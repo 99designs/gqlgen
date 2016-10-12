@@ -6,6 +6,9 @@ import (
 	"reflect"
 	"strings"
 	"text/scanner"
+
+	"github.com/neelance/graphql-go/internal/lexer"
+	"github.com/neelance/graphql-go/internal/query"
 )
 
 type Schema struct {
@@ -14,7 +17,7 @@ type Schema struct {
 }
 
 type typ interface {
-	exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{}
+	exec(schema *Schema, sel *query.SelectionSet, resolver reflect.Value) interface{}
 }
 
 type scalar struct {
@@ -28,8 +31,6 @@ type object struct {
 	fields map[string]typ
 }
 
-type parseError string
-
 func NewSchema(schema string, filename string, resolver interface{}) (res *Schema, errRes error) {
 	sc := &scanner.Scanner{}
 	sc.Filename = filename
@@ -37,7 +38,7 @@ func NewSchema(schema string, filename string, resolver interface{}) (res *Schem
 
 	defer func() {
 		if err := recover(); err != nil {
-			if err, ok := err.(parseError); ok {
+			if err, ok := err.(lexer.SyntaxError); ok {
 				errRes = errors.New(string(err))
 				return
 			}
@@ -45,51 +46,51 @@ func NewSchema(schema string, filename string, resolver interface{}) (res *Schem
 		}
 	}()
 
-	s := parseSchema(newLexer(sc))
+	s := parseSchema(lexer.New(sc))
 	s.resolver = reflect.ValueOf(resolver)
 	// TODO type check resolver
 	return s, nil
 }
 
-func parseSchema(l *lexer) *Schema {
+func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
 		types: make(map[string]*object),
 	}
 
-	for l.peek() != scanner.EOF {
-		switch l.consumeIdent() {
+	for l.Peek() != scanner.EOF {
+		switch l.ConsumeIdent() {
 		case "type":
 			name, obj := parseTypeDecl(l)
 			s.types[name] = obj
 		default:
-			l.syntaxError(`"type"`)
+			l.SyntaxError(`"type"`)
 		}
 	}
 
 	return s
 }
 
-func parseTypeDecl(l *lexer) (string, *object) {
-	typeName := l.consumeIdent()
-	l.consumeToken('{')
+func parseTypeDecl(l *lexer.Lexer) (string, *object) {
+	typeName := l.ConsumeIdent()
+	l.ConsumeToken('{')
 
 	o := &object{
 		fields: make(map[string]typ),
 	}
-	for l.peek() != '}' {
-		fieldName := l.consumeIdent()
-		l.consumeToken(':')
+	for l.Peek() != '}' {
+		fieldName := l.ConsumeIdent()
+		l.ConsumeToken(':')
 		o.fields[fieldName] = parseType(l)
 	}
-	l.consumeToken('}')
+	l.ConsumeToken('}')
 
 	return typeName, o
 }
 
-func parseType(l *lexer) typ {
+func parseType(l *lexer.Lexer) typ {
 	// TODO check args
 	// TODO check return type
-	name := l.consumeIdent()
+	name := l.ConsumeIdent()
 	if name == "String" {
 		return &scalar{}
 	}
@@ -98,13 +99,13 @@ func parseType(l *lexer) typ {
 	}
 }
 
-func (s *Schema) Exec(query string) (res []byte, errRes error) {
+func (s *Schema) Exec(queryInput string) (res []byte, errRes error) {
 	sc := &scanner.Scanner{}
-	sc.Init(strings.NewReader(query))
+	sc.Init(strings.NewReader(queryInput))
 
 	defer func() {
 		if err := recover(); err != nil {
-			if err, ok := err.(parseError); ok {
+			if err, ok := err.(lexer.SyntaxError); ok {
 				errRes = errors.New(string(err))
 				return
 			}
@@ -112,43 +113,15 @@ func (s *Schema) Exec(query string) (res []byte, errRes error) {
 		}
 	}()
 
-	rawRes := s.types["Query"].exec(s, parseSelectionSet(newLexer(sc)), s.resolver)
+	rawRes := s.types["Query"].exec(s, query.Parse(lexer.New(sc)), s.resolver)
 	return json.Marshal(rawRes)
 }
 
-type selectionSet struct {
-	selections []*field
-}
-
-func parseSelectionSet(l *lexer) *selectionSet {
-	sel := &selectionSet{}
-	l.consumeToken('{')
-	for l.peek() != '}' {
-		sel.selections = append(sel.selections, parseField(l))
-	}
-	l.consumeToken('}')
-	return sel
-}
-
-type field struct {
-	name string
-	sel  *selectionSet
-}
-
-func parseField(l *lexer) *field {
-	f := &field{}
-	f.name = l.consumeIdent()
-	if l.peek() == '{' {
-		f.sel = parseSelectionSet(l)
-	}
-	return f
-}
-
-func (o *object) exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{} {
+func (o *object) exec(schema *Schema, sel *query.SelectionSet, resolver reflect.Value) interface{} {
 	res := make(map[string]interface{})
-	for _, f := range sel.selections {
-		m := findMethod(resolver.Type(), f.name)
-		res[f.name] = o.fields[f.name].exec(schema, f.sel, resolver.Method(m).Call(nil)[0])
+	for _, f := range sel.Selections {
+		m := findMethod(resolver.Type(), f.Name)
+		res[f.Name] = o.fields[f.Name].exec(schema, f.Sel, resolver.Method(m).Call(nil)[0])
 	}
 	return res
 }
@@ -162,13 +135,13 @@ func findMethod(t reflect.Type, name string) int {
 	return -1
 }
 
-func (s *scalar) exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{} {
+func (s *scalar) exec(schema *Schema, sel *query.SelectionSet, resolver reflect.Value) interface{} {
 	if !resolver.IsValid() {
 		return "bad"
 	}
 	return resolver.Interface()
 }
 
-func (s *typeName) exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{} {
+func (s *typeName) exec(schema *Schema, sel *query.SelectionSet, resolver reflect.Value) interface{} {
 	return schema.types[s.name].exec(schema, sel, resolver)
 }

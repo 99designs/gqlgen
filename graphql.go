@@ -1,23 +1,27 @@
 package graphql
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 	"text/scanner"
 )
 
 type Schema struct {
-	types map[string]*object
+	types    map[string]*object
+	resolver reflect.Value
 }
 
 type typ interface {
-	exec() interface{}
+	exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{}
 }
 
 type scalar struct {
-	resolver reflect.Value
+}
+
+type typeName struct {
+	name string
 }
 
 type object struct {
@@ -41,104 +45,130 @@ func NewSchema(schema string, filename string, resolver interface{}) (res *Schem
 		}
 	}()
 
-	return parseFile(sc, reflect.ValueOf(resolver)), nil
+	s := parseSchema(newLexer(sc))
+	s.resolver = reflect.ValueOf(resolver)
+	// TODO type check resolver
+	return s, nil
 }
 
-func parseFile(sc *scanner.Scanner, r reflect.Value) *Schema {
-	types := make(map[string]*object)
-
-	scanToken(sc, scanner.Ident)
-	switch sc.TokenText() {
-	case "type":
-		name, obj := parseTypeDecl(sc, r)
-		types[name] = obj
-	default:
-		syntaxError(sc, `"type"`)
+func parseSchema(l *lexer) *Schema {
+	s := &Schema{
+		types: make(map[string]*object),
 	}
 
-	return &Schema{
-		types: types,
+	for l.peek() != scanner.EOF {
+		switch l.consumeIdent() {
+		case "type":
+			name, obj := parseTypeDecl(l)
+			s.types[name] = obj
+		default:
+			l.syntaxError(`"type"`)
+		}
 	}
+
+	return s
 }
 
-func parseTypeDecl(sc *scanner.Scanner, r reflect.Value) (string, *object) {
-	typeName := scanIdent(sc)
-	scanToken(sc, '{')
+func parseTypeDecl(l *lexer) (string, *object) {
+	typeName := l.consumeIdent()
+	l.consumeToken('{')
 
-	fields := make(map[string]typ)
-
-	fieldName := scanIdent(sc)
-	m := r.MethodByName(strings.ToUpper(fieldName[:1]) + fieldName[1:])
-	scanToken(sc, ':')
-	fields[fieldName] = parseType(sc, m)
-
-	scanToken(sc, '}')
-
-	return typeName, &object{
-		fields: fields,
+	o := &object{
+		fields: make(map[string]typ),
 	}
+	for l.peek() != '}' {
+		fieldName := l.consumeIdent()
+		l.consumeToken(':')
+		o.fields[fieldName] = parseType(l)
+	}
+	l.consumeToken('}')
+
+	return typeName, o
 }
 
-func parseType(sc *scanner.Scanner, r reflect.Value) typ {
+func parseType(l *lexer) typ {
 	// TODO check args
 	// TODO check return type
-	scanToken(sc, scanner.Ident)
-	return &scalar{
-		resolver: r,
+	name := l.consumeIdent()
+	if name == "String" {
+		return &scalar{}
+	}
+	return &typeName{
+		name: name,
 	}
 }
 
-func scanIdent(sc *scanner.Scanner) string {
-	scanToken(sc, scanner.Ident)
-	return sc.TokenText()
-}
-
-func scanToken(sc *scanner.Scanner, expected rune) {
-	if got := sc.Scan(); got != expected {
-		syntaxError(sc, scanner.TokenString(expected))
-	}
-}
-
-func syntaxError(sc *scanner.Scanner, expected string) {
-	panic(parseError(fmt.Sprintf("%s:%d: syntax error: unexpected %q, expecting %s", sc.Filename, sc.Line, sc.TokenText(), expected)))
-}
-
-func (s *Schema) Exec(query string) (interface{}, error) {
+func (s *Schema) Exec(query string) (res []byte, errRes error) {
 	sc := &scanner.Scanner{}
 	sc.Init(strings.NewReader(query))
 
-	res := s.types["Query"].exec(parseSelectionSet(sc))
-	return res, nil
+	defer func() {
+		if err := recover(); err != nil {
+			if err, ok := err.(parseError); ok {
+				errRes = errors.New(string(err))
+				return
+			}
+			panic(err)
+		}
+	}()
+
+	rawRes := s.types["Query"].exec(s, parseSelectionSet(newLexer(sc)), s.resolver)
+	return json.Marshal(rawRes)
 }
 
 type selectionSet struct {
 	selections []*field
 }
 
-func parseSelectionSet(sc *scanner.Scanner) *selectionSet {
-	scanToken(sc, '{')
-	f := parseField(sc)
-	scanToken(sc, '}')
-	return &selectionSet{
-		selections: []*field{f},
+func parseSelectionSet(l *lexer) *selectionSet {
+	sel := &selectionSet{}
+	l.consumeToken('{')
+	for l.peek() != '}' {
+		sel.selections = append(sel.selections, parseField(l))
 	}
+	l.consumeToken('}')
+	return sel
 }
 
 type field struct {
 	name string
+	sel  *selectionSet
 }
 
-func parseField(sc *scanner.Scanner) *field {
-	name := scanIdent(sc)
-	return &field{
-		name: name,
+func parseField(l *lexer) *field {
+	f := &field{}
+	f.name = l.consumeIdent()
+	if l.peek() == '{' {
+		f.sel = parseSelectionSet(l)
 	}
+	return f
 }
 
-func (o *object) exec(sel *selectionSet) interface{} {
-	return o.fields[sel.selections[0].name].exec()
+func (o *object) exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{} {
+	res := make(map[string]interface{})
+	for _, f := range sel.selections {
+		m := findMethod(resolver.Type(), f.name)
+		res[f.name] = o.fields[f.name].exec(schema, f.sel, resolver.Method(m).Call(nil)[0])
+	}
+	return res
 }
 
-func (s *scalar) exec() interface{} {
-	return s.resolver.Call(nil)[0].Interface()
+func findMethod(t reflect.Type, name string) int {
+	for i := 0; i < t.NumMethod(); i++ {
+		if strings.EqualFold(name, t.Method(i).Name) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (s *scalar) exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{} {
+	if !resolver.IsValid() {
+		return "bad"
+	}
+	return resolver.Interface()
+}
+
+func (s *typeName) exec(schema *Schema, sel *selectionSet, resolver reflect.Value) interface{} {
+	return schema.types[s.name].exec(schema, sel, resolver)
 }

@@ -17,6 +17,7 @@ var starWarsSchema = `
 		query: Query
 	}
 
+	# test comment
 	type Query {
 		hero: User
 		human(id: ID): User

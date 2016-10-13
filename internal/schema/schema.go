@@ -37,7 +37,9 @@ type Field struct {
 }
 
 func Parse(schemaString string, filename string) (res *Schema, errRes error) {
-	sc := &scanner.Scanner{}
+	sc := &scanner.Scanner{
+		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
+	}
 	sc.Filename = filename
 	sc.Init(strings.NewReader(schemaString))
 

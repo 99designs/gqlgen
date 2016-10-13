@@ -23,7 +23,9 @@ type Value struct {
 }
 
 func Parse(queryString string) (res *SelectionSet, errRes error) {
-	sc := &scanner.Scanner{}
+	sc := &scanner.Scanner{
+		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
+	}
 	sc.Init(strings.NewReader(queryString))
 
 	defer func() {

@@ -33,7 +33,7 @@ func (s *Schema) Exec(queryString string) (res []byte, errRes error) {
 		return nil, err
 	}
 
-	rawRes := exec(s, s.Types["Query"], q, s.resolver)
+	rawRes := exec(s, s.Types[s.EntryPoints["query"]], q, s.resolver)
 	return json.Marshal(rawRes)
 }
 

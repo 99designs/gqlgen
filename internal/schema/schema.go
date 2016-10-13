@@ -9,7 +9,8 @@ import (
 )
 
 type Schema struct {
-	Types map[string]*Object
+	EntryPoints map[string]string
+	Types       map[string]*Object
 }
 
 type Type interface{}
@@ -55,16 +56,26 @@ func Parse(schemaString string, filename string) (res *Schema, errRes error) {
 
 func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
-		Types: make(map[string]*Object),
+		EntryPoints: make(map[string]string),
+		Types:       make(map[string]*Object),
 	}
 
 	for l.Peek() != scanner.EOF {
 		switch l.ConsumeIdent() {
+		case "schema":
+			l.ConsumeToken('{')
+			for l.Peek() != '}' {
+				name := l.ConsumeIdent()
+				l.ConsumeToken(':')
+				typ := l.ConsumeIdent()
+				s.EntryPoints[name] = typ
+			}
+			l.ConsumeToken('}')
 		case "type":
 			name, obj := parseTypeDecl(l)
 			s.Types[name] = obj
 		default:
-			l.UnexpectedSyntaxError(`"type"`)
+			l.UnexpectedSyntaxError(`"schema" or "type"`)
 		}
 	}
 

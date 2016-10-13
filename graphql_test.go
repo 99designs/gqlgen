@@ -13,6 +13,10 @@ func (r *helloWorldResolver) Hello() string {
 }
 
 var starWarsSchema = `
+	schema {
+		query: Query
+	}
+
 	type Query {
 		hero: User
 		human(id: ID): User
@@ -83,6 +87,10 @@ var tests = []struct {
 	{
 		name: "HelloWorld",
 		schema: `
+			schema {
+				query: Query
+			}
+			
 			type Query {
 				hello: String
 			}

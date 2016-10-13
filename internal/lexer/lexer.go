@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+	"strconv"
 	"text/scanner"
 )
 
@@ -32,13 +33,27 @@ func (l *Lexer) ConsumeIdent() string {
 	return text
 }
 
+func (l *Lexer) ConsumeString() string {
+	text := l.sc.TokenText()
+	l.ConsumeToken(scanner.String)
+	value, err := strconv.Unquote(text)
+	if err != nil {
+		l.SyntaxError(err.Error())
+	}
+	return value
+}
+
 func (l *Lexer) ConsumeToken(expected rune) {
 	if l.next != expected {
-		l.SyntaxError(scanner.TokenString(expected))
+		l.UnexpectedSyntaxError(scanner.TokenString(expected))
 	}
 	l.Consume()
 }
 
-func (l *Lexer) SyntaxError(expected string) {
-	panic(SyntaxError(fmt.Sprintf("%s:%d: syntax error: unexpected %q, expecting %s", l.sc.Filename, l.sc.Line, l.sc.TokenText(), expected)))
+func (l *Lexer) UnexpectedSyntaxError(expected string) {
+	l.SyntaxError(fmt.Sprintf("unexpected %q, expecting %s", l.sc.TokenText(), expected))
+}
+
+func (l *Lexer) SyntaxError(message string) {
+	panic(SyntaxError(fmt.Sprintf("%s:%d: syntax error: %s", l.sc.Filename, l.sc.Line, message)))
 }

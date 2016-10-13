@@ -12,6 +12,16 @@ type SelectionSet struct {
 	Selections []*Field
 }
 
+type Field struct {
+	Name      string
+	Arguments map[string]*Value
+	Sel       *SelectionSet
+}
+
+type Value struct {
+	Value interface{}
+}
+
 func Parse(queryString string) (res *SelectionSet, errRes error) {
 	sc := &scanner.Scanner{}
 	sc.Init(strings.NewReader(queryString))
@@ -39,16 +49,38 @@ func parseSelectionSet(l *lexer.Lexer) *SelectionSet {
 	return sel
 }
 
-type Field struct {
-	Name string
-	Sel  *SelectionSet
-}
-
 func parseField(l *lexer.Lexer) *Field {
-	f := &Field{}
+	f := &Field{
+		Arguments: make(map[string]*Value),
+	}
 	f.Name = l.ConsumeIdent()
+	if l.Peek() == '(' {
+		l.ConsumeToken('(')
+		if l.Peek() != ')' {
+			name, value := parseArgument(l)
+			f.Arguments[name] = value
+			for l.Peek() != ')' {
+				l.ConsumeToken(',')
+				name, value := parseArgument(l)
+				f.Arguments[name] = value
+			}
+		}
+		l.ConsumeToken(')')
+	}
 	if l.Peek() == '{' {
 		f.Sel = parseSelectionSet(l)
 	}
 	return f
+}
+
+func parseArgument(l *lexer.Lexer) (string, *Value) {
+	name := l.ConsumeIdent()
+	l.ConsumeToken(':')
+	value := parseValue(l)
+	return name, value
+}
+
+func parseValue(l *lexer.Lexer) *Value {
+	value := l.ConsumeString()
+	return &Value{Value: value}
 }

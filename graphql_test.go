@@ -12,6 +12,20 @@ func (r *helloWorldResolver) Hello() string {
 	return "Hello world!"
 }
 
+var starWarsSchema = `
+	type Query {
+		hero: User
+		human(id: ID): User
+	}
+
+	type User {
+		id: String
+		name: String
+		height: Float
+		friends: [User]
+	}
+`
+
 type starWarsResolver struct{}
 
 func (r *starWarsResolver) Hero() *userResolver {
@@ -26,9 +40,20 @@ func (r *starWarsResolver) Hero() *userResolver {
 	}
 }
 
+func (r *starWarsResolver) Human(args *struct{ ID string }) *userResolver {
+	if args.ID == "1000" {
+		return &userResolver{
+			name:   "Luke Skywalker",
+			height: 1.72,
+		}
+	}
+	return nil
+}
+
 type userResolver struct {
 	id      string
 	name    string
+	height  float64
 	friends []*userResolver
 }
 
@@ -38,6 +63,10 @@ func (r *userResolver) ID() string {
 
 func (r *userResolver) Name() string {
 	return r.name
+}
+
+func (r *userResolver) Height() float64 {
+	return r.height
 }
 
 func (r *userResolver) Friends() []*userResolver {
@@ -71,18 +100,8 @@ var tests = []struct {
 		`,
 	},
 	{
-		name: "StarWars",
-		schema: `
-			type Query {
-				hero: User
-			}
-
-			type User {
-				id: String
-				name: String
-				friends: [User]
-			}
-		`,
+		name:     "StarWars1",
+		schema:   starWarsSchema,
 		resolver: &starWarsResolver{},
 		query: `
 			{
@@ -111,6 +130,27 @@ var tests = []struct {
 							"name": "Leia Organa"
 						}
 					]
+				}
+			}
+		`,
+	},
+	{
+		name:     "StarWars2",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			{
+				human(id: "1000") {
+					name
+					height
+				}
+			}
+		`,
+		result: `
+			{
+				"human": {
+					"name": "Luke Skywalker",
+					"height": 1.72
 				}
 			}
 		`,

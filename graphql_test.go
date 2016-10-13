@@ -15,12 +15,21 @@ func (r *helloWorldResolver) Hello() string {
 type starWarsResolver struct{}
 
 func (r *starWarsResolver) Hero() *userResolver {
-	return &userResolver{id: "2001", name: "R2-D2"}
+	return &userResolver{
+		id:   "2001",
+		name: "R2-D2",
+		friends: []*userResolver{
+			{name: "Luke Skywalker"},
+			{name: "Han Solo"},
+			{name: "Leia Organa"},
+		},
+	}
 }
 
 type userResolver struct {
-	id   string
-	name string
+	id      string
+	name    string
+	friends []*userResolver
 }
 
 func (r *userResolver) ID() string {
@@ -29,6 +38,10 @@ func (r *userResolver) ID() string {
 
 func (r *userResolver) Name() string {
 	return r.name
+}
+
+func (r *userResolver) Friends() []*userResolver {
+	return r.friends
 }
 
 var tests = []struct {
@@ -58,7 +71,7 @@ var tests = []struct {
 		`,
 	},
 	{
-		name: "User",
+		name: "StarWars",
 		schema: `
 			type Query {
 				hero: User
@@ -67,6 +80,7 @@ var tests = []struct {
 			type User {
 				id: String
 				name: String
+				friends: [User]
 			}
 		`,
 		resolver: &starWarsResolver{},
@@ -75,6 +89,9 @@ var tests = []struct {
 				hero {
 					id
 					name
+					friends {
+						name
+					}
 				}
 			}
 		`,
@@ -82,7 +99,18 @@ var tests = []struct {
 			{
 				"hero": {
 					"id": "2001",
-					"name": "R2-D2"
+					"name": "R2-D2",
+					"friends": [
+						{
+							"name": "Luke Skywalker"
+						},
+						{
+							"name": "Han Solo"
+						},
+						{
+							"name": "Leia Organa"
+						}
+					]
 				}
 			}
 		`,

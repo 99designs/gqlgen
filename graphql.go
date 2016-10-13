@@ -41,6 +41,12 @@ func exec(s *Schema, t schema.Type, sel *query.SelectionSet, resolver reflect.Va
 	switch t := t.(type) {
 	case *schema.Scalar:
 		return resolver.Interface()
+	case *schema.Array:
+		a := make([]interface{}, resolver.Len())
+		for i := range a {
+			a[i] = exec(s, t.Elem, sel, resolver.Index(i))
+		}
+		return a
 	case *schema.TypeName:
 		return exec(s, s.Types[t.Name], sel, resolver)
 	case *schema.Object:

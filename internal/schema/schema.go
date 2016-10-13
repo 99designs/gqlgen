@@ -17,6 +17,10 @@ type Type interface{}
 type Scalar struct {
 }
 
+type Array struct {
+	Elem Type
+}
+
 type TypeName struct {
 	Name string
 }
@@ -79,8 +83,10 @@ func parseTypeDecl(l *lexer.Lexer) (string, *Object) {
 }
 
 func parseType(l *lexer.Lexer) Type {
-	// TODO check args
-	// TODO check return type
+	if l.Peek() == '[' {
+		return parseArray(l)
+	}
+
 	name := l.ConsumeIdent()
 	if name == "String" {
 		return &Scalar{}
@@ -88,4 +94,11 @@ func parseType(l *lexer.Lexer) Type {
 	return &TypeName{
 		Name: name,
 	}
+}
+
+func parseArray(l *lexer.Lexer) *Array {
+	l.ConsumeToken('[')
+	elem := parseType(l)
+	l.ConsumeToken(']')
+	return &Array{Elem: elem}
 }

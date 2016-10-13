@@ -1,13 +1,32 @@
 package query
 
-import "github.com/neelance/graphql-go/internal/lexer"
+import (
+	"errors"
+	"strings"
+	"text/scanner"
+
+	"github.com/neelance/graphql-go/internal/lexer"
+)
 
 type SelectionSet struct {
 	Selections []*Field
 }
 
-func Parse(l *lexer.Lexer) *SelectionSet {
-	return parseSelectionSet(l)
+func Parse(queryString string) (res *SelectionSet, errRes error) {
+	sc := &scanner.Scanner{}
+	sc.Init(strings.NewReader(queryString))
+
+	defer func() {
+		if err := recover(); err != nil {
+			if err, ok := err.(lexer.SyntaxError); ok {
+				errRes = errors.New(string(err))
+				return
+			}
+			panic(err)
+		}
+	}()
+
+	return parseSelectionSet(lexer.New(sc)), nil
 }
 
 func parseSelectionSet(l *lexer.Lexer) *SelectionSet {

@@ -33,8 +33,14 @@ type Object struct {
 
 type Field struct {
 	Name       string
-	Parameters map[string]string
+	Parameters map[string]*Parameter
 	Type       Type
+}
+
+type Parameter struct {
+	Name    string
+	Type    string
+	Default string
 }
 
 func Parse(schemaString string, filename string) (res *Schema, errRes error) {
@@ -144,18 +150,18 @@ func parseInputDecl(l *lexer.Lexer) {
 
 func parseField(l *lexer.Lexer) *Field {
 	f := &Field{
-		Parameters: make(map[string]string),
+		Parameters: make(map[string]*Parameter),
 	}
 	f.Name = l.ConsumeIdent()
 	if l.Peek() == '(' {
 		l.ConsumeToken('(')
 		if l.Peek() != ')' {
-			name, typ := parseParameter(l)
-			f.Parameters[name] = typ
+			p := parseParameter(l)
+			f.Parameters[p.Name] = p
 			for l.Peek() != ')' {
 				l.ConsumeToken(',')
-				name, typ := parseParameter(l)
-				f.Parameters[name] = typ
+				p := parseParameter(l)
+				f.Parameters[p.Name] = p
 			}
 		}
 		l.ConsumeToken(')')
@@ -168,18 +174,19 @@ func parseField(l *lexer.Lexer) *Field {
 	return f
 }
 
-func parseParameter(l *lexer.Lexer) (string, string) {
-	name := l.ConsumeIdent()
+func parseParameter(l *lexer.Lexer) *Parameter {
+	p := &Parameter{}
+	p.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
-	typ := l.ConsumeIdent()
+	p.Type = l.ConsumeIdent()
 	if l.Peek() == '!' {
 		l.ConsumeToken('!') // TODO
 	}
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
-		l.ConsumeIdent() // TODO
+		p.Default = l.ConsumeIdent()
 	}
-	return name, typ
+	return p
 }
 
 func parseType(l *lexer.Lexer) Type {

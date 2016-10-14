@@ -52,17 +52,22 @@ func exec(s *Schema, t schema.Type, sel *query.SelectionSet, resolver reflect.Va
 	case *schema.Object:
 		res := make(map[string]interface{})
 		for _, f := range sel.Selections {
+			sf := t.Fields[f.Name]
 			m := resolver.Method(findMethod(resolver.Type(), f.Name))
 			var in []reflect.Value
-			if len(f.Arguments) != 0 {
-				args := reflect.New(m.Type().In(0).Elem())
-				for name, value := range f.Arguments {
-					f := args.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) })
-					f.Set(reflect.ValueOf(value.Value))
+			if len(sf.Parameters) != 0 {
+				args := reflect.New(m.Type().In(0))
+				for name, param := range sf.Parameters {
+					value, ok := f.Arguments[name]
+					if !ok {
+						value = &query.Value{Value: param.Default}
+					}
+					rf := args.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) })
+					rf.Set(reflect.ValueOf(value.Value))
 				}
-				in = []reflect.Value{args}
+				in = []reflect.Value{args.Elem()}
 			}
-			res[f.Name] = exec(s, t.Fields[f.Name].Type, f.Sel, m.Call(in)[0])
+			res[f.Name] = exec(s, sf.Type, f.Sel, m.Call(in)[0])
 		}
 		return res
 	}

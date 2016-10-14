@@ -279,11 +279,12 @@ func init() {
 
 type starWarsResolver struct{}
 
-func (r *starWarsResolver) Hero() characterResolver {
+func (r *starWarsResolver) Hero(args struct{ Episode string }) characterResolver {
+	// TODO episode
 	return &droidResolver{droidData["2001"]}
 }
 
-func (r *starWarsResolver) Human(args *struct{ ID string }) *humanResolver {
+func (r *starWarsResolver) Human(args struct{ ID string }) *humanResolver {
 	h := humanData[args.ID]
 	if h == nil {
 		return nil
@@ -309,8 +310,15 @@ func (r *humanResolver) Name() string {
 	return r.h.Name
 }
 
-func (r *humanResolver) Height() float64 {
-	return r.h.Height
+func (r *humanResolver) Height(args struct{ Unit string }) float64 {
+	switch args.Unit {
+	case "METER":
+		return r.h.Height
+	case "FOOT":
+		return r.h.Height * 3.28084
+	default:
+		panic("invalid unit")
+	}
 }
 
 func (r *humanResolver) Friends() []characterResolver {
@@ -373,7 +381,7 @@ var tests = []struct {
 		`,
 	},
 	{
-		name:     "StarWars1",
+		name:     "StarWarsBasic",
 		schema:   starWarsSchema,
 		resolver: &starWarsResolver{},
 		query: `
@@ -408,7 +416,7 @@ var tests = []struct {
 		`,
 	},
 	{
-		name:     "StarWars2",
+		name:     "StarWarsArguments1",
 		schema:   starWarsSchema,
 		resolver: &starWarsResolver{},
 		query: `
@@ -424,6 +432,27 @@ var tests = []struct {
 				"human": {
 					"name": "Luke Skywalker",
 					"height": 1.72
+				}
+			}
+		`,
+	},
+	{
+		name:     "StarWarsArguments2",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			{
+				human(id: "1000") {
+					name
+					height(unit: FOOT)
+				}
+			}
+		`,
+		result: `
+			{
+				"human": {
+					"name": "Luke Skywalker",
+					"height": 5.6430448
 				}
 			}
 		`,

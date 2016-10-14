@@ -82,7 +82,28 @@ func parseArgument(l *lexer.Lexer) (string, *Value) {
 	return name, value
 }
 
+type ValueType int
+
+const (
+	Int ValueType = iota
+	Float
+	String
+	Boolean
+	Enum
+)
+
 func parseValue(l *lexer.Lexer) *Value {
-	value := l.ConsumeString()
-	return &Value{Value: value}
+	switch l.Peek() {
+	case scanner.String:
+		return &Value{
+			Value: l.ConsumeString(),
+		}
+	case scanner.Ident:
+		return &Value{
+			Value: l.ConsumeIdent(),
+		}
+	default:
+		l.SyntaxError("invalid value")
+		panic("unreachable")
+	}
 }

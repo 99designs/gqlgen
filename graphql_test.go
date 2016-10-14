@@ -143,51 +143,203 @@ var starWarsSchema = `
 	union SearchResult = Human | Droid | Starship
 `
 
-type starWarsResolver struct{}
+type Human struct {
+	ID        string
+	Name      string
+	Friends   []string
+	AppearsIn []string
+	Height    float64
+	Mass      int
+	Starships []string
+}
 
-func (r *starWarsResolver) Hero() *userResolver {
-	return &userResolver{
-		id:   "2001",
-		name: "R2-D2",
-		friends: []*userResolver{
-			{name: "Luke Skywalker"},
-			{name: "Han Solo"},
-			{name: "Leia Organa"},
-		},
+var humans = []*Human{
+	{
+		ID:        "1000",
+		Name:      "Luke Skywalker",
+		Friends:   []string{"1002", "1003", "2000", "2001"},
+		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+		Height:    1.72,
+		Mass:      77,
+		Starships: []string{"3001", "3003"},
+	},
+	{
+		ID:        "1001",
+		Name:      "Darth Vader",
+		Friends:   []string{"1004"},
+		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+		Height:    2.02,
+		Mass:      136,
+		Starships: []string{"3002"},
+	},
+	{
+		ID:        "1002",
+		Name:      "Han Solo",
+		Friends:   []string{"1000", "1003", "2001"},
+		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+		Height:    1.8,
+		Mass:      80,
+		Starships: []string{"3000", "3003"},
+	},
+	{
+		ID:        "1003",
+		Name:      "Leia Organa",
+		Friends:   []string{"1000", "1002", "2000", "2001"},
+		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+		Height:    1.5,
+		Mass:      49,
+	},
+	{
+		ID:        "1004",
+		Name:      "Wilhuff Tarkin",
+		Friends:   []string{"1001"},
+		AppearsIn: []string{"NEWHOPE"},
+		Height:    1.8,
+		Mass:      0,
+	},
+}
+
+var humanData = make(map[string]*Human)
+
+func init() {
+	for _, h := range humans {
+		humanData[h.ID] = h
 	}
 }
 
-func (r *starWarsResolver) Human(args *struct{ ID string }) *userResolver {
-	if args.ID == "1000" {
-		return &userResolver{
-			name:   "Luke Skywalker",
-			height: 1.72,
-		}
+type Droid struct {
+	ID              string
+	Name            string
+	Friends         []string
+	AppearsIn       []string
+	PrimaryFunction string
+}
+
+var droids = []*Droid{
+	{
+		ID:              "2000",
+		Name:            "C-3PO",
+		Friends:         []string{"1000", "1002", "1003", "2001"},
+		AppearsIn:       []string{"NEWHOPE", "EMPIRE", "JEDI"},
+		PrimaryFunction: "Protocol",
+	},
+	{
+		ID:              "2001",
+		Name:            "R2-D2",
+		Friends:         []string{"1000", "1002", "1003"},
+		AppearsIn:       []string{"NEWHOPE", "EMPIRE", "JEDI"},
+		PrimaryFunction: "Astromech",
+	},
+}
+
+var droidData = make(map[string]*Droid)
+
+func init() {
+	for _, d := range droids {
+		droidData[d.ID] = d
 	}
+}
+
+type Starship struct {
+	ID     string
+	Name   string
+	Length float64
+}
+
+var starships = []*Starship{
+	{
+		ID:     "3000",
+		Name:   "Millenium Falcon",
+		Length: 34.37,
+	},
+	{
+		ID:     "3001",
+		Name:   "X-Wing",
+		Length: 12.5,
+	},
+	{
+		ID:     "3002",
+		Name:   "TIE Advanced x1",
+		Length: 9.2,
+	},
+	{
+		ID:     "3003",
+		Name:   "Imperial shuttle",
+		Length: 20,
+	},
+}
+
+var starshipData = make(map[string]*Starship)
+
+func init() {
+	for _, s := range starships {
+		starshipData[s.ID] = s
+	}
+}
+
+type starWarsResolver struct{}
+
+func (r *starWarsResolver) Hero() characterResolver {
+	return &droidResolver{droidData["2001"]}
+}
+
+func (r *starWarsResolver) Human(args *struct{ ID string }) *humanResolver {
+	h := humanData[args.ID]
+	if h == nil {
+		return nil
+	}
+	return &humanResolver{h}
+}
+
+type characterResolver interface {
+	ID() string
+	Name() string
+	Friends() []characterResolver
+}
+
+type humanResolver struct {
+	h *Human
+}
+
+func (r *humanResolver) ID() string {
+	return r.h.ID
+}
+
+func (r *humanResolver) Name() string {
+	return r.h.Name
+}
+
+func (r *humanResolver) Height() float64 {
+	return r.h.Height
+}
+
+func (r *humanResolver) Friends() []characterResolver {
 	return nil
 }
 
-type userResolver struct {
-	id      string
-	name    string
-	height  float64
-	friends []*userResolver
+type droidResolver struct {
+	d *Droid
 }
 
-func (r *userResolver) ID() string {
-	return r.id
+func (r *droidResolver) ID() string {
+	return r.d.ID
 }
 
-func (r *userResolver) Name() string {
-	return r.name
+func (r *droidResolver) Name() string {
+	return r.d.Name
 }
 
-func (r *userResolver) Height() float64 {
-	return r.height
-}
-
-func (r *userResolver) Friends() []*userResolver {
-	return r.friends
+func (r *droidResolver) Friends() []characterResolver {
+	var friends []characterResolver
+	for _, id := range r.d.Friends {
+		if h, ok := humanData[id]; ok {
+			friends = append(friends, &humanResolver{h})
+		}
+		if d, ok := droidData[id]; ok {
+			friends = append(friends, &droidResolver{d})
+		}
+	}
+	return friends
 }
 
 var tests = []struct {

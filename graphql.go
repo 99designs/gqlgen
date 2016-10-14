@@ -42,20 +42,23 @@ func exec(s *Schema, q *query.Query, t schema.Type, selSet *query.SelectionSet, 
 	case *schema.Scalar:
 		return resolver.Interface()
 
-	case *schema.Array:
+	case *schema.Object:
+		result := make(map[string]interface{})
+		execSelectionSet(s, q, t, selSet, resolver, result)
+		return result
+
+	case *schema.Enum:
+		return resolver.Interface()
+
+	case *schema.List:
 		a := make([]interface{}, resolver.Len())
 		for i := range a {
 			a[i] = exec(s, q, t.Elem, selSet, resolver.Index(i))
 		}
 		return a
 
-	case *schema.TypeName:
+	case *schema.TypeReference:
 		return exec(s, q, s.Types[t.Name], selSet, resolver)
-
-	case *schema.Object:
-		result := make(map[string]interface{})
-		execSelectionSet(s, q, t, selSet, resolver, result)
-		return result
 
 	default:
 		panic("invalid type")

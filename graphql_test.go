@@ -518,6 +518,7 @@ var tests = []struct {
 			
 			fragment comparisonFields on Character {
 				name
+				appearsIn
 				friends {
 					name
 				}
@@ -527,6 +528,11 @@ var tests = []struct {
 			{
 				"leftComparison": {
 					"name": "Luke Skywalker",
+					"appearsIn": [
+						"NEWHOPE",
+						"EMPIRE",
+						"JEDI"
+					],
 					"friends": [
 						{
 							"name": "Han Solo"
@@ -544,6 +550,11 @@ var tests = []struct {
 				},
 				"rightComparison": {
 					"name": "R2-D2",
+					"appearsIn": [
+						"NEWHOPE",
+						"EMPIRE",
+						"JEDI"
+					],
 					"friends": [
 						{
 							"name": "Luke Skywalker"

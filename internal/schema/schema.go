@@ -11,7 +11,7 @@ import (
 
 type Schema struct {
 	EntryPoints map[string]string
-	Types       map[string]*Object
+	Types       map[string]Type
 }
 
 type Type interface {
@@ -20,22 +20,29 @@ type Type interface {
 
 type Scalar struct{}
 
-type Array struct {
-	Elem Type
-}
-
-type TypeName struct {
-	Name string
-}
-
 type Object struct {
+	Name   string
 	Fields map[string]*Field
 }
 
-func (Scalar) isType()   {}
-func (Array) isType()    {}
-func (TypeName) isType() {}
-func (Object) isType()   {}
+type Enum struct {
+	Name   string
+	Values []string
+}
+
+type List struct {
+	Elem Type
+}
+
+type TypeReference struct {
+	Name string
+}
+
+func (Scalar) isType()        {}
+func (Object) isType()        {}
+func (Enum) isType()          {}
+func (List) isType()          {}
+func (TypeReference) isType() {}
 
 type Field struct {
 	Name       string
@@ -72,7 +79,7 @@ func Parse(schemaString string, filename string) (res *Schema, errRes error) {
 func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
 		EntryPoints: make(map[string]string),
-		Types:       make(map[string]*Object),
+		Types:       make(map[string]Type),
 	}
 
 	for l.Peek() != scanner.EOF {
@@ -87,15 +94,16 @@ func parseSchema(l *lexer.Lexer) *Schema {
 			}
 			l.ConsumeToken('}')
 		case "type":
-			name, obj := parseTypeDecl(l)
-			s.Types[name] = obj
-		case "enum":
-			parseEnumDecl(l) // TODO
+			obj := parseTypeDecl(l)
+			s.Types[obj.Name] = obj
 		case "interface":
-			name, obj := parseTypeDecl(l) // TODO
-			s.Types[name] = obj
+			obj := parseTypeDecl(l) // TODO
+			s.Types[obj.Name] = obj
 		case "union":
 			parseUnionDecl(l) // TODO
+		case "enum":
+			enum := parseEnumDecl(l)
+			s.Types[enum.Name] = enum
 		case "input":
 			parseInputDecl(l) // TODO
 		default:
@@ -106,33 +114,36 @@ func parseSchema(l *lexer.Lexer) *Schema {
 	return s
 }
 
-func parseTypeDecl(l *lexer.Lexer) (string, *Object) {
-	typeName := l.ConsumeIdent()
+func parseTypeDecl(l *lexer.Lexer) *Object {
+	o := &Object{
+		Fields: make(map[string]*Field),
+	}
+
+	o.Name = l.ConsumeIdent()
 	if l.Peek() == scanner.Ident {
 		l.ConsumeKeyword("implements")
 		l.ConsumeIdent()
 	}
 	l.ConsumeToken('{')
 
-	o := &Object{
-		Fields: make(map[string]*Field),
-	}
 	for l.Peek() != '}' {
 		f := parseField(l)
 		o.Fields[f.Name] = f
 	}
 	l.ConsumeToken('}')
 
-	return typeName, o
+	return o
 }
 
-func parseEnumDecl(l *lexer.Lexer) {
-	l.ConsumeIdent()
+func parseEnumDecl(l *lexer.Lexer) *Enum {
+	enum := &Enum{}
+	enum.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
 	for l.Peek() != '}' {
-		l.ConsumeIdent()
+		enum.Values = append(enum.Values, l.ConsumeIdent())
 	}
 	l.ConsumeToken('}')
+	return enum
 }
 
 func parseUnionDecl(l *lexer.Lexer) {
@@ -197,7 +208,7 @@ func parseParameter(l *lexer.Lexer) *Parameter {
 
 func parseType(l *lexer.Lexer) Type {
 	if l.Peek() == '[' {
-		return parseArray(l)
+		return parseList(l)
 	}
 
 	name := l.ConsumeIdent()
@@ -205,14 +216,14 @@ func parseType(l *lexer.Lexer) Type {
 	case "Int", "Float", "String", "Boolean", "ID":
 		return &Scalar{}
 	}
-	return &TypeName{
+	return &TypeReference{
 		Name: name,
 	}
 }
 
-func parseArray(l *lexer.Lexer) *Array {
+func parseList(l *lexer.Lexer) *List {
 	l.ConsumeToken('[')
 	elem := parseType(l)
 	l.ConsumeToken(']')
-	return &Array{Elem: elem}
+	return &List{Elem: elem}
 }

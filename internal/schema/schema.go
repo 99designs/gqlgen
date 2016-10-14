@@ -14,10 +14,11 @@ type Schema struct {
 	Types       map[string]*Object
 }
 
-type Type interface{}
-
-type Scalar struct {
+type Type interface {
+	isType()
 }
+
+type Scalar struct{}
 
 type Array struct {
 	Elem Type
@@ -30,6 +31,11 @@ type TypeName struct {
 type Object struct {
 	Fields map[string]*Field
 }
+
+func (Scalar) isType()   {}
+func (Array) isType()    {}
+func (TypeName) isType() {}
+func (Object) isType()   {}
 
 type Field struct {
 	Name       string
@@ -103,7 +109,7 @@ func parseSchema(l *lexer.Lexer) *Schema {
 func parseTypeDecl(l *lexer.Lexer) (string, *Object) {
 	typeName := l.ConsumeIdent()
 	if l.Peek() == scanner.Ident {
-		l.ConsumeIdent() // TODO
+		l.ConsumeKeyword("implements")
 		l.ConsumeIdent()
 	}
 	l.ConsumeToken('{')

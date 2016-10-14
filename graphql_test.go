@@ -298,6 +298,7 @@ type characterResolver interface {
 	ID() string
 	Name() string
 	Friends() []characterResolver
+	AppearsIn() []string
 }
 
 type humanResolver struct {
@@ -324,7 +325,11 @@ func (r *humanResolver) Height(args struct{ Unit string }) float64 {
 }
 
 func (r *humanResolver) Friends() []characterResolver {
-	return nil
+	return resolveCharacters(r.h.Friends)
+}
+
+func (r *humanResolver) AppearsIn() []string {
+	return r.h.AppearsIn
 }
 
 type droidResolver struct {
@@ -340,16 +345,24 @@ func (r *droidResolver) Name() string {
 }
 
 func (r *droidResolver) Friends() []characterResolver {
-	var friends []characterResolver
-	for _, id := range r.d.Friends {
+	return resolveCharacters(r.d.Friends)
+}
+
+func (r *droidResolver) AppearsIn() []string {
+	return r.d.AppearsIn
+}
+
+func resolveCharacters(ids []string) []characterResolver {
+	var characters []characterResolver
+	for _, id := range ids {
 		if h, ok := humanData[id]; ok {
-			friends = append(friends, &humanResolver{h})
+			characters = append(characters, &humanResolver{h})
 		}
 		if d, ok := droidData[id]; ok {
-			friends = append(friends, &droidResolver{d})
+			characters = append(characters, &droidResolver{d})
 		}
 	}
-	return friends
+	return characters
 }
 
 var tests = []struct {
@@ -382,6 +395,7 @@ var tests = []struct {
 			}
 		`,
 	},
+
 	{
 		name:     "StarWarsBasic",
 		schema:   starWarsSchema,
@@ -417,6 +431,7 @@ var tests = []struct {
 			}
 		`,
 	},
+
 	{
 		name:     "StarWarsArguments1",
 		schema:   starWarsSchema,
@@ -438,6 +453,7 @@ var tests = []struct {
 			}
 		`,
 	},
+
 	{
 		name:     "StarWarsArguments2",
 		schema:   starWarsSchema,
@@ -459,6 +475,7 @@ var tests = []struct {
 			}
 		`,
 	},
+
 	{
 		name:     "StarWarsAliases",
 		schema:   starWarsSchema,
@@ -480,6 +497,64 @@ var tests = []struct {
 				},
 				"jediHero": {
 					"name": "R2-D2"
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsFragments",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			{
+				leftComparison: hero(episode: EMPIRE) {
+					...comparisonFields
+				}
+				rightComparison: hero(episode: JEDI) {
+					...comparisonFields
+				}
+			}
+			
+			fragment comparisonFields on Character {
+				name
+				friends {
+					name
+				}
+			}
+		`,
+		result: `
+			{
+				"leftComparison": {
+					"name": "Luke Skywalker",
+					"friends": [
+						{
+							"name": "Han Solo"
+						},
+						{
+							"name": "Leia Organa"
+						},
+						{
+							"name": "C-3PO"
+						},
+						{
+							"name": "R2-D2"
+						}
+					]
+				},
+				"rightComparison": {
+					"name": "R2-D2",
+					"friends": [
+						{
+							"name": "Luke Skywalker"
+						},
+						{
+							"name": "Han Solo"
+						},
+						{
+							"name": "Leia Organa"
+						}
+					]
 				}
 			}
 		`,

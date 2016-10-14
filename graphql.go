@@ -33,32 +33,46 @@ func (s *Schema) Exec(queryString string) (res []byte, errRes error) {
 		return nil, err
 	}
 
-	rawRes := exec(s, s.Types[s.EntryPoints["query"]], q, s.resolver)
+	rawRes := exec(s, q, s.Types[s.EntryPoints["query"]], q.Root, s.resolver)
 	return json.Marshal(rawRes)
 }
 
-func exec(s *Schema, t schema.Type, sel *query.SelectionSet, resolver reflect.Value) interface{} {
+func exec(s *Schema, q *query.Query, t schema.Type, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	switch t := t.(type) {
 	case *schema.Scalar:
 		return resolver.Interface()
+
 	case *schema.Array:
 		a := make([]interface{}, resolver.Len())
 		for i := range a {
-			a[i] = exec(s, t.Elem, sel, resolver.Index(i))
+			a[i] = exec(s, q, t.Elem, selSet, resolver.Index(i))
 		}
 		return a
+
 	case *schema.TypeName:
-		return exec(s, s.Types[t.Name], sel, resolver)
+		return exec(s, q, s.Types[t.Name], selSet, resolver)
+
 	case *schema.Object:
-		res := make(map[string]interface{})
-		for _, f := range sel.Selections {
-			sf := t.Fields[f.Name]
-			m := resolver.Method(findMethod(resolver.Type(), f.Name))
+		result := make(map[string]interface{})
+		execSelectionSet(s, q, t, selSet, resolver, result)
+		return result
+
+	default:
+		panic("invalid type")
+	}
+}
+
+func execSelectionSet(s *Schema, q *query.Query, t *schema.Object, selSet *query.SelectionSet, resolver reflect.Value, result map[string]interface{}) {
+	for _, sel := range selSet.Selections {
+		switch sel := sel.(type) {
+		case *query.Field:
+			sf := t.Fields[sel.Name]
+			m := resolver.Method(findMethod(resolver.Type(), sel.Name))
 			var in []reflect.Value
 			if len(sf.Parameters) != 0 {
 				args := reflect.New(m.Type().In(0))
 				for name, param := range sf.Parameters {
-					value, ok := f.Arguments[name]
+					value, ok := sel.Arguments[name]
 					if !ok {
 						value = &query.Value{Value: param.Default}
 					}
@@ -67,11 +81,15 @@ func exec(s *Schema, t schema.Type, sel *query.SelectionSet, resolver reflect.Va
 				}
 				in = []reflect.Value{args.Elem()}
 			}
-			res[f.Alias] = exec(s, sf.Type, f.Sel, m.Call(in)[0])
+			result[sel.Alias] = exec(s, q, sf.Type, sel.SelSet, m.Call(in)[0])
+
+		case *query.FragmentSpread:
+			execSelectionSet(s, q, t, q.Fragments[sel.Name].SelSet, resolver, result)
+
+		default:
+			panic("invalid type")
 		}
-		return res
 	}
-	return nil
 }
 
 func findMethod(t reflect.Type, name string) int {

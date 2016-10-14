@@ -42,6 +42,13 @@ func (l *Lexer) ConsumeIdent() string {
 	return text
 }
 
+func (l *Lexer) ConsumeKeyword(keyword string) {
+	if l.next != scanner.Ident || l.sc.TokenText() != keyword {
+		l.SyntaxError(fmt.Sprintf("unexpected %q, expecting %q", l.sc.TokenText(), keyword))
+	}
+	l.Consume()
+}
+
 func (l *Lexer) ConsumeString() string {
 	text := l.sc.TokenText()
 	l.ConsumeToken(scanner.String)

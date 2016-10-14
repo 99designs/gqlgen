@@ -280,7 +280,9 @@ func init() {
 type starWarsResolver struct{}
 
 func (r *starWarsResolver) Hero(args struct{ Episode string }) characterResolver {
-	// TODO episode
+	if args.Episode == "EMPIRE" {
+		return &humanResolver{humanData["1000"]}
+	}
 	return &droidResolver{droidData["2001"]}
 }
 
@@ -453,6 +455,31 @@ var tests = []struct {
 				"human": {
 					"name": "Luke Skywalker",
 					"height": 5.6430448
+				}
+			}
+		`,
+	},
+	{
+		name:     "StarWarsAliases",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			{
+				empireHero: hero(episode: EMPIRE) {
+					name
+				}
+				jediHero: hero(episode: JEDI) {
+					name
+				}
+			}
+		`,
+		result: `
+			{
+				"empireHero": {
+					"name": "Luke Skywalker"
+				},
+				"jediHero": {
+					"name": "R2-D2"
 				}
 			}
 		`,

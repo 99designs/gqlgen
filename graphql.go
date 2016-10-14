@@ -67,7 +67,7 @@ func exec(s *Schema, t schema.Type, sel *query.SelectionSet, resolver reflect.Va
 				}
 				in = []reflect.Value{args.Elem()}
 			}
-			res[f.Name] = exec(s, sf.Type, f.Sel, m.Call(in)[0])
+			res[f.Alias] = exec(s, sf.Type, f.Sel, m.Call(in)[0])
 		}
 		return res
 	}

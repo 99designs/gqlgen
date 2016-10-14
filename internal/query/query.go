@@ -13,6 +13,7 @@ type SelectionSet struct {
 }
 
 type Field struct {
+	Alias     string
 	Name      string
 	Arguments map[string]*Value
 	Sel       *SelectionSet
@@ -55,7 +56,12 @@ func parseField(l *lexer.Lexer) *Field {
 	f := &Field{
 		Arguments: make(map[string]*Value),
 	}
-	f.Name = l.ConsumeIdent()
+	f.Alias = l.ConsumeIdent()
+	f.Name = f.Alias
+	if l.Peek() == ':' {
+		l.ConsumeToken(':')
+		f.Name = l.ConsumeIdent()
+	}
 	if l.Peek() == '(' {
 		l.ConsumeToken('(')
 		if l.Peek() != ')' {

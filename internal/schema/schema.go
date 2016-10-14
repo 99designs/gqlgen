@@ -2,6 +2,7 @@ package schema
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"text/scanner"
 
@@ -63,7 +64,7 @@ func parseSchema(l *lexer.Lexer) *Schema {
 	}
 
 	for l.Peek() != scanner.EOF {
-		switch l.ConsumeIdent() {
+		switch x := l.ConsumeIdent(); x {
 		case "schema":
 			l.ConsumeToken('{')
 			for l.Peek() != '}' {
@@ -76,8 +77,17 @@ func parseSchema(l *lexer.Lexer) *Schema {
 		case "type":
 			name, obj := parseTypeDecl(l)
 			s.Types[name] = obj
+		case "enum":
+			parseEnumDecl(l) // TODO
+		case "interface":
+			name, obj := parseTypeDecl(l) // TODO
+			s.Types[name] = obj
+		case "union":
+			parseUnionDecl(l) // TODO
+		case "input":
+			parseInputDecl(l) // TODO
 		default:
-			l.UnexpectedSyntaxError(`"schema" or "type"`)
+			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
 		}
 	}
 
@@ -86,6 +96,10 @@ func parseSchema(l *lexer.Lexer) *Schema {
 
 func parseTypeDecl(l *lexer.Lexer) (string, *Object) {
 	typeName := l.ConsumeIdent()
+	if l.Peek() == scanner.Ident {
+		l.ConsumeIdent() // TODO
+		l.ConsumeIdent()
+	}
 	l.ConsumeToken('{')
 
 	o := &Object{
@@ -98,6 +112,34 @@ func parseTypeDecl(l *lexer.Lexer) (string, *Object) {
 	l.ConsumeToken('}')
 
 	return typeName, o
+}
+
+func parseEnumDecl(l *lexer.Lexer) {
+	l.ConsumeIdent()
+	l.ConsumeToken('{')
+	for l.Peek() != '}' {
+		l.ConsumeIdent()
+	}
+	l.ConsumeToken('}')
+}
+
+func parseUnionDecl(l *lexer.Lexer) {
+	l.ConsumeIdent()
+	l.ConsumeToken('=')
+	l.ConsumeIdent()
+	for l.Peek() == '|' {
+		l.ConsumeToken('|')
+		l.ConsumeIdent()
+	}
+}
+
+func parseInputDecl(l *lexer.Lexer) {
+	l.ConsumeIdent()
+	l.ConsumeToken('{')
+	for l.Peek() != '}' {
+		parseField(l)
+	}
+	l.ConsumeToken('}')
 }
 
 func parseField(l *lexer.Lexer) *Field {
@@ -120,6 +162,9 @@ func parseField(l *lexer.Lexer) *Field {
 	}
 	l.ConsumeToken(':')
 	f.Type = parseType(l)
+	if l.Peek() == '!' {
+		l.ConsumeToken('!') // TODO
+	}
 	return f
 }
 
@@ -127,6 +172,13 @@ func parseParameter(l *lexer.Lexer) (string, string) {
 	name := l.ConsumeIdent()
 	l.ConsumeToken(':')
 	typ := l.ConsumeIdent()
+	if l.Peek() == '!' {
+		l.ConsumeToken('!') // TODO
+	}
+	if l.Peek() == '=' {
+		l.ConsumeToken('=')
+		l.ConsumeIdent() // TODO
+	}
 	return name, typ
 }
 
@@ -136,7 +188,8 @@ func parseType(l *lexer.Lexer) Type {
 	}
 
 	name := l.ConsumeIdent()
-	if name == "String" || name == "Float" {
+	switch name {
+	case "Int", "Float", "String", "Boolean", "ID":
 		return &Scalar{}
 	}
 	return &TypeName{

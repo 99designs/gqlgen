@@ -54,13 +54,9 @@ func (l *Lexer) ConsumeString() string {
 
 func (l *Lexer) ConsumeToken(expected rune) {
 	if l.next != expected {
-		l.UnexpectedSyntaxError(scanner.TokenString(expected))
+		l.SyntaxError(fmt.Sprintf("unexpected %q, expecting %s", l.sc.TokenText(), scanner.TokenString(expected)))
 	}
 	l.Consume()
-}
-
-func (l *Lexer) UnexpectedSyntaxError(expected string) {
-	l.SyntaxError(fmt.Sprintf("unexpected %q, expecting %s", l.sc.TokenText(), expected))
 }
 
 func (l *Lexer) SyntaxError(message string) {

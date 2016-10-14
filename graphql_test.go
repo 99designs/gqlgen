@@ -366,11 +366,12 @@ func resolveCharacters(ids []string) []characterResolver {
 }
 
 var tests = []struct {
-	name     string
-	schema   string
-	resolver interface{}
-	query    string
-	result   string
+	name      string
+	schema    string
+	variables map[string]interface{}
+	resolver  interface{}
+	query     string
+	result    string
 }{
 	{
 		name: "HelloWorld",
@@ -570,6 +571,52 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsVariables1",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			query HeroNameAndFriends($episode: Episode) {
+				hero(episode: $episode) {
+					name
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode": "JEDI",
+		},
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2"
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsVariables2",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			query HeroNameAndFriends($episode: Episode) {
+				hero(episode: $episode) {
+					name
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode": "EMPIRE",
+		},
+		result: `
+			{
+				"hero": {
+					"name": "Luke Skywalker"
+				}
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {
@@ -580,7 +627,7 @@ func TestAll(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got, err := schema.Exec(test.query)
+			got, err := schema.Exec(test.query, "", test.variables)
 			if err != nil {
 				t.Fatal(err)
 			}

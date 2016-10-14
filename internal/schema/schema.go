@@ -166,20 +166,14 @@ func parseInputDecl(l *lexer.Lexer) {
 }
 
 func parseField(l *lexer.Lexer) *Field {
-	f := &Field{
-		Parameters: make(map[string]*Parameter),
-	}
+	f := &Field{}
 	f.Name = l.ConsumeIdent()
 	if l.Peek() == '(' {
+		f.Parameters = make(map[string]*Parameter)
 		l.ConsumeToken('(')
-		if l.Peek() != ')' {
+		for l.Peek() != ')' {
 			p := parseParameter(l)
 			f.Parameters[p.Name] = p
-			for l.Peek() != ')' {
-				l.ConsumeToken(',')
-				p := parseParameter(l)
-				f.Parameters[p.Name] = p
-			}
 		}
 		l.ConsumeToken(')')
 	}

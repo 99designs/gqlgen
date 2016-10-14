@@ -9,9 +9,28 @@ import (
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
-type Query struct {
-	Root      *SelectionSet
-	Fragments map[string]*Fragment
+type Document struct {
+	Operations map[string]*Operation
+	Fragments  map[string]*Fragment
+}
+
+type Operation struct {
+	Type      OperationType
+	Name      string
+	Variables map[string]*VariableDef
+	SelSet    *SelectionSet
+}
+
+type OperationType int
+
+const (
+	Query OperationType = iota
+	Mutation
+)
+
+type VariableDef struct {
+	Name string
+	Type string
 }
 
 type Fragment struct {
@@ -31,7 +50,7 @@ type Selection interface {
 type Field struct {
 	Alias     string
 	Name      string
-	Arguments map[string]*Value
+	Arguments map[string]Value
 	SelSet    *SelectionSet
 }
 
@@ -42,11 +61,22 @@ type FragmentSpread struct {
 func (Field) isSelection()          {}
 func (FragmentSpread) isSelection() {}
 
-type Value struct {
+type Value interface {
+	isValue()
+}
+
+type Variable struct {
+	Name string
+}
+
+type Literal struct {
 	Value interface{}
 }
 
-func Parse(queryString string) (res *Query, errRes error) {
+func (Variable) isValue() {}
+func (Literal) isValue()  {}
+
+func Parse(queryString string) (res *Document, errRes error) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
 	}
@@ -62,29 +92,56 @@ func Parse(queryString string) (res *Query, errRes error) {
 		}
 	}()
 
-	return parseQuery(lexer.New(sc)), nil
+	return parseDocument(lexer.New(sc)), nil
 }
 
-func parseQuery(l *lexer.Lexer) *Query {
-	q := &Query{
-		Fragments: make(map[string]*Fragment),
+func parseDocument(l *lexer.Lexer) *Document {
+	d := &Document{
+		Operations: make(map[string]*Operation),
+		Fragments:  make(map[string]*Fragment),
 	}
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
-			q.Root = parseSelectionSet(l)
+			d.Operations[""] = &Operation{SelSet: parseSelectionSet(l)}
 			continue
 		}
 
 		switch x := l.ConsumeIdent(); x {
+		case "query":
+			q := parseOperation(l, Query)
+			d.Operations[q.Name] = q
+
+		case "mutation":
+			q := parseOperation(l, Mutation)
+			d.Operations[q.Name] = q
+
 		case "fragment":
 			f := parseFragment(l)
-			q.Fragments[f.Name] = f
+			d.Fragments[f.Name] = f
 
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "fragment"`, x))
 		}
 	}
-	return q
+	return d
+}
+
+func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
+	op := &Operation{Type: opType}
+	if l.Peek() == scanner.Ident {
+		op.Name = l.ConsumeIdent()
+	}
+	if l.Peek() == '(' {
+		l.ConsumeToken('(')
+		op.Variables = make(map[string]*VariableDef)
+		for l.Peek() != ')' {
+			v := parseVariableDef(l)
+			op.Variables[v.Name] = v
+		}
+		l.ConsumeToken(')')
+	}
+	op.SelSet = parseSelectionSet(l)
+	return op
 }
 
 func parseFragment(l *lexer.Lexer) *Fragment {
@@ -94,6 +151,18 @@ func parseFragment(l *lexer.Lexer) *Fragment {
 	f.Type = l.ConsumeIdent()
 	f.SelSet = parseSelectionSet(l)
 	return f
+}
+
+func parseVariableDef(l *lexer.Lexer) *VariableDef {
+	v := &VariableDef{}
+	l.ConsumeToken('$')
+	v.Name = l.ConsumeIdent()
+	l.ConsumeToken(':')
+	v.Type = l.ConsumeIdent()
+	if l.Peek() == '!' {
+		l.ConsumeToken('!') // TODO
+	}
+	return v
 }
 
 func parseSelectionSet(l *lexer.Lexer) *SelectionSet {
@@ -115,7 +184,7 @@ func parseSelection(l *lexer.Lexer) Selection {
 
 func parseField(l *lexer.Lexer) *Field {
 	f := &Field{
-		Arguments: make(map[string]*Value),
+		Arguments: make(map[string]Value),
 	}
 	f.Alias = l.ConsumeIdent()
 	f.Name = f.Alias
@@ -149,7 +218,7 @@ func parseFragmentSpread(l *lexer.Lexer) *FragmentSpread {
 	return &FragmentSpread{Name: l.ConsumeIdent()}
 }
 
-func parseArgument(l *lexer.Lexer) (string, *Value) {
+func parseArgument(l *lexer.Lexer) (string, Value) {
 	name := l.ConsumeIdent()
 	l.ConsumeToken(':')
 	value := parseValue(l)
@@ -166,14 +235,19 @@ const (
 	Enum
 )
 
-func parseValue(l *lexer.Lexer) *Value {
+func parseValue(l *lexer.Lexer) Value {
 	switch l.Peek() {
+	case '$':
+		l.ConsumeToken('$')
+		return &Variable{
+			Name: l.ConsumeIdent(),
+		}
 	case scanner.String:
-		return &Value{
+		return &Literal{
 			Value: l.ConsumeString(),
 		}
 	case scanner.Ident:
-		return &Value{
+		return &Literal{
 			Value: l.ConsumeIdent(),
 		}
 	default:

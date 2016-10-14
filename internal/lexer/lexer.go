@@ -25,6 +25,10 @@ func (l *Lexer) Peek() rune {
 
 func (l *Lexer) Consume() {
 	l.next = l.sc.Scan()
+	if l.next == ',' {
+		l.Consume()
+		return
+	}
 	if l.next == '#' {
 		for {
 			next := l.sc.Next()
@@ -33,6 +37,7 @@ func (l *Lexer) Consume() {
 			}
 		}
 		l.Consume()
+		return
 	}
 }
 

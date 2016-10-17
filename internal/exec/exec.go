@@ -3,6 +3,7 @@ package exec
 import (
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
@@ -101,9 +102,15 @@ type listExec struct {
 
 func (e *listExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	l := make([]interface{}, resolver.Len())
+	var wg sync.WaitGroup
 	for i := range l {
-		l[i] = e.elem.exec(r, selSet, resolver.Index(i))
+		wg.Add(1)
+		go func(i int) {
+			l[i] = e.elem.exec(r, selSet, resolver.Index(i))
+			wg.Done()
+		}(i)
 	}
+	wg.Wait()
 	return l
 }
 
@@ -121,12 +128,23 @@ type objectExec struct {
 }
 
 func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
-	result := make(map[string]interface{})
 	var allFields []*query.Field
 	collectFields(r, selSet, &allFields)
+
+	var wg sync.WaitGroup
+	var m sync.Mutex
+	result := make(map[string]interface{})
 	for _, f := range allFields {
-		result[f.Alias] = e.fields[f.Name].exec(r, f, resolver)
+		wg.Add(1)
+		go func(f *query.Field) {
+			v := e.fields[f.Name].exec(r, f, resolver)
+			m.Lock()
+			result[f.Alias] = v
+			m.Unlock()
+			wg.Done()
+		}(f)
 	}
+	wg.Wait()
 	return result
 }
 

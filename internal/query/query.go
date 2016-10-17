@@ -48,14 +48,21 @@ type Selection interface {
 }
 
 type Field struct {
-	Alias     string
+	Alias      string
+	Name       string
+	Arguments  map[string]Value
+	Directives map[string]*Directive
+	SelSet     *SelectionSet
+}
+
+type Directive struct {
 	Name      string
 	Arguments map[string]Value
-	SelSet    *SelectionSet
 }
 
 type FragmentSpread struct {
-	Name string
+	Name       string
+	Directives map[string]*Directive
 }
 
 func (Field) isSelection()          {}
@@ -184,7 +191,7 @@ func parseSelection(l *lexer.Lexer) Selection {
 
 func parseField(l *lexer.Lexer) *Field {
 	f := &Field{
-		Arguments: make(map[string]Value),
+		Directives: make(map[string]*Directive),
 	}
 	f.Alias = l.ConsumeIdent()
 	f.Name = f.Alias
@@ -193,17 +200,11 @@ func parseField(l *lexer.Lexer) *Field {
 		f.Name = l.ConsumeIdent()
 	}
 	if l.Peek() == '(' {
-		l.ConsumeToken('(')
-		if l.Peek() != ')' {
-			name, value := parseArgument(l)
-			f.Arguments[name] = value
-			for l.Peek() != ')' {
-				l.ConsumeToken(',')
-				name, value := parseArgument(l)
-				f.Arguments[name] = value
-			}
-		}
-		l.ConsumeToken(')')
+		f.Arguments = parseArguments(l)
+	}
+	for l.Peek() == '@' {
+		d := parseDirective(l)
+		f.Directives[d.Name] = d
 	}
 	if l.Peek() == '{' {
 		f.SelSet = parseSelectionSet(l)
@@ -211,11 +212,45 @@ func parseField(l *lexer.Lexer) *Field {
 	return f
 }
 
+func parseArguments(l *lexer.Lexer) map[string]Value {
+	args := make(map[string]Value)
+	l.ConsumeToken('(')
+	if l.Peek() != ')' {
+		name, value := parseArgument(l)
+		args[name] = value
+		for l.Peek() != ')' {
+			l.ConsumeToken(',')
+			name, value := parseArgument(l)
+			args[name] = value
+		}
+	}
+	l.ConsumeToken(')')
+	return args
+}
+
+func parseDirective(l *lexer.Lexer) *Directive {
+	d := &Directive{}
+	l.ConsumeToken('@')
+	d.Name = l.ConsumeIdent()
+	if l.Peek() == '(' {
+		d.Arguments = parseArguments(l)
+	}
+	return d
+}
+
 func parseFragmentSpread(l *lexer.Lexer) *FragmentSpread {
+	fs := &FragmentSpread{
+		Directives: make(map[string]*Directive),
+	}
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
-	return &FragmentSpread{Name: l.ConsumeIdent()}
+	fs.Name = l.ConsumeIdent()
+	for l.Peek() == '@' {
+		d := parseDirective(l)
+		fs.Directives[d.Name] = d
+	}
+	return fs
 }
 
 func parseArgument(l *lexer.Lexer) (string, Value) {

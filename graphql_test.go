@@ -617,6 +617,144 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsInclude1",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			query Hero($episode: Episode, $withoutFriends: Boolean!) {
+				hero(episode: $episode) {
+					name
+					friends @skip(if: $withoutFriends) {
+						name
+					}
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode":        "JEDI",
+			"withoutFriends": true,
+		},
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2"
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsInclude2",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			query Hero($episode: Episode, $withoutFriends: Boolean!) {
+				hero(episode: $episode) {
+					name
+					friends @skip(if: $withoutFriends) {
+						name
+					}
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode":        "JEDI",
+			"withoutFriends": false,
+		},
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2",
+					"friends": [
+						{
+							"name": "Luke Skywalker"
+						},
+						{
+							"name": "Han Solo"
+						},
+						{
+							"name": "Leia Organa"
+						}
+					]
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsSkip1",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			query Hero($episode: Episode, $withFriends: Boolean!) {
+				hero(episode: $episode) {
+					name
+					...friendsFragment @include(if: $withFriends)
+				}
+			}
+
+			fragment friendsFragment on Character {
+				friends {
+					name
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode":     "JEDI",
+			"withFriends": false,
+		},
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2"
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsSkip2",
+		schema:   starWarsSchema,
+		resolver: &starWarsResolver{},
+		query: `
+			query Hero($episode: Episode, $withFriends: Boolean!) {
+				hero(episode: $episode) {
+					name
+					...friendsFragment @include(if: $withFriends)
+				}
+			}
+
+			fragment friendsFragment on Character {
+				friends {
+					name
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode":     "JEDI",
+			"withFriends": true,
+		},
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2",
+					"friends": [
+						{
+							"name": "Luke Skywalker"
+						},
+						{
+							"name": "Han Solo"
+						},
+						{
+							"name": "Leia Organa"
+						}
+					]
+				}
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {

@@ -87,36 +87,62 @@ func execSelectionSet(s *Schema, r *request, t *schema.Object, selSet *query.Sel
 	for _, sel := range selSet.Selections {
 		switch sel := sel.(type) {
 		case *query.Field:
-			sf := t.Fields[sel.Name]
-			m := resolver.Method(findMethod(resolver.Type(), sel.Name))
-			var in []reflect.Value
-			if len(sf.Parameters) != 0 {
-				args := reflect.New(m.Type().In(0))
-				for name, param := range sf.Parameters {
-					value, ok := sel.Arguments[name]
-					if !ok {
-						value = &query.Literal{Value: param.Default}
-					}
-					rf := args.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) })
-					switch v := value.(type) {
-					case *query.Variable:
-						rf.Set(reflect.ValueOf(r.Variables[v.Name]))
-					case *query.Literal:
-						rf.Set(reflect.ValueOf(v.Value))
-					default:
-						panic("invalid value")
-					}
-				}
-				in = []reflect.Value{args.Elem()}
+			if skipByDirective(r, sel.Directives) {
+				continue
 			}
-			result[sel.Alias] = exec(s, r, sf.Type, sel.SelSet, m.Call(in)[0])
-
+			execField(s, r, t, sel, resolver, result)
 		case *query.FragmentSpread:
+			if skipByDirective(r, sel.Directives) {
+				continue
+			}
 			execSelectionSet(s, r, t, r.Fragments[sel.Name].SelSet, resolver, result)
-
 		default:
 			panic("invalid type")
 		}
+	}
+}
+
+func execField(s *Schema, r *request, t *schema.Object, f *query.Field, resolver reflect.Value, result map[string]interface{}) {
+	sf := t.Fields[f.Name]
+	m := resolver.Method(findMethod(resolver.Type(), f.Name))
+	var in []reflect.Value
+	if len(sf.Parameters) != 0 {
+		args := reflect.New(m.Type().In(0))
+		for name, param := range sf.Parameters {
+			value, ok := f.Arguments[name]
+			if !ok {
+				value = &query.Literal{Value: param.Default}
+			}
+			rf := args.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) })
+			rf.Set(reflect.ValueOf(execValue(r, value)))
+		}
+		in = []reflect.Value{args.Elem()}
+	}
+	result[f.Alias] = exec(s, r, sf.Type, f.SelSet, m.Call(in)[0])
+}
+
+func skipByDirective(r *request, d map[string]*query.Directive) bool {
+	if skip, ok := d["skip"]; ok {
+		if execValue(r, skip.Arguments["if"]).(bool) {
+			return true
+		}
+	}
+	if include, ok := d["include"]; ok {
+		if !execValue(r, include.Arguments["if"]).(bool) {
+			return true
+		}
+	}
+	return false
+}
+
+func execValue(r *request, v query.Value) interface{} {
+	switch v := v.(type) {
+	case *query.Variable:
+		return r.Variables[v.Name]
+	case *query.Literal:
+		return v.Value
+	default:
+		panic("invalid value")
 	}
 }
 

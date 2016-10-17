@@ -122,23 +122,25 @@ type objectExec struct {
 
 func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	result := make(map[string]interface{})
-	e.execFragment(r, selSet, resolver, result)
+	var allFields []*query.Field
+	collectFields(r, selSet, &allFields)
+	for _, f := range allFields {
+		result[f.Alias] = e.fields[f.Name].exec(r, f, resolver)
+	}
 	return result
 }
 
-func (e *objectExec) execFragment(r *request, selSet *query.SelectionSet, resolver reflect.Value, result map[string]interface{}) {
+func collectFields(r *request, selSet *query.SelectionSet, allFields *[]*query.Field) {
 	for _, sel := range selSet.Selections {
 		switch sel := sel.(type) {
 		case *query.Field:
-			if skipByDirective(r, sel.Directives) {
-				continue
+			if !skipByDirective(r, sel.Directives) {
+				*allFields = append(*allFields, sel)
 			}
-			e.fields[sel.Name].exec(r, sel, resolver, result)
 		case *query.FragmentSpread:
-			if skipByDirective(r, sel.Directives) {
-				continue
+			if !skipByDirective(r, sel.Directives) {
+				collectFields(r, r.Fragments[sel.Name].SelSet, allFields)
 			}
-			e.execFragment(r, r.Fragments[sel.Name].SelSet, resolver, result)
 		default:
 			panic("invalid type")
 		}
@@ -151,7 +153,7 @@ type fieldExec struct {
 	valueExec   iExec
 }
 
-func (e *fieldExec) exec(r *request, f *query.Field, resolver reflect.Value, result map[string]interface{}) {
+func (e *fieldExec) exec(r *request, f *query.Field, resolver reflect.Value) interface{} {
 	m := resolver.Method(e.methodIndex)
 	var in []reflect.Value
 	if len(e.field.Parameters) != 0 {
@@ -166,7 +168,7 @@ func (e *fieldExec) exec(r *request, f *query.Field, resolver reflect.Value, res
 		}
 		in = []reflect.Value{args.Elem()}
 	}
-	result[f.Alias] = e.valueExec.exec(r, f.SelSet, m.Call(in)[0])
+	return e.valueExec.exec(r, f.SelSet, m.Call(in)[0])
 }
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {

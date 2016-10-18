@@ -274,18 +274,55 @@ func (r *Resolver) Hero(args struct{ Episode string }) characterResolver {
 	return &droidResolver{droidData["2001"]}
 }
 
-func (r *Resolver) Human(args struct{ ID string }) *humanResolver {
-	h := humanData[args.ID]
-	if h == nil {
-		return nil
+func (r *Resolver) Reviews(args struct{ Episode string }) []*reviewResolver {
+	panic("TODO")
+}
+
+func (r *Resolver) Search(args struct{ Text string }) []characterResolver {
+	panic("TODO")
+}
+
+func (r *Resolver) Character(args struct{ ID string }) characterResolver {
+	if h := humanData[args.ID]; h != nil {
+		return &humanResolver{h}
 	}
-	return &humanResolver{h}
+	if d := droidData[args.ID]; d != nil {
+		return &droidResolver{d}
+	}
+	return nil
+}
+
+func (r *Resolver) Human(args struct{ ID string }) *humanResolver {
+	if h := humanData[args.ID]; h != nil {
+		return &humanResolver{h}
+	}
+	return nil
+}
+
+func (r *Resolver) Droid(args struct{ ID string }) *droidResolver {
+	if d := droidData[args.ID]; d != nil {
+		return &droidResolver{d}
+	}
+	return nil
+}
+
+func (r *Resolver) Starship(args struct{ ID string }) *starshipResolver {
+	if s := starshipData[args.ID]; s != nil {
+		return &starshipResolver{s}
+	}
+	return nil
+}
+
+type friendsConenctionArgs struct {
+	First int
+	After string
 }
 
 type characterResolver interface {
 	ID() string
 	Name() string
 	Friends() []characterResolver
+	FriendsConnection(friendsConenctionArgs) *friendsConnectionResolver
 	AppearsIn() []string
 }
 
@@ -302,22 +339,31 @@ func (r *humanResolver) Name() string {
 }
 
 func (r *humanResolver) Height(args struct{ Unit string }) float64 {
-	switch args.Unit {
-	case "METER":
-		return r.h.Height
-	case "FOOT":
-		return r.h.Height * 3.28084
-	default:
-		panic("invalid unit")
-	}
+	return convertLength(r.h.Height, args.Unit)
+}
+
+func (r *humanResolver) Mass() float64 {
+	return float64(r.h.Mass)
 }
 
 func (r *humanResolver) Friends() []characterResolver {
 	return resolveCharacters(r.h.Friends)
 }
 
+func (r *humanResolver) FriendsConnection(args friendsConenctionArgs) *friendsConnectionResolver {
+	panic("TODO")
+}
+
 func (r *humanResolver) AppearsIn() []string {
 	return r.h.AppearsIn
+}
+
+func (r *humanResolver) Starships() []*starshipResolver {
+	l := make([]*starshipResolver, len(r.h.Starships))
+	for i, id := range r.h.Starships {
+		l[i] = &starshipResolver{starshipData[id]}
+	}
+	return l
 }
 
 type droidResolver struct {
@@ -336,8 +382,43 @@ func (r *droidResolver) Friends() []characterResolver {
 	return resolveCharacters(r.d.Friends)
 }
 
+func (r *droidResolver) FriendsConnection(args friendsConenctionArgs) *friendsConnectionResolver {
+	panic("TODO")
+}
+
 func (r *droidResolver) AppearsIn() []string {
 	return r.d.AppearsIn
+}
+
+func (r *droidResolver) PrimaryFunction() string {
+	return r.d.PrimaryFunction
+}
+
+type starshipResolver struct {
+	s *starship
+}
+
+func (r *starshipResolver) ID() string {
+	return r.s.ID
+}
+
+func (r *starshipResolver) Name() string {
+	return r.s.Name
+}
+
+func (r *starshipResolver) Length(args struct{ Unit string }) float64 {
+	return convertLength(r.s.Length, args.Unit)
+}
+
+func convertLength(meters float64, unit string) float64 {
+	switch unit {
+	case "METER":
+		return meters
+	case "FOOT":
+		return meters * 3.28084
+	default:
+		panic("invalid unit")
+	}
 }
 
 func resolveCharacters(ids []string) []characterResolver {
@@ -351,4 +432,60 @@ func resolveCharacters(ids []string) []characterResolver {
 		}
 	}
 	return characters
+}
+
+type reviewResolver struct {
+}
+
+func (r *reviewResolver) Stars() int {
+	panic("TODO")
+}
+
+func (r *reviewResolver) Commentary() string {
+	panic("TODO")
+}
+
+type friendsConnectionResolver struct {
+}
+
+func (r *friendsConnectionResolver) TotalCount() int {
+	panic("TODO")
+}
+
+func (r *friendsConnectionResolver) Edges() []*friendsEdgeResolver {
+	panic("TODO")
+}
+
+func (r *friendsConnectionResolver) Friends() []characterResolver {
+	panic("TODO")
+}
+
+func (r *friendsConnectionResolver) PageInfo() *pageInfoResolver {
+	panic("TODO")
+}
+
+type friendsEdgeResolver struct {
+}
+
+func (r *friendsEdgeResolver) Cursor() string {
+	panic("TODO")
+}
+
+func (r *friendsEdgeResolver) Node() characterResolver {
+	panic("TODO")
+}
+
+type pageInfoResolver struct {
+}
+
+func (r *pageInfoResolver) StartCursor() string {
+	panic("TODO")
+}
+
+func (r *pageInfoResolver) EndCursor() string {
+	panic("TODO")
+}
+
+func (r *pageInfoResolver) HasNextPage() bool {
+	panic("TODO")
 }

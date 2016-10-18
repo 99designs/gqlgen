@@ -25,6 +25,11 @@ type Object struct {
 	Fields map[string]*Field
 }
 
+type Union struct {
+	Name  string
+	Types []string
+}
+
 type Enum struct {
 	Name   string
 	Values []string
@@ -40,6 +45,7 @@ type TypeReference struct {
 
 func (Scalar) isType()        {}
 func (Object) isType()        {}
+func (Union) isType()         {}
 func (Enum) isType()          {}
 func (List) isType()          {}
 func (TypeReference) isType() {}
@@ -100,7 +106,8 @@ func parseSchema(l *lexer.Lexer) *Schema {
 			obj := parseTypeDecl(l) // TODO
 			s.Types[obj.Name] = obj
 		case "union":
-			parseUnionDecl(l) // TODO
+			union := parseUnionDecl(l)
+			s.Types[union.Name] = union
 		case "enum":
 			enum := parseEnumDecl(l)
 			s.Types[enum.Name] = enum
@@ -146,14 +153,16 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 	return enum
 }
 
-func parseUnionDecl(l *lexer.Lexer) {
-	l.ConsumeIdent()
+func parseUnionDecl(l *lexer.Lexer) *Union {
+	union := &Union{}
+	union.Name = l.ConsumeIdent()
 	l.ConsumeToken('=')
-	l.ConsumeIdent()
+	union.Types = []string{l.ConsumeIdent()}
 	for l.Peek() == '|' {
 		l.ConsumeToken('|')
-		l.ConsumeIdent()
+		union.Types = append(union.Types, l.ConsumeIdent())
 	}
+	return union
 }
 
 func parseInputDecl(l *lexer.Lexer) {

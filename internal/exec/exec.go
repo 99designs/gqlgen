@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -43,7 +44,8 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRe
 				}
 			}
 			if methodIndex == -1 {
-				continue // TODO error
+				// continue // TODO error
+				panic(fmt.Errorf("%s does not implement %q: missing method for %q", resolverType, t.Name, name)) // TODO proper error handling
 			}
 
 			fields[name] = &fieldExec{
@@ -57,16 +59,25 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRe
 			fields: fields,
 		}
 
+	case *schema.Union:
+		return nil // TODO
+
 	case *schema.Enum:
 		return &scalarExec{}
 
 	case *schema.List:
+		if resolverType.Kind() != reflect.Slice {
+			panic(fmt.Errorf("%s is not a slice", resolverType)) // TODO proper error handling
+		}
 		return &listExec{
 			elem: makeExec(s, t.Elem, resolverType.Elem(), typeRefMap),
 		}
 
 	case *schema.TypeReference:
-		refT := s.Types[t.Name]
+		refT, ok := s.Types[t.Name]
+		if !ok {
+			panic("type not found: " + t.Name) // TODO proper error
+		}
 		k := typeRefMapKey{refT, resolverType}
 		e, ok := typeRefMap[k]
 		if !ok {

@@ -195,12 +195,22 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 			if !skipByDirective(r, sel.Directives) {
 				wg.Add(1)
 				go func(f *query.Field) {
+					defer wg.Done()
+					if f.Name == "__typename" {
+						for name, a := range e.typeAssertions {
+							out := resolver.Method(a.methodIndex).Call(nil)
+							if out[1].Bool() {
+								addResult(f.Alias, name)
+								return
+							}
+						}
+						return
+					}
 					fe, ok := e.fields[f.Name]
 					if !ok {
 						panic(fmt.Errorf("%q has no field %q", e.name, f.Name)) // TODO proper error handling
 					}
 					fe.execField(r, f, resolver, addResult)
-					wg.Done()
 				}(sel)
 			}
 
@@ -208,12 +218,12 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 			if !skipByDirective(r, sel.Directives) {
 				wg.Add(1)
 				go func(fs *query.FragmentSpread) {
+					defer wg.Done()
 					frag, ok := r.Fragments[fs.Name]
 					if !ok {
 						panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
 					}
 					e.execFragment(r, &frag.Fragment, resolver, addResult)
-					wg.Done()
 				}(sel)
 			}
 
@@ -221,8 +231,8 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 			if !skipByDirective(r, sel.Directives) {
 				wg.Add(1)
 				go func(frag *query.InlineFragment) {
+					defer wg.Done()
 					e.execFragment(r, &frag.Fragment, resolver, addResult)
-					wg.Done()
 				}(sel)
 			}
 

@@ -479,6 +479,7 @@ var tests = []struct {
 		query: `
 			{
 				search(text: "an") {
+					__typename
 					... on Human {
 						name
 					}
@@ -495,12 +496,15 @@ var tests = []struct {
 			{
 				"search": [
 					{
+						"__typename": "Human",
 						"name": "Han Solo"
 					},
 					{
+						"__typename": "Human",
 						"name": "Leia Organa"
 					},
 					{
+						"__typename": "Starship",
 						"name": "TIE Advanced x1"
 					}
 				]

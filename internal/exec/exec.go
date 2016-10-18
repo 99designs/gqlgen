@@ -2,7 +2,9 @@ package exec
 
 import (
 	"fmt"
+	"log"
 	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -34,8 +36,21 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	}, nil
 }
 
-func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) interface{} {
-	return e.exec(&request{document, variables}, selSet, e.resolver)
+func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, error) {
+	r := &request{
+		Document:  document,
+		Variables: variables,
+	}
+
+	res := func() interface{} {
+		defer r.handlePanic()
+		return e.exec(r, selSet, e.resolver)
+	}()
+
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return res, nil
 }
 
 func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implementsMap map[string][]string, typeRefMap map[typeRefMapKey]*typeRefExec) (iExec, error) {
@@ -156,6 +171,21 @@ func findMethod(t reflect.Type, name string) int {
 type request struct {
 	*query.Document
 	Variables map[string]interface{}
+	Mu        sync.Mutex
+	Error     error
+}
+
+func (r *request) handlePanic() {
+	if err := recover(); err != nil {
+		r.Mu.Lock()
+		defer r.Mu.Unlock()
+		r.Error = fmt.Errorf("graphql: panic occured: %v", err)
+
+		const size = 64 << 10
+		buf := make([]byte, size)
+		buf = buf[:runtime.Stack(buf, false)]
+		log.Printf("%s\n%s", r.Error, buf)
+	}
 }
 
 type iExec interface {
@@ -178,8 +208,9 @@ func (e *listExec) exec(r *request, selSet *query.SelectionSet, resolver reflect
 	for i := range l {
 		wg.Add(1)
 		go func(i int) {
+			defer wg.Done()
+			defer r.handlePanic()
 			l[i] = e.elem.exec(r, selSet, resolver.Index(i))
-			wg.Done()
 		}(i)
 	}
 	wg.Wait()
@@ -224,6 +255,7 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 				wg.Add(1)
 				go func(f *query.Field) {
 					defer wg.Done()
+					defer r.handlePanic()
 					if f.Name == "__typename" {
 						for name, a := range e.typeAssertions {
 							out := resolver.Method(a.methodIndex).Call(nil)
@@ -247,6 +279,7 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 				wg.Add(1)
 				go func(fs *query.FragmentSpread) {
 					defer wg.Done()
+					defer r.handlePanic()
 					frag, ok := r.Fragments[fs.Name]
 					if !ok {
 						panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
@@ -260,6 +293,7 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 				wg.Add(1)
 				go func(frag *query.InlineFragment) {
 					defer wg.Done()
+					defer r.handlePanic()
 					e.execFragment(r, &frag.Fragment, resolver, addResult)
 				}(sel)
 			}

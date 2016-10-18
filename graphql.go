@@ -45,6 +45,9 @@ func (s *Schema) Exec(queryString string, operationName string, variables map[st
 		return nil, fmt.Errorf("no operation with name %q", operationName)
 	}
 
-	rawRes := s.exec.Exec(d, variables, op.SelSet)
+	rawRes, err := s.exec.Exec(d, variables, op.SelSet)
+	if err != nil {
+		return nil, err
+	}
 	return json.Marshal(rawRes)
 }

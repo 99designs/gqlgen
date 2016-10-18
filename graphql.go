@@ -19,8 +19,12 @@ func NewSchema(schemaString string, filename string, resolver interface{}) (*Sch
 		return nil, err
 	}
 
+	e, err := exec.Make(s, resolver)
+	if err != nil {
+		return nil, err
+	}
 	return &Schema{
-		exec: exec.Make(s, resolver),
+		exec: e,
 	}, nil
 }
 

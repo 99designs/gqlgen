@@ -160,9 +160,11 @@ var tests = []struct {
 			{
 				leftComparison: hero(episode: EMPIRE) {
 					...comparisonFields
+					...height
 				}
 				rightComparison: hero(episode: JEDI) {
 					...comparisonFields
+					...height
 				}
 			}
 			
@@ -172,6 +174,10 @@ var tests = []struct {
 				friends {
 					name
 				}
+			}
+
+			fragment height on Human {
+				height
 			}
 		`,
 		result: `
@@ -196,7 +202,8 @@ var tests = []struct {
 						{
 							"name": "R2-D2"
 						}
-					]
+					],
+					"height": 1.72
 				},
 				"rightComparison": {
 					"name": "R2-D2",

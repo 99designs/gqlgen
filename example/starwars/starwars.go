@@ -324,6 +324,8 @@ type characterResolver interface {
 	Friends() []characterResolver
 	FriendsConnection(friendsConenctionArgs) *friendsConnectionResolver
 	AppearsIn() []string
+	ToHuman() (*humanResolver, bool)
+	ToDroid() (*droidResolver, bool)
 }
 
 type humanResolver struct {
@@ -366,6 +368,14 @@ func (r *humanResolver) Starships() []*starshipResolver {
 	return l
 }
 
+func (r *humanResolver) ToHuman() (*humanResolver, bool) {
+	return r, true
+}
+
+func (r *humanResolver) ToDroid() (*droidResolver, bool) {
+	return nil, false
+}
+
 type droidResolver struct {
 	d *droid
 }
@@ -392,6 +402,14 @@ func (r *droidResolver) AppearsIn() []string {
 
 func (r *droidResolver) PrimaryFunction() string {
 	return r.d.PrimaryFunction
+}
+
+func (r *droidResolver) ToHuman() (*humanResolver, bool) {
+	return nil, false
+}
+
+func (r *droidResolver) ToDroid() (*droidResolver, bool) {
+	return r, true
 }
 
 type starshipResolver struct {

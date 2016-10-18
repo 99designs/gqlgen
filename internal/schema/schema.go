@@ -21,8 +21,9 @@ type Type interface {
 type Scalar struct{}
 
 type Object struct {
-	Name   string
-	Fields map[string]*Field
+	Name       string
+	Implements string
+	Fields     map[string]*Field
 }
 
 type Union struct {
@@ -129,7 +130,7 @@ func parseTypeDecl(l *lexer.Lexer) *Object {
 	o.Name = l.ConsumeIdent()
 	if l.Peek() == scanner.Ident {
 		l.ConsumeKeyword("implements")
-		l.ConsumeIdent()
+		o.Implements = l.ConsumeIdent()
 	}
 	l.ConsumeToken('{')
 

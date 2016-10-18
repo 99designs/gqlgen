@@ -35,7 +35,7 @@ type VariableDef struct {
 
 type Fragment struct {
 	Name   string
-	Type   string
+	On     string
 	SelSet *SelectionSet
 }
 
@@ -155,7 +155,7 @@ func parseFragment(l *lexer.Lexer) *Fragment {
 	f := &Fragment{}
 	f.Name = l.ConsumeIdent()
 	l.ConsumeKeyword("on")
-	f.Type = l.ConsumeIdent()
+	f.On = l.ConsumeIdent()
 	f.SelSet = parseSelectionSet(l)
 	return f
 }

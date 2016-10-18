@@ -138,24 +138,29 @@ type objectExec struct {
 	fields map[string]*fieldExec
 }
 
+type addResultFn func(key string, value interface{})
+
 func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
-	return e.execFragment(r, selSet, resolver)
+	var mu sync.Mutex
+	results := make(map[string]interface{})
+	addResult := func(key string, value interface{}) {
+		mu.Lock()
+		results[key] = value
+		mu.Unlock()
+	}
+	e.execFragment(r, selSet, resolver, addResult)
+	return results
 }
 
-func (e *objectExec) execFragment(r *request, selSet *query.SelectionSet, resolver reflect.Value) map[string]interface{} {
+func (e *objectExec) execFragment(r *request, selSet *query.SelectionSet, resolver reflect.Value, addResult addResultFn) {
 	var wg sync.WaitGroup
-	var mu sync.Mutex
-	result := make(map[string]interface{})
 	for _, sel := range selSet.Selections {
 		switch sel := sel.(type) {
 		case *query.Field:
 			if !skipByDirective(r, sel.Directives) {
 				wg.Add(1)
 				go func(f *query.Field) {
-					v := e.fields[f.Name].execField(r, f, resolver)
-					mu.Lock()
-					result[f.Alias] = v
-					mu.Unlock()
+					e.fields[f.Name].execField(r, f, resolver, addResult)
 					wg.Done()
 				}(sel)
 			}
@@ -164,12 +169,7 @@ func (e *objectExec) execFragment(r *request, selSet *query.SelectionSet, resolv
 			if !skipByDirective(r, sel.Directives) {
 				wg.Add(1)
 				go func(fs *query.FragmentSpread) {
-					m := e.execFragment(r, r.Fragments[fs.Name].SelSet, resolver)
-					mu.Lock()
-					for k, v := range m {
-						result[k] = v
-					}
-					mu.Unlock()
+					e.execFragment(r, r.Fragments[fs.Name].SelSet, resolver, addResult)
 					wg.Done()
 				}(sel)
 			}
@@ -179,7 +179,6 @@ func (e *objectExec) execFragment(r *request, selSet *query.SelectionSet, resolv
 		}
 	}
 	wg.Wait()
-	return result
 }
 
 type fieldExec struct {
@@ -188,7 +187,7 @@ type fieldExec struct {
 	valueExec   iExec
 }
 
-func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value) interface{} {
+func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
 	m := resolver.Method(e.methodIndex)
 	var in []reflect.Value
 	if len(e.field.Parameters) != 0 {
@@ -203,7 +202,7 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 		}
 		in = []reflect.Value{args.Elem()}
 	}
-	return e.valueExec.exec(r, f.SelSet, m.Call(in)[0])
+	addResult(f.Alias, e.valueExec.exec(r, f.SelSet, m.Call(in)[0]))
 }
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {

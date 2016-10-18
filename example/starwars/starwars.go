@@ -3,6 +3,8 @@
 // Source: https://github.com/graphql/graphql.github.io/blob/source/site/_core/swapiSchema.js
 package starwars
 
+import "strings"
+
 var Schema = `
 	schema {
 		query: Query
@@ -281,8 +283,24 @@ func (r *Resolver) Reviews(args struct{ Episode string }) []*reviewResolver {
 	panic("TODO")
 }
 
-func (r *Resolver) Search(args struct{ Text string }) []characterResolver {
-	panic("TODO")
+func (r *Resolver) Search(args struct{ Text string }) []searchResultResolver {
+	var l []searchResultResolver
+	for _, h := range humans {
+		if strings.Contains(h.Name, args.Text) {
+			l = append(l, &humanResolver{h})
+		}
+	}
+	for _, d := range droids {
+		if strings.Contains(d.Name, args.Text) {
+			l = append(l, &droidResolver{d})
+		}
+	}
+	for _, s := range starships {
+		if strings.Contains(s.Name, args.Text) {
+			l = append(l, &starshipResolver{s})
+		}
+	}
+	return l
 }
 
 func (r *Resolver) Character(args struct{ ID string }) characterResolver {
@@ -379,6 +397,10 @@ func (r *humanResolver) ToDroid() (*droidResolver, bool) {
 	return nil, false
 }
 
+func (r *humanResolver) ToStarship() (*starshipResolver, bool) {
+	return nil, false
+}
+
 type droidResolver struct {
 	d *droid
 }
@@ -415,6 +437,10 @@ func (r *droidResolver) ToDroid() (*droidResolver, bool) {
 	return r, true
 }
 
+func (r *droidResolver) ToStarship() (*starshipResolver, bool) {
+	return nil, false
+}
+
 type starshipResolver struct {
 	s *starship
 }
@@ -429,6 +455,24 @@ func (r *starshipResolver) Name() string {
 
 func (r *starshipResolver) Length(args struct{ Unit string }) float64 {
 	return convertLength(r.s.Length, args.Unit)
+}
+
+func (r *starshipResolver) ToHuman() (*humanResolver, bool) {
+	return nil, false
+}
+
+func (r *starshipResolver) ToDroid() (*droidResolver, bool) {
+	return nil, false
+}
+
+func (r *starshipResolver) ToStarship() (*starshipResolver, bool) {
+	return r, true
+}
+
+type searchResultResolver interface {
+	ToHuman() (*humanResolver, bool)
+	ToDroid() (*droidResolver, bool)
+	ToStarship() (*starshipResolver, bool)
 }
 
 func convertLength(meters float64, unit string) float64 {

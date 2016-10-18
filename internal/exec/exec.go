@@ -54,27 +54,17 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 			}
 		}
 
-		typeAssertions := make(map[string]*typeAssertExec)
-		for _, impl := range implementsMap[t.Name] {
-			methodIndex := findMethod(resolverType, "to"+impl)
-			if methodIndex == -1 {
-				panic(fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, t.Name, "to"+impl, impl)) // TODO proper error handling
-			}
-			e := resolveType(s, impl, resolverType.Method(methodIndex).Type.Out(0), implementsMap, typeRefMap)
-			typeAssertions[impl] = &typeAssertExec{
-				methodIndex: methodIndex,
-				typeExec:    e,
-			}
-		}
-
 		return &objectExec{
 			name:           t.Name,
 			fields:         fields,
-			typeAssertions: typeAssertions,
+			typeAssertions: makeTypeAssertions(s, t.Name, implementsMap[t.Name], resolverType, implementsMap, typeRefMap),
 		}
 
 	case *schema.Union:
-		return nil // TODO
+		return &objectExec{
+			name:           t.Name,
+			typeAssertions: makeTypeAssertions(s, t.Name, t.Types, resolverType, implementsMap, typeRefMap),
+		}
 
 	case *schema.Enum:
 		return &scalarExec{}
@@ -93,6 +83,22 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 	default:
 		panic("invalid type")
 	}
+}
+
+func makeTypeAssertions(s *schema.Schema, typeName string, impls []string, resolverType reflect.Type, implementsMap map[string][]string, typeRefMap map[typeRefMapKey]*typeRefExec) map[string]*typeAssertExec {
+	typeAssertions := make(map[string]*typeAssertExec)
+	for _, impl := range impls {
+		methodIndex := findMethod(resolverType, "to"+impl)
+		if methodIndex == -1 {
+			panic(fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, typeName, "to"+impl, impl)) // TODO proper error handling
+		}
+		e := resolveType(s, impl, resolverType.Method(methodIndex).Type.Out(0), implementsMap, typeRefMap)
+		typeAssertions[impl] = &typeAssertExec{
+			methodIndex: methodIndex,
+			typeExec:    e,
+		}
+	}
+	return typeAssertions
 }
 
 func resolveType(s *schema.Schema, name string, resolverType reflect.Type, implementsMap map[string][]string, typeRefMap map[typeRefMapKey]*typeRefExec) *typeRefExec {

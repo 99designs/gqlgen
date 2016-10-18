@@ -471,6 +471,42 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsTypeName",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				search(text: "an") {
+					... on Human {
+						name
+					}
+					... on Droid {
+						name
+					}
+					... on Starship {
+						name
+					}
+				}
+			}
+		`,
+		result: `
+			{
+				"search": [
+					{
+						"name": "Han Solo"
+					},
+					{
+						"name": "Leia Organa"
+					},
+					{
+						"name": "TIE Advanced x1"
+					}
+				]
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {

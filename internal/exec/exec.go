@@ -139,41 +139,47 @@ type objectExec struct {
 }
 
 func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
-	var allFields []*query.Field
-	collectFields(r, selSet, &allFields)
-
-	var wg sync.WaitGroup
-	var m sync.Mutex
-	result := make(map[string]interface{})
-	for _, f := range allFields {
-		wg.Add(1)
-		go func(f *query.Field) {
-			v := e.fields[f.Name].exec(r, f, resolver)
-			m.Lock()
-			result[f.Alias] = v
-			m.Unlock()
-			wg.Done()
-		}(f)
-	}
-	wg.Wait()
-	return result
+	return e.execFragment(r, selSet, resolver)
 }
 
-func collectFields(r *request, selSet *query.SelectionSet, allFields *[]*query.Field) {
+func (e *objectExec) execFragment(r *request, selSet *query.SelectionSet, resolver reflect.Value) map[string]interface{} {
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	result := make(map[string]interface{})
 	for _, sel := range selSet.Selections {
 		switch sel := sel.(type) {
 		case *query.Field:
 			if !skipByDirective(r, sel.Directives) {
-				*allFields = append(*allFields, sel)
+				wg.Add(1)
+				go func(f *query.Field) {
+					v := e.fields[f.Name].execField(r, f, resolver)
+					mu.Lock()
+					result[f.Alias] = v
+					mu.Unlock()
+					wg.Done()
+				}(sel)
 			}
+
 		case *query.FragmentSpread:
 			if !skipByDirective(r, sel.Directives) {
-				collectFields(r, r.Fragments[sel.Name].SelSet, allFields)
+				wg.Add(1)
+				go func(fs *query.FragmentSpread) {
+					m := e.execFragment(r, r.Fragments[fs.Name].SelSet, resolver)
+					mu.Lock()
+					for k, v := range m {
+						result[k] = v
+					}
+					mu.Unlock()
+					wg.Done()
+				}(sel)
 			}
+
 		default:
 			panic("invalid type")
 		}
 	}
+	wg.Wait()
+	return result
 }
 
 type fieldExec struct {
@@ -182,7 +188,7 @@ type fieldExec struct {
 	valueExec   iExec
 }
 
-func (e *fieldExec) exec(r *request, f *query.Field, resolver reflect.Value) interface{} {
+func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value) interface{} {
 	m := resolver.Method(e.methodIndex)
 	var in []reflect.Value
 	if len(e.field.Parameters) != 0 {

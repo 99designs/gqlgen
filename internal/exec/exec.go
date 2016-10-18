@@ -17,6 +17,14 @@ type Exec struct {
 	resolver reflect.Value
 }
 
+var builtinTypes = map[string]iExec{
+	"Int":     &scalarExec{},
+	"Float":   &scalarExec{},
+	"String":  &scalarExec{},
+	"Boolean": &scalarExec{},
+	"ID":      &scalarExec{},
+}
+
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	implementsMap := make(map[string][]string)
 	for _, t := range s.Types {
@@ -55,9 +63,6 @@ func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, 
 
 func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implementsMap map[string][]string, typeRefMap map[typeRefMapKey]*typeRefExec) (iExec, error) {
 	switch t := t.(type) {
-	case *schema.Scalar:
-		return &scalarExec{}, nil
-
 	case *schema.Object:
 		fields := make(map[string]*fieldExec)
 		for name, f := range t.Fields {
@@ -113,6 +118,9 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 		}, nil
 
 	case *schema.TypeReference:
+		if builtin, ok := builtinTypes[t.Name]; ok {
+			return builtin, nil
+		}
 		e, err := resolveType(s, t.Name, resolverType, implementsMap, typeRefMap)
 		return e, err
 

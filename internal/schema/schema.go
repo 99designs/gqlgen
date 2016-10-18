@@ -18,8 +18,6 @@ type Type interface {
 	isType()
 }
 
-type Scalar struct{}
-
 type Object struct {
 	Name       string
 	Implements string
@@ -44,7 +42,6 @@ type TypeReference struct {
 	Name string
 }
 
-func (Scalar) isType()        {}
 func (Object) isType()        {}
 func (Union) isType()         {}
 func (Enum) isType()          {}
@@ -215,13 +212,8 @@ func parseType(l *lexer.Lexer) Type {
 		return parseList(l)
 	}
 
-	name := l.ConsumeIdent()
-	switch name {
-	case "Int", "Float", "String", "Boolean", "ID":
-		return &Scalar{}
-	}
 	return &TypeReference{
-		Name: name,
+		Name: l.ConsumeIdent(),
 	}
 }
 

@@ -511,6 +511,56 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsIntrospection",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				__schema {
+					types {
+						name
+					}
+				}
+			}
+		`,
+		result: `
+		{
+				"__schema": {
+					"types": [
+						{ "name": "Character" },
+						{ "name": "Droid" },
+						{ "name": "Episode" },
+						{ "name": "FriendsConnection" },
+						{ "name": "FriendsEdge" },
+						{ "name": "Human" },
+						{ "name": "LengthUnit" },
+						{ "name": "Mutation" },
+						{ "name": "PageInfo" },
+						{ "name": "Query" },
+						{ "name": "Review" },
+						{ "name": "ReviewInput" },
+						{ "name": "SearchResult" },
+						{ "name": "Starship" },
+						{ "name": "__Directive" },
+						{ "name": "__DirectiveLocation" },
+						{ "name": "__EnumValue" },
+						{ "name": "__Field" },
+						{ "name": "__InputValue" },
+						{ "name": "__Schema" },
+						{ "name": "__Type" },
+						{ "name": "__TypeKind" },
+						{ "name": "Int" },
+						{ "name": "Float" },
+						{ "name": "String" },
+						{ "name": "Boolean" },
+						{ "name": "ID" }
+					]
+				}
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {

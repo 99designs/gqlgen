@@ -14,16 +14,18 @@ import (
 
 type Exec struct {
 	iExec
+	schema   *schema.Schema
 	resolver reflect.Value
 }
 
-var builtinTypes = map[string]iExec{
+var scalarTypes = map[string]iExec{
 	"Int":     &scalarExec{},
 	"Float":   &scalarExec{},
 	"String":  &scalarExec{},
 	"Boolean": &scalarExec{},
 	"ID":      &scalarExec{},
 }
+var scalarTypeNames = []string{"Int", "Float", "String", "Boolean", "ID"}
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	implementsMap := make(map[string][]string)
@@ -40,6 +42,7 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	}
 	return &Exec{
 		iExec:    e,
+		schema:   s,
 		resolver: reflect.ValueOf(resolver),
 	}, nil
 }
@@ -48,6 +51,7 @@ func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, 
 	r := &request{
 		Document:  document,
 		Variables: variables,
+		Schema:    e.schema,
 	}
 
 	res := func() interface{} {
@@ -71,7 +75,12 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 				return nil, fmt.Errorf("%s does not resolve %q: missing method for field %q", resolverType, t.Name, name)
 			}
 
-			ve, err := makeExec(s, f.Type, resolverType.Method(methodIndex).Type.Out(0), implementsMap, typeRefMap)
+			m := resolverType.Method(methodIndex)
+			if m.Type.NumOut() != 1 {
+				return nil, fmt.Errorf("method %q of %s must have exactly one return value", m.Name, resolverType)
+			}
+
+			ve, err := makeExec(s, f.Type, m.Type.Out(0), implementsMap, typeRefMap)
 			if err != nil {
 				return nil, err
 			}
@@ -118,8 +127,8 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 		}, nil
 
 	case *schema.TypeReference:
-		if builtin, ok := builtinTypes[t.Name]; ok {
-			return builtin, nil
+		if scalar, ok := scalarTypes[t.Name]; ok {
+			return scalar, nil
 		}
 		e, err := resolveType(s, t.Name, resolverType, implementsMap, typeRefMap)
 		return e, err
@@ -179,6 +188,7 @@ func findMethod(t reflect.Type, name string) int {
 type request struct {
 	*query.Document
 	Variables map[string]interface{}
+	Schema    *schema.Schema
 	Mu        sync.Mutex
 	Error     error
 }
@@ -264,7 +274,8 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 				go func(f *query.Field) {
 					defer wg.Done()
 					defer r.handlePanic()
-					if f.Name == "__typename" {
+					switch f.Name {
+					case "__typename":
 						for name, a := range e.typeAssertions {
 							out := resolver.Method(a.methodIndex).Call(nil)
 							if out[1].Bool() {
@@ -272,13 +283,17 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 								return
 							}
 						}
-						return
+
+					case "__schema":
+						addResult(f.Alias, introspect(r, f.SelSet))
+
+					default:
+						fe, ok := e.fields[f.Name]
+						if !ok {
+							panic(fmt.Errorf("%q has no field %q", e.name, f.Name)) // TODO proper error handling
+						}
+						fe.execField(r, f, resolver, addResult)
 					}
-					fe, ok := e.fields[f.Name]
-					if !ok {
-						panic(fmt.Errorf("%q has no field %q", e.name, f.Name)) // TODO proper error handling
-					}
-					fe.execField(r, f, resolver, addResult)
 				}(sel)
 			}
 

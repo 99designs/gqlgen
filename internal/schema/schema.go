@@ -110,7 +110,8 @@ func parseSchema(l *lexer.Lexer) *Schema {
 			enum := parseEnumDecl(l)
 			s.Types[enum.Name] = enum
 		case "input":
-			parseInputDecl(l) // TODO
+			obj := parseTypeDecl(l) // TODO
+			s.Types[obj.Name] = obj
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
 		}
@@ -163,15 +164,6 @@ func parseUnionDecl(l *lexer.Lexer) *Union {
 	return union
 }
 
-func parseInputDecl(l *lexer.Lexer) {
-	l.ConsumeIdent()
-	l.ConsumeToken('{')
-	for l.Peek() != '}' {
-		parseField(l)
-	}
-	l.ConsumeToken('}')
-}
-
 func parseField(l *lexer.Lexer) *Field {
 	f := &Field{}
 	f.Name = l.ConsumeIdent()
@@ -186,9 +178,6 @@ func parseField(l *lexer.Lexer) *Field {
 	}
 	l.ConsumeToken(':')
 	f.Type = parseType(l)
-	if l.Peek() == '!' {
-		l.ConsumeToken('!') // TODO
-	}
 	return f
 }
 
@@ -212,8 +201,12 @@ func parseType(l *lexer.Lexer) Type {
 		return parseList(l)
 	}
 
+	name := l.ConsumeIdent()
+	if l.Peek() == '!' {
+		l.ConsumeToken('!') // TODO
+	}
 	return &TypeReference{
-		Name: l.ConsumeIdent(),
+		Name: name,
 	}
 }
 
@@ -221,5 +214,8 @@ func parseList(l *lexer.Lexer) *List {
 	l.ConsumeToken('[')
 	elem := parseType(l)
 	l.ConsumeToken(']')
+	if l.Peek() == '!' {
+		l.ConsumeToken('!') // TODO
+	}
 	return &List{Elem: elem}
 }

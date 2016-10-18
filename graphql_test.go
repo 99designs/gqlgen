@@ -411,6 +411,66 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsInlineFragments1",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			query HeroForEpisode($episode: Episode!) {
+				hero(episode: $episode) {
+					name
+					... on Droid {
+						primaryFunction
+					}
+					... on Human {
+						height
+					}
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode": "JEDI",
+		},
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2",
+					"primaryFunction": "Astromech"
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsInlineFragments2",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			query HeroForEpisode($episode: Episode!) {
+				hero(episode: $episode) {
+					name
+					... on Droid {
+						primaryFunction
+					}
+					... on Human {
+						height
+					}
+				}
+			}
+		`,
+		variables: map[string]interface{}{
+			"episode": "EMPIRE",
+		},
+		result: `
+			{
+				"hero": {
+					"name": "Luke Skywalker",
+					"height": 1.72
+				}
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {

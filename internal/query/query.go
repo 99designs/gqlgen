@@ -11,7 +11,7 @@ import (
 
 type Document struct {
 	Operations map[string]*Operation
-	Fragments  map[string]*Fragment
+	Fragments  map[string]*NamedFragment
 }
 
 type Operation struct {
@@ -33,8 +33,12 @@ type VariableDef struct {
 	Type string
 }
 
+type NamedFragment struct {
+	Fragment
+	Name string
+}
+
 type Fragment struct {
-	Name   string
 	On     string
 	SelSet *SelectionSet
 }
@@ -65,8 +69,14 @@ type FragmentSpread struct {
 	Directives map[string]*Directive
 }
 
+type InlineFragment struct {
+	Fragment
+	Directives map[string]*Directive
+}
+
 func (Field) isSelection()          {}
 func (FragmentSpread) isSelection() {}
+func (InlineFragment) isSelection() {}
 
 type Value interface {
 	isValue()
@@ -105,7 +115,7 @@ func Parse(queryString string) (res *Document, errRes error) {
 func parseDocument(l *lexer.Lexer) *Document {
 	d := &Document{
 		Operations: make(map[string]*Operation),
-		Fragments:  make(map[string]*Fragment),
+		Fragments:  make(map[string]*NamedFragment),
 	}
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
@@ -151,8 +161,8 @@ func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	return op
 }
 
-func parseFragment(l *lexer.Lexer) *Fragment {
-	f := &Fragment{}
+func parseFragment(l *lexer.Lexer) *NamedFragment {
+	f := &NamedFragment{}
 	f.Name = l.ConsumeIdent()
 	l.ConsumeKeyword("on")
 	f.On = l.ConsumeIdent()
@@ -184,7 +194,7 @@ func parseSelectionSet(l *lexer.Lexer) *SelectionSet {
 
 func parseSelection(l *lexer.Lexer) Selection {
 	if l.Peek() == '.' {
-		return parseFragmentSpread(l)
+		return parseSpread(l)
 	}
 	return parseField(l)
 }
@@ -238,14 +248,29 @@ func parseDirective(l *lexer.Lexer) *Directive {
 	return d
 }
 
-func parseFragmentSpread(l *lexer.Lexer) *FragmentSpread {
+func parseSpread(l *lexer.Lexer) Selection {
+	l.ConsumeToken('.')
+	l.ConsumeToken('.')
+	l.ConsumeToken('.')
+	ident := l.ConsumeIdent()
+
+	if ident == "on" {
+		f := &InlineFragment{
+			Directives: make(map[string]*Directive),
+		}
+		f.On = l.ConsumeIdent()
+		for l.Peek() == '@' {
+			d := parseDirective(l)
+			f.Directives[d.Name] = d
+		}
+		f.SelSet = parseSelectionSet(l)
+		return f
+	}
+
 	fs := &FragmentSpread{
 		Directives: make(map[string]*Directive),
+		Name:       ident,
 	}
-	l.ConsumeToken('.')
-	l.ConsumeToken('.')
-	l.ConsumeToken('.')
-	fs.Name = l.ConsumeIdent()
 	for l.Peek() == '@' {
 		d := parseDirective(l)
 		fs.Directives[d.Name] = d

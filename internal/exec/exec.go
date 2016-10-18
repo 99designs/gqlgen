@@ -206,7 +206,16 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 					if !ok {
 						panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
 					}
-					e.execFragment(r, frag, resolver, addResult)
+					e.execFragment(r, &frag.Fragment, resolver, addResult)
+					wg.Done()
+				}(sel)
+			}
+
+		case *query.InlineFragment:
+			if !skipByDirective(r, sel.Directives) {
+				wg.Add(1)
+				go func(frag *query.InlineFragment) {
+					e.execFragment(r, &frag.Fragment, resolver, addResult)
 					wg.Done()
 				}(sel)
 			}

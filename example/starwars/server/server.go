@@ -15,7 +15,7 @@ func main() {
 	}))
 
 	http.HandleFunc("/query", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		schema, err := graphql.NewSchema(starwars.Schema, "starwars", &starwars.Resolver{})
+		schema, err := graphql.ParseSchema(starwars.Schema, "starwars", &starwars.Resolver{})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

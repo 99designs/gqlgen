@@ -13,7 +13,7 @@ type Schema struct {
 	exec *exec.Exec
 }
 
-func NewSchema(schemaString string, filename string, resolver interface{}) (*Schema, error) {
+func ParseSchema(schemaString string, filename string, resolver interface{}) (*Schema, error) {
 	s, err := schema.Parse(schemaString, filename)
 	if err != nil {
 		return nil, err

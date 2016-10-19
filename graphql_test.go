@@ -620,7 +620,7 @@ var tests = []struct {
 func TestAll(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			schema, err := NewSchema(test.schema, test.name, test.resolver)
+			schema, err := ParseSchema(test.schema, test.name, test.resolver)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -28,15 +28,8 @@ var scalarTypes = map[string]iExec{
 var scalarTypeNames = []string{"Int", "Float", "String", "Boolean", "ID"}
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
-	implementsMap := make(map[string][]string)
-	for _, t := range s.Types {
-		if obj, ok := t.(*schema.Object); ok && obj.Implements != "" {
-			implementsMap[obj.Implements] = append(implementsMap[obj.Implements], obj.Name)
-		}
-	}
-
 	t := s.Types[s.EntryPoints["query"]]
-	e, err := makeExec(s, t, reflect.TypeOf(resolver), implementsMap, make(map[typeRefMapKey]*typeRefExec))
+	e, err := makeExec(s, t, reflect.TypeOf(resolver), make(map[typeRefMapKey]*typeRefExec))
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +58,7 @@ func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, 
 	return res, nil
 }
 
-func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implementsMap map[string][]string, typeRefMap map[typeRefMapKey]*typeRefExec) (iExec, error) {
+func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRefExec) (iExec, error) {
 	switch t := t.(type) {
 	case *schema.Object:
 		fields := make(map[string]*fieldExec)
@@ -80,7 +73,7 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 				return nil, fmt.Errorf("method %q of %s must have exactly one return value", m.Name, resolverType)
 			}
 
-			ve, err := makeExec(s, f.Type, m.Type.Out(0), implementsMap, typeRefMap)
+			ve, err := makeExec(s, f.Type, m.Type.Out(0), typeRefMap)
 			if err != nil {
 				return nil, err
 			}
@@ -91,7 +84,7 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 			}
 		}
 
-		typeAssertions, err := makeTypeAssertions(s, t.Name, implementsMap[t.Name], resolverType, implementsMap, typeRefMap)
+		typeAssertions, err := makeTypeAssertions(s, t.Name, t.ImplementedBy, resolverType, typeRefMap)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +95,7 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 		}, nil
 
 	case *schema.Union:
-		typeAssertions, err := makeTypeAssertions(s, t.Name, t.Types, resolverType, implementsMap, typeRefMap)
+		typeAssertions, err := makeTypeAssertions(s, t.Name, t.Types, resolverType, typeRefMap)
 		if err != nil {
 			return nil, err
 		}
@@ -118,7 +111,7 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 		if resolverType.Kind() != reflect.Slice {
 			return nil, fmt.Errorf("%s is not a slice", resolverType)
 		}
-		e, err := makeExec(s, t.Elem, resolverType.Elem(), implementsMap, typeRefMap)
+		e, err := makeExec(s, t.Elem, resolverType.Elem(), typeRefMap)
 		if err != nil {
 			return nil, err
 		}
@@ -130,7 +123,7 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 		if scalar, ok := scalarTypes[t.Name]; ok {
 			return scalar, nil
 		}
-		e, err := resolveType(s, t.Name, resolverType, implementsMap, typeRefMap)
+		e, err := resolveType(s, t.Name, resolverType, typeRefMap)
 		return e, err
 
 	default:
@@ -138,14 +131,14 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, implem
 	}
 }
 
-func makeTypeAssertions(s *schema.Schema, typeName string, impls []string, resolverType reflect.Type, implementsMap map[string][]string, typeRefMap map[typeRefMapKey]*typeRefExec) (map[string]*typeAssertExec, error) {
+func makeTypeAssertions(s *schema.Schema, typeName string, impls []string, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRefExec) (map[string]*typeAssertExec, error) {
 	typeAssertions := make(map[string]*typeAssertExec)
 	for _, impl := range impls {
 		methodIndex := findMethod(resolverType, "to"+impl)
 		if methodIndex == -1 {
 			return nil, fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, typeName, "to"+impl, impl)
 		}
-		e, err := resolveType(s, impl, resolverType.Method(methodIndex).Type.Out(0), implementsMap, typeRefMap)
+		e, err := resolveType(s, impl, resolverType.Method(methodIndex).Type.Out(0), typeRefMap)
 		if err != nil {
 			return nil, err
 		}
@@ -157,7 +150,7 @@ func makeTypeAssertions(s *schema.Schema, typeName string, impls []string, resol
 	return typeAssertions, nil
 }
 
-func resolveType(s *schema.Schema, name string, resolverType reflect.Type, implementsMap map[string][]string, typeRefMap map[typeRefMapKey]*typeRefExec) (*typeRefExec, error) {
+func resolveType(s *schema.Schema, name string, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRefExec) (*typeRefExec, error) {
 	refT, ok := s.Types[name]
 	if !ok {
 		return nil, fmt.Errorf("type %q not found", name)
@@ -168,7 +161,7 @@ func resolveType(s *schema.Schema, name string, resolverType reflect.Type, imple
 		e = &typeRefExec{}
 		typeRefMap[k] = e
 		var err error
-		e.iExec, err = makeExec(s, refT, resolverType, implementsMap, typeRefMap)
+		e.iExec, err = makeExec(s, refT, resolverType, typeRefMap)
 		if err != nil {
 			return nil, err
 		}

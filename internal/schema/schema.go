@@ -12,6 +12,7 @@ import (
 type Schema struct {
 	EntryPoints map[string]string
 	Types       map[string]Type
+	Interfaces  map[string]*Object
 }
 
 type Type interface {
@@ -19,9 +20,10 @@ type Type interface {
 }
 
 type Object struct {
-	Name       string
-	Implements string
-	Fields     map[string]*Field
+	Name          string
+	Implements    string
+	ImplementedBy []string
+	Fields        map[string]*Field
 }
 
 type Union struct {
@@ -77,13 +79,26 @@ func Parse(schemaString string, filename string) (res *Schema, errRes error) {
 		}
 	}()
 
-	return parseSchema(lexer.New(sc)), nil
+	s := parseSchema(lexer.New(sc))
+
+	for _, t := range s.Types {
+		if obj, ok := t.(*Object); ok && obj.Implements != "" {
+			intf, ok := s.Interfaces[obj.Implements]
+			if !ok {
+				return nil, fmt.Errorf("interface %q not found", obj.Implements)
+			}
+			intf.ImplementedBy = append(intf.ImplementedBy, obj.Name)
+		}
+	}
+
+	return s, nil
 }
 
 func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
 		EntryPoints: make(map[string]string),
 		Types:       make(map[string]Type),
+		Interfaces:  make(map[string]*Object),
 	}
 
 	for l.Peek() != scanner.EOF {
@@ -103,6 +118,7 @@ func parseSchema(l *lexer.Lexer) *Schema {
 		case "interface":
 			obj := parseTypeDecl(l) // TODO
 			s.Types[obj.Name] = obj
+			s.Interfaces[obj.Name] = obj
 		case "union":
 			union := parseUnionDecl(l)
 			s.Types[union.Name] = union

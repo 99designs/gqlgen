@@ -1,5 +1,7 @@
 # graphql-go
 
+[![GoDoc](https://godoc.org/github.com/neelance/graphql-go?status.svg)](https://godoc.org/github.com/neelance/graphql-go)
+
 ## Goals:
 
 * minimal API

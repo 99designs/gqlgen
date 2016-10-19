@@ -179,7 +179,7 @@ func (r *typeResolver) Kind() string {
 		return "UNION"
 	case *schema.Enum:
 		return "ENUM"
-	case *schema.Input:
+	case *schema.InputObject:
 		return "INPUT_OBJECT"
 	case *schema.List:
 		return "LIST"
@@ -202,7 +202,7 @@ func (r *typeResolver) Name() string {
 		return t.Name
 	case *schema.Enum:
 		return t.Name
-	case *schema.Input:
+	case *schema.InputObject:
 		return t.Name
 	default:
 		panic("unreachable")

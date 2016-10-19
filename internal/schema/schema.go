@@ -42,7 +42,7 @@ type Enum struct {
 	Values []string
 }
 
-type Input struct {
+type InputObject struct {
 	Name   string
 	Fields map[string]*Field
 }
@@ -59,7 +59,7 @@ func (Object) isType()        {}
 func (Interface) isType()     {}
 func (Union) isType()         {}
 func (Enum) isType()          {}
-func (Input) isType()         {}
+func (InputObject) isType()   {}
 func (List) isType()          {}
 func (TypeReference) isType() {}
 
@@ -185,8 +185,8 @@ func parseUnionDecl(l *lexer.Lexer) *Union {
 	return union
 }
 
-func parseInputDecl(l *lexer.Lexer) *Input {
-	i := &Input{}
+func parseInputDecl(l *lexer.Lexer) *InputObject {
+	i := &InputObject{}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
 	i.Fields = parseFields(l)

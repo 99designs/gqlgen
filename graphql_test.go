@@ -513,7 +513,7 @@ var tests = []struct {
 	},
 
 	{
-		name:     "StarWarsIntrospection",
+		name:     "StarWarsIntrospection1",
 		schema:   starwars.Schema,
 		resolver: &starwars.Resolver{},
 		query: `
@@ -526,7 +526,7 @@ var tests = []struct {
 			}
 		`,
 		result: `
-		{
+			{
 				"__schema": {
 					"types": [
 						{ "name": "Character" },
@@ -557,6 +557,30 @@ var tests = []struct {
 						{ "name": "Boolean" },
 						{ "name": "ID" }
 					]
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsIntrospection2",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				__schema {
+					queryType {
+						name
+					}
+				}
+			}
+		`,
+		result: `
+			{
+				"__schema": {
+					"queryType": {
+						"name": "Query"
+					}
 				}
 			}
 		`,

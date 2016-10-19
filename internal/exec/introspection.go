@@ -138,11 +138,11 @@ func (r *schemaResolver) Types() []*typeResolver {
 }
 
 func (r *schemaResolver) QueryType() *typeResolver {
-	panic("TODO")
+	return &typeResolver{typ: r.schema.Types[r.schema.EntryPoints["query"]]}
 }
 
 func (r *schemaResolver) MutationType() *typeResolver {
-	panic("TODO")
+	return &typeResolver{typ: r.schema.Types[r.schema.EntryPoints["mutation"]]}
 }
 
 func (r *schemaResolver) Directives() []*directiveResolver {

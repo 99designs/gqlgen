@@ -11,8 +11,9 @@ import (
 
 type Schema struct {
 	EntryPoints map[string]string
-	Types       map[string]Type
-	Interfaces  map[string]*Object
+	AllTypes    map[string]Type
+	Objects     map[string]*Object
+	Interfaces  map[string]*Interface
 }
 
 type Type interface {
@@ -20,8 +21,13 @@ type Type interface {
 }
 
 type Object struct {
+	Name       string
+	Implements string
+	Fields     map[string]*Field
+}
+
+type Interface struct {
 	Name          string
-	Implements    string
 	ImplementedBy []string
 	Fields        map[string]*Field
 }
@@ -36,6 +42,11 @@ type Enum struct {
 	Values []string
 }
 
+type Input struct {
+	Name   string
+	Fields map[string]*Field
+}
+
 type List struct {
 	Elem Type
 }
@@ -45,8 +56,10 @@ type TypeReference struct {
 }
 
 func (Object) isType()        {}
+func (Interface) isType()     {}
 func (Union) isType()         {}
 func (Enum) isType()          {}
+func (Input) isType()         {}
 func (List) isType()          {}
 func (TypeReference) isType() {}
 
@@ -81,8 +94,8 @@ func Parse(schemaString string, filename string) (res *Schema, errRes error) {
 
 	s := parseSchema(lexer.New(sc))
 
-	for _, t := range s.Types {
-		if obj, ok := t.(*Object); ok && obj.Implements != "" {
+	for _, obj := range s.Objects {
+		if obj.Implements != "" {
 			intf, ok := s.Interfaces[obj.Implements]
 			if !ok {
 				return nil, fmt.Errorf("interface %q not found", obj.Implements)
@@ -97,8 +110,9 @@ func Parse(schemaString string, filename string) (res *Schema, errRes error) {
 func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
 		EntryPoints: make(map[string]string),
-		Types:       make(map[string]Type),
-		Interfaces:  make(map[string]*Object),
+		AllTypes:    make(map[string]Type),
+		Objects:     make(map[string]*Object),
+		Interfaces:  make(map[string]*Interface),
 	}
 
 	for l.Peek() != scanner.EOF {
@@ -113,21 +127,22 @@ func parseSchema(l *lexer.Lexer) *Schema {
 			}
 			l.ConsumeToken('}')
 		case "type":
-			obj := parseTypeDecl(l)
-			s.Types[obj.Name] = obj
+			obj := parseObjectDecl(l)
+			s.AllTypes[obj.Name] = obj
+			s.Objects[obj.Name] = obj
 		case "interface":
-			obj := parseTypeDecl(l) // TODO
-			s.Types[obj.Name] = obj
-			s.Interfaces[obj.Name] = obj
+			intf := parseInterfaceDecl(l)
+			s.AllTypes[intf.Name] = intf
+			s.Interfaces[intf.Name] = intf
 		case "union":
 			union := parseUnionDecl(l)
-			s.Types[union.Name] = union
+			s.AllTypes[union.Name] = union
 		case "enum":
 			enum := parseEnumDecl(l)
-			s.Types[enum.Name] = enum
+			s.AllTypes[enum.Name] = enum
 		case "input":
-			obj := parseTypeDecl(l) // TODO
-			s.Types[obj.Name] = obj
+			input := parseInputDecl(l)
+			s.AllTypes[input.Name] = input
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
 		}
@@ -136,36 +151,26 @@ func parseSchema(l *lexer.Lexer) *Schema {
 	return s
 }
 
-func parseTypeDecl(l *lexer.Lexer) *Object {
-	o := &Object{
-		Fields: make(map[string]*Field),
-	}
-
+func parseObjectDecl(l *lexer.Lexer) *Object {
+	o := &Object{}
 	o.Name = l.ConsumeIdent()
 	if l.Peek() == scanner.Ident {
 		l.ConsumeKeyword("implements")
 		o.Implements = l.ConsumeIdent()
 	}
 	l.ConsumeToken('{')
-
-	for l.Peek() != '}' {
-		f := parseField(l)
-		o.Fields[f.Name] = f
-	}
+	o.Fields = parseFields(l)
 	l.ConsumeToken('}')
-
 	return o
 }
 
-func parseEnumDecl(l *lexer.Lexer) *Enum {
-	enum := &Enum{}
-	enum.Name = l.ConsumeIdent()
+func parseInterfaceDecl(l *lexer.Lexer) *Interface {
+	i := &Interface{}
+	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
-	for l.Peek() != '}' {
-		enum.Values = append(enum.Values, l.ConsumeIdent())
-	}
+	i.Fields = parseFields(l)
 	l.ConsumeToken('}')
-	return enum
+	return i
 }
 
 func parseUnionDecl(l *lexer.Lexer) *Union {
@@ -180,21 +185,45 @@ func parseUnionDecl(l *lexer.Lexer) *Union {
 	return union
 }
 
-func parseField(l *lexer.Lexer) *Field {
-	f := &Field{}
-	f.Name = l.ConsumeIdent()
-	if l.Peek() == '(' {
-		f.Parameters = make(map[string]*Parameter)
-		l.ConsumeToken('(')
-		for l.Peek() != ')' {
-			p := parseParameter(l)
-			f.Parameters[p.Name] = p
-		}
-		l.ConsumeToken(')')
+func parseInputDecl(l *lexer.Lexer) *Input {
+	i := &Input{}
+	i.Name = l.ConsumeIdent()
+	l.ConsumeToken('{')
+	i.Fields = parseFields(l)
+	l.ConsumeToken('}')
+	return i
+}
+
+func parseEnumDecl(l *lexer.Lexer) *Enum {
+	enum := &Enum{}
+	enum.Name = l.ConsumeIdent()
+	l.ConsumeToken('{')
+	for l.Peek() != '}' {
+		enum.Values = append(enum.Values, l.ConsumeIdent())
 	}
-	l.ConsumeToken(':')
-	f.Type = parseType(l)
-	return f
+	l.ConsumeToken('}')
+	return enum
+}
+
+func parseFields(l *lexer.Lexer) map[string]*Field {
+	fields := make(map[string]*Field)
+	for l.Peek() != '}' {
+		f := &Field{}
+		f.Name = l.ConsumeIdent()
+		if l.Peek() == '(' {
+			f.Parameters = make(map[string]*Parameter)
+			l.ConsumeToken('(')
+			for l.Peek() != ')' {
+				p := parseParameter(l)
+				f.Parameters[p.Name] = p
+			}
+			l.ConsumeToken(')')
+		}
+		l.ConsumeToken(':')
+		f.Type = parseType(l)
+		fields[f.Name] = f
+	}
+	return fields
 }
 
 func parseParameter(l *lexer.Lexer) *Parameter {

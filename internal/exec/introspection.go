@@ -19,12 +19,12 @@ func init() {
 		panic(err)
 	}
 
-	schemaExec, err = makeExec(metaSchema, metaSchema.Types["__Schema"], reflect.TypeOf(&schemaResolver{}), make(map[typeRefMapKey]*typeRefExec))
+	schemaExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Schema"], reflect.TypeOf(&schemaResolver{}), make(map[typeRefMapKey]*typeRefExec))
 	if err != nil {
 		panic(err)
 	}
 
-	typeExec, err = makeExec(metaSchema, metaSchema.Types["__Type"], reflect.TypeOf(&typeResolver{}), make(map[typeRefMapKey]*typeRefExec))
+	typeExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Type"], reflect.TypeOf(&typeResolver{}), make(map[typeRefMapKey]*typeRefExec))
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func introspectSchema(r *request, selSet *query.SelectionSet) interface{} {
 }
 
 func introspectType(r *request, name string, selSet *query.SelectionSet) interface{} {
-	t, ok := r.Schema.Types[name]
+	t, ok := r.Schema.AllTypes[name]
 	if !ok {
 		return nil
 	}
@@ -133,12 +133,12 @@ func (r *schemaResolver) Types() []*typeResolver {
 	var l []*typeResolver
 	addTypes := func(s *schema.Schema) {
 		var names []string
-		for name := range s.Types {
+		for name := range s.AllTypes {
 			names = append(names, name)
 		}
 		sort.Strings(names)
 		for _, name := range names {
-			l = append(l, &typeResolver{typ: s.Types[name]})
+			l = append(l, &typeResolver{typ: s.AllTypes[name]})
 		}
 	}
 	addTypes(r.schema)
@@ -150,11 +150,11 @@ func (r *schemaResolver) Types() []*typeResolver {
 }
 
 func (r *schemaResolver) QueryType() *typeResolver {
-	return &typeResolver{typ: r.schema.Types[r.schema.EntryPoints["query"]]}
+	return &typeResolver{typ: r.schema.AllTypes[r.schema.EntryPoints["query"]]}
 }
 
 func (r *schemaResolver) MutationType() *typeResolver {
-	return &typeResolver{typ: r.schema.Types[r.schema.EntryPoints["mutation"]]}
+	return &typeResolver{typ: r.schema.AllTypes[r.schema.EntryPoints["mutation"]]}
 }
 
 func (r *schemaResolver) Directives() []*directiveResolver {
@@ -177,9 +177,13 @@ func (r *typeResolver) Name() string {
 	switch t := r.typ.(type) {
 	case *schema.Object:
 		return t.Name
+	case *schema.Interface:
+		return t.Name
 	case *schema.Union:
 		return t.Name
 	case *schema.Enum:
+		return t.Name
+	case *schema.Input:
 		return t.Name
 	default:
 		panic("unreachable")

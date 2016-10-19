@@ -278,7 +278,10 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 						}
 
 					case "__schema":
-						addResult(f.Alias, introspect(r, f.SelSet))
+						addResult(f.Alias, introspectSchema(r, f.SelSet))
+
+					case "__type":
+						addResult(f.Alias, introspectType(r, execValue(r, f.Arguments["name"]).(string), f.SelSet))
 
 					default:
 						fe, ok := e.fields[f.Name]

@@ -585,6 +585,26 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsIntrospection3",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				__type(name: "Droid") {
+					name
+				}
+			}
+		`,
+		result: `
+			{
+				"__type": {
+					"name": "Droid"
+				}
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {

@@ -8,29 +8,41 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
-var metaExec *Exec
+var metaSchema *schema.Schema
+var schemaExec iExec
+var typeExec iExec
 
 func init() {
-	metaSchema, err := schema.Parse(metaSchemaSrc, "")
+	var err error
+	metaSchema, err = schema.Parse(metaSchemaSrc, "")
 	if err != nil {
 		panic(err)
 	}
 
-	metaExec, err = Make(metaSchema, &schemaResolver{})
+	schemaExec, err = makeExec(metaSchema, metaSchema.Types["__Schema"], reflect.TypeOf(&schemaResolver{}), make(map[typeRefMapKey]*typeRefExec))
+	if err != nil {
+		panic(err)
+	}
+
+	typeExec, err = makeExec(metaSchema, metaSchema.Types["__Type"], reflect.TypeOf(&typeResolver{}), make(map[typeRefMapKey]*typeRefExec))
 	if err != nil {
 		panic(err)
 	}
 }
 
-func introspect(r *request, selSet *query.SelectionSet) interface{} {
-	return metaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.Schema}))
+func introspectSchema(r *request, selSet *query.SelectionSet) interface{} {
+	return schemaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.Schema}))
+}
+
+func introspectType(r *request, name string, selSet *query.SelectionSet) interface{} {
+	t, ok := r.Schema.Types[name]
+	if !ok {
+		return nil
+	}
+	return typeExec.exec(r, selSet, reflect.ValueOf(&typeResolver{typ: t}))
 }
 
 var metaSchemaSrc = `
-	schema {
-		query: __Schema
-	}
-
 	type __Schema {
 		types: [__Type!]!
 		queryType: __Type!
@@ -130,7 +142,7 @@ func (r *schemaResolver) Types() []*typeResolver {
 		}
 	}
 	addTypes(r.schema)
-	addTypes(metaExec.schema)
+	addTypes(metaSchema)
 	for _, name := range scalarTypeNames {
 		l = append(l, &typeResolver{scalar: name})
 	}

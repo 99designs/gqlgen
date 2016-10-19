@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"reflect"
@@ -119,6 +120,17 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 
 		m := resolverType.Method(methodIndex)
+		numIn := m.Type.NumIn()
+		if resolverType.Kind() != reflect.Interface {
+			numIn-- // first parameter is receiver
+		}
+		if len(f.Parameters) == 0 && numIn != 1 {
+			return nil, fmt.Errorf("method %q of %s must have exactly one parameter", m.Name, resolverType)
+		}
+		if len(f.Parameters) > 0 && numIn != 2 {
+			return nil, fmt.Errorf("method %q of %s must have exactly two parameters", m.Name, resolverType)
+		}
+		// TODO check parameter types
 		if m.Type.NumOut() != 1 {
 			return nil, fmt.Errorf("method %q of %s must have exactly one return value", m.Name, resolverType)
 		}
@@ -184,6 +196,7 @@ func findMethod(t reflect.Type, name string) int {
 }
 
 type request struct {
+	ctx    context.Context
 	doc    *query.Document
 	vars   map[string]interface{}
 	schema *schema.Schema
@@ -204,8 +217,9 @@ func (r *request) handlePanic() {
 	}
 }
 
-func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, error) {
+func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, error) {
 	r := &request{
+		ctx:    ctx,
 		doc:    document,
 		vars:   variables,
 		schema: e.schema,
@@ -293,7 +307,7 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 					switch f.Name {
 					case "__typename":
 						for name, a := range e.typeAssertions {
-							out := resolver.Method(a.methodIndex).Call(nil)
+							out := resolver.Method(a.methodIndex).Call([]reflect.Value{reflect.ValueOf(r.ctx)})
 							if out[1].Bool() {
 								addResult(f.Alias, name)
 								return
@@ -353,7 +367,7 @@ func (e *objectExec) execFragment(r *request, frag *query.Fragment, resolver ref
 		if !ok {
 			panic(fmt.Errorf("%q does not implement %q", frag.On, e.name)) // TODO proper error handling
 		}
-		out := resolver.Method(a.methodIndex).Call(nil)
+		out := resolver.Method(a.methodIndex).Call([]reflect.Value{reflect.ValueOf(r.ctx)})
 		if !out[1].Bool() {
 			return
 		}
@@ -371,9 +385,9 @@ type fieldExec struct {
 
 func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
 	m := resolver.Method(e.methodIndex)
-	var in []reflect.Value
+	in := []reflect.Value{reflect.ValueOf(r.ctx)}
 	if len(e.field.Parameters) != 0 {
-		args := reflect.New(m.Type().In(0))
+		args := reflect.New(m.Type().In(1))
 		for name, param := range e.field.Parameters {
 			value, ok := f.Arguments[name]
 			if !ok {
@@ -382,7 +396,7 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 			rf := args.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) }) // TODO resolve at startup
 			rf.Set(reflect.ValueOf(execValue(r, value)))
 		}
-		in = []reflect.Value{args.Elem()}
+		in = append(in, args.Elem())
 	}
 	addResult(f.Alias, e.valueExec.exec(r, f.SelSet, m.Call(in)[0]))
 }

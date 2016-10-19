@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -28,7 +29,7 @@ func ParseSchema(schemaString string, filename string, resolver interface{}) (*S
 	}, nil
 }
 
-func (s *Schema) Exec(queryString string, operationName string, variables map[string]interface{}) ([]byte, error) {
+func (s *Schema) Exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) ([]byte, error) {
 	d, err := query.Parse(queryString)
 	if err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func (s *Schema) Exec(queryString string, operationName string, variables map[st
 		return nil, fmt.Errorf("no operation with name %q", operationName)
 	}
 
-	rawRes, err := s.exec.Exec(d, variables, op.SelSet)
+	rawRes, err := s.exec.Exec(ctx, d, variables, op.SelSet)
 	if err != nil {
 		return nil, err
 	}

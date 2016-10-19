@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"context"
 	"reflect"
 	"sort"
 
@@ -129,7 +130,7 @@ type schemaResolver struct {
 	schema *schema.Schema
 }
 
-func (r *schemaResolver) Types() []*typeResolver {
+func (r *schemaResolver) Types(ctx context.Context) []*typeResolver {
 	var l []*typeResolver
 	addTypes := func(s *schema.Schema) {
 		var names []string
@@ -149,15 +150,15 @@ func (r *schemaResolver) Types() []*typeResolver {
 	return l
 }
 
-func (r *schemaResolver) QueryType() *typeResolver {
+func (r *schemaResolver) QueryType(ctx context.Context) *typeResolver {
 	return &typeResolver{typ: r.schema.AllTypes[r.schema.EntryPoints["query"]]}
 }
 
-func (r *schemaResolver) MutationType() *typeResolver {
+func (r *schemaResolver) MutationType(ctx context.Context) *typeResolver {
 	return &typeResolver{typ: r.schema.AllTypes[r.schema.EntryPoints["mutation"]]}
 }
 
-func (r *schemaResolver) Directives() []*directiveResolver {
+func (r *schemaResolver) Directives(ctx context.Context) []*directiveResolver {
 	panic("TODO")
 }
 
@@ -166,7 +167,7 @@ type typeResolver struct {
 	typ    schema.Type
 }
 
-func (r *typeResolver) Kind() string {
+func (r *typeResolver) Kind(ctx context.Context) string {
 	if r.scalar != "" {
 		return "SCALAR"
 	}
@@ -190,7 +191,7 @@ func (r *typeResolver) Kind() string {
 	}
 }
 
-func (r *typeResolver) Name() string {
+func (r *typeResolver) Name(ctx context.Context) string {
 	if r.scalar != "" {
 		return r.scalar
 	}
@@ -210,114 +211,114 @@ func (r *typeResolver) Name() string {
 	}
 }
 
-func (r *typeResolver) Description() string {
+func (r *typeResolver) Description(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *typeResolver) Fields() []*fieldResolver {
+func (r *typeResolver) Fields(ctx context.Context, args struct{ IncludeDeprecated bool }) []*fieldResolver {
 	panic("TODO")
 }
 
-func (r *typeResolver) Interfaces() []*typeResolver {
+func (r *typeResolver) Interfaces(ctx context.Context) []*typeResolver {
 	panic("TODO")
 }
 
-func (r *typeResolver) PossibleTypes() []*typeResolver {
+func (r *typeResolver) PossibleTypes(ctx context.Context) []*typeResolver {
 	panic("TODO")
 }
 
-func (r *typeResolver) EnumValues() []*enumValueResolver {
+func (r *typeResolver) EnumValues(ctx context.Context, args struct{ IncludeDeprecated bool }) []*enumValueResolver {
 	panic("TODO")
 }
 
-func (r *typeResolver) InputFields() []*inputValueResolver {
+func (r *typeResolver) InputFields(ctx context.Context) []*inputValueResolver {
 	panic("TODO")
 }
 
-func (r *typeResolver) OfType() *typeResolver {
+func (r *typeResolver) OfType(ctx context.Context) *typeResolver {
 	panic("TODO")
 }
 
 type fieldResolver struct {
 }
 
-func (r *fieldResolver) Name() string {
+func (r *fieldResolver) Name(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *fieldResolver) Description() string {
+func (r *fieldResolver) Description(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *fieldResolver) Args() []*inputValueResolver {
+func (r *fieldResolver) Args(ctx context.Context) []*inputValueResolver {
 	panic("TODO")
 }
 
-func (r *fieldResolver) Type() *typeResolver {
+func (r *fieldResolver) Type(ctx context.Context) *typeResolver {
 	panic("TODO")
 }
 
-func (r *fieldResolver) IsDeprecated() bool {
+func (r *fieldResolver) IsDeprecated(ctx context.Context) bool {
 	panic("TODO")
 }
 
-func (r *fieldResolver) DeprecationReason() string {
+func (r *fieldResolver) DeprecationReason(ctx context.Context) string {
 	panic("TODO")
 }
 
 type inputValueResolver struct {
 }
 
-func (r *inputValueResolver) Name() string {
+func (r *inputValueResolver) Name(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *inputValueResolver) Description() string {
+func (r *inputValueResolver) Description(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *inputValueResolver) Type() *typeResolver {
+func (r *inputValueResolver) Type(ctx context.Context) *typeResolver {
 	panic("TODO")
 }
 
-func (r *inputValueResolver) DefaultValue() string {
+func (r *inputValueResolver) DefaultValue(ctx context.Context) string {
 	panic("TODO")
 }
 
 type enumValueResolver struct {
 }
 
-func (r *enumValueResolver) Name() string {
+func (r *enumValueResolver) Name(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *enumValueResolver) Description() string {
+func (r *enumValueResolver) Description(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *enumValueResolver) IsDeprecated() bool {
+func (r *enumValueResolver) IsDeprecated(ctx context.Context) bool {
 	panic("TODO")
 }
 
-func (r *enumValueResolver) DeprecationReason() string {
+func (r *enumValueResolver) DeprecationReason(ctx context.Context) string {
 	panic("TODO")
 }
 
 type directiveResolver struct {
 }
 
-func (r *directiveResolver) Name() string {
+func (r *directiveResolver) Name(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *directiveResolver) Description() string {
+func (r *directiveResolver) Description(ctx context.Context) string {
 	panic("TODO")
 }
 
-func (r *directiveResolver) Locations() []string {
+func (r *directiveResolver) Locations(ctx context.Context) []string {
 	panic("TODO")
 }
 
-func (r *directiveResolver) Args() []*inputValueResolver {
+func (r *directiveResolver) Args(ctx context.Context) []*inputValueResolver {
 	panic("TODO")
 }

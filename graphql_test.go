@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 
 type helloWorldResolver struct{}
 
-func (r *helloWorldResolver) Hello() string {
+func (r *helloWorldResolver) Hello(ctx context.Context) string {
 	return "Hello world!"
 }
 
@@ -625,7 +626,7 @@ func TestAll(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got, err := schema.Exec(test.query, "", test.variables)
+			got, err := schema.Exec(context.Background(), test.query, "", test.variables)
 			if err != nil {
 				t.Fatal(err)
 			}

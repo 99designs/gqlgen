@@ -183,7 +183,8 @@ func (r *typeResolver) Kind() string {
 		return "INPUT_OBJECT"
 	case *schema.List:
 		return "LIST"
-	// TODO NON_NULL
+	case *schema.NonNull:
+		return "NON_NULL"
 	default:
 		panic("unreachable")
 	}

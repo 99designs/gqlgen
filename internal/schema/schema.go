@@ -51,6 +51,10 @@ type List struct {
 	Elem Type
 }
 
+type NonNull struct {
+	Elem Type
+}
+
 type TypeReference struct {
 	Name string
 }
@@ -61,6 +65,7 @@ func (Union) isType()         {}
 func (Enum) isType()          {}
 func (InputObject) isType()   {}
 func (List) isType()          {}
+func (NonNull) isType()       {}
 func (TypeReference) isType() {}
 
 type Field struct {
@@ -71,7 +76,7 @@ type Field struct {
 
 type Parameter struct {
 	Name    string
-	Type    string
+	Type    Type
 	Default string
 }
 
@@ -230,10 +235,7 @@ func parseParameter(l *lexer.Lexer) *Parameter {
 	p := &Parameter{}
 	p.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
-	p.Type = l.ConsumeIdent()
-	if l.Peek() == '!' {
-		l.ConsumeToken('!') // TODO
-	}
+	p.Type = parseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
 		p.Default = l.ConsumeIdent()
@@ -242,25 +244,23 @@ func parseParameter(l *lexer.Lexer) *Parameter {
 }
 
 func parseType(l *lexer.Lexer) Type {
-	if l.Peek() == '[' {
-		return parseList(l)
-	}
-
-	name := l.ConsumeIdent()
+	t := parseNullableType(l)
 	if l.Peek() == '!' {
-		l.ConsumeToken('!') // TODO
+		l.ConsumeToken('!')
+		return &NonNull{t}
 	}
+	return t
+}
+
+func parseNullableType(l *lexer.Lexer) Type {
+	if l.Peek() == '[' {
+		l.ConsumeToken('[')
+		elem := parseType(l)
+		l.ConsumeToken(']')
+		return &List{Elem: elem}
+	}
+	name := l.ConsumeIdent()
 	return &TypeReference{
 		Name: name,
 	}
-}
-
-func parseList(l *lexer.Lexer) *List {
-	l.ConsumeToken('[')
-	elem := parseType(l)
-	l.ConsumeToken(']')
-	if l.Peek() == '!' {
-		l.ConsumeToken('!') // TODO
-	}
-	return &List{Elem: elem}
 }

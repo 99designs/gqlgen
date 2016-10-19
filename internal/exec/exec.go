@@ -113,6 +113,9 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRe
 			elem: e,
 		}, nil
 
+	case *schema.NonNull:
+		return makeExec(s, t.Elem, resolverType, typeRefMap)
+
 	case *schema.TypeReference:
 		if scalar, ok := scalarTypes[t.Name]; ok {
 			return scalar, nil

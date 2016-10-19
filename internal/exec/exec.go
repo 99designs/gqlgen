@@ -40,24 +40,6 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	}, nil
 }
 
-func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, error) {
-	r := &request{
-		Document:  document,
-		Variables: variables,
-		Schema:    e.schema,
-	}
-
-	res := func() interface{} {
-		defer r.handlePanic()
-		return e.exec(r, selSet, e.resolver)
-	}()
-
-	if r.Error != nil {
-		return nil, r.Error
-	}
-	return res, nil
-}
-
 func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRefExec) (iExec, error) {
 	switch t := t.(type) {
 	case *schema.Object:
@@ -202,24 +184,42 @@ func findMethod(t reflect.Type, name string) int {
 }
 
 type request struct {
-	*query.Document
-	Variables map[string]interface{}
-	Schema    *schema.Schema
-	Mu        sync.Mutex
-	Error     error
+	doc    *query.Document
+	vars   map[string]interface{}
+	schema *schema.Schema
+	mu     sync.Mutex
+	err    error
 }
 
 func (r *request) handlePanic() {
 	if err := recover(); err != nil {
-		r.Mu.Lock()
-		defer r.Mu.Unlock()
-		r.Error = fmt.Errorf("graphql: panic occured: %v", err)
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		r.err = fmt.Errorf("graphql: panic occured: %v", err)
 
 		const size = 64 << 10
 		buf := make([]byte, size)
 		buf = buf[:runtime.Stack(buf, false)]
-		log.Printf("%s\n%s", r.Error, buf)
+		log.Printf("%s\n%s", r.err, buf)
 	}
+}
+
+func (e *Exec) Exec(document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, error) {
+	r := &request{
+		doc:    document,
+		vars:   variables,
+		schema: e.schema,
+	}
+
+	res := func() interface{} {
+		defer r.handlePanic()
+		return e.exec(r, selSet, e.resolver)
+	}()
+
+	if r.err != nil {
+		return nil, r.err
+	}
+	return res, nil
 }
 
 type iExec interface {
@@ -322,7 +322,7 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 				go func(fs *query.FragmentSpread) {
 					defer wg.Done()
 					defer r.handlePanic()
-					frag, ok := r.Fragments[fs.Name]
+					frag, ok := r.doc.Fragments[fs.Name]
 					if !ok {
 						panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
 					}
@@ -409,7 +409,7 @@ func skipByDirective(r *request, d map[string]*query.Directive) bool {
 func execValue(r *request, v query.Value) interface{} {
 	switch v := v.(type) {
 	case *query.Variable:
-		return r.Variables[v.Name]
+		return r.vars[v.Name]
 	case *query.Literal:
 		return v.Value
 	default:

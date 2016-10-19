@@ -31,11 +31,11 @@ func init() {
 }
 
 func introspectSchema(r *request, selSet *query.SelectionSet) interface{} {
-	return schemaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.Schema}))
+	return schemaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.schema}))
 }
 
 func introspectType(r *request, name string, selSet *query.SelectionSet) interface{} {
-	t, ok := r.Schema.AllTypes[name]
+	t, ok := r.schema.AllTypes[name]
 	if !ok {
 		return nil
 	}

@@ -167,7 +167,26 @@ type typeResolver struct {
 }
 
 func (r *typeResolver) Kind() string {
-	panic("TODO")
+	if r.scalar != "" {
+		return "SCALAR"
+	}
+	switch r.typ.(type) {
+	case *schema.Object:
+		return "OBJECT"
+	case *schema.Interface:
+		return "INTERFACE"
+	case *schema.Union:
+		return "UNION"
+	case *schema.Enum:
+		return "ENUM"
+	case *schema.Input:
+		return "INPUT_OBJECT"
+	case *schema.List:
+		return "LIST"
+	// TODO NON_NULL
+	default:
+		panic("unreachable")
+	}
 }
 
 func (r *typeResolver) Name() string {

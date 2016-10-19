@@ -592,15 +592,25 @@ var tests = []struct {
 		resolver: &starwars.Resolver{},
 		query: `
 			{
-				__type(name: "Droid") {
+				a: __type(name: "Droid") {
 					name
+					kind
+				},
+				b: __type(name: "Character") {
+					name
+					kind
 				}
 			}
 		`,
 		result: `
 			{
-				"__type": {
-					"name": "Droid"
+				"a": {
+					"name": "Droid",
+					"kind": "OBJECT"
+				},
+				"b": {
+					"name": "Character",
+					"kind": "INTERFACE"
 				}
 			}
 		`,

@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 )
@@ -14,20 +15,28 @@ var schemaExec iExec
 var typeExec iExec
 
 func init() {
-	var err error
-	metaSchema, err = schema.Parse(metaSchemaSrc, "")
-	if err != nil {
-		panic(err)
+	{
+		var err *errors.GraphQLError
+		metaSchema, err = schema.Parse(metaSchemaSrc)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	schemaExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Schema"], reflect.TypeOf(&schemaResolver{}), make(map[typeRefMapKey]*typeRefExec))
-	if err != nil {
-		panic(err)
+	{
+		var err error
+		schemaExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Schema"], reflect.TypeOf(&schemaResolver{}), make(map[typeRefMapKey]*typeRefExec))
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	typeExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Type"], reflect.TypeOf(&typeResolver{}), make(map[typeRefMapKey]*typeRefExec))
-	if err != nil {
-		panic(err)
+	{
+		var err error
+		typeExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Type"], reflect.TypeOf(&typeResolver{}), make(map[typeRefMapKey]*typeRefExec))
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

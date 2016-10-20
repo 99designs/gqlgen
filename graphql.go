@@ -2,9 +2,8 @@ package graphql
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 
+	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
@@ -14,25 +13,33 @@ type Schema struct {
 	exec *exec.Exec
 }
 
-func ParseSchema(schemaString string, filename string, resolver interface{}) (*Schema, error) {
-	s, err := schema.Parse(schemaString, filename)
+func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
+	s, err := schema.Parse(schemaString)
 	if err != nil {
 		return nil, err
 	}
 
-	e, err := exec.Make(s, resolver)
-	if err != nil {
-		return nil, err
+	e, err2 := exec.Make(s, resolver)
+	if err2 != nil {
+		return nil, err2
 	}
 	return &Schema{
 		exec: e,
 	}, nil
 }
 
-func (s *Schema) Exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) ([]byte, error) {
+type Response struct {
+	Data       interface{}            `json:"data,omitempty"`
+	Errors     []*errors.GraphQLError `json:"errors,omitempty"`
+	Extensions map[string]interface{} `json:"extensions,omitempty"`
+}
+
+func (s *Schema) Exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) *Response {
 	d, err := query.Parse(queryString)
 	if err != nil {
-		return nil, err
+		return &Response{
+			Errors: []*errors.GraphQLError{err},
+		}
 	}
 
 	if operationName == "" && len(d.Operations) == 1 {
@@ -43,12 +50,14 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 
 	op, ok := d.Operations[operationName]
 	if !ok {
-		return nil, fmt.Errorf("no operation with name %q", operationName)
+		return &Response{
+			Errors: []*errors.GraphQLError{errors.Errorf("no operation with name %q", operationName)},
+		}
 	}
 
-	rawRes, err := s.exec.Exec(ctx, d, variables, op.SelSet)
-	if err != nil {
-		return nil, err
+	data, errs := s.exec.Exec(ctx, d, variables, op.SelSet)
+	return &Response{
+		Data:   data,
+		Errors: errs,
 	}
-	return json.Marshal(rawRes)
 }

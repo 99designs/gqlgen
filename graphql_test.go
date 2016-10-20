@@ -621,12 +621,17 @@ var tests = []struct {
 func TestAll(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			schema, err := ParseSchema(test.schema, test.name, test.resolver)
+			schema, err := ParseSchema(test.schema, test.resolver)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			got, err := schema.Exec(context.Background(), test.query, "", test.variables)
+			result := schema.Exec(context.Background(), test.query, "", test.variables)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			got, err := json.Marshal(result.Data)
 			if err != nil {
 				t.Fatal(err)
 			}

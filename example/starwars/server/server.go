@@ -15,7 +15,7 @@ func main() {
 	}))
 
 	http.HandleFunc("/query", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		schema, err := graphql.ParseSchema(starwars.Schema, "starwars", &starwars.Resolver{})
+		schema, err := graphql.ParseSchema(starwars.Schema, &starwars.Resolver{})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -29,18 +29,14 @@ func main() {
 			return
 		}
 
-		result, err := schema.Exec(params.Query, "", nil)
+		response := schema.Exec(r.Context(), params.Query, "", nil)
+		responseJSON, err := json.Marshal(response)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		response := struct {
-			Data *json.RawMessage `json:"data"`
-		}{
-			Data: (*json.RawMessage)(&result),
-		}
-		json.NewEncoder(w).Encode(response)
+		w.Write(responseJSON)
 	}))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

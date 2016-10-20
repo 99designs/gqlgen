@@ -1,11 +1,11 @@
 package query
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"text/scanner"
 
+	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
@@ -93,7 +93,7 @@ type Literal struct {
 func (Variable) isValue() {}
 func (Literal) isValue()  {}
 
-func Parse(queryString string) (res *Document, errRes error) {
+func Parse(queryString string) (res *Document, errRes *errors.GraphQLError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
 	}
@@ -102,7 +102,7 @@ func Parse(queryString string) (res *Document, errRes error) {
 	defer func() {
 		if err := recover(); err != nil {
 			if err, ok := err.(lexer.SyntaxError); ok {
-				errRes = errors.New(string(err))
+				errRes = errors.Errorf("%s", string(err))
 				return
 			}
 			panic(err)

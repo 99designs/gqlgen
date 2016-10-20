@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 )
@@ -201,23 +202,24 @@ type request struct {
 	vars   map[string]interface{}
 	schema *schema.Schema
 	mu     sync.Mutex
-	err    error
+	errs   []*errors.GraphQLError
 }
 
 func (r *request) handlePanic() {
 	if err := recover(); err != nil {
 		r.mu.Lock()
 		defer r.mu.Unlock()
-		r.err = fmt.Errorf("graphql: panic occured: %v", err)
+		execErr := errors.Errorf("graphql: panic occured: %v", err)
+		r.errs = append(r.errs, execErr)
 
 		const size = 64 << 10
 		buf := make([]byte, size)
 		buf = buf[:runtime.Stack(buf, false)]
-		log.Printf("%s\n%s", r.err, buf)
+		log.Printf("%s\n%s", execErr, buf)
 	}
 }
 
-func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, error) {
+func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, []*errors.GraphQLError) {
 	r := &request{
 		ctx:    ctx,
 		doc:    document,
@@ -225,15 +227,12 @@ func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map
 		schema: e.schema,
 	}
 
-	res := func() interface{} {
+	data := func() interface{} {
 		defer r.handlePanic()
 		return e.exec(r, selSet, e.resolver)
 	}()
 
-	if r.err != nil {
-		return nil, r.err
-	}
-	return res, nil
+	return data, r.errs
 }
 
 type iExec interface {

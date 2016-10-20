@@ -1,11 +1,11 @@
 package schema
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"text/scanner"
 
+	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
@@ -80,17 +80,16 @@ type Parameter struct {
 	Default string
 }
 
-func Parse(schemaString string, filename string) (res *Schema, errRes error) {
+func Parse(schemaString string) (res *Schema, errRes *errors.GraphQLError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
 	}
-	sc.Filename = filename
 	sc.Init(strings.NewReader(schemaString))
 
 	defer func() {
 		if err := recover(); err != nil {
 			if err, ok := err.(lexer.SyntaxError); ok {
-				errRes = errors.New(string(err))
+				errRes = errors.Errorf("%s", string(err))
 				return
 			}
 			panic(err)
@@ -103,7 +102,7 @@ func Parse(schemaString string, filename string) (res *Schema, errRes error) {
 		if obj.Implements != "" {
 			intf, ok := s.Interfaces[obj.Implements]
 			if !ok {
-				return nil, fmt.Errorf("interface %q not found", obj.Implements)
+				return nil, errors.Errorf("interface %q not found", obj.Implements)
 			}
 			intf.ImplementedBy = append(intf.ImplementedBy, obj.Name)
 		}

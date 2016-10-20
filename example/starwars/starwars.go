@@ -3,10 +3,7 @@
 // Source: https://github.com/graphql/graphql.github.io/blob/source/site/_core/swapiSchema.js
 package starwars
 
-import (
-	"context"
-	"strings"
-)
+import "strings"
 
 var Schema = `
 	schema {
@@ -275,18 +272,18 @@ func init() {
 
 type Resolver struct{}
 
-func (r *Resolver) Hero(ctx context.Context, args struct{ Episode string }) characterResolver {
+func (r *Resolver) Hero(args struct{ Episode string }) characterResolver {
 	if args.Episode == "EMPIRE" {
 		return &humanResolver{humanData["1000"]}
 	}
 	return &droidResolver{droidData["2001"]}
 }
 
-func (r *Resolver) Reviews(ctx context.Context, args struct{ Episode string }) []*reviewResolver {
+func (r *Resolver) Reviews(args struct{ Episode string }) []*reviewResolver {
 	panic("TODO")
 }
 
-func (r *Resolver) Search(ctx context.Context, args struct{ Text string }) []searchResultResolver {
+func (r *Resolver) Search(args struct{ Text string }) []searchResultResolver {
 	var l []searchResultResolver
 	for _, h := range humans {
 		if strings.Contains(h.Name, args.Text) {
@@ -306,7 +303,7 @@ func (r *Resolver) Search(ctx context.Context, args struct{ Text string }) []sea
 	return l
 }
 
-func (r *Resolver) Character(ctx context.Context, args struct{ ID string }) characterResolver {
+func (r *Resolver) Character(args struct{ ID string }) characterResolver {
 	if h := humanData[args.ID]; h != nil {
 		return &humanResolver{h}
 	}
@@ -316,21 +313,21 @@ func (r *Resolver) Character(ctx context.Context, args struct{ ID string }) char
 	return nil
 }
 
-func (r *Resolver) Human(ctx context.Context, args struct{ ID string }) *humanResolver {
+func (r *Resolver) Human(args struct{ ID string }) *humanResolver {
 	if h := humanData[args.ID]; h != nil {
 		return &humanResolver{h}
 	}
 	return nil
 }
 
-func (r *Resolver) Droid(ctx context.Context, args struct{ ID string }) *droidResolver {
+func (r *Resolver) Droid(args struct{ ID string }) *droidResolver {
 	if d := droidData[args.ID]; d != nil {
 		return &droidResolver{d}
 	}
 	return nil
 }
 
-func (r *Resolver) Starship(ctx context.Context, args struct{ ID string }) *starshipResolver {
+func (r *Resolver) Starship(args struct{ ID string }) *starshipResolver {
 	if s := starshipData[args.ID]; s != nil {
 		return &starshipResolver{s}
 	}
@@ -343,48 +340,48 @@ type friendsConenctionArgs struct {
 }
 
 type characterResolver interface {
-	ID(context.Context) string
-	Name(context.Context) string
-	Friends(context.Context) []characterResolver
-	FriendsConnection(context.Context, friendsConenctionArgs) *friendsConnectionResolver
-	AppearsIn(context.Context) []string
-	ToHuman(context.Context) (*humanResolver, bool)
-	ToDroid(context.Context) (*droidResolver, bool)
+	ID() string
+	Name() string
+	Friends() []characterResolver
+	FriendsConnection(friendsConenctionArgs) *friendsConnectionResolver
+	AppearsIn() []string
+	ToHuman() (*humanResolver, bool)
+	ToDroid() (*droidResolver, bool)
 }
 
 type humanResolver struct {
 	h *human
 }
 
-func (r *humanResolver) ID(ctx context.Context) string {
+func (r *humanResolver) ID() string {
 	return r.h.ID
 }
 
-func (r *humanResolver) Name(ctx context.Context) string {
+func (r *humanResolver) Name() string {
 	return r.h.Name
 }
 
-func (r *humanResolver) Height(ctx context.Context, args struct{ Unit string }) float64 {
+func (r *humanResolver) Height(args struct{ Unit string }) float64 {
 	return convertLength(r.h.Height, args.Unit)
 }
 
-func (r *humanResolver) Mass(ctx context.Context) float64 {
+func (r *humanResolver) Mass() float64 {
 	return float64(r.h.Mass)
 }
 
-func (r *humanResolver) Friends(ctx context.Context) []characterResolver {
+func (r *humanResolver) Friends() []characterResolver {
 	return resolveCharacters(r.h.Friends)
 }
 
-func (r *humanResolver) FriendsConnection(ctx context.Context, args friendsConenctionArgs) *friendsConnectionResolver {
+func (r *humanResolver) FriendsConnection(args friendsConenctionArgs) *friendsConnectionResolver {
 	panic("TODO")
 }
 
-func (r *humanResolver) AppearsIn(ctx context.Context) []string {
+func (r *humanResolver) AppearsIn() []string {
 	return r.h.AppearsIn
 }
 
-func (r *humanResolver) Starships(ctx context.Context) []*starshipResolver {
+func (r *humanResolver) Starships() []*starshipResolver {
 	l := make([]*starshipResolver, len(r.h.Starships))
 	for i, id := range r.h.Starships {
 		l[i] = &starshipResolver{starshipData[id]}
@@ -392,15 +389,15 @@ func (r *humanResolver) Starships(ctx context.Context) []*starshipResolver {
 	return l
 }
 
-func (r *humanResolver) ToHuman(ctx context.Context) (*humanResolver, bool) {
+func (r *humanResolver) ToHuman() (*humanResolver, bool) {
 	return r, true
 }
 
-func (r *humanResolver) ToDroid(ctx context.Context) (*droidResolver, bool) {
+func (r *humanResolver) ToDroid() (*droidResolver, bool) {
 	return nil, false
 }
 
-func (r *humanResolver) ToStarship(ctx context.Context) (*starshipResolver, bool) {
+func (r *humanResolver) ToStarship() (*starshipResolver, bool) {
 	return nil, false
 }
 
@@ -408,39 +405,39 @@ type droidResolver struct {
 	d *droid
 }
 
-func (r *droidResolver) ID(ctx context.Context) string {
+func (r *droidResolver) ID() string {
 	return r.d.ID
 }
 
-func (r *droidResolver) Name(ctx context.Context) string {
+func (r *droidResolver) Name() string {
 	return r.d.Name
 }
 
-func (r *droidResolver) Friends(ctx context.Context) []characterResolver {
+func (r *droidResolver) Friends() []characterResolver {
 	return resolveCharacters(r.d.Friends)
 }
 
-func (r *droidResolver) FriendsConnection(ctx context.Context, args friendsConenctionArgs) *friendsConnectionResolver {
+func (r *droidResolver) FriendsConnection(args friendsConenctionArgs) *friendsConnectionResolver {
 	panic("TODO")
 }
 
-func (r *droidResolver) AppearsIn(ctx context.Context) []string {
+func (r *droidResolver) AppearsIn() []string {
 	return r.d.AppearsIn
 }
 
-func (r *droidResolver) PrimaryFunction(ctx context.Context) string {
+func (r *droidResolver) PrimaryFunction() string {
 	return r.d.PrimaryFunction
 }
 
-func (r *droidResolver) ToHuman(ctx context.Context) (*humanResolver, bool) {
+func (r *droidResolver) ToHuman() (*humanResolver, bool) {
 	return nil, false
 }
 
-func (r *droidResolver) ToDroid(ctx context.Context) (*droidResolver, bool) {
+func (r *droidResolver) ToDroid() (*droidResolver, bool) {
 	return r, true
 }
 
-func (r *droidResolver) ToStarship(ctx context.Context) (*starshipResolver, bool) {
+func (r *droidResolver) ToStarship() (*starshipResolver, bool) {
 	return nil, false
 }
 
@@ -448,34 +445,34 @@ type starshipResolver struct {
 	s *starship
 }
 
-func (r *starshipResolver) ID(ctx context.Context) string {
+func (r *starshipResolver) ID() string {
 	return r.s.ID
 }
 
-func (r *starshipResolver) Name(ctx context.Context) string {
+func (r *starshipResolver) Name() string {
 	return r.s.Name
 }
 
-func (r *starshipResolver) Length(ctx context.Context, args struct{ Unit string }) float64 {
+func (r *starshipResolver) Length(args struct{ Unit string }) float64 {
 	return convertLength(r.s.Length, args.Unit)
 }
 
-func (r *starshipResolver) ToHuman(ctx context.Context) (*humanResolver, bool) {
+func (r *starshipResolver) ToHuman() (*humanResolver, bool) {
 	return nil, false
 }
 
-func (r *starshipResolver) ToDroid(ctx context.Context) (*droidResolver, bool) {
+func (r *starshipResolver) ToDroid() (*droidResolver, bool) {
 	return nil, false
 }
 
-func (r *starshipResolver) ToStarship(ctx context.Context) (*starshipResolver, bool) {
+func (r *starshipResolver) ToStarship() (*starshipResolver, bool) {
 	return r, true
 }
 
 type searchResultResolver interface {
-	ToHuman(context.Context) (*humanResolver, bool)
-	ToDroid(context.Context) (*droidResolver, bool)
-	ToStarship(context.Context) (*starshipResolver, bool)
+	ToHuman() (*humanResolver, bool)
+	ToDroid() (*droidResolver, bool)
+	ToStarship() (*starshipResolver, bool)
 }
 
 func convertLength(meters float64, unit string) float64 {
@@ -505,55 +502,55 @@ func resolveCharacters(ids []string) []characterResolver {
 type reviewResolver struct {
 }
 
-func (r *reviewResolver) Stars(ctx context.Context) int {
+func (r *reviewResolver) Stars() int {
 	panic("TODO")
 }
 
-func (r *reviewResolver) Commentary(ctx context.Context) string {
+func (r *reviewResolver) Commentary() string {
 	panic("TODO")
 }
 
 type friendsConnectionResolver struct {
 }
 
-func (r *friendsConnectionResolver) TotalCount(ctx context.Context) int {
+func (r *friendsConnectionResolver) TotalCount() int {
 	panic("TODO")
 }
 
-func (r *friendsConnectionResolver) Edges(ctx context.Context) []*friendsEdgeResolver {
+func (r *friendsConnectionResolver) Edges() []*friendsEdgeResolver {
 	panic("TODO")
 }
 
-func (r *friendsConnectionResolver) Friends(ctx context.Context) []characterResolver {
+func (r *friendsConnectionResolver) Friends() []characterResolver {
 	panic("TODO")
 }
 
-func (r *friendsConnectionResolver) PageInfo(ctx context.Context) *pageInfoResolver {
+func (r *friendsConnectionResolver) PageInfo() *pageInfoResolver {
 	panic("TODO")
 }
 
 type friendsEdgeResolver struct {
 }
 
-func (r *friendsEdgeResolver) Cursor(ctx context.Context) string {
+func (r *friendsEdgeResolver) Cursor() string {
 	panic("TODO")
 }
 
-func (r *friendsEdgeResolver) Node(ctx context.Context) characterResolver {
+func (r *friendsEdgeResolver) Node() characterResolver {
 	panic("TODO")
 }
 
 type pageInfoResolver struct {
 }
 
-func (r *pageInfoResolver) StartCursor(ctx context.Context) string {
+func (r *pageInfoResolver) StartCursor() string {
 	panic("TODO")
 }
 
-func (r *pageInfoResolver) EndCursor(ctx context.Context) string {
+func (r *pageInfoResolver) EndCursor() string {
 	panic("TODO")
 }
 
-func (r *pageInfoResolver) HasNextPage(ctx context.Context) bool {
+func (r *pageInfoResolver) HasNextPage() bool {
 	panic("TODO")
 }

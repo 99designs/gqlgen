@@ -9,9 +9,15 @@ import (
 	"github.com/neelance/graphql-go/example/starwars"
 )
 
-type helloWorldResolver struct{}
+type helloWorldResolver1 struct{}
 
-func (r *helloWorldResolver) Hello(ctx context.Context) string {
+func (r *helloWorldResolver1) Hello() string {
+	return "Hello world!"
+}
+
+type helloWorldResolver2 struct{}
+
+func (r *helloWorldResolver2) Hello(ctx context.Context) string {
 	return "Hello world!"
 }
 
@@ -24,7 +30,7 @@ var tests = []struct {
 	result    string
 }{
 	{
-		name: "HelloWorld",
+		name: "HelloWorld1",
 		schema: `
 			schema {
 				query: Query
@@ -34,7 +40,31 @@ var tests = []struct {
 				hello: String
 			}
 		`,
-		resolver: &helloWorldResolver{},
+		resolver: &helloWorldResolver1{},
+		query: `
+			{
+				hello
+			}
+		`,
+		result: `
+			{
+				"hello": "Hello world!"
+			}
+		`,
+	},
+
+	{
+		name: "HelloWorld2",
+		schema: `
+			schema {
+				query: Query
+			}
+			
+			type Query {
+				hello: String
+			}
+		`,
+		resolver: &helloWorldResolver2{},
 		query: `
 			{
 				hello

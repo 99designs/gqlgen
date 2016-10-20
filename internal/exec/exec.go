@@ -112,6 +112,8 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRe
 	}
 }
 
+var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
+
 func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema.Field, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRefExec) (map[string]*fieldExec, error) {
 	fieldExecs := make(map[string]*fieldExec)
 	for name, f := range fields {
@@ -121,17 +123,33 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 
 		m := resolverType.Method(methodIndex)
-		numIn := m.Type.NumIn()
+		in := make([]reflect.Type, m.Type.NumIn())
+		for i := range in {
+			in[i] = m.Type.In(i)
+		}
 		if resolverType.Kind() != reflect.Interface {
-			numIn-- // first parameter is receiver
+			in = in[1:] // first parameter is receiver
 		}
-		if len(f.Parameters) == 0 && numIn != 1 {
-			return nil, fmt.Errorf("method %q of %s must have exactly one parameter", m.Name, resolverType)
+
+		hasContext := len(in) > 0 && in[0] == contextType
+		if hasContext {
+			in = in[1:]
 		}
-		if len(f.Parameters) > 0 && numIn != 2 {
-			return nil, fmt.Errorf("method %q of %s must have exactly two parameters", m.Name, resolverType)
+
+		var argumentsType reflect.Type
+		if len(f.Parameters) > 0 {
+			if len(in) == 0 {
+				return nil, fmt.Errorf("method %q of %s is missing a parameter for field arguments", m.Name, resolverType)
+			}
+			argumentsType = in[0]
+			// TODO type check arguments
+			in = in[1:]
 		}
-		// TODO check parameter types
+
+		if len(in) > 0 {
+			return nil, fmt.Errorf("method %q of %s has too many parameters", m.Name, resolverType)
+		}
+
 		if m.Type.NumOut() != 1 {
 			return nil, fmt.Errorf("method %q of %s must have exactly one return value", m.Name, resolverType)
 		}
@@ -141,9 +159,11 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			return nil, err
 		}
 		fieldExecs[name] = &fieldExec{
-			field:       f,
-			methodIndex: methodIndex,
-			valueExec:   ve,
+			field:         f,
+			methodIndex:   methodIndex,
+			hasContext:    hasContext,
+			argumentsType: argumentsType,
+			valueExec:     ve,
 		}
 	}
 	return fieldExecs, nil
@@ -306,7 +326,7 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 					switch f.Name {
 					case "__typename":
 						for name, a := range e.typeAssertions {
-							out := resolver.Method(a.methodIndex).Call([]reflect.Value{reflect.ValueOf(r.ctx)})
+							out := resolver.Method(a.methodIndex).Call(nil)
 							if out[1].Bool() {
 								addResult(f.Alias, name)
 								return
@@ -366,7 +386,7 @@ func (e *objectExec) execFragment(r *request, frag *query.Fragment, resolver ref
 		if !ok {
 			panic(fmt.Errorf("%q does not implement %q", frag.On, e.name)) // TODO proper error handling
 		}
-		out := resolver.Method(a.methodIndex).Call([]reflect.Value{reflect.ValueOf(r.ctx)})
+		out := resolver.Method(a.methodIndex).Call(nil)
 		if !out[1].Bool() {
 			return
 		}
@@ -377,16 +397,22 @@ func (e *objectExec) execFragment(r *request, frag *query.Fragment, resolver ref
 }
 
 type fieldExec struct {
-	field       *schema.Field
-	methodIndex int
-	valueExec   iExec
+	field         *schema.Field
+	methodIndex   int
+	hasContext    bool
+	argumentsType reflect.Type
+	valueExec     iExec
 }
 
 func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
-	m := resolver.Method(e.methodIndex)
-	in := []reflect.Value{reflect.ValueOf(r.ctx)}
-	if len(e.field.Parameters) != 0 {
-		args := reflect.New(m.Type().In(1))
+	var in []reflect.Value
+
+	if e.hasContext {
+		in = append(in, reflect.ValueOf(r.ctx))
+	}
+
+	if e.argumentsType != nil {
+		args := reflect.New(e.argumentsType)
 		for name, param := range e.field.Parameters {
 			value, ok := f.Arguments[name]
 			if !ok {
@@ -397,6 +423,8 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 		}
 		in = append(in, args.Elem())
 	}
+
+	m := resolver.Method(e.methodIndex)
 	addResult(f.Alias, e.valueExec.exec(r, f.SelSet, m.Call(in)[0]))
 }
 

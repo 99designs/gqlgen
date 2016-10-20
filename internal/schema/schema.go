@@ -82,7 +82,7 @@ type Parameter struct {
 
 func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 	sc := &scanner.Scanner{
-		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
+		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
 	sc.Init(strings.NewReader(schemaString))
 

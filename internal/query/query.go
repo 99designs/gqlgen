@@ -95,7 +95,7 @@ func (Literal) isValue()  {}
 
 func Parse(queryString string) (doc *Document, err *errors.GraphQLError) {
 	sc := &scanner.Scanner{
-		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
+		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
 	sc.Init(strings.NewReader(queryString))
 
@@ -295,6 +295,14 @@ func parseValue(l *lexer.Lexer) Value {
 		l.ConsumeToken('$')
 		return &Variable{
 			Name: l.ConsumeIdent(),
+		}
+	case scanner.Int:
+		return &Literal{
+			Value: l.ConsumeInt(),
+		}
+	case scanner.Float:
+		return &Literal{
+			Value: l.ConsumeFloat(),
 		}
 	case scanner.String:
 		return &Literal{

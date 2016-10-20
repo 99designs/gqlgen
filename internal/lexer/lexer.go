@@ -71,13 +71,24 @@ func (l *Lexer) ConsumeKeyword(keyword string) {
 	l.Consume()
 }
 
+func (l *Lexer) ConsumeInt() int32 {
+	text := l.sc.TokenText()
+	l.ConsumeToken(scanner.Int)
+	value, _ := strconv.Atoi(text)
+	return int32(value)
+}
+
+func (l *Lexer) ConsumeFloat() float64 {
+	text := l.sc.TokenText()
+	l.ConsumeToken(scanner.Int)
+	value, _ := strconv.ParseFloat(text, 64)
+	return value
+}
+
 func (l *Lexer) ConsumeString() string {
 	text := l.sc.TokenText()
 	l.ConsumeToken(scanner.String)
-	value, err := strconv.Unquote(text)
-	if err != nil {
-		l.SyntaxError(err.Error())
-	}
+	value, _ := strconv.Unquote(text)
 	return value
 }
 

@@ -9,18 +9,22 @@ import (
 	"github.com/neelance/graphql-go/example/starwars"
 )
 
+var schema *graphql.Schema
+
+func init() {
+	var err error
+	schema, err = graphql.ParseSchema(starwars.Schema, &starwars.Resolver{})
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(page)
 	}))
 
 	http.HandleFunc("/query", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		schema, err := graphql.ParseSchema(starwars.Schema, &starwars.Resolver{})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		var params struct {
 			Query string `json:"query"`
 		}

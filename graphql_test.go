@@ -17,8 +17,8 @@ func (r *helloWorldResolver1) Hello() string {
 
 type helloWorldResolver2 struct{}
 
-func (r *helloWorldResolver2) Hello(ctx context.Context) string {
-	return "Hello world!"
+func (r *helloWorldResolver2) Hello(ctx context.Context) (string, error) {
+	return "Hello world!", nil
 }
 
 var tests = []struct {

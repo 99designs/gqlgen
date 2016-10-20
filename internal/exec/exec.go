@@ -113,6 +113,7 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRe
 }
 
 var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
+var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
 func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema.Field, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRefExec) (map[string]*fieldExec, error) {
 	fieldExecs := make(map[string]*fieldExec)
@@ -150,8 +151,17 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			return nil, fmt.Errorf("method %q of %s has too many parameters", m.Name, resolverType)
 		}
 
-		if m.Type.NumOut() != 1 {
-			return nil, fmt.Errorf("method %q of %s must have exactly one return value", m.Name, resolverType)
+		if m.Type.NumOut() > 2 {
+			return nil, fmt.Errorf("method %q of %s has too many return values", m.Name, resolverType)
+		}
+
+		// TODO type check result
+
+		hasError := m.Type.NumOut() == 2
+		if hasError {
+			if m.Type.Out(1) != errorType {
+				return nil, fmt.Errorf(`method %q of %s must have "error" as its second return value`, m.Name, resolverType)
+			}
 		}
 
 		ve, err := makeExec(s, f.Type, m.Type.Out(0), typeRefMap)
@@ -163,6 +173,7 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			methodIndex:   methodIndex,
 			hasContext:    hasContext,
 			argumentsType: argumentsType,
+			hasError:      hasError,
 			valueExec:     ve,
 		}
 	}
@@ -225,12 +236,16 @@ type request struct {
 	errs   []*errors.GraphQLError
 }
 
+func (r *request) addError(err *errors.GraphQLError) {
+	r.mu.Lock()
+	r.errs = append(r.errs, err)
+	r.mu.Unlock()
+}
+
 func (r *request) handlePanic() {
 	if err := recover(); err != nil {
-		r.mu.Lock()
-		defer r.mu.Unlock()
 		execErr := errors.Errorf("graphql: panic occured: %v", err)
-		r.errs = append(r.errs, execErr)
+		r.addError(execErr)
 
 		const size = 64 << 10
 		buf := make([]byte, size)
@@ -401,6 +416,7 @@ type fieldExec struct {
 	methodIndex   int
 	hasContext    bool
 	argumentsType reflect.Type
+	hasError      bool
 	valueExec     iExec
 }
 
@@ -425,7 +441,14 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 	}
 
 	m := resolver.Method(e.methodIndex)
-	addResult(f.Alias, e.valueExec.exec(r, f.SelSet, m.Call(in)[0]))
+	out := m.Call(in)
+	if e.hasError && !out[1].IsNil() {
+		err := out[1].Interface().(error)
+		r.addError(errors.Errorf("%s", err))
+		addResult(f.Alias, nil) // TODO handle non-nil
+		return
+	}
+	addResult(f.Alias, e.valueExec.exec(r, f.SelSet, out[0]))
 }
 
 type typeAssertExec struct {

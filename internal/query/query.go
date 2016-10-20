@@ -93,23 +93,17 @@ type Literal struct {
 func (Variable) isValue() {}
 func (Literal) isValue()  {}
 
-func Parse(queryString string) (res *Document, errRes *errors.GraphQLError) {
+func Parse(queryString string) (doc *Document, err *errors.GraphQLError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
 	}
 	sc.Init(strings.NewReader(queryString))
 
-	defer func() {
-		if err := recover(); err != nil {
-			if err, ok := err.(lexer.SyntaxError); ok {
-				errRes = errors.Errorf("%s", string(err))
-				return
-			}
-			panic(err)
-		}
-	}()
-
-	return parseDocument(lexer.New(sc)), nil
+	l := lexer.New(sc)
+	err = l.CatchSyntaxError(func() {
+		doc = parseDocument(l)
+	})
+	return
 }
 
 func parseDocument(l *lexer.Lexer) *Document {

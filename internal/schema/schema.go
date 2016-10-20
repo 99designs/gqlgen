@@ -80,23 +80,19 @@ type Parameter struct {
 	Default string
 }
 
-func Parse(schemaString string) (res *Schema, errRes *errors.GraphQLError) {
+func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanFloats | scanner.ScanStrings,
 	}
 	sc.Init(strings.NewReader(schemaString))
 
-	defer func() {
-		if err := recover(); err != nil {
-			if err, ok := err.(lexer.SyntaxError); ok {
-				errRes = errors.Errorf("%s", string(err))
-				return
-			}
-			panic(err)
-		}
-	}()
-
-	s := parseSchema(lexer.New(sc))
+	l := lexer.New(sc)
+	err = l.CatchSyntaxError(func() {
+		s = parseSchema(l)
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	for _, obj := range s.Objects {
 		if obj.Implements != "" {

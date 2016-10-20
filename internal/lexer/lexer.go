@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"strconv"
 	"text/scanner"
+
+	"github.com/neelance/graphql-go/errors"
 )
 
-type SyntaxError string
+type syntaxError string
 
 type Lexer struct {
 	sc   *scanner.Scanner
@@ -17,6 +19,21 @@ func New(sc *scanner.Scanner) *Lexer {
 	l := &Lexer{sc: sc}
 	l.Consume()
 	return l
+}
+
+func (l *Lexer) CatchSyntaxError(f func()) (errRes *errors.GraphQLError) {
+	defer func() {
+		if err := recover(); err != nil {
+			if err, ok := err.(syntaxError); ok {
+				errRes = errors.ErrorfWithLoc(l.sc.Line, l.sc.Column, "syntax error: %s", err)
+				return
+			}
+			panic(err)
+		}
+	}()
+
+	f()
+	return
 }
 
 func (l *Lexer) Peek() rune {
@@ -72,5 +89,5 @@ func (l *Lexer) ConsumeToken(expected rune) {
 }
 
 func (l *Lexer) SyntaxError(message string) {
-	panic(SyntaxError(fmt.Sprintf("%s:%d: syntax error: %s", l.sc.Filename, l.sc.Line, message)))
+	panic(syntaxError(message))
 }

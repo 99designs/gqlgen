@@ -14,13 +14,13 @@ type Location struct {
 
 func Errorf(format string, a ...interface{}) *GraphQLError {
 	return &GraphQLError{
-		Message: fmt.Sprintf(format, a),
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
 func ErrorfWithLoc(line int, column int, format string, a ...interface{}) *GraphQLError {
 	return &GraphQLError{
-		Message: fmt.Sprintf(format, a),
+		Message: fmt.Sprintf(format, a...),
 		Locations: []*Location{{
 			Line:   line,
 			Column: column,

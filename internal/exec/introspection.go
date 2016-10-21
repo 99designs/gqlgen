@@ -294,8 +294,8 @@ func (r *typeResolver) Name() *string {
 	}
 }
 
-func (r *typeResolver) Description() string {
-	return ""
+func (r *typeResolver) Description() *string {
+	return nil
 }
 
 func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) *[]*fieldResolver {
@@ -395,8 +395,8 @@ func (r *fieldResolver) Name() string {
 	return r.field.Name
 }
 
-func (r *fieldResolver) Description() string {
-	return ""
+func (r *fieldResolver) Description() *string {
+	return nil
 }
 
 func (r *fieldResolver) Args() []*inputValueResolver {
@@ -427,8 +427,8 @@ func (r *inputValueResolver) Name() string {
 	return r.value.Name
 }
 
-func (r *inputValueResolver) Description() string {
-	return ""
+func (r *inputValueResolver) Description() *string {
+	return nil
 }
 
 func (r *inputValueResolver) Type() *typeResolver {
@@ -451,8 +451,8 @@ func (r *enumValueResolver) Name() string {
 	return r.value
 }
 
-func (r *enumValueResolver) Description() string {
-	return ""
+func (r *enumValueResolver) Description() *string {
+	return nil
 }
 
 func (r *enumValueResolver) IsDeprecated() bool {
@@ -470,7 +470,7 @@ func (r *directiveResolver) Name() string {
 	panic("TODO")
 }
 
-func (r *directiveResolver) Description() string {
+func (r *directiveResolver) Description() *string {
 	panic("TODO")
 }
 

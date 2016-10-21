@@ -44,7 +44,7 @@ var Schema = `
 		# The friends of the character exposed as a connection with edges
 		friendsConnection(first: Int, after: ID): FriendsConnection!
 		# The movies this character appears in
-		appearsIn: [Episode]!
+		appearsIn: [Episode!]!
 	}
 	# Units of height
 	enum LengthUnit {
@@ -60,7 +60,7 @@ var Schema = `
 		# What this human calls themselves
 		name: String!
 		# Height in the preferred unit, default is meters
-		height(unit: LengthUnit = METER): Float
+		height(unit: LengthUnit = METER): Float!
 		# Mass in kilograms, or null if unknown
 		mass: Float
 		# This human's friends, or an empty list if they have none
@@ -68,7 +68,7 @@ var Schema = `
 		# The friends of the human exposed as a connection with edges
 		friendsConnection(first: Int, after: ID): FriendsConnection!
 		# The movies this human appears in
-		appearsIn: [Episode]!
+		appearsIn: [Episode!]!
 		# A list of starships this person has piloted, or an empty list if none
 		starships: [Starship]
 	}
@@ -83,14 +83,14 @@ var Schema = `
 		# The friends of the droid exposed as a connection with edges
 		friendsConnection(first: Int, after: ID): FriendsConnection!
 		# The movies this droid appears in
-		appearsIn: [Episode]!
+		appearsIn: [Episode!]!
 		# This droid's primary function
 		primaryFunction: String
 	}
 	# A connection object for a character's friends
 	type FriendsConnection {
 		# The total number of friends
-		totalCount: Int
+		totalCount: Int!
 		# The edges for each of the character's friends.
 		edges: [FriendsEdge]
 		# A list of the friends, as a convenience when edges are not needed.
@@ -131,7 +131,7 @@ var Schema = `
 		# The name of the starship
 		name: String!
 		# Length of the starship, along the longest axis
-		length(unit: LengthUnit = METER): Float
+		length(unit: LengthUnit = METER): Float!
 	}
 	union SearchResult = Human | Droid | Starship
 `
@@ -365,8 +365,12 @@ func (r *humanResolver) Height(args struct{ Unit string }) float64 {
 	return convertLength(r.h.Height, args.Unit)
 }
 
-func (r *humanResolver) Mass() float64 {
-	return float64(r.h.Mass)
+func (r *humanResolver) Mass() *float64 {
+	if r.h.Mass == 0 {
+		return nil
+	}
+	f := float64(r.h.Mass)
+	return &f
 }
 
 func (r *humanResolver) Friends() *[]characterResolver {
@@ -425,8 +429,11 @@ func (r *droidResolver) AppearsIn() []string {
 	return r.d.AppearsIn
 }
 
-func (r *droidResolver) PrimaryFunction() string {
-	return r.d.PrimaryFunction
+func (r *droidResolver) PrimaryFunction() *string {
+	if r.d.PrimaryFunction == "" {
+		return nil
+	}
+	return &r.d.PrimaryFunction
 }
 
 func (r *droidResolver) ToHuman() (*humanResolver, bool) {
@@ -506,7 +513,7 @@ func (r *reviewResolver) Stars() int {
 	panic("TODO")
 }
 
-func (r *reviewResolver) Commentary() string {
+func (r *reviewResolver) Commentary() *string {
 	panic("TODO")
 }
 
@@ -543,11 +550,11 @@ func (r *friendsEdgeResolver) Node() characterResolver {
 type pageInfoResolver struct {
 }
 
-func (r *pageInfoResolver) StartCursor() string {
+func (r *pageInfoResolver) StartCursor() *string {
 	panic("TODO")
 }
 
-func (r *pageInfoResolver) EndCursor() string {
+func (r *pageInfoResolver) EndCursor() *string {
 	panic("TODO")
 }
 

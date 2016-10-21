@@ -37,7 +37,7 @@ var tests = []struct {
 			}
 			
 			type Query {
-				hello: String
+				hello: String!
 			}
 		`,
 		resolver: &helloWorldResolver1{},
@@ -61,7 +61,7 @@ var tests = []struct {
 			}
 			
 			type Query {
-				hello: String
+				hello: String!
 			}
 		`,
 		resolver: &helloWorldResolver2{},

@@ -66,7 +66,7 @@ func makeExec(target *iExec, s *schema.Schema, t schema.Type, resolverType refle
 		ref = &typeRef{}
 		typeRefMap[k] = ref
 		var err error
-		ref.exec, err = makeExec2(s, t, false, resolverType, typeRefMap)
+		ref.exec, err = makeExec2(s, t, resolverType, typeRefMap)
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,19 @@ func makeExec(target *iExec, s *schema.Schema, t schema.Type, resolverType refle
 	return nil
 }
 
-func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
+func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
+	nonNull := false
+	if nn, ok := t.(*schema.NonNull); ok {
+		nonNull = true
+		t = nn.OfType
+	}
+
+	if !nonNull {
+		if resolverType.Kind() != reflect.Ptr && resolverType.Kind() != reflect.Interface {
+			return nil, fmt.Errorf("%s is not a pointer or interface", resolverType)
+		}
+	}
+
 	switch t := t.(type) {
 	case *schema.Scalar:
 		return &scalarExec{}, nil
@@ -87,8 +99,9 @@ func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType refle
 		}
 
 		return &objectExec{
-			name:   t.Name,
-			fields: fields,
+			name:    t.Name,
+			fields:  fields,
+			nonNull: nonNull,
 		}, nil
 
 	case *schema.Interface:
@@ -106,6 +119,7 @@ func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType refle
 			name:           t.Name,
 			fields:         fields,
 			typeAssertions: typeAssertions,
+			nonNull:        nonNull,
 		}, nil
 
 	case *schema.Union:
@@ -116,6 +130,7 @@ func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType refle
 		return &objectExec{
 			name:           t.Name,
 			typeAssertions: typeAssertions,
+			nonNull:        nonNull,
 		}, nil
 
 	case *schema.Enum:
@@ -123,9 +138,6 @@ func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType refle
 
 	case *schema.List:
 		if !nonNull {
-			if resolverType.Kind() != reflect.Ptr {
-				return nil, fmt.Errorf("%s is not a pointer", resolverType)
-			}
 			resolverType = resolverType.Elem()
 		}
 		if resolverType.Kind() != reflect.Slice {
@@ -136,9 +148,6 @@ func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType refle
 			return nil, err
 		}
 		return e, nil
-
-	case *schema.NonNull:
-		return makeExec2(s, t.OfType, true, resolverType, typeRefMap)
 
 	default:
 		panic("invalid type")
@@ -322,11 +331,18 @@ type objectExec struct {
 	name           string
 	fields         map[string]*fieldExec
 	typeAssertions map[string]*typeAssertExec
+	nonNull        bool
 }
 
 type addResultFn func(key string, value interface{})
 
 func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+	if resolver.IsNil() {
+		if e.nonNull {
+			r.addError(errors.Errorf("got nil for non-null %q", e.name))
+		}
+		return nil
+	}
 	var mu sync.Mutex
 	results := make(map[string]interface{})
 	addResult := func(key string, value interface{}) {

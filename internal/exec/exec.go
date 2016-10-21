@@ -98,7 +98,13 @@ func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRe
 		}, nil
 
 	case *schema.NonNull:
-		return makeExec(s, t.Elem, resolverType, typeRefMap)
+		e, err := makeExec(s, t.Elem, resolverType, typeRefMap)
+		if err != nil {
+			return nil, err
+		}
+		return &nonNilExec{
+			elem: e,
+		}, nil
 
 	case *schema.TypeReference:
 		if scalar, ok := scalarTypes[t.Name]; ok {
@@ -454,6 +460,15 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 type typeAssertExec struct {
 	methodIndex int
 	typeExec    *typeRefExec
+}
+
+type nonNilExec struct {
+	elem iExec
+}
+
+func (e *nonNilExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+	// TODO ensure non-nil result
+	return e.elem.exec(r, selSet, resolver)
 }
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {

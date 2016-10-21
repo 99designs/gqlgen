@@ -50,7 +50,7 @@ func introspectType(r *request, name string, selSet *query.SelectionSet) interfa
 	if !ok {
 		return nil
 	}
-	return typeExec.exec(r, selSet, reflect.ValueOf(&typeResolver{typ: t}))
+	return typeExec.exec(r, selSet, reflect.ValueOf(&typeResolver{t}))
 }
 
 var metaSchemaSrc = `
@@ -225,7 +225,7 @@ func (r *schemaResolver) QueryType() *typeResolver {
 	if !ok {
 		return nil
 	}
-	return &typeResolver{typ: t}
+	return &typeResolver{t}
 }
 
 func (r *schemaResolver) MutationType() *typeResolver {
@@ -233,7 +233,7 @@ func (r *schemaResolver) MutationType() *typeResolver {
 	if !ok {
 		return nil
 	}
-	return &typeResolver{typ: t}
+	return &typeResolver{t}
 }
 
 func (r *schemaResolver) SubscriptionType() *typeResolver {
@@ -241,7 +241,7 @@ func (r *schemaResolver) SubscriptionType() *typeResolver {
 	if !ok {
 		return nil
 	}
-	return &typeResolver{typ: t}
+	return &typeResolver{t}
 }
 
 func (r *schemaResolver) Directives() []*directiveResolver {
@@ -408,7 +408,7 @@ func (r *fieldResolver) Args() []*inputValueResolver {
 }
 
 func (r *fieldResolver) Type() *typeResolver {
-	return &typeResolver{typ: r.field.Type}
+	return &typeResolver{r.field.Type}
 }
 
 func (r *fieldResolver) IsDeprecated() bool {

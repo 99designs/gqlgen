@@ -243,11 +243,34 @@ func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) *[]*fieldRe
 }
 
 func (r *typeResolver) Interfaces() *[]*typeResolver {
-	panic("TODO")
+	t, ok := r.typ.(*schema.Object)
+	if !ok {
+		return nil
+	}
+
+	l := make([]*typeResolver, len(t.Interfaces))
+	for i, intf := range t.Interfaces {
+		l[i] = &typeResolver{intf}
+	}
+	return &l
 }
 
 func (r *typeResolver) PossibleTypes() *[]*typeResolver {
-	panic("TODO")
+	var possibleTypes []*schema.Object
+	switch t := r.typ.(type) {
+	case *schema.Interface:
+		possibleTypes = t.PossibleTypes
+	case *schema.Union:
+		possibleTypes = t.PossibleTypes
+	default:
+		return nil
+	}
+
+	l := make([]*typeResolver, len(possibleTypes))
+	for i, intf := range possibleTypes {
+		l[i] = &typeResolver{intf}
+	}
+	return &l
 }
 
 func (r *typeResolver) EnumValues(args struct{ IncludeDeprecated bool }) *[]*enumValueResolver {

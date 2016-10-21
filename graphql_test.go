@@ -626,10 +626,32 @@ var tests = []struct {
 				a: __type(name: "Droid") {
 					name
 					kind
+					interfaces {
+            name
+          }
+          possibleTypes {
+            name
+          }
 				},
 				b: __type(name: "Character") {
 					name
 					kind
+					interfaces {
+            name
+          }
+					possibleTypes {
+            name
+          }
+				}
+				c: __type(name: "SearchResult") {
+					name
+					kind
+					interfaces {
+            name
+          }
+					possibleTypes {
+            name
+          }
 				}
 			}
 		`,
@@ -637,11 +659,42 @@ var tests = []struct {
 			{
 				"a": {
 					"name": "Droid",
-					"kind": "OBJECT"
+					"kind": "OBJECT",
+					"interfaces": [
+						{
+							"name": "Character"
+						}
+					],
+					"possibleTypes": null
 				},
 				"b": {
 					"name": "Character",
-					"kind": "INTERFACE"
+					"kind": "INTERFACE",
+					"interfaces": null,
+					"possibleTypes": [
+						{
+							"name": "Human"
+						},
+						{
+							"name": "Droid"
+						}
+					]
+				},
+				"c": {
+					"name": "SearchResult",
+					"kind": "UNION",
+					"interfaces": null,
+					"possibleTypes": [
+						{
+							"name": "Human"
+						},
+						{
+							"name": "Droid"
+						},
+						{
+							"name": "Starship"
+						}
+					]
 				}
 			}
 		`,

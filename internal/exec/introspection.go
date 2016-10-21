@@ -147,13 +147,13 @@ func (r *schemaResolver) Types() []*typeResolver {
 		}
 		sort.Strings(names)
 		for _, name := range names {
-			l = append(l, &typeResolver{typ: s.AllTypes[name]})
+			l = append(l, &typeResolver{s.AllTypes[name]})
 		}
 	}
 	addTypes(r.schema)
 	addTypes(metaSchema)
-	for _, name := range scalarTypeNames {
-		l = append(l, &typeResolver{scalar: name})
+	for _, name := range []string{"Int", "Float", "String", "Boolean", "ID"} {
+		l = append(l, &typeResolver{&schema.Scalar{Name: name}})
 	}
 	return l
 }
@@ -171,15 +171,13 @@ func (r *schemaResolver) Directives() []*directiveResolver {
 }
 
 type typeResolver struct {
-	scalar string
-	typ    schema.Type
+	typ schema.Type
 }
 
 func (r *typeResolver) Kind() string {
-	if r.scalar != "" {
-		return "SCALAR"
-	}
 	switch r.typ.(type) {
+	case *schema.Scalar:
+		return "SCALAR"
 	case *schema.Object:
 		return "OBJECT"
 	case *schema.Interface:
@@ -200,10 +198,9 @@ func (r *typeResolver) Kind() string {
 }
 
 func (r *typeResolver) Name() string {
-	if r.scalar != "" {
-		return r.scalar
-	}
 	switch t := r.typ.(type) {
+	case *schema.Scalar:
+		return t.Name
 	case *schema.Object:
 		return t.Name
 	case *schema.Interface:

@@ -20,6 +20,10 @@ type Type interface {
 	isType()
 }
 
+type Scalar struct {
+	Name string
+}
+
 type Object struct {
 	Name       string
 	Implements string
@@ -59,6 +63,7 @@ type TypeReference struct {
 	Name string
 }
 
+func (Scalar) isType()        {}
 func (Object) isType()        {}
 func (Interface) isType()     {}
 func (Union) isType()         {}
@@ -254,8 +259,11 @@ func parseNullableType(l *lexer.Lexer) Type {
 		l.ConsumeToken(']')
 		return &List{Elem: elem}
 	}
-	name := l.ConsumeIdent()
-	return &TypeReference{
-		Name: name,
+
+	switch name := l.ConsumeIdent(); name {
+	case "Int", "Float", "String", "Boolean", "ID":
+		return &Scalar{Name: name}
+	default:
+		return &TypeReference{Name: name}
 	}
 }

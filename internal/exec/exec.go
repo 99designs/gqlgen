@@ -20,15 +20,6 @@ type Exec struct {
 	resolver reflect.Value
 }
 
-var scalarTypes = map[string]iExec{
-	"Int":     &scalarExec{},
-	"Float":   &scalarExec{},
-	"String":  &scalarExec{},
-	"Boolean": &scalarExec{},
-	"ID":      &scalarExec{},
-}
-var scalarTypeNames = []string{"Int", "Float", "String", "Boolean", "ID"}
-
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	t := s.AllTypes[s.EntryPoints["query"]]
 	e, err := makeWithType(s, t, resolver)
@@ -86,6 +77,9 @@ func makeExec(target *iExec, s *schema.Schema, t schema.Type, resolverType refle
 
 func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
 	switch t := t.(type) {
+	case *schema.Scalar:
+		return &scalarExec{}, nil
+
 	case *schema.Object:
 		fields, err := makeFieldExecs(s, t.Name, t.Fields, resolverType, typeRefMap)
 		if err != nil {
@@ -145,9 +139,6 @@ func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeR
 		return e, nil
 
 	case *schema.TypeReference:
-		if scalar, ok := scalarTypes[t.Name]; ok {
-			return scalar, nil
-		}
 		refT, ok := s.AllTypes[t.Name]
 		if !ok {
 			return nil, fmt.Errorf("type %q not found", t.Name)

@@ -169,7 +169,7 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 
 		var argumentsType reflect.Type
-		if len(f.Parameters) > 0 {
+		if len(f.Args) > 0 {
 			if len(in) == 0 {
 				return nil, fmt.Errorf("method %q of %s is missing a parameter for field arguments", m.Name, resolverType)
 			}
@@ -433,19 +433,19 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 	}
 
 	if e.argumentsType != nil {
-		args := reflect.New(e.argumentsType)
-		for name, param := range e.field.Parameters {
+		argsValue := reflect.New(e.argumentsType)
+		for name, arg := range e.field.Args {
 			value, ok := f.Arguments[name]
 			if !ok {
-				if param.Default == nil {
+				if arg.Default == nil {
 					continue
 				}
-				value = &query.Literal{Value: param.Default}
+				value = &query.Literal{Value: arg.Default}
 			}
-			rf := args.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) }) // TODO resolve at startup
+			rf := argsValue.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) }) // TODO resolve at startup
 			rf.Set(reflect.ValueOf(execValue(r, value)))
 		}
-		in = append(in, args.Elem())
+		in = append(in, argsValue.Elem())
 	}
 
 	m := resolver.Method(e.methodIndex)

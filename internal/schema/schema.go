@@ -47,8 +47,8 @@ type Enum struct {
 }
 
 type InputObject struct {
-	Name   string
-	Fields map[string]*Field
+	Name        string
+	InputFields map[string]*InputValue
 }
 
 type List struct {
@@ -69,12 +69,12 @@ func (List) isType()        {}
 func (NonNull) isType()     {}
 
 type Field struct {
-	Name       string
-	Parameters map[string]*Parameter
-	Type       Type
+	Name string
+	Args map[string]*InputValue
+	Type Type
 }
 
-type Parameter struct {
+type InputValue struct {
 	Name    string
 	Type    Type
 	Default interface{}
@@ -199,10 +199,15 @@ func parseUnionDecl(l *lexer.Lexer, c *context) *Union {
 }
 
 func parseInputDecl(l *lexer.Lexer, c *context) *InputObject {
-	i := &InputObject{}
+	i := &InputObject{
+		InputFields: make(map[string]*InputValue),
+	}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
-	i.Fields = parseFields(l, c)
+	for l.Peek() != '}' {
+		v := parseInputValue(l, c)
+		i.InputFields[v.Name] = v
+	}
 	l.ConsumeToken('}')
 	return i
 }
@@ -224,11 +229,11 @@ func parseFields(l *lexer.Lexer, c *context) map[string]*Field {
 		f := &Field{}
 		f.Name = l.ConsumeIdent()
 		if l.Peek() == '(' {
-			f.Parameters = make(map[string]*Parameter)
+			f.Args = make(map[string]*InputValue)
 			l.ConsumeToken('(')
 			for l.Peek() != ')' {
-				p := parseParameter(l, c)
-				f.Parameters[p.Name] = p
+				v := parseInputValue(l, c)
+				f.Args[v.Name] = v
 			}
 			l.ConsumeToken(')')
 		}
@@ -239,8 +244,8 @@ func parseFields(l *lexer.Lexer, c *context) map[string]*Field {
 	return fields
 }
 
-func parseParameter(l *lexer.Lexer, c *context) *Parameter {
-	p := &Parameter{}
+func parseInputValue(l *lexer.Lexer, c *context) *InputValue {
+	p := &InputValue{}
 	p.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
 	parseType(&p.Type, l, c)

@@ -227,8 +227,6 @@ func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) []*fieldRes
 		fields = t.Fields
 	case *schema.Interface:
 		fields = t.Fields
-	case *schema.InputObject:
-		fields = t.Fields
 	default:
 		return nil
 	}

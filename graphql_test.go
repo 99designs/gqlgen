@@ -657,6 +657,13 @@ var tests = []struct {
 					name
 					fields {
 						name
+						args {
+							name
+							type {
+								name
+							}
+							defaultValue
+						}
 						type {
 							name
 							kind
@@ -672,6 +679,7 @@ var tests = []struct {
 					"fields": [
 						{
 							"name": "appearsIn",
+							"args": [],
 							"type": {
 								"name": null,
 								"kind": "NON_NULL"
@@ -679,6 +687,7 @@ var tests = []struct {
 						},
 						{
 							"name": "friends",
+							"args": [],
 							"type": {
 								"name": null,
 								"kind": "LIST"
@@ -686,6 +695,22 @@ var tests = []struct {
 						},
 						{
 							"name": "friendsConnection",
+							"args": [
+								{
+									"name": "after",
+									"type": {
+										"name": "ID"
+									},
+									"defaultValue": null
+								},
+								{
+									"name": "first",
+									"type": {
+										"name": "Int"
+									},
+									"defaultValue": null
+								}
+							],
 							"type": {
 								"name": null,
 								"kind": "NON_NULL"
@@ -693,6 +718,7 @@ var tests = []struct {
 						},
 						{
 							"name": "id",
+							"args": [],
 							"type": {
 								"name": null,
 								"kind": "NON_NULL"
@@ -700,6 +726,7 @@ var tests = []struct {
 						},
 						{
 							"name": "name",
+							"args": [],
 							"type": {
 								"name": null,
 								"kind": "NON_NULL"
@@ -707,6 +734,7 @@ var tests = []struct {
 						},
 						{
 							"name": "primaryFunction",
+							"args": [],
 							"type": {
 								"name": "String",
 								"kind": "SCALAR"

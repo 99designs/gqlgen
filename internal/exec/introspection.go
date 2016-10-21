@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 
@@ -277,7 +278,17 @@ func (r *fieldResolver) Description() string {
 }
 
 func (r *fieldResolver) Args() []*inputValueResolver {
-	panic("TODO")
+	var names []string
+	for name := range r.field.Args {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	l := make([]*inputValueResolver, len(names))
+	for i, name := range names {
+		l[i] = &inputValueResolver{r.field.Args[name]}
+	}
+	return l
 }
 
 func (r *fieldResolver) Type() *typeResolver {
@@ -293,10 +304,11 @@ func (r *fieldResolver) DeprecationReason() *string {
 }
 
 type inputValueResolver struct {
+	value *schema.InputValue
 }
 
 func (r *inputValueResolver) Name() string {
-	panic("TODO")
+	return r.value.Name
 }
 
 func (r *inputValueResolver) Description() string {
@@ -304,11 +316,15 @@ func (r *inputValueResolver) Description() string {
 }
 
 func (r *inputValueResolver) Type() *typeResolver {
-	panic("TODO")
+	return &typeResolver{r.value.Type}
 }
 
-func (r *inputValueResolver) DefaultValue() string {
-	panic("TODO")
+func (r *inputValueResolver) DefaultValue() *string {
+	if r.value.Default == nil {
+		return nil
+	}
+	s := fmt.Sprint(r.value.Default)
+	return &s
 }
 
 type enumValueResolver struct {

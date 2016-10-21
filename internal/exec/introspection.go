@@ -287,7 +287,16 @@ func (r *typeResolver) EnumValues(args struct{ IncludeDeprecated bool }) *[]*enu
 }
 
 func (r *typeResolver) InputFields() *[]*inputValueResolver {
-	panic("TODO")
+	t, ok := r.typ.(*schema.InputObject)
+	if !ok {
+		return nil
+	}
+
+	l := make([]*inputValueResolver, len(t.InputFieldOrder))
+	for i, name := range t.InputFieldOrder {
+		l[i] = &inputValueResolver{t.InputFields[name]}
+	}
+	return &l
 }
 
 func (r *typeResolver) OfType() *typeResolver {

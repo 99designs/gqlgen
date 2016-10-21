@@ -560,12 +560,16 @@ var tests = []struct {
 			{
 				"__schema": {
 					"types": [
+						{ "name": "Boolean" },
 						{ "name": "Character" },
 						{ "name": "Droid" },
 						{ "name": "Episode" },
+						{ "name": "Float" },
 						{ "name": "FriendsConnection" },
 						{ "name": "FriendsEdge" },
 						{ "name": "Human" },
+						{ "name": "ID" },
+						{ "name": "Int" },
 						{ "name": "LengthUnit" },
 						{ "name": "Mutation" },
 						{ "name": "PageInfo" },
@@ -574,6 +578,7 @@ var tests = []struct {
 						{ "name": "ReviewInput" },
 						{ "name": "SearchResult" },
 						{ "name": "Starship" },
+						{ "name": "String" },
 						{ "name": "__Directive" },
 						{ "name": "__DirectiveLocation" },
 						{ "name": "__EnumValue" },
@@ -581,12 +586,7 @@ var tests = []struct {
 						{ "name": "__InputValue" },
 						{ "name": "__Schema" },
 						{ "name": "__Type" },
-						{ "name": "__TypeKind" },
-						{ "name": "Int" },
-						{ "name": "Float" },
-						{ "name": "String" },
-						{ "name": "Boolean" },
-						{ "name": "ID" }
+						{ "name": "__TypeKind" }
 					]
 				}
 			}

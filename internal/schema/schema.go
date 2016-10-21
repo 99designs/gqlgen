@@ -127,9 +127,15 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 func parseSchema(l *lexer.Lexer, c *context) *Schema {
 	s := &Schema{
 		EntryPoints: make(map[string]string),
-		AllTypes:    make(map[string]Type),
-		Objects:     make(map[string]*Object),
-		Interfaces:  make(map[string]*Interface),
+		AllTypes: map[string]Type{
+			"Int":     &Scalar{Name: "Int"},
+			"Float":   &Scalar{Name: "Float"},
+			"String":  &Scalar{Name: "String"},
+			"Boolean": &Scalar{Name: "Boolean"},
+			"ID":      &Scalar{Name: "ID"},
+		},
+		Objects:    make(map[string]*Object),
+		Interfaces: make(map[string]*Interface),
 	}
 
 	for l.Peek() != scanner.EOF {
@@ -286,15 +292,10 @@ func parseType(target *Type, l *lexer.Lexer, c *context) {
 
 	name := l.ConsumeIdent()
 	parseNonNil()
-	switch name {
-	case "Int", "Float", "String", "Boolean", "ID":
-		*target = &Scalar{Name: name}
-	default:
-		c.typeRefs = append(c.typeRefs, &typeRef{
-			name:   name,
-			target: target,
-		})
-	}
+	c.typeRefs = append(c.typeRefs, &typeRef{
+		name:   name,
+		target: target,
+	})
 }
 
 func parseValue(l *lexer.Lexer) interface{} {

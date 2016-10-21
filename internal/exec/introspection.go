@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/query"
@@ -141,21 +142,20 @@ type schemaResolver struct {
 
 func (r *schemaResolver) Types() []*typeResolver {
 	var l []*typeResolver
-	addTypes := func(s *schema.Schema) {
+	addTypes := func(s *schema.Schema, metaOnly bool) {
 		var names []string
 		for name := range s.AllTypes {
-			names = append(names, name)
+			if !metaOnly || strings.HasPrefix(name, "__") {
+				names = append(names, name)
+			}
 		}
 		sort.Strings(names)
 		for _, name := range names {
 			l = append(l, &typeResolver{s.AllTypes[name]})
 		}
 	}
-	addTypes(r.schema)
-	addTypes(metaSchema)
-	for _, name := range []string{"Int", "Float", "String", "Boolean", "ID"} {
-		l = append(l, &typeResolver{&schema.Scalar{Name: name}})
-	}
+	addTypes(r.schema, false)
+	addTypes(metaSchema, true)
 	return l
 }
 

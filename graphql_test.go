@@ -678,7 +678,15 @@ var tests = []struct {
 					"name": "Droid",
 					"fields": [
 						{
-							"name": "appearsIn",
+							"name": "id",
+							"args": [],
+							"type": {
+								"name": null,
+								"kind": "NON_NULL"
+							}
+						},
+						{
+							"name": "name",
 							"args": [],
 							"type": {
 								"name": null,
@@ -697,16 +705,16 @@ var tests = []struct {
 							"name": "friendsConnection",
 							"args": [
 								{
-									"name": "after",
+									"name": "first",
 									"type": {
-										"name": "ID"
+										"name": "Int"
 									},
 									"defaultValue": null
 								},
 								{
-									"name": "first",
+									"name": "after",
 									"type": {
-										"name": "Int"
+										"name": "ID"
 									},
 									"defaultValue": null
 								}
@@ -717,15 +725,7 @@ var tests = []struct {
 							}
 						},
 						{
-							"name": "id",
-							"args": [],
-							"type": {
-								"name": null,
-								"kind": "NON_NULL"
-							}
-						},
-						{
-							"name": "name",
+							"name": "appearsIn",
 							"args": [],
 							"type": {
 								"name": null,

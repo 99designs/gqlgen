@@ -168,7 +168,7 @@ func (r *schemaResolver) MutationType() *typeResolver {
 }
 
 func (r *schemaResolver) Directives() []*directiveResolver {
-	panic("TODO")
+	return nil
 }
 
 type typeResolver struct {
@@ -223,23 +223,20 @@ func (r *typeResolver) Description() string {
 
 func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) []*fieldResolver {
 	var fields map[string]*schema.Field
+	var fieldOrder []string
 	switch t := r.typ.(type) {
 	case *schema.Object:
 		fields = t.Fields
+		fieldOrder = t.FieldOrder
 	case *schema.Interface:
 		fields = t.Fields
+		fieldOrder = t.FieldOrder
 	default:
 		return nil
 	}
 
-	var names []string
-	for name := range fields {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-
-	l := make([]*fieldResolver, len(names))
-	for i, name := range names {
+	l := make([]*fieldResolver, len(fieldOrder))
+	for i, name := range fieldOrder {
 		l[i] = &fieldResolver{fields[name]}
 	}
 	return l
@@ -278,14 +275,8 @@ func (r *fieldResolver) Description() string {
 }
 
 func (r *fieldResolver) Args() []*inputValueResolver {
-	var names []string
-	for name := range r.field.Args {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-
-	l := make([]*inputValueResolver, len(names))
-	for i, name := range names {
+	l := make([]*inputValueResolver, len(r.field.ArgOrder))
+	for i, name := range r.field.ArgOrder {
 		l[i] = &inputValueResolver{r.field.Args[name]}
 	}
 	return l
@@ -354,7 +345,7 @@ func (r *directiveResolver) Name() string {
 }
 
 func (r *directiveResolver) Description() string {
-	return ""
+	panic("TODO")
 }
 
 func (r *directiveResolver) Locations() []string {

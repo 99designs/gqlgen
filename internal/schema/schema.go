@@ -28,12 +28,14 @@ type Object struct {
 	Name       string
 	Implements string
 	Fields     map[string]*Field
+	FieldOrder []string
 }
 
 type Interface struct {
 	Name          string
 	ImplementedBy []string
 	Fields        map[string]*Field
+	FieldOrder    []string
 }
 
 type Union struct {
@@ -47,8 +49,9 @@ type Enum struct {
 }
 
 type InputObject struct {
-	Name        string
-	InputFields map[string]*InputValue
+	Name            string
+	InputFields     map[string]*InputValue
+	InputFieldOrder []string
 }
 
 type List struct {
@@ -69,9 +72,10 @@ func (List) isType()        {}
 func (NonNull) isType()     {}
 
 type Field struct {
-	Name string
-	Args map[string]*InputValue
-	Type Type
+	Name     string
+	Args     map[string]*InputValue
+	ArgOrder []string
+	Type     Type
 }
 
 type InputValue struct {
@@ -172,7 +176,7 @@ func parseObjectDecl(l *lexer.Lexer, c *context) *Object {
 		o.Implements = l.ConsumeIdent()
 	}
 	l.ConsumeToken('{')
-	o.Fields = parseFields(l, c)
+	o.Fields, o.FieldOrder = parseFields(l, c)
 	l.ConsumeToken('}')
 	return o
 }
@@ -181,7 +185,7 @@ func parseInterfaceDecl(l *lexer.Lexer, c *context) *Interface {
 	i := &Interface{}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
-	i.Fields = parseFields(l, c)
+	i.Fields, i.FieldOrder = parseFields(l, c)
 	l.ConsumeToken('}')
 	return i
 }
@@ -207,6 +211,7 @@ func parseInputDecl(l *lexer.Lexer, c *context) *InputObject {
 	for l.Peek() != '}' {
 		v := parseInputValue(l, c)
 		i.InputFields[v.Name] = v
+		i.InputFieldOrder = append(i.InputFieldOrder, v.Name)
 	}
 	l.ConsumeToken('}')
 	return i
@@ -223,8 +228,9 @@ func parseEnumDecl(l *lexer.Lexer, c *context) *Enum {
 	return enum
 }
 
-func parseFields(l *lexer.Lexer, c *context) map[string]*Field {
+func parseFields(l *lexer.Lexer, c *context) (map[string]*Field, []string) {
 	fields := make(map[string]*Field)
+	var fieldOrder []string
 	for l.Peek() != '}' {
 		f := &Field{}
 		f.Name = l.ConsumeIdent()
@@ -234,14 +240,16 @@ func parseFields(l *lexer.Lexer, c *context) map[string]*Field {
 			for l.Peek() != ')' {
 				v := parseInputValue(l, c)
 				f.Args[v.Name] = v
+				f.ArgOrder = append(f.ArgOrder, v.Name)
 			}
 			l.ConsumeToken(')')
 		}
 		l.ConsumeToken(':')
 		parseType(&f.Type, l, c)
 		fields[f.Name] = f
+		fieldOrder = append(fieldOrder, f.Name)
 	}
-	return fields
+	return fields, fieldOrder
 }
 
 func parseInputValue(l *lexer.Lexer, c *context) *InputValue {

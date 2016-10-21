@@ -11,9 +11,10 @@ import (
 
 type Schema struct {
 	EntryPoints map[string]string
-	AllTypes    map[string]Type
-	Objects     map[string]*Object
-	Interfaces  map[string]*Interface
+	Types       map[string]Type
+
+	objects []*Object
+	unions  []*Union
 }
 
 type Type interface {
@@ -26,21 +27,25 @@ type Scalar struct {
 
 type Object struct {
 	Name       string
-	Implements string
+	Interfaces []*Interface
 	Fields     map[string]*Field
 	FieldOrder []string
+
+	interfaceNames []string
 }
 
 type Interface struct {
 	Name          string
-	ImplementedBy []string
+	PossibleTypes []*Object
 	Fields        map[string]*Field
 	FieldOrder    []string
 }
 
 type Union struct {
-	Name  string
-	Types []string
+	Name          string
+	PossibleTypes []*Object
+
+	typeNames []string
 }
 
 type Enum struct {
@@ -99,25 +104,51 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 	}
 	sc.Init(strings.NewReader(schemaString))
 
+	c := &context{}
 	l := lexer.New(sc)
 	err = l.CatchSyntaxError(func() {
-		c := &context{}
 		s = parseSchema(l, c)
-		for _, ref := range c.typeRefs {
-			*ref.target = s.AllTypes[ref.name]
-		}
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	for _, obj := range s.Objects {
-		if obj.Implements != "" {
-			intf, ok := s.Interfaces[obj.Implements]
+	for _, ref := range c.typeRefs {
+		t, ok := s.Types[ref.name]
+		if !ok {
+			return nil, errors.Errorf("type %q not found", ref.name)
+		}
+		*ref.target = t
+	}
+
+	for _, obj := range s.objects {
+		obj.Interfaces = make([]*Interface, len(obj.interfaceNames))
+		for i, intfName := range obj.interfaceNames {
+			t, ok := s.Types[intfName]
 			if !ok {
-				return nil, errors.Errorf("interface %q not found", obj.Implements)
+				return nil, errors.Errorf("interface %q not found", intfName)
 			}
-			intf.ImplementedBy = append(intf.ImplementedBy, obj.Name)
+			intf, ok := t.(*Interface)
+			if !ok {
+				return nil, errors.Errorf("type %q is not an interface", intfName)
+			}
+			obj.Interfaces[i] = intf
+			intf.PossibleTypes = append(intf.PossibleTypes, obj)
+		}
+	}
+
+	for _, union := range s.unions {
+		union.PossibleTypes = make([]*Object, len(union.typeNames))
+		for i, name := range union.typeNames {
+			t, ok := s.Types[name]
+			if !ok {
+				return nil, errors.Errorf("object type %q not found", name)
+			}
+			obj, ok := t.(*Object)
+			if !ok {
+				return nil, errors.Errorf("type %q is not an object", name)
+			}
+			union.PossibleTypes[i] = obj
 		}
 	}
 
@@ -127,15 +158,13 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 func parseSchema(l *lexer.Lexer, c *context) *Schema {
 	s := &Schema{
 		EntryPoints: make(map[string]string),
-		AllTypes: map[string]Type{
+		Types: map[string]Type{
 			"Int":     &Scalar{Name: "Int"},
 			"Float":   &Scalar{Name: "Float"},
 			"String":  &Scalar{Name: "String"},
 			"Boolean": &Scalar{Name: "Boolean"},
 			"ID":      &Scalar{Name: "ID"},
 		},
-		Objects:    make(map[string]*Object),
-		Interfaces: make(map[string]*Interface),
 	}
 
 	for l.Peek() != scanner.EOF {
@@ -151,21 +180,21 @@ func parseSchema(l *lexer.Lexer, c *context) *Schema {
 			l.ConsumeToken('}')
 		case "type":
 			obj := parseObjectDecl(l, c)
-			s.AllTypes[obj.Name] = obj
-			s.Objects[obj.Name] = obj
+			s.Types[obj.Name] = obj
+			s.objects = append(s.objects, obj)
 		case "interface":
 			intf := parseInterfaceDecl(l, c)
-			s.AllTypes[intf.Name] = intf
-			s.Interfaces[intf.Name] = intf
+			s.Types[intf.Name] = intf
 		case "union":
 			union := parseUnionDecl(l, c)
-			s.AllTypes[union.Name] = union
+			s.Types[union.Name] = union
+			s.unions = append(s.unions, union)
 		case "enum":
 			enum := parseEnumDecl(l, c)
-			s.AllTypes[enum.Name] = enum
+			s.Types[enum.Name] = enum
 		case "input":
 			input := parseInputDecl(l, c)
-			s.AllTypes[input.Name] = input
+			s.Types[input.Name] = input
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
 		}
@@ -179,7 +208,12 @@ func parseObjectDecl(l *lexer.Lexer, c *context) *Object {
 	o.Name = l.ConsumeIdent()
 	if l.Peek() == scanner.Ident {
 		l.ConsumeKeyword("implements")
-		o.Implements = l.ConsumeIdent()
+		for {
+			o.interfaceNames = append(o.interfaceNames, l.ConsumeIdent())
+			if l.Peek() == '{' {
+				break
+			}
+		}
 	}
 	l.ConsumeToken('{')
 	o.Fields, o.FieldOrder = parseFields(l, c)
@@ -200,10 +234,10 @@ func parseUnionDecl(l *lexer.Lexer, c *context) *Union {
 	union := &Union{}
 	union.Name = l.ConsumeIdent()
 	l.ConsumeToken('=')
-	union.Types = []string{l.ConsumeIdent()}
+	union.typeNames = []string{l.ConsumeIdent()}
 	for l.Peek() == '|' {
 		l.ConsumeToken('|')
-		union.Types = append(union.Types, l.ConsumeIdent())
+		union.typeNames = append(union.typeNames, l.ConsumeIdent())
 	}
 	return union
 }

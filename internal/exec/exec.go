@@ -21,7 +21,7 @@ type Exec struct {
 }
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
-	t := s.AllTypes[s.EntryPoints["query"]]
+	t := s.Types[s.EntryPoints["query"]]
 	e, err := makeWithType(s, t, resolver)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeR
 			return nil, err
 		}
 
-		typeAssertions, err := makeTypeAssertions(s, t.Name, t.ImplementedBy, resolverType, typeRefMap)
+		typeAssertions, err := makeTypeAssertions(s, t.Name, t.PossibleTypes, resolverType, typeRefMap)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +109,7 @@ func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeR
 		}, nil
 
 	case *schema.Union:
-		typeAssertions, err := makeTypeAssertions(s, t.Name, t.Types, resolverType, typeRefMap)
+		typeAssertions, err := makeTypeAssertions(s, t.Name, t.PossibleTypes, resolverType, typeRefMap)
 		if err != nil {
 			return nil, err
 		}
@@ -210,24 +210,20 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 	return fieldExecs, nil
 }
 
-func makeTypeAssertions(s *schema.Schema, typeName string, impls []string, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (map[string]*typeAssertExec, error) {
+func makeTypeAssertions(s *schema.Schema, typeName string, impls []*schema.Object, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (map[string]*typeAssertExec, error) {
 	typeAssertions := make(map[string]*typeAssertExec)
 	for _, impl := range impls {
-		methodIndex := findMethod(resolverType, "to"+impl)
+		methodIndex := findMethod(resolverType, "to"+impl.Name)
 		if methodIndex == -1 {
-			return nil, fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, typeName, "to"+impl, impl)
-		}
-		refT, ok := s.AllTypes[impl]
-		if !ok {
-			return nil, fmt.Errorf("type %q not found", impl)
+			return nil, fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, typeName, "to"+impl.Name, impl.Name)
 		}
 		a := &typeAssertExec{
 			methodIndex: methodIndex,
 		}
-		if err := makeExec(&a.typeExec, s, refT, resolverType.Method(methodIndex).Type.Out(0), typeRefMap); err != nil {
+		if err := makeExec(&a.typeExec, s, impl, resolverType.Method(methodIndex).Type.Out(0), typeRefMap); err != nil {
 			return nil, err
 		}
-		typeAssertions[impl] = a
+		typeAssertions[impl.Name] = a
 	}
 	return typeAssertions, nil
 }

@@ -26,7 +26,7 @@ func init() {
 
 	{
 		var err error
-		schemaExec, err = makeWithType(metaSchema, metaSchema.AllTypes["__Schema"], &schemaResolver{})
+		schemaExec, err = makeWithType(metaSchema, metaSchema.Types["__Schema"], &schemaResolver{})
 		if err != nil {
 			panic(err)
 		}
@@ -34,7 +34,7 @@ func init() {
 
 	{
 		var err error
-		typeExec, err = makeWithType(metaSchema, metaSchema.AllTypes["__Type"], &typeResolver{})
+		typeExec, err = makeWithType(metaSchema, metaSchema.Types["__Type"], &typeResolver{})
 		if err != nil {
 			panic(err)
 		}
@@ -46,7 +46,7 @@ func introspectSchema(r *request, selSet *query.SelectionSet) interface{} {
 }
 
 func introspectType(r *request, name string, selSet *query.SelectionSet) interface{} {
-	t, ok := r.schema.AllTypes[name]
+	t, ok := r.schema.Types[name]
 	if !ok {
 		return nil
 	}
@@ -144,14 +144,14 @@ func (r *schemaResolver) Types() []*typeResolver {
 	var l []*typeResolver
 	addTypes := func(s *schema.Schema, metaOnly bool) {
 		var names []string
-		for name := range s.AllTypes {
+		for name := range s.Types {
 			if !metaOnly || strings.HasPrefix(name, "__") {
 				names = append(names, name)
 			}
 		}
 		sort.Strings(names)
 		for _, name := range names {
-			l = append(l, &typeResolver{s.AllTypes[name]})
+			l = append(l, &typeResolver{s.Types[name]})
 		}
 	}
 	addTypes(r.schema, false)
@@ -160,11 +160,11 @@ func (r *schemaResolver) Types() []*typeResolver {
 }
 
 func (r *schemaResolver) QueryType() *typeResolver {
-	return &typeResolver{typ: r.schema.AllTypes[r.schema.EntryPoints["query"]]}
+	return &typeResolver{typ: r.schema.Types[r.schema.EntryPoints["query"]]}
 }
 
 func (r *schemaResolver) MutationType() *typeResolver {
-	return &typeResolver{typ: r.schema.AllTypes[r.schema.EntryPoints["mutation"]]}
+	return &typeResolver{typ: r.schema.Types[r.schema.EntryPoints["mutation"]]}
 }
 
 func (r *schemaResolver) Directives() []*directiveResolver {

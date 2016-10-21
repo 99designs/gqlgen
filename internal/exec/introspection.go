@@ -217,7 +217,7 @@ func (r *typeResolver) Name() *string {
 }
 
 func (r *typeResolver) Description() string {
-	panic("TODO")
+	return ""
 }
 
 func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) []*fieldResolver {
@@ -275,7 +275,7 @@ func (r *fieldResolver) Name() string {
 }
 
 func (r *fieldResolver) Description() string {
-	panic("TODO")
+	return ""
 }
 
 func (r *fieldResolver) Args() []*inputValueResolver {
@@ -287,11 +287,11 @@ func (r *fieldResolver) Type() *typeResolver {
 }
 
 func (r *fieldResolver) IsDeprecated() bool {
-	panic("TODO")
+	return false
 }
 
-func (r *fieldResolver) DeprecationReason() string {
-	panic("TODO")
+func (r *fieldResolver) DeprecationReason() *string {
+	return nil
 }
 
 type inputValueResolver struct {
@@ -302,7 +302,7 @@ func (r *inputValueResolver) Name() string {
 }
 
 func (r *inputValueResolver) Description() string {
-	panic("TODO")
+	return ""
 }
 
 func (r *inputValueResolver) Type() *typeResolver {
@@ -321,15 +321,15 @@ func (r *enumValueResolver) Name() string {
 }
 
 func (r *enumValueResolver) Description() string {
-	panic("TODO")
+	return ""
 }
 
 func (r *enumValueResolver) IsDeprecated() bool {
-	panic("TODO")
+	return false
 }
 
-func (r *enumValueResolver) DeprecationReason() string {
-	panic("TODO")
+func (r *enumValueResolver) DeprecationReason() *string {
+	return nil
 }
 
 type directiveResolver struct {
@@ -340,7 +340,7 @@ func (r *directiveResolver) Name() string {
 }
 
 func (r *directiveResolver) Description() string {
-	panic("TODO")
+	return ""
 }
 
 func (r *directiveResolver) Locations() []string {

@@ -279,11 +279,11 @@ func (r *Resolver) Hero(args struct{ Episode string }) characterResolver {
 	return &droidResolver{droidData["2001"]}
 }
 
-func (r *Resolver) Reviews(args struct{ Episode string }) []*reviewResolver {
+func (r *Resolver) Reviews(args struct{ Episode string }) *[]*reviewResolver {
 	panic("TODO")
 }
 
-func (r *Resolver) Search(args struct{ Text string }) []searchResultResolver {
+func (r *Resolver) Search(args struct{ Text string }) *[]searchResultResolver {
 	var l []searchResultResolver
 	for _, h := range humans {
 		if strings.Contains(h.Name, args.Text) {
@@ -300,7 +300,7 @@ func (r *Resolver) Search(args struct{ Text string }) []searchResultResolver {
 			l = append(l, &starshipResolver{s})
 		}
 	}
-	return l
+	return &l
 }
 
 func (r *Resolver) Character(args struct{ ID string }) characterResolver {
@@ -342,7 +342,7 @@ type friendsConenctionArgs struct {
 type characterResolver interface {
 	ID() string
 	Name() string
-	Friends() []characterResolver
+	Friends() *[]characterResolver
 	FriendsConnection(friendsConenctionArgs) *friendsConnectionResolver
 	AppearsIn() []string
 	ToHuman() (*humanResolver, bool)
@@ -369,7 +369,7 @@ func (r *humanResolver) Mass() float64 {
 	return float64(r.h.Mass)
 }
 
-func (r *humanResolver) Friends() []characterResolver {
+func (r *humanResolver) Friends() *[]characterResolver {
 	return resolveCharacters(r.h.Friends)
 }
 
@@ -381,12 +381,12 @@ func (r *humanResolver) AppearsIn() []string {
 	return r.h.AppearsIn
 }
 
-func (r *humanResolver) Starships() []*starshipResolver {
+func (r *humanResolver) Starships() *[]*starshipResolver {
 	l := make([]*starshipResolver, len(r.h.Starships))
 	for i, id := range r.h.Starships {
 		l[i] = &starshipResolver{starshipData[id]}
 	}
-	return l
+	return &l
 }
 
 func (r *humanResolver) ToHuman() (*humanResolver, bool) {
@@ -413,7 +413,7 @@ func (r *droidResolver) Name() string {
 	return r.d.Name
 }
 
-func (r *droidResolver) Friends() []characterResolver {
+func (r *droidResolver) Friends() *[]characterResolver {
 	return resolveCharacters(r.d.Friends)
 }
 
@@ -486,7 +486,7 @@ func convertLength(meters float64, unit string) float64 {
 	}
 }
 
-func resolveCharacters(ids []string) []characterResolver {
+func resolveCharacters(ids []string) *[]characterResolver {
 	var characters []characterResolver
 	for _, id := range ids {
 		if h, ok := humanData[id]; ok {
@@ -496,7 +496,7 @@ func resolveCharacters(ids []string) []characterResolver {
 			characters = append(characters, &droidResolver{d})
 		}
 	}
-	return characters
+	return &characters
 }
 
 type reviewResolver struct {
@@ -517,11 +517,11 @@ func (r *friendsConnectionResolver) TotalCount() int {
 	panic("TODO")
 }
 
-func (r *friendsConnectionResolver) Edges() []*friendsEdgeResolver {
+func (r *friendsConnectionResolver) Edges() *[]*friendsEdgeResolver {
 	panic("TODO")
 }
 
-func (r *friendsConnectionResolver) Friends() []characterResolver {
+func (r *friendsConnectionResolver) Friends() *[]characterResolver {
 	panic("TODO")
 }
 

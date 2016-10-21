@@ -221,7 +221,7 @@ func (r *typeResolver) Description() string {
 	return ""
 }
 
-func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) []*fieldResolver {
+func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) *[]*fieldResolver {
 	var fields map[string]*schema.Field
 	var fieldOrder []string
 	switch t := r.typ.(type) {
@@ -239,18 +239,18 @@ func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) []*fieldRes
 	for i, name := range fieldOrder {
 		l[i] = &fieldResolver{fields[name]}
 	}
-	return l
+	return &l
 }
 
-func (r *typeResolver) Interfaces() []*typeResolver {
+func (r *typeResolver) Interfaces() *[]*typeResolver {
 	panic("TODO")
 }
 
-func (r *typeResolver) PossibleTypes() []*typeResolver {
+func (r *typeResolver) PossibleTypes() *[]*typeResolver {
 	panic("TODO")
 }
 
-func (r *typeResolver) EnumValues(args struct{ IncludeDeprecated bool }) []*enumValueResolver {
+func (r *typeResolver) EnumValues(args struct{ IncludeDeprecated bool }) *[]*enumValueResolver {
 	t, ok := r.typ.(*schema.Enum)
 	if !ok {
 		return nil
@@ -260,10 +260,10 @@ func (r *typeResolver) EnumValues(args struct{ IncludeDeprecated bool }) []*enum
 	for i, v := range t.Values {
 		l[i] = &enumValueResolver{v}
 	}
-	return l
+	return &l
 }
 
-func (r *typeResolver) InputFields() []*inputValueResolver {
+func (r *typeResolver) InputFields() *[]*inputValueResolver {
 	panic("TODO")
 }
 

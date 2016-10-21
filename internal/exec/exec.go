@@ -66,7 +66,7 @@ func makeExec(target *iExec, s *schema.Schema, t schema.Type, resolverType refle
 		ref = &typeRef{}
 		typeRefMap[k] = ref
 		var err error
-		ref.exec, err = makeExec2(s, t, resolverType, typeRefMap)
+		ref.exec, err = makeExec2(s, t, false, resolverType, typeRefMap)
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func makeExec(target *iExec, s *schema.Schema, t schema.Type, resolverType refle
 	return nil
 }
 
-func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
+func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
 	switch t := t.(type) {
 	case *schema.Scalar:
 		return &scalarExec{}, nil
@@ -122,21 +122,23 @@ func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeR
 		return &scalarExec{}, nil
 
 	case *schema.List:
+		if !nonNull {
+			if resolverType.Kind() != reflect.Ptr {
+				return nil, fmt.Errorf("%s is not a pointer", resolverType)
+			}
+			resolverType = resolverType.Elem()
+		}
 		if resolverType.Kind() != reflect.Slice {
 			return nil, fmt.Errorf("%s is not a slice", resolverType)
 		}
-		e := &listExec{}
+		e := &listExec{nonNull: nonNull}
 		if err := makeExec(&e.elem, s, t.Elem, resolverType.Elem(), typeRefMap); err != nil {
 			return nil, err
 		}
 		return e, nil
 
 	case *schema.NonNull:
-		e := &nonNilExec{}
-		if err := makeExec(&e.elem, s, t.Elem, resolverType, typeRefMap); err != nil {
-			return nil, err
-		}
-		return e, nil
+		return makeExec2(s, t.Elem, true, resolverType, typeRefMap)
 
 	default:
 		panic("invalid type")
@@ -291,10 +293,17 @@ func (e *scalarExec) exec(r *request, selSet *query.SelectionSet, resolver refle
 }
 
 type listExec struct {
-	elem iExec
+	elem    iExec
+	nonNull bool
 }
 
 func (e *listExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+	if !e.nonNull {
+		if resolver.IsNil() {
+			return nil
+		}
+		resolver = resolver.Elem()
+	}
 	l := make([]interface{}, resolver.Len())
 	var wg sync.WaitGroup
 	for i := range l {
@@ -458,15 +467,6 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 type typeAssertExec struct {
 	methodIndex int
 	typeExec    iExec
-}
-
-type nonNilExec struct {
-	elem iExec
-}
-
-func (e *nonNilExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
-	// TODO ensure non-nil result
-	return e.elem.exec(r, selSet, resolver)
 }
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {

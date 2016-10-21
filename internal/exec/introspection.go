@@ -291,7 +291,14 @@ func (r *typeResolver) InputFields() *[]*inputValueResolver {
 }
 
 func (r *typeResolver) OfType() *typeResolver {
-	panic("TODO")
+	switch t := r.typ.(type) {
+	case *schema.List:
+		return &typeResolver{t.OfType}
+	case *schema.NonNull:
+		return &typeResolver{t.OfType}
+	default:
+		return nil
+	}
 }
 
 type fieldResolver struct {

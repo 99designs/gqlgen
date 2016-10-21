@@ -132,13 +132,13 @@ func makeExec2(s *schema.Schema, t schema.Type, nonNull bool, resolverType refle
 			return nil, fmt.Errorf("%s is not a slice", resolverType)
 		}
 		e := &listExec{nonNull: nonNull}
-		if err := makeExec(&e.elem, s, t.Elem, resolverType.Elem(), typeRefMap); err != nil {
+		if err := makeExec(&e.elem, s, t.OfType, resolverType.Elem(), typeRefMap); err != nil {
 			return nil, err
 		}
 		return e, nil
 
 	case *schema.NonNull:
-		return makeExec2(s, t.Elem, true, resolverType, typeRefMap)
+		return makeExec2(s, t.OfType, true, resolverType, typeRefMap)
 
 	default:
 		panic("invalid type")

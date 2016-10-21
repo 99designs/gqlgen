@@ -60,11 +60,11 @@ type InputObject struct {
 }
 
 type List struct {
-	Elem Type
+	OfType Type
 }
 
 type NonNull struct {
-	Elem Type
+	OfType Type
 }
 
 func (Scalar) isType()      {}
@@ -310,14 +310,14 @@ func parseType(target *Type, l *lexer.Lexer, c *context) {
 			l.ConsumeToken('!')
 			nn := &NonNull{}
 			*target = nn
-			target = &nn.Elem
+			target = &nn.OfType
 		}
 	}
 
 	if l.Peek() == '[' {
 		l.ConsumeToken('[')
 		t := &List{}
-		parseType(&t.Elem, l, c)
+		parseType(&t.OfType, l, c)
 		l.ConsumeToken(']')
 		parseNonNil()
 		*target = t

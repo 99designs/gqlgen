@@ -745,6 +745,38 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsIntrospection5",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				__type(name: "Episode") {
+					enumValues {
+						name
+					}
+				}
+			}
+		`,
+		result: `
+			{
+				"__type": {
+					"enumValues": [
+						{
+							"name": "NEWHOPE"
+						},
+						{
+							"name": "EMPIRE"
+						},
+						{
+							"name": "JEDI"
+						}
+					]
+				}
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {

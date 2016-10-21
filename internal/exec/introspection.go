@@ -251,7 +251,16 @@ func (r *typeResolver) PossibleTypes() []*typeResolver {
 }
 
 func (r *typeResolver) EnumValues(args struct{ IncludeDeprecated bool }) []*enumValueResolver {
-	panic("TODO")
+	t, ok := r.typ.(*schema.Enum)
+	if !ok {
+		return nil
+	}
+
+	l := make([]*enumValueResolver, len(t.Values))
+	for i, v := range t.Values {
+		l[i] = &enumValueResolver{v}
+	}
+	return l
 }
 
 func (r *typeResolver) InputFields() []*inputValueResolver {
@@ -319,10 +328,11 @@ func (r *inputValueResolver) DefaultValue() *string {
 }
 
 type enumValueResolver struct {
+	value string
 }
 
 func (r *enumValueResolver) Name() string {
-	panic("TODO")
+	return r.value
 }
 
 func (r *enumValueResolver) Description() string {

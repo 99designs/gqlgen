@@ -138,13 +138,6 @@ func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeR
 		}
 		return e, nil
 
-	case *schema.TypeReference:
-		refT, ok := s.AllTypes[t.Name]
-		if !ok {
-			return nil, fmt.Errorf("type %q not found", t.Name)
-		}
-		return makeExec2(s, refT, resolverType, typeRefMap)
-
 	default:
 		panic("invalid type")
 	}

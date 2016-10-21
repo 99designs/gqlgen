@@ -59,19 +59,14 @@ type NonNull struct {
 	Elem Type
 }
 
-type TypeReference struct {
-	Name string
-}
-
-func (Scalar) isType()        {}
-func (Object) isType()        {}
-func (Interface) isType()     {}
-func (Union) isType()         {}
-func (Enum) isType()          {}
-func (InputObject) isType()   {}
-func (List) isType()          {}
-func (NonNull) isType()       {}
-func (TypeReference) isType() {}
+func (Scalar) isType()      {}
+func (Object) isType()      {}
+func (Interface) isType()   {}
+func (Union) isType()       {}
+func (Enum) isType()        {}
+func (InputObject) isType() {}
+func (List) isType()        {}
+func (NonNull) isType()     {}
 
 type Field struct {
 	Name       string
@@ -85,6 +80,15 @@ type Parameter struct {
 	Default string
 }
 
+type typeRef struct {
+	name   string
+	target *Type
+}
+
+type context struct {
+	typeRefs []*typeRef
+}
+
 func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
@@ -93,7 +97,11 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 
 	l := lexer.New(sc)
 	err = l.CatchSyntaxError(func() {
-		s = parseSchema(l)
+		c := &context{}
+		s = parseSchema(l, c)
+		for _, ref := range c.typeRefs {
+			*ref.target = s.AllTypes[ref.name]
+		}
 	})
 	if err != nil {
 		return nil, err
@@ -112,7 +120,7 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 	return s, nil
 }
 
-func parseSchema(l *lexer.Lexer) *Schema {
+func parseSchema(l *lexer.Lexer, c *context) *Schema {
 	s := &Schema{
 		EntryPoints: make(map[string]string),
 		AllTypes:    make(map[string]Type),
@@ -132,21 +140,21 @@ func parseSchema(l *lexer.Lexer) *Schema {
 			}
 			l.ConsumeToken('}')
 		case "type":
-			obj := parseObjectDecl(l)
+			obj := parseObjectDecl(l, c)
 			s.AllTypes[obj.Name] = obj
 			s.Objects[obj.Name] = obj
 		case "interface":
-			intf := parseInterfaceDecl(l)
+			intf := parseInterfaceDecl(l, c)
 			s.AllTypes[intf.Name] = intf
 			s.Interfaces[intf.Name] = intf
 		case "union":
-			union := parseUnionDecl(l)
+			union := parseUnionDecl(l, c)
 			s.AllTypes[union.Name] = union
 		case "enum":
-			enum := parseEnumDecl(l)
+			enum := parseEnumDecl(l, c)
 			s.AllTypes[enum.Name] = enum
 		case "input":
-			input := parseInputDecl(l)
+			input := parseInputDecl(l, c)
 			s.AllTypes[input.Name] = input
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
@@ -156,7 +164,7 @@ func parseSchema(l *lexer.Lexer) *Schema {
 	return s
 }
 
-func parseObjectDecl(l *lexer.Lexer) *Object {
+func parseObjectDecl(l *lexer.Lexer, c *context) *Object {
 	o := &Object{}
 	o.Name = l.ConsumeIdent()
 	if l.Peek() == scanner.Ident {
@@ -164,21 +172,21 @@ func parseObjectDecl(l *lexer.Lexer) *Object {
 		o.Implements = l.ConsumeIdent()
 	}
 	l.ConsumeToken('{')
-	o.Fields = parseFields(l)
+	o.Fields = parseFields(l, c)
 	l.ConsumeToken('}')
 	return o
 }
 
-func parseInterfaceDecl(l *lexer.Lexer) *Interface {
+func parseInterfaceDecl(l *lexer.Lexer, c *context) *Interface {
 	i := &Interface{}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
-	i.Fields = parseFields(l)
+	i.Fields = parseFields(l, c)
 	l.ConsumeToken('}')
 	return i
 }
 
-func parseUnionDecl(l *lexer.Lexer) *Union {
+func parseUnionDecl(l *lexer.Lexer, c *context) *Union {
 	union := &Union{}
 	union.Name = l.ConsumeIdent()
 	l.ConsumeToken('=')
@@ -190,16 +198,16 @@ func parseUnionDecl(l *lexer.Lexer) *Union {
 	return union
 }
 
-func parseInputDecl(l *lexer.Lexer) *InputObject {
+func parseInputDecl(l *lexer.Lexer, c *context) *InputObject {
 	i := &InputObject{}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
-	i.Fields = parseFields(l)
+	i.Fields = parseFields(l, c)
 	l.ConsumeToken('}')
 	return i
 }
 
-func parseEnumDecl(l *lexer.Lexer) *Enum {
+func parseEnumDecl(l *lexer.Lexer, c *context) *Enum {
 	enum := &Enum{}
 	enum.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
@@ -210,7 +218,7 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 	return enum
 }
 
-func parseFields(l *lexer.Lexer) map[string]*Field {
+func parseFields(l *lexer.Lexer, c *context) map[string]*Field {
 	fields := make(map[string]*Field)
 	for l.Peek() != '}' {
 		f := &Field{}
@@ -219,23 +227,23 @@ func parseFields(l *lexer.Lexer) map[string]*Field {
 			f.Parameters = make(map[string]*Parameter)
 			l.ConsumeToken('(')
 			for l.Peek() != ')' {
-				p := parseParameter(l)
+				p := parseParameter(l, c)
 				f.Parameters[p.Name] = p
 			}
 			l.ConsumeToken(')')
 		}
 		l.ConsumeToken(':')
-		f.Type = parseType(l)
+		parseType(&f.Type, l, c)
 		fields[f.Name] = f
 	}
 	return fields
 }
 
-func parseParameter(l *lexer.Lexer) *Parameter {
+func parseParameter(l *lexer.Lexer, c *context) *Parameter {
 	p := &Parameter{}
 	p.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
-	p.Type = parseType(l)
+	parseType(&p.Type, l, c)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
 		p.Default = l.ConsumeIdent()
@@ -243,27 +251,35 @@ func parseParameter(l *lexer.Lexer) *Parameter {
 	return p
 }
 
-func parseType(l *lexer.Lexer) Type {
-	t := parseNullableType(l)
-	if l.Peek() == '!' {
-		l.ConsumeToken('!')
-		return &NonNull{t}
+func parseType(target *Type, l *lexer.Lexer, c *context) {
+	parseNonNil := func() {
+		if l.Peek() == '!' {
+			l.ConsumeToken('!')
+			nn := &NonNull{}
+			*target = nn
+			target = &nn.Elem
+		}
 	}
-	return t
-}
 
-func parseNullableType(l *lexer.Lexer) Type {
 	if l.Peek() == '[' {
 		l.ConsumeToken('[')
-		elem := parseType(l)
+		t := &List{}
+		parseType(&t.Elem, l, c)
 		l.ConsumeToken(']')
-		return &List{Elem: elem}
+		parseNonNil()
+		*target = t
+		return
 	}
 
-	switch name := l.ConsumeIdent(); name {
+	name := l.ConsumeIdent()
+	parseNonNil()
+	switch name {
 	case "Int", "Float", "String", "Boolean", "ID":
-		return &Scalar{Name: name}
+		*target = &Scalar{Name: name}
 	default:
-		return &TypeReference{Name: name}
+		c.typeRefs = append(c.typeRefs, &typeRef{
+			name:   name,
+			target: target,
+		})
 	}
 }

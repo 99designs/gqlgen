@@ -24,7 +24,7 @@ func init() {
 
 	{
 		var err error
-		schemaExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Schema"], reflect.TypeOf(&schemaResolver{}), make(map[typeRefMapKey]*typeRefExec))
+		schemaExec, err = makeWithType(metaSchema, metaSchema.AllTypes["__Schema"], &schemaResolver{})
 		if err != nil {
 			panic(err)
 		}
@@ -32,7 +32,7 @@ func init() {
 
 	{
 		var err error
-		typeExec, err = makeExec(metaSchema, metaSchema.AllTypes["__Type"], reflect.TypeOf(&typeResolver{}), make(map[typeRefMapKey]*typeRefExec))
+		typeExec, err = makeWithType(metaSchema, metaSchema.AllTypes["__Type"], &typeResolver{})
 		if err != nil {
 			panic(err)
 		}

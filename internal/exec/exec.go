@@ -31,7 +31,7 @@ var scalarTypeNames = []string{"Int", "Float", "String", "Boolean", "ID"}
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	t := s.AllTypes[s.EntryPoints["query"]]
-	e, err := makeExec(s, t, reflect.TypeOf(resolver), make(map[typeRefMapKey]*typeRefExec))
+	e, err := makeWithType(s, t, resolver)
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +40,10 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 		schema:   s,
 		resolver: reflect.ValueOf(resolver),
 	}, nil
+}
+
+func makeWithType(s *schema.Schema, t schema.Type, resolver interface{}) (iExec, error) {
+	return makeExec(s, t, reflect.TypeOf(resolver), make(map[typeRefMapKey]*typeRefExec))
 }
 
 func makeExec(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRefExec) (iExec, error) {

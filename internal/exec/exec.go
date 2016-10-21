@@ -437,6 +437,9 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 		for name, param := range e.field.Parameters {
 			value, ok := f.Arguments[name]
 			if !ok {
+				if param.Default == nil {
+					continue
+				}
 				value = &query.Literal{Value: param.Default}
 			}
 			rf := args.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) }) // TODO resolve at startup

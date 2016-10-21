@@ -197,22 +197,22 @@ func (r *typeResolver) Kind() string {
 	}
 }
 
-func (r *typeResolver) Name() string {
+func (r *typeResolver) Name() *string {
 	switch t := r.typ.(type) {
 	case *schema.Scalar:
-		return t.Name
+		return &t.Name
 	case *schema.Object:
-		return t.Name
+		return &t.Name
 	case *schema.Interface:
-		return t.Name
+		return &t.Name
 	case *schema.Union:
-		return t.Name
+		return &t.Name
 	case *schema.Enum:
-		return t.Name
+		return &t.Name
 	case *schema.InputObject:
-		return t.Name
+		return &t.Name
 	default:
-		panic("unreachable")
+		return nil
 	}
 }
 
@@ -221,7 +221,29 @@ func (r *typeResolver) Description() string {
 }
 
 func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) []*fieldResolver {
-	panic("TODO")
+	var fields map[string]*schema.Field
+	switch t := r.typ.(type) {
+	case *schema.Object:
+		fields = t.Fields
+	case *schema.Interface:
+		fields = t.Fields
+	case *schema.InputObject:
+		fields = t.Fields
+	default:
+		return nil
+	}
+
+	var names []string
+	for name := range fields {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	l := make([]*fieldResolver, len(names))
+	for i, name := range names {
+		l[i] = &fieldResolver{fields[name]}
+	}
+	return l
 }
 
 func (r *typeResolver) Interfaces() []*typeResolver {
@@ -245,10 +267,11 @@ func (r *typeResolver) OfType() *typeResolver {
 }
 
 type fieldResolver struct {
+	field *schema.Field
 }
 
 func (r *fieldResolver) Name() string {
-	panic("TODO")
+	return r.field.Name
 }
 
 func (r *fieldResolver) Description() string {
@@ -260,7 +283,7 @@ func (r *fieldResolver) Args() []*inputValueResolver {
 }
 
 func (r *fieldResolver) Type() *typeResolver {
-	panic("TODO")
+	return &typeResolver{typ: r.field.Type}
 }
 
 func (r *fieldResolver) IsDeprecated() bool {

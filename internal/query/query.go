@@ -293,24 +293,21 @@ func parseValue(l *lexer.Lexer) Value {
 	switch l.Peek() {
 	case '$':
 		l.ConsumeToken('$')
-		return &Variable{
-			Name: l.ConsumeIdent(),
-		}
+		return &Variable{Name: l.ConsumeIdent()}
 	case scanner.Int:
-		return &Literal{
-			Value: l.ConsumeInt(),
-		}
+		return &Literal{Value: l.ConsumeInt()}
 	case scanner.Float:
-		return &Literal{
-			Value: l.ConsumeFloat(),
-		}
+		return &Literal{Value: l.ConsumeFloat()}
 	case scanner.String:
-		return &Literal{
-			Value: l.ConsumeString(),
-		}
+		return &Literal{Value: l.ConsumeString()}
 	case scanner.Ident:
-		return &Literal{
-			Value: l.ConsumeIdent(),
+		switch ident := l.ConsumeIdent(); ident {
+		case "true":
+			return &Literal{Value: true}
+		case "false":
+			return &Literal{Value: false}
+		default:
+			return &Literal{Value: ident}
 		}
 	default:
 		l.SyntaxError("invalid value")

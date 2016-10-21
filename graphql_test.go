@@ -646,6 +646,77 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name:     "StarWarsIntrospection4",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				__type(name: "Droid") {
+					name
+					fields {
+						name
+						type {
+							name
+							kind
+						}
+					}
+				}
+			}
+		`,
+		result: `
+			{
+				"__type": {
+					"name": "Droid",
+					"fields": [
+						{
+							"name": "appearsIn",
+							"type": {
+								"name": null,
+								"kind": "NON_NULL"
+							}
+						},
+						{
+							"name": "friends",
+							"type": {
+								"name": null,
+								"kind": "LIST"
+							}
+						},
+						{
+							"name": "friendsConnection",
+							"type": {
+								"name": null,
+								"kind": "NON_NULL"
+							}
+						},
+						{
+							"name": "id",
+							"type": {
+								"name": null,
+								"kind": "NON_NULL"
+							}
+						},
+						{
+							"name": "name",
+							"type": {
+								"name": null,
+								"kind": "NON_NULL"
+							}
+						},
+						{
+							"name": "primaryFunction",
+							"type": {
+								"name": "String",
+								"kind": "SCALAR"
+							}
+						}
+					]
+				}
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {

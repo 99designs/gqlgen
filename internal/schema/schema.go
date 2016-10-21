@@ -77,7 +77,7 @@ type Field struct {
 type Parameter struct {
 	Name    string
 	Type    Type
-	Default string
+	Default interface{}
 }
 
 type typeRef struct {
@@ -246,7 +246,7 @@ func parseParameter(l *lexer.Lexer, c *context) *Parameter {
 	parseType(&p.Type, l, c)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
-		p.Default = l.ConsumeIdent()
+		p.Default = parseValue(l)
 	}
 	return p
 }
@@ -281,5 +281,28 @@ func parseType(target *Type, l *lexer.Lexer, c *context) {
 			name:   name,
 			target: target,
 		})
+	}
+}
+
+func parseValue(l *lexer.Lexer) interface{} {
+	switch l.Peek() {
+	case scanner.Int:
+		return l.ConsumeInt()
+	case scanner.Float:
+		return l.ConsumeFloat()
+	case scanner.String:
+		return l.ConsumeString()
+	case scanner.Ident:
+		switch ident := l.ConsumeIdent(); ident {
+		case "true":
+			return true
+		case "false":
+			return false
+		default:
+			return ident
+		}
+	default:
+		l.SyntaxError("invalid value")
+		panic("unreachable")
 	}
 }

@@ -75,6 +75,14 @@ func makeExec(target *iExec, s *schema.Schema, t schema.Type, resolverType refle
 	return nil
 }
 
+var scalarTypes = map[string]reflect.Type{
+	"Int":     reflect.TypeOf(int32(0)),
+	"Float":   reflect.TypeOf(float64(0)),
+	"String":  reflect.TypeOf(""),
+	"Boolean": reflect.TypeOf(true),
+	"ID":      reflect.TypeOf(""),
+}
+
 func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
 	nonNull := false
 	if nn, ok := t.(*schema.NonNull); ok {
@@ -90,6 +98,13 @@ func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeR
 
 	switch t := t.(type) {
 	case *schema.Scalar:
+		if !nonNull {
+			resolverType = resolverType.Elem()
+		}
+		scalarType := scalarTypes[t.Name]
+		if resolverType != scalarType {
+			return nil, fmt.Errorf("expected %s, got %s", scalarType, resolverType)
+		}
 		return &scalarExec{}, nil
 
 	case *schema.Object:

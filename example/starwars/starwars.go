@@ -509,7 +509,7 @@ func resolveCharacters(ids []string) *[]characterResolver {
 type reviewResolver struct {
 }
 
-func (r *reviewResolver) Stars() int {
+func (r *reviewResolver) Stars() int32 {
 	panic("TODO")
 }
 
@@ -520,7 +520,7 @@ func (r *reviewResolver) Commentary() *string {
 type friendsConnectionResolver struct {
 }
 
-func (r *friendsConnectionResolver) TotalCount() int {
+func (r *friendsConnectionResolver) TotalCount() int32 {
 	panic("TODO")
 }
 

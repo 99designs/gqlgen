@@ -279,16 +279,6 @@ func parseArgument(l *lexer.Lexer) (string, Value) {
 	return name, value
 }
 
-type ValueType int
-
-const (
-	Int ValueType = iota
-	Float
-	String
-	Boolean
-	Enum
-)
-
 func parseValue(l *lexer.Lexer) Value {
 	switch l.Peek() {
 	case '$':

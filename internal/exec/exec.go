@@ -194,14 +194,35 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			in = in[1:]
 		}
 
-		var argumentsType reflect.Type
+		var argsType reflect.Type
+		var args []*argExec
 		if len(f.Args) > 0 {
 			if len(in) == 0 {
 				return nil, fmt.Errorf("method %q of %s is missing a parameter for field arguments", m.Name, resolverType)
 			}
-			argumentsType = in[0]
-			// TODO type check arguments
+			argsType = in[0]
 			in = in[1:]
+
+			for _, arg := range f.Args {
+				ae := &argExec{
+					name: arg.Name,
+				}
+
+				sf, ok := argsType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, arg.Name) })
+				if !ok {
+					return nil, fmt.Errorf("method %q of %s is missing argument %q", m.Name, resolverType, arg.Name)
+				}
+				ae.fieldIndex = sf.Index
+				if !checkType(arg.Type, sf.Type) {
+					return nil, fmt.Errorf("method %q of %s has argument %q with wrong type", m.Name, resolverType, arg.Name)
+				}
+
+				if arg.Default != nil {
+					ae.defaultVal = reflect.ValueOf(arg.Default)
+				}
+
+				args = append(args, ae)
+			}
 		}
 
 		if len(in) > 0 {
@@ -222,11 +243,12 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 
 		fe := &fieldExec{
-			field:         f,
-			methodIndex:   methodIndex,
-			hasContext:    hasContext,
-			argumentsType: argumentsType,
-			hasError:      hasError,
+			field:       f,
+			methodIndex: methodIndex,
+			hasContext:  hasContext,
+			args:        args,
+			argsType:    argsType,
+			hasError:    hasError,
 		}
 		if err := makeExec(&fe.valueExec, s, f.Type, m.Type.Out(0), typeRefMap); err != nil {
 			return nil, err
@@ -453,12 +475,19 @@ func (e *objectExec) execFragment(r *request, frag *query.Fragment, resolver ref
 }
 
 type fieldExec struct {
-	field         *schema.Field
-	methodIndex   int
-	hasContext    bool
-	argumentsType reflect.Type
-	hasError      bool
-	valueExec     iExec
+	field       *schema.Field
+	methodIndex int
+	hasContext  bool
+	args        []*argExec
+	argsType    reflect.Type
+	hasError    bool
+	valueExec   iExec
+}
+
+type argExec struct {
+	name       string
+	fieldIndex []int
+	defaultVal reflect.Value
 }
 
 func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
@@ -468,20 +497,19 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 		in = append(in, reflect.ValueOf(r.ctx))
 	}
 
-	if e.argumentsType != nil {
-		argsValue := reflect.New(e.argumentsType)
-		for name, arg := range e.field.Args {
-			value, ok := f.Arguments[name]
+	if len(e.args) != 0 {
+		argsValue := reflect.New(e.argsType).Elem()
+		for _, arg := range e.args {
+			value, ok := f.Arguments[arg.name]
 			if !ok {
-				if arg.Default == nil {
-					continue
+				if arg.defaultVal.IsValid() {
+					argsValue.FieldByIndex(arg.fieldIndex).Set(arg.defaultVal)
 				}
-				value = &query.Literal{Value: arg.Default}
+				continue
 			}
-			rf := argsValue.Elem().FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) }) // TODO resolve at startup
-			rf.Set(reflect.ValueOf(execValue(r, value)))
+			argsValue.FieldByIndex(arg.fieldIndex).Set(reflect.ValueOf(execValue(r, value)))
 		}
-		in = append(in, argsValue.Elem())
+		in = append(in, argsValue)
 	}
 
 	m := resolver.Method(e.methodIndex)
@@ -522,5 +550,20 @@ func execValue(r *request, v query.Value) interface{} {
 		return v.Value
 	default:
 		panic("invalid value")
+	}
+}
+
+func checkType(st schema.Type, rt reflect.Type) bool {
+	if nn, ok := st.(*schema.NonNull); ok {
+		st = nn.OfType
+	}
+
+	switch st := st.(type) {
+	case *schema.Scalar:
+		return rt == scalarTypes[st.Name]
+	case *schema.Enum:
+		return rt == scalarTypes["String"]
+	default:
+		panic("TODO")
 	}
 }

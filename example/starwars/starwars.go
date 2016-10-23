@@ -335,7 +335,7 @@ func (r *Resolver) Starship(args struct{ ID string }) *starshipResolver {
 }
 
 type friendsConenctionArgs struct {
-	First int
+	First int32
 	After string
 }
 

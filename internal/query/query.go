@@ -7,6 +7,7 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/lexer"
+	"github.com/neelance/graphql-go/internal/schema"
 )
 
 type Document struct {
@@ -30,7 +31,7 @@ const (
 
 type VariableDef struct {
 	Name string
-	Type string
+	Type schema.Type
 }
 
 type NamedFragment struct {
@@ -169,10 +170,7 @@ func parseVariableDef(l *lexer.Lexer) *VariableDef {
 	l.ConsumeToken('$')
 	v.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
-	v.Type = l.ConsumeIdent()
-	if l.Peek() == '!' {
-		l.ConsumeToken('!') // TODO
-	}
+	v.Type = schema.ParseType(l)
 	return v
 }
 

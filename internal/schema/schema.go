@@ -349,7 +349,7 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 			l.ConsumeToken(')')
 		}
 		l.ConsumeToken(':')
-		f.Type = parseType(l)
+		f.Type = ParseType(l)
 		fields[f.Name] = f
 		fieldOrder = append(fieldOrder, f.Name)
 	}
@@ -360,7 +360,7 @@ func parseInputValue(l *lexer.Lexer) *InputValue {
 	p := &InputValue{}
 	p.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
-	p.Type = parseType(l)
+	p.Type = ParseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
 		p.Default = parseValue(l)
@@ -368,7 +368,7 @@ func parseInputValue(l *lexer.Lexer) *InputValue {
 	return p
 }
 
-func parseType(l *lexer.Lexer) Type {
+func ParseType(l *lexer.Lexer) Type {
 	t := parseNullType(l)
 	if l.Peek() == '!' {
 		l.ConsumeToken('!')
@@ -380,7 +380,7 @@ func parseType(l *lexer.Lexer) Type {
 func parseNullType(l *lexer.Lexer) Type {
 	if l.Peek() == '[' {
 		l.ConsumeToken('[')
-		ofType := parseType(l)
+		ofType := ParseType(l)
 		l.ConsumeToken(']')
 		return &List{OfType: ofType}
 	}

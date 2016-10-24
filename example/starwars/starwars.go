@@ -279,9 +279,9 @@ type Resolver struct{}
 
 func (r *Resolver) Hero(args struct{ Episode string }) characterResolver {
 	if args.Episode == "EMPIRE" {
-		return &humanResolver{humanData["1000"]}
+		return &humanResolver{h: humanData["1000"]}
 	}
-	return &droidResolver{droidData["2001"]}
+	return &droidResolver{d: droidData["2001"]}
 }
 
 func (r *Resolver) Reviews(args struct{ Episode string }) *[]*reviewResolver {
@@ -292,17 +292,17 @@ func (r *Resolver) Search(args struct{ Text string }) *[]searchResultResolver {
 	var l []searchResultResolver
 	for _, h := range humans {
 		if strings.Contains(h.Name, args.Text) {
-			l = append(l, &humanResolver{h})
+			l = append(l, &humanResolver{h: h})
 		}
 	}
 	for _, d := range droids {
 		if strings.Contains(d.Name, args.Text) {
-			l = append(l, &droidResolver{d})
+			l = append(l, &droidResolver{d: d})
 		}
 	}
 	for _, s := range starships {
 		if strings.Contains(s.Name, args.Text) {
-			l = append(l, &starshipResolver{s})
+			l = append(l, &starshipResolver{s: s})
 		}
 	}
 	return &l
@@ -310,31 +310,31 @@ func (r *Resolver) Search(args struct{ Text string }) *[]searchResultResolver {
 
 func (r *Resolver) Character(args struct{ ID string }) characterResolver {
 	if h := humanData[args.ID]; h != nil {
-		return &humanResolver{h}
+		return &humanResolver{h: h}
 	}
 	if d := droidData[args.ID]; d != nil {
-		return &droidResolver{d}
+		return &droidResolver{d: d}
 	}
 	return nil
 }
 
 func (r *Resolver) Human(args struct{ ID string }) *humanResolver {
 	if h := humanData[args.ID]; h != nil {
-		return &humanResolver{h}
+		return &humanResolver{h: h}
 	}
 	return nil
 }
 
 func (r *Resolver) Droid(args struct{ ID string }) *droidResolver {
 	if d := droidData[args.ID]; d != nil {
-		return &droidResolver{d}
+		return &droidResolver{d: d}
 	}
 	return nil
 }
 
 func (r *Resolver) Starship(args struct{ ID string }) *starshipResolver {
 	if s := starshipData[args.ID]; s != nil {
-		return &starshipResolver{s}
+		return &starshipResolver{s: s}
 	}
 	return nil
 }
@@ -354,7 +354,22 @@ type characterResolver interface {
 	ToDroid() (*droidResolver, bool)
 }
 
+type characterBase struct{}
+
+func (r characterBase) ToHuman() (*humanResolver, bool) {
+	return nil, false
+}
+
+func (r characterBase) ToDroid() (*droidResolver, bool) {
+	return nil, false
+}
+
+func (r characterBase) ToStarship() (*starshipResolver, bool) {
+	return nil, false
+}
+
 type humanResolver struct {
+	characterBase
 	h *human
 }
 
@@ -393,7 +408,7 @@ func (r *humanResolver) AppearsIn() []string {
 func (r *humanResolver) Starships() *[]*starshipResolver {
 	l := make([]*starshipResolver, len(r.h.Starships))
 	for i, id := range r.h.Starships {
-		l[i] = &starshipResolver{starshipData[id]}
+		l[i] = &starshipResolver{s: starshipData[id]}
 	}
 	return &l
 }
@@ -402,15 +417,8 @@ func (r *humanResolver) ToHuman() (*humanResolver, bool) {
 	return r, true
 }
 
-func (r *humanResolver) ToDroid() (*droidResolver, bool) {
-	return nil, false
-}
-
-func (r *humanResolver) ToStarship() (*starshipResolver, bool) {
-	return nil, false
-}
-
 type droidResolver struct {
+	characterBase
 	d *droid
 }
 
@@ -441,19 +449,12 @@ func (r *droidResolver) PrimaryFunction() *string {
 	return &r.d.PrimaryFunction
 }
 
-func (r *droidResolver) ToHuman() (*humanResolver, bool) {
-	return nil, false
-}
-
 func (r *droidResolver) ToDroid() (*droidResolver, bool) {
 	return r, true
 }
 
-func (r *droidResolver) ToStarship() (*starshipResolver, bool) {
-	return nil, false
-}
-
 type starshipResolver struct {
+	characterBase
 	s *starship
 }
 
@@ -467,14 +468,6 @@ func (r *starshipResolver) Name() string {
 
 func (r *starshipResolver) Length(args struct{ Unit string }) float64 {
 	return convertLength(r.s.Length, args.Unit)
-}
-
-func (r *starshipResolver) ToHuman() (*humanResolver, bool) {
-	return nil, false
-}
-
-func (r *starshipResolver) ToDroid() (*droidResolver, bool) {
-	return nil, false
 }
 
 func (r *starshipResolver) ToStarship() (*starshipResolver, bool) {
@@ -510,10 +503,10 @@ func resolveCharacters(ids []string) *[]characterResolver {
 
 func resolveCharacter(id string) characterResolver {
 	if h, ok := humanData[id]; ok {
-		return &humanResolver{h}
+		return &humanResolver{h: h}
 	}
 	if d, ok := droidData[id]; ok {
-		return &droidResolver{d}
+		return &droidResolver{d: d}
 	}
 	return nil
 }

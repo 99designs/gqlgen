@@ -221,7 +221,6 @@ func parseArguments(l *lexer.Lexer) map[string]Value {
 		name, value := parseArgument(l)
 		args[name] = value
 		for l.Peek() != ')' {
-			l.ConsumeToken(',')
 			name, value := parseArgument(l)
 			args[name] = value
 		}

@@ -233,8 +233,6 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			return nil, fmt.Errorf("method %q of %s has too many return values", m.Name, resolverType)
 		}
 
-		// TODO type check result
-
 		hasError := m.Type.NumOut() == 2
 		if hasError {
 			if m.Type.Out(1) != errorType {

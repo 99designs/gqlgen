@@ -3,7 +3,12 @@
 // Source: https://github.com/graphql/graphql.github.io/blob/source/site/_core/swapiSchema.js
 package starwars
 
-import "strings"
+import (
+	"encoding/base64"
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 var Schema = `
 	schema {
@@ -343,7 +348,7 @@ type characterResolver interface {
 	ID() string
 	Name() string
 	Friends() *[]characterResolver
-	FriendsConnection(friendsConenctionArgs) *friendsConnectionResolver
+	FriendsConnection(friendsConenctionArgs) (*friendsConnectionResolver, error)
 	AppearsIn() []string
 	ToHuman() (*humanResolver, bool)
 	ToDroid() (*droidResolver, bool)
@@ -377,8 +382,8 @@ func (r *humanResolver) Friends() *[]characterResolver {
 	return resolveCharacters(r.h.Friends)
 }
 
-func (r *humanResolver) FriendsConnection(args friendsConenctionArgs) *friendsConnectionResolver {
-	panic("TODO")
+func (r *humanResolver) FriendsConnection(args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+	return newFriendsConnectionResolver(r.h.Friends, args)
 }
 
 func (r *humanResolver) AppearsIn() []string {
@@ -421,8 +426,8 @@ func (r *droidResolver) Friends() *[]characterResolver {
 	return resolveCharacters(r.d.Friends)
 }
 
-func (r *droidResolver) FriendsConnection(args friendsConenctionArgs) *friendsConnectionResolver {
-	panic("TODO")
+func (r *droidResolver) FriendsConnection(args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+	return newFriendsConnectionResolver(r.d.Friends, args)
 }
 
 func (r *droidResolver) AppearsIn() []string {
@@ -496,14 +501,21 @@ func convertLength(meters float64, unit string) float64 {
 func resolveCharacters(ids []string) *[]characterResolver {
 	var characters []characterResolver
 	for _, id := range ids {
-		if h, ok := humanData[id]; ok {
-			characters = append(characters, &humanResolver{h})
-		}
-		if d, ok := droidData[id]; ok {
-			characters = append(characters, &droidResolver{d})
+		if c := resolveCharacter(id); c != nil {
+			characters = append(characters, c)
 		}
 	}
 	return &characters
+}
+
+func resolveCharacter(id string) characterResolver {
+	if h, ok := humanData[id]; ok {
+		return &humanResolver{h}
+	}
+	if d, ok := droidData[id]; ok {
+		return &droidResolver{d}
+	}
+	return nil
 }
 
 type reviewResolver struct {
@@ -518,46 +530,98 @@ func (r *reviewResolver) Commentary() *string {
 }
 
 type friendsConnectionResolver struct {
+	ids  []string
+	from int
+	to   int
+}
+
+func newFriendsConnectionResolver(ids []string, args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+	from := 0
+	if args.After != "" {
+		b, err := base64.StdEncoding.DecodeString(args.After)
+		if err != nil {
+			return nil, err
+		}
+		i, err := strconv.Atoi(strings.TrimPrefix(string(b), "cursor"))
+		if err != nil {
+			return nil, err
+		}
+		from = i
+	}
+
+	to := len(ids)
+	if args.First != 0 {
+		to = from + int(args.First)
+	}
+	if to > len(ids)-from {
+		to = len(ids) - from
+	}
+
+	return &friendsConnectionResolver{
+		ids:  ids,
+		from: from,
+		to:   to,
+	}, nil
 }
 
 func (r *friendsConnectionResolver) TotalCount() int32 {
-	panic("TODO")
+	return int32(len(r.ids))
 }
 
 func (r *friendsConnectionResolver) Edges() *[]*friendsEdgeResolver {
-	panic("TODO")
+	l := make([]*friendsEdgeResolver, r.to-r.from)
+	for i := range l {
+		l[i] = &friendsEdgeResolver{
+			cursor: encodeCursor(r.from + i),
+			id:     r.ids[r.from+i],
+		}
+	}
+	return &l
 }
 
 func (r *friendsConnectionResolver) Friends() *[]characterResolver {
-	panic("TODO")
+	return resolveCharacters(r.ids[r.from:r.to])
 }
 
 func (r *friendsConnectionResolver) PageInfo() *pageInfoResolver {
-	panic("TODO")
+	return &pageInfoResolver{
+		startCursor: encodeCursor(r.from),
+		endCursor:   encodeCursor(r.to - 1),
+		hasNextPage: r.to < len(r.ids),
+	}
+}
+
+func encodeCursor(i int) string {
+	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i+1)))
 }
 
 type friendsEdgeResolver struct {
+	cursor string
+	id     string
 }
 
 func (r *friendsEdgeResolver) Cursor() string {
-	panic("TODO")
+	return r.cursor
 }
 
 func (r *friendsEdgeResolver) Node() characterResolver {
-	panic("TODO")
+	return resolveCharacter(r.id)
 }
 
 type pageInfoResolver struct {
+	startCursor string
+	endCursor   string
+	hasNextPage bool
 }
 
 func (r *pageInfoResolver) StartCursor() *string {
-	panic("TODO")
+	return &r.startCursor
 }
 
 func (r *pageInfoResolver) EndCursor() *string {
-	panic("TODO")
+	return &r.endCursor
 }
 
 func (r *pageInfoResolver) HasNextPage() bool {
-	panic("TODO")
+	return r.hasNextPage
 }

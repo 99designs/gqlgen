@@ -544,6 +544,118 @@ var tests = []struct {
 	},
 
 	{
+		name:     "StarWarsConnections1",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				hero {
+					name
+					friendsConnection {
+						totalCount
+            pageInfo {
+              startCursor
+              endCursor
+              hasNextPage
+            }
+            edges {
+              cursor
+              node {
+                name
+              }
+            }
+					}
+				}
+			}
+		`,
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2",
+					"friendsConnection": {
+						"totalCount": 3,
+						"pageInfo": {
+							"startCursor": "Y3Vyc29yMQ==",
+							"endCursor": "Y3Vyc29yMw==",
+							"hasNextPage": false
+						},
+						"edges": [
+							{
+								"cursor": "Y3Vyc29yMQ==",
+								"node": {
+									"name": "Luke Skywalker"
+								}
+							},
+							{
+								"cursor": "Y3Vyc29yMg==",
+								"node": {
+									"name": "Han Solo"
+								}
+							},
+							{
+								"cursor": "Y3Vyc29yMw==",
+								"node": {
+									"name": "Leia Organa"
+								}
+							}
+						]
+					}
+				}
+			}
+		`,
+	},
+
+	{
+		name:     "StarWarsConnections2",
+		schema:   starwars.Schema,
+		resolver: &starwars.Resolver{},
+		query: `
+			{
+				hero {
+					name
+					friendsConnection(first: 1, after: "Y3Vyc29yMQ==") {
+						totalCount
+            pageInfo {
+              startCursor
+              endCursor
+              hasNextPage
+            }
+            edges {
+              cursor
+              node {
+                name
+              }
+            }
+					}
+				}
+			}
+		`,
+		result: `
+			{
+				"hero": {
+					"name": "R2-D2",
+					"friendsConnection": {
+						"totalCount": 3,
+						"pageInfo": {
+							"startCursor": "Y3Vyc29yMg==",
+							"endCursor": "Y3Vyc29yMg==",
+							"hasNextPage": true
+						},
+						"edges": [
+							{
+								"cursor": "Y3Vyc29yMg==",
+								"node": {
+									"name": "Han Solo"
+								}
+							}
+						]
+					}
+				}
+			}
+		`,
+	},
+
+	{
 		name:     "StarWarsIntrospection1",
 		schema:   starwars.Schema,
 		resolver: &starwars.Resolver{},
@@ -843,6 +955,10 @@ func TestAll(t *testing.T) {
 			result := schema.Exec(context.Background(), test.query, "", test.variables)
 			if err != nil {
 				t.Fatal(err)
+			}
+
+			if len(result.Errors) != 0 {
+				t.Fatal(result.Errors[0])
 			}
 
 			got, err := json.Marshal(result.Data)

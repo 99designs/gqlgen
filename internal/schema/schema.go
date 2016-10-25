@@ -11,12 +11,17 @@ import (
 )
 
 type Schema struct {
-	EntryPoints map[string]common.Type
-	Types       map[string]common.Type
+	EntryPoints map[string]NamedType
+	Types       map[string]NamedType
 
 	entryPointNames map[string]string
 	objects         []*Object
 	unions          []*Union
+}
+
+type NamedType interface {
+	common.Type
+	TypeName() string
 }
 
 type Scalar struct {
@@ -57,12 +62,19 @@ type InputObject struct {
 	InputFieldOrder []string
 }
 
-func (*Scalar) IsType()      {}
-func (*Object) IsType()      {}
-func (*Interface) IsType()   {}
-func (*Union) IsType()       {}
-func (*Enum) IsType()        {}
-func (*InputObject) IsType() {}
+func (*Scalar) Kind() string      { return "SCALAR" }
+func (*Object) Kind() string      { return "OBJECT" }
+func (*Interface) Kind() string   { return "INTERFACE" }
+func (*Union) Kind() string       { return "UNION" }
+func (*Enum) Kind() string        { return "ENUM" }
+func (*InputObject) Kind() string { return "INPUT_OBJECT" }
+
+func (t *Scalar) TypeName() string      { return t.Name }
+func (t *Object) TypeName() string      { return t.Name }
+func (t *Interface) TypeName() string   { return t.Name }
+func (t *Union) TypeName() string       { return t.Name }
+func (t *Enum) TypeName() string        { return t.Name }
+func (t *InputObject) TypeName() string { return t.Name }
 
 type Field struct {
 	Name     string
@@ -97,7 +109,7 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 		}
 	}
 
-	s.EntryPoints = make(map[string]common.Type)
+	s.EntryPoints = make(map[string]NamedType)
 	for key, name := range s.entryPointNames {
 		t, ok := s.Types[name]
 		if !ok {
@@ -216,7 +228,7 @@ func resolveTypeName(s *Schema, t common.Type) (common.Type, *errors.GraphQLErro
 func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
 		entryPointNames: make(map[string]string),
-		Types: map[string]common.Type{
+		Types: map[string]NamedType{
 			"Int":     &Scalar{Name: "Int"},
 			"Float":   &Scalar{Name: "Float"},
 			"String":  &Scalar{Name: "String"},

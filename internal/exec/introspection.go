@@ -254,45 +254,15 @@ type typeResolver struct {
 }
 
 func (r *typeResolver) Kind() string {
-	switch r.typ.(type) {
-	case *schema.Scalar:
-		return "SCALAR"
-	case *schema.Object:
-		return "OBJECT"
-	case *schema.Interface:
-		return "INTERFACE"
-	case *schema.Union:
-		return "UNION"
-	case *schema.Enum:
-		return "ENUM"
-	case *schema.InputObject:
-		return "INPUT_OBJECT"
-	case *common.List:
-		return "LIST"
-	case *common.NonNull:
-		return "NON_NULL"
-	default:
-		panic("unreachable")
-	}
+	return r.typ.Kind()
 }
 
 func (r *typeResolver) Name() *string {
-	switch t := r.typ.(type) {
-	case *schema.Scalar:
-		return &t.Name
-	case *schema.Object:
-		return &t.Name
-	case *schema.Interface:
-		return &t.Name
-	case *schema.Union:
-		return &t.Name
-	case *schema.Enum:
-		return &t.Name
-	case *schema.InputObject:
-		return &t.Name
-	default:
-		return nil
+	if named, ok := r.typ.(schema.NamedType); ok {
+		name := named.TypeName()
+		return &name
 	}
+	return nil
 }
 
 func (r *typeResolver) Description() *string {

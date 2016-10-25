@@ -3,7 +3,7 @@ package common
 import "github.com/neelance/graphql-go/internal/lexer"
 
 type Type interface {
-	IsType()
+	Kind() string
 }
 
 type List struct {
@@ -18,9 +18,9 @@ type TypeName struct {
 	Name string
 }
 
-func (*List) IsType()     {}
-func (*NonNull) IsType()  {}
-func (*TypeName) IsType() {}
+func (*List) Kind() string     { return "LIST" }
+func (*NonNull) Kind() string  { return "NON_NULL" }
+func (*TypeName) Kind() string { panic("TypeName needs to be resolved to actual type") }
 
 func ParseType(l *lexer.Lexer) Type {
 	t := parseNullType(l)

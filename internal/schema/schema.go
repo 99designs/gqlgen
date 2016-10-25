@@ -10,11 +10,12 @@ import (
 )
 
 type Schema struct {
-	EntryPoints map[string]string
+	EntryPoints map[string]Type
 	Types       map[string]Type
 
-	objects []*Object
-	unions  []*Union
+	entryPointNames map[string]string
+	objects         []*Object
+	unions          []*Union
 }
 
 type Type interface {
@@ -112,6 +113,17 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 		if err := resolveType(s, t); err != nil {
 			return nil, err
 		}
+	}
+
+	s.EntryPoints = make(map[string]Type)
+	for key, name := range s.entryPointNames {
+		t, ok := s.Types[name]
+		if !ok {
+			if !ok {
+				return nil, errors.Errorf("type %q not found", name)
+			}
+		}
+		s.EntryPoints[key] = t
 	}
 
 	for _, obj := range s.objects {
@@ -221,7 +233,7 @@ func resolveTypeRef(s *Schema, t Type) (Type, *errors.GraphQLError) {
 
 func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
-		EntryPoints: make(map[string]string),
+		entryPointNames: make(map[string]string),
 		Types: map[string]Type{
 			"Int":     &Scalar{Name: "Int"},
 			"Float":   &Scalar{Name: "Float"},
@@ -239,7 +251,7 @@ func parseSchema(l *lexer.Lexer) *Schema {
 				name := l.ConsumeIdent()
 				l.ConsumeToken(':')
 				typ := l.ConsumeIdent()
-				s.EntryPoints[name] = typ
+				s.entryPointNames[name] = typ
 			}
 			l.ConsumeToken('}')
 		case "type":

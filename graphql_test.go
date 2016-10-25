@@ -655,6 +655,35 @@ var tests = []struct {
 		`,
 	},
 
+	// {
+	// 	name:     "StarWarsMutation1",
+	// 	schema:   starwars.Schema,
+	// 	resolver: &starwars.Resolver{},
+	// 	query: `
+	// 		mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
+	// 			createReview(episode: $ep, review: $review) {
+	// 				stars
+	// 				commentary
+	// 			}
+	// 		}
+	// 	`,
+	// 	variables: map[string]interface{}{
+	// 		"ep": "JEDI",
+	// 		"review": map[string]interface{}{
+	// 			"stars":      5,
+	// 			"commentary": "This is a great movie!",
+	// 		},
+	// 	},
+	// 	result: `
+	// 		{
+	// 			"createReview": {
+	// 				"stars": 5,
+	// 				"commentary": "This is a great movie!"
+	// 			}
+	// 		}
+	// 	`,
+	// },
+
 	{
 		name:     "StarWarsIntrospection1",
 		schema:   starwars.Schema,

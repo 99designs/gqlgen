@@ -42,20 +42,33 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		}
 	}
 
-	if operationName == "" && len(d.Operations) == 1 {
-		for name := range d.Operations {
-			operationName = name
-		}
-	}
-
-	op, ok := d.Operations[operationName]
-	if !ok {
+	if len(d.Operations) == 0 {
 		return &Response{
-			Errors: []*errors.GraphQLError{errors.Errorf("no operation with name %q", operationName)},
+			Errors: []*errors.GraphQLError{errors.Errorf("no operations in query document")},
 		}
 	}
 
-	data, errs := s.exec.Exec(ctx, d, variables, op.SelSet)
+	var op *query.Operation
+	if operationName == "" {
+		if len(d.Operations) > 1 {
+			return &Response{
+				Errors: []*errors.GraphQLError{errors.Errorf("more than one operation in query document and no operation name given")},
+			}
+		}
+		for _, op2 := range d.Operations {
+			op = op2
+		}
+	} else {
+		var ok bool
+		op, ok = d.Operations[operationName]
+		if !ok {
+			return &Response{
+				Errors: []*errors.GraphQLError{errors.Errorf("no operation with name %q", operationName)},
+			}
+		}
+	}
+
+	data, errs := s.exec.Exec(ctx, d, variables, op)
 	return &Response{
 		Data:   data,
 		Errors: errs,

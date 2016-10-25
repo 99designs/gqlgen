@@ -339,6 +339,13 @@ func (r *Resolver) Starship(args struct{ ID string }) *starshipResolver {
 	return nil
 }
 
+func (r *Resolver) CreateReview(args struct {
+	Episode string
+	Review  *reviewInput
+}) *reviewResolver {
+	panic("TODO")
+}
+
 type friendsConenctionArgs struct {
 	First int32
 	After string
@@ -617,4 +624,9 @@ func (r *pageInfoResolver) EndCursor() *string {
 
 func (r *pageInfoResolver) HasNextPage() bool {
 	return r.hasNextPage
+}
+
+type reviewInput struct {
+	Stars      int32
+	Commentary string
 }

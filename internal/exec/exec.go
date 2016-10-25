@@ -15,22 +15,35 @@ import (
 )
 
 type Exec struct {
-	iExec
-	schema   *schema.Schema
-	resolver reflect.Value
+	queryExec    iExec
+	mutationExec iExec
+	schema       *schema.Schema
+	resolver     reflect.Value
 }
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
-	t := s.Types[s.EntryPoints["query"]]
-	e, err := makeWithType(s, t, resolver)
-	if err != nil {
-		return nil, err
-	}
-	return &Exec{
-		iExec:    e,
+	e := &Exec{
 		schema:   s,
 		resolver: reflect.ValueOf(resolver),
-	}, nil
+	}
+
+	if t, ok := s.EntryPoints["query"]; ok {
+		var err error
+		e.queryExec, err = makeWithType(s, t, resolver)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if t, ok := s.EntryPoints["mutation"]; ok {
+		var err error
+		e.mutationExec, err = makeWithType(s, t, resolver)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return e, nil
 }
 
 type typeRefMapKey struct {
@@ -206,6 +219,7 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			for _, arg := range f.Args {
 				ae := &argExec{
 					name: arg.Name,
+					typ:  arg.Type,
 				}
 
 				sf, ok := argsType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, arg.Name) })
@@ -310,7 +324,7 @@ func (r *request) handlePanic() {
 	}
 }
 
-func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map[string]interface{}, selSet *query.SelectionSet) (interface{}, []*errors.GraphQLError) {
+func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) (interface{}, []*errors.GraphQLError) {
 	r := &request{
 		ctx:    ctx,
 		doc:    document,
@@ -318,9 +332,17 @@ func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map
 		schema: e.schema,
 	}
 
+	var opExec iExec
+	switch op.Type {
+	case query.Query:
+		opExec = e.queryExec
+	case query.Mutation:
+		opExec = e.mutationExec
+	}
+
 	data := func() interface{} {
 		defer r.handlePanic()
-		return e.exec(r, selSet, e.resolver)
+		return opExec.exec(r, op.SelSet, e.resolver)
 	}()
 
 	return data, r.errs
@@ -484,6 +506,7 @@ type fieldExec struct {
 
 type argExec struct {
 	name       string
+	typ        schema.Type
 	fieldIndex []int
 	defaultVal reflect.Value
 }
@@ -505,7 +528,8 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 				}
 				continue
 			}
-			argsValue.FieldByIndex(arg.fieldIndex).Set(reflect.ValueOf(execValue(r, value)))
+			v := execValue(r, value)
+			argsValue.FieldByIndex(arg.fieldIndex).Set(reflect.ValueOf(v))
 		}
 		in = append(in, argsValue)
 	}
@@ -562,6 +586,6 @@ func checkType(st schema.Type, rt reflect.Type) bool {
 	case *schema.Enum:
 		return rt == scalarTypes["String"]
 	default:
-		panic("TODO")
+		return true
 	}
 }

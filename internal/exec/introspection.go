@@ -221,7 +221,7 @@ func (r *schemaResolver) Types() []*typeResolver {
 }
 
 func (r *schemaResolver) QueryType() *typeResolver {
-	t, ok := r.schema.Types[r.schema.EntryPoints["query"]]
+	t, ok := r.schema.EntryPoints["query"]
 	if !ok {
 		return nil
 	}
@@ -229,7 +229,7 @@ func (r *schemaResolver) QueryType() *typeResolver {
 }
 
 func (r *schemaResolver) MutationType() *typeResolver {
-	t, ok := r.schema.Types[r.schema.EntryPoints["mutation"]]
+	t, ok := r.schema.EntryPoints["mutation"]
 	if !ok {
 		return nil
 	}
@@ -237,7 +237,7 @@ func (r *schemaResolver) MutationType() *typeResolver {
 }
 
 func (r *schemaResolver) SubscriptionType() *typeResolver {
-	t, ok := r.schema.Types[r.schema.EntryPoints["subscription"]]
+	t, ok := r.schema.EntryPoints["subscription"]
 	if !ok {
 		return nil
 	}

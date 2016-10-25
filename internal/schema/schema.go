@@ -6,20 +6,17 @@ import (
 	"text/scanner"
 
 	"github.com/neelance/graphql-go/errors"
+	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
 type Schema struct {
-	EntryPoints map[string]Type
-	Types       map[string]Type
+	EntryPoints map[string]common.Type
+	Types       map[string]common.Type
 
 	entryPointNames map[string]string
 	objects         []*Object
 	unions          []*Union
-}
-
-type Type interface {
-	isType()
 }
 
 type Scalar struct {
@@ -60,38 +57,23 @@ type InputObject struct {
 	InputFieldOrder []string
 }
 
-type List struct {
-	OfType Type
-}
-
-type NonNull struct {
-	OfType Type
-}
-
-type typeRef struct {
-	name string
-}
-
-func (*Scalar) isType()      {}
-func (*Object) isType()      {}
-func (*Interface) isType()   {}
-func (*Union) isType()       {}
-func (*Enum) isType()        {}
-func (*InputObject) isType() {}
-func (*List) isType()        {}
-func (*NonNull) isType()     {}
-func (*typeRef) isType()     {}
+func (*Scalar) IsType()      {}
+func (*Object) IsType()      {}
+func (*Interface) IsType()   {}
+func (*Union) IsType()       {}
+func (*Enum) IsType()        {}
+func (*InputObject) IsType() {}
 
 type Field struct {
 	Name     string
 	Args     map[string]*InputValue
 	ArgOrder []string
-	Type     Type
+	Type     common.Type
 }
 
 type InputValue struct {
 	Name    string
-	Type    Type
+	Type    common.Type
 	Default interface{}
 }
 
@@ -115,7 +97,7 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 		}
 	}
 
-	s.EntryPoints = make(map[string]Type)
+	s.EntryPoints = make(map[string]common.Type)
 	for key, name := range s.entryPointNames {
 		t, ok := s.Types[name]
 		if !ok {
@@ -160,7 +142,7 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 	return s, nil
 }
 
-func resolveType(s *Schema, t Type) *errors.GraphQLError {
+func resolveType(s *Schema, t common.Type) *errors.GraphQLError {
 	var err *errors.GraphQLError
 	switch t := t.(type) {
 	case *Scalar:
@@ -183,18 +165,18 @@ func resolveType(s *Schema, t Type) *errors.GraphQLError {
 		// nothing
 	case *InputObject:
 		for _, f := range t.InputFields {
-			f.Type, err = resolveTypeRef(s, f.Type)
+			f.Type, err = resolveTypeName(s, f.Type)
 			if err != nil {
 				return err
 			}
 		}
-	case *List:
-		t.OfType, err = resolveTypeRef(s, t.OfType)
+	case *common.List:
+		t.OfType, err = resolveTypeName(s, t.OfType)
 		if err != nil {
 			return err
 		}
-	case *NonNull:
-		t.OfType, err = resolveTypeRef(s, t.OfType)
+	case *common.NonNull:
+		t.OfType, err = resolveTypeName(s, t.OfType)
 		if err != nil {
 			return err
 		}
@@ -206,12 +188,12 @@ func resolveType(s *Schema, t Type) *errors.GraphQLError {
 
 func resolveField(s *Schema, f *Field) *errors.GraphQLError {
 	var err *errors.GraphQLError
-	f.Type, err = resolveTypeRef(s, f.Type)
+	f.Type, err = resolveTypeName(s, f.Type)
 	if err != nil {
 		return err
 	}
 	for _, arg := range f.Args {
-		arg.Type, err = resolveTypeRef(s, arg.Type)
+		arg.Type, err = resolveTypeName(s, arg.Type)
 		if err != nil {
 			return err
 		}
@@ -219,11 +201,11 @@ func resolveField(s *Schema, f *Field) *errors.GraphQLError {
 	return nil
 }
 
-func resolveTypeRef(s *Schema, t Type) (Type, *errors.GraphQLError) {
-	if ref, ok := t.(*typeRef); ok {
-		refT, ok := s.Types[ref.name]
+func resolveTypeName(s *Schema, t common.Type) (common.Type, *errors.GraphQLError) {
+	if name, ok := t.(*common.TypeName); ok {
+		refT, ok := s.Types[name.Name]
 		if !ok {
-			return nil, errors.Errorf("type %q not found", ref.name)
+			return nil, errors.Errorf("type %q not found", name.Name)
 		}
 		return refT, nil
 	}
@@ -234,7 +216,7 @@ func resolveTypeRef(s *Schema, t Type) (Type, *errors.GraphQLError) {
 func parseSchema(l *lexer.Lexer) *Schema {
 	s := &Schema{
 		entryPointNames: make(map[string]string),
-		Types: map[string]Type{
+		Types: map[string]common.Type{
 			"Int":     &Scalar{Name: "Int"},
 			"Float":   &Scalar{Name: "Float"},
 			"String":  &Scalar{Name: "String"},
@@ -361,7 +343,7 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 			l.ConsumeToken(')')
 		}
 		l.ConsumeToken(':')
-		f.Type = ParseType(l)
+		f.Type = common.ParseType(l)
 		fields[f.Name] = f
 		fieldOrder = append(fieldOrder, f.Name)
 	}
@@ -372,32 +354,12 @@ func parseInputValue(l *lexer.Lexer) *InputValue {
 	p := &InputValue{}
 	p.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
-	p.Type = ParseType(l)
+	p.Type = common.ParseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
 		p.Default = parseValue(l)
 	}
 	return p
-}
-
-func ParseType(l *lexer.Lexer) Type {
-	t := parseNullType(l)
-	if l.Peek() == '!' {
-		l.ConsumeToken('!')
-		return &NonNull{OfType: t}
-	}
-	return t
-}
-
-func parseNullType(l *lexer.Lexer) Type {
-	if l.Peek() == '[' {
-		l.ConsumeToken('[')
-		ofType := ParseType(l)
-		l.ConsumeToken(']')
-		return &List{OfType: ofType}
-	}
-
-	return &typeRef{name: l.ConsumeIdent()}
 }
 
 func parseValue(l *lexer.Lexer) interface{} {

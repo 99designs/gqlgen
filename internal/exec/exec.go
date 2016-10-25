@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/neelance/graphql-go/errors"
+	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 )
@@ -47,7 +48,7 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 }
 
 type typeRefMapKey struct {
-	s schema.Type
+	s common.Type
 	r reflect.Type
 }
 
@@ -56,7 +57,7 @@ type typeRef struct {
 	exec    iExec
 }
 
-func makeWithType(s *schema.Schema, t schema.Type, resolver interface{}) (iExec, error) {
+func makeWithType(s *schema.Schema, t common.Type, resolver interface{}) (iExec, error) {
 	m := make(map[typeRefMapKey]*typeRef)
 	var e iExec
 	if err := makeExec(&e, s, t, reflect.TypeOf(resolver), m); err != nil {
@@ -72,7 +73,7 @@ func makeWithType(s *schema.Schema, t schema.Type, resolver interface{}) (iExec,
 	return e, nil
 }
 
-func makeExec(target *iExec, s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) error {
+func makeExec(target *iExec, s *schema.Schema, t common.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) error {
 	k := typeRefMapKey{t, resolverType}
 	ref, ok := typeRefMap[k]
 	if !ok {
@@ -96,9 +97,9 @@ var scalarTypes = map[string]reflect.Type{
 	"ID":      reflect.TypeOf(""),
 }
 
-func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
+func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
 	nonNull := false
-	if nn, ok := t.(*schema.NonNull); ok {
+	if nn, ok := t.(*common.NonNull); ok {
 		nonNull = true
 		t = nn.OfType
 	}
@@ -164,7 +165,7 @@ func makeExec2(s *schema.Schema, t schema.Type, resolverType reflect.Type, typeR
 	case *schema.Enum:
 		return &scalarExec{}, nil
 
-	case *schema.List:
+	case *common.List:
 		if !nonNull {
 			resolverType = resolverType.Elem()
 		}
@@ -506,7 +507,7 @@ type fieldExec struct {
 
 type argExec struct {
 	name       string
-	typ        schema.Type
+	typ        common.Type
 	fieldIndex []int
 	defaultVal reflect.Value
 }
@@ -575,8 +576,8 @@ func execValue(r *request, v query.Value) interface{} {
 	}
 }
 
-func checkType(st schema.Type, rt reflect.Type) bool {
-	if nn, ok := st.(*schema.NonNull); ok {
+func checkType(st common.Type, rt reflect.Type) bool {
+	if nn, ok := st.(*common.NonNull); ok {
 		st = nn.OfType
 	}
 

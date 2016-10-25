@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/neelance/graphql-go/errors"
+	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 )
@@ -249,7 +250,7 @@ func (r *schemaResolver) Directives() []*directiveResolver {
 }
 
 type typeResolver struct {
-	typ schema.Type
+	typ common.Type
 }
 
 func (r *typeResolver) Kind() string {
@@ -266,9 +267,9 @@ func (r *typeResolver) Kind() string {
 		return "ENUM"
 	case *schema.InputObject:
 		return "INPUT_OBJECT"
-	case *schema.List:
+	case *common.List:
 		return "LIST"
-	case *schema.NonNull:
+	case *common.NonNull:
 		return "NON_NULL"
 	default:
 		panic("unreachable")
@@ -378,9 +379,9 @@ func (r *typeResolver) InputFields() *[]*inputValueResolver {
 
 func (r *typeResolver) OfType() *typeResolver {
 	switch t := r.typ.(type) {
-	case *schema.List:
+	case *common.List:
 		return &typeResolver{t.OfType}
-	case *schema.NonNull:
+	case *common.NonNull:
 		return &typeResolver{t.OfType}
 	default:
 		return nil

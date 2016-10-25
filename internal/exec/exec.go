@@ -187,6 +187,7 @@ var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
 var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
 func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema.Field, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (map[string]*fieldExec, error) {
+	methodHasReceiver := resolverType.Kind() != reflect.Interface
 	fieldExecs := make(map[string]*fieldExec)
 	for name, f := range fields {
 		methodIndex := findMethod(resolverType, name)
@@ -195,60 +196,68 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 
 		m := resolverType.Method(methodIndex)
-		in := make([]reflect.Type, m.Type.NumIn())
-		for i := range in {
-			in[i] = m.Type.In(i)
-		}
-		if resolverType.Kind() != reflect.Interface {
-			in = in[1:] // first parameter is receiver
-		}
-
-		hasContext := len(in) > 0 && in[0] == contextType
-		if hasContext {
-			in = in[1:]
-		}
-
-		var argsExec *inputObjectExec
-		if len(f.Args.InputFields) > 0 {
-			if len(in) == 0 {
-				return nil, fmt.Errorf("method %q of %s is missing a parameter for field arguments", m.Name, resolverType)
-			}
-			var err error
-			argsExec, err = makeInputObjectExec(in[0], &f.Args)
-			if err != nil {
-				return nil, fmt.Errorf("method %q of %s: %s", m.Name, resolverType, err)
-			}
-			in = in[1:]
-		}
-
-		if len(in) > 0 {
-			return nil, fmt.Errorf("method %q of %s has too many parameters", m.Name, resolverType)
-		}
-
-		if m.Type.NumOut() > 2 {
-			return nil, fmt.Errorf("method %q of %s has too many return values", m.Name, resolverType)
-		}
-
-		hasError := m.Type.NumOut() == 2
-		if hasError {
-			if m.Type.Out(1) != errorType {
-				return nil, fmt.Errorf(`method %q of %s must have "error" as its second return value`, m.Name, resolverType)
-			}
-		}
-
-		fe := &fieldExec{
-			field:       f,
-			methodIndex: methodIndex,
-			hasContext:  hasContext,
-			argsExec:    argsExec,
-			hasError:    hasError,
-		}
-		if err := makeExec(&fe.valueExec, s, f.Type, m.Type.Out(0), typeRefMap); err != nil {
-			return nil, err
+		fe, err := makeFieldExec(s, f, m, methodIndex, methodHasReceiver, typeRefMap)
+		if err != nil {
+			return nil, fmt.Errorf("method %q of %s: %s", m.Name, resolverType, err)
 		}
 		fieldExecs[name] = fe
 	}
 	return fieldExecs, nil
+}
+
+func makeFieldExec(s *schema.Schema, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool, typeRefMap map[typeRefMapKey]*typeRef) (*fieldExec, error) {
+	in := make([]reflect.Type, m.Type.NumIn())
+	for i := range in {
+		in[i] = m.Type.In(i)
+	}
+	if methodHasReceiver {
+		in = in[1:] // first parameter is receiver
+	}
+
+	hasContext := len(in) > 0 && in[0] == contextType
+	if hasContext {
+		in = in[1:]
+	}
+
+	var argsExec *inputObjectExec
+	if len(f.Args.InputFields) > 0 {
+		if len(in) == 0 {
+			return nil, fmt.Errorf("must have parameter for field arguments")
+		}
+		var err error
+		argsExec, err = makeInputObjectExec(in[0], &f.Args)
+		if err != nil {
+			return nil, err
+		}
+		in = in[1:]
+	}
+
+	if len(in) > 0 {
+		return nil, fmt.Errorf("too many parameters")
+	}
+
+	if m.Type.NumOut() > 2 {
+		return nil, fmt.Errorf("too many return values")
+	}
+
+	hasError := m.Type.NumOut() == 2
+	if hasError {
+		if m.Type.Out(1) != errorType {
+			return nil, fmt.Errorf(`must have "error" as its second return value`)
+		}
+	}
+
+	fe := &fieldExec{
+		field:       f,
+		methodIndex: methodIndex,
+		hasContext:  hasContext,
+		argsExec:    argsExec,
+		hasError:    hasError,
+	}
+	if err := makeExec(&fe.valueExec, s, f.Type, m.Type.Out(0), typeRefMap); err != nil {
+		return nil, err
+	}
+	return fe, nil
 }
 
 func makeInputObjectExec(typ reflect.Type, obj *schema.InputObject) (*inputObjectExec, error) {

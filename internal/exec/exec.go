@@ -436,7 +436,7 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 						addResult(f.Alias, introspectSchema(r, f.SelSet))
 
 					case "__type":
-						addResult(f.Alias, introspectType(r, execValue(r, f.Arguments["name"]).(string), f.SelSet))
+						addResult(f.Alias, introspectType(r, f.Arguments["name"].Eval(r.vars).(string), f.SelSet))
 
 					default:
 						fe, ok := e.fields[f.Name]
@@ -529,7 +529,7 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 				}
 				continue
 			}
-			v := execValue(r, value)
+			v := value.Eval(r.vars)
 			argsValue.FieldByIndex(arg.fieldIndex).Set(reflect.ValueOf(v))
 		}
 		in = append(in, argsValue)
@@ -553,27 +553,16 @@ type typeAssertExec struct {
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {
 	if skip, ok := d["skip"]; ok {
-		if execValue(r, skip.Arguments["if"]).(bool) {
+		if skip.Arguments["if"].Eval(r.vars).(bool) {
 			return true
 		}
 	}
 	if include, ok := d["include"]; ok {
-		if !execValue(r, include.Arguments["if"]).(bool) {
+		if !include.Arguments["if"].Eval(r.vars).(bool) {
 			return true
 		}
 	}
 	return false
-}
-
-func execValue(r *request, v query.Value) interface{} {
-	switch v := v.(type) {
-	case *query.Variable:
-		return r.vars[v.Name]
-	case *query.Literal:
-		return v.Value
-	default:
-		panic("invalid value")
-	}
 }
 
 func checkType(st common.Type, rt reflect.Type) bool {

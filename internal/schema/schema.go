@@ -369,30 +369,7 @@ func parseInputValue(l *lexer.Lexer) *InputValue {
 	p.Type = common.ParseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
-		p.Default = parseValue(l)
+		p.Default = common.ParseValue(l, true).Eval(nil)
 	}
 	return p
-}
-
-func parseValue(l *lexer.Lexer) interface{} {
-	switch l.Peek() {
-	case scanner.Int:
-		return l.ConsumeInt()
-	case scanner.Float:
-		return l.ConsumeFloat()
-	case scanner.String:
-		return l.ConsumeString()
-	case scanner.Ident:
-		switch ident := l.ConsumeIdent(); ident {
-		case "true":
-			return true
-		case "false":
-			return false
-		default:
-			return ident
-		}
-	default:
-		l.SyntaxError("invalid value")
-		panic("unreachable")
-	}
 }

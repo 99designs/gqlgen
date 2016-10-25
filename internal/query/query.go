@@ -55,14 +55,14 @@ type Selection interface {
 type Field struct {
 	Alias      string
 	Name       string
-	Arguments  map[string]Value
+	Arguments  map[string]common.Value
 	Directives map[string]*Directive
 	SelSet     *SelectionSet
 }
 
 type Directive struct {
 	Name      string
-	Arguments map[string]Value
+	Arguments map[string]common.Value
 }
 
 type FragmentSpread struct {
@@ -78,21 +78,6 @@ type InlineFragment struct {
 func (Field) isSelection()          {}
 func (FragmentSpread) isSelection() {}
 func (InlineFragment) isSelection() {}
-
-type Value interface {
-	isValue()
-}
-
-type Variable struct {
-	Name string
-}
-
-type Literal struct {
-	Value interface{}
-}
-
-func (Variable) isValue() {}
-func (Literal) isValue()  {}
 
 func Parse(queryString string) (doc *Document, err *errors.GraphQLError) {
 	sc := &scanner.Scanner{
@@ -214,8 +199,8 @@ func parseField(l *lexer.Lexer) *Field {
 	return f
 }
 
-func parseArguments(l *lexer.Lexer) map[string]Value {
-	args := make(map[string]Value)
+func parseArguments(l *lexer.Lexer) map[string]common.Value {
+	args := make(map[string]common.Value)
 	l.ConsumeToken('(')
 	if l.Peek() != ')' {
 		name, value := parseArgument(l)
@@ -269,35 +254,9 @@ func parseSpread(l *lexer.Lexer) Selection {
 	return fs
 }
 
-func parseArgument(l *lexer.Lexer) (string, Value) {
+func parseArgument(l *lexer.Lexer) (string, common.Value) {
 	name := l.ConsumeIdent()
 	l.ConsumeToken(':')
-	value := parseValue(l)
+	value := common.ParseValue(l, false)
 	return name, value
-}
-
-func parseValue(l *lexer.Lexer) Value {
-	switch l.Peek() {
-	case '$':
-		l.ConsumeToken('$')
-		return &Variable{Name: l.ConsumeIdent()}
-	case scanner.Int:
-		return &Literal{Value: l.ConsumeInt()}
-	case scanner.Float:
-		return &Literal{Value: l.ConsumeFloat()}
-	case scanner.String:
-		return &Literal{Value: l.ConsumeString()}
-	case scanner.Ident:
-		switch ident := l.ConsumeIdent(); ident {
-		case "true":
-			return &Literal{Value: true}
-		case "false":
-			return &Literal{Value: false}
-		default:
-			return &Literal{Value: ident}
-		}
-	default:
-		l.SyntaxError("invalid value")
-		panic("unreachable")
-	}
 }

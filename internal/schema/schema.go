@@ -77,10 +77,9 @@ func (t *Enum) TypeName() string        { return t.Name }
 func (t *InputObject) TypeName() string { return t.Name }
 
 type Field struct {
-	Name     string
-	Args     map[string]*InputValue
-	ArgOrder []string
-	Type     common.Type
+	Name string
+	Args InputObject
+	Type common.Type
 }
 
 type InputValue struct {
@@ -204,12 +203,7 @@ func resolveField(s *Schema, f *Field) *errors.GraphQLError {
 	if err != nil {
 		return err
 	}
-	for _, arg := range f.Args {
-		arg.Type, err = resolveTypeName(s, arg.Type)
-		if err != nil {
-			return err
-		}
-	}
+	resolveType(s, &f.Args)
 	return nil
 }
 
@@ -345,12 +339,12 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 		f := &Field{}
 		f.Name = l.ConsumeIdent()
 		if l.Peek() == '(' {
-			f.Args = make(map[string]*InputValue)
+			f.Args.InputFields = make(map[string]*InputValue)
 			l.ConsumeToken('(')
 			for l.Peek() != ')' {
 				v := parseInputValue(l)
-				f.Args[v.Name] = v
-				f.ArgOrder = append(f.ArgOrder, v.Name)
+				f.Args.InputFields[v.Name] = v
+				f.Args.InputFieldOrder = append(f.Args.InputFieldOrder, v.Name)
 			}
 			l.ConsumeToken(')')
 		}

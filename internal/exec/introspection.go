@@ -371,9 +371,9 @@ func (r *fieldResolver) Description() *string {
 }
 
 func (r *fieldResolver) Args() []*inputValueResolver {
-	l := make([]*inputValueResolver, len(r.field.ArgOrder))
-	for i, name := range r.field.ArgOrder {
-		l[i] = &inputValueResolver{r.field.Args[name]}
+	l := make([]*inputValueResolver, len(r.field.Args.InputFieldOrder))
+	for i, name := range r.field.Args.InputFieldOrder {
+		l[i] = &inputValueResolver{r.field.Args.InputFields[name]}
 	}
 	return l
 }

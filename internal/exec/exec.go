@@ -208,36 +208,17 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			in = in[1:]
 		}
 
-		var argsType reflect.Type
-		var args []*argExec
-		if len(f.Args) > 0 {
+		var argsExec *inputObjectExec
+		if len(f.Args.InputFields) > 0 {
 			if len(in) == 0 {
 				return nil, fmt.Errorf("method %q of %s is missing a parameter for field arguments", m.Name, resolverType)
 			}
-			argsType = in[0]
-			in = in[1:]
-
-			for _, arg := range f.Args {
-				ae := &argExec{
-					name: arg.Name,
-					typ:  arg.Type,
-				}
-
-				sf, ok := argsType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, arg.Name) })
-				if !ok {
-					return nil, fmt.Errorf("method %q of %s is missing argument %q", m.Name, resolverType, arg.Name)
-				}
-				ae.fieldIndex = sf.Index
-				if !checkType(arg.Type, sf.Type) {
-					return nil, fmt.Errorf("method %q of %s has argument %q with wrong type", m.Name, resolverType, arg.Name)
-				}
-
-				if arg.Default != nil {
-					ae.defaultVal = reflect.ValueOf(arg.Default)
-				}
-
-				args = append(args, ae)
+			var err error
+			argsExec, err = makeInputObjectExec(in[0], &f.Args)
+			if err != nil {
+				return nil, fmt.Errorf("method %q of %s: %s", m.Name, resolverType, err)
 			}
+			in = in[1:]
 		}
 
 		if len(in) > 0 {
@@ -259,8 +240,7 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 			field:       f,
 			methodIndex: methodIndex,
 			hasContext:  hasContext,
-			args:        args,
-			argsType:    argsType,
+			argsExec:    argsExec,
 			hasError:    hasError,
 		}
 		if err := makeExec(&fe.valueExec, s, f.Type, m.Type.Out(0), typeRefMap); err != nil {
@@ -269,6 +249,36 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		fieldExecs[name] = fe
 	}
 	return fieldExecs, nil
+}
+
+func makeInputObjectExec(typ reflect.Type, obj *schema.InputObject) (*inputObjectExec, error) {
+	e := &inputObjectExec{
+		typ: typ,
+	}
+
+	for _, arg := range obj.InputFields {
+		fe := &inputFieldExec{
+			name: arg.Name,
+			typ:  arg.Type,
+		}
+
+		sf, ok := e.typ.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, arg.Name) })
+		if !ok {
+			return nil, fmt.Errorf("missing argument %q", arg.Name)
+		}
+		fe.fieldIndex = sf.Index
+		if !checkType(arg.Type, sf.Type) {
+			return nil, fmt.Errorf("argument %q with wrong type", arg.Name)
+		}
+
+		if arg.Default != nil {
+			fe.defaultVal = reflect.ValueOf(arg.Default)
+		}
+
+		e.fields = append(e.fields, fe)
+	}
+
+	return e, nil
 }
 
 func makeTypeAssertions(s *schema.Schema, typeName string, impls []*schema.Object, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (map[string]*typeAssertExec, error) {
@@ -499,17 +509,9 @@ type fieldExec struct {
 	field       *schema.Field
 	methodIndex int
 	hasContext  bool
-	args        []*argExec
-	argsType    reflect.Type
+	argsExec    *inputObjectExec
 	hasError    bool
 	valueExec   iExec
-}
-
-type argExec struct {
-	name       string
-	typ        common.Type
-	fieldIndex []int
-	defaultVal reflect.Value
 }
 
 func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
@@ -519,20 +521,12 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 		in = append(in, reflect.ValueOf(r.ctx))
 	}
 
-	if len(e.args) != 0 {
-		argsValue := reflect.New(e.argsType).Elem()
-		for _, arg := range e.args {
-			value, ok := f.Arguments[arg.name]
-			if !ok {
-				if arg.defaultVal.IsValid() {
-					argsValue.FieldByIndex(arg.fieldIndex).Set(arg.defaultVal)
-				}
-				continue
-			}
-			v := value.Eval(r.vars)
-			argsValue.FieldByIndex(arg.fieldIndex).Set(reflect.ValueOf(v))
+	if e.argsExec != nil {
+		values := make(map[string]interface{})
+		for name, arg := range f.Arguments {
+			values[name] = arg.Eval(r.vars)
 		}
-		in = append(in, argsValue)
+		in = append(in, e.argsExec.eval(values))
 	}
 
 	m := resolver.Method(e.methodIndex)
@@ -549,6 +543,33 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 type typeAssertExec struct {
 	methodIndex int
 	typeExec    iExec
+}
+
+type inputObjectExec struct {
+	typ    reflect.Type
+	fields []*inputFieldExec
+}
+
+type inputFieldExec struct {
+	name       string
+	typ        common.Type
+	fieldIndex []int
+	defaultVal reflect.Value
+}
+
+func (e *inputObjectExec) eval(values map[string]interface{}) reflect.Value {
+	v := reflect.New(e.typ).Elem()
+	for _, f := range e.fields {
+		value, ok := values[f.name]
+		if !ok {
+			if f.defaultVal.IsValid() {
+				v.FieldByIndex(f.fieldIndex).Set(f.defaultVal)
+			}
+			continue
+		}
+		v.FieldByIndex(f.fieldIndex).Set(reflect.ValueOf(value))
+	}
+	return v
 }
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {

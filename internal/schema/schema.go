@@ -215,7 +215,9 @@ func resolveTypeName(s *Schema, t common.Type) (common.Type, *errors.GraphQLErro
 		}
 		return refT, nil
 	}
-	resolveType(s, t)
+	if err := resolveType(s, t); err != nil {
+		return nil, err
+	}
 	return t, nil
 }
 

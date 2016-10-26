@@ -17,9 +17,9 @@ var Schema = `
 	}
 	# The query type, represents all of the entry points into our object graph
 	type Query {
-		hero(episode: Episode): Character
+		hero(episode: Episode = NEWHOPE): Character
 		reviews(episode: Episode!): [Review]!
-		search(text: String): [SearchResult]!
+		search(text: String!): [SearchResult]!
 		character(id: ID!): Character
 		droid(id: ID!): Droid
 		human(id: ID!): Human
@@ -27,7 +27,7 @@ var Schema = `
 	}
 	# The mutation type, represents all updates we can make to our data
 	type Mutation {
-		createReview(episode: Episode, review: ReviewInput!): Review
+		createReview(episode: Episode!, review: ReviewInput!): Review
 	}
 	# The episodes in the Star Wars trilogy
 	enum Episode {
@@ -356,15 +356,15 @@ func (r *Resolver) CreateReview(args *struct {
 }) *reviewResolver {
 	review := &review{
 		stars:      args.Review.Stars,
-		commentary: &args.Review.Commentary,
+		commentary: args.Review.Commentary,
 	}
 	reviews[args.Episode] = append(reviews[args.Episode], review)
 	return &reviewResolver{review}
 }
 
 type friendsConenctionArgs struct {
-	First int32
-	After string
+	First *int32
+	After *string
 }
 
 type characterResolver interface {
@@ -554,8 +554,8 @@ type friendsConnectionResolver struct {
 
 func newFriendsConnectionResolver(ids []string, args *friendsConenctionArgs) (*friendsConnectionResolver, error) {
 	from := 0
-	if args.After != "" {
-		b, err := base64.StdEncoding.DecodeString(args.After)
+	if args.After != nil {
+		b, err := base64.StdEncoding.DecodeString(*args.After)
 		if err != nil {
 			return nil, err
 		}
@@ -567,8 +567,8 @@ func newFriendsConnectionResolver(ids []string, args *friendsConenctionArgs) (*f
 	}
 
 	to := len(ids)
-	if args.First != 0 {
-		to = from + int(args.First)
+	if args.First != nil {
+		to = from + int(*args.First)
 	}
 	if to > len(ids)-from {
 		to = len(ids) - from
@@ -645,5 +645,5 @@ func (r *pageInfoResolver) HasNextPage() bool {
 
 type reviewInput struct {
 	Stars      int32
-	Commentary string
+	Commentary *string
 }

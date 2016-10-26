@@ -280,21 +280,42 @@ func makeInputObjectExec(obj *schema.InputObject, typ reflect.Type) (*inputObjec
 		fe.fieldIndex = sf.Index
 
 		ft := f.Type
+		nonNull := (f.Default != nil)
 		if nn, ok := ft.(*common.NonNull); ok {
 			ft = nn.OfType
+			nonNull = true
 		}
-		typeErr := fmt.Errorf("argument %q with wrong type", f.Name)
+		expectType := func(got, want reflect.Type) error {
+			if got != want {
+				return fmt.Errorf("%q has wrong type, expected %s", sf.Name, want)
+			}
+			return nil
+		}
 		switch ft := ft.(type) {
 		case *schema.Scalar:
-			if sf.Type != scalarTypes[ft.Name] {
-				return nil, typeErr
+			want := scalarTypes[ft.Name]
+			if !nonNull {
+				want = reflect.PtrTo(want)
 			}
-			fe.exec = &scalarInputExec{ft}
+			if err := expectType(sf.Type, want); err != nil {
+				return nil, err
+			}
+			fe.exec = &scalarInputExec{
+				scalar:  ft,
+				nonNull: nonNull,
+			}
 		case *schema.Enum:
-			if sf.Type != scalarTypes["String"] {
-				return nil, typeErr
+			want := scalarTypes["String"]
+			if !nonNull {
+				want = reflect.PtrTo(want)
 			}
-			fe.exec = &scalarInputExec{&schema.Scalar{Name: "String"}}
+			if err := expectType(sf.Type, want); err != nil {
+				return nil, err
+			}
+			fe.exec = &scalarInputExec{
+				scalar:  &schema.Scalar{Name: "String"},
+				nonNull: nonNull,
+			}
 		case *schema.InputObject:
 			e, err := makeInputObjectExec(ft, sf.Type)
 			if err != nil {
@@ -621,16 +642,24 @@ func (e *inputObjectExec) eval(value interface{}) reflect.Value {
 }
 
 type scalarInputExec struct {
-	scalar *schema.Scalar
+	scalar  *schema.Scalar
+	nonNull bool
 }
 
 func (e *scalarInputExec) eval(value interface{}) reflect.Value {
+	var v reflect.Value
 	switch e.scalar.Name {
 	case "Int":
-		return reflect.ValueOf(int32(value.(int)))
+		v = reflect.ValueOf(int32(value.(int)))
 	default:
-		return reflect.ValueOf(value)
+		v = reflect.ValueOf(value)
 	}
+	if !e.nonNull {
+		p := reflect.New(v.Type())
+		p.Elem().Set(v)
+		return p
+	}
+	return v
 }
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {

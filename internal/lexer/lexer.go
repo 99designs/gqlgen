@@ -71,11 +71,11 @@ func (l *Lexer) ConsumeKeyword(keyword string) {
 	l.Consume()
 }
 
-func (l *Lexer) ConsumeInt() int32 {
+func (l *Lexer) ConsumeInt() int {
 	text := l.sc.TokenText()
 	l.ConsumeToken(scanner.Int)
 	value, _ := strconv.Atoi(text)
-	return int32(value)
+	return value
 }
 
 func (l *Lexer) ConsumeFloat() float64 {

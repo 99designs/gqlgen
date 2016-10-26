@@ -225,7 +225,7 @@ func makeFieldExec(s *schema.Schema, f *schema.Field, m reflect.Method, methodIn
 			return nil, fmt.Errorf("must have parameter for field arguments")
 		}
 		var err error
-		argsExec, err = makeInputObjectExec(in[0], &f.Args)
+		argsExec, err = makeInputObjectExec(&f.Args, in[0])
 		if err != nil {
 			return nil, err
 		}
@@ -260,34 +260,63 @@ func makeFieldExec(s *schema.Schema, f *schema.Field, m reflect.Method, methodIn
 	return fe, nil
 }
 
-func makeInputObjectExec(typ reflect.Type, obj *schema.InputObject) (*inputObjectExec, error) {
-	e := &inputObjectExec{
-		typ: typ,
+func makeInputObjectExec(obj *schema.InputObject, typ reflect.Type) (*inputObjectExec, error) {
+	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
+		return nil, fmt.Errorf("expected pointer to struct, got %s", typ)
 	}
+	structType := typ.Elem()
 
-	for _, arg := range obj.InputFields {
+	var fields []*inputFieldExec
+	defaultStruct := reflect.New(structType).Elem()
+	for _, f := range obj.InputFields {
 		fe := &inputFieldExec{
-			name: arg.Name,
-			typ:  arg.Type,
+			name: f.Name,
 		}
 
-		sf, ok := e.typ.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, arg.Name) })
+		sf, ok := structType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, f.Name) })
 		if !ok {
-			return nil, fmt.Errorf("missing argument %q", arg.Name)
+			return nil, fmt.Errorf("missing argument %q", f.Name)
 		}
 		fe.fieldIndex = sf.Index
-		if !checkType(arg.Type, sf.Type) {
-			return nil, fmt.Errorf("argument %q with wrong type", arg.Name)
+
+		ft := f.Type
+		if nn, ok := ft.(*common.NonNull); ok {
+			ft = nn.OfType
+		}
+		typeErr := fmt.Errorf("argument %q with wrong type", f.Name)
+		switch ft := ft.(type) {
+		case *schema.Scalar:
+			if sf.Type != scalarTypes[ft.Name] {
+				return nil, typeErr
+			}
+			fe.exec = &scalarInputExec{ft}
+		case *schema.Enum:
+			if sf.Type != scalarTypes["String"] {
+				return nil, typeErr
+			}
+			fe.exec = &scalarInputExec{&schema.Scalar{Name: "String"}}
+		case *schema.InputObject:
+			e, err := makeInputObjectExec(ft, sf.Type)
+			if err != nil {
+				return nil, err
+			}
+			fe.exec = e
+		default:
+			panic("TODO")
 		}
 
-		if arg.Default != nil {
-			fe.defaultVal = reflect.ValueOf(arg.Default)
+		if f.Default != nil {
+			defaultStruct.FieldByIndex(fe.fieldIndex).Set(fe.exec.eval(f.Default))
 		}
 
-		e.fields = append(e.fields, fe)
+		fields = append(fields, fe)
 	}
 
-	return e, nil
+	return &inputObjectExec{
+		structType:    structType,
+		defaultStruct: defaultStruct,
+		fields:        fields,
+	}, nil
 }
 
 func makeTypeAssertions(s *schema.Schema, typeName string, impls []*schema.Object, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (map[string]*typeAssertExec, error) {
@@ -555,30 +584,44 @@ type typeAssertExec struct {
 }
 
 type inputObjectExec struct {
-	typ    reflect.Type
-	fields []*inputFieldExec
+	structType    reflect.Type
+	defaultStruct reflect.Value
+	fields        []*inputFieldExec
+}
+
+type inputExec interface {
+	eval(value interface{}) reflect.Value
 }
 
 type inputFieldExec struct {
 	name       string
-	typ        common.Type
 	fieldIndex []int
-	defaultVal reflect.Value
+	exec       inputExec
 }
 
-func (e *inputObjectExec) eval(values map[string]interface{}) reflect.Value {
-	v := reflect.New(e.typ).Elem()
+func (e *inputObjectExec) eval(value interface{}) reflect.Value {
+	values := value.(map[string]interface{})
+	v := reflect.New(e.structType)
+	v.Elem().Set(e.defaultStruct)
 	for _, f := range e.fields {
-		value, ok := values[f.name]
-		if !ok {
-			if f.defaultVal.IsValid() {
-				v.FieldByIndex(f.fieldIndex).Set(f.defaultVal)
-			}
-			continue
+		if value, ok := values[f.name]; ok {
+			v.Elem().FieldByIndex(f.fieldIndex).Set(f.exec.eval(value))
 		}
-		v.FieldByIndex(f.fieldIndex).Set(reflect.ValueOf(value))
 	}
 	return v
+}
+
+type scalarInputExec struct {
+	scalar *schema.Scalar
+}
+
+func (e *scalarInputExec) eval(value interface{}) reflect.Value {
+	switch e.scalar.Name {
+	case "Int":
+		return reflect.ValueOf(int32(value.(int)))
+	default:
+		return reflect.ValueOf(value)
+	}
 }
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {
@@ -593,19 +636,4 @@ func skipByDirective(r *request, d map[string]*query.Directive) bool {
 		}
 	}
 	return false
-}
-
-func checkType(st common.Type, rt reflect.Type) bool {
-	if nn, ok := st.(*common.NonNull); ok {
-		st = nn.OfType
-	}
-
-	switch st := st.(type) {
-	case *schema.Scalar:
-		return rt == scalarTypes[st.Name]
-	case *schema.Enum:
-		return rt == scalarTypes["String"]
-	default:
-		return true
-	}
 }

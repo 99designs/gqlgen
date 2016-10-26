@@ -269,7 +269,7 @@ func (r *typeResolver) Description() *string {
 	return nil
 }
 
-func (r *typeResolver) Fields(args struct{ IncludeDeprecated bool }) *[]*fieldResolver {
+func (r *typeResolver) Fields(args *struct{ IncludeDeprecated bool }) *[]*fieldResolver {
 	var fields map[string]*schema.Field
 	var fieldOrder []string
 	switch t := r.typ.(type) {
@@ -321,7 +321,7 @@ func (r *typeResolver) PossibleTypes() *[]*typeResolver {
 	return &l
 }
 
-func (r *typeResolver) EnumValues(args struct{ IncludeDeprecated bool }) *[]*enumValueResolver {
+func (r *typeResolver) EnumValues(args *struct{ IncludeDeprecated bool }) *[]*enumValueResolver {
 	t, ok := r.typ.(*schema.Enum)
 	if !ok {
 		return nil

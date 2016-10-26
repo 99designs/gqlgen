@@ -18,8 +18,8 @@ var Schema = `
 	# The query type, represents all of the entry points into our object graph
 	type Query {
 		hero(episode: Episode): Character
-		reviews(episode: Episode!): [Review]
-		search(text: String): [SearchResult]
+		reviews(episode: Episode!): [Review]!
+		search(text: String): [SearchResult]!
 		character(id: ID!): Character
 		droid(id: ID!): Droid
 		human(id: ID!): Human
@@ -275,20 +275,31 @@ func init() {
 	}
 }
 
+type review struct {
+	stars      int32
+	commentary *string
+}
+
+var reviews = make(map[string][]*review)
+
 type Resolver struct{}
 
-func (r *Resolver) Hero(args struct{ Episode string }) characterResolver {
+func (r *Resolver) Hero(args *struct{ Episode string }) characterResolver {
 	if args.Episode == "EMPIRE" {
 		return &humanResolver{h: humanData["1000"]}
 	}
 	return &droidResolver{d: droidData["2001"]}
 }
 
-func (r *Resolver) Reviews(args struct{ Episode string }) *[]*reviewResolver {
-	panic("TODO")
+func (r *Resolver) Reviews(args *struct{ Episode string }) []*reviewResolver {
+	var l []*reviewResolver
+	for _, review := range reviews[args.Episode] {
+		l = append(l, &reviewResolver{review})
+	}
+	return l
 }
 
-func (r *Resolver) Search(args struct{ Text string }) *[]searchResultResolver {
+func (r *Resolver) Search(args *struct{ Text string }) []searchResultResolver {
 	var l []searchResultResolver
 	for _, h := range humans {
 		if strings.Contains(h.Name, args.Text) {
@@ -305,10 +316,10 @@ func (r *Resolver) Search(args struct{ Text string }) *[]searchResultResolver {
 			l = append(l, &starshipResolver{s: s})
 		}
 	}
-	return &l
+	return l
 }
 
-func (r *Resolver) Character(args struct{ ID string }) characterResolver {
+func (r *Resolver) Character(args *struct{ ID string }) characterResolver {
 	if h := humanData[args.ID]; h != nil {
 		return &humanResolver{h: h}
 	}
@@ -318,32 +329,37 @@ func (r *Resolver) Character(args struct{ ID string }) characterResolver {
 	return nil
 }
 
-func (r *Resolver) Human(args struct{ ID string }) *humanResolver {
+func (r *Resolver) Human(args *struct{ ID string }) *humanResolver {
 	if h := humanData[args.ID]; h != nil {
 		return &humanResolver{h: h}
 	}
 	return nil
 }
 
-func (r *Resolver) Droid(args struct{ ID string }) *droidResolver {
+func (r *Resolver) Droid(args *struct{ ID string }) *droidResolver {
 	if d := droidData[args.ID]; d != nil {
 		return &droidResolver{d: d}
 	}
 	return nil
 }
 
-func (r *Resolver) Starship(args struct{ ID string }) *starshipResolver {
+func (r *Resolver) Starship(args *struct{ ID string }) *starshipResolver {
 	if s := starshipData[args.ID]; s != nil {
 		return &starshipResolver{s: s}
 	}
 	return nil
 }
 
-func (r *Resolver) CreateReview(args struct {
+func (r *Resolver) CreateReview(args *struct {
 	Episode string
 	Review  *reviewInput
 }) *reviewResolver {
-	panic("TODO")
+	review := &review{
+		stars:      args.Review.Stars,
+		commentary: &args.Review.Commentary,
+	}
+	reviews[args.Episode] = append(reviews[args.Episode], review)
+	return &reviewResolver{review}
 }
 
 type friendsConenctionArgs struct {
@@ -355,7 +371,7 @@ type characterResolver interface {
 	ID() string
 	Name() string
 	Friends() *[]characterResolver
-	FriendsConnection(friendsConenctionArgs) (*friendsConnectionResolver, error)
+	FriendsConnection(*friendsConenctionArgs) (*friendsConnectionResolver, error)
 	AppearsIn() []string
 	ToHuman() (*humanResolver, bool)
 	ToDroid() (*droidResolver, bool)
@@ -388,7 +404,7 @@ func (r *humanResolver) Name() string {
 	return r.h.Name
 }
 
-func (r *humanResolver) Height(args struct{ Unit string }) float64 {
+func (r *humanResolver) Height(args *struct{ Unit string }) float64 {
 	return convertLength(r.h.Height, args.Unit)
 }
 
@@ -404,7 +420,7 @@ func (r *humanResolver) Friends() *[]characterResolver {
 	return resolveCharacters(r.h.Friends)
 }
 
-func (r *humanResolver) FriendsConnection(args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+func (r *humanResolver) FriendsConnection(args *friendsConenctionArgs) (*friendsConnectionResolver, error) {
 	return newFriendsConnectionResolver(r.h.Friends, args)
 }
 
@@ -441,7 +457,7 @@ func (r *droidResolver) Friends() *[]characterResolver {
 	return resolveCharacters(r.d.Friends)
 }
 
-func (r *droidResolver) FriendsConnection(args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+func (r *droidResolver) FriendsConnection(args *friendsConenctionArgs) (*friendsConnectionResolver, error) {
 	return newFriendsConnectionResolver(r.d.Friends, args)
 }
 
@@ -473,7 +489,7 @@ func (r *starshipResolver) Name() string {
 	return r.s.Name
 }
 
-func (r *starshipResolver) Length(args struct{ Unit string }) float64 {
+func (r *starshipResolver) Length(args *struct{ Unit string }) float64 {
 	return convertLength(r.s.Length, args.Unit)
 }
 
@@ -519,14 +535,15 @@ func resolveCharacter(id string) characterResolver {
 }
 
 type reviewResolver struct {
+	r *review
 }
 
 func (r *reviewResolver) Stars() int32 {
-	panic("TODO")
+	return r.r.stars
 }
 
 func (r *reviewResolver) Commentary() *string {
-	panic("TODO")
+	return r.r.commentary
 }
 
 type friendsConnectionResolver struct {
@@ -535,7 +552,7 @@ type friendsConnectionResolver struct {
 	to   int
 }
 
-func newFriendsConnectionResolver(ids []string, args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+func newFriendsConnectionResolver(ids []string, args *friendsConenctionArgs) (*friendsConnectionResolver, error) {
 	from := 0
 	if args.After != "" {
 		b, err := base64.StdEncoding.DecodeString(args.After)

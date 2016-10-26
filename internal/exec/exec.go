@@ -391,19 +391,19 @@ func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map
 
 	data := func() interface{} {
 		defer r.handlePanic()
-		return opExec.exec(r, op.SelSet, e.resolver)
+		return opExec.exec(r, op.SelSet, e.resolver, op.Type == query.Mutation)
 	}()
 
 	return data, r.errs
 }
 
 type iExec interface {
-	exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{}
+	exec(r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{}
 }
 
 type scalarExec struct{}
 
-func (e *scalarExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+func (e *scalarExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{} {
 	return resolver.Interface()
 }
 
@@ -412,7 +412,7 @@ type listExec struct {
 	nonNull bool
 }
 
-func (e *listExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+func (e *listExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{} {
 	if !e.nonNull {
 		if resolver.IsNil() {
 			return nil
@@ -426,7 +426,7 @@ func (e *listExec) exec(r *request, selSet *query.SelectionSet, resolver reflect
 		go func(i int) {
 			defer wg.Done()
 			defer r.handlePanic()
-			l[i] = e.elem.exec(r, selSet, resolver.Index(i))
+			l[i] = e.elem.exec(r, selSet, resolver.Index(i), false)
 		}(i)
 	}
 	wg.Wait()
@@ -442,7 +442,7 @@ type objectExec struct {
 
 type addResultFn func(key string, value interface{})
 
-func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{} {
 	if resolver.IsNil() {
 		if e.nonNull {
 			r.addError(errors.Errorf("got nil for non-null %q", e.name))
@@ -456,20 +456,33 @@ func (e *objectExec) exec(r *request, selSet *query.SelectionSet, resolver refle
 		results[key] = value
 		mu.Unlock()
 	}
-	e.execSelectionSet(r, selSet, resolver, addResult)
+	e.execSelectionSet(r, selSet, resolver, addResult, serially)
 	return results
 }
 
-func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, resolver reflect.Value, addResult addResultFn) {
+func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, resolver reflect.Value, addResult addResultFn, serially bool) {
 	var wg sync.WaitGroup
 	for _, sel := range selSet.Selections {
+		execSel := func(f func()) {
+			if serially {
+				defer r.handlePanic()
+				f()
+				return
+			}
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				defer r.handlePanic()
+				f()
+			}()
+		}
+
 		switch sel := sel.(type) {
 		case *query.Field:
 			if !skipByDirective(r, sel.Directives) {
-				wg.Add(1)
-				go func(f *query.Field) {
-					defer wg.Done()
-					defer r.handlePanic()
+				f := sel
+				execSel(func() {
 					switch f.Name {
 					case "__typename":
 						for name, a := range e.typeAssertions {
@@ -493,31 +506,27 @@ func (e *objectExec) execSelectionSet(r *request, selSet *query.SelectionSet, re
 						}
 						fe.execField(r, f, resolver, addResult)
 					}
-				}(sel)
+				})
 			}
 
 		case *query.FragmentSpread:
 			if !skipByDirective(r, sel.Directives) {
-				wg.Add(1)
-				go func(fs *query.FragmentSpread) {
-					defer wg.Done()
-					defer r.handlePanic()
+				fs := sel
+				execSel(func() {
 					frag, ok := r.doc.Fragments[fs.Name]
 					if !ok {
 						panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
 					}
 					e.execFragment(r, &frag.Fragment, resolver, addResult)
-				}(sel)
+				})
 			}
 
 		case *query.InlineFragment:
 			if !skipByDirective(r, sel.Directives) {
-				wg.Add(1)
-				go func(frag *query.InlineFragment) {
-					defer wg.Done()
-					defer r.handlePanic()
+				frag := sel
+				execSel(func() {
 					e.execFragment(r, &frag.Fragment, resolver, addResult)
-				}(sel)
+				})
 			}
 
 		default:
@@ -537,10 +546,10 @@ func (e *objectExec) execFragment(r *request, frag *query.Fragment, resolver ref
 		if !out[1].Bool() {
 			return
 		}
-		a.typeExec.(*objectExec).execSelectionSet(r, frag.SelSet, out[0], addResult)
+		a.typeExec.(*objectExec).execSelectionSet(r, frag.SelSet, out[0], addResult, false)
 		return
 	}
-	e.execSelectionSet(r, frag.SelSet, resolver, addResult)
+	e.execSelectionSet(r, frag.SelSet, resolver, addResult, false)
 }
 
 type fieldExec struct {
@@ -575,7 +584,7 @@ func (e *fieldExec) execField(r *request, f *query.Field, resolver reflect.Value
 		addResult(f.Alias, nil) // TODO handle non-nil
 		return
 	}
-	addResult(f.Alias, e.valueExec.exec(r, f.SelSet, out[0]))
+	addResult(f.Alias, e.valueExec.exec(r, f.SelSet, out[0], false))
 }
 
 type typeAssertExec struct {

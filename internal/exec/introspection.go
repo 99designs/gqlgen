@@ -43,7 +43,7 @@ func init() {
 }
 
 func introspectSchema(r *request, selSet *query.SelectionSet) interface{} {
-	return schemaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.schema}))
+	return schemaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.schema}), false)
 }
 
 func introspectType(r *request, name string, selSet *query.SelectionSet) interface{} {
@@ -51,7 +51,7 @@ func introspectType(r *request, name string, selSet *query.SelectionSet) interfa
 	if !ok {
 		return nil
 	}
-	return typeExec.exec(r, selSet, reflect.ValueOf(&typeResolver{t}))
+	return typeExec.exec(r, selSet, reflect.ValueOf(&typeResolver{t}), false)
 }
 
 var metaSchemaSrc = `

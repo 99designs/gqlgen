@@ -21,6 +21,19 @@ func (r *helloWorldResolver2) Hello(ctx context.Context) (string, error) {
 	return "Hello world!", nil
 }
 
+type theNumberResolver struct {
+	number int32
+}
+
+func (r *theNumberResolver) TheNumber() int32 {
+	return r.number
+}
+
+func (r *theNumberResolver) ChangeTheNumber(args *struct{ NewNumber int32 }) *theNumberResolver {
+	r.number = args.NewNumber
+	return r
+}
+
 var tests = []struct {
 	name      string
 	schema    string
@@ -1008,6 +1021,51 @@ var tests = []struct {
 							"name": "JEDI"
 						}
 					]
+				}
+			}
+		`,
+	},
+
+	{
+		name: "MutationOrder",
+		schema: `
+			schema {
+				query: Query
+				mutation: Mutation
+			}
+
+			type Query {
+				theNumber: Int!
+			}
+
+			type Mutation {
+				changeTheNumber(newNumber: Int!): Query
+			}
+		`,
+		resolver: &theNumberResolver{},
+		query: `
+			mutation {
+				first: changeTheNumber(newNumber: 1) {
+					theNumber
+				}
+				second: changeTheNumber(newNumber: 3) {
+					theNumber
+				}
+				third: changeTheNumber(newNumber: 2) {
+					theNumber
+				}
+			}
+		`,
+		result: `
+			{
+				"first": {
+					"theNumber": 1
+				},
+				"second": {
+					"theNumber": 3
+				},
+				"third": {
+					"theNumber": 2
 				}
 			}
 		`,

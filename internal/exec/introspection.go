@@ -42,6 +42,14 @@ func init() {
 	}
 }
 
+func IntrospectSchema(s *schema.Schema) (interface{}, error) {
+	r := &request{
+		schema: s,
+		doc:    introspectionQuery,
+	}
+	return introspectSchema(r, introspectionQuery.Operations["IntrospectionQuery"].SelSet), nil
+}
+
 func introspectSchema(r *request, selSet *query.SelectionSet) interface{} {
 	return schemaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.schema}), false)
 }
@@ -452,3 +460,104 @@ func (r *directiveResolver) Locations() []string {
 func (r *directiveResolver) Args() []*inputValueResolver {
 	panic("TODO")
 }
+
+var introspectionQuery *query.Document
+
+func init() {
+	var err *errors.GraphQLError
+	introspectionQuery, err = query.Parse(introspectionQuerySrc)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var introspectionQuerySrc = `
+  query IntrospectionQuery {
+    __schema {
+      queryType { name }
+      mutationType { name }
+      subscriptionType { name }
+      types {
+        ...FullType
+      }
+      directives {
+        name
+        description
+        locations
+        args {
+          ...InputValue
+        }
+      }
+    }
+  }
+  fragment FullType on __Type {
+    kind
+    name
+    description
+    fields(includeDeprecated: true) {
+      name
+      description
+      args {
+        ...InputValue
+      }
+      type {
+        ...TypeRef
+      }
+      isDeprecated
+      deprecationReason
+    }
+    inputFields {
+      ...InputValue
+    }
+    interfaces {
+      ...TypeRef
+    }
+    enumValues(includeDeprecated: true) {
+      name
+      description
+      isDeprecated
+      deprecationReason
+    }
+    possibleTypes {
+      ...TypeRef
+    }
+  }
+  fragment InputValue on __InputValue {
+    name
+    description
+    type { ...TypeRef }
+    defaultValue
+  }
+  fragment TypeRef on __Type {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+            ofType {
+              kind
+              name
+              ofType {
+                kind
+                name
+                ofType {
+                  kind
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`

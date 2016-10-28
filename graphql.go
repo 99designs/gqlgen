@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/exec"
@@ -73,4 +74,18 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		Data:   data,
 		Errors: errs,
 	}
+}
+
+func SchemaToJSON(schemaString string) ([]byte, error) {
+	s, err := schema.Parse(schemaString)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err2 := exec.IntrospectSchema(s)
+	if err2 != nil {
+		return nil, err
+	}
+
+	return json.Marshal(result)
 }

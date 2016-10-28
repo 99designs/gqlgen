@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -47,19 +48,19 @@ func IntrospectSchema(s *schema.Schema) (interface{}, error) {
 		schema: s,
 		doc:    introspectionQuery,
 	}
-	return introspectSchema(r, introspectionQuery.Operations["IntrospectionQuery"].SelSet), nil
+	return introspectSchema(context.Background(), r, introspectionQuery.Operations["IntrospectionQuery"].SelSet), nil
 }
 
-func introspectSchema(r *request, selSet *query.SelectionSet) interface{} {
-	return schemaExec.exec(r, selSet, reflect.ValueOf(&schemaResolver{r.schema}), false)
+func introspectSchema(ctx context.Context, r *request, selSet *query.SelectionSet) interface{} {
+	return schemaExec.exec(ctx, r, selSet, reflect.ValueOf(&schemaResolver{r.schema}), false)
 }
 
-func introspectType(r *request, name string, selSet *query.SelectionSet) interface{} {
+func introspectType(ctx context.Context, r *request, name string, selSet *query.SelectionSet) interface{} {
 	t, ok := r.schema.Types[name]
 	if !ok {
 		return nil
 	}
-	return typeExec.exec(r, selSet, reflect.ValueOf(&typeResolver{t}), false)
+	return typeExec.exec(ctx, r, selSet, reflect.ValueOf(&typeResolver{t}), false)
 }
 
 var metaSchemaSrc = `

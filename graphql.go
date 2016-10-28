@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
+
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
@@ -69,7 +72,21 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		}
 	}
 
-	data, errs := s.exec.Exec(ctx, d, variables, op)
+	span, subCtx := opentracing.StartSpanFromContext(ctx, "GraphQL request")
+	span.SetTag("query", queryString)
+	if operationName != "" {
+		span.SetTag("operationName", operationName)
+	}
+	if len(variables) != 0 {
+		span.SetTag("variables", variables)
+	}
+	defer span.Finish()
+
+	data, errs := s.exec.Exec(subCtx, d, variables, op)
+	if len(errs) != 0 {
+		ext.Error.Set(span, true)
+		span.SetTag("errorMsg", errs)
+	}
 	return &Response{
 		Data:   data,
 		Errors: errs,

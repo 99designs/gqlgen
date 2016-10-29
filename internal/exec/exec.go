@@ -396,7 +396,12 @@ func (r *request) handlePanic() {
 	}
 }
 
-func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) (interface{}, []*errors.GraphQLError) {
+func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}) (interface{}, []*errors.GraphQLError) {
+	op, err := getOperation(document, operationName)
+	if err != nil {
+		return nil, []*errors.GraphQLError{err}
+	}
+
 	r := &request{
 		doc:    document,
 		vars:   variables,
@@ -404,19 +409,43 @@ func (e *Exec) Exec(ctx context.Context, document *query.Document, variables map
 	}
 
 	var opExec iExec
+	var serially bool
 	switch op.Type {
 	case query.Query:
 		opExec = e.queryExec
+		serially = false
 	case query.Mutation:
 		opExec = e.mutationExec
+		serially = true
 	}
 
 	data := func() interface{} {
 		defer r.handlePanic()
-		return opExec.exec(ctx, r, op.SelSet, e.resolver, op.Type == query.Mutation)
+		return opExec.exec(ctx, r, op.SelSet, e.resolver, serially)
 	}()
 
 	return data, r.errs
+}
+
+func getOperation(document *query.Document, operationName string) (*query.Operation, *errors.GraphQLError) {
+	if len(document.Operations) == 0 {
+		return nil, errors.Errorf("no operations in query document")
+	}
+
+	if operationName == "" {
+		if len(document.Operations) > 1 {
+			return nil, errors.Errorf("more than one operation in query document and no operation name given")
+		}
+		for _, op := range document.Operations {
+			return op, nil // return the one and only operation
+		}
+	}
+
+	op, ok := document.Operations[operationName]
+	if !ok {
+		return nil, errors.Errorf("no operation with name %q", operationName)
+	}
+	return op, nil
 }
 
 type iExec interface {

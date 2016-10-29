@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/opentracing/opentracing-go"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 
 	"github.com/neelance/graphql-go/errors"
@@ -39,36 +39,10 @@ type Response struct {
 }
 
 func (s *Schema) Exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) *Response {
-	d, err := query.Parse(queryString)
+	document, err := query.Parse(queryString)
 	if err != nil {
 		return &Response{
 			Errors: []*errors.GraphQLError{err},
-		}
-	}
-
-	if len(d.Operations) == 0 {
-		return &Response{
-			Errors: []*errors.GraphQLError{errors.Errorf("no operations in query document")},
-		}
-	}
-
-	var op *query.Operation
-	if operationName == "" {
-		if len(d.Operations) > 1 {
-			return &Response{
-				Errors: []*errors.GraphQLError{errors.Errorf("more than one operation in query document and no operation name given")},
-			}
-		}
-		for _, op2 := range d.Operations {
-			op = op2
-		}
-	} else {
-		var ok bool
-		op, ok = d.Operations[operationName]
-		if !ok {
-			return &Response{
-				Errors: []*errors.GraphQLError{errors.Errorf("no operation with name %q", operationName)},
-			}
 		}
 	}
 
@@ -82,7 +56,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	}
 	defer span.Finish()
 
-	data, errs := s.exec.Exec(subCtx, d, variables, op)
+	data, errs := exec.ExecuteRequest(subCtx, s.exec, document, operationName, variables)
 	if len(errs) != 0 {
 		ext.Error.Set(span, true)
 		span.SetTag("errorMsg", errs)

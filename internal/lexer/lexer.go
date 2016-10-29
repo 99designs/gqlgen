@@ -21,7 +21,7 @@ func New(sc *scanner.Scanner) *Lexer {
 	return l
 }
 
-func (l *Lexer) CatchSyntaxError(f func()) (errRes *errors.GraphQLError) {
+func (l *Lexer) CatchSyntaxError(f func()) (errRes *errors.QueryError) {
 	defer func() {
 		if err := recover(); err != nil {
 			if err, ok := err.(syntaxError); ok {

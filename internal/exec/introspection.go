@@ -19,7 +19,7 @@ var typeExec iExec
 
 func init() {
 	{
-		var err *errors.GraphQLError
+		var err *errors.QueryError
 		metaSchema, err = schema.Parse(metaSchemaSrc)
 		if err != nil {
 			panic(err)
@@ -465,7 +465,7 @@ func (r *directiveResolver) Args() []*inputValueResolver {
 var introspectionQuery *query.Document
 
 func init() {
-	var err *errors.GraphQLError
+	var err *errors.QueryError
 	introspectionQuery, err = query.Parse(introspectionQuerySrc)
 	if err != nil {
 		panic(err)

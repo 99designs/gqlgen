@@ -79,7 +79,7 @@ func (Field) isSelection()          {}
 func (FragmentSpread) isSelection() {}
 func (InlineFragment) isSelection() {}
 
-func Parse(queryString string) (doc *Document, err *errors.GraphQLError) {
+func Parse(queryString string) (doc *Document, err *errors.QueryError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}

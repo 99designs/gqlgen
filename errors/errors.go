@@ -2,7 +2,7 @@ package errors
 
 import "fmt"
 
-type GraphQLError struct {
+type QueryError struct {
 	Message   string      `json:"message"`
 	Locations []*Location `json:"locations,omitempty"`
 }
@@ -12,14 +12,14 @@ type Location struct {
 	Column int `json:"column"`
 }
 
-func Errorf(format string, a ...interface{}) *GraphQLError {
-	return &GraphQLError{
+func Errorf(format string, a ...interface{}) *QueryError {
+	return &QueryError{
 		Message: fmt.Sprintf(format, a...),
 	}
 }
 
-func ErrorfWithLoc(line int, column int, format string, a ...interface{}) *GraphQLError {
-	return &GraphQLError{
+func ErrorfWithLoc(line int, column int, format string, a ...interface{}) *QueryError {
+	return &QueryError{
 		Message: fmt.Sprintf(format, a...),
 		Locations: []*Location{{
 			Line:   line,
@@ -28,7 +28,7 @@ func ErrorfWithLoc(line int, column int, format string, a ...interface{}) *Graph
 	}
 }
 
-func (err *GraphQLError) Error() string {
+func (err *QueryError) Error() string {
 	if err == nil {
 		return "<nil>"
 	}
@@ -39,4 +39,4 @@ func (err *GraphQLError) Error() string {
 	return fmt.Sprintf("graphql: %s", err.Message)
 }
 
-var _ error = &GraphQLError{}
+var _ error = &QueryError{}

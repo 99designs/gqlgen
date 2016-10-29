@@ -375,10 +375,10 @@ type request struct {
 	vars   map[string]interface{}
 	schema *schema.Schema
 	mu     sync.Mutex
-	errs   []*errors.GraphQLError
+	errs   []*errors.QueryError
 }
 
-func (r *request) addError(err *errors.GraphQLError) {
+func (r *request) addError(err *errors.QueryError) {
 	r.mu.Lock()
 	r.errs = append(r.errs, err)
 	r.mu.Unlock()
@@ -396,10 +396,10 @@ func (r *request) handlePanic() {
 	}
 }
 
-func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}) (interface{}, []*errors.GraphQLError) {
+func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}) (interface{}, []*errors.QueryError) {
 	op, err := getOperation(document, operationName)
 	if err != nil {
-		return nil, []*errors.GraphQLError{err}
+		return nil, []*errors.QueryError{err}
 	}
 
 	r := &request{
@@ -427,7 +427,7 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 	return data, r.errs
 }
 
-func getOperation(document *query.Document, operationName string) (*query.Operation, *errors.GraphQLError) {
+func getOperation(document *query.Document, operationName string) (*query.Operation, *errors.QueryError) {
 	if len(document.Operations) == 0 {
 		return nil, errors.Errorf("no operations in query document")
 	}

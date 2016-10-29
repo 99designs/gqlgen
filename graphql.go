@@ -34,7 +34,7 @@ func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 
 type Response struct {
 	Data       interface{}            `json:"data,omitempty"`
-	Errors     []*errors.GraphQLError `json:"errors,omitempty"`
+	Errors     []*errors.QueryError   `json:"errors,omitempty"`
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }
 
@@ -42,7 +42,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	document, err := query.Parse(queryString)
 	if err != nil {
 		return &Response{
-			Errors: []*errors.GraphQLError{err},
+			Errors: []*errors.QueryError{err},
 		}
 	}
 

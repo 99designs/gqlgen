@@ -88,7 +88,7 @@ type InputValue struct {
 	Default interface{}
 }
 
-func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
+func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
@@ -153,8 +153,8 @@ func Parse(schemaString string) (s *Schema, err *errors.GraphQLError) {
 	return s, nil
 }
 
-func resolveType(s *Schema, t common.Type) *errors.GraphQLError {
-	var err *errors.GraphQLError
+func resolveType(s *Schema, t common.Type) *errors.QueryError {
+	var err *errors.QueryError
 	switch t := t.(type) {
 	case *Scalar:
 		// nothing
@@ -197,8 +197,8 @@ func resolveType(s *Schema, t common.Type) *errors.GraphQLError {
 	return nil
 }
 
-func resolveField(s *Schema, f *Field) *errors.GraphQLError {
-	var err *errors.GraphQLError
+func resolveField(s *Schema, f *Field) *errors.QueryError {
+	var err *errors.QueryError
 	f.Type, err = resolveTypeName(s, f.Type)
 	if err != nil {
 		return err
@@ -207,7 +207,7 @@ func resolveField(s *Schema, f *Field) *errors.GraphQLError {
 	return nil
 }
 
-func resolveTypeName(s *Schema, t common.Type) (common.Type, *errors.GraphQLError) {
+func resolveTypeName(s *Schema, t common.Type) (common.Type, *errors.QueryError) {
 	if name, ok := t.(*common.TypeName); ok {
 		refT, ok := s.Types[name.Name]
 		if !ok {

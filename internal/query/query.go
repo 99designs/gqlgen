@@ -16,10 +16,10 @@ type Document struct {
 }
 
 type Operation struct {
-	Type      OperationType
-	Name      string
-	Variables map[string]*VariableDef
-	SelSet    *SelectionSet
+	Type   OperationType
+	Name   string
+	Vars   common.InputMap
+	SelSet *SelectionSet
 }
 
 type OperationType int
@@ -28,11 +28,6 @@ const (
 	Query OperationType = iota
 	Mutation
 )
-
-type VariableDef struct {
-	Name string
-	Type common.Type
-}
 
 type NamedFragment struct {
 	Fragment
@@ -79,7 +74,7 @@ func (Field) isSelection()          {}
 func (FragmentSpread) isSelection() {}
 func (InlineFragment) isSelection() {}
 
-func Parse(queryString string) (doc *Document, err *errors.QueryError) {
+func Parse(queryString string, resolver common.Resolver) (doc *Document, err *errors.QueryError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
@@ -89,6 +84,17 @@ func Parse(queryString string) (doc *Document, err *errors.QueryError) {
 	err = l.CatchSyntaxError(func() {
 		doc = parseDocument(l)
 	})
+
+	for _, op := range doc.Operations {
+		for _, v := range op.Vars.Fields {
+			t, err := common.ResolveType(v.Type, resolver)
+			if err != nil {
+				return nil, err
+			}
+			v.Type = t
+		}
+	}
+
 	return
 }
 
@@ -130,10 +136,12 @@ func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	}
 	if l.Peek() == '(' {
 		l.ConsumeToken('(')
-		op.Variables = make(map[string]*VariableDef)
+		op.Vars.Fields = make(map[string]*common.InputValue)
 		for l.Peek() != ')' {
-			v := parseVariableDef(l)
-			op.Variables[v.Name] = v
+			l.ConsumeToken('$')
+			v := common.ParseInputValue(l)
+			op.Vars.Fields[v.Name] = v
+			op.Vars.FieldOrder = append(op.Vars.FieldOrder, v.Name)
 		}
 		l.ConsumeToken(')')
 	}
@@ -148,15 +156,6 @@ func parseFragment(l *lexer.Lexer) *NamedFragment {
 	f.On = l.ConsumeIdent()
 	f.SelSet = parseSelectionSet(l)
 	return f
-}
-
-func parseVariableDef(l *lexer.Lexer) *VariableDef {
-	v := &VariableDef{}
-	l.ConsumeToken('$')
-	v.Name = l.ConsumeIdent()
-	l.ConsumeToken(':')
-	v.Type = common.ParseType(l)
-	return v
 }
 
 func parseSelectionSet(l *lexer.Lexer) *SelectionSet {

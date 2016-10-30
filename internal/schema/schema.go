@@ -19,6 +19,10 @@ type Schema struct {
 	unions          []*Union
 }
 
+func (s *Schema) Resolve(name string) common.Type {
+	return s.Types[name]
+}
+
 type NamedType interface {
 	common.Type
 	TypeName() string
@@ -57,9 +61,8 @@ type Enum struct {
 }
 
 type InputObject struct {
-	Name            string
-	InputFields     map[string]*InputValue
-	InputFieldOrder []string
+	Name string
+	common.InputMap
 }
 
 func (*Scalar) Kind() string      { return "SCALAR" }
@@ -78,14 +81,8 @@ func (t *InputObject) TypeName() string { return t.Name }
 
 type Field struct {
 	Name string
-	Args InputObject
+	Args common.InputMap
 	Type common.Type
-}
-
-type InputValue struct {
-	Name    string
-	Type    common.Type
-	Default interface{}
 }
 
 func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
@@ -103,7 +100,7 @@ func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
 	}
 
 	for _, t := range s.Types {
-		if err := resolveType(s, t); err != nil {
+		if err := resolveNamedType(s, t); err != nil {
 			return nil, err
 		}
 	}
@@ -153,8 +150,7 @@ func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
 	return s, nil
 }
 
-func resolveType(s *Schema, t common.Type) *errors.QueryError {
-	var err *errors.QueryError
+func resolveNamedType(s *Schema, t NamedType) *errors.QueryError {
 	switch t := t.(type) {
 	case *Scalar:
 		// nothing
@@ -175,22 +171,7 @@ func resolveType(s *Schema, t common.Type) *errors.QueryError {
 	case *Enum:
 		// nothing
 	case *InputObject:
-		for _, f := range t.InputFields {
-			f.Type, err = resolveTypeName(s, f.Type)
-			if err != nil {
-				return err
-			}
-		}
-	case *common.List:
-		t.OfType, err = resolveTypeName(s, t.OfType)
-		if err != nil {
-			return err
-		}
-	case *common.NonNull:
-		t.OfType, err = resolveTypeName(s, t.OfType)
-		if err != nil {
-			return err
-		}
+		resolveInputObject(s, &t.InputMap)
 	default:
 		panic("unreachable")
 	}
@@ -198,27 +179,23 @@ func resolveType(s *Schema, t common.Type) *errors.QueryError {
 }
 
 func resolveField(s *Schema, f *Field) *errors.QueryError {
-	var err *errors.QueryError
-	f.Type, err = resolveTypeName(s, f.Type)
+	t, err := common.ResolveType(f.Type, s.Resolve)
 	if err != nil {
 		return err
 	}
-	resolveType(s, &f.Args)
-	return nil
+	f.Type = t
+	return resolveInputObject(s, &f.Args)
 }
 
-func resolveTypeName(s *Schema, t common.Type) (common.Type, *errors.QueryError) {
-	if name, ok := t.(*common.TypeName); ok {
-		refT, ok := s.Types[name.Name]
-		if !ok {
-			return nil, errors.Errorf("type %q not found", name.Name)
+func resolveInputObject(s *Schema, io *common.InputMap) *errors.QueryError {
+	for _, f := range io.Fields {
+		t, err := common.ResolveType(f.Type, s.Resolve)
+		if err != nil {
+			return err
 		}
-		return refT, nil
+		f.Type = t
 	}
-	if err := resolveType(s, t); err != nil {
-		return nil, err
-	}
-	return t, nil
+	return nil
 }
 
 func parseSchema(l *lexer.Lexer) *Schema {
@@ -309,15 +286,14 @@ func parseUnionDecl(l *lexer.Lexer) *Union {
 }
 
 func parseInputDecl(l *lexer.Lexer) *InputObject {
-	i := &InputObject{
-		InputFields: make(map[string]*InputValue),
-	}
+	i := &InputObject{}
+	i.Fields = make(map[string]*common.InputValue)
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
 	for l.Peek() != '}' {
-		v := parseInputValue(l)
-		i.InputFields[v.Name] = v
-		i.InputFieldOrder = append(i.InputFieldOrder, v.Name)
+		v := common.ParseInputValue(l)
+		i.Fields[v.Name] = v
+		i.FieldOrder = append(i.FieldOrder, v.Name)
 	}
 	l.ConsumeToken('}')
 	return i
@@ -341,12 +317,12 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 		f := &Field{}
 		f.Name = l.ConsumeIdent()
 		if l.Peek() == '(' {
-			f.Args.InputFields = make(map[string]*InputValue)
+			f.Args.Fields = make(map[string]*common.InputValue)
 			l.ConsumeToken('(')
 			for l.Peek() != ')' {
-				v := parseInputValue(l)
-				f.Args.InputFields[v.Name] = v
-				f.Args.InputFieldOrder = append(f.Args.InputFieldOrder, v.Name)
+				v := common.ParseInputValue(l)
+				f.Args.Fields[v.Name] = v
+				f.Args.FieldOrder = append(f.Args.FieldOrder, v.Name)
 			}
 			l.ConsumeToken(')')
 		}
@@ -356,16 +332,4 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 		fieldOrder = append(fieldOrder, f.Name)
 	}
 	return fields, fieldOrder
-}
-
-func parseInputValue(l *lexer.Lexer) *InputValue {
-	p := &InputValue{}
-	p.Name = l.ConsumeIdent()
-	l.ConsumeToken(':')
-	p.Type = common.ParseType(l)
-	if l.Peek() == '=' {
-		l.ConsumeToken('=')
-		p.Default = common.ParseValue(l, true).Eval(nil)
-	}
-	return p
 }

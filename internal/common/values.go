@@ -6,6 +6,29 @@ import (
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
+type InputMap struct {
+	Fields     map[string]*InputValue
+	FieldOrder []string
+}
+
+type InputValue struct {
+	Name    string
+	Type    Type
+	Default Value
+}
+
+func ParseInputValue(l *lexer.Lexer) *InputValue {
+	p := &InputValue{}
+	p.Name = l.ConsumeIdent()
+	l.ConsumeToken(':')
+	p.Type = ParseType(l)
+	if l.Peek() == '=' {
+		l.ConsumeToken('=')
+		p.Default = ParseValue(l, true)
+	}
+	return p
+}
+
 type Value interface {
 	Eval(vars map[string]interface{}) interface{}
 }

@@ -14,7 +14,8 @@ import (
 )
 
 type Schema struct {
-	exec *exec.Exec
+	schema *schema.Schema
+	exec   *exec.Exec
 }
 
 func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
@@ -28,7 +29,8 @@ func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 		return nil, err2
 	}
 	return &Schema{
-		exec: e,
+		schema: s,
+		exec:   e,
 	}, nil
 }
 
@@ -39,7 +41,7 @@ type Response struct {
 }
 
 func (s *Schema) Exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) *Response {
-	document, err := query.Parse(queryString)
+	document, err := query.Parse(queryString, s.schema.Resolve)
 	if err != nil {
 		return &Response{
 			Errors: []*errors.QueryError{err},

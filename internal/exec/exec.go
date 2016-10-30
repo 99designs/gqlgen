@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"reflect"
 	"runtime"
 	"strings"
@@ -101,11 +102,8 @@ var scalarTypes = map[string]reflect.Type{
 }
 
 func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
-	nonNull := false
-	if nn, ok := t.(*common.NonNull); ok {
-		nonNull = true
-		t = nn.OfType
-	}
+	var nonNull bool
+	t, nonNull = unwrapNonNull(t)
 
 	if !nonNull {
 		if resolverType.Kind() != reflect.Ptr && resolverType.Kind() != reflect.Interface {
@@ -223,12 +221,12 @@ func makeFieldExec(s *schema.Schema, f *schema.Field, m reflect.Method, methodIn
 	}
 
 	var argsExec *inputObjectExec
-	if len(f.Args.InputFields) > 0 {
+	if len(f.Args.Fields) > 0 {
 		if len(in) == 0 {
 			return nil, fmt.Errorf("must have parameter for field arguments")
 		}
 		var err error
-		argsExec, err = makeInputObjectExec(&f.Args, in[0])
+		argsExec, err = makeInputObjectExec(s, &f.Args, in[0])
 		if err != nil {
 			return nil, err
 		}
@@ -263,7 +261,7 @@ func makeFieldExec(s *schema.Schema, f *schema.Field, m reflect.Method, methodIn
 	return fe, nil
 }
 
-func makeInputObjectExec(obj *schema.InputObject, typ reflect.Type) (*inputObjectExec, error) {
+func makeInputObjectExec(s *schema.Schema, obj *common.InputMap, typ reflect.Type) (*inputObjectExec, error) {
 	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
 		return nil, fmt.Errorf("expected pointer to struct, got %s", typ)
 	}
@@ -271,7 +269,7 @@ func makeInputObjectExec(obj *schema.InputObject, typ reflect.Type) (*inputObjec
 
 	var fields []*inputFieldExec
 	defaultStruct := reflect.New(structType).Elem()
-	for _, f := range obj.InputFields {
+	for _, f := range obj.Fields {
 		fe := &inputFieldExec{
 			name: f.Name,
 		}
@@ -282,10 +280,8 @@ func makeInputObjectExec(obj *schema.InputObject, typ reflect.Type) (*inputObjec
 		}
 		fe.fieldIndex = sf.Index
 
-		ft := f.Type
-		nonNull := (f.Default != nil)
-		if nn, ok := ft.(*common.NonNull); ok {
-			ft = nn.OfType
+		ft, nonNull := unwrapNonNull(f.Type)
+		if f.Default != nil {
 			nonNull = true
 		}
 		expectType := func(got, want reflect.Type) error {
@@ -320,7 +316,7 @@ func makeInputObjectExec(obj *schema.InputObject, typ reflect.Type) (*inputObjec
 				nonNull: nonNull,
 			}
 		case *schema.InputObject:
-			e, err := makeInputObjectExec(ft, sf.Type)
+			e, err := makeInputObjectExec(s, &ft.InputMap, sf.Type)
 			if err != nil {
 				return nil, err
 			}
@@ -330,7 +326,7 @@ func makeInputObjectExec(obj *schema.InputObject, typ reflect.Type) (*inputObjec
 		}
 
 		if f.Default != nil {
-			defaultStruct.FieldByIndex(fe.fieldIndex).Set(fe.exec.eval(f.Default))
+			defaultStruct.FieldByIndex(fe.fieldIndex).Set(fe.exec.eval(f.Default.Eval(nil)))
 		}
 
 		fields = append(fields, fe)
@@ -402,9 +398,14 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 		return nil, []*errors.QueryError{err}
 	}
 
+	coercedVariables, err := coerceInputObject(&op.Vars, variables)
+	if err != nil {
+		return nil, []*errors.QueryError{err}
+	}
+
 	r := &request{
 		doc:    document,
-		vars:   variables,
+		vars:   coercedVariables,
 		schema: e.schema,
 	}
 
@@ -446,6 +447,43 @@ func getOperation(document *query.Document, operationName string) (*query.Operat
 		return nil, errors.Errorf("no operation with name %q", operationName)
 	}
 	return op, nil
+}
+
+func coerceInputObject(io *common.InputMap, variables map[string]interface{}) (map[string]interface{}, *errors.QueryError) {
+	coerced := make(map[string]interface{})
+	for _, iv := range io.Fields {
+		value, ok := variables[iv.Name]
+		if !ok {
+			if iv.Default == nil {
+				return nil, errors.Errorf("missing %q", iv.Name)
+			}
+			coerced[iv.Name] = iv.Default.Eval(nil)
+			continue
+		}
+		c, err := coerceInputValue(iv, value)
+		if err != nil {
+			return nil, err
+		}
+		coerced[iv.Name] = c
+	}
+	return coerced, nil
+}
+
+func coerceInputValue(iv *common.InputValue, value interface{}) (interface{}, *errors.QueryError) {
+	t, _ := unwrapNonNull(iv.Type)
+	switch t := t.(type) {
+	case *schema.Scalar:
+		if t.Name == "Int" {
+			i := value.(int)
+			if i < math.MinInt32 || i > math.MaxInt32 {
+				return nil, errors.Errorf("not a 32-bit integer: %d", i)
+			}
+			return int32(i), nil
+		}
+	case *schema.InputObject:
+		return coerceInputObject(&t.InputMap, value.(map[string]interface{}))
+	}
+	return value, nil
 }
 
 type iExec interface {
@@ -691,13 +729,7 @@ type scalarInputExec struct {
 }
 
 func (e *scalarInputExec) eval(value interface{}) reflect.Value {
-	var v reflect.Value
-	switch e.scalar.Name {
-	case "Int":
-		v = reflect.ValueOf(int32(value.(int)))
-	default:
-		v = reflect.ValueOf(value)
-	}
+	v := reflect.ValueOf(value)
 	if !e.nonNull {
 		p := reflect.New(v.Type())
 		p.Elem().Set(v)
@@ -718,4 +750,11 @@ func skipByDirective(r *request, d map[string]*query.Directive) bool {
 		}
 	}
 	return false
+}
+
+func unwrapNonNull(t common.Type) (common.Type, bool) {
+	if nn, ok := t.(*common.NonNull); ok {
+		return nn.OfType, true
+	}
+	return t, false
 }

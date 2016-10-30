@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"text/scanner"
 
@@ -71,11 +72,14 @@ func (l *Lexer) ConsumeKeyword(keyword string) {
 	l.Consume()
 }
 
-func (l *Lexer) ConsumeInt() int {
+func (l *Lexer) ConsumeInt() int32 {
 	text := l.sc.TokenText()
 	l.ConsumeToken(scanner.Int)
 	value, _ := strconv.Atoi(text)
-	return value
+	if value < math.MinInt32 || value > math.MaxInt32 {
+		l.SyntaxError(fmt.Sprintf("not a 32-bit integer: %d", value))
+	}
+	return int32(value)
 }
 
 func (l *Lexer) ConsumeFloat() float64 {

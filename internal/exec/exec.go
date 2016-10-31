@@ -384,12 +384,12 @@ func (r *request) handlePanic() {
 func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}) (interface{}, []*errors.QueryError) {
 	op, err := getOperation(document, operationName)
 	if err != nil {
-		return nil, []*errors.QueryError{err}
+		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
 	}
 
 	coercedVariables, err := coerceInputObject(&op.Vars, variables)
 	if err != nil {
-		return nil, []*errors.QueryError{err}
+		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
 	}
 
 	r := &request{
@@ -417,14 +417,14 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 	return data, r.errs
 }
 
-func getOperation(document *query.Document, operationName string) (*query.Operation, *errors.QueryError) {
+func getOperation(document *query.Document, operationName string) (*query.Operation, error) {
 	if len(document.Operations) == 0 {
-		return nil, errors.Errorf("no operations in query document")
+		return nil, fmt.Errorf("no operations in query document")
 	}
 
 	if operationName == "" {
 		if len(document.Operations) > 1 {
-			return nil, errors.Errorf("more than one operation in query document and no operation name given")
+			return nil, fmt.Errorf("more than one operation in query document and no operation name given")
 		}
 		for _, op := range document.Operations {
 			return op, nil // return the one and only operation
@@ -433,12 +433,12 @@ func getOperation(document *query.Document, operationName string) (*query.Operat
 
 	op, ok := document.Operations[operationName]
 	if !ok {
-		return nil, errors.Errorf("no operation with name %q", operationName)
+		return nil, fmt.Errorf("no operation with name %q", operationName)
 	}
 	return op, nil
 }
 
-func coerceInputObject(io *common.InputMap, variables map[string]interface{}) (map[string]interface{}, *errors.QueryError) {
+func coerceInputObject(io *common.InputMap, variables map[string]interface{}) (map[string]interface{}, error) {
 	coerced := make(map[string]interface{})
 	for _, iv := range io.Fields {
 		value, ok := variables[iv.Name]
@@ -458,7 +458,7 @@ func coerceInputObject(io *common.InputMap, variables map[string]interface{}) (m
 	return coerced, nil
 }
 
-func coerceInputValue(iv *common.InputValue, value interface{}) (interface{}, *errors.QueryError) {
+func coerceInputValue(iv *common.InputValue, value interface{}) (interface{}, error) {
 	t, _ := unwrapNonNull(iv.Type)
 	switch t := t.(type) {
 	case *scalar:

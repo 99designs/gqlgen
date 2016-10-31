@@ -86,7 +86,7 @@ func New() *Schema {
 	}
 }
 
-func (s *Schema) Parse(schemaString string) *errors.QueryError {
+func (s *Schema) Parse(schemaString string) error {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
@@ -151,7 +151,7 @@ func (s *Schema) Parse(schemaString string) *errors.QueryError {
 	return nil
 }
 
-func resolveNamedType(s *Schema, t NamedType) *errors.QueryError {
+func resolveNamedType(s *Schema, t NamedType) error {
 	switch t := t.(type) {
 	case *Object:
 		for _, f := range t.Fields {
@@ -173,7 +173,7 @@ func resolveNamedType(s *Schema, t NamedType) *errors.QueryError {
 	return nil
 }
 
-func resolveField(s *Schema, f *Field) *errors.QueryError {
+func resolveField(s *Schema, f *Field) error {
 	t, err := common.ResolveType(f.Type, s.Resolve)
 	if err != nil {
 		return err
@@ -182,7 +182,7 @@ func resolveField(s *Schema, f *Field) *errors.QueryError {
 	return resolveInputObject(s, &f.Args)
 }
 
-func resolveInputObject(s *Schema, io *common.InputMap) *errors.QueryError {
+func resolveInputObject(s *Schema, io *common.InputMap) error {
 	for _, f := range io.Fields {
 		t, err := common.ResolveType(f.Type, s.Resolve)
 		if err != nil {

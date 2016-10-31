@@ -89,7 +89,7 @@ func Parse(queryString string, resolver common.Resolver) (doc *Document, err *er
 		for _, v := range op.Vars.Fields {
 			t, err := common.ResolveType(v.Type, resolver)
 			if err != nil {
-				return nil, err
+				return nil, errors.Errorf("%s", err)
 			}
 			v.Type = t
 		}

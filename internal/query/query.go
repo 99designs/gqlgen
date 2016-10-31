@@ -74,16 +74,20 @@ func (Field) isSelection()          {}
 func (FragmentSpread) isSelection() {}
 func (InlineFragment) isSelection() {}
 
-func Parse(queryString string, resolver common.Resolver) (doc *Document, err *errors.QueryError) {
+func Parse(queryString string, resolver common.Resolver) (*Document, *errors.QueryError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
 	sc.Init(strings.NewReader(queryString))
 
 	l := lexer.New(sc)
-	err = l.CatchSyntaxError(func() {
+	var doc *Document
+	err := l.CatchSyntaxError(func() {
 		doc = parseDocument(l)
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	for _, op := range doc.Operations {
 		for _, v := range op.Vars.Fields {
@@ -95,7 +99,7 @@ func Parse(queryString string, resolver common.Resolver) (doc *Document, err *er
 		}
 	}
 
-	return
+	return doc, nil
 }
 
 func parseDocument(l *lexer.Lexer) *Document {

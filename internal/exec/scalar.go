@@ -64,3 +64,11 @@ func AddBuiltinScalars(s *schema.Schema) {
 		s.Types[scalar.name] = scalar
 	}
 }
+
+func AddCustomScalar(s *schema.Schema, name string, reflectType reflect.Type, coerceInput func(input interface{}) (interface{}, error)) {
+	s.Types[name] = &scalar{
+		name:        name,
+		reflectType: reflectType,
+		coerceInput: coerceInput,
+	}
+}

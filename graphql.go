@@ -7,6 +7,8 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 
+	"reflect"
+
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
@@ -14,8 +16,8 @@ import (
 )
 
 func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
-	b, err := New().Parse(schemaString)
-	if err != nil {
+	b := New()
+	if err := b.Parse(schemaString); err != nil {
 		return nil, err
 	}
 	return b.ApplyResolver(resolver)
@@ -33,11 +35,12 @@ func New() *SchemaBuilder {
 	}
 }
 
-func (b *SchemaBuilder) Parse(schemaString string) (*SchemaBuilder, error) {
-	if err := b.schema.Parse(schemaString); err != nil {
-		return nil, err
-	}
-	return b, nil
+func (b *SchemaBuilder) Parse(schemaString string) error {
+	return b.schema.Parse(schemaString)
+}
+
+func (b *SchemaBuilder) AddCustomScalar(name string, scalar *ScalarConfig) {
+	exec.AddCustomScalar(b.schema, name, scalar.ReflectType, scalar.CoerceInput)
 }
 
 func (b *SchemaBuilder) ApplyResolver(resolver interface{}) (*Schema, error) {
@@ -103,4 +106,9 @@ func SchemaToJSON(schemaString string) ([]byte, error) {
 	}
 
 	return json.Marshal(result)
+}
+
+type ScalarConfig struct {
+	ReflectType reflect.Type
+	CoerceInput func(input interface{}) (interface{}, error)
 }

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/neelance/graphql-go/example/starwars"
 )
@@ -34,8 +35,15 @@ func (r *theNumberResolver) ChangeTheNumber(args *struct{ NewNumber int32 }) *th
 	return r
 }
 
+type timeResolver struct{}
+
+func (r *timeResolver) AddHour(args *struct{ Time time.Time }) time.Time {
+	return args.Time.Add(time.Hour)
+}
+
 var tests = []struct {
 	name      string
+	setup     func(b *SchemaBuilder)
 	schema    string
 	variables map[string]interface{}
 	resolver  interface{}
@@ -1070,12 +1078,53 @@ var tests = []struct {
 			}
 		`,
 	},
+
+	{
+		name: "Time",
+		setup: func(b *SchemaBuilder) {
+			b.AddCustomScalar("Time", Time)
+		},
+		schema: `
+			schema {
+				query: Query
+			}
+
+			type Query {
+				addHour(time: Time = "2001-02-03T04:05:06Z"): Time!
+			}
+		`,
+		resolver: &timeResolver{},
+		query: `
+			query($t: Time!) {
+				a: addHour(time: $t)
+				b: addHour
+			}
+		`,
+		variables: map[string]interface{}{
+			"t": time.Date(2000, 2, 3, 4, 5, 6, 0, time.UTC),
+		},
+		result: `
+			{
+				"a": "2000-02-03T05:05:06Z",
+				"b": "2001-02-03T05:05:06Z"
+			}
+		`,
+	},
 }
 
 func TestAll(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			schema, err := ParseSchema(test.schema, test.resolver)
+			b := New()
+			if test.setup != nil {
+				test.setup(b)
+			}
+
+			if err := b.Parse(test.schema); err != nil {
+				t.Fatal(err)
+			}
+
+			schema, err := b.ApplyResolver(test.resolver)
 			if err != nil {
 				t.Fatal(err)
 			}

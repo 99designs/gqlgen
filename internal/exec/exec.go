@@ -315,7 +315,11 @@ func makeInputObjectExec(s *schema.Schema, obj *common.InputMap, typ reflect.Typ
 		}
 
 		if f.Default != nil {
-			defaultStruct.FieldByIndex(fe.fieldIndex).Set(fe.exec.eval(f.Default.Eval(nil)))
+			defaultValue, err := coerceValue(f.Type, f.Default.Eval(nil))
+			if err != nil {
+				return nil, err
+			}
+			defaultStruct.FieldByIndex(fe.fieldIndex).Set(fe.exec.eval(defaultValue))
 		}
 
 		fields = append(fields, fe)
@@ -449,7 +453,7 @@ func coerceInputObject(io *common.InputMap, variables map[string]interface{}) (m
 			coerced[iv.Name] = iv.Default.Eval(nil)
 			continue
 		}
-		c, err := coerceInputValue(iv, value)
+		c, err := coerceValue(iv.Type, value)
 		if err != nil {
 			return nil, err
 		}
@@ -458,8 +462,8 @@ func coerceInputObject(io *common.InputMap, variables map[string]interface{}) (m
 	return coerced, nil
 }
 
-func coerceInputValue(iv *common.InputValue, value interface{}) (interface{}, error) {
-	t, _ := unwrapNonNull(iv.Type)
+func coerceValue(typ common.Type, value interface{}) (interface{}, error) {
+	t, _ := unwrapNonNull(typ)
 	switch t := t.(type) {
 	case *scalar:
 		return t.coerceInput(value)

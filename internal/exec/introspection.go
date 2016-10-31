@@ -18,12 +18,10 @@ var schemaExec iExec
 var typeExec iExec
 
 func init() {
-	{
-		var err *errors.QueryError
-		metaSchema, err = schema.Parse(metaSchemaSrc)
-		if err != nil {
-			panic(err)
-		}
+	metaSchema = schema.New()
+	AddBuiltinScalars(metaSchema)
+	if err := metaSchema.Parse(metaSchemaSrc); err != nil {
+		panic(err)
 	}
 
 	{

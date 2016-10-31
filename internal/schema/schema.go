@@ -28,10 +28,6 @@ type NamedType interface {
 	TypeName() string
 }
 
-type Scalar struct {
-	Name string
-}
-
 type Object struct {
 	Name       string
 	Interfaces []*Interface
@@ -65,14 +61,12 @@ type InputObject struct {
 	common.InputMap
 }
 
-func (*Scalar) Kind() string      { return "SCALAR" }
 func (*Object) Kind() string      { return "OBJECT" }
 func (*Interface) Kind() string   { return "INTERFACE" }
 func (*Union) Kind() string       { return "UNION" }
 func (*Enum) Kind() string        { return "ENUM" }
 func (*InputObject) Kind() string { return "INPUT_OBJECT" }
 
-func (t *Scalar) TypeName() string      { return t.Name }
 func (t *Object) TypeName() string      { return t.Name }
 func (t *Interface) TypeName() string   { return t.Name }
 func (t *Union) TypeName() string       { return t.Name }
@@ -85,23 +79,30 @@ type Field struct {
 	Type common.Type
 }
 
-func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
+func New() *Schema {
+	return &Schema{
+		entryPointNames: make(map[string]string),
+		Types:           make(map[string]NamedType),
+	}
+}
+
+func (s *Schema) Parse(schemaString string) *errors.QueryError {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
 	sc.Init(strings.NewReader(schemaString))
 
 	l := lexer.New(sc)
-	err = l.CatchSyntaxError(func() {
-		s = parseSchema(l)
+	err := l.CatchSyntaxError(func() {
+		parseSchema(s, l)
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, t := range s.Types {
 		if err := resolveNamedType(s, t); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -110,7 +111,7 @@ func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
 		t, ok := s.Types[name]
 		if !ok {
 			if !ok {
-				return nil, errors.Errorf("type %q not found", name)
+				return errors.Errorf("type %q not found", name)
 			}
 		}
 		s.EntryPoints[key] = t
@@ -121,11 +122,11 @@ func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
 		for i, intfName := range obj.interfaceNames {
 			t, ok := s.Types[intfName]
 			if !ok {
-				return nil, errors.Errorf("interface %q not found", intfName)
+				return errors.Errorf("interface %q not found", intfName)
 			}
 			intf, ok := t.(*Interface)
 			if !ok {
-				return nil, errors.Errorf("type %q is not an interface", intfName)
+				return errors.Errorf("type %q is not an interface", intfName)
 			}
 			obj.Interfaces[i] = intf
 			intf.PossibleTypes = append(intf.PossibleTypes, obj)
@@ -137,23 +138,21 @@ func Parse(schemaString string) (s *Schema, err *errors.QueryError) {
 		for i, name := range union.typeNames {
 			t, ok := s.Types[name]
 			if !ok {
-				return nil, errors.Errorf("object type %q not found", name)
+				return errors.Errorf("object type %q not found", name)
 			}
 			obj, ok := t.(*Object)
 			if !ok {
-				return nil, errors.Errorf("type %q is not an object", name)
+				return errors.Errorf("type %q is not an object", name)
 			}
 			union.PossibleTypes[i] = obj
 		}
 	}
 
-	return s, nil
+	return nil
 }
 
 func resolveNamedType(s *Schema, t NamedType) *errors.QueryError {
 	switch t := t.(type) {
-	case *Scalar:
-		// nothing
 	case *Object:
 		for _, f := range t.Fields {
 			if err := resolveField(s, f); err != nil {
@@ -166,14 +165,10 @@ func resolveNamedType(s *Schema, t NamedType) *errors.QueryError {
 				return err
 			}
 		}
-	case *Union:
-		// nothing
-	case *Enum:
-		// nothing
 	case *InputObject:
-		resolveInputObject(s, &t.InputMap)
-	default:
-		panic("unreachable")
+		if err := resolveInputObject(s, &t.InputMap); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -198,18 +193,7 @@ func resolveInputObject(s *Schema, io *common.InputMap) *errors.QueryError {
 	return nil
 }
 
-func parseSchema(l *lexer.Lexer) *Schema {
-	s := &Schema{
-		entryPointNames: make(map[string]string),
-		Types: map[string]NamedType{
-			"Int":     &Scalar{Name: "Int"},
-			"Float":   &Scalar{Name: "Float"},
-			"String":  &Scalar{Name: "String"},
-			"Boolean": &Scalar{Name: "Boolean"},
-			"ID":      &Scalar{Name: "ID"},
-		},
-	}
-
+func parseSchema(s *Schema, l *lexer.Lexer) {
 	for l.Peek() != scanner.EOF {
 		switch x := l.ConsumeIdent(); x {
 		case "schema":
@@ -242,8 +226,6 @@ func parseSchema(l *lexer.Lexer) *Schema {
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
 		}
 	}
-
-	return s
 }
 
 func parseObjectDecl(l *lexer.Lexer) *Object {

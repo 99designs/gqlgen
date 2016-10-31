@@ -13,25 +13,47 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
-type Schema struct {
-	schema *schema.Schema
-	exec   *exec.Exec
-}
-
 func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
-	s, err := schema.Parse(schemaString)
+	b, err := New().Parse(schemaString)
 	if err != nil {
 		return nil, err
 	}
+	return b.ApplyResolver(resolver)
+}
 
-	e, err2 := exec.Make(s, resolver)
+type SchemaBuilder struct {
+	schema *schema.Schema
+}
+
+func New() *SchemaBuilder {
+	s := schema.New()
+	exec.AddBuiltinScalars(s)
+	return &SchemaBuilder{
+		schema: s,
+	}
+}
+
+func (b *SchemaBuilder) Parse(schemaString string) (*SchemaBuilder, error) {
+	if err := b.schema.Parse(schemaString); err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func (b *SchemaBuilder) ApplyResolver(resolver interface{}) (*Schema, error) {
+	e, err2 := exec.Make(b.schema, resolver)
 	if err2 != nil {
 		return nil, err2
 	}
 	return &Schema{
-		schema: s,
+		schema: b.schema,
 		exec:   e,
 	}, nil
+}
+
+type Schema struct {
+	schema *schema.Schema
+	exec   *exec.Exec
 }
 
 type Response struct {
@@ -70,13 +92,13 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 }
 
 func SchemaToJSON(schemaString string) ([]byte, error) {
-	s, err := schema.Parse(schemaString)
-	if err != nil {
+	s := schema.New()
+	if err := s.Parse(schemaString); err != nil {
 		return nil, err
 	}
 
-	result, err2 := exec.IntrospectSchema(s)
-	if err2 != nil {
+	result, err := exec.IntrospectSchema(s)
+	if err != nil {
 		return nil, err
 	}
 

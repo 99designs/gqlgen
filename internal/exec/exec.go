@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"reflect"
 	"runtime"
 	"strings"
@@ -93,14 +92,6 @@ func makeExec(target *iExec, s *schema.Schema, t common.Type, resolverType refle
 	return nil
 }
 
-var scalarTypes = map[string]reflect.Type{
-	"Int":     reflect.TypeOf(int32(0)),
-	"Float":   reflect.TypeOf(float64(0)),
-	"String":  reflect.TypeOf(""),
-	"Boolean": reflect.TypeOf(true),
-	"ID":      reflect.TypeOf(""),
-}
-
 func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
 	var nonNull bool
 	t, nonNull = unwrapNonNull(t)
@@ -112,11 +103,11 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 	}
 
 	switch t := t.(type) {
-	case *schema.Scalar:
+	case *scalar:
 		if !nonNull {
 			resolverType = resolverType.Elem()
 		}
-		scalarType := scalarTypes[t.Name]
+		scalarType := t.reflectType
 		if resolverType != scalarType {
 			return nil, fmt.Errorf("expected %s, got %s", scalarType, resolverType)
 		}
@@ -291,8 +282,8 @@ func makeInputObjectExec(s *schema.Schema, obj *common.InputMap, typ reflect.Typ
 			return nil
 		}
 		switch ft := ft.(type) {
-		case *schema.Scalar:
-			want := scalarTypes[ft.Name]
+		case *scalar:
+			want := ft.reflectType
 			if !nonNull {
 				want = reflect.PtrTo(want)
 			}
@@ -300,11 +291,10 @@ func makeInputObjectExec(s *schema.Schema, obj *common.InputMap, typ reflect.Typ
 				return nil, err
 			}
 			fe.exec = &scalarInputExec{
-				scalar:  ft,
 				nonNull: nonNull,
 			}
 		case *schema.Enum:
-			want := scalarTypes["String"]
+			want := reflect.TypeOf("string")
 			if !nonNull {
 				want = reflect.PtrTo(want)
 			}
@@ -312,7 +302,6 @@ func makeInputObjectExec(s *schema.Schema, obj *common.InputMap, typ reflect.Typ
 				return nil, err
 			}
 			fe.exec = &scalarInputExec{
-				scalar:  &schema.Scalar{Name: "String"},
 				nonNull: nonNull,
 			}
 		case *schema.InputObject:
@@ -472,14 +461,8 @@ func coerceInputObject(io *common.InputMap, variables map[string]interface{}) (m
 func coerceInputValue(iv *common.InputValue, value interface{}) (interface{}, *errors.QueryError) {
 	t, _ := unwrapNonNull(iv.Type)
 	switch t := t.(type) {
-	case *schema.Scalar:
-		if t.Name == "Int" {
-			i := value.(int)
-			if i < math.MinInt32 || i > math.MaxInt32 {
-				return nil, errors.Errorf("not a 32-bit integer: %d", i)
-			}
-			return int32(i), nil
-		}
+	case *scalar:
+		return t.coerceInput(value)
 	case *schema.InputObject:
 		return coerceInputObject(&t.InputMap, value.(map[string]interface{}))
 	}
@@ -724,7 +707,6 @@ func (e *inputObjectExec) eval(value interface{}) reflect.Value {
 }
 
 type scalarInputExec struct {
-	scalar  *schema.Scalar
 	nonNull bool
 }
 

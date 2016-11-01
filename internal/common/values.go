@@ -30,7 +30,7 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 }
 
 type Value interface {
-	Eval(vars map[string]interface{}) interface{}
+	isValue()
 }
 
 type Variable struct {
@@ -41,13 +41,8 @@ type Literal struct {
 	Value interface{}
 }
 
-func (v *Variable) Eval(vars map[string]interface{}) interface{} {
-	return vars[v.Name]
-}
-
-func (l *Literal) Eval(vars map[string]interface{}) interface{} {
-	return l.Value
-}
+func (*Variable) isValue() {}
+func (*Literal) isValue()  {}
 
 func ParseValue(l *lexer.Lexer, constOnly bool) Value {
 	if !constOnly && l.Peek() == '$' {

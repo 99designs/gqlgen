@@ -18,7 +18,7 @@ var Time = &ScalarConfig{
 		case int:
 			return time.Unix(int64(input), 0), nil
 		default:
-			return nil, fmt.Errorf("could not convert %v (%t) to time", input, input)
+			return nil, fmt.Errorf("wrong type")
 		}
 	},
 }

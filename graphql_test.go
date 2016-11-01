@@ -1,4 +1,4 @@
-package graphql
+package graphql_test
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/example/starwars"
 )
 
@@ -43,7 +44,7 @@ func (r *timeResolver) AddHour(args *struct{ Time time.Time }) time.Time {
 
 var tests = []struct {
 	name      string
-	setup     func(b *SchemaBuilder)
+	setup     func(b *graphql.SchemaBuilder)
 	schema    string
 	variables map[string]interface{}
 	resolver  interface{}
@@ -1081,8 +1082,8 @@ var tests = []struct {
 
 	{
 		name: "Time",
-		setup: func(b *SchemaBuilder) {
-			b.AddCustomScalar("Time", Time)
+		setup: func(b *graphql.SchemaBuilder) {
+			b.AddCustomScalar("Time", graphql.Time)
 		},
 		schema: `
 			schema {
@@ -1115,7 +1116,7 @@ var tests = []struct {
 func TestAll(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			b := New()
+			b := graphql.New()
 			if test.setup != nil {
 				test.setup(b)
 			}

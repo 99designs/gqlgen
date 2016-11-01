@@ -3,6 +3,7 @@ package graphql
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -14,6 +15,8 @@ import (
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 )
+
+type ID string
 
 func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 	b := New()
@@ -30,6 +33,16 @@ type SchemaBuilder struct {
 func New() *SchemaBuilder {
 	s := schema.New()
 	exec.AddBuiltinScalars(s)
+	exec.AddCustomScalar(s, "ID", reflect.TypeOf(ID("")), func(input interface{}) (interface{}, error) {
+		switch input := input.(type) {
+		case ID:
+			return input, nil
+		case string:
+			return ID(input), nil
+		default:
+			return nil, fmt.Errorf("wrong type")
+		}
+	})
 	return &SchemaBuilder{
 		schema: s,
 	}

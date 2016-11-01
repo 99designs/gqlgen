@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	graphql "github.com/neelance/graphql-go"
 )
 
 var Schema = `
@@ -142,47 +144,47 @@ var Schema = `
 `
 
 type human struct {
-	ID        string
+	ID        graphql.ID
 	Name      string
-	Friends   []string
+	Friends   []graphql.ID
 	AppearsIn []string
 	Height    float64
 	Mass      int
-	Starships []string
+	Starships []graphql.ID
 }
 
 var humans = []*human{
 	{
 		ID:        "1000",
 		Name:      "Luke Skywalker",
-		Friends:   []string{"1002", "1003", "2000", "2001"},
+		Friends:   []graphql.ID{"1002", "1003", "2000", "2001"},
 		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
 		Height:    1.72,
 		Mass:      77,
-		Starships: []string{"3001", "3003"},
+		Starships: []graphql.ID{"3001", "3003"},
 	},
 	{
 		ID:        "1001",
 		Name:      "Darth Vader",
-		Friends:   []string{"1004"},
+		Friends:   []graphql.ID{"1004"},
 		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
 		Height:    2.02,
 		Mass:      136,
-		Starships: []string{"3002"},
+		Starships: []graphql.ID{"3002"},
 	},
 	{
 		ID:        "1002",
 		Name:      "Han Solo",
-		Friends:   []string{"1000", "1003", "2001"},
+		Friends:   []graphql.ID{"1000", "1003", "2001"},
 		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
 		Height:    1.8,
 		Mass:      80,
-		Starships: []string{"3000", "3003"},
+		Starships: []graphql.ID{"3000", "3003"},
 	},
 	{
 		ID:        "1003",
 		Name:      "Leia Organa",
-		Friends:   []string{"1000", "1002", "2000", "2001"},
+		Friends:   []graphql.ID{"1000", "1002", "2000", "2001"},
 		AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
 		Height:    1.5,
 		Mass:      49,
@@ -190,14 +192,14 @@ var humans = []*human{
 	{
 		ID:        "1004",
 		Name:      "Wilhuff Tarkin",
-		Friends:   []string{"1001"},
+		Friends:   []graphql.ID{"1001"},
 		AppearsIn: []string{"NEWHOPE"},
 		Height:    1.8,
 		Mass:      0,
 	},
 }
 
-var humanData = make(map[string]*human)
+var humanData = make(map[graphql.ID]*human)
 
 func init() {
 	for _, h := range humans {
@@ -206,9 +208,9 @@ func init() {
 }
 
 type droid struct {
-	ID              string
+	ID              graphql.ID
 	Name            string
-	Friends         []string
+	Friends         []graphql.ID
 	AppearsIn       []string
 	PrimaryFunction string
 }
@@ -217,20 +219,20 @@ var droids = []*droid{
 	{
 		ID:              "2000",
 		Name:            "C-3PO",
-		Friends:         []string{"1000", "1002", "1003", "2001"},
+		Friends:         []graphql.ID{"1000", "1002", "1003", "2001"},
 		AppearsIn:       []string{"NEWHOPE", "EMPIRE", "JEDI"},
 		PrimaryFunction: "Protocol",
 	},
 	{
 		ID:              "2001",
 		Name:            "R2-D2",
-		Friends:         []string{"1000", "1002", "1003"},
+		Friends:         []graphql.ID{"1000", "1002", "1003"},
 		AppearsIn:       []string{"NEWHOPE", "EMPIRE", "JEDI"},
 		PrimaryFunction: "Astromech",
 	},
 }
 
-var droidData = make(map[string]*droid)
+var droidData = make(map[graphql.ID]*droid)
 
 func init() {
 	for _, d := range droids {
@@ -239,7 +241,7 @@ func init() {
 }
 
 type starship struct {
-	ID     string
+	ID     graphql.ID
 	Name   string
 	Length float64
 }
@@ -267,7 +269,7 @@ var starships = []*starship{
 	},
 }
 
-var starshipData = make(map[string]*starship)
+var starshipData = make(map[graphql.ID]*starship)
 
 func init() {
 	for _, s := range starships {
@@ -319,7 +321,7 @@ func (r *Resolver) Search(args *struct{ Text string }) []searchResultResolver {
 	return l
 }
 
-func (r *Resolver) Character(args *struct{ ID string }) characterResolver {
+func (r *Resolver) Character(args *struct{ ID graphql.ID }) characterResolver {
 	if h := humanData[args.ID]; h != nil {
 		return &humanResolver{h: h}
 	}
@@ -329,21 +331,21 @@ func (r *Resolver) Character(args *struct{ ID string }) characterResolver {
 	return nil
 }
 
-func (r *Resolver) Human(args *struct{ ID string }) *humanResolver {
+func (r *Resolver) Human(args *struct{ ID graphql.ID }) *humanResolver {
 	if h := humanData[args.ID]; h != nil {
 		return &humanResolver{h: h}
 	}
 	return nil
 }
 
-func (r *Resolver) Droid(args *struct{ ID string }) *droidResolver {
+func (r *Resolver) Droid(args *struct{ ID graphql.ID }) *droidResolver {
 	if d := droidData[args.ID]; d != nil {
 		return &droidResolver{d: d}
 	}
 	return nil
 }
 
-func (r *Resolver) Starship(args *struct{ ID string }) *starshipResolver {
+func (r *Resolver) Starship(args *struct{ ID graphql.ID }) *starshipResolver {
 	if s := starshipData[args.ID]; s != nil {
 		return &starshipResolver{s: s}
 	}
@@ -364,11 +366,11 @@ func (r *Resolver) CreateReview(args *struct {
 
 type friendsConenctionArgs struct {
 	First *int32
-	After *string
+	After *graphql.ID
 }
 
 type characterResolver interface {
-	ID() string
+	ID() graphql.ID
 	Name() string
 	Friends() *[]characterResolver
 	FriendsConnection(*friendsConenctionArgs) (*friendsConnectionResolver, error)
@@ -396,7 +398,7 @@ type humanResolver struct {
 	h *human
 }
 
-func (r *humanResolver) ID() string {
+func (r *humanResolver) ID() graphql.ID {
 	return r.h.ID
 }
 
@@ -445,7 +447,7 @@ type droidResolver struct {
 	d *droid
 }
 
-func (r *droidResolver) ID() string {
+func (r *droidResolver) ID() graphql.ID {
 	return r.d.ID
 }
 
@@ -481,7 +483,7 @@ type starshipResolver struct {
 	s *starship
 }
 
-func (r *starshipResolver) ID() string {
+func (r *starshipResolver) ID() graphql.ID {
 	return r.s.ID
 }
 
@@ -514,7 +516,7 @@ func convertLength(meters float64, unit string) float64 {
 	}
 }
 
-func resolveCharacters(ids []string) *[]characterResolver {
+func resolveCharacters(ids []graphql.ID) *[]characterResolver {
 	var characters []characterResolver
 	for _, id := range ids {
 		if c := resolveCharacter(id); c != nil {
@@ -524,7 +526,7 @@ func resolveCharacters(ids []string) *[]characterResolver {
 	return &characters
 }
 
-func resolveCharacter(id string) characterResolver {
+func resolveCharacter(id graphql.ID) characterResolver {
 	if h, ok := humanData[id]; ok {
 		return &humanResolver{h: h}
 	}
@@ -547,15 +549,15 @@ func (r *reviewResolver) Commentary() *string {
 }
 
 type friendsConnectionResolver struct {
-	ids  []string
+	ids  []graphql.ID
 	from int
 	to   int
 }
 
-func newFriendsConnectionResolver(ids []string, args *friendsConenctionArgs) (*friendsConnectionResolver, error) {
+func newFriendsConnectionResolver(ids []graphql.ID, args *friendsConenctionArgs) (*friendsConnectionResolver, error) {
 	from := 0
 	if args.After != nil {
-		b, err := base64.StdEncoding.DecodeString(*args.After)
+		b, err := base64.StdEncoding.DecodeString(string(*args.After))
 		if err != nil {
 			return nil, err
 		}
@@ -608,16 +610,16 @@ func (r *friendsConnectionResolver) PageInfo() *pageInfoResolver {
 	}
 }
 
-func encodeCursor(i int) string {
-	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i+1)))
+func encodeCursor(i int) graphql.ID {
+	return graphql.ID(base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i+1))))
 }
 
 type friendsEdgeResolver struct {
-	cursor string
-	id     string
+	cursor graphql.ID
+	id     graphql.ID
 }
 
-func (r *friendsEdgeResolver) Cursor() string {
+func (r *friendsEdgeResolver) Cursor() graphql.ID {
 	return r.cursor
 }
 
@@ -626,16 +628,16 @@ func (r *friendsEdgeResolver) Node() characterResolver {
 }
 
 type pageInfoResolver struct {
-	startCursor string
-	endCursor   string
+	startCursor graphql.ID
+	endCursor   graphql.ID
 	hasNextPage bool
 }
 
-func (r *pageInfoResolver) StartCursor() *string {
+func (r *pageInfoResolver) StartCursor() *graphql.ID {
 	return &r.startCursor
 }
 
-func (r *pageInfoResolver) EndCursor() *string {
+func (r *pageInfoResolver) EndCursor() *graphql.ID {
 	return &r.endCursor
 }
 

@@ -108,12 +108,12 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 }
 
 func SchemaToJSON(schemaString string) ([]byte, error) {
-	s := schema.New()
-	if err := s.Parse(schemaString); err != nil {
+	b := New()
+	if err := b.Parse(schemaString); err != nil {
 		return nil, err
 	}
 
-	result, err := exec.IntrospectSchema(s)
+	result, err := exec.IntrospectSchema(b.schema)
 	if err != nil {
 		return nil, err
 	}

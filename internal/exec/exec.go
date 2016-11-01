@@ -315,8 +315,11 @@ func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) 
 		}
 
 		if f.Default != nil {
-			defaultValue := fe.fieldPacker.pack(evalValue(f.Type, f.Default, nil))
-			defaultStruct.FieldByIndex(fe.fieldIndex).Set(defaultValue)
+			defaultValue, err := coerceValue(nil, f.Type, f.Default)
+			if err != nil {
+				return nil, err
+			}
+			defaultStruct.FieldByIndex(fe.fieldIndex).Set(fe.fieldPacker.pack(defaultValue))
 		}
 
 		fields = append(fields, fe)
@@ -388,7 +391,7 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
 	}
 
-	coercedVariables, err := coerceMap(&op.Vars, variables)
+	coercedVariables, err := coerceMap(nil, &op.Vars, variables)
 	if err != nil {
 		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
 	}
@@ -539,7 +542,13 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 						addResult(f.Alias, introspectSchema(ctx, r, f.SelSet))
 
 					case "__type":
-						addResult(f.Alias, introspectType(ctx, r, evalValue(stringScalar, f.Arguments["name"], r.vars).(string), f.SelSet))
+						v, err := coerceValue(r, stringScalar, f.Arguments["name"])
+						if err != nil {
+							r.addError(errors.Errorf("%s", err))
+							addResult(f.Alias, nil)
+							return
+						}
+						addResult(f.Alias, introspectType(ctx, r, v.(string), f.SelSet))
 
 					default:
 						fe, ok := e.fields[f.Name]
@@ -612,6 +621,21 @@ func (e *fieldExec) execField(ctx context.Context, r *request, f *query.Field, r
 		defer span.Finish()
 	}
 
+	result, err := e.execField2(ctx, r, f, resolver, span)
+
+	if err != nil {
+		r.addError(errors.Errorf("%s", err))
+		addResult(f.Alias, nil) // TODO handle non-nil
+
+		ext.Error.Set(span, true)
+		span.SetTag("errorMsg", err)
+		return
+	}
+
+	addResult(f.Alias, result)
+}
+
+func (e *fieldExec) execField2(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, span opentracing.Span) (interface{}, error) {
 	var in []reflect.Value
 
 	if e.hasContext {
@@ -621,7 +645,10 @@ func (e *fieldExec) execField(ctx context.Context, r *request, f *query.Field, r
 	if e.argsPacker != nil {
 		values := make(map[string]interface{})
 		for name, arg := range f.Arguments {
-			v := evalValue(e.field.Args.Fields[name].Type, arg, r.vars)
+			v, err := coerceValue(r, e.field.Args.Fields[name].Type, arg)
+			if err != nil {
+				return nil, err
+			}
 			values[name] = v
 			span.SetTag(name, v)
 		}
@@ -631,16 +658,10 @@ func (e *fieldExec) execField(ctx context.Context, r *request, f *query.Field, r
 	m := resolver.Method(e.methodIndex)
 	out := m.Call(in)
 	if e.hasError && !out[1].IsNil() {
-		err := out[1].Interface().(error)
-		r.addError(errors.Errorf("%s", err))
-		addResult(f.Alias, nil) // TODO handle non-nil
-
-		ext.Error.Set(span, true)
-		span.SetTag("errorMsg", err)
-
-		return
+		return nil, out[1].Interface().(error)
 	}
-	addResult(f.Alias, e.valueExec.exec(ctx, r, f.SelSet, out[0], false))
+
+	return e.valueExec.exec(ctx, r, f.SelSet, out[0], false), nil
 }
 
 type typeAssertExec struct {
@@ -648,22 +669,7 @@ type typeAssertExec struct {
 	typeExec    iExec
 }
 
-func evalValue(t common.Type, v common.Value, vars map[string]interface{}) interface{} {
-	switch v := v.(type) {
-	case *common.Variable:
-		return vars[v.Name]
-	case *common.Literal:
-		coerced, err := coerceValue(t, v.Value)
-		if err != nil {
-			panic(err) // TODO proper error handling
-		}
-		return coerced
-	default:
-		panic("unreachable")
-	}
-}
-
-func coerceMap(io *common.InputMap, m map[string]interface{}) (map[string]interface{}, error) {
+func coerceMap(r *request, io *common.InputMap, m map[string]interface{}) (map[string]interface{}, error) {
 	coerced := make(map[string]interface{})
 	for _, iv := range io.Fields {
 		value, ok := m[iv.Name]
@@ -671,10 +677,9 @@ func coerceMap(io *common.InputMap, m map[string]interface{}) (map[string]interf
 			if iv.Default == nil {
 				return nil, errors.Errorf("missing %q", iv.Name)
 			}
-			coerced[iv.Name] = evalValue(iv.Type, iv.Default, nil)
-			continue
+			value = iv.Default
 		}
-		c, err := coerceValue(iv.Type, value)
+		c, err := coerceValue(r, iv.Type, value)
 		if err != nil {
 			return nil, err
 		}
@@ -683,7 +688,11 @@ func coerceMap(io *common.InputMap, m map[string]interface{}) (map[string]interf
 	return coerced, nil
 }
 
-func coerceValue(typ common.Type, value interface{}) (interface{}, error) {
+func coerceValue(r *request, typ common.Type, value interface{}) (interface{}, error) {
+	if v, ok := value.(common.Variable); ok {
+		return r.vars[string(v)], nil
+	}
+
 	t, _ := unwrapNonNull(typ)
 	switch t := t.(type) {
 	case *scalar:
@@ -693,7 +702,7 @@ func coerceValue(typ common.Type, value interface{}) (interface{}, error) {
 		}
 		return v, nil
 	case *schema.InputObject:
-		return coerceMap(&t.InputMap, value.(map[string]interface{}))
+		return coerceMap(r, &t.InputMap, value.(map[string]interface{}))
 	}
 	return value, nil
 }
@@ -743,15 +752,25 @@ func (e *valuePacker) pack(value interface{}) reflect.Value {
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {
 	if skip, ok := d["skip"]; ok {
-		if evalValue(booleanScalar, skip.Arguments["if"], r.vars).(bool) {
+		v, err := coerceValue(r, booleanScalar, skip.Arguments["if"])
+		if err != nil {
+			r.addError(errors.Errorf("%s", err))
+		}
+		if err == nil && v.(bool) {
 			return true
 		}
 	}
+
 	if include, ok := d["include"]; ok {
-		if !evalValue(booleanScalar, include.Arguments["if"], r.vars).(bool) {
+		v, err := coerceValue(r, booleanScalar, include.Arguments["if"])
+		if err != nil {
+			r.addError(errors.Errorf("%s", err))
+		}
+		if err == nil && !v.(bool) {
 			return true
 		}
 	}
+
 	return false
 }
 

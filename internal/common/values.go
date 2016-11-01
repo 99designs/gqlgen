@@ -14,7 +14,7 @@ type InputMap struct {
 type InputValue struct {
 	Name    string
 	Type    Type
-	Default Value
+	Default interface{}
 }
 
 func ParseInputValue(l *lexer.Lexer) *InputValue {
@@ -29,42 +29,29 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 	return p
 }
 
-type Value interface {
-	isValue()
-}
+type Variable string
 
-type Variable struct {
-	Name string
-}
-
-type Literal struct {
-	Value interface{}
-}
-
-func (*Variable) isValue() {}
-func (*Literal) isValue()  {}
-
-func ParseValue(l *lexer.Lexer, constOnly bool) Value {
+func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	if !constOnly && l.Peek() == '$' {
 		l.ConsumeToken('$')
-		return &Variable{Name: l.ConsumeIdent()}
+		return Variable(l.ConsumeIdent())
 	}
 
 	switch l.Peek() {
 	case scanner.Int:
-		return &Literal{Value: l.ConsumeInt()}
+		return l.ConsumeInt()
 	case scanner.Float:
-		return &Literal{Value: l.ConsumeFloat()}
+		return l.ConsumeFloat()
 	case scanner.String:
-		return &Literal{Value: l.ConsumeString()}
+		return l.ConsumeString()
 	case scanner.Ident:
 		switch ident := l.ConsumeIdent(); ident {
 		case "true":
-			return &Literal{Value: true}
+			return true
 		case "false":
-			return &Literal{Value: false}
+			return false
 		default:
-			return &Literal{Value: ident}
+			return ident
 		}
 	default:
 		l.SyntaxError("invalid value")

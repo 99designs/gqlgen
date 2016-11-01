@@ -50,14 +50,14 @@ type Selection interface {
 type Field struct {
 	Alias      string
 	Name       string
-	Arguments  map[string]common.Value
+	Arguments  map[string]interface{}
 	Directives map[string]*Directive
 	SelSet     *SelectionSet
 }
 
 type Directive struct {
 	Name      string
-	Arguments map[string]common.Value
+	Arguments map[string]interface{}
 }
 
 type FragmentSpread struct {
@@ -202,8 +202,8 @@ func parseField(l *lexer.Lexer) *Field {
 	return f
 }
 
-func parseArguments(l *lexer.Lexer) map[string]common.Value {
-	args := make(map[string]common.Value)
+func parseArguments(l *lexer.Lexer) map[string]interface{} {
+	args := make(map[string]interface{})
 	l.ConsumeToken('(')
 	if l.Peek() != ')' {
 		name, value := parseArgument(l)
@@ -257,7 +257,7 @@ func parseSpread(l *lexer.Lexer) Selection {
 	return fs
 }
 
-func parseArgument(l *lexer.Lexer) (string, common.Value) {
+func parseArgument(l *lexer.Lexer) (string, interface{}) {
 	name := l.ConsumeIdent()
 	l.ConsumeToken(':')
 	value := common.ParseValue(l, false)

@@ -44,18 +44,18 @@ func (r *timeResolver) AddHour(args *struct{ Time time.Time }) time.Time {
 }
 
 type Test struct {
-	setup     func(b *graphql.SchemaBuilder)
-	schema    string
+	schema    *graphql.Schema
 	variables map[string]interface{}
-	resolver  interface{}
 	query     string
 	result    string
 }
 
+var starwarsSchema = graphql.MustParseSchema(starwars.Schema, &starwars.Resolver{})
+
 func TestHelloWorld(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema: `
+			schema: graphql.MustParseSchema(`
 				schema {
 					query: Query
 				}
@@ -63,8 +63,7 @@ func TestHelloWorld(t *testing.T) {
 				type Query {
 					hello: String!
 				}
-			`,
-			resolver: &helloWorldResolver1{},
+			`, &helloWorldResolver1{}),
 			query: `
 				{
 					hello
@@ -78,7 +77,7 @@ func TestHelloWorld(t *testing.T) {
 		},
 
 		{
-			schema: `
+			schema: graphql.MustParseSchema(`
 				schema {
 					query: Query
 				}
@@ -86,8 +85,7 @@ func TestHelloWorld(t *testing.T) {
 				type Query {
 					hello: String!
 				}
-			`,
-			resolver: &helloWorldResolver2{},
+			`, &helloWorldResolver2{}),
 			query: `
 				{
 					hello
@@ -105,8 +103,7 @@ func TestHelloWorld(t *testing.T) {
 func TestBasic(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					hero {
@@ -144,8 +141,7 @@ func TestBasic(t *testing.T) {
 func TestArguments(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					human(id: "1000") {
@@ -165,8 +161,7 @@ func TestArguments(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					human(id: "1000") {
@@ -190,8 +185,7 @@ func TestArguments(t *testing.T) {
 func TestAliases(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					empireHero: hero(episode: EMPIRE) {
@@ -219,8 +213,7 @@ func TestAliases(t *testing.T) {
 func TestFragments(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					leftComparison: hero(episode: EMPIRE) {
@@ -298,8 +291,7 @@ func TestFragments(t *testing.T) {
 func TestVariables(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query HeroNameAndFriends($episode: Episode) {
 					hero(episode: $episode) {
@@ -320,8 +312,7 @@ func TestVariables(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query HeroNameAndFriends($episode: Episode) {
 					hero(episode: $episode) {
@@ -346,8 +337,7 @@ func TestVariables(t *testing.T) {
 func TestSkipDirective(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query Hero($episode: Episode, $withoutFriends: Boolean!) {
 					hero(episode: $episode) {
@@ -372,8 +362,7 @@ func TestSkipDirective(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query Hero($episode: Episode, $withoutFriends: Boolean!) {
 					hero(episode: $episode) {
@@ -413,8 +402,7 @@ func TestSkipDirective(t *testing.T) {
 func TestIncludeDirective(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query Hero($episode: Episode, $withFriends: Boolean!) {
 					hero(episode: $episode) {
@@ -443,8 +431,7 @@ func TestIncludeDirective(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query Hero($episode: Episode, $withFriends: Boolean!) {
 					hero(episode: $episode) {
@@ -488,8 +475,7 @@ func TestIncludeDirective(t *testing.T) {
 func TestInlineFragments(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query HeroForEpisode($episode: Episode!) {
 					hero(episode: $episode) {
@@ -517,8 +503,7 @@ func TestInlineFragments(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				query HeroForEpisode($episode: Episode!) {
 					hero(episode: $episode) {
@@ -550,8 +535,7 @@ func TestInlineFragments(t *testing.T) {
 func TestTypeName(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					search(text: "an") {
@@ -593,8 +577,7 @@ func TestTypeName(t *testing.T) {
 func TestConnections(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					hero {
@@ -654,8 +637,7 @@ func TestConnections(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					hero {
@@ -707,8 +689,7 @@ func TestConnections(t *testing.T) {
 func TestMutation(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					reviews(episode: "JEDI") {
@@ -725,8 +706,7 @@ func TestMutation(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
 					createReview(episode: $ep, review: $review) {
@@ -753,8 +733,7 @@ func TestMutation(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					reviews(episode: "JEDI") {
@@ -778,8 +757,7 @@ func TestMutation(t *testing.T) {
 func TestIntrospection(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					__schema {
@@ -827,8 +805,7 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					__schema {
@@ -850,8 +827,7 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					a: __type(name: "Droid") {
@@ -932,8 +908,7 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					__type(name: "Droid") {
@@ -1030,8 +1005,7 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema:   starwars.Schema,
-			resolver: &starwars.Resolver{},
+			schema: starwarsSchema,
 			query: `
 				{
 					__type(name: "Episode") {
@@ -1065,7 +1039,7 @@ func TestIntrospection(t *testing.T) {
 func TestMutationOrder(t *testing.T) {
 	runTests(t, []*Test{
 		{
-			schema: `
+			schema: graphql.MustParseSchema(`
 				schema {
 					query: Query
 					mutation: Mutation
@@ -1078,8 +1052,7 @@ func TestMutationOrder(t *testing.T) {
 				type Mutation {
 					changeTheNumber(newNumber: Int!): Query
 				}
-			`,
-			resolver: &theNumberResolver{},
+			`, &theNumberResolver{}),
 			query: `
 				mutation {
 					first: changeTheNumber(newNumber: 1) {
@@ -1111,21 +1084,29 @@ func TestMutationOrder(t *testing.T) {
 }
 
 func TestTime(t *testing.T) {
+	b := graphql.New()
+	b.AddCustomScalar("Time", graphql.Time)
+
+	if err := b.Parse(`
+		schema {
+			query: Query
+		}
+
+		type Query {
+			addHour(time: Time = "2001-02-03T04:05:06Z"): Time!
+		}
+	`); err != nil {
+		t.Fatal(err)
+	}
+
+	schema, err := b.ApplyResolver(&timeResolver{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	runTests(t, []*Test{
 		{
-			setup: func(b *graphql.SchemaBuilder) {
-				b.AddCustomScalar("Time", graphql.Time)
-			},
-			schema: `
-				schema {
-					query: Query
-				}
-
-				type Query {
-					addHour(time: Time = "2001-02-03T04:05:06Z"): Time!
-				}
-			`,
-			resolver: &timeResolver{},
+			schema: schema,
 			query: `
 				query($t: Time!) {
 					a: addHour(time: $t)
@@ -1159,25 +1140,7 @@ func runTests(t *testing.T, tests []*Test) {
 }
 
 func runTest(t *testing.T, test *Test) {
-	b := graphql.New()
-	if test.setup != nil {
-		test.setup(b)
-	}
-
-	if err := b.Parse(test.schema); err != nil {
-		t.Fatal(err)
-	}
-
-	schema, err := b.ApplyResolver(test.resolver)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	result := schema.Exec(context.Background(), test.query, "", test.variables)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	result := test.schema.Exec(context.Background(), test.query, "", test.variables)
 	if len(result.Errors) != 0 {
 		t.Fatal(result.Errors[0])
 	}

@@ -26,6 +26,14 @@ func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 	return b.ApplyResolver(resolver)
 }
 
+func MustParseSchema(schemaString string, resolver interface{}) *Schema {
+	s, err := ParseSchema(schemaString, resolver)
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
 type SchemaBuilder struct {
 	schema *schema.Schema
 }

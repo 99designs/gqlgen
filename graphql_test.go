@@ -1,10 +1,7 @@
 package graphql_test
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"strconv"
 	"testing"
 	"time"
 
@@ -43,19 +40,12 @@ func (r *timeResolver) AddHour(args *struct{ Time time.Time }) time.Time {
 	return args.Time.Add(time.Hour)
 }
 
-type Test struct {
-	schema    *graphql.Schema
-	variables map[string]interface{}
-	query     string
-	result    string
-}
-
 var starwarsSchema = graphql.MustParseSchema(starwars.Schema, &starwars.Resolver{})
 
 func TestHelloWorld(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: graphql.MustParseSchema(`
+			Schema: graphql.MustParseSchema(`
 				schema {
 					query: Query
 				}
@@ -64,12 +54,12 @@ func TestHelloWorld(t *testing.T) {
 					hello: String!
 				}
 			`, &helloWorldResolver1{}),
-			query: `
+			Query: `
 				{
 					hello
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"hello": "Hello world!"
 				}
@@ -77,7 +67,7 @@ func TestHelloWorld(t *testing.T) {
 		},
 
 		{
-			schema: graphql.MustParseSchema(`
+			Schema: graphql.MustParseSchema(`
 				schema {
 					query: Query
 				}
@@ -86,12 +76,12 @@ func TestHelloWorld(t *testing.T) {
 					hello: String!
 				}
 			`, &helloWorldResolver2{}),
-			query: `
+			Query: `
 				{
 					hello
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"hello": "Hello world!"
 				}
@@ -101,10 +91,10 @@ func TestHelloWorld(t *testing.T) {
 }
 
 func TestBasic(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					hero {
 						id
@@ -115,7 +105,7 @@ func TestBasic(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"id": "2001",
@@ -139,10 +129,10 @@ func TestBasic(t *testing.T) {
 }
 
 func TestArguments(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					human(id: "1000") {
 						name
@@ -150,7 +140,7 @@ func TestArguments(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"human": {
 						"name": "Luke Skywalker",
@@ -161,8 +151,8 @@ func TestArguments(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					human(id: "1000") {
 						name
@@ -170,7 +160,7 @@ func TestArguments(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"human": {
 						"name": "Luke Skywalker",
@@ -183,10 +173,10 @@ func TestArguments(t *testing.T) {
 }
 
 func TestAliases(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					empireHero: hero(episode: EMPIRE) {
 						name
@@ -196,7 +186,7 @@ func TestAliases(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"empireHero": {
 						"name": "Luke Skywalker"
@@ -211,10 +201,10 @@ func TestAliases(t *testing.T) {
 }
 
 func TestFragments(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					leftComparison: hero(episode: EMPIRE) {
 						...comparisonFields
@@ -238,7 +228,7 @@ func TestFragments(t *testing.T) {
 					height
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"leftComparison": {
 						"name": "Luke Skywalker",
@@ -289,20 +279,20 @@ func TestFragments(t *testing.T) {
 }
 
 func TestVariables(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query HeroNameAndFriends($episode: Episode) {
 					hero(episode: $episode) {
 						name
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode": "JEDI",
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2"
@@ -312,18 +302,18 @@ func TestVariables(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query HeroNameAndFriends($episode: Episode) {
 					hero(episode: $episode) {
 						name
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode": "EMPIRE",
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "Luke Skywalker"
@@ -335,10 +325,10 @@ func TestVariables(t *testing.T) {
 }
 
 func TestSkipDirective(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query Hero($episode: Episode, $withoutFriends: Boolean!) {
 					hero(episode: $episode) {
 						name
@@ -348,11 +338,11 @@ func TestSkipDirective(t *testing.T) {
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode":        "JEDI",
 				"withoutFriends": true,
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2"
@@ -362,8 +352,8 @@ func TestSkipDirective(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query Hero($episode: Episode, $withoutFriends: Boolean!) {
 					hero(episode: $episode) {
 						name
@@ -373,11 +363,11 @@ func TestSkipDirective(t *testing.T) {
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode":        "JEDI",
 				"withoutFriends": false,
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2",
@@ -400,10 +390,10 @@ func TestSkipDirective(t *testing.T) {
 }
 
 func TestIncludeDirective(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query Hero($episode: Episode, $withFriends: Boolean!) {
 					hero(episode: $episode) {
 						name
@@ -417,11 +407,11 @@ func TestIncludeDirective(t *testing.T) {
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode":     "JEDI",
 				"withFriends": false,
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2"
@@ -431,8 +421,8 @@ func TestIncludeDirective(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query Hero($episode: Episode, $withFriends: Boolean!) {
 					hero(episode: $episode) {
 						name
@@ -446,11 +436,11 @@ func TestIncludeDirective(t *testing.T) {
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode":     "JEDI",
 				"withFriends": true,
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2",
@@ -473,10 +463,10 @@ func TestIncludeDirective(t *testing.T) {
 }
 
 func TestInlineFragments(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query HeroForEpisode($episode: Episode!) {
 					hero(episode: $episode) {
 						name
@@ -489,10 +479,10 @@ func TestInlineFragments(t *testing.T) {
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode": "JEDI",
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2",
@@ -503,8 +493,8 @@ func TestInlineFragments(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				query HeroForEpisode($episode: Episode!) {
 					hero(episode: $episode) {
 						name
@@ -517,10 +507,10 @@ func TestInlineFragments(t *testing.T) {
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"episode": "EMPIRE",
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "Luke Skywalker",
@@ -533,10 +523,10 @@ func TestInlineFragments(t *testing.T) {
 }
 
 func TestTypeName(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					search(text: "an") {
 						__typename
@@ -552,7 +542,7 @@ func TestTypeName(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"search": [
 						{
@@ -575,10 +565,10 @@ func TestTypeName(t *testing.T) {
 }
 
 func TestConnections(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					hero {
 						name
@@ -599,7 +589,7 @@ func TestConnections(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2",
@@ -637,8 +627,8 @@ func TestConnections(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					hero {
 						name
@@ -659,7 +649,7 @@ func TestConnections(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"hero": {
 						"name": "R2-D2",
@@ -687,10 +677,10 @@ func TestConnections(t *testing.T) {
 }
 
 func TestMutation(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					reviews(episode: "JEDI") {
 						stars
@@ -698,7 +688,7 @@ func TestMutation(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"reviews": []
 				}
@@ -706,8 +696,8 @@ func TestMutation(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
 					createReview(episode: $ep, review: $review) {
 						stars
@@ -715,14 +705,14 @@ func TestMutation(t *testing.T) {
 					}
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"ep": "JEDI",
 				"review": map[string]interface{}{
 					"stars":      5,
 					"commentary": "This is a great movie!",
 				},
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"createReview": {
 						"stars": 5,
@@ -733,8 +723,8 @@ func TestMutation(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					reviews(episode: "JEDI") {
 						stars
@@ -742,7 +732,7 @@ func TestMutation(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"reviews": [{
 						"stars": 5,
@@ -755,10 +745,10 @@ func TestMutation(t *testing.T) {
 }
 
 func TestIntrospection(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					__schema {
 						types {
@@ -767,7 +757,7 @@ func TestIntrospection(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"__schema": {
 						"types": [
@@ -805,8 +795,8 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					__schema {
 						queryType {
@@ -815,7 +805,7 @@ func TestIntrospection(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"__schema": {
 						"queryType": {
@@ -827,8 +817,8 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					a: __type(name: "Droid") {
 						name
@@ -862,7 +852,7 @@ func TestIntrospection(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"a": {
 						"name": "Droid",
@@ -908,8 +898,8 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					__type(name: "Droid") {
 						name
@@ -930,7 +920,7 @@ func TestIntrospection(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"__type": {
 						"name": "Droid",
@@ -1005,8 +995,8 @@ func TestIntrospection(t *testing.T) {
 		},
 
 		{
-			schema: starwarsSchema,
-			query: `
+			Schema: starwarsSchema,
+			Query: `
 				{
 					__type(name: "Episode") {
 						enumValues {
@@ -1015,7 +1005,7 @@ func TestIntrospection(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"__type": {
 						"enumValues": [
@@ -1037,9 +1027,9 @@ func TestIntrospection(t *testing.T) {
 }
 
 func TestMutationOrder(t *testing.T) {
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: graphql.MustParseSchema(`
+			Schema: graphql.MustParseSchema(`
 				schema {
 					query: Query
 					mutation: Mutation
@@ -1053,7 +1043,7 @@ func TestMutationOrder(t *testing.T) {
 					changeTheNumber(newNumber: Int!): Query
 				}
 			`, &theNumberResolver{}),
-			query: `
+			Query: `
 				mutation {
 					first: changeTheNumber(newNumber: 1) {
 						theNumber
@@ -1066,7 +1056,7 @@ func TestMutationOrder(t *testing.T) {
 					}
 				}
 			`,
-			result: `
+			ExpectedResult: `
 				{
 					"first": {
 						"theNumber": 1
@@ -1104,19 +1094,19 @@ func TestTime(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	runTests(t, []*Test{
+	graphql.RunTests(t, []*graphql.Test{
 		{
-			schema: schema,
-			query: `
+			Schema: schema,
+			Query: `
 				query($t: Time!) {
 					a: addHour(time: $t)
 					b: addHour
 				}
 			`,
-			variables: map[string]interface{}{
+			Variables: map[string]interface{}{
 				"t": time.Date(2000, 2, 3, 4, 5, 6, 0, time.UTC),
 			},
-			result: `
+			ExpectedResult: `
 				{
 					"a": "2000-02-03T05:05:06Z",
 					"b": "2001-02-03T05:05:06Z"
@@ -1124,43 +1114,4 @@ func TestTime(t *testing.T) {
 			`,
 		},
 	})
-}
-
-func runTests(t *testing.T, tests []*Test) {
-	if len(tests) == 1 {
-		runTest(t, tests[0])
-		return
-	}
-
-	for i, test := range tests {
-		t.Run(strconv.Itoa(i+1), func(t *testing.T) {
-			runTest(t, test)
-		})
-	}
-}
-
-func runTest(t *testing.T, test *Test) {
-	result := test.schema.Exec(context.Background(), test.query, "", test.variables)
-	if len(result.Errors) != 0 {
-		t.Fatal(result.Errors[0])
-	}
-
-	got, err := json.Marshal(result.Data)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	want := formatJSON([]byte(test.result))
-	if !bytes.Equal(got, want) {
-		t.Logf("want: %s", want)
-		t.Logf("got:  %s", got)
-		t.Fail()
-	}
-}
-
-func formatJSON(data []byte) []byte {
-	var v interface{}
-	json.Unmarshal(data, &v)
-	b, _ := json.Marshal(v)
-	return b
 }

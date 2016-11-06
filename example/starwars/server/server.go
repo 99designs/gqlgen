@@ -26,14 +26,16 @@ func main() {
 
 	http.HandleFunc("/query", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params struct {
-			Query string `json:"query"`
+			Query         string                 `json:"query"`
+			OperationName string                 `json:"operationName"`
+			Variables     map[string]interface{} `json:"variables"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		response := schema.Exec(r.Context(), params.Query, "", nil)
+		response := schema.Exec(r.Context(), params.Query, params.OperationName, params.Variables)
 		responseJSON, err := json.Marshal(response)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -60,6 +62,7 @@ var page = []byte(`
 		<div id="graphiql" style="height: 100vh;">Loading...</div>
 		<script>
 			function graphQLFetcher(graphQLParams) {
+				graphQLParams.variables = graphQLParams.variables ? JSON.parse(graphQLParams.variables) : null;
 				return fetch("/query", {
 					method: "post",
 					body: JSON.stringify(graphQLParams),

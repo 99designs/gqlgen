@@ -21,11 +21,23 @@ var intScalar = &scalar{
 	name:        "Int",
 	reflectType: reflect.TypeOf(int32(0)),
 	coerceInput: func(input interface{}) (interface{}, error) {
-		i := input.(int)
-		if i < math.MinInt32 || i > math.MaxInt32 {
-			return nil, fmt.Errorf("not a 32-bit integer: %d", i)
+		switch input := input.(type) {
+		case int32:
+			return input, nil
+		case int:
+			if input < math.MinInt32 || input > math.MaxInt32 {
+				return nil, fmt.Errorf("not a 32-bit integer")
+			}
+			return int32(input), nil
+		case float64:
+			coerced := int32(input)
+			if input < math.MinInt32 || input > math.MaxInt32 || float64(coerced) != input {
+				return nil, fmt.Errorf("not a 32-bit integer")
+			}
+			return coerced, nil
+		default:
+			return nil, fmt.Errorf("wrong type")
 		}
-		return int32(i), nil
 	},
 }
 var floatScalar = &scalar{

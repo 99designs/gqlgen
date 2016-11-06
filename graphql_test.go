@@ -728,7 +728,7 @@ func TestMutation(t *testing.T) {
 			Variables: map[string]interface{}{
 				"ep": "JEDI",
 				"review": map[string]interface{}{
-					"stars":      5,
+					"stars":      float64(5),
 					"commentary": "This is a great movie!",
 				},
 			},

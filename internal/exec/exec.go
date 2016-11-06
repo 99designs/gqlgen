@@ -120,9 +120,10 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 		}
 
 		return &objectExec{
-			name:    t.Name,
-			fields:  fields,
-			nonNull: nonNull,
+			name:       t.Name,
+			fields:     fields,
+			isConcrete: true,
+			nonNull:    nonNull,
 		}, nil
 
 	case *schema.Interface:
@@ -481,6 +482,7 @@ func (e *listExec) exec(ctx context.Context, r *request, selSet *query.Selection
 type objectExec struct {
 	name           string
 	fields         map[string]*fieldExec
+	isConcrete     bool
 	typeAssertions map[string]*typeAssertExec
 	nonNull        bool
 }
@@ -530,6 +532,11 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 				execSel(func() {
 					switch f.Name {
 					case "__typename":
+						if e.isConcrete {
+							addResult(f.Alias, e.name)
+							return
+						}
+
 						for name, a := range e.typeAssertions {
 							out := resolver.Method(a.methodIndex).Call(nil)
 							if out[1].Bool() {

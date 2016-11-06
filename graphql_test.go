@@ -561,6 +561,26 @@ func TestTypeName(t *testing.T) {
 				}
 			`,
 		},
+
+		{
+			Schema: starwarsSchema,
+			Query: `
+				{
+					human(id: "1000") {
+						__typename
+						name
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+					"human": {
+						"__typename": "Human",
+						"name": "Luke Skywalker"
+					}
+				}
+			`,
+		},
 	})
 }
 

@@ -666,6 +666,23 @@ func TestConnections(t *testing.T) {
 								}
 							}
 						}
+					},
+					moreFriends: hero {
+						name
+						friendsConnection(first: 1, after: "Y3Vyc29yMg==") {
+							totalCount
+							pageInfo {
+								startCursor
+								endCursor
+								hasNextPage
+							}
+							edges {
+								cursor
+								node {
+									name
+								}
+							}
+						}
 					}
 				}
 			`,
@@ -687,6 +704,25 @@ func TestConnections(t *testing.T) {
 										"name": "Han Solo"
 									}
 								}
+							]
+						}
+					},
+					"moreFriends": {
+						"name": "R2-D2",
+						"friendsConnection": {
+							"totalCount": 3,
+							"pageInfo": {
+								"startCursor": "Y3Vyc29yMw==",
+								"endCursor": "Y3Vyc29yMw==",
+								"hasNextPage": false
+							},
+							"edges": [
+							{
+								"cursor": "Y3Vyc29yMw==",
+								"node": {
+									"name": "Leia Organa"
+								}
+							}
 							]
 						}
 					}

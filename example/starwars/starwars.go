@@ -571,9 +571,9 @@ func newFriendsConnectionResolver(ids []graphql.ID, args *friendsConenctionArgs)
 	to := len(ids)
 	if args.First != nil {
 		to = from + int(*args.First)
-	}
-	if to > len(ids)-from {
-		to = len(ids) - from
+		if to > len(ids) {
+			to = len(ids)
+		}
 	}
 
 	return &friendsConnectionResolver{

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/example/starwars"
+	"github.com/neelance/graphql-go/relay"
 )
 
 var schema *graphql.Schema
@@ -24,26 +24,7 @@ func main() {
 		w.Write(page)
 	}))
 
-	http.HandleFunc("/query", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params struct {
-			Query         string                 `json:"query"`
-			OperationName string                 `json:"operationName"`
-			Variables     map[string]interface{} `json:"variables"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		response := schema.Exec(r.Context(), params.Query, params.OperationName, params.Variables)
-		responseJSON, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Write(responseJSON)
-	}))
+	http.Handle("/query", &relay.Handler{Schema: schema})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

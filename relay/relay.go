@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"encoding/json"
@@ -41,4 +42,29 @@ func UnmarshalSpec(id graphql.ID, v interface{}) error {
 		return errors.New("invalid graphql.ID")
 	}
 	return json.Unmarshal([]byte(s[i+1:]), v)
+}
+
+type Handler struct {
+	Schema *graphql.Schema
+}
+
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var params struct {
+		Query         string                 `json:"query"`
+		OperationName string                 `json:"operationName"`
+		Variables     map[string]interface{} `json:"variables"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response := h.Schema.Exec(r.Context(), params.Query, params.OperationName, params.Variables)
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(responseJSON)
 }

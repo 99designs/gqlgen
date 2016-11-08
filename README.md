@@ -1,5 +1,6 @@
 # graphql-go
 
+[![Build Status](https://semaphoreci.com/api/v1/neelance/graphql-go/branches/master/badge.svg)](https://semaphoreci.com/neelance/graphql-go)
 [![GoDoc](https://godoc.org/github.com/neelance/graphql-go?status.svg)](https://godoc.org/github.com/neelance/graphql-go)
 
 ## Goals:

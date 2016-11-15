@@ -18,6 +18,13 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
+// keep in sync with main package
+const OpenTracingTagType = "graphql.type"
+const OpenTracingTagField = "graphql.field"
+const OpenTracingTagTrivial = "graphql.trivial"
+const OpenTracingTagArgsPrefix = "graphql.args."
+const OpenTracingTagError = "graphql.error"
+
 type Exec struct {
 	queryExec    iExec
 	mutationExec iExec
@@ -189,7 +196,7 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 
 		m := resolverType.Method(methodIndex)
-		fe, err := makeFieldExec(s, f, m, methodIndex, methodHasReceiver, typeRefMap)
+		fe, err := makeFieldExec(s, typeName, f, m, methodIndex, methodHasReceiver, typeRefMap)
 		if err != nil {
 			return nil, fmt.Errorf("method %q of %s: %s", m.Name, resolverType, err)
 		}
@@ -198,7 +205,7 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 	return fieldExecs, nil
 }
 
-func makeFieldExec(s *schema.Schema, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool, typeRefMap map[typeRefMapKey]*typeRef) (*fieldExec, error) {
+func makeFieldExec(s *schema.Schema, typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool, typeRefMap map[typeRefMapKey]*typeRef) (*fieldExec, error) {
 	in := make([]reflect.Type, m.Type.NumIn())
 	for i := range in {
 		in[i] = m.Type.In(i)
@@ -241,6 +248,7 @@ func makeFieldExec(s *schema.Schema, f *schema.Field, m reflect.Method, methodIn
 	}
 
 	fe := &fieldExec{
+		typeName:    typeName,
 		field:       f,
 		methodIndex: methodIndex,
 		hasContext:  hasContext,
@@ -611,6 +619,7 @@ func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.F
 }
 
 type fieldExec struct {
+	typeName    string
 	field       *schema.Field
 	methodIndex int
 	hasContext  bool
@@ -620,22 +629,22 @@ type fieldExec struct {
 }
 
 func (e *fieldExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
-	trivial := !e.hasContext && e.argsPacker == nil && !e.hasError
-
-	var span opentracing.Span
-	if !trivial {
-		span, ctx = opentracing.StartSpanFromContext(ctx, "GraphQL field: "+f.Name)
-		defer span.Finish()
+	span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", e.typeName, e.field.Name))
+	defer span.Finish()
+	span.SetTag(OpenTracingTagType, e.typeName)
+	span.SetTag(OpenTracingTagField, e.field.Name)
+	if !e.hasContext && e.argsPacker == nil && !e.hasError {
+		span.SetTag(OpenTracingTagTrivial, true)
 	}
 
-	result, err := e.execField2(ctx, r, f, resolver, span)
+	result, err := e.execField2(spanCtx, r, f, resolver, span)
 
 	if err != nil {
 		r.addError(errors.Errorf("%s", err))
 		addResult(f.Alias, nil) // TODO handle non-nil
 
 		ext.Error.Set(span, true)
-		span.SetTag("errorMsg", err)
+		span.SetTag(OpenTracingTagError, err)
 		return
 	}
 
@@ -657,7 +666,7 @@ func (e *fieldExec) execField2(ctx context.Context, r *request, f *query.Field, 
 				return nil, err
 			}
 			values[name] = v
-			span.SetTag(name, v)
+			span.SetTag(OpenTracingTagArgsPrefix+name, v)
 		}
 		in = append(in, e.argsPacker.pack(values))
 	}

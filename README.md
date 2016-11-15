@@ -52,4 +52,17 @@ func (r *helloWorldResolver) Hello(ctx context.Context) (string, error) {
 
 ### OpenTracing
 
-OpenTracing spans are automatically added for each field of the GraphQL query, except those with trivial resolvers that have no `context.Context` argument, no field arguments and no `error` result. This is to avoid unnecessary clutter in the trace.
+OpenTracing spans are automatically created for each field of the GraphQL query. Fields are marked as trivial if they have no `context.Context` argument, no field arguments and no `error` result. You can use this to avoid unnecessary clutter in the trace:
+
+```go
+type trivialFieldsFilter struct {
+	rec basictracer.SpanRecorder
+}
+
+func (f *trivialFieldsFilter) RecordSpan(span basictracer.RawSpan) {
+	if b, ok := span.Tags[graphql.OpenTracingTagTrivial].(bool); ok && b {
+		return
+	}
+	f.rec.RecordSpan(span)
+}
+```

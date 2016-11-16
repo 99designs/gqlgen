@@ -14,8 +14,9 @@ type scalar struct {
 	coerceInput func(input interface{}) (interface{}, error)
 }
 
-func (*scalar) Kind() string       { return "SCALAR" }
-func (t *scalar) TypeName() string { return t.name }
+func (*scalar) Kind() string          { return "SCALAR" }
+func (t *scalar) TypeName() string    { return t.name }
+func (t *scalar) Description() string { return "" }
 
 var intScalar = &scalar{
 	name:        "Int",

@@ -26,6 +26,7 @@ func (s *Schema) Resolve(name string) common.Type {
 type NamedType interface {
 	common.Type
 	TypeName() string
+	Description() string
 }
 
 type Object struct {
@@ -33,6 +34,7 @@ type Object struct {
 	Interfaces []*Interface
 	Fields     map[string]*Field
 	FieldOrder []string
+	Desc       string
 
 	interfaceNames []string
 }
@@ -42,22 +44,31 @@ type Interface struct {
 	PossibleTypes []*Object
 	Fields        map[string]*Field
 	FieldOrder    []string
+	Desc          string
 }
 
 type Union struct {
 	Name          string
 	PossibleTypes []*Object
+	Desc          string
 
 	typeNames []string
 }
 
 type Enum struct {
 	Name   string
-	Values []string
+	Values []*EnumValue
+	Desc   string
+}
+
+type EnumValue struct {
+	Name string
+	Desc string
 }
 
 type InputObject struct {
 	Name string
+	Desc string
 	common.InputMap
 }
 
@@ -73,10 +84,17 @@ func (t *Union) TypeName() string       { return t.Name }
 func (t *Enum) TypeName() string        { return t.Name }
 func (t *InputObject) TypeName() string { return t.Name }
 
+func (t *Object) Description() string      { return t.Desc }
+func (t *Interface) Description() string   { return t.Desc }
+func (t *Union) Description() string       { return t.Desc }
+func (t *Enum) Description() string        { return t.Desc }
+func (t *InputObject) Description() string { return t.Desc }
+
 type Field struct {
 	Name string
 	Args common.InputMap
 	Type common.Type
+	Desc string
 }
 
 func New() *Schema {
@@ -195,6 +213,7 @@ func resolveInputObject(s *Schema, io *common.InputMap) error {
 
 func parseSchema(s *Schema, l *lexer.Lexer) {
 	for l.Peek() != scanner.EOF {
+		desc := l.DescComment()
 		switch x := l.ConsumeIdent(); x {
 		case "schema":
 			l.ConsumeToken('{')
@@ -207,20 +226,25 @@ func parseSchema(s *Schema, l *lexer.Lexer) {
 			l.ConsumeToken('}')
 		case "type":
 			obj := parseObjectDecl(l)
+			obj.Desc = desc
 			s.Types[obj.Name] = obj
 			s.objects = append(s.objects, obj)
 		case "interface":
 			intf := parseInterfaceDecl(l)
+			intf.Desc = desc
 			s.Types[intf.Name] = intf
 		case "union":
 			union := parseUnionDecl(l)
+			union.Desc = desc
 			s.Types[union.Name] = union
 			s.unions = append(s.unions, union)
 		case "enum":
 			enum := parseEnumDecl(l)
+			enum.Desc = desc
 			s.Types[enum.Name] = enum
 		case "input":
 			input := parseInputDecl(l)
+			input.Desc = desc
 			s.Types[input.Name] = input
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
@@ -286,7 +310,10 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 	enum.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
 	for l.Peek() != '}' {
-		enum.Values = append(enum.Values, l.ConsumeIdent())
+		v := &EnumValue{}
+		v.Desc = l.DescComment()
+		v.Name = l.ConsumeIdent()
+		enum.Values = append(enum.Values, v)
 	}
 	l.ConsumeToken('}')
 	return enum
@@ -297,6 +324,7 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 	var fieldOrder []string
 	for l.Peek() != '}' {
 		f := &Field{}
+		f.Desc = l.DescComment()
 		f.Name = l.ConsumeIdent()
 		if l.Peek() == '(' {
 			f.Args.Fields = make(map[string]*common.InputValue)

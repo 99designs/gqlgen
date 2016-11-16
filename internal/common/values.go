@@ -15,10 +15,12 @@ type InputValue struct {
 	Name    string
 	Type    Type
 	Default interface{}
+	Desc    string
 }
 
 func ParseInputValue(l *lexer.Lexer) *InputValue {
 	p := &InputValue{}
+	p.Desc = l.DescComment()
 	p.Name = l.ConsumeIdent()
 	l.ConsumeToken(':')
 	p.Type = ParseType(l)

@@ -273,6 +273,10 @@ func (r *typeResolver) Name() *string {
 }
 
 func (r *typeResolver) Description() *string {
+	if named, ok := r.typ.(schema.NamedType); ok {
+		desc := named.Description()
+		return &desc
+	}
 	return nil
 }
 
@@ -374,7 +378,10 @@ func (r *fieldResolver) Name() string {
 }
 
 func (r *fieldResolver) Description() *string {
-	return nil
+	if r.field.Desc == "" {
+		return nil
+	}
+	return &r.field.Desc
 }
 
 func (r *fieldResolver) Args() []*inputValueResolver {
@@ -406,7 +413,10 @@ func (r *inputValueResolver) Name() string {
 }
 
 func (r *inputValueResolver) Description() *string {
-	return nil
+	if r.value.Desc == "" {
+		return nil
+	}
+	return &r.value.Desc
 }
 
 func (r *inputValueResolver) Type() *typeResolver {
@@ -422,15 +432,18 @@ func (r *inputValueResolver) DefaultValue() *string {
 }
 
 type enumValueResolver struct {
-	value string
+	value *schema.EnumValue
 }
 
 func (r *enumValueResolver) Name() string {
-	return r.value
+	return r.value.Name
 }
 
 func (r *enumValueResolver) Description() *string {
-	return nil
+	if r.value.Desc == "" {
+		return nil
+	}
+	return &r.value.Desc
 }
 
 func (r *enumValueResolver) IsDeprecated() bool {

@@ -11,8 +11,9 @@ import (
 type syntaxError string
 
 type Lexer struct {
-	sc   *scanner.Scanner
-	next rune
+	sc          *scanner.Scanner
+	next        rune
+	descComment string
 }
 
 func New(sc *scanner.Scanner) *Lexer {
@@ -41,20 +42,29 @@ func (l *Lexer) Peek() rune {
 }
 
 func (l *Lexer) Consume() {
-	l.next = l.sc.Scan()
-	if l.next == ',' {
-		l.Consume()
-		return
-	}
-	if l.next == '#' {
-		for {
-			next := l.sc.Next()
-			if next == '\n' || next == scanner.EOF {
-				break
-			}
+	l.descComment = ""
+	for {
+		l.next = l.sc.Scan()
+		if l.next == ',' {
+			continue
 		}
-		l.Consume()
-		return
+		if l.next == '#' {
+			if l.sc.Peek() == ' ' {
+				l.sc.Next()
+			}
+			if l.descComment != "" {
+				l.descComment += "\n"
+			}
+			for {
+				next := l.sc.Next()
+				if next == '\n' || next == scanner.EOF {
+					break
+				}
+				l.descComment += string(next)
+			}
+			continue
+		}
+		break
 	}
 }
 
@@ -97,6 +107,10 @@ func (l *Lexer) ConsumeToken(expected rune) {
 		l.SyntaxError(fmt.Sprintf("unexpected %q, expecting %s", l.sc.TokenText(), scanner.TokenString(expected)))
 	}
 	l.Consume()
+}
+
+func (l *Lexer) DescComment() string {
+	return l.descComment
 }
 
 func (l *Lexer) SyntaxError(message string) {

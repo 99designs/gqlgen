@@ -1239,3 +1239,61 @@ func TestUnexportedField(t *testing.T) {
 		t.Error("error expected")
 	}
 }
+
+type coercionResolver struct{}
+
+func (r *coercionResolver) Int(args *struct{ Value int32 }) int32 {
+	return args.Value
+}
+
+func (r *coercionResolver) Float(args *struct{ Value float64 }) float64 {
+	return args.Value
+}
+
+func (r *coercionResolver) String(args *struct{ Value string }) string {
+	return args.Value
+}
+
+func (r *coercionResolver) Boolean(args *struct{ Value bool }) bool {
+	return args.Value
+}
+
+func TestCoercion(t *testing.T) {
+	coercionSchema := graphql.MustParseSchema(`
+		schema {
+			query: Query
+		}
+
+		type Query {
+			int(value: Int!): Int!
+			float(value: Float!): Float!
+			string(value: String!): String!
+			boolean(value: Boolean!): Boolean!
+		}
+	`, &coercionResolver{})
+	graphql.RunTests(t, []*graphql.Test{
+		{
+			Schema: coercionSchema,
+			Query: `
+				{
+					int1: int(value: 42)
+					int2: int(value: 42.0)
+					float1: float(value: 42)
+					float2: float(value: 42.5)
+					string(value: "foo")
+					boolean(value: true)
+				}
+			`,
+			ExpectedResult: `
+				{
+					"int1": 42,
+					"int2": 42,
+					"float1": 42,
+					"float2": 42.5,
+					"string": "foo",
+					"boolean": true
+				}
+			`,
+		},
+	})
+}

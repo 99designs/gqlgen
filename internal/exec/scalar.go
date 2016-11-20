@@ -45,7 +45,16 @@ var floatScalar = &scalar{
 	name:        "Float",
 	reflectType: reflect.TypeOf(float64(0)),
 	coerceInput: func(input interface{}) (interface{}, error) {
-		return input, nil // TODO
+		switch input := input.(type) {
+		case int32:
+			return float64(input), nil
+		case int:
+			return float64(input), nil
+		case float64:
+			return input, nil
+		default:
+			return nil, fmt.Errorf("wrong type")
+		}
 	},
 }
 var stringScalar = &scalar{

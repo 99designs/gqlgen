@@ -90,7 +90,7 @@ func (l *Lexer) ConsumeInt() int {
 
 func (l *Lexer) ConsumeFloat() float64 {
 	text := l.sc.TokenText()
-	l.ConsumeToken(scanner.Int)
+	l.ConsumeToken(scanner.Float)
 	value, _ := strconv.ParseFloat(text, 64)
 	return value
 }

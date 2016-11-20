@@ -690,6 +690,9 @@ func coerceMap(r *request, io *common.InputMap, m map[string]interface{}) (map[s
 	for _, iv := range io.Fields {
 		value, ok := m[iv.Name]
 		if !ok {
+			if _, nonNull := unwrapNonNull(iv.Type); !nonNull {
+				continue
+			}
 			if iv.Default == nil {
 				return nil, errors.Errorf("missing %q", iv.Name)
 			}

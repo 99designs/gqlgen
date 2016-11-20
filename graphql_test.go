@@ -764,7 +764,7 @@ func TestMutation(t *testing.T) {
 			Variables: map[string]interface{}{
 				"ep": "JEDI",
 				"review": map[string]interface{}{
-					"stars":      float64(5),
+					"stars":      5,
 					"commentary": "This is a great movie!",
 				},
 			},
@@ -773,6 +773,32 @@ func TestMutation(t *testing.T) {
 					"createReview": {
 						"stars": 5,
 						"commentary": "This is a great movie!"
+					}
+				}
+			`,
+		},
+
+		{
+			Schema: starwarsSchema,
+			Query: `
+				mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
+					createReview(episode: $ep, review: $review) {
+						stars
+						commentary
+					}
+				}
+			`,
+			Variables: map[string]interface{}{
+				"ep": "EMPIRE",
+				"review": map[string]interface{}{
+					"stars": float64(4),
+				},
+			},
+			ExpectedResult: `
+				{
+					"createReview": {
+						"stars": 4,
+						"commentary": null
 					}
 				}
 			`,

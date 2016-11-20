@@ -1240,25 +1240,29 @@ func TestUnexportedField(t *testing.T) {
 	}
 }
 
-type coercionResolver struct{}
+type inputResolver struct{}
 
-func (r *coercionResolver) Int(args *struct{ Value int32 }) int32 {
+func (r *inputResolver) Int(args *struct{ Value int32 }) int32 {
 	return args.Value
 }
 
-func (r *coercionResolver) Float(args *struct{ Value float64 }) float64 {
+func (r *inputResolver) Float(args *struct{ Value float64 }) float64 {
 	return args.Value
 }
 
-func (r *coercionResolver) String(args *struct{ Value string }) string {
+func (r *inputResolver) String(args *struct{ Value string }) string {
 	return args.Value
 }
 
-func (r *coercionResolver) Boolean(args *struct{ Value bool }) bool {
+func (r *inputResolver) Boolean(args *struct{ Value bool }) bool {
 	return args.Value
 }
 
-func TestCoercion(t *testing.T) {
+func (r *inputResolver) List(args *struct{ Value []int32 }) []int32 {
+	return args.Value
+}
+
+func TestInput(t *testing.T) {
 	coercionSchema := graphql.MustParseSchema(`
 		schema {
 			query: Query
@@ -1269,8 +1273,9 @@ func TestCoercion(t *testing.T) {
 			float(value: Float!): Float!
 			string(value: String!): String!
 			boolean(value: Boolean!): Boolean!
+			list(value: [Int!]!): [Int!]!
 		}
-	`, &coercionResolver{})
+	`, &inputResolver{})
 	graphql.RunTests(t, []*graphql.Test{
 		{
 			Schema: coercionSchema,
@@ -1282,6 +1287,7 @@ func TestCoercion(t *testing.T) {
 					float2: float(value: 42.5)
 					string(value: "foo")
 					boolean(value: true)
+					list(value: [41, 42, 43])
 				}
 			`,
 			ExpectedResult: `
@@ -1291,7 +1297,8 @@ func TestCoercion(t *testing.T) {
 					"float1": 42,
 					"float2": 42.5,
 					"string": "foo",
-					"boolean": true
+					"boolean": true,
+					"list": [41, 42, 43]
 				}
 			`,
 		},

@@ -261,6 +261,57 @@ func makeFieldExec(s *schema.Schema, typeName string, f *schema.Field, m reflect
 	return fe, nil
 }
 
+func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, reflectType reflect.Type) (packer, error) {
+	t, nonNull := unwrapNonNull(schemaType)
+	if hasDefault {
+		nonNull = true
+	}
+	switch t := t.(type) {
+	case *scalar:
+		want := t.reflectType
+		if !nonNull {
+			want = reflect.PtrTo(want)
+		}
+		if reflectType != want {
+			return nil, fmt.Errorf("wrong type, expected %s", want)
+		}
+		return &valuePacker{
+			nonNull: nonNull,
+		}, nil
+	case *schema.Enum:
+		want := reflect.TypeOf("")
+		if !nonNull {
+			want = reflect.PtrTo(want)
+		}
+		if reflectType != want {
+			return nil, fmt.Errorf("wrong type, expected %s", want)
+		}
+		return &valuePacker{
+			nonNull: nonNull,
+		}, nil
+	case *schema.InputObject:
+		e, err := makeStructPacker(s, &t.InputMap, reflectType)
+		if err != nil {
+			return nil, err
+		}
+		return e, nil
+	case *common.List:
+		if reflectType.Kind() != reflect.Slice {
+			return nil, fmt.Errorf("expected slice, got %s", reflectType)
+		}
+		elem, err := makePacker(s, t.OfType, false, reflectType.Elem())
+		if err != nil {
+			return nil, err
+		}
+		return &listPacker{
+			sliceType: reflectType,
+			elem:      elem,
+		}, nil
+	default:
+		panic("TODO")
+	}
+}
+
 func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) (*structPacker, error) {
 	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
 		return nil, fmt.Errorf("expected pointer to struct, got %s", typ)
@@ -279,52 +330,15 @@ func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) 
 			return nil, fmt.Errorf("missing argument %q", f.Name)
 		}
 		if sf.PkgPath != "" {
-			return nil, fmt.Errorf("field must be exported: %s", sf.Name)
+			return nil, fmt.Errorf("field %q must be exported", sf.Name)
 		}
 		fe.fieldIndex = sf.Index
 
-		ft, nonNull := unwrapNonNull(f.Type)
-		if f.Default != nil {
-			nonNull = true
+		p, err := makePacker(s, f.Type, f.Default != nil, sf.Type)
+		if err != nil {
+			return nil, fmt.Errorf("field %q: %s", sf.Name, err)
 		}
-		expectType := func(got, want reflect.Type) error {
-			if got != want {
-				return fmt.Errorf("%q has wrong type, expected %s", sf.Name, want)
-			}
-			return nil
-		}
-		switch ft := ft.(type) {
-		case *scalar:
-			want := ft.reflectType
-			if !nonNull {
-				want = reflect.PtrTo(want)
-			}
-			if err := expectType(sf.Type, want); err != nil {
-				return nil, err
-			}
-			fe.fieldPacker = &valuePacker{
-				nonNull: nonNull,
-			}
-		case *schema.Enum:
-			want := reflect.TypeOf("string")
-			if !nonNull {
-				want = reflect.PtrTo(want)
-			}
-			if err := expectType(sf.Type, want); err != nil {
-				return nil, err
-			}
-			fe.fieldPacker = &valuePacker{
-				nonNull: nonNull,
-			}
-		case *schema.InputObject:
-			e, err := makeStructPacker(s, &ft.InputMap, sf.Type)
-			if err != nil {
-				return nil, err
-			}
-			fe.fieldPacker = e
-		default:
-			panic("TODO")
-		}
+		fe.fieldPacker = p
 
 		if f.Default != nil {
 			defaultValue, err := coerceValue(nil, f.Type, f.Default)
@@ -725,6 +739,17 @@ func coerceValue(r *request, typ common.Type, value interface{}) (interface{}, e
 		return v, nil
 	case *schema.InputObject:
 		return coerceMap(r, &t.InputMap, value.(map[string]interface{}))
+	case *common.List:
+		list := value.([]interface{})
+		coerced := make([]interface{}, len(list))
+		for i, entry := range list {
+			c, err := coerceValue(r, t.OfType, entry)
+			if err != nil {
+				return nil, err
+			}
+			coerced[i] = c
+		}
+		return coerced, nil
 	}
 	return value, nil
 }
@@ -745,11 +770,11 @@ type structPackerField struct {
 	fieldPacker packer
 }
 
-func (e *structPacker) pack(value interface{}) reflect.Value {
+func (p *structPacker) pack(value interface{}) reflect.Value {
 	values := value.(map[string]interface{})
-	v := reflect.New(e.structType)
-	v.Elem().Set(e.defaultStruct)
-	for _, f := range e.fields {
+	v := reflect.New(p.structType)
+	v.Elem().Set(p.defaultStruct)
+	for _, f := range p.fields {
 		if value, ok := values[f.name]; ok {
 			fv := f.fieldPacker.pack(value)
 			v.Elem().FieldByIndex(f.fieldIndex).Set(fv)
@@ -758,16 +783,30 @@ func (e *structPacker) pack(value interface{}) reflect.Value {
 	return v
 }
 
+type listPacker struct {
+	sliceType reflect.Type
+	elem      packer
+}
+
+func (e *listPacker) pack(value interface{}) reflect.Value {
+	list := value.([]interface{})
+	v := reflect.MakeSlice(e.sliceType, len(list), len(list))
+	for i := range list {
+		v.Index(i).Set(e.elem.pack(list[i]))
+	}
+	return v
+}
+
 type valuePacker struct {
 	nonNull bool
 }
 
-func (e *valuePacker) pack(value interface{}) reflect.Value {
+func (p *valuePacker) pack(value interface{}) reflect.Value {
 	v := reflect.ValueOf(value)
-	if !e.nonNull {
-		p := reflect.New(v.Type())
-		p.Elem().Set(v)
-		return p
+	if !p.nonNull {
+		ptr := reflect.New(v.Type())
+		ptr.Elem().Set(v)
+		return ptr
 	}
 	return v
 }

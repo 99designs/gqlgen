@@ -34,12 +34,22 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 type Variable string
 
 func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
-	if !constOnly && l.Peek() == '$' {
+	switch l.Peek() {
+	case '$':
+		if constOnly {
+			l.SyntaxError("variable not allowed")
+			panic("unreachable")
+		}
 		l.ConsumeToken('$')
 		return Variable(l.ConsumeIdent())
-	}
-
-	switch l.Peek() {
+	case '[':
+		l.ConsumeToken('[')
+		var list []interface{}
+		for l.Peek() != ']' {
+			list = append(list, ParseValue(l, constOnly))
+		}
+		l.ConsumeToken(']')
+		return list
 	case scanner.Int:
 		return l.ConsumeInt()
 	case scanner.Float:

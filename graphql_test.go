@@ -1197,3 +1197,45 @@ func TestTime(t *testing.T) {
 		},
 	})
 }
+
+type resolverWithUnexportedMethod struct{}
+
+func (r *resolverWithUnexportedMethod) changeTheNumber(args *struct{ NewNumber int32 }) int32 {
+	return args.NewNumber
+}
+
+func TestUnexportedMethod(t *testing.T) {
+	_, err := graphql.ParseSchema(`
+		schema {
+			mutation: Mutation
+		}
+
+		type Mutation {
+			changeTheNumber(newNumber: Int!): Int!
+		}
+	`, &resolverWithUnexportedMethod{})
+	if err == nil {
+		t.Error("error expected")
+	}
+}
+
+type resolverWithUnexportedField struct{}
+
+func (r *resolverWithUnexportedField) ChangeTheNumber(args *struct{ newNumber int32 }) int32 {
+	return args.newNumber
+}
+
+func TestUnexportedField(t *testing.T) {
+	_, err := graphql.ParseSchema(`
+		schema {
+			mutation: Mutation
+		}
+
+		type Mutation {
+			changeTheNumber(newNumber: Int!): Int!
+		}
+	`, &resolverWithUnexportedField{})
+	if err == nil {
+		t.Error("error expected")
+	}
+}

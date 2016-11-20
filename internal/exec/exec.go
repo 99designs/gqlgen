@@ -278,6 +278,9 @@ func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) 
 		if !ok {
 			return nil, fmt.Errorf("missing argument %q", f.Name)
 		}
+		if sf.PkgPath != "" {
+			return nil, fmt.Errorf("field must be exported: %s", sf.Name)
+		}
 		fe.fieldIndex = sf.Index
 
 		ft, nonNull := unwrapNonNull(f.Type)

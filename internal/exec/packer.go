@@ -61,8 +61,10 @@ func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, refle
 			sliceType: reflectType,
 			elem:      elem,
 		}, nil
+	case *schema.Object, *schema.Interface, *schema.Union:
+		return nil, fmt.Errorf("type of kind %s can not be used as input", t.Kind())
 	default:
-		panic("TODO")
+		panic("unreachable")
 	}
 }
 

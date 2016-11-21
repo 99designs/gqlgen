@@ -54,6 +54,8 @@ func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 			return true
 		case "false":
 			return false
+		case "null":
+			return nil
 		default:
 			return ident
 		}

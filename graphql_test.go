@@ -1258,6 +1258,10 @@ func (r *inputResolver) Boolean(args *struct{ Value bool }) bool {
 	return args.Value
 }
 
+func (r *inputResolver) Nullable(args *struct{ Value *int32 }) *int32 {
+	return args.Value
+}
+
 func (r *inputResolver) List(args *struct{ Value []*struct{ V int32 } }) []int32 {
 	l := make([]int32, len(args.Value))
 	for i, entry := range args.Value {
@@ -1277,6 +1281,7 @@ func TestInput(t *testing.T) {
 			float(value: Float!): Float!
 			string(value: String!): String!
 			boolean(value: Boolean!): Boolean!
+			nullable(value: Int): Int
 			list(value: [Input!]!): [Int!]!
 		}
 
@@ -1295,6 +1300,8 @@ func TestInput(t *testing.T) {
 					float2: float(value: 42.5)
 					string(value: "foo")
 					boolean(value: true)
+					nullable1: nullable(value: 42)
+					nullable2: nullable(value: null)
 					list(value: [{v: 41}, {v: 42}, {v: 43}])
 				}
 			`,
@@ -1306,6 +1313,8 @@ func TestInput(t *testing.T) {
 					"float2": 42.5,
 					"string": "foo",
 					"boolean": true,
+					"nullable1": 42,
+					"nullable2": null,
 					"list": [41, 42, 43]
 				}
 			`,

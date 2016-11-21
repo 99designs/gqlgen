@@ -28,7 +28,8 @@ func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, refle
 			return nil, fmt.Errorf("wrong type, expected %s", want)
 		}
 		return &valuePacker{
-			nonNull: nonNull,
+			valueType: reflectType,
+			nonNull:   nonNull,
 		}, nil
 	case *schema.Enum:
 		want := reflect.TypeOf("")
@@ -39,7 +40,8 @@ func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, refle
 			return nil, fmt.Errorf("wrong type, expected %s", want)
 		}
 		return &valuePacker{
-			nonNull: nonNull,
+			valueType: reflectType,
+			nonNull:   nonNull,
 		}, nil
 	case *schema.InputObject:
 		e, err := makeStructPacker(s, &t.InputMap, reflectType)
@@ -150,15 +152,18 @@ func (e *listPacker) pack(value interface{}) reflect.Value {
 }
 
 type valuePacker struct {
-	nonNull bool
+	valueType reflect.Type
+	nonNull   bool
 }
 
 func (p *valuePacker) pack(value interface{}) reflect.Value {
-	v := reflect.ValueOf(value)
 	if !p.nonNull {
-		ptr := reflect.New(v.Type())
-		ptr.Elem().Set(v)
+		if value == nil {
+			return reflect.Zero(p.valueType)
+		}
+		ptr := reflect.New(p.valueType.Elem())
+		ptr.Elem().Set(reflect.ValueOf(value))
 		return ptr
 	}
-	return v
+	return reflect.ValueOf(value)
 }

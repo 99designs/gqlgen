@@ -632,7 +632,10 @@ func coerceValue(r *request, typ common.Type, value interface{}) (interface{}, e
 		return r.vars[string(v)], nil
 	}
 
-	t, _ := unwrapNonNull(typ)
+	t, nonNull := unwrapNonNull(typ)
+	if !nonNull && value == nil {
+		return nil, nil
+	}
 	switch t := t.(type) {
 	case *scalar:
 		v, err := t.coerceInput(value)

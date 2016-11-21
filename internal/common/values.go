@@ -42,14 +42,6 @@ func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 		}
 		l.ConsumeToken('$')
 		return Variable(l.ConsumeIdent())
-	case '[':
-		l.ConsumeToken('[')
-		var list []interface{}
-		for l.Peek() != ']' {
-			list = append(list, ParseValue(l, constOnly))
-		}
-		l.ConsumeToken(']')
-		return list
 	case scanner.Int:
 		return l.ConsumeInt()
 	case scanner.Float:
@@ -65,6 +57,24 @@ func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 		default:
 			return ident
 		}
+	case '[':
+		l.ConsumeToken('[')
+		var list []interface{}
+		for l.Peek() != ']' {
+			list = append(list, ParseValue(l, constOnly))
+		}
+		l.ConsumeToken(']')
+		return list
+	case '{':
+		l.ConsumeToken('{')
+		obj := make(map[string]interface{})
+		for l.Peek() != '}' {
+			name := l.ConsumeIdent()
+			l.ConsumeToken(':')
+			obj[name] = ParseValue(l, constOnly)
+		}
+		l.ConsumeToken('}')
+		return obj
 	default:
 		l.SyntaxError("invalid value")
 		panic("unreachable")

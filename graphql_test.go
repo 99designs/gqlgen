@@ -1258,8 +1258,12 @@ func (r *inputResolver) Boolean(args *struct{ Value bool }) bool {
 	return args.Value
 }
 
-func (r *inputResolver) List(args *struct{ Value []int32 }) []int32 {
-	return args.Value
+func (r *inputResolver) List(args *struct{ Value []*struct{ V int32 } }) []int32 {
+	l := make([]int32, len(args.Value))
+	for i, entry := range args.Value {
+		l[i] = entry.V
+	}
+	return l
 }
 
 func TestInput(t *testing.T) {
@@ -1273,7 +1277,11 @@ func TestInput(t *testing.T) {
 			float(value: Float!): Float!
 			string(value: String!): String!
 			boolean(value: Boolean!): Boolean!
-			list(value: [Int!]!): [Int!]!
+			list(value: [Input!]!): [Int!]!
+		}
+
+		input Input {
+			v: Int!
 		}
 	`, &inputResolver{})
 	graphql.RunTests(t, []*graphql.Test{
@@ -1287,7 +1295,7 @@ func TestInput(t *testing.T) {
 					float2: float(value: 42.5)
 					string(value: "foo")
 					boolean(value: true)
-					list(value: [41, 42, 43])
+					list(value: [{v: 41}, {v: 42}, {v: 43}])
 				}
 			`,
 			ExpectedResult: `

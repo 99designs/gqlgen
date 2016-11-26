@@ -275,6 +275,9 @@ func (r *typeResolver) Name() *string {
 func (r *typeResolver) Description() *string {
 	if named, ok := r.typ.(schema.NamedType); ok {
 		desc := named.Description()
+		if desc == "" {
+			return nil
+		}
 		return &desc
 	}
 	return nil

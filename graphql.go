@@ -85,6 +85,14 @@ func (b *SchemaBuilder) ApplyResolver(resolver interface{}) (*Schema, error) {
 	}, nil
 }
 
+func (b *SchemaBuilder) ToJSON() ([]byte, error) {
+	result, err := exec.IntrospectSchema(b.schema)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(result)
+}
+
 type Schema struct {
 	schema *schema.Schema
 	exec   *exec.Exec
@@ -123,20 +131,6 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		Data:   data,
 		Errors: errs,
 	}
-}
-
-func SchemaToJSON(schemaString string) ([]byte, error) {
-	b := New()
-	if err := b.Parse(schemaString); err != nil {
-		return nil, err
-	}
-
-	result, err := exec.IntrospectSchema(b.schema)
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(result)
 }
 
 type ScalarConfig struct {

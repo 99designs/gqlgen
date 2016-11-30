@@ -90,7 +90,7 @@ func (b *SchemaBuilder) ToJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(result)
+	return json.MarshalIndent(result, "", "\t")
 }
 
 type Schema struct {

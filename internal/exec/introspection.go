@@ -253,7 +253,32 @@ func (r *schemaResolver) SubscriptionType() *typeResolver {
 }
 
 func (r *schemaResolver) Directives() []*directiveResolver {
-	return nil
+	return []*directiveResolver{
+		&directiveResolver{
+			name:        "skip",
+			description: "Directs the executor to skip this field or fragment when the `if` argument is true.",
+			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
+			args: []*inputValueResolver{
+				&inputValueResolver{&common.InputValue{
+					Name: "if",
+					Desc: "Skipped when true.",
+					Type: &common.NonNull{OfType: booleanScalar},
+				}},
+			},
+		},
+		&directiveResolver{
+			name:        "include",
+			description: "Directs the executor to include this field or fragment only when the `if` argument is true.",
+			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
+			args: []*inputValueResolver{
+				&inputValueResolver{&common.InputValue{
+					Name: "if",
+					Desc: "Included when true.",
+					Type: &common.NonNull{OfType: booleanScalar},
+				}},
+			},
+		},
+	}
 }
 
 type typeResolver struct {
@@ -458,22 +483,26 @@ func (r *enumValueResolver) DeprecationReason() *string {
 }
 
 type directiveResolver struct {
+	name        string
+	description string
+	locations   []string
+	args        []*inputValueResolver
 }
 
 func (r *directiveResolver) Name() string {
-	panic("TODO")
+	return r.name
 }
 
 func (r *directiveResolver) Description() *string {
-	panic("TODO")
+	return &r.description
 }
 
 func (r *directiveResolver) Locations() []string {
-	panic("TODO")
+	return r.locations
 }
 
 func (r *directiveResolver) Args() []*inputValueResolver {
-	panic("TODO")
+	return r.args
 }
 
 var introspectionQuery *query.Document

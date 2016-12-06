@@ -1105,6 +1105,84 @@ func TestIntrospection(t *testing.T) {
 				}
 			`,
 		},
+
+		{
+			Schema: starwarsSchema,
+			Query: `
+				{
+					__schema {
+						directives {
+							name
+							description
+							locations
+							args {
+								name
+								description
+								type {
+									kind
+									ofType {
+										kind
+										name
+									}
+								}
+							}
+						}
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+						"__schema": {
+							"directives": [
+								{
+									"name": "skip",
+									"description": "Directs the executor to skip this field or fragment when the ` + "`" + `if` + "`" + ` argument is true.",
+									"locations": [
+										"FIELD",
+										"FRAGMENT_SPREAD",
+										"INLINE_FRAGMENT"
+									],
+									"args": [
+										{
+											"name": "if",
+											"description": "Skipped when true.",
+											"type": {
+												"kind": "NON_NULL",
+												"ofType": {
+													"kind": "SCALAR",
+													"name": "Boolean"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "include",
+									"description": "Directs the executor to include this field or fragment only when the ` + "`" + `if` + "`" + ` argument is true.",
+									"locations": [
+										"FIELD",
+										"FRAGMENT_SPREAD",
+										"INLINE_FRAGMENT"
+									],
+									"args": [
+										{
+											"name": "if",
+											"description": "Included when true.",
+											"type": {
+												"kind": "NON_NULL",
+												"ofType": {
+													"kind": "SCALAR",
+													"name": "Boolean"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+			`,
+		},
 	})
 }
 

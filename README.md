@@ -9,7 +9,7 @@ The project is under heavy development. It is stable enough so we use it in prod
 
 ## Goals
 
-* full support of GraphQL spec
+* full support of [GraphQL spec (October 2016)](https://facebook.github.io/graphql/)
 * minimal API
 * support for context.Context and OpenTracing
 * early error detection at application startup by type-checking if the given resolver matches the schema 

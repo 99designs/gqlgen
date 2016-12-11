@@ -320,14 +320,9 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
 	}
 
-	coercedVariables, err := coerceMap(nil, &op.Vars, variables)
-	if err != nil {
-		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
-	}
-
 	r := &request{
 		doc:    document,
-		vars:   coercedVariables,
+		vars:   variables,
 		schema: e.schema,
 	}
 
@@ -477,13 +472,14 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 						addResult(f.Alias, introspectSchema(ctx, r, f.SelSet))
 
 					case "__type":
-						v, err := coerceValue(r, stringScalar, f.Arguments["name"])
+						p := valuePacker{scalar: stringScalar, nonNull: true}
+						v, err := p.pack(r, f.Arguments["name"])
 						if err != nil {
 							r.addError(errors.Errorf("%s", err))
 							addResult(f.Alias, nil)
 							return
 						}
-						addResult(f.Alias, introspectType(ctx, r, v.(string), f.SelSet))
+						addResult(f.Alias, introspectType(ctx, r, v.String(), f.SelSet))
 
 					default:
 						fe, ok := e.fields[f.Name]
@@ -579,16 +575,14 @@ func (e *fieldExec) execField2(ctx context.Context, r *request, f *query.Field, 
 	}
 
 	if e.argsPacker != nil {
-		values := make(map[string]interface{})
 		for name, arg := range f.Arguments {
-			v, err := coerceValue(r, e.field.Args.Fields[name].Type, arg)
-			if err != nil {
-				return nil, err
-			}
-			values[name] = v
-			span.SetTag(OpenTracingTagArgsPrefix+name, v)
+			span.SetTag(OpenTracingTagArgsPrefix+name, arg)
 		}
-		in = append(in, e.argsPacker.pack(values))
+		packed, err := e.argsPacker.pack(r, f.Arguments)
+		if err != nil {
+			return nil, err
+		}
+		in = append(in, packed)
 	}
 
 	m := resolver.Method(e.methodIndex)
@@ -605,78 +599,25 @@ type typeAssertExec struct {
 	typeExec    iExec
 }
 
-func coerceMap(r *request, io *common.InputMap, m map[string]interface{}) (map[string]interface{}, error) {
-	coerced := make(map[string]interface{})
-	for _, iv := range io.Fields {
-		value, ok := m[iv.Name]
-		if !ok {
-			if _, nonNull := unwrapNonNull(iv.Type); !nonNull {
-				continue
-			}
-			if iv.Default == nil {
-				return nil, errors.Errorf("missing %q", iv.Name)
-			}
-			value = iv.Default
-		}
-		c, err := coerceValue(r, iv.Type, value)
-		if err != nil {
-			return nil, err
-		}
-		coerced[iv.Name] = c
-	}
-	return coerced, nil
-}
-
-func coerceValue(r *request, typ common.Type, value interface{}) (interface{}, error) {
-	if v, ok := value.(common.Variable); ok {
-		return r.vars[string(v)], nil
-	}
-
-	t, nonNull := unwrapNonNull(typ)
-	if !nonNull && value == nil {
-		return nil, nil
-	}
-	switch t := t.(type) {
-	case *scalar:
-		v, err := t.coerceInput(value)
-		if v == nil {
-			return nil, fmt.Errorf("could not convert %#v (%T) to %s: %s", value, value, t.name, err)
-		}
-		return v, nil
-	case *schema.InputObject:
-		return coerceMap(r, &t.InputMap, value.(map[string]interface{}))
-	case *common.List:
-		list := value.([]interface{})
-		coerced := make([]interface{}, len(list))
-		for i, entry := range list {
-			c, err := coerceValue(r, t.OfType, entry)
-			if err != nil {
-				return nil, err
-			}
-			coerced[i] = c
-		}
-		return coerced, nil
-	}
-	return value, nil
-}
-
 func skipByDirective(r *request, d map[string]*query.Directive) bool {
 	if skip, ok := d["skip"]; ok {
-		v, err := coerceValue(r, booleanScalar, skip.Arguments["if"])
+		p := valuePacker{scalar: booleanScalar, nonNull: true}
+		v, err := p.pack(r, skip.Arguments["if"])
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}
-		if err == nil && v.(bool) {
+		if err == nil && v.Bool() {
 			return true
 		}
 	}
 
 	if include, ok := d["include"]; ok {
-		v, err := coerceValue(r, booleanScalar, include.Arguments["if"])
+		p := valuePacker{scalar: booleanScalar, nonNull: true}
+		v, err := p.pack(r, include.Arguments["if"])
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}
-		if err == nil && !v.(bool) {
+		if err == nil && !v.Bool() {
 			return true
 		}
 	}

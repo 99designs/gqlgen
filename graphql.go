@@ -8,8 +8,6 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 
-	"reflect"
-
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
@@ -27,6 +25,20 @@ const OpenTracingTagArgsPrefix = "graphql.args."
 const OpenTracingTagError = "graphql.error"
 
 type ID string
+
+func (_ ID) ImplementsGraphQLType(name string) bool {
+	return name == "ID"
+}
+
+func (id *ID) UnmarshalGraphQL(input interface{}) error {
+	switch input := input.(type) {
+	case string:
+		*id = ID(input)
+		return nil
+	default:
+		return fmt.Errorf("wrong type")
+	}
+}
 
 func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 	b := New()
@@ -49,29 +61,13 @@ type SchemaBuilder struct {
 }
 
 func New() *SchemaBuilder {
-	s := schema.New()
-	exec.AddBuiltinScalars(s)
-	exec.AddCustomScalar(s, "ID", reflect.TypeOf(ID("")), func(input interface{}) (interface{}, error) {
-		switch input := input.(type) {
-		case ID:
-			return input, nil
-		case string:
-			return ID(input), nil
-		default:
-			return nil, fmt.Errorf("wrong type")
-		}
-	})
 	return &SchemaBuilder{
-		schema: s,
+		schema: schema.New(),
 	}
 }
 
 func (b *SchemaBuilder) Parse(schemaString string) error {
 	return b.schema.Parse(schemaString)
-}
-
-func (b *SchemaBuilder) AddCustomScalar(name string, scalar *ScalarConfig) {
-	exec.AddCustomScalar(b.schema, name, scalar.ReflectType, scalar.CoerceInput)
 }
 
 func (b *SchemaBuilder) ApplyResolver(resolver interface{}) (*Schema, error) {
@@ -131,9 +127,4 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		Data:   data,
 		Errors: errs,
 	}
-}
-
-type ScalarConfig struct {
-	ReflectType reflect.Type
-	CoerceInput func(input interface{}) (interface{}, error)
 }

@@ -2,6 +2,7 @@ package exec
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"strings"
 
@@ -20,17 +21,21 @@ func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, refle
 		nonNull = true
 	}
 	switch t := t.(type) {
-	case *scalar:
-		want := t.reflectType
-		if !nonNull {
-			want = reflect.PtrTo(want)
+	case *schema.Scalar:
+		if u, ok := reflect.New(reflectType).Interface().(Unmarshaler); ok {
+			if !u.ImplementsGraphQLType(t.Name) {
+				return nil, fmt.Errorf("can not unmarshal %s into %s", t.Name, reflectType)
+			}
 		}
-		if reflectType != want {
-			return nil, fmt.Errorf("wrong type, expected %s", want)
+		if !nonNull {
+			return &nullPacker{
+				elemPacker: &valuePacker{
+					valueType: reflectType.Elem(),
+				},
+				valueType: reflectType,
+			}, nil
 		}
 		return &valuePacker{
-			scalar:    t,
-			nonNull:   nonNull,
 			valueType: reflectType,
 		}, nil
 
@@ -43,8 +48,6 @@ func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, refle
 			return nil, fmt.Errorf("wrong type, expected %s", want)
 		}
 		return &valuePacker{
-			scalar:    stringScalar,
-			nonNull:   nonNull,
 			valueType: reflectType,
 		}, nil
 
@@ -176,9 +179,31 @@ func (e *listPacker) pack(r *request, value interface{}) (reflect.Value, error) 
 	return v, nil
 }
 
+type nullPacker struct {
+	elemPacker packer
+	valueType  reflect.Type
+}
+
+func (p *nullPacker) pack(r *request, value interface{}) (reflect.Value, error) {
+	if v, ok := value.(common.Variable); ok {
+		value = r.vars[string(v)]
+	}
+
+	if value == nil {
+		return reflect.Zero(p.valueType), nil
+	}
+
+	v, err := p.elemPacker.pack(r, value)
+	if err != nil {
+		return reflect.Value{}, err
+	}
+
+	ptr := reflect.New(p.valueType.Elem())
+	ptr.Elem().Set(v)
+	return ptr, nil
+}
+
 type valuePacker struct {
-	scalar    *scalar
-	nonNull   bool
 	valueType reflect.Type
 }
 
@@ -188,20 +213,63 @@ func (p *valuePacker) pack(r *request, value interface{}) (reflect.Value, error)
 	}
 
 	if value == nil {
-		if p.nonNull {
-			return reflect.Value{}, errors.Errorf("got null for non-null")
-		}
-		return reflect.Zero(p.valueType), nil
+		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	coerced, err := p.scalar.coerceInput(value)
-	if err != nil {
-		return reflect.Value{}, fmt.Errorf("could not convert %#v (%T) to %s: %s", value, value, p.scalar.name, err)
+	v := reflect.New(p.valueType).Interface()
+	if v, ok := v.(Unmarshaler); ok {
+		if err := v.UnmarshalGraphQL(value); err != nil {
+			return reflect.Value{}, err
+		}
+		return reflect.ValueOf(v).Elem(), nil
 	}
-	if !p.nonNull {
-		ptr := reflect.New(p.valueType.Elem())
-		ptr.Elem().Set(reflect.ValueOf(coerced))
-		return ptr, nil
+
+	coerced, err := unmarshalInput(p.valueType, value)
+	if err != nil {
+		return reflect.Value{}, fmt.Errorf("could not unmarshal %#v (%T) into %s: %s", value, value, p.valueType, err)
 	}
 	return reflect.ValueOf(coerced), nil
+}
+
+type Unmarshaler interface {
+	ImplementsGraphQLType(name string) bool
+	UnmarshalGraphQL(input interface{}) error
+}
+
+var int32Type = reflect.TypeOf(int32(0))
+var float64Type = reflect.TypeOf(float64(0))
+var stringType = reflect.TypeOf("")
+var boolType = reflect.TypeOf(false)
+
+func unmarshalInput(typ reflect.Type, input interface{}) (interface{}, error) {
+	if reflect.TypeOf(input) == typ {
+		return input, nil
+	}
+
+	switch typ {
+	case int32Type:
+		switch input := input.(type) {
+		case int:
+			if input < math.MinInt32 || input > math.MaxInt32 {
+				return nil, fmt.Errorf("not a 32-bit integer")
+			}
+			return int32(input), nil
+		case float64:
+			coerced := int32(input)
+			if input < math.MinInt32 || input > math.MaxInt32 || float64(coerced) != input {
+				return nil, fmt.Errorf("not a 32-bit integer")
+			}
+			return coerced, nil
+		}
+
+	case float64Type:
+		switch input := input.(type) {
+		case int32:
+			return float64(input), nil
+		case int:
+			return float64(input), nil
+		}
+	}
+
+	return nil, fmt.Errorf("incompatible type")
 }

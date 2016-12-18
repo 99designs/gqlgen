@@ -110,13 +110,11 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 	}
 
 	switch t := t.(type) {
-	case *scalar:
-		if !nonNull {
-			resolverType = resolverType.Elem()
-		}
-		scalarType := t.reflectType
-		if resolverType != scalarType {
-			return nil, fmt.Errorf("expected %s, got %s", scalarType, resolverType)
+	case *schema.Scalar:
+		if u, ok := reflect.New(resolverType).Interface().(Unmarshaler); ok {
+			if !u.ImplementsGraphQLType(t.Name) {
+				return nil, fmt.Errorf("can not use %s as %s", resolverType, t.Name)
+			}
 		}
 		return &scalarExec{}, nil
 
@@ -472,7 +470,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 						addResult(f.Alias, introspectSchema(ctx, r, f.SelSet))
 
 					case "__type":
-						p := valuePacker{scalar: stringScalar, nonNull: true}
+						p := valuePacker{valueType: stringType}
 						v, err := p.pack(r, f.Arguments["name"])
 						if err != nil {
 							r.addError(errors.Errorf("%s", err))
@@ -601,7 +599,7 @@ type typeAssertExec struct {
 
 func skipByDirective(r *request, d map[string]*query.Directive) bool {
 	if skip, ok := d["skip"]; ok {
-		p := valuePacker{scalar: booleanScalar, nonNull: true}
+		p := valuePacker{valueType: boolType}
 		v, err := p.pack(r, skip.Arguments["if"])
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
@@ -612,7 +610,7 @@ func skipByDirective(r *request, d map[string]*query.Directive) bool {
 	}
 
 	if include, ok := d["include"]; ok {
-		p := valuePacker{scalar: booleanScalar, nonNull: true}
+		p := valuePacker{valueType: boolType}
 		v, err := p.pack(r, include.Arguments["if"])
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))

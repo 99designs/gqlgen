@@ -19,7 +19,6 @@ var typeExec iExec
 
 func init() {
 	metaSchema = schema.New()
-	AddBuiltinScalars(metaSchema)
 	if err := metaSchema.Parse(metaSchemaSrc); err != nil {
 		panic(err)
 	}
@@ -262,7 +261,7 @@ func (r *schemaResolver) Directives() []*directiveResolver {
 				&inputValueResolver{&common.InputValue{
 					Name: "if",
 					Desc: "Skipped when true.",
-					Type: &common.NonNull{OfType: booleanScalar},
+					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},
 				}},
 			},
 		},
@@ -274,7 +273,7 @@ func (r *schemaResolver) Directives() []*directiveResolver {
 				&inputValueResolver{&common.InputValue{
 					Name: "if",
 					Desc: "Included when true.",
-					Type: &common.NonNull{OfType: booleanScalar},
+					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},
 				}},
 			},
 		},

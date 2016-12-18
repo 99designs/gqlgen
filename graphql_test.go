@@ -36,8 +36,8 @@ func (r *theNumberResolver) ChangeTheNumber(args *struct{ NewNumber int32 }) *th
 
 type timeResolver struct{}
 
-func (r *timeResolver) AddHour(args *struct{ Time time.Time }) time.Time {
-	return args.Time.Add(time.Hour)
+func (r *timeResolver) AddHour(args *struct{ Time graphql.Time }) graphql.Time {
+	return graphql.Time{Time: args.Time.Add(time.Hour)}
 }
 
 var starwarsSchema = graphql.MustParseSchema(starwars.Schema, &starwars.Resolver{})
@@ -1234,29 +1234,19 @@ func TestMutationOrder(t *testing.T) {
 }
 
 func TestTime(t *testing.T) {
-	b := graphql.New()
-	b.AddCustomScalar("Time", graphql.Time)
-
-	if err := b.Parse(`
-		schema {
-			query: Query
-		}
-
-		type Query {
-			addHour(time: Time = "2001-02-03T04:05:06Z"): Time!
-		}
-	`); err != nil {
-		t.Fatal(err)
-	}
-
-	schema, err := b.ApplyResolver(&timeResolver{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	graphql.RunTests(t, []*graphql.Test{
 		{
-			Schema: schema,
+			Schema: graphql.MustParseSchema(`
+				schema {
+					query: Query
+				}
+
+				type Query {
+					addHour(time: Time = "2001-02-03T04:05:06Z"): Time!
+				}
+
+				scalar Time
+			`, &timeResolver{}),
 			Query: `
 				query($t: Time!) {
 					a: addHour(time: $t)

@@ -29,6 +29,11 @@ type NamedType interface {
 	Description() string
 }
 
+type Scalar struct {
+	Name string
+	Desc string
+}
+
 type Object struct {
 	Name       string
 	Interfaces []*Interface
@@ -72,18 +77,21 @@ type InputObject struct {
 	common.InputMap
 }
 
+func (*Scalar) Kind() string      { return "SCALAR" }
 func (*Object) Kind() string      { return "OBJECT" }
 func (*Interface) Kind() string   { return "INTERFACE" }
 func (*Union) Kind() string       { return "UNION" }
 func (*Enum) Kind() string        { return "ENUM" }
 func (*InputObject) Kind() string { return "INPUT_OBJECT" }
 
+func (t *Scalar) TypeName() string      { return t.Name }
 func (t *Object) TypeName() string      { return t.Name }
 func (t *Interface) TypeName() string   { return t.Name }
 func (t *Union) TypeName() string       { return t.Name }
 func (t *Enum) TypeName() string        { return t.Name }
 func (t *InputObject) TypeName() string { return t.Name }
 
+func (t *Scalar) Description() string      { return t.Desc }
 func (t *Object) Description() string      { return t.Desc }
 func (t *Interface) Description() string   { return t.Desc }
 func (t *Union) Description() string       { return t.Desc }
@@ -100,7 +108,13 @@ type Field struct {
 func New() *Schema {
 	return &Schema{
 		entryPointNames: make(map[string]string),
-		Types:           make(map[string]NamedType),
+		Types: map[string]NamedType{
+			"Int":     &Scalar{"Int", "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1."},
+			"Float":   &Scalar{"Float", "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point)."},
+			"String":  &Scalar{"String", "The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text."},
+			"Boolean": &Scalar{"Boolean", "The `Boolean` scalar type represents `true` or `false`."},
+			"ID":      &Scalar{"ID", "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `\"4\"`) or integer (such as `4`) input value will be accepted as an ID."},
+		},
 	}
 }
 
@@ -246,8 +260,11 @@ func parseSchema(s *Schema, l *lexer.Lexer) {
 			input := parseInputDecl(l)
 			input.Desc = desc
 			s.Types[input.Name] = input
+		case "scalar":
+			name := l.ConsumeIdent()
+			s.Types[name] = &Scalar{Name: name, Desc: desc}
 		default:
-			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union" or "input"`, x))
+			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union", "input" or "scalar"`, x))
 		}
 	}
 }

@@ -167,7 +167,11 @@ func (e *listPacker) pack(r *request, value interface{}) (reflect.Value, error) 
 		value = r.vars[string(v)]
 	}
 
-	list := value.([]interface{})
+	list, ok := value.([]interface{})
+	if !ok {
+		list = []interface{}{value}
+	}
+
 	v := reflect.MakeSlice(e.sliceType, len(list), len(list))
 	for i := range list {
 		packed, err := e.elem.pack(r, list[i])

@@ -1370,7 +1370,8 @@ func TestInput(t *testing.T) {
 					boolean(value: true)
 					nullable1: nullable(value: 42)
 					nullable2: nullable(value: null)
-					list(value: [{v: 41}, {v: 42}, {v: 43}])
+					list1: list(value: [{v: 41}, {v: 42}, {v: 43}])
+					list2: list(value: {v: 42})
 				}
 			`,
 			ExpectedResult: `
@@ -1383,7 +1384,8 @@ func TestInput(t *testing.T) {
 					"boolean": true,
 					"nullable1": 42,
 					"nullable2": null,
-					"list": [41, 42, 43]
+					"list1": [41, 42, 43],
+					"list2": [42]
 				}
 			`,
 		},

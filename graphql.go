@@ -12,6 +12,7 @@ import (
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
+	"github.com/neelance/graphql-go/introspection"
 )
 
 const OpenTracingTagQuery = "graphql.query"
@@ -109,6 +110,10 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		Data:   data,
 		Errors: errs,
 	}
+}
+
+func (s *Schema) Inspect() *introspection.Schema {
+	return &introspection.Schema{Schema: s.schema}
 }
 
 func (s *Schema) ToJSON() ([]byte, error) {

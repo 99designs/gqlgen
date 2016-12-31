@@ -69,6 +69,6 @@ func ResolveType(t Type, resolver Resolver) (Type, error) {
 		}
 		return refT, nil
 	default:
-		panic("unreachable")
+		return t, nil
 	}
 }

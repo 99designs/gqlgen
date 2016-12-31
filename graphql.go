@@ -41,11 +41,22 @@ func (id *ID) UnmarshalGraphQL(input interface{}) error {
 }
 
 func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
-	b := New()
-	if err := b.Parse(schemaString); err != nil {
+	s := &Schema{
+		schema: schema.New(),
+	}
+	if err := s.schema.Parse(schemaString); err != nil {
 		return nil, err
 	}
-	return b.ApplyResolver(resolver)
+
+	if resolver != nil {
+		e, err := exec.Make(s.schema, resolver)
+		if err != nil {
+			return nil, err
+		}
+		s.exec = e
+	}
+
+	return s, nil
 }
 
 func MustParseSchema(schemaString string, resolver interface{}) *Schema {
@@ -54,39 +65,6 @@ func MustParseSchema(schemaString string, resolver interface{}) *Schema {
 		panic(err)
 	}
 	return s
-}
-
-type SchemaBuilder struct {
-	schema *schema.Schema
-}
-
-func New() *SchemaBuilder {
-	return &SchemaBuilder{
-		schema: schema.New(),
-	}
-}
-
-func (b *SchemaBuilder) Parse(schemaString string) error {
-	return b.schema.Parse(schemaString)
-}
-
-func (b *SchemaBuilder) ApplyResolver(resolver interface{}) (*Schema, error) {
-	e, err2 := exec.Make(b.schema, resolver)
-	if err2 != nil {
-		return nil, err2
-	}
-	return &Schema{
-		schema: b.schema,
-		exec:   e,
-	}, nil
-}
-
-func (b *SchemaBuilder) ToJSON() ([]byte, error) {
-	result, err := exec.IntrospectSchema(b.schema)
-	if err != nil {
-		return nil, err
-	}
-	return json.MarshalIndent(result, "", "\t")
 }
 
 type Schema struct {
@@ -101,6 +79,10 @@ type Response struct {
 }
 
 func (s *Schema) Exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) *Response {
+	if s.exec == nil {
+		panic("schema created without resolver, can not exec")
+	}
+
 	document, err := query.Parse(queryString, s.schema.Resolve)
 	if err != nil {
 		return &Response{
@@ -127,4 +109,12 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		Data:   data,
 		Errors: errs,
 	}
+}
+
+func (s *Schema) ToJSON() ([]byte, error) {
+	result, err := exec.IntrospectSchema(s.schema)
+	if err != nil {
+		return nil, err
+	}
+	return json.MarshalIndent(result, "", "\t")
 }

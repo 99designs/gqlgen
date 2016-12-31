@@ -50,9 +50,9 @@ func (r *Schema) SubscriptionType() *Type {
 	return &Type{t}
 }
 
-func (r *Schema) Directives() []*directiveResolver {
-	return []*directiveResolver{
-		&directiveResolver{
+func (r *Schema) Directives() []*Directive {
+	return []*Directive{
+		&Directive{
 			name:        "skip",
 			description: "Directs the executor to skip this field or fragment when the `if` argument is true.",
 			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
@@ -64,7 +64,7 @@ func (r *Schema) Directives() []*directiveResolver {
 				}},
 			},
 		},
-		&directiveResolver{
+		&Directive{
 			name:        "include",
 			description: "Directs the executor to include this field or fragment only when the `if` argument is true.",
 			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
@@ -280,25 +280,25 @@ func (r *EnumValue) DeprecationReason() *string {
 	return nil
 }
 
-type directiveResolver struct {
+type Directive struct {
 	name        string
 	description string
 	locations   []string
 	args        []*InputValue
 }
 
-func (r *directiveResolver) Name() string {
+func (r *Directive) Name() string {
 	return r.name
 }
 
-func (r *directiveResolver) Description() *string {
+func (r *Directive) Description() *string {
 	return &r.description
 }
 
-func (r *directiveResolver) Locations() []string {
+func (r *Directive) Locations() []string {
 	return r.locations
 }
 
-func (r *directiveResolver) Args() []*InputValue {
+func (r *Directive) Args() []*InputValue {
 	return r.args
 }

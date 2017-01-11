@@ -554,7 +554,9 @@ func (e *fieldExec) execField(ctx context.Context, r *request, f *query.Field, r
 	result, err := e.execField2(spanCtx, r, f, resolver, span)
 
 	if err != nil {
-		r.addError(errors.Errorf("%s", err))
+		queryError := errors.Errorf("%s", err)
+		queryError.ResolverError = err
+		r.addError(queryError)
 		addResult(f.Alias, nil) // TODO handle non-nil
 
 		ext.Error.Set(span, true)

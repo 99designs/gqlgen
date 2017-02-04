@@ -103,17 +103,26 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 	var nonNull bool
 	t, nonNull = unwrapNonNull(t)
 
+	switch t := t.(type) {
+	case *schema.Object:
+		return makeObjectExec(s, t.Name, t.Fields, nil, nonNull, resolverType, typeRefMap)
+
+	case *schema.Interface:
+		return makeObjectExec(s, t.Name, t.Fields, t.PossibleTypes, nonNull, resolverType, typeRefMap)
+
+	case *schema.Union:
+		return makeObjectExec(s, t.Name, nil, t.PossibleTypes, nonNull, resolverType, typeRefMap)
+	}
+
 	if !nonNull {
-		if resolverType.Kind() != reflect.Ptr && resolverType.Kind() != reflect.Interface {
-			return nil, fmt.Errorf("%s is not a pointer or interface", resolverType)
+		if resolverType.Kind() != reflect.Ptr {
+			return nil, fmt.Errorf("%s is not a pointer", resolverType)
 		}
+		resolverType = resolverType.Elem()
 	}
 
 	switch t := t.(type) {
 	case *schema.Scalar:
-		if !nonNull {
-			resolverType = resolverType.Elem()
-		}
 		implementsType := false
 		switch r := reflect.New(resolverType).Interface().(type) {
 		case *int32:
@@ -132,55 +141,10 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 		}
 		return &scalarExec{}, nil
 
-	case *schema.Object:
-		fields, err := makeFieldExecs(s, t.Name, t.Fields, resolverType, typeRefMap)
-		if err != nil {
-			return nil, err
-		}
-
-		return &objectExec{
-			name:       t.Name,
-			fields:     fields,
-			isConcrete: true,
-			nonNull:    nonNull,
-		}, nil
-
-	case *schema.Interface:
-		fields, err := makeFieldExecs(s, t.Name, t.Fields, resolverType, typeRefMap)
-		if err != nil {
-			return nil, err
-		}
-
-		typeAssertions, err := makeTypeAssertions(s, t.Name, t.PossibleTypes, resolverType, typeRefMap)
-		if err != nil {
-			return nil, err
-		}
-
-		return &objectExec{
-			name:           t.Name,
-			fields:         fields,
-			typeAssertions: typeAssertions,
-			nonNull:        nonNull,
-		}, nil
-
-	case *schema.Union:
-		typeAssertions, err := makeTypeAssertions(s, t.Name, t.PossibleTypes, resolverType, typeRefMap)
-		if err != nil {
-			return nil, err
-		}
-		return &objectExec{
-			name:           t.Name,
-			typeAssertions: typeAssertions,
-			nonNull:        nonNull,
-		}, nil
-
 	case *schema.Enum:
 		return &scalarExec{}, nil
 
 	case *common.List:
-		if !nonNull {
-			resolverType = resolverType.Elem()
-		}
 		if resolverType.Kind() != reflect.Slice {
 			return nil, fmt.Errorf("%s is not a slice", resolverType)
 		}
@@ -195,10 +159,13 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 	}
 }
 
-var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
-var errorType = reflect.TypeOf((*error)(nil)).Elem()
+func makeObjectExec(s *schema.Schema, typeName string, fields map[string]*schema.Field, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (*objectExec, error) {
+	if !nonNull {
+		if resolverType.Kind() != reflect.Ptr && resolverType.Kind() != reflect.Interface {
+			return nil, fmt.Errorf("%s is not a pointer or interface", resolverType)
+		}
+	}
 
-func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema.Field, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (map[string]*fieldExec, error) {
 	methodHasReceiver := resolverType.Kind() != reflect.Interface
 	fieldExecs := make(map[string]*fieldExec)
 	for name, f := range fields {
@@ -214,8 +181,32 @@ func makeFieldExecs(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 		fieldExecs[name] = fe
 	}
-	return fieldExecs, nil
+
+	typeAssertions := make(map[string]*typeAssertExec)
+	for _, impl := range possibleTypes {
+		methodIndex := findMethod(resolverType, "to"+impl.Name)
+		if methodIndex == -1 {
+			return nil, fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, typeName, "to"+impl.Name, impl.Name)
+		}
+		a := &typeAssertExec{
+			methodIndex: methodIndex,
+		}
+		if err := makeExec(&a.typeExec, s, impl, resolverType.Method(methodIndex).Type.Out(0), typeRefMap); err != nil {
+			return nil, err
+		}
+		typeAssertions[impl.Name] = a
+	}
+
+	return &objectExec{
+		name:           typeName,
+		fields:         fieldExecs,
+		typeAssertions: typeAssertions,
+		nonNull:        nonNull,
+	}, nil
 }
+
+var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
+var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
 func makeFieldExec(s *schema.Schema, typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool, typeRefMap map[typeRefMapKey]*typeRef) (*fieldExec, error) {
 	in := make([]reflect.Type, m.Type.NumIn())
@@ -271,24 +262,6 @@ func makeFieldExec(s *schema.Schema, typeName string, f *schema.Field, m reflect
 		return nil, err
 	}
 	return fe, nil
-}
-
-func makeTypeAssertions(s *schema.Schema, typeName string, impls []*schema.Object, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (map[string]*typeAssertExec, error) {
-	typeAssertions := make(map[string]*typeAssertExec)
-	for _, impl := range impls {
-		methodIndex := findMethod(resolverType, "to"+impl.Name)
-		if methodIndex == -1 {
-			return nil, fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, typeName, "to"+impl.Name, impl.Name)
-		}
-		a := &typeAssertExec{
-			methodIndex: methodIndex,
-		}
-		if err := makeExec(&a.typeExec, s, impl, resolverType.Method(methodIndex).Type.Out(0), typeRefMap); err != nil {
-			return nil, err
-		}
-		typeAssertions[impl.Name] = a
-	}
-	return typeAssertions, nil
 }
 
 func findMethod(t reflect.Type, name string) int {
@@ -417,7 +390,6 @@ func (e *listExec) exec(ctx context.Context, r *request, selSet *query.Selection
 type objectExec struct {
 	name           string
 	fields         map[string]*fieldExec
-	isConcrete     bool
 	typeAssertions map[string]*typeAssertExec
 	nonNull        bool
 }
@@ -467,7 +439,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 				execSel(func() {
 					switch f.Name {
 					case "__typename":
-						if e.isConcrete {
+						if len(e.typeAssertions) == 0 {
 							addResult(f.Alias, e.name)
 							return
 						}

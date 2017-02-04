@@ -111,10 +111,24 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 
 	switch t := t.(type) {
 	case *schema.Scalar:
-		if u, ok := reflect.New(resolverType).Interface().(Unmarshaler); ok {
-			if !u.ImplementsGraphQLType(t.Name) {
-				return nil, fmt.Errorf("can not use %s as %s", resolverType, t.Name)
-			}
+		if !nonNull {
+			resolverType = resolverType.Elem()
+		}
+		implementsType := false
+		switch r := reflect.New(resolverType).Interface().(type) {
+		case *int32:
+			implementsType = (t.Name == "Int")
+		case *float64:
+			implementsType = (t.Name == "Float")
+		case *string:
+			implementsType = (t.Name == "String")
+		case *bool:
+			implementsType = (t.Name == "Boolean")
+		case Unmarshaler:
+			implementsType = r.ImplementsGraphQLType(t.Name)
+		}
+		if !implementsType {
+			return nil, fmt.Errorf("can not use %s as %s", resolverType, t.Name)
 		}
 		return &scalarExec{}, nil
 

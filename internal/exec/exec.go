@@ -299,6 +299,13 @@ func (r *request) handlePanic() {
 	}
 }
 
+func (r *request) resolveVar(value interface{}) interface{} {
+	if v, ok := value.(common.Variable); ok {
+		value = r.vars[string(v)]
+	}
+	return value
+}
+
 func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}) (interface{}, []*errors.QueryError) {
 	op, err := getOperation(document, operationName)
 	if err != nil {
@@ -457,7 +464,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 
 					case "__type":
 						p := valuePacker{valueType: stringType}
-						v, err := p.pack(r, f.Arguments["name"])
+						v, err := p.pack(r, r.resolveVar(f.Arguments["name"]))
 						if err != nil {
 							r.addError(errors.Errorf("%s", err))
 							addResult(f.Alias, nil)
@@ -588,7 +595,7 @@ type typeAssertExec struct {
 func skipByDirective(r *request, d map[string]*query.Directive) bool {
 	if skip, ok := d["skip"]; ok {
 		p := valuePacker{valueType: boolType}
-		v, err := p.pack(r, skip.Arguments["if"])
+		v, err := p.pack(r, r.resolveVar(skip.Arguments["if"]))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}
@@ -599,7 +606,7 @@ func skipByDirective(r *request, d map[string]*query.Directive) bool {
 
 	if include, ok := d["include"]; ok {
 		p := valuePacker{valueType: boolType}
-		v, err := p.pack(r, include.Arguments["if"])
+		v, err := p.pack(r, r.resolveVar(include.Arguments["if"]))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}

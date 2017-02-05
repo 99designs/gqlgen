@@ -153,16 +153,12 @@ type structPackerField struct {
 }
 
 func (p *structPacker) pack(r *request, value interface{}) (reflect.Value, error) {
-	if v, ok := value.(common.Variable); ok {
-		value = r.vars[string(v)]
-	}
-
 	values := value.(map[string]interface{})
 	v := reflect.New(p.structType)
 	v.Elem().Set(p.defaultStruct)
 	for _, f := range p.fields {
 		if value, ok := values[f.name]; ok {
-			packed, err := f.fieldPacker.pack(r, value)
+			packed, err := f.fieldPacker.pack(r, r.resolveVar(value))
 			if err != nil {
 				return reflect.Value{}, err
 			}
@@ -178,10 +174,6 @@ type listPacker struct {
 }
 
 func (e *listPacker) pack(r *request, value interface{}) (reflect.Value, error) {
-	if v, ok := value.(common.Variable); ok {
-		value = r.vars[string(v)]
-	}
-
 	list, ok := value.([]interface{})
 	if !ok {
 		list = []interface{}{value}
@@ -189,7 +181,7 @@ func (e *listPacker) pack(r *request, value interface{}) (reflect.Value, error) 
 
 	v := reflect.MakeSlice(e.sliceType, len(list), len(list))
 	for i := range list {
-		packed, err := e.elem.pack(r, list[i])
+		packed, err := e.elem.pack(r, r.resolveVar(list[i]))
 		if err != nil {
 			return reflect.Value{}, err
 		}
@@ -204,10 +196,6 @@ type nullPacker struct {
 }
 
 func (p *nullPacker) pack(r *request, value interface{}) (reflect.Value, error) {
-	if v, ok := value.(common.Variable); ok {
-		value = r.vars[string(v)]
-	}
-
 	if value == nil {
 		return reflect.Zero(p.valueType), nil
 	}
@@ -227,10 +215,6 @@ type valuePacker struct {
 }
 
 func (p *valuePacker) pack(r *request, value interface{}) (reflect.Value, error) {
-	if v, ok := value.(common.Variable); ok {
-		value = r.vars[string(v)]
-	}
-
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
@@ -247,10 +231,6 @@ type unmarshalerPacker struct {
 }
 
 func (p *unmarshalerPacker) pack(r *request, value interface{}) (reflect.Value, error) {
-	if v, ok := value.(common.Variable); ok {
-		value = r.vars[string(v)]
-	}
-
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}

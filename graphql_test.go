@@ -1338,6 +1338,27 @@ func (r *inputResolver) List(args *struct{ Value []*struct{ V int32 } }) []int32
 	return l
 }
 
+func (r *inputResolver) NullableList(args *struct{ Value *[]*struct{ V int32 } }) *[]*int32 {
+	if args.Value == nil {
+		return nil
+	}
+	l := make([]*int32, len(*args.Value))
+	for i, entry := range *args.Value {
+		if entry != nil {
+			l[i] = &entry.V
+		}
+	}
+	return &l
+}
+
+func (r *inputResolver) Enum(args *struct{ Value string }) string {
+	return args.Value
+}
+
+func (r *inputResolver) NullableEnum(args *struct{ Value *string }) *string {
+	return args.Value
+}
+
 func TestInput(t *testing.T) {
 	coercionSchema := graphql.MustParseSchema(`
 		schema {
@@ -1351,10 +1372,18 @@ func TestInput(t *testing.T) {
 			boolean(value: Boolean!): Boolean!
 			nullable(value: Int): Int
 			list(value: [Input!]!): [Int!]!
+			nullableList(value: [Input]): [Int]
+			enum(value: Enum!): Enum!
+			nullableEnum(value: Enum): Enum
 		}
 
 		input Input {
 			v: Int!
+		}
+
+		enum Enum {
+			Option1
+			Option2
 		}
 	`, &inputResolver{})
 	graphql.RunTests(t, []*graphql.Test{
@@ -1372,6 +1401,11 @@ func TestInput(t *testing.T) {
 					nullable2: nullable(value: null)
 					list1: list(value: [{v: 41}, {v: 42}, {v: 43}])
 					list2: list(value: {v: 42})
+					nullableList1: nullableList(value: [{v: 41}, null, {v: 43}])
+					nullableList2: nullableList(value: null)
+					enum(value: Option2)
+					nullableEnum1: nullableEnum(value: Option2)
+					nullableEnum2: nullableEnum(value: null)
 				}
 			`,
 			ExpectedResult: `
@@ -1385,7 +1419,12 @@ func TestInput(t *testing.T) {
 					"nullable1": 42,
 					"nullable2": null,
 					"list1": [41, 42, 43],
-					"list2": [42]
+					"list2": [42],
+					"nullableList1": [41, null, 43],
+					"nullableList2": null,
+					"enum": "Option2",
+					"nullableEnum1": "Option2",
+					"nullableEnum2": null
 				}
 			`,
 		},

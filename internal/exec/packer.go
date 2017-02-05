@@ -17,18 +17,24 @@ type packer interface {
 
 func makePacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	t, nonNull := unwrapNonNull(schemaType)
-
 	if !nonNull {
 		if reflectType.Kind() != reflect.Ptr {
 			return nil, fmt.Errorf("%s is not a pointer", reflectType)
 		}
-		elem, err := makeNonNullPacker(s, t, reflectType.Elem())
+		elemType := reflectType.Elem()
+		addPtr := true
+		if _, ok := t.(*schema.InputObject); ok {
+			elemType = reflectType // keep pointer for input objects
+			addPtr = false
+		}
+		elem, err := makeNonNullPacker(s, t, elemType)
 		if err != nil {
 			return nil, err
 		}
 		return &nullPacker{
 			elemPacker: elem,
 			valueType:  reflectType,
+			addPtr:     addPtr,
 		}, nil
 	}
 
@@ -110,7 +116,7 @@ func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) 
 		}
 		fe.fieldIndex = sf.Index
 
-		var ft common.Type = f.Type
+		ft := f.Type
 		if f.Default != nil {
 			ft, _ = unwrapNonNull(ft)
 			ft = &common.NonNull{OfType: ft}
@@ -153,6 +159,10 @@ type structPackerField struct {
 }
 
 func (p *structPacker) pack(r *request, value interface{}) (reflect.Value, error) {
+	if value == nil {
+		return reflect.Value{}, errors.Errorf("got null for non-null")
+	}
+
 	values := value.(map[string]interface{})
 	v := reflect.New(p.structType)
 	v.Elem().Set(p.defaultStruct)
@@ -193,6 +203,7 @@ func (e *listPacker) pack(r *request, value interface{}) (reflect.Value, error) 
 type nullPacker struct {
 	elemPacker packer
 	valueType  reflect.Type
+	addPtr     bool
 }
 
 func (p *nullPacker) pack(r *request, value interface{}) (reflect.Value, error) {
@@ -205,9 +216,13 @@ func (p *nullPacker) pack(r *request, value interface{}) (reflect.Value, error) 
 		return reflect.Value{}, err
 	}
 
-	ptr := reflect.New(p.valueType.Elem())
-	ptr.Elem().Set(v)
-	return ptr, nil
+	if p.addPtr {
+		ptr := reflect.New(p.valueType.Elem())
+		ptr.Elem().Set(v)
+		return ptr, nil
+	}
+
+	return v, nil
 }
 
 type valuePacker struct {

@@ -40,6 +40,9 @@ func makeNonNullPacker(s *schema.Schema, schemaType common.Type, reflectType ref
 		if !u.ImplementsGraphQLType(schemaType.String()) {
 			return nil, fmt.Errorf("can not unmarshal %s into %s", schemaType, reflectType)
 		}
+		return &unmarshalerPacker{
+			valueType: reflectType,
+		}, nil
 	}
 
 	switch t := schemaType.(type) {
@@ -232,19 +235,31 @@ func (p *valuePacker) pack(r *request, value interface{}) (reflect.Value, error)
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	v := reflect.New(p.valueType).Interface()
-	if v, ok := v.(Unmarshaler); ok {
-		if err := v.UnmarshalGraphQL(value); err != nil {
-			return reflect.Value{}, err
-		}
-		return reflect.ValueOf(v).Elem(), nil
-	}
-
 	coerced, err := unmarshalInput(p.valueType, value)
 	if err != nil {
 		return reflect.Value{}, fmt.Errorf("could not unmarshal %#v (%T) into %s: %s", value, value, p.valueType, err)
 	}
 	return reflect.ValueOf(coerced), nil
+}
+
+type unmarshalerPacker struct {
+	valueType reflect.Type
+}
+
+func (p *unmarshalerPacker) pack(r *request, value interface{}) (reflect.Value, error) {
+	if v, ok := value.(common.Variable); ok {
+		value = r.vars[string(v)]
+	}
+
+	if value == nil {
+		return reflect.Value{}, errors.Errorf("got null for non-null")
+	}
+
+	v := reflect.New(p.valueType)
+	if err := v.Interface().(Unmarshaler).UnmarshalGraphQL(value); err != nil {
+		return reflect.Value{}, err
+	}
+	return v.Elem(), nil
 }
 
 type Unmarshaler interface {

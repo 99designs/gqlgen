@@ -15,11 +15,8 @@ type packer interface {
 	pack(r *request, value interface{}) (reflect.Value, error)
 }
 
-func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, reflectType reflect.Type) (packer, error) {
+func makePacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	t, nonNull := unwrapNonNull(schemaType)
-	if hasDefault {
-		nonNull = true
-	}
 
 	if u, ok := reflect.New(reflectType).Interface().(Unmarshaler); ok {
 		if !u.ImplementsGraphQLType(t.String()) {
@@ -64,7 +61,7 @@ func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, refle
 		if reflectType.Kind() != reflect.Slice {
 			return nil, fmt.Errorf("expected slice, got %s", reflectType)
 		}
-		elem, err := makePacker(s, t.OfType, false, reflectType.Elem())
+		elem, err := makePacker(s, t.OfType, reflectType.Elem())
 		if err != nil {
 			return nil, err
 		}
@@ -103,7 +100,13 @@ func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) 
 		}
 		fe.fieldIndex = sf.Index
 
-		p, err := makePacker(s, f.Type, f.Default != nil, sf.Type)
+		var ft common.Type = f.Type
+		if f.Default != nil {
+			ft, _ = unwrapNonNull(ft)
+			ft = &common.NonNull{OfType: ft}
+		}
+
+		p, err := makePacker(s, ft, sf.Type)
 		if err != nil {
 			return nil, fmt.Errorf("field %q: %s", sf.Name, err)
 		}

@@ -8,6 +8,7 @@ import (
 
 type Type interface {
 	Kind() string
+	String() string
 }
 
 type List struct {
@@ -25,6 +26,10 @@ type TypeName struct {
 func (*List) Kind() string     { return "LIST" }
 func (*NonNull) Kind() string  { return "NON_NULL" }
 func (*TypeName) Kind() string { panic("TypeName needs to be resolved to actual type") }
+
+func (t *List) String() string    { return "[" + t.OfType.String() + "]" }
+func (t *NonNull) String() string { return t.OfType.String() + "!" }
+func (*TypeName) String() string  { panic("TypeName needs to be resolved to actual type") }
 
 func ParseType(l *lexer.Lexer) Type {
 	t := parseNullType(l)

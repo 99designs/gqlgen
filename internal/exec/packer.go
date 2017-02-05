@@ -20,13 +20,15 @@ func makePacker(s *schema.Schema, schemaType common.Type, hasDefault bool, refle
 	if hasDefault {
 		nonNull = true
 	}
+
+	if u, ok := reflect.New(reflectType).Interface().(Unmarshaler); ok {
+		if !u.ImplementsGraphQLType(t.String()) {
+			return nil, fmt.Errorf("can not unmarshal %s into %s", t, reflectType)
+		}
+	}
+
 	switch t := t.(type) {
 	case *schema.Scalar:
-		if u, ok := reflect.New(reflectType).Interface().(Unmarshaler); ok {
-			if !u.ImplementsGraphQLType(t.Name) {
-				return nil, fmt.Errorf("can not unmarshal %s into %s", t.Name, reflectType)
-			}
-		}
 		if !nonNull {
 			return &nullPacker{
 				elemPacker: &valuePacker{

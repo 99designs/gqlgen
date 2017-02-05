@@ -84,6 +84,13 @@ func (*Union) Kind() string       { return "UNION" }
 func (*Enum) Kind() string        { return "ENUM" }
 func (*InputObject) Kind() string { return "INPUT_OBJECT" }
 
+func (t *Scalar) String() string      { return t.Name }
+func (t *Object) String() string      { return t.Name }
+func (t *Interface) String() string   { return t.Name }
+func (t *Union) String() string       { return t.Name }
+func (t *Enum) String() string        { return t.Name }
+func (t *InputObject) String() string { return t.Name }
+
 func (t *Scalar) TypeName() string      { return t.Name }
 func (t *Object) TypeName() string      { return t.Name }
 func (t *Interface) TypeName() string   { return t.Name }

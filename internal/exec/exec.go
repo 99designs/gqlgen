@@ -33,64 +33,66 @@ type Exec struct {
 }
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
-	e := &Exec{
-		schema:   s,
-		resolver: reflect.ValueOf(resolver),
+	b := &execBuilder{
+		schema:  s,
+		execMap: make(map[typePair]*execMapEntry),
 	}
 
+	var queryExec, mutationExec iExec
+
 	if t, ok := s.EntryPoints["query"]; ok {
-		var err error
-		e.queryExec, err = makeWithType(s, t, resolver)
-		if err != nil {
+		if err := b.assignExec(&queryExec, t, reflect.TypeOf(resolver)); err != nil {
 			return nil, err
 		}
 	}
 
 	if t, ok := s.EntryPoints["mutation"]; ok {
-		var err error
-		e.mutationExec, err = makeWithType(s, t, resolver)
-		if err != nil {
+		if err := b.assignExec(&mutationExec, t, reflect.TypeOf(resolver)); err != nil {
 			return nil, err
 		}
 	}
 
-	return e, nil
+	b.finish()
+
+	return &Exec{
+		schema:       s,
+		resolver:     reflect.ValueOf(resolver),
+		queryExec:    queryExec,
+		mutationExec: mutationExec,
+	}, nil
 }
 
-type typeRefMapKey struct {
-	s common.Type
-	r reflect.Type
+type execBuilder struct {
+	schema  *schema.Schema
+	execMap map[typePair]*execMapEntry
 }
 
-type typeRef struct {
-	targets []*iExec
+type typePair struct {
+	graphQLType  common.Type
+	resolverType reflect.Type
+}
+
+type execMapEntry struct {
 	exec    iExec
+	targets []*iExec
 }
 
-func makeWithType(s *schema.Schema, t common.Type, resolver interface{}) (iExec, error) {
-	m := make(map[typeRefMapKey]*typeRef)
-	var e iExec
-	if err := makeExec(&e, s, t, reflect.TypeOf(resolver), m); err != nil {
-		return nil, err
-	}
-
-	for _, ref := range m {
+func (b *execBuilder) finish() {
+	for _, ref := range b.execMap {
 		for _, target := range ref.targets {
 			*target = ref.exec
 		}
 	}
-
-	return e, nil
 }
 
-func makeExec(target *iExec, s *schema.Schema, t common.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) error {
-	k := typeRefMapKey{t, resolverType}
-	ref, ok := typeRefMap[k]
+func (b *execBuilder) assignExec(target *iExec, t common.Type, resolverType reflect.Type) error {
+	k := typePair{t, resolverType}
+	ref, ok := b.execMap[k]
 	if !ok {
-		ref = &typeRef{}
-		typeRefMap[k] = ref
+		ref = &execMapEntry{}
+		b.execMap[k] = ref
 		var err error
-		ref.exec, err = makeExec2(s, t, resolverType, typeRefMap)
+		ref.exec, err = b.makeExec(t, resolverType)
 		if err != nil {
 			return err
 		}
@@ -99,19 +101,19 @@ func makeExec(target *iExec, s *schema.Schema, t common.Type, resolverType refle
 	return nil
 }
 
-func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (iExec, error) {
+func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (iExec, error) {
 	var nonNull bool
 	t, nonNull = unwrapNonNull(t)
 
 	switch t := t.(type) {
 	case *schema.Object:
-		return makeObjectExec(s, t.Name, t.Fields, nil, nonNull, resolverType, typeRefMap)
+		return b.makeObjectExec(t.Name, t.Fields, nil, nonNull, resolverType)
 
 	case *schema.Interface:
-		return makeObjectExec(s, t.Name, t.Fields, t.PossibleTypes, nonNull, resolverType, typeRefMap)
+		return b.makeObjectExec(t.Name, t.Fields, t.PossibleTypes, nonNull, resolverType)
 
 	case *schema.Union:
-		return makeObjectExec(s, t.Name, nil, t.PossibleTypes, nonNull, resolverType, typeRefMap)
+		return b.makeObjectExec(t.Name, nil, t.PossibleTypes, nonNull, resolverType)
 	}
 
 	if !nonNull {
@@ -149,7 +151,7 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 			return nil, fmt.Errorf("%s is not a slice", resolverType)
 		}
 		e := &listExec{nonNull: nonNull}
-		if err := makeExec(&e.elem, s, t.OfType, resolverType.Elem(), typeRefMap); err != nil {
+		if err := b.assignExec(&e.elem, t.OfType, resolverType.Elem()); err != nil {
 			return nil, err
 		}
 		return e, nil
@@ -159,7 +161,7 @@ func makeExec2(s *schema.Schema, t common.Type, resolverType reflect.Type, typeR
 	}
 }
 
-func makeObjectExec(s *schema.Schema, typeName string, fields map[string]*schema.Field, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type, typeRefMap map[typeRefMapKey]*typeRef) (*objectExec, error) {
+func (b *execBuilder) makeObjectExec(typeName string, fields map[string]*schema.Field, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type) (*objectExec, error) {
 	if !nonNull {
 		if resolverType.Kind() != reflect.Ptr && resolverType.Kind() != reflect.Interface {
 			return nil, fmt.Errorf("%s is not a pointer or interface", resolverType)
@@ -175,7 +177,7 @@ func makeObjectExec(s *schema.Schema, typeName string, fields map[string]*schema
 		}
 
 		m := resolverType.Method(methodIndex)
-		fe, err := makeFieldExec(s, typeName, f, m, methodIndex, methodHasReceiver, typeRefMap)
+		fe, err := b.makeFieldExec(typeName, f, m, methodIndex, methodHasReceiver)
 		if err != nil {
 			return nil, fmt.Errorf("method %q of %s: %s", m.Name, resolverType, err)
 		}
@@ -191,7 +193,7 @@ func makeObjectExec(s *schema.Schema, typeName string, fields map[string]*schema
 		a := &typeAssertExec{
 			methodIndex: methodIndex,
 		}
-		if err := makeExec(&a.typeExec, s, impl, resolverType.Method(methodIndex).Type.Out(0), typeRefMap); err != nil {
+		if err := b.assignExec(&a.typeExec, impl, resolverType.Method(methodIndex).Type.Out(0)); err != nil {
 			return nil, err
 		}
 		typeAssertions[impl.Name] = a
@@ -208,7 +210,7 @@ func makeObjectExec(s *schema.Schema, typeName string, fields map[string]*schema
 var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
 var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
-func makeFieldExec(s *schema.Schema, typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool, typeRefMap map[typeRefMapKey]*typeRef) (*fieldExec, error) {
+func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool) (*fieldExec, error) {
 	in := make([]reflect.Type, m.Type.NumIn())
 	for i := range in {
 		in[i] = m.Type.In(i)
@@ -228,7 +230,7 @@ func makeFieldExec(s *schema.Schema, typeName string, f *schema.Field, m reflect
 			return nil, fmt.Errorf("must have parameter for field arguments")
 		}
 		var err error
-		argsPacker, err = makeStructPacker(s, &f.Args, in[0])
+		argsPacker, err = makeStructPacker(b.schema, &f.Args, in[0])
 		if err != nil {
 			return nil, err
 		}
@@ -258,7 +260,7 @@ func makeFieldExec(s *schema.Schema, typeName string, f *schema.Field, m reflect
 		argsPacker:  argsPacker,
 		hasError:    hasError,
 	}
-	if err := makeExec(&fe.valueExec, s, f.Type, m.Type.Out(0), typeRefMap); err != nil {
+	if err := b.assignExec(&fe.valueExec, f.Type, m.Type.Out(0)); err != nil {
 		return nil, err
 	}
 	return fe, nil

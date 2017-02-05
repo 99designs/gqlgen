@@ -18,31 +18,38 @@ type packer interface {
 func makePacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	t, nonNull := unwrapNonNull(schemaType)
 
+	if !nonNull {
+		if reflectType.Kind() != reflect.Ptr {
+			return nil, fmt.Errorf("%s is not a pointer", reflectType)
+		}
+		elem, err := makeNonNullPacker(s, t, reflectType.Elem())
+		if err != nil {
+			return nil, err
+		}
+		return &nullPacker{
+			elemPacker: elem,
+			valueType:  reflectType,
+		}, nil
+	}
+
+	return makeNonNullPacker(s, t, reflectType)
+}
+
+func makeNonNullPacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	if u, ok := reflect.New(reflectType).Interface().(Unmarshaler); ok {
-		if !u.ImplementsGraphQLType(t.String()) {
-			return nil, fmt.Errorf("can not unmarshal %s into %s", t, reflectType)
+		if !u.ImplementsGraphQLType(schemaType.String()) {
+			return nil, fmt.Errorf("can not unmarshal %s into %s", schemaType, reflectType)
 		}
 	}
 
-	switch t := t.(type) {
+	switch t := schemaType.(type) {
 	case *schema.Scalar:
-		if !nonNull {
-			return &nullPacker{
-				elemPacker: &valuePacker{
-					valueType: reflectType.Elem(),
-				},
-				valueType: reflectType,
-			}, nil
-		}
 		return &valuePacker{
 			valueType: reflectType,
 		}, nil
 
 	case *schema.Enum:
 		want := reflect.TypeOf("")
-		if !nonNull {
-			want = reflect.PtrTo(want)
-		}
 		if reflectType != want {
 			return nil, fmt.Errorf("wrong type, expected %s", want)
 		}

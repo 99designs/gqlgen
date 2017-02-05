@@ -9,25 +9,30 @@ import (
 )
 
 type Schema struct {
-	Schema *schema.Schema
+	schema *schema.Schema
+}
+
+// WrapSchema is only used internally.
+func WrapSchema(schema *schema.Schema) *Schema {
+	return &Schema{schema}
 }
 
 func (r *Schema) Types() []*Type {
 	var names []string
-	for name := range r.Schema.Types {
+	for name := range r.schema.Types {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 
 	var l []*Type
 	for _, name := range names {
-		l = append(l, &Type{r.Schema.Types[name]})
+		l = append(l, &Type{r.schema.Types[name]})
 	}
 	return l
 }
 
 func (r *Schema) QueryType() *Type {
-	t, ok := r.Schema.EntryPoints["query"]
+	t, ok := r.schema.EntryPoints["query"]
 	if !ok {
 		return nil
 	}
@@ -35,7 +40,7 @@ func (r *Schema) QueryType() *Type {
 }
 
 func (r *Schema) MutationType() *Type {
-	t, ok := r.Schema.EntryPoints["mutation"]
+	t, ok := r.schema.EntryPoints["mutation"]
 	if !ok {
 		return nil
 	}
@@ -43,7 +48,7 @@ func (r *Schema) MutationType() *Type {
 }
 
 func (r *Schema) SubscriptionType() *Type {
-	t, ok := r.Schema.EntryPoints["subscription"]
+	t, ok := r.schema.EntryPoints["subscription"]
 	if !ok {
 		return nil
 	}
@@ -60,7 +65,7 @@ func (r *Schema) Directives() []*Directive {
 				&InputValue{&common.InputValue{
 					Name: "if",
 					Desc: "Skipped when true.",
-					Type: &common.NonNull{OfType: r.Schema.Types["Boolean"]},
+					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},
 				}},
 			},
 		},
@@ -72,7 +77,7 @@ func (r *Schema) Directives() []*Directive {
 				&InputValue{&common.InputValue{
 					Name: "if",
 					Desc: "Included when true.",
-					Type: &common.NonNull{OfType: r.Schema.Types["Boolean"]},
+					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},
 				}},
 			},
 		},
@@ -80,15 +85,20 @@ func (r *Schema) Directives() []*Directive {
 }
 
 type Type struct {
-	Typ common.Type
+	typ common.Type
+}
+
+// WrapType is only used internally.
+func WrapType(typ common.Type) *Type {
+	return &Type{typ}
 }
 
 func (r *Type) Kind() string {
-	return r.Typ.Kind()
+	return r.typ.Kind()
 }
 
 func (r *Type) Name() *string {
-	if named, ok := r.Typ.(schema.NamedType); ok {
+	if named, ok := r.typ.(schema.NamedType); ok {
 		name := named.TypeName()
 		return &name
 	}
@@ -96,7 +106,7 @@ func (r *Type) Name() *string {
 }
 
 func (r *Type) Description() *string {
-	if named, ok := r.Typ.(schema.NamedType); ok {
+	if named, ok := r.typ.(schema.NamedType); ok {
 		desc := named.Description()
 		if desc == "" {
 			return nil
@@ -109,7 +119,7 @@ func (r *Type) Description() *string {
 func (r *Type) Fields(args *struct{ IncludeDeprecated bool }) *[]*Field {
 	var fields map[string]*schema.Field
 	var fieldOrder []string
-	switch t := r.Typ.(type) {
+	switch t := r.typ.(type) {
 	case *schema.Object:
 		fields = t.Fields
 		fieldOrder = t.FieldOrder
@@ -128,7 +138,7 @@ func (r *Type) Fields(args *struct{ IncludeDeprecated bool }) *[]*Field {
 }
 
 func (r *Type) Interfaces() *[]*Type {
-	t, ok := r.Typ.(*schema.Object)
+	t, ok := r.typ.(*schema.Object)
 	if !ok {
 		return nil
 	}
@@ -142,7 +152,7 @@ func (r *Type) Interfaces() *[]*Type {
 
 func (r *Type) PossibleTypes() *[]*Type {
 	var possibleTypes []*schema.Object
-	switch t := r.Typ.(type) {
+	switch t := r.typ.(type) {
 	case *schema.Interface:
 		possibleTypes = t.PossibleTypes
 	case *schema.Union:
@@ -159,7 +169,7 @@ func (r *Type) PossibleTypes() *[]*Type {
 }
 
 func (r *Type) EnumValues(args *struct{ IncludeDeprecated bool }) *[]*EnumValue {
-	t, ok := r.Typ.(*schema.Enum)
+	t, ok := r.typ.(*schema.Enum)
 	if !ok {
 		return nil
 	}
@@ -172,7 +182,7 @@ func (r *Type) EnumValues(args *struct{ IncludeDeprecated bool }) *[]*EnumValue 
 }
 
 func (r *Type) InputFields() *[]*InputValue {
-	t, ok := r.Typ.(*schema.InputObject)
+	t, ok := r.typ.(*schema.InputObject)
 	if !ok {
 		return nil
 	}
@@ -185,7 +195,7 @@ func (r *Type) InputFields() *[]*InputValue {
 }
 
 func (r *Type) OfType() *Type {
-	switch t := r.Typ.(type) {
+	switch t := r.typ.(type) {
 	case *common.List:
 		return &Type{t.OfType}
 	case *common.NonNull:

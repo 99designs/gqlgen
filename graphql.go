@@ -113,7 +113,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 }
 
 func (s *Schema) Inspect() *introspection.Schema {
-	return &introspection.Schema{Schema: s.schema}
+	return introspection.WrapSchema(s.schema)
 }
 
 func (s *Schema) ToJSON() ([]byte, error) {

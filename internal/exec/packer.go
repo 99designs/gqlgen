@@ -15,7 +15,23 @@ type packer interface {
 	pack(r *request, value interface{}) (reflect.Value, error)
 }
 
-func makePacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Type) (packer, error) {
+func (b *execBuilder) assignPacker(target *packer, schemaType common.Type, reflectType reflect.Type) error {
+	k := typePair{schemaType, reflectType}
+	ref, ok := b.packerMap[k]
+	if !ok {
+		ref = &packerMapEntry{}
+		b.packerMap[k] = ref
+		var err error
+		ref.packer, err = b.makePacker(schemaType, reflectType)
+		if err != nil {
+			return err
+		}
+	}
+	ref.targets = append(ref.targets, target)
+	return nil
+}
+
+func (b *execBuilder) makePacker(schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	t, nonNull := unwrapNonNull(schemaType)
 	if !nonNull {
 		if reflectType.Kind() != reflect.Ptr {
@@ -27,7 +43,7 @@ func makePacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Ty
 			elemType = reflectType // keep pointer for input objects
 			addPtr = false
 		}
-		elem, err := makeNonNullPacker(s, t, elemType)
+		elem, err := b.makeNonNullPacker(t, elemType)
 		if err != nil {
 			return nil, err
 		}
@@ -38,10 +54,10 @@ func makePacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Ty
 		}, nil
 	}
 
-	return makeNonNullPacker(s, t, reflectType)
+	return b.makeNonNullPacker(t, reflectType)
 }
 
-func makeNonNullPacker(s *schema.Schema, schemaType common.Type, reflectType reflect.Type) (packer, error) {
+func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	if u, ok := reflect.New(reflectType).Interface().(Unmarshaler); ok {
 		if !u.ImplementsGraphQLType(schemaType.String()) {
 			return nil, fmt.Errorf("can not unmarshal %s into %s", schemaType, reflectType)
@@ -67,7 +83,7 @@ func makeNonNullPacker(s *schema.Schema, schemaType common.Type, reflectType ref
 		}, nil
 
 	case *schema.InputObject:
-		e, err := makeStructPacker(s, &t.InputMap, reflectType)
+		e, err := b.makeStructPacker(&t.InputMap, reflectType)
 		if err != nil {
 			return nil, err
 		}
@@ -77,14 +93,13 @@ func makeNonNullPacker(s *schema.Schema, schemaType common.Type, reflectType ref
 		if reflectType.Kind() != reflect.Slice {
 			return nil, fmt.Errorf("expected slice, got %s", reflectType)
 		}
-		elem, err := makePacker(s, t.OfType, reflectType.Elem())
-		if err != nil {
+		p := &listPacker{
+			sliceType: reflectType,
+		}
+		if err := b.assignPacker(&p.elem, t.OfType, reflectType.Elem()); err != nil {
 			return nil, err
 		}
-		return &listPacker{
-			sliceType: reflectType,
-			elem:      elem,
-		}, nil
+		return p, nil
 
 	case *schema.Object, *schema.Interface, *schema.Union:
 		return nil, fmt.Errorf("type of kind %s can not be used as input", t.Kind())
@@ -94,18 +109,15 @@ func makeNonNullPacker(s *schema.Schema, schemaType common.Type, reflectType ref
 	}
 }
 
-func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) (*structPacker, error) {
+func (b *execBuilder) makeStructPacker(obj *common.InputMap, typ reflect.Type) (*structPacker, error) {
 	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
 		return nil, fmt.Errorf("expected pointer to struct, got %s", typ)
 	}
 	structType := typ.Elem()
 
 	var fields []*structPackerField
-	defaultStruct := reflect.New(structType).Elem()
 	for _, f := range obj.Fields {
-		fe := &structPackerField{
-			name: f.Name,
-		}
+		fe := &structPackerField{field: f}
 
 		sf, ok := structType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, f.Name) })
 		if !ok {
@@ -122,28 +134,19 @@ func makeStructPacker(s *schema.Schema, obj *common.InputMap, typ reflect.Type) 
 			ft = &common.NonNull{OfType: ft}
 		}
 
-		p, err := makePacker(s, ft, sf.Type)
-		if err != nil {
+		if err := b.assignPacker(&fe.fieldPacker, ft, sf.Type); err != nil {
 			return nil, fmt.Errorf("field %q: %s", sf.Name, err)
-		}
-		fe.fieldPacker = p
-
-		if f.Default != nil {
-			v, err := fe.fieldPacker.pack(nil, f.Default)
-			if err != nil {
-				return nil, err
-			}
-			defaultStruct.FieldByIndex(fe.fieldIndex).Set(v)
 		}
 
 		fields = append(fields, fe)
 	}
 
-	return &structPacker{
-		structType:    structType,
-		defaultStruct: defaultStruct,
-		fields:        fields,
-	}, nil
+	p := &structPacker{
+		structType: structType,
+		fields:     fields,
+	}
+	b.structPackers = append(b.structPackers, p)
+	return p, nil
 }
 
 type structPacker struct {
@@ -153,7 +156,7 @@ type structPacker struct {
 }
 
 type structPackerField struct {
-	name        string
+	field       *common.InputValue
 	fieldIndex  []int
 	fieldPacker packer
 }
@@ -167,7 +170,7 @@ func (p *structPacker) pack(r *request, value interface{}) (reflect.Value, error
 	v := reflect.New(p.structType)
 	v.Elem().Set(p.defaultStruct)
 	for _, f := range p.fields {
-		if value, ok := values[f.name]; ok {
+		if value, ok := values[f.field.Name]; ok {
 			packed, err := f.fieldPacker.pack(r, r.resolveVar(value))
 			if err != nil {
 				return reflect.Value{}, err

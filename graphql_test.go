@@ -1359,6 +1359,20 @@ func (r *inputResolver) NullableEnum(args *struct{ Value *string }) *string {
 	return args.Value
 }
 
+type recursive struct {
+	Next *recursive
+}
+
+func (r *inputResolver) Recursive(args *struct{ Value *recursive }) int32 {
+	n := int32(0)
+	v := args.Value
+	for v != nil {
+		v = v.Next
+		n++
+	}
+	return n
+}
+
 func TestInput(t *testing.T) {
 	coercionSchema := graphql.MustParseSchema(`
 		schema {
@@ -1375,10 +1389,15 @@ func TestInput(t *testing.T) {
 			nullableList(value: [Input]): [Int]
 			enum(value: Enum!): Enum!
 			nullableEnum(value: Enum): Enum
+			recursive(value: RecursiveInput!): Int!
 		}
 
 		input Input {
 			v: Int!
+		}
+
+		input RecursiveInput {
+			next: RecursiveInput
 		}
 
 		enum Enum {
@@ -1406,6 +1425,7 @@ func TestInput(t *testing.T) {
 					enum(value: Option2)
 					nullableEnum1: nullableEnum(value: Option2)
 					nullableEnum2: nullableEnum(value: null)
+					recursive(value: {next: {next: {}}})
 				}
 			`,
 			ExpectedResult: `
@@ -1424,7 +1444,8 @@ func TestInput(t *testing.T) {
 					"nullableList2": null,
 					"enum": "Option2",
 					"nullableEnum1": "Option2",
-					"nullableEnum2": null
+					"nullableEnum2": null,
+					"recursive": 3
 				}
 			`,
 		},

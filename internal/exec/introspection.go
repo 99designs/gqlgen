@@ -14,10 +14,7 @@ var schemaExec iExec
 var typeExec iExec
 
 func init() {
-	b := &execBuilder{
-		schema:  schema.Meta,
-		execMap: make(map[typePair]*execMapEntry),
-	}
+	b := newExecBuilder(schema.Meta)
 
 	if err := b.assignExec(&schemaExec, schema.Meta.Types["__Schema"], reflect.TypeOf(&introspection.Schema{})); err != nil {
 		panic(err)
@@ -27,7 +24,9 @@ func init() {
 		panic(err)
 	}
 
-	b.finish()
+	if err := b.finish(); err != nil {
+		panic(err)
+	}
 }
 
 func IntrospectSchema(s *schema.Schema) (interface{}, error) {

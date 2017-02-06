@@ -33,10 +33,7 @@ type Exec struct {
 }
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
-	b := &execBuilder{
-		schema:  s,
-		execMap: make(map[typePair]*execMapEntry),
-	}
+	b := newExecBuilder(s)
 
 	var queryExec, mutationExec iExec
 
@@ -52,7 +49,9 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 		}
 	}
 
-	b.finish()
+	if err := b.finish(); err != nil {
+		return nil, err
+	}
 
 	return &Exec{
 		schema:       s,
@@ -63,8 +62,10 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 }
 
 type execBuilder struct {
-	schema  *schema.Schema
-	execMap map[typePair]*execMapEntry
+	schema        *schema.Schema
+	execMap       map[typePair]*execMapEntry
+	packerMap     map[typePair]*packerMapEntry
+	structPackers []*structPacker
 }
 
 type typePair struct {
@@ -77,12 +78,46 @@ type execMapEntry struct {
 	targets []*iExec
 }
 
-func (b *execBuilder) finish() {
-	for _, ref := range b.execMap {
-		for _, target := range ref.targets {
-			*target = ref.exec
+type packerMapEntry struct {
+	packer  packer
+	targets []*packer
+}
+
+func newExecBuilder(s *schema.Schema) *execBuilder {
+	return &execBuilder{
+		schema:    s,
+		execMap:   make(map[typePair]*execMapEntry),
+		packerMap: make(map[typePair]*packerMapEntry),
+	}
+}
+
+func (b *execBuilder) finish() error {
+	for _, entry := range b.execMap {
+		for _, target := range entry.targets {
+			*target = entry.exec
 		}
 	}
+
+	for _, entry := range b.packerMap {
+		for _, target := range entry.targets {
+			*target = entry.packer
+		}
+	}
+
+	for _, p := range b.structPackers {
+		p.defaultStruct = reflect.New(p.structType).Elem()
+		for _, f := range p.fields {
+			if f.field.Default != nil {
+				v, err := f.fieldPacker.pack(nil, f.field.Default)
+				if err != nil {
+					return err
+				}
+				p.defaultStruct.FieldByIndex(f.fieldIndex).Set(v)
+			}
+		}
+	}
+
+	return nil
 }
 
 func (b *execBuilder) assignExec(target *iExec, t common.Type, resolverType reflect.Type) error {
@@ -230,7 +265,7 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 			return nil, fmt.Errorf("must have parameter for field arguments")
 		}
 		var err error
-		argsPacker, err = makeStructPacker(b.schema, &f.Args, in[0])
+		argsPacker, err = b.makeStructPacker(&f.Args, in[0])
 		if err != nil {
 			return nil, err
 		}

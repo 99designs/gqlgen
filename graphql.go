@@ -43,7 +43,8 @@ func (id *ID) UnmarshalGraphQL(input interface{}) error {
 
 func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 	s := &Schema{
-		schema: schema.New(),
+		schema:         schema.New(),
+		MaxParallelism: 10,
 	}
 	if err := s.schema.Parse(schemaString); err != nil {
 		return nil, err
@@ -71,6 +72,9 @@ func MustParseSchema(schemaString string, resolver interface{}) *Schema {
 type Schema struct {
 	schema *schema.Schema
 	exec   *exec.Exec
+
+	// MaxParallelism specifies the maximum number of resolvers per request allowed to run in parallel.
+	MaxParallelism int
 }
 
 type Response struct {
@@ -101,7 +105,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	}
 	defer span.Finish()
 
-	data, errs := exec.ExecuteRequest(subCtx, s.exec, document, operationName, variables)
+	data, errs := exec.ExecuteRequest(subCtx, s.exec, document, operationName, variables, s.MaxParallelism)
 	if len(errs) != 0 {
 		ext.Error.Set(span, true)
 		span.SetTag(OpenTracingTagError, errs)

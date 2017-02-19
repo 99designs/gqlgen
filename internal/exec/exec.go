@@ -310,12 +310,15 @@ func findMethod(t reflect.Type, name string) int {
 	return -1
 }
 
+type semaphore chan struct{}
+
 type request struct {
-	doc    *query.Document
-	vars   map[string]interface{}
-	schema *schema.Schema
-	mu     sync.Mutex
-	errs   []*errors.QueryError
+	doc     *query.Document
+	vars    map[string]interface{}
+	schema  *schema.Schema
+	limiter semaphore
+	mu      sync.Mutex
+	errs    []*errors.QueryError
 }
 
 func (r *request) addError(err *errors.QueryError) {
@@ -343,16 +346,17 @@ func (r *request) resolveVar(value interface{}) interface{} {
 	return value
 }
 
-func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}) (interface{}, []*errors.QueryError) {
+func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}, maxParallelism int) (interface{}, []*errors.QueryError) {
 	op, err := getOperation(document, operationName)
 	if err != nil {
 		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
 	}
 
 	r := &request{
-		doc:    document,
-		vars:   variables,
-		schema: e.schema,
+		doc:     document,
+		vars:    variables,
+		schema:  e.schema,
+		limiter: make(semaphore, maxParallelism),
 	}
 
 	var opExec iExec
@@ -489,7 +493,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 						}
 
 						for name, a := range e.typeAssertions {
-							out := resolver.Method(a.methodIndex).Call(nil)
+							out := callWithLimiter(resolver.Method(a.methodIndex), nil, r)
 							if out[1].Bool() {
 								addResult(f.Alias, name)
 								return
@@ -552,7 +556,7 @@ func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.F
 		if !ok {
 			panic(fmt.Errorf("%q does not implement %q", frag.On, e.name)) // TODO proper error handling
 		}
-		out := resolver.Method(a.methodIndex).Call(nil)
+		out := callWithLimiter(resolver.Method(a.methodIndex), nil, r)
 		if !out[1].Bool() {
 			return
 		}
@@ -616,12 +620,18 @@ func (e *fieldExec) execField2(ctx context.Context, r *request, f *query.Field, 
 	}
 
 	m := resolver.Method(e.methodIndex)
-	out := m.Call(in)
+	out := callWithLimiter(m, in, r)
 	if e.hasError && !out[1].IsNil() {
 		return nil, out[1].Interface().(error)
 	}
 
 	return e.valueExec.exec(ctx, r, f.SelSet, out[0], false), nil
+}
+
+func callWithLimiter(fn reflect.Value, in []reflect.Value, r *request) []reflect.Value {
+	r.limiter <- struct{}{}
+	defer func() { <-r.limiter }()
+	return fn.Call(in)
 }
 
 type typeAssertExec struct {

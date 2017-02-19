@@ -375,6 +375,10 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 		return opExec.exec(ctx, r, op.SelSet, e.resolver, serially)
 	}()
 
+	if err := ctx.Err(); err != nil {
+		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
+	}
+
 	return data, r.errs
 }
 
@@ -493,7 +497,10 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 						}
 
 						for name, a := range e.typeAssertions {
-							out := callWithLimiter(resolver.Method(a.methodIndex), nil, r)
+							out, err := callWithLimiter(ctx, resolver.Method(a.methodIndex), nil, r)
+							if err != nil {
+								return
+							}
 							if out[1].Bool() {
 								addResult(f.Alias, name)
 								return
@@ -556,7 +563,10 @@ func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.F
 		if !ok {
 			panic(fmt.Errorf("%q does not implement %q", frag.On, e.name)) // TODO proper error handling
 		}
-		out := callWithLimiter(resolver.Method(a.methodIndex), nil, r)
+		out, err := callWithLimiter(ctx, resolver.Method(a.methodIndex), nil, r)
+		if err != nil {
+			return
+		}
 		if !out[1].Bool() {
 			return
 		}
@@ -620,7 +630,10 @@ func (e *fieldExec) execField2(ctx context.Context, r *request, f *query.Field, 
 	}
 
 	m := resolver.Method(e.methodIndex)
-	out := callWithLimiter(m, in, r)
+	out, err := callWithLimiter(ctx, m, in, r)
+	if err != nil {
+		return nil, err
+	}
 	if e.hasError && !out[1].IsNil() {
 		return nil, out[1].Interface().(error)
 	}
@@ -628,10 +641,15 @@ func (e *fieldExec) execField2(ctx context.Context, r *request, f *query.Field, 
 	return e.valueExec.exec(ctx, r, f.SelSet, out[0], false), nil
 }
 
-func callWithLimiter(fn reflect.Value, in []reflect.Value, r *request) []reflect.Value {
+func callWithLimiter(ctx context.Context, fn reflect.Value, in []reflect.Value, r *request) ([]reflect.Value, error) {
 	r.limiter <- struct{}{}
 	defer func() { <-r.limiter }()
-	return fn.Call(in)
+
+	if err := ctx.Err(); err != nil {
+		return nil, err // don't execute any more resolvers if context got cancelled
+	}
+
+	return fn.Call(in), nil
 }
 
 type typeAssertExec struct {

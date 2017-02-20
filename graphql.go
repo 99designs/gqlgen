@@ -73,7 +73,7 @@ type Schema struct {
 	schema *schema.Schema
 	exec   *exec.Exec
 
-	// MaxParallelism specifies the maximum number of resolvers per request allowed to run in parallel.
+	// MaxParallelism specifies the maximum number of resolvers per request allowed to run in parallel. The default is 10.
 	MaxParallelism int
 }
 

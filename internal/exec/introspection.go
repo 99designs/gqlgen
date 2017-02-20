@@ -31,8 +31,9 @@ func init() {
 
 func IntrospectSchema(s *schema.Schema) (interface{}, error) {
 	r := &request{
-		schema: s,
-		doc:    introspectionQuery,
+		schema:  s,
+		doc:     introspectionQuery,
+		limiter: make(semaphore, 10),
 	}
 	return introspectSchema(context.Background(), r, introspectionQuery.Operations["IntrospectionQuery"].SelSet), nil
 }

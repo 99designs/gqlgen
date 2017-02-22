@@ -160,23 +160,7 @@ func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (iExec,
 
 	switch t := t.(type) {
 	case *schema.Scalar:
-		implementsType := false
-		switch r := reflect.New(resolverType).Interface().(type) {
-		case *int32:
-			implementsType = (t.Name == "Int")
-		case *float64:
-			implementsType = (t.Name == "Float")
-		case *string:
-			implementsType = (t.Name == "String")
-		case *bool:
-			implementsType = (t.Name == "Boolean")
-		case Unmarshaler:
-			implementsType = r.ImplementsGraphQLType(t.Name)
-		}
-		if !implementsType {
-			return nil, fmt.Errorf("can not use %s as %s", resolverType, t.Name)
-		}
-		return &scalarExec{}, nil
+		return makeScalarExec(t, resolverType)
 
 	case *schema.Enum:
 		return &scalarExec{}, nil
@@ -194,6 +178,26 @@ func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (iExec,
 	default:
 		panic("invalid type")
 	}
+}
+
+func makeScalarExec(t *schema.Scalar, resolverType reflect.Type) (iExec, error) {
+	implementsType := false
+	switch r := reflect.New(resolverType).Interface().(type) {
+	case *int32:
+		implementsType = (t.Name == "Int")
+	case *float64:
+		implementsType = (t.Name == "Float")
+	case *string:
+		implementsType = (t.Name == "String")
+	case *bool:
+		implementsType = (t.Name == "Boolean")
+	case Unmarshaler:
+		implementsType = r.ImplementsGraphQLType(t.Name)
+	}
+	if !implementsType {
+		return nil, fmt.Errorf("can not use %s as %s", resolverType, t.Name)
+	}
+	return &scalarExec{}, nil
 }
 
 func (b *execBuilder) makeObjectExec(typeName string, fields map[string]*schema.Field, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type) (*objectExec, error) {
@@ -486,75 +490,106 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 
 		switch sel := sel.(type) {
 		case *query.Field:
-			if !skipByDirective(r, sel.Directives) {
-				f := sel
-				execSel(func() {
-					switch f.Name {
-					case "__typename":
-						if len(e.typeAssertions) == 0 {
-							addResult(f.Alias, e.name)
-							return
-						}
-
-						for name, a := range e.typeAssertions {
-							out, err := callWithLimiter(ctx, resolver.Method(a.methodIndex), nil, r)
-							if err != nil {
-								return
-							}
-							if out[1].Bool() {
-								addResult(f.Alias, name)
-								return
-							}
-						}
-
-					case "__schema":
-						addResult(f.Alias, introspectSchema(ctx, r, f.SelSet))
-
-					case "__type":
-						p := valuePacker{valueType: stringType}
-						v, err := p.pack(r, r.resolveVar(f.Arguments["name"]))
-						if err != nil {
-							r.addError(errors.Errorf("%s", err))
-							addResult(f.Alias, nil)
-							return
-						}
-						addResult(f.Alias, introspectType(ctx, r, v.String(), f.SelSet))
-
-					default:
-						fe, ok := e.fields[f.Name]
-						if !ok {
-							panic(fmt.Errorf("%q has no field %q", e.name, f.Name)) // TODO proper error handling
-						}
-						fe.execField(ctx, r, f, resolver, addResult)
-					}
-				})
+			if skipByDirective(r, sel.Directives) {
+				continue
 			}
+
+			execSel(func() {
+				e.execField(ctx, r, sel, resolver, addResult)
+			})
 
 		case *query.FragmentSpread:
-			if !skipByDirective(r, sel.Directives) {
-				fs := sel
-				execSel(func() {
-					frag, ok := r.doc.Fragments[fs.Name]
-					if !ok {
-						panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
-					}
-					e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
-				})
+			if skipByDirective(r, sel.Directives) {
+				continue
 			}
 
+			fs := sel
+			execSel(func() {
+				frag, ok := r.doc.Fragments[fs.Name]
+				if !ok {
+					panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
+				}
+				e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
+			})
+
 		case *query.InlineFragment:
-			if !skipByDirective(r, sel.Directives) {
-				frag := sel
-				execSel(func() {
-					e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
-				})
+			if skipByDirective(r, sel.Directives) {
+				continue
 			}
+
+			frag := sel
+			execSel(func() {
+				e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
+			})
 
 		default:
 			panic("invalid type")
 		}
 	}
 	wg.Wait()
+}
+
+func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
+	switch f.Name {
+	case "__typename":
+		if len(e.typeAssertions) == 0 {
+			addResult(f.Alias, e.name)
+			return
+		}
+
+		for name, a := range e.typeAssertions {
+			out, err := callWithLimiter(ctx, resolver.Method(a.methodIndex), nil, r)
+			if err != nil {
+				return
+			}
+			if out[1].Bool() {
+				addResult(f.Alias, name)
+				return
+			}
+		}
+
+	case "__schema":
+		addResult(f.Alias, introspectSchema(ctx, r, f.SelSet))
+
+	case "__type":
+		p := valuePacker{valueType: stringType}
+		v, err := p.pack(r, r.resolveVar(f.Arguments["name"]))
+		if err != nil {
+			r.addError(errors.Errorf("%s", err))
+			addResult(f.Alias, nil)
+			return
+		}
+		addResult(f.Alias, introspectType(ctx, r, v.String(), f.SelSet))
+
+	default:
+		fe, ok := e.fields[f.Name]
+		if !ok {
+			panic(fmt.Errorf("%q has no field %q", e.name, f.Name)) // TODO proper error handling
+		}
+
+		span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", fe.typeName, fe.field.Name))
+		defer span.Finish()
+		span.SetTag(OpenTracingTagType, fe.typeName)
+		span.SetTag(OpenTracingTagField, fe.field.Name)
+		if !fe.hasContext && fe.argsPacker == nil && !fe.hasError {
+			span.SetTag(OpenTracingTagTrivial, true)
+		}
+
+		result, err := fe.exec(spanCtx, r, f, resolver, span)
+
+		if err != nil {
+			queryError := errors.Errorf("%s", err)
+			queryError.ResolverError = err
+			r.addError(queryError)
+			addResult(f.Alias, nil) // TODO handle non-nil
+
+			ext.Error.Set(span, true)
+			span.SetTag(OpenTracingTagError, err)
+			return
+		}
+
+		addResult(f.Alias, result)
+	}
 }
 
 func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.Fragment, resolver reflect.Value, addResult addResultFn) {
@@ -586,32 +621,7 @@ type fieldExec struct {
 	valueExec   iExec
 }
 
-func (e *fieldExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
-	span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", e.typeName, e.field.Name))
-	defer span.Finish()
-	span.SetTag(OpenTracingTagType, e.typeName)
-	span.SetTag(OpenTracingTagField, e.field.Name)
-	if !e.hasContext && e.argsPacker == nil && !e.hasError {
-		span.SetTag(OpenTracingTagTrivial, true)
-	}
-
-	result, err := e.execField2(spanCtx, r, f, resolver, span)
-
-	if err != nil {
-		queryError := errors.Errorf("%s", err)
-		queryError.ResolverError = err
-		r.addError(queryError)
-		addResult(f.Alias, nil) // TODO handle non-nil
-
-		ext.Error.Set(span, true)
-		span.SetTag(OpenTracingTagError, err)
-		return
-	}
-
-	addResult(f.Alias, result)
-}
-
-func (e *fieldExec) execField2(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, span opentracing.Span) (interface{}, error) {
+func (e *fieldExec) exec(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, span opentracing.Span) (interface{}, error) {
 	var in []reflect.Value
 
 	if e.hasContext {

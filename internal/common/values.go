@@ -49,16 +49,7 @@ func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	case scanner.String:
 		return l.ConsumeString()
 	case scanner.Ident:
-		switch ident := l.ConsumeIdent(); ident {
-		case "true":
-			return true
-		case "false":
-			return false
-		case "null":
-			return nil
-		default:
-			return ident
-		}
+		return parseIdent(l)
 	case '[':
 		l.ConsumeToken('[')
 		var list []interface{}
@@ -80,5 +71,18 @@ func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	default:
 		l.SyntaxError("invalid value")
 		panic("unreachable")
+	}
+}
+
+func parseIdent(l *lexer.Lexer) interface{} {
+	switch ident := l.ConsumeIdent(); ident {
+	case "true":
+		return true
+	case "false":
+		return false
+	case "null":
+		return nil
+	default:
+		return ident
 	}
 }

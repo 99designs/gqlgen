@@ -57,24 +57,24 @@ func (r *Schema) SubscriptionType() *Type {
 
 func (r *Schema) Directives() []*Directive {
 	return []*Directive{
-		&Directive{
+		{
 			name:        "skip",
 			description: "Directs the executor to skip this field or fragment when the `if` argument is true.",
 			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
 			args: []*InputValue{
-				&InputValue{&common.InputValue{
+				{&common.InputValue{
 					Name: "if",
 					Desc: "Skipped when true.",
 					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},
 				}},
 			},
 		},
-		&Directive{
+		{
 			name:        "include",
 			description: "Directs the executor to include this field or fragment only when the `if` argument is true.",
 			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
 			args: []*InputValue{
-				&InputValue{&common.InputValue{
+				{&common.InputValue{
 					Name: "if",
 					Desc: "Included when true.",
 					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},

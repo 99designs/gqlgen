@@ -249,7 +249,7 @@ type starship struct {
 var starships = []*starship{
 	{
 		ID:     "3000",
-		Name:   "Millenium Falcon",
+		Name:   "Millennium Falcon",
 		Length: 34.37,
 	},
 	{

@@ -329,7 +329,7 @@ func (r *request) addError(err *errors.QueryError) {
 
 func (r *request) handlePanic() {
 	if err := recover(); err != nil {
-		execErr := errors.Errorf("graphql: panic occured: %v", err)
+		execErr := errors.Errorf("graphql: panic occurred: %v", err)
 		r.addError(execErr)
 
 		const size = 64 << 10

@@ -13,6 +13,7 @@ import (
 type Schema struct {
 	EntryPoints map[string]NamedType
 	Types       map[string]NamedType
+	Directives  map[string]*Directive
 
 	entryPointNames map[string]string
 	objects         []*Object
@@ -77,6 +78,14 @@ type InputObject struct {
 	common.InputMap
 }
 
+type Directive struct {
+	Name     string
+	Desc     string
+	Locs     []string
+	Args     map[string]*common.InputValue
+	ArgOrder []string
+}
+
 func (*Scalar) Kind() string      { return "SCALAR" }
 func (*Object) Kind() string      { return "OBJECT" }
 func (*Interface) Kind() string   { return "INTERFACE" }
@@ -116,9 +125,13 @@ func New() *Schema {
 	s := &Schema{
 		entryPointNames: make(map[string]string),
 		Types:           make(map[string]NamedType),
+		Directives:      make(map[string]*Directive),
 	}
 	for n, t := range Meta.Types {
 		s.Types[n] = t
+	}
+	for n, d := range Meta.Directives {
+		s.Directives[n] = d
 	}
 	return s
 }
@@ -140,6 +153,15 @@ func (s *Schema) Parse(schemaString string) error {
 	for _, t := range s.Types {
 		if err := resolveNamedType(s, t); err != nil {
 			return err
+		}
+	}
+	for _, d := range s.Directives {
+		for _, arg := range d.Args {
+			t, err := common.ResolveType(arg.Type, s.Resolve)
+			if err != nil {
+				return err
+			}
+			arg.Type = t
 		}
 	}
 
@@ -268,8 +290,12 @@ func parseSchema(s *Schema, l *lexer.Lexer) {
 		case "scalar":
 			name := l.ConsumeIdent()
 			s.Types[name] = &Scalar{Name: name, Desc: desc}
+		case "directive":
+			directive := parseDirectiveDecl(l)
+			directive.Desc = desc
+			s.Directives[directive.Name] = directive
 		default:
-			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union", "input" or "scalar"`, x))
+			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "schema", "type", "enum", "interface", "union", "input", "scalar" or "directive"`, x))
 		}
 	}
 }
@@ -339,6 +365,30 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 	}
 	l.ConsumeToken('}')
 	return enum
+}
+
+func parseDirectiveDecl(l *lexer.Lexer) *Directive {
+	d := &Directive{}
+	d.Args = make(map[string]*common.InputValue)
+	l.ConsumeToken('@')
+	d.Name = l.ConsumeIdent()
+	l.ConsumeToken('(')
+	for l.Peek() != ')' {
+		v := common.ParseInputValue(l)
+		d.Args[v.Name] = v
+		d.ArgOrder = append(d.ArgOrder, v.Name)
+	}
+	l.ConsumeToken(')')
+	l.ConsumeKeyword("on")
+	for {
+		loc := l.ConsumeIdent()
+		d.Locs = append(d.Locs, loc)
+		if l.Peek() != '|' {
+			break
+		}
+		l.ConsumeToken('|')
+	}
+	return d
 }
 
 func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {

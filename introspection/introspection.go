@@ -24,9 +24,23 @@ func (r *Schema) Types() []*Type {
 	}
 	sort.Strings(names)
 
-	var l []*Type
-	for _, name := range names {
-		l = append(l, &Type{r.schema.Types[name]})
+	l := make([]*Type, len(names))
+	for i, name := range names {
+		l[i] = &Type{r.schema.Types[name]}
+	}
+	return l
+}
+
+func (r *Schema) Directives() []*Directive {
+	var names []string
+	for name := range r.schema.Directives {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	l := make([]*Directive, len(names))
+	for i, name := range names {
+		l[i] = &Directive{r.schema.Directives[name]}
 	}
 	return l
 }
@@ -53,35 +67,6 @@ func (r *Schema) SubscriptionType() *Type {
 		return nil
 	}
 	return &Type{t}
-}
-
-func (r *Schema) Directives() []*Directive {
-	return []*Directive{
-		{
-			name:        "skip",
-			description: "Directs the executor to skip this field or fragment when the `if` argument is true.",
-			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
-			args: []*InputValue{
-				{&common.InputValue{
-					Name: "if",
-					Desc: "Skipped when true.",
-					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},
-				}},
-			},
-		},
-		{
-			name:        "include",
-			description: "Directs the executor to include this field or fragment only when the `if` argument is true.",
-			locations:   []string{"FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"},
-			args: []*InputValue{
-				{&common.InputValue{
-					Name: "if",
-					Desc: "Included when true.",
-					Type: &common.NonNull{OfType: r.schema.Types["Boolean"]},
-				}},
-			},
-		},
-	}
 }
 
 type Type struct {
@@ -291,24 +276,28 @@ func (r *EnumValue) DeprecationReason() *string {
 }
 
 type Directive struct {
-	name        string
-	description string
-	locations   []string
-	args        []*InputValue
+	directive *schema.Directive
 }
 
 func (r *Directive) Name() string {
-	return r.name
+	return r.directive.Name
 }
 
 func (r *Directive) Description() *string {
-	return &r.description
+	if r.directive.Desc == "" {
+		return nil
+	}
+	return &r.directive.Desc
 }
 
 func (r *Directive) Locations() []string {
-	return r.locations
+	return r.directive.Locs
 }
 
 func (r *Directive) Args() []*InputValue {
-	return r.args
+	l := make([]*InputValue, len(r.directive.ArgOrder))
+	for i, name := range r.directive.ArgOrder {
+		l[i] = &InputValue{r.directive.Args[name]}
+	}
+	return l
 }

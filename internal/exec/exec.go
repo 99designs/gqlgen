@@ -212,7 +212,11 @@ func (b *execBuilder) makeObjectExec(typeName string, fields map[string]*schema.
 	for name, f := range fields {
 		methodIndex := findMethod(resolverType, name)
 		if methodIndex == -1 {
-			return nil, fmt.Errorf("%s does not resolve %q: missing method for field %q", resolverType, typeName, name)
+			hint := ""
+			if findMethod(reflect.PtrTo(resolverType), name) != -1 {
+				hint = " (hint: the method exists on the pointer type)"
+			}
+			return nil, fmt.Errorf("%s does not resolve %q: missing method for field %q%s", resolverType, typeName, name, hint)
 		}
 
 		m := resolverType.Method(methodIndex)

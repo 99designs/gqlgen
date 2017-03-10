@@ -218,7 +218,7 @@ func (b *execBuilder) makeObjectExec(typeName string, fields map[string]*schema.
 		m := resolverType.Method(methodIndex)
 		fe, err := b.makeFieldExec(typeName, f, m, methodIndex, methodHasReceiver)
 		if err != nil {
-			return nil, fmt.Errorf("method %q of %s: %s", m.Name, resolverType, err)
+			return nil, fmt.Errorf("%s\n\treturned by (%s).%s", err, resolverType, m.Name)
 		}
 		fieldExecs[name] = fe
 	}

@@ -10,14 +10,19 @@ The project is under heavy development. It is stable enough so we use it in prod
 
 ## Goals
 
-* full support of [GraphQL spec (October 2016)](https://facebook.github.io/graphql/)
-* minimal API
-* support for context.Context and OpenTracing
-* early error detection at application startup by type-checking if the given resolver matches the schema 
-* resolvers are purely based on method sets (e.g. it's up to you if you want to resolve a GraphQL interface with a Go interface or a Go struct)
-* nice error messages (no internal panics, even with an invalid schema or resolver; please file a bug if you see an internal panic)
-* panic handling (a panic in a resolver should not take down the whole app)
-* parallel execution of resolvers
+* [ ] full support of [GraphQL spec (October 2016)](https://facebook.github.io/graphql/)
+  * [ ] propagation of `null` on resolver errors
+  * [x] everything else
+* [x] minimal API
+* [x] support for context.Context and OpenTracing
+* [x] early error detection at application startup by type-checking if the given resolver matches the schema 
+* [x] resolvers are purely based on method sets (e.g. it's up to you if you want to resolve a GraphQL interface with a Go interface or a Go struct)
+* [ ] nice error messages (no internal panics, even with an invalid schema or resolver; please file a bug if you see an internal panic)
+  * [x] nice errors on resolver validation
+  * [ ] nice errors on all invalid schemas
+  * [ ] nice errors on all invalid queries
+* [x] panic handling (a panic in a resolver should not take down the whole app)
+* [x] parallel execution of resolvers
 
 ## (Some) Documentation
 

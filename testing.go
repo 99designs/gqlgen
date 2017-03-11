@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+// Test is a GraphQL test case to be used with RunTest(s).
 type Test struct {
 	Schema         *Schema
 	Query          string
@@ -16,6 +17,7 @@ type Test struct {
 	ExpectedResult string
 }
 
+// RunTests runs the given GraphQL test cases as subtests.
 func RunTests(t *testing.T, tests []*Test) {
 	if len(tests) == 1 {
 		RunTest(t, tests[0])
@@ -29,6 +31,7 @@ func RunTests(t *testing.T, tests []*Test) {
 	}
 }
 
+// RunTest runs a single GraphQL test case.
 func RunTest(t *testing.T, test *Test) {
 	result := test.Schema.Exec(context.Background(), test.Query, test.OperationName, test.Variables)
 	if len(result.Errors) != 0 {

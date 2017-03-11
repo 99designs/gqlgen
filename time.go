@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Time is a custom GraphQL type to represent an instant in time. It has to be added to a schema
+// via "scalar Time" since it is not a predeclared GraphQL type like "ID".
 type Time struct {
 	time.Time
 }

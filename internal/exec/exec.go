@@ -671,10 +671,10 @@ type typeAssertExec struct {
 	typeExec    iExec
 }
 
-func skipByDirective(r *request, d map[string]*common.Directive) bool {
-	if skip, ok := d["skip"]; ok {
+func skipByDirective(r *request, d map[string]common.DirectiveArgs) bool {
+	if args, ok := d["skip"]; ok {
 		p := valuePacker{valueType: boolType}
-		v, err := p.pack(r, r.resolveVar(skip.Args["if"]))
+		v, err := p.pack(r, r.resolveVar(args["if"]))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}
@@ -683,9 +683,9 @@ func skipByDirective(r *request, d map[string]*common.Directive) bool {
 		}
 	}
 
-	if include, ok := d["include"]; ok {
+	if args, ok := d["include"]; ok {
 		p := valuePacker{valueType: boolType}
-		v, err := p.pack(r, r.resolveVar(include.Args["if"]))
+		v, err := p.pack(r, r.resolveVar(args["if"]))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}

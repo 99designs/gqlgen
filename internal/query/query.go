@@ -51,18 +51,18 @@ type Field struct {
 	Alias      string
 	Name       string
 	Arguments  map[string]interface{}
-	Directives map[string]*common.Directive
+	Directives map[string]common.DirectiveArgs
 	SelSet     *SelectionSet
 }
 
 type FragmentSpread struct {
 	Name       string
-	Directives map[string]*common.Directive
+	Directives map[string]common.DirectiveArgs
 }
 
 type InlineFragment struct {
 	Fragment
-	Directives map[string]*common.Directive
+	Directives map[string]common.DirectiveArgs
 }
 
 func (Field) isSelection()          {}

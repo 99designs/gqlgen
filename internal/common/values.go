@@ -33,6 +33,19 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 
 type Variable string
 
+func ParseArguments(l *lexer.Lexer) map[string]interface{} {
+	args := make(map[string]interface{})
+	l.ConsumeToken('(')
+	for l.Peek() != ')' {
+		name := l.ConsumeIdent()
+		l.ConsumeToken(':')
+		value := ParseValue(l, false)
+		args[name] = value
+	}
+	l.ConsumeToken(')')
+	return args
+}
+
 func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	switch l.Peek() {
 	case '$':

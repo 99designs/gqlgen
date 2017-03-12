@@ -51,23 +51,18 @@ type Field struct {
 	Alias      string
 	Name       string
 	Arguments  map[string]interface{}
-	Directives map[string]*Directive
+	Directives map[string]*common.Directive
 	SelSet     *SelectionSet
-}
-
-type Directive struct {
-	Name      string
-	Arguments map[string]interface{}
 }
 
 type FragmentSpread struct {
 	Name       string
-	Directives map[string]*Directive
+	Directives map[string]*common.Directive
 }
 
 type InlineFragment struct {
 	Fragment
-	Directives map[string]*Directive
+	Directives map[string]*common.Directive
 }
 
 func (Field) isSelection()          {}
@@ -180,9 +175,7 @@ func parseSelection(l *lexer.Lexer) Selection {
 }
 
 func parseField(l *lexer.Lexer) *Field {
-	f := &Field{
-		Directives: make(map[string]*Directive),
-	}
+	f := &Field{}
 	f.Alias = l.ConsumeIdent()
 	f.Name = f.Alias
 	if l.Peek() == ':' {
@@ -190,39 +183,13 @@ func parseField(l *lexer.Lexer) *Field {
 		f.Name = l.ConsumeIdent()
 	}
 	if l.Peek() == '(' {
-		f.Arguments = parseArguments(l)
+		f.Arguments = common.ParseArguments(l)
 	}
-	for l.Peek() == '@' {
-		d := parseDirective(l)
-		f.Directives[d.Name] = d
-	}
+	f.Directives = common.ParseDirectives(l)
 	if l.Peek() == '{' {
 		f.SelSet = parseSelectionSet(l)
 	}
 	return f
-}
-
-func parseArguments(l *lexer.Lexer) map[string]interface{} {
-	args := make(map[string]interface{})
-	l.ConsumeToken('(')
-	for l.Peek() != ')' {
-		name := l.ConsumeIdent()
-		l.ConsumeToken(':')
-		value := common.ParseValue(l, false)
-		args[name] = value
-	}
-	l.ConsumeToken(')')
-	return args
-}
-
-func parseDirective(l *lexer.Lexer) *Directive {
-	d := &Directive{}
-	l.ConsumeToken('@')
-	d.Name = l.ConsumeIdent()
-	if l.Peek() == '(' {
-		d.Arguments = parseArguments(l)
-	}
-	return d
 }
 
 func parseSpread(l *lexer.Lexer) Selection {
@@ -232,25 +199,16 @@ func parseSpread(l *lexer.Lexer) Selection {
 	ident := l.ConsumeIdent()
 
 	if ident == "on" {
-		f := &InlineFragment{
-			Directives: make(map[string]*Directive),
-		}
+		f := &InlineFragment{}
 		f.On = l.ConsumeIdent()
-		for l.Peek() == '@' {
-			d := parseDirective(l)
-			f.Directives[d.Name] = d
-		}
+		f.Directives = common.ParseDirectives(l)
 		f.SelSet = parseSelectionSet(l)
 		return f
 	}
 
 	fs := &FragmentSpread{
-		Directives: make(map[string]*Directive),
-		Name:       ident,
+		Name: ident,
 	}
-	for l.Peek() == '@' {
-		d := parseDirective(l)
-		fs.Directives[d.Name] = d
-	}
+	fs.Directives = common.ParseDirectives(l)
 	return fs
 }

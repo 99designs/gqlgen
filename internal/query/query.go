@@ -205,13 +205,11 @@ func parseField(l *lexer.Lexer) *Field {
 func parseArguments(l *lexer.Lexer) map[string]interface{} {
 	args := make(map[string]interface{})
 	l.ConsumeToken('(')
-	if l.Peek() != ')' {
-		name, value := parseArgument(l)
+	for l.Peek() != ')' {
+		name := l.ConsumeIdent()
+		l.ConsumeToken(':')
+		value := common.ParseValue(l, false)
 		args[name] = value
-		for l.Peek() != ')' {
-			name, value := parseArgument(l)
-			args[name] = value
-		}
 	}
 	l.ConsumeToken(')')
 	return args
@@ -255,11 +253,4 @@ func parseSpread(l *lexer.Lexer) Selection {
 		fs.Directives[d.Name] = d
 	}
 	return fs
-}
-
-func parseArgument(l *lexer.Lexer) (string, interface{}) {
-	name := l.ConsumeIdent()
-	l.ConsumeToken(':')
-	value := common.ParseValue(l, false)
-	return name, value
 }

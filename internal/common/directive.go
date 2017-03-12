@@ -11,7 +11,7 @@ func ParseDirectives(l *lexer.Lexer) map[string]DirectiveArgs {
 	for l.Peek() == '@' {
 		l.ConsumeToken('@')
 		name := l.ConsumeIdent()
-		var args DirectiveArgs
+		args := make(DirectiveArgs)
 		if l.Peek() == '(' {
 			args = ParseArguments(l)
 		}

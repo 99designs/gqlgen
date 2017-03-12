@@ -115,10 +115,11 @@ func (t *Enum) Description() string        { return t.Desc }
 func (t *InputObject) Description() string { return t.Desc }
 
 type Field struct {
-	Name string
-	Args common.InputMap
-	Type common.Type
-	Desc string
+	Name       string
+	Args       common.InputMap
+	Type       common.Type
+	Directives map[string]common.DirectiveArgs
+	Desc       string
 }
 
 func New() *Schema {
@@ -238,6 +239,22 @@ func resolveField(s *Schema, f *Field) error {
 		return err
 	}
 	f.Type = t
+	for name, args := range f.Directives {
+		d, ok := s.Directives[name]
+		if !ok {
+			return errors.Errorf("directive %q not found", name)
+		}
+		for argName := range args {
+			if _, ok := d.Args[argName]; !ok {
+				return errors.Errorf("invalid argument %q for directive %q", argName, name)
+			}
+		}
+		for argName, arg := range d.Args {
+			if _, ok := args[argName]; !ok {
+				args[argName] = arg.Default
+			}
+		}
+	}
 	return resolveInputObject(s, &f.Args)
 }
 
@@ -410,6 +427,7 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 		}
 		l.ConsumeToken(':')
 		f.Type = common.ParseType(l)
+		f.Directives = common.ParseDirectives(l)
 		fields[f.Name] = f
 		fieldOrder = append(fieldOrder, f.Name)
 	}

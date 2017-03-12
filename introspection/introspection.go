@@ -115,9 +115,12 @@ func (r *Type) Fields(args *struct{ IncludeDeprecated bool }) *[]*Field {
 		return nil
 	}
 
-	l := make([]*Field, len(fieldOrder))
-	for i, name := range fieldOrder {
-		l[i] = &Field{fields[name]}
+	var l []*Field
+	for _, name := range fieldOrder {
+		f := fields[name]
+		if _, ok := f.Directives["deprecated"]; !ok || args.IncludeDeprecated {
+			l = append(l, &Field{f})
+		}
 	}
 	return &l
 }
@@ -218,11 +221,17 @@ func (r *Field) Type() *Type {
 }
 
 func (r *Field) IsDeprecated() bool {
-	return false
+	_, ok := r.field.Directives["deprecated"]
+	return ok
 }
 
 func (r *Field) DeprecationReason() *string {
-	return nil
+	args, ok := r.field.Directives["deprecated"]
+	if !ok {
+		return nil
+	}
+	reason := args["reason"].(string)
+	return &reason
 }
 
 type InputValue struct {

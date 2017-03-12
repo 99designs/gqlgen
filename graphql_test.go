@@ -462,6 +462,66 @@ func TestIncludeDirective(t *testing.T) {
 	})
 }
 
+type testDeprecatedDirectiveResolver struct{}
+
+func (r *testDeprecatedDirectiveResolver) A() int32 {
+	return 0
+}
+
+func (r *testDeprecatedDirectiveResolver) B() int32 {
+	return 0
+}
+
+func (r *testDeprecatedDirectiveResolver) C() int32 {
+	return 0
+}
+
+func TestDeprecatedDirective(t *testing.T) {
+	graphql.RunTests(t, []*graphql.Test{
+		{
+			Schema: graphql.MustParseSchema(`
+				schema {
+					query: Query
+				}
+
+				type Query {
+					a: Int!
+					b: Int! @deprecated
+					c: Int! @deprecated(reason: "We don't like it")
+				}
+			`, &testDeprecatedDirectiveResolver{}),
+			Query: `
+				{
+					__type(name: "Query") {
+						fields {
+							name
+						}
+						allFields: fields(includeDeprecated: true) {
+							name
+							isDeprecated
+							deprecationReason
+						}
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+					"__type": {
+						"fields": [
+							{ "name": "a" }
+						],
+						"allFields": [
+							{ "name": "a", "isDeprecated": false, "deprecationReason": null },
+							{ "name": "b", "isDeprecated": true, "deprecationReason": "No longer supported" },
+							{ "name": "c", "isDeprecated": true, "deprecationReason": "We don't like it" }
+						]
+					}
+				}
+			`,
+		},
+	})
+}
+
 func TestInlineFragments(t *testing.T) {
 	graphql.RunTests(t, []*graphql.Test{
 		{
@@ -1134,6 +1194,24 @@ func TestIntrospection(t *testing.T) {
 				{
 						"__schema": {
 							"directives": [
+								{
+									"name": "deprecated",
+									"description": "Marks an element of a GraphQL schema as no longer supported.",
+									"locations": [
+										"FIELD_DEFINITION",
+										"ENUM_VALUE"
+									],
+									"args": [
+										{
+											"name": "reason",
+											"description": "Explains why this element was deprecated, usually also including a suggestion\nfor how to access supported similar data. Formatted in\n[Markdown](https://daringfireball.net/projects/markdown/).",
+											"type": {
+												"kind": "SCALAR",
+												"ofType": null
+											}
+										}
+									]
+								},
 								{
 									"name": "include",
 									"description": "Directs the executor to include this field or fragment only when the ` + "`" + `if` + "`" + ` argument is true.",

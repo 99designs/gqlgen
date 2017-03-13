@@ -162,9 +162,11 @@ func (r *Type) EnumValues(args *struct{ IncludeDeprecated bool }) *[]*EnumValue 
 		return nil
 	}
 
-	l := make([]*EnumValue, len(t.Values))
-	for i, v := range t.Values {
-		l[i] = &EnumValue{v}
+	var l []*EnumValue
+	for _, v := range t.Values {
+		if _, ok := v.Directives["deprecated"]; !ok || args.IncludeDeprecated {
+			l = append(l, &EnumValue{v})
+		}
 	}
 	return &l
 }
@@ -277,11 +279,17 @@ func (r *EnumValue) Description() *string {
 }
 
 func (r *EnumValue) IsDeprecated() bool {
-	return false
+	_, ok := r.value.Directives["deprecated"]
+	return ok
 }
 
 func (r *EnumValue) DeprecationReason() *string {
-	return nil
+	args, ok := r.value.Directives["deprecated"]
+	if !ok {
+		return nil
+	}
+	reason := args["reason"].(string)
+	return &reason
 }
 
 type Directive struct {

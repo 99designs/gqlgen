@@ -18,6 +18,7 @@ type Schema struct {
 	entryPointNames map[string]string
 	objects         []*Object
 	unions          []*Union
+	enums           []*Enum
 }
 
 func (s *Schema) Resolve(name string) common.Type {
@@ -68,8 +69,9 @@ type Enum struct {
 }
 
 type EnumValue struct {
-	Name string
-	Desc string
+	Name       string
+	Directives map[string]common.DirectiveArgs
+	Desc       string
 }
 
 type InputObject struct {
@@ -208,6 +210,14 @@ func (s *Schema) Parse(schemaString string) error {
 		}
 	}
 
+	for _, enum := range s.enums {
+		for _, value := range enum.Values {
+			if err := resolveDirectives(s, value.Directives); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -239,7 +249,14 @@ func resolveField(s *Schema, f *Field) error {
 		return err
 	}
 	f.Type = t
-	for name, args := range f.Directives {
+	if err := resolveDirectives(s, f.Directives); err != nil {
+		return err
+	}
+	return resolveInputObject(s, &f.Args)
+}
+
+func resolveDirectives(s *Schema, directives map[string]common.DirectiveArgs) error {
+	for name, args := range directives {
 		d, ok := s.Directives[name]
 		if !ok {
 			return errors.Errorf("directive %q not found", name)
@@ -255,7 +272,7 @@ func resolveField(s *Schema, f *Field) error {
 			}
 		}
 	}
-	return resolveInputObject(s, &f.Args)
+	return nil
 }
 
 func resolveInputObject(s *Schema, io *common.InputMap) error {
@@ -300,6 +317,7 @@ func parseSchema(s *Schema, l *lexer.Lexer) {
 			enum := parseEnumDecl(l)
 			enum.Desc = desc
 			s.Types[enum.Name] = enum
+			s.enums = append(s.enums, enum)
 		case "input":
 			input := parseInputDecl(l)
 			input.Desc = desc
@@ -378,6 +396,7 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 		v := &EnumValue{}
 		v.Desc = l.DescComment()
 		v.Name = l.ConsumeIdent()
+		v.Directives = common.ParseDirectives(l)
 		enum.Values = append(enum.Values, v)
 	}
 	l.ConsumeToken('}')

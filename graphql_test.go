@@ -519,6 +519,50 @@ func TestDeprecatedDirective(t *testing.T) {
 				}
 			`,
 		},
+		{
+			Schema: graphql.MustParseSchema(`
+				schema {
+					query: Query
+				}
+
+				type Query {
+				}
+
+				enum Test {
+					A
+					B @deprecated
+					C @deprecated(reason: "We don't like it")
+				}
+			`, &testDeprecatedDirectiveResolver{}),
+			Query: `
+				{
+					__type(name: "Test") {
+						enumValues {
+							name
+						}
+						allEnumValues: enumValues(includeDeprecated: true) {
+							name
+							isDeprecated
+							deprecationReason
+						}
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+					"__type": {
+						"enumValues": [
+							{ "name": "A" }
+						],
+						"allEnumValues": [
+							{ "name": "A", "isDeprecated": false, "deprecationReason": null },
+							{ "name": "B", "isDeprecated": true, "deprecationReason": "No longer supported" },
+							{ "name": "C", "isDeprecated": true, "deprecationReason": "We don't like it" }
+						]
+					}
+				}
+			`,
+		},
 	})
 }
 

@@ -408,13 +408,15 @@ func parseDirectiveDecl(l *lexer.Lexer) *Directive {
 	d.Args = make(map[string]*common.InputValue)
 	l.ConsumeToken('@')
 	d.Name = l.ConsumeIdent()
-	l.ConsumeToken('(')
-	for l.Peek() != ')' {
-		v := common.ParseInputValue(l)
-		d.Args[v.Name] = v
-		d.ArgOrder = append(d.ArgOrder, v.Name)
+	if l.Peek() == '(' {
+		l.ConsumeToken('(')
+		for l.Peek() != ')' {
+			v := common.ParseInputValue(l)
+			d.Args[v.Name] = v
+			d.ArgOrder = append(d.ArgOrder, v.Name)
+		}
+		l.ConsumeToken(')')
 	}
-	l.ConsumeToken(')')
 	l.ConsumeKeyword("on")
 	for {
 		loc := l.ConsumeIdent()

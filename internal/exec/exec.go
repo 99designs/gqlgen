@@ -494,36 +494,21 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 
 		switch sel := sel.(type) {
 		case *query.Field:
-			if skipByDirective(r, sel.Directives) {
+			field := sel
+			if skipByDirective(r, field.Directives) {
 				continue
 			}
-
 			execSel(func() {
-				e.execField(ctx, r, sel, resolver, addResult)
+				e.execField(ctx, r, field, resolver, addResult)
 			})
 
-		case *query.FragmentSpread:
-			if skipByDirective(r, sel.Directives) {
-				continue
-			}
-
-			fs := sel
-			execSel(func() {
-				frag, ok := r.doc.Fragments[fs.Name]
-				if !ok {
-					panic(fmt.Errorf("fragment %q not found", fs.Name)) // TODO proper error handling
-				}
-				e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
-			})
-
-		case *query.InlineFragment:
-			if skipByDirective(r, sel.Directives) {
-				continue
-			}
-
+		case *query.Fragment:
 			frag := sel
+			if skipByDirective(r, frag.Directives) {
+				continue
+			}
 			execSel(func() {
-				e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
+				e.execFragment(ctx, r, frag, resolver, addResult)
 			})
 
 		default:

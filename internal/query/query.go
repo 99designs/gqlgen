@@ -35,8 +35,9 @@ type NamedFragment struct {
 }
 
 type Fragment struct {
-	On     string
-	SelSet *SelectionSet
+	On         string
+	SelSet     *SelectionSet
+	Directives map[string]common.DirectiveArgs
 }
 
 type SelectionSet struct {
@@ -60,14 +61,9 @@ type FragmentSpread struct {
 	Directives map[string]common.DirectiveArgs
 }
 
-type InlineFragment struct {
-	Fragment
-	Directives map[string]common.DirectiveArgs
-}
-
 func (Field) isSelection()          {}
+func (Fragment) isSelection()       {}
 func (FragmentSpread) isSelection() {}
-func (InlineFragment) isSelection() {}
 
 func Parse(queryString string) (*Document, *errors.QueryError) {
 	sc := &scanner.Scanner{
@@ -84,7 +80,59 @@ func Parse(queryString string) (*Document, *errors.QueryError) {
 		return nil, err
 	}
 
+	for _, op := range doc.Operations {
+		if err := resolveSelSet(doc, op.SelSet); err != nil {
+			return nil, err
+		}
+	}
+
+	for _, f := range doc.Fragments {
+		if err := resolveSelSet(doc, f.Fragment.SelSet); err != nil {
+			return nil, err
+		}
+	}
+
 	return doc, nil
+}
+
+func resolveSelSet(doc *Document, selSet *SelectionSet) *errors.QueryError {
+	var err *errors.QueryError
+	for i, sel := range selSet.Selections {
+		selSet.Selections[i], err = resolveSelection(doc, sel)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func resolveSelection(doc *Document, sel Selection) (Selection, *errors.QueryError) {
+	switch sel := sel.(type) {
+	case *Field:
+		if sel.SelSet != nil {
+			if err := resolveSelSet(doc, sel.SelSet); err != nil {
+				return nil, err
+			}
+		}
+		return sel, nil
+
+	case *FragmentSpread:
+		frag, ok := doc.Fragments[sel.Name]
+		if !ok {
+			return nil, errors.Errorf("fragment %q not found", sel.Name)
+		}
+		return &Fragment{
+			On:         frag.On,
+			SelSet:     frag.SelSet,
+			Directives: sel.Directives,
+		}, nil
+
+	case *Fragment:
+		return sel, nil
+
+	default:
+		panic("unreachable")
+	}
 }
 
 func parseDocument(l *lexer.Lexer) *Document {
@@ -189,7 +237,7 @@ func parseSpread(l *lexer.Lexer) Selection {
 	ident := l.ConsumeIdent()
 
 	if ident == "on" {
-		f := &InlineFragment{}
+		f := &Fragment{}
 		f.On = l.ConsumeIdent()
 		f.Directives = common.ParseDirectives(l)
 		f.SelSet = parseSelectionSet(l)

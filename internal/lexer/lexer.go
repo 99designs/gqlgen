@@ -26,7 +26,7 @@ func (l *Lexer) CatchSyntaxError(f func()) (errRes *errors.QueryError) {
 	defer func() {
 		if err := recover(); err != nil {
 			if err, ok := err.(syntaxError); ok {
-				errRes = errors.ErrorfWithLoc(l.sc.Line, l.sc.Column, "syntax error: %s", err)
+				errRes = errors.ErrorfWithLoc(l.Location(), "syntax error: %s", err)
 				return
 			}
 			panic(err)
@@ -115,4 +115,11 @@ func (l *Lexer) DescComment() string {
 
 func (l *Lexer) SyntaxError(message string) {
 	panic(syntaxError(message))
+}
+
+func (l *Lexer) Location() *errors.Location {
+	return &errors.Location{
+		Line:   l.sc.Line,
+		Column: l.sc.Column,
+	}
 }

@@ -107,8 +107,8 @@ func (b *execBuilder) finish() error {
 	for _, p := range b.structPackers {
 		p.defaultStruct = reflect.New(p.structType).Elem()
 		for _, f := range p.fields {
-			if f.field.Default != nil {
-				v, err := f.fieldPacker.pack(nil, f.field.Default)
+			if defaultVal := f.field.Default; defaultVal != nil {
+				v, err := f.fieldPacker.pack(nil, defaultVal)
 				if err != nil {
 					return err
 				}
@@ -542,7 +542,7 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 
 	case "__type":
 		p := valuePacker{valueType: stringType}
-		v, err := p.pack(r, r.resolveVar(f.Arguments["name"]))
+		v, err := p.pack(r, r.resolveVar(f.Arguments["name"].Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 			addResult(f.Alias, nil)
@@ -618,10 +618,12 @@ func (e *fieldExec) exec(ctx context.Context, r *request, f *query.Field, resolv
 	}
 
 	if e.argsPacker != nil {
+		args := make(map[string]interface{})
 		for name, arg := range f.Arguments {
+			args[name] = arg.Value
 			span.SetTag(OpenTracingTagArgsPrefix+name, arg)
 		}
-		packed, err := e.argsPacker.pack(r, f.Arguments)
+		packed, err := e.argsPacker.pack(r, args)
 		if err != nil {
 			return nil, err
 		}
@@ -659,7 +661,7 @@ type typeAssertExec struct {
 func skipByDirective(r *request, d map[string]common.DirectiveArgs) bool {
 	if args, ok := d["skip"]; ok {
 		p := valuePacker{valueType: boolType}
-		v, err := p.pack(r, r.resolveVar(args["if"]))
+		v, err := p.pack(r, r.resolveVar(args["if"].Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}
@@ -670,7 +672,7 @@ func skipByDirective(r *request, d map[string]common.DirectiveArgs) bool {
 
 	if args, ok := d["include"]; ok {
 		p := valuePacker{valueType: boolType}
-		v, err := p.pack(r, r.resolveVar(args["if"]))
+		v, err := p.pack(r, r.resolveVar(args["if"].Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}

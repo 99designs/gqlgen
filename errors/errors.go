@@ -19,13 +19,10 @@ func Errorf(format string, a ...interface{}) *QueryError {
 	}
 }
 
-func ErrorfWithLoc(line int, column int, format string, a ...interface{}) *QueryError {
+func ErrorfWithLoc(loc *Location, format string, a ...interface{}) *QueryError {
 	return &QueryError{
-		Message: fmt.Sprintf(format, a...),
-		Locations: []*Location{{
-			Line:   line,
-			Column: column,
-		}},
+		Message:   fmt.Sprintf(format, a...),
+		Locations: []*Location{loc},
 	}
 }
 

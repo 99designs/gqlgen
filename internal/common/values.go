@@ -3,6 +3,7 @@ package common
 import (
 	"text/scanner"
 
+	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
@@ -18,6 +19,15 @@ type InputValue struct {
 	Desc    string
 }
 
+type ValueWithLoc struct {
+	Value interface{}
+	Loc   *errors.Location
+}
+
+type Variable string
+
+type EnumValue string
+
 func ParseInputValue(l *lexer.Lexer) *InputValue {
 	p := &InputValue{}
 	p.Desc = l.DescComment()
@@ -26,16 +36,13 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 	p.Type = ParseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
-		p.Default = ParseValue(l, true)
+		p.Default = parseValue(l, true)
 	}
 	return p
 }
 
-type Variable string
-type EnumValue string
-
-func ParseArguments(l *lexer.Lexer) map[string]interface{} {
-	args := make(map[string]interface{})
+func ParseArguments(l *lexer.Lexer) map[string]ValueWithLoc {
+	args := make(map[string]ValueWithLoc)
 	l.ConsumeToken('(')
 	for l.Peek() != ')' {
 		name := l.ConsumeIdent()
@@ -47,7 +54,16 @@ func ParseArguments(l *lexer.Lexer) map[string]interface{} {
 	return args
 }
 
-func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
+func ParseValue(l *lexer.Lexer, constOnly bool) ValueWithLoc {
+	loc := l.Location()
+	value := parseValue(l, constOnly)
+	return ValueWithLoc{
+		Value: value,
+		Loc:   loc,
+	}
+}
+
+func parseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	switch l.Peek() {
 	case '$':
 		if constOnly {
@@ -68,7 +84,7 @@ func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 		l.ConsumeToken('[')
 		var list []interface{}
 		for l.Peek() != ']' {
-			list = append(list, ParseValue(l, constOnly))
+			list = append(list, parseValue(l, constOnly))
 		}
 		l.ConsumeToken(']')
 		return list
@@ -78,7 +94,7 @@ func ParseValue(l *lexer.Lexer, constOnly bool) interface{} {
 		for l.Peek() != '}' {
 			name := l.ConsumeIdent()
 			l.ConsumeToken(':')
-			obj[name] = ParseValue(l, constOnly)
+			obj[name] = parseValue(l, constOnly)
 		}
 		l.ConsumeToken('}')
 		return obj

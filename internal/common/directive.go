@@ -4,7 +4,7 @@ import (
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
-type DirectiveArgs map[string]interface{}
+type DirectiveArgs map[string]ValueWithLoc
 
 func ParseDirectives(l *lexer.Lexer) map[string]DirectiveArgs {
 	directives := make(map[string]DirectiveArgs)

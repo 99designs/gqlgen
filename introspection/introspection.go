@@ -232,7 +232,7 @@ func (r *Field) DeprecationReason() *string {
 	if !ok {
 		return nil
 	}
-	reason := args["reason"].(string)
+	reason := args["reason"].Value.(string)
 	return &reason
 }
 
@@ -292,7 +292,7 @@ func (r *EnumValue) DeprecationReason() *string {
 	if !ok {
 		return nil
 	}
-	reason := args["reason"].(string)
+	reason := args["reason"].Value.(string)
 	return &reason
 }
 

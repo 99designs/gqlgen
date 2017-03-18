@@ -51,7 +51,7 @@ type Selection interface {
 type Field struct {
 	Alias      string
 	Name       string
-	Arguments  map[string]interface{}
+	Arguments  map[string]common.ValueWithLoc
 	Directives map[string]common.DirectiveArgs
 	SelSet     *SelectionSet
 }

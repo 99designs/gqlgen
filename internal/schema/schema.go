@@ -268,7 +268,7 @@ func resolveDirectives(s *Schema, directives map[string]common.DirectiveArgs) er
 		}
 		for argName, arg := range d.Args {
 			if _, ok := args[argName]; !ok {
-				args[argName] = arg.Default
+				args[argName] = common.ValueWithLoc{Value: arg.Default}
 			}
 		}
 	}

@@ -306,5 +306,6 @@ func unmarshalInput(typ reflect.Type, input interface{}) (interface{}, error) {
 		}
 	}
 
+	panic("incompatible type")
 	return nil, fmt.Errorf("incompatible type")
 }

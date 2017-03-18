@@ -298,6 +298,12 @@ func unmarshalInput(typ reflect.Type, input interface{}) (interface{}, error) {
 		case int:
 			return float64(input), nil
 		}
+
+	case stringType:
+		switch input := input.(type) {
+		case common.EnumValue:
+			return string(input), nil
+		}
 	}
 
 	return nil, fmt.Errorf("incompatible type")

@@ -32,6 +32,7 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 }
 
 type Variable string
+type EnumValue string
 
 func ParseArguments(l *lexer.Lexer) map[string]interface{} {
 	args := make(map[string]interface{})
@@ -96,6 +97,6 @@ func parseIdent(l *lexer.Lexer) interface{} {
 	case "null":
 		return nil
 	default:
-		return ident
+		return EnumValue(ident)
 	}
 }

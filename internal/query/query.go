@@ -69,7 +69,7 @@ func (Field) isSelection()          {}
 func (FragmentSpread) isSelection() {}
 func (InlineFragment) isSelection() {}
 
-func Parse(queryString string, resolver common.Resolver) (*Document, *errors.QueryError) {
+func Parse(queryString string) (*Document, *errors.QueryError) {
 	sc := &scanner.Scanner{
 		Mode: scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings,
 	}
@@ -82,16 +82,6 @@ func Parse(queryString string, resolver common.Resolver) (*Document, *errors.Que
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	for _, op := range doc.Operations {
-		for _, v := range op.Vars.Fields {
-			t, err := common.ResolveType(v.Type, resolver)
-			if err != nil {
-				return nil, errors.Errorf("%s", err)
-			}
-			v.Type = t
-		}
 	}
 
 	return doc, nil

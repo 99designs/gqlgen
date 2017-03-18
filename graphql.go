@@ -99,7 +99,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		panic("schema created without resolver, can not exec")
 	}
 
-	document, err := query.Parse(queryString, s.schema.Resolve)
+	document, err := query.Parse(queryString)
 	if err != nil {
 		return &Response{
 			Errors: []*errors.QueryError{err},

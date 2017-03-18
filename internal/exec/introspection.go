@@ -54,7 +54,7 @@ var introspectionQuery *query.Document
 
 func init() {
 	var err *errors.QueryError
-	introspectionQuery, err = query.Parse(introspectionQuerySrc, schema.Meta.Resolve)
+	introspectionQuery, err = query.Parse(introspectionQuerySrc)
 	if err != nil {
 		panic(err)
 	}

@@ -11,7 +11,7 @@ import (
 type InputValue struct {
 	Name    string
 	Type    Type
-	Default interface{}
+	Default *ValueWithLoc
 	Desc    string
 }
 
@@ -39,7 +39,8 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 	p.Type = ParseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
-		p.Default = parseValue(l, true)
+		v := ParseValue(l, true)
+		p.Default = &v
 	}
 	return p
 }

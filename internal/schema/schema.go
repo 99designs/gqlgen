@@ -276,7 +276,7 @@ func resolveDirectives(s *Schema, directives map[string]common.ArgumentList) err
 		}
 		for _, arg := range d.Args {
 			if args.Get(arg.Name).Value == nil {
-				args = append(args, common.Argument{Name: arg.Name, Value: common.ValueWithLoc{Value: arg.Default}})
+				args = append(args, common.Argument{Name: arg.Name, Value: *arg.Default})
 			}
 		}
 		directives[name] = args

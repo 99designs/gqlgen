@@ -256,7 +256,7 @@ func (r *InputValue) DefaultValue() *string {
 	if r.value.Default == nil {
 		return nil
 	}
-	b, err := json.Marshal(r.value.Default)
+	b, err := json.Marshal(r.value.Default.Value)
 	if err != nil {
 		panic("could not marshal default value: " + err.Error())
 	}

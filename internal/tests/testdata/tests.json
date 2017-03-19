@@ -681,5 +681,163 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Variable default values of correct type/variables with no default values",
+    "query": "\n      query NullableValues($a: Int, $b: String, $c: ComplexInput) {\n        dog { name }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Variable default values of correct type/required variables without default values",
+    "query": "\n      query RequiredValues($a: Int!, $b: String!) {\n        dog { name }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Variable default values of correct type/variables with valid default values",
+    "query": "\n      query WithDefaultValues(\n        $a: Int = 1,\n        $b: String = \"ok\",\n        $c: ComplexInput = { requiredField: true, intField: 3 }\n      ) {\n        dog { name }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Variable default values of correct type/variables with valid default null values",
+    "query": "\n      query WithDefaultValues(\n        $a: Int = null,\n        $b: String = null,\n        $c: ComplexInput = { requiredField: true, intField: null }\n      ) {\n        dog { name }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Variable default values of correct type/variables with invalid default null values",
+    "query": "\n      query WithDefaultValues(\n        $a: Int! = null,\n        $b: String! = null,\n        $c: ComplexInput = { requiredField: null, intField: null }\n      ) {\n        dog { name }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" of type \"Int!\" is required and will not use the default value. Perhaps you meant to use type \"Int\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 20
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$a\" of type \"Int!\" has invalid default value null.\nExpected \"Int!\", found null.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 20
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" of type \"String!\" is required and will not use the default value. Perhaps you meant to use type \"String\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 23
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" of type \"String!\" has invalid default value null.\nExpected \"String!\", found null.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 23
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$c\" of type \"ComplexInput\" has invalid default value {intField: null, requiredField: null}.\nIn field \"requiredField\": Expected \"Boolean!\", found null.",
+        "locations": [
+          {
+            "line": 5,
+            "column": 28
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Variable default values of correct type/no required variables with default values",
+    "query": "\n      query UnreachableDefaultValues($a: Int! = 3, $b: String! = \"default\") {\n        dog { name }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" of type \"Int!\" is required and will not use the default value. Perhaps you meant to use type \"Int\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 49
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" of type \"String!\" is required and will not use the default value. Perhaps you meant to use type \"String\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 66
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Variable default values of correct type/variables with invalid default values",
+    "query": "\n      query InvalidDefaultValues(\n        $a: Int = \"one\",\n        $b: String = 4,\n        $c: ComplexInput = \"notverycomplex\"\n      ) {\n        dog { name }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" of type \"Int\" has invalid default value \"one\".\nExpected type \"Int\", found \"one\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 19
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" of type \"String\" has invalid default value 4.\nExpected type \"String\", found 4.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 22
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$c\" of type \"ComplexInput\" has invalid default value \"notverycomplex\".\nExpected \"ComplexInput\", found not an object.",
+        "locations": [
+          {
+            "line": 5,
+            "column": 28
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Variable default values of correct type/complex variables missing required field",
+    "query": "\n      query MissingRequiredField($a: ComplexInput = {intField: 3}) {\n        dog { name }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" of type \"ComplexInput\" has invalid default value {intField: 3}.\nIn field \"requiredField\": Expected \"Boolean!\", found null.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 53
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Variable default values of correct type/list variables with invalid item",
+    "query": "\n      query InvalidItem($a: [String] = [\"one\", 2]) {\n        dog { name }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" of type \"[String]\" has invalid default value [\"one\", 2].\nIn element #1: Expected type \"String\", found 2.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 40
+          }
+        ]
+      }
+    ]
   }
 ]

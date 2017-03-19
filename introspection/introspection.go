@@ -103,22 +103,18 @@ func (r *Type) Description() *string {
 }
 
 func (r *Type) Fields(args *struct{ IncludeDeprecated bool }) *[]*Field {
-	var fields map[string]*schema.Field
-	var fieldOrder []string
+	var fields schema.FieldList
 	switch t := r.typ.(type) {
 	case *schema.Object:
 		fields = t.Fields
-		fieldOrder = t.FieldOrder
 	case *schema.Interface:
 		fields = t.Fields
-		fieldOrder = t.FieldOrder
 	default:
 		return nil
 	}
 
 	var l []*Field
-	for _, name := range fieldOrder {
-		f := fields[name]
+	for _, f := range fields {
 		if _, ok := f.Directives["deprecated"]; !ok || args.IncludeDeprecated {
 			l = append(l, &Field{f})
 		}

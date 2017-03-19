@@ -39,8 +39,7 @@ type Scalar struct {
 type Object struct {
 	Name       string
 	Interfaces []*Interface
-	Fields     map[string]*Field
-	FieldOrder []string
+	Fields     FieldList
 	Desc       string
 
 	interfaceNames []string
@@ -49,8 +48,7 @@ type Object struct {
 type Interface struct {
 	Name          string
 	PossibleTypes []*Object
-	Fields        map[string]*Field
-	FieldOrder    []string
+	Fields        FieldList
 	Desc          string
 }
 
@@ -78,6 +76,17 @@ type InputObject struct {
 	Name string
 	Desc string
 	common.InputMap
+}
+
+type FieldList []*Field
+
+func (l FieldList) Get(name string) *Field {
+	for _, f := range l {
+		if f.Name == name {
+			return f
+		}
+	}
+	return nil
 }
 
 type Directive struct {
@@ -349,7 +358,7 @@ func parseObjectDecl(l *lexer.Lexer) *Object {
 		}
 	}
 	l.ConsumeToken('{')
-	o.Fields, o.FieldOrder = parseFields(l)
+	o.Fields = parseFields(l)
 	l.ConsumeToken('}')
 	return o
 }
@@ -358,7 +367,7 @@ func parseInterfaceDecl(l *lexer.Lexer) *Interface {
 	i := &Interface{}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
-	i.Fields, i.FieldOrder = parseFields(l)
+	i.Fields = parseFields(l)
 	l.ConsumeToken('}')
 	return i
 }
@@ -430,9 +439,8 @@ func parseDirectiveDecl(l *lexer.Lexer) *Directive {
 	return d
 }
 
-func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
-	fields := make(map[string]*Field)
-	var fieldOrder []string
+func parseFields(l *lexer.Lexer) FieldList {
+	var fields FieldList
 	for l.Peek() != '}' {
 		f := &Field{}
 		f.Desc = l.DescComment()
@@ -450,8 +458,7 @@ func parseFields(l *lexer.Lexer) (map[string]*Field, []string) {
 		l.ConsumeToken(':')
 		f.Type = common.ParseType(l)
 		f.Directives = common.ParseDirectives(l)
-		fields[f.Name] = f
-		fieldOrder = append(fieldOrder, f.Name)
+		fields = append(fields, f)
 	}
-	return fields, fieldOrder
+	return fields
 }

@@ -201,7 +201,7 @@ func makeScalarExec(t *schema.Scalar, resolverType reflect.Type) (iExec, error) 
 	return &scalarExec{}, nil
 }
 
-func (b *execBuilder) makeObjectExec(typeName string, fields map[string]*schema.Field, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type) (*objectExec, error) {
+func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type) (*objectExec, error) {
 	if !nonNull {
 		if resolverType.Kind() != reflect.Ptr && resolverType.Kind() != reflect.Interface {
 			return nil, fmt.Errorf("%s is not a pointer or interface", resolverType)
@@ -210,14 +210,14 @@ func (b *execBuilder) makeObjectExec(typeName string, fields map[string]*schema.
 
 	methodHasReceiver := resolverType.Kind() != reflect.Interface
 	fieldExecs := make(map[string]*fieldExec)
-	for name, f := range fields {
-		methodIndex := findMethod(resolverType, name)
+	for _, f := range fields {
+		methodIndex := findMethod(resolverType, f.Name)
 		if methodIndex == -1 {
 			hint := ""
-			if findMethod(reflect.PtrTo(resolverType), name) != -1 {
+			if findMethod(reflect.PtrTo(resolverType), f.Name) != -1 {
 				hint = " (hint: the method exists on the pointer type)"
 			}
-			return nil, fmt.Errorf("%s does not resolve %q: missing method for field %q%s", resolverType, typeName, name, hint)
+			return nil, fmt.Errorf("%s does not resolve %q: missing method for field %q%s", resolverType, typeName, f.Name, hint)
 		}
 
 		m := resolverType.Method(methodIndex)
@@ -225,7 +225,7 @@ func (b *execBuilder) makeObjectExec(typeName string, fields map[string]*schema.
 		if err != nil {
 			return nil, fmt.Errorf("%s\n\treturned by (%s).%s", err, resolverType, m.Name)
 		}
-		fieldExecs[name] = fe
+		fieldExecs[f.Name] = fe
 	}
 
 	typeAssertions := make(map[string]*typeAssertExec)

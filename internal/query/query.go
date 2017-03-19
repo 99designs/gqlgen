@@ -37,7 +37,7 @@ type NamedFragment struct {
 type Fragment struct {
 	On         string
 	SelSet     *SelectionSet
-	Directives map[string]common.DirectiveArgs
+	Directives map[string]common.ArgumentList
 }
 
 type SelectionSet struct {
@@ -51,14 +51,14 @@ type Selection interface {
 type Field struct {
 	Alias      string
 	Name       string
-	Arguments  map[string]common.ValueWithLoc
-	Directives map[string]common.DirectiveArgs
+	Arguments  common.ArgumentList
+	Directives map[string]common.ArgumentList
 	SelSet     *SelectionSet
 }
 
 type FragmentSpread struct {
 	Name       string
-	Directives map[string]common.DirectiveArgs
+	Directives map[string]common.ArgumentList
 }
 
 func (Field) isSelection()          {}

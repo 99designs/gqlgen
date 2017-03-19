@@ -38,14 +38,30 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 	return p
 }
 
-func ParseArguments(l *lexer.Lexer) map[string]ValueWithLoc {
-	args := make(map[string]ValueWithLoc)
+type Argument struct {
+	Name  string
+	Value ValueWithLoc
+}
+
+type ArgumentList []Argument
+
+func (l ArgumentList) Get(name string) ValueWithLoc {
+	for _, arg := range l {
+		if arg.Name == name {
+			return arg.Value
+		}
+	}
+	return ValueWithLoc{}
+}
+
+func ParseArguments(l *lexer.Lexer) ArgumentList {
+	var args ArgumentList
 	l.ConsumeToken('(')
 	for l.Peek() != ')' {
 		name := l.ConsumeIdent()
 		l.ConsumeToken(':')
 		value := ParseValue(l, false)
-		args[name] = value
+		args = append(args, Argument{Name: name, Value: value})
 	}
 	l.ConsumeToken(')')
 	return args

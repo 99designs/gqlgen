@@ -4,14 +4,12 @@ import (
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
-type DirectiveArgs map[string]ValueWithLoc
-
-func ParseDirectives(l *lexer.Lexer) map[string]DirectiveArgs {
-	directives := make(map[string]DirectiveArgs)
+func ParseDirectives(l *lexer.Lexer) map[string]ArgumentList {
+	directives := make(map[string]ArgumentList)
 	for l.Peek() == '@' {
 		l.ConsumeToken('@')
 		name := l.ConsumeIdent()
-		args := make(DirectiveArgs)
+		var args ArgumentList
 		if l.Peek() == '(' {
 			args = ParseArguments(l)
 		}

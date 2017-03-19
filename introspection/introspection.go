@@ -233,7 +233,7 @@ func (r *Field) DeprecationReason() *string {
 	if !ok {
 		return nil
 	}
-	reason := common.UnmarshalLiteral(args["reason"].Value.(*lexer.Literal)).(string)
+	reason := common.UnmarshalLiteral(args.Get("reason").Value.(*lexer.Literal)).(string)
 	return &reason
 }
 
@@ -293,7 +293,7 @@ func (r *EnumValue) DeprecationReason() *string {
 	if !ok {
 		return nil
 	}
-	reason := common.UnmarshalLiteral(args["reason"].Value.(*lexer.Literal)).(string)
+	reason := common.UnmarshalLiteral(args.Get("reason").Value.(*lexer.Literal)).(string)
 	return &reason
 }
 

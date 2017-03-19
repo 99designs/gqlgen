@@ -70,7 +70,7 @@ type Enum struct {
 
 type EnumValue struct {
 	Name       string
-	Directives map[string]common.DirectiveArgs
+	Directives map[string]common.ArgumentList
 	Desc       string
 }
 
@@ -120,7 +120,7 @@ type Field struct {
 	Name       string
 	Args       common.InputMap
 	Type       common.Type
-	Directives map[string]common.DirectiveArgs
+	Directives map[string]common.ArgumentList
 	Desc       string
 }
 
@@ -255,22 +255,23 @@ func resolveField(s *Schema, f *Field) error {
 	return resolveInputObject(s, &f.Args)
 }
 
-func resolveDirectives(s *Schema, directives map[string]common.DirectiveArgs) error {
+func resolveDirectives(s *Schema, directives map[string]common.ArgumentList) error {
 	for name, args := range directives {
 		d, ok := s.Directives[name]
 		if !ok {
 			return errors.Errorf("directive %q not found", name)
 		}
-		for argName := range args {
-			if _, ok := d.Args[argName]; !ok {
-				return errors.Errorf("invalid argument %q for directive %q", argName, name)
+		for _, arg := range args {
+			if _, ok := d.Args[arg.Name]; !ok {
+				return errors.Errorf("invalid argument %q for directive %q", arg.Name, name)
 			}
 		}
 		for argName, arg := range d.Args {
-			if _, ok := args[argName]; !ok {
-				args[argName] = common.ValueWithLoc{Value: arg.Default}
+			if args.Get(argName).Value == nil {
+				args = append(args, common.Argument{Name: argName, Value: common.ValueWithLoc{Value: arg.Default}})
 			}
 		}
+		directives[name] = args
 	}
 	return nil
 }

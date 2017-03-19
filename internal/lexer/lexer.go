@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"fmt"
-	"strconv"
 	"text/scanner"
 
 	"github.com/neelance/graphql-go/errors"
@@ -15,6 +14,13 @@ type Lexer struct {
 	next        rune
 	descComment string
 }
+
+type Literal struct {
+	Type rune
+	Text string
+}
+
+type Variable string
 
 func New(sc *scanner.Scanner) *Lexer {
 	l := &Lexer{sc: sc}
@@ -81,25 +87,18 @@ func (l *Lexer) ConsumeKeyword(keyword string) {
 	l.Consume()
 }
 
-func (l *Lexer) ConsumeInt() int {
-	text := l.sc.TokenText()
-	l.ConsumeToken(scanner.Int)
-	value, _ := strconv.Atoi(text)
-	return value
+func (l *Lexer) ConsumeVariable() Variable {
+	l.ConsumeToken('$')
+	return Variable(l.ConsumeIdent())
 }
 
-func (l *Lexer) ConsumeFloat() float64 {
-	text := l.sc.TokenText()
-	l.ConsumeToken(scanner.Float)
-	value, _ := strconv.ParseFloat(text, 64)
-	return value
-}
-
-func (l *Lexer) ConsumeString() string {
-	text := l.sc.TokenText()
-	l.ConsumeToken(scanner.String)
-	value, _ := strconv.Unquote(text)
-	return value
+func (l *Lexer) ConsumeLiteral() interface{} {
+	lit := &Literal{Type: l.next, Text: l.sc.TokenText()}
+	l.Consume()
+	if lit.Type == scanner.Ident && lit.Text == "null" {
+		return nil
+	}
+	return lit
 }
 
 func (l *Lexer) ConsumeToken(expected rune) {

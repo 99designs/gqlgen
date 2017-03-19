@@ -8,6 +8,7 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
+	"github.com/neelance/graphql-go/internal/lexer"
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
@@ -237,6 +238,10 @@ func (p *valuePacker) pack(r *request, value interface{}) (reflect.Value, error)
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
+	if lit, ok := value.(*lexer.Literal); ok {
+		value = common.UnmarshalLiteral(lit)
+	}
+
 	coerced, err := unmarshalInput(p.valueType, value)
 	if err != nil {
 		return reflect.Value{}, fmt.Errorf("could not unmarshal %#v (%T) into %s: %s", value, value, p.valueType, err)
@@ -253,6 +258,10 @@ func (p *unmarshalerPacker) pack(r *request, value interface{}) (reflect.Value, 
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
+	if lit, ok := value.(*lexer.Literal); ok {
+		value = common.UnmarshalLiteral(lit)
+	}
+
 	v := reflect.New(p.valueType)
 	if err := v.Interface().(Unmarshaler).UnmarshalGraphQL(value); err != nil {
 		return reflect.Value{}, err
@@ -265,18 +274,13 @@ type Unmarshaler interface {
 	UnmarshalGraphQL(input interface{}) error
 }
 
-var int32Type = reflect.TypeOf(int32(0))
-var float64Type = reflect.TypeOf(float64(0))
-var stringType = reflect.TypeOf("")
-var boolType = reflect.TypeOf(false)
-
 func unmarshalInput(typ reflect.Type, input interface{}) (interface{}, error) {
 	if reflect.TypeOf(input) == typ {
 		return input, nil
 	}
 
-	switch typ {
-	case int32Type:
+	switch typ.Kind() {
+	case reflect.Int32:
 		switch input := input.(type) {
 		case int:
 			if input < math.MinInt32 || input > math.MaxInt32 {
@@ -291,21 +295,14 @@ func unmarshalInput(typ reflect.Type, input interface{}) (interface{}, error) {
 			return coerced, nil
 		}
 
-	case float64Type:
+	case reflect.Float64:
 		switch input := input.(type) {
 		case int32:
 			return float64(input), nil
 		case int:
 			return float64(input), nil
 		}
-
-	case stringType:
-		switch input := input.(type) {
-		case common.EnumValue:
-			return string(input), nil
-		}
 	}
 
-	panic("incompatible type")
 	return nil, fmt.Errorf("incompatible type")
 }

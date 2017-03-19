@@ -1,6 +1,7 @@
 package common
 
 import (
+	"strconv"
 	"text/scanner"
 
 	"github.com/neelance/graphql-go/errors"
@@ -23,10 +24,6 @@ type ValueWithLoc struct {
 	Value interface{}
 	Loc   *errors.Location
 }
-
-type Variable string
-
-type EnumValue string
 
 func ParseInputValue(l *lexer.Lexer) *InputValue {
 	p := &InputValue{}
@@ -70,16 +67,9 @@ func parseValue(l *lexer.Lexer, constOnly bool) interface{} {
 			l.SyntaxError("variable not allowed")
 			panic("unreachable")
 		}
-		l.ConsumeToken('$')
-		return Variable(l.ConsumeIdent())
-	case scanner.Int:
-		return l.ConsumeInt()
-	case scanner.Float:
-		return l.ConsumeFloat()
-	case scanner.String:
-		return l.ConsumeString()
-	case scanner.Ident:
-		return parseIdent(l)
+		return l.ConsumeVariable()
+	case scanner.Int, scanner.Float, scanner.String, scanner.Ident:
+		return l.ConsumeLiteral()
 	case '[':
 		l.ConsumeToken('[')
 		var list []interface{}
@@ -104,15 +94,33 @@ func parseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	}
 }
 
-func parseIdent(l *lexer.Lexer) interface{} {
-	switch ident := l.ConsumeIdent(); ident {
-	case "true":
-		return true
-	case "false":
-		return false
-	case "null":
-		return nil
+func UnmarshalLiteral(lit *lexer.Literal) interface{} {
+	switch lit.Type {
+	case scanner.Int, scanner.Float:
+		value, err := strconv.ParseFloat(lit.Text, 64)
+		if err != nil {
+			panic(err)
+		}
+		return value
+
+	case scanner.String:
+		value, err := strconv.Unquote(lit.Text)
+		if err != nil {
+			panic(err)
+		}
+		return value
+
+	case scanner.Ident:
+		switch lit.Text {
+		case "true":
+			return true
+		case "false":
+			return false
+		default:
+			return lit.Text
+		}
+
 	default:
-		return EnumValue(ident)
+		panic("invalid literal")
 	}
 }

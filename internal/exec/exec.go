@@ -14,6 +14,7 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
+	"github.com/neelance/graphql-go/internal/lexer"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 )
@@ -348,7 +349,7 @@ func (r *request) handlePanic() {
 }
 
 func (r *request) resolveVar(value interface{}) interface{} {
-	if v, ok := value.(common.Variable); ok {
+	if v, ok := value.(lexer.Variable); ok {
 		value = r.vars[string(v)]
 	}
 	return value
@@ -541,7 +542,7 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 		addResult(f.Alias, introspectSchema(ctx, r, f.SelSet))
 
 	case "__type":
-		p := valuePacker{valueType: stringType}
+		p := valuePacker{valueType: reflect.TypeOf("")}
 		v, err := p.pack(r, r.resolveVar(f.Arguments["name"].Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
@@ -660,7 +661,7 @@ type typeAssertExec struct {
 
 func skipByDirective(r *request, d map[string]common.DirectiveArgs) bool {
 	if args, ok := d["skip"]; ok {
-		p := valuePacker{valueType: boolType}
+		p := valuePacker{valueType: reflect.TypeOf(false)}
 		v, err := p.pack(r, r.resolveVar(args["if"].Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
@@ -671,7 +672,7 @@ func skipByDirective(r *request, d map[string]common.DirectiveArgs) bool {
 	}
 
 	if args, ok := d["include"]; ok {
-		p := valuePacker{valueType: boolType}
+		p := valuePacker{valueType: reflect.TypeOf(false)}
 		v, err := p.pack(r, r.resolveVar(args["if"].Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))

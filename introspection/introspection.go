@@ -313,9 +313,9 @@ func (r *Directive) Locations() []string {
 }
 
 func (r *Directive) Args() []*InputValue {
-	l := make([]*InputValue, len(r.directive.ArgOrder))
-	for i, name := range r.directive.ArgOrder {
-		l[i] = &InputValue{r.directive.Args[name]}
+	l := make([]*InputValue, len(r.directive.Args))
+	for i, v := range r.directive.Args {
+		l[i] = &InputValue{v}
 	}
 	return l
 }

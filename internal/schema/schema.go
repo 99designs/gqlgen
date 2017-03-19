@@ -90,11 +90,10 @@ func (l FieldList) Get(name string) *Field {
 }
 
 type Directive struct {
-	Name     string
-	Desc     string
-	Locs     []string
-	Args     map[string]*common.InputValue
-	ArgOrder []string
+	Name string
+	Desc string
+	Locs []string
+	Args common.InputValueList
 }
 
 func (*Scalar) Kind() string      { return "SCALAR" }
@@ -271,13 +270,13 @@ func resolveDirectives(s *Schema, directives map[string]common.ArgumentList) err
 			return errors.Errorf("directive %q not found", name)
 		}
 		for _, arg := range args {
-			if _, ok := d.Args[arg.Name]; !ok {
+			if d.Args.Get(arg.Name) == nil {
 				return errors.Errorf("invalid argument %q for directive %q", arg.Name, name)
 			}
 		}
-		for argName, arg := range d.Args {
-			if args.Get(argName).Value == nil {
-				args = append(args, common.Argument{Name: argName, Value: common.ValueWithLoc{Value: arg.Default}})
+		for _, arg := range d.Args {
+			if args.Get(arg.Name).Value == nil {
+				args = append(args, common.Argument{Name: arg.Name, Value: common.ValueWithLoc{Value: arg.Default}})
 			}
 		}
 		directives[name] = args
@@ -412,15 +411,13 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 
 func parseDirectiveDecl(l *lexer.Lexer) *Directive {
 	d := &Directive{}
-	d.Args = make(map[string]*common.InputValue)
 	l.ConsumeToken('@')
 	d.Name = l.ConsumeIdent()
 	if l.Peek() == '(' {
 		l.ConsumeToken('(')
 		for l.Peek() != ')' {
 			v := common.ParseInputValue(l)
-			d.Args[v.Name] = v
-			d.ArgOrder = append(d.ArgOrder, v.Name)
+			d.Args = append(d.Args, v)
 		}
 		l.ConsumeToken(')')
 	}

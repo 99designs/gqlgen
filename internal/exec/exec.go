@@ -269,12 +269,12 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 	}
 
 	var argsPacker *structPacker
-	if len(f.Args.Fields) > 0 {
+	if len(f.Args) > 0 {
 		if len(in) == 0 {
 			return nil, fmt.Errorf("must have parameter for field arguments")
 		}
 		var err error
-		argsPacker, err = b.makeStructPacker(&f.Args, in[0])
+		argsPacker, err = b.makeStructPacker(f.Args, in[0])
 		if err != nil {
 			return nil, err
 		}

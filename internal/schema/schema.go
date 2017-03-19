@@ -73,9 +73,9 @@ type EnumValue struct {
 }
 
 type InputObject struct {
-	Name string
-	Desc string
-	common.InputMap
+	Name   string
+	Desc   string
+	Values common.InputValueList
 }
 
 type FieldList []*Field
@@ -127,7 +127,7 @@ func (t *InputObject) Description() string { return t.Desc }
 
 type Field struct {
 	Name       string
-	Args       common.InputMap
+	Args       common.InputValueList
 	Type       common.Type
 	Directives map[string]common.ArgumentList
 	Desc       string
@@ -245,7 +245,7 @@ func resolveNamedType(s *Schema, t NamedType) error {
 			}
 		}
 	case *InputObject:
-		if err := resolveInputObject(s, &t.InputMap); err != nil {
+		if err := resolveInputObject(s, t.Values); err != nil {
 			return err
 		}
 	}
@@ -261,7 +261,7 @@ func resolveField(s *Schema, f *Field) error {
 	if err := resolveDirectives(s, f.Directives); err != nil {
 		return err
 	}
-	return resolveInputObject(s, &f.Args)
+	return resolveInputObject(s, f.Args)
 }
 
 func resolveDirectives(s *Schema, directives map[string]common.ArgumentList) error {
@@ -285,13 +285,13 @@ func resolveDirectives(s *Schema, directives map[string]common.ArgumentList) err
 	return nil
 }
 
-func resolveInputObject(s *Schema, io *common.InputMap) error {
-	for _, f := range io.Fields {
-		t, err := common.ResolveType(f.Type, s.Resolve)
+func resolveInputObject(s *Schema, values common.InputValueList) error {
+	for _, v := range values {
+		t, err := common.ResolveType(v.Type, s.Resolve)
 		if err != nil {
 			return err
 		}
-		f.Type = t
+		v.Type = t
 	}
 	return nil
 }
@@ -386,13 +386,10 @@ func parseUnionDecl(l *lexer.Lexer) *Union {
 
 func parseInputDecl(l *lexer.Lexer) *InputObject {
 	i := &InputObject{}
-	i.Fields = make(map[string]*common.InputValue)
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
 	for l.Peek() != '}' {
-		v := common.ParseInputValue(l)
-		i.Fields[v.Name] = v
-		i.FieldOrder = append(i.FieldOrder, v.Name)
+		i.Values = append(i.Values, common.ParseInputValue(l))
 	}
 	l.ConsumeToken('}')
 	return i
@@ -446,12 +443,9 @@ func parseFields(l *lexer.Lexer) FieldList {
 		f.Desc = l.DescComment()
 		f.Name = l.ConsumeIdent()
 		if l.Peek() == '(' {
-			f.Args.Fields = make(map[string]*common.InputValue)
 			l.ConsumeToken('(')
 			for l.Peek() != ')' {
-				v := common.ParseInputValue(l)
-				f.Args.Fields[v.Name] = v
-				f.Args.FieldOrder = append(f.Args.FieldOrder, v.Name)
+				f.Args = append(f.Args, common.ParseInputValue(l))
 			}
 			l.ConsumeToken(')')
 		}

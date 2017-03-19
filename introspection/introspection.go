@@ -174,9 +174,9 @@ func (r *Type) InputFields() *[]*InputValue {
 		return nil
 	}
 
-	l := make([]*InputValue, len(t.FieldOrder))
-	for i, name := range t.FieldOrder {
-		l[i] = &InputValue{t.Fields[name]}
+	l := make([]*InputValue, len(t.Values))
+	for i, v := range t.Values {
+		l[i] = &InputValue{v}
 	}
 	return &l
 }
@@ -208,9 +208,9 @@ func (r *Field) Description() *string {
 }
 
 func (r *Field) Args() []*InputValue {
-	l := make([]*InputValue, len(r.field.Args.FieldOrder))
-	for i, name := range r.field.Args.FieldOrder {
-		l[i] = &InputValue{r.field.Args.Fields[name]}
+	l := make([]*InputValue, len(r.field.Args))
+	for i, v := range r.field.Args {
+		l[i] = &InputValue{v}
 	}
 	return l
 }

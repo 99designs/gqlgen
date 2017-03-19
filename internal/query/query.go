@@ -18,7 +18,7 @@ type Document struct {
 type Operation struct {
 	Type   OperationType
 	Name   string
-	Vars   common.InputMap
+	Vars   common.InputValueList
 	SelSet *SelectionSet
 }
 
@@ -173,12 +173,9 @@ func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	}
 	if l.Peek() == '(' {
 		l.ConsumeToken('(')
-		op.Vars.Fields = make(map[string]*common.InputValue)
 		for l.Peek() != ')' {
 			l.ConsumeToken('$')
-			v := common.ParseInputValue(l)
-			op.Vars.Fields[v.Name] = v
-			op.Vars.FieldOrder = append(op.Vars.FieldOrder, v.Name)
+			op.Vars = append(op.Vars, common.ParseInputValue(l))
 		}
 		l.ConsumeToken(')')
 	}

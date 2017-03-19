@@ -8,16 +8,22 @@ import (
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
-type InputMap struct {
-	Fields     map[string]*InputValue
-	FieldOrder []string
-}
-
 type InputValue struct {
 	Name    string
 	Type    Type
 	Default interface{}
 	Desc    string
+}
+
+type InputValueList []*InputValue
+
+func (l InputValueList) Get(name string) *InputValue {
+	for _, v := range l {
+		if v.Name == name {
+			return v
+		}
+	}
+	return nil
 }
 
 type ValueWithLoc struct {

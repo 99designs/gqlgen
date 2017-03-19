@@ -84,7 +84,7 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 		}, nil
 
 	case *schema.InputObject:
-		e, err := b.makeStructPacker(&t.InputMap, reflectType)
+		e, err := b.makeStructPacker(t.Values, reflectType)
 		if err != nil {
 			return nil, err
 		}
@@ -110,27 +110,27 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 	}
 }
 
-func (b *execBuilder) makeStructPacker(obj *common.InputMap, typ reflect.Type) (*structPacker, error) {
+func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect.Type) (*structPacker, error) {
 	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
 		return nil, fmt.Errorf("expected pointer to struct, got %s", typ)
 	}
 	structType := typ.Elem()
 
 	var fields []*structPackerField
-	for _, f := range obj.Fields {
-		fe := &structPackerField{field: f}
+	for _, v := range values {
+		fe := &structPackerField{field: v}
 
-		sf, ok := structType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, f.Name) })
+		sf, ok := structType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, v.Name) })
 		if !ok {
-			return nil, fmt.Errorf("missing argument %q", f.Name)
+			return nil, fmt.Errorf("missing argument %q", v.Name)
 		}
 		if sf.PkgPath != "" {
 			return nil, fmt.Errorf("field %q must be exported", sf.Name)
 		}
 		fe.fieldIndex = sf.Index
 
-		ft := f.Type
-		if f.Default != nil {
+		ft := v.Type
+		if v.Default != nil {
 			ft, _ = unwrapNonNull(ft)
 			ft = &common.NonNull{OfType: ft}
 		}

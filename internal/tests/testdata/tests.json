@@ -1,0 +1,685 @@
+[
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Good int value",
+    "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: 2)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Good boolean value",
+    "query": "\n        {\n          complicatedArgs {\n            booleanArgField(booleanArg: true)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Good string value",
+    "query": "\n        {\n          complicatedArgs {\n            stringArgField(stringArg: \"foo\")\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Good float value",
+    "query": "\n        {\n          complicatedArgs {\n            floatArgField(floatArg: 1.1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Int into Float",
+    "query": "\n        {\n          complicatedArgs {\n            floatArgField(floatArg: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Int into ID",
+    "query": "\n        {\n          complicatedArgs {\n            idArgField(idArg: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/String into ID",
+    "query": "\n        {\n          complicatedArgs {\n            idArgField(idArg: \"someIdString\")\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Good enum value",
+    "query": "\n        {\n          dog {\n            doesKnowCommand(dogCommand: SIT)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/null into nullable type",
+    "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: null)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/null into nullable type",
+    "query": "\n        {\n          dog(a: null, b: null, c:{ requiredField: true, intField: null }) {\n            name\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid String values/Int into String",
+    "query": "\n        {\n          complicatedArgs {\n            stringArgField(stringArg: 1)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"stringArg\" has invalid value 1.\nExpected type \"String\", found 1.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 39
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid String values/Float into String",
+    "query": "\n        {\n          complicatedArgs {\n            stringArgField(stringArg: 1.0)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"stringArg\" has invalid value 1.0.\nExpected type \"String\", found 1.0.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 39
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid String values/Boolean into String",
+    "query": "\n        {\n          complicatedArgs {\n            stringArgField(stringArg: true)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"stringArg\" has invalid value true.\nExpected type \"String\", found true.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 39
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid String values/Unquoted String into String",
+    "query": "\n        {\n          complicatedArgs {\n            stringArgField(stringArg: BAR)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"stringArg\" has invalid value BAR.\nExpected type \"String\", found BAR.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 39
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Int values/String into Int",
+    "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: \"3\")\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"intArg\" has invalid value \"3\".\nExpected type \"Int\", found \"3\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 33
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Int values/Big Int into Int",
+    "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: 829384293849283498239482938)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"intArg\" has invalid value 829384293849283498239482938.\nExpected type \"Int\", found 829384293849283498239482938.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 33
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Int values/Unquoted String into Int",
+    "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: FOO)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"intArg\" has invalid value FOO.\nExpected type \"Int\", found FOO.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 33
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Int values/Simple Float into Int",
+    "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: 3.0)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"intArg\" has invalid value 3.0.\nExpected type \"Int\", found 3.0.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 33
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Int values/Float into Int",
+    "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: 3.333)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"intArg\" has invalid value 3.333.\nExpected type \"Int\", found 3.333.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 33
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Float values/String into Float",
+    "query": "\n        {\n          complicatedArgs {\n            floatArgField(floatArg: \"3.333\")\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"floatArg\" has invalid value \"3.333\".\nExpected type \"Float\", found \"3.333\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 37
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Float values/Boolean into Float",
+    "query": "\n        {\n          complicatedArgs {\n            floatArgField(floatArg: true)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"floatArg\" has invalid value true.\nExpected type \"Float\", found true.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 37
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Float values/Unquoted into Float",
+    "query": "\n        {\n          complicatedArgs {\n            floatArgField(floatArg: FOO)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"floatArg\" has invalid value FOO.\nExpected type \"Float\", found FOO.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 37
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Boolean value/Int into Boolean",
+    "query": "\n        {\n          complicatedArgs {\n            booleanArgField(booleanArg: 2)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"booleanArg\" has invalid value 2.\nExpected type \"Boolean\", found 2.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Boolean value/Float into Boolean",
+    "query": "\n        {\n          complicatedArgs {\n            booleanArgField(booleanArg: 1.0)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"booleanArg\" has invalid value 1.0.\nExpected type \"Boolean\", found 1.0.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Boolean value/String into Boolean",
+    "query": "\n        {\n          complicatedArgs {\n            booleanArgField(booleanArg: \"true\")\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"booleanArg\" has invalid value \"true\".\nExpected type \"Boolean\", found \"true\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Boolean value/Unquoted into Boolean",
+    "query": "\n        {\n          complicatedArgs {\n            booleanArgField(booleanArg: TRUE)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"booleanArg\" has invalid value TRUE.\nExpected type \"Boolean\", found TRUE.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid ID value/Float into ID",
+    "query": "\n        {\n          complicatedArgs {\n            idArgField(idArg: 1.0)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"idArg\" has invalid value 1.0.\nExpected type \"ID\", found 1.0.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid ID value/Boolean into ID",
+    "query": "\n        {\n          complicatedArgs {\n            idArgField(idArg: true)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"idArg\" has invalid value true.\nExpected type \"ID\", found true.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid ID value/Unquoted into ID",
+    "query": "\n        {\n          complicatedArgs {\n            idArgField(idArg: SOMETHING)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"idArg\" has invalid value SOMETHING.\nExpected type \"ID\", found SOMETHING.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Enum value/Int into Enum",
+    "query": "\n        {\n          dog {\n            doesKnowCommand(dogCommand: 2)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"dogCommand\" has invalid value 2.\nExpected type \"DogCommand\", found 2.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Enum value/Float into Enum",
+    "query": "\n        {\n          dog {\n            doesKnowCommand(dogCommand: 1.0)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"dogCommand\" has invalid value 1.0.\nExpected type \"DogCommand\", found 1.0.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Enum value/String into Enum",
+    "query": "\n        {\n          dog {\n            doesKnowCommand(dogCommand: \"SIT\")\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"dogCommand\" has invalid value \"SIT\".\nExpected type \"DogCommand\", found \"SIT\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Enum value/Boolean into Enum",
+    "query": "\n        {\n          dog {\n            doesKnowCommand(dogCommand: true)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"dogCommand\" has invalid value true.\nExpected type \"DogCommand\", found true.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Enum value/Unknown Enum Value into Enum",
+    "query": "\n        {\n          dog {\n            doesKnowCommand(dogCommand: JUGGLE)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"dogCommand\" has invalid value JUGGLE.\nExpected type \"DogCommand\", found JUGGLE.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid Enum value/Different case Enum Value into Enum",
+    "query": "\n        {\n          dog {\n            doesKnowCommand(dogCommand: sit)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"dogCommand\" has invalid value sit.\nExpected type \"DogCommand\", found sit.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid List value/Good list value",
+    "query": "\n        {\n          complicatedArgs {\n            stringListArgField(stringListArg: [\"one\", null, \"two\"])\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid List value/Empty list value",
+    "query": "\n        {\n          complicatedArgs {\n            stringListArgField(stringListArg: [])\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid List value/Null value",
+    "query": "\n        {\n          complicatedArgs {\n            stringListArgField(stringListArg: null)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid List value/Single value into List",
+    "query": "\n        {\n          complicatedArgs {\n            stringListArgField(stringListArg: \"one\")\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid List value/Incorrect item type",
+    "query": "\n        {\n          complicatedArgs {\n            stringListArgField(stringListArg: [\"one\", 2])\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"stringListArg\" has invalid value [\"one\", 2].\nIn element #1: Expected type \"String\", found 2.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 47
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid List value/Single value of incorrect type",
+    "query": "\n        {\n          complicatedArgs {\n            stringListArgField(stringListArg: 1)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"stringListArg\" has invalid value 1.\nExpected type \"String\", found 1.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 47
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/Arg on optional arg",
+    "query": "\n        {\n          dog {\n            isHousetrained(atOtherHomes: true)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/No Arg on optional arg",
+    "query": "\n        {\n          dog {\n            isHousetrained\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/Multiple args",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req1: 1, req2: 2)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/Multiple args reverse order",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req2: 2, req1: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/No args on multiple optional",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOpts\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/One arg on multiple optional",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOpts(opt1: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/Second arg on multiple optional",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOpts(opt2: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/Multiple reqs on mixedList",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOptAndReq(req1: 3, req2: 4)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/Multiple reqs and one opt on mixedList",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOptAndReq(req1: 3, req2: 4, opt1: 5)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid non-nullable value/All reqs and opts on mixedList",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOptAndReq(req1: 3, req2: 4, opt1: 5, opt2: 6)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid non-nullable value/Incorrect value type",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req2: \"two\", req1: \"one\")\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"req2\" has invalid value \"two\".\nExpected type \"Int\", found \"two\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 32
+          }
+        ]
+      },
+      {
+        "message": "Argument \"req1\" has invalid value \"one\".\nExpected type \"Int\", found \"one\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 45
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid non-nullable value/Incorrect value and missing argument",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req1: \"one\")\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"req1\" has invalid value \"one\".\nExpected type \"Int\", found \"one\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 32
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid non-nullable value/Null value",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req1: null)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"req1\" has invalid value null.\nExpected \"Int!\", found null.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 32
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid input object value/Optional arg, despite required field in type",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid input object value/Partial object, only required",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: { requiredField: true })\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid input object value/Partial object, required field can be falsey",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: { requiredField: false })\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid input object value/Partial object, including required",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: { requiredField: true, intField: 4 })\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid input object value/Full object",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: {\n              requiredField: true,\n              intField: 4,\n              stringField: \"foo\",\n              booleanField: false,\n              stringListField: [\"one\", \"two\"]\n            })\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid input object value/Full object with fields in different order",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: {\n              stringListField: [\"one\", \"two\"],\n              booleanField: false,\n              requiredField: true,\n              stringField: \"foo\",\n              intField: 4,\n            })\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid input object value/Partial object, missing required",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: { intField: 4 })\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"complexArg\" has invalid value {intField: 4}.\nIn field \"requiredField\": Expected \"Boolean!\", found null.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid input object value/Partial object, invalid field type",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: {\n              stringListField: [\"one\", 2],\n              requiredField: true,\n            })\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"complexArg\" has invalid value {requiredField: true, stringListField: [\"one\", 2]}.\nIn field \"stringListField\": In element #1: Expected type \"String\", found 2.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Invalid input object value/Partial object, unknown field arg",
+    "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: {\n              requiredField: true,\n              unknownField: \"value\"\n            })\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"complexArg\" has invalid value {requiredField: true, unknownField: \"value\"}.\nIn field \"unknownField\": Unknown field.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Argument values of correct type/Directive arguments/with directives of valid types",
+    "query": "\n        {\n          dog @include(if: true) {\n            name\n          }\n          human @skip(if: false) {\n            name\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Directive arguments/with directive with incorrect types",
+    "query": "\n        {\n          dog @include(if: \"yes\") {\n            name @skip(if: ENUM)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Argument \"if\" has invalid value \"yes\".\nExpected type \"Boolean\", found \"yes\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 28
+          }
+        ]
+      },
+      {
+        "message": "Argument \"if\" has invalid value ENUM.\nExpected type \"Boolean\", found ENUM.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 28
+          }
+        ]
+      }
+    ]
+  }
+]

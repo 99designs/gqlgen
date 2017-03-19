@@ -842,7 +842,7 @@ func TestMutation(t *testing.T) {
 			Schema: starwarsSchema,
 			Query: `
 				{
-					reviews(episode: "JEDI") {
+					reviews(episode: JEDI) {
 						stars
 						commentary
 					}
@@ -912,7 +912,7 @@ func TestMutation(t *testing.T) {
 			Schema: starwarsSchema,
 			Query: `
 				{
-					reviews(episode: "JEDI") {
+					reviews(episode: JEDI) {
 						stars
 						commentary
 					}
@@ -1532,8 +1532,7 @@ func TestInput(t *testing.T) {
 			Schema: coercionSchema,
 			Query: `
 				{
-					int1: int(value: 42)
-					int2: int(value: 42.0)
+					int(value: 42)
 					float1: float(value: 42)
 					float2: float(value: 42.5)
 					string(value: "foo")
@@ -1552,8 +1551,7 @@ func TestInput(t *testing.T) {
 			`,
 			ExpectedResult: `
 				{
-					"int1": 42,
-					"int2": 42,
+					"int": 42,
 					"float1": 42,
 					"float2": 42.5,
 					"string": "foo",

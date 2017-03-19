@@ -12,6 +12,7 @@ import (
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
+	"github.com/neelance/graphql-go/internal/validation"
 	"github.com/neelance/graphql-go/introspection"
 )
 
@@ -116,11 +117,16 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	}
 	defer span.Finish()
 
-	data, errs := exec.ExecuteRequest(subCtx, s.exec, document, operationName, variables, s.MaxParallelism)
-	if len(errs) != 0 {
-		ext.Error.Set(span, true)
-		span.SetTag(OpenTracingTagError, errs)
+	var data interface{}
+	errs := validation.Validate(s.schema, document)
+	if len(errs) == 0 {
+		data, errs = exec.ExecuteRequest(subCtx, s.exec, document, operationName, variables, s.MaxParallelism)
+		if len(errs) != 0 {
+			ext.Error.Set(span, true)
+			span.SetTag(OpenTracingTagError, errs)
+		}
 	}
+
 	return &Response{
 		Data:   data,
 		Errors: errs,

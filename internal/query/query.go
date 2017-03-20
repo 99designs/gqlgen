@@ -54,6 +54,7 @@ type Field struct {
 	Arguments  common.ArgumentList
 	Directives map[string]common.ArgumentList
 	SelSet     *SelectionSet
+	Location   *errors.Location
 }
 
 type FragmentSpread struct {
@@ -210,7 +211,9 @@ func parseSelection(l *lexer.Lexer) Selection {
 }
 
 func parseField(l *lexer.Lexer) *Field {
-	f := &Field{}
+	f := &Field{
+		Location: l.Location(),
+	}
 	f.Alias = l.ConsumeIdent()
 	f.Name = f.Alias
 	if l.Peek() == ':' {
@@ -231,19 +234,20 @@ func parseSpread(l *lexer.Lexer) Selection {
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
-	ident := l.ConsumeIdent()
 
-	if ident == "on" {
-		f := &Fragment{}
+	f := &Fragment{}
+	if l.Peek() == scanner.Ident {
+		ident := l.ConsumeIdent()
+		if ident != "on" {
+			fs := &FragmentSpread{
+				Name: ident,
+			}
+			fs.Directives = common.ParseDirectives(l)
+			return fs
+		}
 		f.On = l.ConsumeIdent()
-		f.Directives = common.ParseDirectives(l)
-		f.SelSet = parseSelectionSet(l)
-		return f
 	}
-
-	fs := &FragmentSpread{
-		Name: ident,
-	}
-	fs.Directives = common.ParseDirectives(l)
-	return fs
+	f.Directives = common.ParseDirectives(l)
+	f.SelSet = parseSelectionSet(l)
+	return f
 }

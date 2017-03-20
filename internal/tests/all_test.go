@@ -45,7 +45,7 @@ func TestAll(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			d, err := query.Parse(test.Query)
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 			got := validation.Validate(s, d)
 			if got == nil {

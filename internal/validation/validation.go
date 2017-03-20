@@ -46,34 +46,42 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 		}
 		errs = append(errs, validateSelectionSet(s, op.SelSet, entryPoint)...)
 	}
+
+	for _, frag := range q.Fragments {
+		t, ok := s.Types[frag.On]
+		if !ok {
+			continue
+		}
+		errs = append(errs, validateSelectionSet(s, frag.SelSet, t)...)
+	}
+
 	return
 }
 
 func validateSelectionSet(s *schema.Schema, selSet *query.SelectionSet, t common.Type) []*errors.QueryError {
 	var errs []*errors.QueryError
-	switch t := t.(type) {
-	case *schema.Object:
-		for _, sel := range selSet.Selections {
-			errs = append(errs, validateSelection(s, sel, t.Fields)...)
-		}
-	case *schema.Interface:
-		for _, sel := range selSet.Selections {
-			errs = append(errs, validateSelection(s, sel, t.Fields)...)
-		}
+	for _, sel := range selSet.Selections {
+		errs = append(errs, validateSelection(s, sel, t)...)
 	}
 	return errs
 }
 
-func validateSelection(s *schema.Schema, sel query.Selection, fields schema.FieldList) (errs []*errors.QueryError) {
+func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (errs []*errors.QueryError) {
 	switch sel := sel.(type) {
 	case *query.Field:
 		errs = append(errs, validateDirectives(s, sel.Directives)...)
-		f := fields.Get(sel.Name)
-		if f == nil {
-			// TODO
+		if sel.Name == "__schema" || sel.Name == "__type" || sel.Name == "__typename" {
 			return
 		}
-		if len(f.Args) != 0 { // seems like a bug in graphql-js tests
+
+		t = unwrapType(t)
+		f := fields(t).Get(sel.Name)
+		if f == nil && t != nil {
+			suggestion := makeSuggestion("Did you mean", fields(t).Names(), sel.Name)
+			errs = append(errs, errors.ErrorfWithLoc(sel.Location, "Cannot query field %q on type %q.%s", sel.Name, t, suggestion))
+		}
+
+		if f != nil && len(f.Args) != 0 { // seems like a bug in graphql-js tests
 			for _, selArg := range sel.Arguments {
 				arg := f.Args.Get(selArg.Name)
 				value := selArg.Value
@@ -82,20 +90,50 @@ func validateSelection(s *schema.Schema, sel query.Selection, fields schema.Fiel
 				}
 			}
 		}
+
+		var ft common.Type
+		if f != nil {
+			ft = f.Type
+		}
 		if sel.SelSet != nil {
-			errs = append(errs, validateSelectionSet(s, sel.SelSet, f.Type)...)
+			errs = append(errs, validateSelectionSet(s, sel.SelSet, ft)...)
 		}
 
 	case *query.Fragment:
-	// errs = append(errs, validateDirectives(s, sel.Directives)...)
-	// for _, sel := range sel.SelSet.Selections {
-	// 	errs = append(errs, validateSelection(s, sel, fields)...)
-	// }
+		if sel.On != "" {
+			t = s.Types[sel.On]
+		}
+		errs = append(errs, validateDirectives(s, sel.Directives)...)
+		errs = append(errs, validateSelectionSet(s, sel.SelSet, t)...)
 
 	default:
 		panic("unreachable")
 	}
 	return
+}
+
+func fields(t common.Type) schema.FieldList {
+	switch t := t.(type) {
+	case *schema.Object:
+		return t.Fields
+	case *schema.Interface:
+		return t.Fields
+	case *schema.Union, nil:
+		return nil
+	default:
+		panic("unreachable")
+	}
+}
+
+func unwrapType(t common.Type) common.Type {
+	switch t := t.(type) {
+	case *common.List:
+		return unwrapType(t.OfType)
+	case *common.NonNull:
+		return unwrapType(t.OfType)
+	default:
+		return t
+	}
 }
 
 func validateDirectives(s *schema.Schema, directives map[string]common.ArgumentList) (errs []*errors.QueryError) {

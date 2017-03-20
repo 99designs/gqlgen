@@ -839,5 +839,219 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Object field selection",
+    "query": "\n      fragment objectFieldSelection on Dog {\n        __typename\n        name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fields on correct type/Aliased object field selection",
+    "query": "\n      fragment aliasedObjectFieldSelection on Dog {\n        tn : __typename\n        otherName : name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fields on correct type/Interface field selection",
+    "query": "\n      fragment interfaceFieldSelection on Pet {\n        __typename\n        name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fields on correct type/Aliased interface field selection",
+    "query": "\n      fragment interfaceFieldSelection on Pet {\n        otherName : name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fields on correct type/Lying alias selection",
+    "query": "\n      fragment lyingAliasSelection on Dog {\n        name : nickname\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fields on correct type/Ignores fields on unknown type",
+    "query": "\n      fragment unknownSelection on UnknownType {\n        unknownField\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fields on correct type/reports errors when type is known again",
+    "query": "\n      fragment typeKnownAgain on Pet {\n        unknown_pet_field {\n          ... on Cat {\n            unknown_cat_field\n          }\n        }\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"unknown_pet_field\" on type \"Pet\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      },
+      {
+        "message": "Cannot query field \"unknown_cat_field\" on type \"Cat\".",
+        "locations": [
+          {
+            "line": 5,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Field not defined on fragment",
+    "query": "\n      fragment fieldNotDefined on Dog {\n        meowVolume\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"meowVolume\" on type \"Dog\". Did you mean \"barkVolume\"?",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Ignores deeply unknown field",
+    "query": "\n      fragment deepFieldNotDefined on Dog {\n        unknown_field {\n          deeper_unknown_field\n        }\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"unknown_field\" on type \"Dog\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Sub-field not defined",
+    "query": "\n      fragment subFieldNotDefined on Human {\n        pets {\n          unknown_field\n        }\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"unknown_field\" on type \"Pet\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 11
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Field not defined on inline fragment",
+    "query": "\n      fragment fieldNotDefined on Pet {\n        ... on Dog {\n          meowVolume\n        }\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"meowVolume\" on type \"Dog\". Did you mean \"barkVolume\"?",
+        "locations": [
+          {
+            "line": 4,
+            "column": 11
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Aliased field target not defined",
+    "query": "\n      fragment aliasedFieldTargetNotDefined on Dog {\n        volume : mooVolume\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"mooVolume\" on type \"Dog\". Did you mean \"barkVolume\"?",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Aliased lying field target not defined",
+    "query": "\n      fragment aliasedLyingFieldTargetNotDefined on Dog {\n        barkVolume : kawVolume\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"kawVolume\" on type \"Dog\". Did you mean \"barkVolume\"?",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Not defined on interface",
+    "query": "\n      fragment notDefinedOnInterface on Pet {\n        tailLength\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"tailLength\" on type \"Pet\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Defined on implementors but not on interface",
+    "query": "\n      fragment definedOnImplementorsButNotInterface on Pet {\n        nickname\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"nickname\" on type \"Pet\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Meta field selection on union",
+    "query": "\n      fragment directFieldSelectionOnUnion on CatOrDog {\n        __typename\n      }",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fields on correct type/Direct field selection on union",
+    "query": "\n      fragment directFieldSelectionOnUnion on CatOrDog {\n        directField\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"directField\" on type \"CatOrDog\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/Defined on implementors queried on union",
+    "query": "\n      fragment definedOnImplementorsQueriedOnUnion on CatOrDog {\n        name\n      }",
+    "errors": [
+      {
+        "message": "Cannot query field \"name\" on type \"CatOrDog\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fields on correct type/valid field in inline fragment",
+    "query": "\n      fragment objectFieldSelection on Pet {\n        ... on Dog {\n          name\n        }\n        ... {\n          name\n        }\n      }\n    ",
+    "errors": []
   }
 ]

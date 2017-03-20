@@ -89,6 +89,14 @@ func (l FieldList) Get(name string) *Field {
 	return nil
 }
 
+func (l FieldList) Names() []string {
+	names := make([]string, len(l))
+	for i, f := range l {
+		names[i] = f.Name
+	}
+	return names
+}
+
 type Directive struct {
 	Name string
 	Desc string

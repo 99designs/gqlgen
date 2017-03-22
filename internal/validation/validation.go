@@ -42,7 +42,10 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 
 		c.validateDirectives(string(op.Type), op.Directives)
 
+		names := make(nameSet)
 		for _, v := range op.Vars {
+			c.validateName(names, v.Name, "UniqueVariableNames", "variable")
+
 			t := c.resolveType(v.Type)
 			if !canBeInput(t) {
 				c.addErr(v.TypeLoc, "VariablesAreInputTypes", "Variable %q cannot be non-input type %q.", "$"+v.Name.Name, t)
@@ -108,7 +111,11 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			c.addErr(sel.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
 		}
 
-		c.validateArgumentNames(sel.Arguments)
+		names := make(nameSet)
+		for _, arg := range sel.Arguments {
+			c.validateName(names, arg.Name, "UniqueArgumentNames", "argument")
+		}
+
 		if f != nil {
 			c.validateArguments(sel.Arguments, f.Args, sel.Loc,
 				func() string { return fmt.Sprintf("field %q of type %q", sel.Name, t) },
@@ -187,7 +194,10 @@ func (c *context) resolveType(t common.Type) common.Type {
 
 func (c *context) validateDirectives(loc string, directives map[string]*common.Directive) {
 	for name, d := range directives {
-		c.validateArgumentNames(d.Args)
+		names := make(nameSet)
+		for _, arg := range d.Args {
+			c.validateName(names, arg.Name, "UniqueArgumentNames", "argument")
+		}
 
 		dd, ok := c.schema.Directives[name]
 		if !ok {
@@ -214,19 +224,19 @@ func (c *context) validateDirectives(loc string, directives map[string]*common.D
 	return
 }
 
-func (c *context) validateArgumentNames(args common.ArgumentList) {
-	seen := make(map[string]errors.Location)
-	for _, arg := range args {
-		if loc, ok := seen[arg.Name.Name]; ok {
-			c.errs = append(c.errs, &errors.QueryError{
-				Message:   fmt.Sprintf("There can be only one argument named %q.", arg.Name.Name),
-				Locations: []errors.Location{loc, arg.Name.Loc},
-				Rule:      "UniqueArgumentNames",
-			})
-			continue
-		}
-		seen[arg.Name.Name] = arg.Name.Loc
+type nameSet map[string]errors.Location
+
+func (c *context) validateName(set nameSet, name lexer.Ident, rule, kind string) {
+	if loc, ok := set[name.Name]; ok {
+		c.errs = append(c.errs, &errors.QueryError{
+			Message:   fmt.Sprintf("There can be only one %s named %q.", kind, name.Name),
+			Locations: []errors.Location{loc, name.Loc},
+			Rule:      rule,
+		})
+		return
 	}
+	set[name.Name] = name.Loc
+	return
 }
 
 func (c *context) validateArguments(args common.ArgumentList, argDecls common.InputValueList, loc errors.Location, owner1, owner2 func() string) {

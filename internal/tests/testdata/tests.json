@@ -2066,6 +2066,71 @@
     ]
   },
   {
+    "name": "Validate: Unique variable names/unique variable names",
+    "rule": "UniqueVariableNames",
+    "query": "\n      query A($x: Int, $y: String) { __typename }\n      query B($x: String, $y: Int) { __typename }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique variable names/duplicate variable names",
+    "rule": "UniqueVariableNames",
+    "query": "\n      query A($x: Int, $x: Int, $x: String) { __typename }\n      query B($x: String, $x: Int) { __typename }\n      query C($x: Int, $x: Int) { __typename }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one variable named \"x\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 16
+          },
+          {
+            "line": 2,
+            "column": 25
+          }
+        ]
+      },
+      {
+        "message": "There can be only one variable named \"x\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 16
+          },
+          {
+            "line": 2,
+            "column": 34
+          }
+        ]
+      },
+      {
+        "message": "There can be only one variable named \"x\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 16
+          },
+          {
+            "line": 3,
+            "column": 28
+          }
+        ]
+      },
+      {
+        "message": "There can be only one variable named \"x\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 16
+          },
+          {
+            "line": 4,
+            "column": 25
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: Variables are input types/input types are valid",
     "rule": "VariablesAreInputTypes",
     "query": "\n      query Foo($a: String, $b: [Boolean!]!, $c: ComplexInput) {\n        field(a: $a, b: $b, c: $c)\n      }\n    ",

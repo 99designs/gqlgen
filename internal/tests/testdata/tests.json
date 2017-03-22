@@ -1364,5 +1364,116 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Known directives/with no directives",
+    "rule": "KnownDirectives",
+    "query": "\n      query Foo {\n        name\n        ...Frag\n      }\n\n      fragment Frag on Dog {\n        name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known directives/with known directives",
+    "rule": "KnownDirectives",
+    "query": "\n      {\n        dog @include(if: true) {\n          name\n        }\n        human @skip(if: false) {\n          name\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known directives/with unknown directive",
+    "rule": "KnownDirectives",
+    "query": "\n      {\n        dog @unknown(directive: \"value\") {\n          name\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown directive \"unknown\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Known directives/with many unknown directives",
+    "rule": "KnownDirectives",
+    "query": "\n      {\n        dog @unknown(directive: \"value\") {\n          name\n        }\n        human @unknown(directive: \"value\") {\n          name\n          pets @unknown(directive: \"value\") {\n            name\n          }\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown directive \"unknown\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 13
+          }
+        ]
+      },
+      {
+        "message": "Unknown directive \"unknown\".",
+        "locations": [
+          {
+            "line": 6,
+            "column": 15
+          }
+        ]
+      },
+      {
+        "message": "Unknown directive \"unknown\".",
+        "locations": [
+          {
+            "line": 8,
+            "column": 16
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Known directives/with well placed directives",
+    "rule": "KnownDirectives",
+    "query": "\n      query Foo @onQuery {\n        name @include(if: true)\n        ...Frag @include(if: true)\n        skippedField @skip(if: true)\n        ...SkippedFrag @skip(if: true)\n      }\n\n      mutation Bar @onMutation {\n        someField\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known directives/with misplaced directives",
+    "rule": "KnownDirectives",
+    "query": "\n      query Foo @include(if: true) {\n        name @onQuery\n        ...Frag @onQuery\n      }\n\n      mutation Bar @onQuery {\n        someField\n      }\n    ",
+    "errors": [
+      {
+        "message": "Directive \"include\" may not be used on QUERY.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 17
+          }
+        ]
+      },
+      {
+        "message": "Directive \"onQuery\" may not be used on FIELD.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 14
+          }
+        ]
+      },
+      {
+        "message": "Directive \"onQuery\" may not be used on FRAGMENT_SPREAD.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 17
+          }
+        ]
+      },
+      {
+        "message": "Directive \"onQuery\" may not be used on MUTATION.",
+        "locations": [
+          {
+            "line": 7,
+            "column": 20
+          }
+        ]
+      }
+    ]
   }
 ]

@@ -25,6 +25,8 @@ func addErr(errs *[]*errors.QueryError, loc errors.Location, rule string, format
 
 func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 	for _, op := range q.Operations {
+		errs = append(errs, validateDirectives(s, string(op.Type), op.Directives)...)
+
 		for _, v := range op.Vars {
 			if v.Default != nil {
 				t, err := common.ResolveType(v.Type, s.Resolve)
@@ -55,7 +57,7 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 	}
 
 	for _, frag := range q.Fragments {
-		errs = append(errs, validateDirectives(s, frag.Directives)...)
+		errs = append(errs, validateDirectives(s, "FRAGMENT_DEFINITION", frag.Directives)...)
 		t, ok := s.Types[frag.On.Name]
 		if !ok {
 			continue
@@ -67,6 +69,7 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 		errs = append(errs, validateSelectionSet(s, frag.SelSet, t)...)
 	}
 
+	sort.Slice(errs, func(i, j int) bool { return errs[i].Locations[0].Before(errs[j].Locations[0]) })
 	return
 }
 
@@ -80,7 +83,7 @@ func validateSelectionSet(s *schema.Schema, selSet *query.SelectionSet, t common
 func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (errs []*errors.QueryError) {
 	switch sel := sel.(type) {
 	case *query.Field:
-		errs = append(errs, validateDirectives(s, sel.Directives)...)
+		errs = append(errs, validateDirectives(s, "FIELD", sel.Directives)...)
 		if sel.Name == "__schema" || sel.Name == "__type" || sel.Name == "__typename" {
 			return
 		}
@@ -115,7 +118,7 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 		}
 
 	case *query.InlineFragment:
-		errs = append(errs, validateDirectives(s, sel.Directives)...)
+		errs = append(errs, validateDirectives(s, "INLINE_FRAGMENT", sel.Directives)...)
 		if sel.On.Name != "" {
 			t = s.Types[sel.On.Name]
 		}
@@ -126,7 +129,7 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 		errs = append(errs, validateSelectionSet(s, sel.SelSet, t)...)
 
 	case *query.FragmentSpread:
-		// TODO
+		errs = append(errs, validateDirectives(s, "FRAGMENT_SPREAD", sel.Directives)...)
 
 	default:
 		panic("unreachable")
@@ -156,14 +159,27 @@ func unwrapType(t common.Type) common.Type {
 	}
 }
 
-func validateDirectives(s *schema.Schema, directives map[string]common.ArgumentList) (errs []*errors.QueryError) {
-	for name, args := range directives {
-		d, ok := s.Directives[name]
+func validateDirectives(s *schema.Schema, loc string, directives map[string]*common.Directive) (errs []*errors.QueryError) {
+	for name, d := range directives {
+		dd, ok := s.Directives[name]
 		if !ok {
+			addErr(&errs, d.Name.Loc, "KnownDirectives", "Unknown directive %q.", name)
 			continue
 		}
-		for _, arg := range args {
-			iv := d.Args.Get(arg.Name.Name)
+
+		locOK := false
+		for _, allowedLoc := range dd.Locs {
+			if loc == allowedLoc {
+				locOK = true
+				break
+			}
+		}
+		if !locOK {
+			addErr(&errs, d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", name, loc)
+		}
+
+		for _, arg := range d.Args {
+			iv := dd.Args.Get(arg.Name.Name)
 			if iv == nil {
 				addErr(&errs, arg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on directive %q.", arg.Name.Name, "@"+name)
 				continue

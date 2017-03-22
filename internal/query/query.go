@@ -16,17 +16,18 @@ type Document struct {
 }
 
 type Operation struct {
-	Type   OperationType
-	Name   string
-	Vars   common.InputValueList
-	SelSet *SelectionSet
+	Type       OperationType
+	Name       string
+	Vars       common.InputValueList
+	SelSet     *SelectionSet
+	Directives map[string]*common.Directive
 }
 
-type OperationType int
+type OperationType string
 
 const (
-	Query OperationType = iota
-	Mutation
+	Query    OperationType = "QUERY"
+	Mutation               = "MUTATION"
 )
 
 type Fragment struct {
@@ -37,7 +38,7 @@ type Fragment struct {
 type NamedFragment struct {
 	Fragment
 	Name       string
-	Directives map[string]common.ArgumentList
+	Directives map[string]*common.Directive
 }
 
 type SelectionSet struct {
@@ -52,19 +53,19 @@ type Field struct {
 	Alias      string
 	Name       string
 	Arguments  common.ArgumentList
-	Directives map[string]common.ArgumentList
+	Directives map[string]*common.Directive
 	SelSet     *SelectionSet
 	Loc        errors.Location
 }
 
 type InlineFragment struct {
 	Fragment
-	Directives map[string]common.ArgumentList
+	Directives map[string]*common.Directive
 }
 
 type FragmentSpread struct {
 	Name       string
-	Directives map[string]common.ArgumentList
+	Directives map[string]*common.Directive
 }
 
 func (Field) isSelection()          {}
@@ -96,7 +97,7 @@ func parseDocument(l *lexer.Lexer) *Document {
 	}
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
-			d.Operations[""] = &Operation{SelSet: parseSelectionSet(l)}
+			d.Operations[""] = &Operation{Type: Query, SelSet: parseSelectionSet(l)}
 			continue
 		}
 
@@ -125,6 +126,7 @@ func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	if l.Peek() == scanner.Ident {
 		op.Name = l.ConsumeIdent()
 	}
+	op.Directives = common.ParseDirectives(l)
 	if l.Peek() == '(' {
 		l.ConsumeToken('(')
 		for l.Peek() != ')' {

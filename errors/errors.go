@@ -14,6 +14,10 @@ type Location struct {
 	Column int `json:"column"`
 }
 
+func (a Location) Before(b Location) bool {
+	return a.Line < b.Line || (a.Line == b.Line && a.Column < b.Column)
+}
+
 func Errorf(format string, a ...interface{}) *QueryError {
 	return &QueryError{
 		Message: fmt.Sprintf(format, a...),

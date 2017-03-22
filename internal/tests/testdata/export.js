@@ -11,6 +11,9 @@ let names = []
 let fakeModules = {
 	'mocha': {
 		describe(name, f) {
+			if (name == 'within schema language') {
+				return;
+			}
 			names.push(name);
 			f();
 			names.pop();
@@ -51,6 +54,7 @@ require('./src/validation/__tests__/DefaultValuesOfCorrectType-test.js');
 require('./src/validation/__tests__/FieldsOnCorrectType-test.js');
 require('./src/validation/__tests__/FragmentsOnCompositeTypes-test.js');
 require('./src/validation/__tests__/KnownArgumentNames-test.js');
+require('./src/validation/__tests__/KnownDirectives-test.js');
 
 let output = JSON.stringify(tests, null, 2)
 output = output.replace('{stringListField: [\\"one\\", 2], requiredField: true}', '{requiredField: true, stringListField: [\\"one\\", 2]}');

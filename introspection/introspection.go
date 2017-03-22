@@ -225,11 +225,11 @@ func (r *Field) IsDeprecated() bool {
 }
 
 func (r *Field) DeprecationReason() *string {
-	args, ok := r.field.Directives["deprecated"]
+	d, ok := r.field.Directives["deprecated"]
 	if !ok {
 		return nil
 	}
-	reason := common.UnmarshalLiteral(args.MustGet("reason").Value.(*lexer.Literal)).(string)
+	reason := common.UnmarshalLiteral(d.Args.MustGet("reason").Value.(*lexer.Literal)).(string)
 	return &reason
 }
 
@@ -285,11 +285,11 @@ func (r *EnumValue) IsDeprecated() bool {
 }
 
 func (r *EnumValue) DeprecationReason() *string {
-	args, ok := r.value.Directives["deprecated"]
+	d, ok := r.value.Directives["deprecated"]
 	if !ok {
 		return nil
 	}
-	reason := common.UnmarshalLiteral(args.MustGet("reason").Value.(*lexer.Literal)).(string)
+	reason := common.UnmarshalLiteral(d.Args.MustGet("reason").Value.(*lexer.Literal)).(string)
 	return &reason
 }
 

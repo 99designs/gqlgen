@@ -29,14 +29,14 @@ const (
 	Mutation
 )
 
-type NamedFragment struct {
-	Fragment
-	Name string
+type Fragment struct {
+	On     lexer.Ident
+	SelSet *SelectionSet
 }
 
-type Fragment struct {
-	On         lexer.Ident
-	SelSet     *SelectionSet
+type NamedFragment struct {
+	Fragment
+	Name       string
 	Directives map[string]common.ArgumentList
 }
 
@@ -57,13 +57,18 @@ type Field struct {
 	Loc        errors.Location
 }
 
+type InlineFragment struct {
+	Fragment
+	Directives map[string]common.ArgumentList
+}
+
 type FragmentSpread struct {
 	Name       string
 	Directives map[string]common.ArgumentList
 }
 
 func (Field) isSelection()          {}
-func (Fragment) isSelection()       {}
+func (InlineFragment) isSelection() {}
 func (FragmentSpread) isSelection() {}
 
 func Parse(queryString string) (*Document, *errors.QueryError) {
@@ -81,59 +86,7 @@ func Parse(queryString string) (*Document, *errors.QueryError) {
 		return nil, err
 	}
 
-	for _, op := range doc.Operations {
-		if err := resolveSelSet(doc, op.SelSet); err != nil {
-			return nil, err
-		}
-	}
-
-	for _, f := range doc.Fragments {
-		if err := resolveSelSet(doc, f.Fragment.SelSet); err != nil {
-			return nil, err
-		}
-	}
-
 	return doc, nil
-}
-
-func resolveSelSet(doc *Document, selSet *SelectionSet) *errors.QueryError {
-	var err *errors.QueryError
-	for i, sel := range selSet.Selections {
-		selSet.Selections[i], err = resolveSelection(doc, sel)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func resolveSelection(doc *Document, sel Selection) (Selection, *errors.QueryError) {
-	switch sel := sel.(type) {
-	case *Field:
-		if sel.SelSet != nil {
-			if err := resolveSelSet(doc, sel.SelSet); err != nil {
-				return nil, err
-			}
-		}
-		return sel, nil
-
-	case *FragmentSpread:
-		frag, ok := doc.Fragments[sel.Name]
-		if !ok {
-			return nil, errors.Errorf("fragment %q not found", sel.Name)
-		}
-		return &Fragment{
-			On:         frag.On,
-			SelSet:     frag.SelSet,
-			Directives: sel.Directives,
-		}, nil
-
-	case *Fragment:
-		return sel, nil
-
-	default:
-		panic("unreachable")
-	}
 }
 
 func parseDocument(l *lexer.Lexer) *Document {
@@ -189,6 +142,7 @@ func parseFragment(l *lexer.Lexer) *NamedFragment {
 	f.Name = l.ConsumeIdent()
 	l.ConsumeKeyword("on")
 	f.On = l.ConsumeIdentWithLoc()
+	f.Directives = common.ParseDirectives(l)
 	f.SelSet = parseSelectionSet(l)
 	return f
 }
@@ -235,7 +189,7 @@ func parseSpread(l *lexer.Lexer) Selection {
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
 
-	f := &Fragment{}
+	f := &InlineFragment{}
 	if l.Peek() == scanner.Ident {
 		ident := l.ConsumeIdent()
 		if ident != "on" {

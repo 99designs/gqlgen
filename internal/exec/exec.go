@@ -503,13 +503,22 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 				e.execField(ctx, r, field, resolver, addResult)
 			})
 
-		case *query.Fragment:
+		case *query.InlineFragment:
 			frag := sel
 			if skipByDirective(r, frag.Directives) {
 				continue
 			}
 			execSel(func() {
-				e.execFragment(ctx, r, frag, resolver, addResult)
+				e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
+			})
+
+		case *query.FragmentSpread:
+			spread := sel
+			if skipByDirective(r, spread.Directives) {
+				continue
+			}
+			execSel(func() {
+				e.execFragment(ctx, r, &r.doc.Fragments[spread.Name].Fragment, resolver, addResult)
 			})
 
 		default:

@@ -114,7 +114,7 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 			errs = append(errs, validateSelectionSet(s, sel.SelSet, ft)...)
 		}
 
-	case *query.Fragment:
+	case *query.InlineFragment:
 		errs = append(errs, validateDirectives(s, sel.Directives)...)
 		if sel.On.Name != "" {
 			t = s.Types[sel.On.Name]
@@ -124,6 +124,9 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 			return
 		}
 		errs = append(errs, validateSelectionSet(s, sel.SelSet, t)...)
+
+	case *query.FragmentSpread:
+		// TODO
 
 	default:
 		panic("unreachable")

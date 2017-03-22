@@ -55,15 +55,31 @@ Module._load = function(request, parent, isMain) {
 	return fakeModules[request] || originalLoader(request, parent, isMain);
 };
 
-require('./src/validation/__tests__/ArgumentsOfCorrectType-test.js');
-require('./src/validation/__tests__/DefaultValuesOfCorrectType-test.js');
-require('./src/validation/__tests__/FieldsOnCorrectType-test.js');
-require('./src/validation/__tests__/FragmentsOnCompositeTypes-test.js');
-require('./src/validation/__tests__/KnownArgumentNames-test.js');
-require('./src/validation/__tests__/KnownDirectives-test.js');
-require('./src/validation/__tests__/KnownFragmentNames-test.js');
-require('./src/validation/__tests__/KnownTypeNames-test.js');
-require('./src/validation/__tests__/LoneAnonymousOperation-test.js');
+require('./src/validation/__tests__/ArgumentsOfCorrectType-test');
+require('./src/validation/__tests__/DefaultValuesOfCorrectType-test');
+require('./src/validation/__tests__/FieldsOnCorrectType-test');
+require('./src/validation/__tests__/FragmentsOnCompositeTypes-test');
+require('./src/validation/__tests__/KnownArgumentNames-test');
+require('./src/validation/__tests__/KnownDirectives-test');
+require('./src/validation/__tests__/KnownFragmentNames-test');
+require('./src/validation/__tests__/KnownTypeNames-test');
+require('./src/validation/__tests__/LoneAnonymousOperation-test');
+// require('./src/validation/__tests__/NoFragmentCycles-test');
+// require('./src/validation/__tests__/NoUndefinedVariables-test');
+// require('./src/validation/__tests__/NoUnusedFragments-test');
+// require('./src/validation/__tests__/NoUnusedVariables-test');
+// require('./src/validation/__tests__/OverlappingFieldsCanBeMerged-test');
+// require('./src/validation/__tests__/PossibleFragmentSpreads-test');
+// require('./src/validation/__tests__/ProvidedNonNullArguments-test');
+// require('./src/validation/__tests__/ScalarLeafs-test');
+require('./src/validation/__tests__/UniqueArgumentNames-test');
+// require('./src/validation/__tests__/UniqueDirectivesPerLocation-test');
+// require('./src/validation/__tests__/UniqueFragmentNames-test');
+// require('./src/validation/__tests__/UniqueInputFieldNames-test');
+// require('./src/validation/__tests__/UniqueOperationNames-test');
+// require('./src/validation/__tests__/UniqueVariableNames-test');
+// require('./src/validation/__tests__/VariablesAreInputTypes-test');
+// require('./src/validation/__tests__/VariablesInAllowedPosition-test');
 
 let output = JSON.stringify(tests, null, 2)
 output = output.replace('{stringListField: [\\"one\\", 2], requiredField: true}', '{requiredField: true, stringListField: [\\"one\\", 2]}');

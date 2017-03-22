@@ -104,6 +104,7 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			c.addErr(sel.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
 		}
 
+		c.validateArgumentNames(sel.Arguments)
 		if f != nil {
 			for _, selArg := range sel.Arguments {
 				arg := f.Args.Get(selArg.Name.Name)
@@ -182,6 +183,8 @@ func (c *context) resolveType(t common.Type) common.Type {
 
 func (c *context) validateDirectives(loc string, directives map[string]*common.Directive) {
 	for name, d := range directives {
+		c.validateArgumentNames(d.Args)
+
 		dd, ok := c.schema.Directives[name]
 		if !ok {
 			c.addErr(d.Name.Loc, "KnownDirectives", "Unknown directive %q.", name)
@@ -211,6 +214,21 @@ func (c *context) validateDirectives(loc string, directives map[string]*common.D
 		}
 	}
 	return
+}
+
+func (c *context) validateArgumentNames(args common.ArgumentList) {
+	seen := make(map[string]errors.Location)
+	for _, arg := range args {
+		if loc, ok := seen[arg.Name.Name]; ok {
+			c.errs = append(c.errs, &errors.QueryError{
+				Message:   fmt.Sprintf("There can be only one argument named %q.", arg.Name.Name),
+				Locations: []errors.Location{loc, arg.Name.Loc},
+				Rule:      "UniqueArgumentNames",
+			})
+			continue
+		}
+		seen[arg.Name.Name] = arg.Name.Loc
+	}
 }
 
 func validateValue(v interface{}, t common.Type) (bool, string) {

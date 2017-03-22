@@ -63,12 +63,11 @@ type Selection interface {
 }
 
 type Field struct {
-	Alias      string
-	Name       string
+	Alias      lexer.Ident
+	Name       lexer.Ident
 	Arguments  common.ArgumentList
 	Directives map[string]*common.Directive
 	SelSet     *SelectionSet
-	Loc        errors.Location
 }
 
 type InlineFragment struct {
@@ -182,14 +181,12 @@ func parseSelection(l *lexer.Lexer) Selection {
 }
 
 func parseField(l *lexer.Lexer) *Field {
-	f := &Field{
-		Loc: l.Location(),
-	}
-	f.Alias = l.ConsumeIdent()
+	f := &Field{}
+	f.Alias = l.ConsumeIdentWithLoc()
 	f.Name = f.Alias
 	if l.Peek() == ':' {
 		l.ConsumeToken(':')
-		f.Name = l.ConsumeIdent()
+		f.Name = l.ConsumeIdentWithLoc()
 	}
 	if l.Peek() == '(' {
 		f.Arguments = common.ParseArguments(l)

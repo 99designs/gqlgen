@@ -100,15 +100,17 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 	switch sel := sel.(type) {
 	case *query.Field:
 		c.validateDirectives("FIELD", sel.Directives)
-		if sel.Name == "__schema" || sel.Name == "__type" || sel.Name == "__typename" {
+
+		fieldName := sel.Name.Name
+		if fieldName == "__schema" || fieldName == "__type" || fieldName == "__typename" {
 			return
 		}
 
 		t = unwrapType(t)
-		f := fields(t).Get(sel.Name)
+		f := fields(t).Get(fieldName)
 		if f == nil && t != nil {
-			suggestion := makeSuggestion("Did you mean", fields(t).Names(), sel.Name)
-			c.addErr(sel.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
+			suggestion := makeSuggestion("Did you mean", fields(t).Names(), fieldName)
+			c.addErr(sel.Alias.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", fieldName, t, suggestion)
 		}
 
 		names := make(nameSet)
@@ -117,9 +119,9 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 		}
 
 		if f != nil {
-			c.validateArguments(sel.Arguments, f.Args, sel.Loc,
-				func() string { return fmt.Sprintf("field %q of type %q", sel.Name, t) },
-				func() string { return fmt.Sprintf("Field %q", sel.Name) },
+			c.validateArguments(sel.Arguments, f.Args, sel.Alias.Loc,
+				func() string { return fmt.Sprintf("field %q of type %q", fieldName, t) },
+				func() string { return fmt.Sprintf("Field %q", fieldName) },
 			)
 		}
 
@@ -128,10 +130,10 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			ft = f.Type
 			sf := hasSubfields(ft)
 			if sf && sel.SelSet == nil {
-				c.addErr(sel.Loc, "ScalarLeafs", "Field %q of type %q must have a selection of subfields. Did you mean \"%s { ... }\"?", sel.Name, ft, sel.Name)
+				c.addErr(sel.Alias.Loc, "ScalarLeafs", "Field %q of type %q must have a selection of subfields. Did you mean \"%s { ... }\"?", fieldName, ft, fieldName)
 			}
 			if !sf && sel.SelSet != nil {
-				c.addErr(sel.SelSet.Loc, "ScalarLeafs", "Field %q must not have a selection since type %q has no subfields.", sel.Name, ft)
+				c.addErr(sel.SelSet.Loc, "ScalarLeafs", "Field %q must not have a selection since type %q has no subfields.", fieldName, ft)
 			}
 		}
 		if sel.SelSet != nil {

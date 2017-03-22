@@ -529,10 +529,12 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 }
 
 func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
-	switch f.Name {
+	fieldAlias := f.Alias.Name
+	fieldName := f.Name.Name
+	switch fieldName {
 	case "__typename":
 		if len(e.typeAssertions) == 0 {
-			addResult(f.Alias, e.name)
+			addResult(fieldAlias, e.name)
 			return
 		}
 
@@ -542,28 +544,28 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 				return
 			}
 			if out[1].Bool() {
-				addResult(f.Alias, name)
+				addResult(fieldAlias, name)
 				return
 			}
 		}
 
 	case "__schema":
-		addResult(f.Alias, introspectSchema(ctx, r, f.SelSet))
+		addResult(fieldAlias, introspectSchema(ctx, r, f.SelSet))
 
 	case "__type":
 		p := valuePacker{valueType: reflect.TypeOf("")}
 		v, err := p.pack(r, r.resolveVar(f.Arguments.MustGet("name").Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
-			addResult(f.Alias, nil)
+			addResult(fieldAlias, nil)
 			return
 		}
-		addResult(f.Alias, introspectType(ctx, r, v.String(), f.SelSet))
+		addResult(fieldAlias, introspectType(ctx, r, v.String(), f.SelSet))
 
 	default:
-		fe, ok := e.fields[f.Name]
+		fe, ok := e.fields[fieldName]
 		if !ok {
-			panic(fmt.Errorf("%q has no field %q", e.name, f.Name)) // TODO proper error handling
+			panic(fmt.Errorf("%q has no field %q", e.name, fieldName)) // TODO proper error handling
 		}
 
 		span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", fe.typeName, fe.field.Name))
@@ -580,14 +582,14 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 			queryError := errors.Errorf("%s", err)
 			queryError.ResolverError = err
 			r.addError(queryError)
-			addResult(f.Alias, nil) // TODO handle non-nil
+			addResult(fieldAlias, nil) // TODO handle non-nil
 
 			ext.Error.Set(span, true)
 			span.SetTag(OpenTracingTagError, err)
 			return
 		}
 
-		addResult(f.Alias, result)
+		addResult(fieldAlias, result)
 	}
 }
 

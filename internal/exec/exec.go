@@ -583,8 +583,8 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 }
 
 func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.Fragment, resolver reflect.Value, addResult addResultFn) {
-	if frag.On != "" && frag.On != e.name {
-		a, ok := e.typeAssertions[frag.On]
+	if frag.On.Name != "" && frag.On.Name != e.name {
+		a, ok := e.typeAssertions[frag.On.Name]
 		if !ok {
 			panic(fmt.Errorf("%q does not implement %q", frag.On, e.name)) // TODO proper error handling
 		}

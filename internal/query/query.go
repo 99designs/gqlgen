@@ -35,8 +35,7 @@ type NamedFragment struct {
 }
 
 type Fragment struct {
-	On         string
-	OnLoc      *errors.Location
+	On         lexer.Ident
 	SelSet     *SelectionSet
 	Directives map[string]common.ArgumentList
 }
@@ -125,7 +124,6 @@ func resolveSelection(doc *Document, sel Selection) (Selection, *errors.QueryErr
 		}
 		return &Fragment{
 			On:         frag.On,
-			OnLoc:      frag.OnLoc,
 			SelSet:     frag.SelSet,
 			Directives: sel.Directives,
 		}, nil
@@ -190,8 +188,7 @@ func parseFragment(l *lexer.Lexer) *NamedFragment {
 	f := &NamedFragment{}
 	f.Name = l.ConsumeIdent()
 	l.ConsumeKeyword("on")
-	f.OnLoc = l.Location()
-	f.On = l.ConsumeIdent()
+	f.On = l.ConsumeIdentWithLoc()
 	f.SelSet = parseSelectionSet(l)
 	return f
 }
@@ -248,8 +245,7 @@ func parseSpread(l *lexer.Lexer) Selection {
 			fs.Directives = common.ParseDirectives(l)
 			return fs
 		}
-		f.OnLoc = l.Location()
-		f.On = l.ConsumeIdent()
+		f.On = l.ConsumeIdentWithLoc()
 	}
 	f.Directives = common.ParseDirectives(l)
 	f.SelSet = parseSelectionSet(l)

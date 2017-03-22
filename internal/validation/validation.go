@@ -49,12 +49,12 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 
 	for _, frag := range q.Fragments {
 		errs = append(errs, validateDirectives(s, frag.Directives)...)
-		t, ok := s.Types[frag.On]
+		t, ok := s.Types[frag.On.Name]
 		if !ok {
 			continue
 		}
 		if !canBeFragment(t) {
-			errs = append(errs, errors.ErrorfWithLoc(frag.OnLoc, "Fragment %q cannot condition on non composite type %q.", frag.Name, t))
+			errs = append(errs, errors.ErrorfWithLoc(frag.On.Loc, "Fragment %q cannot condition on non composite type %q.", frag.Name, t))
 			continue
 		}
 		errs = append(errs, validateSelectionSet(s, frag.SelSet, t)...)
@@ -105,11 +105,11 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 
 	case *query.Fragment:
 		errs = append(errs, validateDirectives(s, sel.Directives)...)
-		if sel.On != "" {
-			t = s.Types[sel.On]
+		if sel.On.Name != "" {
+			t = s.Types[sel.On.Name]
 		}
 		if !canBeFragment(t) {
-			errs = append(errs, errors.ErrorfWithLoc(sel.OnLoc, "Fragment cannot condition on non composite type %q.", t))
+			errs = append(errs, errors.ErrorfWithLoc(sel.On.Loc, "Fragment cannot condition on non composite type %q.", t))
 			return
 		}
 		errs = append(errs, validateSelectionSet(s, sel.SelSet, t)...)

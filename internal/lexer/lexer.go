@@ -20,6 +20,11 @@ type Literal struct {
 	Text string
 }
 
+type Ident struct {
+	Name string
+	Loc  *errors.Location
+}
+
 type Variable string
 
 func New(sc *scanner.Scanner) *Lexer {
@@ -75,9 +80,16 @@ func (l *Lexer) Consume() {
 }
 
 func (l *Lexer) ConsumeIdent() string {
-	text := l.sc.TokenText()
+	name := l.sc.TokenText()
 	l.ConsumeToken(scanner.Ident)
-	return text
+	return name
+}
+
+func (l *Lexer) ConsumeIdentWithLoc() Ident {
+	loc := l.Location()
+	name := l.sc.TokenText()
+	l.ConsumeToken(scanner.Ident)
+	return Ident{name, loc}
 }
 
 func (l *Lexer) ConsumeKeyword(keyword string) {

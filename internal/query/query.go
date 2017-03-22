@@ -31,7 +31,7 @@ const (
 )
 
 type Fragment struct {
-	On     lexer.Ident
+	On     common.TypeName
 	SelSet *SelectionSet
 }
 
@@ -143,7 +143,7 @@ func parseFragment(l *lexer.Lexer) *NamedFragment {
 	f := &NamedFragment{}
 	f.Name = l.ConsumeIdent()
 	l.ConsumeKeyword("on")
-	f.On = l.ConsumeIdentWithLoc()
+	f.On = common.TypeName{Ident: l.ConsumeIdentWithLoc()}
 	f.Directives = common.ParseDirectives(l)
 	f.SelSet = parseSelectionSet(l)
 	return f
@@ -201,7 +201,7 @@ func parseSpread(l *lexer.Lexer) Selection {
 			fs.Directives = common.ParseDirectives(l)
 			return fs
 		}
-		f.On = l.ConsumeIdentWithLoc()
+		f.On = common.TypeName{Ident: l.ConsumeIdentWithLoc()}
 	}
 	f.Directives = common.ParseDirectives(l)
 	f.SelSet = parseSelectionSet(l)

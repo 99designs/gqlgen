@@ -19,6 +19,9 @@ let fakeModules = {
 			names.pop();
 		},
 		it(name, f) {
+			if (name == 'ignores type definitions') {
+				return;
+			}
 			names.push(name);
 			f();
 			names.pop();
@@ -56,10 +59,12 @@ require('./src/validation/__tests__/FragmentsOnCompositeTypes-test.js');
 require('./src/validation/__tests__/KnownArgumentNames-test.js');
 require('./src/validation/__tests__/KnownDirectives-test.js');
 require('./src/validation/__tests__/KnownFragmentNames-test.js');
+require('./src/validation/__tests__/KnownTypeNames-test.js');
 
 let output = JSON.stringify(tests, null, 2)
 output = output.replace('{stringListField: [\\"one\\", 2], requiredField: true}', '{requiredField: true, stringListField: [\\"one\\", 2]}');
 output = output.replace('{requiredField: null, intField: null}', '{intField: null, requiredField: null}');
 output = output.replace(' Did you mean to use an inline fragment on \\"Dog\\" or \\"Cat\\"?', '');
 output = output.replace(' Did you mean to use an inline fragment on \\"Being\\", \\"Pet\\", \\"Canine\\", \\"Dog\\", or \\"Cat\\"?', '');
+output = output.replace(' Did you mean \\"Pet\\"?', '');
 fs.writeFileSync("tests.json", output);

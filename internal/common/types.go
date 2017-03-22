@@ -1,8 +1,7 @@
 package common
 
 import (
-	"fmt"
-
+	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/lexer"
 )
 
@@ -20,7 +19,7 @@ type NonNull struct {
 }
 
 type TypeName struct {
-	Name string
+	lexer.Ident
 }
 
 func (*List) Kind() string     { return "LIST" }
@@ -48,12 +47,12 @@ func parseNullType(l *lexer.Lexer) Type {
 		return &List{OfType: ofType}
 	}
 
-	return &TypeName{Name: l.ConsumeIdent()}
+	return &TypeName{Ident: l.ConsumeIdentWithLoc()}
 }
 
 type Resolver func(name string) Type
 
-func ResolveType(t Type, resolver Resolver) (Type, error) {
+func ResolveType(t Type, resolver Resolver) (Type, *errors.QueryError) {
 	switch t := t.(type) {
 	case *List:
 		ofType, err := ResolveType(t.OfType, resolver)
@@ -70,7 +69,10 @@ func ResolveType(t Type, resolver Resolver) (Type, error) {
 	case *TypeName:
 		refT := resolver(t.Name)
 		if refT == nil {
-			return nil, fmt.Errorf("type %q not found", t.Name)
+			err := errors.Errorf("Unknown type %q.", t.Name)
+			err.Rule = "KnownTypeNames"
+			err.Locations = []errors.Location{t.Loc}
+			return nil, err
 		}
 		return refT, nil
 	default:

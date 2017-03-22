@@ -39,12 +39,8 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 		c.validateDirectives(string(op.Type), op.Directives)
 
 		for _, v := range op.Vars {
-			if v.Default != nil {
-				t, err := common.ResolveType(v.Type, s.Resolve)
-				if err != nil {
-					continue
-				}
-
+			t := c.resolveType(v.Type)
+			if t != nil && v.Default != nil {
 				if nn, ok := t.(*common.NonNull); ok {
 					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
 				}
@@ -69,10 +65,8 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 
 	for _, frag := range doc.Fragments {
 		c.validateDirectives("FRAGMENT_DEFINITION", frag.Directives)
-		t, ok := s.Types[frag.On.Name]
-		if !ok {
-			continue
-		}
+		t := c.resolveType(&frag.On)
+		// continue even if t is nil
 		if !canBeFragment(t) {
 			c.addErr(frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name, t)
 			continue
@@ -131,9 +125,10 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 	case *query.InlineFragment:
 		c.validateDirectives("INLINE_FRAGMENT", sel.Directives)
 		if sel.On.Name != "" {
-			t = c.schema.Types[sel.On.Name]
+			t = c.resolveType(&sel.On)
+			// continue even if t is nil
 		}
-		if !canBeFragment(t) {
+		if t != nil && !canBeFragment(t) {
 			c.addErr(sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
@@ -171,6 +166,14 @@ func unwrapType(t common.Type) common.Type {
 	default:
 		return t
 	}
+}
+
+func (c *context) resolveType(t common.Type) common.Type {
+	t2, err := common.ResolveType(t, c.schema.Resolve)
+	if err != nil {
+		c.errs = append(c.errs, err)
+	}
+	return t2
 }
 
 func (c *context) validateDirectives(loc string, directives map[string]*common.Directive) {

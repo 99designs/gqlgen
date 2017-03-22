@@ -1515,5 +1515,45 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Known type names/known type names are valid",
+    "rule": "KnownTypeNames",
+    "query": "\n      query Foo($var: String, $required: [String!]!) {\n        user(id: 4) {\n          pets { ... on Pet { name }, ...PetFields, ... { name } }\n        }\n      }\n      fragment PetFields on Pet {\n        name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known type names/unknown type names are invalid",
+    "rule": "KnownTypeNames",
+    "query": "\n      query Foo($var: JumbledUpLetters) {\n        user(id: 4) {\n          name\n          pets { ... on Badger { name }, ...PetFields }\n        }\n      }\n      fragment PetFields on Peettt {\n        name\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown type \"JumbledUpLetters\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 23
+          }
+        ]
+      },
+      {
+        "message": "Unknown type \"Badger\".",
+        "locations": [
+          {
+            "line": 5,
+            "column": 25
+          }
+        ]
+      },
+      {
+        "message": "Unknown type \"Peettt\".",
+        "locations": [
+          {
+            "line": 8,
+            "column": 29
+          }
+        ]
+      }
+    ]
   }
 ]

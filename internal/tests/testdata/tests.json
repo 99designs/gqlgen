@@ -1053,5 +1053,90 @@
     "name": "Validate: Fields on correct type/valid field in inline fragment",
     "query": "\n      fragment objectFieldSelection on Pet {\n        ... on Dog {\n          name\n        }\n        ... {\n          name\n        }\n      }\n    ",
     "errors": []
+  },
+  {
+    "name": "Validate: Fragments on composite types/object is valid fragment type",
+    "query": "\n      fragment validFragment on Dog {\n        barks\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fragments on composite types/interface is valid fragment type",
+    "query": "\n      fragment validFragment on Pet {\n        name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fragments on composite types/object is valid inline fragment type",
+    "query": "\n      fragment validFragment on Pet {\n        ... on Dog {\n          barks\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fragments on composite types/inline fragment without type is valid",
+    "query": "\n      fragment validFragment on Pet {\n        ... {\n          name\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fragments on composite types/union is valid fragment type",
+    "query": "\n      fragment validFragment on CatOrDog {\n        __typename\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Fragments on composite types/scalar is invalid fragment type",
+    "query": "\n      fragment scalarFragment on Boolean {\n        bad\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fragment \"scalarFragment\" cannot condition on non composite type \"Boolean\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 34
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fragments on composite types/enum is invalid fragment type",
+    "query": "\n      fragment scalarFragment on FurColor {\n        bad\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fragment \"scalarFragment\" cannot condition on non composite type \"FurColor\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 34
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fragments on composite types/input object is invalid fragment type",
+    "query": "\n      fragment inputFragment on ComplexInput {\n        stringField\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fragment \"inputFragment\" cannot condition on non composite type \"ComplexInput\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 33
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Fragments on composite types/scalar is invalid inline fragment type",
+    "query": "\n      fragment invalidFragment on Pet {\n        ... on String {\n          barks\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fragment cannot condition on non composite type \"String\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 16
+          }
+        ]
+      }
+    ]
   }
 ]

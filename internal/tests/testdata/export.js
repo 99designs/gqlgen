@@ -47,6 +47,7 @@ Module._load = function(request, parent, isMain) {
 require('./src/validation/__tests__/ArgumentsOfCorrectType-test.js');
 require('./src/validation/__tests__/DefaultValuesOfCorrectType-test.js');
 require('./src/validation/__tests__/FieldsOnCorrectType-test.js');
+require('./src/validation/__tests__/FragmentsOnCompositeTypes-test.js');
 
 let output = JSON.stringify(tests, null, 2)
 output = output.replace('{stringListField: [\\"one\\", 2], requiredField: true}', '{requiredField: true, stringListField: [\\"one\\", 2]}');

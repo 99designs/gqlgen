@@ -48,8 +48,13 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 	}
 
 	for _, frag := range q.Fragments {
+		errs = append(errs, validateDirectives(s, frag.Directives)...)
 		t, ok := s.Types[frag.On]
 		if !ok {
+			continue
+		}
+		if !canBeFragment(t) {
+			errs = append(errs, errors.ErrorfWithLoc(frag.OnLoc, "Fragment %q cannot condition on non composite type %q.", frag.Name, t))
 			continue
 		}
 		errs = append(errs, validateSelectionSet(s, frag.SelSet, t)...)
@@ -58,12 +63,11 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 	return
 }
 
-func validateSelectionSet(s *schema.Schema, selSet *query.SelectionSet, t common.Type) []*errors.QueryError {
-	var errs []*errors.QueryError
+func validateSelectionSet(s *schema.Schema, selSet *query.SelectionSet, t common.Type) (errs []*errors.QueryError) {
 	for _, sel := range selSet.Selections {
 		errs = append(errs, validateSelection(s, sel, t)...)
 	}
-	return errs
+	return
 }
 
 func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (errs []*errors.QueryError) {
@@ -100,10 +104,14 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 		}
 
 	case *query.Fragment:
+		errs = append(errs, validateDirectives(s, sel.Directives)...)
 		if sel.On != "" {
 			t = s.Types[sel.On]
 		}
-		errs = append(errs, validateDirectives(s, sel.Directives)...)
+		if !canBeFragment(t) {
+			errs = append(errs, errors.ErrorfWithLoc(sel.OnLoc, "Fragment cannot condition on non composite type %q.", t))
+			return
+		}
 		errs = append(errs, validateSelectionSet(s, sel.SelSet, t)...)
 
 	default:
@@ -118,10 +126,8 @@ func fields(t common.Type) schema.FieldList {
 		return t.Fields
 	case *schema.Interface:
 		return t.Fields
-	case *schema.Union, nil:
-		return nil
 	default:
-		panic("unreachable")
+		return nil
 	}
 }
 
@@ -256,6 +262,15 @@ func validateLiteral(v *lexer.Literal, t common.Type) bool {
 	}
 
 	return false
+}
+
+func canBeFragment(t common.Type) bool {
+	switch t.(type) {
+	case *schema.Object, *schema.Interface, *schema.Union:
+		return true
+	default:
+		return false
+	}
 }
 
 func stringify(v interface{}) string {

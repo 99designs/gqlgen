@@ -70,7 +70,7 @@ require('./src/validation/__tests__/LoneAnonymousOperation-test');
 // require('./src/validation/__tests__/NoUnusedVariables-test');
 // require('./src/validation/__tests__/OverlappingFieldsCanBeMerged-test');
 // require('./src/validation/__tests__/PossibleFragmentSpreads-test');
-// require('./src/validation/__tests__/ProvidedNonNullArguments-test');
+require('./src/validation/__tests__/ProvidedNonNullArguments-test');
 // require('./src/validation/__tests__/ScalarLeafs-test');
 require('./src/validation/__tests__/UniqueArgumentNames-test');
 // require('./src/validation/__tests__/UniqueDirectivesPerLocation-test');

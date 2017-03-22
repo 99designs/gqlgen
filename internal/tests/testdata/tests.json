@@ -1622,6 +1622,166 @@
     ]
   },
   {
+    "name": "Validate: Provided required arguments/ignores unknown arguments",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n      {\n        dog {\n          isHousetrained(unknownArgument: true)\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/Arg on optional arg",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          dog {\n            isHousetrained(atOtherHomes: true)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/No Arg on optional arg",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          dog {\n            isHousetrained\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/Multiple args",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req1: 1, req2: 2)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/Multiple args reverse order",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req2: 2, req1: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/No args on multiple optional",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOpts\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/One arg on multiple optional",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOpts(opt1: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/Second arg on multiple optional",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOpts(opt2: 1)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/Multiple reqs on mixedList",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOptAndReq(req1: 3, req2: 4)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/Multiple reqs and one opt on mixedList",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOptAndReq(req1: 3, req2: 4, opt1: 5)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Valid non-nullable value/All reqs and opts on mixedList",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleOptAndReq(req1: 3, req2: 4, opt1: 5, opt2: 6)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Invalid non-nullable value/Missing one non-nullable argument",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req2: 2)\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Field \"multipleReqs\" argument \"req1\" of type \"Int!\" is required but not provided.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Provided required arguments/Invalid non-nullable value/Missing multiple non-nullable arguments",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Field \"multipleReqs\" argument \"req1\" of type \"Int!\" is required but not provided.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 13
+          }
+        ]
+      },
+      {
+        "message": "Field \"multipleReqs\" argument \"req2\" of type \"Int!\" is required but not provided.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Provided required arguments/Invalid non-nullable value/Incorrect value and missing argument",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          complicatedArgs {\n            multipleReqs(req1: \"one\")\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Field \"multipleReqs\" argument \"req2\" of type \"Int!\" is required but not provided.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Provided required arguments/Directive arguments/ignores unknown directives",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          dog @unknown\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Directive arguments/with directives of valid types",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          dog @include(if: true) {\n            name\n          }\n          human @skip(if: false) {\n            name\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Provided required arguments/Directive arguments/with directive with missing types",
+    "rule": "ProvidedNonNullArguments",
+    "query": "\n        {\n          dog @include {\n            name @skip\n          }\n        }\n      ",
+    "errors": [
+      {
+        "message": "Directive \"@include\" argument \"if\" of type \"Boolean!\" is required but not provided.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 15
+          }
+        ]
+      },
+      {
+        "message": "Directive \"@skip\" argument \"if\" of type \"Boolean!\" is required but not provided.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 18
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: Unique argument names/no arguments on field",
     "rule": "UniqueArgumentNames",
     "query": "\n      {\n        field\n      }\n    ",

@@ -110,17 +110,10 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 
 		c.validateArgumentNames(sel.Arguments)
 		if f != nil {
-			for _, selArg := range sel.Arguments {
-				arg := f.Args.Get(selArg.Name.Name)
-				if arg == nil {
-					c.addErr(selArg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on field %q of type %q.", selArg.Name.Name, sel.Name, t)
-					continue
-				}
-				value := selArg.Value
-				if ok, reason := validateValue(value.Value, arg.Type); !ok {
-					c.addErr(value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(value.Value), reason)
-				}
-			}
+			c.validateArguments(sel.Arguments, f.Args, sel.Loc,
+				func() string { return fmt.Sprintf("field %q of type %q", sel.Name, t) },
+				func() string { return fmt.Sprintf("Field %q", sel.Name) },
+			)
 		}
 
 		var ft common.Type
@@ -206,16 +199,10 @@ func (c *context) validateDirectives(loc string, directives map[string]*common.D
 			c.addErr(d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", name, loc)
 		}
 
-		for _, arg := range d.Args {
-			iv := dd.Args.Get(arg.Name.Name)
-			if iv == nil {
-				c.addErr(arg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on directive %q.", arg.Name.Name, "@"+name)
-				continue
-			}
-			if ok, reason := validateValue(arg.Value.Value, iv.Type); !ok {
-				c.addErr(arg.Value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(arg.Value.Value), reason)
-			}
-		}
+		c.validateArguments(d.Args, dd.Args, d.Name.Loc,
+			func() string { return fmt.Sprintf("directive %q", "@"+d.Name.Name) },
+			func() string { return fmt.Sprintf("Directive %q", "@"+d.Name.Name) },
+		)
 	}
 	return
 }
@@ -232,6 +219,27 @@ func (c *context) validateArgumentNames(args common.ArgumentList) {
 			continue
 		}
 		seen[arg.Name.Name] = arg.Name.Loc
+	}
+}
+
+func (c *context) validateArguments(args common.ArgumentList, argDecls common.InputValueList, loc errors.Location, owner1, owner2 func() string) {
+	for _, selArg := range args {
+		arg := argDecls.Get(selArg.Name.Name)
+		if arg == nil {
+			c.addErr(selArg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on %s.", selArg.Name.Name, owner1())
+			continue
+		}
+		value := selArg.Value
+		if ok, reason := validateValue(value.Value, arg.Type); !ok {
+			c.addErr(value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(value.Value), reason)
+		}
+	}
+	for _, decl := range argDecls {
+		if _, ok := decl.Type.(*common.NonNull); ok {
+			if _, ok := args.Get(decl.Name.Name); !ok {
+				c.addErr(loc, "ProvidedNonNullArguments", "%s argument %q of type %q is required but not provided.", owner2(), decl.Name.Name, decl.Type)
+			}
+		}
 	}
 }
 

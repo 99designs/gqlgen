@@ -13,7 +13,7 @@ import (
 type Schema struct {
 	EntryPoints map[string]NamedType
 	Types       map[string]NamedType
-	Directives  map[string]*Directive
+	Directives  map[string]*DirectiveDecl
 
 	entryPointNames map[string]string
 	objects         []*Object
@@ -97,7 +97,7 @@ func (l FieldList) Names() []string {
 	return names
 }
 
-type Directive struct {
+type DirectiveDecl struct {
 	Name string
 	Desc string
 	Locs []string
@@ -144,7 +144,7 @@ func New() *Schema {
 	s := &Schema{
 		entryPointNames: make(map[string]string),
 		Types:           make(map[string]NamedType),
-		Directives:      make(map[string]*Directive),
+		Directives:      make(map[string]*DirectiveDecl),
 	}
 	for n, t := range Meta.Types {
 		s.Types[n] = t
@@ -417,8 +417,8 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 	return enum
 }
 
-func parseDirectiveDecl(l *lexer.Lexer) *Directive {
-	d := &Directive{}
+func parseDirectiveDecl(l *lexer.Lexer) *DirectiveDecl {
+	d := &DirectiveDecl{}
 	l.ConsumeToken('@')
 	d.Name = l.ConsumeIdent()
 	if l.Peek() == '(' {

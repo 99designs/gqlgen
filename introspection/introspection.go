@@ -294,7 +294,7 @@ func (r *EnumValue) DeprecationReason() *string {
 }
 
 type Directive struct {
-	directive *schema.Directive
+	directive *schema.DirectiveDecl
 }
 
 func (r *Directive) Name() string {

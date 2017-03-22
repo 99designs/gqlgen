@@ -37,7 +37,8 @@ func (l *Lexer) CatchSyntaxError(f func()) (errRes *errors.QueryError) {
 	defer func() {
 		if err := recover(); err != nil {
 			if err, ok := err.(syntaxError); ok {
-				errRes = errors.ErrorfWithLoc(l.Location(), "syntax error: %s", err)
+				errRes = errors.Errorf("syntax error: %s", err)
+				errRes.Locations = []*errors.Location{l.Location()}
 				return
 			}
 			panic(err)

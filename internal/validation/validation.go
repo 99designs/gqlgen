@@ -15,22 +15,29 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
+func addErr(errs *[]*errors.QueryError, loc *errors.Location, rule string, format string, a ...interface{}) {
+	*errs = append(*errs, &errors.QueryError{
+		Message:   fmt.Sprintf(format, a...),
+		Locations: []*errors.Location{loc},
+		Rule:      rule,
+	})
+}
+
 func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 	for _, op := range q.Operations {
 		for _, v := range op.Vars {
 			if v.Default != nil {
 				t, err := common.ResolveType(v.Type, s.Resolve)
 				if err != nil {
-					errs = append(errs, errors.ErrorfWithLoc(v.Default.Loc, "TODO"))
 					continue
 				}
 
 				if nn, ok := t.(*common.NonNull); ok {
-					errs = append(errs, errors.ErrorfWithLoc(v.Default.Loc, "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name, t, nn.OfType))
+					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name, t, nn.OfType)
 				}
 
 				if ok, reason := validateValue(v.Default.Value, t); !ok {
-					errs = append(errs, errors.ErrorfWithLoc(v.Default.Loc, "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name, t, stringify(v.Default.Value), reason))
+					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name, t, stringify(v.Default.Value), reason)
 				}
 			}
 		}
@@ -54,7 +61,7 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 			continue
 		}
 		if !canBeFragment(t) {
-			errs = append(errs, errors.ErrorfWithLoc(frag.On.Loc, "Fragment %q cannot condition on non composite type %q.", frag.Name, t))
+			addErr(&errs, frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name, t)
 			continue
 		}
 		errs = append(errs, validateSelectionSet(s, frag.SelSet, t)...)
@@ -82,15 +89,18 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 		f := fields(t).Get(sel.Name)
 		if f == nil && t != nil {
 			suggestion := makeSuggestion("Did you mean", fields(t).Names(), sel.Name)
-			errs = append(errs, errors.ErrorfWithLoc(sel.Location, "Cannot query field %q on type %q.%s", sel.Name, t, suggestion))
+			addErr(&errs, sel.Location, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
 		}
 
-		if f != nil && len(f.Args) != 0 { // seems like a bug in graphql-js tests
+		if f != nil {
 			for _, selArg := range sel.Arguments {
 				arg := f.Args.Get(selArg.Name)
+				if arg == nil {
+					continue
+				}
 				value := selArg.Value
 				if ok, reason := validateValue(value.Value, arg.Type); !ok {
-					errs = append(errs, errors.ErrorfWithLoc(value.Loc, "Argument %q has invalid value %s.\n%s", arg.Name, stringify(value.Value), reason))
+					addErr(&errs, value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name, stringify(value.Value), reason)
 				}
 			}
 		}
@@ -109,7 +119,7 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 			t = s.Types[sel.On.Name]
 		}
 		if !canBeFragment(t) {
-			errs = append(errs, errors.ErrorfWithLoc(sel.On.Loc, "Fragment cannot condition on non composite type %q.", t))
+			addErr(&errs, sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
 		errs = append(errs, validateSelectionSet(s, sel.SelSet, t)...)
@@ -146,13 +156,12 @@ func validateDirectives(s *schema.Schema, directives map[string]common.ArgumentL
 	for name, args := range directives {
 		d, ok := s.Directives[name]
 		if !ok {
-			errs = append(errs, errors.Errorf("TODO"))
 			continue
 		}
 		for _, arg := range d.Args {
 			value := args.Get(arg.Name)
 			if ok, reason := validateValue(value.Value, arg.Type); !ok {
-				errs = append(errs, errors.ErrorfWithLoc(value.Loc, "Argument %q has invalid value %s.\n%s", arg.Name, stringify(value.Value), reason))
+				addErr(&errs, value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name, stringify(value.Value), reason)
 			}
 		}
 	}

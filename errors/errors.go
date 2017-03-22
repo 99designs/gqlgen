@@ -5,6 +5,7 @@ import "fmt"
 type QueryError struct {
 	Message       string      `json:"message"`
 	Locations     []*Location `json:"locations,omitempty"`
+	Rule          string      `json:"-"`
 	ResolverError error       `json:"-"`
 }
 
@@ -16,13 +17,6 @@ type Location struct {
 func Errorf(format string, a ...interface{}) *QueryError {
 	return &QueryError{
 		Message: fmt.Sprintf(format, a...),
-	}
-}
-
-func ErrorfWithLoc(loc *Location, format string, a ...interface{}) *QueryError {
-	return &QueryError{
-		Message:   fmt.Sprintf(format, a...),
-		Locations: []*Location{loc},
 	}
 }
 

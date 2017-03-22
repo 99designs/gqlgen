@@ -16,6 +16,7 @@ import (
 
 type Test struct {
 	Name   string
+	Rule   string
 	Query  string
 	Errors []*errors.QueryError
 }
@@ -47,9 +48,13 @@ func TestAll(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got := validation.Validate(s, d)
-			if got == nil {
-				got = []*errors.QueryError{}
+			errs := validation.Validate(s, d)
+			got := []*errors.QueryError{}
+			for _, err := range errs {
+				if err.Rule == test.Rule {
+					err.Rule = ""
+					got = append(got, err)
+				}
 			}
 			if !reflect.DeepEqual(test.Errors, got) {
 				t.Errorf("wrong errors\nexpected: %v\ngot:      %v", test.Errors, got)

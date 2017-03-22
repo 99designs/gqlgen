@@ -25,6 +25,7 @@ let fakeModules = {
 		expectPassesRule(rule, queryString) {
 			tests.push({
 				name: names.join('/'),
+				rule: rule.name,
 				query: queryString,
 				errors: [],
 			});
@@ -32,6 +33,7 @@ let fakeModules = {
 		expectFailsRule(rule, queryString, errors) {
 			tests.push({
 				name: names.join('/'),
+				rule: rule.name,
 				query: queryString,
 				errors: errors,
 			});

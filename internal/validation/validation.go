@@ -15,17 +15,28 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
-func addErr(errs *[]*errors.QueryError, loc errors.Location, rule string, format string, a ...interface{}) {
-	*errs = append(*errs, &errors.QueryError{
+type context struct {
+	schema *schema.Schema
+	doc    *query.Document
+	errs   []*errors.QueryError
+}
+
+func (c *context) addErr(loc errors.Location, rule string, format string, a ...interface{}) {
+	c.errs = append(c.errs, &errors.QueryError{
 		Message:   fmt.Sprintf(format, a...),
 		Locations: []errors.Location{loc},
 		Rule:      rule,
 	})
 }
 
-func Validate(s *schema.Schema, doc *query.Document) (errs []*errors.QueryError) {
+func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
+	c := context{
+		schema: s,
+		doc:    doc,
+	}
+
 	for _, op := range doc.Operations {
-		errs = append(errs, validateDirectives(s, string(op.Type), op.Directives)...)
+		c.validateDirectives(string(op.Type), op.Directives)
 
 		for _, v := range op.Vars {
 			if v.Default != nil {
@@ -35,11 +46,11 @@ func Validate(s *schema.Schema, doc *query.Document) (errs []*errors.QueryError)
 				}
 
 				if nn, ok := t.(*common.NonNull); ok {
-					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
+					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
 				}
 
 				if ok, reason := validateValue(v.Default.Value, t); !ok {
-					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, stringify(v.Default.Value), reason)
+					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, stringify(v.Default.Value), reason)
 				}
 			}
 		}
@@ -53,37 +64,37 @@ func Validate(s *schema.Schema, doc *query.Document) (errs []*errors.QueryError)
 		default:
 			panic("unreachable")
 		}
-		errs = append(errs, validateSelectionSet(s, doc, op.SelSet, entryPoint)...)
+		c.validateSelectionSet(op.SelSet, entryPoint)
 	}
 
 	for _, frag := range doc.Fragments {
-		errs = append(errs, validateDirectives(s, "FRAGMENT_DEFINITION", frag.Directives)...)
+		c.validateDirectives("FRAGMENT_DEFINITION", frag.Directives)
 		t, ok := s.Types[frag.On.Name]
 		if !ok {
 			continue
 		}
 		if !canBeFragment(t) {
-			addErr(&errs, frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name, t)
+			c.addErr(frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name, t)
 			continue
 		}
-		errs = append(errs, validateSelectionSet(s, doc, frag.SelSet, t)...)
+		c.validateSelectionSet(frag.SelSet, t)
 	}
 
-	sort.Slice(errs, func(i, j int) bool { return errs[i].Locations[0].Before(errs[j].Locations[0]) })
-	return
+	sort.Slice(c.errs, func(i, j int) bool { return c.errs[i].Locations[0].Before(c.errs[j].Locations[0]) })
+	return c.errs
 }
 
-func validateSelectionSet(s *schema.Schema, doc *query.Document, selSet *query.SelectionSet, t common.Type) (errs []*errors.QueryError) {
+func (c *context) validateSelectionSet(selSet *query.SelectionSet, t common.Type) {
 	for _, sel := range selSet.Selections {
-		errs = append(errs, validateSelection(s, doc, sel, t)...)
+		c.validateSelection(sel, t)
 	}
 	return
 }
 
-func validateSelection(s *schema.Schema, doc *query.Document, sel query.Selection, t common.Type) (errs []*errors.QueryError) {
+func (c *context) validateSelection(sel query.Selection, t common.Type) {
 	switch sel := sel.(type) {
 	case *query.Field:
-		errs = append(errs, validateDirectives(s, "FIELD", sel.Directives)...)
+		c.validateDirectives("FIELD", sel.Directives)
 		if sel.Name == "__schema" || sel.Name == "__type" || sel.Name == "__typename" {
 			return
 		}
@@ -92,19 +103,19 @@ func validateSelection(s *schema.Schema, doc *query.Document, sel query.Selectio
 		f := fields(t).Get(sel.Name)
 		if f == nil && t != nil {
 			suggestion := makeSuggestion("Did you mean", fields(t).Names(), sel.Name)
-			addErr(&errs, sel.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
+			c.addErr(sel.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
 		}
 
 		if f != nil {
 			for _, selArg := range sel.Arguments {
 				arg := f.Args.Get(selArg.Name.Name)
 				if arg == nil {
-					addErr(&errs, selArg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on field %q of type %q.", selArg.Name.Name, sel.Name, t)
+					c.addErr(selArg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on field %q of type %q.", selArg.Name.Name, sel.Name, t)
 					continue
 				}
 				value := selArg.Value
 				if ok, reason := validateValue(value.Value, arg.Type); !ok {
-					addErr(&errs, value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(value.Value), reason)
+					c.addErr(value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(value.Value), reason)
 				}
 			}
 		}
@@ -114,24 +125,24 @@ func validateSelection(s *schema.Schema, doc *query.Document, sel query.Selectio
 			ft = f.Type
 		}
 		if sel.SelSet != nil {
-			errs = append(errs, validateSelectionSet(s, doc, sel.SelSet, ft)...)
+			c.validateSelectionSet(sel.SelSet, ft)
 		}
 
 	case *query.InlineFragment:
-		errs = append(errs, validateDirectives(s, "INLINE_FRAGMENT", sel.Directives)...)
+		c.validateDirectives("INLINE_FRAGMENT", sel.Directives)
 		if sel.On.Name != "" {
-			t = s.Types[sel.On.Name]
+			t = c.schema.Types[sel.On.Name]
 		}
 		if !canBeFragment(t) {
-			addErr(&errs, sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
+			c.addErr(sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
-		errs = append(errs, validateSelectionSet(s, doc, sel.SelSet, t)...)
+		c.validateSelectionSet(sel.SelSet, t)
 
 	case *query.FragmentSpread:
-		errs = append(errs, validateDirectives(s, "FRAGMENT_SPREAD", sel.Directives)...)
-		if _, ok := doc.Fragments[sel.Name.Name]; !ok {
-			addErr(&errs, sel.Name.Loc, "KnownFragmentNames", "Unknown fragment %q.", sel.Name.Name)
+		c.validateDirectives("FRAGMENT_SPREAD", sel.Directives)
+		if _, ok := c.doc.Fragments[sel.Name.Name]; !ok {
+			c.addErr(sel.Name.Loc, "KnownFragmentNames", "Unknown fragment %q.", sel.Name.Name)
 		}
 
 	default:
@@ -162,11 +173,11 @@ func unwrapType(t common.Type) common.Type {
 	}
 }
 
-func validateDirectives(s *schema.Schema, loc string, directives map[string]*common.Directive) (errs []*errors.QueryError) {
+func (c *context) validateDirectives(loc string, directives map[string]*common.Directive) {
 	for name, d := range directives {
-		dd, ok := s.Directives[name]
+		dd, ok := c.schema.Directives[name]
 		if !ok {
-			addErr(&errs, d.Name.Loc, "KnownDirectives", "Unknown directive %q.", name)
+			c.addErr(d.Name.Loc, "KnownDirectives", "Unknown directive %q.", name)
 			continue
 		}
 
@@ -178,17 +189,17 @@ func validateDirectives(s *schema.Schema, loc string, directives map[string]*com
 			}
 		}
 		if !locOK {
-			addErr(&errs, d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", name, loc)
+			c.addErr(d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", name, loc)
 		}
 
 		for _, arg := range d.Args {
 			iv := dd.Args.Get(arg.Name.Name)
 			if iv == nil {
-				addErr(&errs, arg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on directive %q.", arg.Name.Name, "@"+name)
+				c.addErr(arg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on directive %q.", arg.Name.Name, "@"+name)
 				continue
 			}
 			if ok, reason := validateValue(arg.Value.Value, iv.Type); !ok {
-				addErr(&errs, arg.Value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(arg.Value.Value), reason)
+				c.addErr(arg.Value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(arg.Value.Value), reason)
 			}
 		}
 	}

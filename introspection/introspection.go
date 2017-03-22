@@ -1,7 +1,6 @@
 package introspection
 
 import (
-	"encoding/json"
 	"sort"
 
 	"github.com/neelance/graphql-go/internal/common"
@@ -255,11 +254,7 @@ func (r *InputValue) DefaultValue() *string {
 	if r.value.Default == nil {
 		return nil
 	}
-	b, err := json.Marshal(r.value.Default.Value)
-	if err != nil {
-		panic("could not marshal default value: " + err.Error())
-	}
-	s := string(b)
+	s := common.Stringify(r.value.Default.Value)
 	return &s
 }
 

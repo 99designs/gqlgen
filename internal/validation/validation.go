@@ -5,7 +5,6 @@ import (
 	"math"
 	"sort"
 	"strconv"
-	"strings"
 	"text/scanner"
 
 	"github.com/neelance/graphql-go/errors"
@@ -61,7 +60,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 				}
 
 				if ok, reason := validateValue(v.Default.Value, t); !ok {
-					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, stringify(v.Default.Value), reason)
+					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, common.Stringify(v.Default.Value), reason)
 				}
 			}
 		}
@@ -270,7 +269,7 @@ func (c *context) validateArguments(args common.ArgumentList, argDecls common.In
 		}
 		value := selArg.Value
 		if ok, reason := validateValue(value.Value, arg.Type); !ok {
-			c.addErr(value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(value.Value), reason)
+			c.addErr(value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, common.Stringify(value.Value), reason)
 		}
 	}
 	for _, decl := range argDecls {
@@ -346,7 +345,7 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 		return true, ""
 	}
 
-	return false, fmt.Sprintf("Expected type %q, found %s.", t, stringify(v))
+	return false, fmt.Sprintf("Expected type %q, found %s.", t, common.Stringify(v))
 }
 
 func validateLiteral(v *lexer.Literal, t common.Type) bool {
@@ -419,38 +418,5 @@ func hasSubfields(t common.Type) bool {
 		return hasSubfields(t.OfType)
 	default:
 		return false
-	}
-}
-
-func stringify(v interface{}) string {
-	switch v := v.(type) {
-	case *lexer.Literal:
-		return v.Text
-
-	case []interface{}:
-		entries := make([]string, len(v))
-		for i, entry := range v {
-			entries[i] = stringify(entry)
-		}
-		return "[" + strings.Join(entries, ", ") + "]"
-
-	case map[string]interface{}:
-		names := make([]string, 0, len(v))
-		for name := range v {
-			names = append(names, name)
-		}
-		sort.Strings(names)
-
-		entries := make([]string, 0, len(names))
-		for _, name := range names {
-			entries = append(entries, name+": "+stringify(v[name]))
-		}
-		return "{" + strings.Join(entries, ", ") + "}"
-
-	case nil:
-		return "null"
-
-	default:
-		return fmt.Sprintf("(invalid type: %T)", v)
 	}
 }

@@ -563,10 +563,7 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 		addResult(fieldAlias, introspectType(ctx, r, v.String(), f.SelSet))
 
 	default:
-		fe, ok := e.fields[fieldName]
-		if !ok {
-			panic(fmt.Errorf("%q has no field %q", e.name, fieldName)) // TODO proper error handling
-		}
+		fe := e.fields[fieldName]
 
 		span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", fe.typeName, fe.field.Name))
 		defer span.Finish()

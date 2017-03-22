@@ -72,7 +72,7 @@ require('./src/validation/__tests__/LoneAnonymousOperation-test');
 require('./src/validation/__tests__/ProvidedNonNullArguments-test');
 require('./src/validation/__tests__/ScalarLeafs-test');
 require('./src/validation/__tests__/UniqueArgumentNames-test');
-// require('./src/validation/__tests__/UniqueDirectivesPerLocation-test');
+require('./src/validation/__tests__/UniqueDirectivesPerLocation-test');
 require('./src/validation/__tests__/UniqueFragmentNames-test');
 // require('./src/validation/__tests__/UniqueInputFieldNames-test');
 require('./src/validation/__tests__/UniqueOperationNames-test');

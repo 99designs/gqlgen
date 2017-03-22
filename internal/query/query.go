@@ -42,7 +42,7 @@ type Operation struct {
 	Name       lexer.Ident
 	Vars       common.InputValueList
 	SelSet     *SelectionSet
-	Directives map[string]*common.Directive
+	Directives common.DirectiveList
 }
 
 type OperationType string
@@ -61,7 +61,7 @@ type Fragment struct {
 type FragmentDecl struct {
 	Fragment
 	Name       lexer.Ident
-	Directives map[string]*common.Directive
+	Directives common.DirectiveList
 }
 
 type SelectionSet struct {
@@ -77,18 +77,18 @@ type Field struct {
 	Alias      lexer.Ident
 	Name       lexer.Ident
 	Arguments  common.ArgumentList
-	Directives map[string]*common.Directive
+	Directives common.DirectiveList
 	SelSet     *SelectionSet
 }
 
 type InlineFragment struct {
 	Fragment
-	Directives map[string]*common.Directive
+	Directives common.DirectiveList
 }
 
 type FragmentSpread struct {
 	Name       lexer.Ident
-	Directives map[string]*common.Directive
+	Directives common.DirectiveList
 }
 
 func (Field) isSelection()          {}

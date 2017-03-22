@@ -86,7 +86,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 		c.validateDirectives("FRAGMENT_DEFINITION", frag.Directives)
 		t := c.resolveType(&frag.On)
 		// continue even if t is nil
-		if !canBeFragment(t) {
+		if t != nil && !canBeFragment(t) {
 			c.addErr(frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name.Name, t)
 			continue
 		}
@@ -202,16 +202,22 @@ func (c *context) resolveType(t common.Type) common.Type {
 	return t2
 }
 
-func (c *context) validateDirectives(loc string, directives map[string]*common.Directive) {
-	for name, d := range directives {
-		names := make(nameSet)
+func (c *context) validateDirectives(loc string, directives common.DirectiveList) {
+	directiveNames := make(nameSet)
+	for _, d := range directives {
+		dirName := d.Name.Name
+		c.validateNameCustomMsg(directiveNames, d.Name, "UniqueDirectivesPerLocation", func() string {
+			return fmt.Sprintf("The directive %q can only be used once at this location.", dirName)
+		})
+
+		argNames := make(nameSet)
 		for _, arg := range d.Args {
-			c.validateName(names, arg.Name, "UniqueArgumentNames", "argument")
+			c.validateName(argNames, arg.Name, "UniqueArgumentNames", "argument")
 		}
 
-		dd, ok := c.schema.Directives[name]
+		dd, ok := c.schema.Directives[dirName]
 		if !ok {
-			c.addErr(d.Name.Loc, "KnownDirectives", "Unknown directive %q.", name)
+			c.addErr(d.Name.Loc, "KnownDirectives", "Unknown directive %q.", dirName)
 			continue
 		}
 
@@ -223,12 +229,12 @@ func (c *context) validateDirectives(loc string, directives map[string]*common.D
 			}
 		}
 		if !locOK {
-			c.addErr(d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", name, loc)
+			c.addErr(d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", dirName, loc)
 		}
 
 		c.validateArguments(d.Args, dd.Args, d.Name.Loc,
-			func() string { return fmt.Sprintf("directive %q", "@"+d.Name.Name) },
-			func() string { return fmt.Sprintf("Directive %q", "@"+d.Name.Name) },
+			func() string { return fmt.Sprintf("directive %q", "@"+dirName) },
+			func() string { return fmt.Sprintf("Directive %q", "@"+dirName) },
 		)
 	}
 	return
@@ -236,10 +242,16 @@ func (c *context) validateDirectives(loc string, directives map[string]*common.D
 
 type nameSet map[string]errors.Location
 
-func (c *context) validateName(set nameSet, name lexer.Ident, rule, kind string) {
+func (c *context) validateName(set nameSet, name lexer.Ident, rule string, kind string) {
+	c.validateNameCustomMsg(set, name, rule, func() string {
+		return fmt.Sprintf("There can be only one %s named %q.", kind, name.Name)
+	})
+}
+
+func (c *context) validateNameCustomMsg(set nameSet, name lexer.Ident, rule string, msg func() string) {
 	if loc, ok := set[name.Name]; ok {
 		c.errs = append(c.errs, &errors.QueryError{
-			Message:   fmt.Sprintf("There can be only one %s named %q.", kind, name.Name),
+			Message:   msg(),
 			Locations: []errors.Location{loc, name.Loc},
 			Rule:      rule,
 		})

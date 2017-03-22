@@ -9,8 +9,8 @@ type Directive struct {
 	Args ArgumentList
 }
 
-func ParseDirectives(l *lexer.Lexer) map[string]*Directive {
-	directives := make(map[string]*Directive)
+func ParseDirectives(l *lexer.Lexer) DirectiveList {
+	var directives DirectiveList
 	for l.Peek() == '@' {
 		l.ConsumeToken('@')
 		d := &Directive{}
@@ -19,7 +19,18 @@ func ParseDirectives(l *lexer.Lexer) map[string]*Directive {
 		if l.Peek() == '(' {
 			d.Args = ParseArguments(l)
 		}
-		directives[d.Name.Name] = d
+		directives = append(directives, d)
 	}
 	return directives
+}
+
+type DirectiveList []*Directive
+
+func (l DirectiveList) Get(name string) *Directive {
+	for _, d := range l {
+		if d.Name.Name == name {
+			return d
+		}
+	}
+	return nil
 }

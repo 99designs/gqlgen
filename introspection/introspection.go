@@ -115,7 +115,7 @@ func (r *Type) Fields(args *struct{ IncludeDeprecated bool }) *[]*Field {
 
 	var l []*Field
 	for _, f := range fields {
-		if _, ok := f.Directives["deprecated"]; !ok || args.IncludeDeprecated {
+		if d := f.Directives.Get("deprecated"); d == nil || args.IncludeDeprecated {
 			l = append(l, &Field{f})
 		}
 	}
@@ -161,7 +161,7 @@ func (r *Type) EnumValues(args *struct{ IncludeDeprecated bool }) *[]*EnumValue 
 
 	var l []*EnumValue
 	for _, v := range t.Values {
-		if _, ok := v.Directives["deprecated"]; !ok || args.IncludeDeprecated {
+		if d := v.Directives.Get("deprecated"); d == nil || args.IncludeDeprecated {
 			l = append(l, &EnumValue{v})
 		}
 	}
@@ -220,13 +220,12 @@ func (r *Field) Type() *Type {
 }
 
 func (r *Field) IsDeprecated() bool {
-	_, ok := r.field.Directives["deprecated"]
-	return ok
+	return r.field.Directives.Get("deprecated") != nil
 }
 
 func (r *Field) DeprecationReason() *string {
-	d, ok := r.field.Directives["deprecated"]
-	if !ok {
+	d := r.field.Directives.Get("deprecated")
+	if d == nil {
 		return nil
 	}
 	reason := common.UnmarshalLiteral(d.Args.MustGet("reason").Value.(*lexer.Literal)).(string)
@@ -280,13 +279,12 @@ func (r *EnumValue) Description() *string {
 }
 
 func (r *EnumValue) IsDeprecated() bool {
-	_, ok := r.value.Directives["deprecated"]
-	return ok
+	return r.value.Directives.Get("deprecated") != nil
 }
 
 func (r *EnumValue) DeprecationReason() *string {
-	d, ok := r.value.Directives["deprecated"]
-	if !ok {
+	d := r.value.Directives.Get("deprecated")
+	if d == nil {
 		return nil
 	}
 	reason := common.UnmarshalLiteral(d.Args.MustGet("reason").Value.(*lexer.Literal)).(string)

@@ -670,8 +670,8 @@ type typeAssertExec struct {
 	typeExec    iExec
 }
 
-func skipByDirective(r *request, directives map[string]*common.Directive) bool {
-	if d, ok := directives["skip"]; ok {
+func skipByDirective(r *request, directives common.DirectiveList) bool {
+	if d := directives.Get("skip"); d != nil {
 		p := valuePacker{valueType: reflect.TypeOf(false)}
 		v, err := p.pack(r, r.resolveVar(d.Args.MustGet("if").Value))
 		if err != nil {
@@ -682,7 +682,7 @@ func skipByDirective(r *request, directives map[string]*common.Directive) bool {
 		}
 	}
 
-	if d, ok := directives["include"]; ok {
+	if d := directives.Get("include"); d != nil {
 		p := valuePacker{valueType: reflect.TypeOf(false)}
 		v, err := p.pack(r, r.resolveVar(d.Args.MustGet("if").Value))
 		if err != nil {

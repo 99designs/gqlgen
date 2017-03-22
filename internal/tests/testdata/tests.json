@@ -2082,6 +2082,155 @@
     ]
   },
   {
+    "name": "Validate: Directives Are Unique Per Location/no directives",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/unique directives in different locations",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type @directiveA {\n        field @directiveB\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/unique directives in same locations",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type @directiveA @directiveB {\n        field @directiveA @directiveB\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/same directives in different locations",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type @directiveA {\n        field @directiveA\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/same directives in similar locations",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type {\n        field @directive\n        field @directive\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/duplicate directives in one location",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type {\n        field @directive @directive\n      }\n    ",
+    "errors": [
+      {
+        "message": "The directive \"directive\" can only be used once at this location.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 15
+          },
+          {
+            "line": 3,
+            "column": 26
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/many duplicate directives in one location",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type {\n        field @directive @directive @directive\n      }\n    ",
+    "errors": [
+      {
+        "message": "The directive \"directive\" can only be used once at this location.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 15
+          },
+          {
+            "line": 3,
+            "column": 26
+          }
+        ]
+      },
+      {
+        "message": "The directive \"directive\" can only be used once at this location.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 15
+          },
+          {
+            "line": 3,
+            "column": 37
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/different duplicate directives in one location",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type {\n        field @directiveA @directiveB @directiveA @directiveB\n      }\n    ",
+    "errors": [
+      {
+        "message": "The directive \"directiveA\" can only be used once at this location.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 15
+          },
+          {
+            "line": 3,
+            "column": 39
+          }
+        ]
+      },
+      {
+        "message": "The directive \"directiveB\" can only be used once at this location.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 27
+          },
+          {
+            "line": 3,
+            "column": 51
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Directives Are Unique Per Location/duplicate directives in many locations",
+    "rule": "UniqueDirectivesPerLocation",
+    "query": "\n      fragment Test on Type @directive @directive {\n        field @directive @directive\n      }\n    ",
+    "errors": [
+      {
+        "message": "The directive \"directive\" can only be used once at this location.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 29
+          },
+          {
+            "line": 2,
+            "column": 40
+          }
+        ]
+      },
+      {
+        "message": "The directive \"directive\" can only be used once at this location.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 15
+          },
+          {
+            "line": 3,
+            "column": 26
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: Unique fragment names/no fragments",
     "rule": "UniqueFragmentNames",
     "query": "\n      {\n        field\n      }\n    ",

@@ -80,12 +80,14 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 		c.validateSelectionSet(op.SelSet, entryPoint)
 	}
 
+	fragNames := make(nameSet)
 	for _, frag := range doc.Fragments {
+		c.validateName(fragNames, frag.Name, "UniqueFragmentNames", "fragment")
 		c.validateDirectives("FRAGMENT_DEFINITION", frag.Directives)
 		t := c.resolveType(&frag.On)
 		// continue even if t is nil
 		if !canBeFragment(t) {
-			c.addErr(frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name, t)
+			c.addErr(frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name.Name, t)
 			continue
 		}
 		c.validateSelectionSet(frag.SelSet, t)
@@ -160,7 +162,7 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 
 	case *query.FragmentSpread:
 		c.validateDirectives("FRAGMENT_SPREAD", sel.Directives)
-		if _, ok := c.doc.Fragments[sel.Name.Name]; !ok {
+		if frag := c.doc.Fragments.Get(sel.Name.Name); frag == nil {
 			c.addErr(sel.Name.Loc, "KnownFragmentNames", "Unknown fragment %q.", sel.Name.Name)
 		}
 

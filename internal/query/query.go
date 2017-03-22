@@ -12,12 +12,23 @@ import (
 
 type Document struct {
 	Operations OperationList
-	Fragments  map[string]*NamedFragment
+	Fragments  FragmentList
 }
 
 type OperationList []*Operation
 
 func (l OperationList) Get(name string) *Operation {
+	for _, f := range l {
+		if f.Name.Name == name {
+			return f
+		}
+	}
+	return nil
+}
+
+type FragmentList []*FragmentDecl
+
+func (l FragmentList) Get(name string) *FragmentDecl {
 	for _, f := range l {
 		if f.Name.Name == name {
 			return f
@@ -47,9 +58,9 @@ type Fragment struct {
 	SelSet *SelectionSet
 }
 
-type NamedFragment struct {
+type FragmentDecl struct {
 	Fragment
-	Name       string
+	Name       lexer.Ident
 	Directives map[string]*common.Directive
 }
 
@@ -103,9 +114,7 @@ func Parse(queryString string) (*Document, *errors.QueryError) {
 }
 
 func parseDocument(l *lexer.Lexer) *Document {
-	d := &Document{
-		Fragments: make(map[string]*NamedFragment),
-	}
+	d := &Document{}
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
 			op := &Operation{Type: Query}
@@ -126,8 +135,7 @@ func parseDocument(l *lexer.Lexer) *Document {
 			d.Operations = append(d.Operations, parseOperation(l, Subscription))
 
 		case "fragment":
-			f := parseFragment(l)
-			d.Fragments[f.Name] = f
+			d.Fragments = append(d.Fragments, parseFragment(l))
 
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "fragment"`, x))
@@ -155,9 +163,9 @@ func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	return op
 }
 
-func parseFragment(l *lexer.Lexer) *NamedFragment {
-	f := &NamedFragment{}
-	f.Name = l.ConsumeIdent()
+func parseFragment(l *lexer.Lexer) *FragmentDecl {
+	f := &FragmentDecl{}
+	f.Name = l.ConsumeIdentWithLoc()
 	l.ConsumeKeyword("on")
 	f.On = common.TypeName{Ident: l.ConsumeIdentWithLoc()}
 	f.Directives = common.ParseDirectives(l)

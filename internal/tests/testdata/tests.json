@@ -2082,6 +2082,76 @@
     ]
   },
   {
+    "name": "Validate: Unique fragment names/no fragments",
+    "rule": "UniqueFragmentNames",
+    "query": "\n      {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique fragment names/one fragment",
+    "rule": "UniqueFragmentNames",
+    "query": "\n      {\n        ...fragA\n      }\n\n      fragment fragA on Type {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique fragment names/many fragments",
+    "rule": "UniqueFragmentNames",
+    "query": "\n      {\n        ...fragA\n        ...fragB\n        ...fragC\n      }\n      fragment fragA on Type {\n        fieldA\n      }\n      fragment fragB on Type {\n        fieldB\n      }\n      fragment fragC on Type {\n        fieldC\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique fragment names/inline fragments are always unique",
+    "rule": "UniqueFragmentNames",
+    "query": "\n      {\n        ...on Type {\n          fieldA\n        }\n        ...on Type {\n          fieldB\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique fragment names/fragment and operation named the same",
+    "rule": "UniqueFragmentNames",
+    "query": "\n      query Foo {\n        ...Foo\n      }\n      fragment Foo on Type {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique fragment names/fragments named the same",
+    "rule": "UniqueFragmentNames",
+    "query": "\n      {\n        ...fragA\n      }\n      fragment fragA on Type {\n        fieldA\n      }\n      fragment fragA on Type {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one fragment named \"fragA\".",
+        "locations": [
+          {
+            "line": 5,
+            "column": 16
+          },
+          {
+            "line": 8,
+            "column": 16
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Unique fragment names/fragments named the same without being referenced",
+    "rule": "UniqueFragmentNames",
+    "query": "\n      fragment fragA on Type {\n        fieldA\n      }\n      fragment fragA on Type {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one fragment named \"fragA\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 16
+          },
+          {
+            "line": 5,
+            "column": 16
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: Unique operation names/no operations",
     "rule": "UniqueOperationNames",
     "query": "\n      fragment fragA on Type {\n        field\n      }\n    ",

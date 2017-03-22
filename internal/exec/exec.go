@@ -518,7 +518,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 				continue
 			}
 			execSel(func() {
-				e.execFragment(ctx, r, &r.doc.Fragments[spread.Name.Name].Fragment, resolver, addResult)
+				e.execFragment(ctx, r, &r.doc.Fragments.Get(spread.Name.Name).Fragment, resolver, addResult)
 			})
 
 		default:

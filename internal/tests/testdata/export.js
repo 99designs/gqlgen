@@ -11,7 +11,8 @@ let names = []
 let fakeModules = {
 	'mocha': {
 		describe(name, f) {
-			if (name == 'within schema language') {
+			switch (name) {
+			case 'within schema language':
 				return;
 			}
 			names.push(name);
@@ -19,7 +20,9 @@ let fakeModules = {
 			names.pop();
 		},
 		it(name, f) {
-			if (name == 'ignores type definitions') {
+			switch (name) {
+			case 'ignores type definitions':
+			case 'anon operation with a subscription':
 				return;
 			}
 			names.push(name);
@@ -60,6 +63,7 @@ require('./src/validation/__tests__/KnownArgumentNames-test.js');
 require('./src/validation/__tests__/KnownDirectives-test.js');
 require('./src/validation/__tests__/KnownFragmentNames-test.js');
 require('./src/validation/__tests__/KnownTypeNames-test.js');
+require('./src/validation/__tests__/LoneAnonymousOperation-test.js');
 
 let output = JSON.stringify(tests, null, 2)
 output = output.replace('{stringListField: [\\"one\\", 2], requiredField: true}', '{requiredField: true, stringListField: [\\"one\\", 2]}');

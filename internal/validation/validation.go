@@ -36,6 +36,10 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	}
 
 	for _, op := range doc.Operations {
+		if op.Name == "" && len(doc.Operations) != 1 {
+			c.addErr(op.Loc, "LoneAnonymousOperation", "This anonymous operation must be the only defined operation.")
+		}
+
 		c.validateDirectives(string(op.Type), op.Directives)
 
 		for _, v := range op.Vars {

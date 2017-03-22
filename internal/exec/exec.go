@@ -405,8 +405,8 @@ func getOperation(document *query.Document, operationName string) (*query.Operat
 		}
 	}
 
-	op, ok := document.Operations[operationName]
-	if !ok {
+	op := document.Operations.Get(operationName)
+	if op == nil {
 		return nil, fmt.Errorf("no operation with name %q", operationName)
 	}
 	return op, nil

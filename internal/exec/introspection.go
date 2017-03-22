@@ -35,7 +35,7 @@ func IntrospectSchema(s *schema.Schema) (interface{}, error) {
 		doc:     introspectionQuery,
 		limiter: make(semaphore, 10),
 	}
-	return introspectSchema(context.Background(), r, introspectionQuery.Operations["IntrospectionQuery"].SelSet), nil
+	return introspectSchema(context.Background(), r, introspectionQuery.Operations.Get("IntrospectionQuery").SelSet), nil
 }
 
 func introspectSchema(ctx context.Context, r *request, selSet *query.SelectionSet) interface{} {

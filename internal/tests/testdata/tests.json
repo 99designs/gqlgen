@@ -1555,5 +1555,70 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Anonymous operation must be alone/no operations",
+    "rule": "LoneAnonymousOperation",
+    "query": "\n      fragment fragA on Type {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Anonymous operation must be alone/one anon operation",
+    "rule": "LoneAnonymousOperation",
+    "query": "\n      {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Anonymous operation must be alone/multiple named operations",
+    "rule": "LoneAnonymousOperation",
+    "query": "\n      query Foo {\n        field\n      }\n\n      query Bar {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Anonymous operation must be alone/anon operation with fragment",
+    "rule": "LoneAnonymousOperation",
+    "query": "\n      {\n        ...Foo\n      }\n      fragment Foo on Type {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Anonymous operation must be alone/multiple anon operations",
+    "rule": "LoneAnonymousOperation",
+    "query": "\n      {\n        fieldA\n      }\n      {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "This anonymous operation must be the only defined operation.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "This anonymous operation must be the only defined operation.",
+        "locations": [
+          {
+            "line": 5,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Anonymous operation must be alone/anon operation with a mutation",
+    "rule": "LoneAnonymousOperation",
+    "query": "\n      {\n        fieldA\n      }\n      mutation Foo {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "This anonymous operation must be the only defined operation.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
   }
 ]

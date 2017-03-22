@@ -11,8 +11,19 @@ import (
 )
 
 type Document struct {
-	Operations map[string]*Operation
+	Operations OperationList
 	Fragments  map[string]*NamedFragment
+}
+
+type OperationList []*Operation
+
+func (l OperationList) Get(name string) *Operation {
+	for _, f := range l {
+		if f.Name == name {
+			return f
+		}
+	}
+	return nil
 }
 
 type Operation struct {
@@ -21,6 +32,7 @@ type Operation struct {
 	Vars       common.InputValueList
 	SelSet     *SelectionSet
 	Directives map[string]*common.Directive
+	Loc        errors.Location
 }
 
 type OperationType string
@@ -92,23 +104,23 @@ func Parse(queryString string) (*Document, *errors.QueryError) {
 
 func parseDocument(l *lexer.Lexer) *Document {
 	d := &Document{
-		Operations: make(map[string]*Operation),
-		Fragments:  make(map[string]*NamedFragment),
+		Fragments: make(map[string]*NamedFragment),
 	}
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
-			d.Operations[""] = &Operation{Type: Query, SelSet: parseSelectionSet(l)}
+			op := &Operation{Type: Query}
+			op.Loc = l.Location()
+			op.SelSet = parseSelectionSet(l)
+			d.Operations = append(d.Operations, op)
 			continue
 		}
 
 		switch x := l.ConsumeIdent(); x {
 		case "query":
-			q := parseOperation(l, Query)
-			d.Operations[q.Name] = q
+			d.Operations = append(d.Operations, parseOperation(l, Query))
 
 		case "mutation":
-			q := parseOperation(l, Mutation)
-			d.Operations[q.Name] = q
+			d.Operations = append(d.Operations, parseOperation(l, Mutation))
 
 		case "fragment":
 			f := parseFragment(l)
@@ -123,6 +135,7 @@ func parseDocument(l *lexer.Lexer) *Document {
 
 func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	op := &Operation{Type: opType}
+	op.Loc = l.Location()
 	if l.Peek() == scanner.Ident {
 		op.Name = l.ConsumeIdent()
 	}

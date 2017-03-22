@@ -15,10 +15,10 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
-func addErr(errs *[]*errors.QueryError, loc *errors.Location, rule string, format string, a ...interface{}) {
+func addErr(errs *[]*errors.QueryError, loc errors.Location, rule string, format string, a ...interface{}) {
 	*errs = append(*errs, &errors.QueryError{
 		Message:   fmt.Sprintf(format, a...),
-		Locations: []*errors.Location{loc},
+		Locations: []errors.Location{loc},
 		Rule:      rule,
 	})
 }
@@ -89,7 +89,7 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 		f := fields(t).Get(sel.Name)
 		if f == nil && t != nil {
 			suggestion := makeSuggestion("Did you mean", fields(t).Names(), sel.Name)
-			addErr(&errs, sel.Location, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
+			addErr(&errs, sel.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", sel.Name, t, suggestion)
 		}
 
 		if f != nil {

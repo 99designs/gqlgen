@@ -22,7 +22,7 @@ type Literal struct {
 
 type Ident struct {
 	Name string
-	Loc  *errors.Location
+	Loc  errors.Location
 }
 
 type Variable string
@@ -38,7 +38,7 @@ func (l *Lexer) CatchSyntaxError(f func()) (errRes *errors.QueryError) {
 		if err := recover(); err != nil {
 			if err, ok := err.(syntaxError); ok {
 				errRes = errors.Errorf("syntax error: %s", err)
-				errRes.Locations = []*errors.Location{l.Location()}
+				errRes.Locations = []errors.Location{l.Location()}
 				return
 			}
 			panic(err)
@@ -129,8 +129,8 @@ func (l *Lexer) SyntaxError(message string) {
 	panic(syntaxError(message))
 }
 
-func (l *Lexer) Location() *errors.Location {
-	return &errors.Location{
+func (l *Lexer) Location() errors.Location {
+	return errors.Location{
 		Line:   l.sc.Line,
 		Column: l.sc.Column,
 	}

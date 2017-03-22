@@ -28,7 +28,7 @@ func (l InputValueList) Get(name string) *InputValue {
 
 type ValueWithLoc struct {
 	Value interface{}
-	Loc   *errors.Location
+	Loc   errors.Location
 }
 
 func ParseInputValue(l *lexer.Lexer) *InputValue {

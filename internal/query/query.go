@@ -54,7 +54,7 @@ type Field struct {
 	Arguments  common.ArgumentList
 	Directives map[string]common.ArgumentList
 	SelSet     *SelectionSet
-	Location   *errors.Location
+	Loc        errors.Location
 }
 
 type FragmentSpread struct {
@@ -212,7 +212,7 @@ func parseSelection(l *lexer.Lexer) Selection {
 
 func parseField(l *lexer.Lexer) *Field {
 	f := &Field{
-		Location: l.Location(),
+		Loc: l.Location(),
 	}
 	f.Alias = l.ConsumeIdent()
 	f.Name = f.Alias

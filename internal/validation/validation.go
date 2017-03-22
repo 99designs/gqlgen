@@ -23,8 +23,8 @@ func addErr(errs *[]*errors.QueryError, loc errors.Location, rule string, format
 	})
 }
 
-func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
-	for _, op := range q.Operations {
+func Validate(s *schema.Schema, doc *query.Document) (errs []*errors.QueryError) {
+	for _, op := range doc.Operations {
 		errs = append(errs, validateDirectives(s, string(op.Type), op.Directives)...)
 
 		for _, v := range op.Vars {
@@ -53,10 +53,10 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 		default:
 			panic("unreachable")
 		}
-		errs = append(errs, validateSelectionSet(s, op.SelSet, entryPoint)...)
+		errs = append(errs, validateSelectionSet(s, doc, op.SelSet, entryPoint)...)
 	}
 
-	for _, frag := range q.Fragments {
+	for _, frag := range doc.Fragments {
 		errs = append(errs, validateDirectives(s, "FRAGMENT_DEFINITION", frag.Directives)...)
 		t, ok := s.Types[frag.On.Name]
 		if !ok {
@@ -66,21 +66,21 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 			addErr(&errs, frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name, t)
 			continue
 		}
-		errs = append(errs, validateSelectionSet(s, frag.SelSet, t)...)
+		errs = append(errs, validateSelectionSet(s, doc, frag.SelSet, t)...)
 	}
 
 	sort.Slice(errs, func(i, j int) bool { return errs[i].Locations[0].Before(errs[j].Locations[0]) })
 	return
 }
 
-func validateSelectionSet(s *schema.Schema, selSet *query.SelectionSet, t common.Type) (errs []*errors.QueryError) {
+func validateSelectionSet(s *schema.Schema, doc *query.Document, selSet *query.SelectionSet, t common.Type) (errs []*errors.QueryError) {
 	for _, sel := range selSet.Selections {
-		errs = append(errs, validateSelection(s, sel, t)...)
+		errs = append(errs, validateSelection(s, doc, sel, t)...)
 	}
 	return
 }
 
-func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (errs []*errors.QueryError) {
+func validateSelection(s *schema.Schema, doc *query.Document, sel query.Selection, t common.Type) (errs []*errors.QueryError) {
 	switch sel := sel.(type) {
 	case *query.Field:
 		errs = append(errs, validateDirectives(s, "FIELD", sel.Directives)...)
@@ -114,7 +114,7 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 			ft = f.Type
 		}
 		if sel.SelSet != nil {
-			errs = append(errs, validateSelectionSet(s, sel.SelSet, ft)...)
+			errs = append(errs, validateSelectionSet(s, doc, sel.SelSet, ft)...)
 		}
 
 	case *query.InlineFragment:
@@ -126,10 +126,13 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 			addErr(&errs, sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
-		errs = append(errs, validateSelectionSet(s, sel.SelSet, t)...)
+		errs = append(errs, validateSelectionSet(s, doc, sel.SelSet, t)...)
 
 	case *query.FragmentSpread:
 		errs = append(errs, validateDirectives(s, "FRAGMENT_SPREAD", sel.Directives)...)
+		if _, ok := doc.Fragments[sel.Name.Name]; !ok {
+			addErr(&errs, sel.Name.Loc, "KnownFragmentNames", "Unknown fragment %q.", sel.Name.Name)
+		}
 
 	default:
 		panic("unreachable")

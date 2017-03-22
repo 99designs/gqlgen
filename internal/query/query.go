@@ -64,7 +64,7 @@ type InlineFragment struct {
 }
 
 type FragmentSpread struct {
-	Name       string
+	Name       lexer.Ident
 	Directives map[string]*common.Directive
 }
 
@@ -193,8 +193,8 @@ func parseSpread(l *lexer.Lexer) Selection {
 
 	f := &InlineFragment{}
 	if l.Peek() == scanner.Ident {
-		ident := l.ConsumeIdent()
-		if ident != "on" {
+		ident := l.ConsumeIdentWithLoc()
+		if ident.Name != "on" {
 			fs := &FragmentSpread{
 				Name: ident,
 			}

@@ -1475,5 +1475,45 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Known fragment names/known fragment names are valid",
+    "rule": "KnownFragmentNames",
+    "query": "\n      {\n        human(id: 4) {\n          ...HumanFields1\n          ... on Human {\n            ...HumanFields2\n          }\n          ... {\n            name\n          }\n        }\n      }\n      fragment HumanFields1 on Human {\n        name\n        ...HumanFields3\n      }\n      fragment HumanFields2 on Human {\n        name\n      }\n      fragment HumanFields3 on Human {\n        name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known fragment names/unknown fragment names are invalid",
+    "rule": "KnownFragmentNames",
+    "query": "\n      {\n        human(id: 4) {\n          ...UnknownFragment1\n          ... on Human {\n            ...UnknownFragment2\n          }\n        }\n      }\n      fragment HumanFields on Human {\n        name\n        ...UnknownFragment3\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown fragment \"UnknownFragment1\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 14
+          }
+        ]
+      },
+      {
+        "message": "Unknown fragment \"UnknownFragment2\".",
+        "locations": [
+          {
+            "line": 6,
+            "column": 16
+          }
+        ]
+      },
+      {
+        "message": "Unknown fragment \"UnknownFragment3\".",
+        "locations": [
+          {
+            "line": 12,
+            "column": 12
+          }
+        ]
+      }
+    ]
   }
 ]

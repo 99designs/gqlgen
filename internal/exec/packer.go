@@ -120,7 +120,7 @@ func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect
 	for _, v := range values {
 		fe := &structPackerField{field: v}
 
-		sf, ok := structType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, v.Name) })
+		sf, ok := structType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, v.Name.Name) })
 		if !ok {
 			return nil, fmt.Errorf("missing argument %q", v.Name)
 		}
@@ -171,7 +171,7 @@ func (p *structPacker) pack(r *request, value interface{}) (reflect.Value, error
 	v := reflect.New(p.structType)
 	v.Elem().Set(p.defaultStruct)
 	for _, f := range p.fields {
-		if value, ok := values[f.field.Name]; ok {
+		if value, ok := values[f.field.Name.Name]; ok {
 			packed, err := f.fieldPacker.pack(r, r.resolveVar(value))
 			if err != nil {
 				return reflect.Value{}, err

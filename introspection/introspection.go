@@ -229,7 +229,7 @@ func (r *Field) DeprecationReason() *string {
 	if !ok {
 		return nil
 	}
-	reason := common.UnmarshalLiteral(args.Get("reason").Value.(*lexer.Literal)).(string)
+	reason := common.UnmarshalLiteral(args.MustGet("reason").Value.(*lexer.Literal)).(string)
 	return &reason
 }
 
@@ -238,7 +238,7 @@ type InputValue struct {
 }
 
 func (r *InputValue) Name() string {
-	return r.value.Name
+	return r.value.Name.Name
 }
 
 func (r *InputValue) Description() *string {
@@ -289,7 +289,7 @@ func (r *EnumValue) DeprecationReason() *string {
 	if !ok {
 		return nil
 	}
-	reason := common.UnmarshalLiteral(args.Get("reason").Value.(*lexer.Literal)).(string)
+	reason := common.UnmarshalLiteral(args.MustGet("reason").Value.(*lexer.Literal)).(string)
 	return &reason
 }
 

@@ -33,11 +33,11 @@ func Validate(s *schema.Schema, q *query.Document) (errs []*errors.QueryError) {
 				}
 
 				if nn, ok := t.(*common.NonNull); ok {
-					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name, t, nn.OfType)
+					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
 				}
 
 				if ok, reason := validateValue(v.Default.Value, t); !ok {
-					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name, t, stringify(v.Default.Value), reason)
+					addErr(&errs, v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, stringify(v.Default.Value), reason)
 				}
 			}
 		}
@@ -94,13 +94,14 @@ func validateSelection(s *schema.Schema, sel query.Selection, t common.Type) (er
 
 		if f != nil {
 			for _, selArg := range sel.Arguments {
-				arg := f.Args.Get(selArg.Name)
+				arg := f.Args.Get(selArg.Name.Name)
 				if arg == nil {
+					addErr(&errs, selArg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on field %q of type %q.", selArg.Name.Name, sel.Name, t)
 					continue
 				}
 				value := selArg.Value
 				if ok, reason := validateValue(value.Value, arg.Type); !ok {
-					addErr(&errs, value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name, stringify(value.Value), reason)
+					addErr(&errs, value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(value.Value), reason)
 				}
 			}
 		}
@@ -158,10 +159,14 @@ func validateDirectives(s *schema.Schema, directives map[string]common.ArgumentL
 		if !ok {
 			continue
 		}
-		for _, arg := range d.Args {
-			value := args.Get(arg.Name)
-			if ok, reason := validateValue(value.Value, arg.Type); !ok {
-				addErr(&errs, value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name, stringify(value.Value), reason)
+		for _, arg := range args {
+			iv := d.Args.Get(arg.Name.Name)
+			if iv == nil {
+				addErr(&errs, arg.Name.Loc, "KnownArgumentNames", "Unknown argument %q on directive %q.", arg.Name.Name, "@"+name)
+				continue
+			}
+			if ok, reason := validateValue(arg.Value.Value, iv.Type); !ok {
+				addErr(&errs, arg.Value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, stringify(arg.Value.Value), reason)
 			}
 		}
 	}
@@ -223,9 +228,9 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 			}
 		}
 		for _, f := range t.Values {
-			if _, ok := v[f.Name]; !ok {
+			if _, ok := v[f.Name.Name]; !ok {
 				if _, ok := f.Type.(*common.NonNull); ok && f.Default == nil {
-					return false, fmt.Sprintf("In field %q: Expected %q, found null.", f.Name, f.Type)
+					return false, fmt.Sprintf("In field %q: Expected %q, found null.", f.Name.Name, f.Type)
 				}
 			}
 		}

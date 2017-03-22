@@ -543,7 +543,7 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 
 	case "__type":
 		p := valuePacker{valueType: reflect.TypeOf("")}
-		v, err := p.pack(r, r.resolveVar(f.Arguments.Get("name").Value))
+		v, err := p.pack(r, r.resolveVar(f.Arguments.MustGet("name").Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 			addResult(f.Alias, nil)
@@ -621,8 +621,8 @@ func (e *fieldExec) exec(ctx context.Context, r *request, f *query.Field, resolv
 	if e.argsPacker != nil {
 		args := make(map[string]interface{})
 		for _, arg := range f.Arguments {
-			args[arg.Name] = arg.Value.Value
-			span.SetTag(OpenTracingTagArgsPrefix+arg.Name, arg.Value.Value)
+			args[arg.Name.Name] = arg.Value.Value
+			span.SetTag(OpenTracingTagArgsPrefix+arg.Name.Name, arg.Value.Value)
 		}
 		packed, err := e.argsPacker.pack(r, args)
 		if err != nil {
@@ -662,7 +662,7 @@ type typeAssertExec struct {
 func skipByDirective(r *request, d map[string]common.ArgumentList) bool {
 	if args, ok := d["skip"]; ok {
 		p := valuePacker{valueType: reflect.TypeOf(false)}
-		v, err := p.pack(r, r.resolveVar(args.Get("if").Value))
+		v, err := p.pack(r, r.resolveVar(args.MustGet("if").Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}
@@ -673,7 +673,7 @@ func skipByDirective(r *request, d map[string]common.ArgumentList) bool {
 
 	if args, ok := d["include"]; ok {
 		p := valuePacker{valueType: reflect.TypeOf(false)}
-		v, err := p.pack(r, r.resolveVar(args.Get("if").Value))
+		v, err := p.pack(r, r.resolveVar(args.MustGet("if").Value))
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 		}

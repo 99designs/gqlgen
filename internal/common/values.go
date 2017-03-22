@@ -9,7 +9,7 @@ import (
 )
 
 type InputValue struct {
-	Name    string
+	Name    lexer.Ident
 	Type    Type
 	Default *ValueWithLoc
 	Desc    string
@@ -19,7 +19,7 @@ type InputValueList []*InputValue
 
 func (l InputValueList) Get(name string) *InputValue {
 	for _, v := range l {
-		if v.Name == name {
+		if v.Name.Name == name {
 			return v
 		}
 	}
@@ -34,7 +34,7 @@ type ValueWithLoc struct {
 func ParseInputValue(l *lexer.Lexer) *InputValue {
 	p := &InputValue{}
 	p.Desc = l.DescComment()
-	p.Name = l.ConsumeIdent()
+	p.Name = l.ConsumeIdentWithLoc()
 	l.ConsumeToken(':')
 	p.Type = ParseType(l)
 	if l.Peek() == '=' {
@@ -46,26 +46,34 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 }
 
 type Argument struct {
-	Name  string
+	Name  lexer.Ident
 	Value ValueWithLoc
 }
 
 type ArgumentList []Argument
 
-func (l ArgumentList) Get(name string) ValueWithLoc {
+func (l ArgumentList) Get(name string) (ValueWithLoc, bool) {
 	for _, arg := range l {
-		if arg.Name == name {
-			return arg.Value
+		if arg.Name.Name == name {
+			return arg.Value, true
 		}
 	}
-	return ValueWithLoc{}
+	return ValueWithLoc{}, false
+}
+
+func (l ArgumentList) MustGet(name string) ValueWithLoc {
+	value, ok := l.Get(name)
+	if !ok {
+		panic("argument not found")
+	}
+	return value
 }
 
 func ParseArguments(l *lexer.Lexer) ArgumentList {
 	var args ArgumentList
 	l.ConsumeToken('(')
 	for l.Peek() != ')' {
-		name := l.ConsumeIdent()
+		name := l.ConsumeIdentWithLoc()
 		l.ConsumeToken(':')
 		value := ParseValue(l, false)
 		args = append(args, Argument{Name: name, Value: value})

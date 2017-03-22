@@ -1240,5 +1240,129 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Known argument names/single arg is known",
+    "rule": "KnownArgumentNames",
+    "query": "\n      fragment argOnRequiredArg on Dog {\n        doesKnowCommand(dogCommand: SIT)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known argument names/multiple args are known",
+    "rule": "KnownArgumentNames",
+    "query": "\n      fragment multipleArgs on ComplicatedArgs {\n        multipleReqs(req1: 1, req2: 2)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known argument names/ignores args of unknown fields",
+    "rule": "KnownArgumentNames",
+    "query": "\n      fragment argOnUnknownField on Dog {\n        unknownField(unknownArg: SIT)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known argument names/multiple args in reverse order are known",
+    "rule": "KnownArgumentNames",
+    "query": "\n      fragment multipleArgsReverseOrder on ComplicatedArgs {\n        multipleReqs(req2: 2, req1: 1)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known argument names/no args on optional arg",
+    "rule": "KnownArgumentNames",
+    "query": "\n      fragment noArgOnOptionalArg on Dog {\n        isHousetrained\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known argument names/args are known deeply",
+    "rule": "KnownArgumentNames",
+    "query": "\n      {\n        dog {\n          doesKnowCommand(dogCommand: SIT)\n        }\n        human {\n          pet {\n            ... on Dog {\n              doesKnowCommand(dogCommand: SIT)\n            }\n          }\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known argument names/directive args are known",
+    "rule": "KnownArgumentNames",
+    "query": "\n      {\n        dog @skip(if: true)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Known argument names/undirective args are invalid",
+    "rule": "KnownArgumentNames",
+    "query": "\n      {\n        dog @skip(unless: true)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown argument \"unless\" on directive \"@skip\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 19
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Known argument names/invalid arg name",
+    "rule": "KnownArgumentNames",
+    "query": "\n      fragment invalidArgName on Dog {\n        doesKnowCommand(unknown: true)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown argument \"unknown\" on field \"doesKnowCommand\" of type \"Dog\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 25
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Known argument names/unknown args amongst known args",
+    "rule": "KnownArgumentNames",
+    "query": "\n      fragment oneGoodArgOneInvalidArg on Dog {\n        doesKnowCommand(whoknows: 1, dogCommand: SIT, unknown: true)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown argument \"whoknows\" on field \"doesKnowCommand\" of type \"Dog\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 25
+          }
+        ]
+      },
+      {
+        "message": "Unknown argument \"unknown\" on field \"doesKnowCommand\" of type \"Dog\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 55
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Known argument names/unknown args deeply",
+    "rule": "KnownArgumentNames",
+    "query": "\n      {\n        dog {\n          doesKnowCommand(unknown: true)\n        }\n        human {\n          pet {\n            ... on Dog {\n              doesKnowCommand(unknown: true)\n            }\n          }\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Unknown argument \"unknown\" on field \"doesKnowCommand\" of type \"Dog\".",
+        "locations": [
+          {
+            "line": 4,
+            "column": 27
+          }
+        ]
+      },
+      {
+        "message": "Unknown argument \"unknown\" on field \"doesKnowCommand\" of type \"Dog\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 31
+          }
+        ]
+      }
+    ]
   }
 ]

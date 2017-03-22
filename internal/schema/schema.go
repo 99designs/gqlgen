@@ -278,12 +278,12 @@ func resolveDirectives(s *Schema, directives map[string]common.ArgumentList) err
 			return errors.Errorf("directive %q not found", name)
 		}
 		for _, arg := range args {
-			if d.Args.Get(arg.Name) == nil {
-				return errors.Errorf("invalid argument %q for directive %q", arg.Name, name)
+			if d.Args.Get(arg.Name.Name) == nil {
+				return errors.Errorf("invalid argument %q for directive %q", arg.Name.Name, name)
 			}
 		}
 		for _, arg := range d.Args {
-			if args.Get(arg.Name).Value == nil {
+			if _, ok := args.Get(arg.Name.Name); !ok {
 				args = append(args, common.Argument{Name: arg.Name, Value: *arg.Default})
 			}
 		}

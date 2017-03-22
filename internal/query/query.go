@@ -55,6 +55,7 @@ type NamedFragment struct {
 
 type SelectionSet struct {
 	Selections []Selection
+	Loc        errors.Location
 }
 
 type Selection interface {
@@ -164,6 +165,7 @@ func parseFragment(l *lexer.Lexer) *NamedFragment {
 
 func parseSelectionSet(l *lexer.Lexer) *SelectionSet {
 	sel := &SelectionSet{}
+	sel.Loc = l.Location()
 	l.ConsumeToken('{')
 	for l.Peek() != '}' {
 		sel.Selections = append(sel.Selections, parseSelection(l))

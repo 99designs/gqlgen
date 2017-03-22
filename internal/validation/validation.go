@@ -119,6 +119,13 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 		var ft common.Type
 		if f != nil {
 			ft = f.Type
+			sf := hasSubfields(ft)
+			if sf && sel.SelSet == nil {
+				c.addErr(sel.Loc, "ScalarLeafs", "Field %q of type %q must have a selection of subfields. Did you mean \"%s { ... }\"?", sel.Name, ft, sel.Name)
+			}
+			if !sf && sel.SelSet != nil {
+				c.addErr(sel.SelSet.Loc, "ScalarLeafs", "Field %q must not have a selection since type %q has no subfields.", sel.Name, ft)
+			}
 		}
 		if sel.SelSet != nil {
 			c.validateSelectionSet(sel.SelSet, ft)
@@ -365,6 +372,19 @@ func canBeInput(t common.Type) bool {
 		return canBeInput(t.OfType)
 	case *common.NonNull:
 		return canBeInput(t.OfType)
+	default:
+		return false
+	}
+}
+
+func hasSubfields(t common.Type) bool {
+	switch t := t.(type) {
+	case *schema.Object, *schema.Interface, *schema.Union:
+		return true
+	case *common.List:
+		return hasSubfields(t.OfType)
+	case *common.NonNull:
+		return hasSubfields(t.OfType)
 	default:
 		return false
 	}

@@ -1782,6 +1782,130 @@
     ]
   },
   {
+    "name": "Validate: Scalar leafs/valid scalar selection",
+    "rule": "ScalarLeafs",
+    "query": "\n      fragment scalarSelection on Dog {\n        barks\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Scalar leafs/object type missing selection",
+    "rule": "ScalarLeafs",
+    "query": "\n      query directQueryOnObjectWithoutSubFields {\n        human\n      }\n    ",
+    "errors": [
+      {
+        "message": "Field \"human\" of type \"Human\" must have a selection of subfields. Did you mean \"human { ... }\"?",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Scalar leafs/interface type missing selection",
+    "rule": "ScalarLeafs",
+    "query": "\n      {\n        human { pets }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Field \"pets\" of type \"[Pet]\" must have a selection of subfields. Did you mean \"pets { ... }\"?",
+        "locations": [
+          {
+            "line": 3,
+            "column": 17
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Scalar leafs/valid scalar selection with args",
+    "rule": "ScalarLeafs",
+    "query": "\n      fragment scalarSelectionWithArgs on Dog {\n        doesKnowCommand(dogCommand: SIT)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Scalar leafs/scalar selection not allowed on Boolean",
+    "rule": "ScalarLeafs",
+    "query": "\n      fragment scalarSelectionsNotAllowedOnBoolean on Dog {\n        barks { sinceWhen }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Field \"barks\" must not have a selection since type \"Boolean\" has no subfields.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Scalar leafs/scalar selection not allowed on Enum",
+    "rule": "ScalarLeafs",
+    "query": "\n      fragment scalarSelectionsNotAllowedOnEnum on Cat {\n        furColor { inHexdec }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Field \"furColor\" must not have a selection since type \"FurColor\" has no subfields.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 18
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Scalar leafs/scalar selection not allowed with args",
+    "rule": "ScalarLeafs",
+    "query": "\n      fragment scalarSelectionsNotAllowedWithArgs on Dog {\n        doesKnowCommand(dogCommand: SIT) { sinceWhen }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Field \"doesKnowCommand\" must not have a selection since type \"Boolean\" has no subfields.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 42
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Scalar leafs/Scalar selection not allowed with directives",
+    "rule": "ScalarLeafs",
+    "query": "\n      fragment scalarSelectionsNotAllowedWithDirectives on Dog {\n        name @include(if: true) { isAlsoHumanName }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Field \"name\" must not have a selection since type \"String\" has no subfields.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 33
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Scalar leafs/Scalar selection not allowed with directives and args",
+    "rule": "ScalarLeafs",
+    "query": "\n      fragment scalarSelectionsNotAllowedWithDirectivesAndArgs on Dog {\n        doesKnowCommand(dogCommand: SIT) @include(if: true) { sinceWhen }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Field \"doesKnowCommand\" must not have a selection since type \"Boolean\" has no subfields.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 61
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: Unique argument names/no arguments on field",
     "rule": "UniqueArgumentNames",
     "query": "\n      {\n        field\n      }\n    ",

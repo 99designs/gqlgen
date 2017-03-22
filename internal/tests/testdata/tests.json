@@ -1780,5 +1780,45 @@
         ]
       }
     ]
+  },
+  {
+    "name": "Validate: Variables are input types/input types are valid",
+    "rule": "VariablesAreInputTypes",
+    "query": "\n      query Foo($a: String, $b: [Boolean!]!, $c: ComplexInput) {\n        field(a: $a, b: $b, c: $c)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Variables are input types/output types are invalid",
+    "rule": "VariablesAreInputTypes",
+    "query": "\n      query Foo($a: Dog, $b: [[CatOrDog!]]!, $c: Pet) {\n        field(a: $a, b: $b, c: $c)\n      }\n    ",
+    "errors": [
+      {
+        "locations": [
+          {
+            "line": 2,
+            "column": 21
+          }
+        ],
+        "message": "Variable \"$a\" cannot be non-input type \"Dog\"."
+      },
+      {
+        "locations": [
+          {
+            "line": 2,
+            "column": 30
+          }
+        ],
+        "message": "Variable \"$b\" cannot be non-input type \"[[CatOrDog!]]!\"."
+      },
+      {
+        "locations": [
+          {
+            "line": 2,
+            "column": 50
+          }
+        ],
+        "message": "Variable \"$c\" cannot be non-input type \"Pet\"."
+      }
+    ]
   }
 ]

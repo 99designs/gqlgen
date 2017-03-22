@@ -11,6 +11,7 @@ import (
 type InputValue struct {
 	Name    lexer.Ident
 	Type    Type
+	TypeLoc errors.Location
 	Default *ValueWithLoc
 	Desc    string
 }
@@ -36,6 +37,7 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 	p.Desc = l.DescComment()
 	p.Name = l.ConsumeIdentWithLoc()
 	l.ConsumeToken(':')
+	p.TypeLoc = l.Location()
 	p.Type = ParseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')

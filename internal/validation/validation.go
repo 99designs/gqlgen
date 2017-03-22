@@ -44,6 +44,10 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 
 		for _, v := range op.Vars {
 			t := c.resolveType(v.Type)
+			if !canBeInput(t) {
+				c.addErr(v.TypeLoc, "VariablesAreInputTypes", "Variable %q cannot be non-input type %q.", "$"+v.Name.Name, t)
+			}
+
 			if t != nil && v.Default != nil {
 				if nn, ok := t.(*common.NonNull); ok {
 					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
@@ -340,6 +344,19 @@ func canBeFragment(t common.Type) bool {
 	switch t.(type) {
 	case *schema.Object, *schema.Interface, *schema.Union:
 		return true
+	default:
+		return false
+	}
+}
+
+func canBeInput(t common.Type) bool {
+	switch t := t.(type) {
+	case *schema.InputObject, *schema.Scalar, *schema.Enum:
+		return true
+	case *common.List:
+		return canBeInput(t.OfType)
+	case *common.NonNull:
+		return canBeInput(t.OfType)
 	default:
 		return false
 	}

@@ -108,16 +108,37 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 	case *query.Field:
 		c.validateDirectives("FIELD", sel.Directives)
 
-		fieldName := sel.Name.Name
-		if fieldName == "__schema" || fieldName == "__type" || fieldName == "__typename" {
-			return
-		}
-
 		t = unwrapType(t)
-		f := fields(t).Get(fieldName)
-		if f == nil && t != nil {
-			suggestion := makeSuggestion("Did you mean", fields(t).Names(), fieldName)
-			c.addErr(sel.Alias.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", fieldName, t, suggestion)
+		fieldName := sel.Name.Name
+		var f *schema.Field
+		switch fieldName {
+		case "__typename":
+			f = &schema.Field{
+				Name: "__typename",
+				Type: c.schema.Types["String"],
+			}
+		case "__schema":
+			f = &schema.Field{
+				Name: "__schema",
+				Type: c.schema.Types["__Schema"],
+			}
+		case "__type":
+			f = &schema.Field{
+				Name: "__type",
+				Args: common.InputValueList{
+					&common.InputValue{
+						Name: lexer.Ident{Name: "name"},
+						Type: &common.NonNull{OfType: c.schema.Types["String"]},
+					},
+				},
+				Type: c.schema.Types["__Type"],
+			}
+		default:
+			f = fields(t).Get(fieldName)
+			if f == nil && t != nil {
+				suggestion := makeSuggestion("Did you mean", fields(t).Names(), fieldName)
+				c.addErr(sel.Alias.Loc, "FieldsOnCorrectType", "Cannot query field %q on type %q.%s", fieldName, t, suggestion)
+			}
 		}
 
 		names := make(nameSet)

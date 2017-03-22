@@ -1622,6 +1622,22 @@
     ]
   },
   {
+    "name": "Validate: Anonymous operation must be alone/anon operation with a subscription",
+    "rule": "LoneAnonymousOperation",
+    "query": "\n      {\n        fieldA\n      }\n      subscription Foo {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "This anonymous operation must be the only defined operation.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: Provided required arguments/ignores unknown arguments",
     "rule": "ProvidedNonNullArguments",
     "query": "\n      {\n        dog {\n          isHousetrained(unknownArgument: true)\n        }\n      }\n    ",
@@ -2060,6 +2076,102 @@
           {
             "line": 3,
             "column": 56
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Unique operation names/no operations",
+    "rule": "UniqueOperationNames",
+    "query": "\n      fragment fragA on Type {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique operation names/one anon operation",
+    "rule": "UniqueOperationNames",
+    "query": "\n      {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique operation names/one named operation",
+    "rule": "UniqueOperationNames",
+    "query": "\n      query Foo {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique operation names/multiple operations",
+    "rule": "UniqueOperationNames",
+    "query": "\n      query Foo {\n        field\n      }\n\n      query Bar {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique operation names/multiple operations of different types",
+    "rule": "UniqueOperationNames",
+    "query": "\n      query Foo {\n        field\n      }\n\n      mutation Bar {\n        field\n      }\n\n      subscription Baz {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique operation names/fragment and operation named the same",
+    "rule": "UniqueOperationNames",
+    "query": "\n      query Foo {\n        ...Foo\n      }\n      fragment Foo on Type {\n        field\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique operation names/multiple operations of same name",
+    "rule": "UniqueOperationNames",
+    "query": "\n      query Foo {\n        fieldA\n      }\n      query Foo {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one operation named \"Foo\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 13
+          },
+          {
+            "line": 5,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Unique operation names/multiple ops of same name of different types (mutation)",
+    "rule": "UniqueOperationNames",
+    "query": "\n      query Foo {\n        fieldA\n      }\n      mutation Foo {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one operation named \"Foo\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 13
+          },
+          {
+            "line": 5,
+            "column": 16
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Unique operation names/multiple ops of same name of different types (subscription)",
+    "rule": "UniqueOperationNames",
+    "query": "\n      query Foo {\n        fieldA\n      }\n      subscription Foo {\n        fieldB\n      }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one operation named \"Foo\".",
+        "locations": [
+          {
+            "line": 2,
+            "column": 13
+          },
+          {
+            "line": 5,
+            "column": 20
           }
         ]
       }

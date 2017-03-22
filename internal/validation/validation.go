@@ -35,16 +35,20 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 		doc:    doc,
 	}
 
+	opNames := make(nameSet)
 	for _, op := range doc.Operations {
-		if op.Name == "" && len(doc.Operations) != 1 {
-			c.addErr(op.Loc, "LoneAnonymousOperation", "This anonymous operation must be the only defined operation.")
+		if op.Name.Name == "" && len(doc.Operations) != 1 {
+			c.addErr(op.Name.Loc, "LoneAnonymousOperation", "This anonymous operation must be the only defined operation.")
+		}
+		if op.Name.Name != "" {
+			c.validateName(opNames, op.Name, "UniqueOperationNames", "operation")
 		}
 
 		c.validateDirectives(string(op.Type), op.Directives)
 
-		names := make(nameSet)
+		varNames := make(nameSet)
 		for _, v := range op.Vars {
-			c.validateName(names, v.Name, "UniqueVariableNames", "variable")
+			c.validateName(varNames, v.Name, "UniqueVariableNames", "variable")
 
 			t := c.resolveType(v.Type)
 			if !canBeInput(t) {
@@ -68,6 +72,8 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			entryPoint = s.EntryPoints["query"]
 		case query.Mutation:
 			entryPoint = s.EntryPoints["mutation"]
+		case query.Subscription:
+			entryPoint = s.EntryPoints["subscription"]
 		default:
 			panic("unreachable")
 		}

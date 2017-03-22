@@ -22,7 +22,6 @@ let fakeModules = {
 		it(name, f) {
 			switch (name) {
 			case 'ignores type definitions':
-			case 'anon operation with a subscription':
 				return;
 			}
 			names.push(name);
@@ -76,12 +75,13 @@ require('./src/validation/__tests__/UniqueArgumentNames-test');
 // require('./src/validation/__tests__/UniqueDirectivesPerLocation-test');
 // require('./src/validation/__tests__/UniqueFragmentNames-test');
 // require('./src/validation/__tests__/UniqueInputFieldNames-test');
-// require('./src/validation/__tests__/UniqueOperationNames-test');
+require('./src/validation/__tests__/UniqueOperationNames-test');
 require('./src/validation/__tests__/UniqueVariableNames-test');
 require('./src/validation/__tests__/VariablesAreInputTypes-test');
 // require('./src/validation/__tests__/VariablesInAllowedPosition-test');
 
 let output = JSON.stringify(tests, null, 2)
+output = output.replace(/There can only be one/g, 'There can be only one');
 output = output.replace('{stringListField: [\\"one\\", 2], requiredField: true}', '{requiredField: true, stringListField: [\\"one\\", 2]}');
 output = output.replace('{requiredField: null, intField: null}', '{intField: null, requiredField: null}');
 output = output.replace(' Did you mean to use an inline fragment on \\"Dog\\" or \\"Cat\\"?', '');

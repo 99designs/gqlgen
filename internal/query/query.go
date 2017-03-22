@@ -19,7 +19,7 @@ type OperationList []*Operation
 
 func (l OperationList) Get(name string) *Operation {
 	for _, f := range l {
-		if f.Name == name {
+		if f.Name.Name == name {
 			return f
 		}
 	}
@@ -28,18 +28,18 @@ func (l OperationList) Get(name string) *Operation {
 
 type Operation struct {
 	Type       OperationType
-	Name       string
+	Name       lexer.Ident
 	Vars       common.InputValueList
 	SelSet     *SelectionSet
 	Directives map[string]*common.Directive
-	Loc        errors.Location
 }
 
 type OperationType string
 
 const (
-	Query    OperationType = "QUERY"
-	Mutation               = "MUTATION"
+	Query        OperationType = "QUERY"
+	Mutation                   = "MUTATION"
+	Subscription               = "SUBSCRIPTION"
 )
 
 type Fragment struct {
@@ -109,7 +109,7 @@ func parseDocument(l *lexer.Lexer) *Document {
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
 			op := &Operation{Type: Query}
-			op.Loc = l.Location()
+			op.Name.Loc = l.Location()
 			op.SelSet = parseSelectionSet(l)
 			d.Operations = append(d.Operations, op)
 			continue
@@ -121,6 +121,9 @@ func parseDocument(l *lexer.Lexer) *Document {
 
 		case "mutation":
 			d.Operations = append(d.Operations, parseOperation(l, Mutation))
+
+		case "subscription":
+			d.Operations = append(d.Operations, parseOperation(l, Subscription))
 
 		case "fragment":
 			f := parseFragment(l)
@@ -135,9 +138,9 @@ func parseDocument(l *lexer.Lexer) *Document {
 
 func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	op := &Operation{Type: opType}
-	op.Loc = l.Location()
+	op.Name.Loc = l.Location()
 	if l.Peek() == scanner.Ident {
-		op.Name = l.ConsumeIdent()
+		op.Name = l.ConsumeIdentWithLoc()
 	}
 	op.Directives = common.ParseDirectives(l)
 	if l.Peek() == '(' {

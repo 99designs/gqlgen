@@ -7,6 +7,7 @@ import (
 
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/example/starwars"
+	"github.com/neelance/graphql-go/gqltesting"
 )
 
 type helloWorldResolver1 struct{}
@@ -43,13 +44,13 @@ func (r *timeResolver) AddHour(args *struct{ Time graphql.Time }) graphql.Time {
 var starwarsSchema = graphql.MustParseSchema(starwars.Schema, &starwars.Resolver{})
 
 func TestHelloWorld(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: graphql.MustParseSchema(`
 				schema {
 					query: Query
 				}
-				
+
 				type Query {
 					hello: String!
 				}
@@ -71,7 +72,7 @@ func TestHelloWorld(t *testing.T) {
 				schema {
 					query: Query
 				}
-				
+
 				type Query {
 					hello: String!
 				}
@@ -91,7 +92,7 @@ func TestHelloWorld(t *testing.T) {
 }
 
 func TestBasic(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -129,7 +130,7 @@ func TestBasic(t *testing.T) {
 }
 
 func TestArguments(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -173,7 +174,7 @@ func TestArguments(t *testing.T) {
 }
 
 func TestAliases(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -201,7 +202,7 @@ func TestAliases(t *testing.T) {
 }
 
 func TestFragments(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -215,7 +216,7 @@ func TestFragments(t *testing.T) {
 						...height
 					}
 				}
-				
+
 				fragment comparisonFields on Character {
 					name
 					appearsIn
@@ -279,7 +280,7 @@ func TestFragments(t *testing.T) {
 }
 
 func TestVariables(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -325,7 +326,7 @@ func TestVariables(t *testing.T) {
 }
 
 func TestSkipDirective(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -390,7 +391,7 @@ func TestSkipDirective(t *testing.T) {
 }
 
 func TestIncludeDirective(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -477,7 +478,7 @@ func (r *testDeprecatedDirectiveResolver) C() int32 {
 }
 
 func TestDeprecatedDirective(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: graphql.MustParseSchema(`
 				schema {
@@ -567,7 +568,7 @@ func TestDeprecatedDirective(t *testing.T) {
 }
 
 func TestInlineFragments(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -627,7 +628,7 @@ func TestInlineFragments(t *testing.T) {
 }
 
 func TestTypeName(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -689,7 +690,7 @@ func TestTypeName(t *testing.T) {
 }
 
 func TestConnections(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -837,7 +838,7 @@ func TestConnections(t *testing.T) {
 }
 
 func TestMutation(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -931,7 +932,7 @@ func TestMutation(t *testing.T) {
 }
 
 func TestIntrospection(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: starwarsSchema,
 			Query: `
@@ -1309,7 +1310,7 @@ func TestIntrospection(t *testing.T) {
 }
 
 func TestMutationOrder(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: graphql.MustParseSchema(`
 				schema {
@@ -1356,7 +1357,7 @@ func TestMutationOrder(t *testing.T) {
 }
 
 func TestTime(t *testing.T) {
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: graphql.MustParseSchema(`
 				schema {
@@ -1527,7 +1528,7 @@ func TestInput(t *testing.T) {
 			Option2
 		}
 	`, &inputResolver{})
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: coercionSchema,
 			Query: `

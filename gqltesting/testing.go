@@ -1,4 +1,4 @@
-package graphql
+package gqltesting
 
 import (
 	"bytes"
@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"strconv"
 	"testing"
+
+	graphql "github.com/neelance/graphql-go"
 )
 
 // Test is a GraphQL test case to be used with RunTest(s).
 type Test struct {
-	Schema         *Schema
+	Schema         *graphql.Schema
 	Query          string
 	OperationName  string
 	Variables      map[string]interface{}

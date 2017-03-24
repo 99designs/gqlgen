@@ -107,7 +107,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		}
 	}
 
-	span, subCtx := opentracing.StartSpanFromContext(ctx, "GraphQL request")
+	span, spanCtx := opentracing.StartSpanFromContext(ctx, "GraphQL request")
 	span.SetTag(OpenTracingTagQuery, queryString)
 	if operationName != "" {
 		span.SetTag(OpenTracingTagOperationName, operationName)
@@ -117,20 +117,58 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	}
 	defer span.Finish()
 
-	var data interface{}
-	errs := validation.Validate(s.schema, document)
-	if len(errs) == 0 {
-		data, errs = exec.ExecuteRequest(subCtx, s.exec, document, operationName, variables, s.MaxParallelism)
-		if len(errs) != 0 {
-			ext.Error.Set(span, true)
-			span.SetTag(OpenTracingTagError, errs)
-		}
+	data, errs := s.doExec(spanCtx, document, operationName, variables)
+
+	if len(errs) != 0 {
+		ext.Error.Set(span, true)
+		span.SetTag(OpenTracingTagError, errs)
 	}
 
 	return &Response{
 		Data:   data,
 		Errors: errs,
 	}
+}
+
+func (s *Schema) doExec(ctx context.Context, doc *query.Document, operationName string, vars map[string]interface{}) (interface{}, []*errors.QueryError) {
+	errs := validation.Validate(s.schema, doc)
+	if len(errs) != 0 {
+		return nil, errs
+	}
+
+	op, err := getOperation(doc, operationName)
+	if err != nil {
+		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
+	}
+
+	r := &exec.Request{
+		Doc:     doc,
+		Vars:    vars,
+		Schema:  s.schema,
+		Limiter: make(chan struct{}, s.MaxParallelism),
+	}
+	return r.Execute(ctx, s.exec, op)
+}
+
+func getOperation(document *query.Document, operationName string) (*query.Operation, error) {
+	if len(document.Operations) == 0 {
+		return nil, fmt.Errorf("no operations in query document")
+	}
+
+	if operationName == "" {
+		if len(document.Operations) > 1 {
+			return nil, fmt.Errorf("more than one operation in query document and no operation name given")
+		}
+		for _, op := range document.Operations {
+			return op, nil // return the one and only operation
+		}
+	}
+
+	op := document.Operations.Get(operationName)
+	if op == nil {
+		return nil, fmt.Errorf("no operation with name %q", operationName)
+	}
+	return op, nil
 }
 
 // Inspect allows inspection of the given schema.

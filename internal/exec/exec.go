@@ -326,25 +326,23 @@ func findMethod(t reflect.Type, name string) int {
 	return -1
 }
 
-type semaphore chan struct{}
-
-type request struct {
-	doc     *query.Document
-	vars    map[string]interface{}
-	schema  *schema.Schema
-	limiter semaphore
+type Request struct {
+	Doc     *query.Document
+	Vars    map[string]interface{}
+	Schema  *schema.Schema
+	Limiter chan struct{}
 	wg      sync.WaitGroup
 	mu      sync.Mutex
 	errs    []*errors.QueryError
 }
 
-func (r *request) addError(err *errors.QueryError) {
+func (r *Request) addError(err *errors.QueryError) {
 	r.mu.Lock()
 	r.errs = append(r.errs, err)
 	r.mu.Unlock()
 }
 
-func (r *request) handlePanic() {
+func (r *Request) handlePanic() {
 	if err := recover(); err != nil {
 		r.addError(makePanicError(err))
 	}
@@ -359,26 +357,14 @@ func makePanicError(value interface{}) *errors.QueryError {
 	return err
 }
 
-func (r *request) resolveVar(value interface{}) interface{} {
+func (r *Request) resolveVar(value interface{}) interface{} {
 	if v, ok := value.(lexer.Variable); ok {
-		value = r.vars[string(v)]
+		value = r.Vars[string(v)]
 	}
 	return value
 }
 
-func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, operationName string, variables map[string]interface{}, maxParallelism int) (interface{}, []*errors.QueryError) {
-	op, err := getOperation(document, operationName)
-	if err != nil {
-		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
-	}
-
-	r := &request{
-		doc:     document,
-		vars:    variables,
-		schema:  e.schema,
-		limiter: make(semaphore, maxParallelism),
-	}
-
+func (r *Request) Execute(ctx context.Context, e *Exec, op *query.Operation) (interface{}, []*errors.QueryError) {
 	var opExec *objectExec
 	var serially bool
 	switch op.Type {
@@ -404,34 +390,13 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 	return results, r.errs
 }
 
-func getOperation(document *query.Document, operationName string) (*query.Operation, error) {
-	if len(document.Operations) == 0 {
-		return nil, fmt.Errorf("no operations in query document")
-	}
-
-	if operationName == "" {
-		if len(document.Operations) > 1 {
-			return nil, fmt.Errorf("more than one operation in query document and no operation name given")
-		}
-		for _, op := range document.Operations {
-			return op, nil // return the one and only operation
-		}
-	}
-
-	op := document.Operations.Get(operationName)
-	if op == nil {
-		return nil, fmt.Errorf("no operation with name %q", operationName)
-	}
-	return op, nil
-}
-
 type iExec interface {
-	exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{}
+	exec(ctx context.Context, r *Request, selSet *query.SelectionSet, resolver reflect.Value) interface{}
 }
 
 type scalarExec struct{}
 
-func (e *scalarExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+func (e *scalarExec) exec(ctx context.Context, r *Request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	return resolver.Interface()
 }
 
@@ -440,7 +405,7 @@ type listExec struct {
 	nonNull bool
 }
 
-func (e *listExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+func (e *listExec) exec(ctx context.Context, r *Request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	if !e.nonNull {
 		if resolver.IsNil() {
 			return nil
@@ -462,7 +427,7 @@ type objectExec struct {
 }
 
 type fieldExec interface {
-	execField(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{}
+	execField(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{}
 }
 
 type normalFieldExec struct {
@@ -477,13 +442,13 @@ type normalFieldExec struct {
 	spanLabel   string
 }
 
-type metaFieldExec func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{}
+type metaFieldExec func(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{}
 
-func (fe metaFieldExec) execField(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+func (fe metaFieldExec) execField(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
 	return fe(ctx, r, e, f, resolver)
 }
 
-var typenameFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+var typenameFieldExec = metaFieldExec(func(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
 	if len(e.typeAssertions) == 0 {
 		return e.name
 	}
@@ -497,11 +462,11 @@ var typenameFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *o
 	return nil
 })
 
-var schemaFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+var schemaFieldExec = metaFieldExec(func(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
 	return introspectSchema(ctx, r, f.SelSet)
 })
 
-var typeFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+var typeFieldExec = metaFieldExec(func(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
 	p := valuePacker{valueType: reflect.TypeOf("")}
 	v, err := p.pack(r, r.resolveVar(f.Arguments.MustGet("name").Value))
 	if err != nil {
@@ -511,7 +476,7 @@ var typeFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *objec
 	return introspectType(ctx, r, v.String(), f.SelSet)
 })
 
-func (e *objectExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+func (e *objectExec) exec(ctx context.Context, r *Request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	if resolver.IsNil() {
 		if e.nonNull {
 			r.addError(errors.Errorf("got nil for non-null %q", e.name))
@@ -523,7 +488,7 @@ func (e *objectExec) exec(ctx context.Context, r *request, selSet *query.Selecti
 	return results
 }
 
-func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value, results map[string]interface{}, serially bool) {
+func (e *objectExec) execSelectionSet(ctx context.Context, r *Request, selSet *query.SelectionSet, resolver reflect.Value, results map[string]interface{}, serially bool) {
 	for _, sel := range selSet.Selections {
 		switch sel := sel.(type) {
 		case *query.Field:
@@ -549,7 +514,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 			if skipByDirective(r, spread.Directives) {
 				continue
 			}
-			e.execFragment(ctx, r, &r.doc.Fragments.Get(spread.Name.Name).Fragment, resolver, results)
+			e.execFragment(ctx, r, &r.Doc.Fragments.Get(spread.Name.Name).Fragment, resolver, results)
 
 		default:
 			panic("invalid type")
@@ -557,7 +522,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 	}
 }
 
-func (fe *normalFieldExec) execField(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+func (fe *normalFieldExec) execField(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
 	var args map[string]interface{}
 	var packedArgs reflect.Value
 	if fe.argsPacker != nil {
@@ -575,7 +540,7 @@ func (fe *normalFieldExec) execField(ctx context.Context, r *request, e *objectE
 
 	do := func(applyLimiter bool) interface{} {
 		if applyLimiter {
-			r.limiter <- struct{}{}
+			r.Limiter <- struct{}{}
 		}
 
 		span, spanCtx := opentracing.StartSpanFromContext(ctx, fe.spanLabel)
@@ -620,7 +585,7 @@ func (fe *normalFieldExec) execField(ctx context.Context, r *request, e *objectE
 		}()
 
 		if applyLimiter {
-			<-r.limiter
+			<-r.Limiter
 		}
 
 		if err != nil {
@@ -646,7 +611,7 @@ func (fe *normalFieldExec) execField(ctx context.Context, r *request, e *objectE
 	return result
 }
 
-func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.Fragment, resolver reflect.Value, results map[string]interface{}) {
+func (e *objectExec) execFragment(ctx context.Context, r *Request, frag *query.Fragment, resolver reflect.Value, results map[string]interface{}) {
 	if frag.On.Name != "" && frag.On.Name != e.name {
 		a, ok := e.typeAssertions[frag.On.Name]
 		if !ok {
@@ -667,7 +632,7 @@ type typeAssertExec struct {
 	typeExec    iExec
 }
 
-func skipByDirective(r *request, directives common.DirectiveList) bool {
+func skipByDirective(r *Request, directives common.DirectiveList) bool {
 	if d := directives.Get("skip"); d != nil {
 		p := valuePacker{valueType: reflect.TypeOf(false)}
 		v, err := p.pack(r, r.resolveVar(d.Args.MustGet("if").Value))

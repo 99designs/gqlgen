@@ -13,7 +13,7 @@ import (
 )
 
 type packer interface {
-	pack(r *request, value interface{}) (reflect.Value, error)
+	pack(r *Request, value interface{}) (reflect.Value, error)
 }
 
 func (b *execBuilder) assignPacker(target *packer, schemaType common.Type, reflectType reflect.Type) error {
@@ -162,7 +162,7 @@ type structPackerField struct {
 	fieldPacker packer
 }
 
-func (p *structPacker) pack(r *request, value interface{}) (reflect.Value, error) {
+func (p *structPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
@@ -187,7 +187,7 @@ type listPacker struct {
 	elem      packer
 }
 
-func (e *listPacker) pack(r *request, value interface{}) (reflect.Value, error) {
+func (e *listPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
 	list, ok := value.([]interface{})
 	if !ok {
 		list = []interface{}{value}
@@ -210,7 +210,7 @@ type nullPacker struct {
 	addPtr     bool
 }
 
-func (p *nullPacker) pack(r *request, value interface{}) (reflect.Value, error) {
+func (p *nullPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Zero(p.valueType), nil
 	}
@@ -233,7 +233,7 @@ type valuePacker struct {
 	valueType reflect.Type
 }
 
-func (p *valuePacker) pack(r *request, value interface{}) (reflect.Value, error) {
+func (p *valuePacker) pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
@@ -253,7 +253,7 @@ type unmarshalerPacker struct {
 	valueType reflect.Type
 }
 
-func (p *unmarshalerPacker) pack(r *request, value interface{}) (reflect.Value, error) {
+func (p *unmarshalerPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}

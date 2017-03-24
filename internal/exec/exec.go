@@ -303,6 +303,7 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		hasContext:  hasContext,
 		argsPacker:  argsPacker,
 		hasError:    hasError,
+		trivial:     !hasContext && argsPacker == nil && !hasError,
 	}
 	if err := b.assignExec(&fe.valueExec, f.Type, m.Type.Out(0)); err != nil {
 		return nil, err
@@ -326,6 +327,7 @@ type request struct {
 	vars    map[string]interface{}
 	schema  *schema.Schema
 	limiter semaphore
+	wg      sync.WaitGroup
 	mu      sync.Mutex
 	errs    []*errors.QueryError
 }
@@ -338,14 +340,17 @@ func (r *request) addError(err *errors.QueryError) {
 
 func (r *request) handlePanic() {
 	if err := recover(); err != nil {
-		execErr := errors.Errorf("graphql: panic occurred: %v", err)
-		r.addError(execErr)
-
-		const size = 64 << 10
-		buf := make([]byte, size)
-		buf = buf[:runtime.Stack(buf, false)]
-		log.Printf("%s\n%s", execErr, buf)
+		r.addError(makePanicError(err))
 	}
+}
+
+func makePanicError(value interface{}) *errors.QueryError {
+	err := errors.Errorf("graphql: panic occurred: %v", value)
+	const size = 64 << 10
+	buf := make([]byte, size)
+	buf = buf[:runtime.Stack(buf, false)]
+	log.Printf("%s\n%s", err, buf)
+	return err
 }
 
 func (r *request) resolveVar(value interface{}) interface{} {
@@ -368,27 +373,29 @@ func ExecuteRequest(ctx context.Context, e *Exec, document *query.Document, oper
 		limiter: make(semaphore, maxParallelism),
 	}
 
-	var opExec iExec
+	var opExec *objectExec
 	var serially bool
 	switch op.Type {
 	case query.Query:
-		opExec = e.queryExec
+		opExec = e.queryExec.(*objectExec)
 		serially = false
 	case query.Mutation:
-		opExec = e.mutationExec
+		opExec = e.mutationExec.(*objectExec)
 		serially = true
 	}
 
-	data := func() interface{} {
+	results := make(map[string]interface{})
+	func() {
 		defer r.handlePanic()
-		return opExec.exec(ctx, r, op.SelSet, e.resolver, serially)
+		opExec.execSelectionSet(ctx, r, op.SelSet, e.resolver, results, serially)
 	}()
+	r.wg.Wait()
 
 	if err := ctx.Err(); err != nil {
 		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
 	}
 
-	return data, r.errs
+	return results, r.errs
 }
 
 func getOperation(document *query.Document, operationName string) (*query.Operation, error) {
@@ -413,12 +420,12 @@ func getOperation(document *query.Document, operationName string) (*query.Operat
 }
 
 type iExec interface {
-	exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{}
+	exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{}
 }
 
 type scalarExec struct{}
 
-func (e *scalarExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{} {
+func (e *scalarExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	return resolver.Interface()
 }
 
@@ -427,7 +434,7 @@ type listExec struct {
 	nonNull bool
 }
 
-func (e *listExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{} {
+func (e *listExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	if !e.nonNull {
 		if resolver.IsNil() {
 			return nil
@@ -435,16 +442,9 @@ func (e *listExec) exec(ctx context.Context, r *request, selSet *query.Selection
 		resolver = resolver.Elem()
 	}
 	l := make([]interface{}, resolver.Len())
-	var wg sync.WaitGroup
 	for i := range l {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			defer r.handlePanic()
-			l[i] = e.elem.exec(ctx, r, selSet, resolver.Index(i), false)
-		}(i)
+		l[i] = e.elem.exec(ctx, r, selSet, resolver.Index(i))
 	}
-	wg.Wait()
 	return l
 }
 
@@ -455,160 +455,6 @@ type objectExec struct {
 	nonNull        bool
 }
 
-type addResultFn func(key string, value interface{})
-
-func (e *objectExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value, serially bool) interface{} {
-	if resolver.IsNil() {
-		if e.nonNull {
-			r.addError(errors.Errorf("got nil for non-null %q", e.name))
-		}
-		return nil
-	}
-	var mu sync.Mutex
-	results := make(map[string]interface{})
-	addResult := func(key string, value interface{}) {
-		mu.Lock()
-		results[key] = value
-		mu.Unlock()
-	}
-	e.execSelectionSet(ctx, r, selSet, resolver, addResult, serially)
-	return results
-}
-
-func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value, addResult addResultFn, serially bool) {
-	var wg sync.WaitGroup
-	for _, sel := range selSet.Selections {
-		execSel := func(f func()) {
-			if serially {
-				defer r.handlePanic()
-				f()
-				return
-			}
-
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				defer r.handlePanic()
-				f()
-			}()
-		}
-
-		switch sel := sel.(type) {
-		case *query.Field:
-			field := sel
-			if skipByDirective(r, field.Directives) {
-				continue
-			}
-			execSel(func() {
-				e.execField(ctx, r, field, resolver, addResult)
-			})
-
-		case *query.InlineFragment:
-			frag := sel
-			if skipByDirective(r, frag.Directives) {
-				continue
-			}
-			execSel(func() {
-				e.execFragment(ctx, r, &frag.Fragment, resolver, addResult)
-			})
-
-		case *query.FragmentSpread:
-			spread := sel
-			if skipByDirective(r, spread.Directives) {
-				continue
-			}
-			execSel(func() {
-				e.execFragment(ctx, r, &r.doc.Fragments.Get(spread.Name.Name).Fragment, resolver, addResult)
-			})
-
-		default:
-			panic("invalid type")
-		}
-	}
-	wg.Wait()
-}
-
-func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, addResult addResultFn) {
-	fieldAlias := f.Alias.Name
-	fieldName := f.Name.Name
-	switch fieldName {
-	case "__typename":
-		if len(e.typeAssertions) == 0 {
-			addResult(fieldAlias, e.name)
-			return
-		}
-
-		for name, a := range e.typeAssertions {
-			out, err := callWithLimiter(ctx, resolver.Method(a.methodIndex), nil, r)
-			if err != nil {
-				return
-			}
-			if out[1].Bool() {
-				addResult(fieldAlias, name)
-				return
-			}
-		}
-
-	case "__schema":
-		addResult(fieldAlias, introspectSchema(ctx, r, f.SelSet))
-
-	case "__type":
-		p := valuePacker{valueType: reflect.TypeOf("")}
-		v, err := p.pack(r, r.resolveVar(f.Arguments.MustGet("name").Value))
-		if err != nil {
-			r.addError(errors.Errorf("%s", err))
-			addResult(fieldAlias, nil)
-			return
-		}
-		addResult(fieldAlias, introspectType(ctx, r, v.String(), f.SelSet))
-
-	default:
-		fe := e.fields[fieldName]
-
-		span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", fe.typeName, fe.field.Name))
-		defer span.Finish()
-		span.SetTag(OpenTracingTagType, fe.typeName)
-		span.SetTag(OpenTracingTagField, fe.field.Name)
-		if !fe.hasContext && fe.argsPacker == nil && !fe.hasError {
-			span.SetTag(OpenTracingTagTrivial, true)
-		}
-
-		result, err := fe.exec(spanCtx, r, f, resolver, span)
-
-		if err != nil {
-			queryError := errors.Errorf("%s", err)
-			queryError.ResolverError = err
-			r.addError(queryError)
-			addResult(fieldAlias, nil) // TODO handle non-nil
-
-			ext.Error.Set(span, true)
-			span.SetTag(OpenTracingTagError, err)
-			return
-		}
-
-		addResult(fieldAlias, result)
-	}
-}
-
-func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.Fragment, resolver reflect.Value, addResult addResultFn) {
-	if frag.On.Name != "" && frag.On.Name != e.name {
-		a, ok := e.typeAssertions[frag.On.Name]
-		if !ok {
-			panic(fmt.Errorf("%q does not implement %q", frag.On, e.name)) // TODO proper error handling
-		}
-		out, err := callWithLimiter(ctx, resolver.Method(a.methodIndex), nil, r)
-		if err != nil {
-			return
-		}
-		if !out[1].Bool() {
-			return
-		}
-		a.typeExec.(*objectExec).execSelectionSet(ctx, r, frag.SelSet, out[0], addResult, false)
-		return
-	}
-	e.execSelectionSet(ctx, r, frag.SelSet, resolver, addResult, false)
-}
-
 type fieldExec struct {
 	typeName    string
 	field       *schema.Field
@@ -616,50 +462,189 @@ type fieldExec struct {
 	hasContext  bool
 	argsPacker  *structPacker
 	hasError    bool
+	trivial     bool
 	valueExec   iExec
 }
 
-func (e *fieldExec) exec(ctx context.Context, r *request, f *query.Field, resolver reflect.Value, span opentracing.Span) (interface{}, error) {
-	var in []reflect.Value
+type addResultFn func(key string, value interface{}, concurrent bool)
 
-	if e.hasContext {
-		in = append(in, reflect.ValueOf(ctx))
+func (e *objectExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
+	if resolver.IsNil() {
+		if e.nonNull {
+			r.addError(errors.Errorf("got nil for non-null %q", e.name))
+		}
+		return nil
+	}
+	results := make(map[string]interface{})
+	e.execSelectionSet(ctx, r, selSet, resolver, results, false)
+	return results
+}
+
+func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value, results map[string]interface{}, serially bool) {
+	for _, sel := range selSet.Selections {
+		switch sel := sel.(type) {
+		case *query.Field:
+			field := sel
+			if skipByDirective(r, field.Directives) {
+				continue
+			}
+			results[field.Alias.Name] = e.execField(ctx, r, field, resolver)
+			if serially {
+				r.wg.Wait()
+			}
+
+		case *query.InlineFragment:
+			frag := sel
+			if skipByDirective(r, frag.Directives) {
+				continue
+			}
+			e.execFragment(ctx, r, &frag.Fragment, resolver, results)
+
+		case *query.FragmentSpread:
+			spread := sel
+			if skipByDirective(r, spread.Directives) {
+				continue
+			}
+			e.execFragment(ctx, r, &r.doc.Fragments.Get(spread.Name.Name).Fragment, resolver, results)
+
+		default:
+			panic("invalid type")
+		}
+	}
+}
+
+func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value) interface{} {
+	fieldName := f.Name.Name
+	switch fieldName {
+	case "__typename":
+		if len(e.typeAssertions) == 0 {
+			return e.name
+		}
+
+		for name, a := range e.typeAssertions {
+			out := resolver.Method(a.methodIndex).Call(nil)
+			if out[1].Bool() {
+				return name
+			}
+		}
+		return nil
+
+	case "__schema":
+		return introspectSchema(ctx, r, f.SelSet)
+
+	case "__type":
+		p := valuePacker{valueType: reflect.TypeOf("")}
+		v, err := p.pack(r, r.resolveVar(f.Arguments.MustGet("name").Value))
+		if err != nil {
+			r.addError(errors.Errorf("%s", err))
+			return nil
+		}
+		return introspectType(ctx, r, v.String(), f.SelSet)
 	}
 
-	if e.argsPacker != nil {
+	fe := e.fields[fieldName]
+
+	span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", fe.typeName, fe.field.Name))
+	defer span.Finish()
+	span.SetTag(OpenTracingTagType, fe.typeName)
+	span.SetTag(OpenTracingTagField, fe.field.Name)
+	if fe.trivial {
+		span.SetTag(OpenTracingTagTrivial, true)
+	}
+
+	var in []reflect.Value
+
+	if fe.hasContext {
+		in = append(in, reflect.ValueOf(spanCtx))
+	}
+
+	if fe.argsPacker != nil {
 		args := make(map[string]interface{})
 		for _, arg := range f.Arguments {
 			args[arg.Name.Name] = arg.Value.Value
 			span.SetTag(OpenTracingTagArgsPrefix+arg.Name.Name, arg.Value.Value)
 		}
-		packed, err := e.argsPacker.pack(r, args)
+		packed, err := fe.argsPacker.pack(r, args)
 		if err != nil {
-			return nil, err
+			r.addError(errors.Errorf("%s", err))
+			return nil
 		}
 		in = append(in, packed)
 	}
 
-	m := resolver.Method(e.methodIndex)
-	out, err := callWithLimiter(ctx, m, in, r)
-	if err != nil {
-		return nil, err
-	}
-	if e.hasError && !out[1].IsNil() {
-		return nil, out[1].Interface().(error)
+	m := resolver.Method(fe.methodIndex)
+	do := func(applyLimiter bool) interface{} {
+		if applyLimiter {
+			r.limiter <- struct{}{}
+		}
+
+		var err *errors.QueryError
+		if ctxErr := spanCtx.Err(); ctxErr != nil {
+			err = errors.Errorf("%s", ctxErr)
+		}
+
+		var result reflect.Value
+		func() {
+			defer func() {
+				if panicValue := recover(); panicValue != nil {
+					err = makePanicError(panicValue)
+				}
+			}()
+
+			if err != nil {
+				return // don't execute any more resolvers if context got cancelled
+			}
+
+			out := m.Call(in)
+			result = out[0]
+			if fe.hasError && !out[1].IsNil() {
+				resolverErr := out[1].Interface().(error)
+				err = errors.Errorf("%s", err)
+				err.ResolverError = resolverErr
+			}
+		}()
+
+		if applyLimiter {
+			<-r.limiter
+		}
+
+		if err != nil {
+			r.addError(err)
+			ext.Error.Set(span, true)
+			span.SetTag(OpenTracingTagError, err.Error())
+			return nil // TODO handle non-nil
+		}
+
+		return fe.valueExec.exec(spanCtx, r, f.SelSet, result)
 	}
 
-	return e.valueExec.exec(ctx, r, f.SelSet, out[0], false), nil
+	if fe.trivial {
+		return do(false)
+	}
+
+	result := new(interface{})
+	r.wg.Add(1)
+	go func() {
+		defer r.wg.Done()
+		*result = do(true)
+	}()
+	return result
 }
 
-func callWithLimiter(ctx context.Context, fn reflect.Value, in []reflect.Value, r *request) ([]reflect.Value, error) {
-	r.limiter <- struct{}{}
-	defer func() { <-r.limiter }()
-
-	if err := ctx.Err(); err != nil {
-		return nil, err // don't execute any more resolvers if context got cancelled
+func (e *objectExec) execFragment(ctx context.Context, r *request, frag *query.Fragment, resolver reflect.Value, results map[string]interface{}) {
+	if frag.On.Name != "" && frag.On.Name != e.name {
+		a, ok := e.typeAssertions[frag.On.Name]
+		if !ok {
+			panic(fmt.Errorf("%q does not implement %q", frag.On, e.name)) // TODO proper error handling
+		}
+		out := resolver.Method(a.methodIndex).Call(nil)
+		if !out[1].Bool() {
+			return
+		}
+		a.typeExec.(*objectExec).execSelectionSet(ctx, r, frag.SelSet, out[0], results, false)
+		return
 	}
-
-	return fn.Call(in), nil
+	e.execSelectionSet(ctx, r, frag.SelSet, resolver, results, false)
 }
 
 type typeAssertExec struct {

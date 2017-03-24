@@ -209,7 +209,12 @@ func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, p
 	}
 
 	methodHasReceiver := resolverType.Kind() != reflect.Interface
-	fieldExecs := make(map[string]*fieldExec)
+	fieldExecs := map[string]fieldExec{
+		"__typename": typenameFieldExec,
+		"__schema":   schemaFieldExec,
+		"__type":     typeFieldExec,
+	}
+
 	for _, f := range fields {
 		methodIndex := findMethod(resolverType, f.Name)
 		if methodIndex == -1 {
@@ -254,7 +259,7 @@ func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, p
 var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
 var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
-func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool) (*fieldExec, error) {
+func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool) (*normalFieldExec, error) {
 	in := make([]reflect.Type, m.Type.NumIn())
 	for i := range in {
 		in[i] = m.Type.In(i)
@@ -296,7 +301,7 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		}
 	}
 
-	fe := &fieldExec{
+	fe := &normalFieldExec{
 		typeName:    typeName,
 		field:       f,
 		methodIndex: methodIndex,
@@ -451,12 +456,16 @@ func (e *listExec) exec(ctx context.Context, r *request, selSet *query.Selection
 
 type objectExec struct {
 	name           string
-	fields         map[string]*fieldExec
+	fields         map[string]fieldExec
 	typeAssertions map[string]*typeAssertExec
 	nonNull        bool
 }
 
-type fieldExec struct {
+type fieldExec interface {
+	execField(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{}
+}
+
+type normalFieldExec struct {
 	typeName    string
 	field       *schema.Field
 	methodIndex int
@@ -468,7 +477,39 @@ type fieldExec struct {
 	spanLabel   string
 }
 
-type addResultFn func(key string, value interface{}, concurrent bool)
+type metaFieldExec func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{}
+
+func (fe metaFieldExec) execField(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+	return fe(ctx, r, e, f, resolver)
+}
+
+var typenameFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+	if len(e.typeAssertions) == 0 {
+		return e.name
+	}
+
+	for name, a := range e.typeAssertions {
+		out := resolver.Method(a.methodIndex).Call(nil)
+		if out[1].Bool() {
+			return name
+		}
+	}
+	return nil
+})
+
+var schemaFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+	return introspectSchema(ctx, r, f.SelSet)
+})
+
+var typeFieldExec = metaFieldExec(func(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
+	p := valuePacker{valueType: reflect.TypeOf("")}
+	v, err := p.pack(r, r.resolveVar(f.Arguments.MustGet("name").Value))
+	if err != nil {
+		r.addError(errors.Errorf("%s", err))
+		return nil
+	}
+	return introspectType(ctx, r, v.String(), f.SelSet)
+})
 
 func (e *objectExec) exec(ctx context.Context, r *request, selSet *query.SelectionSet, resolver reflect.Value) interface{} {
 	if resolver.IsNil() {
@@ -491,26 +532,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 				continue
 			}
 
-			switch field.Name.Name {
-			case "__typename":
-				results[field.Alias.Name] = e.execTypeName(resolver)
-
-			case "__schema":
-				results[field.Alias.Name] = introspectSchema(ctx, r, field.SelSet)
-
-			case "__type":
-				p := valuePacker{valueType: reflect.TypeOf("")}
-				v, err := p.pack(r, r.resolveVar(field.Arguments.MustGet("name").Value))
-				if err != nil {
-					r.addError(errors.Errorf("%s", err))
-					return
-				}
-				results[field.Alias.Name] = introspectType(ctx, r, v.String(), field.SelSet)
-
-			default:
-				results[field.Alias.Name] = e.fields[field.Name.Name].execField(ctx, r, field, resolver)
-			}
-
+			results[field.Alias.Name] = e.fields[field.Name.Name].execField(ctx, r, e, field, resolver)
 			if serially {
 				r.wg.Wait()
 			}
@@ -535,21 +557,7 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 	}
 }
 
-func (e *objectExec) execTypeName(resolver reflect.Value) interface{} {
-	if len(e.typeAssertions) == 0 {
-		return e.name
-	}
-
-	for name, a := range e.typeAssertions {
-		out := resolver.Method(a.methodIndex).Call(nil)
-		if out[1].Bool() {
-			return name
-		}
-	}
-	return nil
-}
-
-func (fe *fieldExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value) interface{} {
+func (fe *normalFieldExec) execField(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
 	span, spanCtx := opentracing.StartSpanFromContext(ctx, fe.spanLabel)
 	defer span.Finish()
 	span.SetTag(OpenTracingTagType, fe.typeName)

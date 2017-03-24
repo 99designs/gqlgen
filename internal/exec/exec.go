@@ -574,7 +574,6 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 		in = append(in, packed)
 	}
 
-	m := resolver.Method(fe.methodIndex)
 	do := func(applyLimiter bool) interface{} {
 		if applyLimiter {
 			r.limiter <- struct{}{}
@@ -597,7 +596,7 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 				return // don't execute any more resolvers if context got cancelled
 			}
 
-			out := m.Call(in)
+			out := resolver.Method(fe.methodIndex).Call(in)
 			result = out[0]
 			if fe.hasError && !out[1].IsNil() {
 				resolverErr := out[1].Interface().(error)

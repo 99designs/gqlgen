@@ -304,6 +304,7 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		argsPacker:  argsPacker,
 		hasError:    hasError,
 		trivial:     !hasContext && argsPacker == nil && !hasError,
+		spanLabel:   fmt.Sprintf("GraphQL field: %s.%s", typeName, f.Name),
 	}
 	if err := b.assignExec(&fe.valueExec, f.Type, m.Type.Out(0)); err != nil {
 		return nil, err
@@ -464,6 +465,7 @@ type fieldExec struct {
 	hasError    bool
 	trivial     bool
 	valueExec   iExec
+	spanLabel   string
 }
 
 type addResultFn func(key string, value interface{}, concurrent bool)
@@ -544,7 +546,7 @@ func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, 
 
 	fe := e.fields[fieldName]
 
-	span, spanCtx := opentracing.StartSpanFromContext(ctx, fmt.Sprintf("GraphQL field: %s.%s", fe.typeName, fe.field.Name))
+	span, spanCtx := opentracing.StartSpanFromContext(ctx, fe.spanLabel)
 	defer span.Finish()
 	span.SetTag(OpenTracingTagType, fe.typeName)
 	span.SetTag(OpenTracingTagField, fe.field.Name)

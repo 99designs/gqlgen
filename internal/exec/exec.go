@@ -558,32 +558,19 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 }
 
 func (fe *normalFieldExec) execField(ctx context.Context, r *request, e *objectExec, f *query.Field, resolver reflect.Value) interface{} {
-	span, spanCtx := opentracing.StartSpanFromContext(ctx, fe.spanLabel)
-	defer span.Finish()
-	span.SetTag(OpenTracingTagType, fe.typeName)
-	span.SetTag(OpenTracingTagField, fe.field.Name)
-	if fe.trivial {
-		span.SetTag(OpenTracingTagTrivial, true)
-	}
-
-	var in []reflect.Value
-
-	if fe.hasContext {
-		in = append(in, reflect.ValueOf(spanCtx))
-	}
-
+	var args map[string]interface{}
+	var packedArgs reflect.Value
 	if fe.argsPacker != nil {
-		args := make(map[string]interface{})
+		args = make(map[string]interface{})
 		for _, arg := range f.Arguments {
 			args[arg.Name.Name] = arg.Value.Value
-			span.SetTag(OpenTracingTagArgsPrefix+arg.Name.Name, arg.Value.Value)
 		}
-		packed, err := fe.argsPacker.pack(r, args)
+		var err error
+		packedArgs, err = fe.argsPacker.pack(r, args)
 		if err != nil {
 			r.addError(errors.Errorf("%s", err))
 			return nil
 		}
-		in = append(in, packed)
 	}
 
 	do := func(applyLimiter bool) interface{} {
@@ -591,30 +578,45 @@ func (fe *normalFieldExec) execField(ctx context.Context, r *request, e *objectE
 			r.limiter <- struct{}{}
 		}
 
-		var err *errors.QueryError
-		if ctxErr := spanCtx.Err(); ctxErr != nil {
-			err = errors.Errorf("%s", ctxErr)
+		span, spanCtx := opentracing.StartSpanFromContext(ctx, fe.spanLabel)
+		defer span.Finish()
+		span.SetTag(OpenTracingTagType, fe.typeName)
+		span.SetTag(OpenTracingTagField, fe.field.Name)
+		if fe.trivial {
+			span.SetTag(OpenTracingTagTrivial, true)
+		}
+		for name, value := range args {
+			span.SetTag(OpenTracingTagArgsPrefix+name, value)
 		}
 
 		var result reflect.Value
-		func() {
+		err := func() (err *errors.QueryError) {
 			defer func() {
 				if panicValue := recover(); panicValue != nil {
 					err = makePanicError(panicValue)
 				}
 			}()
 
-			if err != nil {
-				return // don't execute any more resolvers if context got cancelled
+			if err := spanCtx.Err(); err != nil {
+				return errors.Errorf("%s", err) // don't execute any more resolvers if context got cancelled
 			}
 
+			var in []reflect.Value
+			if fe.hasContext {
+				in = append(in, reflect.ValueOf(spanCtx))
+			}
+			if fe.argsPacker != nil {
+				in = append(in, packedArgs)
+			}
 			out := resolver.Method(fe.methodIndex).Call(in)
 			result = out[0]
 			if fe.hasError && !out[1].IsNil() {
 				resolverErr := out[1].Interface().(error)
-				err = errors.Errorf("%s", err)
+				err := errors.Errorf("%s", resolverErr)
 				err.ResolverError = resolverErr
+				return err
 			}
+			return nil
 		}()
 
 		if applyLimiter {

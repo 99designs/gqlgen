@@ -490,7 +490,27 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 			if skipByDirective(r, field.Directives) {
 				continue
 			}
-			results[field.Alias.Name] = e.execField(ctx, r, field, resolver)
+
+			switch field.Name.Name {
+			case "__typename":
+				results[field.Alias.Name] = e.execTypeName(resolver)
+
+			case "__schema":
+				results[field.Alias.Name] = introspectSchema(ctx, r, field.SelSet)
+
+			case "__type":
+				p := valuePacker{valueType: reflect.TypeOf("")}
+				v, err := p.pack(r, r.resolveVar(field.Arguments.MustGet("name").Value))
+				if err != nil {
+					r.addError(errors.Errorf("%s", err))
+					return
+				}
+				results[field.Alias.Name] = introspectType(ctx, r, v.String(), field.SelSet)
+
+			default:
+				results[field.Alias.Name] = e.fields[field.Name.Name].execField(ctx, r, field, resolver)
+			}
+
 			if serially {
 				r.wg.Wait()
 			}
@@ -515,37 +535,21 @@ func (e *objectExec) execSelectionSet(ctx context.Context, r *request, selSet *q
 	}
 }
 
-func (e *objectExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value) interface{} {
-	fieldName := f.Name.Name
-	switch fieldName {
-	case "__typename":
-		if len(e.typeAssertions) == 0 {
-			return e.name
-		}
-
-		for name, a := range e.typeAssertions {
-			out := resolver.Method(a.methodIndex).Call(nil)
-			if out[1].Bool() {
-				return name
-			}
-		}
-		return nil
-
-	case "__schema":
-		return introspectSchema(ctx, r, f.SelSet)
-
-	case "__type":
-		p := valuePacker{valueType: reflect.TypeOf("")}
-		v, err := p.pack(r, r.resolveVar(f.Arguments.MustGet("name").Value))
-		if err != nil {
-			r.addError(errors.Errorf("%s", err))
-			return nil
-		}
-		return introspectType(ctx, r, v.String(), f.SelSet)
+func (e *objectExec) execTypeName(resolver reflect.Value) interface{} {
+	if len(e.typeAssertions) == 0 {
+		return e.name
 	}
 
-	fe := e.fields[fieldName]
+	for name, a := range e.typeAssertions {
+		out := resolver.Method(a.methodIndex).Call(nil)
+		if out[1].Bool() {
+			return name
+		}
+	}
+	return nil
+}
 
+func (fe *fieldExec) execField(ctx context.Context, r *request, f *query.Field, resolver reflect.Value) interface{} {
 	span, spanCtx := opentracing.StartSpanFromContext(ctx, fe.spanLabel)
 	defer span.Finish()
 	span.SetTag(OpenTracingTagType, fe.typeName)

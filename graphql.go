@@ -5,26 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
-
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 	"github.com/neelance/graphql-go/internal/validation"
 	"github.com/neelance/graphql-go/introspection"
+	"github.com/neelance/graphql-go/trace"
 )
-
-const OpenTracingTagQuery = "graphql.query"
-const OpenTracingTagOperationName = "graphql.operationName"
-const OpenTracingTagVariables = "graphql.variables"
-
-const OpenTracingTagType = "graphql.type"
-const OpenTracingTagField = "graphql.field"
-const OpenTracingTagTrivial = "graphql.trivial"
-const OpenTracingTagArgsPrefix = "graphql.args."
-const OpenTracingTagError = "graphql.error"
 
 // ID represents GraphQL's "ID" type. A custom type may be used instead.
 type ID string
@@ -50,6 +38,7 @@ func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 	s := &Schema{
 		schema:         schema.New(),
 		MaxParallelism: 10,
+		Tracer:         trace.OpenTracingTracer{},
 	}
 	if err := s.schema.Parse(schemaString); err != nil {
 		return nil, err
@@ -82,6 +71,9 @@ type Schema struct {
 
 	// MaxParallelism specifies the maximum number of resolvers per request allowed to run in parallel. The default is 10.
 	MaxParallelism int
+
+	// Tracer is used to trace queries and fields. It defaults to trace.OpenTracingTracer.
+	Tracer trace.Tracer
 }
 
 // Response represents a typical response of a GraphQL server. It may be encoded to JSON directly or
@@ -100,29 +92,9 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		panic("schema created without resolver, can not exec")
 	}
 
-	document, err := query.Parse(queryString)
-	if err != nil {
-		return &Response{
-			Errors: []*errors.QueryError{err},
-		}
-	}
-
-	span, spanCtx := opentracing.StartSpanFromContext(ctx, "GraphQL request")
-	span.SetTag(OpenTracingTagQuery, queryString)
-	if operationName != "" {
-		span.SetTag(OpenTracingTagOperationName, operationName)
-	}
-	if len(variables) != 0 {
-		span.SetTag(OpenTracingTagVariables, variables)
-	}
-	defer span.Finish()
-
-	data, errs := s.doExec(spanCtx, document, operationName, variables)
-
-	if len(errs) != 0 {
-		ext.Error.Set(span, true)
-		span.SetTag(OpenTracingTagError, errs)
-	}
+	traceCtx, finish := s.Tracer.TraceQuery(ctx, queryString, operationName, variables)
+	data, errs := s.doExec(traceCtx, queryString, operationName, variables)
+	finish(errs)
 
 	return &Response{
 		Data:   data,
@@ -130,7 +102,12 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	}
 }
 
-func (s *Schema) doExec(ctx context.Context, doc *query.Document, operationName string, vars map[string]interface{}) (interface{}, []*errors.QueryError) {
+func (s *Schema) doExec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) (interface{}, []*errors.QueryError) {
+	doc, qErr := query.Parse(queryString)
+	if qErr != nil {
+		return nil, []*errors.QueryError{qErr}
+	}
+
 	errs := validation.Validate(s.schema, doc)
 	if len(errs) != 0 {
 		return nil, errs
@@ -143,9 +120,10 @@ func (s *Schema) doExec(ctx context.Context, doc *query.Document, operationName 
 
 	r := &exec.Request{
 		Doc:     doc,
-		Vars:    vars,
+		Vars:    variables,
 		Schema:  s.schema,
 		Limiter: make(chan struct{}, s.MaxParallelism),
+		Tracer:  s.Tracer,
 	}
 	return r.Execute(ctx, s.exec, op)
 }

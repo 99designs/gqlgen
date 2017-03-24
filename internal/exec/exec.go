@@ -9,22 +9,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
-
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/lexer"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
+	"github.com/neelance/graphql-go/trace"
 )
-
-// keep in sync with main package
-const OpenTracingTagType = "graphql.type"
-const OpenTracingTagField = "graphql.field"
-const OpenTracingTagTrivial = "graphql.trivial"
-const OpenTracingTagArgsPrefix = "graphql.args."
-const OpenTracingTagError = "graphql.error"
 
 type Exec struct {
 	queryExec    iExec
@@ -309,7 +300,7 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		argsPacker:  argsPacker,
 		hasError:    hasError,
 		trivial:     !hasContext && argsPacker == nil && !hasError,
-		spanLabel:   fmt.Sprintf("GraphQL field: %s.%s", typeName, f.Name),
+		traceLabel:  fmt.Sprintf("GraphQL field: %s.%s", typeName, f.Name),
 	}
 	if err := b.assignExec(&fe.valueExec, f.Type, m.Type.Out(0)); err != nil {
 		return nil, err
@@ -331,6 +322,7 @@ type Request struct {
 	Vars    map[string]interface{}
 	Schema  *schema.Schema
 	Limiter chan struct{}
+	Tracer  trace.Tracer
 	wg      sync.WaitGroup
 	mu      sync.Mutex
 	errs    []*errors.QueryError
@@ -439,7 +431,7 @@ type normalFieldExec struct {
 	hasError    bool
 	trivial     bool
 	valueExec   iExec
-	spanLabel   string
+	traceLabel  string
 }
 
 type metaFieldExec func(ctx context.Context, r *Request, e *objectExec, f *query.Field, resolver reflect.Value) interface{}
@@ -543,32 +535,28 @@ func (fe *normalFieldExec) execField(ctx context.Context, r *Request, e *objectE
 			r.Limiter <- struct{}{}
 		}
 
-		span, spanCtx := opentracing.StartSpanFromContext(ctx, fe.spanLabel)
-		defer span.Finish()
-		span.SetTag(OpenTracingTagType, fe.typeName)
-		span.SetTag(OpenTracingTagField, fe.field.Name)
-		if fe.trivial {
-			span.SetTag(OpenTracingTagTrivial, true)
-		}
-		for name, value := range args {
-			span.SetTag(OpenTracingTagArgsPrefix+name, value)
-		}
-
 		var result reflect.Value
-		err := func() (err *errors.QueryError) {
+		var err *errors.QueryError
+
+		traceCtx, finish := r.Tracer.TraceField(ctx, fe.traceLabel, fe.typeName, fe.field.Name, fe.trivial, args)
+		defer func() {
+			finish(err)
+		}()
+
+		err = func() (err *errors.QueryError) {
 			defer func() {
 				if panicValue := recover(); panicValue != nil {
 					err = makePanicError(panicValue)
 				}
 			}()
 
-			if err := spanCtx.Err(); err != nil {
+			if err := traceCtx.Err(); err != nil {
 				return errors.Errorf("%s", err) // don't execute any more resolvers if context got cancelled
 			}
 
 			var in []reflect.Value
 			if fe.hasContext {
-				in = append(in, reflect.ValueOf(spanCtx))
+				in = append(in, reflect.ValueOf(traceCtx))
 			}
 			if fe.argsPacker != nil {
 				in = append(in, packedArgs)
@@ -590,12 +578,10 @@ func (fe *normalFieldExec) execField(ctx context.Context, r *Request, e *objectE
 
 		if err != nil {
 			r.addError(err)
-			ext.Error.Set(span, true)
-			span.SetTag(OpenTracingTagError, err.Error())
 			return nil // TODO handle non-nil
 		}
 
-		return fe.valueExec.exec(spanCtx, r, f.SelSet, result)
+		return fe.valueExec.exec(traceCtx, r, f.SelSet, result)
 	}
 
 	if fe.trivial {

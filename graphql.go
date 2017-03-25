@@ -156,9 +156,6 @@ func (s *Schema) Inspect() *introspection.Schema {
 
 // ToJSON encodes the schema in a JSON format used by tools like Relay.
 func (s *Schema) ToJSON() ([]byte, error) {
-	result, err := exec.IntrospectSchema(s.schema)
-	if err != nil {
-		return nil, err
-	}
+	result := exec.IntrospectSchema(s.schema)
 	return json.MarshalIndent(result, "", "\t")
 }

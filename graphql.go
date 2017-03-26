@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/neelance/graphql-go/errors"
+	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/exec"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
@@ -92,30 +93,19 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		panic("schema created without resolver, can not exec")
 	}
 
-	traceCtx, finish := s.Tracer.TraceQuery(ctx, queryString, operationName, variables)
-	data, errs := s.doExec(traceCtx, queryString, operationName, variables)
-	finish(errs)
-
-	return &Response{
-		Data:   data,
-		Errors: errs,
-	}
-}
-
-func (s *Schema) doExec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) (interface{}, []*errors.QueryError) {
 	doc, qErr := query.Parse(queryString)
 	if qErr != nil {
-		return nil, []*errors.QueryError{qErr}
+		return &Response{Errors: []*errors.QueryError{qErr}}
 	}
 
 	errs := validation.Validate(s.schema, doc)
 	if len(errs) != 0 {
-		return nil, errs
+		return &Response{Errors: errs}
 	}
 
 	op, err := getOperation(doc, operationName)
 	if err != nil {
-		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
+		return &Response{Errors: []*errors.QueryError{errors.Errorf("%s", err)}}
 	}
 
 	r := &exec.Request{
@@ -125,7 +115,22 @@ func (s *Schema) doExec(ctx context.Context, queryString string, operationName s
 		Limiter: make(chan struct{}, s.MaxParallelism),
 		Tracer:  s.Tracer,
 	}
-	return r.Execute(ctx, s.exec, op)
+	varTypes := make(map[string]*introspection.Type)
+	for _, v := range op.Vars {
+		t, err := common.ResolveType(v.Type, s.schema.Resolve)
+		if err != nil {
+			return &Response{Errors: []*errors.QueryError{err}}
+		}
+		varTypes[v.Name.Name] = introspection.WrapType(t)
+	}
+	traceCtx, finish := s.Tracer.TraceQuery(ctx, queryString, operationName, variables, varTypes)
+	data, errs := r.Execute(traceCtx, s.exec, op)
+	finish(errs)
+
+	return &Response{
+		Data:   data,
+		Errors: errs,
+	}
 }
 
 func getOperation(document *query.Document, operationName string) (*query.Operation, error) {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/neelance/graphql-go/errors"
+	"github.com/neelance/graphql-go/introspection"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 )
@@ -13,13 +14,13 @@ type TraceQueryFinishFunc func([]*errors.QueryError)
 type TraceFieldFinishFunc func(*errors.QueryError)
 
 type Tracer interface {
-	TraceQuery(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) (context.Context, TraceQueryFinishFunc)
+	TraceQuery(ctx context.Context, queryString string, operationName string, variables map[string]interface{}, varTypes map[string]*introspection.Type) (context.Context, TraceQueryFinishFunc)
 	TraceField(ctx context.Context, label, typeName, fieldName string, trivial bool, args map[string]interface{}) (context.Context, TraceFieldFinishFunc)
 }
 
 type OpenTracingTracer struct{}
 
-func (OpenTracingTracer) TraceQuery(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) (context.Context, TraceQueryFinishFunc) {
+func (OpenTracingTracer) TraceQuery(ctx context.Context, queryString string, operationName string, variables map[string]interface{}, varTypes map[string]*introspection.Type) (context.Context, TraceQueryFinishFunc) {
 	span, spanCtx := opentracing.StartSpanFromContext(ctx, "GraphQL request")
 	span.SetTag("graphql.query", queryString)
 

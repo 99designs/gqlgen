@@ -1,4 +1,4 @@
-package exec
+package resolvable
 
 import (
 	"context"
@@ -10,63 +10,63 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
-type Exec struct {
-	queryExec    iExec
-	mutationExec iExec
-	schema       *schema.Schema
-	resolver     reflect.Value
+type Schema struct {
+	schema.Schema
+	Query    Resolvable
+	Mutation Resolvable
+	Resolver reflect.Value
 }
 
-type iExec interface {
-	isExec()
+type Resolvable interface {
+	isResolvable()
 }
 
-type objectExec struct {
-	name           string
-	fields         map[string]*fieldExec
-	typeAssertions map[string]*typeAssertExec
+type Object struct {
+	Name           string
+	Fields         map[string]*Field
+	TypeAssertions map[string]*TypeAssertion
 }
 
-type fieldExec struct {
-	typeName    string
-	field       *schema.Field
-	methodIndex int
-	hasContext  bool
-	argsPacker  *structPacker
-	hasError    bool
-	trivial     bool
-	valueExec   iExec
-	traceLabel  string
+type Field struct {
+	schema.Field
+	TypeName    string
+	MethodIndex int
+	HasContext  bool
+	ArgsPacker  *StructPacker
+	HasError    bool
+	Trivial     bool
+	ValueExec   Resolvable
+	TraceLabel  string
 }
 
-type typeAssertExec struct {
-	methodIndex int
-	typeExec    iExec
+type TypeAssertion struct {
+	MethodIndex int
+	TypeExec    Resolvable
 }
 
-type listExec struct {
-	elem iExec
+type List struct {
+	Elem Resolvable
 }
 
-type scalarExec struct{}
+type Scalar struct{}
 
-func (*objectExec) isExec() {}
-func (*listExec) isExec()   {}
-func (*scalarExec) isExec() {}
+func (*Object) isResolvable() {}
+func (*List) isResolvable()   {}
+func (*Scalar) isResolvable() {}
 
-func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
-	b := newExecBuilder(s)
+func ApplyResolver(s *schema.Schema, resolver interface{}) (*Schema, error) {
+	b := newBuilder(s)
 
-	var queryExec, mutationExec iExec
+	var query, mutation Resolvable
 
 	if t, ok := s.EntryPoints["query"]; ok {
-		if err := b.assignExec(&queryExec, t, reflect.TypeOf(resolver)); err != nil {
+		if err := b.assignExec(&query, t, reflect.TypeOf(resolver)); err != nil {
 			return nil, err
 		}
 	}
 
 	if t, ok := s.EntryPoints["mutation"]; ok {
-		if err := b.assignExec(&mutationExec, t, reflect.TypeOf(resolver)); err != nil {
+		if err := b.assignExec(&mutation, t, reflect.TypeOf(resolver)); err != nil {
 			return nil, err
 		}
 	}
@@ -75,19 +75,19 @@ func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 		return nil, err
 	}
 
-	return &Exec{
-		schema:       s,
-		resolver:     reflect.ValueOf(resolver),
-		queryExec:    queryExec,
-		mutationExec: mutationExec,
+	return &Schema{
+		Schema:   *s,
+		Resolver: reflect.ValueOf(resolver),
+		Query:    query,
+		Mutation: mutation,
 	}, nil
 }
 
 type execBuilder struct {
 	schema        *schema.Schema
-	execMap       map[typePair]*execMapEntry
+	resMap        map[typePair]*resMapEntry
 	packerMap     map[typePair]*packerMapEntry
-	structPackers []*structPacker
+	structPackers []*StructPacker
 }
 
 type typePair struct {
@@ -95,9 +95,9 @@ type typePair struct {
 	resolverType reflect.Type
 }
 
-type execMapEntry struct {
-	exec    iExec
-	targets []*iExec
+type resMapEntry struct {
+	exec    Resolvable
+	targets []*Resolvable
 }
 
 type packerMapEntry struct {
@@ -105,16 +105,16 @@ type packerMapEntry struct {
 	targets []*packer
 }
 
-func newExecBuilder(s *schema.Schema) *execBuilder {
+func newBuilder(s *schema.Schema) *execBuilder {
 	return &execBuilder{
 		schema:    s,
-		execMap:   make(map[typePair]*execMapEntry),
+		resMap:    make(map[typePair]*resMapEntry),
 		packerMap: make(map[typePair]*packerMapEntry),
 	}
 }
 
 func (b *execBuilder) finish() error {
-	for _, entry := range b.execMap {
+	for _, entry := range b.resMap {
 		for _, target := range entry.targets {
 			*target = entry.exec
 		}
@@ -130,7 +130,7 @@ func (b *execBuilder) finish() error {
 		p.defaultStruct = reflect.New(p.structType).Elem()
 		for _, f := range p.fields {
 			if defaultVal := f.field.Default; defaultVal != nil {
-				v, err := f.fieldPacker.pack(nil, defaultVal.Value)
+				v, err := f.fieldPacker.Pack(nil, defaultVal.Value)
 				if err != nil {
 					return err
 				}
@@ -142,12 +142,12 @@ func (b *execBuilder) finish() error {
 	return nil
 }
 
-func (b *execBuilder) assignExec(target *iExec, t common.Type, resolverType reflect.Type) error {
+func (b *execBuilder) assignExec(target *Resolvable, t common.Type, resolverType reflect.Type) error {
 	k := typePair{t, resolverType}
-	ref, ok := b.execMap[k]
+	ref, ok := b.resMap[k]
 	if !ok {
-		ref = &execMapEntry{}
-		b.execMap[k] = ref
+		ref = &resMapEntry{}
+		b.resMap[k] = ref
 		var err error
 		ref.exec, err = b.makeExec(t, resolverType)
 		if err != nil {
@@ -158,7 +158,7 @@ func (b *execBuilder) assignExec(target *iExec, t common.Type, resolverType refl
 	return nil
 }
 
-func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (iExec, error) {
+func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (Resolvable, error) {
 	var nonNull bool
 	t, nonNull = unwrapNonNull(t)
 
@@ -185,14 +185,14 @@ func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (iExec,
 		return makeScalarExec(t, resolverType)
 
 	case *schema.Enum:
-		return &scalarExec{}, nil
+		return &Scalar{}, nil
 
 	case *common.List:
 		if resolverType.Kind() != reflect.Slice {
 			return nil, fmt.Errorf("%s is not a slice", resolverType)
 		}
-		e := &listExec{}
-		if err := b.assignExec(&e.elem, t.OfType, resolverType.Elem()); err != nil {
+		e := &List{}
+		if err := b.assignExec(&e.Elem, t.OfType, resolverType.Elem()); err != nil {
 			return nil, err
 		}
 		return e, nil
@@ -202,7 +202,7 @@ func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (iExec,
 	}
 }
 
-func makeScalarExec(t *schema.Scalar, resolverType reflect.Type) (iExec, error) {
+func makeScalarExec(t *schema.Scalar, resolverType reflect.Type) (Resolvable, error) {
 	implementsType := false
 	switch r := reflect.New(resolverType).Interface().(type) {
 	case *int32:
@@ -219,10 +219,10 @@ func makeScalarExec(t *schema.Scalar, resolverType reflect.Type) (iExec, error) 
 	if !implementsType {
 		return nil, fmt.Errorf("can not use %s as %s", resolverType, t.Name)
 	}
-	return &scalarExec{}, nil
+	return &Scalar{}, nil
 }
 
-func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type) (*objectExec, error) {
+func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, possibleTypes []*schema.Object, nonNull bool, resolverType reflect.Type) (*Object, error) {
 	if !nonNull {
 		if resolverType.Kind() != reflect.Ptr && resolverType.Kind() != reflect.Interface {
 			return nil, fmt.Errorf("%s is not a pointer or interface", resolverType)
@@ -231,7 +231,7 @@ func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, p
 
 	methodHasReceiver := resolverType.Kind() != reflect.Interface
 
-	fieldExecs := make(map[string]*fieldExec)
+	Fields := make(map[string]*Field)
 	for _, f := range fields {
 		methodIndex := findMethod(resolverType, f.Name)
 		if methodIndex == -1 {
@@ -247,35 +247,35 @@ func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, p
 		if err != nil {
 			return nil, fmt.Errorf("%s\n\treturned by (%s).%s", err, resolverType, m.Name)
 		}
-		fieldExecs[f.Name] = fe
+		Fields[f.Name] = fe
 	}
 
-	typeAssertions := make(map[string]*typeAssertExec)
+	typeAssertions := make(map[string]*TypeAssertion)
 	for _, impl := range possibleTypes {
 		methodIndex := findMethod(resolverType, "to"+impl.Name)
 		if methodIndex == -1 {
 			return nil, fmt.Errorf("%s does not resolve %q: missing method %q to convert to %q", resolverType, typeName, "to"+impl.Name, impl.Name)
 		}
-		a := &typeAssertExec{
-			methodIndex: methodIndex,
+		a := &TypeAssertion{
+			MethodIndex: methodIndex,
 		}
-		if err := b.assignExec(&a.typeExec, impl, resolverType.Method(methodIndex).Type.Out(0)); err != nil {
+		if err := b.assignExec(&a.TypeExec, impl, resolverType.Method(methodIndex).Type.Out(0)); err != nil {
 			return nil, err
 		}
 		typeAssertions[impl.Name] = a
 	}
 
-	return &objectExec{
-		name:           typeName,
-		fields:         fieldExecs,
-		typeAssertions: typeAssertions,
+	return &Object{
+		Name:           typeName,
+		Fields:         Fields,
+		TypeAssertions: typeAssertions,
 	}, nil
 }
 
 var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
 var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
-func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool) (*fieldExec, error) {
+func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.Method, methodIndex int, methodHasReceiver bool) (*Field, error) {
 	in := make([]reflect.Type, m.Type.NumIn())
 	for i := range in {
 		in[i] = m.Type.In(i)
@@ -289,7 +289,7 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		in = in[1:]
 	}
 
-	var argsPacker *structPacker
+	var argsPacker *StructPacker
 	if len(f.Args) > 0 {
 		if len(in) == 0 {
 			return nil, fmt.Errorf("must have parameter for field arguments")
@@ -317,17 +317,17 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		}
 	}
 
-	fe := &fieldExec{
-		typeName:    typeName,
-		field:       f,
-		methodIndex: methodIndex,
-		hasContext:  hasContext,
-		argsPacker:  argsPacker,
-		hasError:    hasError,
-		trivial:     !hasContext && argsPacker == nil && !hasError,
-		traceLabel:  fmt.Sprintf("GraphQL field: %s.%s", typeName, f.Name),
+	fe := &Field{
+		Field:       *f,
+		TypeName:    typeName,
+		MethodIndex: methodIndex,
+		HasContext:  hasContext,
+		ArgsPacker:  argsPacker,
+		HasError:    hasError,
+		Trivial:     !hasContext && argsPacker == nil && !hasError,
+		TraceLabel:  fmt.Sprintf("GraphQL field: %s.%s", typeName, f.Name),
 	}
-	if err := b.assignExec(&fe.valueExec, f.Type, m.Type.Out(0)); err != nil {
+	if err := b.assignExec(&fe.ValueExec, f.Type, m.Type.Out(0)); err != nil {
 		return nil, err
 	}
 	return fe, nil

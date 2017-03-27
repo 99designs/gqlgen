@@ -2,45 +2,96 @@ package exec
 
 import (
 	"context"
+	"log"
 	"reflect"
+	"runtime"
+	"sync"
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
+	"github.com/neelance/graphql-go/internal/exec/resolvable"
+	"github.com/neelance/graphql-go/internal/exec/selected"
+	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
+	"github.com/neelance/graphql-go/introspection"
+	"github.com/neelance/graphql-go/trace"
 )
 
-func execSelection(ctx context.Context, sel appliedSelection, resolver reflect.Value, results map[string]interface{}) {
-	switch sel := sel.(type) {
-	case *appliedFieldSelection:
-		execFieldSelection(ctx, sel, resolver, results)
+type Request struct {
+	selected.Request
+	Limiter chan struct{}
+	Tracer  trace.Tracer
+	wg      sync.WaitGroup
+}
 
-	case *typenameFieldSelection:
-		if len(sel.typeAssertions) == 0 {
-			results[sel.alias] = sel.name
+func (r *Request) handlePanic() {
+	if err := recover(); err != nil {
+		r.AddError(makePanicError(err))
+	}
+}
+
+func makePanicError(value interface{}) *errors.QueryError {
+	err := errors.Errorf("graphql: panic occurred: %v", value)
+	const size = 64 << 10
+	buf := make([]byte, size)
+	buf = buf[:runtime.Stack(buf, false)]
+	log.Printf("%s\n%s", err, buf)
+	return err
+}
+
+func (r *Request) Execute(ctx context.Context, s *resolvable.Schema, op *query.Operation) (interface{}, []*errors.QueryError) {
+	results := make(map[string]interface{})
+	func() {
+		defer r.handlePanic()
+		sels := selected.ApplyOperation(&r.Request, s, op)
+		for _, sel := range sels {
+			r.execSelection(ctx, sel, s.Resolver, results)
+			if op.Type == query.Mutation {
+				r.wg.Wait()
+			}
+		}
+	}()
+	r.wg.Wait()
+
+	if err := ctx.Err(); err != nil {
+		return nil, []*errors.QueryError{errors.Errorf("%s", err)}
+	}
+
+	return results, r.Errs
+}
+
+func (r *Request) execSelection(ctx context.Context, sel selected.Selection, resolver reflect.Value, results map[string]interface{}) {
+	switch sel := sel.(type) {
+	case *selected.SchemaField:
+		r.execFieldSelection(ctx, sel, resolver, results)
+
+	case *selected.TypenameField:
+		if len(sel.TypeAssertions) == 0 {
+			results[sel.Alias] = sel.Name
 			return
 		}
-		for name, a := range sel.typeAssertions {
-			out := resolver.Method(a.methodIndex).Call(nil)
+		for name, a := range sel.TypeAssertions {
+			out := resolver.Method(a.MethodIndex).Call(nil)
 			if out[1].Bool() {
-				results[sel.alias] = name
+				results[sel.Alias] = name
 				return
 			}
 		}
 
-	case *metaFieldSelection:
+	case *selected.MetaField:
 		subresults := make(map[string]interface{})
-		for _, subsel := range sel.sels {
-			execSelection(ctx, subsel, sel.resolver, subresults)
+		for _, subsel := range sel.Sels {
+			r.execSelection(ctx, subsel, sel.Resolver, subresults)
 		}
-		results[sel.alias] = subresults
+		results[sel.Alias] = subresults
 
-	case *appliedTypeAssertion:
-		out := resolver.Method(sel.methodIndex).Call(nil)
+	case *selected.TypeAssertion:
+		out := resolver.Method(sel.MethodIndex).Call(nil)
 		if !out[1].Bool() {
 			return
 		}
-		for _, sel := range sel.sels {
-			execSelection(ctx, sel, out[0], results)
+		for _, sel := range sel.Sels {
+			r.execSelection(ctx, sel, out[0], results)
 		}
 
 	default:
@@ -48,16 +99,16 @@ func execSelection(ctx context.Context, sel appliedSelection, resolver reflect.V
 	}
 }
 
-func execFieldSelection(ctx context.Context, afs *appliedFieldSelection, resolver reflect.Value, results map[string]interface{}) {
+func (r *Request) execFieldSelection(ctx context.Context, field *selected.SchemaField, resolver reflect.Value, results map[string]interface{}) {
 	do := func(applyLimiter bool) interface{} {
 		if applyLimiter {
-			afs.req.Limiter <- struct{}{}
+			r.Limiter <- struct{}{}
 		}
 
 		var result reflect.Value
 		var err *errors.QueryError
 
-		traceCtx, finish := afs.req.Tracer.TraceField(ctx, afs.traceLabel, afs.typeName, afs.field.Name, afs.trivial, afs.args)
+		traceCtx, finish := r.Tracer.TraceField(ctx, field.TraceLabel, field.TypeName, field.Name, field.Trivial, field.Args)
 		defer func() {
 			finish(err)
 		}()
@@ -74,15 +125,15 @@ func execFieldSelection(ctx context.Context, afs *appliedFieldSelection, resolve
 			}
 
 			var in []reflect.Value
-			if afs.hasContext {
+			if field.HasContext {
 				in = append(in, reflect.ValueOf(traceCtx))
 			}
-			if afs.argsPacker != nil {
-				in = append(in, afs.packedArgs)
+			if field.ArgsPacker != nil {
+				in = append(in, field.PackedArgs)
 			}
-			out := resolver.Method(afs.methodIndex).Call(in)
+			out := resolver.Method(field.MethodIndex).Call(in)
 			result = out[0]
-			if afs.hasError && !out[1].IsNil() {
+			if field.HasError && !out[1].IsNil() {
 				resolverErr := out[1].Interface().(error)
 				err := errors.Errorf("%s", resolverErr)
 				err.ResolverError = resolverErr
@@ -92,32 +143,32 @@ func execFieldSelection(ctx context.Context, afs *appliedFieldSelection, resolve
 		}()
 
 		if applyLimiter {
-			<-afs.req.Limiter
+			<-r.Limiter
 		}
 
 		if err != nil {
-			afs.req.addError(err)
+			r.AddError(err)
 			return nil // TODO handle non-nil
 		}
 
-		return execSelectionSet(traceCtx, afs.sels, afs.field.Type, result)
+		return r.execSelectionSet(traceCtx, field.Sels, field.Type, result)
 	}
 
-	if afs.trivial {
-		results[afs.alias] = do(false)
+	if field.Trivial {
+		results[field.Alias] = do(false)
 		return
 	}
 
 	result := new(interface{})
-	afs.req.wg.Add(1)
+	r.wg.Add(1)
 	go func() {
-		defer afs.req.wg.Done()
+		defer r.wg.Done()
 		*result = do(true)
 	}()
-	results[afs.alias] = result
+	results[field.Alias] = result
 }
 
-func execSelectionSet(ctx context.Context, sels []appliedSelection, typ common.Type, resolver reflect.Value) interface{} {
+func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selection, typ common.Type, resolver reflect.Value) interface{} {
 	t, nonNull := unwrapNonNull(typ)
 	switch t := t.(type) {
 	case *schema.Object, *schema.Interface, *schema.Union:
@@ -129,7 +180,7 @@ func execSelectionSet(ctx context.Context, sels []appliedSelection, typ common.T
 		}
 		results := make(map[string]interface{})
 		for _, sel := range sels {
-			execSelection(ctx, sel, resolver, results)
+			r.execSelection(ctx, sel, resolver, results)
 		}
 		return results
 
@@ -142,7 +193,7 @@ func execSelectionSet(ctx context.Context, sels []appliedSelection, typ common.T
 		}
 		l := make([]interface{}, resolver.Len())
 		for i := range l {
-			l[i] = execSelectionSet(ctx, sels, t.OfType, resolver.Index(i))
+			l[i] = r.execSelectionSet(ctx, sels, t.OfType, resolver.Index(i))
 		}
 		return l
 
@@ -152,4 +203,27 @@ func execSelectionSet(ctx context.Context, sels []appliedSelection, typ common.T
 	default:
 		panic("unreachable")
 	}
+}
+
+func unwrapNonNull(t common.Type) (common.Type, bool) {
+	if nn, ok := t.(*common.NonNull); ok {
+		return nn.OfType, true
+	}
+	return t, false
+}
+
+func IntrospectSchema(s *schema.Schema) interface{} {
+	r := &Request{
+		Request: selected.Request{
+			Schema: s,
+		},
+		Limiter: make(chan struct{}, 10),
+		Tracer:  trace.NoopTracer{},
+	}
+	resolver := reflect.ValueOf(introspection.WrapSchema(r.Schema))
+	results := make(map[string]interface{})
+	for _, sel := range selected.IntrospectionSels {
+		r.execSelection(context.Background(), sel, resolver, results)
+	}
+	return results
 }

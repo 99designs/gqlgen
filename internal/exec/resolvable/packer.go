@@ -1,4 +1,4 @@
-package exec
+package resolvable
 
 import (
 	"fmt"
@@ -12,8 +12,19 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
+type Request struct {
+	Vars map[string]interface{}
+}
+
+func (r *Request) resolveVar(value interface{}) interface{} {
+	if v, ok := value.(lexer.Variable); ok {
+		value = r.Vars[string(v)]
+	}
+	return value
+}
+
 type packer interface {
-	pack(r *Request, value interface{}) (reflect.Value, error)
+	Pack(r *Request, value interface{}) (reflect.Value, error)
 }
 
 func (b *execBuilder) assignPacker(target *packer, schemaType common.Type, reflectType reflect.Type) error {
@@ -64,14 +75,14 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 			return nil, fmt.Errorf("can not unmarshal %s into %s", schemaType, reflectType)
 		}
 		return &unmarshalerPacker{
-			valueType: reflectType,
+			ValueType: reflectType,
 		}, nil
 	}
 
 	switch t := schemaType.(type) {
 	case *schema.Scalar:
-		return &valuePacker{
-			valueType: reflectType,
+		return &ValuePacker{
+			ValueType: reflectType,
 		}, nil
 
 	case *schema.Enum:
@@ -79,8 +90,8 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 		if reflectType != want {
 			return nil, fmt.Errorf("wrong type, expected %s", want)
 		}
-		return &valuePacker{
-			valueType: reflectType,
+		return &ValuePacker{
+			ValueType: reflectType,
 		}, nil
 
 	case *schema.InputObject:
@@ -110,7 +121,7 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 	}
 }
 
-func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect.Type) (*structPacker, error) {
+func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect.Type) (*StructPacker, error) {
 	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
 		return nil, fmt.Errorf("expected pointer to struct, got %s", typ)
 	}
@@ -142,7 +153,7 @@ func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect
 		fields = append(fields, fe)
 	}
 
-	p := &structPacker{
+	p := &StructPacker{
 		structType: structType,
 		fields:     fields,
 	}
@@ -150,7 +161,7 @@ func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect
 	return p, nil
 }
 
-type structPacker struct {
+type StructPacker struct {
 	structType    reflect.Type
 	defaultStruct reflect.Value
 	fields        []*structPackerField
@@ -162,7 +173,7 @@ type structPackerField struct {
 	fieldPacker packer
 }
 
-func (p *structPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
+func (p *StructPacker) Pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
@@ -172,7 +183,7 @@ func (p *structPacker) pack(r *Request, value interface{}) (reflect.Value, error
 	v.Elem().Set(p.defaultStruct)
 	for _, f := range p.fields {
 		if value, ok := values[f.field.Name.Name]; ok {
-			packed, err := f.fieldPacker.pack(r, r.resolveVar(value))
+			packed, err := f.fieldPacker.Pack(r, r.resolveVar(value))
 			if err != nil {
 				return reflect.Value{}, err
 			}
@@ -187,7 +198,7 @@ type listPacker struct {
 	elem      packer
 }
 
-func (e *listPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
+func (e *listPacker) Pack(r *Request, value interface{}) (reflect.Value, error) {
 	list, ok := value.([]interface{})
 	if !ok {
 		list = []interface{}{value}
@@ -195,7 +206,7 @@ func (e *listPacker) pack(r *Request, value interface{}) (reflect.Value, error) 
 
 	v := reflect.MakeSlice(e.sliceType, len(list), len(list))
 	for i := range list {
-		packed, err := e.elem.pack(r, r.resolveVar(list[i]))
+		packed, err := e.elem.Pack(r, r.resolveVar(list[i]))
 		if err != nil {
 			return reflect.Value{}, err
 		}
@@ -210,12 +221,12 @@ type nullPacker struct {
 	addPtr     bool
 }
 
-func (p *nullPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
+func (p *nullPacker) Pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Zero(p.valueType), nil
 	}
 
-	v, err := p.elemPacker.pack(r, value)
+	v, err := p.elemPacker.Pack(r, value)
 	if err != nil {
 		return reflect.Value{}, err
 	}
@@ -229,11 +240,11 @@ func (p *nullPacker) pack(r *Request, value interface{}) (reflect.Value, error) 
 	return v, nil
 }
 
-type valuePacker struct {
-	valueType reflect.Type
+type ValuePacker struct {
+	ValueType reflect.Type
 }
 
-func (p *valuePacker) pack(r *Request, value interface{}) (reflect.Value, error) {
+func (p *ValuePacker) Pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
@@ -242,18 +253,18 @@ func (p *valuePacker) pack(r *Request, value interface{}) (reflect.Value, error)
 		value = common.UnmarshalLiteral(lit)
 	}
 
-	coerced, err := unmarshalInput(p.valueType, value)
+	coerced, err := unmarshalInput(p.ValueType, value)
 	if err != nil {
-		return reflect.Value{}, fmt.Errorf("could not unmarshal %#v (%T) into %s: %s", value, value, p.valueType, err)
+		return reflect.Value{}, fmt.Errorf("could not unmarshal %#v (%T) into %s: %s", value, value, p.ValueType, err)
 	}
 	return reflect.ValueOf(coerced), nil
 }
 
 type unmarshalerPacker struct {
-	valueType reflect.Type
+	ValueType reflect.Type
 }
 
-func (p *unmarshalerPacker) pack(r *Request, value interface{}) (reflect.Value, error) {
+func (p *unmarshalerPacker) Pack(r *Request, value interface{}) (reflect.Value, error) {
 	if value == nil {
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
@@ -262,7 +273,7 @@ func (p *unmarshalerPacker) pack(r *Request, value interface{}) (reflect.Value, 
 		value = common.UnmarshalLiteral(lit)
 	}
 
-	v := reflect.New(p.valueType)
+	v := reflect.New(p.ValueType)
 	if err := v.Interface().(Unmarshaler).UnmarshalGraphQL(value); err != nil {
 		return reflect.Value{}, err
 	}

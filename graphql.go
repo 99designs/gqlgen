@@ -8,6 +8,8 @@ import (
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/exec"
+	"github.com/neelance/graphql-go/internal/exec/resolvable"
+	"github.com/neelance/graphql-go/internal/exec/selected"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 	"github.com/neelance/graphql-go/internal/validation"
@@ -50,11 +52,11 @@ func ParseSchema(schemaString string, resolver interface{}, opts ...SchemaOpt) (
 	}
 
 	if resolver != nil {
-		e, err := exec.Make(s.schema, resolver)
+		r, err := resolvable.ApplyResolver(s.schema, resolver)
 		if err != nil {
 			return nil, err
 		}
-		s.exec = e
+		s.res = r
 	}
 
 	return s, nil
@@ -72,7 +74,7 @@ func MustParseSchema(schemaString string, resolver interface{}, opts ...SchemaOp
 // Schema represents a GraphQL schema with an optional resolver.
 type Schema struct {
 	schema *schema.Schema
-	exec   *exec.Exec
+	res    *resolvable.Schema
 
 	maxParallelism int
 	tracer         trace.Tracer
@@ -107,7 +109,7 @@ type Response struct {
 // without a resolver. If the context get cancelled, no further resolvers will be called and a
 // the context error will be returned as soon as possible (not immediately).
 func (s *Schema) Exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}) *Response {
-	if s.exec == nil {
+	if s.res == nil {
 		panic("schema created without resolver, can not exec")
 	}
 
@@ -127,9 +129,11 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	}
 
 	r := &exec.Request{
-		Doc:     doc,
-		Vars:    variables,
-		Schema:  s.schema,
+		Request: selected.Request{
+			Doc:    doc,
+			Vars:   variables,
+			Schema: s.schema,
+		},
 		Limiter: make(chan struct{}, s.maxParallelism),
 		Tracer:  s.tracer,
 	}
@@ -142,7 +146,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		varTypes[v.Name.Name] = introspection.WrapType(t)
 	}
 	traceCtx, finish := s.tracer.TraceQuery(ctx, queryString, operationName, variables, varTypes)
-	data, errs := r.Execute(traceCtx, s.exec, op)
+	data, errs := r.Execute(traceCtx, s.res, op)
 	finish(errs)
 
 	return &Response{

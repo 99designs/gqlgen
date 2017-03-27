@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/neelance/graphql-go/errors"
@@ -112,7 +111,10 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 	if s.res == nil {
 		panic("schema created without resolver, can not exec")
 	}
+	return s.exec(ctx, queryString, operationName, variables, s.res)
+}
 
+func (s *Schema) exec(ctx context.Context, queryString string, operationName string, variables map[string]interface{}, res *resolvable.Schema) *Response {
 	doc, qErr := query.Parse(queryString)
 	if qErr != nil {
 		return &Response{Errors: []*errors.QueryError{qErr}}
@@ -146,7 +148,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		varTypes[v.Name.Name] = introspection.WrapType(t)
 	}
 	traceCtx, finish := s.tracer.TraceQuery(ctx, queryString, operationName, variables, varTypes)
-	data, errs := r.Execute(traceCtx, s.res, op)
+	data, errs := r.Execute(traceCtx, res, op)
 	finish(errs)
 
 	return &Response{
@@ -174,15 +176,4 @@ func getOperation(document *query.Document, operationName string) (*query.Operat
 		return nil, fmt.Errorf("no operation with name %q", operationName)
 	}
 	return op, nil
-}
-
-// Inspect allows inspection of the given schema.
-func (s *Schema) Inspect() *introspection.Schema {
-	return introspection.WrapSchema(s.schema)
-}
-
-// ToJSON encodes the schema in a JSON format used by tools like Relay.
-func (s *Schema) ToJSON() ([]byte, error) {
-	result := exec.IntrospectSchema(s.schema)
-	return json.MarshalIndent(result, "", "\t")
 }

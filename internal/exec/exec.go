@@ -13,7 +13,6 @@ import (
 	"github.com/neelance/graphql-go/internal/exec/selected"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
-	"github.com/neelance/graphql-go/introspection"
 	"github.com/neelance/graphql-go/trace"
 )
 
@@ -210,20 +209,4 @@ func unwrapNonNull(t common.Type) (common.Type, bool) {
 		return nn.OfType, true
 	}
 	return t, false
-}
-
-func IntrospectSchema(s *schema.Schema) interface{} {
-	r := &Request{
-		Request: selected.Request{
-			Schema: s,
-		},
-		Limiter: make(chan struct{}, 10),
-		Tracer:  trace.NoopTracer{},
-	}
-	resolver := reflect.ValueOf(introspection.WrapSchema(r.Schema))
-	results := make(map[string]interface{})
-	for _, sel := range selected.IntrospectionSels {
-		r.execSelection(context.Background(), sel, resolver, results)
-	}
-	return results
 }

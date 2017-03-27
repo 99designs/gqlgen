@@ -1,22 +1,32 @@
-package selected
+package graphql
 
 import (
+	"context"
+	"encoding/json"
+
 	"github.com/neelance/graphql-go/internal/exec/resolvable"
-	"github.com/neelance/graphql-go/internal/query"
+	"github.com/neelance/graphql-go/introspection"
 )
 
-var IntrospectionSels []Selection
-
-func init() {
-	introspectionQuery, err := query.Parse(introspectionQuerySrc)
-	if err != nil {
-		panic(err)
-	}
-	IntrospectionSels = applySelectionSet(&Request{Doc: introspectionQuery}, resolvable.MetaSchema, introspectionQuery.Operations.Get("IntrospectionQuery").SelSet)
+// Inspect allows inspection of the given schema.
+func (s *Schema) Inspect() *introspection.Schema {
+	return introspection.WrapSchema(s.schema)
 }
 
-var introspectionQuerySrc = `
-  query IntrospectionQuery {
+// ToJSON encodes the schema in a JSON format used by tools like Relay.
+func (s *Schema) ToJSON() ([]byte, error) {
+	result := s.exec(context.Background(), introspectionQuery, "", nil, &resolvable.Schema{
+		Query:  &resolvable.Object{},
+		Schema: *s.schema,
+	})
+	if len(result.Errors) != 0 {
+		panic(result.Errors[0])
+	}
+	return json.MarshalIndent(result.Data, "", "\t")
+}
+
+var introspectionQuery = `
+  query {
     __schema {
       queryType { name }
       mutationType { name }

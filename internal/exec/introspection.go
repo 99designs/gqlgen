@@ -43,7 +43,12 @@ func IntrospectSchema(s *schema.Schema) interface{} {
 		Tracer:  trace.NoopTracer{},
 	}
 	sels := applySelectionSet(r, schemaExec, introspectionQuery.Operations.Get("IntrospectionQuery").SelSet)
-	return schemaExec.exec(context.Background(), sels, reflect.ValueOf(introspection.WrapSchema(r.Schema)))
+	resolver := reflect.ValueOf(introspection.WrapSchema(r.Schema))
+	results := make(map[string]interface{})
+	for _, sel := range sels {
+		execSelection(context.Background(), sel, resolver, results)
+	}
+	return results
 }
 
 var introspectionQuery *query.Document

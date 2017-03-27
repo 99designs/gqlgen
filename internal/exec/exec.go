@@ -9,6 +9,29 @@ import (
 
 func execSelection(ctx context.Context, sel appliedSelection, resolver reflect.Value, results map[string]interface{}) {
 	switch sel := sel.(type) {
+	case *appliedFieldSelection:
+		execFieldSelection(ctx, sel, resolver, results)
+
+	case *typenameFieldSelection:
+		if len(sel.typeAssertions) == 0 {
+			results[sel.alias] = sel.name
+			return
+		}
+		for name, a := range sel.typeAssertions {
+			out := resolver.Method(a.methodIndex).Call(nil)
+			if out[1].Bool() {
+				results[sel.alias] = name
+				return
+			}
+		}
+
+	case *metaFieldSelection:
+		subresults := make(map[string]interface{})
+		for _, subsel := range sel.sels {
+			execSelection(ctx, subsel, sel.resolver, subresults)
+		}
+		results[sel.alias] = subresults
+
 	case *appliedTypeAssertion:
 		out := resolver.Method(sel.methodIndex).Call(nil)
 		if !out[1].Bool() {
@@ -18,37 +41,12 @@ func execSelection(ctx context.Context, sel appliedSelection, resolver reflect.V
 			execSelection(ctx, sel, out[0], results)
 		}
 
-	case *appliedFieldSelection:
-		sel.execSelection(ctx, resolver, results)
-
-	case *typenameFieldSelection:
-		results[sel.alias] = typenameOf(sel.oe, resolver)
-
-	case *metaFieldSelection:
-		results[sel.alias] = schemaExec.exec(ctx, sel.sels, sel.resolver)
-
 	default:
 		panic("unreachable")
 	}
 }
 
-func typenameOf(e *objectExec, resolver reflect.Value) interface{} {
-	if len(e.typeAssertions) == 0 {
-		return e.name
-	}
-
-	for name, a := range e.typeAssertions {
-		out := resolver.Method(a.methodIndex).Call(nil)
-		if out[1].Bool() {
-			return name
-		}
-	}
-
-	return nil
-}
-
-func (afs *appliedFieldSelection) execSelection(ctx context.Context, resolver reflect.Value, results map[string]interface{}) {
-	fe := afs.exec
+func execFieldSelection(ctx context.Context, afs *appliedFieldSelection, resolver reflect.Value, results map[string]interface{}) {
 	do := func(applyLimiter bool) interface{} {
 		if applyLimiter {
 			afs.req.Limiter <- struct{}{}
@@ -57,7 +55,7 @@ func (afs *appliedFieldSelection) execSelection(ctx context.Context, resolver re
 		var result reflect.Value
 		var err *errors.QueryError
 
-		traceCtx, finish := afs.req.Tracer.TraceField(ctx, fe.traceLabel, fe.typeName, fe.field.Name, fe.trivial, afs.args)
+		traceCtx, finish := afs.req.Tracer.TraceField(ctx, afs.traceLabel, afs.typeName, afs.field.Name, afs.trivial, afs.args)
 		defer func() {
 			finish(err)
 		}()
@@ -74,15 +72,15 @@ func (afs *appliedFieldSelection) execSelection(ctx context.Context, resolver re
 			}
 
 			var in []reflect.Value
-			if fe.hasContext {
+			if afs.hasContext {
 				in = append(in, reflect.ValueOf(traceCtx))
 			}
-			if fe.argsPacker != nil {
+			if afs.argsPacker != nil {
 				in = append(in, afs.packedArgs)
 			}
-			out := resolver.Method(fe.methodIndex).Call(in)
+			out := resolver.Method(afs.methodIndex).Call(in)
 			result = out[0]
-			if fe.hasError && !out[1].IsNil() {
+			if afs.hasError && !out[1].IsNil() {
 				resolverErr := out[1].Interface().(error)
 				err := errors.Errorf("%s", resolverErr)
 				err.ResolverError = resolverErr
@@ -100,10 +98,10 @@ func (afs *appliedFieldSelection) execSelection(ctx context.Context, resolver re
 			return nil // TODO handle non-nil
 		}
 
-		return fe.valueExec.exec(traceCtx, afs.sels, result)
+		return execSelectionSet(traceCtx, afs.sels, afs.valueExec, result)
 	}
 
-	if fe.trivial {
+	if afs.trivial {
 		results[afs.alias] = do(false)
 		return
 	}
@@ -117,34 +115,38 @@ func (afs *appliedFieldSelection) execSelection(ctx context.Context, resolver re
 	results[afs.alias] = result
 }
 
-func (e *objectExec) exec(ctx context.Context, sels []appliedSelection, resolver reflect.Value) interface{} {
-	if resolver.IsNil() {
-		if e.nonNull {
-			panic(errors.Errorf("got nil for non-null %q", e.name))
-		}
-		return nil
-	}
-	results := make(map[string]interface{})
-	for _, sel := range sels {
-		execSelection(ctx, sel, resolver, results)
-	}
-	return results
-}
-
-func (e *listExec) exec(ctx context.Context, sels []appliedSelection, resolver reflect.Value) interface{} {
-	if !e.nonNull {
+func execSelectionSet(ctx context.Context, sels []appliedSelection, e iExec, resolver reflect.Value) interface{} {
+	switch e := e.(type) {
+	case *objectExec:
 		if resolver.IsNil() {
+			if e.nonNull {
+				panic(errors.Errorf("got nil for non-null %q", e.name))
+			}
 			return nil
 		}
-		resolver = resolver.Elem()
-	}
-	l := make([]interface{}, resolver.Len())
-	for i := range l {
-		l[i] = e.elem.exec(ctx, sels, resolver.Index(i))
-	}
-	return l
-}
+		results := make(map[string]interface{})
+		for _, sel := range sels {
+			execSelection(ctx, sel, resolver, results)
+		}
+		return results
 
-func (e *scalarExec) exec(ctx context.Context, sels []appliedSelection, resolver reflect.Value) interface{} {
-	return resolver.Interface()
+	case *listExec:
+		if !e.nonNull {
+			if resolver.IsNil() {
+				return nil
+			}
+			resolver = resolver.Elem()
+		}
+		l := make([]interface{}, resolver.Len())
+		for i := range l {
+			l[i] = execSelectionSet(ctx, sels, e.elem, resolver.Index(i))
+		}
+		return l
+
+	case *scalarExec:
+		return resolver.Interface()
+
+	default:
+		panic("unreachable")
+	}
 }

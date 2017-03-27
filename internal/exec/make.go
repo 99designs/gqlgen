@@ -18,7 +18,7 @@ type Exec struct {
 }
 
 type iExec interface {
-	exec(ctx context.Context, sels []appliedSelection, resolver reflect.Value) interface{}
+	isExec()
 }
 
 type objectExec struct {
@@ -51,6 +51,10 @@ type listExec struct {
 }
 
 type scalarExec struct{}
+
+func (*objectExec) isExec() {}
+func (*listExec) isExec()   {}
+func (*scalarExec) isExec() {}
 
 func Make(s *schema.Schema, resolver interface{}) (*Exec, error) {
 	b := newExecBuilder(s)

@@ -95,12 +95,12 @@ type appliedSelectionSet struct {
 type appliedSelection interface{}
 
 type appliedFieldSelection struct {
+	fieldExec
 	req        *Request
 	alias      string
 	args       map[string]interface{}
 	packedArgs reflect.Value
 	sels       []appliedSelection
-	exec       *fieldExec
 }
 
 type appliedTypeAssertion struct {
@@ -109,8 +109,8 @@ type appliedTypeAssertion struct {
 }
 
 type typenameFieldSelection struct {
+	objectExec
 	alias string
-	oe    *objectExec
 }
 
 type metaFieldSelection struct {
@@ -134,8 +134,8 @@ func applySelectionSet(r *Request, e *objectExec, selSet *query.SelectionSet) (s
 			switch field.Name.Name {
 			case "__typename":
 				sels = append(sels, &typenameFieldSelection{
-					alias: field.Alias.Name,
-					oe:    e,
+					objectExec: *e,
+					alias:      field.Alias.Name,
 				})
 
 			case "__schema":
@@ -183,12 +183,12 @@ func applySelectionSet(r *Request, e *objectExec, selSet *query.SelectionSet) (s
 				}
 
 				sels = append(sels, &appliedFieldSelection{
+					fieldExec:  *fe,
 					req:        r,
 					alias:      field.Alias.Name,
 					args:       args,
 					packedArgs: packedArgs,
 					sels:       applyField(r, fe.valueExec, field.SelSet),
-					exec:       fe,
 				})
 			}
 

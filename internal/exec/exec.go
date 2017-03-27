@@ -5,6 +5,8 @@ import (
 	"reflect"
 
 	"github.com/neelance/graphql-go/errors"
+	"github.com/neelance/graphql-go/internal/common"
+	"github.com/neelance/graphql-go/internal/schema"
 )
 
 func execSelection(ctx context.Context, sel appliedSelection, resolver reflect.Value, results map[string]interface{}) {
@@ -98,7 +100,7 @@ func execFieldSelection(ctx context.Context, afs *appliedFieldSelection, resolve
 			return nil // TODO handle non-nil
 		}
 
-		return execSelectionSet(traceCtx, afs.sels, afs.valueExec, result)
+		return execSelectionSet(traceCtx, afs.sels, afs.field.Type, result)
 	}
 
 	if afs.trivial {
@@ -115,12 +117,13 @@ func execFieldSelection(ctx context.Context, afs *appliedFieldSelection, resolve
 	results[afs.alias] = result
 }
 
-func execSelectionSet(ctx context.Context, sels []appliedSelection, e iExec, resolver reflect.Value) interface{} {
-	switch e := e.(type) {
-	case *objectExec:
+func execSelectionSet(ctx context.Context, sels []appliedSelection, typ common.Type, resolver reflect.Value) interface{} {
+	t, nonNull := unwrapNonNull(typ)
+	switch t := t.(type) {
+	case *schema.Object, *schema.Interface, *schema.Union:
 		if resolver.IsNil() {
-			if e.nonNull {
-				panic(errors.Errorf("got nil for non-null %q", e.name))
+			if nonNull {
+				panic(errors.Errorf("got nil for non-null %q", t))
 			}
 			return nil
 		}
@@ -130,8 +133,8 @@ func execSelectionSet(ctx context.Context, sels []appliedSelection, e iExec, res
 		}
 		return results
 
-	case *listExec:
-		if !e.nonNull {
+	case *common.List:
+		if !nonNull {
 			if resolver.IsNil() {
 				return nil
 			}
@@ -139,11 +142,11 @@ func execSelectionSet(ctx context.Context, sels []appliedSelection, e iExec, res
 		}
 		l := make([]interface{}, resolver.Len())
 		for i := range l {
-			l[i] = execSelectionSet(ctx, sels, e.elem, resolver.Index(i))
+			l[i] = execSelectionSet(ctx, sels, t.OfType, resolver.Index(i))
 		}
 		return l
 
-	case *scalarExec:
+	case *schema.Scalar, *schema.Enum:
 		return resolver.Interface()
 
 	default:

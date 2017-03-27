@@ -25,7 +25,6 @@ type objectExec struct {
 	name           string
 	fields         map[string]*fieldExec
 	typeAssertions map[string]*typeAssertExec
-	nonNull        bool
 }
 
 type fieldExec struct {
@@ -46,8 +45,7 @@ type typeAssertExec struct {
 }
 
 type listExec struct {
-	elem    iExec
-	nonNull bool
+	elem iExec
 }
 
 type scalarExec struct{}
@@ -193,7 +191,7 @@ func (b *execBuilder) makeExec(t common.Type, resolverType reflect.Type) (iExec,
 		if resolverType.Kind() != reflect.Slice {
 			return nil, fmt.Errorf("%s is not a slice", resolverType)
 		}
-		e := &listExec{nonNull: nonNull}
+		e := &listExec{}
 		if err := b.assignExec(&e.elem, t.OfType, resolverType.Elem()); err != nil {
 			return nil, err
 		}
@@ -271,7 +269,6 @@ func (b *execBuilder) makeObjectExec(typeName string, fields schema.FieldList, p
 		name:           typeName,
 		fields:         fieldExecs,
 		typeAssertions: typeAssertions,
-		nonNull:        nonNull,
 	}, nil
 }
 

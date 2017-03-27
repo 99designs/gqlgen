@@ -35,12 +35,16 @@ func (id *ID) UnmarshalGraphQL(input interface{}) error {
 // ParseSchema parses a GraphQL schema and attaches the given root resolver. It returns an error if
 // the Go type signature of the resolvers does not match the schema. If nil is passed as the
 // resolver, then the schema can not be executed, but it may be inspected (e.g. with ToJSON).
-func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
+func ParseSchema(schemaString string, resolver interface{}, opts ...SchemaOpt) (*Schema, error) {
 	s := &Schema{
 		schema:         schema.New(),
-		MaxParallelism: 10,
-		Tracer:         trace.OpenTracingTracer{},
+		maxParallelism: 10,
+		tracer:         trace.OpenTracingTracer{},
 	}
+	for _, opt := range opts {
+		opt(s)
+	}
+
 	if err := s.schema.Parse(schemaString); err != nil {
 		return nil, err
 	}
@@ -57,8 +61,8 @@ func ParseSchema(schemaString string, resolver interface{}) (*Schema, error) {
 }
 
 // MustParseSchema calls ParseSchema and panics on error.
-func MustParseSchema(schemaString string, resolver interface{}) *Schema {
-	s, err := ParseSchema(schemaString, resolver)
+func MustParseSchema(schemaString string, resolver interface{}, opts ...SchemaOpt) *Schema {
+	s, err := ParseSchema(schemaString, resolver, opts...)
 	if err != nil {
 		panic(err)
 	}
@@ -70,11 +74,25 @@ type Schema struct {
 	schema *schema.Schema
 	exec   *exec.Exec
 
-	// MaxParallelism specifies the maximum number of resolvers per request allowed to run in parallel. The default is 10.
-	MaxParallelism int
+	maxParallelism int
+	tracer         trace.Tracer
+}
 
-	// Tracer is used to trace queries and fields. It defaults to trace.OpenTracingTracer.
-	Tracer trace.Tracer
+// SchemaOpt is an option to pass to ParseSchema or MustParseSchema.
+type SchemaOpt func(*Schema)
+
+// MaxParallelism specifies the maximum number of resolvers per request allowed to run in parallel. The default is 10.
+func MaxParallelism(n int) SchemaOpt {
+	return func(s *Schema) {
+		s.maxParallelism = n
+	}
+}
+
+// Tracer is used to trace queries and fields. It defaults to trace.OpenTracingTracer.
+func Tracer(tracer trace.Tracer) SchemaOpt {
+	return func(s *Schema) {
+		s.tracer = tracer
+	}
 }
 
 // Response represents a typical response of a GraphQL server. It may be encoded to JSON directly or
@@ -112,8 +130,8 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		Doc:     doc,
 		Vars:    variables,
 		Schema:  s.schema,
-		Limiter: make(chan struct{}, s.MaxParallelism),
-		Tracer:  s.Tracer,
+		Limiter: make(chan struct{}, s.maxParallelism),
+		Tracer:  s.tracer,
 	}
 	varTypes := make(map[string]*introspection.Type)
 	for _, v := range op.Vars {
@@ -123,7 +141,7 @@ func (s *Schema) Exec(ctx context.Context, queryString string, operationName str
 		}
 		varTypes[v.Name.Name] = introspection.WrapType(t)
 	}
-	traceCtx, finish := s.Tracer.TraceQuery(ctx, queryString, operationName, variables, varTypes)
+	traceCtx, finish := s.tracer.TraceQuery(ctx, queryString, operationName, variables, varTypes)
 	data, errs := r.Execute(traceCtx, s.exec, op)
 	finish(errs)
 

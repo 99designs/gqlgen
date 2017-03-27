@@ -8,6 +8,7 @@ import (
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 	"github.com/neelance/graphql-go/introspection"
+	"github.com/neelance/graphql-go/trace"
 )
 
 var schemaExec *objectExec
@@ -39,6 +40,7 @@ func IntrospectSchema(s *schema.Schema) interface{} {
 		Schema:  s,
 		Doc:     introspectionQuery,
 		Limiter: make(chan struct{}, 10),
+		Tracer:  trace.NoopTracer{},
 	}
 	sels := applySelectionSet(r, schemaExec, introspectionQuery.Operations.Get("IntrospectionQuery").SelSet)
 	return schemaExec.exec(context.Background(), sels, reflect.ValueOf(introspection.WrapSchema(r.Schema)))

@@ -67,3 +67,13 @@ func (OpenTracingTracer) TraceField(ctx context.Context, label, typeName, fieldN
 }
 
 func noop(*errors.QueryError) {}
+
+type NoopTracer struct{}
+
+func (NoopTracer) TraceQuery(ctx context.Context, queryString string, operationName string, variables map[string]interface{}, varTypes map[string]*introspection.Type) (context.Context, TraceQueryFinishFunc) {
+	return ctx, func(errs []*errors.QueryError) {}
+}
+
+func (NoopTracer) TraceField(ctx context.Context, label, typeName, fieldName string, trivial bool, args map[string]interface{}) (context.Context, TraceFieldFinishFunc) {
+	return ctx, func(err *errors.QueryError) {}
+}

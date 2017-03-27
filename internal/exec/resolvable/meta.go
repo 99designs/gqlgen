@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/schema"
 	"github.com/neelance/graphql-go/introspection"
 )
@@ -35,7 +36,7 @@ func init() {
 var MetaFieldTypename = Field{
 	Field: schema.Field{
 		Name: "__typename",
-		Type: schema.Meta.Types["String"],
+		Type: &common.NonNull{OfType: schema.Meta.Types["String"]},
 	},
 	TraceLabel: fmt.Sprintf("GraphQL field: __typename"),
 }

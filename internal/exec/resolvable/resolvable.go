@@ -34,7 +34,6 @@ type Field struct {
 	HasContext  bool
 	ArgsPacker  *StructPacker
 	HasError    bool
-	Trivial     bool
 	ValueExec   Resolvable
 	TraceLabel  string
 }
@@ -324,7 +323,6 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		HasContext:  hasContext,
 		ArgsPacker:  argsPacker,
 		HasError:    hasError,
-		Trivial:     !hasContext && argsPacker == nil && !hasError,
 		TraceLabel:  fmt.Sprintf("GraphQL field: %s.%s", typeName, f.Name),
 	}
 	if err := b.assignExec(&fe.ValueExec, f.Type, m.Type.Out(0)); err != nil {

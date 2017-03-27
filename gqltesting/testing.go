@@ -39,21 +39,25 @@ func RunTest(t *testing.T, test *Test) {
 	if len(result.Errors) != 0 {
 		t.Fatal(result.Errors[0])
 	}
+	got := formatJSON(t, result.Data)
 
-	got, err := json.Marshal(result.Data)
+	want := formatJSON(t, []byte(test.ExpectedResult))
+
+	if !bytes.Equal(got, want) {
+		t.Logf("got:  %s", got)
+		t.Logf("want: %s", want)
+		t.Fail()
+	}
+}
+
+func formatJSON(t *testing.T, data []byte) []byte {
+	var v interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		t.Fatalf("invalid JSON: %s", err)
+	}
+	formatted, err := json.Marshal(v)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	var v interface{}
-	if err := json.Unmarshal([]byte(test.ExpectedResult), &v); err != nil {
-		t.Fatalf("invalid JSON for ExpectedResult: %s", err)
-	}
-	want, _ := json.Marshal(v)
-
-	if !bytes.Equal(got, want) {
-		t.Logf("want: %s", want)
-		t.Logf("got:  %s", got)
-		t.Fail()
-	}
+	return formatted
 }

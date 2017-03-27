@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"encoding/json"
+
+	"strconv"
+
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/exec"
@@ -31,6 +35,10 @@ func (id *ID) UnmarshalGraphQL(input interface{}) error {
 	default:
 		return fmt.Errorf("wrong type")
 	}
+}
+
+func (id ID) MarshalJSON() ([]byte, error) {
+	return strconv.AppendQuote(nil, string(id)), nil
 }
 
 // ParseSchema parses a GraphQL schema and attaches the given root resolver. It returns an error if
@@ -99,7 +107,7 @@ func Tracer(tracer trace.Tracer) SchemaOpt {
 // Response represents a typical response of a GraphQL server. It may be encoded to JSON directly or
 // it may be further processed to a custom response type, for example to include custom error data.
 type Response struct {
-	Data       interface{}            `json:"data,omitempty"`
+	Data       json.RawMessage        `json:"data,omitempty"`
 	Errors     []*errors.QueryError   `json:"errors,omitempty"`
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }

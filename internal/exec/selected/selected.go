@@ -56,6 +56,7 @@ type SchemaField struct {
 	Args        map[string]interface{}
 	PackedArgs  reflect.Value
 	Sels        []Selection
+	Async       bool
 	FixedResult reflect.Value
 }
 
@@ -97,6 +98,7 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 					Field:       resolvable.MetaFieldSchema,
 					Alias:       field.Alias.Name,
 					Sels:        applySelectionSet(r, resolvable.MetaSchema, field.SelSet),
+					Async:       true,
 					FixedResult: reflect.ValueOf(introspection.WrapSchema(r.Schema)),
 				})
 
@@ -117,6 +119,7 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 					Field:       resolvable.MetaFieldType,
 					Alias:       field.Alias.Name,
 					Sels:        applySelectionSet(r, resolvable.MetaType, field.SelSet),
+					Async:       true,
 					FixedResult: reflect.ValueOf(introspection.WrapType(t)),
 				})
 
@@ -138,12 +141,14 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 					}
 				}
 
+				fieldSels := applyField(r, fe.ValueExec, field.SelSet)
 				sels = append(sels, &SchemaField{
 					Field:      *fe,
 					Alias:      field.Alias.Name,
 					Args:       args,
 					PackedArgs: packedArgs,
-					Sels:       applyField(r, fe.ValueExec, field.SelSet),
+					Sels:       fieldSels,
+					Async:      fe.HasContext || fe.ArgsPacker != nil || fe.HasError || HasAsyncSel(fieldSels),
 				})
 			}
 
@@ -219,5 +224,25 @@ func skipByDirective(r *Request, directives common.DirectiveList) bool {
 		}
 	}
 
+	return false
+}
+
+func HasAsyncSel(sels []Selection) bool {
+	for _, sel := range sels {
+		switch sel := sel.(type) {
+		case *SchemaField:
+			if sel.Async {
+				return true
+			}
+		case *TypeAssertion:
+			if HasAsyncSel(sel.Sels) {
+				return true
+			}
+		case *TypenameField:
+			// sync
+		default:
+			panic("unreachable")
+		}
+	}
 	return false
 }

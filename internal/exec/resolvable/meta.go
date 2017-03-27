@@ -32,6 +32,14 @@ func init() {
 	}
 }
 
+var MetaFieldTypename = Field{
+	Field: schema.Field{
+		Name: "__typename",
+		Type: schema.Meta.Types["String"],
+	},
+	TraceLabel: fmt.Sprintf("GraphQL field: __typename"),
+}
+
 var MetaFieldSchema = Field{
 	Field: schema.Field{
 		Name: "__schema",

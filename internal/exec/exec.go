@@ -43,8 +43,10 @@ func (r *Request) Execute(ctx context.Context, s *resolvable.Schema, op *query.O
 	func() {
 		defer r.handlePanic()
 		sels := selected.ApplyOperation(&r.Request, s, op)
-		for _, sel := range sels {
-			r.execSelection(ctx, sel, s.Resolver, results)
+		var fields []fieldWithResolver
+		collectFieldsToResolve(sels, s.Resolver, &fields)
+		for _, f := range fields {
+			r.execFieldSelection(ctx, f.field, f.resolver, results)
 			if op.Type == query.Mutation {
 				r.wg.Wait()
 			}
@@ -59,36 +61,49 @@ func (r *Request) Execute(ctx context.Context, s *resolvable.Schema, op *query.O
 	return results, r.Errs
 }
 
-func (r *Request) execSelection(ctx context.Context, sel selected.Selection, resolver reflect.Value, results map[string]interface{}) {
-	switch sel := sel.(type) {
-	case *selected.SchemaField:
-		r.execFieldSelection(ctx, sel, resolver, results)
+type fieldWithResolver struct {
+	field    *selected.SchemaField
+	resolver reflect.Value
+}
 
-	case *selected.TypenameField:
-		if len(sel.TypeAssertions) == 0 {
-			results[sel.Alias] = sel.Name
-			return
-		}
-		for name, a := range sel.TypeAssertions {
-			out := resolver.Method(a.MethodIndex).Call(nil)
-			if out[1].Bool() {
-				results[sel.Alias] = name
-				return
+func collectFieldsToResolve(sels []selected.Selection, resolver reflect.Value, fields *[]fieldWithResolver) {
+	for _, sel := range sels {
+		switch sel := sel.(type) {
+		case *selected.SchemaField:
+			*fields = append(*fields, fieldWithResolver{field: sel, resolver: resolver})
+
+		case *selected.TypenameField:
+			sf := &selected.SchemaField{
+				Field:       resolvable.MetaFieldTypename,
+				Alias:       sel.Alias,
+				FixedResult: reflect.ValueOf(typeOf(sel, resolver)),
 			}
-		}
+			*fields = append(*fields, fieldWithResolver{field: sf, resolver: resolver})
 
-	case *selected.TypeAssertion:
-		out := resolver.Method(sel.MethodIndex).Call(nil)
-		if !out[1].Bool() {
-			return
-		}
-		for _, sel := range sel.Sels {
-			r.execSelection(ctx, sel, out[0], results)
-		}
+		case *selected.TypeAssertion:
+			out := resolver.Method(sel.MethodIndex).Call(nil)
+			if !out[1].Bool() {
+				continue
+			}
+			collectFieldsToResolve(sel.Sels, out[0], fields)
 
-	default:
-		panic("unreachable")
+		default:
+			panic("unreachable")
+		}
 	}
+}
+
+func typeOf(tf *selected.TypenameField, resolver reflect.Value) string {
+	if len(tf.TypeAssertions) == 0 {
+		return tf.Name
+	}
+	for name, a := range tf.TypeAssertions {
+		out := resolver.Method(a.MethodIndex).Call(nil)
+		if out[1].Bool() {
+			return name
+		}
+	}
+	return ""
 }
 
 func (r *Request) execFieldSelection(ctx context.Context, field *selected.SchemaField, resolver reflect.Value, results map[string]interface{}) {
@@ -176,8 +191,10 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 			return nil
 		}
 		results := make(map[string]interface{})
-		for _, sel := range sels {
-			r.execSelection(ctx, sel, resolver, results)
+		var fields []fieldWithResolver
+		collectFieldsToResolve(sels, resolver, &fields)
+		for _, f := range fields {
+			r.execFieldSelection(ctx, f.field, f.resolver, results)
 		}
 		return results
 

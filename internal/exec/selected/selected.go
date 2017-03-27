@@ -52,10 +52,11 @@ type Selection interface {
 
 type SchemaField struct {
 	resolvable.Field
-	Alias      string
-	Args       map[string]interface{}
-	PackedArgs reflect.Value
-	Sels       []Selection
+	Alias       string
+	Args        map[string]interface{}
+	PackedArgs  reflect.Value
+	Sels        []Selection
+	FixedResult reflect.Value
 }
 
 type TypeAssertion struct {
@@ -68,16 +69,9 @@ type TypenameField struct {
 	Alias string
 }
 
-type MetaField struct {
-	Alias    string
-	Sels     []Selection
-	Resolver reflect.Value
-}
-
 func (*SchemaField) isSelection()   {}
 func (*TypeAssertion) isSelection() {}
 func (*TypenameField) isSelection() {}
-func (*MetaField) isSelection()     {}
 
 func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.SelectionSet) (sels []Selection) {
 	if selSet == nil {
@@ -99,10 +93,11 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 				})
 
 			case "__schema":
-				sels = append(sels, &MetaField{
-					Alias:    field.Alias.Name,
-					Sels:     applySelectionSet(r, resolvable.MetaSchema, field.SelSet),
-					Resolver: reflect.ValueOf(introspection.WrapSchema(r.Schema)),
+				sels = append(sels, &SchemaField{
+					Field:       resolvable.MetaFieldSchema,
+					Alias:       field.Alias.Name,
+					Sels:        applySelectionSet(r, resolvable.MetaSchema, field.SelSet),
+					FixedResult: reflect.ValueOf(introspection.WrapSchema(r.Schema)),
 				})
 
 			case "__type":
@@ -118,10 +113,11 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 					return nil
 				}
 
-				sels = append(sels, &MetaField{
-					Alias:    field.Alias.Name,
-					Sels:     applySelectionSet(r, resolvable.MetaType, field.SelSet),
-					Resolver: reflect.ValueOf(introspection.WrapType(t)),
+				sels = append(sels, &SchemaField{
+					Field:       resolvable.MetaFieldType,
+					Alias:       field.Alias.Name,
+					Sels:        applySelectionSet(r, resolvable.MetaType, field.SelSet),
+					FixedResult: reflect.ValueOf(introspection.WrapType(t)),
 				})
 
 			default:

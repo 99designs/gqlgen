@@ -1,6 +1,7 @@
 package resolvable
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/neelance/graphql-go/internal/schema"
@@ -29,4 +30,20 @@ func init() {
 	if err := b.finish(); err != nil {
 		panic(err)
 	}
+}
+
+var MetaFieldSchema = Field{
+	Field: schema.Field{
+		Name: "__schema",
+		Type: schema.Meta.Types["__Schema"],
+	},
+	TraceLabel: fmt.Sprintf("GraphQL field: __schema"),
+}
+
+var MetaFieldType = Field{
+	Field: schema.Field{
+		Name: "__type",
+		Type: schema.Meta.Types["__Type"],
+	},
+	TraceLabel: fmt.Sprintf("GraphQL field: __type"),
 }

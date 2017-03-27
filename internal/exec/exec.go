@@ -77,13 +77,6 @@ func (r *Request) execSelection(ctx context.Context, sel selected.Selection, res
 			}
 		}
 
-	case *selected.MetaField:
-		subresults := make(map[string]interface{})
-		for _, subsel := range sel.Sels {
-			r.execSelection(ctx, subsel, sel.Resolver, subresults)
-		}
-		results[sel.Alias] = subresults
-
 	case *selected.TypeAssertion:
 		out := resolver.Method(sel.MethodIndex).Call(nil)
 		if !out[1].Bool() {
@@ -118,6 +111,11 @@ func (r *Request) execFieldSelection(ctx context.Context, field *selected.Schema
 					err = makePanicError(panicValue)
 				}
 			}()
+
+			if field.FixedResult.IsValid() {
+				result = field.FixedResult
+				return nil
+			}
 
 			if err := traceCtx.Err(); err != nil {
 				return errors.Errorf("%s", err) // don't execute any more resolvers if context got cancelled

@@ -17,6 +17,7 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 	"github.com/neelance/graphql-go/internal/validation"
 	"github.com/neelance/graphql-go/introspection"
+	"github.com/neelance/graphql-go/log"
 	"github.com/neelance/graphql-go/trace"
 )
 
@@ -49,6 +50,7 @@ func ParseSchema(schemaString string, resolver interface{}, opts ...SchemaOpt) (
 		schema:         schema.New(),
 		maxParallelism: 10,
 		tracer:         trace.OpenTracingTracer{},
+		logger:         &log.DefaultLogger{},
 	}
 	for _, opt := range opts {
 		opt(s)
@@ -85,6 +87,7 @@ type Schema struct {
 
 	maxParallelism int
 	tracer         trace.Tracer
+	logger         log.Logger
 }
 
 // SchemaOpt is an option to pass to ParseSchema or MustParseSchema.
@@ -101,6 +104,13 @@ func MaxParallelism(n int) SchemaOpt {
 func Tracer(tracer trace.Tracer) SchemaOpt {
 	return func(s *Schema) {
 		s.tracer = tracer
+	}
+}
+
+// Logger is used to log panics durring query execution. It defaults to exec.DefaultLogger.
+func Logger(logger log.Logger) SchemaOpt {
+	return func(s *Schema) {
+		s.logger = logger
 	}
 }
 
@@ -146,6 +156,7 @@ func (s *Schema) exec(ctx context.Context, queryString string, operationName str
 		},
 		Limiter: make(chan struct{}, s.maxParallelism),
 		Tracer:  s.tracer,
+		Logger:  s.logger,
 	}
 	varTypes := make(map[string]*introspection.Type)
 	for _, v := range op.Vars {

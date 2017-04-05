@@ -3,8 +3,8 @@ package exec
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"reflect"
-	"strconv"
 	"sync"
 
 	"github.com/neelance/graphql-go/errors"
@@ -261,24 +261,12 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 		out.WriteByte(']')
 
 	case *schema.Scalar:
-		var b []byte // TODO use scratch
-		switch t.Name {
-		case "Int":
-			out.Write(strconv.AppendInt(b, resolver.Int(), 10))
-		case "Float":
-			out.Write(strconv.AppendFloat(b, resolver.Float(), 'f', -1, 64))
-		case "String":
-			out.Write(strconv.AppendQuote(b, resolver.String()))
-		case "Boolean":
-			out.Write(strconv.AppendBool(b, resolver.Bool()))
-		default:
-			v := resolver.Interface().(marshaler)
-			data, err := v.MarshalJSON()
-			if err != nil {
-				panic(errors.Errorf("could not marshal %v", v))
-			}
-			out.Write(data)
+		v := resolver.Interface()
+		data, err := json.Marshal(v)
+		if err != nil {
+			panic(errors.Errorf("could not marshal %v", v))
 		}
+		out.Write(data)
 
 	case *schema.Enum:
 		out.WriteByte('"')

@@ -22,6 +22,26 @@ func (r *helloWorldResolver2) Hello(ctx context.Context) (string, error) {
 	return "Hello world!", nil
 }
 
+type helloSnakeResolver1 struct{}
+
+func (r *helloSnakeResolver1) HelloHTML() string {
+	return "Hello snake!"
+}
+
+func (r *helloSnakeResolver1) SayHello(args *struct{ FullName string }) string {
+	return "Hello " + args.FullName + "!"
+}
+
+type helloSnakeResolver2 struct{}
+
+func (r *helloSnakeResolver2) HelloHTML(ctx context.Context) (string, error) {
+	return "Hello snake!", nil
+}
+
+func (r *helloSnakeResolver2) SayHello(ctx context.Context, args *struct{ FullName string }) (string, error) {
+	return "Hello " + args.FullName + "!", nil
+}
+
 type theNumberResolver struct {
 	number int32
 }
@@ -85,6 +105,102 @@ func TestHelloWorld(t *testing.T) {
 			ExpectedResult: `
 				{
 					"hello": "Hello world!"
+				}
+			`,
+		},
+	})
+}
+
+func TestHelloSnake(t *testing.T) {
+	gqltesting.RunTests(t, []*gqltesting.Test{
+		{
+			Schema: graphql.MustParseSchema(`
+				schema {
+					query: Query
+				}
+
+				type Query {
+					hello_html: String!
+				}
+			`, &helloSnakeResolver1{}),
+			Query: `
+				{
+					hello_html
+				}
+			`,
+			ExpectedResult: `
+				{
+					"hello_html": "Hello snake!"
+				}
+			`,
+		},
+
+		{
+			Schema: graphql.MustParseSchema(`
+				schema {
+					query: Query
+				}
+
+				type Query {
+					hello_html: String!
+				}
+			`, &helloSnakeResolver2{}),
+			Query: `
+				{
+					hello_html
+				}
+			`,
+			ExpectedResult: `
+				{
+					"hello_html": "Hello snake!"
+				}
+			`,
+		},
+	})
+}
+
+func TestHelloSnakeArguments(t *testing.T) {
+	gqltesting.RunTests(t, []*gqltesting.Test{
+		{
+			Schema: graphql.MustParseSchema(`
+				schema {
+					query: Query
+				}
+
+				type Query {
+					say_hello(full_name: String!): String!
+				}
+			`, &helloSnakeResolver1{}),
+			Query: `
+				{
+					say_hello(full_name: "Rob Pike")
+				}
+			`,
+			ExpectedResult: `
+				{
+					"say_hello": "Hello Rob Pike!"
+				}
+			`,
+		},
+
+		{
+			Schema: graphql.MustParseSchema(`
+				schema {
+					query: Query
+				}
+
+				type Query {
+					say_hello(full_name: String!): String!
+				}
+			`, &helloSnakeResolver2{}),
+			Query: `
+				{
+					say_hello(full_name: "Rob Pike")
+				}
+			`,
+			ExpectedResult: `
+				{
+					"say_hello": "Hello Rob Pike!"
 				}
 			`,
 		},

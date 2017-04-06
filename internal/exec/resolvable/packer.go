@@ -130,8 +130,11 @@ func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect
 	var fields []*structPackerField
 	for _, v := range values {
 		fe := &structPackerField{field: v}
+		fx := func(n string) bool {
+			return strings.EqualFold(stripUnderscore(n), stripUnderscore(v.Name.Name))
+		}
 
-		sf, ok := structType.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, v.Name.Name) })
+		sf, ok := structType.FieldByNameFunc(fx)
 		if !ok {
 			return nil, fmt.Errorf("missing argument %q", v.Name)
 		}

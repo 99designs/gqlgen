@@ -72,9 +72,9 @@ func (r *Request) execSelections(ctx context.Context, sels []selected.Selection,
 		wg.Add(len(fields))
 		for _, f := range fields {
 			go func(f *fieldWithResolver) {
+				defer wg.Done()
 				defer r.handlePanic(ctx)
 				r.execFieldSelection(ctx, f.field, f.resolver, &f.out, false)
-				wg.Done()
 			}(f)
 		}
 		wg.Wait()
@@ -234,8 +234,8 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 			for i := 0; i < l; i++ {
 				go func(i int) {
 					defer r.handlePanic(ctx)
+					defer wg.Done()
 					r.execSelectionSet(ctx, sels, t.OfType, resolver.Index(i), &entryouts[i])
-					wg.Done()
 				}(i)
 			}
 			wg.Wait()

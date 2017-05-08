@@ -233,8 +233,8 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 			entryouts := make([]bytes.Buffer, l)
 			for i := 0; i < l; i++ {
 				go func(i int) {
-					defer r.handlePanic(ctx)
 					defer wg.Done()
+					defer r.handlePanic(ctx)
 					r.execSelectionSet(ctx, sels, t.OfType, resolver.Index(i), &entryouts[i])
 				}(i)
 			}

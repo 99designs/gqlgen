@@ -203,7 +203,7 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 	t, nonNull := unwrapNonNull(typ)
 	switch t := t.(type) {
 	case *schema.Object, *schema.Interface, *schema.Union:
-		if resolver.IsNil() {
+		if resolver.Kind() == reflect.Ptr && resolver.IsNil() {
 			if nonNull {
 				panic(errors.Errorf("got nil for non-null %q", t))
 			}

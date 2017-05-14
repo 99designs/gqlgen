@@ -1688,3 +1688,59 @@ func TestInput(t *testing.T) {
 		},
 	})
 }
+
+func TestComposedFragments(t *testing.T) {
+	gqltesting.RunTests(t, []*gqltesting.Test{
+		{
+			Schema: starwarsSchema,
+			Query: `
+				{
+					composed: hero(episode: EMPIRE) {
+						name
+						...friendsNames
+						...friendsIds
+					}
+				}
+
+				fragment friendsNames on Character {
+					name
+					friends {
+						name
+					}
+				}
+
+				fragment friendsIds on Character {
+					name
+					friends {
+						id
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+					"composed": {
+						"name": "Luke Skywalker",
+						"friends": [
+							{
+								"id": "1002",
+								"name": "Han Solo"
+							},
+							{
+								"id": "1003",
+								"name": "Leia Organa"
+							},
+							{
+								"id": "2000",
+								"name": "C-3PO"
+							},
+							{
+								"id": "2001",
+								"name": "R2-D2"
+							}
+						]
+					}
+				}
+			`,
+		},
+	})
+}

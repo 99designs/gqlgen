@@ -76,7 +76,7 @@ func (r *Request) execSelections(ctx context.Context, sels []selected.Selection,
 				defer wg.Done()
 				defer r.handlePanic(ctx)
 				f.out = new(bytes.Buffer)
-				execFieldSelection(ctx, r, f, false)
+				execFieldSelection(ctx, r, f, true)
 			}(f)
 		}
 		wg.Wait()

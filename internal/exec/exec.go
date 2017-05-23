@@ -45,7 +45,7 @@ func (r *Request) Execute(ctx context.Context, s *resolvable.Schema, op *query.O
 	func() {
 		defer r.handlePanic(ctx)
 		sels := selected.ApplyOperation(&r.Request, s, op)
-		r.execSelections(ctx, sels, s.Resolver, &out, op.Type == query.Mutation)
+		r.execSelections(ctx, sels, nil, s.Resolver, &out, op.Type == query.Mutation)
 	}()
 
 	if err := ctx.Err(); err != nil {
@@ -62,7 +62,7 @@ type fieldToExec struct {
 	out      *bytes.Buffer
 }
 
-func (r *Request) execSelections(ctx context.Context, sels []selected.Selection, resolver reflect.Value, out *bytes.Buffer, serially bool) {
+func (r *Request) execSelections(ctx context.Context, sels []selected.Selection, path *pathSegment, resolver reflect.Value, out *bytes.Buffer, serially bool) {
 	async := !serially && selected.HasAsyncSel(sels)
 
 	var fields []*fieldToExec
@@ -76,7 +76,7 @@ func (r *Request) execSelections(ctx context.Context, sels []selected.Selection,
 				defer wg.Done()
 				defer r.handlePanic(ctx)
 				f.out = new(bytes.Buffer)
-				execFieldSelection(ctx, r, f, true)
+				execFieldSelection(ctx, r, f, &pathSegment{path, f.field.Alias}, true)
 			}(f)
 		}
 		wg.Wait()
@@ -96,7 +96,7 @@ func (r *Request) execSelections(ctx context.Context, sels []selected.Selection,
 			continue
 		}
 		f.out = out
-		execFieldSelection(ctx, r, f, false)
+		execFieldSelection(ctx, r, f, &pathSegment{path, f.field.Alias}, false)
 	}
 	out.WriteByte('}')
 }
@@ -147,7 +147,7 @@ func typeOf(tf *selected.TypenameField, resolver reflect.Value) string {
 	return ""
 }
 
-func execFieldSelection(ctx context.Context, r *Request, f *fieldToExec, applyLimiter bool) {
+func execFieldSelection(ctx context.Context, r *Request, f *fieldToExec, path *pathSegment, applyLimiter bool) {
 	if applyLimiter {
 		r.Limiter <- struct{}{}
 	}
@@ -165,6 +165,7 @@ func execFieldSelection(ctx context.Context, r *Request, f *fieldToExec, applyLi
 			if panicValue := recover(); panicValue != nil {
 				r.Logger.LogPanic(ctx, panicValue)
 				err = makePanicError(panicValue)
+				err.Path = path.toSlice()
 			}
 		}()
 
@@ -189,6 +190,7 @@ func execFieldSelection(ctx context.Context, r *Request, f *fieldToExec, applyLi
 		if f.field.HasError && !callOut[1].IsNil() {
 			resolverErr := callOut[1].Interface().(error)
 			err := errors.Errorf("%s", resolverErr)
+			err.Path = path.toSlice()
 			err.ResolverError = resolverErr
 			return err
 		}
@@ -205,10 +207,10 @@ func execFieldSelection(ctx context.Context, r *Request, f *fieldToExec, applyLi
 		return
 	}
 
-	r.execSelectionSet(traceCtx, f.sels, f.field.Type, result, f.out)
+	r.execSelectionSet(traceCtx, f.sels, f.field.Type, path, result, f.out)
 }
 
-func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selection, typ common.Type, resolver reflect.Value, out *bytes.Buffer) {
+func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selection, typ common.Type, path *pathSegment, resolver reflect.Value, out *bytes.Buffer) {
 	t, nonNull := unwrapNonNull(typ)
 	switch t := t.(type) {
 	case *schema.Object, *schema.Interface, *schema.Union:
@@ -220,7 +222,7 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 			return
 		}
 
-		r.execSelections(ctx, sels, resolver, out, false)
+		r.execSelections(ctx, sels, path, resolver, out, false)
 		return
 	}
 
@@ -244,7 +246,7 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 				go func(i int) {
 					defer wg.Done()
 					defer r.handlePanic(ctx)
-					r.execSelectionSet(ctx, sels, t.OfType, resolver.Index(i), &entryouts[i])
+					r.execSelectionSet(ctx, sels, t.OfType, &pathSegment{path, i}, resolver.Index(i), &entryouts[i])
 				}(i)
 			}
 			wg.Wait()
@@ -265,7 +267,7 @@ func (r *Request) execSelectionSet(ctx context.Context, sels []selected.Selectio
 			if i > 0 {
 				out.WriteByte(',')
 			}
-			r.execSelectionSet(ctx, sels, t.OfType, resolver.Index(i), out)
+			r.execSelectionSet(ctx, sels, t.OfType, &pathSegment{path, i}, resolver.Index(i), out)
 		}
 		out.WriteByte(']')
 
@@ -296,4 +298,16 @@ func unwrapNonNull(t common.Type) (common.Type, bool) {
 
 type marshaler interface {
 	MarshalJSON() ([]byte, error)
+}
+
+type pathSegment struct {
+	parent *pathSegment
+	value  interface{}
+}
+
+func (p *pathSegment) toSlice() []interface{} {
+	if p == nil {
+		return nil
+	}
+	return append(p.parent.toSlice(), p.value)
 }

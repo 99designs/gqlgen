@@ -28,7 +28,7 @@ func (r *helloSnakeResolver1) HelloHTML() string {
 	return "Hello snake!"
 }
 
-func (r *helloSnakeResolver1) SayHello(args *struct{ FullName string }) string {
+func (r *helloSnakeResolver1) SayHello(args struct{ FullName string }) string {
 	return "Hello " + args.FullName + "!"
 }
 
@@ -38,7 +38,7 @@ func (r *helloSnakeResolver2) HelloHTML(ctx context.Context) (string, error) {
 	return "Hello snake!", nil
 }
 
-func (r *helloSnakeResolver2) SayHello(ctx context.Context, args *struct{ FullName string }) (string, error) {
+func (r *helloSnakeResolver2) SayHello(ctx context.Context, args struct{ FullName string }) (string, error) {
 	return "Hello " + args.FullName + "!", nil
 }
 
@@ -50,14 +50,14 @@ func (r *theNumberResolver) TheNumber() int32 {
 	return r.number
 }
 
-func (r *theNumberResolver) ChangeTheNumber(args *struct{ NewNumber int32 }) *theNumberResolver {
+func (r *theNumberResolver) ChangeTheNumber(args struct{ NewNumber int32 }) *theNumberResolver {
 	r.number = args.NewNumber
 	return r
 }
 
 type timeResolver struct{}
 
-func (r *timeResolver) AddHour(args *struct{ Time graphql.Time }) graphql.Time {
+func (r *timeResolver) AddHour(args struct{ Time graphql.Time }) graphql.Time {
 	return graphql.Time{Time: args.Time.Add(time.Hour)}
 }
 
@@ -1507,7 +1507,7 @@ func TestTime(t *testing.T) {
 
 type resolverWithUnexportedMethod struct{}
 
-func (r *resolverWithUnexportedMethod) changeTheNumber(args *struct{ NewNumber int32 }) int32 {
+func (r *resolverWithUnexportedMethod) changeTheNumber(args struct{ NewNumber int32 }) int32 {
 	return args.NewNumber
 }
 
@@ -1528,7 +1528,7 @@ func TestUnexportedMethod(t *testing.T) {
 
 type resolverWithUnexportedField struct{}
 
-func (r *resolverWithUnexportedField) ChangeTheNumber(args *struct{ newNumber int32 }) int32 {
+func (r *resolverWithUnexportedField) ChangeTheNumber(args struct{ newNumber int32 }) int32 {
 	return args.newNumber
 }
 
@@ -1549,27 +1549,27 @@ func TestUnexportedField(t *testing.T) {
 
 type inputResolver struct{}
 
-func (r *inputResolver) Int(args *struct{ Value int32 }) int32 {
+func (r *inputResolver) Int(args struct{ Value int32 }) int32 {
 	return args.Value
 }
 
-func (r *inputResolver) Float(args *struct{ Value float64 }) float64 {
+func (r *inputResolver) Float(args struct{ Value float64 }) float64 {
 	return args.Value
 }
 
-func (r *inputResolver) String(args *struct{ Value string }) string {
+func (r *inputResolver) String(args struct{ Value string }) string {
 	return args.Value
 }
 
-func (r *inputResolver) Boolean(args *struct{ Value bool }) bool {
+func (r *inputResolver) Boolean(args struct{ Value bool }) bool {
 	return args.Value
 }
 
-func (r *inputResolver) Nullable(args *struct{ Value *int32 }) *int32 {
+func (r *inputResolver) Nullable(args struct{ Value *int32 }) *int32 {
 	return args.Value
 }
 
-func (r *inputResolver) List(args *struct{ Value []*struct{ V int32 } }) []int32 {
+func (r *inputResolver) List(args struct{ Value []*struct{ V int32 } }) []int32 {
 	l := make([]int32, len(args.Value))
 	for i, entry := range args.Value {
 		l[i] = entry.V
@@ -1577,7 +1577,7 @@ func (r *inputResolver) List(args *struct{ Value []*struct{ V int32 } }) []int32
 	return l
 }
 
-func (r *inputResolver) NullableList(args *struct{ Value *[]*struct{ V int32 } }) *[]*int32 {
+func (r *inputResolver) NullableList(args struct{ Value *[]*struct{ V int32 } }) *[]*int32 {
 	if args.Value == nil {
 		return nil
 	}
@@ -1590,11 +1590,11 @@ func (r *inputResolver) NullableList(args *struct{ Value *[]*struct{ V int32 } }
 	return &l
 }
 
-func (r *inputResolver) Enum(args *struct{ Value string }) string {
+func (r *inputResolver) Enum(args struct{ Value string }) string {
 	return args.Value
 }
 
-func (r *inputResolver) NullableEnum(args *struct{ Value *string }) *string {
+func (r *inputResolver) NullableEnum(args struct{ Value *string }) *string {
 	return args.Value
 }
 
@@ -1602,7 +1602,7 @@ type recursive struct {
 	Next *recursive
 }
 
-func (r *inputResolver) Recursive(args *struct{ Value *recursive }) int32 {
+func (r *inputResolver) Recursive(args struct{ Value *recursive }) int32 {
 	n := int32(0)
 	v := args.Value
 	for v != nil {

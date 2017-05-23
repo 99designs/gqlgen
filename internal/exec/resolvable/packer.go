@@ -122,10 +122,15 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 }
 
 func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect.Type) (*StructPacker, error) {
-	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
-		return nil, fmt.Errorf("expected pointer to struct, got %s", typ)
+	structType := typ
+	usePtr := false
+	if typ.Kind() == reflect.Ptr {
+		structType = typ.Elem()
+		usePtr = true
 	}
-	structType := typ.Elem()
+	if structType.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("expected struct or pointer to struct, got %s", typ)
+	}
 
 	var fields []*structPackerField
 	for _, v := range values {
@@ -158,6 +163,7 @@ func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect
 
 	p := &StructPacker{
 		structType: structType,
+		usePtr:     usePtr,
 		fields:     fields,
 	}
 	b.structPackers = append(b.structPackers, p)
@@ -166,6 +172,7 @@ func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect
 
 type StructPacker struct {
 	structType    reflect.Type
+	usePtr        bool
 	defaultStruct reflect.Value
 	fields        []*structPackerField
 }
@@ -192,6 +199,9 @@ func (p *StructPacker) Pack(r *Request, value interface{}) (reflect.Value, error
 			}
 			v.Elem().FieldByIndex(f.fieldIndex).Set(packed)
 		}
+	}
+	if !p.usePtr {
+		return v.Elem(), nil
 	}
 	return v, nil
 }

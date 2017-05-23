@@ -42,6 +42,7 @@ type Operation struct {
 	Vars       common.InputValueList
 	SelSet     *SelectionSet
 	Directives common.DirectiveList
+	Loc        errors.Location
 }
 
 type OperationType string
@@ -119,8 +120,7 @@ func parseDocument(l *common.Lexer) *Document {
 	d := &Document{}
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
-			op := &Operation{Type: Query}
-			op.Name.Loc = l.Location()
+			op := &Operation{Type: Query, Loc: l.Location()}
 			op.SelSet = parseSelectionSet(l)
 			d.Operations = append(d.Operations, op)
 			continue
@@ -129,7 +129,9 @@ func parseDocument(l *common.Lexer) *Document {
 		loc := l.Location()
 		switch x := l.ConsumeIdent(); x {
 		case "query":
-			d.Operations = append(d.Operations, parseOperation(l, Query))
+			op := parseOperation(l, Query)
+			op.Loc = loc
+			d.Operations = append(d.Operations, op)
 
 		case "mutation":
 			d.Operations = append(d.Operations, parseOperation(l, Mutation))
@@ -138,7 +140,9 @@ func parseDocument(l *common.Lexer) *Document {
 			d.Operations = append(d.Operations, parseOperation(l, Subscription))
 
 		case "fragment":
-			d.Fragments = append(d.Fragments, parseFragment(l, loc))
+			frag := parseFragment(l)
+			frag.Loc = loc
+			d.Fragments = append(d.Fragments, frag)
 
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "fragment"`, x))
@@ -166,8 +170,8 @@ func parseOperation(l *common.Lexer, opType OperationType) *Operation {
 	return op
 }
 
-func parseFragment(l *common.Lexer, loc errors.Location) *FragmentDecl {
-	f := &FragmentDecl{Loc: loc}
+func parseFragment(l *common.Lexer) *FragmentDecl {
+	f := &FragmentDecl{}
 	f.Name = l.ConsumeIdentWithLoc()
 	l.ConsumeKeyword("on")
 	f.On = common.TypeName{Ident: l.ConsumeIdentWithLoc()}

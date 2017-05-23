@@ -1957,6 +1957,378 @@
     ]
   },
   {
+    "name": "Validate: No undefined variables/all variables defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String, $b: String, $c: String) {\n        field(a: $a, b: $b, c: $c)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No undefined variables/all variables deeply defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String, $b: String, $c: String) {\n        field(a: $a) {\n          field(b: $b) {\n            field(c: $c)\n          }\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No undefined variables/all variables deeply in inline fragments defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String, $b: String, $c: String) {\n        ... on Type {\n          field(a: $a) {\n            field(b: $b) {\n              ... on Type {\n                field(c: $c)\n              }\n            }\n          }\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No undefined variables/all variables in fragments deeply defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String, $b: String, $c: String) {\n        ...FragA\n      }\n      fragment FragA on Type {\n        field(a: $a) {\n          ...FragB\n        }\n      }\n      fragment FragB on Type {\n        field(b: $b) {\n          ...FragC\n        }\n      }\n      fragment FragC on Type {\n        field(c: $c)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No undefined variables/variable within single fragment defined in multiple operations",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String) {\n        ...FragA\n      }\n      query Bar($a: String) {\n        ...FragA\n      }\n      fragment FragA on Type {\n        field(a: $a)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No undefined variables/variable within fragments defined in operations",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String) {\n        ...FragA\n      }\n      query Bar($b: String) {\n        ...FragB\n      }\n      fragment FragA on Type {\n        field(a: $a)\n      }\n      fragment FragB on Type {\n        field(b: $b)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No undefined variables/variable within recursive fragment defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String) {\n        ...FragA\n      }\n      fragment FragA on Type {\n        field(a: $a) {\n          ...FragA\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No undefined variables/variable not defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String, $b: String, $c: String) {\n        field(a: $a, b: $b, c: $c, d: $d)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$d\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 39
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/variable not defined by un-named query",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      {\n        field(a: $a)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" is not defined.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/multiple variables not defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($b: String) {\n        field(a: $a, b: $b, c: $c)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$c\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 32
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/variable in fragment not defined by un-named query",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      {\n        ...FragA\n      }\n      fragment FragA on Type {\n        field(a: $a)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" is not defined.",
+        "locations": [
+          {
+            "line": 6,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/variable in fragment not defined by operation",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String, $b: String) {\n        ...FragA\n      }\n      fragment FragA on Type {\n        field(a: $a) {\n          ...FragB\n        }\n      }\n      fragment FragB on Type {\n        field(b: $b) {\n          ...FragC\n        }\n      }\n      fragment FragC on Type {\n        field(c: $c)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$c\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 16,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/multiple variables in fragments not defined",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($b: String) {\n        ...FragA\n      }\n      fragment FragA on Type {\n        field(a: $a) {\n          ...FragB\n        }\n      }\n      fragment FragB on Type {\n        field(b: $b) {\n          ...FragC\n        }\n      }\n      fragment FragC on Type {\n        field(c: $c)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 6,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$c\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 16,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/single variable in fragment not defined by multiple operations",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($a: String) {\n        ...FragAB\n      }\n      query Bar($a: String) {\n        ...FragAB\n      }\n      fragment FragAB on Type {\n        field(a: $a, b: $b)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$b\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 25
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" is not defined by operation \"Bar\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 25
+          },
+          {
+            "line": 5,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/variables in fragment not defined by multiple operations",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($b: String) {\n        ...FragAB\n      }\n      query Bar($a: String) {\n        ...FragAB\n      }\n      fragment FragAB on Type {\n        field(a: $a, b: $b)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" is not defined by operation \"Bar\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 25
+          },
+          {
+            "line": 5,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/variable in fragment used by other operation",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($b: String) {\n        ...FragA\n      }\n      query Bar($a: String) {\n        ...FragB\n      }\n      fragment FragA on Type {\n        field(a: $a)\n      }\n      fragment FragB on Type {\n        field(b: $b)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 18
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" is not defined by operation \"Bar\".",
+        "locations": [
+          {
+            "line": 12,
+            "column": 18
+          },
+          {
+            "line": 5,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No undefined variables/multiple undefined variables produce multiple errors",
+    "rule": "NoUndefinedVariables",
+    "query": "\n      query Foo($b: String) {\n        ...FragAB\n      }\n      query Bar($a: String) {\n        ...FragAB\n      }\n      fragment FragAB on Type {\n        field1(a: $a, b: $b)\n        ...FragC\n        field3(a: $a, b: $b)\n      }\n      fragment FragC on Type {\n        field2(c: $c)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Variable \"$a\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 19
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$a\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 11,
+            "column": 19
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$c\" is not defined by operation \"Foo\".",
+        "locations": [
+          {
+            "line": 14,
+            "column": 19
+          },
+          {
+            "line": 2,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" is not defined by operation \"Bar\".",
+        "locations": [
+          {
+            "line": 9,
+            "column": 26
+          },
+          {
+            "line": 5,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$b\" is not defined by operation \"Bar\".",
+        "locations": [
+          {
+            "line": 11,
+            "column": 26
+          },
+          {
+            "line": 5,
+            "column": 7
+          }
+        ]
+      },
+      {
+        "message": "Variable \"$c\" is not defined by operation \"Bar\".",
+        "locations": [
+          {
+            "line": 14,
+            "column": 19
+          },
+          {
+            "line": 5,
+            "column": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: No unused fragments/all fragment names are used",
     "rule": "NoUnusedFragments",
     "query": "\n      {\n        human(id: 4) {\n          ...HumanFields1\n          ... on Human {\n            ...HumanFields2\n          }\n        }\n      }\n      fragment HumanFields1 on Human {\n        name\n        ...HumanFields3\n      }\n      fragment HumanFields2 on Human {\n        name\n      }\n      fragment HumanFields3 on Human {\n        name\n      }\n    ",

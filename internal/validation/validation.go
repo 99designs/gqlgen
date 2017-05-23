@@ -17,6 +17,7 @@ type context struct {
 	schema *schema.Schema
 	doc    *query.Document
 	errs   []*errors.QueryError
+	opErrs map[*query.Operation][]*errors.QueryError
 }
 
 func (c *context) addErr(loc errors.Location, rule string, format string, a ...interface{}) {
@@ -35,19 +36,20 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	c := context{
 		schema: s,
 		doc:    doc,
+		opErrs: make(map[*query.Operation][]*errors.QueryError),
 	}
 
 	opNames := make(nameSet)
-	fragUsed := make(map[*query.FragmentDecl]struct{})
+	fragUsedBy := make(map[*query.FragmentDecl][]*query.Operation)
 	for _, op := range doc.Operations {
 		if op.Name.Name == "" && len(doc.Operations) != 1 {
-			c.addErr(op.Name.Loc, "LoneAnonymousOperation", "This anonymous operation must be the only defined operation.")
+			c.addErr(op.Loc, "LoneAnonymousOperation", "This anonymous operation must be the only defined operation.")
 		}
 		if op.Name.Name != "" {
 			c.validateName(opNames, op.Name, "UniqueOperationNames", "operation")
 		}
 
-		c.validateDirectives(string(op.Type), op.Directives)
+		c.validateDirectives(string(op.Type), op.Directives, nil)
 
 		varNames := make(nameSet)
 		for _, v := range op.Vars {
@@ -59,7 +61,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			}
 
 			if v.Default != nil {
-				c.validateLiteral(v.Default)
+				c.validateLiteral(v.Default, nil)
 
 				if t != nil {
 					if nn, ok := t.(*common.NonNull); ok {
@@ -84,15 +86,21 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 		default:
 			panic("unreachable")
 		}
-		c.validateSelectionSet(op.SelSet, entryPoint)
+
+		c.validateSelectionSet(op.SelSet, entryPoint, []*query.Operation{op})
+
+		fragUsed := make(map[*query.FragmentDecl]struct{})
 		c.markUsedFragments(op.SelSet, fragUsed)
+		for frag := range fragUsed {
+			fragUsedBy[frag] = append(fragUsedBy[frag], op)
+		}
 	}
 
 	fragNames := make(nameSet)
 	fragVisited := make(map[*query.FragmentDecl]struct{})
 	for _, frag := range doc.Fragments {
 		c.validateName(fragNames, frag.Name, "UniqueFragmentNames", "fragment")
-		c.validateDirectives("FRAGMENT_DEFINITION", frag.Directives)
+		c.validateDirectives("FRAGMENT_DEFINITION", frag.Directives, nil)
 
 		t := c.resolveType(&frag.On)
 		// continue even if t is nil
@@ -101,7 +109,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			continue
 		}
 
-		c.validateSelectionSet(frag.SelSet, t)
+		c.validateSelectionSet(frag.SelSet, t, fragUsedBy[frag])
 
 		if _, ok := fragVisited[frag]; !ok {
 			c.detectFragmentCycle(frag.SelSet, fragVisited, nil, map[string]int{frag.Name.Name: 0})
@@ -109,24 +117,28 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	}
 
 	for _, frag := range doc.Fragments {
-		if _, ok := fragUsed[frag]; !ok {
+		if len(fragUsedBy[frag]) == 0 {
 			c.addErr(frag.Loc, "NoUnusedFragments", "Fragment %q is never used.", frag.Name.Name)
 		}
+	}
+
+	for _, op := range doc.Operations {
+		c.errs = append(c.errs, c.opErrs[op]...)
 	}
 
 	return c.errs
 }
 
-func (c *context) validateSelectionSet(selSet *query.SelectionSet, t common.Type) {
+func (c *context) validateSelectionSet(selSet *query.SelectionSet, t common.Type, ops []*query.Operation) {
 	for _, sel := range selSet.Selections {
-		c.validateSelection(sel, t)
+		c.validateSelection(sel, t, ops)
 	}
 }
 
-func (c *context) validateSelection(sel query.Selection, t common.Type) {
+func (c *context) validateSelection(sel query.Selection, t common.Type, ops []*query.Operation) {
 	switch sel := sel.(type) {
 	case *query.Field:
-		c.validateDirectives("FIELD", sel.Directives)
+		c.validateDirectives("FIELD", sel.Directives, ops)
 
 		fieldName := sel.Name.Name
 		var f *schema.Field
@@ -160,7 +172,7 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			}
 		}
 
-		c.validateArgumentLiterals(sel.Arguments)
+		c.validateArgumentLiterals(sel.Arguments, ops)
 		if f != nil {
 			c.validateArgumentTypes(sel.Arguments, f.Args, sel.Alias.Loc,
 				func() string { return fmt.Sprintf("field %q of type %q", fieldName, t) },
@@ -180,11 +192,11 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			}
 		}
 		if sel.SelSet != nil {
-			c.validateSelectionSet(sel.SelSet, unwrapType(ft))
+			c.validateSelectionSet(sel.SelSet, unwrapType(ft), ops)
 		}
 
 	case *query.InlineFragment:
-		c.validateDirectives("INLINE_FRAGMENT", sel.Directives)
+		c.validateDirectives("INLINE_FRAGMENT", sel.Directives, ops)
 		if sel.On.Name != "" {
 			fragTyp := c.resolveType(&sel.On)
 			if fragTyp != nil && !compatible(t, fragTyp) {
@@ -197,10 +209,10 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			c.addErr(sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
-		c.validateSelectionSet(sel.SelSet, unwrapType(t))
+		c.validateSelectionSet(sel.SelSet, unwrapType(t), ops)
 
 	case *query.FragmentSpread:
-		c.validateDirectives("FRAGMENT_SPREAD", sel.Directives)
+		c.validateDirectives("FRAGMENT_SPREAD", sel.Directives, ops)
 		frag := c.doc.Fragments.Get(sel.Name.Name)
 		if frag == nil {
 			c.addErr(sel.Name.Loc, "KnownFragmentNames", "Unknown fragment %q.", sel.Name.Name)
@@ -355,7 +367,7 @@ func (c *context) resolveType(t common.Type) common.Type {
 	return t2
 }
 
-func (c *context) validateDirectives(loc string, directives common.DirectiveList) {
+func (c *context) validateDirectives(loc string, directives common.DirectiveList, ops []*query.Operation) {
 	directiveNames := make(nameSet)
 	for _, d := range directives {
 		dirName := d.Name.Name
@@ -363,7 +375,7 @@ func (c *context) validateDirectives(loc string, directives common.DirectiveList
 			return fmt.Sprintf("The directive %q can only be used once at this location.", dirName)
 		})
 
-		c.validateArgumentLiterals(d.Args)
+		c.validateArgumentLiterals(d.Args, ops)
 
 		dd, ok := c.schema.Directives[dirName]
 		if !ok {
@@ -428,25 +440,39 @@ func (c *context) validateArgumentTypes(args common.ArgumentList, argDecls commo
 	}
 }
 
-func (c *context) validateArgumentLiterals(args common.ArgumentList) {
+func (c *context) validateArgumentLiterals(args common.ArgumentList, ops []*query.Operation) {
 	argNames := make(nameSet)
 	for _, arg := range args {
 		c.validateName(argNames, arg.Name, "UniqueArgumentNames", "argument")
-		c.validateLiteral(arg.Value)
+		c.validateLiteral(arg.Value, ops)
 	}
 }
 
-func (c *context) validateLiteral(l common.Literal) {
+func (c *context) validateLiteral(l common.Literal, ops []*query.Operation) {
 	switch l := l.(type) {
 	case *common.ObjectLit:
 		fieldNames := make(nameSet)
 		for _, f := range l.Fields {
 			c.validateName(fieldNames, f.Name, "UniqueInputFieldNames", "input field")
-			c.validateLiteral(f.Value)
+			c.validateLiteral(f.Value, ops)
 		}
 	case *common.ListLit:
 		for _, entry := range l.Entries {
-			c.validateLiteral(entry)
+			c.validateLiteral(entry, ops)
+		}
+	case *common.Variable:
+		for _, op := range ops {
+			if op.Vars.Get(l.Name) == nil {
+				byOp := ""
+				if op.Name.Name != "" {
+					byOp = fmt.Sprintf(" by operation %q", op.Name.Name)
+				}
+				c.opErrs[op] = append(c.opErrs[op], &errors.QueryError{
+					Message:   fmt.Sprintf("Variable %q is not defined%s.", "$"+l.Name, byOp),
+					Locations: []errors.Location{l.Loc, op.Loc},
+					Rule:      "NoUndefinedVariables",
+				})
+			}
 		}
 	}
 }
@@ -463,7 +489,6 @@ func validateValueType(v common.Literal, t common.Type) (bool, string) {
 	}
 
 	if _, ok := v.(*common.Variable); ok {
-		// TODO
 		return true, ""
 	}
 

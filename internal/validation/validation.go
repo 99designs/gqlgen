@@ -15,9 +15,10 @@ import (
 )
 
 type context struct {
-	schema *schema.Schema
-	doc    *query.Document
-	errs   []*errors.QueryError
+	schema        *schema.Schema
+	doc           *query.Document
+	errs          []*errors.QueryError
+	usedFragments map[*query.FragmentDecl]struct{}
 }
 
 func (c *context) addErr(loc errors.Location, rule string, format string, a ...interface{}) {
@@ -30,8 +31,9 @@ func (c *context) addErr(loc errors.Location, rule string, format string, a ...i
 
 func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	c := context{
-		schema: s,
-		doc:    doc,
+		schema:        s,
+		doc:           doc,
+		usedFragments: make(map[*query.FragmentDecl]struct{}),
 	}
 
 	opNames := make(nameSet)
@@ -76,7 +78,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 		default:
 			panic("unreachable")
 		}
-		c.validateSelectionSet(op.SelSet, entryPoint)
+		c.shallowValidateSelectionSet(op.SelSet, entryPoint)
 	}
 
 	fragNames := make(nameSet)
@@ -89,21 +91,30 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			c.addErr(frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name.Name, t)
 			continue
 		}
-		c.validateSelectionSet(frag.SelSet, t)
+		c.shallowValidateSelectionSet(frag.SelSet, t)
+	}
+
+	for _, op := range doc.Operations {
+		c.deepValidateSelectionSet(op.SelSet)
+	}
+
+	for _, frag := range doc.Fragments {
+		if _, ok := c.usedFragments[frag]; !ok {
+			c.addErr(frag.Loc, "NoUnusedFragments", "Fragment %q is never used.", frag.Name.Name)
+		}
 	}
 
 	sort.Slice(c.errs, func(i, j int) bool { return c.errs[i].Locations[0].Before(c.errs[j].Locations[0]) })
 	return c.errs
 }
 
-func (c *context) validateSelectionSet(selSet *query.SelectionSet, t common.Type) {
+func (c *context) shallowValidateSelectionSet(selSet *query.SelectionSet, t common.Type) {
 	for _, sel := range selSet.Selections {
-		c.validateSelection(sel, t)
+		c.shallowValidateSelection(sel, t)
 	}
-	return
 }
 
-func (c *context) validateSelection(sel query.Selection, t common.Type) {
+func (c *context) shallowValidateSelection(sel query.Selection, t common.Type) {
 	switch sel := sel.(type) {
 	case *query.Field:
 		c.validateDirectives("FIELD", sel.Directives)
@@ -165,7 +176,7 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			}
 		}
 		if sel.SelSet != nil {
-			c.validateSelectionSet(sel.SelSet, ft)
+			c.shallowValidateSelectionSet(sel.SelSet, ft)
 		}
 
 	case *query.InlineFragment:
@@ -178,12 +189,40 @@ func (c *context) validateSelection(sel query.Selection, t common.Type) {
 			c.addErr(sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
-		c.validateSelectionSet(sel.SelSet, t)
+		c.shallowValidateSelectionSet(sel.SelSet, t)
 
 	case *query.FragmentSpread:
 		c.validateDirectives("FRAGMENT_SPREAD", sel.Directives)
 		if frag := c.doc.Fragments.Get(sel.Name.Name); frag == nil {
 			c.addErr(sel.Name.Loc, "KnownFragmentNames", "Unknown fragment %q.", sel.Name.Name)
+			return
+		}
+
+	default:
+		panic("unreachable")
+	}
+}
+
+func (c *context) deepValidateSelectionSet(selSet *query.SelectionSet) {
+	for _, sel := range selSet.Selections {
+		c.deepValidateSelection(sel)
+	}
+}
+
+func (c *context) deepValidateSelection(sel query.Selection) {
+	switch sel := sel.(type) {
+	case *query.Field:
+		if sel.SelSet != nil {
+			c.deepValidateSelectionSet(sel.SelSet)
+		}
+
+	case *query.InlineFragment:
+		c.deepValidateSelectionSet(sel.SelSet)
+
+	case *query.FragmentSpread:
+		if frag := c.doc.Fragments.Get(sel.Name.Name); frag != nil {
+			c.usedFragments[frag] = struct{}{}
+			c.deepValidateSelectionSet(frag.SelSet)
 		}
 
 	default:

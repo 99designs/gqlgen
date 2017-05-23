@@ -62,6 +62,7 @@ type FragmentDecl struct {
 	Fragment
 	Name       lexer.Ident
 	Directives common.DirectiveList
+	Loc        errors.Location
 }
 
 type SelectionSet struct {
@@ -124,6 +125,7 @@ func parseDocument(l *lexer.Lexer) *Document {
 			continue
 		}
 
+		loc := l.Location()
 		switch x := l.ConsumeIdent(); x {
 		case "query":
 			d.Operations = append(d.Operations, parseOperation(l, Query))
@@ -135,7 +137,7 @@ func parseDocument(l *lexer.Lexer) *Document {
 			d.Operations = append(d.Operations, parseOperation(l, Subscription))
 
 		case "fragment":
-			d.Fragments = append(d.Fragments, parseFragment(l))
+			d.Fragments = append(d.Fragments, parseFragment(l, loc))
 
 		default:
 			l.SyntaxError(fmt.Sprintf(`unexpected %q, expecting "fragment"`, x))
@@ -163,8 +165,8 @@ func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	return op
 }
 
-func parseFragment(l *lexer.Lexer) *FragmentDecl {
-	f := &FragmentDecl{}
+func parseFragment(l *lexer.Lexer, loc errors.Location) *FragmentDecl {
+	f := &FragmentDecl{Loc: loc}
 	f.Name = l.ConsumeIdentWithLoc()
 	l.ConsumeKeyword("on")
 	f.On = common.TypeName{Ident: l.ConsumeIdentWithLoc()}

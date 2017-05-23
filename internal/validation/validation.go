@@ -84,7 +84,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 		default:
 			panic("unreachable")
 		}
-		c.shallowValidateSelectionSet(op.SelSet, entryPoint)
+		c.validateSelectionSet(op.SelSet, entryPoint)
 		c.markUsedFragments(op.SelSet, fragUsed)
 	}
 
@@ -101,7 +101,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			continue
 		}
 
-		c.shallowValidateSelectionSet(frag.SelSet, t)
+		c.validateSelectionSet(frag.SelSet, t)
 
 		if _, ok := fragVisited[frag]; !ok {
 			c.detectFragmentCycle(frag.SelSet, fragVisited, nil, map[string]int{frag.Name.Name: 0})
@@ -117,18 +117,17 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	return c.errs
 }
 
-func (c *context) shallowValidateSelectionSet(selSet *query.SelectionSet, t common.Type) {
+func (c *context) validateSelectionSet(selSet *query.SelectionSet, t common.Type) {
 	for _, sel := range selSet.Selections {
-		c.shallowValidateSelection(sel, t)
+		c.validateSelection(sel, t)
 	}
 }
 
-func (c *context) shallowValidateSelection(sel query.Selection, t common.Type) {
+func (c *context) validateSelection(sel query.Selection, t common.Type) {
 	switch sel := sel.(type) {
 	case *query.Field:
 		c.validateDirectives("FIELD", sel.Directives)
 
-		t = unwrapType(t)
 		fieldName := sel.Name.Name
 		var f *schema.Field
 		switch fieldName {
@@ -181,30 +180,63 @@ func (c *context) shallowValidateSelection(sel query.Selection, t common.Type) {
 			}
 		}
 		if sel.SelSet != nil {
-			c.shallowValidateSelectionSet(sel.SelSet, ft)
+			c.validateSelectionSet(sel.SelSet, unwrapType(ft))
 		}
 
 	case *query.InlineFragment:
 		c.validateDirectives("INLINE_FRAGMENT", sel.Directives)
 		if sel.On.Name != "" {
-			t = c.resolveType(&sel.On)
+			fragTyp := c.resolveType(&sel.On)
+			if fragTyp != nil && !compatible(t, fragTyp) {
+				c.addErr(sel.Loc, "PossibleFragmentSpreads", "Fragment cannot be spread here as objects of type %q can never be of type %q.", t, fragTyp)
+			}
+			t = fragTyp
 			// continue even if t is nil
 		}
 		if t != nil && !canBeFragment(t) {
 			c.addErr(sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
-		c.shallowValidateSelectionSet(sel.SelSet, t)
+		c.validateSelectionSet(sel.SelSet, unwrapType(t))
 
 	case *query.FragmentSpread:
 		c.validateDirectives("FRAGMENT_SPREAD", sel.Directives)
-		if frag := c.doc.Fragments.Get(sel.Name.Name); frag == nil {
+		frag := c.doc.Fragments.Get(sel.Name.Name)
+		if frag == nil {
 			c.addErr(sel.Name.Loc, "KnownFragmentNames", "Unknown fragment %q.", sel.Name.Name)
 			return
+		}
+		fragTyp := c.schema.Types[frag.On.Name]
+		if !compatible(t, fragTyp) {
+			c.addErr(sel.Loc, "PossibleFragmentSpreads", "Fragment %q cannot be spread here as objects of type %q can never be of type %q.", frag.Name.Name, t, fragTyp)
 		}
 
 	default:
 		panic("unreachable")
+	}
+}
+
+func compatible(a, b common.Type) bool {
+	for _, pta := range possibleTypes(a) {
+		for _, ptb := range possibleTypes(b) {
+			if pta == ptb {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func possibleTypes(t common.Type) []*schema.Object {
+	switch t := t.(type) {
+	case *schema.Object:
+		return []*schema.Object{t}
+	case *schema.Interface:
+		return t.PossibleTypes
+	case *schema.Union:
+		return t.PossibleTypes
+	default:
+		return nil
 	}
 }
 

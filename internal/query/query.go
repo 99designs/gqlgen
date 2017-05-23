@@ -84,6 +84,7 @@ type Field struct {
 type InlineFragment struct {
 	Fragment
 	Directives common.DirectiveList
+	Loc        errors.Location
 }
 
 type FragmentSpread struct {
@@ -217,7 +218,7 @@ func parseSpread(l *common.Lexer) Selection {
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
 
-	f := &InlineFragment{}
+	f := &InlineFragment{Loc: loc}
 	if l.Peek() == scanner.Ident {
 		ident := l.ConsumeIdentWithLoc()
 		if ident.Name != "on" {

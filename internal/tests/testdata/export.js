@@ -68,7 +68,7 @@ require('./src/validation/__tests__/NoFragmentCycles-test');
 require('./src/validation/__tests__/NoUnusedFragments-test');
 // require('./src/validation/__tests__/NoUnusedVariables-test');
 // require('./src/validation/__tests__/OverlappingFieldsCanBeMerged-test');
-// require('./src/validation/__tests__/PossibleFragmentSpreads-test');
+require('./src/validation/__tests__/PossibleFragmentSpreads-test');
 require('./src/validation/__tests__/ProvidedNonNullArguments-test');
 require('./src/validation/__tests__/ScalarLeafs-test');
 require('./src/validation/__tests__/UniqueArgumentNames-test');

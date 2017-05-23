@@ -60,11 +60,11 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 
 			if t != nil && v.Default != nil {
 				if nn, ok := t.(*common.NonNull); ok {
-					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
+					c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
 				}
 
-				if ok, reason := validateValue(v.Default.Value, t); !ok {
-					c.addErr(v.Default.Loc, "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, common.Stringify(v.Default.Value), reason)
+				if ok, reason := validateValue(v.Default, t); !ok {
+					c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, v.Default, reason)
 				}
 			}
 		}
@@ -386,8 +386,8 @@ func (c *context) validateArguments(args common.ArgumentList, argDecls common.In
 			continue
 		}
 		value := selArg.Value
-		if ok, reason := validateValue(value.Value, arg.Type); !ok {
-			c.addErr(value.Loc, "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, common.Stringify(value.Value), reason)
+		if ok, reason := validateValue(value, arg.Type); !ok {
+			c.addErr(value.Location(), "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, value, reason)
 		}
 	}
 	for _, decl := range argDecls {
@@ -399,18 +399,18 @@ func (c *context) validateArguments(args common.ArgumentList, argDecls common.In
 	}
 }
 
-func validateValue(v interface{}, t common.Type) (bool, string) {
+func validateValue(v common.Literal, t common.Type) (bool, string) {
 	if nn, ok := t.(*common.NonNull); ok {
-		if v == nil {
+		if isNull(v) {
 			return false, fmt.Sprintf("Expected %q, found null.", t)
 		}
 		t = nn.OfType
 	}
-	if v == nil {
+	if isNull(v) {
 		return true, ""
 	}
 
-	if _, ok := v.(common.Variable); ok {
+	if _, ok := v.(*common.Variable); ok {
 		// TODO
 		return true, ""
 	}
@@ -424,11 +424,11 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 		}
 
 	case *common.List:
-		list, ok := v.([]interface{})
+		list, ok := v.(*common.ListLit)
 		if !ok {
 			return validateValue(v, t.OfType) // single value instead of list
 		}
-		for i, entry := range list {
+		for i, entry := range list.Entries {
 			if ok, reason := validateValue(entry, t.OfType); !ok {
 				return false, fmt.Sprintf("In element #%d: %s", i, reason)
 			}
@@ -436,11 +436,11 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 		return true, ""
 
 	case *schema.InputObject:
-		v, ok := v.(map[string]interface{})
+		v, ok := v.(*common.ObjectLit)
 		if !ok {
 			return false, fmt.Sprintf("Expected %q, found not an object.", t)
 		}
-		for name, entry := range v {
+		for name, entry := range v.Fields {
 			f := t.Values.Get(name)
 			if f == nil {
 				return false, fmt.Sprintf("In field %q: Unknown field.", name)
@@ -450,7 +450,7 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 			}
 		}
 		for _, f := range t.Values {
-			if _, ok := v[f.Name.Name]; !ok {
+			if _, ok := v.Fields[f.Name.Name]; !ok {
 				if _, ok := f.Type.(*common.NonNull); ok && f.Default == nil {
 					return false, fmt.Sprintf("In field %q: Expected %q, found null.", f.Name.Name, f.Type)
 				}
@@ -459,7 +459,7 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 		return true, ""
 	}
 
-	return false, fmt.Sprintf("Expected type %q, found %s.", t, common.Stringify(v))
+	return false, fmt.Sprintf("Expected type %q, found %s.", t, v)
 }
 
 func validateBasicLit(v *common.BasicLit, t common.Type) bool {
@@ -533,4 +533,9 @@ func hasSubfields(t common.Type) bool {
 	default:
 		return false
 	}
+}
+
+func isNull(lit interface{}) bool {
+	_, ok := lit.(*common.NullLit)
+	return ok
 }

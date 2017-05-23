@@ -284,7 +284,7 @@ func resolveDirectives(s *Schema, directives common.DirectiveList) error {
 		}
 		for _, arg := range dd.Args {
 			if _, ok := d.Args.Get(arg.Name.Name); !ok {
-				d.Args = append(d.Args, common.Argument{Name: arg.Name, Value: *arg.Default})
+				d.Args = append(d.Args, common.Argument{Name: arg.Name, Value: arg.Default})
 			}
 		}
 	}

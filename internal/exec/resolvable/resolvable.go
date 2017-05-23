@@ -129,7 +129,7 @@ func (b *execBuilder) finish() error {
 		p.defaultStruct = reflect.New(p.structType).Elem()
 		for _, f := range p.fields {
 			if defaultVal := f.field.Default; defaultVal != nil {
-				v, err := f.fieldPacker.Pack(nil, defaultVal.Value)
+				v, err := f.fieldPacker.Pack(defaultVal.Value(nil))
 				if err != nil {
 					return err
 				}

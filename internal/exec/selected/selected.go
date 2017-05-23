@@ -21,13 +21,6 @@ type Request struct {
 	Errs   []*errors.QueryError
 }
 
-func (r *Request) resolveVar(value interface{}) interface{} {
-	if v, ok := value.(common.Variable); ok {
-		value = r.Vars[string(v)]
-	}
-	return value
-}
-
 func (r *Request) AddError(err *errors.QueryError) {
 	r.Mu.Lock()
 	r.Errs = append(r.Errs, err)
@@ -103,7 +96,7 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 
 			case "__type":
 				p := resolvable.ValuePacker{ValueType: reflect.TypeOf("")}
-				v, err := p.Pack(&resolvable.Request{Vars: r.Vars}, r.resolveVar(field.Arguments.MustGet("name").Value))
+				v, err := p.Pack(field.Arguments.MustGet("name").Value(r.Vars))
 				if err != nil {
 					r.AddError(errors.Errorf("%s", err))
 					return nil
@@ -130,10 +123,10 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 				if fe.ArgsPacker != nil {
 					args = make(map[string]interface{})
 					for _, arg := range field.Arguments {
-						args[arg.Name.Name] = arg.Value.Value
+						args[arg.Name.Name] = arg.Value.Value(r.Vars)
 					}
 					var err error
-					packedArgs, err = fe.ArgsPacker.Pack(&resolvable.Request{Vars: r.Vars}, args)
+					packedArgs, err = fe.ArgsPacker.Pack(args)
 					if err != nil {
 						r.AddError(errors.Errorf("%s", err))
 						return
@@ -203,7 +196,7 @@ func applyField(r *Request, e resolvable.Resolvable, selSet *query.SelectionSet)
 func skipByDirective(r *Request, directives common.DirectiveList) bool {
 	if d := directives.Get("skip"); d != nil {
 		p := resolvable.ValuePacker{ValueType: reflect.TypeOf(false)}
-		v, err := p.Pack(&resolvable.Request{Vars: r.Vars}, r.resolveVar(d.Args.MustGet("if").Value))
+		v, err := p.Pack(d.Args.MustGet("if").Value(r.Vars))
 		if err != nil {
 			r.AddError(errors.Errorf("%s", err))
 		}
@@ -214,7 +207,7 @@ func skipByDirective(r *Request, directives common.DirectiveList) bool {
 
 	if d := directives.Get("include"); d != nil {
 		p := resolvable.ValuePacker{ValueType: reflect.TypeOf(false)}
-		v, err := p.Pack(&resolvable.Request{Vars: r.Vars}, r.resolveVar(d.Args.MustGet("if").Value))
+		v, err := p.Pack(d.Args.MustGet("if").Value(r.Vars))
 		if err != nil {
 			r.AddError(errors.Errorf("%s", err))
 		}

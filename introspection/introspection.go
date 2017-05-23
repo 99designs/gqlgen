@@ -226,7 +226,7 @@ func (r *Field) DeprecationReason() *string {
 	if d == nil {
 		return nil
 	}
-	reason := d.Args.MustGet("reason").Value.(*common.BasicLit).Value().(string)
+	reason := d.Args.MustGet("reason").Value(nil).(string)
 	return &reason
 }
 
@@ -253,7 +253,7 @@ func (r *InputValue) DefaultValue() *string {
 	if r.value.Default == nil {
 		return nil
 	}
-	s := common.Stringify(r.value.Default.Value)
+	s := r.value.Default.String()
 	return &s
 }
 
@@ -281,7 +281,7 @@ func (r *EnumValue) DeprecationReason() *string {
 	if d == nil {
 		return nil
 	}
-	reason := d.Args.MustGet("reason").Value.(*common.BasicLit).Value().(string)
+	reason := d.Args.MustGet("reason").Value(nil).(string)
 	return &reason
 }
 

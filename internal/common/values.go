@@ -1,8 +1,6 @@
 package common
 
 import (
-	"text/scanner"
-
 	"github.com/neelance/graphql-go/errors"
 )
 
@@ -10,7 +8,7 @@ type InputValue struct {
 	Name    Ident
 	Type    Type
 	TypeLoc errors.Location
-	Default *ValueWithLoc
+	Default Literal
 	Desc    string
 }
 
@@ -25,11 +23,6 @@ func (l InputValueList) Get(name string) *InputValue {
 	return nil
 }
 
-type ValueWithLoc struct {
-	Value interface{}
-	Loc   errors.Location
-}
-
 func ParseInputValue(l *Lexer) *InputValue {
 	p := &InputValue{}
 	p.Desc = l.DescComment()
@@ -39,29 +32,28 @@ func ParseInputValue(l *Lexer) *InputValue {
 	p.Type = ParseType(l)
 	if l.Peek() == '=' {
 		l.ConsumeToken('=')
-		v := ParseValue(l, true)
-		p.Default = &v
+		p.Default = ParseLiteral(l, true)
 	}
 	return p
 }
 
 type Argument struct {
 	Name  Ident
-	Value ValueWithLoc
+	Value Literal
 }
 
 type ArgumentList []Argument
 
-func (l ArgumentList) Get(name string) (ValueWithLoc, bool) {
+func (l ArgumentList) Get(name string) (Literal, bool) {
 	for _, arg := range l {
 		if arg.Name.Name == name {
 			return arg.Value, true
 		}
 	}
-	return ValueWithLoc{}, false
+	return nil, false
 }
 
-func (l ArgumentList) MustGet(name string) ValueWithLoc {
+func (l ArgumentList) MustGet(name string) Literal {
 	value, ok := l.Get(name)
 	if !ok {
 		panic("argument not found")
@@ -75,52 +67,9 @@ func ParseArguments(l *Lexer) ArgumentList {
 	for l.Peek() != ')' {
 		name := l.ConsumeIdentWithLoc()
 		l.ConsumeToken(':')
-		value := ParseValue(l, false)
+		value := ParseLiteral(l, false)
 		args = append(args, Argument{Name: name, Value: value})
 	}
 	l.ConsumeToken(')')
 	return args
-}
-
-func ParseValue(l *Lexer, constOnly bool) ValueWithLoc {
-	loc := l.Location()
-	value := parseValue(l, constOnly)
-	return ValueWithLoc{
-		Value: value,
-		Loc:   loc,
-	}
-}
-
-func parseValue(l *Lexer, constOnly bool) interface{} {
-	switch l.Peek() {
-	case '$':
-		if constOnly {
-			l.SyntaxError("variable not allowed")
-			panic("unreachable")
-		}
-		return l.ConsumeVariable()
-	case scanner.Int, scanner.Float, scanner.String, scanner.Ident:
-		return l.ConsumeLiteral()
-	case '[':
-		l.ConsumeToken('[')
-		var list []interface{}
-		for l.Peek() != ']' {
-			list = append(list, parseValue(l, constOnly))
-		}
-		l.ConsumeToken(']')
-		return list
-	case '{':
-		l.ConsumeToken('{')
-		obj := make(map[string]interface{})
-		for l.Peek() != '}' {
-			name := l.ConsumeIdent()
-			l.ConsumeToken(':')
-			obj[name] = parseValue(l, constOnly)
-		}
-		l.ConsumeToken('}')
-		return obj
-	default:
-		l.SyntaxError("invalid value")
-		panic("unreachable")
-	}
 }

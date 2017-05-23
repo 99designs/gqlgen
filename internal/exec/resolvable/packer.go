@@ -8,7 +8,6 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
-	"github.com/neelance/graphql-go/internal/lexer"
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
@@ -17,7 +16,7 @@ type Request struct {
 }
 
 func (r *Request) resolveVar(value interface{}) interface{} {
-	if v, ok := value.(lexer.Variable); ok {
+	if v, ok := value.(common.Variable); ok {
 		value = r.Vars[string(v)]
 	}
 	return value
@@ -262,7 +261,7 @@ func (p *ValuePacker) Pack(r *Request, value interface{}) (reflect.Value, error)
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	if lit, ok := value.(*lexer.BasicLit); ok {
+	if lit, ok := value.(*common.BasicLit); ok {
 		value = common.UnmarshalLiteral(lit)
 	}
 
@@ -282,7 +281,7 @@ func (p *unmarshalerPacker) Pack(r *Request, value interface{}) (reflect.Value, 
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	if lit, ok := value.(*lexer.BasicLit); ok {
+	if lit, ok := value.(*common.BasicLit); ok {
 		value = common.UnmarshalLiteral(lit)
 	}
 

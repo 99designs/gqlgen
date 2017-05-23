@@ -8,7 +8,6 @@ import (
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/exec/resolvable"
-	"github.com/neelance/graphql-go/internal/lexer"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 	"github.com/neelance/graphql-go/introspection"
@@ -23,7 +22,7 @@ type Request struct {
 }
 
 func (r *Request) resolveVar(value interface{}) interface{} {
-	if v, ok := value.(lexer.Variable); ok {
+	if v, ok := value.(common.Variable); ok {
 		value = r.Vars[string(v)]
 	}
 	return value

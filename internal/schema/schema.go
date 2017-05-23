@@ -7,7 +7,6 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
-	"github.com/neelance/graphql-go/internal/lexer"
 )
 
 type Schema struct {
@@ -161,7 +160,7 @@ func (s *Schema) Parse(schemaString string) error {
 	}
 	sc.Init(strings.NewReader(schemaString))
 
-	l := lexer.New(sc)
+	l := common.New(sc)
 	err := l.CatchSyntaxError(func() {
 		parseSchema(s, l)
 	})
@@ -303,7 +302,7 @@ func resolveInputObject(s *Schema, values common.InputValueList) error {
 	return nil
 }
 
-func parseSchema(s *Schema, l *lexer.Lexer) {
+func parseSchema(s *Schema, l *common.Lexer) {
 	for l.Peek() != scanner.EOF {
 		desc := l.DescComment()
 		switch x := l.ConsumeIdent(); x {
@@ -352,7 +351,7 @@ func parseSchema(s *Schema, l *lexer.Lexer) {
 	}
 }
 
-func parseObjectDecl(l *lexer.Lexer) *Object {
+func parseObjectDecl(l *common.Lexer) *Object {
 	o := &Object{}
 	o.Name = l.ConsumeIdent()
 	if l.Peek() == scanner.Ident {
@@ -370,7 +369,7 @@ func parseObjectDecl(l *lexer.Lexer) *Object {
 	return o
 }
 
-func parseInterfaceDecl(l *lexer.Lexer) *Interface {
+func parseInterfaceDecl(l *common.Lexer) *Interface {
 	i := &Interface{}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
@@ -379,7 +378,7 @@ func parseInterfaceDecl(l *lexer.Lexer) *Interface {
 	return i
 }
 
-func parseUnionDecl(l *lexer.Lexer) *Union {
+func parseUnionDecl(l *common.Lexer) *Union {
 	union := &Union{}
 	union.Name = l.ConsumeIdent()
 	l.ConsumeToken('=')
@@ -391,7 +390,7 @@ func parseUnionDecl(l *lexer.Lexer) *Union {
 	return union
 }
 
-func parseInputDecl(l *lexer.Lexer) *InputObject {
+func parseInputDecl(l *common.Lexer) *InputObject {
 	i := &InputObject{}
 	i.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
@@ -402,7 +401,7 @@ func parseInputDecl(l *lexer.Lexer) *InputObject {
 	return i
 }
 
-func parseEnumDecl(l *lexer.Lexer) *Enum {
+func parseEnumDecl(l *common.Lexer) *Enum {
 	enum := &Enum{}
 	enum.Name = l.ConsumeIdent()
 	l.ConsumeToken('{')
@@ -417,7 +416,7 @@ func parseEnumDecl(l *lexer.Lexer) *Enum {
 	return enum
 }
 
-func parseDirectiveDecl(l *lexer.Lexer) *DirectiveDecl {
+func parseDirectiveDecl(l *common.Lexer) *DirectiveDecl {
 	d := &DirectiveDecl{}
 	l.ConsumeToken('@')
 	d.Name = l.ConsumeIdent()
@@ -441,7 +440,7 @@ func parseDirectiveDecl(l *lexer.Lexer) *DirectiveDecl {
 	return d
 }
 
-func parseFields(l *lexer.Lexer) FieldList {
+func parseFields(l *common.Lexer) FieldList {
 	var fields FieldList
 	for l.Peek() != '}' {
 		f := &Field{}

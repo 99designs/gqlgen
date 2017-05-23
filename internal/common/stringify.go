@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-
-	"github.com/neelance/graphql-go/internal/lexer"
 )
 
 func Stringify(v interface{}) string {
 	switch v := v.(type) {
-	case *lexer.BasicLit:
+	case *BasicLit:
 		return v.Text
 
 	case []interface{}:

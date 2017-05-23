@@ -1,15 +1,11 @@
 package common
 
-import (
-	"github.com/neelance/graphql-go/internal/lexer"
-)
-
 type Directive struct {
-	Name lexer.Ident
+	Name Ident
 	Args ArgumentList
 }
 
-func ParseDirectives(l *lexer.Lexer) DirectiveList {
+func ParseDirectives(l *Lexer) DirectiveList {
 	var directives DirectiveList
 	for l.Peek() == '@' {
 		l.ConsumeToken('@')

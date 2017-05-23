@@ -7,7 +7,6 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
-	"github.com/neelance/graphql-go/internal/lexer"
 )
 
 type Document struct {
@@ -39,7 +38,7 @@ func (l FragmentList) Get(name string) *FragmentDecl {
 
 type Operation struct {
 	Type       OperationType
-	Name       lexer.Ident
+	Name       common.Ident
 	Vars       common.InputValueList
 	SelSet     *SelectionSet
 	Directives common.DirectiveList
@@ -60,7 +59,7 @@ type Fragment struct {
 
 type FragmentDecl struct {
 	Fragment
-	Name       lexer.Ident
+	Name       common.Ident
 	Directives common.DirectiveList
 	Loc        errors.Location
 }
@@ -75,8 +74,8 @@ type Selection interface {
 }
 
 type Field struct {
-	Alias      lexer.Ident
-	Name       lexer.Ident
+	Alias      common.Ident
+	Name       common.Ident
 	Arguments  common.ArgumentList
 	Directives common.DirectiveList
 	SelSet     *SelectionSet
@@ -88,7 +87,7 @@ type InlineFragment struct {
 }
 
 type FragmentSpread struct {
-	Name       lexer.Ident
+	Name       common.Ident
 	Directives common.DirectiveList
 	Loc        errors.Location
 }
@@ -103,7 +102,7 @@ func Parse(queryString string) (*Document, *errors.QueryError) {
 	}
 	sc.Init(strings.NewReader(queryString))
 
-	l := lexer.New(sc)
+	l := common.New(sc)
 	var doc *Document
 	err := l.CatchSyntaxError(func() {
 		doc = parseDocument(l)
@@ -115,7 +114,7 @@ func Parse(queryString string) (*Document, *errors.QueryError) {
 	return doc, nil
 }
 
-func parseDocument(l *lexer.Lexer) *Document {
+func parseDocument(l *common.Lexer) *Document {
 	d := &Document{}
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
@@ -147,7 +146,7 @@ func parseDocument(l *lexer.Lexer) *Document {
 	return d
 }
 
-func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
+func parseOperation(l *common.Lexer, opType OperationType) *Operation {
 	op := &Operation{Type: opType}
 	op.Name.Loc = l.Location()
 	if l.Peek() == scanner.Ident {
@@ -166,7 +165,7 @@ func parseOperation(l *lexer.Lexer, opType OperationType) *Operation {
 	return op
 }
 
-func parseFragment(l *lexer.Lexer, loc errors.Location) *FragmentDecl {
+func parseFragment(l *common.Lexer, loc errors.Location) *FragmentDecl {
 	f := &FragmentDecl{Loc: loc}
 	f.Name = l.ConsumeIdentWithLoc()
 	l.ConsumeKeyword("on")
@@ -176,7 +175,7 @@ func parseFragment(l *lexer.Lexer, loc errors.Location) *FragmentDecl {
 	return f
 }
 
-func parseSelectionSet(l *lexer.Lexer) *SelectionSet {
+func parseSelectionSet(l *common.Lexer) *SelectionSet {
 	sel := &SelectionSet{}
 	sel.Loc = l.Location()
 	l.ConsumeToken('{')
@@ -187,14 +186,14 @@ func parseSelectionSet(l *lexer.Lexer) *SelectionSet {
 	return sel
 }
 
-func parseSelection(l *lexer.Lexer) Selection {
+func parseSelection(l *common.Lexer) Selection {
 	if l.Peek() == '.' {
 		return parseSpread(l)
 	}
 	return parseField(l)
 }
 
-func parseField(l *lexer.Lexer) *Field {
+func parseField(l *common.Lexer) *Field {
 	f := &Field{}
 	f.Alias = l.ConsumeIdentWithLoc()
 	f.Name = f.Alias
@@ -212,7 +211,7 @@ func parseField(l *lexer.Lexer) *Field {
 	return f
 }
 
-func parseSpread(l *lexer.Lexer) Selection {
+func parseSpread(l *common.Lexer) Selection {
 	loc := l.Location()
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')

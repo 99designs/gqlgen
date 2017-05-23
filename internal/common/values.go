@@ -5,11 +5,10 @@ import (
 	"text/scanner"
 
 	"github.com/neelance/graphql-go/errors"
-	"github.com/neelance/graphql-go/internal/lexer"
 )
 
 type InputValue struct {
-	Name    lexer.Ident
+	Name    Ident
 	Type    Type
 	TypeLoc errors.Location
 	Default *ValueWithLoc
@@ -32,7 +31,7 @@ type ValueWithLoc struct {
 	Loc   errors.Location
 }
 
-func ParseInputValue(l *lexer.Lexer) *InputValue {
+func ParseInputValue(l *Lexer) *InputValue {
 	p := &InputValue{}
 	p.Desc = l.DescComment()
 	p.Name = l.ConsumeIdentWithLoc()
@@ -48,7 +47,7 @@ func ParseInputValue(l *lexer.Lexer) *InputValue {
 }
 
 type Argument struct {
-	Name  lexer.Ident
+	Name  Ident
 	Value ValueWithLoc
 }
 
@@ -71,7 +70,7 @@ func (l ArgumentList) MustGet(name string) ValueWithLoc {
 	return value
 }
 
-func ParseArguments(l *lexer.Lexer) ArgumentList {
+func ParseArguments(l *Lexer) ArgumentList {
 	var args ArgumentList
 	l.ConsumeToken('(')
 	for l.Peek() != ')' {
@@ -84,7 +83,7 @@ func ParseArguments(l *lexer.Lexer) ArgumentList {
 	return args
 }
 
-func ParseValue(l *lexer.Lexer, constOnly bool) ValueWithLoc {
+func ParseValue(l *Lexer, constOnly bool) ValueWithLoc {
 	loc := l.Location()
 	value := parseValue(l, constOnly)
 	return ValueWithLoc{
@@ -93,7 +92,7 @@ func ParseValue(l *lexer.Lexer, constOnly bool) ValueWithLoc {
 	}
 }
 
-func parseValue(l *lexer.Lexer, constOnly bool) interface{} {
+func parseValue(l *Lexer, constOnly bool) interface{} {
 	switch l.Peek() {
 	case '$':
 		if constOnly {
@@ -127,7 +126,7 @@ func parseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	}
 }
 
-func UnmarshalLiteral(lit *lexer.BasicLit) interface{} {
+func UnmarshalLiteral(lit *BasicLit) interface{} {
 	switch lit.Type {
 	case scanner.Int, scanner.Float:
 		value, err := strconv.ParseFloat(lit.Text, 64)

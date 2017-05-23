@@ -9,7 +9,6 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
-	"github.com/neelance/graphql-go/internal/lexer"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
 )
@@ -144,7 +143,7 @@ func (c *context) shallowValidateSelection(sel query.Selection, t common.Type) {
 				Name: "__type",
 				Args: common.InputValueList{
 					&common.InputValue{
-						Name: lexer.Ident{Name: "name"},
+						Name: common.Ident{Name: "name"},
 						Type: &common.NonNull{OfType: c.schema.Types["String"]},
 					},
 				},
@@ -364,13 +363,13 @@ func (c *context) validateDirectives(loc string, directives common.DirectiveList
 
 type nameSet map[string]errors.Location
 
-func (c *context) validateName(set nameSet, name lexer.Ident, rule string, kind string) {
+func (c *context) validateName(set nameSet, name common.Ident, rule string, kind string) {
 	c.validateNameCustomMsg(set, name, rule, func() string {
 		return fmt.Sprintf("There can be only one %s named %q.", kind, name.Name)
 	})
 }
 
-func (c *context) validateNameCustomMsg(set nameSet, name lexer.Ident, rule string, msg func() string) {
+func (c *context) validateNameCustomMsg(set nameSet, name common.Ident, rule string, msg func() string) {
 	if loc, ok := set[name.Name]; ok {
 		c.addErrMultiLoc([]errors.Location{loc, name.Loc}, rule, msg())
 		return
@@ -417,12 +416,12 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 		}
 	}
 
-	if _, ok := v.(lexer.Variable); ok {
+	if _, ok := v.(common.Variable); ok {
 		// TODO
 		return true, ""
 	}
 
-	if v, ok := v.(*lexer.BasicLit); ok {
+	if v, ok := v.(*common.BasicLit); ok {
 		if validateLiteral(v, t) {
 			return true, ""
 		}
@@ -467,7 +466,7 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 	return false, fmt.Sprintf("Expected type %q, found %s.", t, common.Stringify(v))
 }
 
-func validateLiteral(v *lexer.BasicLit, t common.Type) bool {
+func validateLiteral(v *common.BasicLit, t common.Type) bool {
 	switch t := t.(type) {
 	case *schema.Scalar:
 		switch t.Name {

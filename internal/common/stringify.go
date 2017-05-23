@@ -10,7 +10,7 @@ import (
 
 func Stringify(v interface{}) string {
 	switch v := v.(type) {
-	case *lexer.Literal:
+	case *lexer.BasicLit:
 		return v.Text
 
 	case []interface{}:

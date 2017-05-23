@@ -422,7 +422,7 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 		return true, ""
 	}
 
-	if v, ok := v.(*lexer.Literal); ok {
+	if v, ok := v.(*lexer.BasicLit); ok {
 		if validateLiteral(v, t) {
 			return true, ""
 		}
@@ -467,7 +467,7 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 	return false, fmt.Sprintf("Expected type %q, found %s.", t, common.Stringify(v))
 }
 
-func validateLiteral(v *lexer.Literal, t common.Type) bool {
+func validateLiteral(v *lexer.BasicLit, t common.Type) bool {
 	switch t := t.(type) {
 	case *schema.Scalar:
 		switch t.Name {

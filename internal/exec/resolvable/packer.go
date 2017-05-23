@@ -262,7 +262,7 @@ func (p *ValuePacker) Pack(r *Request, value interface{}) (reflect.Value, error)
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	if lit, ok := value.(*lexer.Literal); ok {
+	if lit, ok := value.(*lexer.BasicLit); ok {
 		value = common.UnmarshalLiteral(lit)
 	}
 
@@ -282,7 +282,7 @@ func (p *unmarshalerPacker) Pack(r *Request, value interface{}) (reflect.Value, 
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	if lit, ok := value.(*lexer.Literal); ok {
+	if lit, ok := value.(*lexer.BasicLit); ok {
 		value = common.UnmarshalLiteral(lit)
 	}
 

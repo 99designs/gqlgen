@@ -127,7 +127,7 @@ func parseValue(l *lexer.Lexer, constOnly bool) interface{} {
 	}
 }
 
-func UnmarshalLiteral(lit *lexer.Literal) interface{} {
+func UnmarshalLiteral(lit *lexer.BasicLit) interface{} {
 	switch lit.Type {
 	case scanner.Int, scanner.Float:
 		value, err := strconv.ParseFloat(lit.Text, 64)

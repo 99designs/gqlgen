@@ -15,7 +15,7 @@ type Lexer struct {
 	descComment string
 }
 
-type Literal struct {
+type BasicLit struct {
 	Type rune
 	Text string
 }
@@ -106,7 +106,7 @@ func (l *Lexer) ConsumeVariable() Variable {
 }
 
 func (l *Lexer) ConsumeLiteral() interface{} {
-	lit := &Literal{Type: l.next, Text: l.sc.TokenText()}
+	lit := &BasicLit{Type: l.next, Text: l.sc.TokenText()}
 	l.Consume()
 	if lit.Type == scanner.Ident && lit.Text == "null" {
 		return nil

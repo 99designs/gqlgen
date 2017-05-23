@@ -410,35 +410,31 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 		return true, ""
 	}
 
-	if l, ok := t.(*common.List); ok {
-		if _, ok := v.([]interface{}); !ok {
-			return validateValue(v, l.OfType)
-		}
-	}
-
 	if _, ok := v.(common.Variable); ok {
 		// TODO
 		return true, ""
 	}
 
-	if v, ok := v.(*common.BasicLit); ok {
-		if validateLiteral(v, t) {
-			return true, ""
-		}
-	}
-
 	switch t := t.(type) {
-	case *common.List:
-		v, ok := v.([]interface{})
-		if !ok {
-			return false, fmt.Sprintf("Expected %q, found not a list.", t)
+	case *schema.Scalar, *schema.Enum:
+		if lit, ok := v.(*common.BasicLit); ok {
+			if validateBasicLit(lit, t) {
+				return true, ""
+			}
 		}
-		for i, entry := range v {
+
+	case *common.List:
+		list, ok := v.([]interface{})
+		if !ok {
+			return validateValue(v, t.OfType) // single value instead of list
+		}
+		for i, entry := range list {
 			if ok, reason := validateValue(entry, t.OfType); !ok {
 				return false, fmt.Sprintf("In element #%d: %s", i, reason)
 			}
 		}
 		return true, ""
+
 	case *schema.InputObject:
 		v, ok := v.(map[string]interface{})
 		if !ok {
@@ -466,7 +462,7 @@ func validateValue(v interface{}, t common.Type) (bool, string) {
 	return false, fmt.Sprintf("Expected type %q, found %s.", t, common.Stringify(v))
 }
 
-func validateLiteral(v *common.BasicLit, t common.Type) bool {
+func validateBasicLit(v *common.BasicLit, t common.Type) bool {
 	switch t := t.(type) {
 	case *schema.Scalar:
 		switch t.Name {

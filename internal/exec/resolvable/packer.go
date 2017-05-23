@@ -261,8 +261,8 @@ func (p *ValuePacker) Pack(r *Request, value interface{}) (reflect.Value, error)
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	if lit, ok := value.(*common.BasicLit); ok {
-		value = common.UnmarshalLiteral(lit)
+	if lit, ok := value.(common.Literal); ok {
+		value = lit.Value()
 	}
 
 	coerced, err := unmarshalInput(p.ValueType, value)
@@ -281,8 +281,8 @@ func (p *unmarshalerPacker) Pack(r *Request, value interface{}) (reflect.Value, 
 		return reflect.Value{}, errors.Errorf("got null for non-null")
 	}
 
-	if lit, ok := value.(*common.BasicLit); ok {
-		value = common.UnmarshalLiteral(lit)
+	if lit, ok := value.(common.Literal); ok {
+		value = lit.Value()
 	}
 
 	v := reflect.New(p.ValueType)

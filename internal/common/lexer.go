@@ -15,11 +15,6 @@ type Lexer struct {
 	descComment string
 }
 
-type BasicLit struct {
-	Type rune
-	Text string
-}
-
 type Ident struct {
 	Name string
 	Loc  errors.Location

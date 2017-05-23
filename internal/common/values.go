@@ -1,7 +1,6 @@
 package common
 
 import (
-	"strconv"
 	"text/scanner"
 
 	"github.com/neelance/graphql-go/errors"
@@ -123,36 +122,5 @@ func parseValue(l *Lexer, constOnly bool) interface{} {
 	default:
 		l.SyntaxError("invalid value")
 		panic("unreachable")
-	}
-}
-
-func UnmarshalLiteral(lit *BasicLit) interface{} {
-	switch lit.Type {
-	case scanner.Int, scanner.Float:
-		value, err := strconv.ParseFloat(lit.Text, 64)
-		if err != nil {
-			panic(err)
-		}
-		return value
-
-	case scanner.String:
-		value, err := strconv.Unquote(lit.Text)
-		if err != nil {
-			panic(err)
-		}
-		return value
-
-	case scanner.Ident:
-		switch lit.Text {
-		case "true":
-			return true
-		case "false":
-			return false
-		default:
-			return lit.Text
-		}
-
-	default:
-		panic("invalid literal")
 	}
 }

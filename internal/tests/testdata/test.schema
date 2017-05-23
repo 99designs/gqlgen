@@ -108,6 +108,8 @@ enum FurColor {
   BLACK
   TAN
   SPOTTED
+  NO_FUR
+  UNKNOWN
 }
 
 type Human implements Being, Intelligent {

@@ -48,6 +48,18 @@
     "errors": []
   },
   {
+    "name": "Validate: Argument values of correct type/Valid values/Enum with undefined value",
+    "rule": "ArgumentsOfCorrectType",
+    "query": "\n        {\n          complicatedArgs {\n            enumArgField(enumArg: UNKNOWN)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Argument values of correct type/Valid values/Enum with null value",
+    "rule": "ArgumentsOfCorrectType",
+    "query": "\n        {\n          complicatedArgs {\n            enumArgField(enumArg: NO_FUR)\n          }\n        }\n      ",
+    "errors": []
+  },
+  {
     "name": "Validate: Argument values of correct type/Valid values/null into nullable type",
     "rule": "ArgumentsOfCorrectType",
     "query": "\n        {\n          complicatedArgs {\n            intArgField(intArg: null)\n          }\n        }\n      ",

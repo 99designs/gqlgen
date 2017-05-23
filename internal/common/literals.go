@@ -1,7 +1,6 @@
 package common
 
 import (
-	"sort"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -86,28 +85,27 @@ func (lit *ListLit) Location() errors.Location {
 }
 
 type ObjectLit struct {
-	Fields map[string]Literal
+	Fields []*ObjectLitField
 	Loc    errors.Location
+}
+
+type ObjectLitField struct {
+	Name  Ident
+	Value Literal
 }
 
 func (lit *ObjectLit) Value(vars map[string]interface{}) interface{} {
 	fields := make(map[string]interface{}, len(lit.Fields))
-	for k, v := range lit.Fields {
-		fields[k] = v.Value(vars)
+	for _, f := range lit.Fields {
+		fields[f.Name.Name] = f.Value.Value(vars)
 	}
 	return fields
 }
 
 func (lit *ObjectLit) String() string {
-	names := make([]string, 0, len(lit.Fields))
-	for name := range lit.Fields {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-
-	entries := make([]string, 0, len(names))
-	for _, name := range names {
-		entries = append(entries, name+": "+lit.Fields[name].String())
+	entries := make([]string, 0, len(lit.Fields))
+	for _, f := range lit.Fields {
+		entries = append(entries, f.Name.Name+": "+f.Value.String())
 	}
 	return "{" + strings.Join(entries, ", ") + "}"
 }
@@ -179,14 +177,15 @@ func ParseLiteral(l *Lexer, constOnly bool) Literal {
 
 	case '{':
 		l.ConsumeToken('{')
-		obj := make(map[string]Literal)
+		var fields []*ObjectLitField
 		for l.Peek() != '}' {
-			name := l.ConsumeIdent()
+			name := l.ConsumeIdentWithLoc()
 			l.ConsumeToken(':')
-			obj[name] = ParseLiteral(l, constOnly)
+			value := ParseLiteral(l, constOnly)
+			fields = append(fields, &ObjectLitField{name, value})
 		}
 		l.ConsumeToken('}')
-		return &ObjectLit{obj, loc}
+		return &ObjectLit{fields, loc}
 
 	default:
 		l.SyntaxError("invalid value")

@@ -702,7 +702,7 @@
     "query": "\n        {\n          complicatedArgs {\n            complexArgField(complexArg: {\n              stringListField: [\"one\", 2],\n              requiredField: true,\n            })\n          }\n        }\n      ",
     "errors": [
       {
-        "message": "Argument \"complexArg\" has invalid value {requiredField: true, stringListField: [\"one\", 2]}.\nIn field \"stringListField\": In element #1: Expected type \"String\", found 2.",
+        "message": "Argument \"complexArg\" has invalid value {stringListField: [\"one\", 2], requiredField: true}.\nIn field \"stringListField\": In element #1: Expected type \"String\", found 2.",
         "locations": [
           {
             "line": 4,
@@ -825,7 +825,7 @@
         ]
       },
       {
-        "message": "Variable \"$c\" of type \"ComplexInput\" has invalid default value {intField: null, requiredField: null}.\nIn field \"requiredField\": Expected \"Boolean!\", found null.",
+        "message": "Variable \"$c\" of type \"ComplexInput\" has invalid default value {requiredField: null, intField: null}.\nIn field \"requiredField\": Expected \"Boolean!\", found null.",
         "locations": [
           {
             "line": 5,
@@ -2692,6 +2692,83 @@
           {
             "line": 5,
             "column": 16
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Unique input field names/input object with fields",
+    "rule": "UniqueInputFieldNames",
+    "query": "\n      {\n        field(arg: { f: true })\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique input field names/same input object within two args",
+    "rule": "UniqueInputFieldNames",
+    "query": "\n      {\n        field(arg1: { f: true }, arg2: { f: true })\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique input field names/multiple input object fields",
+    "rule": "UniqueInputFieldNames",
+    "query": "\n      {\n        field(arg: { f1: \"value\", f2: \"value\", f3: \"value\" })\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique input field names/allows for nested input objects with similar fields",
+    "rule": "UniqueInputFieldNames",
+    "query": "\n      {\n        field(arg: {\n          deep: {\n            deep: {\n              id: 1\n            }\n            id: 1\n          }\n          id: 1\n        })\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Unique input field names/duplicate input object fields",
+    "rule": "UniqueInputFieldNames",
+    "query": "\n      {\n        field(arg: { f1: \"value\", f1: \"value\" })\n      }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one input field named \"f1\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 22
+          },
+          {
+            "line": 3,
+            "column": 35
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Unique input field names/many duplicate input object fields",
+    "rule": "UniqueInputFieldNames",
+    "query": "\n      {\n        field(arg: { f1: \"value\", f1: \"value\", f1: \"value\" })\n      }\n    ",
+    "errors": [
+      {
+        "message": "There can be only one input field named \"f1\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 22
+          },
+          {
+            "line": 3,
+            "column": 35
+          }
+        ]
+      },
+      {
+        "message": "There can be only one input field named \"f1\".",
+        "locations": [
+          {
+            "line": 3,
+            "column": 22
+          },
+          {
+            "line": 3,
+            "column": 48
           }
         ]
       }

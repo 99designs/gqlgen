@@ -58,13 +58,17 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 				c.addErr(v.TypeLoc, "VariablesAreInputTypes", "Variable %q cannot be non-input type %q.", "$"+v.Name.Name, t)
 			}
 
-			if t != nil && v.Default != nil {
-				if nn, ok := t.(*common.NonNull); ok {
-					c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
-				}
+			if v.Default != nil {
+				c.validateLiteral(v.Default)
 
-				if ok, reason := validateValue(v.Default, t); !ok {
-					c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, v.Default, reason)
+				if t != nil {
+					if nn, ok := t.(*common.NonNull); ok {
+						c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
+					}
+
+					if ok, reason := validateValueType(v.Default, t); !ok {
+						c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, v.Default, reason)
+					}
 				}
 			}
 		}
@@ -157,13 +161,9 @@ func (c *context) shallowValidateSelection(sel query.Selection, t common.Type) {
 			}
 		}
 
-		names := make(nameSet)
-		for _, arg := range sel.Arguments {
-			c.validateName(names, arg.Name, "UniqueArgumentNames", "argument")
-		}
-
+		c.validateArgumentLiterals(sel.Arguments)
 		if f != nil {
-			c.validateArguments(sel.Arguments, f.Args, sel.Alias.Loc,
+			c.validateArgumentTypes(sel.Arguments, f.Args, sel.Alias.Loc,
 				func() string { return fmt.Sprintf("field %q of type %q", fieldName, t) },
 				func() string { return fmt.Sprintf("Field %q", fieldName) },
 			)
@@ -331,10 +331,7 @@ func (c *context) validateDirectives(loc string, directives common.DirectiveList
 			return fmt.Sprintf("The directive %q can only be used once at this location.", dirName)
 		})
 
-		argNames := make(nameSet)
-		for _, arg := range d.Args {
-			c.validateName(argNames, arg.Name, "UniqueArgumentNames", "argument")
-		}
+		c.validateArgumentLiterals(d.Args)
 
 		dd, ok := c.schema.Directives[dirName]
 		if !ok {
@@ -353,7 +350,7 @@ func (c *context) validateDirectives(loc string, directives common.DirectiveList
 			c.addErr(d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", dirName, loc)
 		}
 
-		c.validateArguments(d.Args, dd.Args, d.Name.Loc,
+		c.validateArgumentTypes(d.Args, dd.Args, d.Name.Loc,
 			func() string { return fmt.Sprintf("directive %q", "@"+dirName) },
 			func() string { return fmt.Sprintf("Directive %q", "@"+dirName) },
 		)
@@ -378,7 +375,7 @@ func (c *context) validateNameCustomMsg(set nameSet, name common.Ident, rule str
 	return
 }
 
-func (c *context) validateArguments(args common.ArgumentList, argDecls common.InputValueList, loc errors.Location, owner1, owner2 func() string) {
+func (c *context) validateArgumentTypes(args common.ArgumentList, argDecls common.InputValueList, loc errors.Location, owner1, owner2 func() string) {
 	for _, selArg := range args {
 		arg := argDecls.Get(selArg.Name.Name)
 		if arg == nil {
@@ -386,7 +383,7 @@ func (c *context) validateArguments(args common.ArgumentList, argDecls common.In
 			continue
 		}
 		value := selArg.Value
-		if ok, reason := validateValue(value, arg.Type); !ok {
+		if ok, reason := validateValueType(value, arg.Type); !ok {
 			c.addErr(value.Location(), "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, value, reason)
 		}
 	}
@@ -399,7 +396,30 @@ func (c *context) validateArguments(args common.ArgumentList, argDecls common.In
 	}
 }
 
-func validateValue(v common.Literal, t common.Type) (bool, string) {
+func (c *context) validateArgumentLiterals(args common.ArgumentList) {
+	argNames := make(nameSet)
+	for _, arg := range args {
+		c.validateName(argNames, arg.Name, "UniqueArgumentNames", "argument")
+		c.validateLiteral(arg.Value)
+	}
+}
+
+func (c *context) validateLiteral(l common.Literal) {
+	switch l := l.(type) {
+	case *common.ObjectLit:
+		fieldNames := make(nameSet)
+		for _, f := range l.Fields {
+			c.validateName(fieldNames, f.Name, "UniqueInputFieldNames", "input field")
+			c.validateLiteral(f.Value)
+		}
+	case *common.ListLit:
+		for _, entry := range l.Entries {
+			c.validateLiteral(entry)
+		}
+	}
+}
+
+func validateValueType(v common.Literal, t common.Type) (bool, string) {
 	if nn, ok := t.(*common.NonNull); ok {
 		if isNull(v) {
 			return false, fmt.Sprintf("Expected %q, found null.", t)
@@ -426,10 +446,10 @@ func validateValue(v common.Literal, t common.Type) (bool, string) {
 	case *common.List:
 		list, ok := v.(*common.ListLit)
 		if !ok {
-			return validateValue(v, t.OfType) // single value instead of list
+			return validateValueType(v, t.OfType) // single value instead of list
 		}
 		for i, entry := range list.Entries {
-			if ok, reason := validateValue(entry, t.OfType); !ok {
+			if ok, reason := validateValueType(entry, t.OfType); !ok {
 				return false, fmt.Sprintf("In element #%d: %s", i, reason)
 			}
 		}
@@ -440,19 +460,27 @@ func validateValue(v common.Literal, t common.Type) (bool, string) {
 		if !ok {
 			return false, fmt.Sprintf("Expected %q, found not an object.", t)
 		}
-		for name, entry := range v.Fields {
-			f := t.Values.Get(name)
-			if f == nil {
+		for _, f := range v.Fields {
+			name := f.Name.Name
+			iv := t.Values.Get(name)
+			if iv == nil {
 				return false, fmt.Sprintf("In field %q: Unknown field.", name)
 			}
-			if ok, reason := validateValue(entry, f.Type); !ok {
+			if ok, reason := validateValueType(f.Value, iv.Type); !ok {
 				return false, fmt.Sprintf("In field %q: %s", name, reason)
 			}
 		}
-		for _, f := range t.Values {
-			if _, ok := v.Fields[f.Name.Name]; !ok {
-				if _, ok := f.Type.(*common.NonNull); ok && f.Default == nil {
-					return false, fmt.Sprintf("In field %q: Expected %q, found null.", f.Name.Name, f.Type)
+		for _, iv := range t.Values {
+			found := false
+			for _, f := range v.Fields {
+				if f.Name.Name == iv.Name.Name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				if _, ok := iv.Type.(*common.NonNull); ok && iv.Default == nil {
+					return false, fmt.Sprintf("In field %q: Expected %q, found null.", iv.Name.Name, iv.Type)
 				}
 			}
 		}

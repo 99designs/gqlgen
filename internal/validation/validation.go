@@ -22,9 +22,13 @@ type context struct {
 }
 
 func (c *context) addErr(loc errors.Location, rule string, format string, a ...interface{}) {
+	c.addErrMultiLoc([]errors.Location{loc}, rule, format, a...)
+}
+
+func (c *context) addErrMultiLoc(locs []errors.Location, rule string, format string, a ...interface{}) {
 	c.errs = append(c.errs, &errors.QueryError{
 		Message:   fmt.Sprintf(format, a...),
-		Locations: []errors.Location{loc},
+		Locations: locs,
 		Rule:      rule,
 	})
 }
@@ -309,11 +313,7 @@ func (c *context) validateName(set nameSet, name lexer.Ident, rule string, kind 
 
 func (c *context) validateNameCustomMsg(set nameSet, name lexer.Ident, rule string, msg func() string) {
 	if loc, ok := set[name.Name]; ok {
-		c.errs = append(c.errs, &errors.QueryError{
-			Message:   msg(),
-			Locations: []errors.Location{loc, name.Loc},
-			Rule:      rule,
-		})
+		c.addErrMultiLoc([]errors.Location{loc, name.Loc}, rule, msg())
 		return
 	}
 	set[name.Name] = name.Loc

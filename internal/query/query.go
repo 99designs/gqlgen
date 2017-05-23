@@ -90,6 +90,7 @@ type InlineFragment struct {
 type FragmentSpread struct {
 	Name       lexer.Ident
 	Directives common.DirectiveList
+	Loc        errors.Location
 }
 
 func (Field) isSelection()          {}
@@ -212,6 +213,7 @@ func parseField(l *lexer.Lexer) *Field {
 }
 
 func parseSpread(l *lexer.Lexer) Selection {
+	loc := l.Location()
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
 	l.ConsumeToken('.')
@@ -222,6 +224,7 @@ func parseSpread(l *lexer.Lexer) Selection {
 		if ident.Name != "on" {
 			fs := &FragmentSpread{
 				Name: ident,
+				Loc:  loc,
 			}
 			fs.Directives = common.ParseDirectives(l)
 			return fs

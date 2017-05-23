@@ -1650,6 +1650,313 @@
     ]
   },
   {
+    "name": "Validate: No circular fragment spreads/single reference is valid",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragB }\n      fragment fragB on Dog { name }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No circular fragment spreads/spreading twice is not circular",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragB, ...fragB }\n      fragment fragB on Dog { name }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No circular fragment spreads/spreading twice indirectly is not circular",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragB, ...fragC }\n      fragment fragB on Dog { ...fragC }\n      fragment fragC on Dog { name }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No circular fragment spreads/double spread within abstract types",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment nameFragment on Pet {\n        ... on Dog { name }\n        ... on Cat { name }\n      }\n\n      fragment spreadsInAnon on Pet {\n        ... on Dog { ...nameFragment }\n        ... on Cat { ...nameFragment }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No circular fragment spreads/does not false positive on unknown fragment",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment nameFragment on Pet {\n        ...UnknownFragment\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: No circular fragment spreads/spreading recursively within field fails",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Human { relatives { ...fragA } },\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 45
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself directly",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragA }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself directly within inline fragment",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Pet {\n        ... on Dog {\n          ...fragA\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 11
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself indirectly",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragB }\n      fragment fragB on Dog { ...fragA }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself via fragB.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 31
+          },
+          {
+            "line": 3,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself indirectly reports opposite order",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragB on Dog { ...fragA }\n      fragment fragA on Dog { ...fragB }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragB\" within itself via fragA.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 31
+          },
+          {
+            "line": 3,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself indirectly within inline fragment",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Pet {\n        ... on Dog {\n          ...fragB\n        }\n      }\n      fragment fragB on Pet {\n        ... on Dog {\n          ...fragA\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself via fragB.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 11
+          },
+          {
+            "line": 9,
+            "column": 11
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself deeply",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragB }\n      fragment fragB on Dog { ...fragC }\n      fragment fragC on Dog { ...fragO }\n      fragment fragX on Dog { ...fragY }\n      fragment fragY on Dog { ...fragZ }\n      fragment fragZ on Dog { ...fragO }\n      fragment fragO on Dog { ...fragP }\n      fragment fragP on Dog { ...fragA, ...fragX }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself via fragB, fragC, fragO, fragP.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 31
+          },
+          {
+            "line": 3,
+            "column": 31
+          },
+          {
+            "line": 4,
+            "column": 31
+          },
+          {
+            "line": 8,
+            "column": 31
+          },
+          {
+            "line": 9,
+            "column": 31
+          }
+        ]
+      },
+      {
+        "message": "Cannot spread fragment \"fragO\" within itself via fragP, fragX, fragY, fragZ.",
+        "locations": [
+          {
+            "line": 8,
+            "column": 31
+          },
+          {
+            "line": 9,
+            "column": 41
+          },
+          {
+            "line": 5,
+            "column": 31
+          },
+          {
+            "line": 6,
+            "column": 31
+          },
+          {
+            "line": 7,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself deeply two paths",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragB, ...fragC }\n      fragment fragB on Dog { ...fragA }\n      fragment fragC on Dog { ...fragA }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself via fragB.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 31
+          },
+          {
+            "line": 3,
+            "column": 31
+          }
+        ]
+      },
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself via fragC.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 41
+          },
+          {
+            "line": 4,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself deeply two paths -- alt traverse order",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragC }\n      fragment fragB on Dog { ...fragC }\n      fragment fragC on Dog { ...fragA, ...fragB }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself via fragC.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 31
+          },
+          {
+            "line": 4,
+            "column": 31
+          }
+        ]
+      },
+      {
+        "message": "Cannot spread fragment \"fragC\" within itself via fragB.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 41
+          },
+          {
+            "line": 3,
+            "column": 31
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: No circular fragment spreads/no spreading itself deeply and immediately",
+    "rule": "NoFragmentCycles",
+    "query": "\n      fragment fragA on Dog { ...fragB }\n      fragment fragB on Dog { ...fragB, ...fragC }\n      fragment fragC on Dog { ...fragA, ...fragB }\n    ",
+    "errors": [
+      {
+        "message": "Cannot spread fragment \"fragB\" within itself.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 31
+          }
+        ]
+      },
+      {
+        "message": "Cannot spread fragment \"fragA\" within itself via fragB, fragC.",
+        "locations": [
+          {
+            "line": 2,
+            "column": 31
+          },
+          {
+            "line": 3,
+            "column": 41
+          },
+          {
+            "line": 4,
+            "column": 31
+          }
+        ]
+      },
+      {
+        "message": "Cannot spread fragment \"fragB\" within itself via fragC.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 41
+          },
+          {
+            "line": 4,
+            "column": 41
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "Validate: No unused fragments/all fragment names are used",
     "rule": "NoUnusedFragments",
     "query": "\n      {\n        human(id: 4) {\n          ...HumanFields1\n          ... on Human {\n            ...HumanFields2\n          }\n        }\n      }\n      fragment HumanFields1 on Human {\n        name\n        ...HumanFields3\n      }\n      fragment HumanFields2 on Human {\n        name\n      }\n      fragment HumanFields3 on Human {\n        name\n      }\n    ",

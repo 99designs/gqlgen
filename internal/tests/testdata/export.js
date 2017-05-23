@@ -63,7 +63,7 @@ require('./src/validation/__tests__/KnownDirectives-test');
 require('./src/validation/__tests__/KnownFragmentNames-test');
 require('./src/validation/__tests__/KnownTypeNames-test');
 require('./src/validation/__tests__/LoneAnonymousOperation-test');
-// require('./src/validation/__tests__/NoFragmentCycles-test');
+require('./src/validation/__tests__/NoFragmentCycles-test');
 // require('./src/validation/__tests__/NoUndefinedVariables-test');
 require('./src/validation/__tests__/NoUnusedFragments-test');
 // require('./src/validation/__tests__/NoUnusedVariables-test');

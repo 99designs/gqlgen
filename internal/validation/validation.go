@@ -3,8 +3,8 @@ package validation
 import (
 	"fmt"
 	"math"
-	"sort"
 	"strconv"
+	"strings"
 	"text/scanner"
 
 	"github.com/neelance/graphql-go/errors"
@@ -15,10 +15,9 @@ import (
 )
 
 type context struct {
-	schema        *schema.Schema
-	doc           *query.Document
-	errs          []*errors.QueryError
-	usedFragments map[*query.FragmentDecl]struct{}
+	schema *schema.Schema
+	doc    *query.Document
+	errs   []*errors.QueryError
 }
 
 func (c *context) addErr(loc errors.Location, rule string, format string, a ...interface{}) {
@@ -35,12 +34,12 @@ func (c *context) addErrMultiLoc(locs []errors.Location, rule string, format str
 
 func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	c := context{
-		schema:        s,
-		doc:           doc,
-		usedFragments: make(map[*query.FragmentDecl]struct{}),
+		schema: s,
+		doc:    doc,
 	}
 
 	opNames := make(nameSet)
+	fragUsed := make(map[*query.FragmentDecl]struct{})
 	for _, op := range doc.Operations {
 		if op.Name.Name == "" && len(doc.Operations) != 1 {
 			c.addErr(op.Name.Loc, "LoneAnonymousOperation", "This anonymous operation must be the only defined operation.")
@@ -83,32 +82,35 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			panic("unreachable")
 		}
 		c.shallowValidateSelectionSet(op.SelSet, entryPoint)
+		c.markUsedFragments(op.SelSet, fragUsed)
 	}
 
 	fragNames := make(nameSet)
+	fragVisited := make(map[*query.FragmentDecl]struct{})
 	for _, frag := range doc.Fragments {
 		c.validateName(fragNames, frag.Name, "UniqueFragmentNames", "fragment")
 		c.validateDirectives("FRAGMENT_DEFINITION", frag.Directives)
+
 		t := c.resolveType(&frag.On)
 		// continue even if t is nil
 		if t != nil && !canBeFragment(t) {
 			c.addErr(frag.On.Loc, "FragmentsOnCompositeTypes", "Fragment %q cannot condition on non composite type %q.", frag.Name.Name, t)
 			continue
 		}
-		c.shallowValidateSelectionSet(frag.SelSet, t)
-	}
 
-	for _, op := range doc.Operations {
-		c.deepValidateSelectionSet(op.SelSet)
+		c.shallowValidateSelectionSet(frag.SelSet, t)
+
+		if _, ok := fragVisited[frag]; !ok {
+			c.detectFragmentCycle(frag.SelSet, fragVisited, nil, map[string]int{frag.Name.Name: 0})
+		}
 	}
 
 	for _, frag := range doc.Fragments {
-		if _, ok := c.usedFragments[frag]; !ok {
+		if _, ok := fragUsed[frag]; !ok {
 			c.addErr(frag.Loc, "NoUnusedFragments", "Fragment %q is never used.", frag.Name.Name)
 		}
 	}
 
-	sort.Slice(c.errs, func(i, j int) bool { return c.errs[i].Locations[0].Before(c.errs[j].Locations[0]) })
 	return c.errs
 }
 
@@ -207,32 +209,89 @@ func (c *context) shallowValidateSelection(sel query.Selection, t common.Type) {
 	}
 }
 
-func (c *context) deepValidateSelectionSet(selSet *query.SelectionSet) {
+func (c *context) markUsedFragments(selSet *query.SelectionSet, fragUsed map[*query.FragmentDecl]struct{}) {
 	for _, sel := range selSet.Selections {
-		c.deepValidateSelection(sel)
+		switch sel := sel.(type) {
+		case *query.Field:
+			if sel.SelSet != nil {
+				c.markUsedFragments(sel.SelSet, fragUsed)
+			}
+
+		case *query.InlineFragment:
+			c.markUsedFragments(sel.SelSet, fragUsed)
+
+		case *query.FragmentSpread:
+			frag := c.doc.Fragments.Get(sel.Name.Name)
+			if frag == nil {
+				return
+			}
+
+			if _, ok := fragUsed[frag]; ok {
+				return
+			}
+			fragUsed[frag] = struct{}{}
+			c.markUsedFragments(frag.SelSet, fragUsed)
+
+		default:
+			panic("unreachable")
+		}
 	}
 }
 
-func (c *context) deepValidateSelection(sel query.Selection) {
+func (c *context) detectFragmentCycle(selSet *query.SelectionSet, fragVisited map[*query.FragmentDecl]struct{}, spreadPath []*query.FragmentSpread, spreadPathIndex map[string]int) {
+	for _, sel := range selSet.Selections {
+		c.detectFragmentCycleSel(sel, fragVisited, spreadPath, spreadPathIndex)
+	}
+}
+
+func (c *context) detectFragmentCycleSel(sel query.Selection, fragVisited map[*query.FragmentDecl]struct{}, spreadPath []*query.FragmentSpread, spreadPathIndex map[string]int) {
 	switch sel := sel.(type) {
 	case *query.Field:
 		if sel.SelSet != nil {
-			c.deepValidateSelectionSet(sel.SelSet)
+			c.detectFragmentCycle(sel.SelSet, fragVisited, spreadPath, spreadPathIndex)
 		}
 
 	case *query.InlineFragment:
-		c.deepValidateSelectionSet(sel.SelSet)
+		c.detectFragmentCycle(sel.SelSet, fragVisited, spreadPath, spreadPathIndex)
 
 	case *query.FragmentSpread:
-		if frag := c.doc.Fragments.Get(sel.Name.Name); frag != nil {
-			c.usedFragments[frag] = struct{}{}
-			c.deepValidateSelectionSet(frag.SelSet)
+		frag := c.doc.Fragments.Get(sel.Name.Name)
+		if frag == nil {
+			return
 		}
+
+		spreadPath = append(spreadPath, sel)
+		if i, ok := spreadPathIndex[frag.Name.Name]; ok {
+			cyclePath := spreadPath[i:]
+			via := ""
+			if len(cyclePath) > 1 {
+				names := make([]string, len(cyclePath)-1)
+				for i, frag := range cyclePath[:len(cyclePath)-1] {
+					names[i] = frag.Name.Name
+				}
+				via = " via " + strings.Join(names, ", ")
+			}
+
+			locs := make([]errors.Location, len(cyclePath))
+			for i, frag := range cyclePath {
+				locs[i] = frag.Loc
+			}
+			c.addErrMultiLoc(locs, "NoFragmentCycles", "Cannot spread fragment %q within itself%s.", frag.Name.Name, via)
+			return
+		}
+
+		if _, ok := fragVisited[frag]; ok {
+			return
+		}
+		fragVisited[frag] = struct{}{}
+
+		spreadPathIndex[frag.Name.Name] = len(spreadPath)
+		c.detectFragmentCycle(frag.SelSet, fragVisited, spreadPath, spreadPathIndex)
+		delete(spreadPathIndex, frag.Name.Name)
 
 	default:
 		panic("unreachable")
 	}
-	return
 }
 
 func fields(t common.Type) schema.FieldList {

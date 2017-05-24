@@ -78,7 +78,7 @@ require('./src/validation/__tests__/UniqueInputFieldNames-test');
 require('./src/validation/__tests__/UniqueOperationNames-test');
 require('./src/validation/__tests__/UniqueVariableNames-test');
 require('./src/validation/__tests__/VariablesAreInputTypes-test');
-// require('./src/validation/__tests__/VariablesInAllowedPosition-test');
+require('./src/validation/__tests__/VariablesInAllowedPosition-test');
 
 let output = JSON.stringify(tests, null, 2)
 output = output.replace(' Did you mean to use an inline fragment on \\"Dog\\" or \\"Cat\\"?', '');

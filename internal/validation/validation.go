@@ -68,7 +68,7 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 						c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q is required and will not use the default value. Perhaps you meant to use type %q.", "$"+v.Name.Name, t, nn.OfType)
 					}
 
-					if ok, reason := validateValueType(v.Default, t); !ok {
+					if ok, reason := c.validateValueType(v.Default, t, nil); !ok {
 						c.addErr(v.Default.Location(), "DefaultValuesOfCorrectType", "Variable %q of type %q has invalid default value %s.\n%s", "$"+v.Name.Name, t, v.Default, reason)
 					}
 				}
@@ -174,7 +174,7 @@ func (c *context) validateSelection(sel query.Selection, t common.Type, ops []*q
 
 		c.validateArgumentLiterals(sel.Arguments, ops)
 		if f != nil {
-			c.validateArgumentTypes(sel.Arguments, f.Args, sel.Alias.Loc,
+			c.validateArgumentTypes(sel.Arguments, f.Args, sel.Alias.Loc, ops,
 				func() string { return fmt.Sprintf("field %q of type %q", fieldName, t) },
 				func() string { return fmt.Sprintf("Field %q", fieldName) },
 			)
@@ -394,7 +394,7 @@ func (c *context) validateDirectives(loc string, directives common.DirectiveList
 			c.addErr(d.Name.Loc, "KnownDirectives", "Directive %q may not be used on %s.", dirName, loc)
 		}
 
-		c.validateArgumentTypes(d.Args, dd.Args, d.Name.Loc,
+		c.validateArgumentTypes(d.Args, dd.Args, d.Name.Loc, ops,
 			func() string { return fmt.Sprintf("directive %q", "@"+dirName) },
 			func() string { return fmt.Sprintf("Directive %q", "@"+dirName) },
 		)
@@ -419,7 +419,7 @@ func (c *context) validateNameCustomMsg(set nameSet, name common.Ident, rule str
 	return
 }
 
-func (c *context) validateArgumentTypes(args common.ArgumentList, argDecls common.InputValueList, loc errors.Location, owner1, owner2 func() string) {
+func (c *context) validateArgumentTypes(args common.ArgumentList, argDecls common.InputValueList, loc errors.Location, ops []*query.Operation, owner1, owner2 func() string) {
 	for _, selArg := range args {
 		arg := argDecls.Get(selArg.Name.Name)
 		if arg == nil {
@@ -427,7 +427,7 @@ func (c *context) validateArgumentTypes(args common.ArgumentList, argDecls commo
 			continue
 		}
 		value := selArg.Value
-		if ok, reason := validateValueType(value, arg.Type); !ok {
+		if ok, reason := c.validateValueType(value, arg.Type, ops); !ok {
 			c.addErr(value.Location(), "ArgumentsOfCorrectType", "Argument %q has invalid value %s.\n%s", arg.Name.Name, value, reason)
 		}
 	}
@@ -477,7 +477,22 @@ func (c *context) validateLiteral(l common.Literal, ops []*query.Operation) {
 	}
 }
 
-func validateValueType(v common.Literal, t common.Type) (bool, string) {
+func (c *context) validateValueType(v common.Literal, t common.Type, ops []*query.Operation) (bool, string) {
+	if v, ok := v.(*common.Variable); ok {
+		for _, op := range ops {
+			if v2 := op.Vars.Get(v.Name); v != nil {
+				t2, err := common.ResolveType(v2.Type, c.schema.Resolve)
+				if _, ok := t2.(*common.NonNull); !ok && v2.Default != nil {
+					t2 = &common.NonNull{OfType: t2}
+				}
+				if err == nil && !typeCanBeUsedAs(t2, t) {
+					c.addErrMultiLoc([]errors.Location{v2.Loc, v.Loc}, "VariablesInAllowedPosition", "Variable %q of type %q used in position expecting type %q.", "$"+v.Name, t2, t)
+				}
+			}
+		}
+		return true, ""
+	}
+
 	if nn, ok := t.(*common.NonNull); ok {
 		if isNull(v) {
 			return false, fmt.Sprintf("Expected %q, found null.", t)
@@ -485,10 +500,6 @@ func validateValueType(v common.Literal, t common.Type) (bool, string) {
 		t = nn.OfType
 	}
 	if isNull(v) {
-		return true, ""
-	}
-
-	if _, ok := v.(*common.Variable); ok {
 		return true, ""
 	}
 
@@ -503,10 +514,10 @@ func validateValueType(v common.Literal, t common.Type) (bool, string) {
 	case *common.List:
 		list, ok := v.(*common.ListLit)
 		if !ok {
-			return validateValueType(v, t.OfType) // single value instead of list
+			return c.validateValueType(v, t.OfType, ops) // single value instead of list
 		}
 		for i, entry := range list.Entries {
-			if ok, reason := validateValueType(entry, t.OfType); !ok {
+			if ok, reason := c.validateValueType(entry, t.OfType, ops); !ok {
 				return false, fmt.Sprintf("In element #%d: %s", i, reason)
 			}
 		}
@@ -523,7 +534,7 @@ func validateValueType(v common.Literal, t common.Type) (bool, string) {
 			if iv == nil {
 				return false, fmt.Sprintf("In field %q: Unknown field.", name)
 			}
-			if ok, reason := validateValueType(f.Value, iv.Type); !ok {
+			if ok, reason := c.validateValueType(f.Value, iv.Type, ops); !ok {
 				return false, fmt.Sprintf("In field %q: %s", name, reason)
 			}
 		}
@@ -623,4 +634,30 @@ func hasSubfields(t common.Type) bool {
 func isNull(lit interface{}) bool {
 	_, ok := lit.(*common.NullLit)
 	return ok
+}
+
+func typeCanBeUsedAs(t, as common.Type) bool {
+	nnT, okT := t.(*common.NonNull)
+	if okT {
+		t = nnT.OfType
+	}
+
+	nnAs, okAs := as.(*common.NonNull)
+	if okAs {
+		as = nnAs.OfType
+		if !okT {
+			return false // nullable can not be used as non-null
+		}
+	}
+
+	if t == as {
+		return true
+	}
+
+	if lT, ok := t.(*common.List); ok {
+		if lAs, ok := as.(*common.List); ok {
+			return typeCanBeUsedAs(lT.OfType, lAs.OfType)
+		}
+	}
+	return false
 }

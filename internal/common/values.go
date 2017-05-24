@@ -7,9 +7,10 @@ import (
 type InputValue struct {
 	Name    Ident
 	Type    Type
-	TypeLoc errors.Location
 	Default Literal
 	Desc    string
+	Loc     errors.Location
+	TypeLoc errors.Location
 }
 
 type InputValueList []*InputValue
@@ -25,6 +26,7 @@ func (l InputValueList) Get(name string) *InputValue {
 
 func ParseInputValue(l *Lexer) *InputValue {
 	p := &InputValue{}
+	p.Loc = l.Location()
 	p.Desc = l.DescComment()
 	p.Name = l.ConsumeIdentWithLoc()
 	l.ConsumeToken(':')

@@ -161,8 +161,11 @@ func parseOperation(l *common.Lexer, opType OperationType) *Operation {
 	if l.Peek() == '(' {
 		l.ConsumeToken('(')
 		for l.Peek() != ')' {
+			loc := l.Location()
 			l.ConsumeToken('$')
-			op.Vars = append(op.Vars, common.ParseInputValue(l))
+			iv := common.ParseInputValue(l)
+			iv.Loc = loc
+			op.Vars = append(op.Vars, iv)
 		}
 		l.ConsumeToken(')')
 	}

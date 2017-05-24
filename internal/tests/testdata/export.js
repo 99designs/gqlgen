@@ -66,7 +66,7 @@ require('./src/validation/__tests__/LoneAnonymousOperation-test');
 require('./src/validation/__tests__/NoFragmentCycles-test');
 require('./src/validation/__tests__/NoUndefinedVariables-test');
 require('./src/validation/__tests__/NoUnusedFragments-test');
-// require('./src/validation/__tests__/NoUnusedVariables-test');
+require('./src/validation/__tests__/NoUnusedVariables-test');
 // require('./src/validation/__tests__/OverlappingFieldsCanBeMerged-test');
 require('./src/validation/__tests__/PossibleFragmentSpreads-test');
 require('./src/validation/__tests__/ProvidedNonNullArguments-test');

@@ -13,11 +13,14 @@ import (
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
+type varSet map[*common.InputValue]struct{}
+
 type context struct {
-	schema *schema.Schema
-	doc    *query.Document
-	errs   []*errors.QueryError
-	opErrs map[*query.Operation][]*errors.QueryError
+	schema   *schema.Schema
+	doc      *query.Document
+	errs     []*errors.QueryError
+	opErrs   map[*query.Operation][]*errors.QueryError
+	usedVars map[*query.Operation]varSet
 }
 
 func (c *context) addErr(loc errors.Location, rule string, format string, a ...interface{}) {
@@ -39,14 +42,16 @@ type opContext struct {
 
 func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	c := &context{
-		schema: s,
-		doc:    doc,
-		opErrs: make(map[*query.Operation][]*errors.QueryError),
+		schema:   s,
+		doc:      doc,
+		opErrs:   make(map[*query.Operation][]*errors.QueryError),
+		usedVars: make(map[*query.Operation]varSet),
 	}
 
 	opNames := make(nameSet)
 	fragUsedBy := make(map[*query.FragmentDecl][]*query.Operation)
 	for _, op := range doc.Operations {
+		c.usedVars[op] = make(varSet)
 		opc := &opContext{c, []*query.Operation{op}}
 
 		if op.Name.Name == "" && len(doc.Operations) != 1 {
@@ -133,6 +138,17 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 
 	for _, op := range doc.Operations {
 		c.errs = append(c.errs, c.opErrs[op]...)
+
+		opUsedVars := c.usedVars[op]
+		for _, v := range op.Vars {
+			if _, ok := opUsedVars[v]; !ok {
+				opSuffix := ""
+				if op.Name.Name != "" {
+					opSuffix = fmt.Sprintf(" in operation %q", op.Name.Name)
+				}
+				c.addErr(v.Loc, "NoUnusedVariables", "Variable %q is never used%s.", "$"+v.Name.Name, opSuffix)
+			}
+		}
 	}
 
 	return c.errs
@@ -471,7 +487,8 @@ func validateLiteral(c *opContext, l common.Literal) {
 		}
 	case *common.Variable:
 		for _, op := range c.ops {
-			if op.Vars.Get(l.Name) == nil {
+			v := op.Vars.Get(l.Name)
+			if v == nil {
 				byOp := ""
 				if op.Name.Name != "" {
 					byOp = fmt.Sprintf(" by operation %q", op.Name.Name)
@@ -481,7 +498,9 @@ func validateLiteral(c *opContext, l common.Literal) {
 					Locations: []errors.Location{l.Loc, op.Loc},
 					Rule:      "NoUndefinedVariables",
 				})
+				continue
 			}
+			c.usedVars[op][v] = struct{}{}
 		}
 	}
 }

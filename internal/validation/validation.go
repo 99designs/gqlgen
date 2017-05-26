@@ -607,6 +607,9 @@ func validateBasicLit(v *common.BasicLit, t common.Type) bool {
 			return v.Type == scanner.Ident && (v.Text == "true" || v.Text == "false")
 		case "ID":
 			return v.Type == scanner.Int || v.Type == scanner.String
+		default:
+			//TODO: Type-check against expected type by Unmarshalling
+			return true
 		}
 
 	case *schema.Enum:

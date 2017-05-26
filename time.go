@@ -27,6 +27,9 @@ func (t *Time) UnmarshalGraphQL(input interface{}) error {
 	case int:
 		t.Time = time.Unix(int64(input), 0)
 		return nil
+	case float64:
+		t.Time = time.Unix(int64(input), 0)
+		return nil
 	default:
 		return fmt.Errorf("wrong type")
 	}

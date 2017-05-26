@@ -508,7 +508,7 @@ func validateLiteral(c *opContext, l common.Literal) {
 func validateValueType(c *opContext, v common.Literal, t common.Type) (bool, string) {
 	if v, ok := v.(*common.Variable); ok {
 		for _, op := range c.ops {
-			if v2 := op.Vars.Get(v.Name); v != nil && v2 != nil {
+			if v2 := op.Vars.Get(v.Name); v2 != nil {
 				t2, err := common.ResolveType(v2.Type, c.schema.Resolve)
 				if _, ok := t2.(*common.NonNull); !ok && v2.Default != nil {
 					t2 = &common.NonNull{OfType: t2}

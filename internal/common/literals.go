@@ -165,7 +165,12 @@ func ParseLiteral(l *Lexer, constOnly bool) Literal {
 		}
 		lit.Loc = loc
 		return lit
-
+	case '-':
+		l.ConsumeToken('-')
+		lit := l.ConsumeLiteral()
+		lit.Text = "-" + lit.Text
+		lit.Loc = loc
+		return lit
 	case '[':
 		l.ConsumeToken('[')
 		var list []Literal

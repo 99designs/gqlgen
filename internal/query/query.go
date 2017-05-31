@@ -40,7 +40,7 @@ type Operation struct {
 	Type       OperationType
 	Name       common.Ident
 	Vars       common.InputValueList
-	SelSet     *SelectionSet
+	Selections []Selection
 	Directives common.DirectiveList
 	Loc        errors.Location
 }
@@ -54,8 +54,8 @@ const (
 )
 
 type Fragment struct {
-	On     common.TypeName
-	SelSet *SelectionSet
+	On         common.TypeName
+	Selections []Selection
 }
 
 type FragmentDecl struct {
@@ -65,21 +65,17 @@ type FragmentDecl struct {
 	Loc        errors.Location
 }
 
-type SelectionSet struct {
-	Selections []Selection
-	Loc        errors.Location
-}
-
 type Selection interface {
 	isSelection()
 }
 
 type Field struct {
-	Alias      common.Ident
-	Name       common.Ident
-	Arguments  common.ArgumentList
-	Directives common.DirectiveList
-	SelSet     *SelectionSet
+	Alias           common.Ident
+	Name            common.Ident
+	Arguments       common.ArgumentList
+	Directives      common.DirectiveList
+	Selections      []Selection
+	SelectionSetLoc errors.Location
 }
 
 type InlineFragment struct {
@@ -121,7 +117,7 @@ func parseDocument(l *common.Lexer) *Document {
 	for l.Peek() != scanner.EOF {
 		if l.Peek() == '{' {
 			op := &Operation{Type: Query, Loc: l.Location()}
-			op.SelSet = parseSelectionSet(l)
+			op.Selections = parseSelectionSet(l)
 			d.Operations = append(d.Operations, op)
 			continue
 		}
@@ -169,7 +165,7 @@ func parseOperation(l *common.Lexer, opType OperationType) *Operation {
 		}
 		l.ConsumeToken(')')
 	}
-	op.SelSet = parseSelectionSet(l)
+	op.Selections = parseSelectionSet(l)
 	return op
 }
 
@@ -179,19 +175,18 @@ func parseFragment(l *common.Lexer) *FragmentDecl {
 	l.ConsumeKeyword("on")
 	f.On = common.TypeName{Ident: l.ConsumeIdentWithLoc()}
 	f.Directives = common.ParseDirectives(l)
-	f.SelSet = parseSelectionSet(l)
+	f.Selections = parseSelectionSet(l)
 	return f
 }
 
-func parseSelectionSet(l *common.Lexer) *SelectionSet {
-	sel := &SelectionSet{}
-	sel.Loc = l.Location()
+func parseSelectionSet(l *common.Lexer) []Selection {
+	var sels []Selection
 	l.ConsumeToken('{')
 	for l.Peek() != '}' {
-		sel.Selections = append(sel.Selections, parseSelection(l))
+		sels = append(sels, parseSelection(l))
 	}
 	l.ConsumeToken('}')
-	return sel
+	return sels
 }
 
 func parseSelection(l *common.Lexer) Selection {
@@ -214,7 +209,8 @@ func parseField(l *common.Lexer) *Field {
 	}
 	f.Directives = common.ParseDirectives(l)
 	if l.Peek() == '{' {
-		f.SelSet = parseSelectionSet(l)
+		f.SelectionSetLoc = l.Location()
+		f.Selections = parseSelectionSet(l)
 	}
 	return f
 }
@@ -239,6 +235,6 @@ func parseSpread(l *common.Lexer) Selection {
 		f.On = common.TypeName{Ident: l.ConsumeIdentWithLoc()}
 	}
 	f.Directives = common.ParseDirectives(l)
-	f.SelSet = parseSelectionSet(l)
+	f.Selections = parseSelectionSet(l)
 	return f
 }

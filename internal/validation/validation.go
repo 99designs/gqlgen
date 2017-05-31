@@ -99,10 +99,10 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			panic("unreachable")
 		}
 
-		validateSelectionSet(opc, op.SelSet, entryPoint)
+		validateSelectionSet(opc, op.Selections, entryPoint)
 
 		fragUsed := make(map[*query.FragmentDecl]struct{})
-		markUsedFragments(c, op.SelSet, fragUsed)
+		markUsedFragments(c, op.Selections, fragUsed)
 		for frag := range fragUsed {
 			fragUsedBy[frag] = append(fragUsedBy[frag], op)
 		}
@@ -123,10 +123,10 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 			continue
 		}
 
-		validateSelectionSet(opc, frag.SelSet, t)
+		validateSelectionSet(opc, frag.Selections, t)
 
 		if _, ok := fragVisited[frag]; !ok {
-			detectFragmentCycle(c, frag.SelSet, fragVisited, nil, map[string]int{frag.Name.Name: 0})
+			detectFragmentCycle(c, frag.Selections, fragVisited, nil, map[string]int{frag.Name.Name: 0})
 		}
 	}
 
@@ -154,8 +154,8 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	return c.errs
 }
 
-func validateSelectionSet(c *opContext, selSet *query.SelectionSet, t schema.NamedType) {
-	for _, sel := range selSet.Selections {
+func validateSelectionSet(c *opContext, sels []query.Selection, t schema.NamedType) {
+	for _, sel := range sels {
 		validateSelection(c, sel, t)
 	}
 }
@@ -209,15 +209,15 @@ func validateSelection(c *opContext, sel query.Selection, t schema.NamedType) {
 		if f != nil {
 			ft = f.Type
 			sf := hasSubfields(ft)
-			if sf && sel.SelSet == nil {
+			if sf && sel.Selections == nil {
 				c.addErr(sel.Alias.Loc, "ScalarLeafs", "Field %q of type %q must have a selection of subfields. Did you mean \"%s { ... }\"?", fieldName, ft, fieldName)
 			}
-			if !sf && sel.SelSet != nil {
-				c.addErr(sel.SelSet.Loc, "ScalarLeafs", "Field %q must not have a selection since type %q has no subfields.", fieldName, ft)
+			if !sf && sel.Selections != nil {
+				c.addErr(sel.SelectionSetLoc, "ScalarLeafs", "Field %q must not have a selection since type %q has no subfields.", fieldName, ft)
 			}
 		}
-		if sel.SelSet != nil {
-			validateSelectionSet(c, sel.SelSet, unwrapType(ft))
+		if sel.Selections != nil {
+			validateSelectionSet(c, sel.Selections, unwrapType(ft))
 		}
 
 	case *query.InlineFragment:
@@ -234,7 +234,7 @@ func validateSelection(c *opContext, sel query.Selection, t schema.NamedType) {
 			c.addErr(sel.On.Loc, "FragmentsOnCompositeTypes", "Fragment cannot condition on non composite type %q.", t)
 			return
 		}
-		validateSelectionSet(c, sel.SelSet, unwrapType(t))
+		validateSelectionSet(c, sel.Selections, unwrapType(t))
 
 	case *query.FragmentSpread:
 		validateDirectives(c, "FRAGMENT_SPREAD", sel.Directives)
@@ -277,16 +277,16 @@ func possibleTypes(t common.Type) []*schema.Object {
 	}
 }
 
-func markUsedFragments(c *context, selSet *query.SelectionSet, fragUsed map[*query.FragmentDecl]struct{}) {
-	for _, sel := range selSet.Selections {
+func markUsedFragments(c *context, sels []query.Selection, fragUsed map[*query.FragmentDecl]struct{}) {
+	for _, sel := range sels {
 		switch sel := sel.(type) {
 		case *query.Field:
-			if sel.SelSet != nil {
-				markUsedFragments(c, sel.SelSet, fragUsed)
+			if sel.Selections != nil {
+				markUsedFragments(c, sel.Selections, fragUsed)
 			}
 
 		case *query.InlineFragment:
-			markUsedFragments(c, sel.SelSet, fragUsed)
+			markUsedFragments(c, sel.Selections, fragUsed)
 
 		case *query.FragmentSpread:
 			frag := c.doc.Fragments.Get(sel.Name.Name)
@@ -298,7 +298,7 @@ func markUsedFragments(c *context, selSet *query.SelectionSet, fragUsed map[*que
 				return
 			}
 			fragUsed[frag] = struct{}{}
-			markUsedFragments(c, frag.SelSet, fragUsed)
+			markUsedFragments(c, frag.Selections, fragUsed)
 
 		default:
 			panic("unreachable")
@@ -306,8 +306,8 @@ func markUsedFragments(c *context, selSet *query.SelectionSet, fragUsed map[*que
 	}
 }
 
-func detectFragmentCycle(c *context, selSet *query.SelectionSet, fragVisited map[*query.FragmentDecl]struct{}, spreadPath []*query.FragmentSpread, spreadPathIndex map[string]int) {
-	for _, sel := range selSet.Selections {
+func detectFragmentCycle(c *context, sels []query.Selection, fragVisited map[*query.FragmentDecl]struct{}, spreadPath []*query.FragmentSpread, spreadPathIndex map[string]int) {
+	for _, sel := range sels {
 		detectFragmentCycleSel(c, sel, fragVisited, spreadPath, spreadPathIndex)
 	}
 }
@@ -315,12 +315,12 @@ func detectFragmentCycle(c *context, selSet *query.SelectionSet, fragVisited map
 func detectFragmentCycleSel(c *context, sel query.Selection, fragVisited map[*query.FragmentDecl]struct{}, spreadPath []*query.FragmentSpread, spreadPathIndex map[string]int) {
 	switch sel := sel.(type) {
 	case *query.Field:
-		if sel.SelSet != nil {
-			detectFragmentCycle(c, sel.SelSet, fragVisited, spreadPath, spreadPathIndex)
+		if sel.Selections != nil {
+			detectFragmentCycle(c, sel.Selections, fragVisited, spreadPath, spreadPathIndex)
 		}
 
 	case *query.InlineFragment:
-		detectFragmentCycle(c, sel.SelSet, fragVisited, spreadPath, spreadPathIndex)
+		detectFragmentCycle(c, sel.Selections, fragVisited, spreadPath, spreadPathIndex)
 
 	case *query.FragmentSpread:
 		frag := c.doc.Fragments.Get(sel.Name.Name)
@@ -354,7 +354,7 @@ func detectFragmentCycleSel(c *context, sel query.Selection, fragVisited map[*qu
 		fragVisited[frag] = struct{}{}
 
 		spreadPathIndex[frag.Name.Name] = len(spreadPath)
-		detectFragmentCycle(c, frag.SelSet, fragVisited, spreadPath, spreadPathIndex)
+		detectFragmentCycle(c, frag.Selections, fragVisited, spreadPath, spreadPathIndex)
 		delete(spreadPathIndex, frag.Name.Name)
 
 	default:

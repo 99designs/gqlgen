@@ -35,7 +35,7 @@ func ApplyOperation(r *Request, s *resolvable.Schema, op *query.Operation) []Sel
 	case query.Mutation:
 		obj = s.Mutation.(*resolvable.Object)
 	}
-	return applySelectionSet(r, obj, op.SelSet)
+	return applySelectionSet(r, obj, op.Selections)
 }
 
 type Selection interface {
@@ -66,11 +66,8 @@ func (*SchemaField) isSelection()   {}
 func (*TypeAssertion) isSelection() {}
 func (*TypenameField) isSelection() {}
 
-func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.SelectionSet) (sels []Selection) {
-	if selSet == nil {
-		return nil
-	}
-	for _, sel := range selSet.Selections {
+func applySelectionSet(r *Request, e *resolvable.Object, sels []query.Selection) (flattenedSels []Selection) {
+	for _, sel := range sels {
 		switch sel := sel.(type) {
 		case *query.Field:
 			field := sel
@@ -80,16 +77,16 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 
 			switch field.Name.Name {
 			case "__typename":
-				sels = append(sels, &TypenameField{
+				flattenedSels = append(flattenedSels, &TypenameField{
 					Object: *e,
 					Alias:  field.Alias.Name,
 				})
 
 			case "__schema":
-				sels = append(sels, &SchemaField{
+				flattenedSels = append(flattenedSels, &SchemaField{
 					Field:       resolvable.MetaFieldSchema,
 					Alias:       field.Alias.Name,
-					Sels:        applySelectionSet(r, resolvable.MetaSchema, field.SelSet),
+					Sels:        applySelectionSet(r, resolvable.MetaSchema, field.Selections),
 					Async:       true,
 					FixedResult: reflect.ValueOf(introspection.WrapSchema(r.Schema)),
 				})
@@ -107,10 +104,10 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 					return nil
 				}
 
-				sels = append(sels, &SchemaField{
+				flattenedSels = append(flattenedSels, &SchemaField{
 					Field:       resolvable.MetaFieldType,
 					Alias:       field.Alias.Name,
-					Sels:        applySelectionSet(r, resolvable.MetaType, field.SelSet),
+					Sels:        applySelectionSet(r, resolvable.MetaType, field.Selections),
 					Async:       true,
 					FixedResult: reflect.ValueOf(introspection.WrapType(t)),
 				})
@@ -133,8 +130,8 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 					}
 				}
 
-				fieldSels := applyField(r, fe.ValueExec, field.SelSet)
-				sels = append(sels, &SchemaField{
+				fieldSels := applyField(r, fe.ValueExec, field.Selections)
+				flattenedSels = append(flattenedSels, &SchemaField{
 					Field:      *fe,
 					Alias:      field.Alias.Name,
 					Args:       args,
@@ -149,14 +146,14 @@ func applySelectionSet(r *Request, e *resolvable.Object, selSet *query.Selection
 			if skipByDirective(r, frag.Directives) {
 				continue
 			}
-			sels = append(sels, applyFragment(r, e, &frag.Fragment)...)
+			flattenedSels = append(flattenedSels, applyFragment(r, e, &frag.Fragment)...)
 
 		case *query.FragmentSpread:
 			spread := sel
 			if skipByDirective(r, spread.Directives) {
 				continue
 			}
-			sels = append(sels, applyFragment(r, e, &r.Doc.Fragments.Get(spread.Name.Name).Fragment)...)
+			flattenedSels = append(flattenedSels, applyFragment(r, e, &r.Doc.Fragments.Get(spread.Name.Name).Fragment)...)
 
 		default:
 			panic("invalid type")
@@ -174,18 +171,18 @@ func applyFragment(r *Request, e *resolvable.Object, frag *query.Fragment) []Sel
 
 		return []Selection{&TypeAssertion{
 			TypeAssertion: *a,
-			Sels:          applySelectionSet(r, a.TypeExec.(*resolvable.Object), frag.SelSet),
+			Sels:          applySelectionSet(r, a.TypeExec.(*resolvable.Object), frag.Selections),
 		}}
 	}
-	return applySelectionSet(r, e, frag.SelSet)
+	return applySelectionSet(r, e, frag.Selections)
 }
 
-func applyField(r *Request, e resolvable.Resolvable, selSet *query.SelectionSet) []Selection {
+func applyField(r *Request, e resolvable.Resolvable, sels []query.Selection) []Selection {
 	switch e := e.(type) {
 	case *resolvable.Object:
-		return applySelectionSet(r, e, selSet)
+		return applySelectionSet(r, e, sels)
 	case *resolvable.List:
-		return applyField(r, e.Elem, selSet)
+		return applyField(r, e.Elem, sels)
 	case *resolvable.Scalar:
 		return nil
 	default:

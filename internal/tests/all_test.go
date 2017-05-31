@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"io/ioutil"
 	"os"
 	"reflect"
 	"sort"
@@ -18,38 +17,40 @@ import (
 type Test struct {
 	Name   string
 	Rule   string
+	Schema int
 	Query  string
 	Errors []*errors.QueryError
 }
 
 func TestAll(t *testing.T) {
-	d, err := ioutil.ReadFile("testdata/test.schema")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	s := schema.New()
-	if err := s.Parse(string(d)); err != nil {
-		t.Fatal(err)
-	}
-
 	f, err := os.Open("testdata/tests.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var tests []*Test
-	if err := json.NewDecoder(f).Decode(&tests); err != nil {
+	var testData struct {
+		Schemas []string
+		Tests   []*Test
+	}
+	if err := json.NewDecoder(f).Decode(&testData); err != nil {
 		t.Fatal(err)
 	}
 
-	for _, test := range tests {
+	schemas := make([]*schema.Schema, len(testData.Schemas))
+	for i, schemaStr := range testData.Schemas {
+		schemas[i] = schema.New()
+		if err := schemas[i].Parse(schemaStr); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	for _, test := range testData.Tests {
 		t.Run(test.Name, func(t *testing.T) {
 			d, err := query.Parse(test.Query)
 			if err != nil {
 				t.Fatal(err)
 			}
-			errs := validation.Validate(s, d)
+			errs := validation.Validate(schemas[test.Schema], d)
 			got := []*errors.QueryError{}
 			for _, err := range errs {
 				if err.Rule == test.Rule {

@@ -3,10 +3,18 @@ import Module from 'module';
 import { testSchema } from './src/validation/__tests__/harness';
 import { printSchema } from './src/utilities';
 
-fs.writeFileSync("test.schema", printSchema(testSchema));
+let schemas = [];
+function registerSchema(schema) {
+	for (let i = 0; i < schemas.length; i++) {
+		if (schemas[i] == schema) {
+			return i;
+		}
+	}
+	schemas.push(schema);
+	return schemas.length - 1;
+}
 
 let tests = [];
-
 let names = []
 let fakeModules = {
 	'mocha': {
@@ -34,6 +42,7 @@ let fakeModules = {
 			tests.push({
 				name: names.join('/'),
 				rule: rule.name,
+				schema: registerSchema(testSchema),
 				query: queryString,
 				errors: [],
 			});
@@ -45,6 +54,7 @@ let fakeModules = {
 			tests.push({
 				name: names.join('/'),
 				rule: rule.name,
+				schema: registerSchema(testSchema),
 				query: queryString,
 				errors: errors,
 			});
@@ -86,7 +96,10 @@ require('./src/validation/__tests__/UniqueVariableNames-test');
 require('./src/validation/__tests__/VariablesAreInputTypes-test');
 require('./src/validation/__tests__/VariablesInAllowedPosition-test');
 
-let output = JSON.stringify(tests, null, 2)
+let output = JSON.stringify({
+	schemas: schemas.map(s => printSchema(s)),
+	tests: tests,
+}, null, 2)
 output = output.replace(' Did you mean to use an inline fragment on \\"Dog\\" or \\"Cat\\"?', '');
 output = output.replace(' Did you mean to use an inline fragment on \\"Being\\", \\"Pet\\", \\"Canine\\", \\"Dog\\", or \\"Cat\\"?', '');
 output = output.replace(' Did you mean \\"Pet\\"?', '');

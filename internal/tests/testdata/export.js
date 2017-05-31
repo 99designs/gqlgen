@@ -38,6 +38,9 @@ let fakeModules = {
 				errors: [],
 			});
 		},
+		expectPassesRuleWithSchema(schema, rule, queryString, errors) {
+			// ignored
+		},
 		expectFailsRule(rule, queryString, errors) {
 			tests.push({
 				name: names.join('/'),
@@ -46,6 +49,9 @@ let fakeModules = {
 				errors: errors,
 			});
 		},
+		expectFailsRuleWithSchema(schema, rule, queryString, errors) {
+			// ignored
+		}
 	},
 };
 
@@ -67,7 +73,7 @@ require('./src/validation/__tests__/NoFragmentCycles-test');
 require('./src/validation/__tests__/NoUndefinedVariables-test');
 require('./src/validation/__tests__/NoUnusedFragments-test');
 require('./src/validation/__tests__/NoUnusedVariables-test');
-// require('./src/validation/__tests__/OverlappingFieldsCanBeMerged-test');
+require('./src/validation/__tests__/OverlappingFieldsCanBeMerged-test');
 require('./src/validation/__tests__/PossibleFragmentSpreads-test');
 require('./src/validation/__tests__/ProvidedNonNullArguments-test');
 require('./src/validation/__tests__/ScalarLeafs-test');

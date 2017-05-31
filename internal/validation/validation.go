@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -15,12 +16,15 @@ import (
 
 type varSet map[*common.InputValue]struct{}
 
+type selectionPair struct{ a, b query.Selection }
+
 type context struct {
-	schema   *schema.Schema
-	doc      *query.Document
-	errs     []*errors.QueryError
-	opErrs   map[*query.Operation][]*errors.QueryError
-	usedVars map[*query.Operation]varSet
+	schema           *schema.Schema
+	doc              *query.Document
+	errs             []*errors.QueryError
+	opErrs           map[*query.Operation][]*errors.QueryError
+	usedVars         map[*query.Operation]varSet
+	overlapValidated map[selectionPair]struct{}
 }
 
 func (c *context) addErr(loc errors.Location, rule string, format string, a ...interface{}) {
@@ -42,10 +46,11 @@ type opContext struct {
 
 func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 	c := &context{
-		schema:   s,
-		doc:      doc,
-		opErrs:   make(map[*query.Operation][]*errors.QueryError),
-		usedVars: make(map[*query.Operation]varSet),
+		schema:           s,
+		doc:              doc,
+		opErrs:           make(map[*query.Operation][]*errors.QueryError),
+		usedVars:         make(map[*query.Operation]varSet),
+		overlapValidated: make(map[selectionPair]struct{}),
 	}
 
 	opNames := make(nameSet)
@@ -157,6 +162,16 @@ func Validate(s *schema.Schema, doc *query.Document) []*errors.QueryError {
 func validateSelectionSet(c *opContext, sels []query.Selection, t schema.NamedType) {
 	for _, sel := range sels {
 		validateSelection(c, sel, t)
+	}
+
+	n := ""
+	if t != nil {
+		n = t.TypeName()
+	}
+	for i, a := range sels {
+		for _, b := range sels[i+1:] {
+			c.validateOverlap(a, b, n, n, nil, nil)
+		}
 	}
 }
 
@@ -360,6 +375,115 @@ func detectFragmentCycleSel(c *context, sel query.Selection, fragVisited map[*qu
 	default:
 		panic("unreachable")
 	}
+}
+
+func (c *context) validateOverlap(a, b query.Selection, at, bt string, reasons *[]string, locs *[]errors.Location) {
+	if a == b {
+		return
+	}
+
+	if _, ok := c.overlapValidated[selectionPair{a, b}]; ok {
+		return
+	}
+	c.overlapValidated[selectionPair{a, b}] = struct{}{}
+	c.overlapValidated[selectionPair{b, a}] = struct{}{}
+
+	switch a := a.(type) {
+	case *query.Field:
+		switch b := b.(type) {
+		case *query.Field:
+			if b.Alias.Loc.Before(a.Alias.Loc) {
+				a, b = b, a
+			}
+			if reasons2, locs2 := c.validateFieldOverlap(a, b, at, bt); len(reasons2) != 0 {
+				locs2 = append(locs2, a.Alias.Loc, b.Alias.Loc)
+				if reasons == nil {
+					c.addErrMultiLoc(locs2, "OverlappingFieldsCanBeMerged", "Fields %q conflict because %s. Use different aliases on the fields to fetch both if this was intentional.", a.Alias.Name, strings.Join(reasons2, " and "))
+					return
+				}
+				for _, r := range reasons2 {
+					*reasons = append(*reasons, fmt.Sprintf("subfields %q conflict because %s", a.Alias.Name, r))
+				}
+				*locs = append(*locs, locs2...)
+			}
+
+		case *query.InlineFragment:
+			for _, sel := range b.Selections {
+				if b.On.Name != "" {
+					bt = b.On.Name
+				}
+				c.validateOverlap(a, sel, at, bt, reasons, locs)
+			}
+
+		case *query.FragmentSpread:
+			if frag := c.doc.Fragments.Get(b.Name.Name); frag != nil {
+				for _, sel := range frag.Selections {
+					c.validateOverlap(a, sel, at, frag.On.Name, reasons, locs)
+				}
+			}
+
+		default:
+			panic("unreachable")
+		}
+
+	case *query.InlineFragment:
+		if a.On.Name != "" {
+			at = a.On.Name
+		}
+		for _, sel := range a.Selections {
+			c.validateOverlap(sel, b, at, bt, reasons, locs)
+		}
+
+	case *query.FragmentSpread:
+		if frag := c.doc.Fragments.Get(a.Name.Name); frag != nil {
+			for _, sel := range frag.Selections {
+				c.validateOverlap(sel, b, frag.On.Name, bt, reasons, locs)
+			}
+		}
+
+	default:
+		panic("unreachable")
+	}
+}
+
+func (c *context) validateFieldOverlap(a, b *query.Field, at, bt string) ([]string, []errors.Location) {
+	if at != bt && at != "" && bt != "" {
+		return nil, nil
+	}
+
+	if a.Alias.Name != b.Alias.Name {
+		return nil, nil
+	}
+
+	if a.Name.Name != b.Name.Name {
+		return []string{fmt.Sprintf("%s and %s are different fields", a.Name.Name, b.Name.Name)}, nil
+	}
+
+	if argumentsConflict(a.Arguments, b.Arguments) {
+		return []string{"they have differing arguments"}, nil
+	}
+
+	var reasons []string
+	var locs []errors.Location
+	for _, a2 := range a.Selections {
+		for _, b2 := range b.Selections {
+			c.validateOverlap(a2, b2, "", "", &reasons, &locs)
+		}
+	}
+	return reasons, locs
+}
+
+func argumentsConflict(a, b common.ArgumentList) bool {
+	if len(a) != len(b) {
+		return true
+	}
+	for _, argA := range a {
+		valB, ok := b.Get(argA.Name.Name)
+		if !ok || !reflect.DeepEqual(argA.Value.Value(nil), valB.Value(nil)) {
+			return true
+		}
+	}
+	return false
 }
 
 func fields(t common.Type) schema.FieldList {

@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"sort"
 	"testing"
 
 	"encoding/json"
@@ -56,9 +57,18 @@ func TestAll(t *testing.T) {
 					got = append(got, err)
 				}
 			}
+			sortLocations(test.Errors)
+			sortLocations(got)
 			if !reflect.DeepEqual(test.Errors, got) {
 				t.Errorf("wrong errors\nexpected: %v\ngot:      %v", test.Errors, got)
 			}
 		})
+	}
+}
+
+func sortLocations(errs []*errors.QueryError) {
+	for _, err := range errs {
+		locs := err.Locations
+		sort.Slice(locs, func(i, j int) bool { return locs[i].Before(locs[j]) })
 	}
 }

@@ -2566,6 +2566,424 @@
     ]
   },
   {
+    "name": "Validate: Overlapping fields can be merged/unique fields",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment uniqueFields on Dog {\n        name\n        nickname\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/identical fields",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment mergeIdenticalFields on Dog {\n        name\n        name\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/identical fields with identical args",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment mergeIdenticalFieldsWithIdenticalArgs on Dog {\n        doesKnowCommand(dogCommand: SIT)\n        doesKnowCommand(dogCommand: SIT)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/identical fields with identical directives",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment mergeSameFieldsWithSameDirectives on Dog {\n        name @include(if: true)\n        name @include(if: true)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/different args with different aliases",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment differentArgsWithDifferentAliases on Dog {\n        knowsSit: doesKnowCommand(dogCommand: SIT)\n        knowsDown: doesKnowCommand(dogCommand: DOWN)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/different directives with different aliases",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment differentDirectivesWithDifferentAliases on Dog {\n        nameIfTrue: name @include(if: true)\n        nameIfFalse: name @include(if: false)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/different skip/include directives accepted",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment differentDirectivesWithDifferentAliases on Dog {\n        name @include(if: true)\n        name @include(if: false)\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/Same aliases with different field targets",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment sameAliasesWithDifferentFieldTargets on Dog {\n        fido: name\n        fido: nickname\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"fido\" conflict because name and nickname are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/Same aliases allowed on non-overlapping fields",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment sameAliasesWithDifferentFieldTargets on Pet {\n        ... on Dog {\n          name\n        }\n        ... on Cat {\n          name: nickname\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/Alias masking direct field access",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment aliasMaskingDirectFieldAccess on Dog {\n        name: nickname\n        name\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"name\" conflict because nickname and name are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/different args, second adds an argument",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment conflictingArgs on Dog {\n        doesKnowCommand\n        doesKnowCommand(dogCommand: HEEL)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"doesKnowCommand\" conflict because they have differing arguments. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/different args, second missing an argument",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment conflictingArgs on Dog {\n        doesKnowCommand(dogCommand: SIT)\n        doesKnowCommand\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"doesKnowCommand\" conflict because they have differing arguments. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/conflicting args",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment conflictingArgs on Dog {\n        doesKnowCommand(dogCommand: SIT)\n        doesKnowCommand(dogCommand: HEEL)\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"doesKnowCommand\" conflict because they have differing arguments. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/allows different args where no conflict is possible",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      fragment conflictingArgs on Pet {\n        ... on Dog {\n          name(surname: true)\n        }\n        ... on Cat {\n          name\n        }\n      }\n    ",
+    "errors": []
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/encounters conflict in fragments",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        ...A\n        ...B\n      }\n      fragment A on Type {\n        x: a\n      }\n      fragment B on Type {\n        x: b\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"x\" conflict because a and b are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 7,
+            "column": 9
+          },
+          {
+            "line": 10,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/reports each conflict once",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        f1 {\n          ...A\n          ...B\n        }\n        f2 {\n          ...B\n          ...A\n        }\n        f3 {\n          ...A\n          ...B\n          x: c\n        }\n      }\n      fragment A on Type {\n        x: a\n      }\n      fragment B on Type {\n        x: b\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"x\" conflict because a and b are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 18,
+            "column": 9
+          },
+          {
+            "line": 21,
+            "column": 9
+          }
+        ]
+      },
+      {
+        "message": "Fields \"x\" conflict because c and a are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 14,
+            "column": 11
+          },
+          {
+            "line": 18,
+            "column": 9
+          }
+        ]
+      },
+      {
+        "message": "Fields \"x\" conflict because c and b are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 14,
+            "column": 11
+          },
+          {
+            "line": 21,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/deep conflict",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        field {\n          x: a\n        },\n        field {\n          x: b\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"field\" conflict because subfields \"x\" conflict because a and b are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 11
+          },
+          {
+            "line": 6,
+            "column": 9
+          },
+          {
+            "line": 7,
+            "column": 11
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/deep conflict with multiple issues",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        field {\n          x: a\n          y: c\n        },\n        field {\n          x: b\n          y: d\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"field\" conflict because subfields \"x\" conflict because a and b are different fields and subfields \"y\" conflict because c and d are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 11
+          },
+          {
+            "line": 5,
+            "column": 11
+          },
+          {
+            "line": 7,
+            "column": 9
+          },
+          {
+            "line": 8,
+            "column": 11
+          },
+          {
+            "line": 9,
+            "column": 11
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/very deep conflict",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        field {\n          deepField {\n            x: a\n          }\n        },\n        field {\n          deepField {\n            x: b\n          }\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"field\" conflict because subfields \"deepField\" conflict because subfields \"x\" conflict because a and b are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 4,
+            "column": 11
+          },
+          {
+            "line": 5,
+            "column": 13
+          },
+          {
+            "line": 8,
+            "column": 9
+          },
+          {
+            "line": 9,
+            "column": 11
+          },
+          {
+            "line": 10,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/reports deep conflict to nearest common ancestor",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        field {\n          deepField {\n            x: a\n          }\n          deepField {\n            x: b\n          }\n        },\n        field {\n          deepField {\n            y\n          }\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"deepField\" conflict because subfields \"x\" conflict because a and b are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 4,
+            "column": 11
+          },
+          {
+            "line": 5,
+            "column": 13
+          },
+          {
+            "line": 7,
+            "column": 11
+          },
+          {
+            "line": 8,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/reports deep conflict to nearest common ancestor in fragments",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        field {\n          ...F\n        }\n        field {\n          ...F\n        }\n      }\n      fragment F on T {\n        deepField {\n          deeperField {\n            x: a\n          }\n          deeperField {\n            x: b\n          }\n        },\n        deepField {\n          deeperField {\n            y\n          }\n        }\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"deeperField\" conflict because subfields \"x\" conflict because a and b are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 12,
+            "column": 11
+          },
+          {
+            "line": 13,
+            "column": 13
+          },
+          {
+            "line": 15,
+            "column": 11
+          },
+          {
+            "line": 16,
+            "column": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/reports deep conflict in nested fragments",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n      {\n        field {\n          ...F\n        }\n        field {\n          ...I\n        }\n      }\n      fragment F on T {\n        x: a\n        ...G\n      }\n      fragment G on T {\n        y: c\n      }\n      fragment I on T {\n        y: d\n        ...J\n      }\n      fragment J on T {\n        x: b\n      }\n    ",
+    "errors": [
+      {
+        "message": "Fields \"field\" conflict because subfields \"x\" conflict because a and b are different fields and subfields \"y\" conflict because c and d are different fields. Use different aliases on the fields to fetch both if this was intentional.",
+        "locations": [
+          {
+            "line": 3,
+            "column": 9
+          },
+          {
+            "line": 11,
+            "column": 9
+          },
+          {
+            "line": 15,
+            "column": 9
+          },
+          {
+            "line": 6,
+            "column": 9
+          },
+          {
+            "line": 22,
+            "column": 9
+          },
+          {
+            "line": 18,
+            "column": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Validate: Overlapping fields can be merged/ignores unknown fragments",
+    "rule": "OverlappingFieldsCanBeMerged",
+    "query": "\n    {\n      field\n      ...Unknown\n      ...Known\n    }\n\n    fragment Known on T {\n      field\n      ...OtherUnknown\n    }\n    ",
+    "errors": []
+  },
+  {
     "name": "Validate: Possible fragment spreads/of the same object",
     "rule": "PossibleFragmentSpreads",
     "query": "\n      fragment objectWithinObject on Dog { ...dogFragment }\n      fragment dogFragment on Dog { barkVolume }\n    ",

@@ -14,9 +14,36 @@ function registerSchema(schema) {
 	return schemas.length - 1;
 }
 
+const harness = {
+	expectPassesRule(rule, queryString) {
+		harness.expectPassesRuleWithSchema(testSchema, rule, queryString);
+	},
+	expectPassesRuleWithSchema(schema, rule, queryString, errors) {
+		tests.push({
+			name: names.join('/'),
+			rule: rule.name,
+			schema: registerSchema(schema),
+			query: queryString,
+			errors: [],
+		});
+	},
+	expectFailsRule(rule, queryString, errors) {
+		harness.expectFailsRuleWithSchema(testSchema, rule, queryString, errors);
+	},
+	expectFailsRuleWithSchema(schema, rule, queryString, errors) {
+		tests.push({
+			name: names.join('/'),
+			rule: rule.name,
+			schema: registerSchema(schema),
+			query: queryString,
+			errors: errors,
+		});
+	}
+};
+
 let tests = [];
 let names = []
-let fakeModules = {
+const fakeModules = {
 	'mocha': {
 		describe(name, f) {
 			switch (name) {
@@ -30,6 +57,8 @@ let fakeModules = {
 		it(name, f) {
 			switch (name) {
 			case 'ignores type definitions':
+			case 'reports correctly when a non-exclusive follows an exclusive':
+			case 'disallows differing subfields':
 				return;
 			}
 			names.push(name);
@@ -37,35 +66,10 @@ let fakeModules = {
 			names.pop();
 		},
 	},
-	'./harness': {
-		expectPassesRule(rule, queryString) {
-			tests.push({
-				name: names.join('/'),
-				rule: rule.name,
-				schema: registerSchema(testSchema),
-				query: queryString,
-				errors: [],
-			});
-		},
-		expectPassesRuleWithSchema(schema, rule, queryString, errors) {
-			// ignored
-		},
-		expectFailsRule(rule, queryString, errors) {
-			tests.push({
-				name: names.join('/'),
-				rule: rule.name,
-				schema: registerSchema(testSchema),
-				query: queryString,
-				errors: errors,
-			});
-		},
-		expectFailsRuleWithSchema(schema, rule, queryString, errors) {
-			// ignored
-		}
-	},
+	'./harness': harness,
 };
 
-let originalLoader = Module._load;
+const originalLoader = Module._load;
 Module._load = function(request, parent, isMain) {
 	return fakeModules[request] || originalLoader(request, parent, isMain);
 };

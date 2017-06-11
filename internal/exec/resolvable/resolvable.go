@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/neelance/graphql-go/internal/common"
+	"github.com/neelance/graphql-go/internal/exec/packer"
 	"github.com/neelance/graphql-go/internal/schema"
 )
 
@@ -32,7 +33,7 @@ type Field struct {
 	TypeName    string
 	MethodIndex int
 	HasContext  bool
-	ArgsPacker  *StructPacker
+	ArgsPacker  *packer.StructPacker
 	HasError    bool
 	ValueExec   Resolvable
 	TraceLabel  string
@@ -85,8 +86,7 @@ func ApplyResolver(s *schema.Schema, resolver interface{}) (*Schema, error) {
 type execBuilder struct {
 	schema        *schema.Schema
 	resMap        map[typePair]*resMapEntry
-	packerMap     map[typePair]*packerMapEntry
-	structPackers []*StructPacker
+	packerBuilder *packer.Builder
 }
 
 type typePair struct {
@@ -99,16 +99,11 @@ type resMapEntry struct {
 	targets []*Resolvable
 }
 
-type packerMapEntry struct {
-	packer  packer
-	targets []*packer
-}
-
 func newBuilder(s *schema.Schema) *execBuilder {
 	return &execBuilder{
-		schema:    s,
-		resMap:    make(map[typePair]*resMapEntry),
-		packerMap: make(map[typePair]*packerMapEntry),
+		schema:        s,
+		resMap:        make(map[typePair]*resMapEntry),
+		packerBuilder: packer.NewBuilder(),
 	}
 }
 
@@ -119,26 +114,7 @@ func (b *execBuilder) finish() error {
 		}
 	}
 
-	for _, entry := range b.packerMap {
-		for _, target := range entry.targets {
-			*target = entry.packer
-		}
-	}
-
-	for _, p := range b.structPackers {
-		p.defaultStruct = reflect.New(p.structType).Elem()
-		for _, f := range p.fields {
-			if defaultVal := f.field.Default; defaultVal != nil {
-				v, err := f.fieldPacker.Pack(defaultVal.Value(nil))
-				if err != nil {
-					return err
-				}
-				p.defaultStruct.FieldByIndex(f.fieldIndex).Set(v)
-			}
-		}
-	}
-
-	return nil
+	return b.packerBuilder.Finish()
 }
 
 func (b *execBuilder) assignExec(target *Resolvable, t common.Type, resolverType reflect.Type) error {
@@ -212,7 +188,7 @@ func makeScalarExec(t *schema.Scalar, resolverType reflect.Type) (Resolvable, er
 		implementsType = (t.Name == "String")
 	case *bool:
 		implementsType = (t.Name == "Boolean")
-	case Unmarshaler:
+	case packer.Unmarshaler:
 		implementsType = r.ImplementsGraphQLType(t.Name)
 	}
 	if !implementsType {
@@ -291,13 +267,13 @@ func (b *execBuilder) makeFieldExec(typeName string, f *schema.Field, m reflect.
 		in = in[1:]
 	}
 
-	var argsPacker *StructPacker
+	var argsPacker *packer.StructPacker
 	if len(f.Args) > 0 {
 		if len(in) == 0 {
 			return nil, fmt.Errorf("must have parameter for field arguments")
 		}
 		var err error
-		argsPacker, err = b.makeStructPacker(f.Args, in[0])
+		argsPacker, err = b.packerBuilder.MakeStructPacker(f.Args, in[0])
 		if err != nil {
 			return nil, err
 		}

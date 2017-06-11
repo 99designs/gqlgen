@@ -7,6 +7,7 @@ import (
 
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
+	"github.com/neelance/graphql-go/internal/exec/packer"
 	"github.com/neelance/graphql-go/internal/exec/resolvable"
 	"github.com/neelance/graphql-go/internal/query"
 	"github.com/neelance/graphql-go/internal/schema"
@@ -92,7 +93,7 @@ func applySelectionSet(r *Request, e *resolvable.Object, sels []query.Selection)
 				})
 
 			case "__type":
-				p := resolvable.ValuePacker{ValueType: reflect.TypeOf("")}
+				p := packer.ValuePacker{ValueType: reflect.TypeOf("")}
 				v, err := p.Pack(field.Arguments.MustGet("name").Value(r.Vars))
 				if err != nil {
 					r.AddError(errors.Errorf("%s", err))
@@ -192,7 +193,7 @@ func applyField(r *Request, e resolvable.Resolvable, sels []query.Selection) []S
 
 func skipByDirective(r *Request, directives common.DirectiveList) bool {
 	if d := directives.Get("skip"); d != nil {
-		p := resolvable.ValuePacker{ValueType: reflect.TypeOf(false)}
+		p := packer.ValuePacker{ValueType: reflect.TypeOf(false)}
 		v, err := p.Pack(d.Args.MustGet("if").Value(r.Vars))
 		if err != nil {
 			r.AddError(errors.Errorf("%s", err))
@@ -203,7 +204,7 @@ func skipByDirective(r *Request, directives common.DirectiveList) bool {
 	}
 
 	if d := directives.Get("include"); d != nil {
-		p := resolvable.ValuePacker{ValueType: reflect.TypeOf(false)}
+		p := packer.ValuePacker{ValueType: reflect.TypeOf(false)}
 		v, err := p.Pack(d.Args.MustGet("if").Value(r.Vars))
 		if err != nil {
 			r.AddError(errors.Errorf("%s", err))

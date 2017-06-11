@@ -1,4 +1,4 @@
-package resolvable
+package packer
 
 import (
 	"fmt"
@@ -15,7 +15,51 @@ type packer interface {
 	Pack(value interface{}) (reflect.Value, error)
 }
 
-func (b *execBuilder) assignPacker(target *packer, schemaType common.Type, reflectType reflect.Type) error {
+type Builder struct {
+	packerMap     map[typePair]*packerMapEntry
+	structPackers []*StructPacker
+}
+
+type typePair struct {
+	graphQLType  common.Type
+	resolverType reflect.Type
+}
+
+type packerMapEntry struct {
+	packer  packer
+	targets []*packer
+}
+
+func NewBuilder() *Builder {
+	return &Builder{
+		packerMap: make(map[typePair]*packerMapEntry),
+	}
+}
+
+func (b *Builder) Finish() error {
+	for _, entry := range b.packerMap {
+		for _, target := range entry.targets {
+			*target = entry.packer
+		}
+	}
+
+	for _, p := range b.structPackers {
+		p.defaultStruct = reflect.New(p.structType).Elem()
+		for _, f := range p.fields {
+			if defaultVal := f.field.Default; defaultVal != nil {
+				v, err := f.fieldPacker.Pack(defaultVal.Value(nil))
+				if err != nil {
+					return err
+				}
+				p.defaultStruct.FieldByIndex(f.fieldIndex).Set(v)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (b *Builder) assignPacker(target *packer, schemaType common.Type, reflectType reflect.Type) error {
 	k := typePair{schemaType, reflectType}
 	ref, ok := b.packerMap[k]
 	if !ok {
@@ -31,7 +75,7 @@ func (b *execBuilder) assignPacker(target *packer, schemaType common.Type, refle
 	return nil
 }
 
-func (b *execBuilder) makePacker(schemaType common.Type, reflectType reflect.Type) (packer, error) {
+func (b *Builder) makePacker(schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	t, nonNull := unwrapNonNull(schemaType)
 	if !nonNull {
 		if reflectType.Kind() != reflect.Ptr {
@@ -57,7 +101,7 @@ func (b *execBuilder) makePacker(schemaType common.Type, reflectType reflect.Typ
 	return b.makeNonNullPacker(t, reflectType)
 }
 
-func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType reflect.Type) (packer, error) {
+func (b *Builder) makeNonNullPacker(schemaType common.Type, reflectType reflect.Type) (packer, error) {
 	if u, ok := reflect.New(reflectType).Interface().(Unmarshaler); ok {
 		if !u.ImplementsGraphQLType(schemaType.String()) {
 			return nil, fmt.Errorf("can not unmarshal %s into %s", schemaType, reflectType)
@@ -83,7 +127,7 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 		}, nil
 
 	case *schema.InputObject:
-		e, err := b.makeStructPacker(t.Values, reflectType)
+		e, err := b.MakeStructPacker(t.Values, reflectType)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +153,7 @@ func (b *execBuilder) makeNonNullPacker(schemaType common.Type, reflectType refl
 	}
 }
 
-func (b *execBuilder) makeStructPacker(values common.InputValueList, typ reflect.Type) (*StructPacker, error) {
+func (b *Builder) MakeStructPacker(values common.InputValueList, typ reflect.Type) (*StructPacker, error) {
 	structType := typ
 	usePtr := false
 	if typ.Kind() == reflect.Ptr {
@@ -309,4 +353,15 @@ func unmarshalInput(typ reflect.Type, input interface{}) (interface{}, error) {
 	}
 
 	return nil, fmt.Errorf("incompatible type")
+}
+
+func unwrapNonNull(t common.Type) (common.Type, bool) {
+	if nn, ok := t.(*common.NonNull); ok {
+		return nn.OfType, true
+	}
+	return t, false
+}
+
+func stripUnderscore(s string) string {
+	return strings.Replace(s, "_", "", -1)
 }

@@ -122,6 +122,16 @@ type Response struct {
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }
 
+// Validate validates the given query with the schema.
+func (s *Schema) Validate(queryString string) []*errors.QueryError {
+	doc, qErr := query.Parse(queryString)
+	if qErr != nil {
+		return []*errors.QueryError{qErr}
+	}
+
+	return validation.Validate(s.schema, doc)
+}
+
 // Exec executes the given query with the schema's resolver. It panics if the schema was created
 // without a resolver. If the context get cancelled, no further resolvers will be called and a
 // the context error will be returned as soon as possible (not immediately).

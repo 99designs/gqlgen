@@ -29,7 +29,7 @@ func TestServeHTTP(t *testing.T) {
 	}
 
 	expectedResponse := `{"data":{"hero":{"name":"R2-D2"}}}`
-	actualResponse := string(w.Body.Bytes())
+	actualResponse := w.Body.String()
 	if expectedResponse != actualResponse {
 		t.Fatalf("Invalid response. Expected [%s], but instead got [%s]", expectedResponse, actualResponse)
 	}

@@ -364,7 +364,7 @@ func (r *Resolver) CreateReview(args *struct {
 	return &reviewResolver{review}
 }
 
-type friendsConenctionArgs struct {
+type friendsConnectionArgs struct {
 	First *int32
 	After *graphql.ID
 }
@@ -373,7 +373,7 @@ type character interface {
 	ID() graphql.ID
 	Name() string
 	Friends() *[]*characterResolver
-	FriendsConnection(friendsConenctionArgs) (*friendsConnectionResolver, error)
+	FriendsConnection(friendsConnectionArgs) (*friendsConnectionResolver, error)
 	AppearsIn() []string
 }
 
@@ -419,7 +419,7 @@ func (r *humanResolver) Friends() *[]*characterResolver {
 	return resolveCharacters(r.h.Friends)
 }
 
-func (r *humanResolver) FriendsConnection(args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+func (r *humanResolver) FriendsConnection(args friendsConnectionArgs) (*friendsConnectionResolver, error) {
 	return newFriendsConnectionResolver(r.h.Friends, args)
 }
 
@@ -451,7 +451,7 @@ func (r *droidResolver) Friends() *[]*characterResolver {
 	return resolveCharacters(r.d.Friends)
 }
 
-func (r *droidResolver) FriendsConnection(args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+func (r *droidResolver) FriendsConnection(args friendsConnectionArgs) (*friendsConnectionResolver, error) {
 	return newFriendsConnectionResolver(r.d.Friends, args)
 }
 
@@ -550,7 +550,7 @@ type friendsConnectionResolver struct {
 	to   int
 }
 
-func newFriendsConnectionResolver(ids []graphql.ID, args friendsConenctionArgs) (*friendsConnectionResolver, error) {
+func newFriendsConnectionResolver(ids []graphql.ID, args friendsConnectionArgs) (*friendsConnectionResolver, error) {
 	from := 0
 	if args.After != nil {
 		b, err := base64.StdEncoding.DecodeString(string(*args.After))

@@ -12,11 +12,7 @@ import (
 var schema *graphql.Schema
 
 func init() {
-	var err error
-	schema, err = graphql.ParseSchema(starwars.Schema, &starwars.Resolver{})
-	if err != nil {
-		panic(err)
-	}
+	schema = graphql.MustParseSchema(starwars.Schema, &starwars.Resolver{})
 }
 
 func main() {

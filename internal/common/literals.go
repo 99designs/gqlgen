@@ -22,7 +22,14 @@ type BasicLit struct {
 
 func (lit *BasicLit) Value(vars map[string]interface{}) interface{} {
 	switch lit.Type {
-	case scanner.Int, scanner.Float:
+	case scanner.Int:
+		value, err := strconv.ParseInt(lit.Text, 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		return int32(value)
+
+	case scanner.Float:
 		value, err := strconv.ParseFloat(lit.Text, 64)
 		if err != nil {
 			panic(err)

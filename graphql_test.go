@@ -1612,6 +1612,10 @@ func (r *inputResolver) Recursive(args struct{ Value *recursive }) int32 {
 	return n
 }
 
+func (r *inputResolver) ID(args struct{ Value graphql.ID }) graphql.ID {
+	return args.Value
+}
+
 func TestInput(t *testing.T) {
 	coercionSchema := graphql.MustParseSchema(`
 		schema {
@@ -1629,6 +1633,7 @@ func TestInput(t *testing.T) {
 			enum(value: Enum!): Enum!
 			nullableEnum(value: Enum): Enum
 			recursive(value: RecursiveInput!): Int!
+			id(value: ID!): ID!
 		}
 
 		input Input {
@@ -1664,6 +1669,8 @@ func TestInput(t *testing.T) {
 					nullableEnum1: nullableEnum(value: Option2)
 					nullableEnum2: nullableEnum(value: null)
 					recursive(value: {next: {next: {}}})
+					intID: id(value: 1234)
+					strID: id(value: "1234")
 				}
 			`,
 			ExpectedResult: `
@@ -1682,7 +1689,9 @@ func TestInput(t *testing.T) {
 					"enum": "Option2",
 					"nullableEnum1": "Option2",
 					"nullableEnum2": null,
-					"recursive": 3
+					"recursive": 3,
+					"intID": "1234",
+					"strID": "1234"
 				}
 			`,
 		},

@@ -6,8 +6,6 @@ import (
 
 	"encoding/json"
 
-	"strconv"
-
 	"github.com/neelance/graphql-go/errors"
 	"github.com/neelance/graphql-go/internal/common"
 	"github.com/neelance/graphql-go/internal/exec"
@@ -20,27 +18,6 @@ import (
 	"github.com/neelance/graphql-go/log"
 	"github.com/neelance/graphql-go/trace"
 )
-
-// ID represents GraphQL's "ID" type. A custom type may be used instead.
-type ID string
-
-func (_ ID) ImplementsGraphQLType(name string) bool {
-	return name == "ID"
-}
-
-func (id *ID) UnmarshalGraphQL(input interface{}) error {
-	switch input := input.(type) {
-	case string:
-		*id = ID(input)
-		return nil
-	default:
-		return fmt.Errorf("wrong type")
-	}
-}
-
-func (id ID) MarshalJSON() ([]byte, error) {
-	return strconv.AppendQuote(nil, string(id)), nil
-}
 
 // ParseSchema parses a GraphQL schema and attaches the given root resolver. It returns an error if
 // the Go type signature of the resolvers does not match the schema. If nil is passed as the

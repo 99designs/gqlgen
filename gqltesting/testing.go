@@ -12,6 +12,7 @@ import (
 
 // Test is a GraphQL test case to be used with RunTest(s).
 type Test struct {
+	Context        context.Context
 	Schema         *graphql.Schema
 	Query          string
 	OperationName  string
@@ -35,7 +36,10 @@ func RunTests(t *testing.T, tests []*Test) {
 
 // RunTest runs a single GraphQL test case.
 func RunTest(t *testing.T, test *Test) {
-	result := test.Schema.Exec(context.Background(), test.Query, test.OperationName, test.Variables)
+	if test.Context == nil {
+		test.Context = context.Background()
+	}
+	result := test.Schema.Exec(test.Context, test.Query, test.OperationName, test.Variables)
 	if len(result.Errors) != 0 {
 		t.Fatal(result.Errors[0])
 	}

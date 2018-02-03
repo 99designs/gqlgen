@@ -1,31 +1,33 @@
-package todoresolver
+package exec
 
 import (
 	"bytes"
 	"fmt"
 
 	"github.com/vektah/graphql-go/errors"
-	"github.com/vektah/graphql-go/internal/query"
-	"github.com/vektah/graphql-go/internal/validation"
 	"github.com/vektah/graphql-go/jsonw"
+	"github.com/vektah/graphql-go/query"
+	"github.com/vektah/graphql-go/schema"
+	"github.com/vektah/graphql-go/validation"
 )
 
 type ExecutionContext struct {
 	variables map[string]interface{}
 	errors    []*errors.QueryError
-	resolvers Resolvers
 }
 
-type Type interface {
-	GetField(field string) Type
-	Execute(ec *ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable
+type Root interface {
+	Query(ec *ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable
+	Mutation(ec *ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable
 }
 
-func (c *ExecutionContext) errorf(format string, args ...interface{}) {
+type ResolverFunc func(ec *ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable
+
+func (c *ExecutionContext) Errorf(format string, args ...interface{}) {
 	c.errors = append(c.errors, errors.Errorf(format, args...))
 }
 
-func (c *ExecutionContext) error(err error) {
+func (c *ExecutionContext) Error(err error) {
 	c.errors = append(c.errors, errors.Errorf("%s", err.Error()))
 }
 
@@ -50,13 +52,13 @@ func getOperation(document *query.Document, operationName string) (*query.Operat
 	return op, nil
 }
 
-func ExecuteRequest(resolvers Resolvers, document string, operationName string, variables map[string]interface{}) *jsonw.Response {
+func ExecuteRequest(root Root, schema *schema.Schema, document string, operationName string, variables map[string]interface{}) *jsonw.Response {
 	doc, qErr := query.Parse(document)
 	if qErr != nil {
 		return &jsonw.Response{Errors: []*errors.QueryError{qErr}}
 	}
 
-	errs := validation.Validate(parsedSchema, doc)
+	errs := validation.Validate(schema, doc)
 	if len(errs) != 0 {
 		return &jsonw.Response{Errors: errs}
 	}
@@ -70,17 +72,20 @@ func ExecuteRequest(resolvers Resolvers, document string, operationName string, 
 
 	c := ExecutionContext{
 		variables: variables,
-		resolvers: resolvers,
 	}
 
-	var rootType Type = queryType{}
+	var rootType ResolverFunc
 
-	if op.Type == query.Mutation {
-		rootType = mutationType{}
+	if op.Type == query.Query {
+		rootType = root.Query
+	} else if op.Type == query.Mutation {
+		rootType = root.Mutation
+	} else {
+		return &jsonw.Response{Errors: []*errors.QueryError{errors.Errorf("unsupported operation type")}}
 	}
 
 	// TODO: parallelize if query.
-	data := c.executeSelectionSet(op.Selections, rootType, nil)
+	data := c.ExecuteSelectionSet(op.Selections, rootType, nil)
 	b := &bytes.Buffer{}
 	data.JSON(b)
 	return &jsonw.Response{
@@ -89,8 +94,8 @@ func ExecuteRequest(resolvers Resolvers, document string, operationName string, 
 	}
 }
 
-func (c *ExecutionContext) executeSelectionSet(sel []query.Selection, objectType Type, objectValue interface{}) jsonw.Encodable {
-	groupedFieldSet := c.collectFields(objectType, sel, map[string]interface{}{})
+func (c *ExecutionContext) ExecuteSelectionSet(sel []query.Selection, resolver ResolverFunc, objectValue interface{}) jsonw.Encodable {
+	groupedFieldSet := c.collectFields(sel, map[string]interface{}{})
 	fmt.Println("ESS grouped selections")
 	for _, s := range groupedFieldSet {
 		fmt.Println(s.Alias)
@@ -99,7 +104,7 @@ func (c *ExecutionContext) executeSelectionSet(sel []query.Selection, objectType
 
 	for _, collectedField := range groupedFieldSet {
 
-		resultMap.Set(collectedField.Alias, objectType.Execute(c, objectValue, collectedField.Name, collectedField.Args, collectedField.Selections))
+		resultMap.Set(collectedField.Alias, resolver(c, objectValue, collectedField.Name, collectedField.Args, collectedField.Selections))
 	}
 	return resultMap
 }
@@ -133,7 +138,7 @@ func findField(c *[]CollectedField, field *query.Field, vars map[string]interfac
 	return &(*c)[len(*c)-1]
 }
 
-func (c *ExecutionContext) collectFields(objectType Type, selSet []query.Selection, visited map[string]interface{}) []CollectedField {
+func (c *ExecutionContext) collectFields(selSet []query.Selection, visited map[string]interface{}) []CollectedField {
 	var groupedFields []CollectedField
 
 	// TODO: Basically everything.

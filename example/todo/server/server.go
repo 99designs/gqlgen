@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
-	"fmt"
-
 	"github.com/vektah/graphql-go/example/todo"
-	"github.com/vektah/graphql-go/example/todo/todoresolver"
+	"github.com/vektah/graphql-go/example/todo/gen"
+	"github.com/vektah/graphql-go/relay"
 )
 
 func main() {
@@ -16,29 +14,9 @@ func main() {
 		w.Write(page)
 	}))
 
-	resolver := todo.NewResolver()
-
-	http.HandleFunc("/query", func(w http.ResponseWriter, r *http.Request) {
-		var params struct {
-			Query         string                 `json:"query"`
-			OperationName string                 `json:"operationName"`
-			Variables     map[string]interface{} `json:"variables"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		response := todoresolver.ExecuteRequest(resolver, params.Query, params.OperationName, params.Variables)
-		fmt.Println(string(response.Data))
-		responseJSON, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJSON)
+	http.Handle("/query", relay.Handler{
+		Schema: gen.Schema,
+		Root:   gen.NewResolver(todo.NewResolver()),
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

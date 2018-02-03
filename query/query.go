@@ -5,8 +5,8 @@ import (
 	"strings"
 	"text/scanner"
 
+	"github.com/vektah/graphql-go/common"
 	"github.com/vektah/graphql-go/errors"
-	"github.com/vektah/graphql-go/internal/common"
 )
 
 type Document struct {

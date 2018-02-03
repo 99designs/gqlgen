@@ -9,9 +9,9 @@ import (
 	"encoding/json"
 
 	"github.com/vektah/graphql-go/errors"
-	"github.com/vektah/graphql-go/internal/query"
-	"github.com/vektah/graphql-go/internal/schema"
-	"github.com/vektah/graphql-go/internal/validation"
+	"github.com/vektah/graphql-go/query"
+	"github.com/vektah/graphql-go/schema"
+	"github.com/vektah/graphql-go/validation"
 )
 
 type Test struct {

@@ -98,11 +98,8 @@ func (c *ExecutionContext) executeSelectionSet(sel []query.Selection, objectType
 	resultMap := jsonw.Map{}
 
 	for _, collectedField := range groupedFieldSet {
-		//fieldType := objectType.GetField(collectedField.Name)
-		//if fieldType == nil {
-		//	continue
-		//}
-		resultMap.Set(collectedField.Alias, objectType.Execute(c, objectValue, collectedField.Name, map[string]interface{}{}, collectedField.Selections))
+
+		resultMap.Set(collectedField.Alias, objectType.Execute(c, objectValue, collectedField.Name, collectedField.Args, collectedField.Selections))
 	}
 	return resultMap
 }
@@ -110,17 +107,29 @@ func (c *ExecutionContext) executeSelectionSet(sel []query.Selection, objectType
 type CollectedField struct {
 	Alias      string
 	Name       string
+	Args       map[string]interface{}
 	Selections []query.Selection
 }
 
-func findField(c *[]CollectedField, alias string, name string) *CollectedField {
+func findField(c *[]CollectedField, field *query.Field, vars map[string]interface{}) *CollectedField {
 	for i, cf := range *c {
-		if cf.Alias == alias {
+		if cf.Alias == field.Alias.Name {
 			return &(*c)[i]
 		}
 	}
 
-	*c = append(*c, CollectedField{Alias: alias, Name: name})
+	f := CollectedField{
+		Alias: field.Alias.Name,
+		Name:  field.Name.Name,
+	}
+	if len(field.Arguments) > 0 {
+		f.Args = map[string]interface{}{}
+		for _, arg := range field.Arguments {
+			f.Args[arg.Name.Name] = arg.Value.Value(vars)
+		}
+	}
+
+	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
 }
 
@@ -131,7 +140,7 @@ func (c *ExecutionContext) collectFields(objectType Type, selSet []query.Selecti
 	for _, sel := range selSet {
 		switch sel := sel.(type) {
 		case *query.Field:
-			f := findField(&groupedFields, sel.Alias.Name, sel.Name.Name)
+			f := findField(&groupedFields, sel, c.variables)
 			f.Selections = append(f.Selections, sel.Selections...)
 		default:
 			panic("Unsupported!")

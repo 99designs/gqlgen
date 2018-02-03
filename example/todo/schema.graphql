@@ -1,0 +1,22 @@
+
+schema {
+	query: Query
+	mutation: Mutation
+}
+
+type Query {
+	todo(id: Integer!): Todo
+	lastTodo: Todo
+	todos: [Todos!]!
+}
+
+type Mutation {
+	createTodo(text: String!): Todo!
+	updateTodo(id: Integer!, text: String!): Todo!
+}
+
+type Todo @go(type:"github.com/99designs/graphql-go/example/todo.Todo") {
+	id: ID!
+	text: String!
+	done: Boolean!
+}

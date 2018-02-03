@@ -144,6 +144,18 @@ func (e *extractor) buildGoTypeString(t common.Type) string {
 			name += "[]"
 			t = val.OfType
 		case *schema.Scalar:
+			switch val.Name {
+			case "String":
+				return "string"
+			case "Boolean":
+				return "boolean"
+			case "ID":
+				return "string"
+			case "Int":
+				return "int"
+			default:
+				panic(fmt.Errorf("unknown scalar %s", val.Name))
+			}
 			return val.Name
 		case *schema.Object:
 			return name + e.get(val.Name)
@@ -168,9 +180,18 @@ func (e *extractor) extract(s *schema.Schema) {
 				Name: schemaType.Name,
 			}
 			for _, field := range schemaType.Fields {
+				var args []Arg
+				for _, arg := range field.Args {
+					args = append(args, Arg{
+						Name: arg.Name.Name,
+						Type: e.buildGoTypeString(arg.Type),
+					})
+				}
+
 				object.Fields = append(object.Fields, Field{
 					Name:       field.Name,
 					ReturnType: e.buildGoTypeString(field.Type),
+					Args:       args,
 				})
 			}
 			e.Objects = append(e.Objects, object)
@@ -191,7 +212,18 @@ func (e *extractor) String() string {
 		b.WriteString("object " + o.Name + ":\n")
 
 		for _, f := range o.Fields {
-			b.WriteString("\t" + f.Name + ": " + f.ReturnType + "\n")
+			b.WriteString("\t" + f.Name + "(")
+
+			first := true
+			for _, arg := range f.Args {
+				if !first {
+					b.WriteString(", ")
+				}
+				first = false
+				b.WriteString(arg.Name + " " + arg.Type)
+			}
+
+			b.WriteString(") " + f.ReturnType + "\n")
 		}
 
 		b.WriteString("\n")
@@ -209,4 +241,10 @@ type Object struct {
 type Field struct {
 	Name       string
 	ReturnType string
+	Args       []Arg
+}
+
+type Arg struct {
+	Name string
+	Type string
 }

@@ -5,17 +5,17 @@ schema {
 }
 
 type Query {
-	todo(id: Integer!): Todo
+	todo(id: Int!): Todo
 	lastTodo: Todo
-	todos: [Todos!]!
+	todos: [Todo!]!
 }
 
 type Mutation {
 	createTodo(text: String!): Todo!
-	updateTodo(id: Integer!, text: String!): Todo!
+	updateTodo(id: Int!, text: String!): Todo!
 }
 
-type Todo @go(type:"github.com/99designs/graphql-go/example/todo.Todo") {
+type Todo {
 	id: ID!
 	text: String!
 	done: Boolean!

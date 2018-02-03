@@ -127,6 +127,5 @@ type User @go(type:"github.com/99designs/graphql-go/example/todo.User"){
 `
 
 func init() {
-	Schema = schema.New()
-	Schema.Resolve(schemaStr)
+	Schema = schema.MustParse(schemaStr)
 }

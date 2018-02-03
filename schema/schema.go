@@ -139,6 +139,15 @@ type Field struct {
 	Desc       string
 }
 
+func MustParse(str string) *Schema {
+	s := New()
+	err := s.Parse(str)
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
 func New() *Schema {
 	s := &Schema{
 		entryPointNames: make(map[string]string),

@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/neelance/graphql-go/internal/common"
-	"github.com/neelance/graphql-go/internal/exec/packer"
-	"github.com/neelance/graphql-go/internal/schema"
+	"github.com/vektah/graphql-go/internal/common"
+	"github.com/vektah/graphql-go/internal/exec/packer"
+	"github.com/vektah/graphql-go/internal/schema"
 )
 
 type Schema struct {

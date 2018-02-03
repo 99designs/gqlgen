@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/neelance/graphql-go/errors"
-	"github.com/neelance/graphql-go/internal/common"
-	"github.com/neelance/graphql-go/internal/schema"
+	"github.com/vektah/graphql-go/errors"
+	"github.com/vektah/graphql-go/internal/common"
+	"github.com/vektah/graphql-go/internal/schema"
 )
 
 type packer interface {

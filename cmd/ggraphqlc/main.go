@@ -8,6 +8,11 @@ import (
 	"os"
 	"strings"
 
+	"path/filepath"
+	"strconv"
+
+	"bytes"
+
 	"github.com/vektah/graphql-go/common"
 	"github.com/vektah/graphql-go/schema"
 )
@@ -61,34 +66,63 @@ func main() {
 		os.Exit(1)
 	}
 
-	vars := extract(schema, goTypes)
-	if len(vars.Errors) != 0 {
-		for _, err := range vars.Errors {
-			fmt.Println(os.Stderr, err)
+	e := extractor{
+		goTypeMap: goTypes,
+		imports:   map[string]string{},
+	}
+	e.extract(schema)
+
+	if len(e.Errors) != 0 {
+		for _, err := range e.Errors {
+			fmt.Println(os.Stderr, "err: "+err)
 		}
 		os.Exit(1)
 	}
 
-	for _, o := range vars.Objects {
-		fmt.Println(o.Name)
-
-		for _, f := range o.Fields {
-			fmt.Println("  ", f.Name, f.ReturnType)
-		}
-	}
+	fmt.Println(e.String())
 }
 
-type goTypeMap map[string]string
+type extractor struct {
+	Errors    []string
+	Objects   []Object
+	goTypeMap map[string]string
+	imports   map[string]string // local -> full path
+}
 
-func (m goTypeMap) get(name string) string {
-	if fieldType, ok := m[name]; ok {
-		return fieldType
+func (e *extractor) errorf(format string, args ...interface{}) {
+	e.Errors = append(e.Errors, fmt.Sprintf(format, args...))
+}
+
+// get the type name to put in a file for a given fully resolved type, and add any imports required
+// eg name = github.com/my/pkg.myType will return `pkg.myType` and add an import for `github.com/my/pkg`
+func (e *extractor) get(name string) string {
+	if fieldType, ok := e.goTypeMap[name]; ok {
+		parts := strings.Split(fieldType, ".")
+		if len(parts) == 1 {
+			return parts[0]
+		}
+
+		packageName := strings.Join(parts[:len(parts)-1], ".")
+		typeName := parts[len(parts)-1]
+
+		localName := filepath.Base(packageName)
+		i := 0
+		for pkg, found := e.imports[localName]; found && pkg != packageName; localName = filepath.Base(packageName) + strconv.Itoa(i) {
+			i++
+			if i > 10 {
+				panic("too many collisions")
+			}
+		}
+
+		e.imports[localName] = packageName
+		return localName + "." + typeName
+
 	}
-	fmt.Fprintf(os.Stderr, "unknown go type for %s, using interface{}. you should add it to types.json", name)
+	fmt.Fprintf(os.Stderr, "unknown go type for %s, using interface{}. you should add it to types.json\n", name)
 	return "interface{}"
 }
 
-func (m goTypeMap) buildGoTypeString(t common.Type) string {
+func (e *extractor) buildGoTypeString(t common.Type) string {
 	name := ""
 	usePtr := true
 	for {
@@ -112,9 +146,9 @@ func (m goTypeMap) buildGoTypeString(t common.Type) string {
 		case *schema.Scalar:
 			return val.Name
 		case *schema.Object:
-			return name + m.get(val.Name)
+			return name + e.get(val.Name)
 		case *common.TypeName:
-			return name + m.get(val.Name)
+			return name + e.get(val.Name)
 		default:
 			panic(fmt.Errorf("unknown type %T", t))
 		}
@@ -122,8 +156,7 @@ func (m goTypeMap) buildGoTypeString(t common.Type) string {
 	}
 }
 
-func extract(s *schema.Schema, goTypes goTypeMap) Vars {
-	result := Vars{}
+func (e *extractor) extract(s *schema.Schema) {
 	for _, schemaType := range s.Types {
 
 		switch schemaType := schemaType.(type) {
@@ -137,19 +170,34 @@ func extract(s *schema.Schema, goTypes goTypeMap) Vars {
 			for _, field := range schemaType.Fields {
 				object.Fields = append(object.Fields, Field{
 					Name:       field.Name,
-					ReturnType: goTypes.buildGoTypeString(field.Type),
+					ReturnType: e.buildGoTypeString(field.Type),
 				})
 			}
-			result.Objects = append(result.Objects, object)
+			e.Objects = append(e.Objects, object)
 		}
 	}
-
-	return result
 }
 
-type Vars struct {
-	Errors  []string
-	Objects []Object
+func (e *extractor) String() string {
+	b := &bytes.Buffer{}
+
+	b.WriteString("imports:\n")
+	for local, pkg := range e.imports {
+		b.WriteString("\t" + local + " " + strconv.Quote(pkg) + "\n")
+	}
+	b.WriteString("\n")
+
+	for _, o := range e.Objects {
+		b.WriteString("object " + o.Name + ":\n")
+
+		for _, f := range o.Fields {
+			b.WriteString("\t" + f.Name + ": " + f.ReturnType + "\n")
+		}
+
+		b.WriteString("\n")
+	}
+
+	return b.String()
 }
 
 type Object struct {

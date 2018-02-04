@@ -100,7 +100,7 @@ func (r *Type) Description() *string {
 	return nil
 }
 
-func (r *Type) Fields(args *struct{ IncludeDeprecated bool }) *[]*Field {
+func (r *Type) Fields(includeDeprecated bool) *[]*Field {
 	var fields schema.FieldList
 	switch t := r.typ.(type) {
 	case *schema.Object:
@@ -113,7 +113,7 @@ func (r *Type) Fields(args *struct{ IncludeDeprecated bool }) *[]*Field {
 
 	var l []*Field
 	for _, f := range fields {
-		if d := f.Directives.Get("deprecated"); d == nil || args.IncludeDeprecated {
+		if d := f.Directives.Get("deprecated"); d == nil || includeDeprecated {
 			l = append(l, &Field{f})
 		}
 	}
@@ -151,7 +151,7 @@ func (r *Type) PossibleTypes() *[]*Type {
 	return &l
 }
 
-func (r *Type) EnumValues(args *struct{ IncludeDeprecated bool }) *[]*EnumValue {
+func (r *Type) EnumValues(includeDeprecated bool) *[]*EnumValue {
 	t, ok := r.typ.(*schema.Enum)
 	if !ok {
 		return nil
@@ -159,7 +159,7 @@ func (r *Type) EnumValues(args *struct{ IncludeDeprecated bool }) *[]*EnumValue 
 
 	var l []*EnumValue
 	for _, v := range t.Values {
-		if d := v.Directives.Get("deprecated"); d == nil || args.IncludeDeprecated {
+		if d := v.Directives.Get("deprecated"); d == nil || includeDeprecated {
 			l = append(l, &EnumValue{v})
 		}
 	}

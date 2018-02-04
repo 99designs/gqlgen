@@ -5,6 +5,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type writer struct {
@@ -73,12 +74,12 @@ func (w *writer) writeInterface() {
 	w.begin("type Resolvers interface {")
 	for _, o := range w.Objects {
 		for _, f := range o.Fields {
-			if f.Bind != "" {
+			if f.VarName != "" || f.MethodName != "" {
 				continue
 			}
 
 			w.emitIndent()
-			w.emit("%s_%s(", o.Name, f.Name)
+			w.emit("%s_%s(", o.Name, f.GraphQLName)
 
 			first := true
 			for _, arg := range f.Args {
@@ -122,16 +123,19 @@ func (w *writer) writeObjectResolver(object object) {
 	if object.Type.Name != "interface{}" {
 		w.line("it := object.(*%s)", object.Type.Local())
 	}
+	w.line("if it == nil {")
+	w.line("	return jsonw.Null")
+	w.line("}")
 
 	w.line("switch field {")
 
 	for _, field := range object.Fields {
-		w.begin("case %s:", strconv.Quote(field.Name))
+		w.begin("case %s:", strconv.Quote(field.GraphQLName))
 
-		if field.Bind != "" {
-			w.writeFieldBind(field)
+		if field.VarName != "" {
+			w.writeVarResolver(field)
 		} else {
-			w.writeFieldResolver(object, field)
+			w.writeMethodResolver(object, field)
 		}
 
 		w.end("")
@@ -143,32 +147,90 @@ func (w *writer) writeObjectResolver(object object) {
 	w.lf()
 }
 
-func (w *writer) writeFieldBind(field Field) {
-	w.line("return jsonw.%s(it.%s)", field.Type.GraphQLName, field.Bind)
+func (w *writer) writeMethodResolver(object object, field Field) {
+	var methodName string
+	if field.MethodName != "" {
+		methodName = field.MethodName
+	} else {
+		methodName = fmt.Sprintf("r.resolvers.%s_%s", object.Name, field.GraphQLName)
+	}
+
+	if field.NoErr {
+		w.emitIndent()
+		w.emit("res := %s", methodName)
+		w.writeFuncArgs(field)
+	} else {
+		w.emitIndent()
+		w.emit("res, err := %s", methodName)
+		w.writeFuncArgs(field)
+		w.line("if err != nil {")
+		w.line("	ec.Error(err)")
+		w.line("	return jsonw.Null")
+		w.line("}")
+	}
+
+	w.writeJsonType("json", field.Type, field.Type.Modifiers, "res")
+
+	w.line("return json")
 }
 
-func (w *writer) writeFieldResolver(object object, field Field) {
-	call := fmt.Sprintf("result, err := r.resolvers.%s_%s", object.Name, field.Name)
+func (w *writer) writeVarResolver(field Field) {
+	w.writeJsonType("res", field.Type, field.Type.Modifiers, field.VarName)
+	w.line("return res")
+}
+
+func (w *writer) writeFuncArgs(field Field) {
 	if len(field.Args) == 0 {
-		w.line(call + "()")
+		w.emit("()")
+		w.lf()
 	} else {
-		w.begin(call + "(")
+		w.indent++
+		w.emit("(")
+		w.lf()
 		for _, arg := range field.Args {
 			w.line("arguments[%s].(%s),", strconv.Quote(arg.Name), arg.Type.Local())
 		}
 		w.end(")")
 	}
+}
 
-	w.line("if err != nil {")
-	w.line("	ec.Error(err)")
-	w.line("	return jsonw.Null")
-	w.line("}")
+func (w *writer) writeJsonType(result string, t Type, remainingMods []string, val string) {
+	isPtr := false
+	for i := 0; i < len(remainingMods); i++ {
+		switch remainingMods[i] {
+		case modPtr:
+			isPtr = true
+		case modList:
+			if isPtr {
+				val = "*" + val
+			}
+			w.line("%s := jsonw.Array{}", result)
+			w.begin("for _, val := range %s {", val)
 
-	result := "result"
-	if !strings.HasPrefix(field.Type.Prefix, "*") {
-		result = "&result"
+			w.writeJsonType(result+"1", t, remainingMods[i+1:], "val")
+			w.line("%s = append(%s, %s)", result, result, result+"1")
+			w.end("}")
+			return
+		}
 	}
-	w.line("return ec.ExecuteSelectionSet(sels, r.%s, %s)", field.Type.Name, result)
+
+	if t.Basic {
+		if isPtr {
+			val = "*" + val
+		}
+		w.line("%s := jsonw.%s(%s)", result, ucFirst(t.Name), val)
+	} else {
+		if !isPtr {
+			val = "&" + val
+		}
+		w.line("%s := ec.ExecuteSelectionSet(sels, r.%s, %s)", result, t.GraphQLName, val)
+	}
+}
+
+func ucFirst(s string) string {
+	r := []rune(s)
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
 }
 
 func (w *writer) writeSchema() {

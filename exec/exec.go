@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/vektah/graphql-go/errors"
+	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/jsonw"
 	"github.com/vektah/graphql-go/query"
 	"github.com/vektah/graphql-go/schema"
@@ -14,6 +15,7 @@ import (
 type ExecutionContext struct {
 	variables map[string]interface{}
 	errors    []*errors.QueryError
+	schema    *schema.Schema
 }
 
 type Root interface {
@@ -29,6 +31,18 @@ func (c *ExecutionContext) Errorf(format string, args ...interface{}) {
 
 func (c *ExecutionContext) Error(err error) {
 	c.errors = append(c.errors, errors.Errorf("%s", err.Error()))
+}
+
+func (c *ExecutionContext) IntrospectSchema() *introspection.Schema {
+	return introspection.WrapSchema(c.schema)
+}
+
+func (c *ExecutionContext) IntrospectType(name string) *introspection.Type {
+	t := c.schema.Resolve(name)
+	if t == nil {
+		return nil
+	}
+	return introspection.WrapType(t)
 }
 
 func getOperation(document *query.Document, operationName string) (*query.Operation, error) {
@@ -72,6 +86,7 @@ func ExecuteRequest(root Root, schema *schema.Schema, document string, operation
 
 	c := ExecutionContext{
 		variables: variables,
+		schema:    schema,
 	}
 
 	var rootType ResolverFunc
@@ -85,7 +100,7 @@ func ExecuteRequest(root Root, schema *schema.Schema, document string, operation
 	}
 
 	// TODO: parallelize if query.
-	data := c.ExecuteSelectionSet(op.Selections, rootType, nil)
+	data := c.ExecuteSelectionSet(op.Selections, rootType, true)
 	b := &bytes.Buffer{}
 	data.JSON(b)
 	return &jsonw.Response{
@@ -95,6 +110,9 @@ func ExecuteRequest(root Root, schema *schema.Schema, document string, operation
 }
 
 func (c *ExecutionContext) ExecuteSelectionSet(sel []query.Selection, resolver ResolverFunc, objectValue interface{}) jsonw.Encodable {
+	if objectValue == nil {
+		return jsonw.Null
+	}
 	groupedFieldSet := c.collectFields(sel, map[string]interface{}{})
 	fmt.Println("ESS grouped selections")
 	for _, s := range groupedFieldSet {
@@ -103,7 +121,6 @@ func (c *ExecutionContext) ExecuteSelectionSet(sel []query.Selection, resolver R
 	resultMap := jsonw.Map{}
 
 	for _, collectedField := range groupedFieldSet {
-
 		resultMap.Set(collectedField.Alias, resolver(c, objectValue, collectedField.Name, collectedField.Args, collectedField.Selections))
 	}
 	return resultMap
@@ -148,7 +165,7 @@ func (c *ExecutionContext) collectFields(selSet []query.Selection, visited map[s
 			f := findField(&groupedFields, sel, c.variables)
 			f.Selections = append(f.Selections, sel.Selections...)
 		default:
-			panic("Unsupported!")
+			panic(fmt.Errorf("unsupported %T", sel))
 		}
 	}
 

@@ -1,13 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"go/types"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"sort"
 
 	"github.com/vektah/graphql-go/common"
 	"github.com/vektah/graphql-go/schema"
@@ -66,8 +67,8 @@ func (e *extractor) getType(name string) Type {
 	}
 }
 
-func (e *extractor) buildGoTypeString(t common.Type) Type {
-	prefix := ""
+func (e *extractor) buildType(t common.Type) Type {
+	var modifiers []string
 	usePtr := true
 	for {
 		if _, nonNull := t.(*common.NonNull); nonNull {
@@ -76,7 +77,7 @@ func (e *extractor) buildGoTypeString(t common.Type) Type {
 			usePtr = false
 		} else {
 			if usePtr {
-				prefix += "*"
+				modifiers = append(modifiers, modPtr)
 			}
 			usePtr = true
 		}
@@ -85,33 +86,47 @@ func (e *extractor) buildGoTypeString(t common.Type) Type {
 		case *common.NonNull:
 			t = val.OfType
 		case *common.List:
-			prefix += "[]"
+			modifiers = append(modifiers, modList)
 			t = val.OfType
 		case *schema.Scalar:
+			var goType string
+
 			switch val.Name {
 			case "String":
-				return Type{Prefix: prefix, GraphQLName: "String", Name: "string"}
-			case "Boolean":
-				return Type{Prefix: prefix, GraphQLName: "Boolean", Name: "bool"}
+				goType = "string"
 			case "ID":
-				return Type{Prefix: prefix, GraphQLName: "ID", Name: "int"}
+				goType = "string"
+			case "Boolean":
+				goType = "bool"
 			case "Int":
-				return Type{Prefix: prefix, GraphQLName: "Int", Name: "int"}
+				goType = "int"
 			default:
 				panic(fmt.Errorf("unknown scalar %s", val.Name))
 			}
+			return Type{
+				Basic:       true,
+				Modifiers:   modifiers,
+				GraphQLName: val.Name,
+				Name:        goType,
+			}
 		case *schema.Object:
 			t := e.getType(val.Name)
-			t.Prefix = prefix
+			t.Modifiers = modifiers
 			return t
 		case *common.TypeName:
 			t := e.getType(val.Name)
-			t.Prefix = prefix
+			t.Modifiers = modifiers
 			return t
+		case *schema.Enum:
+			return Type{
+				Basic:       true,
+				Modifiers:   modifiers,
+				GraphQLName: val.Name,
+				Name:        "string",
+			}
 		default:
 			panic(fmt.Errorf("unknown type %T", t))
 		}
-
 	}
 }
 
@@ -119,10 +134,8 @@ func (e *extractor) extract(s *schema.Schema) {
 	for _, schemaType := range s.Types {
 
 		switch schemaType := schemaType.(type) {
+
 		case *schema.Object:
-			if strings.HasPrefix(schemaType.Name, "__") {
-				continue
-			}
 			object := object{
 				Name: schemaType.Name,
 				Type: e.getType(schemaType.Name),
@@ -132,19 +145,23 @@ func (e *extractor) extract(s *schema.Schema) {
 				for _, arg := range field.Args {
 					args = append(args, Arg{
 						Name: arg.Name.Name,
-						Type: e.buildGoTypeString(arg.Type),
+						Type: e.buildType(arg.Type),
 					})
 				}
 
 				object.Fields = append(object.Fields, Field{
-					Name: field.Name,
-					Type: e.buildGoTypeString(field.Type),
-					Args: args,
+					GraphQLName: field.Name,
+					Type:        e.buildType(field.Type),
+					Args:        args,
 				})
 			}
 			e.Objects = append(e.Objects, object)
 		}
 	}
+
+	sort.Slice(e.Objects, func(i, j int) bool {
+		return strings.Compare(e.Objects[i].Name, e.Objects[j].Name) == -1
+	})
 }
 
 func (e *extractor) introspect() error {
@@ -164,22 +181,74 @@ func (e *extractor) introspect() error {
 		}
 		pkg := prog.Package(o.Type.Package)
 
-		for ast, object := range pkg.Defs {
-			if ast.Name != o.Type.Name {
+		for astNode, object := range pkg.Defs {
+			if astNode.Name != o.Type.Name {
 				continue
 			}
 
 			e.findBindTargets(object.Type(), o)
+			// todo: break!
 		}
 	}
 
 	return nil
 }
 
+func (e *extractor) modifiersFromGoType(t types.Type) []string {
+	var modifiers []string
+	for {
+		switch val := t.(type) {
+		case *types.Pointer:
+			modifiers = append(modifiers, modPtr)
+			t = val.Elem()
+		case *types.Array:
+			modifiers = append(modifiers, modList)
+			t = val.Elem()
+		case *types.Slice:
+			modifiers = append(modifiers, modList)
+			t = val.Elem()
+		default:
+			return modifiers
+		}
+	}
+}
+
 func (e *extractor) findBindTargets(t types.Type, object object) {
 	switch t := t.(type) {
 	case *types.Named:
-		// Todo: bind to funcs?
+		for i := 0; i < t.NumMethods(); i++ {
+			method := t.Method(i)
+			if methodField := object.GetField(method.Name()); methodField != nil {
+				methodField.MethodName = "it." + method.Name()
+				sig := method.Type().(*types.Signature)
+
+				methodField.Type.Modifiers = e.modifiersFromGoType(sig.Results().At(0).Type())
+
+				// check arg order matches code, not gql
+
+				var newArgs []Arg
+			l2:
+				for j := 0; j < sig.Params().Len(); j++ {
+					param := sig.Params().At(j)
+					for _, oldArg := range methodField.Args {
+						if strings.EqualFold(oldArg.Name, param.Name()) {
+							oldArg.Type.Modifiers = e.modifiersFromGoType(param.Type())
+							newArgs = append(newArgs, oldArg)
+							continue l2
+						}
+					}
+					e.errorf("cannot match argument " + param.Name() + " to any argument in " + t.String())
+				}
+				methodField.Args = newArgs
+
+				if sig.Results().Len() == 1 {
+					methodField.NoErr = true
+				} else if sig.Results().Len() != 2 {
+					e.errorf("weird number of results on %s. expected either (result), or (result, error)", method.Name())
+				}
+			}
+		}
+
 		e.findBindTargets(t.Underlying(), object)
 
 	case *types.Struct:
@@ -189,69 +258,45 @@ func (e *extractor) findBindTargets(t types.Type, object object) {
 
 			// Todo: check for type matches before binding too?
 			if objectField := object.GetField(field.Name()); objectField != nil {
-				objectField.Bind = field.Name()
+				objectField.VarName = "it." + field.Name()
+				objectField.Type.Modifiers = e.modifiersFromGoType(field.Type())
 			}
 		}
 		t.Underlying()
 
+	case *types.Signature:
+		// ignored
+
 	default:
-		panic(fmt.Errorf("unknown type %T", t))
+		panic(fmt.Errorf("unknown type %T looking at %s", t, object.Name))
 	}
 
 }
 
-func (e *extractor) String() string {
-	b := &bytes.Buffer{}
-
-	b.WriteString("Imports:\n")
-	for local, pkg := range e.Imports {
-		b.WriteString("\t" + local + " " + strconv.Quote(pkg) + "\n")
-	}
-	b.WriteString("\n")
-
-	for _, o := range e.Objects {
-		b.WriteString("object " + o.Name + ":\n")
-
-		for _, f := range o.Fields {
-			if f.Bind != "" {
-				b.WriteString("\t" + f.Bind + " " + f.Type.Local() + "\n")
-				continue
-			}
-			b.WriteString("\t" + o.Name + "_" + f.Name)
-
-			b.WriteString("(")
-			first := true
-			for _, arg := range f.Args {
-				if !first {
-					b.WriteString(", ")
-				}
-				first = false
-				b.WriteString(arg.Name + " " + arg.Type.Local())
-			}
-			b.WriteString(")")
-
-			b.WriteString(" " + f.Type.Local() + "\n")
-		}
-
-		b.WriteString("\n")
-	}
-
-	return b.String()
-}
+const (
+	modList = "[]"
+	modPtr  = "*"
+)
 
 type Type struct {
 	GraphQLName string
 	Name        string
 	Package     string
 	ImportedAs  string
-	Prefix      string
+	Modifiers   []string
+	Basic       bool
 }
 
 func (t Type) Local() string {
 	if t.ImportedAs == "" {
-		return t.Prefix + t.Name
+		return strings.Join(t.Modifiers, "") + t.Name
 	}
-	return t.Prefix + t.ImportedAs + "." + t.Name
+	return strings.Join(t.Modifiers, "") + t.ImportedAs + "." + t.Name
+}
+
+func (t Type) Ptr() Type {
+	t.Modifiers = append(t.Modifiers, modPtr)
+	return t
 }
 
 type object struct {
@@ -260,17 +305,33 @@ type object struct {
 	Type   Type
 }
 
+type enum struct {
+	Name   string
+	Values []string
+}
+
 type Field struct {
-	Name string
-	Type Type
-	Args []Arg
-	Bind string
+	GraphQLName string
+	MethodName  string
+	VarName     string
+	Type        Type
+	Args        []Arg
+	NoErr       bool
 }
 
 func (o *object) GetField(name string) *Field {
 	for i, field := range o.Fields {
-		if strings.EqualFold(field.Name, name) {
+		if strings.EqualFold(field.GraphQLName, name) {
 			return &o.Fields[i]
+		}
+	}
+	return nil
+}
+
+func (e *extractor) GetObject(name string) *object {
+	for i, o := range e.Objects {
+		if strings.EqualFold(o.Name, name) {
+			return &e.Objects[i]
 		}
 	}
 	return nil

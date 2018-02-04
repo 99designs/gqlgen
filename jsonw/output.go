@@ -77,7 +77,7 @@ func String(v string) Encodable {
 	return literal{[]byte(strconv.Quote(v))}
 }
 
-func Boolean(v bool) Encodable {
+func Bool(v bool) Encodable {
 	if v {
 		return True
 	} else {

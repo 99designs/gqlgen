@@ -69,7 +69,7 @@ func main() {
 		goTypeMap:   goTypes,
 		schemaRaw:   string(schemaRaw),
 		Imports: map[string]string{
-			"exec":   "github.com/vektah/graphql-go/exec",
+			//"exec":   "github.com/vektah/graphql-go/exec",
 			"jsonw":  "github.com/vektah/graphql-go/jsonw",
 			"query":  "github.com/vektah/graphql-go/query",
 			"schema": "github.com/vektah/graphql-go/schema",
@@ -83,13 +83,13 @@ func main() {
 		Type:        e.getType("__Schema").Ptr(),
 		GraphQLName: "__schema",
 		NoErr:       true,
-		MethodName:  "ec.IntrospectSchema",
+		MethodName:  "ec.introspectSchema",
 	})
 	q.Fields = append(q.Fields, Field{
 		Type:        e.getType("__Type").Ptr(),
 		GraphQLName: "__type",
 		NoErr:       true,
-		MethodName:  "ec.IntrospectType",
+		MethodName:  "ec.introspectType",
 		Args:        []Arg{{Name: "name", Type: Type{Basic: true, Name: "string"}}},
 	})
 

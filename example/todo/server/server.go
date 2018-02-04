@@ -14,10 +14,7 @@ func main() {
 		w.Write(page)
 	}))
 
-	http.Handle("/query", relay.Handler{
-		Schema: gen.Schema,
-		Root:   gen.NewResolver(todo.NewResolver()),
-	})
+	http.Handle("/query", relay.Handler(gen.NewResolver(todo.NewResolver())))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

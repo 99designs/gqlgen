@@ -39,3 +39,15 @@ func (err *QueryError) Error() string {
 }
 
 var _ error = &QueryError{}
+
+type Builder struct {
+	Errors []*QueryError
+}
+
+func (c *Builder) Errorf(format string, args ...interface{}) {
+	c.Errors = append(c.Errors, Errorf(format, args...))
+}
+
+func (c *Builder) Error(err error) {
+	c.Errors = append(c.Errors, Errorf("%s", err.Error()))
+}

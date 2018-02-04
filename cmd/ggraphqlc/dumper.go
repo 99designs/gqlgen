@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"unicode"
@@ -20,7 +21,9 @@ func write(extractor extractor, out io.Writer) {
 	wr.writePackage()
 	wr.writeImports()
 	wr.writeInterface()
-	wr.writeResolver()
+	for _, object := range wr.Objects {
+		wr.writeObjectResolver(object)
+	}
 	wr.writeSchema()
 }
 
@@ -64,7 +67,12 @@ func (w *writer) writePackage() {
 func (w *writer) writeImports() {
 	w.begin("import (")
 	for local, pkg := range w.Imports {
-		w.line("%s %s", local, strconv.Quote(pkg))
+		if local == filepath.Base(pkg) {
+			w.line(strconv.Quote(pkg))
+		} else {
+			w.line("%s %s", local, strconv.Quote(pkg))
+		}
+
 	}
 	w.end(")")
 	w.lf()
@@ -97,29 +105,16 @@ func (w *writer) writeInterface() {
 	w.lf()
 }
 
-func (w *writer) writeResolver() {
-	w.begin("func NewResolver(r Resolvers) exec.Root {")
-	w.line("return &resolvers{r}")
-	w.end("}")
-	w.lf()
-
-	w.begin("type resolvers struct {")
-	w.line("resolvers Resolvers")
-	w.end("}")
-	w.lf()
-
-	for _, object := range w.Objects {
-		w.writeObjectResolver(object)
-	}
-}
-
 func (w *writer) writeObjectResolver(object object) {
 	objectName := "it"
 	if object.Type.Name != "interface{}" {
 		objectName = "object"
 	}
 
-	w.begin("func (r *resolvers) %s(ec *exec.ExecutionContext, %s interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {", object.Type.GraphQLName, objectName)
+	w.line("type %sType struct {}", lcFirst(object.Type.GraphQLName))
+	w.lf()
+
+	w.begin("func (%sType) resolve(ec *executionContext, %s interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {", lcFirst(object.Type.GraphQLName), objectName)
 	if object.Type.Name != "interface{}" {
 		w.line("it := object.(*%s)", object.Type.Local())
 	}
@@ -152,7 +147,7 @@ func (w *writer) writeMethodResolver(object object, field Field) {
 	if field.MethodName != "" {
 		methodName = field.MethodName
 	} else {
-		methodName = fmt.Sprintf("r.resolvers.%s_%s", object.Name, field.GraphQLName)
+		methodName = fmt.Sprintf("ec.resolvers.%s_%s", object.Name, field.GraphQLName)
 	}
 
 	if field.NoErr {
@@ -223,7 +218,7 @@ func (w *writer) writeJsonType(result string, t Type, remainingMods []string, va
 		if !isPtr {
 			val = "&" + val
 		}
-		w.line("%s := ec.ExecuteSelectionSet(sels, r.%s, %s)", result, t.GraphQLName, val)
+		w.line("%s := ec.executeSelectionSet(sels, %sType{}, %s)", result, lcFirst(t.GraphQLName), val)
 	}
 }
 
@@ -233,6 +228,12 @@ func ucFirst(s string) string {
 	return string(r)
 }
 
+func lcFirst(s string) string {
+	r := []rune(s)
+	r[0] = unicode.ToLower(r[0])
+	return string(r)
+}
+
 func (w *writer) writeSchema() {
-	w.line("var Schema = schema.MustParse(%s)", strconv.Quote(w.schemaRaw))
+	w.line("var parsedSchema = schema.MustParse(%s)", strconv.Quote(w.schemaRaw))
 }

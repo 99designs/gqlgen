@@ -1,12 +1,11 @@
 package gen
 
 import (
-	schema "github.com/vektah/graphql-go/schema"
-	introspection "github.com/vektah/graphql-go/introspection"
-	todo "github.com/vektah/graphql-go/example/todo"
-	exec "github.com/vektah/graphql-go/exec"
-	jsonw "github.com/vektah/graphql-go/jsonw"
-	query "github.com/vektah/graphql-go/query"
+	"github.com/vektah/graphql-go/jsonw"
+	"github.com/vektah/graphql-go/query"
+	"github.com/vektah/graphql-go/schema"
+	"github.com/vektah/graphql-go/introspection"
+	"github.com/vektah/graphql-go/example/todo"
 )
 
 type Resolvers interface {
@@ -17,32 +16,26 @@ type Resolvers interface {
 	Query_todos() ([]todo.Todo, error)
 }
 
-func NewResolver(r Resolvers) exec.Root {
-	return &resolvers{r}
-}
+type mutationType struct {}
 
-type resolvers struct {
-	resolvers Resolvers
-}
-
-func (r *resolvers) Mutation(ec *exec.ExecutionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+func (mutationType) resolve(ec *executionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	if it == nil {
 		return jsonw.Null
 	}
 	switch field {
 	case "createTodo":
-		res, err := r.resolvers.Mutation_createTodo(
+		res, err := ec.resolvers.Mutation_createTodo(
 			arguments["text"].(string),
 		)
 		if err != nil {
 			ec.Error(err)
 			return jsonw.Null
 		}
-		json := ec.ExecuteSelectionSet(sels, r.Todo, &res)
+		json := ec.executeSelectionSet(sels, todoType{}, &res)
 		return json
 	
 	case "updateTodo":
-		res, err := r.resolvers.Mutation_updateTodo(
+		res, err := ec.resolvers.Mutation_updateTodo(
 			arguments["id"].(int),
 			arguments["done"].(bool),
 		)
@@ -50,68 +43,72 @@ func (r *resolvers) Mutation(ec *exec.ExecutionContext, it interface{}, field st
 			ec.Error(err)
 			return jsonw.Null
 		}
-		json := ec.ExecuteSelectionSet(sels, r.Todo, &res)
+		json := ec.executeSelectionSet(sels, todoType{}, &res)
 		return json
 	
 	}
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) Query(ec *exec.ExecutionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type queryType struct {}
+
+func (queryType) resolve(ec *executionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	if it == nil {
 		return jsonw.Null
 	}
 	switch field {
 	case "todo":
-		res, err := r.resolvers.Query_todo(
+		res, err := ec.resolvers.Query_todo(
 			arguments["id"].(int),
 		)
 		if err != nil {
 			ec.Error(err)
 			return jsonw.Null
 		}
-		json := ec.ExecuteSelectionSet(sels, r.Todo, res)
+		json := ec.executeSelectionSet(sels, todoType{}, res)
 		return json
 	
 	case "lastTodo":
-		res, err := r.resolvers.Query_lastTodo()
+		res, err := ec.resolvers.Query_lastTodo()
 		if err != nil {
 			ec.Error(err)
 			return jsonw.Null
 		}
-		json := ec.ExecuteSelectionSet(sels, r.Todo, res)
+		json := ec.executeSelectionSet(sels, todoType{}, res)
 		return json
 	
 	case "todos":
-		res, err := r.resolvers.Query_todos()
+		res, err := ec.resolvers.Query_todos()
 		if err != nil {
 			ec.Error(err)
 			return jsonw.Null
 		}
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.ExecuteSelectionSet(sels, r.Todo, &val)
+			json1 := ec.executeSelectionSet(sels, todoType{}, &val)
 			json = append(json, json1)
 		}
 		return json
 	
 	case "__schema":
-		res := ec.IntrospectSchema()
-		json := ec.ExecuteSelectionSet(sels, r.__Schema, res)
+		res := ec.introspectSchema()
+		json := ec.executeSelectionSet(sels, __SchemaType{}, res)
 		return json
 	
 	case "__type":
-		res := ec.IntrospectType(
+		res := ec.introspectType(
 			arguments["name"].(string),
 		)
-		json := ec.ExecuteSelectionSet(sels, r.__Type, res)
+		json := ec.executeSelectionSet(sels, __TypeType{}, res)
 		return json
 	
 	}
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) Todo(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type todoType struct {}
+
+func (todoType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*todo.Todo)
 	if it == nil {
 		return jsonw.Null
@@ -133,7 +130,9 @@ func (r *resolvers) Todo(ec *exec.ExecutionContext, object interface{}, field st
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) __Directive(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type __DirectiveType struct {}
+
+func (__DirectiveType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Directive)
 	if it == nil {
 		return jsonw.Null
@@ -162,7 +161,7 @@ func (r *resolvers) __Directive(ec *exec.ExecutionContext, object interface{}, f
 		res := it.Args()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__InputValue, val)
+			json1 := ec.executeSelectionSet(sels, __InputValueType{}, val)
 			json = append(json, json1)
 		}
 		return json
@@ -171,7 +170,9 @@ func (r *resolvers) __Directive(ec *exec.ExecutionContext, object interface{}, f
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) __EnumValue(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type __EnumValueType struct {}
+
+func (__EnumValueType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.EnumValue)
 	if it == nil {
 		return jsonw.Null
@@ -201,7 +202,9 @@ func (r *resolvers) __EnumValue(ec *exec.ExecutionContext, object interface{}, f
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) __Field(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type __FieldType struct {}
+
+func (__FieldType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Field)
 	if it == nil {
 		return jsonw.Null
@@ -221,14 +224,14 @@ func (r *resolvers) __Field(ec *exec.ExecutionContext, object interface{}, field
 		res := it.Args()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__InputValue, val)
+			json1 := ec.executeSelectionSet(sels, __InputValueType{}, val)
 			json = append(json, json1)
 		}
 		return json
 	
 	case "type":
 		res := it.Type()
-		json := ec.ExecuteSelectionSet(sels, r.__Type, res)
+		json := ec.executeSelectionSet(sels, __TypeType{}, res)
 		return json
 	
 	case "isDeprecated":
@@ -245,7 +248,9 @@ func (r *resolvers) __Field(ec *exec.ExecutionContext, object interface{}, field
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) __InputValue(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type __InputValueType struct {}
+
+func (__InputValueType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.InputValue)
 	if it == nil {
 		return jsonw.Null
@@ -263,7 +268,7 @@ func (r *resolvers) __InputValue(ec *exec.ExecutionContext, object interface{}, 
 	
 	case "type":
 		res := it.Type()
-		json := ec.ExecuteSelectionSet(sels, r.__Type, res)
+		json := ec.executeSelectionSet(sels, __TypeType{}, res)
 		return json
 	
 	case "defaultValue":
@@ -275,7 +280,9 @@ func (r *resolvers) __InputValue(ec *exec.ExecutionContext, object interface{}, 
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) __Schema(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type __SchemaType struct {}
+
+func (__SchemaType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Schema)
 	if it == nil {
 		return jsonw.Null
@@ -285,31 +292,31 @@ func (r *resolvers) __Schema(ec *exec.ExecutionContext, object interface{}, fiel
 		res := it.Types()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__Type, val)
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, val)
 			json = append(json, json1)
 		}
 		return json
 	
 	case "queryType":
 		res := it.QueryType()
-		json := ec.ExecuteSelectionSet(sels, r.__Type, res)
+		json := ec.executeSelectionSet(sels, __TypeType{}, res)
 		return json
 	
 	case "mutationType":
 		res := it.MutationType()
-		json := ec.ExecuteSelectionSet(sels, r.__Type, res)
+		json := ec.executeSelectionSet(sels, __TypeType{}, res)
 		return json
 	
 	case "subscriptionType":
 		res := it.SubscriptionType()
-		json := ec.ExecuteSelectionSet(sels, r.__Type, res)
+		json := ec.executeSelectionSet(sels, __TypeType{}, res)
 		return json
 	
 	case "directives":
 		res := it.Directives()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__Directive, val)
+			json1 := ec.executeSelectionSet(sels, __DirectiveType{}, val)
 			json = append(json, json1)
 		}
 		return json
@@ -318,7 +325,9 @@ func (r *resolvers) __Schema(ec *exec.ExecutionContext, object interface{}, fiel
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) __Type(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+type __TypeType struct {}
+
+func (__TypeType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Type)
 	if it == nil {
 		return jsonw.Null
@@ -345,7 +354,7 @@ func (r *resolvers) __Type(ec *exec.ExecutionContext, object interface{}, field 
 		)
 		json := jsonw.Array{}
 		for _, val := range *res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__Field, val)
+			json1 := ec.executeSelectionSet(sels, __FieldType{}, val)
 			json = append(json, json1)
 		}
 		return json
@@ -354,7 +363,7 @@ func (r *resolvers) __Type(ec *exec.ExecutionContext, object interface{}, field 
 		res := it.Interfaces()
 		json := jsonw.Array{}
 		for _, val := range *res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__Type, val)
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, val)
 			json = append(json, json1)
 		}
 		return json
@@ -363,7 +372,7 @@ func (r *resolvers) __Type(ec *exec.ExecutionContext, object interface{}, field 
 		res := it.PossibleTypes()
 		json := jsonw.Array{}
 		for _, val := range *res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__Type, val)
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, val)
 			json = append(json, json1)
 		}
 		return json
@@ -374,7 +383,7 @@ func (r *resolvers) __Type(ec *exec.ExecutionContext, object interface{}, field 
 		)
 		json := jsonw.Array{}
 		for _, val := range *res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__EnumValue, val)
+			json1 := ec.executeSelectionSet(sels, __EnumValueType{}, val)
 			json = append(json, json1)
 		}
 		return json
@@ -383,18 +392,18 @@ func (r *resolvers) __Type(ec *exec.ExecutionContext, object interface{}, field 
 		res := it.InputFields()
 		json := jsonw.Array{}
 		for _, val := range *res {
-			json1 := ec.ExecuteSelectionSet(sels, r.__InputValue, val)
+			json1 := ec.executeSelectionSet(sels, __InputValueType{}, val)
 			json = append(json, json1)
 		}
 		return json
 	
 	case "ofType":
 		res := it.OfType()
-		json := ec.ExecuteSelectionSet(sels, r.__Type, res)
+		json := ec.executeSelectionSet(sels, __TypeType{}, res)
 		return json
 	
 	}
 	panic("unknown field " + field)
 }
 
-var Schema = schema.MustParse("\nschema {\n\tquery: Query\n\tmutation: Mutation\n}\n\ntype Query {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype Mutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, done: Boolean!): Todo!\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n")
+var parsedSchema = schema.MustParse("\nschema {\n\tquery: Query\n\tmutation: Mutation\n}\n\ntype Query {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype Mutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, done: Boolean!): Todo!\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n")

@@ -114,6 +114,11 @@ func (w *writer) writeObjectResolver(object object) {
 	w.line("type %sType struct {}", lcFirst(object.Type.GraphQLName))
 	w.lf()
 
+	w.begin("func (%sType) accepts(name string) bool {", lcFirst(object.Type.GraphQLName))
+	w.line("return true")
+	w.end("}")
+	w.lf()
+
 	w.begin("func (%sType) resolve(ec *executionContext, %s interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {", lcFirst(object.Type.GraphQLName), objectName)
 	if object.Type.Name != "interface{}" {
 		w.line("it := object.(*%s)", object.Type.Local())
@@ -164,13 +169,13 @@ func (w *writer) writeMethodResolver(object object, field Field) {
 		w.line("}")
 	}
 
-	w.writeJsonType("json", field.Type, field.Type.Modifiers, "res")
+	w.writeJsonType("json", field.Type, "res")
 
 	w.line("return json")
 }
 
 func (w *writer) writeVarResolver(field Field) {
-	w.writeJsonType("res", field.Type, field.Type.Modifiers, field.VarName)
+	w.writeJsonType("res", field.Type, field.VarName)
 	w.line("return res")
 }
 
@@ -189,12 +194,20 @@ func (w *writer) writeFuncArgs(field Field) {
 	}
 }
 
-func (w *writer) writeJsonType(result string, t Type, remainingMods []string, val string) {
-	isPtr := false
+func (w *writer) writeJsonType(result string, t Type, val string) {
+	w.doWriteJsonType(result, t, val, t.Modifiers, false)
+}
+
+func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMods []string, isPtr bool) {
 	for i := 0; i < len(remainingMods); i++ {
 		switch remainingMods[i] {
 		case modPtr:
-			isPtr = true
+			w.line("var %s jsonw.Encodable = jsonw.Null", result)
+			w.begin("if %s != nil {", val)
+			w.doWriteJsonType(result+"1", t, val, remainingMods[i+1:], true)
+			w.line("%s = %s", result, result+"1")
+			w.end("}")
+			return
 		case modList:
 			if isPtr {
 				val = "*" + val
@@ -202,7 +215,7 @@ func (w *writer) writeJsonType(result string, t Type, remainingMods []string, va
 			w.line("%s := jsonw.Array{}", result)
 			w.begin("for _, val := range %s {", val)
 
-			w.writeJsonType(result+"1", t, remainingMods[i+1:], "val")
+			w.doWriteJsonType(result+"1", t, "val", remainingMods[i+1:], false)
 			w.line("%s = append(%s, %s)", result, result, result+"1")
 			w.end("}")
 			return

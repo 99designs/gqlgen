@@ -1,11 +1,11 @@
 package gen
 
 import (
-	"github.com/vektah/graphql-go/jsonw"
-	"github.com/vektah/graphql-go/query"
 	"github.com/vektah/graphql-go/schema"
 	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/example/todo"
+	"github.com/vektah/graphql-go/jsonw"
+	"github.com/vektah/graphql-go/query"
 )
 
 type Resolvers interface {
@@ -17,6 +17,10 @@ type Resolvers interface {
 }
 
 type mutationType struct {}
+
+func (mutationType) accepts(name string) bool {
+	return true
+}
 
 func (mutationType) resolve(ec *executionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	if it == nil {
@@ -52,6 +56,10 @@ func (mutationType) resolve(ec *executionContext, it interface{}, field string, 
 
 type queryType struct {}
 
+func (queryType) accepts(name string) bool {
+	return true
+}
+
 func (queryType) resolve(ec *executionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	if it == nil {
 		return jsonw.Null
@@ -65,7 +73,11 @@ func (queryType) resolve(ec *executionContext, it interface{}, field string, arg
 			ec.Error(err)
 			return jsonw.Null
 		}
-		json := ec.executeSelectionSet(sels, todoType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, todoType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "lastTodo":
@@ -74,7 +86,11 @@ func (queryType) resolve(ec *executionContext, it interface{}, field string, arg
 			ec.Error(err)
 			return jsonw.Null
 		}
-		json := ec.executeSelectionSet(sels, todoType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, todoType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "todos":
@@ -92,14 +108,22 @@ func (queryType) resolve(ec *executionContext, it interface{}, field string, arg
 	
 	case "__schema":
 		res := ec.introspectSchema()
-		json := ec.executeSelectionSet(sels, __SchemaType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __SchemaType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "__type":
 		res := ec.introspectType(
 			arguments["name"].(string),
 		)
-		json := ec.executeSelectionSet(sels, __TypeType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, res)
+			json = json1
+		}
 		return json
 	
 	}
@@ -107,6 +131,10 @@ func (queryType) resolve(ec *executionContext, it interface{}, field string, arg
 }
 
 type todoType struct {}
+
+func (todoType) accepts(name string) bool {
+	return true
+}
 
 func (todoType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*todo.Todo)
@@ -132,6 +160,10 @@ func (todoType) resolve(ec *executionContext, object interface{}, field string, 
 
 type __DirectiveType struct {}
 
+func (__DirectiveType) accepts(name string) bool {
+	return true
+}
+
 func (__DirectiveType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Directive)
 	if it == nil {
@@ -145,7 +177,11 @@ func (__DirectiveType) resolve(ec *executionContext, object interface{}, field s
 	
 	case "description":
 		res := it.Description()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	case "locations":
@@ -161,7 +197,11 @@ func (__DirectiveType) resolve(ec *executionContext, object interface{}, field s
 		res := it.Args()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.executeSelectionSet(sels, __InputValueType{}, val)
+			var json1 jsonw.Encodable = jsonw.Null
+			if val != nil {
+				json11 := ec.executeSelectionSet(sels, __InputValueType{}, val)
+				json1 = json11
+			}
 			json = append(json, json1)
 		}
 		return json
@@ -171,6 +211,10 @@ func (__DirectiveType) resolve(ec *executionContext, object interface{}, field s
 }
 
 type __EnumValueType struct {}
+
+func (__EnumValueType) accepts(name string) bool {
+	return true
+}
 
 func (__EnumValueType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.EnumValue)
@@ -185,7 +229,11 @@ func (__EnumValueType) resolve(ec *executionContext, object interface{}, field s
 	
 	case "description":
 		res := it.Description()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	case "isDeprecated":
@@ -195,7 +243,11 @@ func (__EnumValueType) resolve(ec *executionContext, object interface{}, field s
 	
 	case "deprecationReason":
 		res := it.DeprecationReason()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	}
@@ -203,6 +255,10 @@ func (__EnumValueType) resolve(ec *executionContext, object interface{}, field s
 }
 
 type __FieldType struct {}
+
+func (__FieldType) accepts(name string) bool {
+	return true
+}
 
 func (__FieldType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Field)
@@ -217,21 +273,33 @@ func (__FieldType) resolve(ec *executionContext, object interface{}, field strin
 	
 	case "description":
 		res := it.Description()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	case "args":
 		res := it.Args()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.executeSelectionSet(sels, __InputValueType{}, val)
+			var json1 jsonw.Encodable = jsonw.Null
+			if val != nil {
+				json11 := ec.executeSelectionSet(sels, __InputValueType{}, val)
+				json1 = json11
+			}
 			json = append(json, json1)
 		}
 		return json
 	
 	case "type":
 		res := it.Type()
-		json := ec.executeSelectionSet(sels, __TypeType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "isDeprecated":
@@ -241,7 +309,11 @@ func (__FieldType) resolve(ec *executionContext, object interface{}, field strin
 	
 	case "deprecationReason":
 		res := it.DeprecationReason()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	}
@@ -249,6 +321,10 @@ func (__FieldType) resolve(ec *executionContext, object interface{}, field strin
 }
 
 type __InputValueType struct {}
+
+func (__InputValueType) accepts(name string) bool {
+	return true
+}
 
 func (__InputValueType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.InputValue)
@@ -263,17 +339,29 @@ func (__InputValueType) resolve(ec *executionContext, object interface{}, field 
 	
 	case "description":
 		res := it.Description()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	case "type":
 		res := it.Type()
-		json := ec.executeSelectionSet(sels, __TypeType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "defaultValue":
 		res := it.DefaultValue()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	}
@@ -281,6 +369,10 @@ func (__InputValueType) resolve(ec *executionContext, object interface{}, field 
 }
 
 type __SchemaType struct {}
+
+func (__SchemaType) accepts(name string) bool {
+	return true
+}
 
 func (__SchemaType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Schema)
@@ -292,31 +384,51 @@ func (__SchemaType) resolve(ec *executionContext, object interface{}, field stri
 		res := it.Types()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.executeSelectionSet(sels, __TypeType{}, val)
+			var json1 jsonw.Encodable = jsonw.Null
+			if val != nil {
+				json11 := ec.executeSelectionSet(sels, __TypeType{}, val)
+				json1 = json11
+			}
 			json = append(json, json1)
 		}
 		return json
 	
 	case "queryType":
 		res := it.QueryType()
-		json := ec.executeSelectionSet(sels, __TypeType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "mutationType":
 		res := it.MutationType()
-		json := ec.executeSelectionSet(sels, __TypeType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "subscriptionType":
 		res := it.SubscriptionType()
-		json := ec.executeSelectionSet(sels, __TypeType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, res)
+			json = json1
+		}
 		return json
 	
 	case "directives":
 		res := it.Directives()
 		json := jsonw.Array{}
 		for _, val := range res {
-			json1 := ec.executeSelectionSet(sels, __DirectiveType{}, val)
+			var json1 jsonw.Encodable = jsonw.Null
+			if val != nil {
+				json11 := ec.executeSelectionSet(sels, __DirectiveType{}, val)
+				json1 = json11
+			}
 			json = append(json, json1)
 		}
 		return json
@@ -326,6 +438,10 @@ func (__SchemaType) resolve(ec *executionContext, object interface{}, field stri
 }
 
 type __TypeType struct {}
+
+func (__TypeType) accepts(name string) bool {
+	return true
+}
 
 func (__TypeType) resolve(ec *executionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	it := object.(*introspection.Type)
@@ -340,40 +456,72 @@ func (__TypeType) resolve(ec *executionContext, object interface{}, field string
 	
 	case "name":
 		res := it.Name()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	case "description":
 		res := it.Description()
-		json := jsonw.String(*res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.String(*res)
+			json = json1
+		}
 		return json
 	
 	case "fields":
 		res := it.Fields(
 			arguments["includeDeprecated"].(bool),
 		)
-		json := jsonw.Array{}
-		for _, val := range *res {
-			json1 := ec.executeSelectionSet(sels, __FieldType{}, val)
-			json = append(json, json1)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.Array{}
+			for _, val := range *res {
+				var json11 jsonw.Encodable = jsonw.Null
+				if val != nil {
+					json111 := ec.executeSelectionSet(sels, __FieldType{}, val)
+					json11 = json111
+				}
+				json1 = append(json1, json11)
+			}
+			json = json1
 		}
 		return json
 	
 	case "interfaces":
 		res := it.Interfaces()
-		json := jsonw.Array{}
-		for _, val := range *res {
-			json1 := ec.executeSelectionSet(sels, __TypeType{}, val)
-			json = append(json, json1)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.Array{}
+			for _, val := range *res {
+				var json11 jsonw.Encodable = jsonw.Null
+				if val != nil {
+					json111 := ec.executeSelectionSet(sels, __TypeType{}, val)
+					json11 = json111
+				}
+				json1 = append(json1, json11)
+			}
+			json = json1
 		}
 		return json
 	
 	case "possibleTypes":
 		res := it.PossibleTypes()
-		json := jsonw.Array{}
-		for _, val := range *res {
-			json1 := ec.executeSelectionSet(sels, __TypeType{}, val)
-			json = append(json, json1)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.Array{}
+			for _, val := range *res {
+				var json11 jsonw.Encodable = jsonw.Null
+				if val != nil {
+					json111 := ec.executeSelectionSet(sels, __TypeType{}, val)
+					json11 = json111
+				}
+				json1 = append(json1, json11)
+			}
+			json = json1
 		}
 		return json
 	
@@ -381,25 +529,45 @@ func (__TypeType) resolve(ec *executionContext, object interface{}, field string
 		res := it.EnumValues(
 			arguments["includeDeprecated"].(bool),
 		)
-		json := jsonw.Array{}
-		for _, val := range *res {
-			json1 := ec.executeSelectionSet(sels, __EnumValueType{}, val)
-			json = append(json, json1)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.Array{}
+			for _, val := range *res {
+				var json11 jsonw.Encodable = jsonw.Null
+				if val != nil {
+					json111 := ec.executeSelectionSet(sels, __EnumValueType{}, val)
+					json11 = json111
+				}
+				json1 = append(json1, json11)
+			}
+			json = json1
 		}
 		return json
 	
 	case "inputFields":
 		res := it.InputFields()
-		json := jsonw.Array{}
-		for _, val := range *res {
-			json1 := ec.executeSelectionSet(sels, __InputValueType{}, val)
-			json = append(json, json1)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := jsonw.Array{}
+			for _, val := range *res {
+				var json11 jsonw.Encodable = jsonw.Null
+				if val != nil {
+					json111 := ec.executeSelectionSet(sels, __InputValueType{}, val)
+					json11 = json111
+				}
+				json1 = append(json1, json11)
+			}
+			json = json1
 		}
 		return json
 	
 	case "ofType":
 		res := it.OfType()
-		json := ec.executeSelectionSet(sels, __TypeType{}, res)
+		var json jsonw.Encodable = jsonw.Null
+		if res != nil {
+			json1 := ec.executeSelectionSet(sels, __TypeType{}, res)
+			json = json1
+		}
 		return json
 	
 	}

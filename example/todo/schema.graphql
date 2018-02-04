@@ -12,7 +12,7 @@ type Query {
 
 type Mutation {
 	createTodo(text: String!): Todo!
-	updateTodo(id: Int!, text: String!): Todo!
+	updateTodo(id: Int!, done: Boolean!): Todo!
 }
 
 type Todo {

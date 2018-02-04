@@ -1,22 +1,19 @@
 package gen
 
 import (
-	"fmt"
-
-	"github.com/vektah/graphql-go/example/todo"
-	"github.com/vektah/graphql-go/exec"
-	"github.com/vektah/graphql-go/jsonw"
-	"github.com/vektah/graphql-go/query"
-	"github.com/vektah/graphql-go/schema"
+	exec "github.com/vektah/graphql-go/exec"
+	jsonw "github.com/vektah/graphql-go/jsonw"
+	query "github.com/vektah/graphql-go/query"
+	schema "github.com/vektah/graphql-go/schema"
+	todo "github.com/vektah/graphql-go/example/todo"
 )
 
 type Resolvers interface {
+	Mutation_createTodo(text string) (todo.Todo, error)
+	Mutation_updateTodo(id int,done bool) (todo.Todo, error)
 	Query_todo(id int) (*todo.Todo, error)
 	Query_lastTodo() (*todo.Todo, error)
-	Query_todos() ([]*todo.Todo, error)
-
-	Mutation_createTodo(text string) (todo.Todo, error)
-	Mutation_updateTodo(id int, done bool) (*todo.Todo, error)
+	Query_todos() ([]todo.Todo, error)
 }
 
 func NewResolver(r Resolvers) exec.Root {
@@ -27,105 +24,79 @@ type resolvers struct {
 	resolvers Resolvers
 }
 
-func (r *resolvers) Query(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+func (r *resolvers) Mutation(ec *exec.ExecutionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
 	switch field {
-	case "todo":
-		result, err := r.resolvers.Query_todo(arguments["id"].(int))
+	case "createTodo":
+		result, err := r.resolvers.Mutation_createTodo(
+			arguments["text"].(string),
+		)
 		if err != nil {
 			ec.Error(err)
 			return jsonw.Null
 		}
-		return ec.ExecuteSelectionSet(sels, r.todo, result)
+		return ec.ExecuteSelectionSet(sels, r.Todo, &result)
+	
+	case "updateTodo":
+		result, err := r.resolvers.Mutation_updateTodo(
+			arguments["id"].(int),
+			arguments["done"].(bool),
+		)
+		if err != nil {
+			ec.Error(err)
+			return jsonw.Null
+		}
+		return ec.ExecuteSelectionSet(sels, r.Todo, &result)
+	
+	}
+	panic("unknown field " + field)
+}
 
+func (r *resolvers) Query(ec *exec.ExecutionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+	switch field {
+	case "todo":
+		result, err := r.resolvers.Query_todo(
+			arguments["id"].(int),
+		)
+		if err != nil {
+			ec.Error(err)
+			return jsonw.Null
+		}
+		return ec.ExecuteSelectionSet(sels, r.Todo, result)
+	
 	case "lastTodo":
 		result, err := r.resolvers.Query_lastTodo()
 		if err != nil {
 			ec.Error(err)
 			return jsonw.Null
 		}
-		return ec.ExecuteSelectionSet(sels, r.todo, result)
-
+		return ec.ExecuteSelectionSet(sels, r.Todo, result)
+	
 	case "todos":
 		result, err := r.resolvers.Query_todos()
 		if err != nil {
 			ec.Error(err)
 			return jsonw.Null
 		}
-
-		var enc jsonw.Array
-		for _, val := range result {
-			enc = append(enc, ec.ExecuteSelectionSet(sels, r.todo, val))
-		}
-
-		return enc
+		return ec.ExecuteSelectionSet(sels, r.Todo, &result)
+	
 	}
-
 	panic("unknown field " + field)
 }
 
-func (r *resolvers) Mutation(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
-	switch field {
-	case "createTodo":
-		result, err := r.resolvers.Mutation_createTodo(arguments["text"].(string))
-		if err != nil {
-			ec.Error(err)
-			return jsonw.Null
-		}
-		return ec.ExecuteSelectionSet(sels, r.todo, result)
-
-	case "updateTodo":
-		result, err := r.resolvers.Mutation_updateTodo(arguments["id"].(int), arguments["done"].(bool))
-		if err != nil {
-			ec.Error(err)
-			return jsonw.Null
-		}
-		return ec.ExecuteSelectionSet(sels, r.todo, result)
-	}
-
-	panic("unknown field " + field)
-}
-
-func (r *resolvers) todo(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
-	fmt.Print("todoExec", object)
+func (r *resolvers) Todo(ec *exec.ExecutionContext, object interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {
+	it := object.(*todo.Todo)
 	switch field {
 	case "id":
-		return jsonw.Int(object.(*todo.Todo).ID)
+		return jsonw.ID(it.ID)
+	
 	case "text":
-		return jsonw.String(object.(*todo.Todo).Text)
+		return jsonw.String(it.Text)
+	
 	case "done":
-		return jsonw.Bool(object.(*todo.Todo).Done)
+		return jsonw.Boolean(it.Done)
+	
 	}
-	return jsonw.Null
+	panic("unknown field " + field)
 }
 
-var Schema *schema.Schema
-
-const schemaStr = `schema {
-	query: Query
-	mutation: Mutation
-}
-type Query {
-	todo(id: Integer!): Todo
-	lastTodo: Todo
-	todos: [Todos!]!
-	user(id: Integer!): User
-}
-type Mutation {
-	createTodo(text: String!): Todo!
-	updateTodo(id: Integer!, text: String!): Todo!
-}
-type Todo @go(type:"github.com/99designs/graphql-go/example/todo.Todo") {
-	id: ID!
-	text: String!
-	done: Boolean!
-	user: User!
-}
-type User @go(type:"github.com/99designs/graphql-go/example/todo.User"){
-	id: ID!
-	name: String!
-}
-`
-
-func init() {
-	Schema = schema.MustParse(schemaStr)
-}
+var Schema = schema.MustParse("\nschema {\n\tquery: Query\n\tmutation: Mutation\n}\n\ntype Query {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype Mutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, done: Boolean!): Todo!\n}\n\ntype Todo {\n\tid: ID!\n\ttext: String!\n\tdone: Boolean!\n}\n")

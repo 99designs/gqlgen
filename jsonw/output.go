@@ -69,11 +69,15 @@ func Int(v int) Encodable {
 	return literal{[]byte(fmt.Sprintf("%d", v))}
 }
 
+func ID(v int) Encodable {
+	return literal{[]byte(fmt.Sprintf("%d", v))}
+}
+
 func String(v string) Encodable {
 	return literal{[]byte(strconv.Quote(v))}
 }
 
-func Bool(v bool) Encodable {
+func Boolean(v bool) Encodable {
 	if v {
 		return True
 	} else {

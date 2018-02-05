@@ -32,11 +32,11 @@ func (e *extractor) errorf(format string, args ...interface{}) {
 
 // getType to put in a file for a given fully resolved type, and add any Imports required
 // eg name = github.com/my/pkg.myType will return `pkg.myType` and add an import for `github.com/my/pkg`
-func (e *extractor) getType(name string) Type {
+func (e *extractor) getType(name string) kind {
 	if fieldType, ok := e.goTypeMap[name]; ok {
 		parts := strings.Split(fieldType, ".")
 		if len(parts) == 1 {
-			return Type{
+			return kind{
 				GraphQLName: name,
 				Name:        parts[0],
 			}
@@ -55,7 +55,7 @@ func (e *extractor) getType(name string) Type {
 		}
 
 		e.Imports[localName] = packageName
-		return Type{
+		return kind{
 			GraphQLName: name,
 			ImportedAs:  localName,
 			Name:        typeName,
@@ -75,13 +75,13 @@ func (e *extractor) getType(name string) Type {
 		fmt.Fprintf(os.Stderr, "unknown go type for %s, using interface{}. you should add it to types.json\n", name)
 	}
 	e.goTypeMap[name] = "interface{}"
-	return Type{
+	return kind{
 		GraphQLName: name,
 		Name:        "interface{}",
 	}
 }
 
-func (e *extractor) buildType(t common.Type) Type {
+func (e *extractor) buildType(t common.Type) kind {
 	var modifiers []string
 	usePtr := true
 	for {
@@ -119,7 +119,7 @@ func (e *extractor) buildType(t common.Type) Type {
 			default:
 				panic(fmt.Errorf("unknown scalar %s", val.Name))
 			}
-			return Type{
+			return kind{
 				Basic:       true,
 				Modifiers:   modifiers,
 				GraphQLName: val.Name,
@@ -159,7 +159,7 @@ func (e *extractor) buildType(t common.Type) Type {
 			t.Modifiers = modifiers
 			return t
 		case *schema.Enum:
-			return Type{
+			return kind{
 				Basic:       true,
 				Modifiers:   modifiers,
 				GraphQLName: val.Name,
@@ -177,31 +177,31 @@ func (e *extractor) extract() {
 		if !ok {
 			continue
 		}
-		object := object{
+		obj := object{
 			Name: schemaObject.Name,
 			Type: e.getType(schemaObject.Name),
 		}
 
 		for _, i := range schemaObject.Interfaces {
-			object.satisfies = append(object.satisfies, i.Name)
+			obj.satisfies = append(obj.satisfies, i.Name)
 		}
 
 		for _, field := range schemaObject.Fields {
-			var args []Arg
+			var args []FieldArgument
 			for _, arg := range field.Args {
-				args = append(args, Arg{
+				args = append(args, FieldArgument{
 					Name: arg.Name.Name,
 					Type: e.buildType(arg.Type),
 				})
 			}
 
-			object.Fields = append(object.Fields, Field{
+			obj.Fields = append(obj.Fields, Field{
 				GraphQLName: field.Name,
 				Type:        e.buildType(field.Type),
 				Args:        args,
 			})
 		}
-		e.Objects = append(e.Objects, object)
+		e.Objects = append(e.Objects, obj)
 	}
 
 	for name, typ := range e.schema.EntryPoints {
@@ -283,7 +283,7 @@ func (e *extractor) findBindTargets(t types.Type, object object) bool {
 
 				// check arg order matches code, not gql
 
-				var newArgs []Arg
+				var newArgs []FieldArgument
 			l2:
 				for j := 0; j < sig.Params().Len(); j++ {
 					param := sig.Params().At(j)
@@ -332,36 +332,36 @@ const (
 	modPtr  = "*"
 )
 
-type Type struct {
+type kind struct {
 	GraphQLName  string
 	Name         string
 	Package      string
 	ImportedAs   string
 	Modifiers    []string
-	Implementors []Type
+	Implementors []kind
 	Basic        bool
 }
 
-func (t Type) Local() string {
+func (t kind) Local() string {
 	if t.ImportedAs == "" {
 		return strings.Join(t.Modifiers, "") + t.Name
 	}
 	return strings.Join(t.Modifiers, "") + t.ImportedAs + "." + t.Name
 }
 
-func (t Type) Ptr() Type {
+func (t kind) Ptr() kind {
 	t.Modifiers = append(t.Modifiers, modPtr)
 	return t
 }
 
-func (t Type) IsPtr() bool {
+func (t kind) IsPtr() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
 }
 
 type object struct {
 	Name      string
 	Fields    []Field
-	Type      Type
+	Type      kind
 	satisfies []string
 	Root      bool
 }
@@ -370,8 +370,8 @@ type Field struct {
 	GraphQLName string
 	MethodName  string
 	VarName     string
-	Type        Type
-	Args        []Arg
+	Type        kind
+	Args        []FieldArgument
 	NoErr       bool
 }
 
@@ -393,7 +393,7 @@ func (e *extractor) GetObject(name string) *object {
 	return nil
 }
 
-type Arg struct {
+type FieldArgument struct {
 	Name string
-	Type Type
+	Type kind
 }

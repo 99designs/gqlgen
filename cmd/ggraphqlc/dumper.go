@@ -121,6 +121,7 @@ func (w *writer) writeVars() {
 }
 
 func (w *writer) writeObjectResolver(object object) {
+	w.line("// nolint: gocyclo, errcheck, gas, goconst")
 	w.begin("func _%s(ec *executionContext, sel []query.Selection, it *%s) {", lcFirst(object.Type.GraphQLName), object.Type.Local())
 
 	w.line("groupedFieldSet := ec.collectFields(sel, %sSatisfies, map[string]bool{})", lcFirst(object.Type.GraphQLName))
@@ -215,11 +216,11 @@ func getFuncArgs(object object, field Field) string {
 	return strings.Join(args, ", ")
 }
 
-func (w *writer) writeJsonType(t Type, val string) {
+func (w *writer) writeJsonType(t kind, val string) {
 	w.doWriteJsonType(t, val, t.Modifiers, false)
 }
 
-func (w *writer) doWriteJsonType(t Type, val string, remainingMods []string, isPtr bool) {
+func (w *writer) doWriteJsonType(t kind, val string, remainingMods []string, isPtr bool) {
 	for i := 0; i < len(remainingMods); i++ {
 		switch remainingMods[i] {
 		case modPtr:

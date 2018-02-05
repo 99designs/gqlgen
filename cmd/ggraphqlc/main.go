@@ -81,12 +81,12 @@ func main() {
 		GraphQLName: "__type",
 		NoErr:       true,
 		MethodName:  "ec.introspectType",
-		Args:        []Arg{{Name: "name", Type: Type{Basic: true, Name: "string"}}},
+		Args:        []FieldArgument{{Name: "name", Type: kind{Basic: true, Name: "string"}}},
 	})
 
 	if len(e.Errors) != 0 {
 		for _, err := range e.Errors {
-			fmt.Println(os.Stderr, "err: "+err)
+			fmt.Fprintln(os.Stderr, "err: "+err)
 		}
 		os.Exit(1)
 	}

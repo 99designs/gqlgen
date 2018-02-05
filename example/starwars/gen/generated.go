@@ -50,6 +50,7 @@ var (
 	__TypeSatisfies            = []string{"__Type"}
 )
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) {
 	groupedFieldSet := ec.collectFields(sel, droidSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -136,6 +137,7 @@ func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwars.FriendsConnection) {
 	groupedFieldSet := ec.collectFields(sel, friendsConnectionSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -200,6 +202,7 @@ func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwar
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _friendsEdge(ec *executionContext, sel []query.Selection, it *starwars.FriendsEdge) {
 	groupedFieldSet := ec.collectFields(sel, friendsEdgeSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -236,6 +239,7 @@ func _friendsEdge(ec *executionContext, sel []query.Selection, it *starwars.Frie
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) {
 	groupedFieldSet := ec.collectFields(sel, humanSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -342,6 +346,7 @@ func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 	groupedFieldSet := ec.collectFields(sel, mutationSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -376,6 +381,7 @@ func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _pageInfo(ec *executionContext, sel []query.Selection, it *starwars.PageInfo) {
 	groupedFieldSet := ec.collectFields(sel, pageInfoSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -405,6 +411,7 @@ func _pageInfo(ec *executionContext, sel []query.Selection, it *starwars.PageInf
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 	groupedFieldSet := ec.collectFields(sel, querySatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -602,6 +609,7 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _review(ec *executionContext, sel []query.Selection, it *starwars.Review) {
 	groupedFieldSet := ec.collectFields(sel, reviewSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -629,6 +637,7 @@ func _review(ec *executionContext, sel []query.Selection, it *starwars.Review) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _starship(ec *executionContext, sel []query.Selection, it *starwars.Starship) {
 	groupedFieldSet := ec.collectFields(sel, starshipSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -658,6 +667,7 @@ func _starship(ec *executionContext, sel []query.Selection, it *starwars.Starshi
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Directive(ec *executionContext, sel []query.Selection, it *introspection.Directive) {
 	groupedFieldSet := ec.collectFields(sel, __DirectiveSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -709,6 +719,7 @@ func ___Directive(ec *executionContext, sel []query.Selection, it *introspection
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) {
 	groupedFieldSet := ec.collectFields(sel, __EnumValueSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -752,6 +763,7 @@ func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Field) {
 	groupedFieldSet := ec.collectFields(sel, __FieldSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -819,6 +831,7 @@ func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Fie
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___InputValue(ec *executionContext, sel []query.Selection, it *introspection.InputValue) {
 	groupedFieldSet := ec.collectFields(sel, __InputValueSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -866,6 +879,7 @@ func ___InputValue(ec *executionContext, sel []query.Selection, it *introspectio
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Schema) {
 	groupedFieldSet := ec.collectFields(sel, __SchemaSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -935,6 +949,7 @@ func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Sc
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type) {
 	groupedFieldSet := ec.collectFields(sel, __TypeSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -1235,6 +1250,7 @@ type collectedField struct {
 	Selections []query.Selection
 }
 
+// nolint: deadcode, megacheck
 func unpackComplexArg(result interface{}, data interface{}) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		TagName:     "graphql",

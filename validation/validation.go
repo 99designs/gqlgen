@@ -561,7 +561,6 @@ func validateDirectives(c *opContext, loc string, directives common.DirectiveLis
 			func() string { return fmt.Sprintf("Directive %q", "@"+dirName) },
 		)
 	}
-	return
 }
 
 type nameSet map[string]errors.Location
@@ -578,7 +577,6 @@ func validateNameCustomMsg(c *context, set nameSet, name common.Ident, rule stri
 		return
 	}
 	set[name.Name] = name.Loc
-	return
 }
 
 func validateArgumentTypes(c *opContext, args common.ArgumentList, argDecls common.InputValueList, loc errors.Location, owner1, owner2 func() string) {

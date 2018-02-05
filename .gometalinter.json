@@ -1,0 +1,13 @@
+{
+  "sort": ["path"],
+  "MinConfidence": 10,
+  "Linters": {
+    "errcheck": {
+      "Command":           "errcheck -abspath -ignore '[rR]ead|[wW]rite'",
+      "Pattern":           "PATH:LINE:COL:MESSAGE",
+      "InstallFrom":       "github.com/kisielk/errcheck",
+      "PartitionStrategy": "packages"
+    }
+  },
+  "Disable": ["gas","golint","gocyclo"]
+}

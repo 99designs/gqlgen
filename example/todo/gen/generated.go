@@ -36,6 +36,7 @@ var (
 	__TypeSatisfies       = []string{"__Type"}
 )
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _myMutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 	groupedFieldSet := ec.collectFields(sel, myMutationSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -79,6 +80,7 @@ func _myMutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _myQuery(ec *executionContext, sel []query.Selection, it *interface{}) {
 	groupedFieldSet := ec.collectFields(sel, myQuerySatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -160,6 +162,7 @@ func _myQuery(ec *executionContext, sel []query.Selection, it *interface{}) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func _todo(ec *executionContext, sel []query.Selection, it *todo.Todo) {
 	groupedFieldSet := ec.collectFields(sel, todoSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -189,6 +192,7 @@ func _todo(ec *executionContext, sel []query.Selection, it *todo.Todo) {
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Directive(ec *executionContext, sel []query.Selection, it *introspection.Directive) {
 	groupedFieldSet := ec.collectFields(sel, __DirectiveSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -240,6 +244,7 @@ func ___Directive(ec *executionContext, sel []query.Selection, it *introspection
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) {
 	groupedFieldSet := ec.collectFields(sel, __EnumValueSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -283,6 +288,7 @@ func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Field) {
 	groupedFieldSet := ec.collectFields(sel, __FieldSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -350,6 +356,7 @@ func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Fie
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___InputValue(ec *executionContext, sel []query.Selection, it *introspection.InputValue) {
 	groupedFieldSet := ec.collectFields(sel, __InputValueSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -397,6 +404,7 @@ func ___InputValue(ec *executionContext, sel []query.Selection, it *introspectio
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Schema) {
 	groupedFieldSet := ec.collectFields(sel, __SchemaSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -466,6 +474,7 @@ func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Sc
 	ec.json.EndObject()
 }
 
+// nolint: gocyclo, errcheck, gas, goconst
 func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type) {
 	groupedFieldSet := ec.collectFields(sel, __TypeSatisfies, map[string]bool{})
 	ec.json.BeginObject()
@@ -766,6 +775,7 @@ type collectedField struct {
 	Selections []query.Selection
 }
 
+// nolint: deadcode, megacheck
 func unpackComplexArg(result interface{}, data interface{}) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		TagName:     "graphql",

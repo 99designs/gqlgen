@@ -5,10 +5,13 @@ import (
 )
 
 func (w *writer) writeExec() {
-	execTemplate.Execute(w.out, map[string]interface{}{
+	err := execTemplate.Execute(w.out, map[string]interface{}{
 		"RootQuery":    "_" + lcFirst(w.QueryRoot),
 		"RootMutation": "_" + lcFirst(w.MutationRoot),
 	})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // some very static code bundled into the same binary. The execution context has the custom interface in it
@@ -167,6 +170,7 @@ type collectedField struct {
 	Selections []query.Selection
 }
 
+// nolint: deadcode, megacheck
 func unpackComplexArg(result interface{}, data interface{}) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		TagName:     "graphql",

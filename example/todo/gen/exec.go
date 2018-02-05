@@ -35,18 +35,17 @@ func NewResolver(resolvers Resolvers) relay.Resolver {
 			doc:       doc,
 		}
 
-		var rootType resolvedType
+		// TODO: parallelize if query.
 
+		var data jsonw.Encodable
 		if op.Type == query.Query {
-			rootType = queryType{}
+			data = queryType{}.executeSelectionSet(&c, op.Selections, nil)
 		} else if op.Type == query.Mutation {
-			rootType = mutationType{}
+			data = mutationType{}.executeSelectionSet(&c, op.Selections, nil)
 		} else {
 			return &jsonw.Response{Errors: []*errors.QueryError{errors.Errorf("unsupported operation type")}}
 		}
 
-		// TODO: parallelize if query.
-		data := c.executeSelectionSet(op.Selections, rootType, true)
 		b := &bytes.Buffer{}
 		data.JSON(b)
 		return &jsonw.Response{
@@ -64,22 +63,7 @@ type executionContext struct {
 }
 
 type resolvedType interface {
-	resolve(ec *executionContext, it interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable
 	accepts(name string) bool
-}
-
-func (c *executionContext) executeSelectionSet(sel []query.Selection, resolver resolvedType, objectValue interface{}) jsonw.Encodable {
-	if objectValue == nil {
-		return jsonw.Null
-	}
-	groupedFieldSet := c.collectFields(sel, resolver, map[string]bool{})
-
-	resultMap := jsonw.Map{}
-	for _, collectedField := range groupedFieldSet {
-		result := resolver.resolve(c, objectValue, collectedField.Name, collectedField.Args, collectedField.Selections)
-		resultMap.Set(collectedField.Alias, result)
-	}
-	return resultMap
 }
 
 func (c *executionContext) introspectSchema() *introspection.Schema {

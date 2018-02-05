@@ -106,11 +106,6 @@ func (w *writer) writeInterface() {
 }
 
 func (w *writer) writeObjectResolver(object object) {
-	objectName := "it"
-	if object.Type.Name != "interface{}" {
-		objectName = "object"
-	}
-
 	w.line("type %sType struct {}", lcFirst(object.Type.GraphQLName))
 	w.lf()
 
@@ -119,15 +114,11 @@ func (w *writer) writeObjectResolver(object object) {
 	w.end("}")
 	w.lf()
 
-	w.begin("func (%sType) resolve(ec *executionContext, %s interface{}, field string, arguments map[string]interface{}, sels []query.Selection) jsonw.Encodable {", lcFirst(object.Type.GraphQLName), objectName)
-	if object.Type.Name != "interface{}" {
-		w.line("it := object.(*%s)", object.Type.Local())
-	}
-	w.line("if it == nil {")
-	w.line("	return jsonw.Null")
-	w.line("}")
-
-	w.line("switch field {")
+	w.begin("func (t %sType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *%s) jsonw.Encodable {", lcFirst(object.Type.GraphQLName), object.Type.Local())
+	w.line("groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})")
+	w.line("resultMap := jsonw.Map{}")
+	w.begin("for _, field := range groupedFieldSet {")
+	w.line("switch field.Name {")
 
 	for _, field := range object.Fields {
 		w.begin("case %s:", strconv.Quote(field.GraphQLName))
@@ -137,12 +128,14 @@ func (w *writer) writeObjectResolver(object object) {
 		} else {
 			w.writeMethodResolver(object, field)
 		}
-
+		w.line("continue")
 		w.end("")
 	}
-
 	w.line("}")
-	w.line(`panic("unknown field " + field)`)
+	w.line(`panic("unknown field " + strconv.Quote(field.Name))`)
+	w.end("}")
+	w.line("return resultMap")
+
 	w.end("}")
 	w.lf()
 }
@@ -165,18 +158,18 @@ func (w *writer) writeMethodResolver(object object, field Field) {
 		w.writeFuncArgs(field)
 		w.line("if err != nil {")
 		w.line("	ec.Error(err)")
-		w.line("	return jsonw.Null")
+		w.line("	continue")
 		w.line("}")
 	}
 
 	w.writeJsonType("json", field.Type, "res")
 
-	w.line("return json")
+	w.line("resultMap.Set(field.Alias, json)")
 }
 
 func (w *writer) writeVarResolver(field Field) {
 	w.writeJsonType("res", field.Type, field.VarName)
-	w.line("return res")
+	w.line("resultMap.Set(field.Alias, res)")
 }
 
 func (w *writer) writeFuncArgs(field Field) {
@@ -188,7 +181,7 @@ func (w *writer) writeFuncArgs(field Field) {
 		w.emit("(")
 		w.lf()
 		for _, arg := range field.Args {
-			w.line("arguments[%s].(%s),", strconv.Quote(arg.Name), arg.Type.Local())
+			w.line("field.Args[%s].(%s),", strconv.Quote(arg.Name), arg.Type.Local())
 		}
 		w.end(")")
 	}
@@ -231,7 +224,7 @@ func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMod
 		if !isPtr {
 			val = "&" + val
 		}
-		w.line("%s := ec.executeSelectionSet(sels, %sType{}, %s)", result, lcFirst(t.GraphQLName), val)
+		w.line("%s := %sType{}.executeSelectionSet(ec, field.Selections, %s)", result, lcFirst(t.GraphQLName), val)
 	}
 }
 

@@ -69,10 +69,10 @@ func main() {
 		goTypeMap:   goTypes,
 		schemaRaw:   string(schemaRaw),
 		Imports: map[string]string{
-			//"exec":   "github.com/vektah/graphql-go/exec",
-			"jsonw":  "github.com/vektah/graphql-go/jsonw",
-			"query":  "github.com/vektah/graphql-go/query",
-			"schema": "github.com/vektah/graphql-go/schema",
+			"strconv": "strconv",
+			"jsonw":   "github.com/vektah/graphql-go/jsonw",
+			"query":   "github.com/vektah/graphql-go/query",
+			"schema":  "github.com/vektah/graphql-go/schema",
 		},
 	}
 	e.extract(schema)

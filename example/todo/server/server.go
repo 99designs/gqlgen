@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/vektah/graphql-go/example/todo"
+	"github.com/vektah/graphql-go/example/todo/gen"
 	"github.com/vektah/graphql-go/relay"
 )
 
@@ -13,7 +14,7 @@ func main() {
 		w.Write(page)
 	}))
 
-	http.Handle("/query", relay.Handler(NewResolver(todo.NewResolver())))
+	http.Handle("/query", relay.Handler(gen.NewResolver(todo.NewResolver())))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

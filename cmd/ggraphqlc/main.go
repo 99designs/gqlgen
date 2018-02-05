@@ -58,7 +58,6 @@ func main() {
 
 			"mapstructure":  "github.com/mitchellh/mapstructure",
 			"errors":        "github.com/vektah/graphql-go/errors",
-			"starwars":      "github.com/vektah/graphql-go/example/starwars",
 			"introspection": "github.com/vektah/graphql-go/introspection",
 			"jsonw":         "github.com/vektah/graphql-go/jsonw",
 			"query":         "github.com/vektah/graphql-go/query",

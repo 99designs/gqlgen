@@ -1,11 +1,10 @@
-package main
+package gen
 
 import (
 	"context"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/vektah/graphql-go/errors"
-	"github.com/vektah/graphql-go/example/starwars"
 	"github.com/vektah/graphql-go/example/todo"
 	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/jsonw"

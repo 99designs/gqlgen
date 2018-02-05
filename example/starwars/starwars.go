@@ -1,10 +1,14 @@
-//go:generate ggraphqlc -out server/generated.go -package main
+//go:generate ggraphqlc -out gen/generated.go
 
 package starwars
 
 import (
 	"context"
+	"encoding/base64"
+	"strconv"
 	"strings"
+
+	"fmt"
 )
 
 type Resolver struct {
@@ -31,9 +35,7 @@ func (r *Resolver) Human_friends(ctx context.Context, it *Human) ([]Character, e
 }
 
 func (r *Resolver) Human_friendsConnection(ctx context.Context, it *Human, first *int, after *string) (FriendsConnection, error) {
-	return FriendsConnection{
-	// todo
-	}, nil
+	return r.resolveFriendConnection(ctx, it.FriendIds, first, after)
 }
 
 func (r *Resolver) Human_starships(ctx context.Context, it *Human) ([]Starship, error) {
@@ -55,9 +57,7 @@ func (r *Resolver) Droid_friends(ctx context.Context, it *Droid) ([]Character, e
 }
 
 func (r *Resolver) Droid_friendsConnection(ctx context.Context, it *Droid, first *int, after *string) (FriendsConnection, error) {
-	return FriendsConnection{
-	// todo
-	}, nil
+	return r.resolveFriendConnection(ctx, it.FriendIds, first, after)
 }
 
 func (r *Resolver) Mutation_createReview(ctx context.Context, episode string, review Review) (*Review, error) {
@@ -249,11 +249,80 @@ type Droid struct {
 type Character interface{}
 type SearchResult interface{}
 
+func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, first *int, after *string) (FriendsConnection, error) {
+	from := 0
+	if after != nil {
+		b, err := base64.StdEncoding.DecodeString(*after)
+		if err != nil {
+			return FriendsConnection{}, err
+		}
+		i, err := strconv.Atoi(strings.TrimPrefix(string(b), "cursor"))
+		if err != nil {
+			return FriendsConnection{}, err
+		}
+		from = i
+	}
+
+	to := len(ids)
+	if first != nil {
+		to = from + *first
+		if to > len(ids) {
+			to = len(ids)
+		}
+	}
+
+	return FriendsConnection{
+		ctx:  ctx,
+		r:    r,
+		ids:  ids,
+		from: from,
+		to:   to,
+	}, nil
+}
+
 type FriendsConnection struct {
-	TotalCount int
-	Edges      []FriendsEdge
-	Friends    []Character
-	PageInfo   PageInfo
+	r    *Resolver
+	ctx  context.Context
+	ids  []string
+	from int
+	to   int
+}
+
+func (f *FriendsConnection) Edges() ([]FriendsEdge, error) {
+	friends, err := f.r.resolveCharacters(f.ctx, f.ids)
+	if err != nil {
+		return nil, err
+	}
+
+	edges := make([]FriendsEdge, f.to-f.from)
+	for i := range edges {
+		edges[i] = FriendsEdge{
+			Cursor: encodeCursor(f.from + i),
+			Node:   friends[i],
+		}
+	}
+	return edges, nil
+}
+
+func (f *FriendsConnection) TotalCount() int {
+	return len(f.ids)
+}
+
+func (f *FriendsConnection) PageInfo() PageInfo {
+	return PageInfo{
+		StartCursor: encodeCursor(f.from),
+		EndCursor:   encodeCursor(f.to - 1),
+		HasNextPage: f.to < len(f.ids),
+	}
+}
+
+func encodeCursor(i int) string {
+	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i+1)))
+}
+
+// A list of the friends, as a convenience when edges are not needed.
+func (f *FriendsConnection) Friends() ([]Character, error) {
+	return f.r.resolveCharacters(f.ctx, f.ids)
 }
 
 type FriendsEdge struct {

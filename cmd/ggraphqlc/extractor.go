@@ -242,8 +242,9 @@ func (e *extractor) introspect() error {
 				continue
 			}
 
-			e.findBindTargets(object.Type(), o)
-			// todo: break!
+			if e.findBindTargets(object.Type(), o) {
+				break
+			}
 		}
 	}
 
@@ -269,7 +270,7 @@ func (e *extractor) modifiersFromGoType(t types.Type) []string {
 	}
 }
 
-func (e *extractor) findBindTargets(t types.Type, object object) {
+func (e *extractor) findBindTargets(t types.Type, object object) bool {
 	switch t := t.(type) {
 	case *types.Named:
 		for i := 0; i < t.NumMethods(); i++ {
@@ -306,6 +307,7 @@ func (e *extractor) findBindTargets(t types.Type, object object) {
 		}
 
 		e.findBindTargets(t.Underlying(), object)
+		return true
 
 	case *types.Struct:
 		for i := 0; i < t.NumFields(); i++ {
@@ -319,14 +321,10 @@ func (e *extractor) findBindTargets(t types.Type, object object) {
 			}
 		}
 		t.Underlying()
-
-	case *types.Signature:
-		// ignored
-
-	default:
-		panic(fmt.Errorf("unknown type %T looking at %s", t, object.Name))
+		return true
 	}
 
+	return false
 }
 
 const (

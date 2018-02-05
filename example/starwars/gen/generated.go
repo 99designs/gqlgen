@@ -1,4 +1,4 @@
-package main
+package gen
 
 import (
 	"context"
@@ -143,13 +143,17 @@ func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwar
 		switch field.Name {
 		case "totalCount":
 			ec.json.ObjectKey(field.Alias)
-			res := it.TotalCount
+			res := it.TotalCount()
 			ec.json.Int(res)
 			continue
 
 		case "edges":
 			ec.json.ObjectKey(field.Alias)
-			res := it.Edges
+			res, err := it.Edges()
+			if err != nil {
+				ec.Error(err)
+				continue
+			}
 			ec.json.BeginArray()
 			for _, val := range res {
 				_friendsEdge(ec, field.Selections, &val)
@@ -159,7 +163,11 @@ func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwar
 
 		case "friends":
 			ec.json.ObjectKey(field.Alias)
-			res := it.Friends
+			res, err := it.Friends()
+			if err != nil {
+				ec.Error(err)
+				continue
+			}
 			ec.json.BeginArray()
 			for _, val := range res {
 				switch it := val.(type) {
@@ -182,7 +190,7 @@ func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwar
 
 		case "pageInfo":
 			ec.json.ObjectKey(field.Alias)
-			res := it.PageInfo
+			res := it.PageInfo()
 			_pageInfo(ec, field.Selections, &res)
 			continue
 

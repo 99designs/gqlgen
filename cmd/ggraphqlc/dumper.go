@@ -120,24 +120,23 @@ func (w *writer) writeVars() {
 }
 
 func (w *writer) writeObjectResolver(object object) {
-	w.begin("func _%s(ec *executionContext, sel []query.Selection, it *%s) jsonw.Encodable {", lcFirst(object.Type.GraphQLName), object.Type.Local())
+	w.begin("func _%s(ec *executionContext, sel []query.Selection, it *%s) {", lcFirst(object.Type.GraphQLName), object.Type.Local())
 
 	w.line("groupedFieldSet := ec.collectFields(sel, %sSatisfies, map[string]bool{})", lcFirst(object.Type.GraphQLName))
-	w.line("resultMap := jsonw.Map{}")
+	w.line("ec.json.BeginObject()")
 	w.begin("for _, field := range groupedFieldSet {")
 	w.line("switch field.Name {")
 
 	for _, field := range object.Fields {
 		w.begin("case %s:", strconv.Quote(field.GraphQLName))
-
+		w.line("ec.json.ObjectKey(field.Alias)")
 		if field.VarName != "" {
 			w.writeEvaluateVar(field)
 		} else {
 			w.writeEvaluateMethod(object, field)
 		}
 
-		w.writeJsonType("json", field.Type, "res")
-		w.line("resultMap.Set(field.Alias, json)")
+		w.writeJsonType(field.Type, "res")
 
 		w.line("continue")
 		w.end("")
@@ -145,7 +144,7 @@ func (w *writer) writeObjectResolver(object object) {
 	w.line("}")
 	w.line(`panic("unknown field " + strconv.Quote(field.Name))`)
 	w.end("}")
-	w.line("return resultMap")
+	w.line("ec.json.EndObject()")
 
 	w.end("}")
 	w.lf()
@@ -199,30 +198,30 @@ func (w *writer) writeFuncArgs(object object, field Field) {
 	}
 }
 
-func (w *writer) writeJsonType(result string, t Type, val string) {
-	w.doWriteJsonType(result, t, val, t.Modifiers, false)
+func (w *writer) writeJsonType(t Type, val string) {
+	w.doWriteJsonType(t, val, t.Modifiers, false)
 }
 
-func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMods []string, isPtr bool) {
+func (w *writer) doWriteJsonType(t Type, val string, remainingMods []string, isPtr bool) {
 	for i := 0; i < len(remainingMods); i++ {
 		switch remainingMods[i] {
 		case modPtr:
-			w.line("var %s jsonw.Encodable = jsonw.Null", result)
-			w.begin("if %s != nil {", val)
-			w.doWriteJsonType(result+"1", t, val, remainingMods[i+1:], true)
-			w.line("%s = %s", result, result+"1")
+			w.begin("if %s == nil {", val)
+			w.line("ec.json.Null()")
+			w.indent--
+			w.begin("} else {")
+			w.doWriteJsonType(t, val, remainingMods[i+1:], true)
 			w.end("}")
 			return
 		case modList:
 			if isPtr {
 				val = "*" + val
 			}
-			w.line("%s := jsonw.Array{}", result)
+			w.line("ec.json.BeginArray()")
 			w.begin("for _, val := range %s {", val)
-
-			w.doWriteJsonType(result+"1", t, "val", remainingMods[i+1:], false)
-			w.line("%s = append(%s, %s)", result, result, result+"1")
+			w.doWriteJsonType(t, "val", remainingMods[i+1:], false)
 			w.end("}")
+			w.line("ec.json.EndArray()")
 			return
 		}
 	}
@@ -231,17 +230,16 @@ func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMod
 		if isPtr {
 			val = "*" + val
 		}
-		w.line("%s := jsonw.%s(%s)", result, ucFirst(t.Name), val)
+		w.line("ec.json.%s(%s)", ucFirst(t.Name), val)
 	} else if len(t.Implementors) > 0 {
-		w.line("var %s jsonw.Encodable = jsonw.Null", result)
 		w.line("switch it := %s.(type) {", val)
 		w.line("case nil:")
-		w.line("	%s = jsonw.Null", result)
+		w.line("	ec.json.Null()")
 		for _, implementor := range t.Implementors {
 			w.line("case %s:", implementor.Local())
-			w.line("	%s = _%s(ec, field.Selections, &it)", result, lcFirst(implementor.GraphQLName))
+			w.line("	_%s(ec, field.Selections, &it)", lcFirst(implementor.GraphQLName))
 			w.line("case *%s:", implementor.Local())
-			w.line("	%s = _%s(ec, field.Selections, it)", result, lcFirst(implementor.GraphQLName))
+			w.line("	_%s(ec, field.Selections, it)", lcFirst(implementor.GraphQLName))
 		}
 
 		w.line("default:")
@@ -251,7 +249,7 @@ func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMod
 		if !isPtr {
 			val = "&" + val
 		}
-		w.line("%s := _%s(ec, field.Selections, %s)", result, lcFirst(t.GraphQLName), val)
+		w.line("_%s(ec, field.Selections, %s)", lcFirst(t.GraphQLName), val)
 	}
 }
 

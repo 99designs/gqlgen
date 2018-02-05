@@ -2,6 +2,9 @@ package errors
 
 import (
 	"fmt"
+	"io"
+
+	"github.com/vektah/graphql-go/jsonw"
 )
 
 type QueryError struct {
@@ -50,4 +53,39 @@ func (c *Builder) Errorf(format string, args ...interface{}) {
 
 func (c *Builder) Error(err error) {
 	c.Errors = append(c.Errors, Errorf("%s", err.Error()))
+}
+
+func WriteErrors(b io.Writer, errs []*QueryError) {
+	w := jsonw.New(b)
+	w.BeginArray()
+	for _, err := range errs {
+		if err == nil {
+			w.Null()
+			continue
+		}
+		w.BeginObject()
+
+		w.ObjectKey("message")
+		w.String(err.Message)
+
+		if len(err.Locations) > 0 {
+			w.ObjectKey("locations")
+			w.BeginArray()
+			for _, location := range err.Locations {
+				w.BeginObject()
+
+				w.ObjectKey("line")
+				w.Int(location.Line)
+
+				w.ObjectKey("column")
+				w.Int(location.Column)
+
+				w.EndObject()
+			}
+			w.EndArray()
+		}
+
+		w.EndObject()
+	}
+	w.EndArray()
 }

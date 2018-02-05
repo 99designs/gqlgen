@@ -51,7 +51,6 @@ func main() {
 			"strconv": "strconv",
 			"fmt":     "fmt",
 			"context": "context",
-			"jsonw":   "github.com/vektah/graphql-go/jsonw",
 			"query":   "github.com/vektah/graphql-go/query",
 			"schema":  "github.com/vektah/graphql-go/schema",
 		},
@@ -89,16 +88,24 @@ func main() {
 	buf := &bytes.Buffer{}
 	write(e, buf)
 
-	out, err := format.Source(buf.Bytes())
 	if *output == "-" {
-		fmt.Println(string(out))
+		fmt.Println(string(gofmt(buf.Bytes())))
 	} else {
-		err := ioutil.WriteFile(*output, out, 0644)
+		err := ioutil.WriteFile(*output, gofmt(buf.Bytes()), 0644)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "failed to write output: ", err.Error())
 			os.Exit(1)
 		}
 	}
+}
+
+func gofmt(b []byte) []byte {
+	out, err := format.Source(b)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "unable to gofmt: "+*output+":"+err.Error())
+		return b
+	}
+	return out
 }
 
 func loadTypeMap() map[string]string {

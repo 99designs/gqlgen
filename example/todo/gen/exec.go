@@ -1,9 +1,9 @@
 package gen
 
 import (
-	"bytes"
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/vektah/graphql-go/errors"
 	"github.com/vektah/graphql-go/introspection"
@@ -14,20 +14,24 @@ import (
 )
 
 func NewResolver(resolvers Resolvers) relay.Resolver {
-	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}) *jsonw.Response {
+	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
 		doc, qErr := query.Parse(document)
 		if qErr != nil {
-			return &jsonw.Response{Errors: []*errors.QueryError{qErr}}
+			return []*errors.QueryError{qErr}
 		}
 
 		errs := validation.Validate(parsedSchema, doc)
 		if len(errs) != 0 {
-			return &jsonw.Response{Errors: errs}
+			return errs
 		}
 
 		op, err := doc.GetOperation(operationName)
 		if err != nil {
-			return &jsonw.Response{Errors: []*errors.QueryError{errors.Errorf("%s", err)}}
+			return []*errors.QueryError{errors.Errorf("%s", err)}
+		}
+
+		if op.Type != query.Query && op.Type != query.Mutation {
+			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
 
 		c := executionContext{
@@ -35,30 +39,37 @@ func NewResolver(resolvers Resolvers) relay.Resolver {
 			variables: variables,
 			doc:       doc,
 			ctx:       ctx,
+			json:      jsonw.New(w),
 		}
 
 		// TODO: parallelize if query.
 
-		var data jsonw.Encodable
+		c.json.BeginObject()
+
+		c.json.ObjectKey("data")
+
 		if op.Type == query.Query {
-			data = _query(&c, op.Selections, nil)
+			_query(&c, op.Selections, nil)
 		} else if op.Type == query.Mutation {
-			data = _mutation(&c, op.Selections, nil)
+			_mutation(&c, op.Selections, nil)
 		} else {
-			return &jsonw.Response{Errors: []*errors.QueryError{errors.Errorf("unsupported operation type")}}
+			c.Errorf("unsupported operation %s", op.Type)
+			c.json.Null()
 		}
 
-		b := &bytes.Buffer{}
-		data.JSON(b)
-		return &jsonw.Response{
-			Data:   b.Bytes(),
-			Errors: c.Errors,
+		if len(c.Errors) > 0 {
+			c.json.ObjectKey("errors")
+			errors.WriteErrors(w, c.Errors)
 		}
+
+		c.json.EndObject()
+		return nil
 	}
 }
 
 type executionContext struct {
 	errors.Builder
+	json      *jsonw.Writer
 	resolvers Resolvers
 	variables map[string]interface{}
 	doc       *query.Document

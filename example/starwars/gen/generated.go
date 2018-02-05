@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/vektah/graphql-go/example/starwars"
 	"github.com/vektah/graphql-go/introspection"
-	"github.com/vektah/graphql-go/jsonw"
 	"github.com/vektah/graphql-go/query"
 	"github.com/vektah/graphql-go/schema"
 	"strconv"
@@ -45,24 +44,25 @@ var (
 	__TypeSatisfies            = []string{"__Type"}
 )
 
-func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) jsonw.Encodable {
+func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) {
 	groupedFieldSet := ec.collectFields(sel, droidSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "id":
+			ec.json.ObjectKey(field.Alias)
 			res := it.ID
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "friends":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Droid_friends(
 				ec.ctx,
 				it,
@@ -71,29 +71,28 @@ func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) jso
 				ec.Error(err)
 				continue
 			}
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
 				case nil:
-					json1 = jsonw.Null
+					ec.json.Null()
 				case starwars.Human:
-					json1 = _human(ec, field.Selections, &it)
+					_human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = _human(ec, field.Selections, it)
+					_human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = _droid(ec, field.Selections, &it)
+					_droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = _droid(ec, field.Selections, it)
+					_droid(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "friendsConnection":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Droid_friendsConnection(
 				ec.ctx,
 				it,
@@ -104,156 +103,154 @@ func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) jso
 				ec.Error(err)
 				continue
 			}
-			json := _friendsConnection(ec, field.Selections, &res)
-			resultMap.Set(field.Alias, json)
+			_friendsConnection(ec, field.Selections, &res)
 			continue
 
 		case "appearsIn":
+			ec.json.ObjectKey(field.Alias)
 			res := it.AppearsIn
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				json1 := jsonw.String(val)
-				json = append(json, json1)
+				ec.json.String(val)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "primaryFunction":
+			ec.json.ObjectKey(field.Alias)
 			res := it.PrimaryFunction
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwars.FriendsConnection) jsonw.Encodable {
+func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwars.FriendsConnection) {
 	groupedFieldSet := ec.collectFields(sel, friendsConnectionSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "totalCount":
+			ec.json.ObjectKey(field.Alias)
 			res := it.TotalCount
-			json := jsonw.Int(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Int(res)
 			continue
 
 		case "edges":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Edges
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				json1 := _friendsEdge(ec, field.Selections, &val)
-				json = append(json, json1)
+				_friendsEdge(ec, field.Selections, &val)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "friends":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Friends
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
 				case nil:
-					json1 = jsonw.Null
+					ec.json.Null()
 				case starwars.Human:
-					json1 = _human(ec, field.Selections, &it)
+					_human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = _human(ec, field.Selections, it)
+					_human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = _droid(ec, field.Selections, &it)
+					_droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = _droid(ec, field.Selections, it)
+					_droid(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "pageInfo":
+			ec.json.ObjectKey(field.Alias)
 			res := it.PageInfo
-			json := _pageInfo(ec, field.Selections, &res)
-			resultMap.Set(field.Alias, json)
+			_pageInfo(ec, field.Selections, &res)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _friendsEdge(ec *executionContext, sel []query.Selection, it *starwars.FriendsEdge) jsonw.Encodable {
+func _friendsEdge(ec *executionContext, sel []query.Selection, it *starwars.FriendsEdge) {
 	groupedFieldSet := ec.collectFields(sel, friendsEdgeSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "cursor":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Cursor
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "node":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Node
-			var json jsonw.Encodable = jsonw.Null
 			switch it := res.(type) {
 			case nil:
-				json = jsonw.Null
+				ec.json.Null()
 			case starwars.Human:
-				json = _human(ec, field.Selections, &it)
+				_human(ec, field.Selections, &it)
 			case *starwars.Human:
-				json = _human(ec, field.Selections, it)
+				_human(ec, field.Selections, it)
 			case starwars.Droid:
-				json = _droid(ec, field.Selections, &it)
+				_droid(ec, field.Selections, &it)
 			case *starwars.Droid:
-				json = _droid(ec, field.Selections, it)
+				_droid(ec, field.Selections, it)
 			default:
 				panic(fmt.Errorf("unexpected type %T", it))
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) jsonw.Encodable {
+func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) {
 	groupedFieldSet := ec.collectFields(sel, humanSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "id":
+			ec.json.ObjectKey(field.Alias)
 			res := it.ID
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "height":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Height
-			json := jsonw.Float64(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Float64(res)
 			continue
 
 		case "mass":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Mass
-			json := jsonw.Float64(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Float64(res)
 			continue
 
 		case "friends":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Human_friends(
 				ec.ctx,
 				it,
@@ -262,29 +259,28 @@ func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) jso
 				ec.Error(err)
 				continue
 			}
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
 				case nil:
-					json1 = jsonw.Null
+					ec.json.Null()
 				case starwars.Human:
-					json1 = _human(ec, field.Selections, &it)
+					_human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = _human(ec, field.Selections, it)
+					_human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = _droid(ec, field.Selections, &it)
+					_droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = _droid(ec, field.Selections, it)
+					_droid(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "friendsConnection":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Human_friendsConnection(
 				ec.ctx,
 				it,
@@ -295,21 +291,21 @@ func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) jso
 				ec.Error(err)
 				continue
 			}
-			json := _friendsConnection(ec, field.Selections, &res)
-			resultMap.Set(field.Alias, json)
+			_friendsConnection(ec, field.Selections, &res)
 			continue
 
 		case "appearsIn":
+			ec.json.ObjectKey(field.Alias)
 			res := it.AppearsIn
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				json1 := jsonw.String(val)
-				json = append(json, json1)
+				ec.json.String(val)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "starships":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Human_starships(
 				ec.ctx,
 				it,
@@ -318,26 +314,26 @@ func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) jso
 				ec.Error(err)
 				continue
 			}
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				json1 := _starship(ec, field.Selections, &val)
-				json = append(json, json1)
+				_starship(ec, field.Selections, &val)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
+func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 	groupedFieldSet := ec.collectFields(sel, mutationSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "createReview":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Mutation_createReview(
 				ec.ctx,
 				field.Args["episode"].(string),
@@ -347,55 +343,55 @@ func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) jso
 				ec.Error(err)
 				continue
 			}
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := _review(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				_review(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _pageInfo(ec *executionContext, sel []query.Selection, it *starwars.PageInfo) jsonw.Encodable {
+func _pageInfo(ec *executionContext, sel []query.Selection, it *starwars.PageInfo) {
 	groupedFieldSet := ec.collectFields(sel, pageInfoSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "startCursor":
+			ec.json.ObjectKey(field.Alias)
 			res := it.StartCursor
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "endCursor":
+			ec.json.ObjectKey(field.Alias)
 			res := it.EndCursor
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "hasNextPage":
+			ec.json.ObjectKey(field.Alias)
 			res := it.HasNextPage
-			json := jsonw.Bool(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Bool(res)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
+func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 	groupedFieldSet := ec.collectFields(sel, querySatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "hero":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Query_hero(
 				ec.ctx,
 				field.Args["episode"].(*string),
@@ -404,25 +400,24 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.
 				ec.Error(err)
 				continue
 			}
-			var json jsonw.Encodable = jsonw.Null
 			switch it := res.(type) {
 			case nil:
-				json = jsonw.Null
+				ec.json.Null()
 			case starwars.Human:
-				json = _human(ec, field.Selections, &it)
+				_human(ec, field.Selections, &it)
 			case *starwars.Human:
-				json = _human(ec, field.Selections, it)
+				_human(ec, field.Selections, it)
 			case starwars.Droid:
-				json = _droid(ec, field.Selections, &it)
+				_droid(ec, field.Selections, &it)
 			case *starwars.Droid:
-				json = _droid(ec, field.Selections, it)
+				_droid(ec, field.Selections, it)
 			default:
 				panic(fmt.Errorf("unexpected type %T", it))
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "reviews":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Query_reviews(
 				ec.ctx,
 				field.Args["episode"].(string),
@@ -431,15 +426,15 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.
 				ec.Error(err)
 				continue
 			}
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				json1 := _review(ec, field.Selections, &val)
-				json = append(json, json1)
+				_review(ec, field.Selections, &val)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "search":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Query_search(
 				ec.ctx,
 				field.Args["text"].(string),
@@ -448,33 +443,32 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.
 				ec.Error(err)
 				continue
 			}
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
 				case nil:
-					json1 = jsonw.Null
+					ec.json.Null()
 				case starwars.Human:
-					json1 = _human(ec, field.Selections, &it)
+					_human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = _human(ec, field.Selections, it)
+					_human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = _droid(ec, field.Selections, &it)
+					_droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = _droid(ec, field.Selections, it)
+					_droid(ec, field.Selections, it)
 				case starwars.Starship:
-					json1 = _starship(ec, field.Selections, &it)
+					_starship(ec, field.Selections, &it)
 				case *starwars.Starship:
-					json1 = _starship(ec, field.Selections, it)
+					_starship(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "character":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Query_character(
 				ec.ctx,
 				field.Args["id"].(string),
@@ -483,25 +477,24 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.
 				ec.Error(err)
 				continue
 			}
-			var json jsonw.Encodable = jsonw.Null
 			switch it := res.(type) {
 			case nil:
-				json = jsonw.Null
+				ec.json.Null()
 			case starwars.Human:
-				json = _human(ec, field.Selections, &it)
+				_human(ec, field.Selections, &it)
 			case *starwars.Human:
-				json = _human(ec, field.Selections, it)
+				_human(ec, field.Selections, it)
 			case starwars.Droid:
-				json = _droid(ec, field.Selections, &it)
+				_droid(ec, field.Selections, &it)
 			case *starwars.Droid:
-				json = _droid(ec, field.Selections, it)
+				_droid(ec, field.Selections, it)
 			default:
 				panic(fmt.Errorf("unexpected type %T", it))
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "droid":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Query_droid(
 				ec.ctx,
 				field.Args["id"].(string),
@@ -510,15 +503,15 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.
 				ec.Error(err)
 				continue
 			}
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := _droid(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				_droid(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "human":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Query_human(
 				ec.ctx,
 				field.Args["id"].(string),
@@ -527,15 +520,15 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.
 				ec.Error(err)
 				continue
 			}
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := _human(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				_human(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "starship":
+			ec.json.ObjectKey(field.Alias)
 			res, err := ec.resolvers.Query_starship(
 				ec.ctx,
 				field.Args["id"].(string),
@@ -544,514 +537,513 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.
 				ec.Error(err)
 				continue
 			}
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := _starship(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				_starship(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "__schema":
+			ec.json.ObjectKey(field.Alias)
 			res := ec.introspectSchema()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Schema(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Schema(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "__type":
+			ec.json.ObjectKey(field.Alias)
 			res := ec.introspectType(
 				field.Args["name"].(string),
 			)
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Type(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Type(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _review(ec *executionContext, sel []query.Selection, it *starwars.Review) jsonw.Encodable {
+func _review(ec *executionContext, sel []query.Selection, it *starwars.Review) {
 	groupedFieldSet := ec.collectFields(sel, reviewSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "stars":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Stars
-			json := jsonw.Int(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Int(res)
 			continue
 
 		case "commentary":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Commentary
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func _starship(ec *executionContext, sel []query.Selection, it *starwars.Starship) jsonw.Encodable {
+func _starship(ec *executionContext, sel []query.Selection, it *starwars.Starship) {
 	groupedFieldSet := ec.collectFields(sel, starshipSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "id":
+			ec.json.ObjectKey(field.Alias)
 			res := it.ID
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "length":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Length
-			json := jsonw.Float64(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Float64(res)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func ___Directive(ec *executionContext, sel []query.Selection, it *introspection.Directive) jsonw.Encodable {
+func ___Directive(ec *executionContext, sel []query.Selection, it *introspection.Directive) {
 	groupedFieldSet := ec.collectFields(sel, __DirectiveSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "description":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "locations":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Locations()
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				json1 := jsonw.String(val)
-				json = append(json, json1)
+				ec.json.String(val)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "args":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Args()
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
-				if val != nil {
-					json11 := ___InputValue(ec, field.Selections, val)
-					json1 = json11
+				if val == nil {
+					ec.json.Null()
+				} else {
+					___InputValue(ec, field.Selections, val)
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) jsonw.Encodable {
+func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) {
 	groupedFieldSet := ec.collectFields(sel, __EnumValueSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "description":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "isDeprecated":
+			ec.json.ObjectKey(field.Alias)
 			res := it.IsDeprecated()
-			json := jsonw.Bool(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Bool(res)
 			continue
 
 		case "deprecationReason":
+			ec.json.ObjectKey(field.Alias)
 			res := it.DeprecationReason()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Field) jsonw.Encodable {
+func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Field) {
 	groupedFieldSet := ec.collectFields(sel, __FieldSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "description":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "args":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Args()
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
-				if val != nil {
-					json11 := ___InputValue(ec, field.Selections, val)
-					json1 = json11
+				if val == nil {
+					ec.json.Null()
+				} else {
+					___InputValue(ec, field.Selections, val)
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "type":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Type()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Type(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Type(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "isDeprecated":
+			ec.json.ObjectKey(field.Alias)
 			res := it.IsDeprecated()
-			json := jsonw.Bool(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.Bool(res)
 			continue
 
 		case "deprecationReason":
+			ec.json.ObjectKey(field.Alias)
 			res := it.DeprecationReason()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func ___InputValue(ec *executionContext, sel []query.Selection, it *introspection.InputValue) jsonw.Encodable {
+func ___InputValue(ec *executionContext, sel []query.Selection, it *introspection.InputValue) {
 	groupedFieldSet := ec.collectFields(sel, __InputValueSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "description":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "type":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Type()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Type(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Type(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "defaultValue":
+			ec.json.ObjectKey(field.Alias)
 			res := it.DefaultValue()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Schema) jsonw.Encodable {
+func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Schema) {
 	groupedFieldSet := ec.collectFields(sel, __SchemaSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "types":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Types()
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
-				if val != nil {
-					json11 := ___Type(ec, field.Selections, val)
-					json1 = json11
+				if val == nil {
+					ec.json.Null()
+				} else {
+					___Type(ec, field.Selections, val)
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		case "queryType":
+			ec.json.ObjectKey(field.Alias)
 			res := it.QueryType()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Type(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Type(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "mutationType":
+			ec.json.ObjectKey(field.Alias)
 			res := it.MutationType()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Type(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Type(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "subscriptionType":
+			ec.json.ObjectKey(field.Alias)
 			res := it.SubscriptionType()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Type(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Type(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "directives":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Directives()
-			json := jsonw.Array{}
+			ec.json.BeginArray()
 			for _, val := range res {
-				var json1 jsonw.Encodable = jsonw.Null
-				if val != nil {
-					json11 := ___Directive(ec, field.Selections, val)
-					json1 = json11
+				if val == nil {
+					ec.json.Null()
+				} else {
+					___Directive(ec, field.Selections, val)
 				}
-				json = append(json, json1)
 			}
-			resultMap.Set(field.Alias, json)
+			ec.json.EndArray()
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
-func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type) jsonw.Encodable {
+func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type) {
 	groupedFieldSet := ec.collectFields(sel, __TypeSatisfies, map[string]bool{})
-	resultMap := jsonw.Map{}
+	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "kind":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Kind()
-			json := jsonw.String(res)
-			resultMap.Set(field.Alias, json)
+			ec.json.String(res)
 			continue
 
 		case "name":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "description":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.String(*res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "fields":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Fields(
 				field.Args["includeDeprecated"].(bool),
 			)
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.Array{}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
 				for _, val := range *res {
-					var json11 jsonw.Encodable = jsonw.Null
-					if val != nil {
-						json111 := ___Field(ec, field.Selections, val)
-						json11 = json111
+					if val == nil {
+						ec.json.Null()
+					} else {
+						___Field(ec, field.Selections, val)
 					}
-					json1 = append(json1, json11)
 				}
-				json = json1
+				ec.json.EndArray()
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "interfaces":
+			ec.json.ObjectKey(field.Alias)
 			res := it.Interfaces()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.Array{}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
 				for _, val := range *res {
-					var json11 jsonw.Encodable = jsonw.Null
-					if val != nil {
-						json111 := ___Type(ec, field.Selections, val)
-						json11 = json111
+					if val == nil {
+						ec.json.Null()
+					} else {
+						___Type(ec, field.Selections, val)
 					}
-					json1 = append(json1, json11)
 				}
-				json = json1
+				ec.json.EndArray()
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "possibleTypes":
+			ec.json.ObjectKey(field.Alias)
 			res := it.PossibleTypes()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.Array{}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
 				for _, val := range *res {
-					var json11 jsonw.Encodable = jsonw.Null
-					if val != nil {
-						json111 := ___Type(ec, field.Selections, val)
-						json11 = json111
+					if val == nil {
+						ec.json.Null()
+					} else {
+						___Type(ec, field.Selections, val)
 					}
-					json1 = append(json1, json11)
 				}
-				json = json1
+				ec.json.EndArray()
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "enumValues":
+			ec.json.ObjectKey(field.Alias)
 			res := it.EnumValues(
 				field.Args["includeDeprecated"].(bool),
 			)
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.Array{}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
 				for _, val := range *res {
-					var json11 jsonw.Encodable = jsonw.Null
-					if val != nil {
-						json111 := ___EnumValue(ec, field.Selections, val)
-						json11 = json111
+					if val == nil {
+						ec.json.Null()
+					} else {
+						___EnumValue(ec, field.Selections, val)
 					}
-					json1 = append(json1, json11)
 				}
-				json = json1
+				ec.json.EndArray()
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "inputFields":
+			ec.json.ObjectKey(field.Alias)
 			res := it.InputFields()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := jsonw.Array{}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
 				for _, val := range *res {
-					var json11 jsonw.Encodable = jsonw.Null
-					if val != nil {
-						json111 := ___InputValue(ec, field.Selections, val)
-						json11 = json111
+					if val == nil {
+						ec.json.Null()
+					} else {
+						___InputValue(ec, field.Selections, val)
 					}
-					json1 = append(json1, json11)
 				}
-				json = json1
+				ec.json.EndArray()
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		case "ofType":
+			ec.json.ObjectKey(field.Alias)
 			res := it.OfType()
-			var json jsonw.Encodable = jsonw.Null
-			if res != nil {
-				json1 := ___Type(ec, field.Selections, res)
-				json = json1
+			if res == nil {
+				ec.json.Null()
+			} else {
+				___Type(ec, field.Selections, res)
 			}
-			resultMap.Set(field.Alias, json)
 			continue
 
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
-	return resultMap
+	ec.json.EndObject()
 }
 
 var parsedSchema = schema.MustParse("schema {\n    query: Query\n    mutation: Mutation\n}\n# The query type, represents all of the entry points into our object graph\ntype Query {\n    hero(episode: Episode = NEWHOPE): Character\n    reviews(episode: Episode!): [Review]!\n    search(text: String!): [SearchResult]!\n    character(id: ID!): Character\n    droid(id: ID!): Droid\n    human(id: ID!): Human\n    starship(id: ID!): Starship\n}\n# The mutation type, represents all updates we can make to our data\ntype Mutation {\n    createReview(episode: Episode!, review: ReviewInput!): Review\n}\n# The episodes in the Star Wars trilogy\nenum Episode {\n    # Star Wars Episode IV: A New Hope, released in 1977.\n    NEWHOPE\n    # Star Wars Episode V: The Empire Strikes Back, released in 1980.\n    EMPIRE\n    # Star Wars Episode VI: Return of the Jedi, released in 1983.\n    JEDI\n}\n# A character from the Star Wars universe\ninterface Character {\n    # The ID of the character\n    id: ID!\n    # The name of the character\n    name: String!\n    # The friends of the character, or an empty list if they have none\n    friends: [Character]\n    # The friends of the character exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this character appears in\n    appearsIn: [Episode!]!\n}\n# Units of height\nenum LengthUnit {\n    # The standard unit around the world\n    METER\n    # Primarily used in the United States\n    FOOT\n}\n# A humanoid creature from the Star Wars universe\ntype Human implements Character {\n    # The ID of the human\n    id: ID!\n    # What this human calls themselves\n    name: String!\n    # Height in the preferred unit, default is meters\n    height(unit: LengthUnit = METER): Float!\n    # Mass in kilograms, or null if unknown\n    mass: Float\n    # This human's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the human exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this human appears in\n    appearsIn: [Episode!]!\n    # A list of starships this person has piloted, or an empty list if none\n    starships: [Starship]\n}\n# An autonomous mechanical character in the Star Wars universe\ntype Droid implements Character {\n    # The ID of the droid\n    id: ID!\n    # What others call this droid\n    name: String!\n    # This droid's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the droid exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this droid appears in\n    appearsIn: [Episode!]!\n    # This droid's primary function\n    primaryFunction: String\n}\n# A connection object for a character's friends\ntype FriendsConnection {\n    # The total number of friends\n    totalCount: Int!\n    # The edges for each of the character's friends.\n    edges: [FriendsEdge]\n    # A list of the friends, as a convenience when edges are not needed.\n    friends: [Character]\n    # Information for paginating this connection\n    pageInfo: PageInfo!\n}\n# An edge object for a character's friends\ntype FriendsEdge {\n    # A cursor used for pagination\n    cursor: ID!\n    # The character represented by this friendship edge\n    node: Character\n}\n# Information for paginating this connection\ntype PageInfo {\n    startCursor: ID\n    endCursor: ID\n    hasNextPage: Boolean!\n}\n# Represents a review for a movie\ntype Review {\n    # The number of stars this review gave, 1-5\n    stars: Int!\n    # Comment about the movie\n    commentary: String\n}\n# The input object sent when someone is creating a new review\ninput ReviewInput {\n    # 0-5 stars\n    stars: Int!\n    # Comment about the movie, optional\n    commentary: String\n}\ntype Starship {\n    # The ID of the starship\n    id: ID!\n    # The name of the starship\n    name: String!\n    # Length of the starship, along the longest axis\n    length(unit: LengthUnit = METER): Float!\n}\nunion SearchResult = Human | Droid | Starship\n")

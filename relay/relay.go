@@ -3,12 +3,13 @@ package relay
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 
-	"github.com/vektah/graphql-go/jsonw"
+	"github.com/vektah/graphql-go/errors"
 )
 
-type Resolver func(ctx context.Context, document string, operationName string, variables map[string]interface{}) *jsonw.Response
+type Resolver func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError
 
 func Handler(resolver Resolver) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -22,14 +23,18 @@ func Handler(resolver Resolver) http.HandlerFunc {
 			return
 		}
 
-		response := resolver(r.Context(), params.Query, params.OperationName, params.Variables)
-		responseJSON, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJSON)
+		errs := resolver(r.Context(), params.Query, params.OperationName, params.Variables, w)
+		if errs != nil {
+			w.WriteHeader(http.StatusBadRequest)
+
+			b, err := json.Marshal(struct {
+				Errors []*errors.QueryError `json:"errors"`
+			}{Errors: errs})
+			if err != nil {
+				panic(err)
+			}
+			w.Write(b)
+		}
 	})
 }

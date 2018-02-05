@@ -1,13 +1,13 @@
 package gen
 
 import (
-	"fmt"
 	"context"
+	"fmt"
+	"github.com/vektah/graphql-go/example/todo"
+	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/jsonw"
 	"github.com/vektah/graphql-go/query"
 	"github.com/vektah/graphql-go/schema"
-	"github.com/vektah/graphql-go/example/todo"
-	"github.com/vektah/graphql-go/introspection"
 	"strconv"
 )
 
@@ -19,14 +19,20 @@ type Resolvers interface {
 	Query_todos(ctx context.Context) ([]todo.Todo, error)
 }
 
-type mutationType struct {}
+var (
+	mutationSatisfies     = []string{"Mutation"}
+	querySatisfies        = []string{"Query"}
+	todoSatisfies         = []string{"Todo"}
+	__DirectiveSatisfies  = []string{"__Directive"}
+	__EnumValueSatisfies  = []string{"__EnumValue"}
+	__FieldSatisfies      = []string{"__Field"}
+	__InputValueSatisfies = []string{"__InputValue"}
+	__SchemaSatisfies     = []string{"__Schema"}
+	__TypeSatisfies       = []string{"__Type"}
+)
 
-func (mutationType) accepts(name string) bool {
-	return true
-}
-
-func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, mutationSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -39,10 +45,10 @@ func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Sele
 				ec.Error(err)
 				continue
 			}
-			json := todoType{}.executeSelectionSet(ec, field.Selections, &res)
+			json := _todo(ec, field.Selections, &res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "updateTodo":
 			res, err := ec.resolvers.Mutation_updateTodo(
 				ec.ctx,
@@ -53,24 +59,18 @@ func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Sele
 				ec.Error(err)
 				continue
 			}
-			json := todoType{}.executeSelectionSet(ec, field.Selections, &res)
+			json := _todo(ec, field.Selections, &res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type queryType struct {}
-
-func (queryType) accepts(name string) bool {
-	return true
-}
-
-func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, querySatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -85,12 +85,12 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := todoType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := _todo(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "lastTodo":
 			res, err := ec.resolvers.Query_lastTodo(
 				ec.ctx,
@@ -101,12 +101,12 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := todoType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := _todo(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "todos":
 			res, err := ec.resolvers.Query_todos(
 				ec.ctx,
@@ -117,48 +117,42 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			json := jsonw.Array{}
 			for _, val := range res {
-				json1 := todoType{}.executeSelectionSet(ec, field.Selections, &val)
+				json1 := _todo(ec, field.Selections, &val)
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "__schema":
 			res := ec.introspectSchema()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __SchemaType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Schema(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "__type":
 			res := ec.introspectType(
 				field.Args["name"].(string),
 			)
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type todoType struct {}
-
-func (todoType) accepts(name string) bool {
-	return true
-}
-
-func (t todoType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *todo.Todo) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _todo(ec *executionContext, sel []query.Selection, it *todo.Todo) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, todoSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -167,33 +161,27 @@ func (t todoType) executeSelectionSet(ec *executionContext, sel []query.Selectio
 			json := jsonw.Int(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "text":
 			res := it.Text
 			json := jsonw.String(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "done":
 			res := it.Done
 			json := jsonw.Bool(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type __DirectiveType struct {}
-
-func (__DirectiveType) accepts(name string) bool {
-	return true
-}
-
-func (t __DirectiveType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Directive) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Directive(ec *executionContext, sel []query.Selection, it *introspection.Directive) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __DirectiveSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -202,7 +190,7 @@ func (t __DirectiveType) executeSelectionSet(ec *executionContext, sel []query.S
 			json := jsonw.String(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "description":
 			res := it.Description()
 			var json jsonw.Encodable = jsonw.Null
@@ -212,7 +200,7 @@ func (t __DirectiveType) executeSelectionSet(ec *executionContext, sel []query.S
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "locations":
 			res := it.Locations()
 			json := jsonw.Array{}
@@ -222,35 +210,29 @@ func (t __DirectiveType) executeSelectionSet(ec *executionContext, sel []query.S
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "args":
 			res := it.Args()
 			json := jsonw.Array{}
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __InputValueType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___InputValue(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type __EnumValueType struct {}
-
-func (__EnumValueType) accepts(name string) bool {
-	return true
-}
-
-func (t __EnumValueType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __EnumValueSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -259,7 +241,7 @@ func (t __EnumValueType) executeSelectionSet(ec *executionContext, sel []query.S
 			json := jsonw.String(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "description":
 			res := it.Description()
 			var json jsonw.Encodable = jsonw.Null
@@ -269,13 +251,13 @@ func (t __EnumValueType) executeSelectionSet(ec *executionContext, sel []query.S
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "isDeprecated":
 			res := it.IsDeprecated()
 			json := jsonw.Bool(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "deprecationReason":
 			res := it.DeprecationReason()
 			var json jsonw.Encodable = jsonw.Null
@@ -285,21 +267,15 @@ func (t __EnumValueType) executeSelectionSet(ec *executionContext, sel []query.S
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type __FieldType struct {}
-
-func (__FieldType) accepts(name string) bool {
-	return true
-}
-
-func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Field) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Field) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __FieldSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -308,7 +284,7 @@ func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selec
 			json := jsonw.String(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "description":
 			res := it.Description()
 			var json jsonw.Encodable = jsonw.Null
@@ -318,37 +294,37 @@ func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selec
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "args":
 			res := it.Args()
 			json := jsonw.Array{}
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __InputValueType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___InputValue(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "type":
 			res := it.Type()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "isDeprecated":
 			res := it.IsDeprecated()
 			json := jsonw.Bool(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "deprecationReason":
 			res := it.DeprecationReason()
 			var json jsonw.Encodable = jsonw.Null
@@ -358,21 +334,15 @@ func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selec
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type __InputValueType struct {}
-
-func (__InputValueType) accepts(name string) bool {
-	return true
-}
-
-func (t __InputValueType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.InputValue) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___InputValue(ec *executionContext, sel []query.Selection, it *introspection.InputValue) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __InputValueSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -381,7 +351,7 @@ func (t __InputValueType) executeSelectionSet(ec *executionContext, sel []query.
 			json := jsonw.String(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "description":
 			res := it.Description()
 			var json jsonw.Encodable = jsonw.Null
@@ -391,17 +361,17 @@ func (t __InputValueType) executeSelectionSet(ec *executionContext, sel []query.
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "type":
 			res := it.Type()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "defaultValue":
 			res := it.DefaultValue()
 			var json jsonw.Encodable = jsonw.Null
@@ -411,21 +381,15 @@ func (t __InputValueType) executeSelectionSet(ec *executionContext, sel []query.
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type __SchemaType struct {}
-
-func (__SchemaType) accepts(name string) bool {
-	return true
-}
-
-func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Schema) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Schema) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __SchemaSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -435,72 +399,66 @@ func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Sele
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __TypeType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___Type(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "queryType":
 			res := it.QueryType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "mutationType":
 			res := it.MutationType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "subscriptionType":
 			res := it.SubscriptionType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "directives":
 			res := it.Directives()
 			json := jsonw.Array{}
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __DirectiveType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___Directive(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}
 	return resultMap
 }
 
-type __TypeType struct {}
-
-func (__TypeType) accepts(name string) bool {
-	return true
-}
-
-func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Type) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __TypeSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -509,7 +467,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			json := jsonw.String(res)
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "name":
 			res := it.Name()
 			var json jsonw.Encodable = jsonw.Null
@@ -519,7 +477,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "description":
 			res := it.Description()
 			var json jsonw.Encodable = jsonw.Null
@@ -529,7 +487,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "fields":
 			res := it.Fields(
 				field.Args["includeDeprecated"].(bool),
@@ -540,7 +498,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __FieldType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___Field(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -549,7 +507,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "interfaces":
 			res := it.Interfaces()
 			var json jsonw.Encodable = jsonw.Null
@@ -558,7 +516,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __TypeType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___Type(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -567,7 +525,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "possibleTypes":
 			res := it.PossibleTypes()
 			var json jsonw.Encodable = jsonw.Null
@@ -576,7 +534,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __TypeType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___Type(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -585,7 +543,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "enumValues":
 			res := it.EnumValues(
 				field.Args["includeDeprecated"].(bool),
@@ -596,7 +554,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __EnumValueType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___EnumValue(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -605,7 +563,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "inputFields":
 			res := it.InputFields()
 			var json jsonw.Encodable = jsonw.Null
@@ -614,7 +572,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __InputValueType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___InputValue(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -623,17 +581,17 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		case "ofType":
 			res := it.OfType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
 			continue
-		
+
 		}
 		panic("unknown field " + strconv.Quote(field.Name))
 	}

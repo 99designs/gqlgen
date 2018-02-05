@@ -21,6 +21,7 @@ func write(extractor extractor, out io.Writer) {
 	wr.writePackage()
 	wr.writeImports()
 	wr.writeInterface()
+	wr.writeVars()
 	for _, object := range wr.Objects {
 		wr.writeObjectResolver(object)
 	}
@@ -105,17 +106,23 @@ func (w *writer) writeInterface() {
 	w.lf()
 }
 
+func (w *writer) writeVars() {
+	w.begin("var (")
+	for _, o := range w.Objects {
+		satisfies := strconv.Quote(o.Type.GraphQLName)
+		for _, s := range o.satisfies {
+			satisfies += ", " + strconv.Quote(s)
+		}
+		w.line("%sSatisfies = []string{%s}", lcFirst(o.Type.GraphQLName), satisfies)
+	}
+	w.end(")")
+	w.lf()
+}
+
 func (w *writer) writeObjectResolver(object object) {
-	w.line("type %sType struct {}", lcFirst(object.Type.GraphQLName))
-	w.lf()
+	w.begin("func _%s(ec *executionContext, sel []query.Selection, it *%s) jsonw.Encodable {", lcFirst(object.Type.GraphQLName), object.Type.Local())
 
-	w.begin("func (%sType) accepts(name string) bool {", lcFirst(object.Type.GraphQLName))
-	w.line("return true")
-	w.end("}")
-	w.lf()
-
-	w.begin("func (t %sType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *%s) jsonw.Encodable {", lcFirst(object.Type.GraphQLName), object.Type.Local())
-	w.line("groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})")
+	w.line("groupedFieldSet := ec.collectFields(sel, %sSatisfies, map[string]bool{})", lcFirst(object.Type.GraphQLName))
 	w.line("resultMap := jsonw.Map{}")
 	w.begin("for _, field := range groupedFieldSet {")
 	w.line("switch field.Name {")
@@ -228,11 +235,13 @@ func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMod
 	} else if len(t.Implementors) > 0 {
 		w.line("var %s jsonw.Encodable = jsonw.Null", result)
 		w.line("switch it := %s.(type) {", val)
+		w.line("case nil:")
+		w.line("	%s = jsonw.Null", result)
 		for _, implementor := range t.Implementors {
 			w.line("case %s:", implementor.Local())
-			w.line("	%s = %sType{}.executeSelectionSet(ec, field.Selections, &it)", result, lcFirst(implementor.GraphQLName))
+			w.line("	%s = _%s(ec, field.Selections, &it)", result, lcFirst(implementor.GraphQLName))
 			w.line("case *%s:", implementor.Local())
-			w.line("	%s = %sType{}.executeSelectionSet(ec, field.Selections, it)", result, lcFirst(implementor.GraphQLName))
+			w.line("	%s = _%s(ec, field.Selections, it)", result, lcFirst(implementor.GraphQLName))
 		}
 
 		w.line("default:")
@@ -242,7 +251,7 @@ func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMod
 		if !isPtr {
 			val = "&" + val
 		}
-		w.line("%s := %sType{}.executeSelectionSet(ec, field.Selections, %s)", result, lcFirst(t.GraphQLName), val)
+		w.line("%s := _%s(ec, field.Selections, %s)", result, lcFirst(t.GraphQLName), val)
 	}
 }
 

@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
+	"go/format"
 	"io/ioutil"
 	"os"
 
@@ -85,18 +86,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	var out io.Writer = os.Stdout
-	if *output != "-" {
-		outFile, err := os.Create(*output)
+	buf := &bytes.Buffer{}
+	write(e, buf)
+
+	out, err := format.Source(buf.Bytes())
+	if *output == "-" {
+		fmt.Println(string(out))
+	} else {
+		err := ioutil.WriteFile(*output, out, 0644)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
+			fmt.Fprintln(os.Stderr, "failed to write output: ", err.Error())
 			os.Exit(1)
 		}
-		defer outFile.Close()
-		out = outFile
 	}
-
-	write(e, out)
 }
 
 func loadTypeMap() map[string]string {

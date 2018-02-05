@@ -159,31 +159,35 @@ func (e *extractor) buildType(t common.Type) Type {
 
 func (e *extractor) extract(s *schema.Schema) {
 	for _, schemaType := range s.Types {
+		schemaObject, ok := schemaType.(*schema.Object)
+		if !ok {
+			continue
+		}
+		object := object{
+			Name: schemaObject.Name,
+			Type: e.getType(schemaObject.Name),
+		}
 
-		switch schemaType := schemaType.(type) {
+		for _, i := range schemaObject.Interfaces {
+			object.satisfies = append(object.satisfies, i.Name)
+		}
 
-		case *schema.Object:
-			object := object{
-				Name: schemaType.Name,
-				Type: e.getType(schemaType.Name),
-			}
-			for _, field := range schemaType.Fields {
-				var args []Arg
-				for _, arg := range field.Args {
-					args = append(args, Arg{
-						Name: arg.Name.Name,
-						Type: e.buildType(arg.Type),
-					})
-				}
-
-				object.Fields = append(object.Fields, Field{
-					GraphQLName: field.Name,
-					Type:        e.buildType(field.Type),
-					Args:        args,
+		for _, field := range schemaObject.Fields {
+			var args []Arg
+			for _, arg := range field.Args {
+				args = append(args, Arg{
+					Name: arg.Name.Name,
+					Type: e.buildType(arg.Type),
 				})
 			}
-			e.Objects = append(e.Objects, object)
+
+			object.Fields = append(object.Fields, Field{
+				GraphQLName: field.Name,
+				Type:        e.buildType(field.Type),
+				Args:        args,
+			})
 		}
+		e.Objects = append(e.Objects, object)
 	}
 
 	sort.Slice(e.Objects, func(i, j int) bool {
@@ -328,14 +332,10 @@ func (t Type) Ptr() Type {
 }
 
 type object struct {
-	Name   string
-	Fields []Field
-	Type   Type
-}
-
-type enum struct {
-	Name   string
-	Values []string
+	Name      string
+	Fields    []Field
+	Type      Type
+	satisfies []string
 }
 
 type Field struct {

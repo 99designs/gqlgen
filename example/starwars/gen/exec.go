@@ -41,9 +41,9 @@ func NewResolver(resolvers Resolvers) relay.Resolver {
 
 		var data jsonw.Encodable
 		if op.Type == query.Query {
-			data = queryType{}.executeSelectionSet(&c, op.Selections, nil)
+			data = _query(&c, op.Selections, nil)
 		} else if op.Type == query.Mutation {
-			data = mutationType{}.executeSelectionSet(&c, op.Selections, nil)
+			data = _mutation(&c, op.Selections, nil)
 		} else {
 			return &jsonw.Response{Errors: []*errors.QueryError{errors.Errorf("unsupported operation type")}}
 		}
@@ -65,10 +65,6 @@ type executionContext struct {
 	ctx       context.Context
 }
 
-type resolvedType interface {
-	accepts(name string) bool
-}
-
 func (c *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -81,7 +77,16 @@ func (c *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapType(t)
 }
 
-func (c *executionContext) collectFields(selSet []query.Selection, resolver resolvedType, visited map[string]bool) []collectedField {
+func instanceOf(val string, satisfies []string) bool {
+	for _, s := range satisfies {
+		if val == s {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
 	var groupedFields []collectedField
 
 	for _, sel := range selSet {
@@ -103,11 +108,11 @@ func (c *executionContext) collectFields(selSet []query.Selection, resolver reso
 
 			f.Selections = append(f.Selections, sel.Selections...)
 		case *query.InlineFragment:
-			if !resolver.accepts(sel.On.Ident.Name) {
+			if !instanceOf(sel.On.Ident.Name, satisfies) {
 				continue
 			}
 
-			for _, childField := range c.collectFields(sel.Selections, resolver, visited) {
+			for _, childField := range c.collectFields(sel.Selections, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
@@ -125,11 +130,11 @@ func (c *executionContext) collectFields(selSet []query.Selection, resolver reso
 				continue
 			}
 
-			if !resolver.accepts(fragment.On.Name) {
+			if !instanceOf(fragment.On.Ident.Name, satisfies) {
 				continue
 			}
 
-			for _, childField := range c.collectFields(fragment.Selections, resolver, visited) {
+			for _, childField := range c.collectFields(fragment.Selections, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}

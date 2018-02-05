@@ -3,13 +3,12 @@ package gen
 import (
 	"context"
 	"fmt"
-	"strconv"
-
 	"github.com/vektah/graphql-go/example/starwars"
 	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/jsonw"
 	"github.com/vektah/graphql-go/query"
 	"github.com/vektah/graphql-go/schema"
+	"strconv"
 )
 
 type Resolvers interface {
@@ -28,14 +27,26 @@ type Resolvers interface {
 	Query_starship(ctx context.Context, id string) (*starwars.Starship, error)
 }
 
-type droidType struct{}
+var (
+	droidSatisfies             = []string{"Droid", "Character"}
+	friendsConnectionSatisfies = []string{"FriendsConnection"}
+	friendsEdgeSatisfies       = []string{"FriendsEdge"}
+	humanSatisfies             = []string{"Human", "Character"}
+	mutationSatisfies          = []string{"Mutation"}
+	pageInfoSatisfies          = []string{"PageInfo"}
+	querySatisfies             = []string{"Query"}
+	reviewSatisfies            = []string{"Review"}
+	starshipSatisfies          = []string{"Starship"}
+	__DirectiveSatisfies       = []string{"__Directive"}
+	__EnumValueSatisfies       = []string{"__EnumValue"}
+	__FieldSatisfies           = []string{"__Field"}
+	__InputValueSatisfies      = []string{"__InputValue"}
+	__SchemaSatisfies          = []string{"__Schema"}
+	__TypeSatisfies            = []string{"__Type"}
+)
 
-func (droidType) accepts(name string) bool {
-	return true
-}
-
-func (t droidType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *starwars.Droid) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, droidSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -64,14 +75,16 @@ func (t droidType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
+				case nil:
+					json1 = jsonw.Null
 				case starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _droid(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
@@ -91,7 +104,7 @@ func (t droidType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 				ec.Error(err)
 				continue
 			}
-			json := friendsConnectionType{}.executeSelectionSet(ec, field.Selections, &res)
+			json := _friendsConnection(ec, field.Selections, &res)
 			resultMap.Set(field.Alias, json)
 			continue
 
@@ -117,14 +130,8 @@ func (t droidType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 	return resultMap
 }
 
-type friendsConnectionType struct{}
-
-func (friendsConnectionType) accepts(name string) bool {
-	return true
-}
-
-func (t friendsConnectionType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *starwars.FriendsConnection) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _friendsConnection(ec *executionContext, sel []query.Selection, it *starwars.FriendsConnection) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, friendsConnectionSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -138,7 +145,7 @@ func (t friendsConnectionType) executeSelectionSet(ec *executionContext, sel []q
 			res := it.Edges
 			json := jsonw.Array{}
 			for _, val := range res {
-				json1 := friendsEdgeType{}.executeSelectionSet(ec, field.Selections, &val)
+				json1 := _friendsEdge(ec, field.Selections, &val)
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
@@ -150,14 +157,16 @@ func (t friendsConnectionType) executeSelectionSet(ec *executionContext, sel []q
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
+				case nil:
+					json1 = jsonw.Null
 				case starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _droid(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
@@ -168,7 +177,7 @@ func (t friendsConnectionType) executeSelectionSet(ec *executionContext, sel []q
 
 		case "pageInfo":
 			res := it.PageInfo
-			json := pageInfoType{}.executeSelectionSet(ec, field.Selections, &res)
+			json := _pageInfo(ec, field.Selections, &res)
 			resultMap.Set(field.Alias, json)
 			continue
 
@@ -178,14 +187,8 @@ func (t friendsConnectionType) executeSelectionSet(ec *executionContext, sel []q
 	return resultMap
 }
 
-type friendsEdgeType struct{}
-
-func (friendsEdgeType) accepts(name string) bool {
-	return true
-}
-
-func (t friendsEdgeType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *starwars.FriendsEdge) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _friendsEdge(ec *executionContext, sel []query.Selection, it *starwars.FriendsEdge) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, friendsEdgeSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -199,14 +202,16 @@ func (t friendsEdgeType) executeSelectionSet(ec *executionContext, sel []query.S
 			res := it.Node
 			var json jsonw.Encodable = jsonw.Null
 			switch it := res.(type) {
+			case nil:
+				json = jsonw.Null
 			case starwars.Human:
-				json = humanType{}.executeSelectionSet(ec, field.Selections, &it)
+				json = _human(ec, field.Selections, &it)
 			case *starwars.Human:
-				json = humanType{}.executeSelectionSet(ec, field.Selections, it)
+				json = _human(ec, field.Selections, it)
 			case starwars.Droid:
-				json = droidType{}.executeSelectionSet(ec, field.Selections, &it)
+				json = _droid(ec, field.Selections, &it)
 			case *starwars.Droid:
-				json = droidType{}.executeSelectionSet(ec, field.Selections, it)
+				json = _droid(ec, field.Selections, it)
 			default:
 				panic(fmt.Errorf("unexpected type %T", it))
 			}
@@ -219,14 +224,8 @@ func (t friendsEdgeType) executeSelectionSet(ec *executionContext, sel []query.S
 	return resultMap
 }
 
-type humanType struct{}
-
-func (humanType) accepts(name string) bool {
-	return true
-}
-
-func (t humanType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *starwars.Human) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, humanSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -267,14 +266,16 @@ func (t humanType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
+				case nil:
+					json1 = jsonw.Null
 				case starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _droid(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
@@ -294,7 +295,7 @@ func (t humanType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 				ec.Error(err)
 				continue
 			}
-			json := friendsConnectionType{}.executeSelectionSet(ec, field.Selections, &res)
+			json := _friendsConnection(ec, field.Selections, &res)
 			resultMap.Set(field.Alias, json)
 			continue
 
@@ -319,7 +320,7 @@ func (t humanType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			json := jsonw.Array{}
 			for _, val := range res {
-				json1 := starshipType{}.executeSelectionSet(ec, field.Selections, &val)
+				json1 := _starship(ec, field.Selections, &val)
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
@@ -331,14 +332,8 @@ func (t humanType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 	return resultMap
 }
 
-type mutationType struct{}
-
-func (mutationType) accepts(name string) bool {
-	return true
-}
-
-func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, mutationSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -354,7 +349,7 @@ func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Sele
 			}
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := reviewType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := _review(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -366,14 +361,8 @@ func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Sele
 	return resultMap
 }
 
-type pageInfoType struct{}
-
-func (pageInfoType) accepts(name string) bool {
-	return true
-}
-
-func (t pageInfoType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *starwars.PageInfo) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _pageInfo(ec *executionContext, sel []query.Selection, it *starwars.PageInfo) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, pageInfoSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -401,14 +390,8 @@ func (t pageInfoType) executeSelectionSet(ec *executionContext, sel []query.Sele
 	return resultMap
 }
 
-type queryType struct{}
-
-func (queryType) accepts(name string) bool {
-	return true
-}
-
-func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _query(ec *executionContext, sel []query.Selection, it *interface{}) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, querySatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -423,14 +406,16 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			var json jsonw.Encodable = jsonw.Null
 			switch it := res.(type) {
+			case nil:
+				json = jsonw.Null
 			case starwars.Human:
-				json = humanType{}.executeSelectionSet(ec, field.Selections, &it)
+				json = _human(ec, field.Selections, &it)
 			case *starwars.Human:
-				json = humanType{}.executeSelectionSet(ec, field.Selections, it)
+				json = _human(ec, field.Selections, it)
 			case starwars.Droid:
-				json = droidType{}.executeSelectionSet(ec, field.Selections, &it)
+				json = _droid(ec, field.Selections, &it)
 			case *starwars.Droid:
-				json = droidType{}.executeSelectionSet(ec, field.Selections, it)
+				json = _droid(ec, field.Selections, it)
 			default:
 				panic(fmt.Errorf("unexpected type %T", it))
 			}
@@ -448,7 +433,7 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			json := jsonw.Array{}
 			for _, val := range res {
-				json1 := reviewType{}.executeSelectionSet(ec, field.Selections, &val)
+				json1 := _review(ec, field.Selections, &val)
 				json = append(json, json1)
 			}
 			resultMap.Set(field.Alias, json)
@@ -467,18 +452,20 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				switch it := val.(type) {
+				case nil:
+					json1 = jsonw.Null
 				case starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _human(ec, field.Selections, &it)
 				case *starwars.Human:
-					json1 = humanType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _human(ec, field.Selections, it)
 				case starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _droid(ec, field.Selections, &it)
 				case *starwars.Droid:
-					json1 = droidType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _droid(ec, field.Selections, it)
 				case starwars.Starship:
-					json1 = starshipType{}.executeSelectionSet(ec, field.Selections, &it)
+					json1 = _starship(ec, field.Selections, &it)
 				case *starwars.Starship:
-					json1 = starshipType{}.executeSelectionSet(ec, field.Selections, it)
+					json1 = _starship(ec, field.Selections, it)
 				default:
 					panic(fmt.Errorf("unexpected type %T", it))
 				}
@@ -498,14 +485,16 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			var json jsonw.Encodable = jsonw.Null
 			switch it := res.(type) {
+			case nil:
+				json = jsonw.Null
 			case starwars.Human:
-				json = humanType{}.executeSelectionSet(ec, field.Selections, &it)
+				json = _human(ec, field.Selections, &it)
 			case *starwars.Human:
-				json = humanType{}.executeSelectionSet(ec, field.Selections, it)
+				json = _human(ec, field.Selections, it)
 			case starwars.Droid:
-				json = droidType{}.executeSelectionSet(ec, field.Selections, &it)
+				json = _droid(ec, field.Selections, &it)
 			case *starwars.Droid:
-				json = droidType{}.executeSelectionSet(ec, field.Selections, it)
+				json = _droid(ec, field.Selections, it)
 			default:
 				panic(fmt.Errorf("unexpected type %T", it))
 			}
@@ -523,7 +512,7 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := droidType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := _droid(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -540,7 +529,7 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := humanType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := _human(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -557,7 +546,7 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			}
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := starshipType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := _starship(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -567,7 +556,7 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			res := ec.introspectSchema()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __SchemaType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Schema(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -579,7 +568,7 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			)
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -591,14 +580,8 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 	return resultMap
 }
 
-type reviewType struct{}
-
-func (reviewType) accepts(name string) bool {
-	return true
-}
-
-func (t reviewType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *starwars.Review) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _review(ec *executionContext, sel []query.Selection, it *starwars.Review) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, reviewSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -624,14 +607,8 @@ func (t reviewType) executeSelectionSet(ec *executionContext, sel []query.Select
 	return resultMap
 }
 
-type starshipType struct{}
-
-func (starshipType) accepts(name string) bool {
-	return true
-}
-
-func (t starshipType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *starwars.Starship) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func _starship(ec *executionContext, sel []query.Selection, it *starwars.Starship) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, starshipSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -659,14 +636,8 @@ func (t starshipType) executeSelectionSet(ec *executionContext, sel []query.Sele
 	return resultMap
 }
 
-type __DirectiveType struct{}
-
-func (__DirectiveType) accepts(name string) bool {
-	return true
-}
-
-func (t __DirectiveType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Directive) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Directive(ec *executionContext, sel []query.Selection, it *introspection.Directive) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __DirectiveSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -702,7 +673,7 @@ func (t __DirectiveType) executeSelectionSet(ec *executionContext, sel []query.S
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __InputValueType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___InputValue(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
@@ -716,14 +687,8 @@ func (t __DirectiveType) executeSelectionSet(ec *executionContext, sel []query.S
 	return resultMap
 }
 
-type __EnumValueType struct{}
-
-func (__EnumValueType) accepts(name string) bool {
-	return true
-}
-
-func (t __EnumValueType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___EnumValue(ec *executionContext, sel []query.Selection, it *introspection.EnumValue) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __EnumValueSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -765,14 +730,8 @@ func (t __EnumValueType) executeSelectionSet(ec *executionContext, sel []query.S
 	return resultMap
 }
 
-type __FieldType struct{}
-
-func (__FieldType) accepts(name string) bool {
-	return true
-}
-
-func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Field) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Field(ec *executionContext, sel []query.Selection, it *introspection.Field) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __FieldSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -798,7 +757,7 @@ func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selec
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __InputValueType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___InputValue(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
@@ -810,7 +769,7 @@ func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selec
 			res := it.Type()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -838,14 +797,8 @@ func (t __FieldType) executeSelectionSet(ec *executionContext, sel []query.Selec
 	return resultMap
 }
 
-type __InputValueType struct{}
-
-func (__InputValueType) accepts(name string) bool {
-	return true
-}
-
-func (t __InputValueType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.InputValue) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___InputValue(ec *executionContext, sel []query.Selection, it *introspection.InputValue) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __InputValueSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -869,7 +822,7 @@ func (t __InputValueType) executeSelectionSet(ec *executionContext, sel []query.
 			res := it.Type()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -891,14 +844,8 @@ func (t __InputValueType) executeSelectionSet(ec *executionContext, sel []query.
 	return resultMap
 }
 
-type __SchemaType struct{}
-
-func (__SchemaType) accepts(name string) bool {
-	return true
-}
-
-func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Schema) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Schema(ec *executionContext, sel []query.Selection, it *introspection.Schema) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __SchemaSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -908,7 +855,7 @@ func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Sele
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __TypeType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___Type(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
@@ -920,7 +867,7 @@ func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Sele
 			res := it.QueryType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -930,7 +877,7 @@ func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Sele
 			res := it.MutationType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -940,7 +887,7 @@ func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Sele
 			res := it.SubscriptionType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)
@@ -952,7 +899,7 @@ func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Sele
 			for _, val := range res {
 				var json1 jsonw.Encodable = jsonw.Null
 				if val != nil {
-					json11 := __DirectiveType{}.executeSelectionSet(ec, field.Selections, val)
+					json11 := ___Directive(ec, field.Selections, val)
 					json1 = json11
 				}
 				json = append(json, json1)
@@ -966,14 +913,8 @@ func (t __SchemaType) executeSelectionSet(ec *executionContext, sel []query.Sele
 	return resultMap
 }
 
-type __TypeType struct{}
-
-func (__TypeType) accepts(name string) bool {
-	return true
-}
-
-func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Selection, it *introspection.Type) jsonw.Encodable {
-	groupedFieldSet := ec.collectFields(sel, t, map[string]bool{})
+func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type) jsonw.Encodable {
+	groupedFieldSet := ec.collectFields(sel, __TypeSatisfies, map[string]bool{})
 	resultMap := jsonw.Map{}
 	for _, field := range groupedFieldSet {
 		switch field.Name {
@@ -1013,7 +954,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __FieldType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___Field(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -1031,7 +972,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __TypeType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___Type(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -1049,7 +990,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __TypeType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___Type(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -1069,7 +1010,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __EnumValueType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___EnumValue(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -1087,7 +1028,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 				for _, val := range *res {
 					var json11 jsonw.Encodable = jsonw.Null
 					if val != nil {
-						json111 := __InputValueType{}.executeSelectionSet(ec, field.Selections, val)
+						json111 := ___InputValue(ec, field.Selections, val)
 						json11 = json111
 					}
 					json1 = append(json1, json11)
@@ -1101,7 +1042,7 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 			res := it.OfType()
 			var json jsonw.Encodable = jsonw.Null
 			if res != nil {
-				json1 := __TypeType{}.executeSelectionSet(ec, field.Selections, res)
+				json1 := ___Type(ec, field.Selections, res)
 				json = json1
 			}
 			resultMap.Set(field.Alias, json)

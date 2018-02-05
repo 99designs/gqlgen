@@ -1,18 +1,20 @@
-package gen
+package main
 
 import (
-	"context"
-	"fmt"
-	"io"
-
-	"github.com/vektah/graphql-go/errors"
-	"github.com/vektah/graphql-go/introspection"
-	"github.com/vektah/graphql-go/jsonw"
-	"github.com/vektah/graphql-go/query"
-	"github.com/vektah/graphql-go/relay"
-	"github.com/vektah/graphql-go/validation"
+	"text/template"
 )
 
+func (w *writer) writeExec() {
+	execTemplate.Execute(w.out, map[string]interface{}{
+		"RootQuery":    "_" + lcFirst(w.QueryRoot),
+		"RootMutation": "_" + lcFirst(w.MutationRoot),
+	})
+}
+
+// some very static code bundled into the same binary. The execution context has the custom interface in it
+// so its rather difficult to extract any of this into its own package in any sane way.
+// OTOH this also changes pretty frequently, so it will probably mean less BC breaks if its left in the generated code.
+var execTemplate = template.Must(template.New("exec").Parse(`
 func NewResolver(resolvers Resolvers) relay.Resolver {
 	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
 		doc, qErr := query.Parse(document)
@@ -49,9 +51,9 @@ func NewResolver(resolvers Resolvers) relay.Resolver {
 		c.json.ObjectKey("data")
 
 		if op.Type == query.Query {
-			_query(&c, op.Selections, nil)
+			{{.RootQuery}}(&c, op.Selections, nil)
 		} else if op.Type == query.Mutation {
-			_mutation(&c, op.Selections, nil)
+			{{.RootMutation}}(&c, op.Selections, nil)
 		} else {
 			c.Errorf("unsupported operation %s", op.Type)
 			c.json.Null()
@@ -165,6 +167,19 @@ type collectedField struct {
 	Selections []query.Selection
 }
 
+func unpackComplexArg(result interface{}, data interface{}) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		TagName:     "graphql",
+		ErrorUnused: true,
+		Result:      result,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return decoder.Decode(data)
+}
+
 func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
 	for i, cf := range *c {
 		if cf.Alias == name {
@@ -177,3 +192,4 @@ func getOrCreateField(c *[]collectedField, name string, creator func() collected
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
 }
+`))

@@ -1,3 +1,5 @@
+//go:generate ggraphqlc -out server/generated.go -package main
+
 package starwars
 
 import (

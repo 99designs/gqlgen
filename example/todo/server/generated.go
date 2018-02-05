@@ -1,26 +1,33 @@
-package gen
+package main
 
 import (
 	"context"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
+	"github.com/vektah/graphql-go/errors"
+	"github.com/vektah/graphql-go/example/starwars"
 	"github.com/vektah/graphql-go/example/todo"
 	"github.com/vektah/graphql-go/introspection"
+	"github.com/vektah/graphql-go/jsonw"
 	"github.com/vektah/graphql-go/query"
+	"github.com/vektah/graphql-go/relay"
 	"github.com/vektah/graphql-go/schema"
+	"github.com/vektah/graphql-go/validation"
+	"io"
 	"strconv"
 )
 
 type Resolvers interface {
-	Mutation_createTodo(ctx context.Context, text string) (todo.Todo, error)
-	Mutation_updateTodo(ctx context.Context, id int, done bool) (todo.Todo, error)
-	Query_todo(ctx context.Context, id int) (*todo.Todo, error)
-	Query_lastTodo(ctx context.Context) (*todo.Todo, error)
-	Query_todos(ctx context.Context) ([]todo.Todo, error)
+	MyMutation_createTodo(ctx context.Context, text string) (todo.Todo, error)
+	MyMutation_updateTodo(ctx context.Context, id int, done bool) (todo.Todo, error)
+	MyQuery_todo(ctx context.Context, id int) (*todo.Todo, error)
+	MyQuery_lastTodo(ctx context.Context) (*todo.Todo, error)
+	MyQuery_todos(ctx context.Context) ([]todo.Todo, error)
 }
 
 var (
-	mutationSatisfies     = []string{"Mutation"}
-	querySatisfies        = []string{"Query"}
+	myMutationSatisfies   = []string{"MyMutation"}
+	myQuerySatisfies      = []string{"MyQuery"}
 	todoSatisfies         = []string{"Todo"}
 	__DirectiveSatisfies  = []string{"__Directive"}
 	__EnumValueSatisfies  = []string{"__EnumValue"}
@@ -30,17 +37,18 @@ var (
 	__TypeSatisfies       = []string{"__Type"}
 )
 
-func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
-	groupedFieldSet := ec.collectFields(sel, mutationSatisfies, map[string]bool{})
+func _myMutation(ec *executionContext, sel []query.Selection, it *interface{}) {
+	groupedFieldSet := ec.collectFields(sel, myMutationSatisfies, map[string]bool{})
 	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "createTodo":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Mutation_createTodo(
-				ec.ctx,
-				field.Args["text"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["text"]; ok {
+				arg0 = tmp.(string)
+			}
+			res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -50,11 +58,15 @@ func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "updateTodo":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Mutation_updateTodo(
-				ec.ctx,
-				field.Args["id"].(int),
-				field.Args["done"].(bool),
-			)
+			var arg0 int
+			if tmp, ok := field.Args["id"]; ok {
+				arg0 = tmp.(int)
+			}
+			var arg1 bool
+			if tmp, ok := field.Args["done"]; ok {
+				arg1 = tmp.(bool)
+			}
+			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -68,17 +80,18 @@ func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 	ec.json.EndObject()
 }
 
-func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
-	groupedFieldSet := ec.collectFields(sel, querySatisfies, map[string]bool{})
+func _myQuery(ec *executionContext, sel []query.Selection, it *interface{}) {
+	groupedFieldSet := ec.collectFields(sel, myQuerySatisfies, map[string]bool{})
 	ec.json.BeginObject()
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "todo":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_todo(
-				ec.ctx,
-				field.Args["id"].(int),
-			)
+			var arg0 int
+			if tmp, ok := field.Args["id"]; ok {
+				arg0 = tmp.(int)
+			}
+			res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -92,9 +105,7 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "lastTodo":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_lastTodo(
-				ec.ctx,
-			)
+			res, err := ec.resolvers.MyQuery_lastTodo(ec.ctx)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -108,9 +119,7 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "todos":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_todos(
-				ec.ctx,
-			)
+			res, err := ec.resolvers.MyQuery_todos(ec.ctx)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -134,9 +143,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "__type":
 			ec.json.ObjectKey(field.Alias)
-			res := ec.introspectType(
-				field.Args["name"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["name"]; ok {
+				arg0 = tmp.(string)
+			}
+			res := ec.introspectType(arg0)
 			if res == nil {
 				ec.json.Null()
 			} else {
@@ -489,9 +500,11 @@ func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type
 
 		case "fields":
 			ec.json.ObjectKey(field.Alias)
-			res := it.Fields(
-				field.Args["includeDeprecated"].(bool),
-			)
+			var arg0 bool
+			if tmp, ok := field.Args["includeDeprecated"]; ok {
+				arg0 = tmp.(bool)
+			}
+			res := it.Fields(arg0)
 			if res == nil {
 				ec.json.Null()
 			} else {
@@ -545,9 +558,11 @@ func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type
 
 		case "enumValues":
 			ec.json.ObjectKey(field.Alias)
-			res := it.EnumValues(
-				field.Args["includeDeprecated"].(bool),
-			)
+			var arg0 bool
+			if tmp, ok := field.Args["includeDeprecated"]; ok {
+				arg0 = tmp.(bool)
+			}
+			res := it.EnumValues(arg0)
 			if res == nil {
 				ec.json.Null()
 			} else {
@@ -597,5 +612,183 @@ func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type
 	ec.json.EndObject()
 }
 
-var parsedSchema = schema.MustParse("\nschema {\n\tquery: Query\n\tmutation: Mutation\n}\n\ntype Query {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype Mutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, done: Boolean!): Todo!\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n")
+var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, done: Boolean!): Todo!\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n")
 var _ = fmt.Print
+
+func NewResolver(resolvers Resolvers) relay.Resolver {
+	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
+		doc, qErr := query.Parse(document)
+		if qErr != nil {
+			return []*errors.QueryError{qErr}
+		}
+
+		errs := validation.Validate(parsedSchema, doc)
+		if len(errs) != 0 {
+			return errs
+		}
+
+		op, err := doc.GetOperation(operationName)
+		if err != nil {
+			return []*errors.QueryError{errors.Errorf("%s", err)}
+		}
+
+		if op.Type != query.Query && op.Type != query.Mutation {
+			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
+		}
+
+		c := executionContext{
+			resolvers: resolvers,
+			variables: variables,
+			doc:       doc,
+			ctx:       ctx,
+			json:      jsonw.New(w),
+		}
+
+		// TODO: parallelize if query.
+
+		c.json.BeginObject()
+
+		c.json.ObjectKey("data")
+
+		if op.Type == query.Query {
+			_myQuery(&c, op.Selections, nil)
+		} else if op.Type == query.Mutation {
+			_myMutation(&c, op.Selections, nil)
+		} else {
+			c.Errorf("unsupported operation %s", op.Type)
+			c.json.Null()
+		}
+
+		if len(c.Errors) > 0 {
+			c.json.ObjectKey("errors")
+			errors.WriteErrors(w, c.Errors)
+		}
+
+		c.json.EndObject()
+		return nil
+	}
+}
+
+type executionContext struct {
+	errors.Builder
+	json      *jsonw.Writer
+	resolvers Resolvers
+	variables map[string]interface{}
+	doc       *query.Document
+	ctx       context.Context
+}
+
+func (c *executionContext) introspectSchema() *introspection.Schema {
+	return introspection.WrapSchema(parsedSchema)
+}
+
+func (c *executionContext) introspectType(name string) *introspection.Type {
+	t := parsedSchema.Resolve(name)
+	if t == nil {
+		return nil
+	}
+	return introspection.WrapType(t)
+}
+
+func instanceOf(val string, satisfies []string) bool {
+	for _, s := range satisfies {
+		if val == s {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
+	var groupedFields []collectedField
+
+	for _, sel := range selSet {
+		switch sel := sel.(type) {
+		case *query.Field:
+			f := getOrCreateField(&groupedFields, sel.Name.Name, func() collectedField {
+				f := collectedField{
+					Alias: sel.Alias.Name,
+					Name:  sel.Name.Name,
+				}
+				if len(sel.Arguments) > 0 {
+					f.Args = map[string]interface{}{}
+					for _, arg := range sel.Arguments {
+						f.Args[arg.Name.Name] = arg.Value.Value(c.variables)
+					}
+				}
+				return f
+			})
+
+			f.Selections = append(f.Selections, sel.Selections...)
+		case *query.InlineFragment:
+			if !instanceOf(sel.On.Ident.Name, satisfies) {
+				continue
+			}
+
+			for _, childField := range c.collectFields(sel.Selections, satisfies, visited) {
+				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
+				f.Selections = append(f.Selections, childField.Selections...)
+			}
+
+		case *query.FragmentSpread:
+			fragmentName := sel.Name.Name
+			if _, seen := visited[fragmentName]; seen {
+				continue
+			}
+			visited[fragmentName] = true
+
+			fragment := c.doc.Fragments.Get(fragmentName)
+			if fragment == nil {
+				c.Errorf("missing fragment %s", fragmentName)
+				continue
+			}
+
+			if !instanceOf(fragment.On.Ident.Name, satisfies) {
+				continue
+			}
+
+			for _, childField := range c.collectFields(fragment.Selections, satisfies, visited) {
+				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
+				f.Selections = append(f.Selections, childField.Selections...)
+			}
+
+		default:
+			panic(fmt.Errorf("unsupported %T", sel))
+		}
+	}
+
+	return groupedFields
+}
+
+type collectedField struct {
+	Alias      string
+	Name       string
+	Args       map[string]interface{}
+	Selections []query.Selection
+}
+
+func unpackComplexArg(result interface{}, data interface{}) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		TagName:     "graphql",
+		ErrorUnused: true,
+		Result:      result,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return decoder.Decode(data)
+}
+
+func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
+	for i, cf := range *c {
+		if cf.Alias == name {
+			return &(*c)[i]
+		}
+	}
+
+	f := creator()
+
+	*c = append(*c, f)
+	return &(*c)[len(*c)-1]
+}

@@ -1,16 +1,15 @@
-
 schema {
-	query: Query
-	mutation: Mutation
+	query: MyQuery
+	mutation: MyMutation
 }
 
-type Query {
+type MyQuery {
 	todo(id: Int!): Todo
 	lastTodo: Todo
 	todos: [Todo!]!
 }
 
-type Mutation {
+type MyMutation {
 	createTodo(text: String!): Todo!
 	updateTodo(id: Int!, done: Boolean!): Todo!
 }

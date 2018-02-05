@@ -27,6 +27,7 @@ func write(extractor extractor, out io.Writer) {
 	}
 	wr.writeSchema()
 	wr.importHack()
+	wr.writeExec()
 }
 
 func (w *writer) emit(format string, args ...interface{}) {
@@ -92,7 +93,7 @@ func (w *writer) writeInterface() {
 			w.emit("%s_%s(", o.Name, f.GraphQLName)
 
 			w.emit("ctx context.Context")
-			if o.Type.Name != "interface{}" {
+			if !o.Root {
 				w.emit(", it *%s", o.Type.Local())
 			}
 			for _, arg := range f.Args {
@@ -202,7 +203,7 @@ func getFuncArgs(object object, field Field) string {
 	if field.MethodName == "" {
 		args = append(args, "ec.ctx")
 
-		if object.Type.Name != "interface{}" {
+		if !object.Root {
 			args = append(args, "it")
 		}
 	}

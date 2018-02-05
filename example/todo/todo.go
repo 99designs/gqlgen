@@ -1,4 +1,4 @@
-//go:generate ggraphqlc -package gen -out gen/generated.go
+//go:generate ggraphqlc -out server/generated.go -package main
 
 package todo
 

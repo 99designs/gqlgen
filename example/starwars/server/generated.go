@@ -1,14 +1,19 @@
-package gen
+package main
 
 import (
 	"context"
 	"fmt"
-	"strconv"
-
+	"github.com/mitchellh/mapstructure"
+	"github.com/vektah/graphql-go/errors"
 	"github.com/vektah/graphql-go/example/starwars"
 	"github.com/vektah/graphql-go/introspection"
+	"github.com/vektah/graphql-go/jsonw"
 	"github.com/vektah/graphql-go/query"
+	"github.com/vektah/graphql-go/relay"
 	"github.com/vektah/graphql-go/schema"
+	"github.com/vektah/graphql-go/validation"
+	"io"
+	"strconv"
 )
 
 type Resolvers interface {
@@ -341,12 +346,10 @@ func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 				arg0 = tmp.(string)
 			}
 			var arg1 starwars.Review
-
 			err := unpackComplexArg(&arg1, field.Args["review"])
 			if err != nil {
 				ec.Error(err)
 			}
-
 			res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
@@ -1071,3 +1074,181 @@ func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type
 
 var parsedSchema = schema.MustParse("schema {\n    query: Query\n    mutation: Mutation\n}\n# The query type, represents all of the entry points into our object graph\ntype Query {\n    hero(episode: Episode = NEWHOPE): Character\n    reviews(episode: Episode!): [Review]!\n    search(text: String!): [SearchResult]!\n    character(id: ID!): Character\n    droid(id: ID!): Droid\n    human(id: ID!): Human\n    starship(id: ID!): Starship\n}\n# The mutation type, represents all updates we can make to our data\ntype Mutation {\n    createReview(episode: Episode!, review: ReviewInput!): Review\n}\n# The episodes in the Star Wars trilogy\nenum Episode {\n    # Star Wars Episode IV: A New Hope, released in 1977.\n    NEWHOPE\n    # Star Wars Episode V: The Empire Strikes Back, released in 1980.\n    EMPIRE\n    # Star Wars Episode VI: Return of the Jedi, released in 1983.\n    JEDI\n}\n# A character from the Star Wars universe\ninterface Character {\n    # The ID of the character\n    id: ID!\n    # The name of the character\n    name: String!\n    # The friends of the character, or an empty list if they have none\n    friends: [Character]\n    # The friends of the character exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this character appears in\n    appearsIn: [Episode!]!\n}\n# Units of height\nenum LengthUnit {\n    # The standard unit around the world\n    METER\n    # Primarily used in the United States\n    FOOT\n}\n# A humanoid creature from the Star Wars universe\ntype Human implements Character {\n    # The ID of the human\n    id: ID!\n    # What this human calls themselves\n    name: String!\n    # Height in the preferred unit, default is meters\n    height(unit: LengthUnit = METER): Float!\n    # Mass in kilograms, or null if unknown\n    mass: Float\n    # This human's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the human exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this human appears in\n    appearsIn: [Episode!]!\n    # A list of starships this person has piloted, or an empty list if none\n    starships: [Starship]\n}\n# An autonomous mechanical character in the Star Wars universe\ntype Droid implements Character {\n    # The ID of the droid\n    id: ID!\n    # What others call this droid\n    name: String!\n    # This droid's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the droid exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this droid appears in\n    appearsIn: [Episode!]!\n    # This droid's primary function\n    primaryFunction: String\n}\n# A connection object for a character's friends\ntype FriendsConnection {\n    # The total number of friends\n    totalCount: Int!\n    # The edges for each of the character's friends.\n    edges: [FriendsEdge]\n    # A list of the friends, as a convenience when edges are not needed.\n    friends: [Character]\n    # Information for paginating this connection\n    pageInfo: PageInfo!\n}\n# An edge object for a character's friends\ntype FriendsEdge {\n    # A cursor used for pagination\n    cursor: ID!\n    # The character represented by this friendship edge\n    node: Character\n}\n# Information for paginating this connection\ntype PageInfo {\n    startCursor: ID\n    endCursor: ID\n    hasNextPage: Boolean!\n}\n# Represents a review for a movie\ntype Review {\n    # The number of stars this review gave, 1-5\n    stars: Int!\n    # Comment about the movie\n    commentary: String\n}\n# The input object sent when someone is creating a new review\ninput ReviewInput {\n    # 0-5 stars\n    stars: Int!\n    # Comment about the movie, optional\n    commentary: String\n}\ntype Starship {\n    # The ID of the starship\n    id: ID!\n    # The name of the starship\n    name: String!\n    # Length of the starship, along the longest axis\n    length(unit: LengthUnit = METER): Float!\n}\nunion SearchResult = Human | Droid | Starship\n")
 var _ = fmt.Print
+
+func NewResolver(resolvers Resolvers) relay.Resolver {
+	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
+		doc, qErr := query.Parse(document)
+		if qErr != nil {
+			return []*errors.QueryError{qErr}
+		}
+
+		errs := validation.Validate(parsedSchema, doc)
+		if len(errs) != 0 {
+			return errs
+		}
+
+		op, err := doc.GetOperation(operationName)
+		if err != nil {
+			return []*errors.QueryError{errors.Errorf("%s", err)}
+		}
+
+		if op.Type != query.Query && op.Type != query.Mutation {
+			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
+		}
+
+		c := executionContext{
+			resolvers: resolvers,
+			variables: variables,
+			doc:       doc,
+			ctx:       ctx,
+			json:      jsonw.New(w),
+		}
+
+		// TODO: parallelize if query.
+
+		c.json.BeginObject()
+
+		c.json.ObjectKey("data")
+
+		if op.Type == query.Query {
+			_query(&c, op.Selections, nil)
+		} else if op.Type == query.Mutation {
+			_mutation(&c, op.Selections, nil)
+		} else {
+			c.Errorf("unsupported operation %s", op.Type)
+			c.json.Null()
+		}
+
+		if len(c.Errors) > 0 {
+			c.json.ObjectKey("errors")
+			errors.WriteErrors(w, c.Errors)
+		}
+
+		c.json.EndObject()
+		return nil
+	}
+}
+
+type executionContext struct {
+	errors.Builder
+	json      *jsonw.Writer
+	resolvers Resolvers
+	variables map[string]interface{}
+	doc       *query.Document
+	ctx       context.Context
+}
+
+func (c *executionContext) introspectSchema() *introspection.Schema {
+	return introspection.WrapSchema(parsedSchema)
+}
+
+func (c *executionContext) introspectType(name string) *introspection.Type {
+	t := parsedSchema.Resolve(name)
+	if t == nil {
+		return nil
+	}
+	return introspection.WrapType(t)
+}
+
+func instanceOf(val string, satisfies []string) bool {
+	for _, s := range satisfies {
+		if val == s {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
+	var groupedFields []collectedField
+
+	for _, sel := range selSet {
+		switch sel := sel.(type) {
+		case *query.Field:
+			f := getOrCreateField(&groupedFields, sel.Name.Name, func() collectedField {
+				f := collectedField{
+					Alias: sel.Alias.Name,
+					Name:  sel.Name.Name,
+				}
+				if len(sel.Arguments) > 0 {
+					f.Args = map[string]interface{}{}
+					for _, arg := range sel.Arguments {
+						f.Args[arg.Name.Name] = arg.Value.Value(c.variables)
+					}
+				}
+				return f
+			})
+
+			f.Selections = append(f.Selections, sel.Selections...)
+		case *query.InlineFragment:
+			if !instanceOf(sel.On.Ident.Name, satisfies) {
+				continue
+			}
+
+			for _, childField := range c.collectFields(sel.Selections, satisfies, visited) {
+				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
+				f.Selections = append(f.Selections, childField.Selections...)
+			}
+
+		case *query.FragmentSpread:
+			fragmentName := sel.Name.Name
+			if _, seen := visited[fragmentName]; seen {
+				continue
+			}
+			visited[fragmentName] = true
+
+			fragment := c.doc.Fragments.Get(fragmentName)
+			if fragment == nil {
+				c.Errorf("missing fragment %s", fragmentName)
+				continue
+			}
+
+			if !instanceOf(fragment.On.Ident.Name, satisfies) {
+				continue
+			}
+
+			for _, childField := range c.collectFields(fragment.Selections, satisfies, visited) {
+				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
+				f.Selections = append(f.Selections, childField.Selections...)
+			}
+
+		default:
+			panic(fmt.Errorf("unsupported %T", sel))
+		}
+	}
+
+	return groupedFields
+}
+
+type collectedField struct {
+	Alias      string
+	Name       string
+	Args       map[string]interface{}
+	Selections []query.Selection
+}
+
+func unpackComplexArg(result interface{}, data interface{}) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		TagName:     "graphql",
+		ErrorUnused: true,
+		Result:      result,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return decoder.Decode(data)
+}
+
+func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
+	for i, cf := range *c {
+		if cf.Alias == name {
+			return &(*c)[i]
+		}
+	}
+
+	f := creator()
+
+	*c = append(*c, f)
+	return &(*c)[len(*c)-1]
+}

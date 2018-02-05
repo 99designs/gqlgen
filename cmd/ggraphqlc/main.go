@@ -9,13 +9,15 @@ import (
 	"io/ioutil"
 	"os"
 
+	"path/filepath"
+
 	"github.com/vektah/graphql-go/schema"
 )
 
 var output = flag.String("out", "-", "the file to write to, - for stdout")
 var schemaFilename = flag.String("schema", "schema.graphql", "the graphql schema to generate types from")
 var typemap = flag.String("typemap", "types.json", "a json map going from graphql to golang types")
-var packageName = flag.String("package", "graphql", "the package name")
+var packageName = flag.String("package", "", "the package name")
 var help = flag.Bool("h", false, "this usage text")
 
 func main() {
@@ -44,21 +46,31 @@ func main() {
 	}
 
 	e := extractor{
-		PackageName: *packageName,
+		PackageName: getPkgName(),
 		goTypeMap:   loadTypeMap(),
 		schemaRaw:   string(schemaRaw),
+		schema:      schema,
 		Imports: map[string]string{
-			"strconv": "strconv",
-			"fmt":     "fmt",
 			"context": "context",
-			"query":   "github.com/vektah/graphql-go/query",
-			"schema":  "github.com/vektah/graphql-go/schema",
+			"fmt":     "fmt",
+			"io":      "io",
+			"strconv": "strconv",
+
+			"mapstructure":  "github.com/mitchellh/mapstructure",
+			"errors":        "github.com/vektah/graphql-go/errors",
+			"starwars":      "github.com/vektah/graphql-go/example/starwars",
+			"introspection": "github.com/vektah/graphql-go/introspection",
+			"jsonw":         "github.com/vektah/graphql-go/jsonw",
+			"query":         "github.com/vektah/graphql-go/query",
+			"relay":         "github.com/vektah/graphql-go/relay",
+			"schema":        "github.com/vektah/graphql-go/schema",
+			"validation":    "github.com/vektah/graphql-go/validation",
 		},
 	}
-	e.extract(schema)
+	e.extract()
 
 	// Poke a few magic methods into query
-	q := e.GetObject("Query")
+	q := e.GetObject(e.QueryRoot)
 	q.Fields = append(q.Fields, Field{
 		Type:        e.getType("__Schema").Ptr(),
 		GraphQLName: "__schema",
@@ -91,7 +103,13 @@ func main() {
 	if *output == "-" {
 		fmt.Println(string(gofmt(buf.Bytes())))
 	} else {
-		err := ioutil.WriteFile(*output, gofmt(buf.Bytes()), 0644)
+		err := os.MkdirAll(filepath.Dir(*output), 0755)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "failed to create directory: ", err.Error())
+			os.Exit(1)
+		}
+
+		err = ioutil.WriteFile(*output, gofmt(buf.Bytes()), 0644)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "failed to write output: ", err.Error())
 			os.Exit(1)
@@ -108,6 +126,18 @@ func gofmt(b []byte) []byte {
 	return out
 }
 
+func getPkgName() string {
+	pkgName := *packageName
+	if pkgName == "" {
+		absPath, err := filepath.Abs(*output)
+		if err != nil {
+			panic(err)
+		}
+		pkgName = filepath.Base(filepath.Dir(absPath))
+	}
+	return pkgName
+}
+
 func loadTypeMap() map[string]string {
 	goTypes := map[string]string{
 		"__Directive":  "github.com/vektah/graphql-go/introspection.Directive",
@@ -116,8 +146,6 @@ func loadTypeMap() map[string]string {
 		"__EnumValue":  "github.com/vektah/graphql-go/introspection.EnumValue",
 		"__InputValue": "github.com/vektah/graphql-go/introspection.InputValue",
 		"__Schema":     "github.com/vektah/graphql-go/introspection.Schema",
-		"Query":        "interface{}",
-		"Mutation":     "interface{}",
 	}
 	b, err := ioutil.ReadFile(*typemap)
 	if err != nil {

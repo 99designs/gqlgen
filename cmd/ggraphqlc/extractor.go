@@ -15,12 +15,15 @@ import (
 )
 
 type extractor struct {
-	Errors      []string
-	PackageName string
-	Objects     []object
-	goTypeMap   map[string]string
-	Imports     map[string]string // local -> full path
-	schemaRaw   string
+	Errors       []string
+	PackageName  string
+	Objects      []object
+	goTypeMap    map[string]string
+	Imports      map[string]string // local -> full path
+	schema       *schema.Schema
+	schemaRaw    string
+	QueryRoot    string
+	MutationRoot string
 }
 
 func (e *extractor) errorf(format string, args ...interface{}) {
@@ -59,7 +62,18 @@ func (e *extractor) getType(name string) Type {
 			Package:     packageName,
 		}
 	}
-	fmt.Fprintf(os.Stderr, "unknown go type for %s, using interface{}. you should add it to types.json\n", name)
+
+	isRoot := false
+	for _, s := range e.schema.EntryPoints {
+		if s.(*schema.Object).Name == name {
+			isRoot = true
+			break
+		}
+	}
+
+	if !isRoot {
+		fmt.Fprintf(os.Stderr, "unknown go type for %s, using interface{}. you should add it to types.json\n", name)
+	}
 	e.goTypeMap[name] = "interface{}"
 	return Type{
 		GraphQLName: name,
@@ -157,8 +171,8 @@ func (e *extractor) buildType(t common.Type) Type {
 	}
 }
 
-func (e *extractor) extract(s *schema.Schema) {
-	for _, schemaType := range s.Types {
+func (e *extractor) extract() {
+	for _, schemaType := range e.schema.Types {
 		schemaObject, ok := schemaType.(*schema.Object)
 		if !ok {
 			continue
@@ -188,6 +202,17 @@ func (e *extractor) extract(s *schema.Schema) {
 			})
 		}
 		e.Objects = append(e.Objects, object)
+	}
+
+	for name, typ := range e.schema.EntryPoints {
+		obj := typ.(*schema.Object)
+		e.GetObject(obj.Name).Root = true
+		if name == "query" {
+			e.QueryRoot = obj.Name
+		}
+		if name == "mutation" {
+			e.MutationRoot = obj.Name
+		}
 	}
 
 	sort.Slice(e.Objects, func(i, j int) bool {
@@ -315,8 +340,8 @@ type Type struct {
 	Package      string
 	ImportedAs   string
 	Modifiers    []string
-	Basic        bool
 	Implementors []Type
+	Basic        bool
 }
 
 func (t Type) Local() string {
@@ -340,6 +365,7 @@ type object struct {
 	Fields    []Field
 	Type      Type
 	satisfies []string
+	Root      bool
 }
 
 type Field struct {

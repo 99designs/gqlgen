@@ -69,6 +69,10 @@ func Int(v int) Encodable {
 	return literal{[]byte(fmt.Sprintf("%d", v))}
 }
 
+func Float64(v float64) Encodable {
+	return literal{[]byte(fmt.Sprintf("%f", v))}
+}
+
 func ID(v int) Encodable {
 	return literal{[]byte(fmt.Sprintf("%d", v))}
 }

@@ -1,13 +1,14 @@
 package relay
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
 	"github.com/vektah/graphql-go/jsonw"
 )
 
-type Resolver func(document string, operationName string, variables map[string]interface{}) *jsonw.Response
+type Resolver func(ctx context.Context, document string, operationName string, variables map[string]interface{}) *jsonw.Response
 
 func Handler(resolver Resolver) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func Handler(resolver Resolver) http.HandlerFunc {
 			return
 		}
 
-		response := resolver(params.Query, params.OperationName, params.Variables)
+		response := resolver(r.Context(), params.Query, params.OperationName, params.Variables)
 		responseJSON, err := json.Marshal(response)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

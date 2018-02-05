@@ -1,20 +1,22 @@
 package gen
 
 import (
+	"fmt"
+	"context"
 	"github.com/vektah/graphql-go/jsonw"
 	"github.com/vektah/graphql-go/query"
 	"github.com/vektah/graphql-go/schema"
-	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/example/todo"
+	"github.com/vektah/graphql-go/introspection"
 	"strconv"
 )
 
 type Resolvers interface {
-	Mutation_createTodo(text string) (todo.Todo, error)
-	Mutation_updateTodo(id int,done bool) (todo.Todo, error)
-	Query_todo(id int) (*todo.Todo, error)
-	Query_lastTodo() (*todo.Todo, error)
-	Query_todos() ([]todo.Todo, error)
+	Mutation_createTodo(ctx context.Context, text string) (todo.Todo, error)
+	Mutation_updateTodo(ctx context.Context, id int, done bool) (todo.Todo, error)
+	Query_todo(ctx context.Context, id int) (*todo.Todo, error)
+	Query_lastTodo(ctx context.Context) (*todo.Todo, error)
+	Query_todos(ctx context.Context) ([]todo.Todo, error)
 }
 
 type mutationType struct {}
@@ -30,6 +32,7 @@ func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Sele
 		switch field.Name {
 		case "createTodo":
 			res, err := ec.resolvers.Mutation_createTodo(
+				ec.ctx,
 				field.Args["text"].(string),
 			)
 			if err != nil {
@@ -42,6 +45,7 @@ func (t mutationType) executeSelectionSet(ec *executionContext, sel []query.Sele
 		
 		case "updateTodo":
 			res, err := ec.resolvers.Mutation_updateTodo(
+				ec.ctx,
 				field.Args["id"].(int),
 				field.Args["done"].(bool),
 			)
@@ -72,6 +76,7 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 		switch field.Name {
 		case "todo":
 			res, err := ec.resolvers.Query_todo(
+				ec.ctx,
 				field.Args["id"].(int),
 			)
 			if err != nil {
@@ -87,7 +92,9 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			continue
 		
 		case "lastTodo":
-			res, err := ec.resolvers.Query_lastTodo()
+			res, err := ec.resolvers.Query_lastTodo(
+				ec.ctx,
+			)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -101,7 +108,9 @@ func (t queryType) executeSelectionSet(ec *executionContext, sel []query.Selecti
 			continue
 		
 		case "todos":
-			res, err := ec.resolvers.Query_todos()
+			res, err := ec.resolvers.Query_todos(
+				ec.ctx,
+			)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -154,18 +163,21 @@ func (t todoType) executeSelectionSet(ec *executionContext, sel []query.Selectio
 	for _, field := range groupedFieldSet {
 		switch field.Name {
 		case "id":
-			res := jsonw.Int(it.ID)
-			resultMap.Set(field.Alias, res)
+			res := it.ID
+			json := jsonw.Int(res)
+			resultMap.Set(field.Alias, json)
 			continue
 		
 		case "text":
-			res := jsonw.String(it.Text)
-			resultMap.Set(field.Alias, res)
+			res := it.Text
+			json := jsonw.String(res)
+			resultMap.Set(field.Alias, json)
 			continue
 		
 		case "done":
-			res := jsonw.Bool(it.Done)
-			resultMap.Set(field.Alias, res)
+			res := it.Done
+			json := jsonw.Bool(res)
+			resultMap.Set(field.Alias, json)
 			continue
 		
 		}
@@ -629,3 +641,4 @@ func (t __TypeType) executeSelectionSet(ec *executionContext, sel []query.Select
 }
 
 var parsedSchema = schema.MustParse("\nschema {\n\tquery: Query\n\tmutation: Mutation\n}\n\ntype Query {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype Mutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, done: Boolean!): Todo!\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n")
+var _ = fmt.Print

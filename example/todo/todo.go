@@ -3,6 +3,7 @@
 package todo
 
 import (
+	"context"
 	"errors"
 )
 
@@ -29,7 +30,7 @@ func NewResolver() *TodoResolver {
 	}
 }
 
-func (r *TodoResolver) Query_todo(id int) (*Todo, error) {
+func (r *TodoResolver) Query_todo(ctx context.Context, id int) (*Todo, error) {
 	for _, todo := range r.todos {
 		if todo.ID == id {
 			return &todo, nil
@@ -38,18 +39,18 @@ func (r *TodoResolver) Query_todo(id int) (*Todo, error) {
 	return nil, errors.New("not found")
 }
 
-func (r *TodoResolver) Query_lastTodo() (*Todo, error) {
+func (r *TodoResolver) Query_lastTodo(ctx context.Context) (*Todo, error) {
 	if len(r.todos) == 0 {
 		return nil, errors.New("not found")
 	}
 	return &r.todos[len(r.todos)-1], nil
 }
 
-func (r *TodoResolver) Query_todos() ([]Todo, error) {
+func (r *TodoResolver) Query_todos(ctx context.Context) ([]Todo, error) {
 	return r.todos, nil
 }
 
-func (r *TodoResolver) Mutation_createTodo(text string) (Todo, error) {
+func (r *TodoResolver) Mutation_createTodo(ctx context.Context, text string) (Todo, error) {
 	newID := r.id()
 
 	newTodo := Todo{
@@ -63,7 +64,7 @@ func (r *TodoResolver) Mutation_createTodo(text string) (Todo, error) {
 	return newTodo, nil
 }
 
-func (r *TodoResolver) Mutation_updateTodo(id int, done bool) (Todo, error) {
+func (r *TodoResolver) Mutation_updateTodo(ctx context.Context, id int, done bool) (Todo, error) {
 	var affectedTodo *Todo
 
 	for i := 0; i < len(r.todos); i++ {

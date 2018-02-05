@@ -5,10 +5,9 @@ import (
 	"go/types"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
-
-	"sort"
 
 	"github.com/vektah/graphql-go/common"
 	"github.com/vektah/graphql-go/schema"
@@ -61,6 +60,7 @@ func (e *extractor) getType(name string) Type {
 		}
 	}
 	fmt.Fprintf(os.Stderr, "unknown go type for %s, using interface{}. you should add it to types.json\n", name)
+	e.goTypeMap[name] = "interface{}"
 	return Type{
 		GraphQLName: name,
 		Name:        "interface{}",
@@ -100,6 +100,8 @@ func (e *extractor) buildType(t common.Type) Type {
 				goType = "bool"
 			case "Int":
 				goType = "int"
+			case "Float":
+				goType = "float64"
 			default:
 				panic(fmt.Errorf("unknown scalar %s", val.Name))
 			}
@@ -114,6 +116,31 @@ func (e *extractor) buildType(t common.Type) Type {
 			t.Modifiers = modifiers
 			return t
 		case *common.TypeName:
+			t := e.getType(val.Name)
+			t.Modifiers = modifiers
+			return t
+		case *schema.Interface:
+			t := e.getType(val.Name)
+			t.Modifiers = modifiers
+			if t.Modifiers[len(t.Modifiers)-1] == modPtr {
+				t.Modifiers = t.Modifiers[0 : len(t.Modifiers)-1]
+			}
+
+			for _, implementor := range val.PossibleTypes {
+				t.Implementors = append(t.Implementors, e.getType(implementor.Name))
+			}
+
+			return t
+		case *schema.Union:
+			t := e.getType(val.Name)
+			t.Modifiers = modifiers
+
+			for _, implementor := range val.PossibleTypes {
+				t.Implementors = append(t.Implementors, e.getType(implementor.Name))
+			}
+
+			return t
+		case *schema.InputObject:
 			t := e.getType(val.Name)
 			t.Modifiers = modifiers
 			return t
@@ -279,12 +306,13 @@ const (
 )
 
 type Type struct {
-	GraphQLName string
-	Name        string
-	Package     string
-	ImportedAs  string
-	Modifiers   []string
-	Basic       bool
+	GraphQLName  string
+	Name         string
+	Package      string
+	ImportedAs   string
+	Modifiers    []string
+	Basic        bool
+	Implementors []Type
 }
 
 func (t Type) Local() string {

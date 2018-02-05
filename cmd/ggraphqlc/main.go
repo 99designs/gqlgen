@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
-
-	"io"
 
 	"github.com/vektah/graphql-go/schema"
 )
@@ -43,33 +42,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	b, err := ioutil.ReadFile(*typemap)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
-		os.Exit(1)
-	}
-
-	goTypes := map[string]string{
-		"__Directive":  "github.com/vektah/graphql-go/introspection.Directive",
-		"__Type":       "github.com/vektah/graphql-go/introspection.Type",
-		"__Field":      "github.com/vektah/graphql-go/introspection.Field",
-		"__EnumValue":  "github.com/vektah/graphql-go/introspection.EnumValue",
-		"__InputValue": "github.com/vektah/graphql-go/introspection.InputValue",
-		"__Schema":     "github.com/vektah/graphql-go/introspection.Schema",
-		"Query":        "interface{}",
-		"Mutation":     "interface{}",
-	}
-	if err = json.Unmarshal(b, &goTypes); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
-		os.Exit(1)
-	}
-
 	e := extractor{
 		PackageName: *packageName,
-		goTypeMap:   goTypes,
+		goTypeMap:   loadTypeMap(),
 		schemaRaw:   string(schemaRaw),
 		Imports: map[string]string{
 			"strconv": "strconv",
+			"fmt":     "fmt",
+			"context": "context",
 			"jsonw":   "github.com/vektah/graphql-go/jsonw",
 			"query":   "github.com/vektah/graphql-go/query",
 			"schema":  "github.com/vektah/graphql-go/schema",
@@ -117,4 +97,28 @@ func main() {
 	}
 
 	write(e, out)
+}
+
+func loadTypeMap() map[string]string {
+	goTypes := map[string]string{
+		"__Directive":  "github.com/vektah/graphql-go/introspection.Directive",
+		"__Type":       "github.com/vektah/graphql-go/introspection.Type",
+		"__Field":      "github.com/vektah/graphql-go/introspection.Field",
+		"__EnumValue":  "github.com/vektah/graphql-go/introspection.EnumValue",
+		"__InputValue": "github.com/vektah/graphql-go/introspection.InputValue",
+		"__Schema":     "github.com/vektah/graphql-go/introspection.Schema",
+		"Query":        "interface{}",
+		"Mutation":     "interface{}",
+	}
+	b, err := ioutil.ReadFile(*typemap)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error()+" creating it.")
+		return goTypes
+	}
+	if err = json.Unmarshal(b, &goTypes); err != nil {
+		fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
+		os.Exit(1)
+	}
+
+	return goTypes
 }

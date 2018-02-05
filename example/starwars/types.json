@@ -1,0 +1,12 @@
+{
+  "Character": "github.com/vektah/graphql-go/example/starwars.Character",
+  "Droid": "github.com/vektah/graphql-go/example/starwars.Droid",
+  "FriendsConnection": "github.com/vektah/graphql-go/example/starwars.FriendsConnection",
+  "FriendsEdge": "github.com/vektah/graphql-go/example/starwars.FriendsEdge",
+  "Human": "github.com/vektah/graphql-go/example/starwars.Human",
+  "PageInfo": "github.com/vektah/graphql-go/example/starwars.PageInfo",
+  "Review": "github.com/vektah/graphql-go/example/starwars.Review",
+  "ReviewInput": "github.com/vektah/graphql-go/example/starwars.Review",
+  "SearchResult": "github.com/vektah/graphql-go/example/starwars.SearchResult",
+  "Starship": "github.com/vektah/graphql-go/example/starwars.Starship"
+}

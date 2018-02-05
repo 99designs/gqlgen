@@ -25,6 +25,7 @@ func write(extractor extractor, out io.Writer) {
 		wr.writeObjectResolver(object)
 	}
 	wr.writeSchema()
+	wr.importHack()
 }
 
 func (w *writer) emit(format string, args ...interface{}) {
@@ -89,13 +90,12 @@ func (w *writer) writeInterface() {
 			w.emitIndent()
 			w.emit("%s_%s(", o.Name, f.GraphQLName)
 
-			first := true
+			w.emit("ctx context.Context")
+			if o.Type.Name != "interface{}" {
+				w.emit(", it *%s", o.Type.Local())
+			}
 			for _, arg := range f.Args {
-				if !first {
-					w.emit(",")
-				}
-				first = false
-				w.emit("%s %s", arg.Name, arg.Type.Local())
+				w.emit(", %s %s", arg.Name, arg.Type.Local())
 			}
 			w.emit(") (%s, error)", f.Type.Local())
 			w.lf()
@@ -124,10 +124,14 @@ func (w *writer) writeObjectResolver(object object) {
 		w.begin("case %s:", strconv.Quote(field.GraphQLName))
 
 		if field.VarName != "" {
-			w.writeVarResolver(field)
+			w.writeEvaluateVar(field)
 		} else {
-			w.writeMethodResolver(object, field)
+			w.writeEvaluateMethod(object, field)
 		}
+
+		w.writeJsonType("json", field.Type, "res")
+		w.line("resultMap.Set(field.Alias, json)")
+
 		w.line("continue")
 		w.end("")
 	}
@@ -140,7 +144,11 @@ func (w *writer) writeObjectResolver(object object) {
 	w.lf()
 }
 
-func (w *writer) writeMethodResolver(object object, field Field) {
+func (w *writer) writeEvaluateVar(field Field) {
+	w.line("res := %s", field.VarName)
+}
+
+func (w *writer) writeEvaluateMethod(object object, field Field) {
 	var methodName string
 	if field.MethodName != "" {
 		methodName = field.MethodName
@@ -151,35 +159,32 @@ func (w *writer) writeMethodResolver(object object, field Field) {
 	if field.NoErr {
 		w.emitIndent()
 		w.emit("res := %s", methodName)
-		w.writeFuncArgs(field)
+		w.writeFuncArgs(object, field)
 	} else {
 		w.emitIndent()
 		w.emit("res, err := %s", methodName)
-		w.writeFuncArgs(field)
+		w.writeFuncArgs(object, field)
 		w.line("if err != nil {")
 		w.line("	ec.Error(err)")
 		w.line("	continue")
 		w.line("}")
 	}
-
-	w.writeJsonType("json", field.Type, "res")
-
-	w.line("resultMap.Set(field.Alias, json)")
 }
 
-func (w *writer) writeVarResolver(field Field) {
-	w.writeJsonType("res", field.Type, field.VarName)
-	w.line("resultMap.Set(field.Alias, res)")
-}
-
-func (w *writer) writeFuncArgs(field Field) {
-	if len(field.Args) == 0 {
+func (w *writer) writeFuncArgs(object object, field Field) {
+	if len(field.Args) == 0 && field.MethodName != "" {
 		w.emit("()")
 		w.lf()
 	} else {
 		w.indent++
 		w.emit("(")
 		w.lf()
+		if field.MethodName == "" {
+			w.line("ec.ctx,")
+			if object.Type.Name != "interface{}" {
+				w.line("it,")
+			}
+		}
 		for _, arg := range field.Args {
 			w.line("field.Args[%s].(%s),", strconv.Quote(arg.Name), arg.Type.Local())
 		}
@@ -220,6 +225,19 @@ func (w *writer) doWriteJsonType(result string, t Type, val string, remainingMod
 			val = "*" + val
 		}
 		w.line("%s := jsonw.%s(%s)", result, ucFirst(t.Name), val)
+	} else if len(t.Implementors) > 0 {
+		w.line("var %s jsonw.Encodable = jsonw.Null", result)
+		w.line("switch it := %s.(type) {", val)
+		for _, implementor := range t.Implementors {
+			w.line("case %s:", implementor.Local())
+			w.line("	%s = %sType{}.executeSelectionSet(ec, field.Selections, &it)", result, lcFirst(implementor.GraphQLName))
+			w.line("case *%s:", implementor.Local())
+			w.line("	%s = %sType{}.executeSelectionSet(ec, field.Selections, it)", result, lcFirst(implementor.GraphQLName))
+		}
+
+		w.line("default:")
+		w.line(`	panic(fmt.Errorf("unexpected type %%T", it))`)
+		w.line("}")
 	} else {
 		if !isPtr {
 			val = "&" + val
@@ -242,4 +260,8 @@ func lcFirst(s string) string {
 
 func (w *writer) writeSchema() {
 	w.line("var parsedSchema = schema.MustParse(%s)", strconv.Quote(w.schemaRaw))
+}
+
+func (w *writer) importHack() {
+	w.line("var _ = fmt.Print")
 }

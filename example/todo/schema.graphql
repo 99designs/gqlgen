@@ -11,11 +11,16 @@ type MyQuery {
 
 type MyMutation {
 	createTodo(text: String!): Todo!
-	updateTodo(id: Int!, done: Boolean!): Todo!
+	updateTodo(id: Int!, changes: TodoInput!): Todo
 }
 
 type Todo {
 	id: Int!
 	text: String!
 	done: Boolean!
+}
+
+input TodoInput {
+	text: String
+	done: Boolean
 }

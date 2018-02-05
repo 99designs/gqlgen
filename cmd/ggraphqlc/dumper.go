@@ -181,7 +181,7 @@ func (w *writer) writeEvaluateMethod(object object, field Field) {
 func (w *writer) writeArgs(field Field) {
 	for i, arg := range field.Args {
 		w.line("var arg%d %s", i, arg.Type.Local())
-		if arg.Type.Basic {
+		if arg.Type.Basic || arg.Type.Name == "map[string]interface{}" {
 			w.line("if tmp, ok := field.Args[%s]; ok {", strconv.Quote(arg.Name))
 			if arg.Type.IsPtr() {
 				w.line("	tmp2 := tmp.(%s)", arg.Type.Name)
@@ -191,7 +191,7 @@ func (w *writer) writeArgs(field Field) {
 			}
 			w.line("}")
 		} else {
-			w.line("err := unpackComplexArg(&arg1, field.Args[%s])", strconv.Quote(arg.Name))
+			w.line("err := unpackComplexArg(&arg%d, field.Args[%s])", i, strconv.Quote(arg.Name))
 			w.line("if err != nil {")
 			w.line("	ec.Error(err)")
 			w.line("}")

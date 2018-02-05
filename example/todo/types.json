@@ -1,3 +1,4 @@
 {
-  "Todo": "github.com/vektah/graphql-go/example/todo.Todo"
+  "Todo": "github.com/vektah/graphql-go/example/todo.Todo",
+  "TodoInput": "map[string]interface{}"
 }

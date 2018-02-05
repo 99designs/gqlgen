@@ -5,6 +5,8 @@ package todo
 import (
 	"context"
 	"errors"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type Todo struct {
@@ -64,17 +66,28 @@ func (r *TodoResolver) MyMutation_createTodo(ctx context.Context, text string) (
 	return newTodo, nil
 }
 
-func (r *TodoResolver) MyMutation_updateTodo(ctx context.Context, id int, done bool) (Todo, error) {
+// this example uses a map instead of a struct for the change set. this scales updating keys on large objects where
+// most properties are optional, and if unspecified the existing value should be kept.
+func (r *TodoResolver) MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {
 	var affectedTodo *Todo
 
 	for i := 0; i < len(r.todos); i++ {
 		if r.todos[i].ID == id {
-			r.todos[i].Done = done
 			affectedTodo = &r.todos[i]
 			break
 		}
 	}
-	return *affectedTodo, errors.New("not found")
+
+	if affectedTodo == nil {
+		return nil, nil
+	}
+
+	err := mapstructure.Decode(changes, affectedTodo)
+	if err != nil {
+		panic(err)
+	}
+
+	return affectedTodo, nil
 }
 
 func (r *TodoResolver) id() int {

@@ -20,7 +20,7 @@ import (
 
 type Resolvers interface {
 	MyMutation_createTodo(ctx context.Context, text string) (todo.Todo, error)
-	MyMutation_updateTodo(ctx context.Context, id int, done bool) (todo.Todo, error)
+	MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*todo.Todo, error)
 	MyQuery_todo(ctx context.Context, id int) (*todo.Todo, error)
 	MyQuery_lastTodo(ctx context.Context) (*todo.Todo, error)
 	MyQuery_todos(ctx context.Context) ([]todo.Todo, error)
@@ -64,16 +64,20 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 			if tmp, ok := field.Args["id"]; ok {
 				arg0 = tmp.(int)
 			}
-			var arg1 bool
-			if tmp, ok := field.Args["done"]; ok {
-				arg1 = tmp.(bool)
+			var arg1 map[string]interface{}
+			if tmp, ok := field.Args["changes"]; ok {
+				arg1 = tmp.(map[string]interface{})
 			}
 			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
 				continue
 			}
-			ec._todo(field.Selections, &res)
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec._todo(field.Selections, res)
+			}
 			continue
 
 		}
@@ -622,7 +626,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	ec.json.EndObject()
 }
 
-var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, done: Boolean!): Todo!\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n")
+var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
 var _ = fmt.Print
 
 func NewResolver(resolvers Resolvers) relay.Resolver {

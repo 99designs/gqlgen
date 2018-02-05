@@ -331,6 +331,10 @@ func (t Type) Ptr() Type {
 	return t
 }
 
+func (t Type) IsPtr() bool {
+	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
+}
+
 type object struct {
 	Name      string
 	Fields    []Field

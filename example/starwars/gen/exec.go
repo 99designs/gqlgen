@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/vektah/graphql-go/errors"
 	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/jsonw"
@@ -163,6 +164,19 @@ type collectedField struct {
 	Name       string
 	Args       map[string]interface{}
 	Selections []query.Selection
+}
+
+func unpackComplexArg(result interface{}, data interface{}) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		TagName:     "graphql",
+		ErrorUnused: true,
+		Result:      result,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return decoder.Decode(data)
 }
 
 func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {

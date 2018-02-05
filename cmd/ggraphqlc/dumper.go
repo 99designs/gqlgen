@@ -162,14 +162,11 @@ func (w *writer) writeEvaluateMethod(object object, field Field) {
 		methodName = fmt.Sprintf("ec.resolvers.%s_%s", object.Name, field.GraphQLName)
 	}
 
+	w.writeArgs(field)
 	if field.NoErr {
-		w.emitIndent()
-		w.emit("res := %s", methodName)
-		w.writeFuncArgs(object, field)
+		w.line("res := %s(%s)", methodName, getFuncArgs(object, field))
 	} else {
-		w.emitIndent()
-		w.emit("res, err := %s", methodName)
-		w.writeFuncArgs(object, field)
+		w.line("res, err := %s(%s)", methodName, getFuncArgs(object, field))
 		w.line("if err != nil {")
 		w.line("	ec.Error(err)")
 		w.line("	continue")
@@ -177,25 +174,44 @@ func (w *writer) writeEvaluateMethod(object object, field Field) {
 	}
 }
 
-func (w *writer) writeFuncArgs(object object, field Field) {
-	if len(field.Args) == 0 && field.MethodName != "" {
-		w.emit("()")
-		w.lf()
-	} else {
-		w.indent++
-		w.emit("(")
-		w.lf()
-		if field.MethodName == "" {
-			w.line("ec.ctx,")
-			if object.Type.Name != "interface{}" {
-				w.line("it,")
+func (w *writer) writeArgs(field Field) {
+	for i, arg := range field.Args {
+		w.line("var arg%d %s", i, arg.Type.Local())
+		if arg.Type.Basic {
+			w.line("if tmp, ok := field.Args[%s]; ok {", strconv.Quote(arg.Name))
+			if arg.Type.IsPtr() {
+				w.line("	tmp2 := tmp.(%s)", arg.Type.Name)
+				w.line("	arg%d = &tmp2", i)
+			} else {
+				w.line("	arg%d = tmp.(%s)", i, arg.Type.Name)
 			}
+			w.line("}")
+		} else {
+			w.line("err := unpackComplexArg(&arg1, field.Args[%s])", strconv.Quote(arg.Name))
+			w.line("if err != nil {")
+			w.line("	ec.Error(err)")
+			w.line("}")
 		}
-		for _, arg := range field.Args {
-			w.line("field.Args[%s].(%s),", strconv.Quote(arg.Name), arg.Type.Local())
-		}
-		w.end(")")
 	}
+
+}
+
+func getFuncArgs(object object, field Field) string {
+	var args []string
+
+	if field.MethodName == "" {
+		args = append(args, "ec.ctx")
+
+		if object.Type.Name != "interface{}" {
+			args = append(args, "it")
+		}
+	}
+
+	for i := range field.Args {
+		args = append(args, "arg"+strconv.Itoa(i))
+	}
+
+	return strings.Join(args, ", ")
 }
 
 func (w *writer) writeJsonType(t Type, val string) {

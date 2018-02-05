@@ -3,11 +3,12 @@ package gen
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/vektah/graphql-go/example/starwars"
 	"github.com/vektah/graphql-go/introspection"
 	"github.com/vektah/graphql-go/query"
 	"github.com/vektah/graphql-go/schema"
-	"strconv"
 )
 
 type Resolvers interface {
@@ -63,10 +64,7 @@ func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) {
 
 		case "friends":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Droid_friends(
-				ec.ctx,
-				it,
-			)
+			res, err := ec.resolvers.Droid_friends(ec.ctx, it)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -93,12 +91,17 @@ func _droid(ec *executionContext, sel []query.Selection, it *starwars.Droid) {
 
 		case "friendsConnection":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Droid_friendsConnection(
-				ec.ctx,
-				it,
-				field.Args["first"].(*int),
-				field.Args["after"].(*string),
-			)
+			var arg0 *int
+			if tmp, ok := field.Args["first"]; ok {
+				tmp2 := tmp.(int)
+				arg0 = &tmp2
+			}
+			var arg1 *string
+			if tmp, ok := field.Args["after"]; ok {
+				tmp2 := tmp.(string)
+				arg1 = &tmp2
+			}
+			res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, it, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -251,10 +254,7 @@ func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) {
 
 		case "friends":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Human_friends(
-				ec.ctx,
-				it,
-			)
+			res, err := ec.resolvers.Human_friends(ec.ctx, it)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -281,12 +281,17 @@ func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) {
 
 		case "friendsConnection":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Human_friendsConnection(
-				ec.ctx,
-				it,
-				field.Args["first"].(*int),
-				field.Args["after"].(*string),
-			)
+			var arg0 *int
+			if tmp, ok := field.Args["first"]; ok {
+				tmp2 := tmp.(int)
+				arg0 = &tmp2
+			}
+			var arg1 *string
+			if tmp, ok := field.Args["after"]; ok {
+				tmp2 := tmp.(string)
+				arg1 = &tmp2
+			}
+			res, err := ec.resolvers.Human_friendsConnection(ec.ctx, it, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -306,10 +311,7 @@ func _human(ec *executionContext, sel []query.Selection, it *starwars.Human) {
 
 		case "starships":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Human_starships(
-				ec.ctx,
-				it,
-			)
+			res, err := ec.resolvers.Human_starships(ec.ctx, it)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -334,11 +336,18 @@ func _mutation(ec *executionContext, sel []query.Selection, it *interface{}) {
 		switch field.Name {
 		case "createReview":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Mutation_createReview(
-				ec.ctx,
-				field.Args["episode"].(string),
-				field.Args["review"].(starwars.Review),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["episode"]; ok {
+				arg0 = tmp.(string)
+			}
+			var arg1 starwars.Review
+
+			err := unpackComplexArg(&arg1, field.Args["review"])
+			if err != nil {
+				ec.Error(err)
+			}
+
+			res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -392,10 +401,12 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 		switch field.Name {
 		case "hero":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_hero(
-				ec.ctx,
-				field.Args["episode"].(*string),
-			)
+			var arg0 *string
+			if tmp, ok := field.Args["episode"]; ok {
+				tmp2 := tmp.(string)
+				arg0 = &tmp2
+			}
+			res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -418,10 +429,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "reviews":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_reviews(
-				ec.ctx,
-				field.Args["episode"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["episode"]; ok {
+				arg0 = tmp.(string)
+			}
+			res, err := ec.resolvers.Query_reviews(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -435,10 +447,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "search":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_search(
-				ec.ctx,
-				field.Args["text"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["text"]; ok {
+				arg0 = tmp.(string)
+			}
+			res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -469,10 +482,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "character":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_character(
-				ec.ctx,
-				field.Args["id"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["id"]; ok {
+				arg0 = tmp.(string)
+			}
+			res, err := ec.resolvers.Query_character(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -495,10 +509,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "droid":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_droid(
-				ec.ctx,
-				field.Args["id"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["id"]; ok {
+				arg0 = tmp.(string)
+			}
+			res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -512,10 +527,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "human":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_human(
-				ec.ctx,
-				field.Args["id"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["id"]; ok {
+				arg0 = tmp.(string)
+			}
+			res, err := ec.resolvers.Query_human(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -529,10 +545,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "starship":
 			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.Query_starship(
-				ec.ctx,
-				field.Args["id"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["id"]; ok {
+				arg0 = tmp.(string)
+			}
+			res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
 				continue
@@ -556,9 +573,11 @@ func _query(ec *executionContext, sel []query.Selection, it *interface{}) {
 
 		case "__type":
 			ec.json.ObjectKey(field.Alias)
-			res := ec.introspectType(
-				field.Args["name"].(string),
-			)
+			var arg0 string
+			if tmp, ok := field.Args["name"]; ok {
+				arg0 = tmp.(string)
+			}
+			res := ec.introspectType(arg0)
 			if res == nil {
 				ec.json.Null()
 			} else {
@@ -938,9 +957,11 @@ func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type
 
 		case "fields":
 			ec.json.ObjectKey(field.Alias)
-			res := it.Fields(
-				field.Args["includeDeprecated"].(bool),
-			)
+			var arg0 bool
+			if tmp, ok := field.Args["includeDeprecated"]; ok {
+				arg0 = tmp.(bool)
+			}
+			res := it.Fields(arg0)
 			if res == nil {
 				ec.json.Null()
 			} else {
@@ -994,9 +1015,11 @@ func ___Type(ec *executionContext, sel []query.Selection, it *introspection.Type
 
 		case "enumValues":
 			ec.json.ObjectKey(field.Alias)
-			res := it.EnumValues(
-				field.Args["includeDeprecated"].(bool),
-			)
+			var arg0 bool
+			if tmp, ok := field.Args["includeDeprecated"]; ok {
+				arg0 = tmp.(bool)
+			}
+			res := it.EnumValues(arg0)
 			if res == nil {
 				ec.json.Null()
 			} else {

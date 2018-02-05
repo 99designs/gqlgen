@@ -67,7 +67,7 @@ func (r *Resolver) Query_hero(ctx context.Context, episode *string) (Character, 
 	if episode != nil && *episode == "EMPIRE" {
 		return r.humans["1000"], nil
 	}
-	return r.humans["2001"], nil
+	return r.droid["2001"], nil
 }
 
 func (r *Resolver) Query_reviews(ctx context.Context, episode string) ([]Review, error) {
@@ -209,6 +209,8 @@ func NewResolver() *Resolver {
 			Length: 20,
 		},
 	}
+
+	r.reviews = map[string][]Review{}
 
 	return &r
 }

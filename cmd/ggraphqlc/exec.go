@@ -54,9 +54,9 @@ func NewResolver(resolvers Resolvers) relay.Resolver {
 		c.json.ObjectKey("data")
 
 		if op.Type == query.Query {
-			{{.RootQuery}}(&c, op.Selections, nil)
+			c.{{.RootQuery}}(op.Selections, nil)
 		} else if op.Type == query.Mutation {
-			{{.RootMutation}}(&c, op.Selections, nil)
+			c.{{.RootMutation}}(op.Selections, nil)
 		} else {
 			c.Errorf("unsupported operation %s", op.Type)
 			c.json.Null()
@@ -81,11 +81,11 @@ type executionContext struct {
 	ctx       context.Context
 }
 
-func (c *executionContext) introspectSchema() *introspection.Schema {
+func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
 
-func (c *executionContext) introspectType(name string) *introspection.Type {
+func (ec *executionContext) introspectType(name string) *introspection.Type {
 	t := parsedSchema.Resolve(name)
 	if t == nil {
 		return nil
@@ -102,7 +102,7 @@ func instanceOf(val string, satisfies []string) bool {
 	return false
 }
 
-func (c *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
+func (ec *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
 	var groupedFields []collectedField
 
 	for _, sel := range selSet {
@@ -116,7 +116,7 @@ func (c *executionContext) collectFields(selSet []query.Selection, satisfies []s
 				if len(sel.Arguments) > 0 {
 					f.Args = map[string]interface{}{}
 					for _, arg := range sel.Arguments {
-						f.Args[arg.Name.Name] = arg.Value.Value(c.variables)
+						f.Args[arg.Name.Name] = arg.Value.Value(ec.variables)
 					}
 				}
 				return f
@@ -128,7 +128,7 @@ func (c *executionContext) collectFields(selSet []query.Selection, satisfies []s
 				continue
 			}
 
-			for _, childField := range c.collectFields(sel.Selections, satisfies, visited) {
+			for _, childField := range ec.collectFields(sel.Selections, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
@@ -140,9 +140,9 @@ func (c *executionContext) collectFields(selSet []query.Selection, satisfies []s
 			}
 			visited[fragmentName] = true
 
-			fragment := c.doc.Fragments.Get(fragmentName)
+			fragment := ec.doc.Fragments.Get(fragmentName)
 			if fragment == nil {
-				c.Errorf("missing fragment %s", fragmentName)
+				ec.Errorf("missing fragment %s", fragmentName)
 				continue
 			}
 
@@ -150,7 +150,7 @@ func (c *executionContext) collectFields(selSet []query.Selection, satisfies []s
 				continue
 			}
 
-			for _, childField := range c.collectFields(fragment.Selections, satisfies, visited) {
+			for _, childField := range ec.collectFields(fragment.Selections, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}

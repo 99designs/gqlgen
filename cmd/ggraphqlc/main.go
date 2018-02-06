@@ -5,13 +5,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"go/format"
 	"io/ioutil"
 	"os"
-
 	"path/filepath"
 
 	"github.com/vektah/graphql-go/schema"
+	"golang.org/x/tools/imports"
 )
 
 var output = flag.String("out", "-", "the file to write to, - for stdout")
@@ -103,7 +102,7 @@ func main() {
 	write(e, buf)
 
 	if *output == "-" {
-		fmt.Println(string(gofmt(buf.Bytes())))
+		fmt.Println(string(gofmt(*output, buf.Bytes())))
 	} else {
 		err := os.MkdirAll(filepath.Dir(*output), 0755)
 		if err != nil {
@@ -111,7 +110,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		err = ioutil.WriteFile(*output, gofmt(buf.Bytes()), 0644)
+		err = ioutil.WriteFile(*output, gofmt(*output, buf.Bytes()), 0644)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "failed to write output: ", err.Error())
 			os.Exit(1)
@@ -119,8 +118,8 @@ func main() {
 	}
 }
 
-func gofmt(b []byte) []byte {
-	out, err := format.Source(b)
+func gofmt(filename string, b []byte) []byte {
+	out, err := imports.Process(filename, b, nil)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to gofmt: "+*output+":"+err.Error())
 		return b

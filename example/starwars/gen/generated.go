@@ -5,6 +5,12 @@ package gen
 import (
 	"context"
 	"fmt"
+	"io"
+	"reflect"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/vektah/graphql-go/errors"
 	"github.com/vektah/graphql-go/example/starwars"
@@ -14,11 +20,6 @@ import (
 	"github.com/vektah/graphql-go/relay"
 	"github.com/vektah/graphql-go/schema"
 	"github.com/vektah/graphql-go/validation"
-	"io"
-	"reflect"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type Resolvers interface {

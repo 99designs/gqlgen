@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/importer"
 	"go/types"
 	"os"
 	"path/filepath"
@@ -221,6 +222,8 @@ func (e *extractor) extract() {
 }
 
 func (e *extractor) introspect() error {
+	// todo: support pre go 1.9
+	sourceImporter := importer.For("source", nil)
 	var conf loader.Config
 	for _, name := range e.Imports {
 		conf.Import(name)
@@ -235,7 +238,14 @@ func (e *extractor) introspect() error {
 		if o.Type.Package == "" {
 			continue
 		}
-		pkg := prog.Package(o.Type.Package)
+		pkgInfo, err := sourceImporter.Import(o.Type.Package)
+		if err != nil {
+			return fmt.Errorf("unable to find package %s: %s", o.Type.Package, err.Error())
+		}
+		pkg := prog.Package(pkgInfo.Path())
+		if pkg == nil {
+			return fmt.Errorf("required package was not loaded: %s", pkgInfo.Path())
+		}
 
 		for astNode, object := range pkg.Defs {
 			if astNode.Name != o.Type.Name {

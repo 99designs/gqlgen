@@ -17,6 +17,7 @@ import (
 	"io"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -50,7 +51,12 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
 			if err != nil {
@@ -64,7 +70,12 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 			ec.json.ObjectKey(field.Alias)
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
-				arg0 = tmp.(int)
+				tmp2, err := coerceInt(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			var arg1 map[string]interface{}
 			if tmp, ok := field.Args["changes"]; ok {
@@ -98,7 +109,12 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
-				arg0 = tmp.(int)
+				tmp2, err := coerceInt(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
 			if err != nil {
@@ -154,7 +170,12 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["name"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res := ec.introspectType(arg0)
 			if res == nil {
@@ -518,7 +539,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			ec.json.ObjectKey(field.Alias)
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				arg0 = tmp.(bool)
+				tmp2, err := coerceBool(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res := it.Fields(arg0)
 			if res == nil {
@@ -576,7 +602,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			ec.json.ObjectKey(field.Alias)
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				arg0 = tmp.(bool)
+				tmp2, err := coerceBool(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res := it.EnumValues(arg0)
 			if res == nil {
@@ -819,4 +850,66 @@ func getOrCreateField(c *[]collectedField, name string, creator func() collected
 
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
+}
+
+// nolint: deadcode, megacheck
+func coerceString(v interface{}) (string, error) {
+	switch v := v.(type) {
+	case string:
+		return v, nil
+	case int:
+		return strconv.Itoa(v), nil
+	case float64:
+		return fmt.Sprintf("%f", v), nil
+	case bool:
+		if v {
+			return "true", nil
+		} else {
+			return "false", nil
+		}
+	case nil:
+		return "null", nil
+	default:
+		return "", fmt.Errorf("%T is not a string", v)
+	}
+}
+
+// nolint: deadcode, megacheck
+func coerceBool(v interface{}) (bool, error) {
+	switch v := v.(type) {
+	case string:
+		return "true" == strings.ToLower(v), nil
+	case int:
+		return v != 0, nil
+	default:
+		return false, fmt.Errorf("%T is not a bool", v)
+	}
+}
+
+// nolint: deadcode, megacheck
+func coerceInt(v interface{}) (int, error) {
+	switch v := v.(type) {
+	case string:
+		return strconv.Atoi(v)
+	case int:
+		return v, nil
+	case float64:
+		return int(v), nil
+	default:
+		return 0, fmt.Errorf("%T is not an int", v)
+	}
+}
+
+// nolint: deadcode, megacheck
+func coercefloat64(v interface{}) (float64, error) {
+	switch v := v.(type) {
+	case string:
+		return strconv.ParseFloat(v, 64)
+	case int:
+		return float64(v), nil
+	case float64:
+		return v, nil
+	default:
+		return 0, fmt.Errorf("%T is not an float", v)
+	}
 }

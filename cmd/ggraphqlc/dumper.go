@@ -181,11 +181,11 @@ func (w *writer) writeEvaluateMethod(object object, field Field) {
 func (w *writer) writeArgs(field Field) {
 	for i, arg := range field.Args {
 		w.line("var arg%d %s", i, arg.Type.Local())
+		prefix := ""
+		if arg.Type.IsPtr() {
+			prefix = "&"
+		}
 		if arg.Type.ImportedAs == "time" && arg.Type.Name == "Time" {
-			prefix := ""
-			if arg.Type.IsPtr() {
-				prefix = "&"
-			}
 			w.line("if tmp, ok := field.Args[%s]; ok {", strconv.Quote(arg.Name))
 			w.line("	if tmpStr, ok := tmp.(string); ok {")
 			w.line("		tmpDate, err := time.Parse(time.RFC3339, tmpStr)")
@@ -199,7 +199,7 @@ func (w *writer) writeArgs(field Field) {
 			w.line("		continue")
 			w.line("	}")
 			w.line("}")
-		} else if arg.Type.Scalar || arg.Type.Name == "map[string]interface{}" {
+		} else if arg.Type.Name == "map[string]interface{}" {
 			w.line("if tmp, ok := field.Args[%s]; ok {", strconv.Quote(arg.Name))
 			if arg.Type.IsPtr() {
 				w.line("	tmp2 := tmp.(%s)", arg.Type.Name)
@@ -207,6 +207,15 @@ func (w *writer) writeArgs(field Field) {
 			} else {
 				w.line("	arg%d = tmp.(%s)", i, arg.Type.Name)
 			}
+			w.line("}")
+		} else if arg.Type.Scalar {
+			w.line("if tmp, ok := field.Args[%s]; ok {", strconv.Quote(arg.Name))
+			w.line("	tmp2, err := coerce%s(tmp)", ucFirst(arg.Type.Name))
+			w.line("	if err != nil {")
+			w.line("		ec.Error(err)")
+			w.line("		continue")
+			w.line("	}")
+			w.line("	arg%d = %stmp2", i, prefix)
 			w.line("}")
 		} else {
 			w.line("err := unpackComplexArg(&arg%d, field.Args[%s])", i, strconv.Quote(arg.Name))

@@ -17,6 +17,7 @@ import (
 	"io"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -103,12 +104,20 @@ func (ec *executionContext) _droid(sel []query.Selection, it *starwars.Droid) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
-				tmp2 := tmp.(int)
+				tmp2, err := coerceInt(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
 				arg0 = &tmp2
 			}
 			var arg1 *string
 			if tmp, ok := field.Args["after"]; ok {
-				tmp2 := tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
 				arg1 = &tmp2
 			}
 			res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, it, arg0, arg1)
@@ -304,12 +313,20 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
-				tmp2 := tmp.(int)
+				tmp2, err := coerceInt(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
 				arg0 = &tmp2
 			}
 			var arg1 *string
 			if tmp, ok := field.Args["after"]; ok {
-				tmp2 := tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
 				arg1 = &tmp2
 			}
 			res, err := ec.resolvers.Human_friendsConnection(ec.ctx, it, arg0, arg1)
@@ -360,7 +377,12 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["episode"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			var arg1 starwars.Review
 			err := unpackComplexArg(&arg1, field.Args["review"])
@@ -425,7 +447,11 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 *string
 			if tmp, ok := field.Args["episode"]; ok {
-				tmp2 := tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
 				arg0 = &tmp2
 			}
 			res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
@@ -453,7 +479,12 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["episode"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			var arg1 *time.Time
 			if tmp, ok := field.Args["since"]; ok {
@@ -485,7 +516,12 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 			if err != nil {
@@ -520,7 +556,12 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res, err := ec.resolvers.Query_character(ec.ctx, arg0)
 			if err != nil {
@@ -547,7 +588,12 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
 			if err != nil {
@@ -565,7 +611,12 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res, err := ec.resolvers.Query_human(ec.ctx, arg0)
 			if err != nil {
@@ -583,7 +634,12 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
 			if err != nil {
@@ -611,7 +667,12 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["name"]; ok {
-				arg0 = tmp.(string)
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res := ec.introspectType(arg0)
 			if res == nil {
@@ -1009,7 +1070,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			ec.json.ObjectKey(field.Alias)
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				arg0 = tmp.(bool)
+				tmp2, err := coerceBool(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res := it.Fields(arg0)
 			if res == nil {
@@ -1067,7 +1133,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			ec.json.ObjectKey(field.Alias)
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				arg0 = tmp.(bool)
+				tmp2, err := coerceBool(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg0 = tmp2
 			}
 			res := it.EnumValues(arg0)
 			if res == nil {
@@ -1310,4 +1381,66 @@ func getOrCreateField(c *[]collectedField, name string, creator func() collected
 
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
+}
+
+// nolint: deadcode, megacheck
+func coerceString(v interface{}) (string, error) {
+	switch v := v.(type) {
+	case string:
+		return v, nil
+	case int:
+		return strconv.Itoa(v), nil
+	case float64:
+		return fmt.Sprintf("%f", v), nil
+	case bool:
+		if v {
+			return "true", nil
+		} else {
+			return "false", nil
+		}
+	case nil:
+		return "null", nil
+	default:
+		return "", fmt.Errorf("%T is not a string", v)
+	}
+}
+
+// nolint: deadcode, megacheck
+func coerceBool(v interface{}) (bool, error) {
+	switch v := v.(type) {
+	case string:
+		return "true" == strings.ToLower(v), nil
+	case int:
+		return v != 0, nil
+	default:
+		return false, fmt.Errorf("%T is not a bool", v)
+	}
+}
+
+// nolint: deadcode, megacheck
+func coerceInt(v interface{}) (int, error) {
+	switch v := v.(type) {
+	case string:
+		return strconv.Atoi(v)
+	case int:
+		return v, nil
+	case float64:
+		return int(v), nil
+	default:
+		return 0, fmt.Errorf("%T is not an int", v)
+	}
+}
+
+// nolint: deadcode, megacheck
+func coercefloat64(v interface{}) (float64, error) {
+	switch v := v.(type) {
+	case string:
+		return strconv.ParseFloat(v, 64)
+	case int:
+		return float64(v), nil
+	case float64:
+		return v, nil
+	default:
+		return 0, fmt.Errorf("%T is not an float", v)
+	}
 }

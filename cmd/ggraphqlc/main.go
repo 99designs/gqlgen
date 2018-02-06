@@ -57,6 +57,7 @@ func main() {
 			"strconv": "strconv",
 			"time":    "time",
 			"reflect": "reflect",
+			"strings": "strings",
 
 			"mapstructure":  "github.com/mitchellh/mapstructure",
 			"errors":        "github.com/vektah/graphql-go/errors",

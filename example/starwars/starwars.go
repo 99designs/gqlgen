@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"strconv"
 	"strings"
+	"time"
 
 	"fmt"
 )
@@ -72,8 +73,18 @@ func (r *Resolver) Query_hero(ctx context.Context, episode *string) (Character, 
 	return r.droid["2001"], nil
 }
 
-func (r *Resolver) Query_reviews(ctx context.Context, episode string) ([]Review, error) {
-	return r.reviews[episode], nil
+func (r *Resolver) Query_reviews(ctx context.Context, episode string, since *time.Time) ([]Review, error) {
+	if since == nil {
+		return r.reviews[episode], nil
+	}
+
+	var filtered []Review
+	for _, rev := range r.reviews[episode] {
+		if rev.Time.After(*since) {
+			filtered = append(filtered, rev)
+		}
+	}
+	return filtered, nil
 }
 
 func (r *Resolver) Query_search(ctx context.Context, text string) ([]SearchResult, error) {
@@ -236,6 +247,7 @@ type Starship struct {
 type Review struct {
 	Stars      int
 	Commentary *string
+	Time       time.Time
 }
 
 type Droid struct {

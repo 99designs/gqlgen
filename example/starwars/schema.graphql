@@ -5,7 +5,7 @@ schema {
 # The query type, represents all of the entry points into our object graph
 type Query {
     hero(episode: Episode = NEWHOPE): Character
-    reviews(episode: Episode!): [Review]!
+    reviews(episode: Episode!, since: Time): [Review]!
     search(text: String!): [SearchResult]!
     character(id: ID!): Character
     droid(id: ID!): Droid
@@ -109,6 +109,8 @@ type Review {
     stars: Int!
     # Comment about the movie
     commentary: String
+    # when the review was posted
+    time: Time
 }
 # The input object sent when someone is creating a new review
 input ReviewInput {
@@ -116,6 +118,8 @@ input ReviewInput {
     stars: Int!
     # Comment about the movie, optional
     commentary: String
+    # when the review was posted
+    time: Time
 }
 type Starship {
     # The ID of the starship

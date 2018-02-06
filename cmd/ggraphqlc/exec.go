@@ -170,12 +170,23 @@ type collectedField struct {
 	Selections []query.Selection
 }
 
+func decodeHook(sourceType reflect.Type, destType reflect.Type, value interface{}) (interface{}, error) {
+	if destType.PkgPath() == "time" && destType.Name() == "Time" {
+		if dateStr, ok := value.(string); ok {
+			return time.Parse(time.RFC3339, dateStr)
+		}
+		return nil, errors.Errorf("time should be an RFC3339 formatted string")
+	}
+	return value, nil
+}
+
 // nolint: deadcode, megacheck
 func unpackComplexArg(result interface{}, data interface{}) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		TagName:     "graphql",
 		ErrorUnused: true,
 		Result:      result,
+		DecodeHook:  decodeHook,
 	})
 	if err != nil {
 		panic(err)

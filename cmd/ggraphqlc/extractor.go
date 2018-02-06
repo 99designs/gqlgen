@@ -117,11 +117,20 @@ func (e *extractor) buildType(t common.Type) kind {
 				goType = "int"
 			case "Float":
 				goType = "float64"
+			case "Time":
+				return kind{
+					Scalar:      true,
+					Modifiers:   modifiers,
+					GraphQLName: val.Name,
+					Name:        "Time",
+					Package:     "time",
+					ImportedAs:  "time",
+				}
 			default:
 				panic(fmt.Errorf("unknown scalar %s", val.Name))
 			}
 			return kind{
-				Basic:       true,
+				Scalar:      true,
 				Modifiers:   modifiers,
 				GraphQLName: val.Name,
 				Name:        goType,
@@ -161,7 +170,7 @@ func (e *extractor) buildType(t common.Type) kind {
 			return t
 		case *schema.Enum:
 			return kind{
-				Basic:       true,
+				Scalar:      true,
 				Modifiers:   modifiers,
 				GraphQLName: val.Name,
 				Name:        "string",
@@ -349,7 +358,7 @@ type kind struct {
 	ImportedAs   string
 	Modifiers    []string
 	Implementors []kind
-	Basic        bool
+	Scalar       bool
 }
 
 func (t kind) Local() string {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 var nullLit = []byte(`null`)
@@ -72,6 +73,11 @@ func (w *Writer) Float64(v float64) {
 func (w *Writer) String(v string) {
 	w.split()
 	io.WriteString(w.out, strconv.Quote(v))
+}
+
+func (w *Writer) Time(t time.Time) {
+	w.split()
+	io.WriteString(w.out, strconv.Quote(t.Format(time.RFC3339)))
 }
 
 func (w *Writer) BeginObject() {

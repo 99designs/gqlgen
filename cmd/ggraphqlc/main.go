@@ -55,6 +55,8 @@ func main() {
 			"fmt":     "fmt",
 			"io":      "io",
 			"strconv": "strconv",
+			"time":    "time",
+			"reflect": "reflect",
 
 			"mapstructure":  "github.com/mitchellh/mapstructure",
 			"errors":        "github.com/vektah/graphql-go/errors",
@@ -81,7 +83,7 @@ func main() {
 		GraphQLName: "__type",
 		NoErr:       true,
 		MethodName:  "ec.introspectType",
-		Args:        []FieldArgument{{Name: "name", Type: kind{Basic: true, Name: "string"}}},
+		Args:        []FieldArgument{{Name: "name", Type: kind{Scalar: true, Name: "string"}}},
 	})
 
 	if len(e.Errors) != 0 {

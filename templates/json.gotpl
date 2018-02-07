@@ -1,0 +1,17 @@
+{{define "writejson"}}
+{{ $object := .}}
+
+func (t *_{{ $object.Type.GraphQLName }}Node) Write(w *jsonw.Writer) {
+    w.BeginObject()
+    for _, field := range t._fields {
+        switch field.Name {
+            {{range $field := $object.Fields -}}
+                case "{{$field.GraphQLName}}":
+                    w.ObjectKey({{$field.GraphQLName|quote}})
+                    {{ $field.WriteJson }}
+            {{ end }}
+        }
+    }
+    w.EndObject()
+}
+{{end}}

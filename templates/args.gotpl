@@ -7,13 +7,11 @@
                     tmpDate, err := time.Parse(time.RFC3339, tmpStr)
                     if err != nil {
                         ec.Error(err)
-                        ec.json.Null()
                         continue
                     }
                     arg{{$i}} = {{if $arg.Type.IsPtr}}&{{end}}tmpDate
                 } else {
                     ec.Errorf("Time '{{$arg.Name}}' should be RFC3339 formatted string")
-                    ec.json.Null()
                     continue
                 }
             }
@@ -31,7 +29,6 @@
                 tmp2, err := coerce{{$arg.Type.Name|ucFirst}}(tmp)
                 if err != nil {
                     ec.Error(err)
-                    ec.json.Null()
                     continue
                 }
                 arg{{$i}} = {{if $arg.Type.IsPtr}}&{{end}}tmp2
@@ -40,7 +37,6 @@
             err := unpackComplexArg(&arg{{$i}}, field.Args[{{$arg.Name|quote}}])
             if err != nil {
                 ec.Error(err)
-                ec.json.Null()
                 continue
             }
         {{end}}

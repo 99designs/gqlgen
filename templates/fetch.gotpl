@@ -1,0 +1,70 @@
+{{define "fetch"}}
+{{ $object := .}}
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) Writer {
+    node := _{{$object.Type.GraphQLName}}Node {
+        _fields: ec.collectFields(sel, {{$object.Type.GraphQLName|lcFirst}}Implementors, map[string]bool{}),
+    }
+
+	for _, field := range node._fields {
+		switch field.Name {
+        {{range $field := $object.Fields -}}
+		case "{{$field.GraphQLName}}":
+            {{ template "args" $field.Args -}}
+
+            {{ if $field.IsResolver }}
+                ec.wg.Add(1)
+                go func(field collectedField) {
+                    defer ec.wg.Done()
+            {{ end }}
+
+            {{- if $field.VarName -}}
+                res := {{$field.VarName}}
+            {{ else if $field.MethodName -}}
+                {{ if $field.NoErr -}}
+                    res := {{$field.MethodName}}({{ $field.CallArgs $object }})
+                {{ else -}}
+                    res, err := {{$field.MethodName}}({{ $field.CallArgs $object }})
+                    if err != nil {
+                        ec.Error(err)
+                        continue
+                    }
+                {{ end }}
+            {{ else }}
+                res, err := ec.resolvers.{{ $object.Name }}_{{ $field.GraphQLName }}({{ $field.CallArgs $object }})
+                if err != nil {
+                    ec.Error(err)
+                    return
+                }
+            {{ end -}}
+
+            {{ if $field.Type.Scalar }}
+                node.{{$field.GraphQLName|ucFirst}} = res
+            {{ else }}
+                {{ if or $field.Type.IsPtr $field.Type.IsSlice }}
+                    if res != nil {
+                {{ end}}
+                    {{ if $field.Type.IsSlice }}
+                        for _, f := range {{$field.Type.ByVal "res" }} {
+                            node.{{$field.GraphQLName|ucFirst}} = append(node.{{$field.GraphQLName|ucFirst}},  ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{ $field.Type.Elem.ByRef "f" }}))
+                        }
+                    {{ else }}
+                        node.{{$field.GraphQLName|ucFirst}} = ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{$field.Type.ByRef "res" }})
+                    {{ end }}
+                {{ if or $field.Type.IsPtr $field.Type.IsSlice }}
+                    }
+                {{ end}}
+            {{ end }}
+
+            {{ if $field.IsResolver }}
+                }(field)
+            {{ end }}
+        {{ end}}
+        default:
+            panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+    return &node
+}
+{{end}}

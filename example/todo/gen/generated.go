@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
+	sync "sync"
 	time "time"
 
 	mapstructure "github.com/mitchellh/mapstructure"
@@ -48,50 +49,56 @@ func NewResolver(resolvers Resolvers) relay.Resolver {
 			return []*errors.QueryError{errors.Errorf("%s", err)}
 		}
 
-		if op.Type != query.Query && op.Type != query.Mutation {
-			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
-		}
-
 		c := executionContext{
 			resolvers: resolvers,
 			variables: variables,
 			doc:       doc,
 			ctx:       ctx,
-			json:      jsonw.New(w),
 		}
+
+		var result interface {
+			Write(w *jsonw.Writer)
+		}
+
+		if op.Type == query.Query {
+			result = c._myQuery(op.Selections, nil)
+		} else if op.Type == query.Mutation {
+			result = c._myMutation(op.Selections, nil)
+		} else {
+			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
+		}
+
+		c.wg.Wait()
 
 		// TODO: parallelize if query.
 
-		c.json.BeginObject()
+		writer := jsonw.New(w)
+		writer.BeginObject()
 
-		c.json.ObjectKey("data")
-
-		if op.Type == query.Query {
-			c._myQuery(op.Selections, nil)
-		} else if op.Type == query.Mutation {
-			c._myMutation(op.Selections, nil)
-		} else {
-			c.Errorf("unsupported operation %s", op.Type)
-			c.json.Null()
-		}
+		writer.ObjectKey("data")
+		result.Write(writer)
 
 		if len(c.Errors) > 0 {
-			c.json.ObjectKey("errors")
+			writer.ObjectKey("errors")
 			errors.WriteErrors(w, c.Errors)
 		}
 
-		c.json.EndObject()
+		writer.EndObject()
 		return nil
 	}
 }
 
 type executionContext struct {
 	errors.Builder
-	json      *jsonw.Writer
 	resolvers Resolvers
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
+	wg        sync.WaitGroup
+}
+
+type Writer interface {
+	Write(w *jsonw.Writer)
 }
 
 var (
@@ -106,40 +113,52 @@ var (
 	__TypeImplementors       = []string{"__Type"}
 )
 
+type _MyMutationNode struct {
+	_fields []collectedField
+
+	CreateTodo Writer
+	UpdateTodo Writer
+}
+
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) {
-	groupedFieldSet := ec.collectFields(sel, myMutationImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) Writer {
+	node := _MyMutationNode{
+		_fields: ec.collectFields(sel, myMutationImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "createTodo":
-			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
-					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
 			}
-			res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			ec._todo(field.Selections, &res)
+
+			ec.wg.Add(1)
+			go func(field collectedField) {
+				defer ec.wg.Done()
+
+				res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				node.CreateTodo = ec._todo(field.Selections, &res)
+
+			}(field)
 
 		case "updateTodo":
-			ec.json.ObjectKey(field.Alias)
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
 				tmp2, err := coerceInt(tmp)
 				if err != nil {
 					ec.Error(err)
-					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -150,558 +169,984 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 				arg1 = tmp.(map[string]interface{})
 
 			}
-			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec._todo(field.Selections, res)
-			}
+
+			ec.wg.Add(1)
+			go func(field collectedField) {
+				defer ec.wg.Done()
+
+				res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				if res != nil {
+
+					node.UpdateTodo = ec._todo(field.Selections, res)
+
+				}
+
+			}(field)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
+}
+
+func (t *_MyMutationNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "createTodo":
+			w.ObjectKey("createTodo")
+			t.CreateTodo.Write(w)
+		case "updateTodo":
+			w.ObjectKey("updateTodo")
+			if t.UpdateTodo == nil {
+				w.Null()
+			} else {
+				t.UpdateTodo.Write(w)
+			}
+
+		}
+	}
+	w.EndObject()
+}
+
+type _MyQueryNode struct {
+	_fields []collectedField
+
+	Todo     Writer
+	LastTodo Writer
+	Todos    []Writer
+	__schema Writer
+	__type   Writer
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
-	groupedFieldSet := ec.collectFields(sel, myQueryImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) Writer {
+	node := _MyQueryNode{
+		_fields: ec.collectFields(sel, myQueryImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "todo":
-			ec.json.ObjectKey(field.Alias)
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
 				tmp2, err := coerceInt(tmp)
 				if err != nil {
 					ec.Error(err)
-					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
 			}
-			res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec._todo(field.Selections, res)
-			}
+
+			ec.wg.Add(1)
+			go func(field collectedField) {
+				defer ec.wg.Done()
+
+				res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				if res != nil {
+
+					node.Todo = ec._todo(field.Selections, res)
+
+				}
+
+			}(field)
 
 		case "lastTodo":
-			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.MyQuery_lastTodo(ec.ctx)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec._todo(field.Selections, res)
-			}
+
+			ec.wg.Add(1)
+			go func(field collectedField) {
+				defer ec.wg.Done()
+
+				res, err := ec.resolvers.MyQuery_lastTodo(ec.ctx)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				if res != nil {
+
+					node.LastTodo = ec._todo(field.Selections, res)
+
+				}
+
+			}(field)
 
 		case "todos":
-			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.MyQuery_todos(ec.ctx)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			ec.json.BeginArray()
-			for _, val := range res {
-				ec._todo(field.Selections, &val)
-			}
-			ec.json.EndArray()
+
+			ec.wg.Add(1)
+			go func(field collectedField) {
+				defer ec.wg.Done()
+
+				res, err := ec.resolvers.MyQuery_todos(ec.ctx)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				if res != nil {
+
+					for _, f := range res {
+						node.Todos = append(node.Todos, ec._todo(field.Selections, &f))
+					}
+
+				}
+
+			}(field)
 
 		case "__schema":
-			ec.json.ObjectKey(field.Alias)
 			res := ec.introspectSchema()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Schema(field.Selections, res)
+
+			if res != nil {
+
+				node.__schema = ec.___Schema(field.Selections, res)
+
 			}
 
 		case "__type":
-			ec.json.ObjectKey(field.Alias)
 			var arg0 string
 			if tmp, ok := field.Args["name"]; ok {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
-					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
 			}
 			res := ec.introspectType(arg0)
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
+
+			if res != nil {
+
+				node.__type = ec.___Type(field.Selections, res)
+
 			}
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
+}
+
+func (t *_MyQueryNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "todo":
+			w.ObjectKey("todo")
+			if t.Todo == nil {
+				w.Null()
+			} else {
+				t.Todo.Write(w)
+			}
+		case "lastTodo":
+			w.ObjectKey("lastTodo")
+			if t.LastTodo == nil {
+				w.Null()
+			} else {
+				t.LastTodo.Write(w)
+			}
+		case "todos":
+			w.ObjectKey("todos")
+			w.BeginArray()
+			for _, val := range t.Todos {
+				val.Write(w)
+			}
+			w.EndArray()
+		case "__schema":
+			w.ObjectKey("__schema")
+			if t.__schema == nil {
+				w.Null()
+			} else {
+				t.__schema.Write(w)
+			}
+		case "__type":
+			w.ObjectKey("__type")
+			if t.__type == nil {
+				w.Null()
+			} else {
+				t.__type.Write(w)
+			}
+
+		}
+	}
+	w.EndObject()
+}
+
+type _TodoNode struct {
+	_fields []collectedField
+
+	Id   int
+	Text string
+	Done bool
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _todo(sel []query.Selection, it *todo.Todo) {
-	groupedFieldSet := ec.collectFields(sel, todoImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) _todo(sel []query.Selection, it *todo.Todo) Writer {
+	node := _TodoNode{
+		_fields: ec.collectFields(sel, todoImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "id":
-			ec.json.ObjectKey(field.Alias)
 			res := it.ID
-			ec.json.Int(res)
+
+			node.Id = res
 
 		case "text":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Text
-			ec.json.String(res)
+
+			node.Text = res
 
 		case "done":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Done
-			ec.json.Bool(res)
+
+			node.Done = res
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
+}
+
+func (t *_TodoNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "id":
+			w.ObjectKey("id")
+			w.Int(t.Id)
+		case "text":
+			w.ObjectKey("text")
+			w.String(t.Text)
+		case "done":
+			w.ObjectKey("done")
+			w.Bool(t.Done)
+
+		}
+	}
+	w.EndObject()
+}
+
+type ___DirectiveNode struct {
+	_fields []collectedField
+
+	Name        string
+	Description *string
+	Locations   []string
+	Args        []Writer
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) {
-	groupedFieldSet := ec.collectFields(sel, __DirectiveImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) Writer {
+	node := ___DirectiveNode{
+		_fields: ec.collectFields(sel, __DirectiveImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "name":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			ec.json.String(res)
+
+			node.Name = res
 
 		case "description":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
+
+			node.Description = res
 
 		case "locations":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Locations()
-			ec.json.BeginArray()
-			for _, val := range res {
-				ec.json.String(val)
-			}
-			ec.json.EndArray()
+
+			node.Locations = res
 
 		case "args":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Args()
-			ec.json.BeginArray()
-			for _, val := range res {
-				if val == nil {
-					ec.json.Null()
-				} else {
-					ec.___InputValue(field.Selections, val)
+
+			if res != nil {
+
+				for _, f := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
 				}
+
 			}
-			ec.json.EndArray()
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
+}
+
+func (t *___DirectiveNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "name":
+			w.ObjectKey("name")
+			w.String(t.Name)
+		case "description":
+			w.ObjectKey("description")
+			if t.Description == nil {
+				w.Null()
+			} else {
+				w.String(*t.Description)
+			}
+		case "locations":
+			w.ObjectKey("locations")
+			w.BeginArray()
+			for _, val := range t.Locations {
+				w.String(val)
+			}
+			w.EndArray()
+		case "args":
+			w.ObjectKey("args")
+			w.BeginArray()
+			for _, val := range t.Args {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+
+		}
+	}
+	w.EndObject()
+}
+
+type ___EnumValueNode struct {
+	_fields []collectedField
+
+	Name              string
+	Description       *string
+	IsDeprecated      bool
+	DeprecationReason *string
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) {
-	groupedFieldSet := ec.collectFields(sel, __EnumValueImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) Writer {
+	node := ___EnumValueNode{
+		_fields: ec.collectFields(sel, __EnumValueImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "name":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			ec.json.String(res)
+
+			node.Name = res
 
 		case "description":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			if res == nil {
-				ec.json.Null()
+
+			node.Description = res
+
+		case "isDeprecated":
+			res := it.IsDeprecated()
+
+			node.IsDeprecated = res
+
+		case "deprecationReason":
+			res := it.DeprecationReason()
+
+			node.DeprecationReason = res
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return &node
+}
+
+func (t *___EnumValueNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "name":
+			w.ObjectKey("name")
+			w.String(t.Name)
+		case "description":
+			w.ObjectKey("description")
+			if t.Description == nil {
+				w.Null()
 			} else {
-				ec.json.String(*res)
+				w.String(*t.Description)
+			}
+		case "isDeprecated":
+			w.ObjectKey("isDeprecated")
+			w.Bool(t.IsDeprecated)
+		case "deprecationReason":
+			w.ObjectKey("deprecationReason")
+			if t.DeprecationReason == nil {
+				w.Null()
+			} else {
+				w.String(*t.DeprecationReason)
+			}
+
+		}
+	}
+	w.EndObject()
+}
+
+type ___FieldNode struct {
+	_fields []collectedField
+
+	Name              string
+	Description       *string
+	Args              []Writer
+	Type              Writer
+	IsDeprecated      bool
+	DeprecationReason *string
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) Writer {
+	node := ___FieldNode{
+		_fields: ec.collectFields(sel, __FieldImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
+		switch field.Name {
+		case "name":
+			res := it.Name()
+
+			node.Name = res
+
+		case "description":
+			res := it.Description()
+
+			node.Description = res
+
+		case "args":
+			res := it.Args()
+
+			if res != nil {
+
+				for _, f := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
+				}
+
+			}
+
+		case "type":
+			res := it.Type()
+
+			if res != nil {
+
+				node.Type = ec.___Type(field.Selections, res)
+
 			}
 
 		case "isDeprecated":
-			ec.json.ObjectKey(field.Alias)
 			res := it.IsDeprecated()
-			ec.json.Bool(res)
+
+			node.IsDeprecated = res
 
 		case "deprecationReason":
-			ec.json.ObjectKey(field.Alias)
 			res := it.DeprecationReason()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
+
+			node.DeprecationReason = res
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
 }
 
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) {
-	groupedFieldSet := ec.collectFields(sel, __FieldImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (t *___FieldNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
 		switch field.Name {
 		case "name":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Name()
-			ec.json.String(res)
-
+			w.ObjectKey("name")
+			w.String(t.Name)
 		case "description":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Description()
-			if res == nil {
-				ec.json.Null()
+			w.ObjectKey("description")
+			if t.Description == nil {
+				w.Null()
 			} else {
-				ec.json.String(*res)
+				w.String(*t.Description)
 			}
-
 		case "args":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Args()
-			ec.json.BeginArray()
-			for _, val := range res {
+			w.ObjectKey("args")
+			w.BeginArray()
+			for _, val := range t.Args {
 				if val == nil {
-					ec.json.Null()
+					w.Null()
 				} else {
-					ec.___InputValue(field.Selections, val)
+					val.Write(w)
 				}
 			}
-			ec.json.EndArray()
-
+			w.EndArray()
 		case "type":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Type()
-			if res == nil {
-				ec.json.Null()
+			w.ObjectKey("type")
+			if t.Type == nil {
+				w.Null()
 			} else {
-				ec.___Type(field.Selections, res)
+				t.Type.Write(w)
 			}
-
 		case "isDeprecated":
-			ec.json.ObjectKey(field.Alias)
-			res := it.IsDeprecated()
-			ec.json.Bool(res)
-
+			w.ObjectKey("isDeprecated")
+			w.Bool(t.IsDeprecated)
 		case "deprecationReason":
-			ec.json.ObjectKey(field.Alias)
-			res := it.DeprecationReason()
-			if res == nil {
-				ec.json.Null()
+			w.ObjectKey("deprecationReason")
+			if t.DeprecationReason == nil {
+				w.Null()
 			} else {
-				ec.json.String(*res)
+				w.String(*t.DeprecationReason)
 			}
 
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+	w.EndObject()
+}
+
+type ___InputValueNode struct {
+	_fields []collectedField
+
+	Name         string
+	Description  *string
+	Type         Writer
+	DefaultValue *string
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) {
-	groupedFieldSet := ec.collectFields(sel, __InputValueImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) Writer {
+	node := ___InputValueNode{
+		_fields: ec.collectFields(sel, __InputValueImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "name":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			ec.json.String(res)
+
+			node.Name = res
 
 		case "description":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
+
+			node.Description = res
 
 		case "type":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Type()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
+
+			if res != nil {
+
+				node.Type = ec.___Type(field.Selections, res)
+
 			}
 
 		case "defaultValue":
-			ec.json.ObjectKey(field.Alias)
 			res := it.DefaultValue()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
+
+			node.DefaultValue = res
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
+}
+
+func (t *___InputValueNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "name":
+			w.ObjectKey("name")
+			w.String(t.Name)
+		case "description":
+			w.ObjectKey("description")
+			if t.Description == nil {
+				w.Null()
+			} else {
+				w.String(*t.Description)
+			}
+		case "type":
+			w.ObjectKey("type")
+			if t.Type == nil {
+				w.Null()
+			} else {
+				t.Type.Write(w)
+			}
+		case "defaultValue":
+			w.ObjectKey("defaultValue")
+			if t.DefaultValue == nil {
+				w.Null()
+			} else {
+				w.String(*t.DefaultValue)
+			}
+
+		}
+	}
+	w.EndObject()
+}
+
+type ___SchemaNode struct {
+	_fields []collectedField
+
+	Types            []Writer
+	QueryType        Writer
+	MutationType     Writer
+	SubscriptionType Writer
+	Directives       []Writer
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) {
-	groupedFieldSet := ec.collectFields(sel, __SchemaImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) Writer {
+	node := ___SchemaNode{
+		_fields: ec.collectFields(sel, __SchemaImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "types":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Types()
-			ec.json.BeginArray()
-			for _, val := range res {
-				if val == nil {
-					ec.json.Null()
-				} else {
-					ec.___Type(field.Selections, val)
+
+			if res != nil {
+
+				for _, f := range res {
+					node.Types = append(node.Types, ec.___Type(field.Selections, f))
 				}
+
 			}
-			ec.json.EndArray()
 
 		case "queryType":
-			ec.json.ObjectKey(field.Alias)
 			res := it.QueryType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
+
+			if res != nil {
+
+				node.QueryType = ec.___Type(field.Selections, res)
+
 			}
 
 		case "mutationType":
-			ec.json.ObjectKey(field.Alias)
 			res := it.MutationType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
+
+			if res != nil {
+
+				node.MutationType = ec.___Type(field.Selections, res)
+
 			}
 
 		case "subscriptionType":
-			ec.json.ObjectKey(field.Alias)
 			res := it.SubscriptionType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
+
+			if res != nil {
+
+				node.SubscriptionType = ec.___Type(field.Selections, res)
+
 			}
 
 		case "directives":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Directives()
-			ec.json.BeginArray()
-			for _, val := range res {
-				if val == nil {
-					ec.json.Null()
-				} else {
-					ec.___Directive(field.Selections, val)
+
+			if res != nil {
+
+				for _, f := range res {
+					node.Directives = append(node.Directives, ec.___Directive(field.Selections, f))
 				}
+
 			}
-			ec.json.EndArray()
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
+}
+
+func (t *___SchemaNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "types":
+			w.ObjectKey("types")
+			w.BeginArray()
+			for _, val := range t.Types {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+		case "queryType":
+			w.ObjectKey("queryType")
+			if t.QueryType == nil {
+				w.Null()
+			} else {
+				t.QueryType.Write(w)
+			}
+		case "mutationType":
+			w.ObjectKey("mutationType")
+			if t.MutationType == nil {
+				w.Null()
+			} else {
+				t.MutationType.Write(w)
+			}
+		case "subscriptionType":
+			w.ObjectKey("subscriptionType")
+			if t.SubscriptionType == nil {
+				w.Null()
+			} else {
+				t.SubscriptionType.Write(w)
+			}
+		case "directives":
+			w.ObjectKey("directives")
+			w.BeginArray()
+			for _, val := range t.Directives {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+
+		}
+	}
+	w.EndObject()
+}
+
+type ___TypeNode struct {
+	_fields []collectedField
+
+	Kind          string
+	Name          *string
+	Description   *string
+	Fields        []Writer
+	Interfaces    []Writer
+	PossibleTypes []Writer
+	EnumValues    []Writer
+	InputFields   []Writer
+	OfType        Writer
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) {
-	groupedFieldSet := ec.collectFields(sel, __TypeImplementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
+func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) Writer {
+	node := ___TypeNode{
+		_fields: ec.collectFields(sel, __TypeImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
 		switch field.Name {
 		case "kind":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Kind()
-			ec.json.String(res)
+
+			node.Kind = res
 
 		case "name":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Name()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
+
+			node.Name = res
 
 		case "description":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
+
+			node.Description = res
 
 		case "fields":
-			ec.json.ObjectKey(field.Alias)
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
 				tmp2, err := coerceBool(tmp)
 				if err != nil {
 					ec.Error(err)
-					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
 			}
 			res := it.Fields(arg0)
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___Field(field.Selections, val)
-					}
+
+			if res != nil {
+
+				for _, f := range res {
+					node.Fields = append(node.Fields, ec.___Field(field.Selections, f))
 				}
-				ec.json.EndArray()
+
 			}
 
 		case "interfaces":
-			ec.json.ObjectKey(field.Alias)
 			res := it.Interfaces()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___Type(field.Selections, val)
-					}
+
+			if res != nil {
+
+				for _, f := range res {
+					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, f))
 				}
-				ec.json.EndArray()
+
 			}
 
 		case "possibleTypes":
-			ec.json.ObjectKey(field.Alias)
 			res := it.PossibleTypes()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___Type(field.Selections, val)
-					}
+
+			if res != nil {
+
+				for _, f := range res {
+					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, f))
 				}
-				ec.json.EndArray()
+
 			}
 
 		case "enumValues":
-			ec.json.ObjectKey(field.Alias)
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
 				tmp2, err := coerceBool(tmp)
 				if err != nil {
 					ec.Error(err)
-					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
 			}
 			res := it.EnumValues(arg0)
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___EnumValue(field.Selections, val)
-					}
+
+			if res != nil {
+
+				for _, f := range res {
+					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, f))
 				}
-				ec.json.EndArray()
+
 			}
 
 		case "inputFields":
-			ec.json.ObjectKey(field.Alias)
 			res := it.InputFields()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___InputValue(field.Selections, val)
-					}
+
+			if res != nil {
+
+				for _, f := range res {
+					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, f))
 				}
-				ec.json.EndArray()
+
 			}
 
 		case "ofType":
-			ec.json.ObjectKey(field.Alias)
 			res := it.OfType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
+
+			if res != nil {
+
+				node.OfType = ec.___Type(field.Selections, res)
+
 			}
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	ec.json.EndObject()
+
+	return &node
+}
+
+func (t *___TypeNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "kind":
+			w.ObjectKey("kind")
+			w.String(t.Kind)
+		case "name":
+			w.ObjectKey("name")
+			if t.Name == nil {
+				w.Null()
+			} else {
+				w.String(*t.Name)
+			}
+		case "description":
+			w.ObjectKey("description")
+			if t.Description == nil {
+				w.Null()
+			} else {
+				w.String(*t.Description)
+			}
+		case "fields":
+			w.ObjectKey("fields")
+			w.BeginArray()
+			for _, val := range t.Fields {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+		case "interfaces":
+			w.ObjectKey("interfaces")
+			w.BeginArray()
+			for _, val := range t.Interfaces {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+		case "possibleTypes":
+			w.ObjectKey("possibleTypes")
+			w.BeginArray()
+			for _, val := range t.PossibleTypes {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+		case "enumValues":
+			w.ObjectKey("enumValues")
+			w.BeginArray()
+			for _, val := range t.EnumValues {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+		case "inputFields":
+			w.ObjectKey("inputFields")
+			w.BeginArray()
+			for _, val := range t.InputFields {
+				if val == nil {
+					w.Null()
+				} else {
+					val.Write(w)
+				}
+			}
+			w.EndArray()
+		case "ofType":
+			w.ObjectKey("ofType")
+			if t.OfType == nil {
+				w.Null()
+			} else {
+				t.OfType.Write(w)
+			}
+
+		}
+	}
+	w.EndObject()
 }
 
 var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")

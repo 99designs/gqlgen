@@ -56,6 +56,7 @@ func main() {
 			"time":    "time",
 			"reflect": "reflect",
 			"strings": "strings",
+			"sync":    "sync",
 
 			"mapstructure":  "github.com/mitchellh/mapstructure",
 			"errors":        "github.com/vektah/graphql-go/errors",

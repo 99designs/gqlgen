@@ -100,7 +100,7 @@ func (r *Type) Description() *string {
 	return nil
 }
 
-func (r *Type) Fields(includeDeprecated bool) *[]*Field {
+func (r *Type) Fields(includeDeprecated bool) []*Field {
 	var fields schema.FieldList
 	switch t := r.typ.(type) {
 	case *schema.Object:
@@ -117,10 +117,10 @@ func (r *Type) Fields(includeDeprecated bool) *[]*Field {
 			l = append(l, &Field{f})
 		}
 	}
-	return &l
+	return l
 }
 
-func (r *Type) Interfaces() *[]*Type {
+func (r *Type) Interfaces() []*Type {
 	t, ok := r.typ.(*schema.Object)
 	if !ok {
 		return nil
@@ -130,10 +130,10 @@ func (r *Type) Interfaces() *[]*Type {
 	for i, intf := range t.Interfaces {
 		l[i] = &Type{intf}
 	}
-	return &l
+	return l
 }
 
-func (r *Type) PossibleTypes() *[]*Type {
+func (r *Type) PossibleTypes() []*Type {
 	var possibleTypes []*schema.Object
 	switch t := r.typ.(type) {
 	case *schema.Interface:
@@ -148,10 +148,10 @@ func (r *Type) PossibleTypes() *[]*Type {
 	for i, intf := range possibleTypes {
 		l[i] = &Type{intf}
 	}
-	return &l
+	return l
 }
 
-func (r *Type) EnumValues(includeDeprecated bool) *[]*EnumValue {
+func (r *Type) EnumValues(includeDeprecated bool) []*EnumValue {
 	t, ok := r.typ.(*schema.Enum)
 	if !ok {
 		return nil
@@ -163,10 +163,10 @@ func (r *Type) EnumValues(includeDeprecated bool) *[]*EnumValue {
 			l = append(l, &EnumValue{v})
 		}
 	}
-	return &l
+	return l
 }
 
-func (r *Type) InputFields() *[]*InputValue {
+func (r *Type) InputFields() []*InputValue {
 	t, ok := r.typ.(*schema.InputObject)
 	if !ok {
 		return nil
@@ -176,7 +176,7 @@ func (r *Type) InputFields() *[]*InputValue {
 	for i, v := range t.Values {
 		l[i] = &InputValue{v}
 	}
-	return &l
+	return l
 }
 
 func (r *Type) OfType() *Type {

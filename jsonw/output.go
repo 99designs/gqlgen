@@ -16,6 +16,7 @@ var openBracket = []byte(`[`)
 var closeBracket = []byte(`]`)
 var colon = []byte(`:`)
 var comma = []byte(`,`)
+var NullWriter = &litWriter{nullLit}
 
 type Writer struct {
 	out   io.Writer
@@ -110,4 +111,12 @@ func (w *Writer) BeginArray() {
 func (w *Writer) EndArray() {
 	w.first = false
 	w.out.Write(closeBracket)
+}
+
+type litWriter struct {
+	val []byte
+}
+
+func (l *litWriter) Write(writer *Writer) {
+	writer.out.Write(l.val)
 }

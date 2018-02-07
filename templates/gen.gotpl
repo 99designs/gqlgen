@@ -35,50 +35,56 @@ func NewResolver(resolvers Resolvers) relay.Resolver {
 			return []*errors.QueryError{errors.Errorf("%s", err)}
 		}
 
-		if op.Type != query.Query && op.Type != query.Mutation {
-			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
-		}
-
 		c := executionContext{
 			resolvers: resolvers,
 			variables: variables,
 			doc:       doc,
 			ctx:       ctx,
-			json:      jsonw.New(w),
 		}
+
+		var result interface {
+			Write(w *jsonw.Writer)
+		}
+
+		if op.Type == query.Query {
+			result = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
+		} else if op.Type == query.Mutation {
+			result = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
+		} else {
+			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
+		}
+
+        c.wg.Wait()
 
 		// TODO: parallelize if query.
 
-		c.json.BeginObject()
+		writer := jsonw.New(w)
+		writer.BeginObject()
 
-		c.json.ObjectKey("data")
-
-		if op.Type == query.Query {
-			c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
-		} else if op.Type == query.Mutation {
-			c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
-		} else {
-			c.Errorf("unsupported operation %s", op.Type)
-			c.json.Null()
-		}
+		writer.ObjectKey("data")
+		result.Write(writer)
 
 		if len(c.Errors) > 0 {
-			c.json.ObjectKey("errors")
+			writer.ObjectKey("errors")
 			errors.WriteErrors(w, c.Errors)
 		}
 
-		c.json.EndObject()
+		writer.EndObject()
 		return nil
 	}
 }
 
 type executionContext struct {
 	errors.Builder
-	json      *jsonw.Writer
 	resolvers Resolvers
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
+	wg        sync.WaitGroup
+}
+
+type Writer interface {
+    Write(w *jsonw.Writer)
 }
 
 var (
@@ -88,61 +94,23 @@ var (
 )
 
 {{range $object := .Objects }}
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) {
-	groupedFieldSet := ec.collectFields(sel, {{$object.Type.GraphQLName|lcFirst}}Implementors, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-        {{range $field := $object.Fields -}}
-		case "{{$field.GraphQLName}}":
-            ec.json.ObjectKey(field.Alias)
-            {{ template "args" $field.Args -}}
-
-            {{- if $field.VarName -}}
-                res := {{$field.VarName}}
-            {{ else if $field.MethodName -}}
-                {{ if $field.NoErr -}}
-                    res := {{$field.MethodName}}({{ $field.CallArgs $object }})
-                {{ else -}}
-                    res, err := {{$field.MethodName}}({{ $field.CallArgs $object }})
-                    if err != nil {
-                        ec.Error(err)
-                        ec.json.Null()
-                        continue
-                    }
-                {{ end -}}
-            {{ else -}}
-                res, err := ec.resolvers.{{ $object.Name }}_{{ $field.GraphQLName }}({{ $field.CallArgs $object }})
-                if err != nil {
-                    ec.Error(err)
-                    ec.json.Null()
-                    continue
-                }
-            {{ end -}}
-
-            {{ $field.Type.WriteJson "res" }}
-
-        {{ end}}
-        default:
-            panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	ec.json.EndObject()
-}
+{{ template "objectNode" $object }}
+{{ template "fetch" $object }}
+{{ template "writejson" $object }}
 {{end}}
 
 {{ range $interface := .Interfaces }}
-func (ec *executionContext) _{{$interface.Type.GraphQLName|lcFirst}}(sel []query.Selection, it {{$interface.Type.Local}}) {
+
+func (ec *executionContext) _{{$interface.Type.GraphQLName|lcFirst}}(sel []query.Selection, it {{$interface.Type.Local}}) Writer {
     switch it := it.(type) {
     case nil:
-        ec.json.Null()
+        return jsonw.NullWriter
     {{range $implementor := $interface.Type.Implementors}}
     case {{$implementor.Local}}:
-        ec._{{$implementor.GraphQLName|lcFirst}}(sel, &it)
+        return ec._{{$implementor.GraphQLName|lcFirst}}(sel, &it)
 
     case *{{$implementor.Local}}:
-        ec._{{$implementor.GraphQLName|lcFirst}}(sel, it)
+        return ec._{{$implementor.GraphQLName|lcFirst}}(sel, it)
 
     {{end}}
     default:

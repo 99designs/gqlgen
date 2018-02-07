@@ -16,7 +16,7 @@ func main() {
 
 	http.Handle("/query", relay.Handler(gen.NewResolver(todo.NewResolver())))
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 
 var page = []byte(`

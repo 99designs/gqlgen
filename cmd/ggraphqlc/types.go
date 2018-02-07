@@ -29,55 +29,42 @@ func (t kind) IsPtr() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
 }
 
+func (t kind) IsSlice() bool {
+	return len(t.Modifiers) > 0 && t.Modifiers[0] == modList
+}
+
+func (t kind) Elem() kind {
+	if len(t.Modifiers) == 0 {
+		return t
+	}
+
+	t.Modifiers = t.Modifiers[1:]
+	return t
+}
+
+func (t kind) ByRef(name string) string {
+	needPtr := len(t.Implementors) == 0
+	if needPtr && !t.IsPtr() {
+		return "&" + name
+	}
+	if !needPtr && t.IsPtr() {
+		return "*" + name
+	}
+	return name
+}
+
+func (t kind) ByVal(name string) string {
+	if t.IsPtr() {
+		return "*" + name
+	}
+	return name
+}
+
 func (t kind) FullName() string {
 	if t.ImportedAs == "" {
 		return t.Name
 	}
 	return t.ImportedAs + "." + t.Name
-}
-
-func (t kind) WriteJson(val string) string {
-	return t.doWriteJson(val, t.Modifiers, false)
-}
-
-// should be in the template, but its recursive and has a bunch fo args
-func (t kind) doWriteJson(val string, remainingMods []string, isPtr bool) string {
-	switch {
-	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
-		return fmt.Sprintf(
-			"if %s == nil { ec.json.Null() } else { %s } ",
-			val, t.doWriteJson(val, remainingMods[1:], true),
-		)
-
-	case len(remainingMods) > 0 && remainingMods[0] == modList:
-		if isPtr {
-			val = "*" + val
-		}
-
-		return strings.Join([]string{
-			"ec.json.BeginArray()",
-			fmt.Sprintf("for _, val := range %s {", val),
-			t.doWriteJson("val", remainingMods[1:], false),
-			"}",
-			"ec.json.EndArray()",
-		}, "\n")
-
-	case t.Scalar:
-		if isPtr {
-			val = "*" + val
-		}
-		return fmt.Sprintf("ec.json.%s(%s)", ucFirst(t.Name), val)
-
-	default:
-		needPtr := len(t.Implementors) == 0
-		if needPtr && !isPtr {
-			val = "&" + val
-		}
-		if !needPtr && isPtr {
-			val = "*" + val
-		}
-		return fmt.Sprintf("ec._%s(field.Selections, %s)", lcFirst(t.GraphQLName), val)
-	}
 }
 
 type object struct {
@@ -134,6 +121,43 @@ func (f *Field) CallArgs(object object) string {
 	}
 
 	return strings.Join(args, ", ")
+}
+
+// should be in the template, but its recursive and has a bunch fo args
+func (f *Field) WriteJson() string {
+	return f.doWriteJson("t."+ucFirst(f.GraphQLName), f.Type.Modifiers, false)
+}
+
+func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool) string {
+	switch {
+	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
+		return fmt.Sprintf(
+			"if %s == nil { w.Null() } else { %s } ",
+			val, f.doWriteJson(val, remainingMods[1:], true),
+		)
+
+	case len(remainingMods) > 0 && remainingMods[0] == modList:
+		if isPtr {
+			val = "*" + val
+		}
+
+		return strings.Join([]string{
+			"w.BeginArray()",
+			fmt.Sprintf("for _, val := range %s {", val),
+			f.doWriteJson("val", remainingMods[1:], false),
+			"}",
+			"w.EndArray()",
+		}, "\n")
+
+	case f.Type.Scalar:
+		if isPtr {
+			val = "*" + val
+		}
+		return fmt.Sprintf("w.%s(%s)", ucFirst(f.Type.Name), val)
+
+	default:
+		return fmt.Sprintf("%s.Write(w)", val)
+	}
 }
 
 func (o *object) GetField(name string) *Field {

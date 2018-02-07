@@ -6,6 +6,8 @@ import (
 	"context"
 	"errors"
 
+	"time"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -33,6 +35,7 @@ func NewResolver() *TodoResolver {
 }
 
 func (r *TodoResolver) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
+	time.Sleep(220 * time.Millisecond)
 	for _, todo := range r.todos {
 		if todo.ID == id {
 			return &todo, nil

@@ -173,6 +173,7 @@ func (w *writer) writeEvaluateMethod(object object, field Field) {
 		w.line("res, err := %s(%s)", methodName, getFuncArgs(object, field))
 		w.line("if err != nil {")
 		w.line("	ec.Error(err)")
+		w.line("	ec.json.Null()")
 		w.line("	continue")
 		w.line("}")
 	}
@@ -191,11 +192,13 @@ func (w *writer) writeArgs(field Field) {
 			w.line("		tmpDate, err := time.Parse(time.RFC3339, tmpStr)")
 			w.line("		if err != nil {")
 			w.line("			ec.Error(err)")
+			w.line("			ec.json.Null()")
 			w.line("			continue")
 			w.line("		}")
 			w.line("		arg%d = %stmpDate", i, prefix)
 			w.line("	} else {")
 			w.line(`		ec.Errorf("Time '%s' should be RFC3339 formatted string")`, arg.Name)
+			w.line("		ec.json.Null()")
 			w.line("		continue")
 			w.line("	}")
 			w.line("}")
@@ -213,6 +216,7 @@ func (w *writer) writeArgs(field Field) {
 			w.line("	tmp2, err := coerce%s(tmp)", ucFirst(arg.Type.Name))
 			w.line("	if err != nil {")
 			w.line("		ec.Error(err)")
+			w.line("		ec.json.Null()")
 			w.line("		continue")
 			w.line("	}")
 			w.line("	arg%d = %stmp2", i, prefix)
@@ -221,6 +225,8 @@ func (w *writer) writeArgs(field Field) {
 			w.line("err := unpackComplexArg(&arg%d, field.Args[%s])", i, strconv.Quote(arg.Name))
 			w.line("if err != nil {")
 			w.line("	ec.Error(err)")
+			w.line("	ec.json.Null()")
+			w.line("	continue")
 			w.line("}")
 		}
 	}

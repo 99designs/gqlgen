@@ -79,6 +79,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *starwars.Droid) {
 			res, err := ec.resolvers.Droid_friends(ec.ctx, it)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -108,6 +109,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *starwars.Droid) {
 				tmp2, err := coerceInt(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = &tmp2
@@ -117,6 +119,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *starwars.Droid) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg1 = &tmp2
@@ -124,6 +127,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *starwars.Droid) {
 			res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, it, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec._friendsConnection(field.Selections, &res)
@@ -168,6 +172,7 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *starwa
 			res, err := it.Edges()
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -182,6 +187,7 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *starwa
 			res, err := it.Friends()
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -288,6 +294,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) {
 			res, err := ec.resolvers.Human_friends(ec.ctx, it)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -317,6 +324,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) {
 				tmp2, err := coerceInt(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = &tmp2
@@ -326,6 +334,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg1 = &tmp2
@@ -333,6 +342,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) {
 			res, err := ec.resolvers.Human_friendsConnection(ec.ctx, it, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec._friendsConnection(field.Selections, &res)
@@ -353,6 +363,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) {
 			res, err := ec.resolvers.Human_starships(ec.ctx, it)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -381,6 +392,7 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -389,10 +401,13 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) {
 			err := unpackComplexArg(&arg1, field.Args["review"])
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
+				continue
 			}
 			res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			if res == nil {
@@ -451,6 +466,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = &tmp2
@@ -458,6 +474,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			switch it := res.(type) {
@@ -483,6 +500,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -493,17 +511,20 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 					tmpDate, err := time.Parse(time.RFC3339, tmpStr)
 					if err != nil {
 						ec.Error(err)
+						ec.json.Null()
 						continue
 					}
 					arg1 = &tmpDate
 				} else {
 					ec.Errorf("Time 'since' should be RFC3339 formatted string")
+					ec.json.Null()
 					continue
 				}
 			}
 			res, err := ec.resolvers.Query_reviews(ec.ctx, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -520,6 +541,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -527,6 +549,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -560,6 +583,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -567,6 +591,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.Query_character(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			switch it := res.(type) {
@@ -592,6 +617,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -599,6 +625,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			if res == nil {
@@ -615,6 +642,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -622,6 +650,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.Query_human(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			if res == nil {
@@ -638,6 +667,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -645,6 +675,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			if res == nil {
@@ -671,6 +702,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -1074,6 +1106,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				tmp2, err := coerceBool(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -1137,6 +1170,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				tmp2, err := coerceBool(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -1413,6 +1447,8 @@ func coerceBool(v interface{}) (bool, error) {
 		return "true" == strings.ToLower(v), nil
 	case int:
 		return v != 0, nil
+	case bool:
+		return v, nil
 	default:
 		return false, fmt.Errorf("%T is not a bool", v)
 	}

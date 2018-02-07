@@ -55,6 +55,7 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -62,6 +63,7 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 			res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec._todo(field.Selections, &res)
@@ -74,6 +76,7 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 				tmp2, err := coerceInt(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -85,6 +88,7 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			if res == nil {
@@ -113,6 +117,7 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceInt(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -120,6 +125,7 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			if res == nil {
@@ -134,6 +140,7 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.MyQuery_lastTodo(ec.ctx)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			if res == nil {
@@ -148,6 +155,7 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
 			res, err := ec.resolvers.MyQuery_todos(ec.ctx)
 			if err != nil {
 				ec.Error(err)
+				ec.json.Null()
 				continue
 			}
 			ec.json.BeginArray()
@@ -174,6 +182,7 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
 				tmp2, err := coerceString(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -543,6 +552,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				tmp2, err := coerceBool(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -606,6 +616,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				tmp2, err := coerceBool(tmp)
 				if err != nil {
 					ec.Error(err)
+					ec.json.Null()
 					continue
 				}
 				arg0 = tmp2
@@ -882,6 +893,8 @@ func coerceBool(v interface{}) (bool, error) {
 		return "true" == strings.ToLower(v), nil
 	case int:
 		return v != 0, nil
+	case bool:
+		return v, nil
 	default:
 		return false, fmt.Errorf("%T is not a bool", v)
 	}

@@ -237,6 +237,8 @@ func coerceBool(v interface{}) (bool, error) {
 		return "true" == strings.ToLower(v), nil
 	case int:
 		return v != 0, nil
+	case bool:
+		return v, nil
 	default:
 		return false, fmt.Errorf("%T is not a bool", v)
 	}

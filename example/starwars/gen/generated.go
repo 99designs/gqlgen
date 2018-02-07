@@ -149,7 +149,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *starwars.Droid) {
 			}
 			ec.json.BeginArray()
 			for _, val := range res {
-				ec._character(field.Selections, &val)
+				ec._character(field.Selections, val)
 			}
 			ec.json.EndArray()
 
@@ -239,7 +239,7 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *starwa
 			}
 			ec.json.BeginArray()
 			for _, val := range res {
-				ec._character(field.Selections, &val)
+				ec._character(field.Selections, val)
 			}
 			ec.json.EndArray()
 
@@ -269,7 +269,7 @@ func (ec *executionContext) _friendsEdge(sel []query.Selection, it *starwars.Fri
 		case "node":
 			ec.json.ObjectKey(field.Alias)
 			res := it.Node
-			ec._character(field.Selections, &res)
+			ec._character(field.Selections, res)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -324,7 +324,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) {
 			}
 			ec.json.BeginArray()
 			for _, val := range res {
-				ec._character(field.Selections, &val)
+				ec._character(field.Selections, val)
 			}
 			ec.json.EndArray()
 
@@ -484,7 +484,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				ec.json.Null()
 				continue
 			}
-			ec._character(field.Selections, &res)
+			ec._character(field.Selections, res)
 
 		case "reviews":
 			ec.json.ObjectKey(field.Alias)
@@ -546,7 +546,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 			}
 			ec.json.BeginArray()
 			for _, val := range res {
-				ec._searchResult(field.Selections, &val)
+				ec._searchResult(field.Selections, val)
 			}
 			ec.json.EndArray()
 
@@ -568,7 +568,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) {
 				ec.json.Null()
 				continue
 			}
-			ec._character(field.Selections, &res)
+			ec._character(field.Selections, res)
 
 		case "droid":
 			ec.json.ObjectKey(field.Alias)
@@ -1161,7 +1161,29 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	ec.json.EndObject()
 }
 
-func (ec *executionContext) _searchResult(sel []query.Selection, it *starwars.SearchResult) {
+func (ec *executionContext) _character(sel []query.Selection, it starwars.Character) {
+	switch it := it.(type) {
+	case nil:
+		ec.json.Null()
+
+	case starwars.Human:
+		ec._human(sel, &it)
+
+	case *starwars.Human:
+		ec._human(sel, it)
+
+	case starwars.Droid:
+		ec._droid(sel, &it)
+
+	case *starwars.Droid:
+		ec._droid(sel, it)
+
+	default:
+		panic(fmt.Errorf("unexpected type %T", it))
+	}
+}
+
+func (ec *executionContext) _searchResult(sel []query.Selection, it starwars.SearchResult) {
 	switch it := it.(type) {
 	case nil:
 		ec.json.Null()
@@ -1183,28 +1205,6 @@ func (ec *executionContext) _searchResult(sel []query.Selection, it *starwars.Se
 
 	case *starwars.Starship:
 		ec._starship(sel, it)
-
-	default:
-		panic(fmt.Errorf("unexpected type %T", it))
-	}
-}
-
-func (ec *executionContext) _character(sel []query.Selection, it starwars.Character) {
-	switch it := it.(type) {
-	case nil:
-		ec.json.Null()
-
-	case starwars.Human:
-		ec._human(sel, &it)
-
-	case *starwars.Human:
-		ec._human(sel, it)
-
-	case starwars.Droid:
-		ec._droid(sel, &it)
-
-	case *starwars.Droid:
-		ec._droid(sel, it)
 
 	default:
 		panic(fmt.Errorf("unexpected type %T", it))

@@ -69,8 +69,12 @@ func (t kind) doWriteJson(val string, remainingMods []string, isPtr bool) string
 		return fmt.Sprintf("ec.json.%s(%s)", ucFirst(t.Name), val)
 
 	default:
-		if !isPtr {
+		needPtr := len(t.Implementors) == 0
+		if needPtr && !isPtr {
 			val = "&" + val
+		}
+		if !needPtr && isPtr {
+			val = "*" + val
 		}
 		return fmt.Sprintf("ec._%s(field.Selections, %s)", lcFirst(t.GraphQLName), val)
 	}

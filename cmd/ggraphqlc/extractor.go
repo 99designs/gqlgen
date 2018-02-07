@@ -87,6 +87,10 @@ func (e *extractor) extract() {
 	sort.Slice(e.Objects, func(i, j int) bool {
 		return strings.Compare(e.Objects[i].Name, e.Objects[j].Name) == -1
 	})
+
+	sort.Slice(e.Interfaces, func(i, j int) bool {
+		return strings.Compare(e.Interfaces[i].Name, e.Interfaces[j].Name) == -1
+	})
 }
 
 func (e *extractor) introspect() error {
@@ -258,6 +262,9 @@ func (e *extractor) buildType(t common.Type) kind {
 		case *schema.Union:
 			t := e.getType(val.Name)
 			t.Modifiers = modifiers
+			if t.Modifiers[len(t.Modifiers)-1] == modPtr {
+				t.Modifiers = t.Modifiers[0 : len(t.Modifiers)-1]
+			}
 
 			for _, implementor := range val.PossibleTypes {
 				t.Implementors = append(t.Implementors, e.getType(implementor.Name))

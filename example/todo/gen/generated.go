@@ -3,676 +3,33 @@
 package gen
 
 import (
-	"context"
-	"fmt"
-	"io"
-	"reflect"
-	"strconv"
-	"strings"
-	"time"
+	context "context"
+	fmt "fmt"
+	io "io"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+	time "time"
 
-	"github.com/mitchellh/mapstructure"
-	"github.com/vektah/graphql-go/errors"
-	"github.com/vektah/graphql-go/example/todo"
-	"github.com/vektah/graphql-go/introspection"
-	"github.com/vektah/graphql-go/jsonw"
-	"github.com/vektah/graphql-go/query"
-	"github.com/vektah/graphql-go/relay"
-	"github.com/vektah/graphql-go/schema"
-	"github.com/vektah/graphql-go/validation"
+	mapstructure "github.com/mitchellh/mapstructure"
+	errors "github.com/vektah/graphql-go/errors"
+	todo "github.com/vektah/graphql-go/example/todo"
+	introspection "github.com/vektah/graphql-go/introspection"
+	jsonw "github.com/vektah/graphql-go/jsonw"
+	query "github.com/vektah/graphql-go/query"
+	relay "github.com/vektah/graphql-go/relay"
+	schema "github.com/vektah/graphql-go/schema"
+	validation "github.com/vektah/graphql-go/validation"
 )
 
 type Resolvers interface {
 	MyMutation_createTodo(ctx context.Context, text string) (todo.Todo, error)
 	MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*todo.Todo, error)
+
 	MyQuery_todo(ctx context.Context, id int) (*todo.Todo, error)
 	MyQuery_lastTodo(ctx context.Context) (*todo.Todo, error)
 	MyQuery_todos(ctx context.Context) ([]todo.Todo, error)
 }
-
-var (
-	myMutationSatisfies   = []string{"MyMutation"}
-	myQuerySatisfies      = []string{"MyQuery"}
-	todoSatisfies         = []string{"Todo"}
-	__DirectiveSatisfies  = []string{"__Directive"}
-	__EnumValueSatisfies  = []string{"__EnumValue"}
-	__FieldSatisfies      = []string{"__Field"}
-	__InputValueSatisfies = []string{"__InputValue"}
-	__SchemaSatisfies     = []string{"__Schema"}
-	__TypeSatisfies       = []string{"__Type"}
-)
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) {
-	groupedFieldSet := ec.collectFields(sel, myMutationSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "createTodo":
-			ec.json.ObjectKey(field.Alias)
-			var arg0 string
-			if tmp, ok := field.Args["text"]; ok {
-				tmp2, err := coerceString(tmp)
-				if err != nil {
-					ec.Error(err)
-					ec.json.Null()
-					continue
-				}
-				arg0 = tmp2
-			}
-			res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			ec._todo(field.Selections, &res)
-			continue
-
-		case "updateTodo":
-			ec.json.ObjectKey(field.Alias)
-			var arg0 int
-			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceInt(tmp)
-				if err != nil {
-					ec.Error(err)
-					ec.json.Null()
-					continue
-				}
-				arg0 = tmp2
-			}
-			var arg1 map[string]interface{}
-			if tmp, ok := field.Args["changes"]; ok {
-				arg1 = tmp.(map[string]interface{})
-			}
-			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec._todo(field.Selections, res)
-			}
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
-	groupedFieldSet := ec.collectFields(sel, myQuerySatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "todo":
-			ec.json.ObjectKey(field.Alias)
-			var arg0 int
-			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceInt(tmp)
-				if err != nil {
-					ec.Error(err)
-					ec.json.Null()
-					continue
-				}
-				arg0 = tmp2
-			}
-			res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec._todo(field.Selections, res)
-			}
-			continue
-
-		case "lastTodo":
-			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.MyQuery_lastTodo(ec.ctx)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec._todo(field.Selections, res)
-			}
-			continue
-
-		case "todos":
-			ec.json.ObjectKey(field.Alias)
-			res, err := ec.resolvers.MyQuery_todos(ec.ctx)
-			if err != nil {
-				ec.Error(err)
-				ec.json.Null()
-				continue
-			}
-			ec.json.BeginArray()
-			for _, val := range res {
-				ec._todo(field.Selections, &val)
-			}
-			ec.json.EndArray()
-			continue
-
-		case "__schema":
-			ec.json.ObjectKey(field.Alias)
-			res := ec.introspectSchema()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Schema(field.Selections, res)
-			}
-			continue
-
-		case "__type":
-			ec.json.ObjectKey(field.Alias)
-			var arg0 string
-			if tmp, ok := field.Args["name"]; ok {
-				tmp2, err := coerceString(tmp)
-				if err != nil {
-					ec.Error(err)
-					ec.json.Null()
-					continue
-				}
-				arg0 = tmp2
-			}
-			res := ec.introspectType(arg0)
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
-			}
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _todo(sel []query.Selection, it *todo.Todo) {
-	groupedFieldSet := ec.collectFields(sel, todoSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "id":
-			ec.json.ObjectKey(field.Alias)
-			res := it.ID
-			ec.json.Int(res)
-			continue
-
-		case "text":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Text
-			ec.json.String(res)
-			continue
-
-		case "done":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Done
-			ec.json.Bool(res)
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) {
-	groupedFieldSet := ec.collectFields(sel, __DirectiveSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "name":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Name()
-			ec.json.String(res)
-			continue
-
-		case "description":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		case "locations":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Locations()
-			ec.json.BeginArray()
-			for _, val := range res {
-				ec.json.String(val)
-			}
-			ec.json.EndArray()
-			continue
-
-		case "args":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Args()
-			ec.json.BeginArray()
-			for _, val := range res {
-				if val == nil {
-					ec.json.Null()
-				} else {
-					ec.___InputValue(field.Selections, val)
-				}
-			}
-			ec.json.EndArray()
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) {
-	groupedFieldSet := ec.collectFields(sel, __EnumValueSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "name":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Name()
-			ec.json.String(res)
-			continue
-
-		case "description":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		case "isDeprecated":
-			ec.json.ObjectKey(field.Alias)
-			res := it.IsDeprecated()
-			ec.json.Bool(res)
-			continue
-
-		case "deprecationReason":
-			ec.json.ObjectKey(field.Alias)
-			res := it.DeprecationReason()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) {
-	groupedFieldSet := ec.collectFields(sel, __FieldSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "name":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Name()
-			ec.json.String(res)
-			continue
-
-		case "description":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		case "args":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Args()
-			ec.json.BeginArray()
-			for _, val := range res {
-				if val == nil {
-					ec.json.Null()
-				} else {
-					ec.___InputValue(field.Selections, val)
-				}
-			}
-			ec.json.EndArray()
-			continue
-
-		case "type":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Type()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
-			}
-			continue
-
-		case "isDeprecated":
-			ec.json.ObjectKey(field.Alias)
-			res := it.IsDeprecated()
-			ec.json.Bool(res)
-			continue
-
-		case "deprecationReason":
-			ec.json.ObjectKey(field.Alias)
-			res := it.DeprecationReason()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) {
-	groupedFieldSet := ec.collectFields(sel, __InputValueSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "name":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Name()
-			ec.json.String(res)
-			continue
-
-		case "description":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		case "type":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Type()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
-			}
-			continue
-
-		case "defaultValue":
-			ec.json.ObjectKey(field.Alias)
-			res := it.DefaultValue()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) {
-	groupedFieldSet := ec.collectFields(sel, __SchemaSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "types":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Types()
-			ec.json.BeginArray()
-			for _, val := range res {
-				if val == nil {
-					ec.json.Null()
-				} else {
-					ec.___Type(field.Selections, val)
-				}
-			}
-			ec.json.EndArray()
-			continue
-
-		case "queryType":
-			ec.json.ObjectKey(field.Alias)
-			res := it.QueryType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
-			}
-			continue
-
-		case "mutationType":
-			ec.json.ObjectKey(field.Alias)
-			res := it.MutationType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
-			}
-			continue
-
-		case "subscriptionType":
-			ec.json.ObjectKey(field.Alias)
-			res := it.SubscriptionType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
-			}
-			continue
-
-		case "directives":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Directives()
-			ec.json.BeginArray()
-			for _, val := range res {
-				if val == nil {
-					ec.json.Null()
-				} else {
-					ec.___Directive(field.Selections, val)
-				}
-			}
-			ec.json.EndArray()
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) {
-	groupedFieldSet := ec.collectFields(sel, __TypeSatisfies, map[string]bool{})
-	ec.json.BeginObject()
-	for _, field := range groupedFieldSet {
-		switch field.Name {
-		case "kind":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Kind()
-			ec.json.String(res)
-			continue
-
-		case "name":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Name()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		case "description":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Description()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.String(*res)
-			}
-			continue
-
-		case "fields":
-			ec.json.ObjectKey(field.Alias)
-			var arg0 bool
-			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := coerceBool(tmp)
-				if err != nil {
-					ec.Error(err)
-					ec.json.Null()
-					continue
-				}
-				arg0 = tmp2
-			}
-			res := it.Fields(arg0)
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___Field(field.Selections, val)
-					}
-				}
-				ec.json.EndArray()
-			}
-			continue
-
-		case "interfaces":
-			ec.json.ObjectKey(field.Alias)
-			res := it.Interfaces()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___Type(field.Selections, val)
-					}
-				}
-				ec.json.EndArray()
-			}
-			continue
-
-		case "possibleTypes":
-			ec.json.ObjectKey(field.Alias)
-			res := it.PossibleTypes()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___Type(field.Selections, val)
-					}
-				}
-				ec.json.EndArray()
-			}
-			continue
-
-		case "enumValues":
-			ec.json.ObjectKey(field.Alias)
-			var arg0 bool
-			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := coerceBool(tmp)
-				if err != nil {
-					ec.Error(err)
-					ec.json.Null()
-					continue
-				}
-				arg0 = tmp2
-			}
-			res := it.EnumValues(arg0)
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___EnumValue(field.Selections, val)
-					}
-				}
-				ec.json.EndArray()
-			}
-			continue
-
-		case "inputFields":
-			ec.json.ObjectKey(field.Alias)
-			res := it.InputFields()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.json.BeginArray()
-				for _, val := range *res {
-					if val == nil {
-						ec.json.Null()
-					} else {
-						ec.___InputValue(field.Selections, val)
-					}
-				}
-				ec.json.EndArray()
-			}
-			continue
-
-		case "ofType":
-			ec.json.ObjectKey(field.Alias)
-			res := it.OfType()
-			if res == nil {
-				ec.json.Null()
-			} else {
-				ec.___Type(field.Selections, res)
-			}
-			continue
-
-		}
-		panic("unknown field " + strconv.Quote(field.Name))
-	}
-	ec.json.EndObject()
-}
-
-var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
-var _ = fmt.Print
 
 func NewResolver(resolvers Resolvers) relay.Resolver {
 	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
@@ -736,6 +93,618 @@ type executionContext struct {
 	doc       *query.Document
 	ctx       context.Context
 }
+
+var (
+	myMutationImplementors   = []string{"MyMutation"}
+	myQueryImplementors      = []string{"MyQuery"}
+	todoImplementors         = []string{"Todo"}
+	__DirectiveImplementors  = []string{"__Directive"}
+	__EnumValueImplementors  = []string{"__EnumValue"}
+	__FieldImplementors      = []string{"__Field"}
+	__InputValueImplementors = []string{"__InputValue"}
+	__SchemaImplementors     = []string{"__Schema"}
+	__TypeImplementors       = []string{"__Type"}
+)
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) {
+	groupedFieldSet := ec.collectFields(sel, myMutationImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "createTodo":
+			ec.json.ObjectKey(field.Alias)
+			var arg0 string
+			if tmp, ok := field.Args["text"]; ok {
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					ec.json.Null()
+					continue
+				}
+				arg0 = tmp2
+			}
+			res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
+			if err != nil {
+				ec.Error(err)
+				ec.json.Null()
+				continue
+			}
+			ec._todo(field.Selections, &res)
+
+		case "updateTodo":
+			ec.json.ObjectKey(field.Alias)
+			var arg0 int
+			if tmp, ok := field.Args["id"]; ok {
+				tmp2, err := coerceInt(tmp)
+				if err != nil {
+					ec.Error(err)
+					ec.json.Null()
+					continue
+				}
+				arg0 = tmp2
+			}
+			var arg1 map[string]interface{}
+			if tmp, ok := field.Args["changes"]; ok {
+
+				arg1 = tmp.(map[string]interface{})
+
+			}
+			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
+			if err != nil {
+				ec.Error(err)
+				ec.json.Null()
+				continue
+			}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec._todo(field.Selections, res)
+			}
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) {
+	groupedFieldSet := ec.collectFields(sel, myQueryImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "todo":
+			ec.json.ObjectKey(field.Alias)
+			var arg0 int
+			if tmp, ok := field.Args["id"]; ok {
+				tmp2, err := coerceInt(tmp)
+				if err != nil {
+					ec.Error(err)
+					ec.json.Null()
+					continue
+				}
+				arg0 = tmp2
+			}
+			res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
+			if err != nil {
+				ec.Error(err)
+				ec.json.Null()
+				continue
+			}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec._todo(field.Selections, res)
+			}
+
+		case "lastTodo":
+			ec.json.ObjectKey(field.Alias)
+			res, err := ec.resolvers.MyQuery_lastTodo(ec.ctx)
+			if err != nil {
+				ec.Error(err)
+				ec.json.Null()
+				continue
+			}
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec._todo(field.Selections, res)
+			}
+
+		case "todos":
+			ec.json.ObjectKey(field.Alias)
+			res, err := ec.resolvers.MyQuery_todos(ec.ctx)
+			if err != nil {
+				ec.Error(err)
+				ec.json.Null()
+				continue
+			}
+			ec.json.BeginArray()
+			for _, val := range res {
+				ec._todo(field.Selections, &val)
+			}
+			ec.json.EndArray()
+
+		case "__schema":
+			ec.json.ObjectKey(field.Alias)
+			res := ec.introspectSchema()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Schema(field.Selections, res)
+			}
+
+		case "__type":
+			ec.json.ObjectKey(field.Alias)
+			var arg0 string
+			if tmp, ok := field.Args["name"]; ok {
+				tmp2, err := coerceString(tmp)
+				if err != nil {
+					ec.Error(err)
+					ec.json.Null()
+					continue
+				}
+				arg0 = tmp2
+			}
+			res := ec.introspectType(arg0)
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Type(field.Selections, res)
+			}
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _todo(sel []query.Selection, it *todo.Todo) {
+	groupedFieldSet := ec.collectFields(sel, todoImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "id":
+			ec.json.ObjectKey(field.Alias)
+			res := it.ID
+			ec.json.Int(res)
+
+		case "text":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Text
+			ec.json.String(res)
+
+		case "done":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Done
+			ec.json.Bool(res)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) {
+	groupedFieldSet := ec.collectFields(sel, __DirectiveImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "name":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Name()
+			ec.json.String(res)
+
+		case "description":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Description()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		case "locations":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Locations()
+			ec.json.BeginArray()
+			for _, val := range res {
+				ec.json.String(val)
+			}
+			ec.json.EndArray()
+
+		case "args":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Args()
+			ec.json.BeginArray()
+			for _, val := range res {
+				if val == nil {
+					ec.json.Null()
+				} else {
+					ec.___InputValue(field.Selections, val)
+				}
+			}
+			ec.json.EndArray()
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) {
+	groupedFieldSet := ec.collectFields(sel, __EnumValueImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "name":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Name()
+			ec.json.String(res)
+
+		case "description":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Description()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		case "isDeprecated":
+			ec.json.ObjectKey(field.Alias)
+			res := it.IsDeprecated()
+			ec.json.Bool(res)
+
+		case "deprecationReason":
+			ec.json.ObjectKey(field.Alias)
+			res := it.DeprecationReason()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) {
+	groupedFieldSet := ec.collectFields(sel, __FieldImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "name":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Name()
+			ec.json.String(res)
+
+		case "description":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Description()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		case "args":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Args()
+			ec.json.BeginArray()
+			for _, val := range res {
+				if val == nil {
+					ec.json.Null()
+				} else {
+					ec.___InputValue(field.Selections, val)
+				}
+			}
+			ec.json.EndArray()
+
+		case "type":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Type()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Type(field.Selections, res)
+			}
+
+		case "isDeprecated":
+			ec.json.ObjectKey(field.Alias)
+			res := it.IsDeprecated()
+			ec.json.Bool(res)
+
+		case "deprecationReason":
+			ec.json.ObjectKey(field.Alias)
+			res := it.DeprecationReason()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) {
+	groupedFieldSet := ec.collectFields(sel, __InputValueImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "name":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Name()
+			ec.json.String(res)
+
+		case "description":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Description()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		case "type":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Type()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Type(field.Selections, res)
+			}
+
+		case "defaultValue":
+			ec.json.ObjectKey(field.Alias)
+			res := it.DefaultValue()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) {
+	groupedFieldSet := ec.collectFields(sel, __SchemaImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "types":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Types()
+			ec.json.BeginArray()
+			for _, val := range res {
+				if val == nil {
+					ec.json.Null()
+				} else {
+					ec.___Type(field.Selections, val)
+				}
+			}
+			ec.json.EndArray()
+
+		case "queryType":
+			ec.json.ObjectKey(field.Alias)
+			res := it.QueryType()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Type(field.Selections, res)
+			}
+
+		case "mutationType":
+			ec.json.ObjectKey(field.Alias)
+			res := it.MutationType()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Type(field.Selections, res)
+			}
+
+		case "subscriptionType":
+			ec.json.ObjectKey(field.Alias)
+			res := it.SubscriptionType()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Type(field.Selections, res)
+			}
+
+		case "directives":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Directives()
+			ec.json.BeginArray()
+			for _, val := range res {
+				if val == nil {
+					ec.json.Null()
+				} else {
+					ec.___Directive(field.Selections, val)
+				}
+			}
+			ec.json.EndArray()
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) {
+	groupedFieldSet := ec.collectFields(sel, __TypeImplementors, map[string]bool{})
+	ec.json.BeginObject()
+	for _, field := range groupedFieldSet {
+		switch field.Name {
+		case "kind":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Kind()
+			ec.json.String(res)
+
+		case "name":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Name()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		case "description":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Description()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.String(*res)
+			}
+
+		case "fields":
+			ec.json.ObjectKey(field.Alias)
+			var arg0 bool
+			if tmp, ok := field.Args["includeDeprecated"]; ok {
+				tmp2, err := coerceBool(tmp)
+				if err != nil {
+					ec.Error(err)
+					ec.json.Null()
+					continue
+				}
+				arg0 = tmp2
+			}
+			res := it.Fields(arg0)
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
+				for _, val := range *res {
+					if val == nil {
+						ec.json.Null()
+					} else {
+						ec.___Field(field.Selections, val)
+					}
+				}
+				ec.json.EndArray()
+			}
+
+		case "interfaces":
+			ec.json.ObjectKey(field.Alias)
+			res := it.Interfaces()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
+				for _, val := range *res {
+					if val == nil {
+						ec.json.Null()
+					} else {
+						ec.___Type(field.Selections, val)
+					}
+				}
+				ec.json.EndArray()
+			}
+
+		case "possibleTypes":
+			ec.json.ObjectKey(field.Alias)
+			res := it.PossibleTypes()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
+				for _, val := range *res {
+					if val == nil {
+						ec.json.Null()
+					} else {
+						ec.___Type(field.Selections, val)
+					}
+				}
+				ec.json.EndArray()
+			}
+
+		case "enumValues":
+			ec.json.ObjectKey(field.Alias)
+			var arg0 bool
+			if tmp, ok := field.Args["includeDeprecated"]; ok {
+				tmp2, err := coerceBool(tmp)
+				if err != nil {
+					ec.Error(err)
+					ec.json.Null()
+					continue
+				}
+				arg0 = tmp2
+			}
+			res := it.EnumValues(arg0)
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
+				for _, val := range *res {
+					if val == nil {
+						ec.json.Null()
+					} else {
+						ec.___EnumValue(field.Selections, val)
+					}
+				}
+				ec.json.EndArray()
+			}
+
+		case "inputFields":
+			ec.json.ObjectKey(field.Alias)
+			res := it.InputFields()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.json.BeginArray()
+				for _, val := range *res {
+					if val == nil {
+						ec.json.Null()
+					} else {
+						ec.___InputValue(field.Selections, val)
+					}
+				}
+				ec.json.EndArray()
+			}
+
+		case "ofType":
+			ec.json.ObjectKey(field.Alias)
+			res := it.OfType()
+			if res == nil {
+				ec.json.Null()
+			} else {
+				ec.___Type(field.Selections, res)
+			}
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	ec.json.EndObject()
+}
+
+var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

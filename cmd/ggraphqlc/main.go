@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -47,7 +46,7 @@ func main() {
 	e := extractor{
 		PackageName: getPkgName(),
 		goTypeMap:   loadTypeMap(),
-		schemaRaw:   string(schemaRaw),
+		SchemaRaw:   string(schemaRaw),
 		schema:      schema,
 		Imports: map[string]string{
 			"context": "context",
@@ -98,8 +97,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	buf := &bytes.Buffer{}
-	write(e, buf)
+	buf, err := runTemplate(&e)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
+		os.Exit(1)
+	}
 
 	if *output == "-" {
 		fmt.Println(string(gofmt(*output, buf.Bytes())))

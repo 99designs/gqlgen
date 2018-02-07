@@ -18,12 +18,113 @@ type extractor struct {
 	Errors       []string
 	PackageName  string
 	Objects      []object
+	Interfaces   []object
 	goTypeMap    map[string]string
 	Imports      map[string]string // local -> full path
 	schema       *schema.Schema
-	schemaRaw    string
+	SchemaRaw    string
 	QueryRoot    string
 	MutationRoot string
+}
+
+func (e *extractor) extract() {
+	for _, typ := range e.schema.Types {
+		switch typ := typ.(type) {
+		case *schema.Object:
+			obj := object{
+				Name: typ.Name,
+				Type: e.getType(typ.Name),
+			}
+
+			for _, i := range typ.Interfaces {
+				obj.satisfies = append(obj.satisfies, i.Name)
+			}
+
+			for _, field := range typ.Fields {
+				var args []FieldArgument
+				for _, arg := range field.Args {
+					args = append(args, FieldArgument{
+						Name: arg.Name.Name,
+						Type: e.buildType(arg.Type),
+					})
+				}
+
+				obj.Fields = append(obj.Fields, Field{
+					GraphQLName: field.Name,
+					Type:        e.buildType(field.Type),
+					Args:        args,
+				})
+			}
+			e.Objects = append(e.Objects, obj)
+		case *schema.Union:
+			obj := object{
+				Name: typ.Name,
+				Type: e.buildType(typ),
+			}
+			e.Interfaces = append(e.Interfaces, obj)
+
+		case *schema.Interface:
+			obj := object{
+				Name: typ.Name,
+				Type: e.buildType(typ),
+			}
+			e.Interfaces = append(e.Interfaces, obj)
+		}
+
+	}
+
+	for name, typ := range e.schema.EntryPoints {
+		obj := typ.(*schema.Object)
+		e.GetObject(obj.Name).Root = true
+		if name == "query" {
+			e.QueryRoot = obj.Name
+		}
+		if name == "mutation" {
+			e.MutationRoot = obj.Name
+		}
+	}
+
+	sort.Slice(e.Objects, func(i, j int) bool {
+		return strings.Compare(e.Objects[i].Name, e.Objects[j].Name) == -1
+	})
+}
+
+func (e *extractor) introspect() error {
+	var conf loader.Config
+	for _, name := range e.Imports {
+		conf.Import(name)
+	}
+
+	prog, err := conf.Load()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range e.Objects {
+		if o.Type.Package == "" {
+			continue
+		}
+		pkgName, err := resolvePkg(o.Type.Package)
+		if err != nil {
+			return fmt.Errorf("unable to find package %s: %s", o.Type.Package, err.Error())
+		}
+		pkg := prog.Package(pkgName)
+		if pkg == nil {
+			return fmt.Errorf("required package was not loaded: %s", pkgName)
+		}
+
+		for astNode, object := range pkg.Defs {
+			if astNode.Name != o.Type.Name {
+				continue
+			}
+
+			if e.findBindTargets(object.Type(), o) {
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 func (e *extractor) errorf(format string, args ...interface{}) {
@@ -180,93 +281,6 @@ func (e *extractor) buildType(t common.Type) kind {
 	}
 }
 
-func (e *extractor) extract() {
-	for _, schemaType := range e.schema.Types {
-		schemaObject, ok := schemaType.(*schema.Object)
-		if !ok {
-			continue
-		}
-		obj := object{
-			Name: schemaObject.Name,
-			Type: e.getType(schemaObject.Name),
-		}
-
-		for _, i := range schemaObject.Interfaces {
-			obj.satisfies = append(obj.satisfies, i.Name)
-		}
-
-		for _, field := range schemaObject.Fields {
-			var args []FieldArgument
-			for _, arg := range field.Args {
-				args = append(args, FieldArgument{
-					Name: arg.Name.Name,
-					Type: e.buildType(arg.Type),
-				})
-			}
-
-			obj.Fields = append(obj.Fields, Field{
-				GraphQLName: field.Name,
-				Type:        e.buildType(field.Type),
-				Args:        args,
-			})
-		}
-		e.Objects = append(e.Objects, obj)
-	}
-
-	for name, typ := range e.schema.EntryPoints {
-		obj := typ.(*schema.Object)
-		e.GetObject(obj.Name).Root = true
-		if name == "query" {
-			e.QueryRoot = obj.Name
-		}
-		if name == "mutation" {
-			e.MutationRoot = obj.Name
-		}
-	}
-
-	sort.Slice(e.Objects, func(i, j int) bool {
-		return strings.Compare(e.Objects[i].Name, e.Objects[j].Name) == -1
-	})
-}
-
-func (e *extractor) introspect() error {
-	var conf loader.Config
-	for _, name := range e.Imports {
-		conf.Import(name)
-	}
-
-	prog, err := conf.Load()
-	if err != nil {
-		return err
-	}
-
-	for _, o := range e.Objects {
-		if o.Type.Package == "" {
-			continue
-		}
-		pkgName, err := resolvePkg(o.Type.Package)
-		if err != nil {
-			return fmt.Errorf("unable to find package %s: %s", o.Type.Package, err.Error())
-		}
-		pkg := prog.Package(pkgName)
-		if pkg == nil {
-			return fmt.Errorf("required package was not loaded: %s", pkgName)
-		}
-
-		for astNode, object := range pkg.Defs {
-			if astNode.Name != o.Type.Name {
-				continue
-			}
-
-			if e.findBindTargets(object.Type(), o) {
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 func (e *extractor) modifiersFromGoType(t types.Type) []string {
 	var modifiers []string
 	for {
@@ -347,69 +361,3 @@ const (
 	modList = "[]"
 	modPtr  = "*"
 )
-
-type kind struct {
-	GraphQLName  string
-	Name         string
-	Package      string
-	ImportedAs   string
-	Modifiers    []string
-	Implementors []kind
-	Scalar       bool
-}
-
-func (t kind) Local() string {
-	if t.ImportedAs == "" {
-		return strings.Join(t.Modifiers, "") + t.Name
-	}
-	return strings.Join(t.Modifiers, "") + t.ImportedAs + "." + t.Name
-}
-
-func (t kind) Ptr() kind {
-	t.Modifiers = append(t.Modifiers, modPtr)
-	return t
-}
-
-func (t kind) IsPtr() bool {
-	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
-}
-
-type object struct {
-	Name      string
-	Fields    []Field
-	Type      kind
-	satisfies []string
-	Root      bool
-}
-
-type Field struct {
-	GraphQLName string
-	MethodName  string
-	VarName     string
-	Type        kind
-	Args        []FieldArgument
-	NoErr       bool
-}
-
-func (o *object) GetField(name string) *Field {
-	for i, field := range o.Fields {
-		if strings.EqualFold(field.GraphQLName, name) {
-			return &o.Fields[i]
-		}
-	}
-	return nil
-}
-
-func (e *extractor) GetObject(name string) *object {
-	for i, o := range e.Objects {
-		if strings.EqualFold(o.Name, name) {
-			return &e.Objects[i]
-		}
-	}
-	return nil
-}
-
-type FieldArgument struct {
-	Name string
-	Type kind
-}

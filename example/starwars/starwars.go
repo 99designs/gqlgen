@@ -139,47 +139,47 @@ func NewResolver() *Resolver {
 	r := Resolver{}
 	r.humans = map[string]Human{
 		"1000": {
-			ID:          "1000",
-			Name:        "Luke Skywalker",
-			FriendIds:   []string{"1002", "1003", "2000", "2001"},
-			AppearsIn:   []string{"NEWHOPE", "EMPIRE", "JEDI"},
-			Height:      1.72,
-			Mass:        77,
-			StarshipIds: []string{"3001", "3003"},
+			ID:           "1000",
+			Name:         "Luke Skywalker",
+			FriendIds:    []string{"1002", "1003", "2000", "2001"},
+			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			heightMeters: 1.72,
+			Mass:         77,
+			StarshipIds:  []string{"3001", "3003"},
 		},
 		"1001": {
-			ID:          "1001",
-			Name:        "Darth Vader",
-			FriendIds:   []string{"1004"},
-			AppearsIn:   []string{"NEWHOPE", "EMPIRE", "JEDI"},
-			Height:      2.02,
-			Mass:        136,
-			StarshipIds: []string{"3002"},
+			ID:           "1001",
+			Name:         "Darth Vader",
+			FriendIds:    []string{"1004"},
+			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			heightMeters: 2.02,
+			Mass:         136,
+			StarshipIds:  []string{"3002"},
 		},
 		"1002": {
-			ID:          "1002",
-			Name:        "Han Solo",
-			FriendIds:   []string{"1000", "1003", "2001"},
-			AppearsIn:   []string{"NEWHOPE", "EMPIRE", "JEDI"},
-			Height:      1.8,
-			Mass:        80,
-			StarshipIds: []string{"3000", "3003"},
+			ID:           "1002",
+			Name:         "Han Solo",
+			FriendIds:    []string{"1000", "1003", "2001"},
+			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			heightMeters: 1.8,
+			Mass:         80,
+			StarshipIds:  []string{"3000", "3003"},
 		},
 		"1003": {
-			ID:        "1003",
-			Name:      "Leia Organa",
-			FriendIds: []string{"1000", "1002", "2000", "2001"},
-			AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
-			Height:    1.5,
-			Mass:      49,
+			ID:           "1003",
+			Name:         "Leia Organa",
+			FriendIds:    []string{"1000", "1002", "2000", "2001"},
+			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			heightMeters: 1.5,
+			Mass:         49,
 		},
 		"1004": {
-			ID:        "1004",
-			Name:      "Wilhuff Tarkin",
-			FriendIds: []string{"1001"},
-			AppearsIn: []string{"NEWHOPE"},
-			Height:    1.8,
-			Mass:      0,
+			ID:           "1004",
+			Name:         "Wilhuff Tarkin",
+			FriendIds:    []string{"1001"},
+			AppearsIn:    []string{"NEWHOPE"},
+			heightMeters: 1.8,
+			Mass:         0,
 		},
 	}
 
@@ -202,24 +202,24 @@ func NewResolver() *Resolver {
 
 	r.starships = map[string]Starship{
 		"3000": {
-			ID:     "3000",
-			Name:   "Millennium Falcon",
-			Length: 34.37,
+			ID:           "3000",
+			Name:         "Millennium Falcon",
+			lengthMeters: 34.37,
 		},
 		"3001": {
-			ID:     "3001",
-			Name:   "X-Wing",
-			Length: 12.5,
+			ID:           "3001",
+			Name:         "X-Wing",
+			lengthMeters: 12.5,
 		},
 		"3002": {
-			ID:     "3002",
-			Name:   "TIE Advanced x1",
-			Length: 9.2,
+			ID:           "3002",
+			Name:         "TIE Advanced x1",
+			lengthMeters: 9.2,
 		},
 		"3003": {
-			ID:     "3003",
-			Name:   "Imperial shuttle",
-			Length: 20,
+			ID:           "3003",
+			Name:         "Imperial shuttle",
+			lengthMeters: 20,
 		},
 	}
 
@@ -229,19 +229,41 @@ func NewResolver() *Resolver {
 }
 
 type Human struct {
-	ID          string
-	Name        string
-	FriendIds   []string
-	StarshipIds []string
-	AppearsIn   []string
-	Height      float64
-	Mass        float64
+	ID           string
+	Name         string
+	FriendIds    []string
+	StarshipIds  []string
+	AppearsIn    []string
+	heightMeters float64
+	Mass         float64
+}
+
+func (h *Human) Height(unit string) float64 {
+	switch unit {
+	case "METER":
+		return h.heightMeters
+	case "FOOT":
+		return h.heightMeters * 3.28084
+	default:
+		panic("invalid unit")
+	}
 }
 
 type Starship struct {
-	ID     string
-	Name   string
-	Length float64
+	ID           string
+	Name         string
+	lengthMeters float64
+}
+
+func (s *Starship) Length(unit string) float64 {
+	switch unit {
+	case "METER":
+		return s.lengthMeters
+	case "FOOT":
+		return s.lengthMeters * 3.28084
+	default:
+		panic("invalid unit")
+	}
 }
 
 type Review struct {

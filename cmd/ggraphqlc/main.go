@@ -63,7 +63,7 @@ func main() {
 			"introspection": "github.com/vektah/graphql-go/introspection",
 			"jsonw":         "github.com/vektah/graphql-go/jsonw",
 			"query":         "github.com/vektah/graphql-go/query",
-			"relay":         "github.com/vektah/graphql-go/relay",
+			"graphql":       "github.com/vektah/graphql-go",
 			"schema":        "github.com/vektah/graphql-go/schema",
 			"validation":    "github.com/vektah/graphql-go/validation",
 		},

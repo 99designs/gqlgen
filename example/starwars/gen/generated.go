@@ -13,12 +13,12 @@ import (
 	time "time"
 
 	mapstructure "github.com/mitchellh/mapstructure"
+	graphql "github.com/vektah/graphql-go"
 	errors "github.com/vektah/graphql-go/errors"
 	starwars "github.com/vektah/graphql-go/example/starwars"
 	introspection "github.com/vektah/graphql-go/introspection"
 	jsonw "github.com/vektah/graphql-go/jsonw"
 	query "github.com/vektah/graphql-go/query"
-	relay "github.com/vektah/graphql-go/relay"
 	schema "github.com/vektah/graphql-go/schema"
 	validation "github.com/vektah/graphql-go/validation"
 )
@@ -43,7 +43,7 @@ type Resolvers interface {
 	Query_starship(ctx context.Context, id string) (*starwars.Starship, error)
 }
 
-func NewResolver(resolvers Resolvers) relay.Resolver {
+func NewResolver(resolvers Resolvers) graphql.Resolver {
 	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
 		doc, qErr := query.Parse(document)
 		if qErr != nil {

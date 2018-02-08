@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/vektah/graphql-go"
 	"github.com/vektah/graphql-go/example/starwars"
 	"github.com/vektah/graphql-go/example/starwars/gen"
-	"github.com/vektah/graphql-go/relay"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 		w.Write(page)
 	}))
 
-	http.Handle("/query", relay.Handler(gen.NewResolver(starwars.NewResolver())))
+	http.Handle("/query", graphql.Handler(gen.NewResolver(starwars.NewResolver())))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

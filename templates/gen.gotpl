@@ -18,7 +18,7 @@ type Resolvers interface {
 }
 
 
-func NewResolver(resolvers Resolvers) relay.Resolver {
+func NewResolver(resolvers Resolvers) graphql.Resolver {
 	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
 		doc, qErr := query.Parse(document)
 		if qErr != nil {

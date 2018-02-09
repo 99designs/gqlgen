@@ -21,7 +21,6 @@ var templateDir = func() string {
 	for _, path := range strings.Split(gopath, ":") {
 		if path != "" {
 			abspath, _ := filepath.Abs(filepath.Join(path, "src", "github.com", "vektah", "graphql-go"))
-			fmt.Println(abspath)
 			if dirExists(abspath) {
 				return abspath
 			}

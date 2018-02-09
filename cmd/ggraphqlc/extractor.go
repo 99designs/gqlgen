@@ -108,13 +108,10 @@ func (e *extractor) introspect() error {
 		if o.Type.Package == "" {
 			continue
 		}
-		pkgName, err := resolvePkg(o.Type.Package)
-		if err != nil {
-			return fmt.Errorf("unable to find package %s: %s", o.Type.Package, err.Error())
-		}
-		pkg := prog.Package(pkgName)
+
+		pkg := prog.Imported[o.Type.Package]
 		if pkg == nil {
-			return fmt.Errorf("required package was not loaded: %s", pkgName)
+			return fmt.Errorf("required package was not loaded: %s", o.Type.Package)
 		}
 
 		for astNode, object := range pkg.Defs {

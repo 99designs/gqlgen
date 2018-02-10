@@ -1,0 +1,31 @@
+schema {
+    query: Query
+}
+
+type Query {
+    customers: [Customer!]
+}
+
+type Customer {
+    id: Int!
+    name: String!
+    address: Address
+    orders: [Order!]
+}
+
+type Address {
+    id: Int!
+    street: String
+    country: String
+}
+
+type Order {
+    id: Int!
+    date: Time
+    amount: Float!
+    items: [Item!]
+}
+
+type Item {
+    name: String
+}

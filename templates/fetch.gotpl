@@ -45,8 +45,8 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
                     if res != nil {
                 {{ end}}
                     {{ if $field.Type.IsSlice }}
-                        for _, f := range {{$field.Type.ByVal "res" }} {
-                            node.{{$field.GraphQLName|ucFirst}} = append(node.{{$field.GraphQLName|ucFirst}},  ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{ $field.Type.Elem.ByRef "f" }}))
+                        for i := range {{$field.Type.ByVal "res" }} {
+                            node.{{$field.GraphQLName|ucFirst}} = append(node.{{$field.GraphQLName|ucFirst}},  ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{ $field.Type.Elem.ByRef "res[i]" }}))
                         }
                     {{ else }}
                         node.{{$field.GraphQLName|ucFirst}} = ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{$field.Type.ByRef "res" }})

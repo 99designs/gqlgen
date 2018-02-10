@@ -1,0 +1,6 @@
+{
+    "Customer": "github.com/vektah/graphql-go/example/dataloader.Customer",
+    "Address": "github.com/vektah/graphql-go/example/dataloader.Address",
+    "Item": "github.com/vektah/graphql-go/example/dataloader.Item",
+    "Order": "github.com/vektah/graphql-go/example/dataloader.Order"
+}

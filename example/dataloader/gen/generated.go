@@ -15,7 +15,7 @@ import (
 	mapstructure "github.com/mitchellh/mapstructure"
 	graphql "github.com/vektah/graphql-go"
 	errors "github.com/vektah/graphql-go/errors"
-	readme "github.com/vektah/graphql-go/example/readme"
+	dataloader "github.com/vektah/graphql-go/example/dataloader"
 	introspection "github.com/vektah/graphql-go/introspection"
 	jsonw "github.com/vektah/graphql-go/jsonw"
 	query "github.com/vektah/graphql-go/query"
@@ -24,11 +24,12 @@ import (
 )
 
 type Resolvers interface {
-	Mutation_createTodo(ctx context.Context, text string) (readme.Todo, error)
+	Customer_address(ctx context.Context, it *dataloader.Customer) (*dataloader.Address, error)
+	Customer_orders(ctx context.Context, it *dataloader.Customer) ([]dataloader.Order, error)
 
-	Query_todos(ctx context.Context) ([]readme.Todo, error)
+	Order_items(ctx context.Context, it *dataloader.Order) ([]dataloader.Item, error)
 
-	Todo_user(ctx context.Context, it *readme.Todo) (readme.User, error)
+	Query_customers(ctx context.Context) ([]dataloader.Customer, error)
 }
 
 func NewResolver(resolvers Resolvers) graphql.Resolver {
@@ -61,8 +62,7 @@ func NewResolver(resolvers Resolvers) graphql.Resolver {
 
 		if op.Type == query.Query {
 			result = c._query(op.Selections, nil)
-		} else if op.Type == query.Mutation {
-			result = c._mutation(op.Selections, nil)
+
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
@@ -101,10 +101,11 @@ type Writer interface {
 }
 
 var (
-	mutationImplementors     = []string{"Mutation"}
+	addressImplementors      = []string{"Address"}
+	customerImplementors     = []string{"Customer"}
+	itemImplementors         = []string{"Item"}
+	orderImplementors        = []string{"Order"}
 	queryImplementors        = []string{"Query"}
-	todoImplementors         = []string{"Todo"}
-	userImplementors         = []string{"User"}
 	__DirectiveImplementors  = []string{"__Directive"}
 	__EnumValueImplementors  = []string{"__EnumValue"}
 	__FieldImplementors      = []string{"__Field"}
@@ -113,42 +114,130 @@ var (
 	__TypeImplementors       = []string{"__Type"}
 )
 
-type _MutationNode struct {
+type _AddressNode struct {
 	_fields []collectedField
 
-	CreateTodo Writer
+	Id      int
+	Street  string
+	Country string
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) Writer {
-	node := _MutationNode{
-		_fields: ec.collectFields(sel, mutationImplementors, map[string]bool{}),
+func (ec *executionContext) _address(sel []query.Selection, it *dataloader.Address) Writer {
+	node := _AddressNode{
+		_fields: ec.collectFields(sel, addressImplementors, map[string]bool{}),
 	}
 
 	for _, field := range node._fields {
 		switch field.Name {
-		case "createTodo":
-			var arg0 string
-			if tmp, ok := field.Args["text"]; ok {
-				tmp2, err := coerceString(tmp)
-				if err != nil {
-					ec.Error(err)
-					continue
-				}
-				arg0 = tmp2
-			}
+		case "id":
+			res := it.ID
+
+			node.Id = res
+
+		case "street":
+			res := it.Street
+
+			node.Street = res
+
+		case "country":
+			res := it.Country
+
+			node.Country = res
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return &node
+}
+
+func (t *_AddressNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "id":
+			w.ObjectKey("id")
+			w.Int(t.Id)
+		case "street":
+			w.ObjectKey("street")
+			w.String(t.Street)
+		case "country":
+			w.ObjectKey("country")
+			w.String(t.Country)
+
+		}
+	}
+	w.EndObject()
+}
+
+type _CustomerNode struct {
+	_fields []collectedField
+
+	Id      int
+	Name    string
+	Address Writer
+	Orders  []Writer
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _customer(sel []query.Selection, it *dataloader.Customer) Writer {
+	node := _CustomerNode{
+		_fields: ec.collectFields(sel, customerImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
+		switch field.Name {
+		case "id":
+			res := it.ID
+
+			node.Id = res
+
+		case "name":
+			res := it.Name
+
+			node.Name = res
+
+		case "address":
 
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
 
-				res, err := ec.resolvers.Mutation_createTodo(ec.ctx, arg0)
+				res, err := ec.resolvers.Customer_address(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
 
-				node.CreateTodo = ec._todo(field.Selections, &res)
+				if res != nil {
+
+					node.Address = ec._address(field.Selections, res)
+
+				}
+
+			}(field)
+
+		case "orders":
+
+			ec.wg.Add(1)
+			go func(field collectedField) {
+				defer ec.wg.Done()
+
+				res, err := ec.resolvers.Customer_orders(ec.ctx, it)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				if res != nil {
+
+					for i := range res {
+						node.Orders = append(node.Orders, ec._order(field.Selections, &res[i]))
+					}
+
+				}
 
 			}(field)
 
@@ -160,13 +249,158 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) Wr
 	return &node
 }
 
-func (t *_MutationNode) Write(w *jsonw.Writer) {
+func (t *_CustomerNode) Write(w *jsonw.Writer) {
 	w.BeginObject()
 	for _, field := range t._fields {
 		switch field.Name {
-		case "createTodo":
-			w.ObjectKey("createTodo")
-			t.CreateTodo.Write(w)
+		case "id":
+			w.ObjectKey("id")
+			w.Int(t.Id)
+		case "name":
+			w.ObjectKey("name")
+			w.String(t.Name)
+		case "address":
+			w.ObjectKey("address")
+			if t.Address == nil {
+				w.Null()
+			} else {
+				t.Address.Write(w)
+			}
+		case "orders":
+			w.ObjectKey("orders")
+			w.BeginArray()
+			for _, val := range t.Orders {
+				val.Write(w)
+			}
+			w.EndArray()
+
+		}
+	}
+	w.EndObject()
+}
+
+type _ItemNode struct {
+	_fields []collectedField
+
+	Name string
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _item(sel []query.Selection, it *dataloader.Item) Writer {
+	node := _ItemNode{
+		_fields: ec.collectFields(sel, itemImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
+		switch field.Name {
+		case "name":
+			res := it.Name
+
+			node.Name = res
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return &node
+}
+
+func (t *_ItemNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "name":
+			w.ObjectKey("name")
+			w.String(t.Name)
+
+		}
+	}
+	w.EndObject()
+}
+
+type _OrderNode struct {
+	_fields []collectedField
+
+	Id     int
+	Date   time.Time
+	Amount float64
+	Items  []Writer
+}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _order(sel []query.Selection, it *dataloader.Order) Writer {
+	node := _OrderNode{
+		_fields: ec.collectFields(sel, orderImplementors, map[string]bool{}),
+	}
+
+	for _, field := range node._fields {
+		switch field.Name {
+		case "id":
+			res := it.ID
+
+			node.Id = res
+
+		case "date":
+			res := it.Date
+
+			node.Date = res
+
+		case "amount":
+			res := it.Amount
+
+			node.Amount = res
+
+		case "items":
+
+			ec.wg.Add(1)
+			go func(field collectedField) {
+				defer ec.wg.Done()
+
+				res, err := ec.resolvers.Order_items(ec.ctx, it)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				if res != nil {
+
+					for i := range res {
+						node.Items = append(node.Items, ec._item(field.Selections, &res[i]))
+					}
+
+				}
+
+			}(field)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return &node
+}
+
+func (t *_OrderNode) Write(w *jsonw.Writer) {
+	w.BeginObject()
+	for _, field := range t._fields {
+		switch field.Name {
+		case "id":
+			w.ObjectKey("id")
+			w.Int(t.Id)
+		case "date":
+			w.ObjectKey("date")
+			w.Time(t.Date)
+		case "amount":
+			w.ObjectKey("amount")
+			w.Float64(t.Amount)
+		case "items":
+			w.ObjectKey("items")
+			w.BeginArray()
+			for _, val := range t.Items {
+				val.Write(w)
+			}
+			w.EndArray()
 
 		}
 	}
@@ -176,9 +410,9 @@ func (t *_MutationNode) Write(w *jsonw.Writer) {
 type _QueryNode struct {
 	_fields []collectedField
 
-	Todos    []Writer
-	__schema Writer
-	__type   Writer
+	Customers []Writer
+	__schema  Writer
+	__type    Writer
 }
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -189,13 +423,13 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) Write
 
 	for _, field := range node._fields {
 		switch field.Name {
-		case "todos":
+		case "customers":
 
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
 
-				res, err := ec.resolvers.Query_todos(ec.ctx)
+				res, err := ec.resolvers.Query_customers(ec.ctx)
 				if err != nil {
 					ec.Error(err)
 					return
@@ -203,8 +437,8 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) Write
 
 				if res != nil {
 
-					for _, f := range res {
-						node.Todos = append(node.Todos, ec._todo(field.Selections, &f))
+					for i := range res {
+						node.Customers = append(node.Customers, ec._customer(field.Selections, &res[i]))
 					}
 
 				}
@@ -250,10 +484,10 @@ func (t *_QueryNode) Write(w *jsonw.Writer) {
 	w.BeginObject()
 	for _, field := range t._fields {
 		switch field.Name {
-		case "todos":
-			w.ObjectKey("todos")
+		case "customers":
+			w.ObjectKey("customers")
 			w.BeginArray()
-			for _, val := range t.Todos {
+			for _, val := range t.Customers {
 				val.Write(w)
 			}
 			w.EndArray()
@@ -271,133 +505,6 @@ func (t *_QueryNode) Write(w *jsonw.Writer) {
 			} else {
 				t.__type.Write(w)
 			}
-
-		}
-	}
-	w.EndObject()
-}
-
-type _TodoNode struct {
-	_fields []collectedField
-
-	Id   string
-	Text string
-	Done bool
-	User Writer
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _todo(sel []query.Selection, it *readme.Todo) Writer {
-	node := _TodoNode{
-		_fields: ec.collectFields(sel, todoImplementors, map[string]bool{}),
-	}
-
-	for _, field := range node._fields {
-		switch field.Name {
-		case "id":
-			res := it.ID
-
-			node.Id = res
-
-		case "text":
-			res := it.Text
-
-			node.Text = res
-
-		case "done":
-			res := it.Done
-
-			node.Done = res
-
-		case "user":
-
-			ec.wg.Add(1)
-			go func(field collectedField) {
-				defer ec.wg.Done()
-
-				res, err := ec.resolvers.Todo_user(ec.ctx, it)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				node.User = ec._user(field.Selections, &res)
-
-			}(field)
-
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return &node
-}
-
-func (t *_TodoNode) Write(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "id":
-			w.ObjectKey("id")
-			w.String(t.Id)
-		case "text":
-			w.ObjectKey("text")
-			w.String(t.Text)
-		case "done":
-			w.ObjectKey("done")
-			w.Bool(t.Done)
-		case "user":
-			w.ObjectKey("user")
-			t.User.Write(w)
-
-		}
-	}
-	w.EndObject()
-}
-
-type _UserNode struct {
-	_fields []collectedField
-
-	Id   string
-	Name string
-}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _user(sel []query.Selection, it *readme.User) Writer {
-	node := _UserNode{
-		_fields: ec.collectFields(sel, userImplementors, map[string]bool{}),
-	}
-
-	for _, field := range node._fields {
-		switch field.Name {
-		case "id":
-			res := it.ID
-
-			node.Id = res
-
-		case "name":
-			res := it.Name
-
-			node.Name = res
-
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return &node
-}
-
-func (t *_UserNode) Write(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "id":
-			w.ObjectKey("id")
-			w.String(t.Id)
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
 
 		}
 	}
@@ -441,8 +548,8 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}
@@ -602,8 +709,8 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}
@@ -789,8 +896,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Types = append(node.Types, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.Types = append(node.Types, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -827,8 +934,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Directives = append(node.Directives, ec.___Directive(field.Selections, f))
+				for i := range res {
+					node.Directives = append(node.Directives, ec.___Directive(field.Selections, res[i]))
 				}
 
 			}
@@ -945,8 +1052,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Fields = append(node.Fields, ec.___Field(field.Selections, f))
+				for i := range res {
+					node.Fields = append(node.Fields, ec.___Field(field.Selections, res[i]))
 				}
 
 			}
@@ -956,8 +1063,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -967,8 +1074,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -987,8 +1094,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, f))
+				for i := range res {
+					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, res[i]))
 				}
 
 			}
@@ -998,8 +1105,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}
@@ -1110,7 +1217,7 @@ func (t *___TypeNode) Write(w *jsonw.Writer) {
 	w.EndObject()
 }
 
-var parsedSchema = schema.MustParse("schema {\n    query: Query\n    mutation: Mutation\n}\n\ntype Query {\n    todos: [Todo!]!\n}\n\ntype Mutation {\n    createTodo(text: String!): Todo!\n}\n\ntype Todo {\n    id: ID!\n    text: String!\n    done: Boolean!\n    user: User!\n}\n\ntype User {\n    id: ID!\n    name: String!\n}\n")
+var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    customers: [Customer!]\n}\n\ntype Customer {\n    id: Int!\n    name: String!\n    address: Address\n    orders: [Order!]\n}\n\ntype Address {\n    id: Int!\n    street: String\n    country: String\n}\n\ntype Order {\n    id: Int!\n    date: Time\n    amount: Float!\n    items: [Item!]\n}\n\ntype Item {\n    name: String\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

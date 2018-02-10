@@ -62,8 +62,10 @@ func NewResolver(resolvers Resolvers) graphql.Resolver {
 
 		if op.Type == query.Query {
 			result = c._myQuery(op.Selections, nil)
+
 		} else if op.Type == query.Mutation {
 			result = c._myMutation(op.Selections, nil)
+
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
@@ -297,8 +299,8 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) Wri
 
 				if res != nil {
 
-					for _, f := range res {
-						node.Todos = append(node.Todos, ec._todo(field.Selections, &f))
+					for i := range res {
+						node.Todos = append(node.Todos, ec._todo(field.Selections, &res[i]))
 					}
 
 				}
@@ -480,8 +482,8 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}
@@ -641,8 +643,8 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}
@@ -828,8 +830,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Types = append(node.Types, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.Types = append(node.Types, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -866,8 +868,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Directives = append(node.Directives, ec.___Directive(field.Selections, f))
+				for i := range res {
+					node.Directives = append(node.Directives, ec.___Directive(field.Selections, res[i]))
 				}
 
 			}
@@ -984,8 +986,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Fields = append(node.Fields, ec.___Field(field.Selections, f))
+				for i := range res {
+					node.Fields = append(node.Fields, ec.___Field(field.Selections, res[i]))
 				}
 
 			}
@@ -995,8 +997,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -1006,8 +1008,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -1026,8 +1028,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, f))
+				for i := range res {
+					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, res[i]))
 				}
 
 			}
@@ -1037,8 +1039,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}

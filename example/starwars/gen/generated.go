@@ -73,8 +73,10 @@ func NewResolver(resolvers Resolvers) graphql.Resolver {
 
 		if op.Type == query.Query {
 			result = c._query(op.Selections, nil)
+
 		} else if op.Type == query.Mutation {
 			result = c._mutation(op.Selections, nil)
+
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
@@ -173,8 +175,8 @@ func (ec *executionContext) _droid(sel []query.Selection, it *starwars.Droid) Wr
 
 				if res != nil {
 
-					for _, f := range res {
-						node.Friends = append(node.Friends, ec._character(field.Selections, f))
+					for i := range res {
+						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
 					}
 
 				}
@@ -300,8 +302,8 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *starwa
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Edges = append(node.Edges, ec._friendsEdge(field.Selections, &f))
+				for i := range res {
+					node.Edges = append(node.Edges, ec._friendsEdge(field.Selections, &res[i]))
 				}
 
 			}
@@ -315,8 +317,8 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *starwa
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Friends = append(node.Friends, ec._character(field.Selections, f))
+				for i := range res {
+					node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
 				}
 
 			}
@@ -477,8 +479,8 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) Wr
 
 				if res != nil {
 
-					for _, f := range res {
-						node.Friends = append(node.Friends, ec._character(field.Selections, f))
+					for i := range res {
+						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
 					}
 
 				}
@@ -538,8 +540,8 @@ func (ec *executionContext) _human(sel []query.Selection, it *starwars.Human) Wr
 
 				if res != nil {
 
-					for _, f := range res {
-						node.Starships = append(node.Starships, ec._starship(field.Selections, &f))
+					for i := range res {
+						node.Starships = append(node.Starships, ec._starship(field.Selections, &res[i]))
 					}
 
 				}
@@ -816,8 +818,8 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) Write
 
 				if res != nil {
 
-					for _, f := range res {
-						node.Reviews = append(node.Reviews, ec._review(field.Selections, &f))
+					for i := range res {
+						node.Reviews = append(node.Reviews, ec._review(field.Selections, &res[i]))
 					}
 
 				}
@@ -847,8 +849,8 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) Write
 
 				if res != nil {
 
-					for _, f := range res {
-						node.Search = append(node.Search, ec._searchResult(field.Selections, f))
+					for i := range res {
+						node.Search = append(node.Search, ec._searchResult(field.Selections, res[i]))
 					}
 
 				}
@@ -1233,8 +1235,8 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}
@@ -1394,8 +1396,8 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}
@@ -1581,8 +1583,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Types = append(node.Types, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.Types = append(node.Types, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -1619,8 +1621,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Directives = append(node.Directives, ec.___Directive(field.Selections, f))
+				for i := range res {
+					node.Directives = append(node.Directives, ec.___Directive(field.Selections, res[i]))
 				}
 
 			}
@@ -1737,8 +1739,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Fields = append(node.Fields, ec.___Field(field.Selections, f))
+				for i := range res {
+					node.Fields = append(node.Fields, ec.___Field(field.Selections, res[i]))
 				}
 
 			}
@@ -1748,8 +1750,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -1759,8 +1761,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, f))
+				for i := range res {
+					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, res[i]))
 				}
 
 			}
@@ -1779,8 +1781,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, f))
+				for i := range res {
+					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, res[i]))
 				}
 
 			}
@@ -1790,8 +1792,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 			if res != nil {
 
-				for _, f := range res {
-					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, f))
+				for i := range res {
+					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, res[i]))
 				}
 
 			}

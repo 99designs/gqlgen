@@ -48,8 +48,10 @@ func NewResolver(resolvers Resolvers) graphql.Resolver {
 
 		if op.Type == query.Query {
 			result = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
+        {{if .MutationRoot}}
 		} else if op.Type == query.Mutation {
 			result = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
+        {{end}}
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}

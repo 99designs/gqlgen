@@ -110,6 +110,6 @@ func Bool(b bool) Writer {
 
 func Time(t time.Time) Writer {
 	return writerFunc(func(w io.Writer) {
-		io.WriteString(w, t.Format(time.RFC3339))
+		io.WriteString(w, strconv.Quote(t.Format(time.RFC3339)))
 	})
 }

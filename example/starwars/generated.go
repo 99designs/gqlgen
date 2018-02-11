@@ -425,21 +425,17 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) js
 				ec.Error(err)
 				continue
 			}
-			ec.wg.Add(1)
-			go func(i int, field collectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
+			res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
+			if err != nil {
+				ec.Error(err)
+				continue
+			}
 
-				if res == nil {
-					out.Values[i] = jsonw.Null
-				} else {
-					out.Values[i] = ec._review(field.Selections, res)
-				}
-			}(i, field)
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec._review(field.Selections, res)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

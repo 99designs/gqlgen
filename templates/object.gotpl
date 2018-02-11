@@ -16,7 +16,7 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 		case "{{$field.GraphQLName}}":
             {{- template "args" $field.Args }}
 
-            {{- if $field.IsResolver }}
+            {{- if $field.IsConcurrent }}
                 ec.wg.Add(1)
                 go func(i int, field collectedField) {
                     defer ec.wg.Done()
@@ -26,25 +26,25 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
                 res := {{$field.VarName}}
             {{- else if $field.MethodName }}
                 {{- if $field.NoErr }}
-                    res := {{$field.MethodName}}({{ $field.CallArgs $object }})
+                    res := {{$field.MethodName}}({{ $field.CallArgs }})
                 {{- else }}
-                    res, err := {{$field.MethodName}}({{ $field.CallArgs $object }})
+                    res, err := {{$field.MethodName}}({{ $field.CallArgs }})
                     if err != nil {
                         ec.Error(err)
-                        continue
+                        {{ if $field.IsConcurrent }}return{{ else }}continue{{end}}
                     }
                 {{- end }}
             {{- else }}
-                res, err := ec.resolvers.{{ $object.Name }}_{{ $field.GraphQLName }}({{ $field.CallArgs $object }})
+                res, err := ec.resolvers.{{ $object.Name }}_{{ $field.GraphQLName }}({{ $field.CallArgs }})
                 if err != nil {
                     ec.Error(err)
-                    return
+                    {{ if $field.IsConcurrent }}return{{ else }}continue{{end}}
                 }
             {{- end }}
 
             {{ $field.WriteJson "out.Values[i]" }}
 
-            {{- if $field.IsResolver }}
+            {{- if $field.IsConcurrent }}
                 }(i, field)
             {{- end }}
         {{- end }}

@@ -133,6 +133,29 @@ func TestStarwars(t *testing.T) {
 		require.Equal(t, "Leia Organa", resp.Droid.FriendsConnection.Edges[2].Node.Name)
 	})
 
+	t.Run("mutations must be run in sequence", func(t *testing.T) {
+		var resp struct {
+			A struct{ Time string }
+			B struct{ Time string }
+			C struct{ Time string }
+		}
+
+		c.MustPost(`mutation f{
+		  a:createReview(episode: NEWHOPE, review:{stars:1, commentary:"Blah blah"})  {
+			time
+		  }
+		  b:createReview(episode: NEWHOPE, review:{stars:1, commentary:"Blah blah"})  {
+			time
+		  }
+		  c:createReview(episode: NEWHOPE, review:{stars:1, commentary:"Blah blah"})  {
+			time
+		  }
+		}`, &resp)
+
+		require.NotEqual(t, resp.A.Time, resp.B.Time)
+		require.NotEqual(t, resp.C.Time, resp.B.Time)
+	})
+
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
 		c.MustPost(introspection.Query, nil)

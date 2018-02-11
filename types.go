@@ -70,11 +70,12 @@ func (t kind) FullName() string {
 }
 
 type object struct {
-	Name      string
-	Fields    []Field
-	Type      kind
-	satisfies []string
-	Root      bool
+	Name               string
+	Fields             []Field
+	Type               kind
+	satisfies          []string
+	Root               bool
+	DisableConcurrency bool
 }
 
 type Field struct {
@@ -84,20 +85,25 @@ type Field struct {
 	Type        kind
 	Args        []FieldArgument
 	NoErr       bool
+	Object      *object
 }
 
 func (f *Field) IsResolver() bool {
 	return f.MethodName == "" && f.VarName == ""
 }
 
-func (f *Field) ResolverDeclaration(o object) string {
+func (f *Field) IsConcurrent() bool {
+	return f.IsResolver() && !f.Object.DisableConcurrency
+}
+
+func (f *Field) ResolverDeclaration() string {
 	if !f.IsResolver() {
 		return ""
 	}
-	res := fmt.Sprintf("%s_%s(ctx context.Context", o.Name, f.GraphQLName)
+	res := fmt.Sprintf("%s_%s(ctx context.Context", f.Object.Name, f.GraphQLName)
 
-	if !o.Root {
-		res += fmt.Sprintf(", it *%s", o.Type.Local())
+	if !f.Object.Root {
+		res += fmt.Sprintf(", it *%s", f.Object.Type.Local())
 	}
 	for _, arg := range f.Args {
 		res += fmt.Sprintf(", %s %s", arg.Name, arg.Type.Local())
@@ -107,13 +113,13 @@ func (f *Field) ResolverDeclaration(o object) string {
 	return res
 }
 
-func (f *Field) CallArgs(object object) string {
+func (f *Field) CallArgs() string {
 	var args []string
 
 	if f.MethodName == "" {
 		args = append(args, "ec.ctx")
 
-		if !object.Root {
+		if !f.Object.Root {
 			args = append(args, "it")
 		}
 	}
@@ -202,7 +208,7 @@ func (o *object) Implementors() string {
 func (e *extractor) GetObject(name string) *object {
 	for i, o := range e.Objects {
 		if strings.EqualFold(o.Name, name) {
-			return &e.Objects[i]
+			return e.Objects[i]
 		}
 	}
 	return nil

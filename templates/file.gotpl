@@ -12,7 +12,7 @@ import (
 type Resolvers interface {
 {{- range $object := .Objects -}}
     {{ range $field := $object.Fields -}}
-        {{ $field.ResolverDeclaration $object }}
+        {{ $field.ResolverDeclaration }}
     {{ end }}
 {{- end }}
 }

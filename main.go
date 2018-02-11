@@ -78,6 +78,7 @@ func main() {
 		GraphQLName: "__schema",
 		NoErr:       true,
 		MethodName:  "ec.introspectSchema",
+		Object:      q,
 	})
 	q.Fields = append(q.Fields, Field{
 		Type:        e.getType("__Type").Ptr(),
@@ -85,6 +86,7 @@ func main() {
 		NoErr:       true,
 		MethodName:  "ec.introspectType",
 		Args:        []FieldArgument{{Name: "name", Type: kind{Scalar: true, Name: "string"}}},
+		Object:      q,
 	})
 
 	if len(e.Errors) != 0 {

@@ -106,17 +106,13 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 				}
 				arg0 = tmp2
 			}
-			ec.wg.Add(1)
-			go func(i int, field collectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
+			res, err := ec.resolvers.MyMutation_createTodo(ec.ctx, arg0)
+			if err != nil {
+				ec.Error(err)
+				continue
+			}
 
-				out.Values[i] = ec._todo(field.Selections, &res)
-			}(i, field)
+			out.Values[i] = ec._todo(field.Selections, &res)
 		case "updateTodo":
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
@@ -131,21 +127,17 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 			if tmp, ok := field.Args["changes"]; ok {
 				arg1 = tmp.(map[string]interface{})
 			}
-			ec.wg.Add(1)
-			go func(i int, field collectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
+			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
+			if err != nil {
+				ec.Error(err)
+				continue
+			}
 
-				if res == nil {
-					out.Values[i] = jsonw.Null
-				} else {
-					out.Values[i] = ec._todo(field.Selections, res)
-				}
-			}(i, field)
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec._todo(field.Selections, res)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

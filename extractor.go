@@ -18,8 +18,8 @@ import (
 type extractor struct {
 	Errors       []string
 	PackageName  string
-	Objects      []object
-	Interfaces   []object
+	Objects      []*object
+	Interfaces   []*object
 	goTypeMap    map[string]string
 	Imports      map[string]string // local -> full path
 	schema       *schema.Schema
@@ -32,7 +32,7 @@ func (e *extractor) extract() {
 	for _, typ := range e.schema.Types {
 		switch typ := typ.(type) {
 		case *schema.Object:
-			obj := object{
+			obj := &object{
 				Name: typ.Name,
 				Type: e.getType(typ.Name),
 			}
@@ -54,18 +54,19 @@ func (e *extractor) extract() {
 					GraphQLName: field.Name,
 					Type:        e.buildType(field.Type),
 					Args:        args,
+					Object:      obj,
 				})
 			}
 			e.Objects = append(e.Objects, obj)
 		case *schema.Union:
-			obj := object{
+			obj := &object{
 				Name: typ.Name,
 				Type: e.buildType(typ),
 			}
 			e.Interfaces = append(e.Interfaces, obj)
 
 		case *schema.Interface:
-			obj := object{
+			obj := &object{
 				Name: typ.Name,
 				Type: e.buildType(typ),
 			}
@@ -82,6 +83,7 @@ func (e *extractor) extract() {
 		}
 		if name == "mutation" {
 			e.MutationRoot = obj.Name
+			e.GetObject(obj.Name).DisableConcurrency = true
 		}
 	}
 
@@ -316,7 +318,7 @@ func (e *extractor) modifiersFromGoType(t types.Type) []string {
 	}
 }
 
-func (e *extractor) findBindTargets(t types.Type, object object) bool {
+func (e *extractor) findBindTargets(t types.Type, object *object) bool {
 	switch t := t.(type) {
 	case *types.Named:
 		for i := 0; i < t.NumMethods(); i++ {

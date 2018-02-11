@@ -11,7 +11,6 @@ import (
 	"syscall"
 
 	"github.com/vektah/gqlgen/neelance/schema"
-
 	"golang.org/x/tools/imports"
 )
 
@@ -68,7 +67,6 @@ func main() {
 			"schema":        "github.com/vektah/gqlgen/neelance/schema",
 			"validation":    "github.com/vektah/gqlgen/neelance/validation",
 			"jsonw":         "github.com/vektah/gqlgen/jsonw",
-			"graphql":       "github.com/vektah/gqlgen",
 		},
 	}
 	e.extract()

@@ -1,15 +1,15 @@
-{{ define "object" }}
+{{- define "object" }}
 {{ $object := . }}
 type _{{ .Type.GraphQLName}}Node struct {
 	_fields []collectedField
 
-    {{range $field := .Fields -}}
-        {{ if $field.Type.Scalar -}}
+    {{- range $field := .Fields }}
+        {{- if $field.Type.Scalar }}
             {{$field.GraphQLName|ucFirst}} {{ $field.Type.Local }}
-        {{ else -}}
+        {{- else }}
             {{$field.GraphQLName|ucFirst}} {{if $field.Type.IsSlice}}[]{{end}}jsonw.JsonWriter
-        {{ end -}}
-    {{end}}
+        {{- end }}
+    {{- end}}
 }
 
 var {{ $object.Type.GraphQLName|lcFirst}}Implementors = {{$object.Implementors}}
@@ -22,58 +22,58 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 
 	for _, field := range node._fields {
 		switch field.Name {
-        {{range $field := $object.Fields -}}
+        {{- range $field := $object.Fields }}
 		case "{{$field.GraphQLName}}":
-            {{ template "args" $field.Args -}}
+            {{- template "args" $field.Args }}
 
-            {{ if $field.IsResolver }}
+            {{- if $field.IsResolver }}
                 ec.wg.Add(1)
                 go func(field collectedField) {
                     defer ec.wg.Done()
-            {{ end }}
+            {{- end }}
 
-            {{- if $field.VarName -}}
+            {{- if $field.VarName }}
                 res := {{$field.VarName}}
-            {{ else if $field.MethodName -}}
-                {{ if $field.NoErr -}}
+            {{- else if $field.MethodName }}
+                {{- if $field.NoErr }}
                     res := {{$field.MethodName}}({{ $field.CallArgs $object }})
-                {{ else -}}
+                {{- else }}
                     res, err := {{$field.MethodName}}({{ $field.CallArgs $object }})
                     if err != nil {
                         ec.Error(err)
                         continue
                     }
-                {{ end }}
-            {{ else }}
+                {{- end }}
+            {{- else }}
                 res, err := ec.resolvers.{{ $object.Name }}_{{ $field.GraphQLName }}({{ $field.CallArgs $object }})
                 if err != nil {
                     ec.Error(err)
                     return
                 }
-            {{ end -}}
+            {{- end }}
 
-            {{ if $field.Type.Scalar }}
+            {{- if $field.Type.Scalar }}
                 node.{{$field.GraphQLName|ucFirst}} = res
-            {{ else }}
-                {{ if or $field.Type.IsPtr $field.Type.IsSlice }}
+            {{- else }}
+                {{- if or $field.Type.IsPtr $field.Type.IsSlice }}
                     if res != nil {
-                {{ end}}
-                    {{ if $field.Type.IsSlice }}
+                {{- end }}
+                    {{- if $field.Type.IsSlice }}
                         for i := range {{$field.Type.ByVal "res" }} {
                             node.{{$field.GraphQLName|ucFirst}} = append(node.{{$field.GraphQLName|ucFirst}},  ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{ $field.Type.Elem.ByRef "res[i]" }}))
                         }
-                    {{ else }}
+                    {{- else }}
                         node.{{$field.GraphQLName|ucFirst}} = ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{$field.Type.ByRef "res" }})
-                    {{ end }}
-                {{ if or $field.Type.IsPtr $field.Type.IsSlice }}
+                    {{- end }}
+                {{- if or $field.Type.IsPtr $field.Type.IsSlice }}
                     }
-                {{ end}}
-            {{ end }}
+                {{- end}}
+            {{- end }}
 
-            {{ if $field.IsResolver }}
+            {{- if $field.IsResolver }}
                 }(field)
-            {{ end }}
-        {{ end}}
+            {{- end }}
+        {{- end }}
         default:
             panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -86,14 +86,14 @@ func (t *_{{ $object.Type.GraphQLName }}Node) WriteJson(w *jsonw.Writer) {
     w.BeginObject()
     for _, field := range t._fields {
         switch field.Name {
-            {{range $field := $object.Fields -}}
+            {{- range $field := $object.Fields }}
                 case "{{$field.GraphQLName}}":
                     w.ObjectKey({{$field.GraphQLName|quote}})
                     {{ $field.WriteJson }}
-            {{ end }}
+            {{- end }}
         }
     }
     w.EndObject()
 }
 
-{{end}}
+{{- end}}

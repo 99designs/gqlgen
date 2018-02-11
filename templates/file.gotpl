@@ -4,17 +4,17 @@
 package {{ .PackageName }}
 
 import (
-{{ range $as, $import := .Imports }}
+{{- range $as, $import := .Imports }}
     {{- $as }} "{{ $import }}"
 {{ end }}
 )
 
 type Resolvers interface {
-{{ range $object := .Objects -}}
+{{- range $object := .Objects -}}
     {{ range $field := $object.Fields -}}
         {{ $field.ResolverDeclaration $object }}
     {{ end }}
-{{ end }}
+{{- end }}
 }
 
 func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[string]interface{}, io.Writer) []*errors.QueryError {
@@ -44,17 +44,15 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 		var result jsonw.JsonWriter
 		if op.Type == query.Query {
 			result = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
-        {{if .MutationRoot}}
+        {{- if .MutationRoot}}
 		} else if op.Type == query.Mutation {
 			result = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
-        {{end}}
+        {{- end}}
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
 
         c.wg.Wait()
-
-		// TODO: parallelize if query.
 
 		writer := jsonw.New(w)
 		writer.BeginObject()
@@ -81,13 +79,13 @@ type executionContext struct {
 	wg        sync.WaitGroup
 }
 
-{{range $object := .Objects }}
+{{- range $object := .Objects }}
     {{ template "object" $object }}
-{{end}}
+{{- end}}
 
-{{ range $interface := .Interfaces }}
+{{- range $interface := .Interfaces }}
     {{ template "interface" $interface }}
-{{ end }}
+{{- end }}
 
 var parsedSchema = schema.MustParse({{.SchemaRaw|quote}})
 

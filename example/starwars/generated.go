@@ -32,7 +32,6 @@ type Resolvers interface {
 	Human_friendsConnection(ctx context.Context, it *Human, first *int, after *string) (FriendsConnection, error)
 
 	Human_starships(ctx context.Context, it *Human) ([]Starship, error)
-
 	Mutation_createReview(ctx context.Context, episode string, review Review) (*Review, error)
 
 	Query_hero(ctx context.Context, episode *string) (Character, error)
@@ -71,17 +70,13 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 		var result jsonw.JsonWriter
 		if op.Type == query.Query {
 			result = c._query(op.Selections, nil)
-
 		} else if op.Type == query.Mutation {
 			result = c._mutation(op.Selections, nil)
-
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
 
 		c.wg.Wait()
-
-		// TODO: parallelize if query.
 
 		writer := jsonw.New(w)
 		writer.BeginObject()
@@ -109,8 +104,7 @@ type executionContext struct {
 }
 
 type _DroidNode struct {
-	_fields []collectedField
-
+	_fields           []collectedField
 	Id                string
 	Name              string
 	Friends           []jsonw.JsonWriter
@@ -131,36 +125,25 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.JsonW
 		switch field.Name {
 		case "id":
 			res := it.ID
-
 			node.Id = res
-
 		case "name":
 			res := it.Name
-
 			node.Name = res
-
 		case "friends":
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Droid_friends(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					for i := range res {
 						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
 					}
-
 				}
-
 			}(field)
-
 		case "friendsConnection":
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
@@ -180,31 +163,22 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.JsonW
 				}
 				arg1 = &tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, it, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				node.FriendsConnection = ec._friendsConnection(field.Selections, &res)
-
 			}(field)
-
 		case "appearsIn":
 			res := it.AppearsIn
-
 			node.AppearsIn = res
-
 		case "primaryFunction":
 			res := it.PrimaryFunction
-
 			node.PrimaryFunction = res
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -243,15 +217,13 @@ func (t *_DroidNode) WriteJson(w *jsonw.Writer) {
 		case "primaryFunction":
 			w.ObjectKey("primaryFunction")
 			w.String(t.PrimaryFunction)
-
 		}
 	}
 	w.EndObject()
 }
 
 type _FriendsConnectionNode struct {
-	_fields []collectedField
-
+	_fields    []collectedField
 	TotalCount int
 	Edges      []jsonw.JsonWriter
 	Friends    []jsonw.JsonWriter
@@ -270,58 +242,40 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *Friend
 		switch field.Name {
 		case "totalCount":
 			res := it.TotalCount()
-
 			node.TotalCount = res
-
 		case "edges":
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.FriendsConnection_edges(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					for i := range res {
 						node.Edges = append(node.Edges, ec._friendsEdge(field.Selections, &res[i]))
 					}
-
 				}
-
 			}(field)
-
 		case "friends":
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.FriendsConnection_friends(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					for i := range res {
 						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
 					}
-
 				}
-
 			}(field)
-
 		case "pageInfo":
 			res := it.PageInfo()
-
 			node.PageInfo = ec._pageInfo(field.Selections, &res)
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -354,7 +308,6 @@ func (t *_FriendsConnectionNode) WriteJson(w *jsonw.Writer) {
 		case "pageInfo":
 			w.ObjectKey("pageInfo")
 			t.PageInfo.WriteJson(w)
-
 		}
 	}
 	w.EndObject()
@@ -362,9 +315,8 @@ func (t *_FriendsConnectionNode) WriteJson(w *jsonw.Writer) {
 
 type _FriendsEdgeNode struct {
 	_fields []collectedField
-
-	Cursor string
-	Node   jsonw.JsonWriter
+	Cursor  string
+	Node    jsonw.JsonWriter
 }
 
 var friendsEdgeImplementors = []string{"FriendsEdge"}
@@ -379,14 +331,10 @@ func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge)
 		switch field.Name {
 		case "cursor":
 			res := it.Cursor
-
 			node.Cursor = res
-
 		case "node":
 			res := it.Node
-
 			node.Node = ec._character(field.Selections, res)
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -405,15 +353,13 @@ func (t *_FriendsEdgeNode) WriteJson(w *jsonw.Writer) {
 		case "node":
 			w.ObjectKey("node")
 			t.Node.WriteJson(w)
-
 		}
 	}
 	w.EndObject()
 }
 
 type _HumanNode struct {
-	_fields []collectedField
-
+	_fields           []collectedField
 	Id                string
 	Name              string
 	Height            float64
@@ -436,14 +382,10 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.JsonW
 		switch field.Name {
 		case "id":
 			res := it.ID
-
 			node.Id = res
-
 		case "name":
 			res := it.Name
-
 			node.Name = res
-
 		case "height":
 			var arg0 string
 			if tmp, ok := field.Args["unit"]; ok {
@@ -455,36 +397,25 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.JsonW
 				arg0 = tmp2
 			}
 			res := it.Height(arg0)
-
 			node.Height = res
-
 		case "mass":
 			res := it.Mass
-
 			node.Mass = res
-
 		case "friends":
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Human_friends(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					for i := range res {
 						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
 					}
-
 				}
-
 			}(field)
-
 		case "friendsConnection":
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
@@ -504,48 +435,34 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.JsonW
 				}
 				arg1 = &tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Human_friendsConnection(ec.ctx, it, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				node.FriendsConnection = ec._friendsConnection(field.Selections, &res)
-
 			}(field)
-
 		case "appearsIn":
 			res := it.AppearsIn
-
 			node.AppearsIn = res
-
 		case "starships":
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Human_starships(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					for i := range res {
 						node.Starships = append(node.Starships, ec._starship(field.Selections, &res[i]))
 					}
-
 				}
-
 			}(field)
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -594,15 +511,13 @@ func (t *_HumanNode) WriteJson(w *jsonw.Writer) {
 				val.WriteJson(w)
 			}
 			w.EndArray()
-
 		}
 	}
 	w.EndObject()
 }
 
 type _MutationNode struct {
-	_fields []collectedField
-
+	_fields      []collectedField
 	CreateReview jsonw.JsonWriter
 }
 
@@ -632,25 +547,18 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) js
 				ec.Error(err)
 				continue
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					node.CreateReview = ec._review(field.Selections, res)
-
 				}
-
 			}(field)
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -670,15 +578,13 @@ func (t *_MutationNode) WriteJson(w *jsonw.Writer) {
 			} else {
 				t.CreateReview.WriteJson(w)
 			}
-
 		}
 	}
 	w.EndObject()
 }
 
 type _PageInfoNode struct {
-	_fields []collectedField
-
+	_fields     []collectedField
 	StartCursor string
 	EndCursor   string
 	HasNextPage bool
@@ -696,19 +602,13 @@ func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) jsonw
 		switch field.Name {
 		case "startCursor":
 			res := it.StartCursor
-
 			node.StartCursor = res
-
 		case "endCursor":
 			res := it.EndCursor
-
 			node.EndCursor = res
-
 		case "hasNextPage":
 			res := it.HasNextPage
-
 			node.HasNextPage = res
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -730,15 +630,13 @@ func (t *_PageInfoNode) WriteJson(w *jsonw.Writer) {
 		case "hasNextPage":
 			w.ObjectKey("hasNextPage")
 			w.Bool(t.HasNextPage)
-
 		}
 	}
 	w.EndObject()
 }
 
 type _QueryNode struct {
-	_fields []collectedField
-
+	_fields   []collectedField
 	Hero      jsonw.JsonWriter
 	Reviews   []jsonw.JsonWriter
 	Search    []jsonw.JsonWriter
@@ -770,21 +668,16 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 				arg0 = &tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				node.Hero = ec._character(field.Selections, res)
-
 			}(field)
-
 		case "reviews":
 			var arg0 string
 			if tmp, ok := field.Args["episode"]; ok {
@@ -809,27 +702,20 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 					continue
 				}
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Query_reviews(ec.ctx, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					for i := range res {
 						node.Reviews = append(node.Reviews, ec._review(field.Selections, &res[i]))
 					}
-
 				}
-
 			}(field)
-
 		case "search":
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
@@ -840,27 +726,20 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 				arg0 = tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					for i := range res {
 						node.Search = append(node.Search, ec._searchResult(field.Selections, res[i]))
 					}
-
 				}
-
 			}(field)
-
 		case "character":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -871,21 +750,16 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 				arg0 = tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Query_character(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				node.Character = ec._character(field.Selections, res)
-
 			}(field)
-
 		case "droid":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -896,25 +770,18 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 				arg0 = tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					node.Droid = ec._droid(field.Selections, res)
-
 				}
-
 			}(field)
-
 		case "human":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -925,25 +792,18 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 				arg0 = tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Query_human(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					node.Human = ec._human(field.Selections, res)
-
 				}
-
 			}(field)
-
 		case "starship":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -954,34 +814,23 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 				arg0 = tmp2
 			}
-
 			ec.wg.Add(1)
 			go func(field collectedField) {
 				defer ec.wg.Done()
-
 				res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-
 				if res != nil {
-
 					node.Starship = ec._starship(field.Selections, res)
-
 				}
-
 			}(field)
-
 		case "__schema":
 			res := ec.introspectSchema()
-
 			if res != nil {
-
 				node.__schema = ec.___Schema(field.Selections, res)
-
 			}
-
 		case "__type":
 			var arg0 string
 			if tmp, ok := field.Args["name"]; ok {
@@ -993,13 +842,9 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			res := ec.introspectType(arg0)
-
 			if res != nil {
-
 				node.__type = ec.___Type(field.Selections, res)
-
 			}
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1067,15 +912,13 @@ func (t *_QueryNode) WriteJson(w *jsonw.Writer) {
 			} else {
 				t.__type.WriteJson(w)
 			}
-
 		}
 	}
 	w.EndObject()
 }
 
 type _ReviewNode struct {
-	_fields []collectedField
-
+	_fields    []collectedField
 	Stars      int
 	Commentary *string
 	Time       time.Time
@@ -1093,19 +936,13 @@ func (ec *executionContext) _review(sel []query.Selection, it *Review) jsonw.Jso
 		switch field.Name {
 		case "stars":
 			res := it.Stars
-
 			node.Stars = res
-
 		case "commentary":
 			res := it.Commentary
-
 			node.Commentary = res
-
 		case "time":
 			res := it.Time
-
 			node.Time = res
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1131,7 +968,6 @@ func (t *_ReviewNode) WriteJson(w *jsonw.Writer) {
 		case "time":
 			w.ObjectKey("time")
 			w.Time(t.Time)
-
 		}
 	}
 	w.EndObject()
@@ -1139,10 +975,9 @@ func (t *_ReviewNode) WriteJson(w *jsonw.Writer) {
 
 type _StarshipNode struct {
 	_fields []collectedField
-
-	Id     string
-	Name   string
-	Length float64
+	Id      string
+	Name    string
+	Length  float64
 }
 
 var starshipImplementors = []string{"Starship"}
@@ -1157,14 +992,10 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw
 		switch field.Name {
 		case "id":
 			res := it.ID
-
 			node.Id = res
-
 		case "name":
 			res := it.Name
-
 			node.Name = res
-
 		case "length":
 			var arg0 string
 			if tmp, ok := field.Args["unit"]; ok {
@@ -1176,9 +1007,7 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw
 				arg0 = tmp2
 			}
 			res := it.Length(arg0)
-
 			node.Length = res
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1200,15 +1029,13 @@ func (t *_StarshipNode) WriteJson(w *jsonw.Writer) {
 		case "length":
 			w.ObjectKey("length")
 			w.Float64(t.Length)
-
 		}
 	}
 	w.EndObject()
 }
 
 type ___DirectiveNode struct {
-	_fields []collectedField
-
+	_fields     []collectedField
 	Name        string
 	Description *string
 	Locations   []string
@@ -1227,30 +1054,20 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 		switch field.Name {
 		case "name":
 			res := it.Name()
-
 			node.Name = res
-
 		case "description":
 			res := it.Description()
-
 			node.Description = res
-
 		case "locations":
 			res := it.Locations()
-
 			node.Locations = res
-
 		case "args":
 			res := it.Args()
-
 			if res != nil {
-
 				for i := range res {
 					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
-
 			}
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1291,15 +1108,13 @@ func (t *___DirectiveNode) WriteJson(w *jsonw.Writer) {
 				}
 			}
 			w.EndArray()
-
 		}
 	}
 	w.EndObject()
 }
 
 type ___EnumValueNode struct {
-	_fields []collectedField
-
+	_fields           []collectedField
 	Name              string
 	Description       *string
 	IsDeprecated      bool
@@ -1318,24 +1133,16 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 		switch field.Name {
 		case "name":
 			res := it.Name()
-
 			node.Name = res
-
 		case "description":
 			res := it.Description()
-
 			node.Description = res
-
 		case "isDeprecated":
 			res := it.IsDeprecated()
-
 			node.IsDeprecated = res
-
 		case "deprecationReason":
 			res := it.DeprecationReason()
-
 			node.DeprecationReason = res
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1368,15 +1175,13 @@ func (t *___EnumValueNode) WriteJson(w *jsonw.Writer) {
 			} else {
 				w.String(*t.DeprecationReason)
 			}
-
 		}
 	}
 	w.EndObject()
 }
 
 type ___FieldNode struct {
-	_fields []collectedField
-
+	_fields           []collectedField
 	Name              string
 	Description       *string
 	Args              []jsonw.JsonWriter
@@ -1397,44 +1202,28 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 		switch field.Name {
 		case "name":
 			res := it.Name()
-
 			node.Name = res
-
 		case "description":
 			res := it.Description()
-
 			node.Description = res
-
 		case "args":
 			res := it.Args()
-
 			if res != nil {
-
 				for i := range res {
 					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
 				}
-
 			}
-
 		case "type":
 			res := it.Type()
-
 			if res != nil {
-
 				node.Type = ec.___Type(field.Selections, res)
-
 			}
-
 		case "isDeprecated":
 			res := it.IsDeprecated()
-
 			node.IsDeprecated = res
-
 		case "deprecationReason":
 			res := it.DeprecationReason()
-
 			node.DeprecationReason = res
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1485,15 +1274,13 @@ func (t *___FieldNode) WriteJson(w *jsonw.Writer) {
 			} else {
 				w.String(*t.DeprecationReason)
 			}
-
 		}
 	}
 	w.EndObject()
 }
 
 type ___InputValueNode struct {
-	_fields []collectedField
-
+	_fields      []collectedField
 	Name         string
 	Description  *string
 	Type         jsonw.JsonWriter
@@ -1512,28 +1299,18 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 		switch field.Name {
 		case "name":
 			res := it.Name()
-
 			node.Name = res
-
 		case "description":
 			res := it.Description()
-
 			node.Description = res
-
 		case "type":
 			res := it.Type()
-
 			if res != nil {
-
 				node.Type = ec.___Type(field.Selections, res)
-
 			}
-
 		case "defaultValue":
 			res := it.DefaultValue()
-
 			node.DefaultValue = res
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1570,15 +1347,13 @@ func (t *___InputValueNode) WriteJson(w *jsonw.Writer) {
 			} else {
 				w.String(*t.DefaultValue)
 			}
-
 		}
 	}
 	w.EndObject()
 }
 
 type ___SchemaNode struct {
-	_fields []collectedField
-
+	_fields          []collectedField
 	Types            []jsonw.JsonWriter
 	QueryType        jsonw.JsonWriter
 	MutationType     jsonw.JsonWriter
@@ -1598,53 +1373,33 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 		switch field.Name {
 		case "types":
 			res := it.Types()
-
 			if res != nil {
-
 				for i := range res {
 					node.Types = append(node.Types, ec.___Type(field.Selections, res[i]))
 				}
-
 			}
-
 		case "queryType":
 			res := it.QueryType()
-
 			if res != nil {
-
 				node.QueryType = ec.___Type(field.Selections, res)
-
 			}
-
 		case "mutationType":
 			res := it.MutationType()
-
 			if res != nil {
-
 				node.MutationType = ec.___Type(field.Selections, res)
-
 			}
-
 		case "subscriptionType":
 			res := it.SubscriptionType()
-
 			if res != nil {
-
 				node.SubscriptionType = ec.___Type(field.Selections, res)
-
 			}
-
 		case "directives":
 			res := it.Directives()
-
 			if res != nil {
-
 				for i := range res {
 					node.Directives = append(node.Directives, ec.___Directive(field.Selections, res[i]))
 				}
-
 			}
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1700,15 +1455,13 @@ func (t *___SchemaNode) WriteJson(w *jsonw.Writer) {
 				}
 			}
 			w.EndArray()
-
 		}
 	}
 	w.EndObject()
 }
 
 type ___TypeNode struct {
-	_fields []collectedField
-
+	_fields       []collectedField
 	Kind          string
 	Name          *string
 	Description   *string
@@ -1732,19 +1485,13 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		switch field.Name {
 		case "kind":
 			res := it.Kind()
-
 			node.Kind = res
-
 		case "name":
 			res := it.Name()
-
 			node.Name = res
-
 		case "description":
 			res := it.Description()
-
 			node.Description = res
-
 		case "fields":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
@@ -1756,37 +1503,25 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				arg0 = tmp2
 			}
 			res := it.Fields(arg0)
-
 			if res != nil {
-
 				for i := range res {
 					node.Fields = append(node.Fields, ec.___Field(field.Selections, res[i]))
 				}
-
 			}
-
 		case "interfaces":
 			res := it.Interfaces()
-
 			if res != nil {
-
 				for i := range res {
 					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, res[i]))
 				}
-
 			}
-
 		case "possibleTypes":
 			res := it.PossibleTypes()
-
 			if res != nil {
-
 				for i := range res {
 					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, res[i]))
 				}
-
 			}
-
 		case "enumValues":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
@@ -1798,35 +1533,23 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				arg0 = tmp2
 			}
 			res := it.EnumValues(arg0)
-
 			if res != nil {
-
 				for i := range res {
 					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, res[i]))
 				}
-
 			}
-
 		case "inputFields":
 			res := it.InputFields()
-
 			if res != nil {
-
 				for i := range res {
 					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, res[i]))
 				}
-
 			}
-
 		case "ofType":
 			res := it.OfType()
-
 			if res != nil {
-
 				node.OfType = ec.___Type(field.Selections, res)
-
 			}
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1918,7 +1641,6 @@ func (t *___TypeNode) WriteJson(w *jsonw.Writer) {
 			} else {
 				t.OfType.WriteJson(w)
 			}
-
 		}
 	}
 	w.EndObject()
@@ -1928,19 +1650,16 @@ func (ec *executionContext) _character(sel []query.Selection, it Character) json
 	switch it := it.(type) {
 	case nil:
 		return jsonw.NullWriter
-
 	case Human:
 		return ec._human(sel, &it)
 
 	case *Human:
 		return ec._human(sel, it)
-
 	case Droid:
 		return ec._droid(sel, &it)
 
 	case *Droid:
 		return ec._droid(sel, it)
-
 	default:
 		panic(fmt.Errorf("unexpected type %T", it))
 	}
@@ -1950,25 +1669,21 @@ func (ec *executionContext) _searchResult(sel []query.Selection, it SearchResult
 	switch it := it.(type) {
 	case nil:
 		return jsonw.NullWriter
-
 	case Human:
 		return ec._human(sel, &it)
 
 	case *Human:
 		return ec._human(sel, it)
-
 	case Droid:
 		return ec._droid(sel, &it)
 
 	case *Droid:
 		return ec._droid(sel, it)
-
 	case Starship:
 		return ec._starship(sel, &it)
 
 	case *Starship:
 		return ec._starship(sel, it)
-
 	default:
 		panic(fmt.Errorf("unexpected type %T", it))
 	}

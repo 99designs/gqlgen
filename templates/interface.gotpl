@@ -1,21 +1,21 @@
-{{define "interface"}}
-{{ $interface := . }}
+{{- define "interface"}}
+{{- $interface := . }}
 
 func (ec *executionContext) _{{$interface.Type.GraphQLName|lcFirst}}(sel []query.Selection, it {{$interface.Type.Local}}) jsonw.JsonWriter {
     switch it := it.(type) {
     case nil:
         return jsonw.NullWriter
-    {{range $implementor := $interface.Type.Implementors}}
+    {{- range $implementor := $interface.Type.Implementors }}
     case {{$implementor.Local}}:
         return ec._{{$implementor.GraphQLName|lcFirst}}(sel, &it)
 
     case *{{$implementor.Local}}:
         return ec._{{$implementor.GraphQLName|lcFirst}}(sel, it)
 
-    {{end}}
+    {{- end }}
     default:
         panic(fmt.Errorf("unexpected type %T", it))
     }
 }
 
-{{end}}
+{{- end}}

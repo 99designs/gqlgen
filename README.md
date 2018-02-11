@@ -2,7 +2,28 @@
 
 This is a library for quickly creating a strictly typed graphql servers in golang.
 
-`go get -u github.com/vektah/gqlgen`
+`dep ensure -add github.com/vektah/gqlgen`
+
+Please use [dep](https://github.com/golang/dep) to pin your versions, the apis here should be considered unstable.
+
+Ideally you should version the binary used to generate the code, as well as the library itself. Version mismatches
+between the generated code and the runtime will be ugly. (gorunpkg)[https://github.com/vektah/gorunpkg] makes this
+as easy as:
+
+Gopkg.toml
+```toml
+required = ["github.com/vektah/gqlgen"]  
+```
+
+then
+```go
+//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go
+```
+
+#### Todo
+
+ - [ ] opentracing
+ - [ ] subscriptions
 
 ### Try it
 
@@ -91,7 +112,7 @@ func main() {
 #### neelance/graphql-go
 
 The gold standard of graphql servers in golang. It provided the inspiration, and a good chunk of code for gqlgen. Its
-strictly typed and uses your schema and some reflection to build up a resolver graph. The only downside is the amount
+strictly typed and uses your schema and some reflection to build up a resolver graph. The biggest downside is the amount
 of work building up all of the resolvers, wrapping every object manually.
 
 Reasons to use gqlgen instead:

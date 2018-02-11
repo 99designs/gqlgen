@@ -1,3 +1,6 @@
+package templates
+
+const interfaceTpl = `
 {{- define "interface"}}
 {{- $interface := . }}
 
@@ -19,3 +22,4 @@ func (ec *executionContext) _{{$interface.Type.GraphQLName|lcFirst}}(sel []query
 }
 
 {{- end}}
+`

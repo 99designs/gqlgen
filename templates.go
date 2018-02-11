@@ -2,10 +2,11 @@ package main
 
 import (
 	"bytes"
-	"path/filepath"
 	"strconv"
 	"text/template"
 	"unicode"
+
+	"github.com/vektah/gqlgen/templates"
 )
 
 func runTemplate(e *extractor) (*bytes.Buffer, error) {
@@ -13,7 +14,7 @@ func runTemplate(e *extractor) (*bytes.Buffer, error) {
 		"ucFirst": ucFirst,
 		"lcFirst": lcFirst,
 		"quote":   strconv.Quote,
-	}).ParseGlob(filepath.Join(templateDir, "templates", "*.gotpl"))
+	}).Parse(templates.String())
 	if err != nil {
 		return nil, err
 	}

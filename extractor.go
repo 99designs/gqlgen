@@ -12,6 +12,8 @@ import (
 	"github.com/vektah/gqlgen/neelance/common"
 	"github.com/vektah/gqlgen/neelance/schema"
 
+	"go/build"
+
 	"golang.org/x/tools/go/loader"
 )
 
@@ -96,6 +98,17 @@ func (e *extractor) extract() {
 	})
 }
 
+func resolvePkg(pkgName string) (string, error) {
+	cwd, _ := os.Getwd()
+
+	pkg, err := build.Default.Import(pkgName, cwd, build.FindOnly)
+	if err != nil {
+		return "", err
+	}
+
+	return pkg.ImportPath, nil
+}
+
 func (e *extractor) introspect() error {
 	var conf loader.Config
 	for _, name := range e.Imports {
@@ -112,9 +125,13 @@ func (e *extractor) introspect() error {
 			continue
 		}
 
-		pkg := prog.Imported[o.Type.Package]
+		pkgName, err := resolvePkg(o.Type.Package)
+		if err != nil {
+			return fmt.Errorf("unable to resolve package: %s", o.Type.Package)
+		}
+		pkg := prog.Imported[pkgName]
 		if pkg == nil {
-			return fmt.Errorf("required package was not loaded: %s", o.Type.Package)
+			return fmt.Errorf("required package was not loaded: %s", pkgName)
 		}
 
 		for astNode, object := range pkg.Defs {

@@ -1,3 +1,6 @@
+package templates
+
+var argsTpl = `
 {{- define "args" }}
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.Type.Local }}
@@ -42,3 +45,4 @@
 		{{- end}}
 	{{- end }}
 {{- end }}
+`

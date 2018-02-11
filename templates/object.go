@@ -1,3 +1,6 @@
+package templates
+
+const objectTpl = `
 {{- define "object" }}
 {{ $object := . }}
 
@@ -58,3 +61,4 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 
 
 {{- end}}
+`

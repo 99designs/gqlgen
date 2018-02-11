@@ -5,15 +5,15 @@ package {{ .PackageName }}
 
 import (
 {{- range $as, $import := .Imports }}
-    {{- $as }} "{{ $import }}"
+	{{- $as }} "{{ $import }}"
 {{ end }}
 )
 
 type Resolvers interface {
 {{- range $object := .Objects -}}
-    {{ range $field := $object.Fields -}}
-        {{ $field.ResolverDeclaration }}
-    {{ end }}
+	{{ range $field := $object.Fields -}}
+		{{ $field.ResolverDeclaration }}
+	{{ end }}
 {{- end }}
 }
 
@@ -43,22 +43,22 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 
 		var data jsonw.Writer
 		if op.Type == query.Query {
-            data = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
-        {{- if .MutationRoot}}
+			data = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
+		{{- if .MutationRoot}}
 		} else if op.Type == query.Mutation {
-            data = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
-        {{- end}}
+			data = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
+		{{- end}}
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
 
-        c.wg.Wait()
+		c.wg.Wait()
 
-        result := &jsonw.OrderedMap{}
-        result.Add("data", data)
+		result := &jsonw.OrderedMap{}
+		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-            result.Add("errors", errors.ErrorWriter(c.Errors))
+			result.Add("errors", errors.ErrorWriter(c.Errors))
 		}
 
 		result.WriteJson(w)
@@ -76,11 +76,11 @@ type executionContext struct {
 }
 
 {{- range $object := .Objects }}
-    {{ template "object" $object }}
+	{{ template "object" $object }}
 {{- end}}
 
 {{- range $interface := .Interfaces }}
-    {{ template "interface" $interface }}
+	{{ template "interface" $interface }}
 {{- end }}
 
 var parsedSchema = schema.MustParse({{.SchemaRaw|quote}})

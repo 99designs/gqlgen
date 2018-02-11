@@ -7,7 +7,7 @@ This is a library for quickly creating a strictly typed graphql servers in golan
 Please use [dep](https://github.com/golang/dep) to pin your versions, the apis here should be considered unstable.
 
 Ideally you should version the binary used to generate the code, as well as the library itself. Version mismatches
-between the generated code and the runtime will be ugly. (gorunpkg)[https://github.com/vektah/gorunpkg] makes this
+between the generated code and the runtime will be ugly. [gorunpkg](https://github.com/vektah/gorunpkg) makes this
 as easy as:
 
 Gopkg.toml

@@ -12,7 +12,7 @@ jobs:
           go get -u github.com/alecthomas/gometalinter &&
           gometalinter --install &&
           dep ensure --vendor-only
-      - run: go install -v .
+      - run: go install -v . github.com/vektah/dataloaden
       - run: go generate ./... && if [[ $(git diff) ]] ; then echo "you need to run go generate" ; git diff ; exit 1 ; fi
       - run: go vet ./...
       - run: go test -race ./...

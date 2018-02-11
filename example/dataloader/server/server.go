@@ -4,14 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/vektah/graphql-go"
-	"github.com/vektah/graphql-go/example/dataloader"
+	"github.com/vektah/gqlgen/example/dataloader"
+	"github.com/vektah/gqlgen/handler"
 )
 
 func main() {
-	http.Handle("/", graphql.GraphiqlHandler("Dataloader", "/query"))
+	http.Handle("/", handler.GraphiQL("Dataloader", "/query"))
 
-	http.Handle("/query", dataloader.LoaderMiddleware(graphql.Handler(dataloader.NewExecutor(&dataloader.Resolver{}))))
+	http.Handle("/query", dataloader.LoaderMiddleware(handler.GraphQL(dataloader.NewExecutor(&dataloader.Resolver{}))))
 
 	log.Fatal(http.ListenAndServe(":8082", nil))
 }

@@ -3,8 +3,8 @@ package introspection
 import (
 	"sort"
 
-	"github.com/vektah/graphql-go/common"
-	"github.com/vektah/graphql-go/schema"
+	"github.com/vektah/gqlgen/neelance/common"
+	"github.com/vektah/gqlgen/neelance/schema"
 )
 
 type Schema struct {

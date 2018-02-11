@@ -1,4 +1,4 @@
-//go:generate ggraphqlc -out generated.go
+//go:generate gqlgen -out generated.go
 
 package starwars
 

@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/graphql-go"
-	"github.com/vektah/graphql-go/client"
-	introspection "github.com/vektah/graphql-go/introspection"
+	"github.com/vektah/gqlgen/client"
+	"github.com/vektah/gqlgen/handler"
+	introspection "github.com/vektah/gqlgen/neelance/introspection"
 )
 
 func TestStarwars(t *testing.T) {
-	srv := httptest.NewServer(graphql.Handler(NewExecutor(NewResolver())))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutor(NewResolver())))
 	c := client.New(srv.URL)
 
 	t.Run("Lukes starships", func(t *testing.T) {

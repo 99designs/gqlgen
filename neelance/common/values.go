@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/vektah/graphql-go/errors"
+	"github.com/vektah/gqlgen/neelance/errors"
 )
 
 type InputValue struct {

@@ -4,14 +4,15 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/vektah/gqlgen/client"
+	"github.com/vektah/gqlgen/neelance/introspection"
+
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/graphql-go"
-	"github.com/vektah/graphql-go/client"
-	"github.com/vektah/graphql-go/introspection"
+	"github.com/vektah/gqlgen/handler"
 )
 
 func TestTodo(t *testing.T) {
-	srv := httptest.NewServer(graphql.Handler(NewExecutor(New())))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutor(New())))
 	c := client.New(srv.URL)
 
 	t.Run("create a new todo", func(t *testing.T) {

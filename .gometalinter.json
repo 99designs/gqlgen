@@ -1,6 +1,5 @@
 {
   "sort": ["path"],
-  "MinConfidence": 10,
   "Linters": {
     "errcheck": {
       "Command":           "errcheck -abspath -ignore '[rR]ead|[wW]rite'",

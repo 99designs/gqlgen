@@ -20,14 +20,14 @@ var templateDir = func() string {
 	}
 	for _, path := range strings.Split(gopath, ":") {
 		if path != "" {
-			abspath, _ := filepath.Abs(filepath.Join(path, "src", "github.com", "vektah", "graphql-go"))
+			abspath, _ := filepath.Abs(filepath.Join(path, "src", "github.com", "vektah", "gqlgen"))
 			if dirExists(abspath) {
 				return abspath
 			}
 		}
 	}
 
-	fmt.Fprintln(os.Stderr, "cannot determine base of github.com/vektah/grapqhl-go")
+	fmt.Fprintln(os.Stderr, "cannot determine base of github.com/vektah/gqlgen")
 	os.Exit(1)
 	return ""
 }()

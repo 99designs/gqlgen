@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/vektah/graphql-go/jsonw"
+	"github.com/vektah/gqlgen/jsonw"
 )
 
 type QueryError struct {

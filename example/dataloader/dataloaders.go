@@ -1,6 +1,6 @@
-//go:generate dataloaden -keys int github.com/vektah/graphql-go/example/dataloader.Address
-//go:generate dataloaden -keys int -slice github.com/vektah/graphql-go/example/dataloader.Order
-//go:generate dataloaden -keys int -slice github.com/vektah/graphql-go/example/dataloader.Item
+//go:generate dataloaden -keys int github.com/vektah/gqlgen/example/dataloader.Address
+//go:generate dataloaden -keys int -slice github.com/vektah/gqlgen/example/dataloader.Order
+//go:generate dataloaden -keys int -slice github.com/vektah/gqlgen/example/dataloader.Item
 
 package dataloader
 

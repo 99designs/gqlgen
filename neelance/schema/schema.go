@@ -5,8 +5,8 @@ import (
 	"strings"
 	"text/scanner"
 
-	"github.com/vektah/graphql-go/common"
-	"github.com/vektah/graphql-go/errors"
+	"github.com/vektah/gqlgen/neelance/common"
+	"github.com/vektah/gqlgen/neelance/errors"
 )
 
 type Schema struct {

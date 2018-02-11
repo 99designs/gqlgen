@@ -1,8 +1,6 @@
-# graphql-go
+# gqlgen
 
-This is a library for creating a strictly typed graphql server in golang.
-
-I've forked from github.com/neelance/graphql-go to use the well written parsing and validation library it has locked away in [internal](https://github.com/neelance/graphql-go/issues/116).   
+This is a library for quickly creating a strictly typed graphql servers in golang.
 
 
 Big todos:

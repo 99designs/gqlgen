@@ -10,7 +10,8 @@ import (
 
 	"syscall"
 
-	"github.com/vektah/graphql-go/schema"
+	"github.com/vektah/gqlgen/neelance/schema"
+
 	"golang.org/x/tools/imports"
 )
 
@@ -61,13 +62,13 @@ func main() {
 			"sync":    "sync",
 
 			"mapstructure":  "github.com/mitchellh/mapstructure",
-			"errors":        "github.com/vektah/graphql-go/errors",
-			"introspection": "github.com/vektah/graphql-go/introspection",
-			"jsonw":         "github.com/vektah/graphql-go/jsonw",
-			"query":         "github.com/vektah/graphql-go/query",
-			"graphql":       "github.com/vektah/graphql-go",
-			"schema":        "github.com/vektah/graphql-go/schema",
-			"validation":    "github.com/vektah/graphql-go/validation",
+			"introspection": "github.com/vektah/gqlgen/neelance/introspection",
+			"errors":        "github.com/vektah/gqlgen/neelance/errors",
+			"query":         "github.com/vektah/gqlgen/neelance/query",
+			"schema":        "github.com/vektah/gqlgen/neelance/schema",
+			"validation":    "github.com/vektah/gqlgen/neelance/validation",
+			"jsonw":         "github.com/vektah/gqlgen/jsonw",
+			"graphql":       "github.com/vektah/gqlgen",
 		},
 	}
 	e.extract()
@@ -150,12 +151,12 @@ func getPkgName() string {
 
 func loadTypeMap() map[string]string {
 	goTypes := map[string]string{
-		"__Directive":  "github.com/vektah/graphql-go/introspection.Directive",
-		"__Type":       "github.com/vektah/graphql-go/introspection.Type",
-		"__Field":      "github.com/vektah/graphql-go/introspection.Field",
-		"__EnumValue":  "github.com/vektah/graphql-go/introspection.EnumValue",
-		"__InputValue": "github.com/vektah/graphql-go/introspection.InputValue",
-		"__Schema":     "github.com/vektah/graphql-go/introspection.Schema",
+		"__Directive":  "github.com/vektah/gqlgen/neelance/introspection.Directive",
+		"__Type":       "github.com/vektah/gqlgen/neelance/introspection.Type",
+		"__Field":      "github.com/vektah/gqlgen/neelance/introspection.Field",
+		"__EnumValue":  "github.com/vektah/gqlgen/neelance/introspection.EnumValue",
+		"__InputValue": "github.com/vektah/gqlgen/neelance/introspection.InputValue",
+		"__Schema":     "github.com/vektah/gqlgen/neelance/introspection.Schema",
 	}
 	b, err := ioutil.ReadFile(*typemap)
 	if err != nil {

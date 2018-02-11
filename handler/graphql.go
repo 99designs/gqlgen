@@ -1,4 +1,4 @@
-package graphql
+package handler
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/vektah/graphql-go/errors"
+	"github.com/vektah/gqlgen/neelance/errors"
 )
 
 type Executor func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError
@@ -15,7 +15,7 @@ type errorResponse struct {
 	Errors []*errors.QueryError `json:"errors"`
 }
 
-func Handler(resolver Executor) http.HandlerFunc {
+func GraphQL(resolver Executor) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params struct {
 			Query         string                 `json:"query"`

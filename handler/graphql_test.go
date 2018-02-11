@@ -1,4 +1,4 @@
-package graphql
+package handler
 
 import (
 	"context"
@@ -8,12 +8,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/vektah/gqlgen/neelance/errors"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/vektah/graphql-go/errors"
 )
 
 func TestHandlerPOST(t *testing.T) {
-	h := Handler(func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
+	h := GraphQL(func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
 		if document == "error" {
 			return []*errors.QueryError{errors.Errorf("error!")}
 		}
@@ -42,7 +43,7 @@ func TestHandlerPOST(t *testing.T) {
 }
 
 func TestHandlerGET(t *testing.T) {
-	h := Handler(func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
+	h := GraphQL(func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
 		if document == "error" {
 			return []*errors.QueryError{errors.Errorf("error!")}
 		}

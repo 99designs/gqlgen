@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"text/scanner"
 
-	"github.com/vektah/graphql-go/errors"
+	"github.com/vektah/gqlgen/neelance/errors"
 )
 
 type syntaxError string

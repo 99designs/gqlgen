@@ -4,12 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	graphql "github.com/vektah/graphql-go"
-	"github.com/vektah/graphql-go/example/todo"
+	"github.com/vektah/gqlgen/example/todo"
+	"github.com/vektah/gqlgen/handler"
 )
 
 func main() {
-	http.Handle("/", graphql.GraphiqlHandler("Todo", "/query"))
-	http.Handle("/query", graphql.Handler(todo.NewExecutor(todo.New())))
+	http.Handle("/", handler.GraphiQL("Todo", "/query"))
+	http.Handle("/query", handler.GraphQL(todo.NewExecutor(todo.New())))
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }

@@ -1,4 +1,4 @@
-package graphql
+package handler
 
 import (
 	"html/template"
@@ -44,7 +44,7 @@ var page = template.Must(template.New("graphiql").Parse(`
 </html>
 `))
 
-func GraphiqlHandler(title string, endpoint string) http.HandlerFunc {
+func GraphiQL(title string, endpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := page.Execute(w, map[string]string{
 			"title":    title,

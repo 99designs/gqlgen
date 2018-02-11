@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/vektah/gqlgen/neelance/errors"
 )
 
 // Client for graphql requests
@@ -102,8 +103,8 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 	}
 
 	respData := struct {
-		Data   interface{}     `json:"data"`
-		Errors json.RawMessage `json:"errors"`
+		Data   interface{}          `json:"data"`
+		Errors []*errors.QueryError `json:"errors"`
 	}{
 		Data: response,
 	}

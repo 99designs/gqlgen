@@ -53,6 +53,16 @@ func TestTodo(t *testing.T) {
 		require.Equal(t, "t2", resp.B.ID)
 	})
 
+	t.Run("find a missing todo", func(t *testing.T) {
+		var resp struct {
+			Todo *struct{ Text string }
+		}
+		err := c.Post(`{ todo(id:99) { text } }`, &resp)
+
+		require.Error(t, err)
+		require.Nil(t, resp.Todo)
+	})
+
 	t.Run("select all", func(t *testing.T) {
 		var resp struct {
 			Todo struct {

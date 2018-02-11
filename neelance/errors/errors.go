@@ -79,6 +79,7 @@ func ErrorWriter(errs []*QueryError) jsonw.Writer {
 
 			errObj.Add("locations", locations)
 		}
+		res = append(res, errObj)
 	}
 
 	return res

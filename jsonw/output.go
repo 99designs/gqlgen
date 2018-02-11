@@ -23,6 +23,10 @@ type Writer struct {
 	first bool
 }
 
+type JsonWriter interface {
+	WriteJson(w *Writer)
+}
+
 func New(w io.Writer) *Writer {
 	return &Writer{
 		out:   w,
@@ -117,6 +121,6 @@ type litWriter struct {
 	val []byte
 }
 
-func (l *litWriter) Write(writer *Writer) {
-	writer.out.Write(l.val)
+func (l *litWriter) WriteJson(writer *Writer) {
+	writer.Null()
 }

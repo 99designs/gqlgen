@@ -1,7 +1,7 @@
 {{define "fetch"}}
 {{ $object := .}}
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) Writer {
+func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) jsonw.JsonWriter {
     node := _{{$object.Type.GraphQLName}}Node {
         _fields: ec.collectFields(sel, {{$object.Type.GraphQLName|lcFirst}}Implementors, map[string]bool{}),
     }

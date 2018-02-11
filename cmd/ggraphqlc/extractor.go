@@ -132,6 +132,15 @@ func (e *extractor) errorf(format string, args ...interface{}) {
 	e.Errors = append(e.Errors, fmt.Sprintf(format, args...))
 }
 
+func isOwnPkg(pkg string) bool {
+	absPath, err := filepath.Abs(*output)
+	if err != nil {
+		panic(err)
+	}
+
+	return strings.HasSuffix(filepath.Dir(absPath), pkg)
+}
+
 // getType to put in a file for a given fully resolved type, and add any Imports required
 // eg name = github.com/my/pkg.myType will return `pkg.myType` and add an import for `github.com/my/pkg`
 func (e *extractor) getType(name string) kind {
@@ -147,15 +156,17 @@ func (e *extractor) getType(name string) kind {
 		packageName := strings.Join(parts[:len(parts)-1], ".")
 		typeName := parts[len(parts)-1]
 
-		localName := filepath.Base(packageName)
-		i := 0
-		for pkg, found := e.Imports[localName]; found && pkg != packageName; localName = filepath.Base(packageName) + strconv.Itoa(i) {
-			i++
-			if i > 10 {
-				panic("too many collisions")
+		localName := ""
+		if !isOwnPkg(packageName) {
+			localName = filepath.Base(packageName)
+			i := 0
+			for pkg, found := e.Imports[localName]; found && pkg != packageName; localName = filepath.Base(packageName) + strconv.Itoa(i) {
+				i++
+				if i > 10 {
+					panic("too many collisions")
+				}
 			}
 		}
-
 		e.Imports[localName] = packageName
 		return kind{
 			GraphQLName: name,

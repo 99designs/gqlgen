@@ -18,7 +18,7 @@ type Resolvers interface {
 }
 
 
-func NewResolver(resolvers Resolvers) graphql.Resolver {
+func NewExecutor(resolvers Resolvers) graphql.Executor {
 	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
 		doc, qErr := query.Parse(document)
 		if qErr != nil {
@@ -42,10 +42,7 @@ func NewResolver(resolvers Resolvers) graphql.Resolver {
 			ctx:       ctx,
 		}
 
-		var result interface {
-			Write(w *jsonw.Writer)
-		}
-
+		var result jsonw.JsonWriter
 		if op.Type == query.Query {
 			result = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
         {{if .MutationRoot}}
@@ -64,7 +61,7 @@ func NewResolver(resolvers Resolvers) graphql.Resolver {
 		writer.BeginObject()
 
 		writer.ObjectKey("data")
-		result.Write(writer)
+		result.WriteJson(writer)
 
 		if len(c.Errors) > 0 {
 			writer.ObjectKey("errors")
@@ -85,10 +82,6 @@ type executionContext struct {
 	wg        sync.WaitGroup
 }
 
-type Writer interface {
-    Write(w *jsonw.Writer)
-}
-
 var (
 {{range $object := .Objects }}
     {{- $object.Type.GraphQLName|lcFirst}}Implementors = {{$object.Implementors}}
@@ -103,7 +96,7 @@ var (
 
 {{ range $interface := .Interfaces }}
 
-func (ec *executionContext) _{{$interface.Type.GraphQLName|lcFirst}}(sel []query.Selection, it {{$interface.Type.Local}}) Writer {
+func (ec *executionContext) _{{$interface.Type.GraphQLName|lcFirst}}(sel []query.Selection, it {{$interface.Type.Local}}) jsonw.JsonWriter {
     switch it := it.(type) {
     case nil:
         return jsonw.NullWriter

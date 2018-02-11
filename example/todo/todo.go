@@ -1,11 +1,10 @@
-//go:generate ggraphqlc -out gen/generated.go
+//go:generate ggraphqlc -out generated.go
 
 package todo
 
 import (
 	"context"
 	"errors"
-
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -18,13 +17,13 @@ type Todo struct {
 	UserID int
 }
 
-type TodoResolver struct {
+type todoResolver struct {
 	todos  []Todo
 	lastID int
 }
 
-func NewResolver() *TodoResolver {
-	return &TodoResolver{
+func New() *todoResolver {
+	return &todoResolver{
 		todos: []Todo{
 			{ID: 1, Text: "A todo not to forget", Done: false, UserID: 1},
 			{ID: 2, Text: "This is the most important", Done: false, UserID: 1},
@@ -34,7 +33,7 @@ func NewResolver() *TodoResolver {
 	}
 }
 
-func (r *TodoResolver) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
+func (r *todoResolver) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
 	time.Sleep(220 * time.Millisecond)
 	for _, todo := range r.todos {
 		if todo.ID == id {
@@ -44,18 +43,18 @@ func (r *TodoResolver) MyQuery_todo(ctx context.Context, id int) (*Todo, error) 
 	return nil, errors.New("not found")
 }
 
-func (r *TodoResolver) MyQuery_lastTodo(ctx context.Context) (*Todo, error) {
+func (r *todoResolver) MyQuery_lastTodo(ctx context.Context) (*Todo, error) {
 	if len(r.todos) == 0 {
 		return nil, errors.New("not found")
 	}
 	return &r.todos[len(r.todos)-1], nil
 }
 
-func (r *TodoResolver) MyQuery_todos(ctx context.Context) ([]Todo, error) {
+func (r *todoResolver) MyQuery_todos(ctx context.Context) ([]Todo, error) {
 	return r.todos, nil
 }
 
-func (r *TodoResolver) MyMutation_createTodo(ctx context.Context, text string) (Todo, error) {
+func (r *todoResolver) MyMutation_createTodo(ctx context.Context, text string) (Todo, error) {
 	newID := r.id()
 
 	newTodo := Todo{
@@ -71,7 +70,7 @@ func (r *TodoResolver) MyMutation_createTodo(ctx context.Context, text string) (
 
 // this example uses a map instead of a struct for the change set. this scales updating keys on large objects where
 // most properties are optional, and if unspecified the existing value should be kept.
-func (r *TodoResolver) MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {
+func (r *todoResolver) MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {
 	var affectedTodo *Todo
 
 	for i := 0; i < len(r.todos); i++ {
@@ -93,7 +92,7 @@ func (r *TodoResolver) MyMutation_updateTodo(ctx context.Context, id int, change
 	return affectedTodo, nil
 }
 
-func (r *TodoResolver) id() int {
+func (r *todoResolver) id() int {
 	r.lastID++
 	return r.lastID
 }

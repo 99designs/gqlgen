@@ -1,4 +1,4 @@
-//go:generate ggraphqlc -out gen/generated.go
+//go:generate ggraphqlc -out generated.go
 
 package starwars
 
@@ -59,6 +59,27 @@ func (r *Resolver) Droid_friends(ctx context.Context, it *Droid) ([]Character, e
 
 func (r *Resolver) Droid_friendsConnection(ctx context.Context, it *Droid, first *int, after *string) (FriendsConnection, error) {
 	return r.resolveFriendConnection(ctx, it.FriendIds, first, after)
+}
+
+func (r *Resolver) FriendsConnection_edges(ctx context.Context, it *FriendsConnection) ([]FriendsEdge, error) {
+	friends, err := r.resolveCharacters(ctx, it.ids)
+	if err != nil {
+		return nil, err
+	}
+
+	edges := make([]FriendsEdge, it.to-it.from)
+	for i := range edges {
+		edges[i] = FriendsEdge{
+			Cursor: encodeCursor(it.from + i),
+			Node:   friends[i],
+		}
+	}
+	return edges, nil
+}
+
+// A list of the friends, as a convenience when edges are not needed.
+func (r *Resolver) FriendsConnection_friends(ctx context.Context, it *FriendsConnection) ([]Character, error) {
+	return r.resolveCharacters(ctx, it.ids)
 }
 
 func (r *Resolver) Mutation_createReview(ctx context.Context, episode string, review Review) (*Review, error) {
@@ -240,7 +261,7 @@ type Human struct {
 
 func (h *Human) Height(unit string) float64 {
 	switch unit {
-	case "METER":
+	case "METER", "":
 		return h.heightMeters
 	case "FOOT":
 		return h.heightMeters * 3.28084
@@ -257,7 +278,7 @@ type Starship struct {
 
 func (s *Starship) Length(unit string) float64 {
 	switch unit {
-	case "METER":
+	case "METER", "":
 		return s.lengthMeters
 	case "FOOT":
 		return s.lengthMeters * 3.28084
@@ -306,8 +327,6 @@ func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, fi
 	}
 
 	return FriendsConnection{
-		ctx:  ctx,
-		r:    r,
 		ids:  ids,
 		from: from,
 		to:   to,
@@ -315,27 +334,9 @@ func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, fi
 }
 
 type FriendsConnection struct {
-	r    *Resolver
-	ctx  context.Context
 	ids  []string
 	from int
 	to   int
-}
-
-func (f *FriendsConnection) Edges() ([]FriendsEdge, error) {
-	friends, err := f.r.resolveCharacters(f.ctx, f.ids)
-	if err != nil {
-		return nil, err
-	}
-
-	edges := make([]FriendsEdge, f.to-f.from)
-	for i := range edges {
-		edges[i] = FriendsEdge{
-			Cursor: encodeCursor(f.from + i),
-			Node:   friends[i],
-		}
-	}
-	return edges, nil
 }
 
 func (f *FriendsConnection) TotalCount() int {
@@ -352,11 +353,6 @@ func (f *FriendsConnection) PageInfo() PageInfo {
 
 func encodeCursor(i int) string {
 	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i+1)))
-}
-
-// A list of the friends, as a convenience when edges are not needed.
-func (f *FriendsConnection) Friends() ([]Character, error) {
-	return f.r.resolveCharacters(f.ctx, f.ids)
 }
 
 type FriendsEdge struct {

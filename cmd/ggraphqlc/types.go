@@ -156,7 +156,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool) stri
 		return fmt.Sprintf("w.%s(%s)", ucFirst(f.Type.Name), val)
 
 	default:
-		return fmt.Sprintf("%s.Write(w)", val)
+		return fmt.Sprintf("%s.WriteJson(w)", val)
 	}
 }
 

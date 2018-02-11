@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"syscall"
+
 	"github.com/vektah/graphql-go/schema"
 	"golang.org/x/tools/imports"
 )
@@ -91,6 +93,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, "err: "+err)
 		}
 		os.Exit(1)
+	}
+
+	if *output != "-" {
+		_ = syscall.Unlink(*output)
 	}
 
 	if err := e.introspect(); err != nil {

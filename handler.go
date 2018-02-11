@@ -9,13 +9,13 @@ import (
 	"github.com/vektah/graphql-go/errors"
 )
 
-type Resolver func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError
+type Executor func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError
 
 type errorResponse struct {
 	Errors []*errors.QueryError `json:"errors"`
 }
 
-func Handler(resolver Resolver) http.HandlerFunc {
+func Handler(resolver Executor) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params struct {
 			Query         string                 `json:"query"`

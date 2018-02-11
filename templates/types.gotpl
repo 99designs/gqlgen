@@ -6,7 +6,7 @@ type _{{ .Type.GraphQLName}}Node struct {
         {{ if $field.Type.Scalar -}}
             {{$field.GraphQLName|ucFirst}} {{ $field.Type.Local }}
         {{ else -}}
-            {{$field.GraphQLName|ucFirst}} {{if $field.Type.IsSlice}}[]{{end}}Writer
+            {{$field.GraphQLName|ucFirst}} {{if $field.Type.IsSlice}}[]{{end}}jsonw.JsonWriter
         {{ end -}}
     {{end}}
 }

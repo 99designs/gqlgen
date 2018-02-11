@@ -2,7 +2,6 @@ package errors
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/vektah/gqlgen/jsonw"
 )
@@ -55,37 +54,32 @@ func (c *Builder) Error(err error) {
 	c.Errors = append(c.Errors, Errorf("%s", err.Error()))
 }
 
-func WriteErrors(b io.Writer, errs []*QueryError) {
-	w := jsonw.New(b)
-	w.BeginArray()
+func ErrorWriter(errs []*QueryError) jsonw.Writer {
+	res := jsonw.Array{}
+
 	for _, err := range errs {
 		if err == nil {
-			w.Null()
+			res = append(res, jsonw.Null)
 			continue
 		}
-		w.BeginObject()
 
-		w.ObjectKey("message")
-		w.String(err.Message)
+		errObj := &jsonw.OrderedMap{}
+
+		errObj.Add("message", jsonw.String(err.Message))
 
 		if len(err.Locations) > 0 {
-			w.ObjectKey("locations")
-			w.BeginArray()
+			locations := jsonw.Array{}
 			for _, location := range err.Locations {
-				w.BeginObject()
+				locationObj := &jsonw.OrderedMap{}
+				locationObj.Add("line", jsonw.Int(location.Line))
+				locationObj.Add("column", jsonw.Int(location.Column))
 
-				w.ObjectKey("line")
-				w.Int(location.Line)
-
-				w.ObjectKey("column")
-				w.Int(location.Column)
-
-				w.EndObject()
+				locations = append(locations, locationObj)
 			}
-			w.EndArray()
-		}
 
-		w.EndObject()
+			errObj.Add("locations", locations)
+		}
 	}
-	w.EndArray()
+
+	return res
 }

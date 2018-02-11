@@ -42,6 +42,20 @@ func TestTodo(t *testing.T) {
 		require.Equal(t, "Very important", resp.UpdateTodo.Text)
 	})
 
+	t.Run("select with alias", func(t *testing.T) {
+		var resp struct {
+			A Todo
+			B Todo
+		}
+		c.MustPost(`{ a: todo(id:1) { text } b: todo(id:2) { id } }`, &resp)
+
+		require.Equal(t, "A todo not to forget", resp.A.Text)
+		require.Equal(t, 0, resp.A.ID)
+
+		require.Equal(t, "", resp.B.Text)
+		require.Equal(t, 2, resp.B.ID)
+	})
+
 	t.Run("select all", func(t *testing.T) {
 		var resp struct {
 			Todo     Todo

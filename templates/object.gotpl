@@ -1,26 +1,16 @@
 {{- define "object" }}
 {{ $object := . }}
-type _{{ .Type.GraphQLName}}Node struct {
-	_fields []collectedField
-
-    {{- range $field := .Fields }}
-        {{- if $field.Type.Scalar }}
-            {{$field.GraphQLName|ucFirst}} {{ $field.Type.Local }}
-        {{- else }}
-            {{$field.GraphQLName|ucFirst}} {{if $field.Type.IsSlice}}[]{{end}}jsonw.JsonWriter
-        {{- end }}
-    {{- end}}
-}
 
 var {{ $object.Type.GraphQLName|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) jsonw.JsonWriter {
-    node := _{{$object.Type.GraphQLName}}Node {
-        _fields: ec.collectFields(sel, {{$object.Type.GraphQLName|lcFirst}}Implementors, map[string]bool{}),
-    }
+func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) jsonw.Writer {
+    fields := ec.collectFields(sel, {{$object.Type.GraphQLName|lcFirst}}Implementors, map[string]bool{})
+    out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+        out.Keys[i] = field.Alias
+        out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
         {{- range $field := $object.Fields }}
 		case "{{$field.GraphQLName}}":
@@ -28,7 +18,7 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 
             {{- if $field.IsResolver }}
                 ec.wg.Add(1)
-                go func(field collectedField) {
+                go func(i int, field collectedField) {
                     defer ec.wg.Done()
             {{- end }}
 
@@ -52,26 +42,10 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
                 }
             {{- end }}
 
-            {{- if $field.Type.Scalar }}
-                node.{{$field.GraphQLName|ucFirst}} = res
-            {{- else }}
-                {{- if or $field.Type.IsPtr $field.Type.IsSlice }}
-                    if res != nil {
-                {{- end }}
-                    {{- if $field.Type.IsSlice }}
-                        for i := range {{$field.Type.ByVal "res" }} {
-                            node.{{$field.GraphQLName|ucFirst}} = append(node.{{$field.GraphQLName|ucFirst}},  ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{ $field.Type.Elem.ByRef "res[i]" }}))
-                        }
-                    {{- else }}
-                        node.{{$field.GraphQLName|ucFirst}} = ec._{{$field.Type.GraphQLName|lcFirst}}(field.Selections, {{$field.Type.ByRef "res" }})
-                    {{- end }}
-                {{- if or $field.Type.IsPtr $field.Type.IsSlice }}
-                    }
-                {{- end}}
-            {{- end }}
+            {{ $field.WriteJson "out.Values[i]" }}
 
             {{- if $field.IsResolver }}
-                }(field)
+                }(i, field)
             {{- end }}
         {{- end }}
         default:
@@ -79,21 +53,8 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 		}
 	}
 
-    return &node
+    return out
 }
 
-func (t *_{{ $object.Type.GraphQLName }}Node) WriteJson(w *jsonw.Writer) {
-    w.BeginObject()
-    for _, field := range t._fields {
-        switch field.Name {
-            {{- range $field := $object.Fields }}
-                case "{{$field.GraphQLName}}":
-                    w.ObjectKey({{$field.GraphQLName|quote}})
-                    {{ $field.WriteJson }}
-            {{- end }}
-        }
-    }
-    w.EndObject()
-}
 
 {{- end}}

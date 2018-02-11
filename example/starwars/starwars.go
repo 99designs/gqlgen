@@ -83,6 +83,8 @@ func (r *Resolver) FriendsConnection_friends(ctx context.Context, it *FriendsCon
 }
 
 func (r *Resolver) Mutation_createReview(ctx context.Context, episode string, review Review) (*Review, error) {
+	review.Time = time.Now()
+	time.Sleep(1 * time.Second)
 	r.reviews[episode] = append(r.reviews[episode], review)
 	return &review, nil
 }

@@ -41,12 +41,12 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 			ctx:       ctx,
 		}
 
-		var result jsonw.JsonWriter
+		var data jsonw.Writer
 		if op.Type == query.Query {
-			result = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
+            data = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
         {{- if .MutationRoot}}
 		} else if op.Type == query.Mutation {
-			result = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
+            data = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
         {{- end}}
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
@@ -54,18 +54,14 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 
         c.wg.Wait()
 
-		writer := jsonw.New(w)
-		writer.BeginObject()
-
-		writer.ObjectKey("data")
-		result.WriteJson(writer)
+        result := &jsonw.OrderedMap{}
+        result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-			writer.ObjectKey("errors")
-			errors.WriteErrors(w, c.Errors)
+            result.Add("errors", errors.ErrorWriter(c.Errors))
 		}
 
-		writer.EndObject()
+		result.WriteJson(w)
 		return nil
 	}
 }

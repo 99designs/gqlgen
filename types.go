@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
+	"text/template"
 )
 
 type kind struct {
@@ -123,40 +125,60 @@ func (f *Field) CallArgs(object object) string {
 	return strings.Join(args, ", ")
 }
 
-// should be in the template, but its recursive and has a bunch fo args
-func (f *Field) WriteJson() string {
-	return f.doWriteJson("t."+ucFirst(f.GraphQLName), f.Type.Modifiers, false)
+// should be in the template, but its recursive and has a bunch of args
+func (f *Field) WriteJson(res string) string {
+	return f.doWriteJson(res, "res", f.Type.Modifiers, false, 1)
 }
 
-func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool) string {
+func (f *Field) doWriteJson(res string, val string, remainingMods []string, isPtr bool, depth int) string {
 	switch {
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
-		return fmt.Sprintf(
-			"if %s == nil { w.Null() } else { %s } ",
-			val, f.doWriteJson(val, remainingMods[1:], true),
-		)
+		return tpl(`
+			if {{.val}} == nil {
+				{{.res}} = jsonw.Null				
+			} else {
+				{{.next}}
+			}`, map[string]interface{}{
+			"res":  res,
+			"val":  val,
+			"next": f.doWriteJson(res, val, remainingMods[1:], true, depth+1),
+		})
 
 	case len(remainingMods) > 0 && remainingMods[0] == modList:
 		if isPtr {
 			val = "*" + val
 		}
+		var tmp = "tmp" + strconv.Itoa(depth)
+		var arr = "arr" + strconv.Itoa(depth)
+		var loopval = "loopval" + strconv.Itoa(depth)
 
-		return strings.Join([]string{
-			"w.BeginArray()",
-			fmt.Sprintf("for _, val := range %s {", val),
-			f.doWriteJson("val", remainingMods[1:], false),
-			"}",
-			"w.EndArray()",
-		}, "\n")
+		return tpl(`
+			{{.arr}} := jsonw.Array{}
+			for _, {{.loopval}} := range {{.val}} {
+				var {{.tmp}} jsonw.Writer
+				{{.next}}
+				{{.arr}} = append({{.arr}}, {{.tmp}})
+			}
+			{{.res}} = {{.arr}}`, map[string]interface{}{
+			"res":     res,
+			"val":     val,
+			"tmp":     tmp,
+			"arr":     arr,
+			"loopval": loopval,
+			"next":    f.doWriteJson(tmp, loopval, remainingMods[1:], false, depth+1),
+		})
 
 	case f.Type.Scalar:
 		if isPtr {
 			val = "*" + val
 		}
-		return fmt.Sprintf("w.%s(%s)", ucFirst(f.Type.Name), val)
+		return fmt.Sprintf("%s = jsonw.%s(%s)", res, ucFirst(f.Type.Name), val)
 
 	default:
-		return fmt.Sprintf("%s.WriteJson(w)", val)
+		if !isPtr {
+			val = "&" + val
+		}
+		return fmt.Sprintf("%s = ec._%s(field.Selections, %s)", res, lcFirst(f.Type.GraphQLName), val)
 	}
 }
 
@@ -189,4 +211,10 @@ func (e *extractor) GetObject(name string) *object {
 type FieldArgument struct {
 	Name string
 	Type kind
+}
+
+func tpl(tpl string, vars map[string]interface{}) string {
+	b := &bytes.Buffer{}
+	template.Must(template.New("inline").Parse(tpl)).Execute(b, vars)
+	return b.String()
 }

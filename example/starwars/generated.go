@@ -67,29 +67,25 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 			ctx:       ctx,
 		}
 
-		var result jsonw.JsonWriter
+		var data jsonw.Writer
 		if op.Type == query.Query {
-			result = c._query(op.Selections, nil)
+			data = c._query(op.Selections, nil)
 		} else if op.Type == query.Mutation {
-			result = c._mutation(op.Selections, nil)
+			data = c._mutation(op.Selections, nil)
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
 		}
 
 		c.wg.Wait()
 
-		writer := jsonw.New(w)
-		writer.BeginObject()
-
-		writer.ObjectKey("data")
-		result.WriteJson(writer)
+		result := &jsonw.OrderedMap{}
+		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-			writer.ObjectKey("errors")
-			errors.WriteErrors(w, c.Errors)
+			result.Add("errors", errors.ErrorWriter(c.Errors))
 		}
 
-		writer.EndObject()
+		result.WriteJson(w)
 		return nil
 	}
 }
@@ -103,47 +99,43 @@ type executionContext struct {
 	wg        sync.WaitGroup
 }
 
-type _DroidNode struct {
-	_fields           []collectedField
-	Id                string
-	Name              string
-	Friends           []jsonw.JsonWriter
-	FriendsConnection jsonw.JsonWriter
-	AppearsIn         []string
-	PrimaryFunction   string
-}
-
 var droidImplementors = []string{"Droid", "Character"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.JsonWriter {
-	node := _DroidNode{
-		_fields: ec.collectFields(sel, droidImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Writer {
+	fields := ec.collectFields(sel, droidImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "id":
 			res := it.ID
-			node.Id = res
+
+			out.Values[i] = jsonw.String(res)
 		case "name":
 			res := it.Name
-			node.Name = res
+
+			out.Values[i] = jsonw.String(res)
 		case "friends":
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Droid_friends(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					for i := range res {
-						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
-					}
+
+				arr1 := jsonw.Array{}
+				for _, loopval1 := range res {
+					var tmp1 jsonw.Writer
+					tmp1 = ec._character(field.Selections, &loopval1)
+					arr1 = append(arr1, tmp1)
 				}
-			}(field)
+				out.Values[i] = arr1
+			}(i, field)
 		case "friendsConnection":
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
@@ -164,228 +156,147 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.JsonW
 				arg1 = &tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, it, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				node.FriendsConnection = ec._friendsConnection(field.Selections, &res)
-			}(field)
+
+				out.Values[i] = ec._friendsConnection(field.Selections, &res)
+			}(i, field)
 		case "appearsIn":
 			res := it.AppearsIn
-			node.AppearsIn = res
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+				tmp1 = jsonw.String(loopval1)
+				arr1 = append(arr1, tmp1)
+			}
+			out.Values[i] = arr1
 		case "primaryFunction":
 			res := it.PrimaryFunction
-			node.PrimaryFunction = res
+
+			out.Values[i] = jsonw.String(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_DroidNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "id":
-			w.ObjectKey("id")
-			w.String(t.Id)
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
-		case "friends":
-			w.ObjectKey("friends")
-			w.BeginArray()
-			for _, val := range t.Friends {
-				val.WriteJson(w)
-			}
-			w.EndArray()
-		case "friendsConnection":
-			w.ObjectKey("friendsConnection")
-			t.FriendsConnection.WriteJson(w)
-		case "appearsIn":
-			w.ObjectKey("appearsIn")
-			w.BeginArray()
-			for _, val := range t.AppearsIn {
-				w.String(val)
-			}
-			w.EndArray()
-		case "primaryFunction":
-			w.ObjectKey("primaryFunction")
-			w.String(t.PrimaryFunction)
-		}
-	}
-	w.EndObject()
-}
-
-type _FriendsConnectionNode struct {
-	_fields    []collectedField
-	TotalCount int
-	Edges      []jsonw.JsonWriter
-	Friends    []jsonw.JsonWriter
-	PageInfo   jsonw.JsonWriter
+	return out
 }
 
 var friendsConnectionImplementors = []string{"FriendsConnection"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _friendsConnection(sel []query.Selection, it *FriendsConnection) jsonw.JsonWriter {
-	node := _FriendsConnectionNode{
-		_fields: ec.collectFields(sel, friendsConnectionImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _friendsConnection(sel []query.Selection, it *FriendsConnection) jsonw.Writer {
+	fields := ec.collectFields(sel, friendsConnectionImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "totalCount":
 			res := it.TotalCount()
-			node.TotalCount = res
+
+			out.Values[i] = jsonw.Int(res)
 		case "edges":
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.FriendsConnection_edges(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					for i := range res {
-						node.Edges = append(node.Edges, ec._friendsEdge(field.Selections, &res[i]))
-					}
+
+				arr1 := jsonw.Array{}
+				for _, loopval1 := range res {
+					var tmp1 jsonw.Writer
+					tmp1 = ec._friendsEdge(field.Selections, &loopval1)
+					arr1 = append(arr1, tmp1)
 				}
-			}(field)
+				out.Values[i] = arr1
+			}(i, field)
 		case "friends":
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.FriendsConnection_friends(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					for i := range res {
-						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
-					}
+
+				arr1 := jsonw.Array{}
+				for _, loopval1 := range res {
+					var tmp1 jsonw.Writer
+					tmp1 = ec._character(field.Selections, &loopval1)
+					arr1 = append(arr1, tmp1)
 				}
-			}(field)
+				out.Values[i] = arr1
+			}(i, field)
 		case "pageInfo":
 			res := it.PageInfo()
-			node.PageInfo = ec._pageInfo(field.Selections, &res)
+
+			out.Values[i] = ec._pageInfo(field.Selections, &res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_FriendsConnectionNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "totalCount":
-			w.ObjectKey("totalCount")
-			w.Int(t.TotalCount)
-		case "edges":
-			w.ObjectKey("edges")
-			w.BeginArray()
-			for _, val := range t.Edges {
-				val.WriteJson(w)
-			}
-			w.EndArray()
-		case "friends":
-			w.ObjectKey("friends")
-			w.BeginArray()
-			for _, val := range t.Friends {
-				val.WriteJson(w)
-			}
-			w.EndArray()
-		case "pageInfo":
-			w.ObjectKey("pageInfo")
-			t.PageInfo.WriteJson(w)
-		}
-	}
-	w.EndObject()
-}
-
-type _FriendsEdgeNode struct {
-	_fields []collectedField
-	Cursor  string
-	Node    jsonw.JsonWriter
+	return out
 }
 
 var friendsEdgeImplementors = []string{"FriendsEdge"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge) jsonw.JsonWriter {
-	node := _FriendsEdgeNode{
-		_fields: ec.collectFields(sel, friendsEdgeImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge) jsonw.Writer {
+	fields := ec.collectFields(sel, friendsEdgeImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "cursor":
 			res := it.Cursor
-			node.Cursor = res
+
+			out.Values[i] = jsonw.String(res)
 		case "node":
 			res := it.Node
-			node.Node = ec._character(field.Selections, res)
+
+			out.Values[i] = ec._character(field.Selections, &res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_FriendsEdgeNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "cursor":
-			w.ObjectKey("cursor")
-			w.String(t.Cursor)
-		case "node":
-			w.ObjectKey("node")
-			t.Node.WriteJson(w)
-		}
-	}
-	w.EndObject()
-}
-
-type _HumanNode struct {
-	_fields           []collectedField
-	Id                string
-	Name              string
-	Height            float64
-	Mass              float64
-	Friends           []jsonw.JsonWriter
-	FriendsConnection jsonw.JsonWriter
-	AppearsIn         []string
-	Starships         []jsonw.JsonWriter
+	return out
 }
 
 var humanImplementors = []string{"Human", "Character"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.JsonWriter {
-	node := _HumanNode{
-		_fields: ec.collectFields(sel, humanImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Writer {
+	fields := ec.collectFields(sel, humanImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "id":
 			res := it.ID
-			node.Id = res
+
+			out.Values[i] = jsonw.String(res)
 		case "name":
 			res := it.Name
-			node.Name = res
+
+			out.Values[i] = jsonw.String(res)
 		case "height":
 			var arg0 string
 			if tmp, ok := field.Args["unit"]; ok {
@@ -397,25 +308,30 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.JsonW
 				arg0 = tmp2
 			}
 			res := it.Height(arg0)
-			node.Height = res
+
+			out.Values[i] = jsonw.Float64(res)
 		case "mass":
 			res := it.Mass
-			node.Mass = res
+
+			out.Values[i] = jsonw.Float64(res)
 		case "friends":
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Human_friends(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					for i := range res {
-						node.Friends = append(node.Friends, ec._character(field.Selections, res[i]))
-					}
+
+				arr1 := jsonw.Array{}
+				for _, loopval1 := range res {
+					var tmp1 jsonw.Writer
+					tmp1 = ec._character(field.Selections, &loopval1)
+					arr1 = append(arr1, tmp1)
 				}
-			}(field)
+				out.Values[i] = arr1
+			}(i, field)
 		case "friendsConnection":
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
@@ -436,100 +352,62 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.JsonW
 				arg1 = &tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Human_friendsConnection(ec.ctx, it, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				node.FriendsConnection = ec._friendsConnection(field.Selections, &res)
-			}(field)
+
+				out.Values[i] = ec._friendsConnection(field.Selections, &res)
+			}(i, field)
 		case "appearsIn":
 			res := it.AppearsIn
-			node.AppearsIn = res
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+				tmp1 = jsonw.String(loopval1)
+				arr1 = append(arr1, tmp1)
+			}
+			out.Values[i] = arr1
 		case "starships":
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Human_starships(ec.ctx, it)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					for i := range res {
-						node.Starships = append(node.Starships, ec._starship(field.Selections, &res[i]))
-					}
+
+				arr1 := jsonw.Array{}
+				for _, loopval1 := range res {
+					var tmp1 jsonw.Writer
+					tmp1 = ec._starship(field.Selections, &loopval1)
+					arr1 = append(arr1, tmp1)
 				}
-			}(field)
+				out.Values[i] = arr1
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_HumanNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "id":
-			w.ObjectKey("id")
-			w.String(t.Id)
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
-		case "height":
-			w.ObjectKey("height")
-			w.Float64(t.Height)
-		case "mass":
-			w.ObjectKey("mass")
-			w.Float64(t.Mass)
-		case "friends":
-			w.ObjectKey("friends")
-			w.BeginArray()
-			for _, val := range t.Friends {
-				val.WriteJson(w)
-			}
-			w.EndArray()
-		case "friendsConnection":
-			w.ObjectKey("friendsConnection")
-			t.FriendsConnection.WriteJson(w)
-		case "appearsIn":
-			w.ObjectKey("appearsIn")
-			w.BeginArray()
-			for _, val := range t.AppearsIn {
-				w.String(val)
-			}
-			w.EndArray()
-		case "starships":
-			w.ObjectKey("starships")
-			w.BeginArray()
-			for _, val := range t.Starships {
-				val.WriteJson(w)
-			}
-			w.EndArray()
-		}
-	}
-	w.EndObject()
-}
-
-type _MutationNode struct {
-	_fields      []collectedField
-	CreateReview jsonw.JsonWriter
+	return out
 }
 
 var mutationImplementors = []string{"Mutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) jsonw.JsonWriter {
-	node := _MutationNode{
-		_fields: ec.collectFields(sel, mutationImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) jsonw.Writer {
+	fields := ec.collectFields(sel, mutationImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "createReview":
 			var arg0 string
@@ -548,115 +426,69 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) js
 				continue
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					node.CreateReview = ec._review(field.Selections, res)
+
+				if res == nil {
+					out.Values[i] = jsonw.Null
+				} else {
+					out.Values[i] = ec._review(field.Selections, res)
 				}
-			}(field)
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_MutationNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "createReview":
-			w.ObjectKey("createReview")
-			if t.CreateReview == nil {
-				w.Null()
-			} else {
-				t.CreateReview.WriteJson(w)
-			}
-		}
-	}
-	w.EndObject()
-}
-
-type _PageInfoNode struct {
-	_fields     []collectedField
-	StartCursor string
-	EndCursor   string
-	HasNextPage bool
+	return out
 }
 
 var pageInfoImplementors = []string{"PageInfo"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) jsonw.JsonWriter {
-	node := _PageInfoNode{
-		_fields: ec.collectFields(sel, pageInfoImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) jsonw.Writer {
+	fields := ec.collectFields(sel, pageInfoImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "startCursor":
 			res := it.StartCursor
-			node.StartCursor = res
+
+			out.Values[i] = jsonw.String(res)
 		case "endCursor":
 			res := it.EndCursor
-			node.EndCursor = res
+
+			out.Values[i] = jsonw.String(res)
 		case "hasNextPage":
 			res := it.HasNextPage
-			node.HasNextPage = res
+
+			out.Values[i] = jsonw.Bool(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_PageInfoNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "startCursor":
-			w.ObjectKey("startCursor")
-			w.String(t.StartCursor)
-		case "endCursor":
-			w.ObjectKey("endCursor")
-			w.String(t.EndCursor)
-		case "hasNextPage":
-			w.ObjectKey("hasNextPage")
-			w.Bool(t.HasNextPage)
-		}
-	}
-	w.EndObject()
-}
-
-type _QueryNode struct {
-	_fields   []collectedField
-	Hero      jsonw.JsonWriter
-	Reviews   []jsonw.JsonWriter
-	Search    []jsonw.JsonWriter
-	Character jsonw.JsonWriter
-	Droid     jsonw.JsonWriter
-	Human     jsonw.JsonWriter
-	Starship  jsonw.JsonWriter
-	__schema  jsonw.JsonWriter
-	__type    jsonw.JsonWriter
+	return out
 }
 
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw.JsonWriter {
-	node := _QueryNode{
-		_fields: ec.collectFields(sel, queryImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw.Writer {
+	fields := ec.collectFields(sel, queryImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "hero":
 			var arg0 *string
@@ -669,15 +501,16 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = &tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				node.Hero = ec._character(field.Selections, res)
-			}(field)
+
+				out.Values[i] = ec._character(field.Selections, &res)
+			}(i, field)
 		case "reviews":
 			var arg0 string
 			if tmp, ok := field.Args["episode"]; ok {
@@ -703,19 +536,22 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_reviews(ec.ctx, arg0, arg1)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					for i := range res {
-						node.Reviews = append(node.Reviews, ec._review(field.Selections, &res[i]))
-					}
+
+				arr1 := jsonw.Array{}
+				for _, loopval1 := range res {
+					var tmp1 jsonw.Writer
+					tmp1 = ec._review(field.Selections, &loopval1)
+					arr1 = append(arr1, tmp1)
 				}
-			}(field)
+				out.Values[i] = arr1
+			}(i, field)
 		case "search":
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
@@ -727,19 +563,22 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					for i := range res {
-						node.Search = append(node.Search, ec._searchResult(field.Selections, res[i]))
-					}
+
+				arr1 := jsonw.Array{}
+				for _, loopval1 := range res {
+					var tmp1 jsonw.Writer
+					tmp1 = ec._searchResult(field.Selections, &loopval1)
+					arr1 = append(arr1, tmp1)
 				}
-			}(field)
+				out.Values[i] = arr1
+			}(i, field)
 		case "character":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -751,15 +590,16 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_character(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				node.Character = ec._character(field.Selections, res)
-			}(field)
+
+				out.Values[i] = ec._character(field.Selections, &res)
+			}(i, field)
 		case "droid":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -771,17 +611,20 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					node.Droid = ec._droid(field.Selections, res)
+
+				if res == nil {
+					out.Values[i] = jsonw.Null
+				} else {
+					out.Values[i] = ec._droid(field.Selections, res)
 				}
-			}(field)
+			}(i, field)
 		case "human":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -793,17 +636,20 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_human(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					node.Human = ec._human(field.Selections, res)
+
+				if res == nil {
+					out.Values[i] = jsonw.Null
+				} else {
+					out.Values[i] = ec._human(field.Selections, res)
 				}
-			}(field)
+			}(i, field)
 		case "starship":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
@@ -815,21 +661,27 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(field collectedField) {
+			go func(i int, field collectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
 				if err != nil {
 					ec.Error(err)
 					return
 				}
-				if res != nil {
-					node.Starship = ec._starship(field.Selections, res)
+
+				if res == nil {
+					out.Values[i] = jsonw.Null
+				} else {
+					out.Values[i] = ec._starship(field.Selections, res)
 				}
-			}(field)
+			}(i, field)
 		case "__schema":
 			res := ec.introspectSchema()
-			if res != nil {
-				node.__schema = ec.___Schema(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Schema(field.Selections, res)
 			}
 		case "__type":
 			var arg0 string
@@ -842,160 +694,74 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			res := ec.introspectType(arg0)
-			if res != nil {
-				node.__type = ec.___Type(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_QueryNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "hero":
-			w.ObjectKey("hero")
-			t.Hero.WriteJson(w)
-		case "reviews":
-			w.ObjectKey("reviews")
-			w.BeginArray()
-			for _, val := range t.Reviews {
-				val.WriteJson(w)
-			}
-			w.EndArray()
-		case "search":
-			w.ObjectKey("search")
-			w.BeginArray()
-			for _, val := range t.Search {
-				val.WriteJson(w)
-			}
-			w.EndArray()
-		case "character":
-			w.ObjectKey("character")
-			t.Character.WriteJson(w)
-		case "droid":
-			w.ObjectKey("droid")
-			if t.Droid == nil {
-				w.Null()
-			} else {
-				t.Droid.WriteJson(w)
-			}
-		case "human":
-			w.ObjectKey("human")
-			if t.Human == nil {
-				w.Null()
-			} else {
-				t.Human.WriteJson(w)
-			}
-		case "starship":
-			w.ObjectKey("starship")
-			if t.Starship == nil {
-				w.Null()
-			} else {
-				t.Starship.WriteJson(w)
-			}
-		case "__schema":
-			w.ObjectKey("__schema")
-			if t.__schema == nil {
-				w.Null()
-			} else {
-				t.__schema.WriteJson(w)
-			}
-		case "__type":
-			w.ObjectKey("__type")
-			if t.__type == nil {
-				w.Null()
-			} else {
-				t.__type.WriteJson(w)
-			}
-		}
-	}
-	w.EndObject()
-}
-
-type _ReviewNode struct {
-	_fields    []collectedField
-	Stars      int
-	Commentary *string
-	Time       time.Time
+	return out
 }
 
 var reviewImplementors = []string{"Review"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _review(sel []query.Selection, it *Review) jsonw.JsonWriter {
-	node := _ReviewNode{
-		_fields: ec.collectFields(sel, reviewImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _review(sel []query.Selection, it *Review) jsonw.Writer {
+	fields := ec.collectFields(sel, reviewImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "stars":
 			res := it.Stars
-			node.Stars = res
+
+			out.Values[i] = jsonw.Int(res)
 		case "commentary":
 			res := it.Commentary
-			node.Commentary = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		case "time":
 			res := it.Time
-			node.Time = res
+
+			out.Values[i] = jsonw.Time(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_ReviewNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "stars":
-			w.ObjectKey("stars")
-			w.Int(t.Stars)
-		case "commentary":
-			w.ObjectKey("commentary")
-			if t.Commentary == nil {
-				w.Null()
-			} else {
-				w.String(*t.Commentary)
-			}
-		case "time":
-			w.ObjectKey("time")
-			w.Time(t.Time)
-		}
-	}
-	w.EndObject()
-}
-
-type _StarshipNode struct {
-	_fields []collectedField
-	Id      string
-	Name    string
-	Length  float64
+	return out
 }
 
 var starshipImplementors = []string{"Starship"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw.JsonWriter {
-	node := _StarshipNode{
-		_fields: ec.collectFields(sel, starshipImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw.Writer {
+	fields := ec.collectFields(sel, starshipImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "id":
 			res := it.ID
-			node.Id = res
+
+			out.Values[i] = jsonw.String(res)
 		case "name":
 			res := it.Name
-			node.Name = res
+
+			out.Values[i] = jsonw.String(res)
 		case "length":
 			var arg0 string
 			if tmp, ok := field.Args["unit"]; ok {
@@ -1007,491 +773,332 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw
 				arg0 = tmp2
 			}
 			res := it.Length(arg0)
-			node.Length = res
+
+			out.Values[i] = jsonw.Float64(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *_StarshipNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "id":
-			w.ObjectKey("id")
-			w.String(t.Id)
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
-		case "length":
-			w.ObjectKey("length")
-			w.Float64(t.Length)
-		}
-	}
-	w.EndObject()
-}
-
-type ___DirectiveNode struct {
-	_fields     []collectedField
-	Name        string
-	Description *string
-	Locations   []string
-	Args        []jsonw.JsonWriter
+	return out
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) jsonw.JsonWriter {
-	node := ___DirectiveNode{
-		_fields: ec.collectFields(sel, __DirectiveImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) jsonw.Writer {
+	fields := ec.collectFields(sel, __DirectiveImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "name":
 			res := it.Name()
-			node.Name = res
+
+			out.Values[i] = jsonw.String(res)
 		case "description":
 			res := it.Description()
-			node.Description = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		case "locations":
 			res := it.Locations()
-			node.Locations = res
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+				tmp1 = jsonw.String(loopval1)
+				arr1 = append(arr1, tmp1)
+			}
+			out.Values[i] = arr1
 		case "args":
 			res := it.Args()
-			if res != nil {
-				for i := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___InputValue(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *___DirectiveNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
-		case "description":
-			w.ObjectKey("description")
-			if t.Description == nil {
-				w.Null()
-			} else {
-				w.String(*t.Description)
-			}
-		case "locations":
-			w.ObjectKey("locations")
-			w.BeginArray()
-			for _, val := range t.Locations {
-				w.String(val)
-			}
-			w.EndArray()
-		case "args":
-			w.ObjectKey("args")
-			w.BeginArray()
-			for _, val := range t.Args {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		}
-	}
-	w.EndObject()
-}
-
-type ___EnumValueNode struct {
-	_fields           []collectedField
-	Name              string
-	Description       *string
-	IsDeprecated      bool
-	DeprecationReason *string
+	return out
 }
 
 var __EnumValueImplementors = []string{"__EnumValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) jsonw.JsonWriter {
-	node := ___EnumValueNode{
-		_fields: ec.collectFields(sel, __EnumValueImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) jsonw.Writer {
+	fields := ec.collectFields(sel, __EnumValueImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "name":
 			res := it.Name()
-			node.Name = res
+
+			out.Values[i] = jsonw.String(res)
 		case "description":
 			res := it.Description()
-			node.Description = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		case "isDeprecated":
 			res := it.IsDeprecated()
-			node.IsDeprecated = res
+
+			out.Values[i] = jsonw.Bool(res)
 		case "deprecationReason":
 			res := it.DeprecationReason()
-			node.DeprecationReason = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *___EnumValueNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
-		case "description":
-			w.ObjectKey("description")
-			if t.Description == nil {
-				w.Null()
-			} else {
-				w.String(*t.Description)
-			}
-		case "isDeprecated":
-			w.ObjectKey("isDeprecated")
-			w.Bool(t.IsDeprecated)
-		case "deprecationReason":
-			w.ObjectKey("deprecationReason")
-			if t.DeprecationReason == nil {
-				w.Null()
-			} else {
-				w.String(*t.DeprecationReason)
-			}
-		}
-	}
-	w.EndObject()
-}
-
-type ___FieldNode struct {
-	_fields           []collectedField
-	Name              string
-	Description       *string
-	Args              []jsonw.JsonWriter
-	Type              jsonw.JsonWriter
-	IsDeprecated      bool
-	DeprecationReason *string
+	return out
 }
 
 var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) jsonw.JsonWriter {
-	node := ___FieldNode{
-		_fields: ec.collectFields(sel, __FieldImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) jsonw.Writer {
+	fields := ec.collectFields(sel, __FieldImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "name":
 			res := it.Name()
-			node.Name = res
+
+			out.Values[i] = jsonw.String(res)
 		case "description":
 			res := it.Description()
-			node.Description = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		case "args":
 			res := it.Args()
-			if res != nil {
-				for i := range res {
-					node.Args = append(node.Args, ec.___InputValue(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___InputValue(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		case "type":
 			res := it.Type()
-			if res != nil {
-				node.Type = ec.___Type(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "isDeprecated":
 			res := it.IsDeprecated()
-			node.IsDeprecated = res
+
+			out.Values[i] = jsonw.Bool(res)
 		case "deprecationReason":
 			res := it.DeprecationReason()
-			node.DeprecationReason = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *___FieldNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
-		case "description":
-			w.ObjectKey("description")
-			if t.Description == nil {
-				w.Null()
-			} else {
-				w.String(*t.Description)
-			}
-		case "args":
-			w.ObjectKey("args")
-			w.BeginArray()
-			for _, val := range t.Args {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		case "type":
-			w.ObjectKey("type")
-			if t.Type == nil {
-				w.Null()
-			} else {
-				t.Type.WriteJson(w)
-			}
-		case "isDeprecated":
-			w.ObjectKey("isDeprecated")
-			w.Bool(t.IsDeprecated)
-		case "deprecationReason":
-			w.ObjectKey("deprecationReason")
-			if t.DeprecationReason == nil {
-				w.Null()
-			} else {
-				w.String(*t.DeprecationReason)
-			}
-		}
-	}
-	w.EndObject()
-}
-
-type ___InputValueNode struct {
-	_fields      []collectedField
-	Name         string
-	Description  *string
-	Type         jsonw.JsonWriter
-	DefaultValue *string
+	return out
 }
 
 var __InputValueImplementors = []string{"__InputValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) jsonw.JsonWriter {
-	node := ___InputValueNode{
-		_fields: ec.collectFields(sel, __InputValueImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) jsonw.Writer {
+	fields := ec.collectFields(sel, __InputValueImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "name":
 			res := it.Name()
-			node.Name = res
+
+			out.Values[i] = jsonw.String(res)
 		case "description":
 			res := it.Description()
-			node.Description = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		case "type":
 			res := it.Type()
-			if res != nil {
-				node.Type = ec.___Type(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "defaultValue":
 			res := it.DefaultValue()
-			node.DefaultValue = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *___InputValueNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "name":
-			w.ObjectKey("name")
-			w.String(t.Name)
-		case "description":
-			w.ObjectKey("description")
-			if t.Description == nil {
-				w.Null()
-			} else {
-				w.String(*t.Description)
-			}
-		case "type":
-			w.ObjectKey("type")
-			if t.Type == nil {
-				w.Null()
-			} else {
-				t.Type.WriteJson(w)
-			}
-		case "defaultValue":
-			w.ObjectKey("defaultValue")
-			if t.DefaultValue == nil {
-				w.Null()
-			} else {
-				w.String(*t.DefaultValue)
-			}
-		}
-	}
-	w.EndObject()
-}
-
-type ___SchemaNode struct {
-	_fields          []collectedField
-	Types            []jsonw.JsonWriter
-	QueryType        jsonw.JsonWriter
-	MutationType     jsonw.JsonWriter
-	SubscriptionType jsonw.JsonWriter
-	Directives       []jsonw.JsonWriter
+	return out
 }
 
 var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) jsonw.JsonWriter {
-	node := ___SchemaNode{
-		_fields: ec.collectFields(sel, __SchemaImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) jsonw.Writer {
+	fields := ec.collectFields(sel, __SchemaImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "types":
 			res := it.Types()
-			if res != nil {
-				for i := range res {
-					node.Types = append(node.Types, ec.___Type(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___Type(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		case "queryType":
 			res := it.QueryType()
-			if res != nil {
-				node.QueryType = ec.___Type(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "mutationType":
 			res := it.MutationType()
-			if res != nil {
-				node.MutationType = ec.___Type(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "subscriptionType":
 			res := it.SubscriptionType()
-			if res != nil {
-				node.SubscriptionType = ec.___Type(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "directives":
 			res := it.Directives()
-			if res != nil {
-				for i := range res {
-					node.Directives = append(node.Directives, ec.___Directive(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___Directive(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
-}
-
-func (t *___SchemaNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "types":
-			w.ObjectKey("types")
-			w.BeginArray()
-			for _, val := range t.Types {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		case "queryType":
-			w.ObjectKey("queryType")
-			if t.QueryType == nil {
-				w.Null()
-			} else {
-				t.QueryType.WriteJson(w)
-			}
-		case "mutationType":
-			w.ObjectKey("mutationType")
-			if t.MutationType == nil {
-				w.Null()
-			} else {
-				t.MutationType.WriteJson(w)
-			}
-		case "subscriptionType":
-			w.ObjectKey("subscriptionType")
-			if t.SubscriptionType == nil {
-				w.Null()
-			} else {
-				t.SubscriptionType.WriteJson(w)
-			}
-		case "directives":
-			w.ObjectKey("directives")
-			w.BeginArray()
-			for _, val := range t.Directives {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		}
-	}
-	w.EndObject()
-}
-
-type ___TypeNode struct {
-	_fields       []collectedField
-	Kind          string
-	Name          *string
-	Description   *string
-	Fields        []jsonw.JsonWriter
-	Interfaces    []jsonw.JsonWriter
-	PossibleTypes []jsonw.JsonWriter
-	EnumValues    []jsonw.JsonWriter
-	InputFields   []jsonw.JsonWriter
-	OfType        jsonw.JsonWriter
+	return out
 }
 
 var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) jsonw.JsonWriter {
-	node := ___TypeNode{
-		_fields: ec.collectFields(sel, __TypeImplementors, map[string]bool{}),
-	}
+func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) jsonw.Writer {
+	fields := ec.collectFields(sel, __TypeImplementors, map[string]bool{})
+	out := jsonw.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+		out.Values[i] = jsonw.Null
 
-	for _, field := range node._fields {
 		switch field.Name {
 		case "kind":
 			res := it.Kind()
-			node.Kind = res
+
+			out.Values[i] = jsonw.String(res)
 		case "name":
 			res := it.Name()
-			node.Name = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		case "description":
 			res := it.Description()
-			node.Description = res
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = jsonw.String(*res)
+			}
 		case "fields":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
@@ -1503,25 +1110,49 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				arg0 = tmp2
 			}
 			res := it.Fields(arg0)
-			if res != nil {
-				for i := range res {
-					node.Fields = append(node.Fields, ec.___Field(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___Field(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		case "interfaces":
 			res := it.Interfaces()
-			if res != nil {
-				for i := range res {
-					node.Interfaces = append(node.Interfaces, ec.___Type(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___Type(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		case "possibleTypes":
 			res := it.PossibleTypes()
-			if res != nil {
-				for i := range res {
-					node.PossibleTypes = append(node.PossibleTypes, ec.___Type(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___Type(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		case "enumValues":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
@@ -1533,123 +1164,54 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				arg0 = tmp2
 			}
 			res := it.EnumValues(arg0)
-			if res != nil {
-				for i := range res {
-					node.EnumValues = append(node.EnumValues, ec.___EnumValue(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___EnumValue(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		case "inputFields":
 			res := it.InputFields()
-			if res != nil {
-				for i := range res {
-					node.InputFields = append(node.InputFields, ec.___InputValue(field.Selections, res[i]))
+
+			arr1 := jsonw.Array{}
+			for _, loopval1 := range res {
+				var tmp1 jsonw.Writer
+
+				if loopval1 == nil {
+					tmp1 = jsonw.Null
+				} else {
+					tmp1 = ec.___InputValue(field.Selections, loopval1)
 				}
+				arr1 = append(arr1, tmp1)
 			}
+			out.Values[i] = arr1
 		case "ofType":
 			res := it.OfType()
-			if res != nil {
-				node.OfType = ec.___Type(field.Selections, res)
+
+			if res == nil {
+				out.Values[i] = jsonw.Null
+			} else {
+				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
-	return &node
+	return out
 }
 
-func (t *___TypeNode) WriteJson(w *jsonw.Writer) {
-	w.BeginObject()
-	for _, field := range t._fields {
-		switch field.Name {
-		case "kind":
-			w.ObjectKey("kind")
-			w.String(t.Kind)
-		case "name":
-			w.ObjectKey("name")
-			if t.Name == nil {
-				w.Null()
-			} else {
-				w.String(*t.Name)
-			}
-		case "description":
-			w.ObjectKey("description")
-			if t.Description == nil {
-				w.Null()
-			} else {
-				w.String(*t.Description)
-			}
-		case "fields":
-			w.ObjectKey("fields")
-			w.BeginArray()
-			for _, val := range t.Fields {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		case "interfaces":
-			w.ObjectKey("interfaces")
-			w.BeginArray()
-			for _, val := range t.Interfaces {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		case "possibleTypes":
-			w.ObjectKey("possibleTypes")
-			w.BeginArray()
-			for _, val := range t.PossibleTypes {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		case "enumValues":
-			w.ObjectKey("enumValues")
-			w.BeginArray()
-			for _, val := range t.EnumValues {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		case "inputFields":
-			w.ObjectKey("inputFields")
-			w.BeginArray()
-			for _, val := range t.InputFields {
-				if val == nil {
-					w.Null()
-				} else {
-					val.WriteJson(w)
-				}
-			}
-			w.EndArray()
-		case "ofType":
-			w.ObjectKey("ofType")
-			if t.OfType == nil {
-				w.Null()
-			} else {
-				t.OfType.WriteJson(w)
-			}
-		}
-	}
-	w.EndObject()
-}
-
-func (ec *executionContext) _character(sel []query.Selection, it Character) jsonw.JsonWriter {
-	switch it := it.(type) {
+func (ec *executionContext) _character(sel []query.Selection, it *Character) jsonw.Writer {
+	switch it := (*it).(type) {
 	case nil:
-		return jsonw.NullWriter
+		return jsonw.Null
 	case Human:
 		return ec._human(sel, &it)
 
@@ -1665,10 +1227,10 @@ func (ec *executionContext) _character(sel []query.Selection, it Character) json
 	}
 }
 
-func (ec *executionContext) _searchResult(sel []query.Selection, it SearchResult) jsonw.JsonWriter {
-	switch it := it.(type) {
+func (ec *executionContext) _searchResult(sel []query.Selection, it *SearchResult) jsonw.Writer {
+	switch it := (*it).(type) {
 	case nil:
-		return jsonw.NullWriter
+		return jsonw.Null
 	case Human:
 		return ec._human(sel, &it)
 

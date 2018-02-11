@@ -15,7 +15,7 @@ type MyMutation {
 }
 
 type Todo {
-	id: Int!
+	id: ID!
 	text: String!
 	done: Boolean!
 }

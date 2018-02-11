@@ -7,14 +7,19 @@ import (
 	"errors"
 	"time"
 
+	"strconv"
+
 	"github.com/mitchellh/mapstructure"
 )
 
 type Todo struct {
-	ID     int
-	Text   string
-	Done   bool
-	UserID int
+	id   int
+	Text string
+	Done bool
+}
+
+func (t *Todo) ID() string {
+	return "t" + strconv.Itoa(t.id)
 }
 
 type todoResolver struct {
@@ -25,9 +30,9 @@ type todoResolver struct {
 func New() *todoResolver {
 	return &todoResolver{
 		todos: []Todo{
-			{ID: 1, Text: "A todo not to forget", Done: false, UserID: 1},
-			{ID: 2, Text: "This is the most important", Done: false, UserID: 1},
-			{ID: 3, Text: "Please do this or else", Done: false, UserID: 1},
+			{id: 1, Text: "A todo not to forget", Done: false},
+			{id: 2, Text: "This is the most important", Done: false},
+			{id: 3, Text: "Please do this or else", Done: false},
 		},
 		lastID: 3,
 	}
@@ -36,7 +41,7 @@ func New() *todoResolver {
 func (r *todoResolver) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
 	time.Sleep(220 * time.Millisecond)
 	for _, todo := range r.todos {
-		if todo.ID == id {
+		if todo.id == id {
 			return &todo, nil
 		}
 	}
@@ -58,7 +63,7 @@ func (r *todoResolver) MyMutation_createTodo(ctx context.Context, text string) (
 	newID := r.id()
 
 	newTodo := Todo{
-		ID:   newID,
+		id:   newID,
 		Text: text,
 		Done: false,
 	}
@@ -74,7 +79,7 @@ func (r *todoResolver) MyMutation_updateTodo(ctx context.Context, id int, change
 	var affectedTodo *Todo
 
 	for i := 0; i < len(r.todos); i++ {
-		if r.todos[i].ID == id {
+		if r.todos[i].id == id {
 			affectedTodo = &r.todos[i]
 			break
 		}

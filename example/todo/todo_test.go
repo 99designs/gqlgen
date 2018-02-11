@@ -17,16 +17,16 @@ func TestTodo(t *testing.T) {
 
 	t.Run("create a new todo", func(t *testing.T) {
 		var resp struct {
-			CreateTodo Todo
+			CreateTodo struct{ ID string }
 		}
 		c.MustPost(`mutation { createTodo(text:"Fery important") { id } }`, &resp)
 
-		require.Equal(t, 4, resp.CreateTodo.ID)
+		require.Equal(t, "t4", resp.CreateTodo.ID)
 	})
 
 	t.Run("update the todo text", func(t *testing.T) {
 		var resp struct {
-			UpdateTodo Todo
+			UpdateTodo struct{ Text string }
 		}
 		c.MustPost(`mutation { updateTodo(id: 4, changes:{text:"Very important"}) { text } }`, &resp)
 
@@ -35,7 +35,7 @@ func TestTodo(t *testing.T) {
 
 	t.Run("update the todo status", func(t *testing.T) {
 		var resp struct {
-			UpdateTodo Todo
+			UpdateTodo struct{ Text string }
 		}
 		c.MustPost(`mutation { updateTodo(id: 4, changes:{done:true}) { text } }`, &resp)
 
@@ -44,23 +44,32 @@ func TestTodo(t *testing.T) {
 
 	t.Run("select with alias", func(t *testing.T) {
 		var resp struct {
-			A Todo
-			B Todo
+			A struct{ Text string }
+			B struct{ ID string }
 		}
 		c.MustPost(`{ a: todo(id:1) { text } b: todo(id:2) { id } }`, &resp)
 
 		require.Equal(t, "A todo not to forget", resp.A.Text)
-		require.Equal(t, 0, resp.A.ID)
-
-		require.Equal(t, "", resp.B.Text)
-		require.Equal(t, 2, resp.B.ID)
+		require.Equal(t, "t2", resp.B.ID)
 	})
 
 	t.Run("select all", func(t *testing.T) {
 		var resp struct {
-			Todo     Todo
-			LastTodo Todo
-			Todos    []Todo
+			Todo struct {
+				ID   string
+				Text string
+				Done bool
+			}
+			LastTodo struct {
+				ID   string
+				Text string
+				Done bool
+			}
+			Todos []struct {
+				ID   string
+				Text string
+				Done bool
+			}
 		}
 		c.MustPost(`{
 			todo(id:1) { id done text }
@@ -68,11 +77,11 @@ func TestTodo(t *testing.T) {
 			todos { id text done }
 		}`, &resp)
 
-		require.Equal(t, 1, resp.Todo.ID)
-		require.Equal(t, 4, resp.LastTodo.ID)
+		require.Equal(t, "t1", resp.Todo.ID)
+		require.Equal(t, "t4", resp.LastTodo.ID)
 		require.Len(t, resp.Todos, 4)
 		require.Equal(t, "Very important", resp.LastTodo.Text)
-		require.Equal(t, 4, resp.LastTodo.ID)
+		require.Equal(t, "t4", resp.LastTodo.ID)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

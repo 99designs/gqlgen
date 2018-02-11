@@ -323,6 +323,10 @@ func (e *extractor) findBindTargets(t types.Type, object *object) bool {
 	case *types.Named:
 		for i := 0; i < t.NumMethods(); i++ {
 			method := t.Method(i)
+			if !method.Exported() {
+				continue
+			}
+
 			if methodField := object.GetField(method.Name()); methodField != nil {
 				methodField.MethodName = "it." + method.Name()
 				sig := method.Type().(*types.Signature)
@@ -361,6 +365,10 @@ func (e *extractor) findBindTargets(t types.Type, object *object) bool {
 		for i := 0; i < t.NumFields(); i++ {
 			field := t.Field(i)
 			// Todo: struct tags, name and - at least
+
+			if !field.Exported() {
+				continue
+			}
 
 			// Todo: check for type matches before binding too?
 			if objectField := object.GetField(field.Name()); objectField != nil {

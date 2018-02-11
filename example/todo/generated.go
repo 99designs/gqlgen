@@ -261,9 +261,9 @@ func (ec *executionContext) _todo(sel []query.Selection, it *Todo) jsonw.Writer 
 
 		switch field.Name {
 		case "id":
-			res := it.ID
+			res := it.ID()
 
-			out.Values[i] = jsonw.Int(res)
+			out.Values[i] = jsonw.String(res)
 		case "text":
 			res := it.Text
 
@@ -705,7 +705,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
+var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: ID!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

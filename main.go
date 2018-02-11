@@ -98,7 +98,7 @@ func main() {
 		_ = syscall.Unlink(*output)
 	}
 
-	if err := e.introspect(); err != nil {
+	if err = e.introspect(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}

@@ -6,7 +6,7 @@ This is a library for quickly creating a strictly typed graphql servers in golan
  
 #### Try it
 
-Create a graphql schema somewhere
+Define your schema first:
 ```graphql schema
 schema {
 	query: Query
@@ -34,7 +34,7 @@ type User {
 }
 ```
 
-Then define your apps models somewhere:
+Then define your models:
 ```go
 package yourapp
 
@@ -51,7 +51,7 @@ type User struct {
 }
 ```
 
-Tell the generator how your types line up by creating a `types.json`
+Tell the generator how to map between the two in `types.json`
 ```json
 {
   "Todo": "github.com/you/yourapp.Todo",
@@ -61,7 +61,7 @@ Tell the generator how your types line up by creating a `types.json`
 
 Then generate the runtime from it:
 ```bash
-gqlgen -schema schema.graphql -typemap types.json -out gen/generated.go
+gqlgen -out generated.go
 ```
 
 At the top of the generated file will be an interface with the resolvers that are required to complete the graph:
@@ -69,11 +69,11 @@ At the top of the generated file will be an interface with the resolvers that ar
 package yourapp
 
 type Resolvers interface {
-	Mutation_createTodo(ctx context.Context, text string) (readme.Todo, error)
+	Mutation_createTodo(ctx context.Context, text string) (Todo, error)
 
-	Query_todos(ctx context.Context) ([]readme.Todo, error)
+	Query_todos(ctx context.Context) ([]Todo, error)
 
-	Todo_user(ctx context.Context, it *readme.Todo) (readme.User, error)
+	Todo_user(ctx context.Context, it *Todo) (User, error)
 }
 ```
 

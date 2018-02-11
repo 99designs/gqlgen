@@ -79,7 +79,9 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 	if err != nil {
 		return fmt.Errorf("post: %s", err.Error())
 	}
-	defer rawResponse.Body.Close()
+	defer func() {
+		_ = rawResponse.Body.Close()
+	}()
 
 	if rawResponse.StatusCode >= http.StatusBadRequest {
 		responseBody, _ := ioutil.ReadAll(rawResponse.Body)

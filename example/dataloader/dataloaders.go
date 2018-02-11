@@ -26,13 +26,13 @@ type loaders struct {
 
 func LoaderMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		loaders := loaders{}
+		ldrs := loaders{}
 
 		// set this to zero what happens without dataloading
 		wait := 250 * time.Microsecond
 
 		// simple 1:1 loader, fetch an address by its primary key
-		loaders.addressByID = &AddressLoader{
+		ldrs.addressByID = &AddressLoader{
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []int) ([]*Address, []error) {
@@ -54,7 +54,7 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 		}
 
 		// 1:M loader
-		loaders.ordersByCustomer = &OrderSliceLoader{
+		ldrs.ordersByCustomer = &OrderSliceLoader{
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []int) ([][]Order, []error) {
@@ -76,7 +76,7 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 					}
 
 					// if you had another customer loader you would prime its cache here
-					// by calling `loaders.ordersByID.Prime(id, orders[i])`
+					// by calling `ldrs.ordersByID.Prime(id, orders[i])`
 				}
 
 				return orders, errors
@@ -84,7 +84,7 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 		}
 
 		// M:M loader
-		loaders.itemsByOrder = &ItemSliceLoader{
+		ldrs.itemsByOrder = &ItemSliceLoader{
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []int) ([][]Item, []error) {
@@ -109,7 +109,7 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 			},
 		}
 
-		dlCtx := context.WithValue(r.Context(), ctxKey, loaders)
+		dlCtx := context.WithValue(r.Context(), ctxKey, ldrs)
 		next.ServeHTTP(w, r.WithContext(dlCtx))
 	})
 }

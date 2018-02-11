@@ -8,5 +8,5 @@
       "PartitionStrategy": "packages"
     }
   },
-  "Disable": ["gas","golint","gocyclo"]
+  "Disable": ["gas","golint","gocyclo","goconst", "gotype"]
 }

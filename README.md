@@ -4,7 +4,7 @@ This is a library for quickly creating a strictly typed graphql servers in golan
 
 `go get -u github.com/vektah/gqlgen`
 
-#### Try it
+### Try it
 
 Define your schema first:
 ```graphql schema
@@ -86,9 +86,9 @@ func main() {
 }
 ```
 
-#### Prior art
+### Prior art
 
-##### https://github.com/neelance/graphql-go
+#### neelance/graphql-go
 
 The gold standard of graphql servers in golang. It provided the inspiration, and a good chunk of code for gqlgen. Its
 strictly typed and uses your schema and some reflection to build up a resolver graph. The only downside is the amount
@@ -104,7 +104,9 @@ Reasons to use gqlgen instead:
  - arrays work just fine https://github.com/neelance/graphql-go/issues/144
  - first class dataloader support, see examples/dataloader
 
-##### https://github.com/graphql-go/graphql
+https://github.com/neelance/graphql-go
+
+#### graphql-go/graphql
 
 With this library you write the schema using its internal DSL as go code, and bind in all your resolvers. No go type
 information is used so you can dynamically define new schemas which could be useful for building schema stitching
@@ -116,10 +118,14 @@ Reasons to use gqlgen instead:
  - horrible runtime error messages when you mess up defining your schema https://github.com/graphql-go/graphql/issues/234
  - reviewing schema changes written in a go dsl is really hard across teams
 
-##### https://github.com/Applifier/graphql-codegen and https://github.com/euforic/graphql-gen-go
+see https://github.com/graphql-go/graphql
+
+#### Applifier/graphql-codegen and euforic/graphql-gen-go
 
 Very similar idea, take your schema and generate the code from it.
 
 gqlgen will build the entire execution environment statically, allowing go's type checker to validate everything across
 the the graph. These two libraries generate resolvers that are loaded using reflection by the neelance library, so they
 have most of the downsides of that with an added layer of complexity.
+
+see https://github.com/Applifier/graphql-codegen and https://github.com/euforic/graphql-gen-go

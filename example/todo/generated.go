@@ -209,9 +209,9 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 				}
 
 				arr1 := jsonw.Array{}
-				for _, loopval1 := range res {
+				for idx1 := range res {
 					var tmp1 jsonw.Writer
-					tmp1 = ec._todo(field.Selections, &loopval1)
+					tmp1 = ec._todo(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
 				out.Values[i] = arr1
@@ -307,9 +307,9 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 			res := it.Locations()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
-				tmp1 = jsonw.String(loopval1)
+				tmp1 = jsonw.String(res[idx1])
 				arr1 = append(arr1, tmp1)
 			}
 			out.Values[i] = arr1
@@ -317,13 +317,13 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 			res := it.Args()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___InputValue(field.Selections, loopval1)
+					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -406,13 +406,13 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 			res := it.Args()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___InputValue(field.Selections, loopval1)
+					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -507,13 +507,13 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.Types()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___Type(field.Selections, loopval1)
+					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -546,13 +546,13 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.Directives()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___Directive(field.Selections, loopval1)
+					tmp1 = ec.___Directive(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -609,13 +609,13 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			res := it.Fields(arg0)
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___Field(field.Selections, loopval1)
+					tmp1 = ec.___Field(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -624,13 +624,13 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			res := it.Interfaces()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___Type(field.Selections, loopval1)
+					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -639,13 +639,13 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			res := it.PossibleTypes()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___Type(field.Selections, loopval1)
+					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -663,13 +663,13 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			res := it.EnumValues(arg0)
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___EnumValue(field.Selections, loopval1)
+					tmp1 = ec.___EnumValue(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}
@@ -678,13 +678,13 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			res := it.InputFields()
 
 			arr1 := jsonw.Array{}
-			for _, loopval1 := range res {
+			for idx1 := range res {
 				var tmp1 jsonw.Writer
 
-				if loopval1 == nil {
+				if res[idx1] == nil {
 					tmp1 = jsonw.Null
 				} else {
-					tmp1 = ec.___InputValue(field.Selections, loopval1)
+					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
 				arr1 = append(arr1, tmp1)
 			}

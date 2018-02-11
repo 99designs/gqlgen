@@ -156,22 +156,22 @@ func (f *Field) doWriteJson(res string, val string, remainingMods []string, isPt
 		}
 		var tmp = "tmp" + strconv.Itoa(depth)
 		var arr = "arr" + strconv.Itoa(depth)
-		var loopval = "loopval" + strconv.Itoa(depth)
+		var index = "idx" + strconv.Itoa(depth)
 
 		return tpl(`
 			{{.arr}} := jsonw.Array{}
-			for _, {{.loopval}} := range {{.val}} {
+			for {{.index}} := range {{.val}} {
 				var {{.tmp}} jsonw.Writer
 				{{.next}}
 				{{.arr}} = append({{.arr}}, {{.tmp}})
 			}
 			{{.res}} = {{.arr}}`, map[string]interface{}{
-			"res":     res,
-			"val":     val,
-			"tmp":     tmp,
-			"arr":     arr,
-			"loopval": loopval,
-			"next":    f.doWriteJson(tmp, loopval, remainingMods[1:], false, depth+1),
+			"res":   res,
+			"val":   val,
+			"tmp":   tmp,
+			"arr":   arr,
+			"index": index,
+			"next":  f.doWriteJson(tmp, val+"["+index+"]", remainingMods[1:], false, depth+1),
 		})
 
 	case f.Type.Scalar:

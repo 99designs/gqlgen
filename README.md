@@ -2,13 +2,7 @@
 
 This is a library for quickly creating a strictly typed graphql servers in golang.
 
-
-Big todos:
- - [ ] data loading
- - [ ] lots of tests
- - [ ] lots of docs
- - [ ] a version of https://github.com/tonyghita/graphql-go-example using this
- 
+`go get -u github.com/vektah/gqlgen`
  
 #### Try it
 
@@ -67,7 +61,7 @@ Tell the generator how your types line up by creating a `types.json`
 
 Then generate the runtime from it:
 ```bash
-ggraphqlc -schema schema.graphql -typemap types.json -out gen/generated.go
+gqlgen -schema schema.graphql -typemap types.json -out gen/generated.go
 ```
 
 At the top of the generated file will be an interface with the resolvers that are required to complete the graph:

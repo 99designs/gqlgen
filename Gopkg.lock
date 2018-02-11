@@ -30,6 +30,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/vektah/dataloaden"
+  packages = ["."]
+  revision = "5b8b47ca082af0c38d3a76403c842d12c7e88449"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -42,6 +48,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e5fdf0dfabd013e644f5734056881865c8860d8f3637377e96b6717efc49f969"
+  inputs-digest = "591dab62f7bafac9caf095199196713d68e4c4b85ed72ad38aad1f665fd118b5"
   solver-name = "gps-cdcl"
   solver-version = 1

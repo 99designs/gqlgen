@@ -1,4 +1,4 @@
-//go:generate gqlgen -out generated.go
+//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go
 
 package starwars
 

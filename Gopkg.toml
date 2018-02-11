@@ -1,3 +1,5 @@
+required = ["github.com/vektah/dataloaden"]
+
 [[constraint]]
   branch = "master"
   name = "github.com/mitchellh/mapstructure"

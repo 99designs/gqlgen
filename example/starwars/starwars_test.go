@@ -156,6 +156,18 @@ func TestStarwars(t *testing.T) {
 		require.NotEqual(t, resp.C.Time, resp.B.Time)
 	})
 
+	t.Run("multidimensional arrays", func(t *testing.T) {
+		var resp struct {
+			Starship struct {
+				History [][]int
+			}
+		}
+		c.MustPost(`{ starship(id:"3001") { history } }`, &resp)
+
+		require.Len(t, resp.Starship.History, 4)
+		require.Len(t, resp.Starship.History[0], 2)
+	})
+
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
 		c.MustPost(introspection.Query, nil)

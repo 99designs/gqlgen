@@ -225,23 +225,47 @@ func NewResolver() *Resolver {
 
 	r.starships = map[string]Starship{
 		"3000": {
-			ID:           "3000",
-			Name:         "Millennium Falcon",
+			ID:   "3000",
+			Name: "Millennium Falcon",
+			History: [][2]int{
+				{1, 2},
+				{4, 5},
+				{1, 2},
+				{3, 2},
+			},
 			lengthMeters: 34.37,
 		},
 		"3001": {
-			ID:           "3001",
-			Name:         "X-Wing",
+			ID:   "3001",
+			Name: "X-Wing",
+			History: [][2]int{
+				{6, 4},
+				{3, 2},
+				{2, 3},
+				{5, 1},
+			},
 			lengthMeters: 12.5,
 		},
 		"3002": {
-			ID:           "3002",
-			Name:         "TIE Advanced x1",
+			ID:   "3002",
+			Name: "TIE Advanced x1",
+			History: [][2]int{
+				{3, 2},
+				{7, 2},
+				{6, 4},
+				{3, 2},
+			},
 			lengthMeters: 9.2,
 		},
 		"3003": {
-			ID:           "3003",
-			Name:         "Imperial shuttle",
+			ID:   "3003",
+			Name: "Imperial shuttle",
+			History: [][2]int{
+				{1, 7},
+				{3, 5},
+				{5, 3},
+				{7, 1},
+			},
 			lengthMeters: 20,
 		},
 	}
@@ -275,6 +299,7 @@ func (h *Human) Height(unit string) float64 {
 type Starship struct {
 	ID           string
 	Name         string
+	History      [][2]int
 	lengthMeters float64
 }
 

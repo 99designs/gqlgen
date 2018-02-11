@@ -128,5 +128,7 @@ type Starship {
     name: String!
     # Length of the starship, along the longest axis
     length(unit: LengthUnit = METER): Float!
+    # coordinates tracking this ship
+    history: [[Int]]
 }
 union SearchResult = Human | Droid | Starship

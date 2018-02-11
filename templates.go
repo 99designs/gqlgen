@@ -19,7 +19,7 @@ func runTemplate(e *extractor) (*bytes.Buffer, error) {
 	}
 
 	buf := &bytes.Buffer{}
-	err = t.Lookup("gen").Execute(buf, e)
+	err = t.Lookup("file").Execute(buf, e)
 	if err != nil {
 		return nil, err
 	}

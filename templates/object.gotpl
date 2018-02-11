@@ -1,5 +1,19 @@
-{{define "fetch"}}
-{{ $object := .}}
+{{ define "object" }}
+{{ $object := . }}
+type _{{ .Type.GraphQLName}}Node struct {
+	_fields []collectedField
+
+    {{range $field := .Fields -}}
+        {{ if $field.Type.Scalar -}}
+            {{$field.GraphQLName|ucFirst}} {{ $field.Type.Local }}
+        {{ else -}}
+            {{$field.GraphQLName|ucFirst}} {{if $field.Type.IsSlice}}[]{{end}}jsonw.JsonWriter
+        {{ end -}}
+    {{end}}
+}
+
+var {{ $object.Type.GraphQLName|lcFirst}}Implementors = {{$object.Implementors}}
+
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) jsonw.JsonWriter {
     node := _{{$object.Type.GraphQLName}}Node {
@@ -67,4 +81,19 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 
     return &node
 }
+
+func (t *_{{ $object.Type.GraphQLName }}Node) WriteJson(w *jsonw.Writer) {
+    w.BeginObject()
+    for _, field := range t._fields {
+        switch field.Name {
+            {{range $field := $object.Fields -}}
+                case "{{$field.GraphQLName}}":
+                    w.ObjectKey({{$field.GraphQLName|quote}})
+                    {{ $field.WriteJson }}
+            {{ end }}
+        }
+    }
+    w.EndObject()
+}
+
 {{end}}

@@ -91,20 +91,6 @@ type executionContext struct {
 	wg        sync.WaitGroup
 }
 
-var (
-	addressImplementors      = []string{"Address"}
-	customerImplementors     = []string{"Customer"}
-	itemImplementors         = []string{"Item"}
-	orderImplementors        = []string{"Order"}
-	queryImplementors        = []string{"Query"}
-	__DirectiveImplementors  = []string{"__Directive"}
-	__EnumValueImplementors  = []string{"__EnumValue"}
-	__FieldImplementors      = []string{"__Field"}
-	__InputValueImplementors = []string{"__InputValue"}
-	__SchemaImplementors     = []string{"__Schema"}
-	__TypeImplementors       = []string{"__Type"}
-)
-
 type _AddressNode struct {
 	_fields []collectedField
 
@@ -112,6 +98,8 @@ type _AddressNode struct {
 	Street  string
 	Country string
 }
+
+var addressImplementors = []string{"Address"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _address(sel []query.Selection, it *Address) jsonw.JsonWriter {
@@ -171,6 +159,8 @@ type _CustomerNode struct {
 	Address jsonw.JsonWriter
 	Orders  []jsonw.JsonWriter
 }
+
+var customerImplementors = []string{"Customer"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _customer(sel []query.Selection, it *Customer) jsonw.JsonWriter {
@@ -276,6 +266,8 @@ type _ItemNode struct {
 	Name string
 }
 
+var itemImplementors = []string{"Item"}
+
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _item(sel []query.Selection, it *Item) jsonw.JsonWriter {
 	node := _ItemNode{
@@ -318,6 +310,8 @@ type _OrderNode struct {
 	Amount float64
 	Items  []jsonw.JsonWriter
 }
+
+var orderImplementors = []string{"Order"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _order(sel []query.Selection, it *Order) jsonw.JsonWriter {
@@ -405,6 +399,8 @@ type _QueryNode struct {
 	__schema  jsonw.JsonWriter
 	__type    jsonw.JsonWriter
 }
+
+var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw.JsonWriter {
@@ -511,6 +507,8 @@ type ___DirectiveNode struct {
 	Args        []jsonw.JsonWriter
 }
 
+var __DirectiveImplementors = []string{"__Directive"}
+
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) jsonw.JsonWriter {
 	node := ___DirectiveNode{
@@ -600,6 +598,8 @@ type ___EnumValueNode struct {
 	DeprecationReason *string
 }
 
+var __EnumValueImplementors = []string{"__EnumValue"}
+
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) jsonw.JsonWriter {
 	node := ___EnumValueNode{
@@ -676,6 +676,8 @@ type ___FieldNode struct {
 	IsDeprecated      bool
 	DeprecationReason *string
 }
+
+var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) jsonw.JsonWriter {
@@ -790,6 +792,8 @@ type ___InputValueNode struct {
 	DefaultValue *string
 }
 
+var __InputValueImplementors = []string{"__InputValue"}
+
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) jsonw.JsonWriter {
 	node := ___InputValueNode{
@@ -873,6 +877,8 @@ type ___SchemaNode struct {
 	SubscriptionType jsonw.JsonWriter
 	Directives       []jsonw.JsonWriter
 }
+
+var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) jsonw.JsonWriter {
@@ -1005,6 +1011,8 @@ type ___TypeNode struct {
 	InputFields   []jsonw.JsonWriter
 	OfType        jsonw.JsonWriter
 }
+
+var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) jsonw.JsonWriter {

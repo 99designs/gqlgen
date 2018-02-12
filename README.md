@@ -1,6 +1,6 @@
 # gqlgen [![CircleCI](https://circleci.com/gh/Vektah/gqlgen.svg?style=svg)](https://circleci.com/gh/Vektah/gqlgen)
 
-This is a library for quickly creating a strictly typed graphql servers in golang.
+This is a library for quickly creating strictly typed graphql servers in golang.
 
 `dep ensure -add github.com/vektah/gqlgen`
 

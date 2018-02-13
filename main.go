@@ -10,6 +10,7 @@ import (
 
 	"syscall"
 
+	"github.com/vektah/gqlgen/codegen"
 	"github.com/vektah/gqlgen/neelance/schema"
 	"golang.org/x/tools/imports"
 )
@@ -45,67 +46,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	e := extractor{
-		PackageName: getPkgName(),
-		goTypeMap:   loadTypeMap(),
-		SchemaRaw:   string(schemaRaw),
-		schema:      schema,
-		Imports: map[string]string{
-			"context": "context",
-			"fmt":     "fmt",
-			"io":      "io",
-			"strconv": "strconv",
-			"time":    "time",
-			"reflect": "reflect",
-			"strings": "strings",
-			"sync":    "sync",
-
-			"mapstructure":  "github.com/mitchellh/mapstructure",
-			"introspection": "github.com/vektah/gqlgen/neelance/introspection",
-			"errors":        "github.com/vektah/gqlgen/neelance/errors",
-			"query":         "github.com/vektah/gqlgen/neelance/query",
-			"schema":        "github.com/vektah/gqlgen/neelance/schema",
-			"validation":    "github.com/vektah/gqlgen/neelance/validation",
-			"jsonw":         "github.com/vektah/gqlgen/jsonw",
-		},
-	}
-	e.extract()
-
-	// Poke a few magic methods into query
-	q := e.GetObject(e.QueryRoot)
-	q.Fields = append(q.Fields, Field{
-		Type:        e.getType("__Schema").Ptr(),
-		GraphQLName: "__schema",
-		NoErr:       true,
-		MethodName:  "ec.introspectSchema",
-		Object:      q,
-	})
-	q.Fields = append(q.Fields, Field{
-		Type:        e.getType("__Type").Ptr(),
-		GraphQLName: "__type",
-		NoErr:       true,
-		MethodName:  "ec.introspectType",
-		Args:        []FieldArgument{{Name: "name", Type: kind{Scalar: true, Name: "string"}}},
-		Object:      q,
-	})
-
-	if len(e.Errors) != 0 {
-		for _, err := range e.Errors {
-			fmt.Fprintln(os.Stderr, "err: "+err)
-		}
-		os.Exit(1)
-	}
-
 	if *output != "-" {
 		_ = syscall.Unlink(*output)
 	}
 
-	if err = e.introspect(); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
+	build, err := codegen.Bind(schema, loadTypeMap(), dirName())
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to generate code: "+err.Error())
 		os.Exit(1)
 	}
+	build.SchemaRaw = string(schemaRaw)
 
-	buf, err := runTemplate(&e)
+	if *packageName != "" {
+		build.PackageName = *packageName
+	}
+
+	buf, err := runTemplate(build)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
 		os.Exit(1)
@@ -131,22 +87,22 @@ func main() {
 func gofmt(filename string, b []byte) []byte {
 	out, err := imports.Process(filename, b, nil)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to gofmt: "+*output+":"+err.Error())
+		fmt.Fprintln(os.Stderr, "unable to gofmt: "+err.Error())
 		return b
 	}
 	return out
 }
 
-func getPkgName() string {
-	pkgName := *packageName
-	if pkgName == "" {
-		absPath, err := filepath.Abs(*output)
-		if err != nil {
-			panic(err)
-		}
-		pkgName = filepath.Base(filepath.Dir(absPath))
+func absOutput() string {
+	absPath, err := filepath.Abs(*output)
+	if err != nil {
+		panic(err)
 	}
-	return pkgName
+	return absPath
+}
+
+func dirName() string {
+	return filepath.Dir(absOutput())
 }
 
 func loadTypeMap() map[string]string {
@@ -157,6 +113,12 @@ func loadTypeMap() map[string]string {
 		"__EnumValue":  "github.com/vektah/gqlgen/neelance/introspection.EnumValue",
 		"__InputValue": "github.com/vektah/gqlgen/neelance/introspection.InputValue",
 		"__Schema":     "github.com/vektah/gqlgen/neelance/introspection.Schema",
+		"Int":          "int",
+		"Float":        "float64",
+		"String":       "string",
+		"Boolean":      "bool",
+		"ID":           "string",
+		"Time":         "time.Time",
 	}
 	b, err := ioutil.ReadFile(*typemap)
 	if err != nil {

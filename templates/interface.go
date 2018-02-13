@@ -4,16 +4,16 @@ const interfaceTpl = `
 {{- define "interface"}}
 {{- $interface := . }}
 
-func (ec *executionContext) _{{$interface.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$interface.Type.Local}}) jsonw.Writer {
+func (ec *executionContext) _{{$interface.GQLType|lcFirst}}(sel []query.Selection, it *{{$interface.FullName}}) jsonw.Writer {
 	switch it := (*it).(type) {
 	case nil:
 		return jsonw.Null
-	{{- range $implementor := $interface.Type.Implementors }}
-	case {{$implementor.Local}}:
-		return ec._{{$implementor.GraphQLName|lcFirst}}(sel, &it)
+	{{- range $implementor := $interface.Implementors }}
+	case {{$implementor.FullName}}:
+		return ec._{{$implementor.GQLType|lcFirst}}(sel, &it)
 
-	case *{{$implementor.Local}}:
-		return ec._{{$implementor.GraphQLName|lcFirst}}(sel, it)
+	case *{{$implementor.FullName}}:
+		return ec._{{$implementor.GQLType|lcFirst}}(sel, it)
 
 	{{- end }}
 	default:

@@ -6,10 +6,11 @@ import (
 	"text/template"
 	"unicode"
 
+	"github.com/vektah/gqlgen/codegen"
 	"github.com/vektah/gqlgen/templates"
 )
 
-func runTemplate(e *extractor) (*bytes.Buffer, error) {
+func runTemplate(e *codegen.Build) (*bytes.Buffer, error) {
 	t, err := template.New("").Funcs(template.FuncMap{
 		"ucFirst": ucFirst,
 		"lcFirst": lcFirst,

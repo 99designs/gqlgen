@@ -4,11 +4,11 @@ const objectTpl = `
 {{- define "object" }}
 {{ $object := . }}
 
-var {{ $object.Type.GraphQLName|lcFirst}}Implementors = {{$object.Implementors}}
+var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Selection, it *{{$object.Type.Local}}) jsonw.Writer {
-	fields := ec.collectFields(sel, {{$object.Type.GraphQLName|lcFirst}}Implementors, map[string]bool{})
+func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, it *{{$object.FullName}}) jsonw.Writer {
+	fields := ec.collectFields(sel, {{$object.GQLType|lcFirst}}Implementors, map[string]bool{})
 	out := jsonw.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
@@ -16,7 +16,7 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 
 		switch field.Name {
 		{{- range $field := $object.Fields }}
-		case "{{$field.GraphQLName}}":
+		case "{{$field.GQLName}}":
 			{{- template "args" $field.Args }}
 
 			{{- if $field.IsConcurrent }}
@@ -25,20 +25,20 @@ func (ec *executionContext) _{{$object.Type.GraphQLName|lcFirst}}(sel []query.Se
 					defer ec.wg.Done()
 			{{- end }}
 
-			{{- if $field.VarName }}
-				res := {{$field.VarName}}
-			{{- else if $field.MethodName }}
+			{{- if $field.GoVarName }}
+				res := {{$field.GoVarName}}
+			{{- else if $field.GoMethodName }}
 				{{- if $field.NoErr }}
-					res := {{$field.MethodName}}({{ $field.CallArgs }})
+					res := {{$field.GoMethodName}}({{ $field.CallArgs }})
 				{{- else }}
-					res, err := {{$field.MethodName}}({{ $field.CallArgs }})
+					res, err := {{$field.GoMethodName}}({{ $field.CallArgs }})
 					if err != nil {
 						ec.Error(err)
 						{{ if $field.IsConcurrent }}return{{ else }}continue{{end}}
 					}
 				{{- end }}
 			{{- else }}
-				res, err := ec.resolvers.{{ $object.Name }}_{{ $field.GraphQLName }}({{ $field.CallArgs }})
+				res, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
 				if err != nil {
 					ec.Error(err)
 					{{ if $field.IsConcurrent }}return{{ else }}continue{{end}}

@@ -7,8 +7,8 @@ const fileTpl = `
 package {{ .PackageName }}
 
 import (
-{{- range $as, $import := .Imports }}
-	{{- $as }} "{{ $import }}"
+{{- range $import := .Imports }}
+	{{- $import.Write }}
 {{ end }}
 )
 
@@ -46,10 +46,10 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 
 		var data jsonw.Writer
 		if op.Type == query.Query {
-			data = c._{{.QueryRoot|lcFirst}}(op.Selections, nil)
+			data = c._{{.QueryRoot.GQLType|lcFirst}}(op.Selections, nil)
 		{{- if .MutationRoot}}
 		} else if op.Type == query.Mutation {
-			data = c._{{.MutationRoot|lcFirst}}(op.Selections, nil)
+			data = c._{{.MutationRoot.GQLType|lcFirst}}(op.Selections, nil)
 		{{- end}}
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}

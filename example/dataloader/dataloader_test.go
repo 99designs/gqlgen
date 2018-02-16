@@ -14,12 +14,13 @@ func TestTodo(t *testing.T) {
 	c := client.New(srv.URL)
 
 	t.Run("create a new todo", func(t *testing.T) {
+		var resp interface{}
 		c.MustPost(`{
 		  customers {
 			name
 			address {
 			  street
-			  
+
 			}
 			orders {
 			  id
@@ -29,11 +30,12 @@ func TestTodo(t *testing.T) {
 			  }
 			}
 		  }
-		}`, nil)
+		}`, &resp)
 	})
 
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
-		c.MustPost(introspection.Query, nil)
+		var resp interface{}
+		c.MustPost(introspection.Query, &resp)
 	})
 }

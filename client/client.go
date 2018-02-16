@@ -102,15 +102,22 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 		return fmt.Errorf("decode: %s", err.Error())
 	}
 
-	respData := struct {
-		Data   interface{}          `json:"data"`
-		Errors []*errors.QueryError `json:"errors"`
-	}{
-		Data: response,
+	if respDataRaw["errors"] != nil {
+		var errs []*errors.QueryError
+		if err := unpack(respDataRaw["errors"], errs); err != nil {
+			return err
+		}
+		if len(errs) > 0 {
+			return fmt.Errorf("errors: %s", errs)
+		}
 	}
 
+	return unpack(respDataRaw["data"], response)
+}
+
+func unpack(data interface{}, into interface{}) error {
 	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Result:      &respData,
+		Result:      into,
 		TagName:     "json",
 		ErrorUnused: true,
 	})
@@ -118,14 +125,5 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 		return fmt.Errorf("mapstructure: %s", err.Error())
 	}
 
-	err = d.Decode(respDataRaw)
-	if err != nil {
-		return fmt.Errorf("mapping: %s", err.Error())
-	}
-
-	if len(respData.Errors) > 0 {
-		return fmt.Errorf("errors: %s", respData.Errors)
-	}
-
-	return nil
+	return d.Decode(data)
 }

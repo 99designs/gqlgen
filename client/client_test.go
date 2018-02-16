@@ -7,9 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/vektah/gqlgen/client"
-
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlgen/client"
 )
 
 func TestClient(t *testing.T) {

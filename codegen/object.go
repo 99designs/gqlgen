@@ -35,6 +35,8 @@ type FieldArgument struct {
 	GQLName string // The name of the argument in graphql
 }
 
+type Objects []*Object
+
 func (o *Object) GetField(name string) *Field {
 	for i, field := range o.Fields {
 		if strings.EqualFold(field.GQLName, name) {
@@ -152,19 +154,19 @@ func (f *Field) doWriteJson(res string, val string, remainingMods []string, isPt
 	}
 }
 
+func (os Objects) ByName(name string) *Object {
+	for i, o := range os {
+		if strings.EqualFold(o.GQLType, name) {
+			return os[i]
+		}
+	}
+	return nil
+}
+
 func tpl(tpl string, vars map[string]interface{}) string {
 	b := &bytes.Buffer{}
 	template.Must(template.New("inline").Parse(tpl)).Execute(b, vars)
 	return b.String()
-}
-
-func ucFirst(s string) string {
-	if s == "" {
-		return ""
-	}
-	r := []rune(s)
-	r[0] = unicode.ToUpper(r[0])
-	return string(r)
 }
 
 func lcFirst(s string) string {

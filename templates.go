@@ -15,7 +15,7 @@ func runTemplate(e *codegen.Build) (*bytes.Buffer, error) {
 		"ucFirst": ucFirst,
 		"lcFirst": lcFirst,
 		"quote":   strconv.Quote,
-	}).Parse(templates.String())
+	}).Parse(templates.All)
 	if err != nil {
 		return nil, err
 	}

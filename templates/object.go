@@ -16,7 +16,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String({{$object.GQLType|quote}})
+			out.Values[i] = graphql.String({{$object.GQLType|quote}})
 		{{- range $field := $object.Fields }}
 		case "{{$field.GQLName}}":
 			{{- template "args" $field.Args }}

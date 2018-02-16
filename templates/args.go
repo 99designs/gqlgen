@@ -1,6 +1,6 @@
 package templates
 
-var argsTpl = `
+const argsTpl = `
 {{- define "args" }}
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.Signature }}
@@ -13,7 +13,7 @@ var argsTpl = `
 					arg{{$i}} = tmp.({{$arg.GoType}})
 				{{- end }}
 			}
-		{{- else if $arg.IsScalar }}
+		{{- else}}
 			if tmp, ok := field.Args[{{$arg.GQLName|quote}}]; ok {
 				{{$arg.Unmarshal "tmp2" "tmp" }}
 				if err != nil {
@@ -21,12 +21,6 @@ var argsTpl = `
 					continue
 				}
 				arg{{$i}} = {{if $arg.Type.IsPtr}}&{{end}}tmp2
-			}
-		{{- else }}
-			err := unpackComplexArg(&arg{{$i}}, field.Args[{{$arg.GQLName|quote}}])
-			if err != nil {
-				ec.Error(err)
-				continue
 			}
 		{{- end}}
 	{{- end }}

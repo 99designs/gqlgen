@@ -54,6 +54,10 @@ func (t Type) IsSlice() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modList
 }
 
+func (t NamedType) IsMarshaled() bool {
+	return t.Marshaler != nil
+}
+
 func (t Type) Unmarshal(result, raw string) string {
 	if t.Marshaler != nil {
 		return result + ", err := " + t.Marshaler.pkgDot() + "Unmarshal" + t.Marshaler.GoType + "(" + raw + ")"

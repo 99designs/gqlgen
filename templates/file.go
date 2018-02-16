@@ -86,6 +86,10 @@ type executionContext struct {
 	{{ template "interface" $interface }}
 {{- end }}
 
+{{- range $input := .Inputs }}
+	{{ template "input" $input }}
+{{- end }}
+
 var parsedSchema = schema.MustParse({{.SchemaRaw|quote}})
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {

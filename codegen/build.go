@@ -10,14 +10,15 @@ import (
 )
 
 type Build struct {
-	PackageName  string
-	Objects      Objects
-	Inputs       Objects
-	Interfaces   []*Interface
-	Imports      Imports
-	QueryRoot    *Object
-	MutationRoot *Object
-	SchemaRaw    string
+	PackageName      string
+	Objects          Objects
+	Inputs           Objects
+	Interfaces       []*Interface
+	Imports          Imports
+	QueryRoot        *Object
+	MutationRoot     *Object
+	SubscriptionRoot *Object
+	SchemaRaw        string
 }
 
 // Bind a schema together with some code to generate a Build
@@ -46,6 +47,10 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 
 	if mr, ok := schema.EntryPoints["mutation"]; ok {
 		b.MutationRoot = b.Objects.ByName(mr.TypeName())
+	}
+
+	if sr, ok := schema.EntryPoints["subscription"]; ok {
+		b.SubscriptionRoot = b.Objects.ByName(sr.TypeName())
 	}
 
 	// Poke a few magic methods into query

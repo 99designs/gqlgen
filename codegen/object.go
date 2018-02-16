@@ -16,6 +16,7 @@ type Object struct {
 	Satisfies          []string
 	Root               bool
 	DisableConcurrency bool
+	Stream             bool
 }
 
 type Field struct {
@@ -75,7 +76,12 @@ func (f *Field) ResolverDeclaration() string {
 		res += fmt.Sprintf(", %s %s", arg.GQLName, arg.Signature())
 	}
 
-	res += fmt.Sprintf(") (%s, error)", f.Signature())
+	result := f.Signature()
+	if f.Object.Stream {
+		result = "chan<-" + result
+	}
+
+	res += fmt.Sprintf(") (%s, error)", result)
 	return res
 }
 

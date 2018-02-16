@@ -50,6 +50,9 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 		{{- if .MutationRoot}}
 		} else if op.Type == query.Mutation {
 			data = c._{{.MutationRoot.GQLType|lcFirst}}(op.Selections, nil)
+		{{- end}}{{ if .SubscriptionRoot}}
+		} else if op.Type == query.Subscription {
+			data = c._{{.SubscriptionRoot.GQLType|lcFirst}}(op.Selections, nil)
 		{{- end}}
 		} else {
 			return []*errors.QueryError{errors.Errorf("unsupported operation type")}

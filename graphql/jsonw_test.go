@@ -9,15 +9,15 @@ import (
 
 func TestJsonWriter(t *testing.T) {
 	obj := &OrderedMap{}
-	obj.Add("test", Int(10))
+	obj.Add("test", MarshalInt(10))
 
 	obj.Add("array", &Array{
-		Int(1),
-		String("2"),
-		Boolean(true),
+		MarshalInt(1),
+		MarshalString("2"),
+		MarshalBoolean(true),
 		False,
 		Null,
-		Float(1.3),
+		MarshalFloat(1.3),
 		True,
 	})
 

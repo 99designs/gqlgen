@@ -8,7 +8,7 @@ var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, it *{{$object.FullName}}) graphql.Marshaler {
-	fields := ec.collectFields(sel, {{$object.GQLType|lcFirst}}Implementors, map[string]bool{})
+	fields := graphql.CollectFields(ec.doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
@@ -23,7 +23,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 
 			{{- if $field.IsConcurrent }}
 				ec.wg.Add(1)
-				go func(i int, field collectedField) {
+				go func(i int, field graphql.CollectedField) {
 					defer ec.wg.Done()
 			{{- end }}
 

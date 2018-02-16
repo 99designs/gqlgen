@@ -61,7 +61,7 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-			result.Add("errors", errors.ErrorWriter(c.Errors))
+			result.Add("errors", graphql.Errors(c.Errors))
 		}
 
 		result.MarshalGQL(w)
@@ -102,96 +102,6 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 		return nil
 	}
 	return introspection.WrapType(t)
-}
-
-func instanceOf(val string, satisfies []string) bool {
-	for _, s := range satisfies {
-		if val == s {
-			return true
-		}
-	}
-	return false
-}
-
-func (ec *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
-	var groupedFields []collectedField
-
-	for _, sel := range selSet {
-		switch sel := sel.(type) {
-		case *query.Field:
-			f := getOrCreateField(&groupedFields, sel.Name.Name, func() collectedField {
-				f := collectedField{
-					Alias: sel.Alias.Name,
-					Name:  sel.Name.Name,
-				}
-				if len(sel.Arguments) > 0 {
-					f.Args = map[string]interface{}{}
-					for _, arg := range sel.Arguments {
-						f.Args[arg.Name.Name] = arg.Value.Value(ec.variables)
-					}
-				}
-				return f
-			})
-
-			f.Selections = append(f.Selections, sel.Selections...)
-		case *query.InlineFragment:
-			if !instanceOf(sel.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(sel.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		case *query.FragmentSpread:
-			fragmentName := sel.Name.Name
-			if _, seen := visited[fragmentName]; seen {
-				continue
-			}
-			visited[fragmentName] = true
-
-			fragment := ec.doc.Fragments.Get(fragmentName)
-			if fragment == nil {
-				ec.Errorf("missing fragment %s", fragmentName)
-				continue
-			}
-
-			if !instanceOf(fragment.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(fragment.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		default:
-			panic(fmt.Errorf("unsupported %T", sel))
-		}
-	}
-
-	return groupedFields
-}
-
-type collectedField struct {
-	Alias      string
-	Name       string
-	Args       map[string]interface{}
-	Selections []query.Selection
-}
-
-func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
-	for i, cf := range *c {
-		if cf.Alias == name {
-			return &(*c)[i]
-		}
-	}
-
-	f := creator()
-
-	*c = append(*c, f)
-	return &(*c)[len(*c)-1]
 }
 
 {{end}}

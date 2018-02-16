@@ -33,6 +33,17 @@ func TestTodo(t *testing.T) {
 		require.Equal(t, "Very important", resp.UpdateTodo.Text)
 	})
 
+	t.Run("get __typename", func(t *testing.T) {
+		var resp struct {
+			Todo struct {
+				Typename string `json:"__typename"`
+			}
+		}
+		c.MustPost(`{ todo(id: 4) { __typename } }`, &resp)
+
+		require.Equal(t, "Todo", resp.Todo.Typename)
+	})
+
 	t.Run("update the todo status", func(t *testing.T) {
 		var resp struct {
 			UpdateTodo struct{ Text string }

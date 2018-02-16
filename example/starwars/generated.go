@@ -110,6 +110,8 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Write
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Droid")
 		case "id":
 			res := it.ID
 
@@ -199,6 +201,8 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *Friend
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("FriendsConnection")
 		case "totalCount":
 			res := it.TotalCount()
 
@@ -262,6 +266,8 @@ func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge)
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("FriendsEdge")
 		case "cursor":
 			res := it.Cursor
 
@@ -289,6 +295,8 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Human")
 		case "id":
 			res := it.ID
 
@@ -409,6 +417,8 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) js
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Mutation")
 		case "createReview":
 			var arg0 string
 			if tmp, ok := field.Args["episode"]; ok {
@@ -455,6 +465,8 @@ func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) jsonw
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("PageInfo")
 		case "startCursor":
 			res := it.StartCursor
 
@@ -486,6 +498,8 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Query")
 		case "hero":
 			var arg0 *string
 			if tmp, ok := field.Args["episode"]; ok {
@@ -715,6 +729,8 @@ func (ec *executionContext) _review(sel []query.Selection, it *Review) jsonw.Wri
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Review")
 		case "stars":
 			res := it.Stars
 
@@ -750,6 +766,8 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Starship")
 		case "id":
 			res := it.ID
 
@@ -807,6 +825,8 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Directive")
 		case "name":
 			res := it.Name()
 
@@ -863,6 +883,8 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__EnumValue")
 		case "name":
 			res := it.Name()
 
@@ -906,6 +928,8 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Field")
 		case "name":
 			res := it.Name()
 
@@ -972,6 +996,8 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__InputValue")
 		case "name":
 			res := it.Name()
 
@@ -1019,6 +1045,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Schema")
 		case "types":
 			res := it.Types()
 
@@ -1092,6 +1120,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Type")
 		case "kind":
 			res := it.Kind()
 

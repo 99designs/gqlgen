@@ -96,6 +96,8 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("MyMutation")
 		case "createTodo":
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
@@ -157,6 +159,8 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("MyQuery")
 		case "todo":
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
@@ -260,6 +264,8 @@ func (ec *executionContext) _todo(sel []query.Selection, it *Todo) jsonw.Writer 
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Todo")
 		case "id":
 			res := it.ID()
 
@@ -291,6 +297,8 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Directive")
 		case "name":
 			res := it.Name()
 
@@ -347,6 +355,8 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__EnumValue")
 		case "name":
 			res := it.Name()
 
@@ -390,6 +400,8 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Field")
 		case "name":
 			res := it.Name()
 
@@ -456,6 +468,8 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__InputValue")
 		case "name":
 			res := it.Name()
 
@@ -503,6 +517,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Schema")
 		case "types":
 			res := it.Types()
 
@@ -576,6 +592,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Type")
 		case "kind":
 			res := it.Kind()
 

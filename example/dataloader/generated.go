@@ -94,6 +94,8 @@ func (ec *executionContext) _address(sel []query.Selection, it *Address) jsonw.W
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Address")
 		case "id":
 			res := it.ID
 
@@ -125,6 +127,8 @@ func (ec *executionContext) _customer(sel []query.Selection, it *Customer) jsonw
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Customer")
 		case "id":
 			res := it.ID
 
@@ -186,6 +190,8 @@ func (ec *executionContext) _item(sel []query.Selection, it *Item) jsonw.Writer 
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Item")
 		case "name":
 			res := it.Name
 
@@ -209,6 +215,8 @@ func (ec *executionContext) _order(sel []query.Selection, it *Order) jsonw.Write
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Order")
 		case "id":
 			res := it.ID
 
@@ -258,6 +266,8 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("Query")
 		case "customers":
 			ec.wg.Add(1)
 			go func(i int, field collectedField) {
@@ -320,6 +330,8 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Directive")
 		case "name":
 			res := it.Name()
 
@@ -376,6 +388,8 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__EnumValue")
 		case "name":
 			res := it.Name()
 
@@ -419,6 +433,8 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Field")
 		case "name":
 			res := it.Name()
 
@@ -485,6 +501,8 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__InputValue")
 		case "name":
 			res := it.Name()
 
@@ -532,6 +550,8 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Schema")
 		case "types":
 			res := it.Types()
 
@@ -605,6 +625,8 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String("__Type")
 		case "kind":
 			res := it.Kind()
 

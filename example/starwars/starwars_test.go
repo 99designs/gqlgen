@@ -26,11 +26,15 @@ func TestStarwars(t *testing.T) {
 
 	t.Run("get character", func(t *testing.T) {
 		var resp struct {
-			Character struct{ Name string }
+			Character struct {
+				Name     string
+				Typename string `json:"__typename"`
+			}
 		}
-		c.MustPost(`{ character(id:2001) { name } }`, &resp)
+		c.MustPost(`{ character(id:2001) { name, __typename } }`, &resp)
 
 		require.Equal(t, "R2-D2", resp.Character.Name)
+		require.Equal(t, "Droid", resp.Character.Typename)
 	})
 
 	t.Run("missing character", func(t *testing.T) {

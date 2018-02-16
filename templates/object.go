@@ -15,6 +15,8 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 		out.Values[i] = jsonw.Null
 
 		switch field.Name {
+		case "__typename":
+			out.Values[i] = jsonw.String({{$object.GQLType|quote}})
 		{{- range $field := $object.Fields }}
 		case "{{$field.GQLName}}":
 			{{- template "args" $field.Args }}

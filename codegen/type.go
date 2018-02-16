@@ -63,7 +63,7 @@ func (t Type) Unmarshal(result, raw string) string {
 		return result + ", err := " + t.Marshaler.pkgDot() + "Unmarshal" + t.Marshaler.GoType + "(" + raw + ")"
 	}
 	return tpl(`var {{.result}} {{.type}}
-		err := (&{{.result}}).Unmarshal({{.raw}})`, map[string]interface{}{
+		err := (&{{.result}}).UnmarshalGQL({{.raw}})`, map[string]interface{}{
 		"result": result,
 		"raw":    raw,
 		"type":   t.FullName(),

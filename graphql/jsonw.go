@@ -23,6 +23,10 @@ type Marshaler interface {
 	MarshalGQL(w io.Writer)
 }
 
+type Unmarshaler interface {
+	UnmarshalGQL(v interface{}) error
+}
+
 type OrderedMap struct {
 	Keys   []string
 	Values []Marshaler

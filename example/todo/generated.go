@@ -4,16 +4,11 @@ package todo
 
 import (
 	context "context"
-	fmt "fmt"
 	io "io"
-	reflect "reflect"
 	strconv "strconv"
-	strings "strings"
 	sync "sync"
-	time "time"
 
-	mapstructure "github.com/mitchellh/mapstructure"
-	jsonw "github.com/vektah/gqlgen/jsonw"
+	graphql "github.com/vektah/gqlgen/graphql"
 	errors "github.com/vektah/gqlgen/neelance/errors"
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
@@ -53,7 +48,7 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 			ctx:       ctx,
 		}
 
-		var data jsonw.Writer
+		var data graphql.Marshaler
 		if op.Type == query.Query {
 			data = c._myQuery(op.Selections, nil)
 		} else if op.Type == query.Mutation {
@@ -64,14 +59,14 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 
 		c.wg.Wait()
 
-		result := &jsonw.OrderedMap{}
+		result := &graphql.OrderedMap{}
 		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-			result.Add("errors", errors.ErrorWriter(c.Errors))
+			result.Add("errors", graphql.MarshalErrors(c.Errors))
 		}
 
-		result.WriteJson(w)
+		result.MarshalGQL(w)
 		return nil
 	}
 }
@@ -88,20 +83,20 @@ type executionContext struct {
 var myMutationImplementors = []string{"MyMutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) jsonw.Writer {
-	fields := ec.collectFields(sel, myMutationImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, myMutationImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("MyMutation")
+			out.Values[i] = graphql.MarshalString("MyMutation")
 		case "createTodo":
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -118,7 +113,7 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 		case "updateTodo":
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceInt(tmp)
+				tmp2, err := graphql.UnmarshalInt(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -136,7 +131,7 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 			}
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec._todo(field.Selections, res)
 			}
@@ -151,20 +146,20 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 var myQueryImplementors = []string{"MyQuery"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jsonw.Writer {
-	fields := ec.collectFields(sel, myQueryImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, myQueryImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("MyQuery")
+			out.Values[i] = graphql.MarshalString("MyQuery")
 		case "todo":
 			var arg0 int
 			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceInt(tmp)
+				tmp2, err := graphql.UnmarshalInt(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -172,7 +167,7 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.MyQuery_todo(ec.ctx, arg0)
 				if err != nil {
@@ -181,14 +176,14 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 				}
 
 				if res == nil {
-					out.Values[i] = jsonw.Null
+					out.Values[i] = graphql.Null
 				} else {
 					out.Values[i] = ec._todo(field.Selections, res)
 				}
 			}(i, field)
 		case "lastTodo":
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.MyQuery_lastTodo(ec.ctx)
 				if err != nil {
@@ -197,14 +192,14 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 				}
 
 				if res == nil {
-					out.Values[i] = jsonw.Null
+					out.Values[i] = graphql.Null
 				} else {
 					out.Values[i] = ec._todo(field.Selections, res)
 				}
 			}(i, field)
 		case "todos":
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.MyQuery_todos(ec.ctx)
 				if err != nil {
@@ -212,9 +207,9 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._todo(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -224,14 +219,14 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 			res := ec.introspectSchema()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Schema(field.Selections, res)
 			}
 		case "__type":
 			var arg0 string
 			if tmp, ok := field.Args["name"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -241,7 +236,7 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 			res := ec.introspectType(arg0)
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -256,28 +251,28 @@ func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) jso
 var todoImplementors = []string{"Todo"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _todo(sel []query.Selection, it *Todo) jsonw.Writer {
-	fields := ec.collectFields(sel, todoImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _todo(sel []query.Selection, it *Todo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, todoImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("Todo")
+			out.Values[i] = graphql.MarshalString("Todo")
 		case "id":
 			res := it.ID()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalID(res)
 		case "text":
 			res := it.Text
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "done":
 			res := it.Done
 
-			out.Values[i] = jsonw.Bool(res)
+			out.Values[i] = graphql.MarshalBoolean(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -289,47 +284,47 @@ func (ec *executionContext) _todo(sel []query.Selection, it *Todo) jsonw.Writer 
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) jsonw.Writer {
-	fields := ec.collectFields(sel, __DirectiveImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __DirectiveImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Directive")
+			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "locations":
 			res := it.Locations()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
-				tmp1 = jsonw.String(res[idx1])
+				var tmp1 graphql.Marshaler
+				tmp1 = graphql.MarshalString(res[idx1])
 				arr1 = append(arr1, tmp1)
 			}
 			out.Values[i] = arr1
 		case "args":
 			res := it.Args()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
@@ -347,39 +342,39 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 var __EnumValueImplementors = []string{"__EnumValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) jsonw.Writer {
-	fields := ec.collectFields(sel, __EnumValueImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __EnumValueImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__EnumValue")
+			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "isDeprecated":
 			res := it.IsDeprecated()
 
-			out.Values[i] = jsonw.Bool(res)
+			out.Values[i] = graphql.MarshalBoolean(res)
 		case "deprecationReason":
 			res := it.DeprecationReason()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -392,37 +387,37 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) jsonw.Writer {
-	fields := ec.collectFields(sel, __FieldImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __FieldImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Field")
+			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "args":
 			res := it.Args()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
@@ -433,21 +428,21 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 			res := it.Type()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "isDeprecated":
 			res := it.IsDeprecated()
 
-			out.Values[i] = jsonw.Bool(res)
+			out.Values[i] = graphql.MarshalBoolean(res)
 		case "deprecationReason":
 			res := it.DeprecationReason()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -460,33 +455,33 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 var __InputValueImplementors = []string{"__InputValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) jsonw.Writer {
-	fields := ec.collectFields(sel, __InputValueImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __InputValueImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__InputValue")
+			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "type":
 			res := it.Type()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -494,9 +489,9 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 			res := it.DefaultValue()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -509,25 +504,25 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) jsonw.Writer {
-	fields := ec.collectFields(sel, __SchemaImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __SchemaImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Schema")
+			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
 			res := it.Types()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
@@ -538,7 +533,7 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.QueryType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -546,7 +541,7 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.MutationType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -554,19 +549,19 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.SubscriptionType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "directives":
 			res := it.Directives()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Directive(field.Selections, res[idx1])
 				}
@@ -584,40 +579,40 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) jsonw.Writer {
-	fields := ec.collectFields(sel, __TypeImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __TypeImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Type")
+			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
 			res := it.Kind()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "name":
 			res := it.Name()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "fields":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := coerceBool(tmp)
+				tmp2, err := graphql.UnmarshalBoolean(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -626,12 +621,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			res := it.Fields(arg0)
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Field(field.Selections, res[idx1])
 				}
@@ -641,12 +636,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "interfaces":
 			res := it.Interfaces()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
@@ -656,12 +651,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "possibleTypes":
 			res := it.PossibleTypes()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
@@ -671,7 +666,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "enumValues":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := coerceBool(tmp)
+				tmp2, err := graphql.UnmarshalBoolean(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -680,12 +675,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			res := it.EnumValues(arg0)
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___EnumValue(field.Selections, res[idx1])
 				}
@@ -695,12 +690,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "inputFields":
 			res := it.InputFields()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
@@ -711,7 +706,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			res := it.OfType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -735,183 +730,4 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 		return nil
 	}
 	return introspection.WrapType(t)
-}
-
-func instanceOf(val string, satisfies []string) bool {
-	for _, s := range satisfies {
-		if val == s {
-			return true
-		}
-	}
-	return false
-}
-
-func (ec *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
-	var groupedFields []collectedField
-
-	for _, sel := range selSet {
-		switch sel := sel.(type) {
-		case *query.Field:
-			f := getOrCreateField(&groupedFields, sel.Name.Name, func() collectedField {
-				f := collectedField{
-					Alias: sel.Alias.Name,
-					Name:  sel.Name.Name,
-				}
-				if len(sel.Arguments) > 0 {
-					f.Args = map[string]interface{}{}
-					for _, arg := range sel.Arguments {
-						f.Args[arg.Name.Name] = arg.Value.Value(ec.variables)
-					}
-				}
-				return f
-			})
-
-			f.Selections = append(f.Selections, sel.Selections...)
-		case *query.InlineFragment:
-			if !instanceOf(sel.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(sel.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		case *query.FragmentSpread:
-			fragmentName := sel.Name.Name
-			if _, seen := visited[fragmentName]; seen {
-				continue
-			}
-			visited[fragmentName] = true
-
-			fragment := ec.doc.Fragments.Get(fragmentName)
-			if fragment == nil {
-				ec.Errorf("missing fragment %s", fragmentName)
-				continue
-			}
-
-			if !instanceOf(fragment.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(fragment.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		default:
-			panic(fmt.Errorf("unsupported %T", sel))
-		}
-	}
-
-	return groupedFields
-}
-
-type collectedField struct {
-	Alias      string
-	Name       string
-	Args       map[string]interface{}
-	Selections []query.Selection
-}
-
-func decodeHook(sourceType reflect.Type, destType reflect.Type, value interface{}) (interface{}, error) {
-	if destType.PkgPath() == "time" && destType.Name() == "Time" {
-		if dateStr, ok := value.(string); ok {
-			return time.Parse(time.RFC3339, dateStr)
-		}
-		return nil, errors.Errorf("time should be an RFC3339 formatted string")
-	}
-	return value, nil
-}
-
-// nolint: deadcode, megacheck
-func unpackComplexArg(result interface{}, data interface{}) error {
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		TagName:     "graphql",
-		ErrorUnused: true,
-		Result:      result,
-		DecodeHook:  decodeHook,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	return decoder.Decode(data)
-}
-
-func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
-	for i, cf := range *c {
-		if cf.Alias == name {
-			return &(*c)[i]
-		}
-	}
-
-	f := creator()
-
-	*c = append(*c, f)
-	return &(*c)[len(*c)-1]
-}
-
-// nolint: deadcode, megacheck
-func coerceString(v interface{}) (string, error) {
-	switch v := v.(type) {
-	case string:
-		return v, nil
-	case int:
-		return strconv.Itoa(v), nil
-	case float64:
-		return fmt.Sprintf("%f", v), nil
-	case bool:
-		if v {
-			return "true", nil
-		} else {
-			return "false", nil
-		}
-	case nil:
-		return "null", nil
-	default:
-		return "", fmt.Errorf("%T is not a string", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceBool(v interface{}) (bool, error) {
-	switch v := v.(type) {
-	case string:
-		return "true" == strings.ToLower(v), nil
-	case int:
-		return v != 0, nil
-	case bool:
-		return v, nil
-	default:
-		return false, fmt.Errorf("%T is not a bool", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceInt(v interface{}) (int, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.Atoi(v)
-	case int:
-		return v, nil
-	case float64:
-		return int(v), nil
-	default:
-		return 0, fmt.Errorf("%T is not an int", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coercefloat64(v interface{}) (float64, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.ParseFloat(v, 64)
-	case int:
-		return float64(v), nil
-	case float64:
-		return v, nil
-	default:
-		return 0, fmt.Errorf("%T is not an float", v)
-	}
 }

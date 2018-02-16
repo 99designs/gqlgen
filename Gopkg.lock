@@ -32,7 +32,7 @@
   branch = "master"
   name = "github.com/vektah/dataloaden"
   packages = ["."]
-  revision = "5b8b47ca082af0c38d3a76403c842d12c7e88449"
+  revision = "92d08f61dc2b9f5c37f5eea31a8558d64c2ed6a7"
 
 [[projects]]
   branch = "master"

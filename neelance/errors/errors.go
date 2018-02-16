@@ -2,8 +2,6 @@ package errors
 
 import (
 	"fmt"
-
-	"github.com/vektah/gqlgen/jsonw"
 )
 
 type QueryError struct {
@@ -52,35 +50,4 @@ func (c *Builder) Errorf(format string, args ...interface{}) {
 
 func (c *Builder) Error(err error) {
 	c.Errors = append(c.Errors, Errorf("%s", err.Error()))
-}
-
-func ErrorWriter(errs []*QueryError) jsonw.Writer {
-	res := jsonw.Array{}
-
-	for _, err := range errs {
-		if err == nil {
-			res = append(res, jsonw.Null)
-			continue
-		}
-
-		errObj := &jsonw.OrderedMap{}
-
-		errObj.Add("message", jsonw.String(err.Message))
-
-		if len(err.Locations) > 0 {
-			locations := jsonw.Array{}
-			for _, location := range err.Locations {
-				locationObj := &jsonw.OrderedMap{}
-				locationObj.Add("line", jsonw.Int(location.Line))
-				locationObj.Add("column", jsonw.Int(location.Column))
-
-				locations = append(locations, locationObj)
-			}
-
-			errObj.Add("locations", locations)
-		}
-		res = append(res, errObj)
-	}
-
-	return res
 }

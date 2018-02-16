@@ -6,14 +6,11 @@ import (
 	context "context"
 	fmt "fmt"
 	io "io"
-	reflect "reflect"
 	strconv "strconv"
-	strings "strings"
 	sync "sync"
 	time "time"
 
-	mapstructure "github.com/mitchellh/mapstructure"
-	jsonw "github.com/vektah/gqlgen/jsonw"
+	graphql "github.com/vektah/gqlgen/graphql"
 	errors "github.com/vektah/gqlgen/neelance/errors"
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
@@ -67,7 +64,7 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 			ctx:       ctx,
 		}
 
-		var data jsonw.Writer
+		var data graphql.Marshaler
 		if op.Type == query.Query {
 			data = c._query(op.Selections, nil)
 		} else if op.Type == query.Mutation {
@@ -78,14 +75,14 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 
 		c.wg.Wait()
 
-		result := &jsonw.OrderedMap{}
+		result := &graphql.OrderedMap{}
 		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-			result.Add("errors", errors.ErrorWriter(c.Errors))
+			result.Add("errors", graphql.MarshalErrors(c.Errors))
 		}
 
-		result.WriteJson(w)
+		result.MarshalGQL(w)
 		return nil
 	}
 }
@@ -102,27 +99,27 @@ type executionContext struct {
 var droidImplementors = []string{"Droid", "Character"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Writer {
-	fields := ec.collectFields(sel, droidImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _droid(sel []query.Selection, it *Droid) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, droidImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("Droid")
+			out.Values[i] = graphql.MarshalString("Droid")
 		case "id":
 			res := it.ID
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalID(res)
 		case "name":
 			res := it.Name
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "friends":
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Droid_friends(ec.ctx, it)
 				if err != nil {
@@ -130,9 +127,9 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Write
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._character(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -141,7 +138,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Write
 		case "friendsConnection":
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
-				tmp2, err := coerceInt(tmp)
+				tmp2, err := graphql.UnmarshalInt(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -150,7 +147,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Write
 			}
 			var arg1 *string
 			if tmp, ok := field.Args["after"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -158,7 +155,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Write
 				arg1 = &tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, it, arg0, arg1)
 				if err != nil {
@@ -171,17 +168,17 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Write
 		case "appearsIn":
 			res := it.AppearsIn
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
-				tmp1 = jsonw.String(res[idx1])
+				var tmp1 graphql.Marshaler
+				tmp1 = graphql.MarshalString(res[idx1])
 				arr1 = append(arr1, tmp1)
 			}
 			out.Values[i] = arr1
 		case "primaryFunction":
 			res := it.PrimaryFunction
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -193,23 +190,23 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) jsonw.Write
 var friendsConnectionImplementors = []string{"FriendsConnection"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _friendsConnection(sel []query.Selection, it *FriendsConnection) jsonw.Writer {
-	fields := ec.collectFields(sel, friendsConnectionImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _friendsConnection(sel []query.Selection, it *FriendsConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, friendsConnectionImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("FriendsConnection")
+			out.Values[i] = graphql.MarshalString("FriendsConnection")
 		case "totalCount":
 			res := it.TotalCount()
 
-			out.Values[i] = jsonw.Int(res)
+			out.Values[i] = graphql.MarshalInt(res)
 		case "edges":
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.FriendsConnection_edges(ec.ctx, it)
 				if err != nil {
@@ -217,9 +214,9 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *Friend
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._friendsEdge(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -227,7 +224,7 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *Friend
 			}(i, field)
 		case "friends":
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.FriendsConnection_friends(ec.ctx, it)
 				if err != nil {
@@ -235,9 +232,9 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *Friend
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._character(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -258,20 +255,20 @@ func (ec *executionContext) _friendsConnection(sel []query.Selection, it *Friend
 var friendsEdgeImplementors = []string{"FriendsEdge"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge) jsonw.Writer {
-	fields := ec.collectFields(sel, friendsEdgeImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, friendsEdgeImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("FriendsEdge")
+			out.Values[i] = graphql.MarshalString("FriendsEdge")
 		case "cursor":
 			res := it.Cursor
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalID(res)
 		case "node":
 			res := it.Node
 
@@ -287,28 +284,28 @@ func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge)
 var humanImplementors = []string{"Human", "Character"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Writer {
-	fields := ec.collectFields(sel, humanImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, humanImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("Human")
+			out.Values[i] = graphql.MarshalString("Human")
 		case "id":
 			res := it.ID
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalID(res)
 		case "name":
 			res := it.Name
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "height":
 			var arg0 string
 			if tmp, ok := field.Args["unit"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -317,14 +314,14 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 			}
 			res := it.Height(arg0)
 
-			out.Values[i] = jsonw.Float64(res)
+			out.Values[i] = graphql.MarshalFloat(res)
 		case "mass":
 			res := it.Mass
 
-			out.Values[i] = jsonw.Float64(res)
+			out.Values[i] = graphql.MarshalFloat(res)
 		case "friends":
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Human_friends(ec.ctx, it)
 				if err != nil {
@@ -332,9 +329,9 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._character(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -343,7 +340,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 		case "friendsConnection":
 			var arg0 *int
 			if tmp, ok := field.Args["first"]; ok {
-				tmp2, err := coerceInt(tmp)
+				tmp2, err := graphql.UnmarshalInt(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -352,7 +349,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 			}
 			var arg1 *string
 			if tmp, ok := field.Args["after"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -360,7 +357,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 				arg1 = &tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Human_friendsConnection(ec.ctx, it, arg0, arg1)
 				if err != nil {
@@ -373,16 +370,16 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 		case "appearsIn":
 			res := it.AppearsIn
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
-				tmp1 = jsonw.String(res[idx1])
+				var tmp1 graphql.Marshaler
+				tmp1 = graphql.MarshalString(res[idx1])
 				arr1 = append(arr1, tmp1)
 			}
 			out.Values[i] = arr1
 		case "starships":
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Human_starships(ec.ctx, it)
 				if err != nil {
@@ -390,9 +387,9 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._starship(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -409,20 +406,20 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) jsonw.Write
 var mutationImplementors = []string{"Mutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) jsonw.Writer {
-	fields := ec.collectFields(sel, mutationImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, mutationImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("Mutation")
+			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createReview":
 			var arg0 string
 			if tmp, ok := field.Args["episode"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -430,10 +427,13 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) js
 				arg0 = tmp2
 			}
 			var arg1 Review
-			err := unpackComplexArg(&arg1, field.Args["review"])
-			if err != nil {
-				ec.Error(err)
-				continue
+			if tmp, ok := field.Args["review"]; ok {
+				tmp2, err := UnmarshalReviewInput(tmp)
+				if err != nil {
+					ec.Error(err)
+					continue
+				}
+				arg1 = tmp2
 			}
 			res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
 			if err != nil {
@@ -442,7 +442,7 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) js
 			}
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec._review(field.Selections, res)
 			}
@@ -457,28 +457,28 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) js
 var pageInfoImplementors = []string{"PageInfo"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) jsonw.Writer {
-	fields := ec.collectFields(sel, pageInfoImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, pageInfoImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("PageInfo")
+			out.Values[i] = graphql.MarshalString("PageInfo")
 		case "startCursor":
 			res := it.StartCursor
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalID(res)
 		case "endCursor":
 			res := it.EndCursor
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalID(res)
 		case "hasNextPage":
 			res := it.HasNextPage
 
-			out.Values[i] = jsonw.Bool(res)
+			out.Values[i] = graphql.MarshalBoolean(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -490,20 +490,20 @@ func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) jsonw
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw.Writer {
-	fields := ec.collectFields(sel, queryImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, queryImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("Query")
+			out.Values[i] = graphql.MarshalString("Query")
 		case "hero":
 			var arg0 *string
 			if tmp, ok := field.Args["episode"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -511,7 +511,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = &tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
 				if err != nil {
@@ -524,7 +524,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		case "reviews":
 			var arg0 string
 			if tmp, ok := field.Args["episode"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -533,20 +533,15 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 			}
 			var arg1 *time.Time
 			if tmp, ok := field.Args["since"]; ok {
-				if tmpStr, ok := tmp.(string); ok {
-					tmpDate, err := time.Parse(time.RFC3339, tmpStr)
-					if err != nil {
-						ec.Error(err)
-						continue
-					}
-					arg1 = &tmpDate
-				} else {
-					ec.Errorf("Time 'since' should be RFC3339 formatted string")
+				tmp2, err := graphql.UnmarshalTime(tmp)
+				if err != nil {
+					ec.Error(err)
 					continue
 				}
+				arg1 = &tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_reviews(ec.ctx, arg0, arg1)
 				if err != nil {
@@ -554,9 +549,9 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._review(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -565,7 +560,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		case "search":
 			var arg0 string
 			if tmp, ok := field.Args["text"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -573,7 +568,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 				if err != nil {
@@ -581,9 +576,9 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 					return
 				}
 
-				arr1 := jsonw.Array{}
+				arr1 := graphql.Array{}
 				for idx1 := range res {
-					var tmp1 jsonw.Writer
+					var tmp1 graphql.Marshaler
 					tmp1 = ec._searchResult(field.Selections, &res[idx1])
 					arr1 = append(arr1, tmp1)
 				}
@@ -592,7 +587,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		case "character":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -600,7 +595,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_character(ec.ctx, arg0)
 				if err != nil {
@@ -613,7 +608,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		case "droid":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -621,7 +616,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
 				if err != nil {
@@ -630,7 +625,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 
 				if res == nil {
-					out.Values[i] = jsonw.Null
+					out.Values[i] = graphql.Null
 				} else {
 					out.Values[i] = ec._droid(field.Selections, res)
 				}
@@ -638,7 +633,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		case "human":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -646,7 +641,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_human(ec.ctx, arg0)
 				if err != nil {
@@ -655,7 +650,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 
 				if res == nil {
-					out.Values[i] = jsonw.Null
+					out.Values[i] = graphql.Null
 				} else {
 					out.Values[i] = ec._human(field.Selections, res)
 				}
@@ -663,7 +658,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 		case "starship":
 			var arg0 string
 			if tmp, ok := field.Args["id"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -671,7 +666,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				arg0 = tmp2
 			}
 			ec.wg.Add(1)
-			go func(i int, field collectedField) {
+			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
 				res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
 				if err != nil {
@@ -680,7 +675,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 				}
 
 				if res == nil {
-					out.Values[i] = jsonw.Null
+					out.Values[i] = graphql.Null
 				} else {
 					out.Values[i] = ec._starship(field.Selections, res)
 				}
@@ -689,14 +684,14 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 			res := ec.introspectSchema()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Schema(field.Selections, res)
 			}
 		case "__type":
 			var arg0 string
 			if tmp, ok := field.Args["name"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -706,7 +701,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 			res := ec.introspectType(arg0)
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -721,32 +716,32 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) jsonw
 var reviewImplementors = []string{"Review"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _review(sel []query.Selection, it *Review) jsonw.Writer {
-	fields := ec.collectFields(sel, reviewImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _review(sel []query.Selection, it *Review) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, reviewImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("Review")
+			out.Values[i] = graphql.MarshalString("Review")
 		case "stars":
 			res := it.Stars
 
-			out.Values[i] = jsonw.Int(res)
+			out.Values[i] = graphql.MarshalInt(res)
 		case "commentary":
 			res := it.Commentary
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "time":
 			res := it.Time
 
-			out.Values[i] = jsonw.Time(res)
+			out.Values[i] = graphql.MarshalTime(res)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -758,28 +753,28 @@ func (ec *executionContext) _review(sel []query.Selection, it *Review) jsonw.Wri
 var starshipImplementors = []string{"Starship"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw.Writer {
-	fields := ec.collectFields(sel, starshipImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) _starship(sel []query.Selection, it *Starship) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, starshipImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("Starship")
+			out.Values[i] = graphql.MarshalString("Starship")
 		case "id":
 			res := it.ID
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalID(res)
 		case "name":
 			res := it.Name
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "length":
 			var arg0 string
 			if tmp, ok := field.Args["unit"]; ok {
-				tmp2, err := coerceString(tmp)
+				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -788,18 +783,18 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw
 			}
 			res := it.Length(arg0)
 
-			out.Values[i] = jsonw.Float64(res)
+			out.Values[i] = graphql.MarshalFloat(res)
 		case "history":
 			res := it.History
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
-				arr2 := jsonw.Array{}
+				arr2 := graphql.Array{}
 				for idx2 := range res[idx1] {
-					var tmp2 jsonw.Writer
-					tmp2 = jsonw.Int(res[idx1][idx2])
+					var tmp2 graphql.Marshaler
+					tmp2 = graphql.MarshalInt(res[idx1][idx2])
 					arr2 = append(arr2, tmp2)
 				}
 				tmp1 = arr2
@@ -817,47 +812,47 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) jsonw
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) jsonw.Writer {
-	fields := ec.collectFields(sel, __DirectiveImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __DirectiveImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Directive")
+			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "locations":
 			res := it.Locations()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
-				tmp1 = jsonw.String(res[idx1])
+				var tmp1 graphql.Marshaler
+				tmp1 = graphql.MarshalString(res[idx1])
 				arr1 = append(arr1, tmp1)
 			}
 			out.Values[i] = arr1
 		case "args":
 			res := it.Args()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
@@ -875,39 +870,39 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 var __EnumValueImplementors = []string{"__EnumValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) jsonw.Writer {
-	fields := ec.collectFields(sel, __EnumValueImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __EnumValueImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__EnumValue")
+			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "isDeprecated":
 			res := it.IsDeprecated()
 
-			out.Values[i] = jsonw.Bool(res)
+			out.Values[i] = graphql.MarshalBoolean(res)
 		case "deprecationReason":
 			res := it.DeprecationReason()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -920,37 +915,37 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) jsonw.Writer {
-	fields := ec.collectFields(sel, __FieldImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __FieldImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Field")
+			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "args":
 			res := it.Args()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
@@ -961,21 +956,21 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 			res := it.Type()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "isDeprecated":
 			res := it.IsDeprecated()
 
-			out.Values[i] = jsonw.Bool(res)
+			out.Values[i] = graphql.MarshalBoolean(res)
 		case "deprecationReason":
 			res := it.DeprecationReason()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -988,33 +983,33 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 var __InputValueImplementors = []string{"__InputValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) jsonw.Writer {
-	fields := ec.collectFields(sel, __InputValueImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __InputValueImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__InputValue")
+			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
 			res := it.Name()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "type":
 			res := it.Type()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -1022,9 +1017,9 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 			res := it.DefaultValue()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -1037,25 +1032,25 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) jsonw.Writer {
-	fields := ec.collectFields(sel, __SchemaImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __SchemaImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Schema")
+			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
 			res := it.Types()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
@@ -1066,7 +1061,7 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.QueryType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -1074,7 +1069,7 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.MutationType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -1082,19 +1077,19 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			res := it.SubscriptionType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "directives":
 			res := it.Directives()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Directive(field.Selections, res[idx1])
 				}
@@ -1112,40 +1107,40 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) jsonw.Writer {
-	fields := ec.collectFields(sel, __TypeImplementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, __TypeImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = jsonw.String("__Type")
+			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
 			res := it.Kind()
 
-			out.Values[i] = jsonw.String(res)
+			out.Values[i] = graphql.MarshalString(res)
 		case "name":
 			res := it.Name()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "description":
 			res := it.Description()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
-				out.Values[i] = jsonw.String(*res)
+				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "fields":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := coerceBool(tmp)
+				tmp2, err := graphql.UnmarshalBoolean(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -1154,12 +1149,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			res := it.Fields(arg0)
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Field(field.Selections, res[idx1])
 				}
@@ -1169,12 +1164,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "interfaces":
 			res := it.Interfaces()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
@@ -1184,12 +1179,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "possibleTypes":
 			res := it.PossibleTypes()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___Type(field.Selections, res[idx1])
 				}
@@ -1199,7 +1194,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "enumValues":
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := coerceBool(tmp)
+				tmp2, err := graphql.UnmarshalBoolean(tmp)
 				if err != nil {
 					ec.Error(err)
 					continue
@@ -1208,12 +1203,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			res := it.EnumValues(arg0)
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___EnumValue(field.Selections, res[idx1])
 				}
@@ -1223,12 +1218,12 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "inputFields":
 			res := it.InputFields()
 
-			arr1 := jsonw.Array{}
+			arr1 := graphql.Array{}
 			for idx1 := range res {
-				var tmp1 jsonw.Writer
+				var tmp1 graphql.Marshaler
 
 				if res[idx1] == nil {
-					tmp1 = jsonw.Null
+					tmp1 = graphql.Null
 				} else {
 					tmp1 = ec.___InputValue(field.Selections, res[idx1])
 				}
@@ -1239,7 +1234,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			res := it.OfType()
 
 			if res == nil {
-				out.Values[i] = jsonw.Null
+				out.Values[i] = graphql.Null
 			} else {
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
@@ -1251,10 +1246,10 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-func (ec *executionContext) _character(sel []query.Selection, it *Character) jsonw.Writer {
+func (ec *executionContext) _character(sel []query.Selection, it *Character) graphql.Marshaler {
 	switch it := (*it).(type) {
 	case nil:
-		return jsonw.Null
+		return graphql.Null
 	case Human:
 		return ec._human(sel, &it)
 
@@ -1270,10 +1265,10 @@ func (ec *executionContext) _character(sel []query.Selection, it *Character) jso
 	}
 }
 
-func (ec *executionContext) _searchResult(sel []query.Selection, it *SearchResult) jsonw.Writer {
+func (ec *executionContext) _searchResult(sel []query.Selection, it *SearchResult) graphql.Marshaler {
 	switch it := (*it).(type) {
 	case nil:
-		return jsonw.Null
+		return graphql.Null
 	case Human:
 		return ec._human(sel, &it)
 
@@ -1294,7 +1289,36 @@ func (ec *executionContext) _searchResult(sel []query.Selection, it *SearchResul
 	}
 }
 
-var parsedSchema = schema.MustParse("schema {\n    query: Query\n    mutation: Mutation\n}\n# The query type, represents all of the entry points into our object graph\ntype Query {\n    hero(episode: Episode = NEWHOPE): Character\n    reviews(episode: Episode!, since: Time): [Review]!\n    search(text: String!): [SearchResult]!\n    character(id: ID!): Character\n    droid(id: ID!): Droid\n    human(id: ID!): Human\n    starship(id: ID!): Starship\n}\n# The mutation type, represents all updates we can make to our data\ntype Mutation {\n    createReview(episode: Episode!, review: ReviewInput!): Review\n}\n# The episodes in the Star Wars trilogy\nenum Episode {\n    # Star Wars Episode IV: A New Hope, released in 1977.\n    NEWHOPE\n    # Star Wars Episode V: The Empire Strikes Back, released in 1980.\n    EMPIRE\n    # Star Wars Episode VI: Return of the Jedi, released in 1983.\n    JEDI\n}\n# A character from the Star Wars universe\ninterface Character {\n    # The ID of the character\n    id: ID!\n    # The name of the character\n    name: String!\n    # The friends of the character, or an empty list if they have none\n    friends: [Character]\n    # The friends of the character exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this character appears in\n    appearsIn: [Episode!]!\n}\n# Units of height\nenum LengthUnit {\n    # The standard unit around the world\n    METER\n    # Primarily used in the United States\n    FOOT\n}\n# A humanoid creature from the Star Wars universe\ntype Human implements Character {\n    # The ID of the human\n    id: ID!\n    # What this human calls themselves\n    name: String!\n    # Height in the preferred unit, default is meters\n    height(unit: LengthUnit = METER): Float!\n    # Mass in kilograms, or null if unknown\n    mass: Float\n    # This human's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the human exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this human appears in\n    appearsIn: [Episode!]!\n    # A list of starships this person has piloted, or an empty list if none\n    starships: [Starship]\n}\n# An autonomous mechanical character in the Star Wars universe\ntype Droid implements Character {\n    # The ID of the droid\n    id: ID!\n    # What others call this droid\n    name: String!\n    # This droid's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the droid exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this droid appears in\n    appearsIn: [Episode!]!\n    # This droid's primary function\n    primaryFunction: String\n}\n# A connection object for a character's friends\ntype FriendsConnection {\n    # The total number of friends\n    totalCount: Int!\n    # The edges for each of the character's friends.\n    edges: [FriendsEdge]\n    # A list of the friends, as a convenience when edges are not needed.\n    friends: [Character]\n    # Information for paginating this connection\n    pageInfo: PageInfo!\n}\n# An edge object for a character's friends\ntype FriendsEdge {\n    # A cursor used for pagination\n    cursor: ID!\n    # The character represented by this friendship edge\n    node: Character\n}\n# Information for paginating this connection\ntype PageInfo {\n    startCursor: ID\n    endCursor: ID\n    hasNextPage: Boolean!\n}\n# Represents a review for a movie\ntype Review {\n    # The number of stars this review gave, 1-5\n    stars: Int!\n    # Comment about the movie\n    commentary: String\n    # when the review was posted\n    time: Time\n}\n# The input object sent when someone is creating a new review\ninput ReviewInput {\n    # 0-5 stars\n    stars: Int!\n    # Comment about the movie, optional\n    commentary: String\n    # when the review was posted\n    time: Time\n}\ntype Starship {\n    # The ID of the starship\n    id: ID!\n    # The name of the starship\n    name: String!\n    # Length of the starship, along the longest axis\n    length(unit: LengthUnit = METER): Float!\n    # coordinates tracking this ship\n    history: [[Int]]\n}\nunion SearchResult = Human | Droid | Starship\n")
+func UnmarshalReviewInput(v interface{}) (Review, error) {
+	var it Review
+
+	for k, v := range v.(map[string]interface{}) {
+		switch k {
+		case "stars":
+			val, err := graphql.UnmarshalInt(v)
+			if err != nil {
+				return it, err
+			}
+			it.Stars = val
+		case "commentary":
+			val, err := graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+			it.Commentary = &val
+		case "time":
+			val, err := graphql.UnmarshalTime(v)
+			if err != nil {
+				return it, err
+			}
+			it.Time = val
+		}
+	}
+
+	return it, nil
+}
+
+var parsedSchema = schema.MustParse("schema {\n    query: Query\n    mutation: Mutation\n}\n# The query type, represents all of the entry points into our object graph\ntype Query {\n    hero(episode: Episode = NEWHOPE): Character\n    reviews(episode: Episode!, since: Time): [Review]!\n    search(text: String!): [SearchResult]!\n    character(id: ID!): Character\n    droid(id: ID!): Droid\n    human(id: ID!): Human\n    starship(id: ID!): Starship\n}\n# The mutation type, represents all updates we can make to our data\ntype Mutation {\n    createReview(episode: Episode!, review: ReviewInput!): Review\n}\n# The episodes in the Star Wars trilogy\nenum Episode {\n    # Star Wars Episode IV: A New Hope, released in 1977.\n    NEWHOPE\n    # Star Wars Episode V: The Empire Strikes Back, released in 1980.\n    EMPIRE\n    # Star Wars Episode VI: Return of the Jedi, released in 1983.\n    JEDI\n}\n# A character from the Star Wars universe\ninterface Character {\n    # The ID of the character\n    id: ID!\n    # The name of the character\n    name: String!\n    # The friends of the character, or an empty list if they have none\n    friends: [Character]\n    # The friends of the character exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this character appears in\n    appearsIn: [Episode!]!\n}\n# Units of height\nenum LengthUnit {\n    # The standard unit around the world\n    METER\n    # Primarily used in the United States\n    FOOT\n}\n# A humanoid creature from the Star Wars universe\ntype Human implements Character {\n    # The ID of the human\n    id: ID!\n    # What this human calls themselves\n    name: String!\n    # Height in the preferred unit, default is meters\n    height(unit: LengthUnit = METER): Float!\n    # Mass in kilograms, or null if unknown\n    mass: Float\n    # This human's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the human exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this human appears in\n    appearsIn: [Episode!]!\n    # A list of starships this person has piloted, or an empty list if none\n    starships: [Starship]\n}\n# An autonomous mechanical character in the Star Wars universe\ntype Droid implements Character {\n    # The ID of the droid\n    id: ID!\n    # What others call this droid\n    name: String!\n    # This droid's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the droid exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this droid appears in\n    appearsIn: [Episode!]!\n    # This droid's primary function\n    primaryFunction: String\n}\n# A connection object for a character's friends\ntype FriendsConnection {\n    # The total number of friends\n    totalCount: Int!\n    # The edges for each of the character's friends.\n    edges: [FriendsEdge]\n    # A list of the friends, as a convenience when edges are not needed.\n    friends: [Character]\n    # Information for paginating this connection\n    pageInfo: PageInfo!\n}\n# An edge object for a character's friends\ntype FriendsEdge {\n    # A cursor used for pagination\n    cursor: ID!\n    # The character represented by this friendship edge\n    node: Character\n}\n# Information for paginating this connection\ntype PageInfo {\n    startCursor: ID\n    endCursor: ID\n    hasNextPage: Boolean!\n}\n# Represents a review for a movie\ntype Review {\n    # The number of stars this review gave, 1-5\n    stars: Int!\n    # Comment about the movie\n    commentary: String\n    # when the review was posted\n    time: Time\n}\n# The input object sent when someone is creating a new review\ninput ReviewInput {\n    # 0-5 stars\n    stars: Int!\n    # Comment about the movie, optional\n    commentary: String\n    # when the review was posted\n    time: Time\n}\ntype Starship {\n    # The ID of the starship\n    id: ID!\n    # The name of the starship\n    name: String!\n    # Length of the starship, along the longest axis\n    length(unit: LengthUnit = METER): Float!\n    # coordinates tracking this ship\n    history: [[Int]]\n}\nunion SearchResult = Human | Droid | Starship\nscalar Time\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
@@ -1306,183 +1330,4 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 		return nil
 	}
 	return introspection.WrapType(t)
-}
-
-func instanceOf(val string, satisfies []string) bool {
-	for _, s := range satisfies {
-		if val == s {
-			return true
-		}
-	}
-	return false
-}
-
-func (ec *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
-	var groupedFields []collectedField
-
-	for _, sel := range selSet {
-		switch sel := sel.(type) {
-		case *query.Field:
-			f := getOrCreateField(&groupedFields, sel.Name.Name, func() collectedField {
-				f := collectedField{
-					Alias: sel.Alias.Name,
-					Name:  sel.Name.Name,
-				}
-				if len(sel.Arguments) > 0 {
-					f.Args = map[string]interface{}{}
-					for _, arg := range sel.Arguments {
-						f.Args[arg.Name.Name] = arg.Value.Value(ec.variables)
-					}
-				}
-				return f
-			})
-
-			f.Selections = append(f.Selections, sel.Selections...)
-		case *query.InlineFragment:
-			if !instanceOf(sel.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(sel.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		case *query.FragmentSpread:
-			fragmentName := sel.Name.Name
-			if _, seen := visited[fragmentName]; seen {
-				continue
-			}
-			visited[fragmentName] = true
-
-			fragment := ec.doc.Fragments.Get(fragmentName)
-			if fragment == nil {
-				ec.Errorf("missing fragment %s", fragmentName)
-				continue
-			}
-
-			if !instanceOf(fragment.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(fragment.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		default:
-			panic(fmt.Errorf("unsupported %T", sel))
-		}
-	}
-
-	return groupedFields
-}
-
-type collectedField struct {
-	Alias      string
-	Name       string
-	Args       map[string]interface{}
-	Selections []query.Selection
-}
-
-func decodeHook(sourceType reflect.Type, destType reflect.Type, value interface{}) (interface{}, error) {
-	if destType.PkgPath() == "time" && destType.Name() == "Time" {
-		if dateStr, ok := value.(string); ok {
-			return time.Parse(time.RFC3339, dateStr)
-		}
-		return nil, errors.Errorf("time should be an RFC3339 formatted string")
-	}
-	return value, nil
-}
-
-// nolint: deadcode, megacheck
-func unpackComplexArg(result interface{}, data interface{}) error {
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		TagName:     "graphql",
-		ErrorUnused: true,
-		Result:      result,
-		DecodeHook:  decodeHook,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	return decoder.Decode(data)
-}
-
-func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
-	for i, cf := range *c {
-		if cf.Alias == name {
-			return &(*c)[i]
-		}
-	}
-
-	f := creator()
-
-	*c = append(*c, f)
-	return &(*c)[len(*c)-1]
-}
-
-// nolint: deadcode, megacheck
-func coerceString(v interface{}) (string, error) {
-	switch v := v.(type) {
-	case string:
-		return v, nil
-	case int:
-		return strconv.Itoa(v), nil
-	case float64:
-		return fmt.Sprintf("%f", v), nil
-	case bool:
-		if v {
-			return "true", nil
-		} else {
-			return "false", nil
-		}
-	case nil:
-		return "null", nil
-	default:
-		return "", fmt.Errorf("%T is not a string", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceBool(v interface{}) (bool, error) {
-	switch v := v.(type) {
-	case string:
-		return "true" == strings.ToLower(v), nil
-	case int:
-		return v != 0, nil
-	case bool:
-		return v, nil
-	default:
-		return false, fmt.Errorf("%T is not a bool", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceInt(v interface{}) (int, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.Atoi(v)
-	case int:
-		return v, nil
-	case float64:
-		return int(v), nil
-	default:
-		return 0, fmt.Errorf("%T is not an int", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coercefloat64(v interface{}) (float64, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.ParseFloat(v, 64)
-	case int:
-		return float64(v), nil
-	case float64:
-		return v, nil
-	default:
-		return 0, fmt.Errorf("%T is not an float", v)
-	}
 }

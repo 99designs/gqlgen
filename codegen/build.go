@@ -12,6 +12,7 @@ import (
 type Build struct {
 	PackageName  string
 	Objects      Objects
+	Inputs       Objects
 	Interfaces   []*Interface
 	Imports      Imports
 	QueryRoot    *Object
@@ -29,10 +30,13 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 		return nil, err
 	}
 
+	bindTypes(imports, namedTypes, prog)
+
 	b := &Build{
 		PackageName: filepath.Base(destDir),
 		Objects:     buildObjects(namedTypes, schema, prog),
 		Interfaces:  buildInterfaces(namedTypes, schema),
+		Inputs:      buildInputs(namedTypes, schema, prog),
 		Imports:     imports,
 	}
 

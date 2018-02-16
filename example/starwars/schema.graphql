@@ -132,3 +132,4 @@ type Starship {
     history: [[Int]]
 }
 union SearchResult = Human | Droid | Starship
+scalar Time

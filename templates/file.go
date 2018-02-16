@@ -44,7 +44,7 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 			ctx:       ctx,
 		}
 
-		var data jsonw.Writer
+		var data graphql.Marshaler
 		if op.Type == query.Query {
 			data = c._{{.QueryRoot.GQLType|lcFirst}}(op.Selections, nil)
 		{{- if .MutationRoot}}
@@ -57,14 +57,14 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 
 		c.wg.Wait()
 
-		result := &jsonw.OrderedMap{}
+		result := &graphql.OrderedMap{}
 		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-			result.Add("errors", errors.ErrorWriter(c.Errors))
+			result.Add("errors", graphql.MarshalErrors(c.Errors))
 		}
 
-		result.WriteJson(w)
+		result.MarshalGQL(w)
 		return nil
 	}
 }
@@ -86,6 +86,10 @@ type executionContext struct {
 	{{ template "interface" $interface }}
 {{- end }}
 
+{{- range $input := .Inputs }}
+	{{ template "input" $input }}
+{{- end }}
+
 var parsedSchema = schema.MustParse({{.SchemaRaw|quote}})
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
@@ -99,186 +103,6 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
-
-func instanceOf(val string, satisfies []string) bool {
-	for _, s := range satisfies {
-		if val == s {
-			return true
-		}
-	}
-	return false
-}
-
-func (ec *executionContext) collectFields(selSet []query.Selection, satisfies []string, visited map[string]bool) []collectedField {
-	var groupedFields []collectedField
-
-	for _, sel := range selSet {
-		switch sel := sel.(type) {
-		case *query.Field:
-			f := getOrCreateField(&groupedFields, sel.Name.Name, func() collectedField {
-				f := collectedField{
-					Alias: sel.Alias.Name,
-					Name:  sel.Name.Name,
-				}
-				if len(sel.Arguments) > 0 {
-					f.Args = map[string]interface{}{}
-					for _, arg := range sel.Arguments {
-						f.Args[arg.Name.Name] = arg.Value.Value(ec.variables)
-					}
-				}
-				return f
-			})
-
-			f.Selections = append(f.Selections, sel.Selections...)
-		case *query.InlineFragment:
-			if !instanceOf(sel.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(sel.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		case *query.FragmentSpread:
-			fragmentName := sel.Name.Name
-			if _, seen := visited[fragmentName]; seen {
-				continue
-			}
-			visited[fragmentName] = true
-
-			fragment := ec.doc.Fragments.Get(fragmentName)
-			if fragment == nil {
-				ec.Errorf("missing fragment %s", fragmentName)
-				continue
-			}
-
-			if !instanceOf(fragment.On.Ident.Name, satisfies) {
-				continue
-			}
-
-			for _, childField := range ec.collectFields(fragment.Selections, satisfies, visited) {
-				f := getOrCreateField(&groupedFields, childField.Name, func() collectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
-			}
-
-		default:
-			panic(fmt.Errorf("unsupported %T", sel))
-		}
-	}
-
-	return groupedFields
-}
-
-type collectedField struct {
-	Alias      string
-	Name       string
-	Args       map[string]interface{}
-	Selections []query.Selection
-}
-
-func decodeHook(sourceType reflect.Type, destType reflect.Type, value interface{}) (interface{}, error) {
-	if destType.PkgPath() == "time" && destType.Name() == "Time" {
-		if dateStr, ok := value.(string); ok {
-			return time.Parse(time.RFC3339, dateStr)
-		}
-		return nil, errors.Errorf("time should be an RFC3339 formatted string")
-	}
-	return value, nil
-}
-
-// nolint: deadcode, megacheck
-func unpackComplexArg(result interface{}, data interface{}) error {
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		TagName:     "graphql",
-		ErrorUnused: true,
-		Result:      result,
-		DecodeHook:  decodeHook,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	return decoder.Decode(data)
-}
-
-func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
-	for i, cf := range *c {
-		if cf.Alias == name {
-			return &(*c)[i]
-		}
-	}
-
-	f := creator()
-
-	*c = append(*c, f)
-	return &(*c)[len(*c)-1]
-}
-
-// nolint: deadcode, megacheck
-func coerceString(v interface{}) (string, error) {
-	switch v := v.(type) {
-	case string:
-		return v, nil
-	case int:
-		return strconv.Itoa(v), nil
-	case float64:
-		return fmt.Sprintf("%f", v), nil
-	case bool:
-		if v {
-			return "true", nil
-		} else {
-			return "false", nil
-		}
-	case nil:
-		return "null", nil
-	default:
-		return "", fmt.Errorf("%T is not a string", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceBool(v interface{}) (bool, error) {
-	switch v := v.(type) {
-	case string:
-		return "true" == strings.ToLower(v), nil
-	case int:
-		return v != 0, nil
-	case bool:
-		return v, nil
-	default:
-		return false, fmt.Errorf("%T is not a bool", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceInt(v interface{}) (int, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.Atoi(v)
-	case int:
-		return v, nil
-	case float64:
-		return int(v), nil
-	default:
-		return 0, fmt.Errorf("%T is not an int", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coercefloat64(v interface{}) (float64, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.ParseFloat(v, 64)
-	case int:
-		return float64(v), nil
-	case float64:
-		return v, nil
-	default:
-		return 0, fmt.Errorf("%T is not an float", v)
-	}
-}
-
 
 {{end}}
 `

@@ -113,12 +113,12 @@ func loadTypeMap() map[string]string {
 		"__EnumValue":  "github.com/vektah/gqlgen/neelance/introspection.EnumValue",
 		"__InputValue": "github.com/vektah/gqlgen/neelance/introspection.InputValue",
 		"__Schema":     "github.com/vektah/gqlgen/neelance/introspection.Schema",
-		"Int":          "int",
-		"Float":        "float64",
-		"String":       "string",
-		"Boolean":      "bool",
-		"ID":           "string",
-		"Time":         "time.Time",
+		"Int":          "github.com/vektah/gqlgen/graphql.Int",
+		"Float":        "github.com/vektah/gqlgen/graphql.Float",
+		"String":       "github.com/vektah/gqlgen/graphql.String",
+		"Boolean":      "github.com/vektah/gqlgen/graphql.Boolean",
+		"ID":           "github.com/vektah/gqlgen/graphql.ID",
+		"Time":         "github.com/vektah/gqlgen/graphql.Time",
 	}
 	b, err := ioutil.ReadFile(*typemap)
 	if err != nil {

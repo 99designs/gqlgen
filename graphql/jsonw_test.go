@@ -1,4 +1,4 @@
-package jsonw
+package graphql
 
 import (
 	"bytes"
@@ -9,15 +9,15 @@ import (
 
 func TestJsonWriter(t *testing.T) {
 	obj := &OrderedMap{}
-	obj.Add("test", Int(10))
+	obj.Add("test", MarshalInt(10))
 
 	obj.Add("array", &Array{
-		Int(1),
-		String("2"),
-		Bool(true),
+		MarshalInt(1),
+		MarshalString("2"),
+		MarshalBoolean(true),
 		False,
 		Null,
-		Float64(1.3),
+		MarshalFloat(1.3),
 		True,
 	})
 
@@ -32,7 +32,7 @@ func TestJsonWriter(t *testing.T) {
 	obj.Add("child", child1)
 
 	b := &bytes.Buffer{}
-	obj.WriteJson(b)
+	obj.MarshalGQL(b)
 
 	require.Equal(t, `{"test":10,"array":[1,"2",true,false,null,1.300000,true],"emptyArray":[],"child":{"child":{"child":null}}}`, b.String())
 }

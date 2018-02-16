@@ -2,10 +2,12 @@ package codegen
 
 import (
 	"fmt"
+	"go/types"
 	"strings"
 
 	"github.com/vektah/gqlgen/neelance/common"
 	"github.com/vektah/gqlgen/neelance/schema"
+	"golang.org/x/tools/go/loader"
 )
 
 // namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of Type for each thing
@@ -17,10 +19,9 @@ func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
 		userType := userTypes[t.GQLType]
 		if userType == "" {
 			if t.IsScalar {
-				userType = "string"
+				userType = "github.com/vektah/gqlgen/graphql.String"
 			} else {
 				userType = "interface{}"
-				userTypes[t.GQLType] = "interface{}"
 			}
 		}
 		t.Package, t.GoType = pkgAndType(userType)
@@ -28,6 +29,25 @@ func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
 		types[t.GQLType] = t
 	}
 	return types
+}
+
+func bindTypes(imports Imports, namedTypes NamedTypes, prog *loader.Program) {
+	for _, t := range namedTypes {
+		if t.Package == "" {
+			continue
+		}
+
+		def, _ := findGoType(prog, t.Package, "Marshal"+t.GoType)
+		switch def := def.(type) {
+		case *types.Func:
+			sig := def.Type().(*types.Signature)
+			cpy := t.Ref
+			t.Marshaler = &cpy
+
+			t.Package, t.GoType = pkgAndType(sig.Params().At(0).Type().String())
+			t.Import = imports.findByName(t.Package)
+		}
+	}
 }
 
 // namedTypeFromSchema objects for every graphql type, including primitives.

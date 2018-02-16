@@ -7,12 +7,12 @@ const objectTpl = `
 var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, it *{{$object.FullName}}) jsonw.Writer {
+func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, it *{{$object.FullName}}) graphql.Marshaler {
 	fields := ec.collectFields(sel, {{$object.GQLType|lcFirst}}Implementors, map[string]bool{})
-	out := jsonw.NewOrderedMap(len(fields))
+	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = jsonw.Null
+		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":

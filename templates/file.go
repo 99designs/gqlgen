@@ -44,7 +44,7 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 			ctx:       ctx,
 		}
 
-		var data jsonw.Writer
+		var data graphql.Marshaler
 		if op.Type == query.Query {
 			data = c._{{.QueryRoot.GQLType|lcFirst}}(op.Selections, nil)
 		{{- if .MutationRoot}}
@@ -57,14 +57,14 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 
 		c.wg.Wait()
 
-		result := &jsonw.OrderedMap{}
+		result := &graphql.OrderedMap{}
 		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
 			result.Add("errors", errors.ErrorWriter(c.Errors))
 		}
 
-		result.WriteJson(w)
+		result.MarshalGQL(w)
 		return nil
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func Int(i int) Marshaler {
+func MarshalInt(i int) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		io.WriteString(w, strconv.Itoa(i))
 	})

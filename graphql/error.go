@@ -4,7 +4,7 @@ import (
 	"github.com/vektah/gqlgen/neelance/errors"
 )
 
-func Errors(errs []*errors.QueryError) Marshaler {
+func MarshalErrors(errs []*errors.QueryError) Marshaler {
 	res := Array{}
 
 	for _, err := range errs {
@@ -15,14 +15,14 @@ func Errors(errs []*errors.QueryError) Marshaler {
 
 		errObj := &OrderedMap{}
 
-		errObj.Add("message", String(err.Message))
+		errObj.Add("message", MarshalString(err.Message))
 
 		if len(err.Locations) > 0 {
 			locations := Array{}
 			for _, location := range err.Locations {
 				locationObj := &OrderedMap{}
-				locationObj.Add("line", Int(location.Line))
-				locationObj.Add("column", Int(location.Column))
+				locationObj.Add("line", MarshalInt(location.Line))
+				locationObj.Add("column", MarshalInt(location.Column))
 
 				locations = append(locations, locationObj)
 			}

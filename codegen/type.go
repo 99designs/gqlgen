@@ -72,7 +72,7 @@ func (t Type) Unmarshal(result, raw string) string {
 
 func (t Type) Marshal(result, val string) string {
 	if t.Marshaler != nil {
-		return result + " = " + t.Marshaler.pkgDot() + "" /* Marshal */ + t.Marshaler.GoType + "(" + val + ")"
+		return result + " = " + t.Marshaler.pkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
 	}
 
 	return result + " = " + val

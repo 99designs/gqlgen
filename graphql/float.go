@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func Float(f float64) Marshaler {
+func MarshalFloat(f float64) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		io.WriteString(w, fmt.Sprintf("%f", f))
 	})

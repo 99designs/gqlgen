@@ -1,6 +1,8 @@
 package codegen
 
 import (
+	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -16,7 +18,11 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program) Obje
 		case *schema.Object:
 			obj := buildObject(types, typ)
 
-			if def := findGoType(prog, obj.Package, obj.GoType); def != nil {
+			def, err := findGoType(prog, obj.Package, obj.GoType)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, err.Error())
+			}
+			if def != nil {
 				bindObject(def.Type(), obj)
 			}
 

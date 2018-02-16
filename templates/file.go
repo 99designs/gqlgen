@@ -61,7 +61,7 @@ func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[
 		result.Add("data", data)
 
 		if len(c.Errors) > 0 {
-			result.Add("errors", graphql.Errors(c.Errors))
+			result.Add("errors", graphql.MarshalErrors(c.Errors))
 		}
 
 		result.MarshalGQL(w)

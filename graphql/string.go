@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func String(s string) Marshaler {
+func MarshalString(s string) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		io.WriteString(w, strconv.Quote(s))
 	})

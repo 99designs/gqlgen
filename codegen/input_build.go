@@ -1,7 +1,9 @@
 package codegen
 
 import (
+	"fmt"
 	"go/types"
+	"os"
 	"sort"
 	"strings"
 
@@ -17,7 +19,11 @@ func buildInputs(namedTypes NamedTypes, s *schema.Schema, prog *loader.Program) 
 		case *schema.InputObject:
 			input := buildInput(namedTypes, typ)
 
-			if def := findGoType(prog, input.Package, input.GoType); def != nil {
+			def, err := findGoType(prog, input.Package, input.GoType)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, err.Error())
+			}
+			if def != nil {
 				input.Marshaler = buildInputMarshaler(typ, def)
 				bindObject(def.Type(), input)
 			}

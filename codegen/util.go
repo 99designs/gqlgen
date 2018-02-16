@@ -9,7 +9,10 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func findGoType(prog *loader.Program, pkgName string, typeName string) types.Object {
+func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Object, error) {
+	if pkgName == "" {
+		return nil, nil
+	}
 	fullName := typeName
 	if pkgName != "" {
 		fullName = pkgName + "." + typeName
@@ -17,14 +20,12 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) types.Obj
 
 	pkgName, err := resolvePkg(pkgName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to resolve package for %s: %s\n", fullName, err.Error())
-		return nil
+		return nil, fmt.Errorf("unable to resolve package for %s: %s\n", fullName, err.Error())
 	}
 
 	pkg := prog.Imported[pkgName]
 	if pkg == nil {
-		fmt.Fprintf(os.Stderr, "required package was not loaded: %s", fullName)
-		return nil
+		return nil, fmt.Errorf("required package was not loaded: %s", fullName)
 	}
 
 	for astNode, def := range pkg.Defs {
@@ -32,10 +33,9 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) types.Obj
 			continue
 		}
 
-		return def
+		return def, nil
 	}
-	fmt.Fprintf(os.Stderr, "unable to find type %s\n", fullName)
-	return nil
+	return nil, fmt.Errorf("unable to find type %s\n", fullName)
 }
 
 func isMethod(t types.Object) bool {

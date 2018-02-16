@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func Boolean(b bool) Marshaler {
+func MarshalBoolean(b bool) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		if b {
 			w.Write(trueLit)

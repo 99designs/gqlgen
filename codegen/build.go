@@ -29,6 +29,8 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 		return nil, err
 	}
 
+	bindTypes(imports, namedTypes, prog)
+
 	b := &Build{
 		PackageName: filepath.Base(destDir),
 		Objects:     buildObjects(namedTypes, schema, prog),

@@ -743,7 +743,7 @@ func validateBasicLit(v *common.BasicLit, t common.Type) bool {
 		case "ID":
 			return v.Type == scanner.Int || v.Type == scanner.String
 		default:
-			//TODO: Type-check against expected type by Unmarshalling
+			//TODO: Type-check against expected type by Unmarshaling
 			return true
 		}
 

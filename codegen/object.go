@@ -105,7 +105,7 @@ func (f *Field) doWriteJson(res string, val string, remainingMods []string, isPt
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
 		return tpl(`
 			if {{.val}} == nil {
-				{{.res}} = jsonw.Null
+				{{.res}} = graphql.Null
 			} else {
 				{{.next}}
 			}`, map[string]interface{}{
@@ -123,9 +123,9 @@ func (f *Field) doWriteJson(res string, val string, remainingMods []string, isPt
 		var index = "idx" + strconv.Itoa(depth)
 
 		return tpl(`
-			{{.arr}} := jsonw.Array{}
+			{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
-				var {{.tmp}} jsonw.Writer
+				var {{.tmp}} graphql.Marshaler
 				{{.next}}
 				{{.arr}} = append({{.arr}}, {{.tmp}})
 			}
@@ -142,7 +142,7 @@ func (f *Field) doWriteJson(res string, val string, remainingMods []string, isPt
 		if isPtr {
 			val = "*" + val
 		}
-		return fmt.Sprintf("%s = jsonw.%s(%s)", res, ucFirst(f.GoType), val)
+		return f.Marshal(res, val)
 
 	default:
 		if !isPtr {

@@ -22,7 +22,7 @@ func buildImports(types NamedTypes, destDir string) Imports {
 		{"query", "github.com/vektah/gqlgen/neelance/query"},
 		{"schema", "github.com/vektah/gqlgen/neelance/schema"},
 		{"validation", "github.com/vektah/gqlgen/neelance/validation"},
-		{"jsonw", "github.com/vektah/gqlgen/jsonw"},
+		{"graphql", "github.com/vektah/gqlgen/graphql"},
 	}
 
 	for _, t := range types {

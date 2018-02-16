@@ -177,31 +177,6 @@ type collectedField struct {
 	Selections []query.Selection
 }
 
-func decodeHook(sourceType reflect.Type, destType reflect.Type, value interface{}) (interface{}, error) {
-	if destType.PkgPath() == "time" && destType.Name() == "Time" {
-		if dateStr, ok := value.(string); ok {
-			return time.Parse(time.RFC3339, dateStr)
-		}
-		return nil, errors.Errorf("time should be an RFC3339 formatted string")
-	}
-	return value, nil
-}
-
-// nolint: deadcode, megacheck
-func unpackComplexArg(result interface{}, data interface{}) error {
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		TagName:     "graphql",
-		ErrorUnused: true,
-		Result:      result,
-		DecodeHook:  decodeHook,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	return decoder.Decode(data)
-}
-
 func getOrCreateField(c *[]collectedField, name string, creator func() collectedField) *collectedField {
 	for i, cf := range *c {
 		if cf.Alias == name {
@@ -214,71 +189,6 @@ func getOrCreateField(c *[]collectedField, name string, creator func() collected
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
 }
-
-// nolint: deadcode, megacheck
-func coerceString(v interface{}) (string, error) {
-	switch v := v.(type) {
-	case string:
-		return v, nil
-	case int:
-		return strconv.Itoa(v), nil
-	case float64:
-		return fmt.Sprintf("%f", v), nil
-	case bool:
-		if v {
-			return "true", nil
-		} else {
-			return "false", nil
-		}
-	case nil:
-		return "null", nil
-	default:
-		return "", fmt.Errorf("%T is not a string", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceBool(v interface{}) (bool, error) {
-	switch v := v.(type) {
-	case string:
-		return "true" == strings.ToLower(v), nil
-	case int:
-		return v != 0, nil
-	case bool:
-		return v, nil
-	default:
-		return false, fmt.Errorf("%T is not a bool", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coerceInt(v interface{}) (int, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.Atoi(v)
-	case int:
-		return v, nil
-	case float64:
-		return int(v), nil
-	default:
-		return 0, fmt.Errorf("%T is not an int", v)
-	}
-}
-
-// nolint: deadcode, megacheck
-func coercefloat64(v interface{}) (float64, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.ParseFloat(v, 64)
-	case int:
-		return float64(v), nil
-	case float64:
-		return v, nil
-	default:
-		return 0, fmt.Errorf("%T is not an float", v)
-	}
-}
-
 
 {{end}}
 `

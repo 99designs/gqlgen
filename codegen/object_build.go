@@ -20,7 +20,10 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program) Obje
 		switch typ := typ.(type) {
 		case *schema.Object:
 			obj := buildObject(types, typ)
-			bindObject(prog, obj)
+
+			if def := findGoType(prog, obj.Package, obj.GoType); def != nil {
+				findBindTargets(def.Type(), obj)
+			}
 
 			objects = append(objects, obj)
 		}
@@ -74,33 +77,6 @@ func buildObject(types NamedTypes, typ *schema.Object) *Object {
 		})
 	}
 	return obj
-}
-
-func bindObject(prog *loader.Program, obj *Object) {
-	if obj.Package == "" {
-		return
-	}
-	pkgName, err := resolvePkg(obj.Package)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to resolve package for %s: %s\n", obj.GQLType, err.Error())
-		return
-	}
-
-	pkg := prog.Imported[pkgName]
-	if pkg == nil {
-		fmt.Fprintf(os.Stderr, "required package was not loaded: %s", pkgName)
-		return
-	}
-
-	for astNode, object := range pkg.Defs {
-		if astNode.Name != obj.GoType {
-			continue
-		}
-
-		if findBindTargets(object.Type(), obj) {
-			return
-		}
-	}
 }
 
 func findBindTargets(t types.Type, object *Object) bool {
@@ -166,20 +142,6 @@ func findBindTargets(t types.Type, object *Object) bool {
 	}
 
 	return false
-}
-
-func mutationRoot(schema *schema.Schema) string {
-	if mu, ok := schema.EntryPoints["mutation"]; ok {
-		return mu.TypeName()
-	}
-	return ""
-}
-
-func queryRoot(schema *schema.Schema) string {
-	if mu, ok := schema.EntryPoints["mutation"]; ok {
-		return mu.TypeName()
-	}
-	return ""
 }
 
 func modifiersFromGoType(t types.Type) []string {

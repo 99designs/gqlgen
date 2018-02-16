@@ -1,0 +1,23 @@
+schema {
+    query: Query
+}
+
+type Query {
+    user(id: ID!): User
+    search(input: SearchArgs!): [User!]!
+}
+
+type User {
+    id: ID!
+    name: String!
+    created: Timestamp
+    location: Point
+}
+
+input SearchArgs {
+    location: Point
+    createdAfter: Timestamp
+}
+
+scalar Timestamp
+scalar Point

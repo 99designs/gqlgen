@@ -23,7 +23,7 @@ func TestWebsocket(t *testing.T) {
 		writeRaw(c, "hello")
 
 		msg := readOp(c)
-		require.Equal(t, errorMsg, msg.Type)
+		require.Equal(t, connectionErrorMsg, msg.Type)
 		require.Equal(t, `{"message":"invalid json"}`, string(msg.Payload))
 	})
 
@@ -44,8 +44,8 @@ func TestWebsocket(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: startMsg}))
 
 		msg := readOp(c)
-		require.Equal(t, errorMsg, msg.Type)
-		require.Equal(t, `{"message":"unexpected message run"}`, string(msg.Payload))
+		require.Equal(t, connectionErrorMsg, msg.Type)
+		require.Equal(t, `{"message":"unexpected message start"}`, string(msg.Payload))
 	})
 
 	t.Run("server acks init", func(t *testing.T) {

@@ -38,9 +38,6 @@ type operationMessage struct {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
 }
 
 type wsConnection struct {
@@ -206,7 +203,7 @@ func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
 	var b bytes.Buffer
 	writer.MarshalGQL(&b)
 
-	c.write(&operationMessage{Type: errorMsg, Payload: b.Bytes()})
+	c.write(&operationMessage{Type: connectionErrorMsg, Payload: b.Bytes()})
 }
 
 func (c *wsConnection) readOp() *operationMessage {

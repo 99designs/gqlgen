@@ -21,7 +21,11 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 	switch field.Name {
 	{{- range $field := $object.Fields }}
 	case "{{$field.GQLName}}":
+		badArgs := false
 		{{- template "args" $field.Args }}
+		if badArgs {
+			return nil
+		}
 
 		{{- if $field.GoVarName }}
 			results := {{$field.GoVarName}}
@@ -73,7 +77,11 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 			out.Values[i] = graphql.MarshalString({{$object.GQLType|quote}})
 		{{- range $field := $object.Fields }}
 		case "{{$field.GQLName}}":
+			badArgs := false
 			{{- template "args" $field.Args }}
+			if badArgs {
+				continue
+			}
 
 			{{- if $field.IsConcurrent }}
 				ec.wg.Add(1)

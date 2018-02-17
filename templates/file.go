@@ -70,16 +70,25 @@ func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document
 
 		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-		go func() {
-			for data := range ec._{{.SubscriptionRoot.GQLType|lcFirst}}(op.Selections, nil) {
-				ec.wg.Wait()
-				events <- &graphql.Response{
-					Data: data,
-					Errors: ec.Errors,
-				}
-				time.Sleep(20 * time.Millisecond)
+		eventData := ec._{{.SubscriptionRoot.GQLType|lcFirst}}(op.Selections, nil)
+		if ec.Errors != nil {
+			events<-&graphql.Response{
+				Data: graphql.Null,
+				Errors: ec.Errors,
 			}
-		}()
+			close(events)
+		} else {
+			go func() {
+				for data := range eventData {
+					ec.wg.Wait()
+					events <- &graphql.Response{
+						Data: data,
+						Errors: ec.Errors,
+					}
+					time.Sleep(20 * time.Millisecond)
+				}
+			}()
+		}
 		return events
 	{{- else }}
 		events := make(chan *graphql.Response, 1)

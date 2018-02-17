@@ -11,7 +11,7 @@ import (
 func main() {
 	http.Handle("/", handler.Playground("Dataloader", "/query"))
 
-	http.Handle("/query", dataloader.LoaderMiddleware(handler.GraphQL(dataloader.NewExecutor(&dataloader.Resolver{}))))
+	http.Handle("/query", dataloader.LoaderMiddleware(handler.GraphQL(dataloader.MakeExecutableSchema(&dataloader.Resolver{}))))
 
 	log.Fatal(http.ListenAndServe(":8082", nil))
 }

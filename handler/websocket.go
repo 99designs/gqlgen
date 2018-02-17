@@ -84,9 +84,7 @@ func (c *wsConnection) init() bool {
 
 	switch message.Type {
 	case connectionInitMsg:
-		c.conn.WriteJSON(&operationMessage{
-			Type: connectionAckMsg,
-		})
+		c.write(&operationMessage{Type: connectionAckMsg})
 	case connectionTerminateMsg:
 		c.close(websocket.CloseNormalClosure, "terminated")
 		return false
@@ -97,6 +95,12 @@ func (c *wsConnection) init() bool {
 	}
 
 	return true
+}
+
+func (c *wsConnection) write(msg *operationMessage) {
+	c.mu.Lock()
+	c.conn.WriteJSON(msg)
+	c.mu.Unlock()
 }
 
 func (c *wsConnection) run() {
@@ -171,10 +175,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 			c.sendData(message.ID, result)
 		}
 
-		c.conn.WriteJSON(&operationMessage{
-			ID:   message.ID,
-			Type: completeMsg,
-		})
+		c.write(&operationMessage{ID: message.ID, Type: completeMsg})
 
 		c.mu.Lock()
 		delete(c.active, message.ID)
@@ -189,11 +190,7 @@ func (c *wsConnection) sendData(id string, response *graphql.Response) {
 	var b bytes.Buffer
 	response.MarshalGQL(&b)
 
-	c.conn.WriteJSON(&operationMessage{
-		Type:    dataMsg,
-		ID:      id,
-		Payload: b.Bytes(),
-	})
+	c.write(&operationMessage{Type: dataMsg, ID: id, Payload: b.Bytes()})
 }
 
 func (c *wsConnection) sendError(id string, errors ...*errors.QueryError) {
@@ -201,11 +198,7 @@ func (c *wsConnection) sendError(id string, errors ...*errors.QueryError) {
 	var b bytes.Buffer
 	writer.MarshalGQL(&b)
 
-	c.conn.WriteJSON(&operationMessage{
-		Type:    errorMsg,
-		ID:      id,
-		Payload: b.Bytes(),
-	})
+	c.write(&operationMessage{Type: errorMsg, ID: id, Payload: b.Bytes()})
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
@@ -213,10 +206,7 @@ func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
 	var b bytes.Buffer
 	writer.MarshalGQL(&b)
 
-	c.conn.WriteJSON(&operationMessage{
-		Type:    errorMsg,
-		Payload: b.Bytes(),
-	})
+	c.write(&operationMessage{Type: errorMsg, Payload: b.Bytes()})
 }
 
 func (c *wsConnection) readOp() *operationMessage {
@@ -229,6 +219,8 @@ func (c *wsConnection) readOp() *operationMessage {
 }
 
 func (c *wsConnection) close(closeCode int, message string) {
+	c.mu.Lock()
 	_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, message))
+	c.mu.Unlock()
 	_ = c.conn.Close()
 }

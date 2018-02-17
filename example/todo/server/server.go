@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	http.Handle("/", handler.GraphiQL("Todo", "/query"))
-	http.Handle("/query", handler.GraphQL(todo.NewExecutor(todo.New())))
+	http.Handle("/", handler.Playground("Todo", "/query"))
+	http.Handle("/query", handler.GraphQL(todo.MakeExecutableSchema(todo.New())))
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }

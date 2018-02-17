@@ -78,7 +78,7 @@ func (f *Field) ResolverDeclaration() string {
 
 	result := f.Signature()
 	if f.Object.Stream {
-		result = "chan<-" + result
+		result = "<-chan " + result
 	}
 
 	res += fmt.Sprintf(") (%s, error)", result)

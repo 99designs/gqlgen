@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	http.Handle("/", handler.GraphiQL("Dataloader", "/query"))
+	http.Handle("/", handler.Playground("Dataloader", "/query"))
 
 	http.Handle("/query", dataloader.LoaderMiddleware(handler.GraphQL(dataloader.NewExecutor(&dataloader.Resolver{}))))
 

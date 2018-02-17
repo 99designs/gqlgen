@@ -19,7 +19,7 @@ type RawUser struct {
 }
 
 func TestScalars(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutor(&Resolver{})))
+	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&Resolver{})))
 	c := client.New(srv.URL)
 
 	var resp struct {

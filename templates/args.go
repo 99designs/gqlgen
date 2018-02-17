@@ -17,8 +17,7 @@ const argsTpl = `
 			if tmp, ok := field.Args[{{$arg.GQLName|quote}}]; ok {
 				{{$arg.Unmarshal "tmp2" "tmp" }}
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg{{$i}} = {{if $arg.Type.IsPtr}}&{{end}}tmp2
 			}

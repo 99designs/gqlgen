@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	http.Handle("/", handler.GraphiQL("Starwars", "/query"))
-	http.Handle("/query", handler.GraphQL(starwars.NewExecutor(starwars.NewResolver())))
+	http.Handle("/", handler.Playground("Starwars", "/query"))
+	http.Handle("/query", handler.GraphQL(starwars.MakeExecutableSchema(starwars.NewResolver())))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -5,7 +5,6 @@ package starwars
 import (
 	context "context"
 	fmt "fmt"
-	io "io"
 	strconv "strconv"
 	sync "sync"
 	time "time"
@@ -15,7 +14,6 @@ import (
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
-	validation "github.com/vektah/gqlgen/neelance/validation"
 )
 
 type Resolvers interface {
@@ -40,51 +38,46 @@ type Resolvers interface {
 	Query_starship(ctx context.Context, id string) (*Starship, error)
 }
 
-func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[string]interface{}, io.Writer) []*errors.QueryError {
-	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
-		doc, qErr := query.Parse(document)
-		if qErr != nil {
-			return []*errors.QueryError{qErr}
-		}
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers}
+}
 
-		errs := validation.Validate(parsedSchema, doc)
-		if len(errs) != 0 {
-			return errs
-		}
+type executableSchema struct {
+	resolvers Resolvers
+}
 
-		op, err := doc.GetOperation(operationName)
-		if err != nil {
-			return []*errors.QueryError{errors.Errorf("%s", err)}
-		}
+func (e *executableSchema) Schema() *schema.Schema {
+	return parsedSchema
+}
 
-		c := executionContext{
-			resolvers: resolvers,
-			variables: variables,
-			doc:       doc,
-			ctx:       ctx,
-		}
+func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-		var data graphql.Marshaler
-		if op.Type == query.Query {
-			data = c._query(op.Selections, nil)
-		} else if op.Type == query.Mutation {
-			data = c._mutation(op.Selections, nil)
-		} else {
-			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
-		}
+	data := ec._query(op.Selections, nil)
+	ec.wg.Wait()
 
-		c.wg.Wait()
-
-		result := &graphql.OrderedMap{}
-		result.Add("data", data)
-
-		if len(c.Errors) > 0 {
-			result.Add("errors", graphql.MarshalErrors(c.Errors))
-		}
-
-		result.MarshalGQL(w)
-		return nil
+	return &graphql.Response{
+		Data:   data,
+		Errors: ec.Errors,
 	}
+}
+
+func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+
+	data := ec._mutation(op.Selections, nil)
+	ec.wg.Wait()
+
+	return &graphql.Response{
+		Data:   data,
+		Errors: ec.Errors,
+	}
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *graphql.Response {
+	events := make(chan *graphql.Response, 1)
+	events <- &graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}}
+	return events
 }
 
 type executionContext struct {
@@ -140,8 +133,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) graphql.Mar
 			if tmp, ok := field.Args["first"]; ok {
 				tmp2, err := graphql.UnmarshalInt(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = &tmp2
 			}
@@ -149,8 +141,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) graphql.Mar
 			if tmp, ok := field.Args["after"]; ok {
 				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg1 = &tmp2
 			}
@@ -307,8 +298,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Mar
 			if tmp, ok := field.Args["unit"]; ok {
 				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -342,8 +332,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Mar
 			if tmp, ok := field.Args["first"]; ok {
 				tmp2, err := graphql.UnmarshalInt(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = &tmp2
 			}
@@ -351,8 +340,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Mar
 			if tmp, ok := field.Args["after"]; ok {
 				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg1 = &tmp2
 			}
@@ -421,8 +409,7 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) gr
 			if tmp, ok := field.Args["episode"]; ok {
 				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -430,8 +417,7 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) gr
 			if tmp, ok := field.Args["review"]; ok {
 				tmp2, err := UnmarshalReviewInput(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg1 = tmp2
 			}
@@ -505,8 +491,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["episode"]; ok {
 				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = &tmp2
 			}
@@ -526,8 +511,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["episode"]; ok {
 				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -535,8 +519,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["since"]; ok {
 				tmp2, err := graphql.UnmarshalTime(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg1 = &tmp2
 			}
@@ -562,8 +545,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["text"]; ok {
 				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -589,8 +571,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["id"]; ok {
 				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -610,8 +591,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["id"]; ok {
 				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -635,8 +615,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["id"]; ok {
 				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -660,8 +639,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["id"]; ok {
 				tmp2, err := graphql.UnmarshalID(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -693,8 +671,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 			if tmp, ok := field.Args["name"]; ok {
 				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -776,8 +753,7 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) graph
 			if tmp, ok := field.Args["unit"]; ok {
 				tmp2, err := graphql.UnmarshalString(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -1142,8 +1118,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
 				tmp2, err := graphql.UnmarshalBoolean(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}
@@ -1196,8 +1171,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
 				tmp2, err := graphql.UnmarshalBoolean(tmp)
 				if err != nil {
-					ec.Error(err)
-					continue
+					panic(err) // todo: fixme
 				}
 				arg0 = tmp2
 			}

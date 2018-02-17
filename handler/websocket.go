@@ -35,11 +35,6 @@ type operationMessage struct {
 	Type    string          `json:"type"`
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 type wsConnection struct {
 	ctx    context.Context
 	conn   *websocket.Conn
@@ -48,7 +43,7 @@ type wsConnection struct {
 	mu     sync.Mutex
 }
 
-func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request) {
+func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, upgrader websocket.Upgrader) {
 	ws, err := upgrader.Upgrade(w, r, http.Header{
 		"Sec-Websocket-Protocol": []string{"graphql-ws"},
 	})
@@ -142,24 +137,32 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 
 	doc, qErr := query.Parse(params.Query)
 	if qErr != nil {
-		c.sendError(params.OperationName, qErr)
+		c.sendError(message.ID, qErr)
 		return true
 	}
 
 	errs := validation.Validate(c.exec.Schema(), doc)
 	if len(errs) != 0 {
-		c.sendError(params.OperationName, errs...)
+		c.sendError(message.ID, errs...)
 		return true
 	}
 
 	op, err := doc.GetOperation(params.OperationName)
 	if err != nil {
-		c.sendError(params.OperationName, errors.Errorf("%s", err.Error()))
+		c.sendError(message.ID, errors.Errorf("%s", err.Error()))
 		return true
 	}
 
 	if op.Type != query.Subscription {
-		c.sendError(params.OperationName, errors.Errorf("only subscriptions are currently supported over websockets"))
+		var result *graphql.Response
+		if op.Type == query.Query {
+			result = c.exec.Query(c.ctx, doc, params.Variables, op)
+		} else {
+			result = c.exec.Mutation(c.ctx, doc, params.Variables, op)
+		}
+
+		c.sendData(message.ID, result)
+		c.write(&operationMessage{ID: message.ID, Type: completeMsg})
 		return true
 	}
 

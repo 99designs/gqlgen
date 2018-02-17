@@ -7,6 +7,7 @@ import (
 
 	"strings"
 
+	"github.com/gorilla/websocket"
 	"github.com/vektah/gqlgen/graphql"
 	"github.com/vektah/gqlgen/neelance/errors"
 	"github.com/vektah/gqlgen/neelance/query"
@@ -19,10 +20,33 @@ type params struct {
 	Variables     map[string]interface{} `json:"variables"`
 }
 
-func GraphQL(exec graphql.ExecutableSchema) http.HandlerFunc {
+type Config struct {
+	upgrader websocket.Upgrader
+}
+
+type Option func(cfg *Config)
+
+func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
+	return func(cfg *Config) {
+		cfg.upgrader = upgrader
+	}
+}
+
+func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
+	cfg := Config{
+		upgrader: websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		},
+	}
+
+	for _, option := range options {
+		option(&cfg)
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
-			connectWs(exec, w, r)
+			connectWs(exec, w, r, cfg.upgrader)
 			return
 		}
 

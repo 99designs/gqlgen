@@ -4,7 +4,6 @@ package chat
 
 import (
 	context "context"
-	fmt "fmt"
 	strconv "strconv"
 	sync "sync"
 	time "time"
@@ -344,7 +343,7 @@ func (ec *executionContext) _subscription(sel []query.Selection, it *interface{}
 	fields := graphql.CollectFields(ec.doc, sel, subscriptionImplementors, ec.variables)
 
 	if len(fields) != 1 {
-		fmt.Errorf("must subscribe to exactly one stream")
+		ec.Errorf("must subscribe to exactly one stream")
 		return nil
 	}
 

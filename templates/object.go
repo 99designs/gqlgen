@@ -12,7 +12,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 	fields := graphql.CollectFields(ec.doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.variables)
 
 	if len(fields) != 1 {
-		fmt.Errorf("must subscribe to exactly one stream")
+		ec.Errorf("must subscribe to exactly one stream")
 		return nil
 	}
 

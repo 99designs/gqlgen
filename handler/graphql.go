@@ -41,7 +41,7 @@ func GraphQL(exec graphql.ExecutableSchema) http.HandlerFunc {
 			}
 		} else {
 			if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded")
+				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
 				return
 			}
 		}

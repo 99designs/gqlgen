@@ -19,7 +19,7 @@ import (
 const (
 	connectionInitMsg      = "connection_init"      // Client -> Server
 	connectionTerminateMsg = "connection_terminate" // Client -> Server
-	startMsg               = "run"                  // Client -> Server
+	startMsg               = "start"                // Client -> Server
 	stopMsg                = "stop"                 // Client -> Server
 	connectionAckMsg       = "connection_ack"       // Server -> Client
 	connectionErrorMsg     = "connection_error"     // Server -> Client
@@ -52,7 +52,9 @@ type wsConnection struct {
 }
 
 func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
+	ws, err := upgrader.Upgrade(w, r, http.Header{
+		"Sec-Websocket-Protocol": []string{"graphql-ws"},
+	})
 	if err != nil {
 		log.Printf("unable to upgrade connection to websocket %s: ", err.Error())
 		sendErrorf(w, http.StatusBadRequest, "unable to upgrade")

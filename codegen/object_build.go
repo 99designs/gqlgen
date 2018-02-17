@@ -36,6 +36,9 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program) Obje
 		if name == "mutation" {
 			objects.ByName(obj.Name).DisableConcurrency = true
 		}
+		if name == "subscription" {
+			objects.ByName(obj.Name).Stream = true
+		}
 	}
 
 	sort.Slice(objects, func(i, j int) bool {

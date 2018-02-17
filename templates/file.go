@@ -20,53 +20,81 @@ type Resolvers interface {
 {{- end }}
 }
 
-func NewExecutor(resolvers Resolvers) func(context.Context, string, string, map[string]interface{}, io.Writer) []*errors.QueryError {
-	return func(ctx context.Context, document string, operationName string, variables map[string]interface{}, w io.Writer) []*errors.QueryError {
-		doc, qErr := query.Parse(document)
-		if qErr != nil {
-			return []*errors.QueryError{qErr}
-		}
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers}
+}
 
-		errs := validation.Validate(parsedSchema, doc)
-		if len(errs) != 0 {
-			return errs
-		}
+type executableSchema struct {
+	resolvers Resolvers
+}
 
-		op, err := doc.GetOperation(operationName)
-		if err != nil {
-			return []*errors.QueryError{errors.Errorf("%s", err)}
-		}
+func (e *executableSchema) Schema() *schema.Schema {
+	return parsedSchema
+}
 
-		c := executionContext{
-			resolvers: resolvers,
-			variables: variables,
-			doc:       doc,
-			ctx:       ctx,
+func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+	{{- if .QueryRoot }}
+		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+	
+		data := ec._{{.QueryRoot.GQLType|lcFirst}}(op.Selections, nil)
+		ec.wg.Wait()
+	
+		return &graphql.Response{
+			Data:   data,
+			Errors: ec.Errors,
 		}
+	{{- else }}
+		return &graphql.Response{Errors: []*errors.QueryError{ {Message: "queries are not supported"} }}
+	{{- end }}
+}
 
-		var data graphql.Marshaler
-		if op.Type == query.Query {
-			data = c._{{.QueryRoot.GQLType|lcFirst}}(op.Selections, nil)
-		{{- if .MutationRoot}}
-		} else if op.Type == query.Mutation {
-			data = c._{{.MutationRoot.GQLType|lcFirst}}(op.Selections, nil)
-		{{- end}}
+func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+	{{- if .MutationRoot }}
+		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+	
+		data := ec._{{.MutationRoot.GQLType|lcFirst}}(op.Selections, nil)
+		ec.wg.Wait()
+	
+		return &graphql.Response{
+			Data:   data,
+			Errors: ec.Errors,
+		}
+	{{- else }}
+		return &graphql.Response{Errors: []*errors.QueryError{ {Message: "mutations are not supported"} }}
+	{{- end }}
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *graphql.Response {
+	{{- if .SubscriptionRoot }}
+		events := make(chan *graphql.Response, 10)
+
+		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+
+		eventData := ec._{{.SubscriptionRoot.GQLType|lcFirst}}(op.Selections, nil)
+		if ec.Errors != nil {
+			events<-&graphql.Response{
+				Data: graphql.Null,
+				Errors: ec.Errors,
+			}
+			close(events)
 		} else {
-			return []*errors.QueryError{errors.Errorf("unsupported operation type")}
+			go func() {
+				for data := range eventData {
+					ec.wg.Wait()
+					events <- &graphql.Response{
+						Data: data,
+						Errors: ec.Errors,
+					}
+					time.Sleep(20 * time.Millisecond)
+				}
+			}()
 		}
-
-		c.wg.Wait()
-
-		result := &graphql.OrderedMap{}
-		result.Add("data", data)
-
-		if len(c.Errors) > 0 {
-			result.Add("errors", graphql.MarshalErrors(c.Errors))
-		}
-
-		result.MarshalGQL(w)
-		return nil
-	}
+		return events
+	{{- else }}
+		events := make(chan *graphql.Response, 1)
+		events<-&graphql.Response{Errors: []*errors.QueryError{ {Message: "subscriptions are not supported"} }}
+		return events
+	{{- end }}
 }
 
 type executionContext struct {

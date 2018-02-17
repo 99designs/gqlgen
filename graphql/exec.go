@@ -1,10 +1,20 @@
 package graphql
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/vektah/gqlgen/neelance/query"
+	"github.com/vektah/gqlgen/neelance/schema"
 )
+
+type ExecutableSchema interface {
+	Schema() *schema.Schema
+
+	Query(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *Response
+	Mutation(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *Response
+	Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *Response
+}
 
 func CollectFields(doc *query.Document, selSet []query.Selection, satisfies []string, variables map[string]interface{}) []CollectedField {
 	return collectFields(doc, selSet, satisfies, variables, map[string]bool{})

@@ -62,7 +62,7 @@ func (p *Client) MustPost(query string, response interface{}, options ...Option)
 	}
 }
 
-func (p *Client) Post(query string, response interface{}, options ...Option) error {
+func (p *Client) mkRequest(query string, options ...Option) Request {
 	r := Request{
 		Query: query,
 	}
@@ -71,6 +71,11 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 		option(&r)
 	}
 
+	return r
+}
+
+func (p *Client) Post(query string, response interface{}, options ...Option) error {
+	r := p.mkRequest(query, options...)
 	requestBody, err := json.Marshal(r)
 	if err != nil {
 		return fmt.Errorf("encode: %s", err.Error())
@@ -120,6 +125,7 @@ func unpack(data interface{}, into interface{}) error {
 		Result:      into,
 		TagName:     "json",
 		ErrorUnused: true,
+		ZeroFields:  true,
 	})
 	if err != nil {
 		return fmt.Errorf("mapstructure: %s", err.Error())

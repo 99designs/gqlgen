@@ -1,0 +1,32 @@
+type Chatroom {
+    id: ID!
+    name: String!
+    messages: [Message!]!
+}
+
+type Message {
+    id: ID!
+    text: String!
+    createdBy: String!
+    createdAt: Time!
+}
+
+type Query {
+    room(name:String!): Chatroom
+}
+
+type Mutation {
+    post(text: String!, username: String!, roomName: String!): Message!
+}
+
+type Subscription {
+    messageAdded(roomName: String!): Message!
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+scalar Time

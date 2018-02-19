@@ -4,15 +4,12 @@ There are two different ways to implement scalars in gqlgen, depending on your n
 
 
 #### With user defined types
-For user defined types you can implement the graphql.Marshal and graphql.Unmarshal interfaces and they will be called, 
-then add the type to your types.json
+For user defined types you can implement the graphql.Marshal and graphql.Unmarshal interfaces and they will be called.
 
 
-#### With types you don't control
-
-If the type isn't owned by you (time.Time), or you want to represent it as a builtin type (string) you can implement
-some magic marshaling hooks. 
- 
+```graphql schema
+type YesNo
+```  
  
 ```go
 package mypkg
@@ -21,31 +18,31 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	
-	"github.com/vektah/gqlgen/graphql"
 )
 
+type YesNo bool
 
-func MarshalMyCustomBooleanScalar(b bool) graphql.Marshaler {
-	return graphql.WriterFunc(func(w io.Writer) {
-		if b {
-			w.Write([]byte("true"))
-		} else {
-			w.Write([]byte("false"))
-		}
-	})
+// UnmarshalGQL implements the graphql.Marshaler interface
+func (y *YesNo) UnmarshalGQL(v interface{}) error {
+	yes, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("points must be strings")
+	}
+
+	if yes == "yes" {
+		*y = true
+	} else {
+		*y = false
+	}
+	return nil
 }
 
-func UnmarshalMyCustomBooleanScalar(v interface{}) (bool, error) {
-	switch v := v.(type) {
-	case string:
-		return "true" == strings.ToLower(v), nil
-	case int:
-		return v != 0, nil
-	case bool:
-		return v, nil
-	default:
-		return false, fmt.Errorf("%T is not a bool", v)
+// MarshalGQL implements the graphql.Marshaler interface
+func (y YesNo) MarshalGQL(w io.Writer) {
+	if y {
+		w.Write([]byte(`"yes"`))
+	} else {
+		w.Write([]byte(`"no"`))
 	}
 }
 ```
@@ -53,8 +50,8 @@ func UnmarshalMyCustomBooleanScalar(v interface{}) (bool, error) {
 and then in types.json point to the name without the Marshal|Unmarshal in front:
 ```json
 {
-    "MyCustomBooleanScalar": "github.com/me/mypkg.MyCustomBooleanScalar"
+    "YesNo": "github.com/me/mypkg.YesNo"
 }
 ```
 
-see the `graphql` package for more examples.
+Occasionally you need to define scalars for types you dont own. [more details](./advanced_scalars.md)

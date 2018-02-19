@@ -12,11 +12,13 @@ type User {
     name: String!
     created: Timestamp
     location: Point
+    isBanned: Boolean!
 }
 
 input SearchArgs {
     location: Point
     createdAfter: Timestamp
+    isBanned: Boolean
 }
 
 scalar Timestamp

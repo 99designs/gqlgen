@@ -47,69 +47,104 @@ func isMethod(t types.Object) bool {
 	return f.Type().(*types.Signature).Recv() != nil
 }
 
-func bindObject(t types.Type, object *Object) bool {
-	switch t := t.(type) {
-	case *types.Named:
-		for i := 0; i < t.NumMethods(); i++ {
-			method := t.Method(i)
-			if !method.Exported() {
-				continue
-			}
-
-			if methodField := object.GetField(method.Name()); methodField != nil {
-				methodField.GoMethodName = "it." + method.Name()
-				sig := method.Type().(*types.Signature)
-
-				methodField.Type.Modifiers = modifiersFromGoType(sig.Results().At(0).Type())
-
-				// check arg order matches code, not gql
-
-				var newArgs []FieldArgument
-			l2:
-				for j := 0; j < sig.Params().Len(); j++ {
-					param := sig.Params().At(j)
-					for _, oldArg := range methodField.Args {
-						if strings.EqualFold(oldArg.GQLName, param.Name()) {
-							oldArg.Type.Modifiers = modifiersFromGoType(param.Type())
-							newArgs = append(newArgs, oldArg)
-							continue l2
-						}
-					}
-					fmt.Fprintln(os.Stderr, "cannot match argument "+param.Name()+" to any argument in "+t.String())
-				}
-				methodField.Args = newArgs
-
-				if sig.Results().Len() == 1 {
-					methodField.NoErr = true
-				} else if sig.Results().Len() != 2 {
-					fmt.Fprintf(os.Stderr, "weird number of results on %s. expected either (result), or (result, error)\n", method.Name())
-				}
-			}
+func findMethod(typ *types.Named, name string) *types.Func {
+	for i := 0; i < typ.NumMethods(); i++ {
+		method := typ.Method(i)
+		if !method.Exported() {
+			continue
 		}
 
-		bindObject(t.Underlying(), object)
-		return true
-
-	case *types.Struct:
-		for i := 0; i < t.NumFields(); i++ {
-			field := t.Field(i)
-			// Todo: struct tags, name and - at least
-
-			if !field.Exported() {
-				continue
-			}
-
-			// Todo: check for type matches before binding too?
-			if objectField := object.GetField(field.Name()); objectField != nil {
-				objectField.GoVarName = "it." + field.Name()
-				objectField.Type.Modifiers = modifiersFromGoType(field.Type())
-			}
+		if strings.EqualFold(method.Name(), name) {
+			return method
 		}
-		t.Underlying()
-		return true
+	}
+	return nil
+}
+
+func findField(typ *types.Struct, name string) *types.Var {
+	for i := 0; i < typ.NumFields(); i++ {
+		field := typ.Field(i)
+		if !field.Exported() {
+			continue
+		}
+
+		if strings.EqualFold(field.Name(), name) {
+			return field
+		}
+	}
+	return nil
+}
+
+func bindObject(t types.Type, object *Object, imports Imports) {
+	namedType, ok := t.(*types.Named)
+	if !ok {
+		fmt.Fprintf(os.Stderr, "expected %s to be a named struct, instead found %s", object.FullName(), t.String())
+		return
 	}
 
-	return false
+	underlying, ok := t.Underlying().(*types.Struct)
+	if !ok {
+		fmt.Fprintf(os.Stderr, "expected %s to be a named struct, instead found %s", object.FullName(), t.String())
+		return
+	}
+
+	for i := range object.Fields {
+		field := &object.Fields[i]
+		if method := findMethod(namedType, field.GQLName); method != nil {
+			sig := method.Type().(*types.Signature)
+			field.GoMethodName = "it." + method.Name()
+			field.Type.Modifiers = modifiersFromGoType(sig.Results().At(0).Type())
+
+			// check arg order matches code, not gql
+			var newArgs []FieldArgument
+		l2:
+			for j := 0; j < sig.Params().Len(); j++ {
+				param := sig.Params().At(j)
+				for _, oldArg := range field.Args {
+					if strings.EqualFold(oldArg.GQLName, param.Name()) {
+						oldArg.Type.Modifiers = modifiersFromGoType(param.Type())
+						newArgs = append(newArgs, oldArg)
+						continue l2
+					}
+				}
+				fmt.Fprintln(os.Stderr, "cannot match argument "+param.Name()+" to any argument in "+t.String())
+			}
+			field.Args = newArgs
+
+			if sig.Results().Len() == 1 {
+				field.NoErr = true
+			} else if sig.Results().Len() != 2 {
+				fmt.Fprintf(os.Stderr, "weird number of results on %s. expected either (result), or (result, error)\n", method.Name())
+			}
+			continue
+		}
+
+		if structField := findField(underlying, field.GQLName); structField != nil {
+			field.Type.Modifiers = modifiersFromGoType(structField.Type())
+			field.GoVarName = "it." + structField.Name()
+
+			switch field.Type.FullSignature() {
+			case structField.Type().String():
+				// everything is fine
+
+			case structField.Type().Underlying().String():
+				pkg, typ := pkgAndType(structField.Type().String())
+				imp := imports.findByPkg(pkg)
+				field.CastType = typ
+				if imp.Name != "" {
+					field.CastType = imp.Name + "." + typ
+				}
+
+			default:
+				fmt.Fprintf(os.Stderr, "type mismatch on %s.%s, expected %s got %s\n", object.GQLType, field.GQLName, field.Type.FullSignature(), structField.Type())
+			}
+			continue
+		}
+
+		if field.IsScalar {
+			fmt.Fprintf(os.Stderr, "unable to bind %s.%s to anything, %s has no suitable fields or methods\n", object.GQLType, field.GQLName, namedType.String())
+		}
+	}
 }
 
 func modifiersFromGoType(t types.Type) []string {

@@ -11,11 +11,14 @@ import (
 	"github.com/vektah/gqlgen/graphql"
 )
 
+type Banned bool
+
 type User struct {
 	ID       string
 	Name     string
 	Location Point     // custom scalar types
 	Created  time.Time // direct binding to builtin types with external Marshal/Unmarshal methods
+	IsBanned Banned    // aliased primitive
 }
 
 // Point is serialized as a simple array, eg [1, 2]
@@ -71,4 +74,5 @@ func UnmarshalTimestamp(v interface{}) (time.Time, error) {
 type SearchArgs struct {
 	Location     *Point
 	CreatedAfter *time.Time
+	IsBanned     Banned
 }

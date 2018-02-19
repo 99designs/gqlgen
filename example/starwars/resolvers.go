@@ -223,7 +223,7 @@ func NewResolver() *Resolver {
 		"3000": {
 			ID:   "3000",
 			Name: "Millennium Falcon",
-			History: [][2]int{
+			History: [][]int{
 				{1, 2},
 				{4, 5},
 				{1, 2},
@@ -234,7 +234,7 @@ func NewResolver() *Resolver {
 		"3001": {
 			ID:   "3001",
 			Name: "X-Wing",
-			History: [][2]int{
+			History: [][]int{
 				{6, 4},
 				{3, 2},
 				{2, 3},
@@ -245,7 +245,7 @@ func NewResolver() *Resolver {
 		"3002": {
 			ID:   "3002",
 			Name: "TIE Advanced x1",
-			History: [][2]int{
+			History: [][]int{
 				{3, 2},
 				{7, 2},
 				{6, 4},
@@ -256,7 +256,7 @@ func NewResolver() *Resolver {
 		"3003": {
 			ID:   "3003",
 			Name: "Imperial shuttle",
-			History: [][2]int{
+			History: [][]int{
 				{1, 7},
 				{3, 5},
 				{5, 3},

@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program) Objects {
+func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program, imports Imports) Objects {
 	var objects Objects
 
 	for _, typ := range s.Types {
@@ -23,7 +23,7 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program) Obje
 				fmt.Fprintf(os.Stderr, err.Error())
 			}
 			if def != nil {
-				bindObject(def.Type(), obj)
+				bindObject(def.Type(), obj, imports)
 			}
 
 			objects = append(objects, obj)

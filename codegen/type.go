@@ -24,6 +24,7 @@ type Type struct {
 	*NamedType
 
 	Modifiers []string
+	CastType  string // the type to cast to when unmarshalling
 }
 
 const (
@@ -46,6 +47,15 @@ func (t Type) Signature() string {
 	return strings.Join(t.Modifiers, "") + t.FullName()
 }
 
+func (t Type) FullSignature() string {
+	pkg := ""
+	if t.Package != "" {
+		pkg = t.Package + "."
+	}
+
+	return strings.Join(t.Modifiers, "") + pkg + t.GoType
+}
+
 func (t Type) IsPtr() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
 }
@@ -59,18 +69,32 @@ func (t NamedType) IsMarshaled() bool {
 }
 
 func (t Type) Unmarshal(result, raw string) string {
-	if t.Marshaler != nil {
-		return result + ", err := " + t.Marshaler.pkgDot() + "Unmarshal" + t.Marshaler.GoType + "(" + raw + ")"
+	realResult := result
+	if t.CastType != "" {
+		result = "castTmp"
 	}
-	return tpl(`var {{.result}} {{.type}}
+	ret := tpl(`var {{.result}} {{.type}}
 		err := (&{{.result}}).UnmarshalGQL({{.raw}})`, map[string]interface{}{
 		"result": result,
 		"raw":    raw,
 		"type":   t.FullName(),
 	})
+
+	if t.Marshaler != nil {
+		ret = result + ", err := " + t.Marshaler.pkgDot() + "Unmarshal" + t.Marshaler.GoType + "(" + raw + ")"
+	}
+
+	if t.CastType != "" {
+		ret += "\n" + realResult + " := " + t.CastType + "(castTmp)"
+	}
+	return ret
 }
 
 func (t Type) Marshal(result, val string) string {
+	if t.CastType != "" {
+		val = t.GoType + "(" + val + ")"
+	}
+
 	if t.Marshaler != nil {
 		return result + " = " + t.Marshaler.pkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
 	}

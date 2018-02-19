@@ -218,6 +218,14 @@ func (ec *executionContext) _user(sel []query.Selection, it *User) graphql.Marsh
 			res := it.Location
 
 			out.Values[i] = res
+		case "isBanned":
+			badArgs := false
+			if badArgs {
+				continue
+			}
+			res := it.IsBanned
+
+			out.Values[i] = graphql.MarshalBoolean(bool(res))
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -807,13 +815,20 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 				return it, err
 			}
 			it.CreatedAfter = &val
+		case "isBanned":
+			castTmp, err := graphql.UnmarshalBoolean(v)
+			val := Banned(castTmp)
+			if err != nil {
+				return it, err
+			}
+			it.IsBanned = val
 		}
 	}
 
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    user(id: ID!): User\n    search(input: SearchArgs!): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n}\n\nscalar Timestamp\nscalar Point\n")
+var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    user(id: ID!): User\n    search(input: SearchArgs!): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n    isBanned: Boolean!\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

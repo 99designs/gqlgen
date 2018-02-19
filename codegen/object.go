@@ -38,15 +38,6 @@ type FieldArgument struct {
 
 type Objects []*Object
 
-func (o *Object) GetField(name string) *Field {
-	for i, field := range o.Fields {
-		if strings.EqualFold(field.GQLName, name) {
-			return &o.Fields[i]
-		}
-	}
-	return nil
-}
-
 func (o *Object) Implementors() string {
 	satisfiedBy := strconv.Quote(o.GQLType)
 	for _, s := range o.Satisfies {

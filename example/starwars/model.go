@@ -33,7 +33,7 @@ func (h *Human) Height(unit string) float64 {
 type Starship struct {
 	ID           string
 	Name         string
-	History      [][2]int
+	History      [][]int
 	lengthMeters float64
 }
 

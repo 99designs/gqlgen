@@ -11,7 +11,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func buildInputs(namedTypes NamedTypes, s *schema.Schema, prog *loader.Program) Objects {
+func buildInputs(namedTypes NamedTypes, s *schema.Schema, prog *loader.Program, imports Imports) Objects {
 	var inputs Objects
 
 	for _, typ := range s.Types {
@@ -25,7 +25,7 @@ func buildInputs(namedTypes NamedTypes, s *schema.Schema, prog *loader.Program) 
 			}
 			if def != nil {
 				input.Marshaler = buildInputMarshaler(typ, def)
-				bindObject(def.Type(), input)
+				bindObject(def.Type(), input, imports)
 			}
 
 			inputs = append(inputs, input)

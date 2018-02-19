@@ -35,9 +35,9 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 
 	b := &Build{
 		PackageName: filepath.Base(destDir),
-		Objects:     buildObjects(namedTypes, schema, prog),
+		Objects:     buildObjects(namedTypes, schema, prog, imports),
 		Interfaces:  buildInterfaces(namedTypes, schema),
-		Inputs:      buildInputs(namedTypes, schema, prog),
+		Inputs:      buildInputs(namedTypes, schema, prog, imports),
 		Imports:     imports,
 	}
 
@@ -56,19 +56,19 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 	// Poke a few magic methods into query
 	q := b.Objects.ByName(b.QueryRoot.GQLType)
 	q.Fields = append(q.Fields, Field{
-		Type:         &Type{namedTypes["__Schema"], []string{modPtr}},
+		Type:         &Type{namedTypes["__Schema"], []string{modPtr}, ""},
 		GQLName:      "__schema",
 		NoErr:        true,
 		GoMethodName: "ec.introspectSchema",
 		Object:       q,
 	})
 	q.Fields = append(q.Fields, Field{
-		Type:         &Type{namedTypes["__Type"], []string{modPtr}},
+		Type:         &Type{namedTypes["__Type"], []string{modPtr}, ""},
 		GQLName:      "__type",
 		NoErr:        true,
 		GoMethodName: "ec.introspectType",
 		Args: []FieldArgument{
-			{GQLName: "name", Type: &Type{namedTypes["String"], []string{}}},
+			{GQLName: "name", Type: &Type{namedTypes["String"], []string{}, ""}},
 		},
 		Object: q,
 	})

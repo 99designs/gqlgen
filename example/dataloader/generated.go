@@ -6,6 +6,7 @@ import (
 	context "context"
 	strconv "strconv"
 	sync "sync"
+	time "time"
 
 	graphql "github.com/vektah/gqlgen/graphql"
 	errors "github.com/vektah/gqlgen/neelance/errors"
@@ -13,6 +14,10 @@ import (
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
+
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers}
+}
 
 type Resolvers interface {
 	Customer_address(ctx context.Context, it *Customer) (*Address, error)
@@ -22,8 +27,28 @@ type Resolvers interface {
 	Query_customers(ctx context.Context) ([]Customer, error)
 }
 
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers}
+type Address struct {
+	ID      int
+	Street  string
+	Country string
+}
+
+type Customer struct {
+	ID        int
+	Name      string
+	AddressID int
+	OrdersID  int
+}
+
+type Item struct {
+	Name string
+}
+
+type Order struct {
+	ID      int
+	Date    time.Time
+	Amount  float64
+	ItemsID int
 }
 
 type executableSchema struct {
@@ -37,7 +62,7 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._query(op.Selections, nil)
+	data := ec._query(op.Selections)
 	ec.wg.Wait()
 
 	return &graphql.Response{
@@ -288,7 +313,7 @@ func (ec *executionContext) _order(sel []query.Selection, it *Order) graphql.Mar
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graphql.Marshaler {
+func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, queryImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -923,7 +948,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    customers: [Customer!]\n}\n\ntype Customer {\n    id: Int!\n    name: String!\n    address: Address\n    orders: [Order!]\n}\n\ntype Address {\n    id: Int!\n    street: String\n    country: String\n}\n\ntype Order {\n    id: Int!\n    date: Time\n    amount: Float!\n    items: [Item!]\n}\n\ntype Item {\n    name: String\n}\nscalar Time\n")
+var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    customers: [Customer!]\n}\n\ntype Customer {\n    id: Int!\n    name: String!\n    address: Address\n    orders: [Order!]\n}\n\ntype Address {\n    id: Int!\n    street: String!\n    country: String!\n}\n\ntype Order {\n    id: Int!\n    date: Time!\n    amount: Float!\n    items: [Item!]\n}\n\ntype Item {\n    name: String!\n}\nscalar Time\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

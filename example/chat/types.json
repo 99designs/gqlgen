@@ -1,5 +1,3 @@
 {
-    "Chatroom": "github.com/vektah/gqlgen/example/chat.Chatroom",
-    "User": "github.com/vektah/gqlgen/example/chat.User",
-    "Message": "github.com/vektah/gqlgen/example/chat.Message"
+    "Chatroom": "github.com/vektah/gqlgen/example/chat.Chatroom"
 }

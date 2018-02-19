@@ -11,7 +11,7 @@ import (
 type Resolver struct{}
 
 func (r *Resolver) Customer_address(ctx context.Context, it *Customer) (*Address, error) {
-	return ctxLoaders(ctx).addressByID.Load(it.addressID)
+	return ctxLoaders(ctx).addressByID.Load(it.AddressID)
 }
 
 func (r *Resolver) Customer_orders(ctx context.Context, it *Customer) ([]Order, error) {
@@ -28,8 +28,8 @@ func (r *Resolver) Query_customers(ctx context.Context) ([]Customer, error) {
 	time.Sleep(5 * time.Millisecond)
 
 	return []Customer{
-		{ID: 1, Name: "Bob", addressID: 1},
-		{ID: 2, Name: "Alice", addressID: 3},
-		{ID: 3, Name: "Eve", addressID: 4},
+		{ID: 1, Name: "Bob", AddressID: 1},
+		{ID: 2, Name: "Alice", AddressID: 3},
+		{ID: 3, Name: "Eve", AddressID: 4},
 	}, nil
 }

@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"syscall"
-
 	"github.com/vektah/gqlgen/codegen"
 	"github.com/vektah/gqlgen/neelance/schema"
 	"golang.org/x/tools/imports"
@@ -17,7 +15,7 @@ import (
 
 var output = flag.String("out", "-", "the file to write to, - for stdout")
 var schemaFilename = flag.String("schema", "schema.graphql", "the graphql schema to generate types from")
-var typemap = flag.String("typemap", "types.json", "a json map going from graphql to golang types")
+var typemap = flag.String("typemap", "", "a json map going from graphql to golang types")
 var packageName = flag.String("package", "", "the package name")
 var help = flag.Bool("h", false, "this usage text")
 
@@ -44,10 +42,6 @@ func main() {
 	if err = schema.Parse(string(schemaRaw)); err != nil {
 		fmt.Fprintln(os.Stderr, "unable to parse schema: "+err.Error())
 		os.Exit(1)
-	}
-
-	if *output != "-" {
-		_ = syscall.Unlink(*output)
 	}
 
 	build, err := codegen.Bind(schema, loadTypeMap(), dirName())
@@ -120,14 +114,16 @@ func loadTypeMap() map[string]string {
 		"ID":           "github.com/vektah/gqlgen/graphql.ID",
 		"Time":         "github.com/vektah/gqlgen/graphql.Time",
 	}
-	b, err := ioutil.ReadFile(*typemap)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error()+" creating it.")
-		return goTypes
-	}
-	if err = json.Unmarshal(b, &goTypes); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
-		os.Exit(1)
+	if *typemap != "" {
+		b, err := ioutil.ReadFile(*typemap)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
+			return goTypes
+		}
+		if err = json.Unmarshal(b, &goTypes); err != nil {
+			fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
+			os.Exit(1)
+		}
 	}
 
 	return goTypes

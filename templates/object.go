@@ -8,7 +8,7 @@ var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
 {{- if .Stream }}
-func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, it *{{$object.FullName}}) <-chan graphql.Marshaler {
+func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection{{if not $object.Root}}, it *{{$object.FullName}}{{end}}) <-chan graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.variables)
 
 	if len(fields) != 1 {
@@ -28,7 +28,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 		}
 
 		{{- if $field.GoVarName }}
-			results := {{$field.GoVarName}}
+			results := it.{{$field.GoVarName}}
 		{{- else if $field.GoMethodName }}
 			{{- if $field.NoErr }}
 				results := {{$field.GoMethodName}}({{ $field.CallArgs }})
@@ -65,7 +65,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 	return channel
 }
 {{- else }}
-func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, it *{{$object.FullName}}) graphql.Marshaler {
+func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection{{if not $object.Root}}, it *{{$object.FullName}} {{end}}) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -90,7 +90,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection, 
 			{{- end }}
 
 			{{- if $field.GoVarName }}
-				res := {{$field.GoVarName}}
+				res := it.{{$field.GoVarName}}
 			{{- else if $field.GoMethodName }}
 				{{- if $field.NoErr }}
 					res := {{$field.GoMethodName}}({{ $field.CallArgs }})

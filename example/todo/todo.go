@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go
+//go:generate gorunpkg github.com/vektah/gqlgen -typemap types.json -out generated.go
 
 package todo
 
@@ -7,20 +7,8 @@ import (
 	"errors"
 	"time"
 
-	"strconv"
-
 	"github.com/mitchellh/mapstructure"
 )
-
-type Todo struct {
-	id   int
-	Text string
-	Done bool
-}
-
-func (t *Todo) ID() string {
-	return "t" + strconv.Itoa(t.id)
-}
 
 type todoResolver struct {
 	todos  []Todo
@@ -30,9 +18,9 @@ type todoResolver struct {
 func New() *todoResolver {
 	return &todoResolver{
 		todos: []Todo{
-			{id: 1, Text: "A todo not to forget", Done: false},
-			{id: 2, Text: "This is the most important", Done: false},
-			{id: 3, Text: "Please do this or else", Done: false},
+			{ID: 1, Text: "A todo not to forget", Done: false},
+			{ID: 2, Text: "This is the most important", Done: false},
+			{ID: 3, Text: "Please do this or else", Done: false},
 		},
 		lastID: 3,
 	}
@@ -41,7 +29,7 @@ func New() *todoResolver {
 func (r *todoResolver) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
 	time.Sleep(220 * time.Millisecond)
 	for _, todo := range r.todos {
-		if todo.id == id {
+		if todo.ID == id {
 			return &todo, nil
 		}
 	}
@@ -63,7 +51,7 @@ func (r *todoResolver) MyMutation_createTodo(ctx context.Context, text string) (
 	newID := r.id()
 
 	newTodo := Todo{
-		id:   newID,
+		ID:   newID,
 		Text: text,
 		Done: false,
 	}
@@ -79,7 +67,7 @@ func (r *todoResolver) MyMutation_updateTodo(ctx context.Context, id int, change
 	var affectedTodo *Todo
 
 	for i := 0; i < len(r.todos); i++ {
-		if r.todos[i].id == id {
+		if r.todos[i].ID == id {
 			affectedTodo = &r.todos[i]
 			break
 		}

@@ -1,5 +1,4 @@
 type Chatroom {
-    id: ID!
     name: String!
     messages: [Message!]!
 }

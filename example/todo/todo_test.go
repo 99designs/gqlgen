@@ -17,11 +17,11 @@ func TestTodo(t *testing.T) {
 
 	t.Run("create a new todo", func(t *testing.T) {
 		var resp struct {
-			CreateTodo struct{ ID string }
+			CreateTodo struct{ ID int }
 		}
 		c.MustPost(`mutation { createTodo(text:"Fery important") { id } }`, &resp)
 
-		require.Equal(t, "t4", resp.CreateTodo.ID)
+		require.Equal(t, 4, resp.CreateTodo.ID)
 	})
 
 	t.Run("update the todo text", func(t *testing.T) {
@@ -56,12 +56,12 @@ func TestTodo(t *testing.T) {
 	t.Run("select with alias", func(t *testing.T) {
 		var resp struct {
 			A struct{ Text string }
-			B struct{ ID string }
+			B struct{ ID int }
 		}
 		c.MustPost(`{ a: todo(id:1) { text } b: todo(id:2) { id } }`, &resp)
 
 		require.Equal(t, "A todo not to forget", resp.A.Text)
-		require.Equal(t, "t2", resp.B.ID)
+		require.Equal(t, 2, resp.B.ID)
 	})
 
 	t.Run("find a missing todo", func(t *testing.T) {
@@ -77,17 +77,17 @@ func TestTodo(t *testing.T) {
 	t.Run("select all", func(t *testing.T) {
 		var resp struct {
 			Todo struct {
-				ID   string
+				ID   int
 				Text string
 				Done bool
 			}
 			LastTodo struct {
-				ID   string
+				ID   int
 				Text string
 				Done bool
 			}
 			Todos []struct {
-				ID   string
+				ID   int
 				Text string
 				Done bool
 			}
@@ -98,11 +98,11 @@ func TestTodo(t *testing.T) {
 			todos { id text done }
 		}`, &resp)
 
-		require.Equal(t, "t1", resp.Todo.ID)
-		require.Equal(t, "t4", resp.LastTodo.ID)
+		require.Equal(t, 1, resp.Todo.ID)
+		require.Equal(t, 4, resp.LastTodo.ID)
 		require.Len(t, resp.Todos, 4)
 		require.Equal(t, "Very important", resp.LastTodo.Text)
-		require.Equal(t, "t4", resp.LastTodo.ID)
+		require.Equal(t, 4, resp.LastTodo.ID)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

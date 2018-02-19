@@ -48,6 +48,45 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program, impo
 	return objects
 }
 
+func findMissingObjects(objects Objects, s *schema.Schema) Objects {
+	var missingObjects Objects
+
+	for _, object := range objects {
+		if !object.Generated || object.Root {
+			continue
+		}
+		object.GoType = ucFirst(object.GQLType)
+
+		for i := range object.Fields {
+			field := &object.Fields[i]
+
+			if field.IsScalar {
+				field.GoVarName = ucFirst(field.GQLName)
+				if field.GoVarName == "Id" {
+					field.GoVarName = "ID"
+				}
+			} else {
+				field.GoFKName = ucFirst(field.GQLName) + "ID"
+				field.GoFKType = "int"
+
+				for _, f := range objects.ByName(field.Type.GQLType).Fields {
+					if strings.EqualFold(f.GQLName, "id") {
+						field.GoFKType = f.GoType
+					}
+				}
+			}
+		}
+
+		missingObjects = append(missingObjects, object)
+	}
+
+	sort.Slice(missingObjects, func(i, j int) bool {
+		return strings.Compare(missingObjects[i].GQLType, missingObjects[j].GQLType) == -1
+	})
+
+	return missingObjects
+}
+
 func buildObject(types NamedTypes, typ *schema.Object) *Object {
 	obj := &Object{NamedType: types[typ.TypeName()]}
 

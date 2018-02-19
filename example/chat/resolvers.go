@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go
+//go:generate gorunpkg github.com/vektah/gqlgen -typemap types.json -out generated.go
 
 package chat
 
@@ -18,6 +18,12 @@ func New() *resolvers {
 	return &resolvers{
 		Rooms: map[string]*Chatroom{},
 	}
+}
+
+type Chatroom struct {
+	Name      string
+	Messages  []Message
+	Observers map[string]chan Message
 }
 
 func (r *resolvers) Mutation_post(ctx context.Context, text string, userName string, roomName string) (Message, error) {

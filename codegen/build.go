@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"go/build"
+	"go/types"
 	"os"
 	"path/filepath"
 
@@ -12,6 +13,7 @@ import (
 type Build struct {
 	PackageName      string
 	Objects          Objects
+	Models           Objects
 	Inputs           Objects
 	Interfaces       []*Interface
 	Imports          Imports
@@ -33,9 +35,12 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 
 	bindTypes(imports, namedTypes, prog)
 
+	objects := buildObjects(namedTypes, schema, prog, imports)
+
 	b := &Build{
 		PackageName: filepath.Base(destDir),
-		Objects:     buildObjects(namedTypes, schema, prog, imports),
+		Objects:     objects,
+		Models:      findMissingObjects(objects, schema),
 		Interfaces:  buildInterfaces(namedTypes, schema),
 		Inputs:      buildInputs(namedTypes, schema, prog, imports),
 		Imports:     imports,
@@ -77,7 +82,12 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 }
 
 func loadProgram(imports Imports) (*loader.Program, error) {
-	var conf loader.Config
+	conf := loader.Config{
+		AllowErrors: true,
+		TypeChecker: types.Config{
+			Error: func(e error) {},
+		},
+	}
 	for _, imp := range imports {
 		if imp.Package != "" {
 			conf.Import(imp.Package)

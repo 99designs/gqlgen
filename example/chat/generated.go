@@ -15,6 +15,10 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers}
+}
+
 type Resolvers interface {
 	Mutation_post(ctx context.Context, text string, username string, roomName string) (Message, error)
 	Query_room(ctx context.Context, name string) (*Chatroom, error)
@@ -22,8 +26,11 @@ type Resolvers interface {
 	Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error)
 }
 
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers}
+type Message struct {
+	ID        string
+	Text      string
+	CreatedBy string
+	CreatedAt time.Time
 }
 
 type executableSchema struct {
@@ -37,7 +44,7 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._query(op.Selections, nil)
+	data := ec._query(op.Selections)
 	ec.wg.Wait()
 
 	return &graphql.Response{
@@ -49,7 +56,7 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._mutation(op.Selections, nil)
+	data := ec._mutation(op.Selections)
 	ec.wg.Wait()
 
 	return &graphql.Response{
@@ -63,7 +70,7 @@ func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document
 
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	eventData := ec._subscription(op.Selections, nil)
+	eventData := ec._subscription(op.Selections)
 	if ec.Errors != nil {
 		events <- &graphql.Response{
 			Data:   graphql.Null,
@@ -107,14 +114,6 @@ func (ec *executionContext) _chatroom(sel []query.Selection, it *Chatroom) graph
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Chatroom")
-		case "id":
-			badArgs := false
-			if badArgs {
-				continue
-			}
-			res := it.ID()
-
-			out.Values[i] = graphql.MarshalID(res)
 		case "name":
 			badArgs := false
 			if badArgs {
@@ -201,7 +200,7 @@ func (ec *executionContext) _message(sel []query.Selection, it *Message) graphql
 var mutationImplementors = []string{"Mutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) graphql.Marshaler {
+func (ec *executionContext) _mutation(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, mutationImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -258,7 +257,7 @@ func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) gr
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graphql.Marshaler {
+func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, queryImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -339,7 +338,7 @@ func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graph
 var subscriptionImplementors = []string{"Subscription"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _subscription(sel []query.Selection, it *interface{}) <-chan graphql.Marshaler {
+func (ec *executionContext) _subscription(sel []query.Selection) <-chan graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, subscriptionImplementors, ec.variables)
 
 	if len(fields) != 1 {
@@ -948,7 +947,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-var parsedSchema = schema.MustParse("type Chatroom {\n    id: ID!\n    name: String!\n    messages: [Message!]!\n}\n\ntype Message {\n    id: ID!\n    text: String!\n    createdBy: String!\n    createdAt: Time!\n}\n\ntype Query {\n    room(name:String!): Chatroom\n}\n\ntype Mutation {\n    post(text: String!, username: String!, roomName: String!): Message!\n}\n\ntype Subscription {\n    messageAdded(roomName: String!): Message!\n}\n\nschema {\n    query: Query\n    mutation: Mutation\n    subscription: Subscription\n}\n\nscalar Time\n")
+var parsedSchema = schema.MustParse("type Chatroom {\n    name: String!\n    messages: [Message!]!\n}\n\ntype Message {\n    id: ID!\n    text: String!\n    createdBy: String!\n    createdAt: Time!\n}\n\ntype Query {\n    room(name:String!): Chatroom\n}\n\ntype Mutation {\n    post(text: String!, username: String!, roomName: String!): Message!\n}\n\ntype Subscription {\n    messageAdded(roomName: String!): Message!\n}\n\nschema {\n    query: Query\n    mutation: Mutation\n    subscription: Subscription\n}\n\nscalar Time\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

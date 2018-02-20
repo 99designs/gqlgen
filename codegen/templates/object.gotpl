@@ -1,7 +1,3 @@
-package templates
-
-const objectTpl = `
-{{- define "object" }}
 {{ $object := . }}
 
 var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
@@ -22,7 +18,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection{{
 	{{- range $field := $object.Fields }}
 	case "{{$field.GQLName}}":
 		badArgs := false
-		{{- template "args" $field.Args }}
+		{{- template "args.gotpl" $field.Args }}
 		if badArgs {
 			return nil
 		}
@@ -78,7 +74,7 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection{{
 		{{- range $field := $object.Fields }}
 		case "{{$field.GQLName}}":
 			badArgs := false
-			{{- template "args" $field.Args }}
+			{{- template "args.gotpl" $field.Args }}
 			if badArgs {
 				continue
 			}
@@ -123,6 +119,3 @@ func (ec *executionContext) _{{$object.GQLType|lcFirst}}(sel []query.Selection{{
 	return out
 }
 {{- end }}
-
-{{- end}}
-`

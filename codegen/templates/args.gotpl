@@ -1,7 +1,3 @@
-package templates
-
-const argsTpl = `
-{{- define "args" }}
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.Signature }}
 		{{- if eq $arg.GoType "map[string]interface{}" }}
@@ -22,6 +18,4 @@ const argsTpl = `
 				arg{{$i}} = {{if $arg.Type.IsPtr}}&{{end}}tmp2
 			}
 		{{- end}}
-	{{- end }}
-{{- end }}
-`
+	{{- end -}}

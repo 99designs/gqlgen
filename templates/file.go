@@ -12,6 +12,10 @@ import (
 {{ end }}
 )
 
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers}
+}
+
 type Resolvers interface {
 {{- range $object := .Objects -}}
 	{{ range $field := $object.Fields -}}
@@ -20,9 +24,9 @@ type Resolvers interface {
 {{- end }}
 }
 
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers}
-}
+{{- range $model := .Models }}
+	{{ template "model" $model }}
+{{- end}}
 
 type executableSchema struct {
 	resolvers Resolvers
@@ -36,7 +40,7 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	{{- if .QueryRoot }}
 		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 	
-		data := ec._{{.QueryRoot.GQLType|lcFirst}}(op.Selections, nil)
+		data := ec._{{.QueryRoot.GQLType|lcFirst}}(op.Selections)
 		ec.wg.Wait()
 	
 		return &graphql.Response{
@@ -52,7 +56,7 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 	{{- if .MutationRoot }}
 		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 	
-		data := ec._{{.MutationRoot.GQLType|lcFirst}}(op.Selections, nil)
+		data := ec._{{.MutationRoot.GQLType|lcFirst}}(op.Selections)
 		ec.wg.Wait()
 	
 		return &graphql.Response{
@@ -70,7 +74,7 @@ func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document
 
 		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-		eventData := ec._{{.SubscriptionRoot.GQLType|lcFirst}}(op.Selections, nil)
+		eventData := ec._{{.SubscriptionRoot.GQLType|lcFirst}}(op.Selections)
 		if ec.Errors != nil {
 			events<-&graphql.Response{
 				Data: graphql.Null,

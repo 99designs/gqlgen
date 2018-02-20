@@ -1,6 +1,0 @@
-{
-    "Customer": "github.com/vektah/gqlgen/example/dataloader.Customer",
-    "Address": "github.com/vektah/gqlgen/example/dataloader.Address",
-    "Item": "github.com/vektah/gqlgen/example/dataloader.Item",
-    "Order": "github.com/vektah/gqlgen/example/dataloader.Order"
-}

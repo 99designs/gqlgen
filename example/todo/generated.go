@@ -14,6 +14,10 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers}
+}
+
 type Resolvers interface {
 	MyMutation_createTodo(ctx context.Context, text string) (Todo, error)
 	MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
@@ -22,8 +26,10 @@ type Resolvers interface {
 	MyQuery_todos(ctx context.Context) ([]Todo, error)
 }
 
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers}
+type Todo struct {
+	ID   int
+	Text string
+	Done bool
 }
 
 type executableSchema struct {
@@ -37,7 +43,7 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._myQuery(op.Selections, nil)
+	data := ec._myQuery(op.Selections)
 	ec.wg.Wait()
 
 	return &graphql.Response{
@@ -49,7 +55,7 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._myMutation(op.Selections, nil)
+	data := ec._myMutation(op.Selections)
 	ec.wg.Wait()
 
 	return &graphql.Response{
@@ -76,7 +82,7 @@ type executionContext struct {
 var myMutationImplementors = []string{"MyMutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) graphql.Marshaler {
+func (ec *executionContext) _myMutation(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, myMutationImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -145,7 +151,7 @@ func (ec *executionContext) _myMutation(sel []query.Selection, it *interface{}) 
 var myQueryImplementors = []string{"MyQuery"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _myQuery(sel []query.Selection, it *interface{}) graphql.Marshaler {
+func (ec *executionContext) _myQuery(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, myQueryImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -283,9 +289,9 @@ func (ec *executionContext) _todo(sel []query.Selection, it *Todo) graphql.Marsh
 			if badArgs {
 				continue
 			}
-			res := it.ID()
+			res := it.ID
 
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = graphql.MarshalInt(res)
 		case "text":
 			badArgs := false
 			if badArgs {
@@ -873,7 +879,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: ID!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
+var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

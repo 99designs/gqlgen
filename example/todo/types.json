@@ -1,4 +1,3 @@
 {
-  "Todo": "github.com/vektah/gqlgen/example/todo.Todo",
   "TodoInput": "map[string]interface{}"
 }

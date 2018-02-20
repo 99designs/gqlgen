@@ -17,14 +17,15 @@ func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
 		t := namedTypeFromSchema(schemaType)
 
 		userType := userTypes[t.GQLType]
-		if userType == "" {
-			if t.IsScalar {
-				userType = "github.com/vektah/gqlgen/graphql.String"
-			} else {
-				userType = "interface{}"
-			}
+		if userType == "" && t.IsScalar {
+			userType = "github.com/vektah/gqlgen/graphql.String"
 		}
-		t.Package, t.GoType = pkgAndType(userType)
+
+		if userType != "" {
+			t.Package, t.GoType = pkgAndType(userType)
+		} else {
+			t.Generated = true
+		}
 
 		types[t.GQLType] = t
 	}

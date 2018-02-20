@@ -15,18 +15,18 @@ type Customer {
 
 type Address {
     id: Int!
-    street: String
-    country: String
+    street: String!
+    country: String!
 }
 
 type Order {
     id: Int!
-    date: Time
+    date: Time!
     amount: Float!
     items: [Item!]
 }
 
 type Item {
-    name: String
+    name: String!
 }
 scalar Time

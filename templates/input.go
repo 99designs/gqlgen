@@ -14,7 +14,7 @@ const inputTpl = `
 				if err != nil {
 					return it, err
 				}
-				{{$field.GoVarName}} = {{if $field.Type.IsPtr}}&{{end}}val
+				it.{{$field.GoVarName}} = {{if $field.Type.IsPtr}}&{{end}}val
 			{{- end }}
 			}
 		} 

@@ -16,6 +16,10 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers}
+}
+
 type Resolvers interface {
 	Droid_friends(ctx context.Context, it *Droid) ([]Character, error)
 	Droid_friendsConnection(ctx context.Context, it *Droid, first *int, after *string) (FriendsConnection, error)
@@ -38,10 +42,6 @@ type Resolvers interface {
 	Query_starship(ctx context.Context, id string) (*Starship, error)
 }
 
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers}
-}
-
 type executableSchema struct {
 	resolvers Resolvers
 }
@@ -53,7 +53,7 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._query(op.Selections, nil)
+	data := ec._query(op.Selections)
 	ec.wg.Wait()
 
 	return &graphql.Response{
@@ -65,7 +65,7 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._mutation(op.Selections, nil)
+	data := ec._mutation(op.Selections)
 	ec.wg.Wait()
 
 	return &graphql.Response{
@@ -474,7 +474,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Mar
 var mutationImplementors = []string{"Mutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _mutation(sel []query.Selection, it *interface{}) graphql.Marshaler {
+func (ec *executionContext) _mutation(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, mutationImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -572,7 +572,7 @@ func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) graph
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _query(sel []query.Selection, it *interface{}) graphql.Marshaler {
+func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, queryImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {

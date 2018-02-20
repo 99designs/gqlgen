@@ -1,4 +1,6 @@
-package main
+//go:generate go run ./inliner/inliner.go
+
+package templates
 
 import (
 	"bytes"
@@ -7,21 +9,24 @@ import (
 	"unicode"
 
 	"github.com/vektah/gqlgen/codegen"
-	"github.com/vektah/gqlgen/templates"
 )
 
-func runTemplate(e *codegen.Build) (*bytes.Buffer, error) {
-	t, err := template.New("").Funcs(template.FuncMap{
+func Run(e *codegen.Build) (*bytes.Buffer, error) {
+	t := template.New("").Funcs(template.FuncMap{
 		"ucFirst": ucFirst,
 		"lcFirst": lcFirst,
 		"quote":   strconv.Quote,
-	}).Parse(templates.All)
-	if err != nil {
-		return nil, err
+	})
+
+	for filename, data := range data {
+		_, err := t.New(filename).Parse(data)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	buf := &bytes.Buffer{}
-	err = t.Lookup("file").Execute(buf, e)
+	err := t.Lookup("file.gotpl").Execute(buf, e)
 	if err != nil {
 		return nil, err
 	}

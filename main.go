@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/vektah/gqlgen/codegen"
+	"github.com/vektah/gqlgen/codegen/templates"
 	"github.com/vektah/gqlgen/neelance/schema"
 	"golang.org/x/tools/imports"
 )
@@ -55,7 +56,7 @@ func main() {
 		build.PackageName = *packageName
 	}
 
-	buf, err := runTemplate(build)
+	buf, err := templates.Run(build)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
 		os.Exit(1)

@@ -13,7 +13,7 @@ jobs:
           gometalinter --install &&
           dep ensure --vendor-only
       - run: go install -v . && go get -u github.com/vektah/dataloaden
-      - run: go generate ./... && if [[ $(git diff) ]] ; then echo "you need to run go generate" ; git diff ; exit 1 ; fi
+      - run: go generate ./... && if [[ $(git --no-pager diff) ]] ; then echo "you need to run go generate" ; git --no-pager diff ; exit 1 ; fi
       - run: go vet ./...
       - run: go test -race ./...
       - run: gometalinter --disable gocyclo ./example

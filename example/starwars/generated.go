@@ -137,6 +137,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) graphql.Mar
 				ptr1, err = graphql.UnmarshalInt(tmp)
 				arg0 = &ptr1
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -148,6 +149,7 @@ func (ec *executionContext) _droid(sel []query.Selection, it *Droid) graphql.Mar
 				ptr1, err = graphql.UnmarshalID(tmp)
 				arg1 = &ptr1
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -306,6 +308,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Mar
 
 				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -343,6 +346,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Mar
 				ptr1, err = graphql.UnmarshalInt(tmp)
 				arg0 = &ptr1
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -354,6 +358,7 @@ func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Mar
 				ptr1, err = graphql.UnmarshalID(tmp)
 				arg1 = &ptr1
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -424,6 +429,7 @@ func (ec *executionContext) _mutation(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -433,6 +439,7 @@ func (ec *executionContext) _mutation(sel []query.Selection) graphql.Marshaler {
 
 				arg1, err = UnmarshalReviewInput(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -510,6 +517,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 				ptr1, err = graphql.UnmarshalString(tmp)
 				arg0 = &ptr1
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -531,6 +539,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -542,6 +551,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 				ptr1, err = graphql.UnmarshalTime(tmp)
 				arg1 = &ptr1
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -569,6 +579,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -596,6 +607,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalID(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -617,6 +629,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalID(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -642,6 +655,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalID(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -667,6 +681,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalID(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -700,6 +715,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -783,6 +799,7 @@ func (ec *executionContext) _starship(sel []query.Selection, it *Starship) graph
 
 				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -1149,6 +1166,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 				arg0, err = graphql.UnmarshalBoolean(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -1203,6 +1221,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 				arg0, err = graphql.UnmarshalBoolean(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}

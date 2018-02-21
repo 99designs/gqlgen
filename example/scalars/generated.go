@@ -83,6 +83,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalID(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -108,6 +109,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = UnmarshalSearchArgs(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -143,6 +145,7 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 
 				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -537,6 +540,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 				arg0, err = graphql.UnmarshalBoolean(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}
@@ -591,6 +595,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 
 				arg0, err = graphql.UnmarshalBoolean(tmp)
 				if err != nil {
+					ec.Error(err)
 					return graphql.Null
 				}
 			}

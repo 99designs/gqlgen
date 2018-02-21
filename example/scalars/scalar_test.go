@@ -22,24 +22,33 @@ func TestScalars(t *testing.T) {
 	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&Resolver{})))
 	c := client.New(srv.URL)
 
-	var resp struct {
-		User   RawUser
-		Search []RawUser
-	}
-	c.MustPost(`{
-			user(id:"1") {
-				...UserData
-			}
-			search(input:{location:"6,66", createdAfter:666}) {
-				...UserData
-			}
+	t.Run("marshaling", func(t *testing.T) {
+		var resp struct {
+			User   RawUser
+			Search []RawUser
 		}
-		fragment UserData on User  { id name created location }`, &resp)
+		c.MustPost(`{
+				user(id:"1") {
+					...UserData
+				}
+				search(input:{location:"6,66", createdAfter:666}) {
+					...UserData
+				}
+			}
+			fragment UserData on User  { id name created location }`, &resp)
 
-	require.Equal(t, "1,2", resp.User.Location)
-	require.Equal(t, time.Now().Unix(), resp.User.Created)
-	require.Equal(t, "6,66", resp.Search[0].Location)
-	require.Equal(t, int64(666), resp.Search[0].Created)
+		require.Equal(t, "1,2", resp.User.Location)
+		require.Equal(t, time.Now().Unix(), resp.User.Created)
+		require.Equal(t, "6,66", resp.Search[0].Location)
+		require.Equal(t, int64(666), resp.Search[0].Created)
+	})
+
+	t.Run("test custom error messages", func(t *testing.T) {
+		var resp struct{ Search []RawUser }
+
+		err := c.Post(`{ search(input:{createdAfter:"2014"}) { id } }`, &resp)
+		require.EqualError(t, err, "errors: [graphql: time should be a unix timestamp]")
+	})
 
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors

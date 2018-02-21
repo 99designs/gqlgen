@@ -68,7 +68,7 @@ func UnmarshalTimestamp(v interface{}) (time.Time, error) {
 	if tmpStr, ok := v.(int); ok {
 		return time.Unix(int64(tmpStr), 0), nil
 	}
-	return time.Time{}, errors.New("time should be RFC3339 formatted string")
+	return time.Time{}, errors.New("time should be a unix timestamp")
 }
 
 type SearchArgs struct {

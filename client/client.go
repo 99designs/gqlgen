@@ -109,7 +109,7 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 
 	if respDataRaw["errors"] != nil {
 		var errs []*errors.QueryError
-		if err := unpack(respDataRaw["errors"], errs); err != nil {
+		if err := unpack(respDataRaw["errors"], &errs); err != nil {
 			return err
 		}
 		if len(errs) > 0 {

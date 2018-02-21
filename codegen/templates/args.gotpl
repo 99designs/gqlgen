@@ -11,11 +11,15 @@
 			}
 		{{- else}}
 			if tmp, ok := field.Args[{{$arg.GQLName|quote}}]; ok {
-				{{$arg.Unmarshal "tmp2" "tmp" }}
+				var err error
+				{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 				if err != nil {
-					badArgs = true
+					{{- if $arg.Object.Stream }}
+						return nil
+					{{- else }}
+						return graphql.Null
+					{{- end }}
 				}
-				arg{{$i}} = {{if $arg.Type.IsPtr}}&{{end}}tmp2
 			}
 		{{- end}}
 	{{- end -}}

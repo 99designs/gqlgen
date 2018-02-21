@@ -35,7 +35,8 @@ type Field struct {
 type FieldArgument struct {
 	*Type
 
-	GQLName string // The name of the argument in graphql
+	GQLName string  // The name of the argument in graphql
+	Object  *Object // A link back to the parent object
 }
 
 type Objects []*Object

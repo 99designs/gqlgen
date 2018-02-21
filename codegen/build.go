@@ -73,7 +73,7 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 		NoErr:        true,
 		GoMethodName: "ec.introspectType",
 		Args: []FieldArgument{
-			{GQLName: "name", Type: &Type{namedTypes["String"], []string{}, ""}},
+			{GQLName: "name", Type: &Type{namedTypes["String"], []string{}, ""}, Object: &Object{}},
 		},
 		Object: q,
 	})

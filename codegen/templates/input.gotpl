@@ -6,11 +6,11 @@
 			switch k {
 			{{- range $field := .Fields }}
 			case {{$field.GQLName|quote}}:
-				{{$field.Unmarshal "val" "v" }}
+				var err error
+				{{ $field.Unmarshal (print "it." $field.GoVarName) "v" }}
 				if err != nil {
 					return it, err
 				}
-				it.{{$field.GoVarName}} = {{if $field.Type.IsPtr}}&{{end}}val
 			{{- end }}
 			}
 		}

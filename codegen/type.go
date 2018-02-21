@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -34,10 +35,10 @@ const (
 )
 
 func (t Ref) FullName() string {
-	return t.pkgDot() + t.GoType
+	return t.PkgDot() + t.GoType
 }
 
-func (t Ref) pkgDot() string {
+func (t Ref) PkgDot() string {
 	if t.Import == nil || t.Import.Name == "" {
 		return ""
 	}
@@ -70,25 +71,62 @@ func (t NamedType) IsMarshaled() bool {
 }
 
 func (t Type) Unmarshal(result, raw string) string {
+	return t.unmarshal(result, raw, t.Modifiers, 1)
+}
+
+func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) string {
+	switch {
+	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
+		ptr := "ptr" + strconv.Itoa(depth)
+		return tpl(`var {{.ptr}} {{.t.FullName}}
+			{{.next}}
+			{{.result}} = &{{.ptr -}}
+		`, map[string]interface{}{
+			"ptr":    ptr,
+			"t":      t,
+			"result": result,
+			"next":   t.unmarshal(ptr, raw, remainingMods[1:], depth+1),
+		})
+
+	case len(remainingMods) > 0 && remainingMods[0] == modList:
+		var rawIf = "rawIf" + strconv.Itoa(depth)
+		var index = "idx" + strconv.Itoa(depth)
+
+		return tpl(`{{.rawSlice}} := {{.raw}}.([]interface{})
+			{{.result}} = make({{.type}}, len({{.rawSlice}}))
+			for {{.index}} := range {{.rawSlice}} {
+				{{ .next }}
+			}`, map[string]interface{}{
+			"raw":      raw,
+			"rawSlice": rawIf,
+			"index":    index,
+			"result":   result,
+			"type":     strings.Join(remainingMods, "") + t.NamedType.FullName(),
+			"next":     t.unmarshal(result+"["+index+"]", rawIf+"["+index+"]", remainingMods[1:], depth+1),
+		})
+	}
+
 	realResult := result
 	if t.CastType != "" {
 		result = "castTmp"
 	}
-	ret := tpl(`var {{.result}} {{.type}}
-		err := (&{{.result}}).UnmarshalGQL({{.raw}})`, map[string]interface{}{
-		"result": result,
-		"raw":    raw,
-		"type":   t.FullName(),
+
+	return tpl(`{{- if .t.CastType }}
+			var castTmp {{.t.FullName}}
+		{{- end }}
+			{{- if .t.Marshaler }}
+				{{ .result }}, err = {{ .t.Marshaler.PkgDot }}Unmarshal{{.t.Marshaler.GoType}}({{.raw}})
+			{{- else }}
+				err = (&{{.result}}).UnmarshalGQL({{.raw}}) 
+			{{- end }}
+		{{- if .t.CastType }}
+			{{ .realResult }} = {{.t.CastType}}(castTmp)
+		{{- end }}`, map[string]interface{}{
+		"realResult": realResult,
+		"result":     result,
+		"raw":        raw,
+		"t":          t,
 	})
-
-	if t.Marshaler != nil {
-		ret = result + ", err := " + t.Marshaler.pkgDot() + "Unmarshal" + t.Marshaler.GoType + "(" + raw + ")"
-	}
-
-	if t.CastType != "" {
-		ret += "\n" + realResult + " := " + t.CastType + "(castTmp)"
-	}
-	return ret
 }
 
 func (t Type) Marshal(result, val string) string {
@@ -97,7 +135,7 @@ func (t Type) Marshal(result, val string) string {
 	}
 
 	if t.Marshaler != nil {
-		return result + " = " + t.Marshaler.pkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
+		return result + " = " + t.Marshaler.PkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
 	}
 
 	return result + " = " + val

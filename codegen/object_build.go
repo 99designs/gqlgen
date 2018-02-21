@@ -100,6 +100,7 @@ func buildObject(types NamedTypes, typ *schema.Object) *Object {
 			args = append(args, FieldArgument{
 				GQLName: arg.Name.Name,
 				Type:    types.getType(arg.Type),
+				Object:  obj,
 			})
 		}
 

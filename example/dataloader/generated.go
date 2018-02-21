@@ -25,6 +25,7 @@ type Resolvers interface {
 
 	Order_items(ctx context.Context, it *Order) ([]Item, error)
 	Query_customers(ctx context.Context) ([]Customer, error)
+	Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
 }
 
 type Address struct {
@@ -104,26 +105,14 @@ func (ec *executionContext) _address(sel []query.Selection, it *Address) graphql
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Address")
 		case "id":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.ID
 
 			out.Values[i] = graphql.MarshalInt(res)
 		case "street":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Street
 
 			out.Values[i] = graphql.MarshalString(res)
 		case "country":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Country
 
 			out.Values[i] = graphql.MarshalString(res)
@@ -149,26 +138,14 @@ func (ec *executionContext) _customer(sel []query.Selection, it *Customer) graph
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Customer")
 		case "id":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.ID
 
 			out.Values[i] = graphql.MarshalInt(res)
 		case "name":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Name
 
 			out.Values[i] = graphql.MarshalString(res)
 		case "address":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			ec.wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
@@ -185,10 +162,6 @@ func (ec *executionContext) _customer(sel []query.Selection, it *Customer) graph
 				}
 			}(i, field)
 		case "orders":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			ec.wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
@@ -228,10 +201,6 @@ func (ec *executionContext) _item(sel []query.Selection, it *Item) graphql.Marsh
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Item")
 		case "name":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Name
 
 			out.Values[i] = graphql.MarshalString(res)
@@ -257,34 +226,18 @@ func (ec *executionContext) _order(sel []query.Selection, it *Order) graphql.Mar
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Order")
 		case "id":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.ID
 
 			out.Values[i] = graphql.MarshalInt(res)
 		case "date":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Date
 
 			out.Values[i] = graphql.MarshalTime(res)
 		case "amount":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Amount
 
 			out.Values[i] = graphql.MarshalFloat(res)
 		case "items":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			ec.wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
@@ -324,10 +277,6 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
 		case "customers":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			ec.wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				defer ec.wg.Done()
@@ -345,11 +294,49 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 				}
 				out.Values[i] = arr1
 			}(i, field)
-		case "__schema":
-			badArgs := false
-			if badArgs {
-				continue
+		case "torture":
+			var arg0 [][]int
+			if tmp, ok := field.Args["customerIds"]; ok {
+				var err error
+				rawIf1 := tmp.([]interface{})
+				arg0 = make([][]int, len(rawIf1))
+				for idx1 := range rawIf1 {
+					rawIf2 := rawIf1[idx1].([]interface{})
+					arg0[idx1] = make([]int, len(rawIf2))
+					for idx2 := range rawIf2 {
+
+						arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
+					}
+				}
+				if err != nil {
+					return graphql.Null
+				}
 			}
+			ec.wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				defer ec.wg.Done()
+				res, err := ec.resolvers.Query_torture(ec.ctx, arg0)
+				if err != nil {
+					ec.Error(err)
+					return
+				}
+
+				arr1 := graphql.Array{}
+				for idx1 := range res {
+					var tmp1 graphql.Marshaler
+
+					arr2 := graphql.Array{}
+					for idx2 := range res[idx1] {
+						var tmp2 graphql.Marshaler
+						tmp2 = ec._customer(field.Selections, &res[idx1][idx2])
+						arr2 = append(arr2, tmp2)
+					}
+					tmp1 = arr2
+					arr1 = append(arr1, tmp1)
+				}
+				out.Values[i] = arr1
+			}(i, field)
+		case "__schema":
 			res := ec.introspectSchema()
 
 			if res == nil {
@@ -358,17 +345,14 @@ func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
 				out.Values[i] = ec.___Schema(field.Selections, res)
 			}
 		case "__type":
-			badArgs := false
 			var arg0 string
 			if tmp, ok := field.Args["name"]; ok {
-				tmp2, err := graphql.UnmarshalString(tmp)
+				var err error
+
+				arg0, err = graphql.UnmarshalString(tmp)
 				if err != nil {
-					badArgs = true
+					return graphql.Null
 				}
-				arg0 = tmp2
-			}
-			if badArgs {
-				continue
 			}
 			res := ec.introspectType(arg0)
 
@@ -399,18 +383,10 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Name()
 
 			out.Values[i] = graphql.MarshalString(res)
 		case "description":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Description()
 
 			if res == nil {
@@ -419,10 +395,6 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "locations":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Locations()
 
 			arr1 := graphql.Array{}
@@ -433,10 +405,6 @@ func (ec *executionContext) ___Directive(sel []query.Selection, it *introspectio
 			}
 			out.Values[i] = arr1
 		case "args":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Args()
 
 			arr1 := graphql.Array{}
@@ -473,18 +441,10 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Name()
 
 			out.Values[i] = graphql.MarshalString(res)
 		case "description":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Description()
 
 			if res == nil {
@@ -493,18 +453,10 @@ func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspectio
 				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "isDeprecated":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.IsDeprecated()
 
 			out.Values[i] = graphql.MarshalBoolean(res)
 		case "deprecationReason":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.DeprecationReason()
 
 			if res == nil {
@@ -534,18 +486,10 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Name()
 
 			out.Values[i] = graphql.MarshalString(res)
 		case "description":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Description()
 
 			if res == nil {
@@ -554,10 +498,6 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "args":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Args()
 
 			arr1 := graphql.Array{}
@@ -573,10 +513,6 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 			}
 			out.Values[i] = arr1
 		case "type":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Type()
 
 			if res == nil {
@@ -585,18 +521,10 @@ func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Fi
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "isDeprecated":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.IsDeprecated()
 
 			out.Values[i] = graphql.MarshalBoolean(res)
 		case "deprecationReason":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.DeprecationReason()
 
 			if res == nil {
@@ -626,18 +554,10 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Name()
 
 			out.Values[i] = graphql.MarshalString(res)
 		case "description":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Description()
 
 			if res == nil {
@@ -646,10 +566,6 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "type":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Type()
 
 			if res == nil {
@@ -658,10 +574,6 @@ func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspecti
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "defaultValue":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.DefaultValue()
 
 			if res == nil {
@@ -691,10 +603,6 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Types()
 
 			arr1 := graphql.Array{}
@@ -710,10 +618,6 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 			}
 			out.Values[i] = arr1
 		case "queryType":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.QueryType()
 
 			if res == nil {
@@ -722,10 +626,6 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "mutationType":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.MutationType()
 
 			if res == nil {
@@ -734,10 +634,6 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "subscriptionType":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.SubscriptionType()
 
 			if res == nil {
@@ -746,10 +642,6 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 				out.Values[i] = ec.___Type(field.Selections, res)
 			}
 		case "directives":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Directives()
 
 			arr1 := graphql.Array{}
@@ -786,18 +678,10 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Kind()
 
 			out.Values[i] = graphql.MarshalString(res)
 		case "name":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Name()
 
 			if res == nil {
@@ -806,10 +690,6 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "description":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Description()
 
 			if res == nil {
@@ -818,17 +698,14 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 				out.Values[i] = graphql.MarshalString(*res)
 			}
 		case "fields":
-			badArgs := false
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := graphql.UnmarshalBoolean(tmp)
+				var err error
+
+				arg0, err = graphql.UnmarshalBoolean(tmp)
 				if err != nil {
-					badArgs = true
+					return graphql.Null
 				}
-				arg0 = tmp2
-			}
-			if badArgs {
-				continue
 			}
 			res := it.Fields(arg0)
 
@@ -845,10 +722,6 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			out.Values[i] = arr1
 		case "interfaces":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.Interfaces()
 
 			arr1 := graphql.Array{}
@@ -864,10 +737,6 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			out.Values[i] = arr1
 		case "possibleTypes":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.PossibleTypes()
 
 			arr1 := graphql.Array{}
@@ -883,17 +752,14 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			out.Values[i] = arr1
 		case "enumValues":
-			badArgs := false
 			var arg0 bool
 			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				tmp2, err := graphql.UnmarshalBoolean(tmp)
+				var err error
+
+				arg0, err = graphql.UnmarshalBoolean(tmp)
 				if err != nil {
-					badArgs = true
+					return graphql.Null
 				}
-				arg0 = tmp2
-			}
-			if badArgs {
-				continue
 			}
 			res := it.EnumValues(arg0)
 
@@ -910,10 +776,6 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			out.Values[i] = arr1
 		case "inputFields":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.InputFields()
 
 			arr1 := graphql.Array{}
@@ -929,10 +791,6 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 			}
 			out.Values[i] = arr1
 		case "ofType":
-			badArgs := false
-			if badArgs {
-				continue
-			}
 			res := it.OfType()
 
 			if res == nil {
@@ -948,7 +806,7 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    customers: [Customer!]\n}\n\ntype Customer {\n    id: Int!\n    name: String!\n    address: Address\n    orders: [Order!]\n}\n\ntype Address {\n    id: Int!\n    street: String!\n    country: String!\n}\n\ntype Order {\n    id: Int!\n    date: Time!\n    amount: Float!\n    items: [Item!]\n}\n\ntype Item {\n    name: String!\n}\nscalar Time\n")
+var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    customers: [Customer!]\n\n    # this method is here to test code generation of nested arrays\n    torture(customerIds: [[Int]]): [[Customer!]]\n}\n\ntype Customer {\n    id: Int!\n    name: String!\n    address: Address\n    orders: [Order!]\n}\n\ntype Address {\n    id: Int!\n    street: String!\n    country: String!\n}\n\ntype Order {\n    id: Int!\n    date: Time!\n    amount: Float!\n    items: [Item!]\n}\n\ntype Item {\n    name: String!\n}\nscalar Time\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

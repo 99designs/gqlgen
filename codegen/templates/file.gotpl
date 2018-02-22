@@ -36,11 +36,12 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	{{- if .QueryRoot }}
 		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-		data := ec._{{.QueryRoot.GQLType|lcFirst}}(op.Selections)
-		ec.wg.Wait()
+		data := ec._{{.QueryRoot.GQLType}}(op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
 
 		return &graphql.Response{
-			Data:   data,
+			Data:   buf.Bytes(),
 			Errors: ec.Errors,
 		}
 	{{- else }}
@@ -52,11 +53,12 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 	{{- if .MutationRoot }}
 		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-		data := ec._{{.MutationRoot.GQLType|lcFirst}}(op.Selections)
-		ec.wg.Wait()
+		data := ec._{{.MutationRoot.GQLType}}(op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
 
 		return &graphql.Response{
-			Data:   data,
+			Data:   buf.Bytes(),
 			Errors: ec.Errors,
 		}
 	{{- else }}
@@ -64,36 +66,33 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 	{{- end }}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
 	{{- if .SubscriptionRoot }}
-		events := make(chan *graphql.Response, 10)
-
 		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-		eventData := ec._{{.SubscriptionRoot.GQLType|lcFirst}}(op.Selections)
+		next := ec._{{.SubscriptionRoot.GQLType}}(op.Selections)
 		if ec.Errors != nil {
-			events<-&graphql.Response{
-				Data: graphql.Null,
-				Errors: ec.Errors,
-			}
-			close(events)
-		} else {
-			go func() {
-				for data := range eventData {
-					ec.wg.Wait()
-					events <- &graphql.Response{
-						Data: data,
-						Errors: ec.Errors,
-					}
-					time.Sleep(20 * time.Millisecond)
-				}
-			}()
+			return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
 		}
-		return events
+
+		var buf bytes.Buffer
+		return func() *graphql.Response {
+			buf.Reset()
+			data := next()
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			errs := ec.Errors
+			ec.Errors = nil
+			return &graphql.Response{
+				Data:   buf.Bytes(),
+				Errors: errs,
+			}
+		}
 	{{- else }}
-		events := make(chan *graphql.Response, 1)
-		events<-&graphql.Response{Errors: []*errors.QueryError{ {Message: "subscriptions are not supported"} }}
-		return events
+		return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{ {Message: "subscriptions are not supported"} }})
 	{{- end }}
 }
 
@@ -103,11 +102,14 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
-	wg        sync.WaitGroup
 }
 
 {{- range $object := .Objects }}
 	{{ template "object.gotpl" $object }}
+
+	{{- range $field := $object.Fields }}
+		{{ template "field.gotpl" $field }}
+	{{ end }}
 {{- end}}
 
 {{- range $interface := .Interfaces }}

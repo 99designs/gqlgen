@@ -64,7 +64,7 @@ func (f *Field) ResolverDeclaration() string {
 	res := fmt.Sprintf("%s_%s(ctx context.Context", f.Object.GQLType, f.GQLName)
 
 	if !f.Object.Root {
-		res += fmt.Sprintf(", it *%s", f.Object.FullName())
+		res += fmt.Sprintf(", obj *%s", f.Object.FullName())
 	}
 	for _, arg := range f.Args {
 		res += fmt.Sprintf(", %s %s", arg.GQLName, arg.Signature())
@@ -86,7 +86,7 @@ func (f *Field) CallArgs() string {
 		args = append(args, "ec.ctx")
 
 		if !f.Object.Root {
-			args = append(args, "it")
+			args = append(args, "obj")
 		}
 	}
 
@@ -98,59 +98,44 @@ func (f *Field) CallArgs() string {
 }
 
 // should be in the template, but its recursive and has a bunch of args
-func (f *Field) WriteJson(res string) string {
-	return f.doWriteJson(res, "res", f.Type.Modifiers, false, 1)
+func (f *Field) WriteJson() string {
+	return f.doWriteJson("res", f.Type.Modifiers, false, 1)
 }
 
-func (f *Field) doWriteJson(res string, val string, remainingMods []string, isPtr bool, depth int) string {
+func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool, depth int) string {
 	switch {
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
-		return tpl(`
-			if {{.val}} == nil {
-				{{.res}} = graphql.Null
-			} else {
-				{{.next}}
-			}`, map[string]interface{}{
-			"res":  res,
-			"val":  val,
-			"next": f.doWriteJson(res, val, remainingMods[1:], true, depth+1),
-		})
+		return fmt.Sprintf("if %s == nil { return graphql.Null }\n%s", val, f.doWriteJson(val, remainingMods[1:], true, depth+1))
 
 	case len(remainingMods) > 0 && remainingMods[0] == modList:
 		if isPtr {
 			val = "*" + val
 		}
-		var tmp = "tmp" + strconv.Itoa(depth)
 		var arr = "arr" + strconv.Itoa(depth)
 		var index = "idx" + strconv.Itoa(depth)
 
-		return tpl(`
-			{{.arr}} := graphql.Array{}
+		return tpl(`{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
-				var {{.tmp}} graphql.Marshaler
-				{{.next}}
-				{{.arr}} = append({{.arr}}, {{.tmp}})
+				{{.arr}} = append({{.arr}}, func() graphql.Marshaler { {{ .next }} }())
 			}
-			{{.res}} = {{.arr}}`, map[string]interface{}{
-			"res":   res,
+			return {{.arr}}`, map[string]interface{}{
 			"val":   val,
-			"tmp":   tmp,
 			"arr":   arr,
 			"index": index,
-			"next":  f.doWriteJson(tmp, val+"["+index+"]", remainingMods[1:], false, depth+1),
+			"next":  f.doWriteJson(val+"["+index+"]", remainingMods[1:], false, depth+1),
 		})
 
 	case f.IsScalar:
 		if isPtr {
 			val = "*" + val
 		}
-		return f.Marshal(res, val)
+		return f.Marshal(val)
 
 	default:
 		if !isPtr {
 			val = "&" + val
 		}
-		return fmt.Sprintf("%s = ec._%s(field.Selections, %s)", res, lcFirst(f.GQLType), val)
+		return fmt.Sprintf("return ec._%s(field.Selections, %s)", f.GQLType, val)
 	}
 }
 
@@ -167,16 +152,6 @@ func tpl(tpl string, vars map[string]interface{}) string {
 	b := &bytes.Buffer{}
 	template.Must(template.New("inline").Parse(tpl)).Execute(b, vars)
 	return b.String()
-}
-
-func lcFirst(s string) string {
-	if s == "" {
-		return ""
-	}
-
-	r := []rune(s)
-	r[0] = unicode.ToLower(r[0])
-	return string(r)
 }
 
 func ucFirst(s string) string {

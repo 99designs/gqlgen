@@ -171,7 +171,9 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	c.active[message.ID] = cancel
 	c.mu.Unlock()
 	go func() {
-		for result := range c.exec.Subscription(ctx, doc, params.Variables, op) {
+		next := c.exec.Subscription(ctx, doc, params.Variables, op)
+		for result := next(); result != nil; result = next() {
+			fmt.Println(result)
 			c.sendData(message.ID, result)
 		}
 
@@ -187,10 +189,13 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 }
 
 func (c *wsConnection) sendData(id string, response *graphql.Response) {
-	var b bytes.Buffer
-	response.MarshalGQL(&b)
+	b, err := json.Marshal(response)
+	if err != nil {
+		c.sendError(id, errors.Errorf("unable to encode json response: %s", err.Error()))
+		return
+	}
 
-	c.write(&operationMessage{Type: dataMsg, ID: id, Payload: b.Bytes()})
+	c.write(&operationMessage{Type: dataMsg, ID: id, Payload: b})
 }
 
 func (c *wsConnection) sendError(id string, errors ...*errors.QueryError) {

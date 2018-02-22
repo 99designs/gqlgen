@@ -3,10 +3,10 @@
 package starwars
 
 import (
+	"bytes"
 	context "context"
 	fmt "fmt"
 	strconv "strconv"
-	sync "sync"
 	time "time"
 
 	graphql "github.com/vektah/gqlgen/graphql"
@@ -21,16 +21,16 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	Droid_friends(ctx context.Context, it *Droid) ([]Character, error)
-	Droid_friendsConnection(ctx context.Context, it *Droid, first *int, after *string) (FriendsConnection, error)
+	Droid_friends(ctx context.Context, obj *Droid) ([]Character, error)
+	Droid_friendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error)
 
-	FriendsConnection_edges(ctx context.Context, it *FriendsConnection) ([]FriendsEdge, error)
-	FriendsConnection_friends(ctx context.Context, it *FriendsConnection) ([]Character, error)
+	FriendsConnection_edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error)
+	FriendsConnection_friends(ctx context.Context, obj *FriendsConnection) ([]Character, error)
 
-	Human_friends(ctx context.Context, it *Human) ([]Character, error)
-	Human_friendsConnection(ctx context.Context, it *Human, first *int, after *string) (FriendsConnection, error)
+	Human_friends(ctx context.Context, obj *Human) ([]Character, error)
+	Human_friendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error)
 
-	Human_starships(ctx context.Context, it *Human) ([]Starship, error)
+	Human_starships(ctx context.Context, obj *Human) ([]Starship, error)
 	Mutation_createReview(ctx context.Context, episode string, review Review) (*Review, error)
 
 	Query_hero(ctx context.Context, episode *string) (Character, error)
@@ -53,11 +53,12 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._query(op.Selections)
-	ec.wg.Wait()
+	data := ec._Query(op.Selections)
+	var buf bytes.Buffer
+	data.MarshalGQL(&buf)
 
 	return &graphql.Response{
-		Data:   data,
+		Data:   buf.Bytes(),
 		Errors: ec.Errors,
 	}
 }
@@ -65,19 +66,18 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._mutation(op.Selections)
-	ec.wg.Wait()
+	data := ec._Mutation(op.Selections)
+	var buf bytes.Buffer
+	data.MarshalGQL(&buf)
 
 	return &graphql.Response{
-		Data:   data,
+		Data:   buf.Bytes(),
 		Errors: ec.Errors,
 	}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *graphql.Response {
-	events := make(chan *graphql.Response, 1)
-	events <- &graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}}
-	return events
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+	return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}})
 }
 
 type executionContext struct {
@@ -86,1182 +86,1172 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
-	wg        sync.WaitGroup
 }
 
 var droidImplementors = []string{"Droid", "Character"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _droid(sel []query.Selection, it *Droid) graphql.Marshaler {
+func (ec *executionContext) _Droid(sel []query.Selection, obj *Droid) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, droidImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Droid")
 		case "id":
-			res := it.ID
-
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = ec._Droid_id(field, obj)
 		case "name":
-			res := it.Name
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec._Droid_name(field, obj)
 		case "friends":
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Droid_friends(ec.ctx, it)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._character(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._Droid_friends(field, obj)
 		case "friendsConnection":
-			var arg0 *int
-			if tmp, ok := field.Args["first"]; ok {
-				var err error
-				var ptr1 int
-
-				ptr1, err = graphql.UnmarshalInt(tmp)
-				arg0 = &ptr1
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			var arg1 *string
-			if tmp, ok := field.Args["after"]; ok {
-				var err error
-				var ptr1 string
-
-				ptr1, err = graphql.UnmarshalID(tmp)
-				arg1 = &ptr1
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, it, arg0, arg1)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				out.Values[i] = ec._friendsConnection(field.Selections, &res)
-			}(i, field)
+			out.Values[i] = ec._Droid_friendsConnection(field, obj)
 		case "appearsIn":
-			res := it.AppearsIn
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-				tmp1 = graphql.MarshalString(res[idx1])
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec._Droid_appearsIn(field, obj)
 		case "primaryFunction":
-			res := it.PrimaryFunction
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec._Droid_primaryFunction(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _Droid_id(field graphql.CollectedField, obj *Droid) graphql.Marshaler {
+	res := obj.ID
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _Droid_name(field graphql.CollectedField, obj *Droid) graphql.Marshaler {
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _Droid_friends(field graphql.CollectedField, obj *Droid) graphql.Marshaler {
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Droid_friends(ec.ctx, obj)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._Character(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Droid_friendsConnection(field graphql.CollectedField, obj *Droid) graphql.Marshaler {
+	var arg0 *int
+	if tmp, ok := field.Args["first"]; ok {
+		var err error
+		var ptr1 int
+
+		ptr1, err = graphql.UnmarshalInt(tmp)
+		arg0 = &ptr1
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	var arg1 *string
+	if tmp, ok := field.Args["after"]; ok {
+		var err error
+		var ptr1 string
+
+		ptr1, err = graphql.UnmarshalID(tmp)
+		arg1 = &ptr1
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, obj, arg0, arg1)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		return ec._FriendsConnection(field.Selections, &res)
+	})
+}
+
+func (ec *executionContext) _Droid_appearsIn(field graphql.CollectedField, obj *Droid) graphql.Marshaler {
+	res := obj.AppearsIn
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler { return graphql.MarshalString(res[idx1]) }())
+	}
+	return arr1
+}
+
+func (ec *executionContext) _Droid_primaryFunction(field graphql.CollectedField, obj *Droid) graphql.Marshaler {
+	res := obj.PrimaryFunction
+	return graphql.MarshalString(res)
 }
 
 var friendsConnectionImplementors = []string{"FriendsConnection"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _friendsConnection(sel []query.Selection, it *FriendsConnection) graphql.Marshaler {
+func (ec *executionContext) _FriendsConnection(sel []query.Selection, obj *FriendsConnection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, friendsConnectionImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("FriendsConnection")
 		case "totalCount":
-			res := it.TotalCount()
-
-			out.Values[i] = graphql.MarshalInt(res)
+			out.Values[i] = ec._FriendsConnection_totalCount(field, obj)
 		case "edges":
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.FriendsConnection_edges(ec.ctx, it)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._friendsEdge(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._FriendsConnection_edges(field, obj)
 		case "friends":
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.FriendsConnection_friends(ec.ctx, it)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._character(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._FriendsConnection_friends(field, obj)
 		case "pageInfo":
-			res := it.PageInfo()
-
-			out.Values[i] = ec._pageInfo(field.Selections, &res)
+			out.Values[i] = ec._FriendsConnection_pageInfo(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _FriendsConnection_totalCount(field graphql.CollectedField, obj *FriendsConnection) graphql.Marshaler {
+	res := obj.TotalCount()
+	return graphql.MarshalInt(res)
+}
+
+func (ec *executionContext) _FriendsConnection_edges(field graphql.CollectedField, obj *FriendsConnection) graphql.Marshaler {
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.FriendsConnection_edges(ec.ctx, obj)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._FriendsEdge(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _FriendsConnection_friends(field graphql.CollectedField, obj *FriendsConnection) graphql.Marshaler {
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.FriendsConnection_friends(ec.ctx, obj)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._Character(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _FriendsConnection_pageInfo(field graphql.CollectedField, obj *FriendsConnection) graphql.Marshaler {
+	res := obj.PageInfo()
+	return ec._PageInfo(field.Selections, &res)
 }
 
 var friendsEdgeImplementors = []string{"FriendsEdge"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _friendsEdge(sel []query.Selection, it *FriendsEdge) graphql.Marshaler {
+func (ec *executionContext) _FriendsEdge(sel []query.Selection, obj *FriendsEdge) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, friendsEdgeImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("FriendsEdge")
 		case "cursor":
-			res := it.Cursor
-
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = ec._FriendsEdge_cursor(field, obj)
 		case "node":
-			res := it.Node
-
-			out.Values[i] = ec._character(field.Selections, &res)
+			out.Values[i] = ec._FriendsEdge_node(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _FriendsEdge_cursor(field graphql.CollectedField, obj *FriendsEdge) graphql.Marshaler {
+	res := obj.Cursor
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _FriendsEdge_node(field graphql.CollectedField, obj *FriendsEdge) graphql.Marshaler {
+	res := obj.Node
+	return ec._Character(field.Selections, &res)
 }
 
 var humanImplementors = []string{"Human", "Character"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _human(sel []query.Selection, it *Human) graphql.Marshaler {
+func (ec *executionContext) _Human(sel []query.Selection, obj *Human) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, humanImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Human")
 		case "id":
-			res := it.ID
-
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = ec._Human_id(field, obj)
 		case "name":
-			res := it.Name
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec._Human_name(field, obj)
 		case "height":
-			var arg0 string
-			if tmp, ok := field.Args["unit"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := it.Height(arg0)
-
-			out.Values[i] = graphql.MarshalFloat(res)
+			out.Values[i] = ec._Human_height(field, obj)
 		case "mass":
-			res := it.Mass
-
-			out.Values[i] = graphql.MarshalFloat(res)
+			out.Values[i] = ec._Human_mass(field, obj)
 		case "friends":
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Human_friends(ec.ctx, it)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._character(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._Human_friends(field, obj)
 		case "friendsConnection":
-			var arg0 *int
-			if tmp, ok := field.Args["first"]; ok {
-				var err error
-				var ptr1 int
-
-				ptr1, err = graphql.UnmarshalInt(tmp)
-				arg0 = &ptr1
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			var arg1 *string
-			if tmp, ok := field.Args["after"]; ok {
-				var err error
-				var ptr1 string
-
-				ptr1, err = graphql.UnmarshalID(tmp)
-				arg1 = &ptr1
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Human_friendsConnection(ec.ctx, it, arg0, arg1)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				out.Values[i] = ec._friendsConnection(field.Selections, &res)
-			}(i, field)
+			out.Values[i] = ec._Human_friendsConnection(field, obj)
 		case "appearsIn":
-			res := it.AppearsIn
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-				tmp1 = graphql.MarshalString(res[idx1])
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec._Human_appearsIn(field, obj)
 		case "starships":
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Human_starships(ec.ctx, it)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._starship(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._Human_starships(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _Human_id(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	res := obj.ID
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _Human_name(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _Human_height(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["unit"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := obj.Height(arg0)
+	return graphql.MarshalFloat(res)
+}
+
+func (ec *executionContext) _Human_mass(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	res := obj.Mass
+	return graphql.MarshalFloat(res)
+}
+
+func (ec *executionContext) _Human_friends(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Human_friends(ec.ctx, obj)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._Character(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Human_friendsConnection(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	var arg0 *int
+	if tmp, ok := field.Args["first"]; ok {
+		var err error
+		var ptr1 int
+
+		ptr1, err = graphql.UnmarshalInt(tmp)
+		arg0 = &ptr1
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	var arg1 *string
+	if tmp, ok := field.Args["after"]; ok {
+		var err error
+		var ptr1 string
+
+		ptr1, err = graphql.UnmarshalID(tmp)
+		arg1 = &ptr1
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Human_friendsConnection(ec.ctx, obj, arg0, arg1)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		return ec._FriendsConnection(field.Selections, &res)
+	})
+}
+
+func (ec *executionContext) _Human_appearsIn(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	res := obj.AppearsIn
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler { return graphql.MarshalString(res[idx1]) }())
+	}
+	return arr1
+}
+
+func (ec *executionContext) _Human_starships(field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Human_starships(ec.ctx, obj)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._Starship(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
 }
 
 var mutationImplementors = []string{"Mutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _mutation(sel []query.Selection) graphql.Marshaler {
+func (ec *executionContext) _Mutation(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, mutationImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createReview":
-			var arg0 string
-			if tmp, ok := field.Args["episode"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			var arg1 Review
-			if tmp, ok := field.Args["review"]; ok {
-				var err error
-
-				arg1, err = UnmarshalReviewInput(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
-			if err != nil {
-				ec.Error(err)
-				continue
-			}
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec._review(field.Selections, res)
-			}
+			out.Values[i] = ec._Mutation_createReview(field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _Mutation_createReview(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["episode"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	var arg1 Review
+	if tmp, ok := field.Args["review"]; ok {
+		var err error
+
+		arg1, err = UnmarshalReviewInput(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res, err := ec.resolvers.Mutation_createReview(ec.ctx, arg0, arg1)
+	if err != nil {
+		ec.Error(err)
+		return graphql.Null
+	}
+	if res == nil {
+		return graphql.Null
+	}
+	return ec._Review(field.Selections, res)
 }
 
 var pageInfoImplementors = []string{"PageInfo"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _pageInfo(sel []query.Selection, it *PageInfo) graphql.Marshaler {
+func (ec *executionContext) _PageInfo(sel []query.Selection, obj *PageInfo) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, pageInfoImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PageInfo")
 		case "startCursor":
-			res := it.StartCursor
-
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = ec._PageInfo_startCursor(field, obj)
 		case "endCursor":
-			res := it.EndCursor
-
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = ec._PageInfo_endCursor(field, obj)
 		case "hasNextPage":
-			res := it.HasNextPage
-
-			out.Values[i] = graphql.MarshalBoolean(res)
+			out.Values[i] = ec._PageInfo_hasNextPage(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _PageInfo_startCursor(field graphql.CollectedField, obj *PageInfo) graphql.Marshaler {
+	res := obj.StartCursor
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _PageInfo_endCursor(field graphql.CollectedField, obj *PageInfo) graphql.Marshaler {
+	res := obj.EndCursor
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _PageInfo_hasNextPage(field graphql.CollectedField, obj *PageInfo) graphql.Marshaler {
+	res := obj.HasNextPage
+	return graphql.MarshalBoolean(res)
 }
 
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
+func (ec *executionContext) _Query(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, queryImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
 		case "hero":
-			var arg0 *string
-			if tmp, ok := field.Args["episode"]; ok {
-				var err error
-				var ptr1 string
-
-				ptr1, err = graphql.UnmarshalString(tmp)
-				arg0 = &ptr1
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				out.Values[i] = ec._character(field.Selections, &res)
-			}(i, field)
+			out.Values[i] = ec._Query_hero(field)
 		case "reviews":
-			var arg0 string
-			if tmp, ok := field.Args["episode"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			var arg1 *time.Time
-			if tmp, ok := field.Args["since"]; ok {
-				var err error
-				var ptr1 time.Time
-
-				ptr1, err = graphql.UnmarshalTime(tmp)
-				arg1 = &ptr1
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_reviews(ec.ctx, arg0, arg1)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._review(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._Query_reviews(field)
 		case "search":
-			var arg0 string
-			if tmp, ok := field.Args["text"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_search(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._searchResult(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._Query_search(field)
 		case "character":
-			var arg0 string
-			if tmp, ok := field.Args["id"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalID(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_character(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				out.Values[i] = ec._character(field.Selections, &res)
-			}(i, field)
+			out.Values[i] = ec._Query_character(field)
 		case "droid":
-			var arg0 string
-			if tmp, ok := field.Args["id"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalID(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				if res == nil {
-					out.Values[i] = graphql.Null
-				} else {
-					out.Values[i] = ec._droid(field.Selections, res)
-				}
-			}(i, field)
+			out.Values[i] = ec._Query_droid(field)
 		case "human":
-			var arg0 string
-			if tmp, ok := field.Args["id"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalID(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_human(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				if res == nil {
-					out.Values[i] = graphql.Null
-				} else {
-					out.Values[i] = ec._human(field.Selections, res)
-				}
-			}(i, field)
+			out.Values[i] = ec._Query_human(field)
 		case "starship":
-			var arg0 string
-			if tmp, ok := field.Args["id"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalID(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				if res == nil {
-					out.Values[i] = graphql.Null
-				} else {
-					out.Values[i] = ec._starship(field.Selections, res)
-				}
-			}(i, field)
+			out.Values[i] = ec._Query_starship(field)
 		case "__schema":
-			res := ec.introspectSchema()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Schema(field.Selections, res)
-			}
+			out.Values[i] = ec._Query___schema(field)
 		case "__type":
-			var arg0 string
-			if tmp, ok := field.Args["name"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := ec.introspectType(arg0)
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec._Query___type(field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _Query_hero(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 *string
+	if tmp, ok := field.Args["episode"]; ok {
+		var err error
+		var ptr1 string
+
+		ptr1, err = graphql.UnmarshalString(tmp)
+		arg0 = &ptr1
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		return ec._Character(field.Selections, &res)
+	})
+}
+
+func (ec *executionContext) _Query_reviews(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["episode"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	var arg1 *time.Time
+	if tmp, ok := field.Args["since"]; ok {
+		var err error
+		var ptr1 time.Time
+
+		ptr1, err = graphql.UnmarshalTime(tmp)
+		arg1 = &ptr1
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_reviews(ec.ctx, arg0, arg1)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._Review(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["text"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_search(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._SearchResult(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Query_character(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_character(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		return ec._Character(field.Selections, &res)
+	})
+}
+
+func (ec *executionContext) _Query_droid(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._Droid(field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _Query_human(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_human(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._Human(field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _Query_starship(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._Starship(field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _Query___schema(field graphql.CollectedField) graphql.Marshaler {
+	res := ec.introspectSchema()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Schema(field.Selections, res)
+}
+
+func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["name"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := ec.introspectType(arg0)
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
 }
 
 var reviewImplementors = []string{"Review"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _review(sel []query.Selection, it *Review) graphql.Marshaler {
+func (ec *executionContext) _Review(sel []query.Selection, obj *Review) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, reviewImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Review")
 		case "stars":
-			res := it.Stars
-
-			out.Values[i] = graphql.MarshalInt(res)
+			out.Values[i] = ec._Review_stars(field, obj)
 		case "commentary":
-			res := it.Commentary
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec._Review_commentary(field, obj)
 		case "time":
-			res := it.Time
-
-			out.Values[i] = graphql.MarshalTime(res)
+			out.Values[i] = ec._Review_time(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _Review_stars(field graphql.CollectedField, obj *Review) graphql.Marshaler {
+	res := obj.Stars
+	return graphql.MarshalInt(res)
+}
+
+func (ec *executionContext) _Review_commentary(field graphql.CollectedField, obj *Review) graphql.Marshaler {
+	res := obj.Commentary
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) _Review_time(field graphql.CollectedField, obj *Review) graphql.Marshaler {
+	res := obj.Time
+	return graphql.MarshalTime(res)
 }
 
 var starshipImplementors = []string{"Starship"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _starship(sel []query.Selection, it *Starship) graphql.Marshaler {
+func (ec *executionContext) _Starship(sel []query.Selection, obj *Starship) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, starshipImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Starship")
 		case "id":
-			res := it.ID
-
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = ec._Starship_id(field, obj)
 		case "name":
-			res := it.Name
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec._Starship_name(field, obj)
 		case "length":
-			var arg0 string
-			if tmp, ok := field.Args["unit"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := it.Length(arg0)
-
-			out.Values[i] = graphql.MarshalFloat(res)
+			out.Values[i] = ec._Starship_length(field, obj)
 		case "history":
-			res := it.History
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				arr2 := graphql.Array{}
-				for idx2 := range res[idx1] {
-					var tmp2 graphql.Marshaler
-					tmp2 = graphql.MarshalInt(res[idx1][idx2])
-					arr2 = append(arr2, tmp2)
-				}
-				tmp1 = arr2
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec._Starship_history(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _Starship_id(field graphql.CollectedField, obj *Starship) graphql.Marshaler {
+	res := obj.ID
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _Starship_name(field graphql.CollectedField, obj *Starship) graphql.Marshaler {
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _Starship_length(field graphql.CollectedField, obj *Starship) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["unit"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := obj.Length(arg0)
+	return graphql.MarshalFloat(res)
+}
+
+func (ec *executionContext) _Starship_history(field graphql.CollectedField, obj *Starship) graphql.Marshaler {
+	res := obj.History
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			arr2 := graphql.Array{}
+			for idx2 := range res[idx1] {
+				arr2 = append(arr2, func() graphql.Marshaler { return graphql.MarshalInt(res[idx1][idx2]) }())
+			}
+			return arr2
+		}())
+	}
+	return arr1
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) graphql.Marshaler {
+func (ec *executionContext) ___Directive(sel []query.Selection, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __DirectiveImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___Directive_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Directive_description(field, obj)
 		case "locations":
-			res := it.Locations()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-				tmp1 = graphql.MarshalString(res[idx1])
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Directive_locations(field, obj)
 		case "args":
-			res := it.Args()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___InputValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Directive_args(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___Directive_name(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___Directive_description(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Directive_locations(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Locations()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler { return graphql.MarshalString(res[idx1]) }())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Directive_args(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Args()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___InputValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
 }
 
 var __EnumValueImplementors = []string{"__EnumValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) graphql.Marshaler {
+func (ec *executionContext) ___EnumValue(sel []query.Selection, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __EnumValueImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___EnumValue_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___EnumValue_description(field, obj)
 		case "isDeprecated":
-			res := it.IsDeprecated()
-
-			out.Values[i] = graphql.MarshalBoolean(res)
+			out.Values[i] = ec.___EnumValue_isDeprecated(field, obj)
 		case "deprecationReason":
-			res := it.DeprecationReason()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___EnumValue_deprecationReason(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___EnumValue_name(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___EnumValue_description(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___EnumValue_isDeprecated(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.IsDeprecated()
+	return graphql.MarshalBoolean(res)
+}
+
+func (ec *executionContext) ___EnumValue_deprecationReason(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.DeprecationReason()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) graphql.Marshaler {
+func (ec *executionContext) ___Field(sel []query.Selection, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __FieldImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___Field_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Field_description(field, obj)
 		case "args":
-			res := it.Args()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___InputValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Field_args(field, obj)
 		case "type":
-			res := it.Type()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Field_type(field, obj)
 		case "isDeprecated":
-			res := it.IsDeprecated()
-
-			out.Values[i] = graphql.MarshalBoolean(res)
+			out.Values[i] = ec.___Field_isDeprecated(field, obj)
 		case "deprecationReason":
-			res := it.DeprecationReason()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Field_deprecationReason(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___Field_name(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___Field_description(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Field_args(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Args()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___InputValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Field_type(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Type()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Field_isDeprecated(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.IsDeprecated()
+	return graphql.MarshalBoolean(res)
+}
+
+func (ec *executionContext) ___Field_deprecationReason(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.DeprecationReason()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __InputValueImplementors = []string{"__InputValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) graphql.Marshaler {
+func (ec *executionContext) ___InputValue(sel []query.Selection, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __InputValueImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___InputValue_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___InputValue_description(field, obj)
 		case "type":
-			res := it.Type()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___InputValue_type(field, obj)
 		case "defaultValue":
-			res := it.DefaultValue()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___InputValue_defaultValue(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___InputValue_name(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___InputValue_description(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___InputValue_type(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.Type()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___InputValue_defaultValue(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.DefaultValue()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) graphql.Marshaler {
+func (ec *executionContext) ___Schema(sel []query.Selection, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __SchemaImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
-			res := it.Types()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Type(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Schema_types(field, obj)
 		case "queryType":
-			res := it.QueryType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Schema_queryType(field, obj)
 		case "mutationType":
-			res := it.MutationType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Schema_mutationType(field, obj)
 		case "subscriptionType":
-			res := it.SubscriptionType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Schema_subscriptionType(field, obj)
 		case "directives":
-			res := it.Directives()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Directive(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Schema_directives(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___Schema_types(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.Types()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Type(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Schema_queryType(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.QueryType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_mutationType(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.MutationType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_subscriptionType(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.SubscriptionType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_directives(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.Directives()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Directive(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
 }
 
 var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) graphql.Marshaler {
+func (ec *executionContext) ___Type(sel []query.Selection, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __TypeImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
-			res := it.Kind()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___Type_kind(field, obj)
 		case "name":
-			res := it.Name()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Type_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Type_description(field, obj)
 		case "fields":
-			var arg0 bool
-			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalBoolean(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := it.Fields(arg0)
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Field(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_fields(field, obj)
 		case "interfaces":
-			res := it.Interfaces()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Type(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_interfaces(field, obj)
 		case "possibleTypes":
-			res := it.PossibleTypes()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Type(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_possibleTypes(field, obj)
 		case "enumValues":
-			var arg0 bool
-			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalBoolean(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := it.EnumValues(arg0)
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___EnumValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_enumValues(field, obj)
 		case "inputFields":
-			res := it.InputFields()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___InputValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_inputFields(field, obj)
 		case "ofType":
-			res := it.OfType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Type_ofType(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1270,46 +1260,165 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-func (ec *executionContext) _character(sel []query.Selection, it *Character) graphql.Marshaler {
-	switch it := (*it).(type) {
+func (ec *executionContext) ___Type_kind(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Kind()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___Type_name(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Name()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Type_description(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	var arg0 bool
+	if tmp, ok := field.Args["includeDeprecated"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := obj.Fields(arg0)
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Field(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_interfaces(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Interfaces()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Type(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_possibleTypes(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.PossibleTypes()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Type(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	var arg0 bool
+	if tmp, ok := field.Args["includeDeprecated"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := obj.EnumValues(arg0)
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___EnumValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_inputFields(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.InputFields()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___InputValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_ofType(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.OfType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) _Character(sel []query.Selection, obj *Character) graphql.Marshaler {
+	switch obj := (*obj).(type) {
 	case nil:
 		return graphql.Null
 	case Human:
-		return ec._human(sel, &it)
+		return ec._Human(sel, &obj)
 
 	case *Human:
-		return ec._human(sel, it)
+		return ec._Human(sel, obj)
 	case Droid:
-		return ec._droid(sel, &it)
+		return ec._Droid(sel, &obj)
 
 	case *Droid:
-		return ec._droid(sel, it)
+		return ec._Droid(sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", it))
+		panic(fmt.Errorf("unexpected type %T", obj))
 	}
 }
 
-func (ec *executionContext) _searchResult(sel []query.Selection, it *SearchResult) graphql.Marshaler {
-	switch it := (*it).(type) {
+func (ec *executionContext) _SearchResult(sel []query.Selection, obj *SearchResult) graphql.Marshaler {
+	switch obj := (*obj).(type) {
 	case nil:
 		return graphql.Null
 	case Human:
-		return ec._human(sel, &it)
+		return ec._Human(sel, &obj)
 
 	case *Human:
-		return ec._human(sel, it)
+		return ec._Human(sel, obj)
 	case Droid:
-		return ec._droid(sel, &it)
+		return ec._Droid(sel, &obj)
 
 	case *Droid:
-		return ec._droid(sel, it)
+		return ec._Droid(sel, obj)
 	case Starship:
-		return ec._starship(sel, &it)
+		return ec._Starship(sel, &obj)
 
 	case *Starship:
-		return ec._starship(sel, it)
+		return ec._Starship(sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", it))
+		panic(fmt.Errorf("unexpected type %T", obj))
 	}
 }
 

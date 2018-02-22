@@ -90,9 +90,17 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 		switch op.Type {
 		case query.Query:
-			exec.Query(r.Context(), doc, params.Variables, op).MarshalGQL(w)
+			b, err := json.Marshal(exec.Query(r.Context(), doc, params.Variables, op))
+			if err != nil {
+				panic(err)
+			}
+			w.Write(b)
 		case query.Mutation:
-			exec.Mutation(r.Context(), doc, params.Variables, op).MarshalGQL(w)
+			b, err := json.Marshal(exec.Mutation(r.Context(), doc, params.Variables, op))
+			if err != nil {
+				panic(err)
+			}
+			w.Write(b)
 		default:
 			sendErrorf(w, http.StatusBadRequest, "unsupported operation type")
 		}
@@ -101,11 +109,11 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 func sendError(w http.ResponseWriter, code int, errs ...*errors.QueryError) {
 	w.WriteHeader(code)
-
-	resp := &graphql.Response{
-		Errors: errs,
+	b, err := json.Marshal(&graphql.Response{Errors: errs})
+	if err != nil {
+		panic(err)
 	}
-	resp.MarshalGQL(w)
+	w.Write(b)
 }
 
 func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {

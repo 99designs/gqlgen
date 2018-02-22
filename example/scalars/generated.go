@@ -3,9 +3,9 @@
 package scalars
 
 import (
+	"bytes"
 	context "context"
 	strconv "strconv"
-	sync "sync"
 	time "time"
 
 	graphql "github.com/vektah/gqlgen/graphql"
@@ -35,11 +35,12 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
 	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
 
-	data := ec._query(op.Selections)
-	ec.wg.Wait()
+	data := ec._Query(op.Selections)
+	var buf bytes.Buffer
+	data.MarshalGQL(&buf)
 
 	return &graphql.Response{
-		Data:   data,
+		Data:   buf.Bytes(),
 		Errors: ec.Errors,
 	}
 }
@@ -48,10 +49,8 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 	return &graphql.Response{Errors: []*errors.QueryError{{Message: "mutations are not supported"}}}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *graphql.Response {
-	events := make(chan *graphql.Response, 1)
-	events <- &graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}}
-	return events
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+	return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}})
 }
 
 type executionContext struct {
@@ -60,438 +59,443 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
-	wg        sync.WaitGroup
 }
 
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _query(sel []query.Selection) graphql.Marshaler {
+func (ec *executionContext) _Query(sel []query.Selection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, queryImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
 		case "user":
-			var arg0 string
-			if tmp, ok := field.Args["id"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalID(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_user(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				if res == nil {
-					out.Values[i] = graphql.Null
-				} else {
-					out.Values[i] = ec._user(field.Selections, res)
-				}
-			}(i, field)
+			out.Values[i] = ec._Query_user(field)
 		case "search":
-			var arg0 SearchArgs
-			if tmp, ok := field.Args["input"]; ok {
-				var err error
-
-				arg0, err = UnmarshalSearchArgs(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			ec.wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				defer ec.wg.Done()
-				res, err := ec.resolvers.Query_search(ec.ctx, arg0)
-				if err != nil {
-					ec.Error(err)
-					return
-				}
-
-				arr1 := graphql.Array{}
-				for idx1 := range res {
-					var tmp1 graphql.Marshaler
-					tmp1 = ec._user(field.Selections, &res[idx1])
-					arr1 = append(arr1, tmp1)
-				}
-				out.Values[i] = arr1
-			}(i, field)
+			out.Values[i] = ec._Query_search(field)
 		case "__schema":
-			res := ec.introspectSchema()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Schema(field.Selections, res)
-			}
+			out.Values[i] = ec._Query___schema(field)
 		case "__type":
-			var arg0 string
-			if tmp, ok := field.Args["name"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := ec.introspectType(arg0)
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec._Query___type(field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _Query_user(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_user(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._User(field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 SearchArgs
+	if tmp, ok := field.Args["input"]; ok {
+		var err error
+
+		arg0, err = UnmarshalSearchArgs(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	return graphql.Defer(func() graphql.Marshaler {
+		res, err := ec.resolvers.Query_search(ec.ctx, arg0)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._User(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Query___schema(field graphql.CollectedField) graphql.Marshaler {
+	res := ec.introspectSchema()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Schema(field.Selections, res)
+}
+
+func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.Marshaler {
+	var arg0 string
+	if tmp, ok := field.Args["name"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := ec.introspectType(arg0)
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
 }
 
 var userImplementors = []string{"User"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _user(sel []query.Selection, it *User) graphql.Marshaler {
+func (ec *executionContext) _User(sel []query.Selection, obj *User) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, userImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
 		case "id":
-			res := it.ID
-
-			out.Values[i] = graphql.MarshalID(res)
+			out.Values[i] = ec._User_id(field, obj)
 		case "name":
-			res := it.Name
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec._User_name(field, obj)
 		case "created":
-			res := it.Created
-
-			out.Values[i] = MarshalTimestamp(res)
+			out.Values[i] = ec._User_created(field, obj)
 		case "location":
-			res := it.Location
-
-			out.Values[i] = res
+			out.Values[i] = ec._User_location(field, obj)
 		case "isBanned":
-			res := it.IsBanned
-
-			out.Values[i] = graphql.MarshalBoolean(bool(res))
+			out.Values[i] = ec._User_isBanned(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) _User_id(field graphql.CollectedField, obj *User) graphql.Marshaler {
+	res := obj.ID
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _User_name(field graphql.CollectedField, obj *User) graphql.Marshaler {
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _User_created(field graphql.CollectedField, obj *User) graphql.Marshaler {
+	res := obj.Created
+	return MarshalTimestamp(res)
+}
+
+func (ec *executionContext) _User_location(field graphql.CollectedField, obj *User) graphql.Marshaler {
+	res := obj.Location
+	return res
+}
+
+func (ec *executionContext) _User_isBanned(field graphql.CollectedField, obj *User) graphql.Marshaler {
+	res := obj.IsBanned
+	return graphql.MarshalBoolean(bool(res))
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(sel []query.Selection, it *introspection.Directive) graphql.Marshaler {
+func (ec *executionContext) ___Directive(sel []query.Selection, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __DirectiveImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___Directive_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Directive_description(field, obj)
 		case "locations":
-			res := it.Locations()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-				tmp1 = graphql.MarshalString(res[idx1])
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Directive_locations(field, obj)
 		case "args":
-			res := it.Args()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___InputValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Directive_args(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___Directive_name(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___Directive_description(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Directive_locations(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Locations()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler { return graphql.MarshalString(res[idx1]) }())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Directive_args(field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	res := obj.Args()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___InputValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
 }
 
 var __EnumValueImplementors = []string{"__EnumValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(sel []query.Selection, it *introspection.EnumValue) graphql.Marshaler {
+func (ec *executionContext) ___EnumValue(sel []query.Selection, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __EnumValueImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___EnumValue_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___EnumValue_description(field, obj)
 		case "isDeprecated":
-			res := it.IsDeprecated()
-
-			out.Values[i] = graphql.MarshalBoolean(res)
+			out.Values[i] = ec.___EnumValue_isDeprecated(field, obj)
 		case "deprecationReason":
-			res := it.DeprecationReason()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___EnumValue_deprecationReason(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___EnumValue_name(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___EnumValue_description(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___EnumValue_isDeprecated(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.IsDeprecated()
+	return graphql.MarshalBoolean(res)
+}
+
+func (ec *executionContext) ___EnumValue_deprecationReason(field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	res := obj.DeprecationReason()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(sel []query.Selection, it *introspection.Field) graphql.Marshaler {
+func (ec *executionContext) ___Field(sel []query.Selection, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __FieldImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___Field_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Field_description(field, obj)
 		case "args":
-			res := it.Args()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___InputValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Field_args(field, obj)
 		case "type":
-			res := it.Type()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Field_type(field, obj)
 		case "isDeprecated":
-			res := it.IsDeprecated()
-
-			out.Values[i] = graphql.MarshalBoolean(res)
+			out.Values[i] = ec.___Field_isDeprecated(field, obj)
 		case "deprecationReason":
-			res := it.DeprecationReason()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Field_deprecationReason(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___Field_name(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___Field_description(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Field_args(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Args()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___InputValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Field_type(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.Type()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Field_isDeprecated(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.IsDeprecated()
+	return graphql.MarshalBoolean(res)
+}
+
+func (ec *executionContext) ___Field_deprecationReason(field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	res := obj.DeprecationReason()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __InputValueImplementors = []string{"__InputValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(sel []query.Selection, it *introspection.InputValue) graphql.Marshaler {
+func (ec *executionContext) ___InputValue(sel []query.Selection, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __InputValueImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
-			res := it.Name()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___InputValue_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___InputValue_description(field, obj)
 		case "type":
-			res := it.Type()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___InputValue_type(field, obj)
 		case "defaultValue":
-			res := it.DefaultValue()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___InputValue_defaultValue(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___InputValue_name(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.Name()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___InputValue_description(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___InputValue_type(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.Type()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___InputValue_defaultValue(field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	res := obj.DefaultValue()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.Schema) graphql.Marshaler {
+func (ec *executionContext) ___Schema(sel []query.Selection, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __SchemaImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
-			res := it.Types()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Type(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Schema_types(field, obj)
 		case "queryType":
-			res := it.QueryType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Schema_queryType(field, obj)
 		case "mutationType":
-			res := it.MutationType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Schema_mutationType(field, obj)
 		case "subscriptionType":
-			res := it.SubscriptionType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Schema_subscriptionType(field, obj)
 		case "directives":
-			res := it.Directives()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Directive(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Schema_directives(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -500,148 +504,213 @@ func (ec *executionContext) ___Schema(sel []query.Selection, it *introspection.S
 	return out
 }
 
+func (ec *executionContext) ___Schema_types(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.Types()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Type(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Schema_queryType(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.QueryType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_mutationType(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.MutationType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_subscriptionType(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.SubscriptionType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_directives(field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	res := obj.Directives()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Directive(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
 var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Type) graphql.Marshaler {
+func (ec *executionContext) ___Type(sel []query.Selection, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, __TypeImplementors, ec.variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
-		out.Values[i] = graphql.Null
 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
-			res := it.Kind()
-
-			out.Values[i] = graphql.MarshalString(res)
+			out.Values[i] = ec.___Type_kind(field, obj)
 		case "name":
-			res := it.Name()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Type_name(field, obj)
 		case "description":
-			res := it.Description()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = graphql.MarshalString(*res)
-			}
+			out.Values[i] = ec.___Type_description(field, obj)
 		case "fields":
-			var arg0 bool
-			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalBoolean(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := it.Fields(arg0)
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Field(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_fields(field, obj)
 		case "interfaces":
-			res := it.Interfaces()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Type(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_interfaces(field, obj)
 		case "possibleTypes":
-			res := it.PossibleTypes()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___Type(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_possibleTypes(field, obj)
 		case "enumValues":
-			var arg0 bool
-			if tmp, ok := field.Args["includeDeprecated"]; ok {
-				var err error
-
-				arg0, err = graphql.UnmarshalBoolean(tmp)
-				if err != nil {
-					ec.Error(err)
-					return graphql.Null
-				}
-			}
-			res := it.EnumValues(arg0)
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___EnumValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_enumValues(field, obj)
 		case "inputFields":
-			res := it.InputFields()
-
-			arr1 := graphql.Array{}
-			for idx1 := range res {
-				var tmp1 graphql.Marshaler
-
-				if res[idx1] == nil {
-					tmp1 = graphql.Null
-				} else {
-					tmp1 = ec.___InputValue(field.Selections, res[idx1])
-				}
-				arr1 = append(arr1, tmp1)
-			}
-			out.Values[i] = arr1
+			out.Values[i] = ec.___Type_inputFields(field, obj)
 		case "ofType":
-			res := it.OfType()
-
-			if res == nil {
-				out.Values[i] = graphql.Null
-			} else {
-				out.Values[i] = ec.___Type(field.Selections, res)
-			}
+			out.Values[i] = ec.___Type_ofType(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
 	return out
+}
+
+func (ec *executionContext) ___Type_kind(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Kind()
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) ___Type_name(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Name()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Type_description(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Description()
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	var arg0 bool
+	if tmp, ok := field.Args["includeDeprecated"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := obj.Fields(arg0)
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Field(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_interfaces(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.Interfaces()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Type(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_possibleTypes(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.PossibleTypes()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___Type(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	var arg0 bool
+	if tmp, ok := field.Args["includeDeprecated"]; ok {
+		var err error
+
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	}
+	res := obj.EnumValues(arg0)
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___EnumValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_inputFields(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.InputFields()
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return ec.___InputValue(field.Selections, res[idx1])
+		}())
+	}
+	return arr1
+}
+
+func (ec *executionContext) ___Type_ofType(field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	res := obj.OfType()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(field.Selections, res)
 }
 
 func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {

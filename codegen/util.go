@@ -92,7 +92,7 @@ func bindObject(t types.Type, object *Object, imports Imports) {
 		field := &object.Fields[i]
 		if method := findMethod(namedType, field.GQLName); method != nil {
 			sig := method.Type().(*types.Signature)
-			field.GoMethodName = "it." + method.Name()
+			field.GoMethodName = "obj." + method.Name()
 			field.Type.Modifiers = modifiersFromGoType(sig.Results().At(0).Type())
 
 			// check arg order matches code, not gql

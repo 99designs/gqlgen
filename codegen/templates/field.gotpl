@@ -1,0 +1,54 @@
+{{ $field := . }}
+{{ $object := $field.Object }}
+
+{{- if $object.Stream }}
+	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(field graphql.CollectedField) func() graphql.Marshaler {
+		{{- template "args.gotpl" $field.Args }}
+		results, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
+		if err != nil {
+			ec.Error(err)
+			return nil
+		}
+		return func() graphql.Marshaler {
+			res, ok := <-results
+			if !ok {
+				return nil
+			}
+			var out graphql.OrderedMap
+			out.Add(field.Alias, func() graphql.Marshaler { {{ $field.WriteJson }} }())
+			return &out
+		}
+	}
+{{ else }}
+	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
+		{{- template "args.gotpl" $field.Args }}
+
+		{{- if $field.IsConcurrent }}
+			return graphql.Defer(func() graphql.Marshaler {
+		{{- end }}
+
+			{{- if $field.GoVarName }}
+				res := obj.{{$field.GoVarName}}
+			{{- else if $field.GoMethodName }}
+				{{- if $field.NoErr }}
+					res := {{$field.GoMethodName}}({{ $field.CallArgs }})
+				{{- else }}
+					res, err := {{$field.GoMethodName}}({{ $field.CallArgs }})
+					if err != nil {
+						ec.Error(err)
+						return graphql.Null
+					}
+				{{- end }}
+			{{- else }}
+				res, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
+				if err != nil {
+					ec.Error(err)
+					return graphql.Null
+				}
+			{{- end }}
+			{{ $field.WriteJson }}
+		{{- if $field.IsConcurrent }}
+			})
+		{{- end }}
+	}
+{{ end }}

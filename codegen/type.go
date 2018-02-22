@@ -129,14 +129,14 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	})
 }
 
-func (t Type) Marshal(result, val string) string {
+func (t Type) Marshal(val string) string {
 	if t.CastType != "" {
 		val = t.GoType + "(" + val + ")"
 	}
 
 	if t.Marshaler != nil {
-		return result + " = " + t.Marshaler.PkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
+		return "return " + t.Marshaler.PkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
 	}
 
-	return result + " = " + val
+	return "return " + val
 }

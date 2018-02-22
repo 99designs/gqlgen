@@ -19,7 +19,7 @@ func TestTodo(t *testing.T) {
 		var resp struct {
 			CreateTodo struct{ ID int }
 		}
-		c.MustPost(`mutation { createTodo(text:"Fery important") { id } }`, &resp)
+		c.MustPost(`mutation { createTodo(todo:{text:"Fery important"}) { id } }`, &resp)
 
 		require.Equal(t, 4, resp.CreateTodo.ID)
 	})

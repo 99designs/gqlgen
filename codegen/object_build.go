@@ -48,7 +48,7 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program, impo
 	return objects
 }
 
-func findMissingObjects(objects Objects, s *schema.Schema) Objects {
+func findMissing(objects Objects) Objects {
 	var missingObjects Objects
 
 	for _, object := range objects {
@@ -56,6 +56,7 @@ func findMissingObjects(objects Objects, s *schema.Schema) Objects {
 			continue
 		}
 		object.GoType = ucFirst(object.GQLType)
+		object.Marshaler = &Ref{GoType: object.GoType}
 
 		for i := range object.Fields {
 			field := &object.Fields[i]

@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -typemap types.json -out generated.go
+//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go
 
 package todo
 
@@ -47,13 +47,16 @@ func (r *todoResolver) MyQuery_todos(ctx context.Context) ([]Todo, error) {
 	return r.todos, nil
 }
 
-func (r *todoResolver) MyMutation_createTodo(ctx context.Context, text string) (Todo, error) {
+func (r *todoResolver) MyMutation_createTodo(ctx context.Context, todo TodoInput) (Todo, error) {
 	newID := r.id()
 
 	newTodo := Todo{
 		ID:   newID,
-		Text: text,
-		Done: false,
+		Text: todo.Text,
+	}
+
+	if todo.Done != nil {
+		newTodo.Done = *todo.Done
 	}
 
 	r.todos = append(r.todos, newTodo)

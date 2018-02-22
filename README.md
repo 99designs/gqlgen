@@ -237,9 +237,18 @@ This magic comment tells `go generate` what command to run when we want to regen
 go generate ./..
 ``` 
 
-*gorunpkg* will build and run the version of gqlgen we just installed into vendor with dep. This makes sure 
+*gorunpkg* will build and run the version of gqlgen we just installed into vendor with dep. This makes sure
 that everyone working on your project generates code the same way regardless which binaries are installed in their gopath.
 
+
+### Included custom scalar types
+
+Included in gqlgen there are some custom scalar types that will just work out of the box.
+
+- Time: An RFC3339 date as a quoted string
+- Map: a json object represented as a map[string]interface{}. Useful change sets.
+
+You are free to redefine these any way you want in types.json, see the [custom scalar example](./example/scalars).
 
 ### Prior art
 

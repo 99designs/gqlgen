@@ -672,6 +672,9 @@ func validateValueType(c *opContext, v common.Literal, t common.Type) (bool, str
 			if validateBasicLit(lit, t) {
 				return true, ""
 			}
+		} else {
+			// custom complex scalars will be validated when unmarshaling
+			return true, ""
 		}
 
 	case *common.List:

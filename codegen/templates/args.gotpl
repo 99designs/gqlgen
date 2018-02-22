@@ -1,26 +1,15 @@
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.Signature }}
-		{{- if eq $arg.GoType "map[string]interface{}" }}
-			if tmp, ok := field.Args[{{$arg.GQLName|quote}}]; ok {
-				{{- if $arg.Type.IsPtr }}
-					tmp2 := tmp.({{$arg.GoType}})
-					arg{{$i}} = &tmp2
+		if tmp, ok := field.Args[{{$arg.GQLName|quote}}]; ok {
+			var err error
+			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
+			if err != nil {
+				ec.Error(err)
+				{{- if $arg.Object.Stream }}
+					return nil
 				{{- else }}
-					arg{{$i}} = tmp.({{$arg.GoType}})
+					return graphql.Null
 				{{- end }}
 			}
-		{{- else}}
-			if tmp, ok := field.Args[{{$arg.GQLName|quote}}]; ok {
-				var err error
-				{{$arg.Unmarshal (print "arg" $i) "tmp" }}
-				if err != nil {
-					ec.Error(err)
-					{{- if $arg.Object.Stream }}
-						return nil
-					{{- else }}
-						return graphql.Null
-					{{- end }}
-				}
-			}
-		{{- end}}
+		}
 	{{- end -}}

@@ -10,8 +10,8 @@ type MyQuery {
 }
 
 type MyMutation {
-	createTodo(text: String!): Todo!
-	updateTodo(id: Int!, changes: TodoInput!): Todo
+	createTodo(todo: TodoInput!): Todo!
+	updateTodo(id: Int!, changes: Map!): Todo
 }
 
 type Todo {
@@ -21,6 +21,6 @@ type Todo {
 }
 
 input TodoInput {
-	text: String
+	text: String!
 	done: Boolean
 }

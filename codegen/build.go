@@ -36,13 +36,15 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 	bindTypes(imports, namedTypes, prog)
 
 	objects := buildObjects(namedTypes, schema, prog, imports)
+	inputs := buildInputs(namedTypes, schema, prog, imports)
+	models := append(findMissing(objects), findMissing(inputs)...)
 
 	b := &Build{
 		PackageName: filepath.Base(destDir),
 		Objects:     objects,
-		Models:      findMissingObjects(objects, schema),
+		Models:      models,
 		Interfaces:  buildInterfaces(namedTypes, schema),
-		Inputs:      buildInputs(namedTypes, schema, prog, imports),
+		Inputs:      inputs,
 		Imports:     imports,
 	}
 

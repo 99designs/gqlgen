@@ -114,6 +114,7 @@ func loadTypeMap() map[string]string {
 		"Boolean":      "github.com/vektah/gqlgen/graphql.Boolean",
 		"ID":           "github.com/vektah/gqlgen/graphql.ID",
 		"Time":         "github.com/vektah/gqlgen/graphql.Time",
+		"Map":          "github.com/vektah/gqlgen/graphql.Map",
 	}
 	if *typemap != "" {
 		b, err := ioutil.ReadFile(*typemap)

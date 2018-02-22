@@ -19,7 +19,7 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	MyMutation_createTodo(ctx context.Context, text string) (Todo, error)
+	MyMutation_createTodo(ctx context.Context, todo TodoInput) (Todo, error)
 	MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
 	MyQuery_todo(ctx context.Context, id int) (*Todo, error)
 	MyQuery_lastTodo(ctx context.Context) (*Todo, error)
@@ -30,6 +30,11 @@ type Todo struct {
 	ID   int
 	Text string
 	Done bool
+}
+
+type TodoInput struct {
+	Text string
+	Done *bool
 }
 
 type executableSchema struct {
@@ -93,11 +98,11 @@ func (ec *executionContext) _myMutation(sel []query.Selection) graphql.Marshaler
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("MyMutation")
 		case "createTodo":
-			var arg0 string
-			if tmp, ok := field.Args["text"]; ok {
+			var arg0 TodoInput
+			if tmp, ok := field.Args["todo"]; ok {
 				var err error
 
-				arg0, err = graphql.UnmarshalString(tmp)
+				arg0, err = UnmarshalTodoInput(tmp)
 				if err != nil {
 					ec.Error(err)
 					return graphql.Null
@@ -123,7 +128,13 @@ func (ec *executionContext) _myMutation(sel []query.Selection) graphql.Marshaler
 			}
 			var arg1 map[string]interface{}
 			if tmp, ok := field.Args["changes"]; ok {
-				arg1 = tmp.(map[string]interface{})
+				var err error
+
+				arg1, err = graphql.UnmarshalMap(tmp)
+				if err != nil {
+					ec.Error(err)
+					return graphql.Null
+				}
 			}
 			res, err := ec.resolvers.MyMutation_updateTodo(ec.ctx, arg0, arg1)
 			if err != nil {
@@ -723,7 +734,34 @@ func (ec *executionContext) ___Type(sel []query.Selection, it *introspection.Typ
 	return out
 }
 
-var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(text: String!): Todo!\n\tupdateTodo(id: Int!, changes: TodoInput!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String\n\tdone: Boolean\n}\n")
+func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
+	var it TodoInput
+
+	for k, v := range v.(map[string]interface{}) {
+		switch k {
+		case "text":
+			var err error
+
+			it.Text, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "done":
+			var err error
+			var ptr1 bool
+
+			ptr1, err = graphql.UnmarshalBoolean(v)
+			it.Done = &ptr1
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(todo: TodoInput!): Todo!\n\tupdateTodo(id: Int!, changes: Map!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String!\n\tdone: Boolean\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

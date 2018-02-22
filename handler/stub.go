@@ -24,10 +24,7 @@ func (e *executableSchemaStub) Schema() *schema.Schema {
 }
 
 func (e *executableSchemaStub) Query(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
-	data := graphql.OrderedMap{}
-	data.Add("name", graphql.MarshalString("test"))
-
-	return &graphql.Response{Data: &data}
+	return &graphql.Response{Data: []byte(`{"name":"test"}`)}
 }
 
 func (e *executableSchemaStub) Mutation(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
@@ -36,25 +33,16 @@ func (e *executableSchemaStub) Mutation(ctx context.Context, document *query.Doc
 	}
 }
 
-func (e *executableSchemaStub) Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *graphql.Response {
-	events := make(chan *graphql.Response, 0)
-
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				close(events)
-				return
-			default:
-				data := graphql.OrderedMap{}
-				data.Add("name", graphql.MarshalString("test"))
-
-				events <- &graphql.Response{
-					Data: &data,
-				}
+func (e *executableSchemaStub) Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+	return func() *graphql.Response {
+		time.Sleep(20 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+			return &graphql.Response{
+				Data: []byte(`{"name":"test"}`),
 			}
-			time.Sleep(20 * time.Millisecond)
 		}
-	}()
-	return events
+	}
 }

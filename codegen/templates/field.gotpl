@@ -2,22 +2,22 @@
 {{ $object := $field.Object }}
 
 {{- if $object.Stream }}
-	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(field graphql.CollectedField) <-chan graphql.Marshaler {
-		channel := make(chan graphql.Marshaler, 1)
+	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(field graphql.CollectedField) func() graphql.Marshaler {
 		{{- template "args.gotpl" $field.Args }}
 		results, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
 		if err != nil {
 			ec.Error(err)
 			return nil
 		}
-		go func() {
-			for res := range results {
-				var out graphql.OrderedMap
-				out.Add(field.Alias, func() graphql.Marshaler { {{ $field.WriteJson }} }())
-				channel <- &out
+		return func() graphql.Marshaler {
+			res, ok := <-results
+			if !ok {
+				return nil
 			}
-		}()
-		return channel
+			var out graphql.OrderedMap
+			out.Add(field.Alias, func() graphql.Marshaler { {{ $field.WriteJson }} }())
+			return &out
+		}
 	}
 {{ else }}
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {

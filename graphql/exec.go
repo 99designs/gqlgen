@@ -13,7 +13,7 @@ type ExecutableSchema interface {
 
 	Query(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *Response
 	Mutation(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *Response
-	Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) <-chan *Response
+	Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) func() *Response
 }
 
 func CollectFields(doc *query.Document, selSet []query.Selection, satisfies []string, variables map[string]interface{}) []CollectedField {

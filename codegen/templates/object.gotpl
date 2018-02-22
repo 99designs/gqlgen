@@ -4,7 +4,7 @@ var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
 {{- if .Stream }}
-func (ec *executionContext) _{{$object.GQLType}}(sel []query.Selection) <-chan graphql.Marshaler {
+func (ec *executionContext) _{{$object.GQLType}}(sel []query.Selection) func() graphql.Marshaler {
 	fields := graphql.CollectFields(ec.doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.variables)
 
 	if len(fields) != 1 {

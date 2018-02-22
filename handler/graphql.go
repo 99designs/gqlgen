@@ -52,25 +52,25 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 		w.Header().Set("Content-Type", "application/json")
 
-		var params params
+		var reqParams params
 		if r.Method == "GET" {
-			params.Query = r.URL.Query().Get("query")
-			params.OperationName = r.URL.Query().Get("operationName")
+			reqParams.Query = r.URL.Query().Get("query")
+			reqParams.OperationName = r.URL.Query().Get("operationName")
 
 			if variables := r.URL.Query().Get("variables"); variables != "" {
-				if err := json.Unmarshal([]byte(variables), &params.Variables); err != nil {
+				if err := json.Unmarshal([]byte(variables), &reqParams.Variables); err != nil {
 					sendErrorf(w, http.StatusBadRequest, "variables could not be decoded")
 					return
 				}
 			}
 		} else {
-			if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+			if err := json.NewDecoder(r.Body).Decode(&reqParams); err != nil {
 				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
 				return
 			}
 		}
 
-		doc, qErr := query.Parse(params.Query)
+		doc, qErr := query.Parse(reqParams.Query)
 		if qErr != nil {
 			sendError(w, http.StatusUnprocessableEntity, qErr)
 			return
@@ -82,7 +82,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			return
 		}
 
-		op, err := doc.GetOperation(params.OperationName)
+		op, err := doc.GetOperation(reqParams.OperationName)
 		if err != nil {
 			sendErrorf(w, http.StatusUnprocessableEntity, err.Error())
 			return
@@ -90,13 +90,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 		switch op.Type {
 		case query.Query:
-			b, err := json.Marshal(exec.Query(r.Context(), doc, params.Variables, op))
+			b, err := json.Marshal(exec.Query(r.Context(), doc, reqParams.Variables, op))
 			if err != nil {
 				panic(err)
 			}
 			w.Write(b)
 		case query.Mutation:
-			b, err := json.Marshal(exec.Mutation(r.Context(), doc, params.Variables, op))
+			b, err := json.Marshal(exec.Mutation(r.Context(), doc, reqParams.Variables, op))
 			if err != nil {
 				panic(err)
 			}

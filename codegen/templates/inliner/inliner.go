@@ -39,9 +39,9 @@ func main() {
 
 	out.WriteString("}\n")
 
-	formatted, err := imports.Process(dir+"data.go", out.Bytes(), nil)
-	if err != nil {
-		panic(err)
+	formatted, err2 := imports.Process(dir+"data.go", out.Bytes(), nil)
+	if err2 != nil {
+		panic(err2)
 	}
 
 	ioutil.WriteFile(dir+"data.go", formatted, 0644)

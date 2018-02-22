@@ -150,7 +150,10 @@ func (os Objects) ByName(name string) *Object {
 
 func tpl(tpl string, vars map[string]interface{}) string {
 	b := &bytes.Buffer{}
-	template.Must(template.New("inline").Parse(tpl)).Execute(b, vars)
+	err := template.Must(template.New("inline").Parse(tpl)).Execute(b, vars)
+	if err != nil {
+		panic(err)
+	}
 	return b.String()
 }
 

@@ -23,10 +23,10 @@ const (
 	stopMsg                = "stop"                 // Client -> Server
 	connectionAckMsg       = "connection_ack"       // Server -> Client
 	connectionErrorMsg     = "connection_error"     // Server -> Client
-	connectionKeepAliveMsg = "ka"                   // Server -> Client
 	dataMsg                = "data"                 // Server -> Client
 	errorMsg               = "error"                // Server -> Client
 	completeMsg            = "complete"             // Server -> Client
+	//connectionKeepAliveMsg = "ka"                   // Server -> Client  TODO: keepalives
 )
 
 type operationMessage struct {
@@ -129,13 +129,13 @@ func (c *wsConnection) run() {
 }
 
 func (c *wsConnection) subscribe(message *operationMessage) bool {
-	var params params
-	if err := json.Unmarshal(message.Payload, &params); err != nil {
+	var reqParams params
+	if err := json.Unmarshal(message.Payload, &reqParams); err != nil {
 		c.sendConnectionError("invalid json")
 		return false
 	}
 
-	doc, qErr := query.Parse(params.Query)
+	doc, qErr := query.Parse(reqParams.Query)
 	if qErr != nil {
 		c.sendError(message.ID, qErr)
 		return true
@@ -147,7 +147,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return true
 	}
 
-	op, err := doc.GetOperation(params.OperationName)
+	op, err := doc.GetOperation(reqParams.OperationName)
 	if err != nil {
 		c.sendError(message.ID, errors.Errorf("%s", err.Error()))
 		return true
@@ -156,9 +156,9 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	if op.Type != query.Subscription {
 		var result *graphql.Response
 		if op.Type == query.Query {
-			result = c.exec.Query(c.ctx, doc, params.Variables, op)
+			result = c.exec.Query(c.ctx, doc, reqParams.Variables, op)
 		} else {
-			result = c.exec.Mutation(c.ctx, doc, params.Variables, op)
+			result = c.exec.Mutation(c.ctx, doc, reqParams.Variables, op)
 		}
 
 		c.sendData(message.ID, result)
@@ -171,7 +171,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	c.active[message.ID] = cancel
 	c.mu.Unlock()
 	go func() {
-		next := c.exec.Subscription(ctx, doc, params.Variables, op)
+		next := c.exec.Subscription(ctx, doc, reqParams.Variables, op)
 		for result := next(); result != nil; result = next() {
 			fmt.Println(result)
 			c.sendData(message.ID, result)

@@ -2,11 +2,11 @@
   "sort": ["path"],
   "Linters": {
     "errcheck": {
-      "Command":           "errcheck -abspath -ignore '[rR]ead|[wW]rite'",
+      "Command":           "errcheck -abspath -ignore '[rR]ead|[wW]rite|Close'",
       "Pattern":           "PATH:LINE:COL:MESSAGE",
       "InstallFrom":       "github.com/kisielk/errcheck",
       "PartitionStrategy": "packages"
     }
   },
-  "Disable": ["gas","golint","gocyclo","goconst", "gotype"]
+  "Disable": ["gas","golint","gocyclo","goconst", "gotype", "maligned"]
 }

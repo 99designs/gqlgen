@@ -49,8 +49,7 @@ func bindGenerated(types NamedTypes, object *Object) {
 				field.GoVarName = "ID"
 			}
 		} else if object.Input {
-			field.GoFKName = ucFirst(field.GQLName)
-			field.GoFKType = types[field.GQLType].GoType
+			field.GoVarName = ucFirst(field.GQLName)
 		} else {
 			field.GoFKName = ucFirst(field.GQLName) + "ID"
 			field.GoFKType = "int" // todo: use schema to determine type of id?

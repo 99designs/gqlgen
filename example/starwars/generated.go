@@ -353,7 +353,7 @@ func (ec *executionContext) _Human_height(field graphql.CollectedField, obj *Hum
 			return graphql.Null
 		}
 	} else {
-		tmp := "METER"
+		var tmp interface{} = "METER"
 		var err error
 
 		arg0, err = graphql.UnmarshalString(tmp)
@@ -590,7 +590,7 @@ func (ec *executionContext) _Query_hero(field graphql.CollectedField) graphql.Ma
 			return graphql.Null
 		}
 	} else {
-		tmp := "NEWHOPE"
+		var tmp interface{} = "NEWHOPE"
 		var err error
 
 		arg0, err = graphql.UnmarshalString(tmp)
@@ -884,7 +884,7 @@ func (ec *executionContext) _Starship_length(field graphql.CollectedField, obj *
 			return graphql.Null
 		}
 	} else {
-		tmp := "METER"
+		var tmp interface{} = "METER"
 		var err error
 
 		arg0, err = graphql.UnmarshalString(tmp)

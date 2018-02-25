@@ -11,5 +11,18 @@
 					return graphql.Null
 				{{- end }}
 			}
+		} {{ if $arg.Default }} else {
+			tmp := {{ $arg.Default | dump }}
+			var err error
+			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
+			if err != nil {
+				ec.Error(err)
+				{{- if $arg.Object.Stream }}
+					return nil
+				{{- else }}
+					return graphql.Null
+				{{- end }}
+			}
 		}
+		{{end }}
 	{{- end -}}

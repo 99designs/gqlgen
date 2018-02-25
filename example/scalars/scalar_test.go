@@ -43,6 +43,14 @@ func TestScalars(t *testing.T) {
 		require.Equal(t, int64(666), resp.Search[0].Created)
 	})
 
+	t.Run("default search location", func(t *testing.T) {
+		var resp struct{ Search []RawUser }
+
+		err := c.Post(`{ search { location } }`, &resp)
+		require.NoError(t, err)
+		require.Equal(t, "37,144", resp.Search[0].Location)
+	})
+
 	t.Run("test custom error messages", func(t *testing.T) {
 		var resp struct{ Search []RawUser }
 

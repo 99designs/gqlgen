@@ -84,6 +84,17 @@ func TestStarwars(t *testing.T) {
 		require.Equal(t, 1.72, resp.Hero.Height)
 	})
 
+	t.Run("default hero episode", func(t *testing.T) {
+		var resp struct {
+			Hero struct {
+				Name string
+			}
+		}
+		c.MustPost(`{ hero { ... on Droid { name } } }`, &resp)
+
+		require.Equal(t, "R2-D2", resp.Hero.Name)
+	})
+
 	t.Run("friends", func(t *testing.T) {
 		var resp struct {
 			Human struct {

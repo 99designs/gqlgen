@@ -98,11 +98,17 @@ func buildObject(types NamedTypes, typ *schema.Object) *Object {
 	for _, field := range typ.Fields {
 		var args []FieldArgument
 		for _, arg := range field.Args {
-			args = append(args, FieldArgument{
+			newArg := FieldArgument{
 				GQLName: arg.Name.Name,
 				Type:    types.getType(arg.Type),
 				Object:  obj,
-			})
+			}
+
+			if arg.Default != nil {
+				newArg.Default = arg.Default.Value(nil)
+				newArg.StripPtr()
+			}
+			args = append(args, newArg)
 		}
 
 		obj.Fields = append(obj.Fields, Field{

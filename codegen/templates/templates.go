@@ -9,11 +9,9 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
-
-	"github.com/vektah/gqlgen/codegen"
 )
 
-func Run(e *codegen.Build) (*bytes.Buffer, error) {
+func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 	t := template.New("").Funcs(template.FuncMap{
 		"ucFirst": ucFirst,
 		"lcFirst": lcFirst,
@@ -29,7 +27,7 @@ func Run(e *codegen.Build) (*bytes.Buffer, error) {
 	}
 
 	buf := &bytes.Buffer{}
-	err := t.Lookup("file.gotpl").Execute(buf, e)
+	err := t.Lookup(name).Execute(buf, tpldata)
 	if err != nil {
 		return nil, err
 	}

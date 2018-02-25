@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+	"syscall"
 
 	"github.com/vektah/gqlgen/codegen"
 	"github.com/vektah/gqlgen/codegen/templates"
@@ -15,6 +18,7 @@ import (
 )
 
 var output = flag.String("out", "-", "the file to write to, - for stdout")
+var models = flag.String("models", "models_gen.go", "the file to write the models to")
 var schemaFilename = flag.String("schema", "schema.graphql", "the graphql schema to generate types from")
 var typemap = flag.String("typemap", "", "a json map going from graphql to golang types")
 var packageName = flag.String("package", "", "the package name")
@@ -45,7 +49,30 @@ func main() {
 		os.Exit(1)
 	}
 
-	build, err := codegen.Bind(schema, loadTypeMap(), dirName())
+	if *output != "-" {
+		_ = syscall.Unlink(*output)
+	}
+	_ = syscall.Unlink(*models)
+
+	types := loadTypeMap()
+
+	modelsBuild := codegen.Models(schema, types, dirName())
+	if len(modelsBuild.Models) > 0 {
+		buf, err := templates.Run("models.gotpl", modelsBuild)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
+			os.Exit(1)
+		}
+
+		write(*models, buf.Bytes())
+		pkgName := fullPackageName()
+
+		for _, model := range modelsBuild.Models {
+			types[model.GQLType] = pkgName + "." + model.GoType
+		}
+	}
+
+	build, err := codegen.Bind(schema, types, dirName())
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "failed to generate code: "+err.Error())
 		os.Exit(1)
@@ -56,27 +83,13 @@ func main() {
 		build.PackageName = *packageName
 	}
 
-	buf, err := templates.Run(build)
+	buf, err := templates.Run("generated.gotpl", build)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
 		os.Exit(1)
 	}
 
-	if *output == "-" {
-		fmt.Println(string(gofmt(*output, buf.Bytes())))
-	} else {
-		err := os.MkdirAll(filepath.Dir(*output), 0755)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to create directory: ", err.Error())
-			os.Exit(1)
-		}
-
-		err = ioutil.WriteFile(*output, gofmt(*output, buf.Bytes()), 0644)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to write output: ", err.Error())
-			os.Exit(1)
-		}
-	}
+	write(*output, buf.Bytes())
 }
 
 func gofmt(filename string, b []byte) []byte {
@@ -86,6 +99,24 @@ func gofmt(filename string, b []byte) []byte {
 		return b
 	}
 	return out
+}
+
+func write(filename string, b []byte) {
+	if filename == "-" {
+		fmt.Println(string(gofmt(filename, b)))
+	} else {
+		err := os.MkdirAll(filepath.Dir(filename), 0755)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "failed to create directory: ", err.Error())
+			os.Exit(1)
+		}
+
+		err = ioutil.WriteFile(filename, gofmt(filename, b), 0644)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to write %s: %s", filename, err.Error())
+			os.Exit(1)
+		}
+	}
 }
 
 func absOutput() string {
@@ -98,6 +129,25 @@ func absOutput() string {
 
 func dirName() string {
 	return filepath.Dir(absOutput())
+}
+
+func fullPackageName() string {
+	absPath, err := filepath.Abs(*output)
+	if err != nil {
+		panic(err)
+	}
+	pkgName := filepath.Dir(absPath)
+	if *packageName != "" {
+		pkgName = filepath.Join(filepath.Dir(pkgName), *packageName)
+	}
+
+	for _, gopath := range strings.Split(build.Default.GOPATH, ":") {
+		gopath += "/src/"
+		if strings.HasPrefix(pkgName, gopath) {
+			pkgName = pkgName[len(gopath):]
+		}
+	}
+	return pkgName
 }
 
 func loadTypeMap() map[string]string {

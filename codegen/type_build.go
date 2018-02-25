@@ -23,8 +23,6 @@ func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
 
 		if userType != "" {
 			t.Package, t.GoType = pkgAndType(userType)
-		} else {
-			t.Generated = true
 		}
 
 		types[t.GQLType] = t

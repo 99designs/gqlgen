@@ -6,7 +6,6 @@ import (
 	"bytes"
 	context "context"
 	strconv "strconv"
-	time "time"
 
 	graphql "github.com/vektah/gqlgen/graphql"
 	errors "github.com/vektah/gqlgen/neelance/errors"
@@ -26,30 +25,6 @@ type Resolvers interface {
 	Order_items(ctx context.Context, obj *Order) ([]Item, error)
 	Query_customers(ctx context.Context) ([]Customer, error)
 	Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
-}
-
-type Address struct {
-	ID      int
-	Street  string
-	Country string
-}
-
-type Customer struct {
-	ID        int
-	Name      string
-	AddressID int
-	OrdersID  int
-}
-
-type Item struct {
-	Name string
-}
-
-type Order struct {
-	ID      int
-	Date    time.Time
-	Amount  float64
-	ItemsID int
 }
 
 type executableSchema struct {

@@ -12,7 +12,7 @@
 				{{- end }}
 			}
 		} {{ if $arg.Default }} else {
-			tmp := {{ $arg.Default | dump }}
+			var tmp interface{} = {{ $arg.Default | dump }}
 			var err error
 			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 			if err != nil {

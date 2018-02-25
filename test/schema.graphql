@@ -1,0 +1,24 @@
+input InnerInput {
+    id:Int!
+}
+
+input OuterInput {
+    inner: InnerInput!
+}
+
+type OuterObject {
+    inner: InnerObject!
+}
+
+type InnerObject {
+    id: Int!
+}
+
+type Query {
+    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
+    nestedOutputs: [[OuterObject]]
+}
+
+schema {
+    query :Query
+}

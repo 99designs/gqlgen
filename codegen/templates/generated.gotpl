@@ -20,10 +20,6 @@ type Resolvers interface {
 {{- end }}
 }
 
-{{ range $model := .Models }}
-	{{ template "model.gotpl" $model }}
-{{- end}}
-
 type executableSchema struct {
 	resolvers Resolvers
 }

@@ -26,17 +26,6 @@ type Resolvers interface {
 	MyQuery_todos(ctx context.Context) ([]Todo, error)
 }
 
-type Todo struct {
-	ID   int
-	Text string
-	Done bool
-}
-
-type TodoInput struct {
-	Text string
-	Done *bool
-}
-
 type executableSchema struct {
 	resolvers Resolvers
 }

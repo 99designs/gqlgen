@@ -13,7 +13,6 @@ import (
 type Build struct {
 	PackageName      string
 	Objects          Objects
-	Models           Objects
 	Inputs           Objects
 	Interfaces       []*Interface
 	Imports          Imports
@@ -23,12 +22,38 @@ type Build struct {
 	SchemaRaw        string
 }
 
+type ModelBuild struct {
+	PackageName string
+	Imports     Imports
+	Models      Objects
+}
+
+// Create a list of models that need to be generated
+func Models(schema *schema.Schema, userTypes map[string]string, destDir string) *ModelBuild {
+	namedTypes := buildNamedTypes(schema, userTypes)
+
+	imports := buildImports(namedTypes, destDir)
+	prog, err := loadProgram(imports, true)
+	if err != nil {
+		panic(err)
+	}
+
+	bindTypes(imports, namedTypes, prog)
+
+	models := buildModels(namedTypes, schema)
+	return &ModelBuild{
+		PackageName: filepath.Base(destDir),
+		Models:      models,
+		Imports:     buildImports(namedTypes, destDir),
+	}
+}
+
 // Bind a schema together with some code to generate a Build
 func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*Build, error) {
 	namedTypes := buildNamedTypes(schema, userTypes)
 
 	imports := buildImports(namedTypes, destDir)
-	prog, err := loadProgram(imports)
+	prog, err := loadProgram(imports, false)
 	if err != nil {
 		return nil, err
 	}
@@ -37,12 +62,10 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 
 	objects := buildObjects(namedTypes, schema, prog, imports)
 	inputs := buildInputs(namedTypes, schema, prog, imports)
-	models := append(findMissing(objects), findMissing(inputs)...)
 
 	b := &Build{
 		PackageName: filepath.Base(destDir),
 		Objects:     objects,
-		Models:      models,
 		Interfaces:  buildInterfaces(namedTypes, schema),
 		Inputs:      inputs,
 		Imports:     imports,
@@ -83,12 +106,15 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 	return b, nil
 }
 
-func loadProgram(imports Imports) (*loader.Program, error) {
-	conf := loader.Config{
-		AllowErrors: true,
-		TypeChecker: types.Config{
-			Error: func(e error) {},
-		},
+func loadProgram(imports Imports, allowErrors bool) (*loader.Program, error) {
+	conf := loader.Config{}
+	if allowErrors {
+		conf = loader.Config{
+			AllowErrors: true,
+			TypeChecker: types.Config{
+				Error: func(e error) {},
+			},
+		}
 	}
 	for _, imp := range imports {
 		if imp.Package != "" {

@@ -6,7 +6,6 @@ import (
 	"bytes"
 	context "context"
 	strconv "strconv"
-	time "time"
 
 	graphql "github.com/vektah/gqlgen/graphql"
 	errors "github.com/vektah/gqlgen/neelance/errors"
@@ -24,13 +23,6 @@ type Resolvers interface {
 	Query_room(ctx context.Context, name string) (*Chatroom, error)
 
 	Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error)
-}
-
-type Message struct {
-	ID        string
-	Text      string
-	CreatedBy string
-	CreatedAt time.Time
 }
 
 type executableSchema struct {

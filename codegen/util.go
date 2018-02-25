@@ -136,9 +136,7 @@ func bindObject(t types.Type, object *Object, imports Imports) {
 				}
 
 			default:
-				if !field.Generated {
-					fmt.Fprintf(os.Stderr, "type mismatch on %s.%s, expected %s got %s\n", object.GQLType, field.GQLName, field.Type.FullSignature(), structField.Type())
-				}
+				fmt.Fprintf(os.Stderr, "type mismatch on %s.%s, expected %s got %s\n", object.GQLType, field.GQLName, field.Type.FullSignature(), structField.Type())
 			}
 			continue
 		}

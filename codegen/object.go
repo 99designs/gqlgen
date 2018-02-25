@@ -17,6 +17,7 @@ type Object struct {
 	Root               bool
 	DisableConcurrency bool
 	Stream             bool
+	Input              bool
 }
 
 type Field struct {

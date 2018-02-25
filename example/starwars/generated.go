@@ -33,7 +33,7 @@ type Resolvers interface {
 	Human_starships(ctx context.Context, obj *Human) ([]Starship, error)
 	Mutation_createReview(ctx context.Context, episode string, review Review) (*Review, error)
 
-	Query_hero(ctx context.Context, episode *string) (Character, error)
+	Query_hero(ctx context.Context, episode string) (Character, error)
 	Query_reviews(ctx context.Context, episode string, since *time.Time) ([]Review, error)
 	Query_search(ctx context.Context, text string) ([]SearchResult, error)
 	Query_character(ctx context.Context, id string) (Character, error)
@@ -352,7 +352,17 @@ func (ec *executionContext) _Human_height(field graphql.CollectedField, obj *Hum
 			ec.Error(err)
 			return graphql.Null
 		}
+	} else {
+		tmp := "METER"
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
 	}
+
 	res := obj.Height(arg0)
 	return graphql.MarshalFloat(res)
 }
@@ -570,18 +580,26 @@ func (ec *executionContext) _Query(sel []query.Selection) graphql.Marshaler {
 }
 
 func (ec *executionContext) _Query_hero(field graphql.CollectedField) graphql.Marshaler {
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := field.Args["episode"]; ok {
 		var err error
-		var ptr1 string
 
-		ptr1, err = graphql.UnmarshalString(tmp)
-		arg0 = &ptr1
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+	} else {
+		tmp := "NEWHOPE"
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
 	}
+
 	return graphql.Defer(func() graphql.Marshaler {
 		res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
 		if err != nil {
@@ -865,7 +883,17 @@ func (ec *executionContext) _Starship_length(field graphql.CollectedField, obj *
 			ec.Error(err)
 			return graphql.Null
 		}
+	} else {
+		tmp := "METER"
+		var err error
+
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
 	}
+
 	res := obj.Length(arg0)
 	return graphql.MarshalFloat(res)
 }

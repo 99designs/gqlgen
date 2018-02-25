@@ -101,8 +101,8 @@ func (n NamedTypes) getType(t common.Type) *Type {
 				Modifiers: modifiers,
 			}
 
-			if t.IsInterface && t.Modifiers[len(t.Modifiers)-1] == modPtr {
-				t.Modifiers = t.Modifiers[0 : len(t.Modifiers)-1]
+			if t.IsInterface {
+				t.StripPtr()
 			}
 
 			return t

@@ -62,6 +62,13 @@ func (t Type) IsPtr() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
 }
 
+func (t *Type) StripPtr() {
+	if !t.IsPtr() {
+		return
+	}
+	t.Modifiers = t.Modifiers[0 : len(t.Modifiers)-1]
+}
+
 func (t Type) IsSlice() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modList
 }

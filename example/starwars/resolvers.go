@@ -85,8 +85,8 @@ func (r *Resolver) Mutation_createReview(ctx context.Context, episode string, re
 	return &review, nil
 }
 
-func (r *Resolver) Query_hero(ctx context.Context, episode *string) (Character, error) {
-	if episode != nil && *episode == "EMPIRE" {
+func (r *Resolver) Query_hero(ctx context.Context, episode string) (Character, error) {
+	if episode == "EMPIRE" {
 		return r.humans["1000"], nil
 	}
 	return r.droid["2001"], nil

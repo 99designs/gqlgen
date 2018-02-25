@@ -123,7 +123,17 @@ func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.
 			ec.Error(err)
 			return graphql.Null
 		}
+	} else {
+		tmp := map[string]interface{}{"location": "37,144"}
+		var err error
+
+		arg0, err = UnmarshalSearchArgs(tmp)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
 	}
+
 	return graphql.Defer(func() graphql.Marshaler {
 		res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 		if err != nil {
@@ -751,7 +761,7 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    user(id: ID!): User\n    search(input: SearchArgs!): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n    isBanned: Boolean!\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
+var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n    isBanned: Boolean!\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

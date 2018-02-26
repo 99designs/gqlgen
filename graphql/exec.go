@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/vektah/gqlgen/neelance/common"
 	"github.com/vektah/gqlgen/neelance/query"
 	"github.com/vektah/gqlgen/neelance/schema"
 )
@@ -34,7 +35,13 @@ func collectFields(doc *query.Document, selSet []query.Selection, satisfies []st
 				if len(sel.Arguments) > 0 {
 					f.Args = map[string]interface{}{}
 					for _, arg := range sel.Arguments {
-						f.Args[arg.Name.Name] = arg.Value.Value(variables)
+						if variable, ok := arg.Value.(*common.Variable); ok {
+							if val, ok := variables[variable.Name]; ok {
+								f.Args[arg.Name.Name] = val
+							}
+						} else {
+							f.Args[arg.Name.Name] = arg.Value.Value(variables)
+						}
 					}
 				}
 				return f

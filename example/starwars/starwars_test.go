@@ -148,6 +148,29 @@ func TestStarwars(t *testing.T) {
 		require.Equal(t, "Leia Organa", resp.Droid.FriendsConnection.Edges[2].Node.Name)
 	})
 
+	t.Run("unset optional arguments", func(t *testing.T) {
+		var resp struct {
+			Hero struct {
+				FriendsConnection struct {
+					Friends []struct {
+						Name string
+					}
+				}
+			}
+		}
+		query := `
+			query a($first:Int, $after:ID) {
+				hero {
+					friendsConnection(first:$first, after:$after) {
+						friends { name }
+					}
+				}
+			}`
+		c.MustPost(query, &resp)
+
+		require.Len(t, resp.Hero.FriendsConnection.Friends, 3)
+	})
+
 	t.Run("mutations must be run in sequence", func(t *testing.T) {
 		var resp struct {
 			A struct{ Time string }

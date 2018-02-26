@@ -32,8 +32,8 @@ func (e *executableSchema) Schema() *schema.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
-	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
+	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 	data := ec._Query(op.Selections)
 	var buf bytes.Buffer
@@ -45,11 +45,11 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
 	return &graphql.Response{Errors: []*errors.QueryError{{Message: "mutations are not supported"}}}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
 	return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}})
 }
 
@@ -59,6 +59,7 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
+	recover   graphql.RecoverFunc
 }
 
 var innerObjectImplementors = []string{"InnerObject"}
@@ -111,7 +112,14 @@ func (ec *executionContext) _OuterObject(sel []query.Selection, obj *OuterObject
 }
 
 func (ec *executionContext) _OuterObject_inner(field graphql.CollectedField, obj *OuterObject) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.OuterObject_inner(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -186,7 +194,14 @@ func (ec *executionContext) _Query_nestedInputs(field graphql.CollectedField) gr
 		}
 	}
 
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_nestedInputs(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)
@@ -200,7 +215,14 @@ func (ec *executionContext) _Query_nestedInputs(field graphql.CollectedField) gr
 }
 
 func (ec *executionContext) _Query_nestedOutputs(field graphql.CollectedField) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_nestedOutputs(ec.ctx)
 		if err != nil {
 			ec.Error(err)

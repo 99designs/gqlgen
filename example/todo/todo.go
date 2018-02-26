@@ -28,6 +28,11 @@ func New() *todoResolver {
 
 func (r *todoResolver) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
 	time.Sleep(220 * time.Millisecond)
+
+	if id == 666 {
+		panic("critical failure")
+	}
+
 	for _, todo := range r.todos {
 		if todo.ID == id {
 			return &todo, nil

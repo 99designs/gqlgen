@@ -35,8 +35,8 @@ func (e *executableSchema) Schema() *schema.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
-	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
+	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 	data := ec._Query(op.Selections)
 	var buf bytes.Buffer
@@ -48,11 +48,11 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
 	return &graphql.Response{Errors: []*errors.QueryError{{Message: "mutations are not supported"}}}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
 	return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}})
 }
 
@@ -62,6 +62,7 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
+	recover   graphql.RecoverFunc
 }
 
 var addressImplementors = []string{"Address"}
@@ -144,7 +145,14 @@ func (ec *executionContext) _Customer_name(field graphql.CollectedField, obj *Cu
 }
 
 func (ec *executionContext) _Customer_address(field graphql.CollectedField, obj *Customer) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Customer_address(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -158,7 +166,14 @@ func (ec *executionContext) _Customer_address(field graphql.CollectedField, obj 
 }
 
 func (ec *executionContext) _Customer_orders(field graphql.CollectedField, obj *Customer) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Customer_orders(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -243,7 +258,14 @@ func (ec *executionContext) _Order_amount(field graphql.CollectedField, obj *Ord
 }
 
 func (ec *executionContext) _Order_items(field graphql.CollectedField, obj *Order) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Order_items(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -286,7 +308,14 @@ func (ec *executionContext) _Query(sel []query.Selection) graphql.Marshaler {
 }
 
 func (ec *executionContext) _Query_customers(field graphql.CollectedField) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_customers(ec.ctx)
 		if err != nil {
 			ec.Error(err)
@@ -319,7 +348,14 @@ func (ec *executionContext) _Query_torture(field graphql.CollectedField) graphql
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_torture(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)

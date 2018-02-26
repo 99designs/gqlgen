@@ -50,8 +50,8 @@ func (e *executableSchema) Schema() *schema.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
-	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
+	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 	data := ec._Query(op.Selections)
 	var buf bytes.Buffer
@@ -63,8 +63,8 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
-	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
+	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 	data := ec._Mutation(op.Selections)
 	var buf bytes.Buffer
@@ -76,7 +76,7 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 	}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
 	return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}})
 }
 
@@ -86,6 +86,7 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
+	recover   graphql.RecoverFunc
 }
 
 var droidImplementors = []string{"Droid", "Character"}
@@ -131,7 +132,14 @@ func (ec *executionContext) _Droid_name(field graphql.CollectedField, obj *Droid
 }
 
 func (ec *executionContext) _Droid_friends(field graphql.CollectedField, obj *Droid) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Droid_friends(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -170,7 +178,14 @@ func (ec *executionContext) _Droid_friendsConnection(field graphql.CollectedFiel
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Droid_friendsConnection(ec.ctx, obj, arg0, arg1)
 		if err != nil {
 			ec.Error(err)
@@ -228,7 +243,14 @@ func (ec *executionContext) _FriendsConnection_totalCount(field graphql.Collecte
 }
 
 func (ec *executionContext) _FriendsConnection_edges(field graphql.CollectedField, obj *FriendsConnection) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.FriendsConnection_edges(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -243,7 +265,14 @@ func (ec *executionContext) _FriendsConnection_edges(field graphql.CollectedFiel
 }
 
 func (ec *executionContext) _FriendsConnection_friends(field graphql.CollectedField, obj *FriendsConnection) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.FriendsConnection_friends(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -373,7 +402,14 @@ func (ec *executionContext) _Human_mass(field graphql.CollectedField, obj *Human
 }
 
 func (ec *executionContext) _Human_friends(field graphql.CollectedField, obj *Human) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Human_friends(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -412,7 +448,14 @@ func (ec *executionContext) _Human_friendsConnection(field graphql.CollectedFiel
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Human_friendsConnection(ec.ctx, obj, arg0, arg1)
 		if err != nil {
 			ec.Error(err)
@@ -432,7 +475,14 @@ func (ec *executionContext) _Human_appearsIn(field graphql.CollectedField, obj *
 }
 
 func (ec *executionContext) _Human_starships(field graphql.CollectedField, obj *Human) graphql.Marshaler {
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Human_starships(ec.ctx, obj)
 		if err != nil {
 			ec.Error(err)
@@ -600,7 +650,14 @@ func (ec *executionContext) _Query_hero(field graphql.CollectedField) graphql.Ma
 		}
 	}
 
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_hero(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)
@@ -633,7 +690,14 @@ func (ec *executionContext) _Query_reviews(field graphql.CollectedField) graphql
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_reviews(ec.ctx, arg0, arg1)
 		if err != nil {
 			ec.Error(err)
@@ -658,7 +722,14 @@ func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)
@@ -683,7 +754,14 @@ func (ec *executionContext) _Query_character(field graphql.CollectedField) graph
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_character(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)
@@ -704,7 +782,14 @@ func (ec *executionContext) _Query_droid(field graphql.CollectedField) graphql.M
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_droid(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)
@@ -728,7 +813,14 @@ func (ec *executionContext) _Query_human(field graphql.CollectedField) graphql.M
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_human(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)
@@ -752,7 +844,14 @@ func (ec *executionContext) _Query_starship(field graphql.CollectedField) graphq
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_starship(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)

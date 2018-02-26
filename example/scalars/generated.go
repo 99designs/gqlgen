@@ -32,8 +32,8 @@ func (e *executableSchema) Schema() *schema.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
-	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
+	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 	data := ec._Query(op.Selections)
 	var buf bytes.Buffer
@@ -45,11 +45,11 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
 	return &graphql.Response{Errors: []*errors.QueryError{{Message: "mutations are not supported"}}}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
 	return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}})
 }
 
@@ -59,6 +59,7 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
+	recover   graphql.RecoverFunc
 }
 
 var queryImplementors = []string{"Query"}
@@ -100,7 +101,14 @@ func (ec *executionContext) _Query_user(field graphql.CollectedField) graphql.Ma
 			return graphql.Null
 		}
 	}
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_user(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)
@@ -134,7 +142,14 @@ func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.
 		}
 	}
 
-	return graphql.Defer(func() graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
 		res, err := ec.resolvers.Query_search(ec.ctx, arg0)
 		if err != nil {
 			ec.Error(err)

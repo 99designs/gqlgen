@@ -23,17 +23,17 @@ func (e *executableSchemaStub) Schema() *schema.Schema {
 	`)
 }
 
-func (e *executableSchemaStub) Query(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+func (e *executableSchemaStub) Query(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
 	return &graphql.Response{Data: []byte(`{"name":"test"}`)}
 }
 
-func (e *executableSchemaStub) Mutation(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+func (e *executableSchemaStub) Mutation(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
 	return &graphql.Response{
 		Errors: []*errors.QueryError{{Message: "mutations are not supported"}},
 	}
 }
 
-func (e *executableSchemaStub) Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+func (e *executableSchemaStub) Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
 	return func() *graphql.Response {
 		time.Sleep(20 * time.Millisecond)
 		select {

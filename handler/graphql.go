@@ -22,6 +22,7 @@ type params struct {
 
 type Config struct {
 	upgrader websocket.Upgrader
+	recover  graphql.RecoverFunc
 }
 
 type Option func(cfg *Config)
@@ -32,8 +33,15 @@ func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 	}
 }
 
+func RecoverFunc(recover graphql.RecoverFunc) Option {
+	return func(cfg *Config) {
+		cfg.recover = recover
+	}
+}
+
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := Config{
+		recover: graphql.DefaultRecoverFunc,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
@@ -46,7 +54,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
-			connectWs(exec, w, r, cfg.upgrader)
+			connectWs(exec, w, r, cfg.upgrader, cfg.recover)
 			return
 		}
 
@@ -90,13 +98,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 		switch op.Type {
 		case query.Query:
-			b, err := json.Marshal(exec.Query(r.Context(), doc, reqParams.Variables, op))
+			b, err := json.Marshal(exec.Query(r.Context(), doc, reqParams.Variables, op, cfg.recover))
 			if err != nil {
 				panic(err)
 			}
 			w.Write(b)
 		case query.Mutation:
-			b, err := json.Marshal(exec.Mutation(r.Context(), doc, reqParams.Variables, op))
+			b, err := json.Marshal(exec.Mutation(r.Context(), doc, reqParams.Variables, op, cfg.recover))
 			if err != nil {
 				panic(err)
 			}

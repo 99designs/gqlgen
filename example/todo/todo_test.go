@@ -74,6 +74,15 @@ func TestTodo(t *testing.T) {
 		require.Nil(t, resp.Todo)
 	})
 
+	t.Run("test panic", func(t *testing.T) {
+		var resp struct {
+			Todo *struct{ Text string }
+		}
+		err := c.Post(`{ todo(id:666) { text } }`, &resp)
+
+		require.EqualError(t, err, "errors: [graphql: internal system error]")
+	})
+
 	t.Run("select all", func(t *testing.T) {
 		var resp struct {
 			Todo struct {

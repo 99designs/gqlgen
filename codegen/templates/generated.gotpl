@@ -28,9 +28,9 @@ func (e *executableSchema) Schema() *schema.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
 	{{- if .QueryRoot }}
-		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 		data := ec._{{.QueryRoot.GQLType}}(op.Selections)
 		var buf bytes.Buffer
@@ -45,9 +45,9 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	{{- end }}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
 	{{- if .MutationRoot }}
-		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 		data := ec._{{.MutationRoot.GQLType}}(op.Selections)
 		var buf bytes.Buffer
@@ -62,9 +62,9 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 	{{- end }}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
 	{{- if .SubscriptionRoot }}
-		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx}
+		ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
 
 		next := ec._{{.SubscriptionRoot.GQLType}}(op.Selections)
 		if ec.Errors != nil {
@@ -98,6 +98,7 @@ type executionContext struct {
 	variables map[string]interface{}
 	doc       *query.Document
 	ctx       context.Context
+	recover   graphql.RecoverFunc
 }
 
 {{- range $object := .Objects }}

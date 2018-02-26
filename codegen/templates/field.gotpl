@@ -24,7 +24,14 @@
 		{{- template "args.gotpl" $field.Args }}
 
 		{{- if $field.IsConcurrent }}
-			return graphql.Defer(func() graphql.Marshaler {
+			return graphql.Defer(func() (ret graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						userErr := ec.recover(r)
+						ec.Error(userErr)
+						ret = graphql.Null
+					}
+				}()
 		{{- end }}
 
 			{{- if $field.GoVarName }}

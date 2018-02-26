@@ -36,14 +36,15 @@ type operationMessage struct {
 }
 
 type wsConnection struct {
-	ctx    context.Context
-	conn   *websocket.Conn
-	exec   graphql.ExecutableSchema
-	active map[string]context.CancelFunc
-	mu     sync.Mutex
+	ctx     context.Context
+	conn    *websocket.Conn
+	exec    graphql.ExecutableSchema
+	active  map[string]context.CancelFunc
+	mu      sync.Mutex
+	recover graphql.RecoverFunc
 }
 
-func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, upgrader websocket.Upgrader) {
+func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, upgrader websocket.Upgrader, recover graphql.RecoverFunc) {
 	ws, err := upgrader.Upgrade(w, r, http.Header{
 		"Sec-Websocket-Protocol": []string{"graphql-ws"},
 	})
@@ -54,10 +55,11 @@ func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Req
 	}
 
 	conn := wsConnection{
-		active: map[string]context.CancelFunc{},
-		exec:   exec,
-		conn:   ws,
-		ctx:    r.Context(),
+		active:  map[string]context.CancelFunc{},
+		exec:    exec,
+		conn:    ws,
+		ctx:     r.Context(),
+		recover: recover,
 	}
 
 	if !conn.init() {
@@ -156,9 +158,9 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	if op.Type != query.Subscription {
 		var result *graphql.Response
 		if op.Type == query.Query {
-			result = c.exec.Query(c.ctx, doc, reqParams.Variables, op)
+			result = c.exec.Query(c.ctx, doc, reqParams.Variables, op, c.recover)
 		} else {
-			result = c.exec.Mutation(c.ctx, doc, reqParams.Variables, op)
+			result = c.exec.Mutation(c.ctx, doc, reqParams.Variables, op, c.recover)
 		}
 
 		c.sendData(message.ID, result)
@@ -171,7 +173,13 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	c.active[message.ID] = cancel
 	c.mu.Unlock()
 	go func() {
-		next := c.exec.Subscription(ctx, doc, reqParams.Variables, op)
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := c.recover(r)
+				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
+			}
+		}()
+		next := c.exec.Subscription(ctx, doc, reqParams.Variables, op, c.recover)
 		for result := next(); result != nil; result = next() {
 			fmt.Println(result)
 			c.sendData(message.ID, result)

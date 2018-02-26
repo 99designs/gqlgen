@@ -11,9 +11,9 @@ import (
 type ExecutableSchema interface {
 	Schema() *schema.Schema
 
-	Query(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *Response
-	Mutation(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) *Response
-	Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation) func() *Response
+	Query(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation, recover RecoverFunc) *Response
+	Mutation(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation, recover RecoverFunc) *Response
+	Subscription(ctx context.Context, document *query.Document, variables map[string]interface{}, op *query.Operation, recover RecoverFunc) func() *Response
 }
 
 func CollectFields(doc *query.Document, selSet []query.Selection, satisfies []string, variables map[string]interface{}) []CollectedField {

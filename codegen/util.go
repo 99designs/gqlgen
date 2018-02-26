@@ -29,22 +29,13 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Ob
 	}
 
 	for astNode, def := range pkg.Defs {
-		if astNode.Name != typeName || isMethod(def) {
+		if astNode.Name != typeName || def.Parent() == nil || def.Parent() != pkg.Pkg.Scope() {
 			continue
 		}
 
 		return def, nil
 	}
 	return nil, fmt.Errorf("unable to find type %s\n", fullName)
-}
-
-func isMethod(t types.Object) bool {
-	f, isFunc := t.(*types.Func)
-	if !isFunc {
-		return false
-	}
-
-	return f.Type().(*types.Signature).Recv() != nil
 }
 
 func findMethod(typ *types.Named, name string) *types.Func {

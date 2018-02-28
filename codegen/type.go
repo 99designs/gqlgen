@@ -11,6 +11,7 @@ type NamedType struct {
 	Ref
 	IsScalar    bool
 	IsInterface bool
+	IsInput     bool
 	GQLType     string // Name of the graphql type
 	Marshaler   *Ref   // If this type has an external marshaler this will be set
 }

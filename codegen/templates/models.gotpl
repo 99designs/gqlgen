@@ -9,13 +9,17 @@ import (
 )
 
 {{ range $model := .Models }}
-	type {{.GoType}} struct {
-		{{- range $field := .Fields }}
-			{{- if $field.GoVarName }}
-				{{ $field.GoVarName }} {{$field.Signature}}
-			{{- else }}
-				{{ $field.GoFKName }} {{$field.GoFKType}}
+	{{- if .IsInterface }}
+		type {{.GoType}} interface {}
+	{{- else }}
+		type {{.GoType}} struct {
+			{{- range $field := .Fields }}
+				{{- if $field.GoVarName }}
+					{{ $field.GoVarName }} {{$field.Signature}}
+				{{- else }}
+					{{ $field.GoFKName }} {{$field.GoFKType}}
+				{{- end }}
 			{{- end }}
-		{{- end }}
-	}
+		}
+	{{- end }}
 {{- end}}

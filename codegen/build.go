@@ -25,7 +25,7 @@ type Build struct {
 type ModelBuild struct {
 	PackageName string
 	Imports     Imports
-	Models      Objects
+	Models      []Model
 }
 
 // Create a list of models that need to be generated

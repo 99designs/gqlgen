@@ -57,6 +57,8 @@ func namedTypeFromSchema(schemaType schema.NamedType) *NamedType {
 		return &NamedType{GQLType: val.TypeName(), IsScalar: true}
 	case *schema.Interface, *schema.Union:
 		return &NamedType{GQLType: val.TypeName(), IsInterface: true}
+	case *schema.InputObject:
+		return &NamedType{GQLType: val.TypeName(), IsInput: true}
 	default:
 		return &NamedType{GQLType: val.TypeName()}
 	}

@@ -17,7 +17,6 @@ type Object struct {
 	Root               bool
 	DisableConcurrency bool
 	Stream             bool
-	Input              bool
 }
 
 type Field struct {
@@ -26,8 +25,6 @@ type Field struct {
 	GQLName      string          // The name of the field in graphql
 	GoMethodName string          // The name of the method in go, if any
 	GoVarName    string          // The name of the var in go, if any
-	GoFKName     string          // The name of the FK used when generating models
-	GoFKType     string          // The type of the FK used when generating models
 	Args         []FieldArgument // A list of arguments to be passed to this field
 	NoErr        bool            // If this is bound to a go method, does that method have an error as the second argument
 	Object       *Object         // A link back to the parent object

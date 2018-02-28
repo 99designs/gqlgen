@@ -40,7 +40,7 @@ func buildInputs(namedTypes NamedTypes, s *schema.Schema, prog *loader.Program, 
 }
 
 func buildInput(types NamedTypes, typ *schema.InputObject) *Object {
-	obj := &Object{NamedType: types[typ.TypeName()], Input: true}
+	obj := &Object{NamedType: types[typ.TypeName()]}
 
 	for _, field := range typ.Values {
 		obj.Fields = append(obj.Fields, Field{

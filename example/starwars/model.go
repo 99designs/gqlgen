@@ -62,9 +62,6 @@ type Droid struct {
 	PrimaryFunction string
 }
 
-type Character interface{}
-type SearchResult interface{}
-
 func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, first *int, after *string) (FriendsConnection, error) {
 	from := 0
 	if after != nil {
@@ -119,10 +116,4 @@ func encodeCursor(i int) string {
 type FriendsEdge struct {
 	Cursor string
 	Node   Character
-}
-
-type PageInfo struct {
-	StartCursor string
-	EndCursor   string
-	HasNextPage bool
 }

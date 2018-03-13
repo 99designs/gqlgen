@@ -158,45 +158,55 @@ func NewResolver() *Resolver {
 	r := Resolver{}
 	r.humans = map[string]Human{
 		"1000": {
-			ID:           "1000",
-			Name:         "Luke Skywalker",
-			FriendIds:    []string{"1002", "1003", "2000", "2001"},
-			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			CharacterFields: CharacterFields{
+				ID:        "1000",
+				Name:      "Luke Skywalker",
+				FriendIds: []string{"1002", "1003", "2000", "2001"},
+				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			},
 			heightMeters: 1.72,
 			Mass:         77,
 			StarshipIds:  []string{"3001", "3003"},
 		},
 		"1001": {
-			ID:           "1001",
-			Name:         "Darth Vader",
-			FriendIds:    []string{"1004"},
-			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			CharacterFields: CharacterFields{
+				ID:        "1001",
+				Name:      "Darth Vader",
+				FriendIds: []string{"1004"},
+				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			},
 			heightMeters: 2.02,
 			Mass:         136,
 			StarshipIds:  []string{"3002"},
 		},
 		"1002": {
-			ID:           "1002",
-			Name:         "Han Solo",
-			FriendIds:    []string{"1000", "1003", "2001"},
-			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			CharacterFields: CharacterFields{
+				ID:        "1002",
+				Name:      "Han Solo",
+				FriendIds: []string{"1000", "1003", "2001"},
+				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			},
 			heightMeters: 1.8,
 			Mass:         80,
 			StarshipIds:  []string{"3000", "3003"},
 		},
 		"1003": {
-			ID:           "1003",
-			Name:         "Leia Organa",
-			FriendIds:    []string{"1000", "1002", "2000", "2001"},
-			AppearsIn:    []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			CharacterFields: CharacterFields{
+				ID:        "1003",
+				Name:      "Leia Organa",
+				FriendIds: []string{"1000", "1002", "2000", "2001"},
+				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			},
 			heightMeters: 1.5,
 			Mass:         49,
 		},
 		"1004": {
-			ID:           "1004",
-			Name:         "Wilhuff Tarkin",
-			FriendIds:    []string{"1001"},
-			AppearsIn:    []string{"NEWHOPE"},
+			CharacterFields: CharacterFields{
+				ID:        "1004",
+				Name:      "Wilhuff Tarkin",
+				FriendIds: []string{"1001"},
+				AppearsIn: []string{"NEWHOPE"},
+			},
 			heightMeters: 1.8,
 			Mass:         0,
 		},
@@ -204,17 +214,21 @@ func NewResolver() *Resolver {
 
 	r.droid = map[string]Droid{
 		"2000": {
-			ID:              "2000",
-			Name:            "C-3PO",
-			FriendIds:       []string{"1000", "1002", "1003", "2001"},
-			AppearsIn:       []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			CharacterFields: CharacterFields{
+				ID:        "2000",
+				Name:      "C-3PO",
+				FriendIds: []string{"1000", "1002", "1003", "2001"},
+				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			},
 			PrimaryFunction: "Protocol",
 		},
 		"2001": {
-			ID:              "2001",
-			Name:            "R2-D2",
-			FriendIds:       []string{"1000", "1002", "1003"},
-			AppearsIn:       []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			CharacterFields: CharacterFields{
+				ID:        "2001",
+				Name:      "R2-D2",
+				FriendIds: []string{"1000", "1002", "1003"},
+				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+			},
 			PrimaryFunction: "Astromech",
 		},
 	}

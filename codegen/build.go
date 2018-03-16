@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"go/build"
 	"go/types"
 	"os"
@@ -81,6 +82,10 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 
 	if sr, ok := schema.EntryPoints["subscription"]; ok {
 		b.SubscriptionRoot = b.Objects.ByName(sr.TypeName())
+	}
+
+	if b.QueryRoot == nil {
+		return b, fmt.Errorf("query entry point missing")
 	}
 
 	// Poke a few magic methods into query

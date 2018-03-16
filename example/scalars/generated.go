@@ -776,7 +776,7 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("schema {\n    query: Query\n}\n\ntype Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n    isBanned: Boolean!\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
+var parsedSchema = schema.MustParse("type Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n    isBanned: Boolean!\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

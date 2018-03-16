@@ -1,7 +1,3 @@
-schema {
-    query: Query
-}
-
 type Query {
     user(id: ID!): User
     search(input: SearchArgs = {location: "37,144"}): [User!]!

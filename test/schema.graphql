@@ -18,7 +18,3 @@ type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
 }
-
-schema {
-    query :Query
-}

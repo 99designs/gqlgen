@@ -1,0 +1,29 @@
+<nav>
+	<a class="logo" href="http://github.com/vektah/gqlgen">gqlgen</a>
+
+	<ul class="menu">
+	{{ $currentPage := . }}
+	{{- range .Site.Menus.main }}
+		<li>
+			{{ if .URL }}
+				<a href="{{ .URL }}">{{ .Name }}</a>
+			{{ else }}
+				<span>{{ .Name }}</span>
+			{{ end }}
+		{{- if .HasChildren }}
+			<ul class="submenu">
+			{{- range .Children }}
+				<li>
+					{{ if .URL }}
+						<a href="{{ .URL }}">{{ .Name }}</a>
+					{{ else }}
+						<span>{{ .Name }}</span>
+					{{ end }}
+				</li>
+			{{- end }}
+			</ul>
+		{{- end }}
+		</li>
+	{{- end}}
+	</ul>
+</nav>

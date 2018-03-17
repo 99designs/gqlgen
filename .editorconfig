@@ -10,3 +10,6 @@ indent_size = 4
 
 [*.{go,gotpl}]
 indent_style = tab
+
+[*.{yml,md}]
+indent_size = 2

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head {{ with .Site.LanguageCode }}lang="{{ . }}"{{ end }}>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9"/>
+	{{ with .Site.Params.description -}}
+		<meta name="description" content="{{ . }}">
+	{{- end }}
+
+	<title>{{ if not .IsHome }}{{ .Title }} &mdash;{{ end }} {{ .Site.Title }}</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:400,700|Space+Mono|VT323" rel="stylesheet">
+	<link rel="stylesheet" href="{{ .Site.BaseURL }}main.css" type="text/css"/>
+	<link rel="stylesheet" href="{{ .Site.BaseURL }}syntax.css" type="text/css"/>
+</head>
+
+<body>
+	{{ partial "sidebar" . }}
+    {{ block "main" . }}{{ end }}
+	<footer>
+	&copy; {{ now.Format "2006" }} <a href="https://github.com/vektah">Adam Scarr</a>
+	</footer>
+</body>
+</html>

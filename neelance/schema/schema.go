@@ -20,6 +20,12 @@ type Schema struct {
 	enums           []*Enum
 }
 
+var defaultEntrypoints = map[string]string{
+	"query":        "Query",
+	"mutation":     "Mutation",
+	"subscription": "Subscription",
+}
+
 func (s *Schema) Resolve(name string) common.Type {
 	return s.Types[name]
 }
@@ -201,6 +207,18 @@ func (s *Schema) Parse(schemaString string) error {
 			}
 		}
 		s.EntryPoints[key] = t
+	}
+
+	for entrypointName, typeName := range defaultEntrypoints {
+		if _, ok := s.EntryPoints[entrypointName]; ok {
+			continue
+		}
+
+		if _, ok := s.Types[typeName]; !ok {
+			continue
+		}
+
+		s.EntryPoints[entrypointName] = s.Types[typeName]
 	}
 
 	for _, obj := range s.objects {

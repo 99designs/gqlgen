@@ -1512,12 +1512,10 @@ func (ec *executionContext) _Character(sel []query.Selection, obj *Character) gr
 		return graphql.Null
 	case Human:
 		return ec._Human(sel, &obj)
-
 	case *Human:
 		return ec._Human(sel, obj)
 	case Droid:
 		return ec._Droid(sel, &obj)
-
 	case *Droid:
 		return ec._Droid(sel, obj)
 	default:
@@ -1531,17 +1529,14 @@ func (ec *executionContext) _SearchResult(sel []query.Selection, obj *SearchResu
 		return graphql.Null
 	case Human:
 		return ec._Human(sel, &obj)
-
 	case *Human:
 		return ec._Human(sel, obj)
 	case Droid:
 		return ec._Droid(sel, &obj)
-
 	case *Droid:
 		return ec._Droid(sel, obj)
 	case Starship:
 		return ec._Starship(sel, &obj)
-
 	case *Starship:
 		return ec._Starship(sel, obj)
 	default:

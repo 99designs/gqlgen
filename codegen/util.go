@@ -38,6 +38,39 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Ob
 	return nil, fmt.Errorf("unable to find type %s\n", fullName)
 }
 
+func findGoNamedType(prog *loader.Program, pkgName string, typeName string) *types.Named {
+	def, err := findGoType(prog, pkgName, typeName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+	}
+	if def == nil {
+		return nil
+	}
+
+	namedType, ok := def.Type().(*types.Named)
+	if !ok {
+		fmt.Fprintf(os.Stderr, "expected %s to be a named type, instead found %T\n", typeName, def.Type())
+		return nil
+	}
+
+	return namedType
+}
+
+func findGoInterface(prog *loader.Program, pkgName string, typeName string) *types.Interface {
+	namedType := findGoNamedType(prog, pkgName, typeName)
+	if namedType == nil {
+		return nil
+	}
+
+	underlying, ok := namedType.Underlying().(*types.Interface)
+	if !ok {
+		fmt.Fprintf(os.Stderr, "expected %s to be a named interface, instead found %s", typeName, namedType.String())
+		return nil
+	}
+
+	return underlying
+}
+
 func findMethod(typ *types.Named, name string) *types.Func {
 	for i := 0; i < typ.NumMethods(); i++ {
 		method := typ.Method(i)

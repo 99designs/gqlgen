@@ -1,0 +1,5 @@
+{
+    "Shape": "github.com/vektah/gqlgen/test.Shape",
+    "Circle": "github.com/vektah/gqlgen/test.Circle",
+    "Rectangle": "github.com/vektah/gqlgen/test.Rectangle"
+}

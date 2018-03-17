@@ -41,7 +41,7 @@ func Models(schema *schema.Schema, userTypes map[string]string, destDir string) 
 
 	bindTypes(imports, namedTypes, prog)
 
-	models := buildModels(namedTypes, schema)
+	models := buildModels(namedTypes, schema, prog)
 	return &ModelBuild{
 		PackageName: filepath.Base(destDir),
 		Models:      models,
@@ -67,7 +67,7 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 	b := &Build{
 		PackageName: filepath.Base(destDir),
 		Objects:     objects,
-		Interfaces:  buildInterfaces(namedTypes, schema),
+		Interfaces:  buildInterfaces(namedTypes, schema, prog),
 		Inputs:      inputs,
 		Imports:     imports,
 	}

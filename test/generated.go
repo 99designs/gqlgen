@@ -5,6 +5,7 @@ package test
 import (
 	"bytes"
 	context "context"
+	fmt "fmt"
 	strconv "strconv"
 
 	graphql "github.com/vektah/gqlgen/graphql"
@@ -22,6 +23,7 @@ type Resolvers interface {
 	OuterObject_inner(ctx context.Context, obj *OuterObject) (InnerObject, error)
 	Query_nestedInputs(ctx context.Context, input [][]OuterInput) (*bool, error)
 	Query_nestedOutputs(ctx context.Context) ([][]OuterObject, error)
+	Query_shapes(ctx context.Context) ([]Shape, error)
 }
 
 type executableSchema struct {
@@ -60,6 +62,40 @@ type executionContext struct {
 	doc       *query.Document
 	ctx       context.Context
 	recover   graphql.RecoverFunc
+}
+
+var circleImplementors = []string{"Circle", "Shape"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Circle(sel []query.Selection, obj *Circle) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, circleImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Circle")
+		case "radius":
+			out.Values[i] = ec._Circle_radius(field, obj)
+		case "area":
+			out.Values[i] = ec._Circle_area(field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _Circle_radius(field graphql.CollectedField, obj *Circle) graphql.Marshaler {
+	res := obj.Radius
+	return graphql.MarshalFloat(res)
+}
+
+func (ec *executionContext) _Circle_area(field graphql.CollectedField, obj *Circle) graphql.Marshaler {
+	res := obj.Area()
+	return graphql.MarshalFloat(res)
 }
 
 var innerObjectImplementors = []string{"InnerObject"}
@@ -145,6 +181,8 @@ func (ec *executionContext) _Query(sel []query.Selection) graphql.Marshaler {
 			out.Values[i] = ec._Query_nestedInputs(field)
 		case "nestedOutputs":
 			out.Values[i] = ec._Query_nestedOutputs(field)
+		case "shapes":
+			out.Values[i] = ec._Query_shapes(field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(field)
 		case "__type":
@@ -242,6 +280,28 @@ func (ec *executionContext) _Query_nestedOutputs(field graphql.CollectedField) g
 	})
 }
 
+func (ec *executionContext) _Query_shapes(field graphql.CollectedField) graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
+		res, err := ec.resolvers.Query_shapes(ec.ctx)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler { return ec._Shape(field.Selections, &res[idx1]) }())
+		}
+		return arr1
+	})
+}
+
 func (ec *executionContext) _Query___schema(field graphql.CollectedField) graphql.Marshaler {
 	res := ec.introspectSchema()
 	if res == nil {
@@ -266,6 +326,47 @@ func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.
 		return graphql.Null
 	}
 	return ec.___Type(field.Selections, res)
+}
+
+var rectangleImplementors = []string{"Rectangle", "Shape"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Rectangle(sel []query.Selection, obj *Rectangle) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, rectangleImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Rectangle")
+		case "length":
+			out.Values[i] = ec._Rectangle_length(field, obj)
+		case "width":
+			out.Values[i] = ec._Rectangle_width(field, obj)
+		case "area":
+			out.Values[i] = ec._Rectangle_area(field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _Rectangle_length(field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
+	res := obj.Length
+	return graphql.MarshalFloat(res)
+}
+
+func (ec *executionContext) _Rectangle_width(field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
+	res := obj.Width
+	return graphql.MarshalFloat(res)
+}
+
+func (ec *executionContext) _Rectangle_area(field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
+	res := obj.Area()
+	return graphql.MarshalFloat(res)
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -762,6 +863,19 @@ func (ec *executionContext) ___Type_ofType(field graphql.CollectedField, obj *in
 	return ec.___Type(field.Selections, res)
 }
 
+func (ec *executionContext) _Shape(sel []query.Selection, obj *Shape) graphql.Marshaler {
+	switch obj := (*obj).(type) {
+	case nil:
+		return graphql.Null
+	case *Circle:
+		return ec._Circle(sel, obj)
+	case *Rectangle:
+		return ec._Rectangle(sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 	var it InnerInput
 
@@ -798,7 +912,7 @@ func UnmarshalOuterInput(v interface{}) (OuterInput, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("input InnerInput {\n    id:Int!\n}\n\ninput OuterInput {\n    inner: InnerInput!\n}\n\ntype OuterObject {\n    inner: InnerObject!\n}\n\ntype InnerObject {\n    id: Int!\n}\n\ntype Query {\n    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean\n    nestedOutputs: [[OuterObject]]\n}\n")
+var parsedSchema = schema.MustParse("input InnerInput {\n    id:Int!\n}\n\ninput OuterInput {\n    inner: InnerInput!\n}\n\ntype OuterObject {\n    inner: InnerObject!\n}\n\ntype InnerObject {\n    id: Int!\n}\n\ninterface Shape {\n    area: Float\n}\n\ntype Circle implements Shape {\n    radius: Float\n    area: Float\n}\n\ntype Rectangle implements Shape {\n    length: Float\n    width: Float\n    area: Float\n}\n\ntype Query {\n    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean\n    nestedOutputs: [[OuterObject]]\n    shapes: [Shape]\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

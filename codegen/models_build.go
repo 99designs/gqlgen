@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/vektah/gqlgen/neelance/schema"
+	"golang.org/x/tools/go/loader"
 )
 
-func buildModels(types NamedTypes, s *schema.Schema) []Model {
+func buildModels(types NamedTypes, s *schema.Schema, prog *loader.Program) []Model {
 	var models []Model
 
 	for _, typ := range s.Types {
@@ -26,7 +27,7 @@ func buildModels(types NamedTypes, s *schema.Schema) []Model {
 			}
 			model = obj2Model(obj)
 		case *schema.Interface, *schema.Union:
-			intf := buildInterface(types, typ)
+			intf := buildInterface(types, typ, prog)
 			if intf.GoType != "" {
 				continue
 			}

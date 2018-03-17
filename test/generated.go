@@ -867,14 +867,8 @@ func (ec *executionContext) _Shape(sel []query.Selection, obj *Shape) graphql.Ma
 	switch obj := (*obj).(type) {
 	case nil:
 		return graphql.Null
-	case Circle:
-		return ec._Circle(sel, &obj)
-
 	case *Circle:
 		return ec._Circle(sel, obj)
-	case Rectangle:
-		return ec._Rectangle(sel, &obj)
-
 	case *Rectangle:
 		return ec._Rectangle(sel, obj)
 	default:

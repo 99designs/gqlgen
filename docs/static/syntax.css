@@ -59,7 +59,6 @@
 .chroma code {
     overflow: auto;
     display: block;
-    width:100%;
     background-color: #e7edef;
     padding: 5px;
     margin-bottom: 1em;

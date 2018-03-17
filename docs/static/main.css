@@ -85,7 +85,8 @@ nav {
 
 header {
     background: #e9ebed;
-    padding: 45px;
+    padding: 45px 20px;
+    overflow:hidden;
 }
 
 footer {
@@ -135,6 +136,7 @@ ul.menu {
 ul.submenu {
     margin-left: 15px;
     list-style: none;
+    margin-bottom: 0;
 }
 
 .menu {

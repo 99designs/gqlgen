@@ -13,3 +13,6 @@ menu:
   main:
     - name: Tutorials
       identifier: tutorial
+      weight: 10
+    - name: Reference
+      identifier: reference

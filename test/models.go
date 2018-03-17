@@ -6,6 +6,10 @@ type Shape interface {
 	Area() float64
 }
 
+type ShapeUnion interface {
+	Area() float64
+}
+
 type Circle struct {
 	Radius float64
 }

@@ -29,6 +29,8 @@ type Rectangle implements Shape {
     area: Float
 }
 
+union ShapeUnion = Circle | Rectangle
+
 type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]

@@ -876,6 +876,19 @@ func (ec *executionContext) _Shape(sel []query.Selection, obj *Shape) graphql.Ma
 	}
 }
 
+func (ec *executionContext) _ShapeUnion(sel []query.Selection, obj *ShapeUnion) graphql.Marshaler {
+	switch obj := (*obj).(type) {
+	case nil:
+		return graphql.Null
+	case *Circle:
+		return ec._Circle(sel, obj)
+	case *Rectangle:
+		return ec._Rectangle(sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 	var it InnerInput
 
@@ -912,7 +925,7 @@ func UnmarshalOuterInput(v interface{}) (OuterInput, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("input InnerInput {\n    id:Int!\n}\n\ninput OuterInput {\n    inner: InnerInput!\n}\n\ntype OuterObject {\n    inner: InnerObject!\n}\n\ntype InnerObject {\n    id: Int!\n}\n\ninterface Shape {\n    area: Float\n}\n\ntype Circle implements Shape {\n    radius: Float\n    area: Float\n}\n\ntype Rectangle implements Shape {\n    length: Float\n    width: Float\n    area: Float\n}\n\ntype Query {\n    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean\n    nestedOutputs: [[OuterObject]]\n    shapes: [Shape]\n}\n")
+var parsedSchema = schema.MustParse("input InnerInput {\n    id:Int!\n}\n\ninput OuterInput {\n    inner: InnerInput!\n}\n\ntype OuterObject {\n    inner: InnerObject!\n}\n\ntype InnerObject {\n    id: Int!\n}\n\ninterface Shape {\n    area: Float\n}\n\ntype Circle implements Shape {\n    radius: Float\n    area: Float\n}\n\ntype Rectangle implements Shape {\n    length: Float\n    width: Float\n    area: Float\n}\n\nunion ShapeUnion = Circle | Rectangle\n\ntype Query {\n    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean\n    nestedOutputs: [[OuterObject]]\n    shapes: [Shape]\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

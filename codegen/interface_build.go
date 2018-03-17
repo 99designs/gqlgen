@@ -37,7 +37,11 @@ func buildInterface(types NamedTypes, typ schema.NamedType, prog *loader.Program
 
 		for _, implementor := range typ.PossibleTypes {
 			t := types[implementor.TypeName()]
-			i.Implementors = append(i.Implementors, InterfaceImplementor{NamedType: t, ValueReceiver: true})
+
+			i.Implementors = append(i.Implementors, InterfaceImplementor{
+				NamedType:     t,
+				ValueReceiver: isValueReceiver(types[typ.Name], t, prog),
+			})
 		}
 
 		return i

@@ -1,5 +1,6 @@
 {
     "Shape": "github.com/vektah/gqlgen/test.Shape",
+    "ShapeUnion": "github.com/vektah/gqlgen/test.ShapeUnion",
     "Circle": "github.com/vektah/gqlgen/test.Circle",
     "Rectangle": "github.com/vektah/gqlgen/test.Rectangle"
 }

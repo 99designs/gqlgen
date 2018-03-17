@@ -9,12 +9,16 @@ import (
 	"time"
 )
 
+type CharacterFields struct {
+	ID        string
+	Name      string
+	FriendIds []string
+	AppearsIn []string
+}
+
 type Human struct {
-	ID           string
-	Name         string
-	FriendIds    []string
+	CharacterFields
 	StarshipIds  []string
-	AppearsIn    []string
 	heightMeters float64
 	Mass         float64
 }
@@ -55,10 +59,7 @@ type Review struct {
 }
 
 type Droid struct {
-	ID              string
-	Name            string
-	FriendIds       []string
-	AppearsIn       []string
+	CharacterFields
 	PrimaryFunction string
 }
 

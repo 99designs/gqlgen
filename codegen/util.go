@@ -82,12 +82,42 @@ func findMethod(typ *types.Named, name string) *types.Func {
 			return method
 		}
 	}
+
+	if s, ok := typ.Underlying().(*types.Struct); ok {
+		for i := 0; i < s.NumFields(); i++ {
+			field := s.Field(i)
+			if !field.Anonymous() {
+				continue
+			}
+
+			if named, ok := field.Type().(*types.Named); ok {
+				if f := findMethod(named, name); f != nil {
+					return f
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
 func findField(typ *types.Struct, name string) *types.Var {
 	for i := 0; i < typ.NumFields(); i++ {
 		field := typ.Field(i)
+		if field.Anonymous() {
+			if named, ok := field.Type().(*types.Struct); ok {
+				if f := findField(named, name); f != nil {
+					return f
+				}
+			}
+
+			if named, ok := field.Type().Underlying().(*types.Struct); ok {
+				if f := findField(named, name); f != nil {
+					return f
+				}
+			}
+		}
+
 		if !field.Exported() {
 			continue
 		}

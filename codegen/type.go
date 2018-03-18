@@ -85,13 +85,14 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	switch {
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
 		ptr := "ptr" + strconv.Itoa(depth)
-		return tpl(`var {{.ptr}} {{.t.FullName}}
+		return tpl(`var {{.ptr}} {{.mods}}{{.t.FullName}}
 			{{.next}}
 			{{.result}} = &{{.ptr -}}
 		`, map[string]interface{}{
 			"ptr":    ptr,
 			"t":      t,
 			"result": result,
+			"mods":   strings.Join(remainingMods[1:], ""),
 			"next":   t.unmarshal(ptr, raw, remainingMods[1:], depth+1),
 		})
 

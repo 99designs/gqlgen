@@ -29,10 +29,15 @@ type Rectangle implements Shape {
     area: Float
 }
 
+input RecursiveInputSlice {
+    self: [RecursiveInputSlice!]
+}
+
 union ShapeUnion = Circle | Rectangle
 
 type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
     shapes: [Shape]
+    recursive(input: RecursiveInputSlice): Boolean
 }

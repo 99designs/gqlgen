@@ -17,7 +17,7 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-var output = flag.String("out", "-", "the file to write to, - for stdout")
+var output = flag.String("out", "generated.go", "the file to write to")
 var models = flag.String("models", "models_gen.go", "the file to write the models to")
 var schemaFilename = flag.String("schema", "schema.graphql", "the graphql schema to generate types from")
 var typemap = flag.String("typemap", "", "a json map going from graphql to golang types")
@@ -49,15 +49,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *output != "-" {
-		_ = syscall.Unlink(*output)
-	}
+	_ = syscall.Unlink(*output)
 	_ = syscall.Unlink(*models)
 
 	types := loadTypeMap()
 
 	modelsBuild := codegen.Models(schema, types, dirName())
 	if len(modelsBuild.Models) > 0 {
+		if *packageName != "" {
+			modelsBuild.PackageName = *packageName
+		}
+
 		buf, err := templates.Run("models.gotpl", modelsBuild)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
@@ -102,20 +104,17 @@ func gofmt(filename string, b []byte) []byte {
 }
 
 func write(filename string, b []byte) {
-	if filename == "-" {
-		fmt.Println(string(gofmt(filename, b)))
-	} else {
-		err := os.MkdirAll(filepath.Dir(filename), 0755)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to create directory: ", err.Error())
-			os.Exit(1)
-		}
+	fmt.Println(filename)
+	err := os.MkdirAll(filepath.Dir(filename), 0755)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create directory: ", err.Error())
+		os.Exit(1)
+	}
 
-		err = ioutil.WriteFile(filename, gofmt(filename, b), 0644)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to write %s: %s", filename, err.Error())
-			os.Exit(1)
-		}
+	err = ioutil.WriteFile(filename, gofmt(filename, b), 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to write %s: %s", filename, err.Error())
+		os.Exit(1)
 	}
 }
 

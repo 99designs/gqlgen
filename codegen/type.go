@@ -70,7 +70,8 @@ func (t *Type) StripPtr() {
 }
 
 func (t Type) IsSlice() bool {
-	return len(t.Modifiers) > 0 && t.Modifiers[0] == modList
+	return len(t.Modifiers) > 0 && t.Modifiers[0] == modList ||
+		len(t.Modifiers) > 1 && t.Modifiers[0] == modPtr && t.Modifiers[1] == modList
 }
 
 func (t NamedType) IsMarshaled() bool {

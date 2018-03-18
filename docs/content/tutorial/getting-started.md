@@ -13,6 +13,7 @@ The aim for this tutorial is to build a "todo" graphql server that can:
  - create new todos
  - mark off todos as they are completed
 
+You can find the finished code for this tutorial [here](https://github.com/vektah/gqlgen-tutorials/tree/master/gettingstarted)
 
 ## Install gqlgen
 
@@ -54,13 +55,15 @@ type Mutation {
 
 Now that we have defined the shape of our data, and what actions can be taken we can ask gqlgen to convert the schema into code:
 ```bash
-gqlgen -out generated.go -package main
+mkdir graph
+cd graph
+gqlgen -schema ../schema.graphql
 ```
 
 gqlgen should have created two new files `generated.go` and `models_gen.go`. If we take a peek in both we can see what the server has generated:
 
 ```go
-// generated.go
+// graph/generated.go
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers}
 }
@@ -71,7 +74,7 @@ type Resolvers interface {
 	Todo_user(ctx context.Context, it *Todo) (User, error)
 }
 
-// models_gen.go
+// graph/models_gen.go
 type Todo struct {
 	ID     string
 	Text   string
@@ -96,23 +99,19 @@ directly.
 Finally, we get to write some code! 
 
 ```go
-// main.go
-package main
+// graph/graph.go
+package graph
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
-	"net/http"
-
-	"github.com/vektah/gqlgen/handler"
 )
 
 type MyApp struct {
 	todos []Todo
 }
- 
+
 func (a *MyApp) Query_todos(ctx context.Context) ([]Todo, error) {
 	return a.todos, nil
 }
@@ -127,21 +126,33 @@ func (a *MyApp) Mutation_createTodo(ctx context.Context, text string) (Todo, err
 	return todo, nil
 }
 
-
 func (a *MyApp) Todo_user(ctx context.Context, it *Todo) (User, error) {
 	return User{ID: it.UserID, Name: "user " + it.UserID}, nil
 }
+```
+
+```go
+// main.go
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/vektah/gqlgen-tutorials/gettingstarted/graph"
+	"github.com/vektah/gqlgen/handler"
+)
 
 func main() {
-	app := &MyApp{
-		todos: []Todo{}, // this would normally be a reference to the db
-	}
+	app := &graph.MyApp{}
 	http.Handle("/", handler.Playground("Todo", "/query"))
-	http.Handle("/query", handler.GraphQL(MakeExecutableSchema(app)))
+	http.Handle("/query", handler.GraphQL(graph.MakeExecutableSchema(app)))
 
 	fmt.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
 ```
 
 We now have a working server, to start it:
@@ -175,33 +186,26 @@ query findTodos {
 ## Customizing the models
 
 Generated models are nice to get moving quickly, but you probably want control over them at some point. To do that
-create a types.json, eg:
+create a `graph/types.json`:
 ```json
 {
-  "Todo": "github.com/vektah/gettingstarted.Todo"
+  "User": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User"
 }
 ```
 
 and create the model yourself:
 ```go
-type Todo struct {
-	ID     string
-	Text   string
-	done   bool
-	userID string // I've made userID private now.
+// graph/graph.go
+type User struct {
+	ID   string
+	Name string
 }
-
-// lets define a getter too. it could also return an error if we needed. 
-func (t Todo) Done() bool {
-	return t.done
-} 
-
 ```
 
 then regenerate, this time specifying the type map:
 
 ```bash
-gqlgen -out generated.go -package main -typemap types.json
+gqlgen -typemap types.json -schema ../schema.graphql
 ```
 
 gqlgen will look at the user defined types and match the fields up finding fields and functions by matching names.

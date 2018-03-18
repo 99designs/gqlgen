@@ -15,14 +15,12 @@ type Customer struct {
 	ID        int
 	Name      string
 	AddressID int
-	OrdersID  int
 }
 type Item struct {
 	Name string
 }
 type Order struct {
-	ID      int
-	Date    time.Time
-	Amount  float64
-	ItemsID int
+	ID     int
+	Date   time.Time
+	Amount float64
 }

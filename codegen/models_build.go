@@ -19,13 +19,13 @@ func buildModels(types NamedTypes, s *schema.Schema, prog *loader.Program) []Mod
 			if obj.Root || obj.GoType != "" {
 				continue
 			}
-			model = obj2Model(obj)
+			model = obj2Model(s, obj)
 		case *schema.InputObject:
 			obj := buildInput(types, typ)
 			if obj.GoType != "" {
 				continue
 			}
-			model = obj2Model(obj)
+			model = obj2Model(s, obj)
 		case *schema.Interface, *schema.Union:
 			intf := buildInterface(types, typ, prog)
 			if intf.GoType != "" {
@@ -46,7 +46,7 @@ func buildModels(types NamedTypes, s *schema.Schema, prog *loader.Program) []Mod
 	return models
 }
 
-func obj2Model(obj *Object) Model {
+func obj2Model(s *schema.Schema, obj *Object) Model {
 	model := Model{
 		NamedType: obj.NamedType,
 		Fields:    []ModelField{},
@@ -66,9 +66,21 @@ func obj2Model(obj *Object) Model {
 			}
 		} else if mf.IsInput {
 			mf.GoVarName = ucFirst(field.GQLName)
+		} else if mf.IsSlice() {
+			// one to many, we don't need a prop, we need a resolver
 		} else {
 			mf.GoFKName = ucFirst(field.GQLName) + "ID"
-			mf.GoFKType = "int" // todo: use schema to determine type of id?
+			mf.GoFKType = "string"
+
+			if obj, ok := s.Types[field.GQLType].(*schema.Object); ok {
+				for _, f := range obj.Fields {
+					if strings.EqualFold(f.Name, "id") {
+						if strings.Contains(f.Type.String(), "Int") {
+							mf.GoFKType = "int"
+						}
+					}
+				}
+			}
 		}
 
 		model.Fields = append(model.Fields, mf)

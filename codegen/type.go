@@ -126,7 +126,9 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	return tpl(`{{- if .t.CastType }}
 			var castTmp {{.t.FullName}}
 		{{ end }}
-			{{- if .t.Marshaler }}
+			{{- if eq .t.GoType "map[string]interface{}" }}
+				{{- .result }} = {{.raw}}.(map[string]interface{})
+			{{- else if .t.Marshaler }}
 				{{- .result }}, err = {{ .t.Marshaler.PkgDot }}Unmarshal{{.t.Marshaler.GoType}}({{.raw}})
 			{{- else -}}
 				err = (&{{.result}}).UnmarshalGQL({{.raw}})

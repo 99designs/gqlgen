@@ -128,7 +128,7 @@ func (ec *executionContext) _MyMutation_updateTodo(field graphql.CollectedField)
 	var arg1 map[string]interface{}
 	if tmp, ok := field.Args["changes"]; ok {
 		var err error
-		arg1, err = graphql.UnmarshalMap(tmp)
+		arg1 = tmp.(map[string]interface{})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null

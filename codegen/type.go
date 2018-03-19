@@ -87,11 +87,14 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
 		ptr := "ptr" + strconv.Itoa(depth)
 		return tpl(`var {{.ptr}} {{.mods}}{{.t.FullName}}
-			{{.next}}
-			{{.result}} = &{{.ptr -}}
+			if {{.raw}} != nil {
+				{{.next}}
+				{{.result}} = &{{.ptr -}}
+			}
 		`, map[string]interface{}{
 			"ptr":    ptr,
 			"t":      t,
+			"raw":    raw,
 			"result": result,
 			"mods":   strings.Join(remainingMods[1:], ""),
 			"next":   t.unmarshal(ptr, raw, remainingMods[1:], depth+1),
@@ -104,7 +107,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 		return tpl(`{{.rawSlice}} := {{.raw}}.([]interface{})
 			{{.result}} = make({{.type}}, len({{.rawSlice}}))
 			for {{.index}} := range {{.rawSlice}} {
-				{{ .next }}
+				{{ .next -}}
 			}`, map[string]interface{}{
 			"raw":      raw,
 			"rawSlice": rawIf,
@@ -122,11 +125,11 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 
 	return tpl(`{{- if .t.CastType }}
 			var castTmp {{.t.FullName}}
-		{{- end }}
+		{{ end }}
 			{{- if .t.Marshaler }}
-				{{ .result }}, err = {{ .t.Marshaler.PkgDot }}Unmarshal{{.t.Marshaler.GoType}}({{.raw}})
-			{{- else }}
-				err = (&{{.result}}).UnmarshalGQL({{.raw}}) 
+				{{- .result }}, err = {{ .t.Marshaler.PkgDot }}Unmarshal{{.t.Marshaler.GoType}}({{.raw}})
+			{{- else -}}
+				err = (&{{.result}}).UnmarshalGQL({{.raw}})
 			{{- end }}
 		{{- if .t.CastType }}
 			{{ .realResult }} = {{.t.CastType}}(castTmp)

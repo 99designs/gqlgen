@@ -206,7 +206,6 @@ func (ec *executionContext) _Mutation_post(field graphql.CollectedField) graphql
 	var arg0 string
 	if tmp, ok := field.Args["text"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -216,7 +215,6 @@ func (ec *executionContext) _Mutation_post(field graphql.CollectedField) graphql
 	var arg1 string
 	if tmp, ok := field.Args["username"]; ok {
 		var err error
-
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -226,7 +224,6 @@ func (ec *executionContext) _Mutation_post(field graphql.CollectedField) graphql
 	var arg2 string
 	if tmp, ok := field.Args["roomName"]; ok {
 		var err error
-
 		arg2, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -271,7 +268,6 @@ func (ec *executionContext) _Query_room(field graphql.CollectedField) graphql.Ma
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -310,7 +306,6 @@ func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -347,7 +342,6 @@ func (ec *executionContext) _Subscription_messageAdded(field graphql.CollectedFi
 	var arg0 string
 	if tmp, ok := field.Args["roomName"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -770,7 +764,6 @@ func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *in
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -822,7 +815,6 @@ func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)

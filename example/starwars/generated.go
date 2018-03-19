@@ -158,9 +158,11 @@ func (ec *executionContext) _Droid_friendsConnection(field graphql.CollectedFiel
 	if tmp, ok := field.Args["first"]; ok {
 		var err error
 		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
 
-		ptr1, err = graphql.UnmarshalInt(tmp)
-		arg0 = &ptr1
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -170,9 +172,11 @@ func (ec *executionContext) _Droid_friendsConnection(field graphql.CollectedFiel
 	if tmp, ok := field.Args["after"]; ok {
 		var err error
 		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalID(tmp)
+			arg1 = &ptr1
+		}
 
-		ptr1, err = graphql.UnmarshalID(tmp)
-		arg1 = &ptr1
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -375,7 +379,6 @@ func (ec *executionContext) _Human_height(field graphql.CollectedField, obj *Hum
 	var arg0 string
 	if tmp, ok := field.Args["unit"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -384,7 +387,6 @@ func (ec *executionContext) _Human_height(field graphql.CollectedField, obj *Hum
 	} else {
 		var tmp interface{} = "METER"
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -428,9 +430,11 @@ func (ec *executionContext) _Human_friendsConnection(field graphql.CollectedFiel
 	if tmp, ok := field.Args["first"]; ok {
 		var err error
 		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
 
-		ptr1, err = graphql.UnmarshalInt(tmp)
-		arg0 = &ptr1
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -440,9 +444,11 @@ func (ec *executionContext) _Human_friendsConnection(field graphql.CollectedFiel
 	if tmp, ok := field.Args["after"]; ok {
 		var err error
 		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalID(tmp)
+			arg1 = &ptr1
+		}
 
-		ptr1, err = graphql.UnmarshalID(tmp)
-		arg1 = &ptr1
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -522,7 +528,6 @@ func (ec *executionContext) _Mutation_createReview(field graphql.CollectedField)
 	var arg0 string
 	if tmp, ok := field.Args["episode"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -532,7 +537,6 @@ func (ec *executionContext) _Mutation_createReview(field graphql.CollectedField)
 	var arg1 Review
 	if tmp, ok := field.Args["review"]; ok {
 		var err error
-
 		arg1, err = UnmarshalReviewInput(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -633,7 +637,6 @@ func (ec *executionContext) _Query_hero(field graphql.CollectedField) graphql.Ma
 	var arg0 string
 	if tmp, ok := field.Args["episode"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -642,7 +645,6 @@ func (ec *executionContext) _Query_hero(field graphql.CollectedField) graphql.Ma
 	} else {
 		var tmp interface{} = "NEWHOPE"
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -671,7 +673,6 @@ func (ec *executionContext) _Query_reviews(field graphql.CollectedField) graphql
 	var arg0 string
 	if tmp, ok := field.Args["episode"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -682,9 +683,11 @@ func (ec *executionContext) _Query_reviews(field graphql.CollectedField) graphql
 	if tmp, ok := field.Args["since"]; ok {
 		var err error
 		var ptr1 time.Time
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalTime(tmp)
+			arg1 = &ptr1
+		}
 
-		ptr1, err = graphql.UnmarshalTime(tmp)
-		arg1 = &ptr1
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -715,7 +718,6 @@ func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.
 	var arg0 string
 	if tmp, ok := field.Args["text"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -747,7 +749,6 @@ func (ec *executionContext) _Query_character(field graphql.CollectedField) graph
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -775,7 +776,6 @@ func (ec *executionContext) _Query_droid(field graphql.CollectedField) graphql.M
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -806,7 +806,6 @@ func (ec *executionContext) _Query_human(field graphql.CollectedField) graphql.M
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -837,7 +836,6 @@ func (ec *executionContext) _Query_starship(field graphql.CollectedField) graphq
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -876,7 +874,6 @@ func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -976,7 +973,6 @@ func (ec *executionContext) _Starship_length(field graphql.CollectedField, obj *
 	var arg0 string
 	if tmp, ok := field.Args["unit"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -985,7 +981,6 @@ func (ec *executionContext) _Starship_length(field graphql.CollectedField, obj *
 	} else {
 		var tmp interface{} = "METER"
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -1412,7 +1407,6 @@ func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *in
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -1464,7 +1458,6 @@ func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -1551,7 +1544,6 @@ func UnmarshalReviewInput(v interface{}) (Review, error) {
 		switch k {
 		case "stars":
 			var err error
-
 			it.Stars, err = graphql.UnmarshalInt(v)
 			if err != nil {
 				return it, err
@@ -1559,15 +1551,16 @@ func UnmarshalReviewInput(v interface{}) (Review, error) {
 		case "commentary":
 			var err error
 			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Commentary = &ptr1
+			}
 
-			ptr1, err = graphql.UnmarshalString(v)
-			it.Commentary = &ptr1
 			if err != nil {
 				return it, err
 			}
 		case "time":
 			var err error
-
 			it.Time, err = graphql.UnmarshalTime(v)
 			if err != nil {
 				return it, err

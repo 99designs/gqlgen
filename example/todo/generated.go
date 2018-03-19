@@ -101,7 +101,6 @@ func (ec *executionContext) _MyMutation_createTodo(field graphql.CollectedField)
 	var arg0 TodoInput
 	if tmp, ok := field.Args["todo"]; ok {
 		var err error
-
 		arg0, err = UnmarshalTodoInput(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -120,7 +119,6 @@ func (ec *executionContext) _MyMutation_updateTodo(field graphql.CollectedField)
 	var arg0 int
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -130,7 +128,6 @@ func (ec *executionContext) _MyMutation_updateTodo(field graphql.CollectedField)
 	var arg1 map[string]interface{}
 	if tmp, ok := field.Args["changes"]; ok {
 		var err error
-
 		arg1, err = graphql.UnmarshalMap(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -182,7 +179,6 @@ func (ec *executionContext) _MyQuery_todo(field graphql.CollectedField) graphql.
 	var arg0 int
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -264,7 +260,6 @@ func (ec *executionContext) _MyQuery___type(field graphql.CollectedField) graphq
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -719,7 +714,6 @@ func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *in
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -771,7 +765,6 @@ func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -820,7 +813,6 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 		switch k {
 		case "text":
 			var err error
-
 			it.Text, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
@@ -828,9 +820,11 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 		case "done":
 			var err error
 			var ptr1 bool
+			if v != nil {
+				ptr1, err = graphql.UnmarshalBoolean(v)
+				it.Done = &ptr1
+			}
 
-			ptr1, err = graphql.UnmarshalBoolean(v)
-			it.Done = &ptr1
 			if err != nil {
 				return it, err
 			}

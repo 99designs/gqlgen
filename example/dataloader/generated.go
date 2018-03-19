@@ -339,7 +339,6 @@ func (ec *executionContext) _Query_torture(field graphql.CollectedField) graphql
 			rawIf2 := rawIf1[idx1].([]interface{})
 			arg0[idx1] = make([]int, len(rawIf2))
 			for idx2 := range rawIf2 {
-
 				arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
 			}
 		}
@@ -387,7 +386,6 @@ func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -801,7 +799,6 @@ func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *in
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -853,7 +850,6 @@ func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)

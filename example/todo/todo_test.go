@@ -119,4 +119,13 @@ func TestTodo(t *testing.T) {
 		var resp interface{}
 		c.MustPost(introspection.Query, &resp)
 	})
+
+	t.Run("null optional field", func(t *testing.T) {
+		var resp struct {
+			CreateTodo struct{ Text string }
+		}
+		c.MustPost(`mutation { createTodo(todo:{text:"Completed todo", done: null}) { text } }`, &resp)
+
+		require.Equal(t, "Completed todo", resp.CreateTodo.Text)
+	})
 }

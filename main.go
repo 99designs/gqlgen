@@ -104,7 +104,6 @@ func gofmt(filename string, b []byte) []byte {
 }
 
 func write(filename string, b []byte) {
-	fmt.Println(filename)
 	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "failed to create directory: ", err.Error())

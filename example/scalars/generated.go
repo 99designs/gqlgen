@@ -94,7 +94,6 @@ func (ec *executionContext) _Query_user(field graphql.CollectedField) graphql.Ma
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -125,7 +124,6 @@ func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.
 	var arg0 SearchArgs
 	if tmp, ok := field.Args["input"]; ok {
 		var err error
-
 		arg0, err = UnmarshalSearchArgs(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -134,7 +132,6 @@ func (ec *executionContext) _Query_search(field graphql.CollectedField) graphql.
 	} else {
 		var tmp interface{} = map[string]interface{}{"location": "37,144"}
 		var err error
-
 		arg0, err = UnmarshalSearchArgs(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -175,7 +172,6 @@ func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -644,7 +640,6 @@ func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *in
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -696,7 +691,6 @@ func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -746,18 +740,23 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 		case "location":
 			var err error
 			var ptr1 Point
+			if v != nil {
 
-			err = (&ptr1).UnmarshalGQL(v)
-			it.Location = &ptr1
+				err = (&ptr1).UnmarshalGQL(v)
+				it.Location = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
 		case "createdAfter":
 			var err error
 			var ptr1 time.Time
+			if v != nil {
+				ptr1, err = UnmarshalTimestamp(v)
+				it.CreatedAfter = &ptr1
+			}
 
-			ptr1, err = UnmarshalTimestamp(v)
-			it.CreatedAfter = &ptr1
 			if err != nil {
 				return it, err
 			}

@@ -208,7 +208,6 @@ func (ec *executionContext) _Query_nestedInputs(field graphql.CollectedField) gr
 			rawIf2 := rawIf1[idx1].([]interface{})
 			arg0[idx1] = make([]OuterInput, len(rawIf2))
 			for idx2 := range rawIf2 {
-
 				arg0[idx1][idx2], err = UnmarshalOuterInput(rawIf2[idx2])
 			}
 		}
@@ -225,7 +224,6 @@ func (ec *executionContext) _Query_nestedInputs(field graphql.CollectedField) gr
 			rawIf2 := rawIf1[idx1].([]interface{})
 			arg0[idx1] = make([]OuterInput, len(rawIf2))
 			for idx2 := range rawIf2 {
-
 				arg0[idx1][idx2], err = UnmarshalOuterInput(rawIf2[idx2])
 			}
 		}
@@ -310,9 +308,11 @@ func (ec *executionContext) _Query_recursive(field graphql.CollectedField) graph
 	if tmp, ok := field.Args["input"]; ok {
 		var err error
 		var ptr1 RecursiveInputSlice
+		if tmp != nil {
+			ptr1, err = UnmarshalRecursiveInputSlice(tmp)
+			arg0 = &ptr1
+		}
 
-		ptr1, err = UnmarshalRecursiveInputSlice(tmp)
-		arg0 = &ptr1
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -350,7 +350,6 @@ func (ec *executionContext) _Query___type(field graphql.CollectedField) graphql.
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -805,7 +804,6 @@ func (ec *executionContext) ___Type_fields(field graphql.CollectedField, obj *in
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -857,7 +855,6 @@ func (ec *executionContext) ___Type_enumValues(field graphql.CollectedField, obj
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
-
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			ec.Error(err)
@@ -932,7 +929,6 @@ func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 		switch k {
 		case "id":
 			var err error
-
 			it.ID, err = graphql.UnmarshalInt(v)
 			if err != nil {
 				return it, err
@@ -950,7 +946,6 @@ func UnmarshalOuterInput(v interface{}) (OuterInput, error) {
 		switch k {
 		case "inner":
 			var err error
-
 			it.Inner, err = UnmarshalInnerInput(v)
 			if err != nil {
 				return it, err
@@ -969,15 +964,20 @@ func UnmarshalRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
 		case "self":
 			var err error
 			var ptr1 []*RecursiveInputSlice
-			rawIf2 := v.([]interface{})
-			ptr1 = make([]*RecursiveInputSlice, len(rawIf2))
-			for idx2 := range rawIf2 {
-				var ptr3 RecursiveInputSlice
+			if v != nil {
+				rawIf2 := v.([]interface{})
+				ptr1 = make([]*RecursiveInputSlice, len(rawIf2))
+				for idx2 := range rawIf2 {
+					var ptr3 RecursiveInputSlice
+					if rawIf2[idx2] != nil {
+						ptr3, err = UnmarshalRecursiveInputSlice(rawIf2[idx2])
+						ptr1[idx2] = &ptr3
+					}
 
-				ptr3, err = UnmarshalRecursiveInputSlice(rawIf2[idx2])
-				ptr1[idx2] = &ptr3
+				}
+				it.Self = &ptr1
 			}
-			it.Self = &ptr1
+
 			if err != nil {
 				return it, err
 			}

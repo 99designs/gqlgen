@@ -3,5 +3,6 @@
     "ShapeUnion": "github.com/vektah/gqlgen/test.ShapeUnion",
     "Circle": "github.com/vektah/gqlgen/test.Circle",
     "Rectangle": "github.com/vektah/gqlgen/test.Rectangle",
-    "RecursiveInputSlice": "github.com/vektah/gqlgen/test.RecursiveInputSlice"
+    "RecursiveInputSlice": "github.com/vektah/gqlgen/test.RecursiveInputSlice",
+    "Changes": "map[string]interface{}"
 }

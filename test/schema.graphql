@@ -35,9 +35,15 @@ input RecursiveInputSlice {
 
 union ShapeUnion = Circle | Rectangle
 
+input Changes {
+    a: Int
+    b: Int
+}
+
 type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
     shapes: [Shape]
     recursive(input: RecursiveInputSlice): Boolean
+    mapInput(input: Changes): Boolean
 }

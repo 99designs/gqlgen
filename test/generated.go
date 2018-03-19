@@ -973,7 +973,6 @@ func UnmarshalRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
 						ptr3, err = UnmarshalRecursiveInputSlice(rawIf2[idx2])
 						ptr1[idx2] = &ptr3
 					}
-
 				}
 				it.Self = &ptr1
 			}

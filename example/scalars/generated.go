@@ -741,7 +741,6 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 			var err error
 			var ptr1 Point
 			if v != nil {
-
 				err = (&ptr1).UnmarshalGQL(v)
 				it.Location = &ptr1
 			}

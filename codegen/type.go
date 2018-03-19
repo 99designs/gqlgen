@@ -107,7 +107,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 		return tpl(`{{.rawSlice}} := {{.raw}}.([]interface{})
 			{{.result}} = make({{.type}}, len({{.rawSlice}}))
 			for {{.index}} := range {{.rawSlice}} {
-				{{ .next }}
+				{{ .next -}}
 			}`, map[string]interface{}{
 			"raw":      raw,
 			"rawSlice": rawIf,
@@ -128,7 +128,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 		{{ end }}
 			{{- if .t.Marshaler }}
 				{{- .result }}, err = {{ .t.Marshaler.PkgDot }}Unmarshal{{.t.Marshaler.GoType}}({{.raw}})
-			{{- else }}
+			{{- else -}}
 				err = (&{{.result}}).UnmarshalGQL({{.raw}})
 			{{- end }}
 		{{- if .t.CastType }}

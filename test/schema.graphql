@@ -40,10 +40,15 @@ input Changes {
     b: Int
 }
 
+type It {
+    id: ID!
+}
+
 type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
     shapes: [Shape]
     recursive(input: RecursiveInputSlice): Boolean
     mapInput(input: Changes): Boolean
+    collision: It
 }

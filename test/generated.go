@@ -13,6 +13,7 @@ import (
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
+	introspection1 "github.com/vektah/gqlgen/test/introspection"
 )
 
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
@@ -26,6 +27,7 @@ type Resolvers interface {
 	Query_shapes(ctx context.Context) ([]Shape, error)
 	Query_recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
 	Query_mapInput(ctx context.Context, input *map[string]interface{}) (*bool, error)
+	Query_collision(ctx context.Context) (*introspection1.It, error)
 }
 
 type executableSchema struct {
@@ -127,6 +129,33 @@ func (ec *executionContext) _InnerObject_id(field graphql.CollectedField, obj *I
 	return graphql.MarshalInt(res)
 }
 
+var itImplementors = []string{"It"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _It(sel []query.Selection, obj *introspection1.It) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.doc, sel, itImplementors, ec.variables)
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("It")
+		case "id":
+			out.Values[i] = ec._It_id(field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _It_id(field graphql.CollectedField, obj *introspection1.It) graphql.Marshaler {
+	res := obj.ID
+	return graphql.MarshalID(res)
+}
+
 var outerObjectImplementors = []string{"OuterObject"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -189,6 +218,8 @@ func (ec *executionContext) _Query(sel []query.Selection) graphql.Marshaler {
 			out.Values[i] = ec._Query_recursive(field)
 		case "mapInput":
 			out.Values[i] = ec._Query_mapInput(field)
+		case "collision":
+			out.Values[i] = ec._Query_collision(field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(field)
 		case "__type":
@@ -373,6 +404,27 @@ func (ec *executionContext) _Query_mapInput(field graphql.CollectedField) graphq
 			return graphql.Null
 		}
 		return graphql.MarshalBoolean(*res)
+	})
+}
+
+func (ec *executionContext) _Query_collision(field graphql.CollectedField) graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
+		res, err := ec.resolvers.Query_collision(ec.ctx)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._It(field.Selections, res)
 	})
 }
 
@@ -1024,7 +1076,7 @@ func UnmarshalRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("input InnerInput {\n    id:Int!\n}\n\ninput OuterInput {\n    inner: InnerInput!\n}\n\ntype OuterObject {\n    inner: InnerObject!\n}\n\ntype InnerObject {\n    id: Int!\n}\n\ninterface Shape {\n    area: Float\n}\n\ntype Circle implements Shape {\n    radius: Float\n    area: Float\n}\n\ntype Rectangle implements Shape {\n    length: Float\n    width: Float\n    area: Float\n}\n\ninput RecursiveInputSlice {\n    self: [RecursiveInputSlice!]\n}\n\nunion ShapeUnion = Circle | Rectangle\n\ninput Changes {\n    a: Int\n    b: Int\n}\n\ntype Query {\n    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean\n    nestedOutputs: [[OuterObject]]\n    shapes: [Shape]\n    recursive(input: RecursiveInputSlice): Boolean\n    mapInput(input: Changes): Boolean\n}\n")
+var parsedSchema = schema.MustParse("input InnerInput {\n    id:Int!\n}\n\ninput OuterInput {\n    inner: InnerInput!\n}\n\ntype OuterObject {\n    inner: InnerObject!\n}\n\ntype InnerObject {\n    id: Int!\n}\n\ninterface Shape {\n    area: Float\n}\n\ntype Circle implements Shape {\n    radius: Float\n    area: Float\n}\n\ntype Rectangle implements Shape {\n    length: Float\n    width: Float\n    area: Float\n}\n\ninput RecursiveInputSlice {\n    self: [RecursiveInputSlice!]\n}\n\nunion ShapeUnion = Circle | Rectangle\n\ninput Changes {\n    a: Int\n    b: Int\n}\n\ntype It {\n    id: ID!\n}\n\ntype Query {\n    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean\n    nestedOutputs: [[OuterObject]]\n    shapes: [Shape]\n    recursive(input: RecursiveInputSlice): Boolean\n    mapInput(input: Changes): Boolean\n    collision: It\n}\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

@@ -4,5 +4,6 @@
     "Circle": "github.com/vektah/gqlgen/test.Circle",
     "Rectangle": "github.com/vektah/gqlgen/test.Rectangle",
     "RecursiveInputSlice": "github.com/vektah/gqlgen/test.RecursiveInputSlice",
+    "It": "github.com/vektah/gqlgen/test/introspection.It",
     "Changes": "map[string]interface{}"
 }

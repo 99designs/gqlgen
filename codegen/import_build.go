@@ -35,8 +35,11 @@ func buildImports(types NamedTypes, destDir string) Imports {
 		localName := ""
 		if !strings.HasSuffix(destDir, t.Package) {
 			localName = filepath.Base(t.Package)
-			i := 0
-			for imp := imports.findByName(localName); imp != nil && imp.Package != t.Package; localName = filepath.Base(t.Package) + strconv.Itoa(i) {
+			i := 1
+			imp := imports.findByName(localName)
+			for imp != nil && imp.Package != t.Package {
+				localName = filepath.Base(t.Package) + strconv.Itoa(i)
+				imp = imports.findByName(localName)
 				i++
 				if i > 10 {
 					panic("too many collisions")

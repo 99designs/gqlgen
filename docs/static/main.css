@@ -134,7 +134,9 @@ nav {
 }
 
 .menu a {
-    color: inherit
+    color: inherit;
+    display: block;
+    padding: 5px 10px;
 }
 
 .menu a:hover {
@@ -153,7 +155,6 @@ ul.submenu {
 }
 
 ul.menu li {
-    padding: 5px;
 }
 
 ul.menu li.active {

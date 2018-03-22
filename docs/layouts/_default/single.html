@@ -1,10 +1,19 @@
 {{ define "main" }}
     <header>
-        <h1>{{ .Title }}</h1>
-        <span class="description">{{ .Description }}</span>
+        <div class="content">
+            <a class="header-link"
+               target="_blank"
+               href="https://github.com/vektah/gqlgen/blob/master/docs/content/{{.File.Path }}">
+                [edit]
+            </a>
+            <h1>{{ .Title }}</h1>
+            <div class="description">{{ .Description }}</div>
+        </div>
     </header>
 
     <main>
-        {{ .Content }}
+        <div class="content">
+            {{ .Content }}
+        </div>
     </main>
 {{ end }}

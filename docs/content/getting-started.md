@@ -1,8 +1,8 @@
 ---
-title: "Getting Started"
+title: Getting Started
 description: Creating a todo graphql server in golang
-date: 2018-03-17T13:06:47+11:00
-menu: {"main": {"parent": "tutorial"}}
+menu: main
+weight: -5
 ---
 
 ## Goal

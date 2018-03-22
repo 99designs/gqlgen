@@ -1,8 +1,7 @@
 ---
 title: "Custom Scalars"
 description: Using custom graphql types in golang
-date: 2018-03-17T13:06:47+11:00
-menu: {"main": {"parent": "reference"}}
+menu: main
 ---
 
 There are two different ways to implement scalars in gqlgen, depending on your need.

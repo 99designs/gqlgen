@@ -71,9 +71,12 @@ a:hover {
 main {
     flex: 1;
     padding: 20px;
-    max-width: 760px;
-    margin: 1em auto;
     color: #445;
+}
+
+.content {
+    max-width: 760px;
+    margin: auto;
 }
 
 nav {
@@ -99,17 +102,16 @@ footer {
 h1 {
     font-size: 25px;
     font-weight: bold;
-    width: 760px;
-    margin: .3em auto;
-    display: block;
+    margin: 10px 0;
 }
 
 .description {
     font-size: 18px;
     color: #555;
-    width: 760px;
-    margin: auto;
-    display: block;
+}
+
+.header-link {
+    float: right;
 }
 
 h2 {

@@ -14,8 +14,12 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers}
+func MakeExecutableSchema(resolvers Resolvers, opts ...ExecutableOption) graphql.ExecutableSchema {
+	ret := &executableSchema{resolvers: resolvers}
+	for _, opt := range opts {
+		opt(ret)
+	}
+	return ret
 }
 
 type Resolvers interface {
@@ -26,8 +30,17 @@ type Resolvers interface {
 	MyQuery_todos(ctx context.Context) ([]Todo, error)
 }
 
+type ExecutableOption func(*executableSchema)
+
+func WithErrorConverter(fn func(error) string) ExecutableOption {
+	return func(s *executableSchema) {
+		s.errorMessageFn = fn
+	}
+}
+
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers      Resolvers
+	errorMessageFn func(error) string
 }
 
 func (e *executableSchema) Schema() *schema.Schema {
@@ -35,7 +48,7 @@ func (e *executableSchema) Schema() *schema.Schema {
 }
 
 func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
-	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
+	ec := e.makeExecutionContext(ctx, doc, variables, recover)
 
 	data := ec._MyQuery(op.Selections)
 	var buf bytes.Buffer
@@ -48,7 +61,7 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 }
 
 func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
-	ec := executionContext{resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover}
+	ec := e.makeExecutionContext(ctx, doc, variables, recover)
 
 	data := ec._MyMutation(op.Selections)
 	var buf bytes.Buffer
@@ -62,6 +75,13 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 
 func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
 	return graphql.OneShot(&graphql.Response{Errors: []*errors.QueryError{{Message: "subscriptions are not supported"}}})
+}
+
+func (e *executableSchema) makeExecutionContext(ctx context.Context, doc *query.Document, variables map[string]interface{}, recover graphql.RecoverFunc) *executionContext {
+	errBuilder := errors.Builder{ErrorMessageFn: e.errorMessageFn}
+	return &executionContext{
+		Builder: errBuilder, resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover,
+	}
 }
 
 type executionContext struct {

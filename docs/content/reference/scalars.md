@@ -1,6 +1,7 @@
 ---
-title: "Custom Scalars"
-description: Using custom graphql types in golang
+linkTitle: Custom Scalars
+title: Using custom graphql types in golang
+description: Defining custom GraphQL scalar types using gqlgen
 menu: main
 ---
 

@@ -1,6 +1,7 @@
 ---
-title: Introduction
-description: Type-safe graphql for golang
+linkTitle: Introduction
+title: Type-safe graphql for golang
+type: homepage
 menu: main
 weight: -10
 date: 2018-03-17T13:06:47+11:00

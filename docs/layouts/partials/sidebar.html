@@ -4,7 +4,7 @@
 	<ul class="menu">
 	{{ $currentPage := . }}
 	{{- range .Site.Menus.main }}
-		<li>
+		<li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
 			{{ if .URL }}
 				<a href="{{ .URL }}">{{ .Name }}</a>
 			{{ else }}
@@ -13,7 +13,7 @@
 		{{- if .HasChildren }}
 			<ul class="submenu">
 			{{- range .Children }}
-				<li>
+				<li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
 					{{ if .URL }}
 						<a href="{{ .URL }}">{{ .Name }}</a>
 					{{ else }}

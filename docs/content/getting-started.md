@@ -1,6 +1,7 @@
 ---
-title: Getting Started
-description: Creating a todo graphql server in golang
+linkTitle: Getting Started
+title: Building graphql servers in golang
+description: Get started building type-safe graphql servers in Golang using gqlgen  
 menu: main
 weight: -5
 ---

@@ -79,13 +79,6 @@ main {
     margin: auto;
 }
 
-nav {
-    color: #eee;
-    background-color: #303538;
-    padding: 20px;
-    grid-row: span 3;
-}
-
 header {
     background: #e9ebed;
     padding: 45px 20px;
@@ -130,6 +123,24 @@ p {
     margin-bottom: 1em;
 }
 
+nav {
+    color: #eee;
+    background-color: #303538;
+    grid-row: span 3;
+}
+
+.menu {
+    font-weight: 700;
+}
+
+.menu a {
+    color: inherit
+}
+
+.menu a:hover {
+    border-bottom: none;
+}
+
 ul.menu {
     margin-left:0;
     list-style: none;
@@ -141,12 +152,16 @@ ul.submenu {
     margin-bottom: 0;
 }
 
-.menu {
-    font-weight: 700;
+ul.menu li {
+    padding: 5px;
 }
 
-.menu a {
-    color: inherit
+ul.menu li.active {
+    background-color: #576;
+}
+
+ul.menu li:hover {
+    background-color: #222;
 }
 
 .logo {
@@ -156,8 +171,7 @@ ul.submenu {
     color: #eee;
     width: 100%;
     text-align: center;
-    margin-top: .2em;
-    margin-bottom: 1em;
+    margin: 70px auto;
     border-bottom: none;
     display:block;
 }

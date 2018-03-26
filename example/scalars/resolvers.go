@@ -4,16 +4,19 @@ package scalars
 
 import (
 	context "context"
+	"fmt"
 	"time"
+
+	"external"
 )
 
 type Resolver struct {
 }
 
-func (r *Resolver) Query_user(ctx context.Context, id string) (*User, error) {
+func (r *Resolver) Query_user(ctx context.Context, id external.ObjectID) (*User, error) {
 	return &User{
 		ID:       id,
-		Name:     "Test User " + id,
+		Name:     fmt.Sprintf("Test User %d", id),
 		Created:  time.Now(),
 		Location: Point{1, 2},
 	}, nil
@@ -32,13 +35,13 @@ func (r *Resolver) Query_search(ctx context.Context, input SearchArgs) ([]User, 
 
 	return []User{
 		{
-			ID:       "1",
+			ID:       1,
 			Name:     "Test User 1",
 			Created:  created,
 			Location: location,
 		},
 		{
-			ID:       "2",
+			ID:       2,
 			Name:     "Test User 2",
 			Created:  created,
 			Location: location,

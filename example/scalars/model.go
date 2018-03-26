@@ -8,13 +8,15 @@ import (
 	"strings"
 	"time"
 
+	"external"
+
 	"github.com/vektah/gqlgen/graphql"
 )
 
 type Banned bool
 
 type User struct {
-	ID       string
+	ID       external.ObjectID
 	Name     string
 	Location Point     // custom scalar types
 	Created  time.Time // direct binding to builtin types with external Marshal/Unmarshal methods
@@ -69,6 +71,23 @@ func UnmarshalTimestamp(v interface{}) (time.Time, error) {
 		return time.Unix(int64(tmpStr), 0), nil
 	}
 	return time.Time{}, errors.New("time should be a unix timestamp")
+}
+
+// Lets redefine the base ID type to use an id from an external library
+func MarshalID(id external.ObjectID) graphql.Marshaler {
+	return graphql.WriterFunc(func(w io.Writer) {
+		io.WriteString(w, fmt.Sprintf("%d", id))
+	})
+}
+
+// And the same for the unmarshaler
+func UnmarshalID(v interface{}) (external.ObjectID, error) {
+	str, ok := v.(string)
+	if !ok {
+		return 0, fmt.Errorf("ids must be strings")
+	}
+	i, err := strconv.Atoi(str)
+	return external.ObjectID(i), err
 }
 
 type SearchArgs struct {

@@ -11,7 +11,7 @@ jobs:
           chmod +x /bin/dep &&
           go get -u github.com/alecthomas/gometalinter github.com/vektah/gorunpkg &&
           gometalinter --install &&
-          dep ensure --vendor-only
+          dep ensure -vendor-only
       - run: go install -v . && go get -u github.com/vektah/dataloaden github.com/pkg/errors
       - run: go generate ./... && if [[ $(git --no-pager diff) ]] ; then echo "you need to run go generate" ; git --no-pager diff ; exit 1 ; fi
       - run: go vet ./...

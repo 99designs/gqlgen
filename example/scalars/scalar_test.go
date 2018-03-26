@@ -15,7 +15,7 @@ type RawUser struct {
 	ID                string
 	Name              string
 	Created           int64
-	Location          string
+	Address           struct{ Location string }
 	PrimitiveResolver string
 	CustomResolver    string
 }
@@ -30,27 +30,27 @@ func TestScalars(t *testing.T) {
 			Search []RawUser
 		}
 		c.MustPost(`{
-				user(id:"1") {
+				user(id:"=1=") {
 					...UserData
 				}
 				search(input:{location:"6,66", createdAfter:666}) {
 					...UserData
 				}
 			}
-			fragment UserData on User  { id name created location }`, &resp)
+			fragment UserData on User  { id name created address { location } }`, &resp)
 
-		require.Equal(t, "1,2", resp.User.Location)
+		require.Equal(t, "1,2", resp.User.Address.Location)
 		require.Equal(t, time.Now().Unix(), resp.User.Created)
-		require.Equal(t, "6,66", resp.Search[0].Location)
+		require.Equal(t, "6,66", resp.Search[0].Address.Location)
 		require.Equal(t, int64(666), resp.Search[0].Created)
 	})
 
 	t.Run("default search location", func(t *testing.T) {
 		var resp struct{ Search []RawUser }
 
-		err := c.Post(`{ search { location } }`, &resp)
+		err := c.Post(`{ search {  address { location }  } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, "37,144", resp.Search[0].Location)
+		require.Equal(t, "37,144", resp.Search[0].Address.Location)
 	})
 
 	t.Run("custom error messages", func(t *testing.T) {
@@ -62,7 +62,7 @@ func TestScalars(t *testing.T) {
 
 	t.Run("scalar resolver methods", func(t *testing.T) {
 		var resp struct{ User RawUser }
-		c.MustPost(`{ user(id: "1") { primitiveResolver, customResolver } }`, &resp)
+		c.MustPost(`{ user(id: "=1=") { primitiveResolver, customResolver } }`, &resp)
 
 		require.Equal(t, "test", resp.User.PrimitiveResolver)
 		require.Equal(t, "5,1", resp.User.CustomResolver)

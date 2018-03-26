@@ -7,10 +7,15 @@ type User {
     id: ID!
     name: String!
     created: Timestamp
-    location: Point
     isBanned: Boolean!
     primitiveResolver: String!
     customResolver: Point!
+    address: Address
+}
+
+type Address {
+    id: ID!
+    location: Point
 }
 
 input SearchArgs {

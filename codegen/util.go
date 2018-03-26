@@ -178,10 +178,10 @@ func bindObject(t types.Type, object *Object, imports Imports) {
 			field.GoVarName = structField.Name()
 
 			switch field.Type.FullSignature() {
-			case structField.Type().String():
+			case normalizeVendor(structField.Type().String()):
 				// everything is fine
 
-			case structField.Type().Underlying().String():
+			case normalizeVendor(structField.Type().Underlying().String()):
 				pkg, typ := pkgAndType(structField.Type().String())
 				imp := imports.findByPkg(pkg)
 				field.CastType = typ

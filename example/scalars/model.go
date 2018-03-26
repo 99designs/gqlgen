@@ -18,9 +18,9 @@ type Banned bool
 type User struct {
 	ID       external.ObjectID
 	Name     string
-	Location Point     // custom scalar types
 	Created  time.Time // direct binding to builtin types with external Marshal/Unmarshal methods
 	IsBanned Banned    // aliased primitive
+	Address  Address
 }
 
 // Point is serialized as a simple array, eg [1, 2]
@@ -76,7 +76,7 @@ func UnmarshalTimestamp(v interface{}) (time.Time, error) {
 // Lets redefine the base ID type to use an id from an external library
 func MarshalID(id external.ObjectID) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
-		io.WriteString(w, fmt.Sprintf("%d", id))
+		io.WriteString(w, strconv.Quote(fmt.Sprintf("=%d=", id)))
 	})
 }
 
@@ -86,7 +86,7 @@ func UnmarshalID(v interface{}) (external.ObjectID, error) {
 	if !ok {
 		return 0, fmt.Errorf("ids must be strings")
 	}
-	i, err := strconv.Atoi(str)
+	i, err := strconv.Atoi(str[1 : len(str)-1])
 	return external.ObjectID(i), err
 }
 

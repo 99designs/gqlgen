@@ -15,7 +15,6 @@ type User {
 
 type Address {
     id: ID!
-    street: String
     location: Point
 }
 

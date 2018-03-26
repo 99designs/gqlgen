@@ -39,7 +39,7 @@ func Models(schema *schema.Schema, userTypes map[string]string, destDir string) 
 		panic(err)
 	}
 
-	bindTypes(imports, namedTypes, prog)
+	bindTypes(imports, namedTypes, destDir, prog)
 
 	models := buildModels(namedTypes, schema, prog)
 	return &ModelBuild{
@@ -59,7 +59,7 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 		return nil, err
 	}
 
-	bindTypes(imports, namedTypes, prog)
+	imports = bindTypes(imports, namedTypes, destDir, prog)
 
 	objects := buildObjects(namedTypes, schema, prog, imports)
 	inputs := buildInputs(namedTypes, schema, prog, imports)

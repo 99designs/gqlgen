@@ -5,6 +5,7 @@ package scalars
 import (
 	"bytes"
 	context "context"
+	external "external"
 	strconv "strconv"
 	time "time"
 
@@ -24,12 +25,11 @@ func MakeExecutableSchema(resolvers Resolvers, opts ...ExecutableOption) graphql
 }
 
 type Resolvers interface {
-	Query_user(ctx context.Context, id ObjectID) (*User, error)
+	Query_user(ctx context.Context, id external.ObjectID) (*User, error)
 	Query_search(ctx context.Context, input SearchArgs) ([]User, error)
 
 	User_primitiveResolver(ctx context.Context, obj *User) (string, error)
 	User_customResolver(ctx context.Context, obj *User) (Point, error)
-	User_address(ctx context.Context, obj *User) (*Address, error)
 }
 
 type ExecutableOption func(*executableSchema)
@@ -100,8 +100,6 @@ func (ec *executionContext) _Address(sel []query.Selection, obj *Address) graphq
 			out.Values[i] = graphql.MarshalString("Address")
 		case "id":
 			out.Values[i] = ec._Address_id(field, obj)
-		case "street":
-			out.Values[i] = ec._Address_street(field, obj)
 		case "location":
 			out.Values[i] = ec._Address_location(field, obj)
 		default:
@@ -115,14 +113,6 @@ func (ec *executionContext) _Address(sel []query.Selection, obj *Address) graphq
 func (ec *executionContext) _Address_id(field graphql.CollectedField, obj *Address) graphql.Marshaler {
 	res := obj.ID
 	return MarshalID(res)
-}
-
-func (ec *executionContext) _Address_street(field graphql.CollectedField, obj *Address) graphql.Marshaler {
-	res := obj.Street
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
 }
 
 func (ec *executionContext) _Address_location(field graphql.CollectedField, obj *Address) graphql.Marshaler {
@@ -162,7 +152,7 @@ func (ec *executionContext) _Query(sel []query.Selection) graphql.Marshaler {
 }
 
 func (ec *executionContext) _Query_user(field graphql.CollectedField) graphql.Marshaler {
-	var arg0 ObjectID
+	var arg0 external.ObjectID
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
 		arg0, err = UnmarshalID(tmp)
@@ -347,24 +337,8 @@ func (ec *executionContext) _User_customResolver(field graphql.CollectedField, o
 }
 
 func (ec *executionContext) _User_address(field graphql.CollectedField, obj *User) graphql.Marshaler {
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.recover(r)
-				ec.Error(userErr)
-				ret = graphql.Null
-			}
-		}()
-		res, err := ec.resolvers.User_address(ec.ctx, obj)
-		if err != nil {
-			ec.Error(err)
-			return graphql.Null
-		}
-		if res == nil {
-			return graphql.Null
-		}
-		return ec._Address(field.Selections, res)
-	})
+	res := obj.Address
+	return ec._Address(field.Selections, &res)
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -901,7 +875,7 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("type Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    isBanned: Boolean!\n    primitiveResolver: String!\n    customResolver: Point!\n    address: Address\n}\n\ntype Address {\n    id: ID!\n    street: String\n    location: Point\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
+var parsedSchema = schema.MustParse("type Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    isBanned: Boolean!\n    primitiveResolver: String!\n    customResolver: Point!\n    address: Address\n}\n\ntype Address {\n    id: ID!\n    location: Point\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

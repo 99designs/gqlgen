@@ -30,7 +30,7 @@ func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
 	return types
 }
 
-func bindTypes(imports Imports, namedTypes NamedTypes, prog *loader.Program) {
+func bindTypes(imports Imports, namedTypes NamedTypes, destDir string, prog *loader.Program) Imports {
 	for _, t := range namedTypes {
 		if t.Package == "" {
 			continue
@@ -44,9 +44,10 @@ func bindTypes(imports Imports, namedTypes NamedTypes, prog *loader.Program) {
 			t.Marshaler = &cpy
 
 			t.Package, t.GoType = pkgAndType(sig.Params().At(0).Type().String())
-			t.Import = imports.findByName(t.Package)
+			imports, t.Import = imports.addPkg(namedTypes, destDir, t.Package)
 		}
 	}
+	return imports
 }
 
 // namedTypeFromSchema objects for every graphql type, including primitives.
@@ -71,7 +72,12 @@ func pkgAndType(name string) (string, string) {
 		return "", name
 	}
 
-	return strings.Join(parts[:len(parts)-1], "."), parts[len(parts)-1]
+	return normalizeVendor(strings.Join(parts[:len(parts)-1], ".")), parts[len(parts)-1]
+}
+
+func normalizeVendor(pkg string) string {
+	parts := strings.Split(pkg, "/vendor/")
+	return parts[len(parts)-1]
 }
 
 func (n NamedTypes) getType(t common.Type) *Type {

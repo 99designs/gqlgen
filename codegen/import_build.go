@@ -23,43 +23,46 @@ func buildImports(types NamedTypes, destDir string) Imports {
 	}
 
 	for _, t := range types {
-		if t.Package == "" {
-			continue
-		}
-
-		if existing := imports.findByPkg(t.Package); existing != nil {
-			t.Import = existing
-			continue
-		}
-
-		localName := ""
-		if !strings.HasSuffix(destDir, t.Package) {
-			localName = filepath.Base(t.Package)
-			i := 1
-			imp := imports.findByName(localName)
-			for imp != nil && imp.Package != t.Package {
-				localName = filepath.Base(t.Package) + strconv.Itoa(i)
-				imp = imports.findByName(localName)
-				i++
-				if i > 10 {
-					panic("too many collisions")
-				}
-			}
-		}
-
-		imp := &Import{
-			Name:    localName,
-			Package: t.Package,
-		}
-		t.Import = imp
-		imports = append(imports, imp)
+		imports, t.Import = imports.addPkg(types, destDir, t.Package)
 	}
 
 	return imports
 }
 
-func (i Imports) findByPkg(pkg string) *Import {
-	for _, imp := range i {
+func (s Imports) addPkg(types NamedTypes, destDir string, pkg string) (Imports, *Import) {
+	if pkg == "" {
+		return s, nil
+	}
+
+	if existing := s.findByPkg(pkg); existing != nil {
+		return s, existing
+	}
+
+	localName := ""
+	if !strings.HasSuffix(destDir, pkg) {
+		localName = filepath.Base(pkg)
+		i := 1
+		imp := s.findByName(localName)
+		for imp != nil && imp.Package != pkg {
+			localName = filepath.Base(pkg) + strconv.Itoa(i)
+			imp = s.findByName(localName)
+			i++
+			if i > 10 {
+				panic("too many collisions")
+			}
+		}
+	}
+
+	imp := &Import{
+		Name:    localName,
+		Package: pkg,
+	}
+	s = append(s, imp)
+	return s, imp
+}
+
+func (s Imports) findByPkg(pkg string) *Import {
+	for _, imp := range s {
 		if imp.Package == pkg {
 			return imp
 		}
@@ -67,8 +70,8 @@ func (i Imports) findByPkg(pkg string) *Import {
 	return nil
 }
 
-func (i Imports) findByName(name string) *Import {
-	for _, imp := range i {
+func (s Imports) findByName(name string) *Import {
+	for _, imp := range s {
 		if imp.Name == name {
 			return imp
 		}

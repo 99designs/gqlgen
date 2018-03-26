@@ -45,3 +45,11 @@ func (r *Resolver) Query_search(ctx context.Context, input SearchArgs) ([]User, 
 		},
 	}, nil
 }
+
+func (r *Resolver) User_primitiveResolver(ctx context.Context, obj *User) (string, error) {
+	return "test", nil
+}
+
+func (r *Resolver) User_customResolver(ctx context.Context, obj *User) (Point, error) {
+	return Point{5, 1}, nil
+}

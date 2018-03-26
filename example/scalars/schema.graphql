@@ -9,6 +9,8 @@ type User {
     created: Timestamp
     location: Point
     isBanned: Boolean!
+    primitiveResolver: String!
+    customResolver: Point!
 }
 
 input SearchArgs {

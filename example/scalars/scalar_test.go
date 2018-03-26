@@ -12,10 +12,12 @@ import (
 )
 
 type RawUser struct {
-	ID       string
-	Name     string
-	Created  int64
-	Location string
+	ID                string
+	Name              string
+	Created           int64
+	Location          string
+	PrimitiveResolver string
+	CustomResolver    string
 }
 
 func TestScalars(t *testing.T) {
@@ -51,11 +53,19 @@ func TestScalars(t *testing.T) {
 		require.Equal(t, "37,144", resp.Search[0].Location)
 	})
 
-	t.Run("test custom error messages", func(t *testing.T) {
+	t.Run("custom error messages", func(t *testing.T) {
 		var resp struct{ Search []RawUser }
 
 		err := c.Post(`{ search(input:{createdAfter:"2014"}) { id } }`, &resp)
 		require.EqualError(t, err, "errors: [graphql: time should be a unix timestamp]")
+	})
+
+	t.Run("scalar resolver methods", func(t *testing.T) {
+		var resp struct{ User RawUser }
+		c.MustPost(`{ user(id: "1") { primitiveResolver, customResolver } }`, &resp)
+
+		require.Equal(t, "test", resp.User.PrimitiveResolver)
+		require.Equal(t, "5,1", resp.User.CustomResolver)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

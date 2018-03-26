@@ -194,10 +194,6 @@ func bindObject(t types.Type, object *Object, imports Imports) {
 			}
 			continue
 		}
-
-		if field.IsScalar {
-			fmt.Fprintf(os.Stderr, "unable to bind %s.%s to anything, %s has no suitable fields or methods\n", object.GQLType, field.GQLName, namedType.String())
-		}
 	}
 }
 

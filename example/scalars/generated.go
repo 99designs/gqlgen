@@ -26,6 +26,9 @@ func MakeExecutableSchema(resolvers Resolvers, opts ...ExecutableOption) graphql
 type Resolvers interface {
 	Query_user(ctx context.Context, id string) (*User, error)
 	Query_search(ctx context.Context, input SearchArgs) ([]User, error)
+
+	User_primitiveResolver(ctx context.Context, obj *User) (string, error)
+	User_customResolver(ctx context.Context, obj *User) (Point, error)
 }
 
 type ExecutableOption func(*executableSchema)
@@ -227,6 +230,10 @@ func (ec *executionContext) _User(sel []query.Selection, obj *User) graphql.Mars
 			out.Values[i] = ec._User_location(field, obj)
 		case "isBanned":
 			out.Values[i] = ec._User_isBanned(field, obj)
+		case "primitiveResolver":
+			out.Values[i] = ec._User_primitiveResolver(field, obj)
+		case "customResolver":
+			out.Values[i] = ec._User_customResolver(field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -258,6 +265,42 @@ func (ec *executionContext) _User_location(field graphql.CollectedField, obj *Us
 func (ec *executionContext) _User_isBanned(field graphql.CollectedField, obj *User) graphql.Marshaler {
 	res := obj.IsBanned
 	return graphql.MarshalBoolean(bool(res))
+}
+
+func (ec *executionContext) _User_primitiveResolver(field graphql.CollectedField, obj *User) graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
+		res, err := ec.resolvers.User_primitiveResolver(ec.ctx, obj)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		return graphql.MarshalString(res)
+	})
+}
+
+func (ec *executionContext) _User_customResolver(field graphql.CollectedField, obj *User) graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
+		res, err := ec.resolvers.User_customResolver(ec.ctx, obj)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		return res
+	})
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -794,7 +837,7 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("type Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n    isBanned: Boolean!\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
+var parsedSchema = schema.MustParse("type Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    location: Point\n    isBanned: Boolean!\n    primitiveResolver: String!\n    customResolver: Point!\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)

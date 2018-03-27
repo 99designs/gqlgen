@@ -1,0 +1,24 @@
+interface Event {
+    selection: [String!]
+    collected: [String!]
+}
+
+type Post implements Event {
+    message: String!
+    sent: Time!
+    selection: [String!]
+    collected: [String!]
+}
+
+type Like implements Event {
+    reaction: String!
+    sent: Time!
+    selection: [String!]
+    collected: [String!]
+}
+
+type Query {
+    events: [Event]
+}
+
+scalar Time

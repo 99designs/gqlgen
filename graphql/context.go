@@ -49,5 +49,12 @@ func GetResolverContext(ctx context.Context) *ResolverContext {
 }
 
 func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Context {
-	return context.WithValue(ctx, request, rc)
+	return context.WithValue(ctx, resolver, rc)
+}
+
+// This is just a convenient wrapper method for CollectFields
+func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
+	reqctx := GetRequestContext(ctx)
+	resctx := GetResolverContext(ctx)
+	return CollectFields(reqctx.Doc, resctx.Field.Selections, satisfies, reqctx.Variables)
 }

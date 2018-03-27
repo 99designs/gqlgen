@@ -184,7 +184,8 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 				ret = graphql.Null
 			}
 		}()
-		res, err := ec.resolvers.OuterObject_inner(ctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.OuterObject_inner(rctx, obj)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -272,7 +273,8 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 				ret = graphql.Null
 			}
 		}()
-		res, err := ec.resolvers.Query_nestedInputs(ctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.Query_nestedInputs(rctx, arg0)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -293,7 +295,8 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 				ret = graphql.Null
 			}
 		}()
-		res, err := ec.resolvers.Query_nestedOutputs(ctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.Query_nestedOutputs(rctx)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -321,7 +324,8 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 				ret = graphql.Null
 			}
 		}()
-		res, err := ec.resolvers.Query_shapes(ctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.Query_shapes(rctx)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -357,7 +361,8 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		res, err := ec.resolvers.Query_recursive(ctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.Query_recursive(rctx, arg0)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -392,7 +397,8 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 				ret = graphql.Null
 			}
 		}()
-		res, err := ec.resolvers.Query_mapInput(ctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.Query_mapInput(rctx, arg0)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
@@ -413,7 +419,8 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		res, err := ec.resolvers.Query_collision(ctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.Query_collision(rctx)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null

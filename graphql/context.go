@@ -17,10 +17,13 @@ type RequestContext struct {
 
 type key string
 
-const rcKey key = "request_context"
+const (
+	request  key = "request_context"
+	resolver key = "resolver_context"
+)
 
 func GetRequestContext(ctx context.Context) *RequestContext {
-	val := ctx.Value(rcKey)
+	val := ctx.Value(request)
 	if val == nil {
 		return nil
 	}
@@ -29,5 +32,22 @@ func GetRequestContext(ctx context.Context) *RequestContext {
 }
 
 func WithRequestContext(ctx context.Context, rc *RequestContext) context.Context {
-	return context.WithValue(ctx, rcKey, rc)
+	return context.WithValue(ctx, request, rc)
+}
+
+type ResolverContext struct {
+	Field CollectedField
+}
+
+func GetResolverContext(ctx context.Context) *ResolverContext {
+	val := ctx.Value(resolver)
+	if val == nil {
+		return nil
+	}
+
+	return val.(*ResolverContext)
+}
+
+func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Context {
+	return context.WithValue(ctx, request, rc)
 }

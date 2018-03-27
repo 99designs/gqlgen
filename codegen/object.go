@@ -82,7 +82,7 @@ func (f *Field) CallArgs() string {
 	var args []string
 
 	if f.GoMethodName == "" {
-		args = append(args, "ctx")
+		args = append(args, "rctx")
 
 		if !f.Object.Root {
 			args = append(args, "obj")

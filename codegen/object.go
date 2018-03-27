@@ -82,7 +82,7 @@ func (f *Field) CallArgs() string {
 	var args []string
 
 	if f.GoMethodName == "" {
-		args = append(args, "ec.ctx")
+		args = append(args, "ctx")
 
 		if !f.Object.Root {
 			args = append(args, "obj")
@@ -134,7 +134,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool, dept
 		if !isPtr {
 			val = "&" + val
 		}
-		return fmt.Sprintf("return ec._%s(field.Selections, %s)", f.GQLType, val)
+		return fmt.Sprintf("return ec._%s(ctx, field.Selections, %s)", f.GQLType, val)
 	}
 }
 

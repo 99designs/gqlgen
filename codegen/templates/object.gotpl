@@ -4,8 +4,8 @@ var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
 {{- if .Stream }}
-func (ec *executionContext) _{{$object.GQLType}}(sel []query.Selection) func() graphql.Marshaler {
-	fields := graphql.CollectFields(ec.doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.variables)
+func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []query.Selection) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
 
 	if len(fields) != 1 {
 		ec.Errorf("must subscribe to exactly one stream")
@@ -15,15 +15,15 @@ func (ec *executionContext) _{{$object.GQLType}}(sel []query.Selection) func() g
 	switch fields[0].Name {
 	{{- range $field := $object.Fields }}
 	case "{{$field.GQLName}}":
-		return ec._{{$object.GQLType}}_{{$field.GQLName}}(fields[0])
+		return ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, fields[0])
 	{{- end }}
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
 }
 {{- else }}
-func (ec *executionContext) _{{$object.GQLType}}(sel []query.Selection{{if not $object.Root}}, obj *{{$object.FullName}} {{end}}) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.variables)
+func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []query.Selection{{if not $object.Root}}, obj *{{$object.FullName}} {{end}}) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
@@ -33,7 +33,7 @@ func (ec *executionContext) _{{$object.GQLType}}(sel []query.Selection{{if not $
 			out.Values[i] = graphql.MarshalString({{$object.GQLType|quote}})
 		{{- range $field := $object.Fields }}
 		case "{{$field.GQLName}}":
-			out.Values[i] = ec._{{$object.GQLType}}_{{$field.GQLName}}(field{{if not $object.Root}}, obj{{end}})
+			out.Values[i] = ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
 		{{- end }}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

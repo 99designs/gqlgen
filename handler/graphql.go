@@ -21,8 +21,9 @@ type params struct {
 }
 
 type Config struct {
-	upgrader websocket.Upgrader
-	recover  graphql.RecoverFunc
+	upgrader    websocket.Upgrader
+	recover     graphql.RecoverFunc
+	formatError func(error) string
 }
 
 type Option func(cfg *Config)
@@ -36,6 +37,12 @@ func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 func RecoverFunc(recover graphql.RecoverFunc) Option {
 	return func(cfg *Config) {
 		cfg.recover = recover
+	}
+}
+
+func FormatErrorFunc(f func(error) string) Option {
+	return func(cfg *Config) {
+		cfg.formatError = f
 	}
 }
 
@@ -96,15 +103,24 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			return
 		}
 
+		ctx := graphql.WithRequestContext(r.Context(), &graphql.RequestContext{
+			Doc:       doc,
+			Variables: reqParams.Variables,
+			Recover:   cfg.recover,
+			Builder: errors.Builder{
+				ErrorMessageFn: cfg.formatError,
+			},
+		})
+
 		switch op.Type {
 		case query.Query:
-			b, err := json.Marshal(exec.Query(r.Context(), doc, reqParams.Variables, op, cfg.recover))
+			b, err := json.Marshal(exec.Query(ctx, op))
 			if err != nil {
 				panic(err)
 			}
 			w.Write(b)
 		case query.Mutation:
-			b, err := json.Marshal(exec.Mutation(r.Context(), doc, reqParams.Variables, op, cfg.recover))
+			b, err := json.Marshal(exec.Mutation(ctx, op))
 			if err != nil {
 				panic(err)
 			}

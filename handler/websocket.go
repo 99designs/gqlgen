@@ -36,12 +36,13 @@ type operationMessage struct {
 }
 
 type wsConnection struct {
-	ctx     context.Context
-	conn    *websocket.Conn
-	exec    graphql.ExecutableSchema
-	active  map[string]context.CancelFunc
-	mu      sync.Mutex
-	recover graphql.RecoverFunc
+	ctx         context.Context
+	conn        *websocket.Conn
+	exec        graphql.ExecutableSchema
+	active      map[string]context.CancelFunc
+	mu          sync.Mutex
+	recover     graphql.RecoverFunc
+	formatError func(err error) string
 }
 
 func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, upgrader websocket.Upgrader, recover graphql.RecoverFunc) {
@@ -155,12 +156,21 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return true
 	}
 
+	ctx := graphql.WithRequestContext(c.ctx, &graphql.RequestContext{
+		Doc:       doc,
+		Variables: reqParams.Variables,
+		Recover:   c.recover,
+		Builder: errors.Builder{
+			ErrorMessageFn: c.formatError,
+		},
+	})
+
 	if op.Type != query.Subscription {
 		var result *graphql.Response
 		if op.Type == query.Query {
-			result = c.exec.Query(c.ctx, doc, reqParams.Variables, op, c.recover)
+			result = c.exec.Query(ctx, op)
 		} else {
-			result = c.exec.Mutation(c.ctx, doc, reqParams.Variables, op, c.recover)
+			result = c.exec.Mutation(ctx, op)
 		}
 
 		c.sendData(message.ID, result)
@@ -168,7 +178,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return true
 	}
 
-	ctx, cancel := context.WithCancel(c.ctx)
+	ctx, cancel := context.WithCancel(ctx)
 	c.mu.Lock()
 	c.active[message.ID] = cancel
 	c.mu.Unlock()
@@ -179,7 +189,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
 			}
 		}()
-		next := c.exec.Subscription(ctx, doc, reqParams.Variables, op, c.recover)
+		next := c.exec.Subscription(ctx, op)
 		for result := next(); result != nil; result = next() {
 			fmt.Println(result)
 			c.sendData(message.ID, result)

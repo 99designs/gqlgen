@@ -8,12 +8,8 @@ import (
 {{ end }}
 )
 
-func MakeExecutableSchema(resolvers Resolvers, opts ...ExecutableOption) graphql.ExecutableSchema {
-	ret := &executableSchema{resolvers: resolvers}
-	for _, opt := range opts {
-		opt(ret)
-	}
-	return ret
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return &executableSchema{resolvers: resolvers}
 }
 
 type Resolvers interface {
@@ -24,28 +20,19 @@ type Resolvers interface {
 {{- end }}
 }
 
-type ExecutableOption func(*executableSchema)
-
-func WithErrorConverter(fn func(error) string) ExecutableOption {
-	return func(s *executableSchema) {
-		s.errorMessageFn = fn
-	}
-}
-
 type executableSchema struct {
 	resolvers      Resolvers
-	errorMessageFn func(error) string
 }
 
 func (e *executableSchema) Schema() *schema.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
+func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	{{- if .QueryRoot }}
-		ec := e.makeExecutionContext(ctx, doc, variables, recover)
+		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-		data := ec._{{.QueryRoot.GQLType}}(op.Selections)
+		data := ec._{{.QueryRoot.GQLType}}(ctx, op.Selections)
 		var buf bytes.Buffer
 		data.MarshalGQL(&buf)
 
@@ -58,11 +45,11 @@ func (e *executableSchema) Query(ctx context.Context, doc *query.Document, varia
 	{{- end }}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) *graphql.Response {
+func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *graphql.Response {
 	{{- if .MutationRoot }}
-		ec := e.makeExecutionContext(ctx, doc, variables, recover)
+		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-		data := ec._{{.MutationRoot.GQLType}}(op.Selections)
+		data := ec._{{.MutationRoot.GQLType}}(ctx, op.Selections)
 		var buf bytes.Buffer
 		data.MarshalGQL(&buf)
 
@@ -75,11 +62,11 @@ func (e *executableSchema) Mutation(ctx context.Context, doc *query.Document, va
 	{{- end }}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document, variables map[string]interface{}, op *query.Operation, recover graphql.RecoverFunc) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, op *query.Operation) func() *graphql.Response {
 	{{- if .SubscriptionRoot }}
-		ec := e.makeExecutionContext(ctx, doc, variables, recover)
+		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-		next := ec._{{.SubscriptionRoot.GQLType}}(op.Selections)
+		next := ec._{{.SubscriptionRoot.GQLType}}(ctx, op.Selections)
 		if ec.Errors != nil {
 			return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
 		}
@@ -105,20 +92,10 @@ func (e *executableSchema) Subscription(ctx context.Context, doc *query.Document
 	{{- end }}
 }
 
-func (e *executableSchema) makeExecutionContext(ctx context.Context, doc *query.Document, variables map[string]interface{}, recover graphql.RecoverFunc) *executionContext {
-	errBuilder := errors.Builder{ErrorMessageFn: e.errorMessageFn}
-	return &executionContext{
-		Builder: errBuilder, resolvers: e.resolvers, variables: variables, doc: doc, ctx: ctx, recover: recover,
-	}
-}
-
 type executionContext struct {
-	errors.Builder
+	*graphql.RequestContext
+
 	resolvers Resolvers
-	variables map[string]interface{}
-	doc       *query.Document
-	ctx       context.Context
-	recover   graphql.RecoverFunc
 }
 
 {{- range $object := .Objects }}

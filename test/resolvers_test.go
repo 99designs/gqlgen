@@ -4,12 +4,14 @@ package test
 
 import (
 	"context"
-	"fmt"
+	fmt "fmt"
 	"testing"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlgen/graphql"
+	gqlerrors "github.com/vektah/gqlgen/neelance/errors"
 	"github.com/vektah/gqlgen/neelance/query"
 	"github.com/vektah/gqlgen/test/introspection"
 )
@@ -17,6 +19,12 @@ import (
 func TestCompiles(t *testing.T) {}
 
 func TestErrorConverter(t *testing.T) {
+	resolvers := &testResolvers{}
+	s := MakeExecutableSchema(resolvers)
+
+	doc, errs := query.Parse(`query { nestedOutputs { inner { id } } } `)
+	require.Nil(t, errs)
+
 	t.Run("with", func(t *testing.T) {
 		testConvErr := func(e error) string {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
@@ -25,24 +33,16 @@ func TestErrorConverter(t *testing.T) {
 			return e.Error()
 		}
 		t.Run("special error", func(t *testing.T) {
-			s := MakeExecutableSchema(&testResolvers{
-				nestedOutputsErr: &specialErr{},
-			}, WithErrorConverter(testConvErr))
-			ctx := context.Background()
-			doc, errs := query.Parse(`query { nestedOutputs { inner { id } } } `)
-			require.Nil(t, errs)
-			resp := s.Query(ctx, doc, nil, doc.Operations[0], nil)
+			resolvers.nestedOutputsErr = &specialErr{}
+
+			resp := s.Query(mkctx(doc, testConvErr), doc.Operations[0])
 			require.Len(t, resp.Errors, 1)
 			assert.Equal(t, "override special error message", resp.Errors[0].Message)
 		})
 		t.Run("normal error", func(t *testing.T) {
-			s := MakeExecutableSchema(&testResolvers{
-				nestedOutputsErr: fmt.Errorf("a normal error"),
-			}, WithErrorConverter(testConvErr))
-			ctx := context.Background()
-			doc, errs := query.Parse(`query { nestedOutputs { inner { id } } } `)
-			require.Nil(t, errs)
-			resp := s.Query(ctx, doc, nil, doc.Operations[0], nil)
+			resolvers.nestedOutputsErr = fmt.Errorf("a normal error")
+
+			resp := s.Query(mkctx(doc, testConvErr), doc.Operations[0])
 			require.Len(t, resp.Errors, 1)
 			assert.Equal(t, "a normal error", resp.Errors[0].Message)
 		})
@@ -50,27 +50,28 @@ func TestErrorConverter(t *testing.T) {
 
 	t.Run("without", func(t *testing.T) {
 		t.Run("special error", func(t *testing.T) {
-			s := MakeExecutableSchema(&testResolvers{
-				nestedOutputsErr: &specialErr{},
-			})
-			ctx := context.Background()
-			doc, errs := query.Parse(`query { nestedOutputs { inner { id } } } `)
-			require.Nil(t, errs)
-			resp := s.Query(ctx, doc, nil, doc.Operations[0], nil)
+			resolvers.nestedOutputsErr = &specialErr{}
+
+			resp := s.Query(mkctx(doc, nil), doc.Operations[0])
 			require.Len(t, resp.Errors, 1)
 			assert.Equal(t, "original special error message", resp.Errors[0].Message)
 		})
 		t.Run("normal error", func(t *testing.T) {
-			s := MakeExecutableSchema(&testResolvers{
-				nestedOutputsErr: fmt.Errorf("a normal error"),
-			})
-			ctx := context.Background()
-			doc, errs := query.Parse(`query { nestedOutputs { inner { id } } } `)
-			require.Nil(t, errs)
-			resp := s.Query(ctx, doc, nil, doc.Operations[0], nil)
+			resolvers.nestedOutputsErr = fmt.Errorf("a normal error")
+
+			resp := s.Query(mkctx(doc, nil), doc.Operations[0])
 			require.Len(t, resp.Errors, 1)
 			assert.Equal(t, "a normal error", resp.Errors[0].Message)
 		})
+	})
+}
+
+func mkctx(doc *query.Document, errFn func(e error) string) context.Context {
+	return graphql.WithRequestContext(context.Background(), &graphql.RequestContext{
+		Doc: doc,
+		Builder: gqlerrors.Builder{
+			ErrorMessageFn: errFn,
+		},
 	})
 }
 

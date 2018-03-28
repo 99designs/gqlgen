@@ -2,8 +2,9 @@
 {{ $object := $field.Object }}
 
 {{- if $object.Stream }}
-	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(field graphql.CollectedField) func() graphql.Marshaler {
+	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 		{{- template "args.gotpl" $field.Args }}
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
 		results, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
 		if err != nil {
 			ec.Error(err)
@@ -20,14 +21,14 @@
 		}
 	}
 {{ else }}
-	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
+	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
 		{{- template "args.gotpl" $field.Args }}
 
 		{{- if $field.IsConcurrent }}
 			return graphql.Defer(func() (ret graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
-						userErr := ec.recover(r)
+						userErr := ec.Recover(r)
 						ec.Error(userErr)
 						ret = graphql.Null
 					}
@@ -47,6 +48,7 @@
 					}
 				{{- end }}
 			{{- else }}
+				rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
 				res, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
 				if err != nil {
 					ec.Error(err)

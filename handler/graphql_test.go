@@ -65,6 +65,21 @@ func TestHandlerGET(t *testing.T) {
 	})
 }
 
+func TestHandlerOptions(t *testing.T) {
+	h := GraphQL(&executableSchemaStub{})
+
+	resp := doRequest(h, "OPTIONS", "/graphql?query={me{name}}", ``)
+	assert.Equal(t, http.StatusOK, resp.Code)
+	assert.Equal(t, "OPTIONS, GET, POST", resp.HeaderMap.Get("Allow"))
+}
+
+func TestHandlerHead(t *testing.T) {
+	h := GraphQL(&executableSchemaStub{})
+
+	resp := doRequest(h, "HEAD", "/graphql?query={me{name}}", ``)
+	assert.Equal(t, http.StatusMethodNotAllowed, resp.Code)
+}
+
 func doRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
 	w := httptest.NewRecorder()

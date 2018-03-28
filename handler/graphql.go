@@ -60,15 +60,20 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.Header().Set("Allow", "OPTIONS, GET, POST")
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
 			connectWs(exec, w, r, cfg.upgrader, cfg.recover)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-
 		var reqParams params
-		if r.Method == "GET" {
+		switch r.Method {
+		case http.MethodGet:
 			reqParams.Query = r.URL.Query().Get("query")
 			reqParams.OperationName = r.URL.Query().Get("operationName")
 
@@ -78,12 +83,16 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 					return
 				}
 			}
-		} else {
+		case http.MethodPost:
 			if err := json.NewDecoder(r.Body).Decode(&reqParams); err != nil {
 				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
 				return
 			}
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
 		}
+		w.Header().Set("Content-Type", "application/json")
 
 		doc, qErr := query.Parse(reqParams.Query)
 		if qErr != nil {

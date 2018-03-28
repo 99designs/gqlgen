@@ -72,6 +72,10 @@ func main() {
 		for _, model := range modelsBuild.Models {
 			types[model.GQLType] = pkgName + "." + model.GoType
 		}
+
+		for _, enum := range modelsBuild.Enums {
+			types[enum.GQLType] = pkgName + "." + enum.GoType
+		}
 	}
 
 	build, err := codegen.Bind(schema, types, dirName())

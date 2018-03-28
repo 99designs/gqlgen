@@ -206,6 +206,18 @@ func TestStarwars(t *testing.T) {
 		require.Len(t, resp.Starship.History[0], 2)
 	})
 
+	t.Run("invalid enums in variables", func(t *testing.T) {
+		var resp struct{}
+
+		err := c.Post(`mutation($episode: Episode!) {
+		  createReview(episode: $episode, review:{stars:1, commentary:"Blah blah"})  {
+			time
+		  }
+		}`, &resp, client.Var("episode", "INVALID"))
+
+		require.EqualError(t, err, "errors: [graphql: INVALID is not a valid Episode]")
+	})
+
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
 		var resp interface{}

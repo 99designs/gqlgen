@@ -893,8 +893,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-var parsedSchema = schema.MustParse("type Query {\n    customers: [Customer!]\n\n    # this method is here to test code generation of nested arrays\n    torture(customerIds: [[Int]]): [[Customer!]]\n}\n\ntype Customer {\n    id: Int!\n    name: String!\n    address: Address\n    orders: [Order!]\n}\n\ntype Address {\n    id: Int!\n    street: String!\n    country: String!\n}\n\ntype Order {\n    id: Int!\n    date: Time!\n    amount: Float!\n    items: [Item!]\n}\n\ntype Item {\n    name: String!\n}\nscalar Time\n")
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -906,3 +904,36 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse(`type Query {
+    customers: [Customer!]
+
+    # this method is here to test code generation of nested arrays
+    torture(customerIds: [[Int]]): [[Customer!]]
+}
+
+type Customer {
+    id: Int!
+    name: String!
+    address: Address
+    orders: [Order!]
+}
+
+type Address {
+    id: Int!
+    street: String!
+    country: String!
+}
+
+type Order {
+    id: Int!
+    date: Time!
+    amount: Float!
+    items: [Item!]
+}
+
+type Item {
+    name: String!
+}
+scalar Time
+`)

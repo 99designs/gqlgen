@@ -13,11 +13,12 @@ import (
 
 func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 	t := template.New("").Funcs(template.FuncMap{
-		"ucFirst": ucFirst,
-		"lcFirst": lcFirst,
-		"quote":   strconv.Quote,
-		"toCamel": toCamel,
-		"dump":    dump,
+		"ucFirst":  ucFirst,
+		"lcFirst":  lcFirst,
+		"quote":    strconv.Quote,
+		"rawQuote": rawQuote,
+		"toCamel":  toCamel,
+		"dump":     dump,
 	})
 
 	for filename, data := range data {
@@ -78,6 +79,10 @@ func toCamel(s string) string {
 	}
 
 	return string(buffer)
+}
+
+func rawQuote(s string) string {
+	return "`" + strings.Replace(s, "'", "`+\"`\"+`", -1) + "`"
 }
 
 func dump(val interface{}) string {

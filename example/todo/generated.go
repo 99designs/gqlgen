@@ -836,8 +836,6 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("schema {\n\tquery: MyQuery\n\tmutation: MyMutation\n}\n\ntype MyQuery {\n\ttodo(id: Int!): Todo\n\tlastTodo: Todo\n\ttodos: [Todo!]!\n}\n\ntype MyMutation {\n\tcreateTodo(todo: TodoInput!): Todo!\n\tupdateTodo(id: Int!, changes: Map!): Todo\n}\n\ntype Todo {\n\tid: Int!\n\ttext: String!\n\tdone: Boolean!\n}\n\ninput TodoInput {\n\ttext: String!\n\tdone: Boolean\n}\n")
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -849,3 +847,31 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse(`schema {
+	query: MyQuery
+	mutation: MyMutation
+}
+
+type MyQuery {
+	todo(id: Int!): Todo
+	lastTodo: Todo
+	todos: [Todo!]!
+}
+
+type MyMutation {
+	createTodo(todo: TodoInput!): Todo!
+	updateTodo(id: Int!, changes: Map!): Todo
+}
+
+type Todo {
+	id: Int!
+	text: String!
+	done: Boolean!
+}
+
+input TodoInput {
+	text: String!
+	done: Boolean
+}
+`)

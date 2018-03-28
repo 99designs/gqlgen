@@ -2,6 +2,12 @@
 
 package starwars
 
+import (
+	fmt "fmt"
+	io "io"
+	strconv "strconv"
+)
+
 type Character interface{}
 type PageInfo struct {
 	StartCursor string
@@ -9,3 +15,76 @@ type PageInfo struct {
 	HasNextPage bool
 }
 type SearchResult interface{}
+
+type Episode string
+
+const (
+	EpisodeNewhope Episode = "NEWHOPE" // Star Wars Episode IV: A New Hope, released in 1977.
+	EpisodeEmpire  Episode = "EMPIRE"  // Star Wars Episode V: The Empire Strikes Back, released in 1980.
+	EpisodeJedi    Episode = "JEDI"    // Star Wars Episode VI: Return of the Jedi, released in 1983.
+)
+
+func (e Episode) IsValid() bool {
+	switch e {
+	case EpisodeNewhope, EpisodeEmpire, EpisodeJedi:
+		return true
+	}
+	return false
+}
+
+func (e Episode) String() string {
+	return string(e)
+}
+
+func (e *Episode) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Episode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Episode", str)
+	}
+	return nil
+}
+
+func (e Episode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type LengthUnit string
+
+const (
+	LengthUnitMeter LengthUnit = "METER" // The standard unit around the world
+	LengthUnitFoot  LengthUnit = "FOOT"  // Primarily used in the United States
+)
+
+func (e LengthUnit) IsValid() bool {
+	switch e {
+	case LengthUnitMeter, LengthUnitFoot:
+		return true
+	}
+	return false
+}
+
+func (e LengthUnit) String() string {
+	return string(e)
+}
+
+func (e *LengthUnit) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LengthUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LengthUnit", str)
+	}
+	return nil
+}
+
+func (e LengthUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}

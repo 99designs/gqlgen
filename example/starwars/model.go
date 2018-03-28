@@ -13,7 +13,7 @@ type CharacterFields struct {
 	ID        string
 	Name      string
 	FriendIds []string
-	AppearsIn []string
+	AppearsIn []Episode
 }
 
 type Human struct {
@@ -23,7 +23,7 @@ type Human struct {
 	Mass         float64
 }
 
-func (h *Human) Height(unit string) float64 {
+func (h *Human) Height(unit LengthUnit) float64 {
 	switch unit {
 	case "METER", "":
 		return h.heightMeters
@@ -41,7 +41,7 @@ type Starship struct {
 	lengthMeters float64
 }
 
-func (s *Starship) Length(unit string) float64 {
+func (s *Starship) Length(unit LengthUnit) float64 {
 	switch unit {
 	case "METER", "":
 		return s.lengthMeters

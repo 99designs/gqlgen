@@ -27,6 +27,7 @@ type ModelBuild struct {
 	PackageName string
 	Imports     Imports
 	Models      []Model
+	Enums       []Enum
 }
 
 // Create a list of models that need to be generated
@@ -45,6 +46,7 @@ func Models(schema *schema.Schema, userTypes map[string]string, destDir string) 
 	return &ModelBuild{
 		PackageName: filepath.Base(destDir),
 		Models:      models,
+		Enums:       buildEnums(namedTypes, schema),
 		Imports:     buildImports(namedTypes, destDir),
 	}
 }
@@ -63,6 +65,7 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 
 	objects := buildObjects(namedTypes, schema, prog, imports)
 	inputs := buildInputs(namedTypes, schema, prog, imports)
+	buildEnums(namedTypes, schema)
 
 	b := &Build{
 		PackageName: filepath.Base(destDir),

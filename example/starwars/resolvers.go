@@ -12,7 +12,7 @@ type Resolver struct {
 	humans    map[string]Human
 	droid     map[string]Droid
 	starships map[string]Starship
-	reviews   map[string][]Review
+	reviews   map[Episode][]Review
 }
 
 func (r *Resolver) resolveCharacters(ctx context.Context, ids []string) ([]Character, error) {
@@ -78,21 +78,21 @@ func (r *Resolver) FriendsConnection_friends(ctx context.Context, it *FriendsCon
 	return r.resolveCharacters(ctx, it.ids)
 }
 
-func (r *Resolver) Mutation_createReview(ctx context.Context, episode string, review Review) (*Review, error) {
+func (r *Resolver) Mutation_createReview(ctx context.Context, episode Episode, review Review) (*Review, error) {
 	review.Time = time.Now()
 	time.Sleep(1 * time.Second)
 	r.reviews[episode] = append(r.reviews[episode], review)
 	return &review, nil
 }
 
-func (r *Resolver) Query_hero(ctx context.Context, episode string) (Character, error) {
-	if episode == "EMPIRE" {
+func (r *Resolver) Query_hero(ctx context.Context, episode Episode) (Character, error) {
+	if episode == EpisodeEmpire {
 		return r.humans["1000"], nil
 	}
 	return r.droid["2001"], nil
 }
 
-func (r *Resolver) Query_reviews(ctx context.Context, episode string, since *time.Time) ([]Review, error) {
+func (r *Resolver) Query_reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error) {
 	if since == nil {
 		return r.reviews[episode], nil
 	}
@@ -162,7 +162,7 @@ func NewResolver() *Resolver {
 				ID:        "1000",
 				Name:      "Luke Skywalker",
 				FriendIds: []string{"1002", "1003", "2000", "2001"},
-				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+				AppearsIn: []Episode{EpisodeNewhope, EpisodeEmpire, EpisodeJedi},
 			},
 			heightMeters: 1.72,
 			Mass:         77,
@@ -173,7 +173,7 @@ func NewResolver() *Resolver {
 				ID:        "1001",
 				Name:      "Darth Vader",
 				FriendIds: []string{"1004"},
-				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+				AppearsIn: []Episode{EpisodeNewhope, EpisodeEmpire, EpisodeJedi},
 			},
 			heightMeters: 2.02,
 			Mass:         136,
@@ -184,7 +184,7 @@ func NewResolver() *Resolver {
 				ID:        "1002",
 				Name:      "Han Solo",
 				FriendIds: []string{"1000", "1003", "2001"},
-				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+				AppearsIn: []Episode{EpisodeNewhope, EpisodeEmpire, EpisodeJedi},
 			},
 			heightMeters: 1.8,
 			Mass:         80,
@@ -195,7 +195,7 @@ func NewResolver() *Resolver {
 				ID:        "1003",
 				Name:      "Leia Organa",
 				FriendIds: []string{"1000", "1002", "2000", "2001"},
-				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+				AppearsIn: []Episode{EpisodeNewhope, EpisodeEmpire, EpisodeJedi},
 			},
 			heightMeters: 1.5,
 			Mass:         49,
@@ -205,7 +205,7 @@ func NewResolver() *Resolver {
 				ID:        "1004",
 				Name:      "Wilhuff Tarkin",
 				FriendIds: []string{"1001"},
-				AppearsIn: []string{"NEWHOPE"},
+				AppearsIn: []Episode{EpisodeNewhope},
 			},
 			heightMeters: 1.8,
 			Mass:         0,
@@ -218,7 +218,7 @@ func NewResolver() *Resolver {
 				ID:        "2000",
 				Name:      "C-3PO",
 				FriendIds: []string{"1000", "1002", "1003", "2001"},
-				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+				AppearsIn: []Episode{EpisodeNewhope, EpisodeEmpire, EpisodeJedi},
 			},
 			PrimaryFunction: "Protocol",
 		},
@@ -227,7 +227,7 @@ func NewResolver() *Resolver {
 				ID:        "2001",
 				Name:      "R2-D2",
 				FriendIds: []string{"1000", "1002", "1003"},
-				AppearsIn: []string{"NEWHOPE", "EMPIRE", "JEDI"},
+				AppearsIn: []Episode{EpisodeNewhope, EpisodeEmpire, EpisodeJedi},
 			},
 			PrimaryFunction: "Astromech",
 		},
@@ -280,7 +280,7 @@ func NewResolver() *Resolver {
 		},
 	}
 
-	r.reviews = map[string][]Review{}
+	r.reviews = map[Episode][]Review{}
 
 	return &r
 }

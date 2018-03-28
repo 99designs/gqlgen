@@ -1583,8 +1583,6 @@ func UnmarshalReviewInput(v interface{}) (Review, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("# The query type, represents all of the entry points into our object graph\ntype Query {\n    hero(episode: Episode = NEWHOPE): Character\n    reviews(episode: Episode!, since: Time): [Review]!\n    search(text: String!): [SearchResult]!\n    character(id: ID!): Character\n    droid(id: ID!): Droid\n    human(id: ID!): Human\n    starship(id: ID!): Starship\n}\n# The mutation type, represents all updates we can make to our data\ntype Mutation {\n    createReview(episode: Episode!, review: ReviewInput!): Review\n}\n# The episodes in the Star Wars trilogy\nenum Episode {\n    # Star Wars Episode IV: A New Hope, released in 1977.\n    NEWHOPE\n    # Star Wars Episode V: The Empire Strikes Back, released in 1980.\n    EMPIRE\n    # Star Wars Episode VI: Return of the Jedi, released in 1983.\n    JEDI\n}\n# A character from the Star Wars universe\ninterface Character {\n    # The ID of the character\n    id: ID!\n    # The name of the character\n    name: String!\n    # The friends of the character, or an empty list if they have none\n    friends: [Character]\n    # The friends of the character exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this character appears in\n    appearsIn: [Episode!]!\n}\n# Units of height\nenum LengthUnit {\n    # The standard unit around the world\n    METER\n    # Primarily used in the United States\n    FOOT\n}\n# A humanoid creature from the Star Wars universe\ntype Human implements Character {\n    # The ID of the human\n    id: ID!\n    # What this human calls themselves\n    name: String!\n    # Height in the preferred unit, default is meters\n    height(unit: LengthUnit = METER): Float!\n    # Mass in kilograms, or null if unknown\n    mass: Float\n    # This human's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the human exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this human appears in\n    appearsIn: [Episode!]!\n    # A list of starships this person has piloted, or an empty list if none\n    starships: [Starship]\n}\n# An autonomous mechanical character in the Star Wars universe\ntype Droid implements Character {\n    # The ID of the droid\n    id: ID!\n    # What others call this droid\n    name: String!\n    # This droid's friends, or an empty list if they have none\n    friends: [Character]\n    # The friends of the droid exposed as a connection with edges\n    friendsConnection(first: Int, after: ID): FriendsConnection!\n    # The movies this droid appears in\n    appearsIn: [Episode!]!\n    # This droid's primary function\n    primaryFunction: String\n}\n# A connection object for a character's friends\ntype FriendsConnection {\n    # The total number of friends\n    totalCount: Int!\n    # The edges for each of the character's friends.\n    edges: [FriendsEdge]\n    # A list of the friends, as a convenience when edges are not needed.\n    friends: [Character]\n    # Information for paginating this connection\n    pageInfo: PageInfo!\n}\n# An edge object for a character's friends\ntype FriendsEdge {\n    # A cursor used for pagination\n    cursor: ID!\n    # The character represented by this friendship edge\n    node: Character\n}\n# Information for paginating this connection\ntype PageInfo {\n    startCursor: ID!\n    endCursor: ID!\n    hasNextPage: Boolean!\n}\n# Represents a review for a movie\ntype Review {\n    # The number of stars this review gave, 1-5\n    stars: Int!\n    # Comment about the movie\n    commentary: String\n    # when the review was posted\n    time: Time\n}\n# The input object sent when someone is creating a new review\ninput ReviewInput {\n    # 0-5 stars\n    stars: Int!\n    # Comment about the movie, optional\n    commentary: String\n    # when the review was posted\n    time: Time\n}\ntype Starship {\n    # The ID of the starship\n    id: ID!\n    # The name of the starship\n    name: String!\n    # Length of the starship, along the longest axis\n    length(unit: LengthUnit = METER): Float!\n    # coordinates tracking this ship\n    history: [[Int]]\n}\nunion SearchResult = Human | Droid | Starship\nscalar Time\n")
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -1596,3 +1594,136 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse(`# The query type, represents all of the entry points into our object graph
+type Query {
+    hero(episode: Episode = NEWHOPE): Character
+    reviews(episode: Episode!, since: Time): [Review]!
+    search(text: String!): [SearchResult]!
+    character(id: ID!): Character
+    droid(id: ID!): Droid
+    human(id: ID!): Human
+    starship(id: ID!): Starship
+}
+# The mutation type, represents all updates we can make to our data
+type Mutation {
+    createReview(episode: Episode!, review: ReviewInput!): Review
+}
+# The episodes in the Star Wars trilogy
+enum Episode {
+    # Star Wars Episode IV: A New Hope, released in 1977.
+    NEWHOPE
+    # Star Wars Episode V: The Empire Strikes Back, released in 1980.
+    EMPIRE
+    # Star Wars Episode VI: Return of the Jedi, released in 1983.
+    JEDI
+}
+# A character from the Star Wars universe
+interface Character {
+    # The ID of the character
+    id: ID!
+    # The name of the character
+    name: String!
+    # The friends of the character, or an empty list if they have none
+    friends: [Character]
+    # The friends of the character exposed as a connection with edges
+    friendsConnection(first: Int, after: ID): FriendsConnection!
+    # The movies this character appears in
+    appearsIn: [Episode!]!
+}
+# Units of height
+enum LengthUnit {
+    # The standard unit around the world
+    METER
+    # Primarily used in the United States
+    FOOT
+}
+# A humanoid creature from the Star Wars universe
+type Human implements Character {
+    # The ID of the human
+    id: ID!
+    # What this human calls themselves
+    name: String!
+    # Height in the preferred unit, default is meters
+    height(unit: LengthUnit = METER): Float!
+    # Mass in kilograms, or null if unknown
+    mass: Float
+    # This human` + "`" + `s friends, or an empty list if they have none
+    friends: [Character]
+    # The friends of the human exposed as a connection with edges
+    friendsConnection(first: Int, after: ID): FriendsConnection!
+    # The movies this human appears in
+    appearsIn: [Episode!]!
+    # A list of starships this person has piloted, or an empty list if none
+    starships: [Starship]
+}
+# An autonomous mechanical character in the Star Wars universe
+type Droid implements Character {
+    # The ID of the droid
+    id: ID!
+    # What others call this droid
+    name: String!
+    # This droid` + "`" + `s friends, or an empty list if they have none
+    friends: [Character]
+    # The friends of the droid exposed as a connection with edges
+    friendsConnection(first: Int, after: ID): FriendsConnection!
+    # The movies this droid appears in
+    appearsIn: [Episode!]!
+    # This droid` + "`" + `s primary function
+    primaryFunction: String
+}
+# A connection object for a character` + "`" + `s friends
+type FriendsConnection {
+    # The total number of friends
+    totalCount: Int!
+    # The edges for each of the character` + "`" + `s friends.
+    edges: [FriendsEdge]
+    # A list of the friends, as a convenience when edges are not needed.
+    friends: [Character]
+    # Information for paginating this connection
+    pageInfo: PageInfo!
+}
+# An edge object for a character` + "`" + `s friends
+type FriendsEdge {
+    # A cursor used for pagination
+    cursor: ID!
+    # The character represented by this friendship edge
+    node: Character
+}
+# Information for paginating this connection
+type PageInfo {
+    startCursor: ID!
+    endCursor: ID!
+    hasNextPage: Boolean!
+}
+# Represents a review for a movie
+type Review {
+    # The number of stars this review gave, 1-5
+    stars: Int!
+    # Comment about the movie
+    commentary: String
+    # when the review was posted
+    time: Time
+}
+# The input object sent when someone is creating a new review
+input ReviewInput {
+    # 0-5 stars
+    stars: Int!
+    # Comment about the movie, optional
+    commentary: String
+    # when the review was posted
+    time: Time
+}
+type Starship {
+    # The ID of the starship
+    id: ID!
+    # The name of the starship
+    name: String!
+    # Length of the starship, along the longest axis
+    length(unit: LengthUnit = METER): Float!
+    # coordinates tracking this ship
+    history: [[Int]]
+}
+union SearchResult = Human | Droid | Starship
+scalar Time
+`)

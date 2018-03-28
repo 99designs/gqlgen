@@ -1080,8 +1080,6 @@ func UnmarshalRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("input InnerInput {\n    id:Int!\n}\n\ninput OuterInput {\n    inner: InnerInput!\n}\n\ntype OuterObject {\n    inner: InnerObject!\n}\n\ntype InnerObject {\n    id: Int!\n}\n\ninterface Shape {\n    area: Float\n}\n\ntype Circle implements Shape {\n    radius: Float\n    area: Float\n}\n\ntype Rectangle implements Shape {\n    length: Float\n    width: Float\n    area: Float\n}\n\ninput RecursiveInputSlice {\n    self: [RecursiveInputSlice!]\n}\n\nunion ShapeUnion = Circle | Rectangle\n\ninput Changes {\n    a: Int\n    b: Int\n}\n\ntype It {\n    id: ID!\n}\n\ntype Query {\n    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean\n    nestedOutputs: [[OuterObject]]\n    shapes: [Shape]\n    recursive(input: RecursiveInputSlice): Boolean\n    mapInput(input: Changes): Boolean\n    collision: It\n}\n")
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -1093,3 +1091,59 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse(`input InnerInput {
+    id:Int!
+}
+
+input OuterInput {
+    inner: InnerInput!
+}
+
+type OuterObject {
+    inner: InnerObject!
+}
+
+type InnerObject {
+    id: Int!
+}
+
+interface Shape {
+    area: Float
+}
+
+type Circle implements Shape {
+    radius: Float
+    area: Float
+}
+
+type Rectangle implements Shape {
+    length: Float
+    width: Float
+    area: Float
+}
+
+input RecursiveInputSlice {
+    self: [RecursiveInputSlice!]
+}
+
+union ShapeUnion = Circle | Rectangle
+
+input Changes {
+    a: Int
+    b: Int
+}
+
+type It {
+    id: ID!
+}
+
+type Query {
+    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
+    nestedOutputs: [[OuterObject]]
+    shapes: [Shape]
+    recursive(input: RecursiveInputSlice): Boolean
+    mapInput(input: Changes): Boolean
+    collision: It
+}
+`)

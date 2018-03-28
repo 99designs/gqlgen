@@ -753,8 +753,6 @@ func (ec *executionContext) _Event(ctx context.Context, sel []query.Selection, o
 	}
 }
 
-var parsedSchema = schema.MustParse("interface Event {\n    selection: [String!]\n    collected: [String!]\n}\n\ntype Post implements Event {\n    message: String!\n    sent: Time!\n    selection: [String!]\n    collected: [String!]\n}\n\ntype Like implements Event {\n    reaction: String!\n    sent: Time!\n    selection: [String!]\n    collected: [String!]\n}\n\ntype Query {\n    events: [Event]\n}\n\nscalar Time\n")
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -766,3 +764,29 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse(`interface Event {
+    selection: [String!]
+    collected: [String!]
+}
+
+type Post implements Event {
+    message: String!
+    sent: Time!
+    selection: [String!]
+    collected: [String!]
+}
+
+type Like implements Event {
+    reaction: String!
+    sent: Time!
+    selection: [String!]
+    collected: [String!]
+}
+
+type Query {
+    events: [Event]
+}
+
+scalar Time
+`)

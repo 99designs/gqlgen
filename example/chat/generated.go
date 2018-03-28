@@ -855,8 +855,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-var parsedSchema = schema.MustParse("type Chatroom {\n    name: String!\n    messages: [Message!]!\n}\n\ntype Message {\n    id: ID!\n    text: String!\n    createdBy: String!\n    createdAt: Time!\n}\n\ntype Query {\n    room(name:String!): Chatroom\n}\n\ntype Mutation {\n    post(text: String!, username: String!, roomName: String!): Message!\n}\n\ntype Subscription {\n    messageAdded(roomName: String!): Message!\n}\n\nscalar Time\n")
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -868,3 +866,30 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse(`type Chatroom {
+    name: String!
+    messages: [Message!]!
+}
+
+type Message {
+    id: ID!
+    text: String!
+    createdBy: String!
+    createdAt: Time!
+}
+
+type Query {
+    room(name:String!): Chatroom
+}
+
+type Mutation {
+    post(text: String!, username: String!, roomName: String!): Message!
+}
+
+type Subscription {
+    messageAdded(roomName: String!): Message!
+}
+
+scalar Time
+`)

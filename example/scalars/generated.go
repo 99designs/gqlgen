@@ -856,8 +856,6 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 	return it, nil
 }
 
-var parsedSchema = schema.MustParse("type Query {\n    user(id: ID!): User\n    search(input: SearchArgs = {location: \"37,144\"}): [User!]!\n}\n\ntype User {\n    id: ID!\n    name: String!\n    created: Timestamp\n    isBanned: Boolean!\n    primitiveResolver: String!\n    customResolver: Point!\n    address: Address\n}\n\ntype Address {\n    id: ID!\n    location: Point\n}\n\ninput SearchArgs {\n    location: Point\n    createdAfter: Timestamp\n    isBanned: Boolean\n}\n\nscalar Timestamp\nscalar Point\n")
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -869,3 +867,33 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse(`type Query {
+    user(id: ID!): User
+    search(input: SearchArgs = {location: "37,144"}): [User!]!
+}
+
+type User {
+    id: ID!
+    name: String!
+    created: Timestamp
+    isBanned: Boolean!
+    primitiveResolver: String!
+    customResolver: Point!
+    address: Address
+}
+
+type Address {
+    id: ID!
+    location: Point
+}
+
+input SearchArgs {
+    location: Point
+    createdAfter: Timestamp
+    isBanned: Boolean
+}
+
+scalar Timestamp
+scalar Point
+`)

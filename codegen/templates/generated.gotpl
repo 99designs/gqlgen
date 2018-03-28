@@ -114,8 +114,6 @@ type executionContext struct {
 	{{ template "input.gotpl" $input }}
 {{- end }}
 
-var parsedSchema = schema.MustParse({{.SchemaRaw|quote}})
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -127,3 +125,5 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	}
 	return introspection.WrapType(t)
 }
+
+var parsedSchema = schema.MustParse({{.SchemaRaw|rawQuote}})

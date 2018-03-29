@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go -typemap types.json
+//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go -typemap types.json -models models/generated.go
 
 package test
 
@@ -14,6 +14,7 @@ import (
 	gqlerrors "github.com/vektah/gqlgen/neelance/errors"
 	"github.com/vektah/gqlgen/neelance/query"
 	"github.com/vektah/gqlgen/test/introspection"
+	"github.com/vektah/gqlgen/test/models"
 )
 
 func TestCompiles(t *testing.T) {}
@@ -76,11 +77,11 @@ func mkctx(doc *query.Document, errFn func(e error) string) context.Context {
 }
 
 type testResolvers struct {
-	inner            InnerObject
+	inner            models.InnerObject
 	innerErr         error
 	nestedInputs     *bool
 	nestedInputsErr  error
-	nestedOutputs    [][]OuterObject
+	nestedOutputs    [][]models.OuterObject
 	nestedOutputsErr error
 }
 
@@ -100,15 +101,15 @@ func (r *testResolvers) Query_collision(ctx context.Context) (*introspection.It,
 	panic("implement me")
 }
 
-func (r *testResolvers) OuterObject_inner(ctx context.Context, obj *OuterObject) (InnerObject, error) {
+func (r *testResolvers) OuterObject_inner(ctx context.Context, obj *models.OuterObject) (models.InnerObject, error) {
 	return r.inner, r.innerErr
 }
 
-func (r *testResolvers) Query_nestedInputs(ctx context.Context, input [][]OuterInput) (*bool, error) {
+func (r *testResolvers) Query_nestedInputs(ctx context.Context, input [][]models.OuterInput) (*bool, error) {
 	return r.nestedInputs, r.nestedInputsErr
 }
 
-func (r *testResolvers) Query_nestedOutputs(ctx context.Context) ([][]OuterObject, error) {
+func (r *testResolvers) Query_nestedOutputs(ctx context.Context) ([][]models.OuterObject, error) {
 	return r.nestedOutputs, r.nestedOutputsErr
 }
 

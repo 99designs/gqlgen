@@ -8,8 +8,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"syscall"
+
+	"strings"
 
 	"github.com/vektah/gqlgen/codegen"
 	"github.com/vektah/gqlgen/codegen/templates"
@@ -22,6 +23,7 @@ var models = flag.String("models", "models_gen.go", "the file to write the model
 var schemaFilename = flag.String("schema", "schema.graphql", "the graphql schema to generate types from")
 var typemap = flag.String("typemap", "", "a json map going from graphql to golang types")
 var packageName = flag.String("package", "", "the package name")
+var modelPackageName = flag.String("modelpackage", "", "the package name to use for models")
 var help = flag.Bool("h", false, "this usage text")
 
 func main() {
@@ -54,7 +56,7 @@ func main() {
 
 	types := loadTypeMap()
 
-	modelsBuild := codegen.Models(schema, types, dirName())
+	modelsBuild := codegen.Models(schema, types, dirName(*models))
 	if len(modelsBuild.Models) > 0 {
 		if *packageName != "" {
 			modelsBuild.PackageName = *packageName
@@ -67,7 +69,7 @@ func main() {
 		}
 
 		write(*models, buf.Bytes())
-		pkgName := fullPackageName()
+		pkgName := fullPackageName(*models, *modelPackageName)
 
 		for _, model := range modelsBuild.Models {
 			types[model.GQLType] = pkgName + "." + model.GoType
@@ -78,7 +80,7 @@ func main() {
 		}
 	}
 
-	build, err := codegen.Bind(schema, types, dirName())
+	build, err := codegen.Bind(schema, types, dirName(*output))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "failed to generate code: "+err.Error())
 		os.Exit(1)
@@ -121,26 +123,22 @@ func write(filename string, b []byte) {
 	}
 }
 
-func absOutput() string {
-	absPath, err := filepath.Abs(*output)
+func abs(path string) string {
+	absPath, err := filepath.Abs(path)
 	if err != nil {
 		panic(err)
 	}
 	return absPath
 }
 
-func dirName() string {
-	return filepath.Dir(absOutput())
-}
-
-func fullPackageName() string {
-	absPath, err := filepath.Abs(*output)
+func fullPackageName(file string, override string) string {
+	absPath, err := filepath.Abs(file)
 	if err != nil {
 		panic(err)
 	}
 	pkgName := filepath.Dir(absPath)
-	if *packageName != "" {
-		pkgName = filepath.Join(filepath.Dir(pkgName), *packageName)
+	if override != "" {
+		pkgName = filepath.Join(filepath.Dir(pkgName), override)
 	}
 
 	for _, gopath := range strings.Split(build.Default.GOPATH, ":") {
@@ -150,6 +148,10 @@ func fullPackageName() string {
 		}
 	}
 	return pkgName
+}
+
+func dirName(path string) string {
+	return filepath.Dir(abs(path))
 }
 
 func loadTypeMap() map[string]string {

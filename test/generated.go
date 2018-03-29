@@ -14,6 +14,7 @@ import (
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
 	introspection1 "github.com/vektah/gqlgen/test/introspection"
+	models "github.com/vektah/gqlgen/test/models"
 )
 
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
@@ -21,9 +22,9 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	OuterObject_inner(ctx context.Context, obj *OuterObject) (InnerObject, error)
-	Query_nestedInputs(ctx context.Context, input [][]OuterInput) (*bool, error)
-	Query_nestedOutputs(ctx context.Context) ([][]OuterObject, error)
+	OuterObject_inner(ctx context.Context, obj *models.OuterObject) (models.InnerObject, error)
+	Query_nestedInputs(ctx context.Context, input [][]models.OuterInput) (*bool, error)
+	Query_nestedOutputs(ctx context.Context) ([][]models.OuterObject, error)
 	Query_shapes(ctx context.Context) ([]Shape, error)
 	Query_recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
 	Query_mapInput(ctx context.Context, input *map[string]interface{}) (*bool, error)
@@ -102,7 +103,7 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 var innerObjectImplementors = []string{"InnerObject"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _InnerObject(ctx context.Context, sel []query.Selection, obj *InnerObject) graphql.Marshaler {
+func (ec *executionContext) _InnerObject(ctx context.Context, sel []query.Selection, obj *models.InnerObject) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, innerObjectImplementors, ec.Variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -121,7 +122,7 @@ func (ec *executionContext) _InnerObject(ctx context.Context, sel []query.Select
 	return out
 }
 
-func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.CollectedField, obj *InnerObject) graphql.Marshaler {
+func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.CollectedField, obj *models.InnerObject) graphql.Marshaler {
 	res := obj.ID
 	return graphql.MarshalInt(res)
 }
@@ -156,7 +157,7 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 var outerObjectImplementors = []string{"OuterObject"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _OuterObject(ctx context.Context, sel []query.Selection, obj *OuterObject) graphql.Marshaler {
+func (ec *executionContext) _OuterObject(ctx context.Context, sel []query.Selection, obj *models.OuterObject) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, outerObjectImplementors, ec.Variables)
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -175,7 +176,7 @@ func (ec *executionContext) _OuterObject(ctx context.Context, sel []query.Select
 	return out
 }
 
-func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *OuterObject) graphql.Marshaler {
+func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *models.OuterObject) graphql.Marshaler {
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -231,14 +232,14 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 }
 
 func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	var arg0 [][]OuterInput
+	var arg0 [][]models.OuterInput
 	if tmp, ok := field.Args["input"]; ok {
 		var err error
 		rawIf1 := tmp.([]interface{})
-		arg0 = make([][]OuterInput, len(rawIf1))
+		arg0 = make([][]models.OuterInput, len(rawIf1))
 		for idx1 := range rawIf1 {
 			rawIf2 := rawIf1[idx1].([]interface{})
-			arg0[idx1] = make([]OuterInput, len(rawIf2))
+			arg0[idx1] = make([]models.OuterInput, len(rawIf2))
 			for idx2 := range rawIf2 {
 				arg0[idx1][idx2], err = UnmarshalOuterInput(rawIf2[idx2])
 			}
@@ -251,10 +252,10 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		var tmp interface{} = []interface{}{[]interface{}{map[string]interface{}{"inner": map[string]interface{}{"id": 1}}}}
 		var err error
 		rawIf1 := tmp.([]interface{})
-		arg0 = make([][]OuterInput, len(rawIf1))
+		arg0 = make([][]models.OuterInput, len(rawIf1))
 		for idx1 := range rawIf1 {
 			rawIf2 := rawIf1[idx1].([]interface{})
-			arg0[idx1] = make([]OuterInput, len(rawIf2))
+			arg0[idx1] = make([]models.OuterInput, len(rawIf2))
 			for idx2 := range rawIf2 {
 				arg0[idx1][idx2], err = UnmarshalOuterInput(rawIf2[idx2])
 			}
@@ -1016,8 +1017,8 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel []query.Selecti
 	}
 }
 
-func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
-	var it InnerInput
+func UnmarshalInnerInput(v interface{}) (models.InnerInput, error) {
+	var it models.InnerInput
 
 	for k, v := range v.(map[string]interface{}) {
 		switch k {
@@ -1033,8 +1034,8 @@ func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 	return it, nil
 }
 
-func UnmarshalOuterInput(v interface{}) (OuterInput, error) {
-	var it OuterInput
+func UnmarshalOuterInput(v interface{}) (models.OuterInput, error) {
+	var it models.OuterInput
 
 	for k, v := range v.(map[string]interface{}) {
 		switch k {

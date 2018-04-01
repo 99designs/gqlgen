@@ -1,10 +1,17 @@
-baseurl: https://vektah.github.io/gqlgen/
+baseurl: https://gqlgen.com/
 metadataformat: yaml
 title: gqlgen
 enableGitInfo: true
 pygmentsCodeFences: true
 pygmentsUseClasses: true
+canonifyURLs: true
 
 params:
   name: gqlgen
   description: graphql servers the easy way
+
+menu:
+  main:
+    - name: Introduction
+      url: /
+      weight: -10

@@ -1,12 +1,17 @@
 {{ define "main" }}
 	{{ range where .Site.Pages "Type" "homepage" }}
-        <header>
-            <h1>{{ .Title }}</h1>
-            <span class="description">{{ .Description }}</span>
-        </header>
+				<header>
+						<span class="description">{{ .Description }}</span>
+						<div class="content">
+							<h1>{{ .LinkTitle }}</h1>
+							<div class="description">{{ .Title }}</div>
+						</div>
+				</header>
 
-        <main>
-        {{ .Content }}
-        </main>
+				<main>
+					<div class="content">
+						{{ .Content }}
+					</div>
+				</main>
 	{{ end }}
 {{ end }}

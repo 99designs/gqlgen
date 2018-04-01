@@ -2,8 +2,6 @@
 linkTitle: Introduction
 title: Type-safe graphql for golang
 type: homepage
-menu: main
-weight: -10
 date: 2018-03-17T13:06:47+11:00
 ---
 
@@ -18,7 +16,7 @@ date: 2018-03-17T13:06:47+11:00
 
 ## Getting started
 
-First take a look at the [Getting Started](tutorial/getting-started) tutorial.
+First take a look at the [Getting Started]({{< ref "getting-started.md" >}}) tutorial.
 
 If you cant find what your looking for, maybe the [examples](https://github.com/vektah/gqlgen/tree/master/example) will help.
 

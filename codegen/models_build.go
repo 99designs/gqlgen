@@ -16,19 +16,19 @@ func buildModels(types NamedTypes, s *schema.Schema, prog *loader.Program) []Mod
 		switch typ := typ.(type) {
 		case *schema.Object:
 			obj := buildObject(types, typ, s)
-			if obj.Root || obj.GoType != "" {
+			if obj.Root || obj.IsUserDefined {
 				continue
 			}
 			model = obj2Model(s, obj)
 		case *schema.InputObject:
 			obj := buildInput(types, typ)
-			if obj.GoType != "" {
+			if obj.IsUserDefined {
 				continue
 			}
 			model = obj2Model(s, obj)
 		case *schema.Interface, *schema.Union:
 			intf := buildInterface(types, typ, prog)
-			if intf.GoType != "" {
+			if intf.IsUserDefined {
 				continue
 			}
 			model = int2Model(intf)

@@ -251,6 +251,8 @@ func (ec *executionContext) _User(ctx context.Context, sel []query.Selection, ob
 			out.Values[i] = ec._User_customResolver(ctx, field, obj)
 		case "address":
 			out.Values[i] = ec._User_address(ctx, field, obj)
+		case "tier":
+			out.Values[i] = ec._User_tier(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -320,6 +322,11 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 func (ec *executionContext) _User_address(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
 	res := obj.Address
 	return ec._Address(ctx, field.Selections, &res)
+}
+
+func (ec *executionContext) _User_tier(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+	res := obj.Tier
+	return res
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -881,6 +888,7 @@ type User {
     primitiveResolver: String!
     customResolver: Point!
     address: Address
+    tier: Tier
 }
 
 type Address {
@@ -892,6 +900,12 @@ input SearchArgs {
     location: Point
     createdAfter: Timestamp
     isBanned: Boolean
+}
+
+enum Tier {
+    A
+    B
+    C
 }
 
 scalar Timestamp

@@ -11,6 +11,7 @@ type User {
     primitiveResolver: String!
     customResolver: Point!
     address: Address
+    tier: Tier
 }
 
 type Address {
@@ -22,6 +23,12 @@ input SearchArgs {
     location: Point
     createdAfter: Timestamp
     isBanned: Boolean
+}
+
+enum Tier {
+    A
+    B
+    C
 }
 
 scalar Timestamp

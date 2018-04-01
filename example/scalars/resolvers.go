@@ -19,6 +19,7 @@ func (r *Resolver) Query_user(ctx context.Context, id external.ObjectID) (*User,
 		Name:    fmt.Sprintf("Test User %d", id),
 		Created: time.Now(),
 		Address: Address{ID: 1, Location: &Point{1, 2}},
+		Tier:    TierC,
 	}, nil
 }
 
@@ -39,12 +40,14 @@ func (r *Resolver) Query_search(ctx context.Context, input SearchArgs) ([]User, 
 			Name:    "Test User 1",
 			Created: created,
 			Address: Address{ID: 2, Location: &location},
+			Tier:    TierA,
 		},
 		{
 			ID:      2,
 			Name:    "Test User 2",
 			Created: created,
 			Address: Address{ID: 1, Location: &location},
+			Tier:    TierC,
 		},
 	}, nil
 }

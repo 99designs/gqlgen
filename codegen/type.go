@@ -17,9 +17,10 @@ type NamedType struct {
 }
 
 type Ref struct {
-	GoType  string  // Name of the go type
-	Package string  // the package the go type lives in
-	Import  *Import // the resolved import with alias
+	GoType        string  // Name of the go type
+	Package       string  // the package the go type lives in
+	Import        *Import // the resolved import with alias
+	IsUserDefined bool    // does the type exist in the typemap
 }
 
 type Type struct {

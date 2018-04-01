@@ -65,7 +65,6 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 
 	objects := buildObjects(namedTypes, schema, prog, imports)
 	inputs := buildInputs(namedTypes, schema, prog, imports)
-	buildEnums(namedTypes, schema)
 
 	b := &Build{
 		PackageName: filepath.Base(destDir),

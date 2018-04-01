@@ -11,22 +11,23 @@ func buildEnums(types NamedTypes, s *schema.Schema) []Enum {
 	var enums []Enum
 
 	for _, typ := range s.Types {
-		if strings.HasPrefix(typ.TypeName(), "__") {
+		namedType := types[typ.TypeName()]
+		e, isEnum := typ.(*schema.Enum)
+		if !isEnum || strings.HasPrefix(typ.TypeName(), "__") || namedType.IsUserDefined {
 			continue
 		}
-		if e, ok := typ.(*schema.Enum); ok {
-			var values []EnumValue
-			for _, v := range e.Values {
-				values = append(values, EnumValue{v.Name, v.Desc})
-			}
 
-			enum := Enum{
-				NamedType: types[e.TypeName()],
-				Values:    values,
-			}
-			enum.GoType = ucFirst(enum.GQLType)
-			enums = append(enums, enum)
+		var values []EnumValue
+		for _, v := range e.Values {
+			values = append(values, EnumValue{v.Name, v.Desc})
 		}
+
+		enum := Enum{
+			NamedType: namedType,
+			Values:    values,
+		}
+		enum.GoType = ucFirst(enum.GQLType)
+		enums = append(enums, enum)
 	}
 
 	sort.Slice(enums, func(i, j int) bool {

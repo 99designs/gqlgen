@@ -18,6 +18,7 @@ type RawUser struct {
 	Address           struct{ Location string }
 	PrimitiveResolver string
 	CustomResolver    string
+	Tier              string
 }
 
 func TestScalars(t *testing.T) {
@@ -37,12 +38,13 @@ func TestScalars(t *testing.T) {
 					...UserData
 				}
 			}
-			fragment UserData on User  { id name created address { location } }`, &resp)
+			fragment UserData on User  { id name created tier address { location } }`, &resp)
 
 		require.Equal(t, "1,2", resp.User.Address.Location)
 		require.Equal(t, time.Now().Unix(), resp.User.Created)
 		require.Equal(t, "6,66", resp.Search[0].Address.Location)
 		require.Equal(t, int64(666), resp.Search[0].Created)
+		require.Equal(t, "A", resp.Search[0].Tier)
 	})
 
 	t.Run("default search location", func(t *testing.T) {

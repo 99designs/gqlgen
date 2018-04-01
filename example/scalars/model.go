@@ -21,6 +21,7 @@ type User struct {
 	Created  time.Time // direct binding to builtin types with external Marshal/Unmarshal methods
 	IsBanned Banned    // aliased primitive
 	Address  Address
+	Tier     Tier
 }
 
 // Point is serialized as a simple array, eg [1, 2]
@@ -94,4 +95,62 @@ type SearchArgs struct {
 	Location     *Point
 	CreatedAfter *time.Time
 	IsBanned     Banned
+}
+
+// A custom enum that uses integers to represent the values in memory but serialize as string for graphql
+type Tier uint
+
+const (
+	TierA Tier = iota
+	TierB Tier = iota
+	TierC Tier = iota
+)
+
+func TierForStr(str string) (Tier, error) {
+	switch str {
+	case "A":
+		return TierA, nil
+	case "B":
+		return TierB, nil
+	case "C":
+		return TierC, nil
+	default:
+		return 0, fmt.Errorf("%s is not a valid Tier", str)
+	}
+}
+
+func (e Tier) IsValid() bool {
+	switch e {
+	case TierA, TierB, TierC:
+		return true
+	}
+	return false
+}
+
+func (e Tier) String() string {
+	switch e {
+	case TierA:
+		return "A"
+	case TierB:
+		return "B"
+	case TierC:
+		return "C"
+	default:
+		panic("invalid enum value")
+	}
+}
+
+func (e *Tier) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	var err error
+	*e, err = TierForStr(str)
+	return err
+}
+
+func (e Tier) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

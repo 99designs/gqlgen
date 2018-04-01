@@ -17,6 +17,7 @@ func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
 		t := namedTypeFromSchema(schemaType)
 
 		userType := userTypes[t.GQLType]
+		t.IsUserDefined = userType != ""
 		if userType == "" && t.IsScalar {
 			userType = "github.com/vektah/gqlgen/graphql.String"
 		}

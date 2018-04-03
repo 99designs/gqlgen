@@ -5,5 +5,6 @@
     "Rectangle": "github.com/vektah/gqlgen/test.Rectangle",
     "RecursiveInputSlice": "github.com/vektah/gqlgen/test.RecursiveInputSlice",
     "It": "github.com/vektah/gqlgen/test/introspection.It",
-    "Changes": "map[string]interface{}"
+    "Changes": "map[string]interface{}",
+    "InvalidIdentifier": "github.com/vektah/gqlgen/test/invalid-identifier.InvalidIdentifier"
 }

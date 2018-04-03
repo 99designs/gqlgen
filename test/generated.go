@@ -14,6 +14,7 @@ import (
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
 	introspection1 "github.com/vektah/gqlgen/test/introspection"
+	invalid_identifier "github.com/vektah/gqlgen/test/invalid-identifier"
 	models "github.com/vektah/gqlgen/test/models"
 )
 
@@ -29,6 +30,7 @@ type Resolvers interface {
 	Query_recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
 	Query_mapInput(ctx context.Context, input *map[string]interface{}) (*bool, error)
 	Query_collision(ctx context.Context) (*introspection1.It, error)
+	Query_invalidIdentifier(ctx context.Context) (*invalid_identifier.InvalidIdentifier, error)
 }
 
 type executableSchema struct {
@@ -127,6 +129,33 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 	return graphql.MarshalInt(res)
 }
 
+var invalidIdentifierImplementors = []string{"InvalidIdentifier"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel []query.Selection, obj *invalid_identifier.InvalidIdentifier) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, invalidIdentifierImplementors, ec.Variables)
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("InvalidIdentifier")
+		case "id":
+			out.Values[i] = ec._InvalidIdentifier_id(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field graphql.CollectedField, obj *invalid_identifier.InvalidIdentifier) graphql.Marshaler {
+	res := obj.ID
+	return graphql.MarshalInt(res)
+}
+
 var itImplementors = []string{"It"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -219,6 +248,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = ec._Query_mapInput(ctx, field)
 		case "collision":
 			out.Values[i] = ec._Query_collision(ctx, field)
+		case "invalidIdentifier":
+			out.Values[i] = ec._Query_invalidIdentifier(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
 		case "__type":
@@ -430,6 +461,28 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 			return graphql.Null
 		}
 		return ec._It(ctx, field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(r)
+				ec.Error(userErr)
+				ret = graphql.Null
+			}
+		}()
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		res, err := ec.resolvers.Query_invalidIdentifier(rctx)
+		if err != nil {
+			ec.Error(err)
+			return graphql.Null
+		}
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._InvalidIdentifier(ctx, field.Selections, res)
 	})
 }
 
@@ -1139,6 +1192,10 @@ type It {
     id: ID!
 }
 
+type InvalidIdentifier {
+    id: Int!
+}
+
 type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
@@ -1146,5 +1203,6 @@ type Query {
     recursive(input: RecursiveInputSlice): Boolean
     mapInput(input: Changes): Boolean
     collision: It
+    invalidIdentifier: InvalidIdentifier
 }
 `)

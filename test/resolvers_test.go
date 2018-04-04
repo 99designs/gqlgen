@@ -14,6 +14,7 @@ import (
 	gqlerrors "github.com/vektah/gqlgen/neelance/errors"
 	"github.com/vektah/gqlgen/neelance/query"
 	"github.com/vektah/gqlgen/test/introspection"
+	invalid_identifier "github.com/vektah/gqlgen/test/invalid-identifier"
 	"github.com/vektah/gqlgen/test/models"
 )
 
@@ -77,12 +78,13 @@ func mkctx(doc *query.Document, errFn func(e error) string) context.Context {
 }
 
 type testResolvers struct {
-	inner            models.InnerObject
-	innerErr         error
-	nestedInputs     *bool
-	nestedInputsErr  error
-	nestedOutputs    [][]models.OuterObject
-	nestedOutputsErr error
+	inner             models.InnerObject
+	innerErr          error
+	nestedInputs      *bool
+	nestedInputsErr   error
+	nestedOutputs     [][]models.OuterObject
+	nestedOutputsErr  error
+	invalidIdentifier *invalid_identifier.InvalidIdentifier
 }
 
 func (r *testResolvers) Query_shapes(ctx context.Context) ([]Shape, error) {
@@ -111,6 +113,10 @@ func (r *testResolvers) Query_nestedInputs(ctx context.Context, input [][]models
 
 func (r *testResolvers) Query_nestedOutputs(ctx context.Context) ([][]models.OuterObject, error) {
 	return r.nestedOutputs, r.nestedOutputsErr
+}
+
+func (r *testResolvers) Query_invalidIdentifier(ctx context.Context) (*invalid_identifier.InvalidIdentifier, error) {
+	return r.invalidIdentifier, nil
 }
 
 type specialErr struct{}

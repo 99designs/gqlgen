@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -29,6 +30,8 @@ func buildImports(types NamedTypes, destDir string) Imports {
 	return imports
 }
 
+var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
+
 func (s Imports) addPkg(types NamedTypes, destDir string, pkg string) (Imports, *Import) {
 	if pkg == "" {
 		return s, nil
@@ -40,11 +43,11 @@ func (s Imports) addPkg(types NamedTypes, destDir string, pkg string) (Imports, 
 
 	localName := ""
 	if !strings.HasSuffix(destDir, pkg) {
-		localName = filepath.Base(pkg)
+		localName = invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
 		i := 1
 		imp := s.findByName(localName)
 		for imp != nil && imp.Package != pkg {
-			localName = filepath.Base(pkg) + strconv.Itoa(i)
+			localName = invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_") + strconv.Itoa(i)
 			imp = s.findByName(localName)
 			i++
 			if i > 10 {

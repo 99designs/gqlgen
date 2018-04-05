@@ -150,12 +150,22 @@ func (ec *executionContext) _Customer_address(ctx context.Context, field graphql
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Customer_address(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Customer",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Customer_address(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Address)
 		if res == nil {
 			return graphql.Null
 		}
@@ -172,12 +182,22 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Customer_orders(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Customer",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Customer_orders(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Order)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Order(ctx, field.Selections, &res[idx1]) }())
@@ -265,12 +285,22 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Order_items(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Order",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Order_items(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Item)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Item(ctx, field.Selections, &res[idx1]) }())
@@ -316,12 +346,22 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_customers(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_customers(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Customer)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Customer(ctx, field.Selections, &res[idx1]) }())
@@ -331,6 +371,7 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 [][]int
 	if tmp, ok := field.Args["customerIds"]; ok {
 		var err error
@@ -348,6 +389,7 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
+	args["customerIds"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -356,12 +398,22 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_torture(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_torture(rctx, args["customerIds"].([][]int))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([][]Customer)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler {
@@ -385,6 +437,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
@@ -394,7 +447,8 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	}
-	res := ec.introspectType(arg0)
+	args["name"] = arg0
+	res := ec.introspectType(args["name"].(string))
 	if res == nil {
 		return graphql.Null
 	}
@@ -798,6 +852,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -807,7 +862,8 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
-	res := obj.Fields(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.Fields(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -849,6 +905,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -858,7 +915,8 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 			return graphql.Null
 		}
 	}
-	res := obj.EnumValues(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.EnumValues(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {

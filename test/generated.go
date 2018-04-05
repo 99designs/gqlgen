@@ -219,14 +219,17 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.OuterObject_inner(rctx, obj)
 		})
-		res := resTmp.(models.InnerObject)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(models.InnerObject)
 		return ec._InnerObject(ctx, field.Selections, &res)
 	})
 }
@@ -319,14 +322,17 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_nestedInputs(rctx, args["input"].([][]models.OuterInput))
 		})
-		res := resTmp.(*bool)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*bool)
 		if res == nil {
 			return graphql.Null
 		}
@@ -348,14 +354,17 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_nestedOutputs(rctx)
 		})
-		res := resTmp.([][]models.OuterObject)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([][]models.OuterObject)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler {
@@ -384,14 +393,17 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_shapes(rctx)
 		})
-		res := resTmp.([]Shape)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Shape)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Shape(ctx, field.Selections, &res[idx1]) }())
@@ -430,14 +442,17 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_recursive(rctx, args["input"].(*RecursiveInputSlice))
 		})
-		res := resTmp.(*bool)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*bool)
 		if res == nil {
 			return graphql.Null
 		}
@@ -475,14 +490,17 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_mapInput(rctx, args["input"].(*map[string]interface{}))
 		})
-		res := resTmp.(*bool)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*bool)
 		if res == nil {
 			return graphql.Null
 		}
@@ -504,14 +522,17 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_collision(rctx)
 		})
-		res := resTmp.(*introspection1.It)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*introspection1.It)
 		if res == nil {
 			return graphql.Null
 		}
@@ -533,14 +554,17 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(ctx context.Context) (interface{}, error) {
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_invalidIdentifier(rctx)
 		})
-		res := resTmp.(*invalid_identifier.InvalidIdentifier)
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*invalid_identifier.InvalidIdentifier)
 		if res == nil {
 			return graphql.Null
 		}

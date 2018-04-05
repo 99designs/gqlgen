@@ -95,6 +95,7 @@ func (ec *executionContext) _MyMutation(ctx context.Context, sel []query.Selecti
 }
 
 func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 TodoInput
 	if tmp, ok := field.Args["todo"]; ok {
 		var err error
@@ -104,16 +105,28 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 			return graphql.Null
 		}
 	}
-	rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-	res, err := ec.resolvers.MyMutation_createTodo(rctx, arg0)
+	args["todo"] = arg0
+	rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "MyMutation",
+		Args:   args,
+		Field:  field,
+	})
+	resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		return ec.resolvers.MyMutation_createTodo(rctx, args["todo"].(TodoInput))
+	})
 	if err != nil {
 		ec.Error(err)
 		return graphql.Null
 	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Todo)
 	return ec._Todo(ctx, field.Selections, &res)
 }
 
 func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
@@ -123,6 +136,7 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 			return graphql.Null
 		}
 	}
+	args["id"] = arg0
 	var arg1 map[string]interface{}
 	if tmp, ok := field.Args["changes"]; ok {
 		var err error
@@ -132,12 +146,23 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 			return graphql.Null
 		}
 	}
-	rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-	res, err := ec.resolvers.MyMutation_updateTodo(rctx, arg0, arg1)
+	args["changes"] = arg1
+	rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "MyMutation",
+		Args:   args,
+		Field:  field,
+	})
+	resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		return ec.resolvers.MyMutation_updateTodo(rctx, args["id"].(int), args["changes"].(map[string]interface{}))
+	})
 	if err != nil {
 		ec.Error(err)
 		return graphql.Null
 	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Todo)
 	if res == nil {
 		return graphql.Null
 	}
@@ -175,6 +200,7 @@ func (ec *executionContext) _MyQuery(ctx context.Context, sel []query.Selection)
 }
 
 func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
@@ -184,6 +210,7 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	}
+	args["id"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -192,12 +219,22 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.MyQuery_todo(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "MyQuery",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.MyQuery_todo(rctx, args["id"].(int))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Todo)
 		if res == nil {
 			return graphql.Null
 		}
@@ -214,12 +251,22 @@ func (ec *executionContext) _MyQuery_lastTodo(ctx context.Context, field graphql
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.MyQuery_lastTodo(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "MyQuery",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.MyQuery_lastTodo(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Todo)
 		if res == nil {
 			return graphql.Null
 		}
@@ -236,12 +283,22 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.MyQuery_todos(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "MyQuery",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.MyQuery_todos(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Todo)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Todo(ctx, field.Selections, &res[idx1]) }())
@@ -259,6 +316,7 @@ func (ec *executionContext) _MyQuery___schema(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) _MyQuery___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
@@ -268,7 +326,8 @@ func (ec *executionContext) _MyQuery___type(ctx context.Context, field graphql.C
 			return graphql.Null
 		}
 	}
-	res := ec.introspectType(arg0)
+	args["name"] = arg0
+	res := ec.introspectType(args["name"].(string))
 	if res == nil {
 		return graphql.Null
 	}
@@ -713,6 +772,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -722,7 +782,8 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
-	res := obj.Fields(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.Fields(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -764,6 +825,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -773,7 +835,8 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 			return graphql.Null
 		}
 	}
-	res := obj.EnumValues(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.EnumValues(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {

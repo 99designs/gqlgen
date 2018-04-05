@@ -26,7 +26,7 @@ const (
 	dataMsg                = "data"                 // Server -> Client
 	errorMsg               = "error"                // Server -> Client
 	completeMsg            = "complete"             // Server -> Client
-	//connectionKeepAliveMsg = "ka"                   // Server -> Client  TODO: keepalives
+	//connectionKeepAliveMsg = "ka"                 // Server -> Client  TODO: keepalives
 )
 
 type operationMessage struct {
@@ -36,17 +36,16 @@ type operationMessage struct {
 }
 
 type wsConnection struct {
-	ctx         context.Context
-	conn        *websocket.Conn
-	exec        graphql.ExecutableSchema
-	active      map[string]context.CancelFunc
-	mu          sync.Mutex
-	recover     graphql.RecoverFunc
-	formatError func(err error) string
+	ctx    context.Context
+	conn   *websocket.Conn
+	exec   graphql.ExecutableSchema
+	active map[string]context.CancelFunc
+	mu     sync.Mutex
+	cfg    *Config
 }
 
-func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, upgrader websocket.Upgrader, recover graphql.RecoverFunc) {
-	ws, err := upgrader.Upgrade(w, r, http.Header{
+func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, cfg *Config) {
+	ws, err := cfg.upgrader.Upgrade(w, r, http.Header{
 		"Sec-Websocket-Protocol": []string{"graphql-ws"},
 	})
 	if err != nil {
@@ -56,11 +55,11 @@ func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Req
 	}
 
 	conn := wsConnection{
-		active:  map[string]context.CancelFunc{},
-		exec:    exec,
-		conn:    ws,
-		ctx:     r.Context(),
-		recover: recover,
+		active: map[string]context.CancelFunc{},
+		exec:   exec,
+		conn:   ws,
+		ctx:    r.Context(),
+		cfg:    cfg,
 	}
 
 	if !conn.init() {
@@ -157,11 +156,12 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	}
 
 	ctx := graphql.WithRequestContext(c.ctx, &graphql.RequestContext{
-		Doc:       doc,
-		Variables: reqParams.Variables,
-		Recover:   c.recover,
+		Doc:        doc,
+		Variables:  reqParams.Variables,
+		Recover:    c.cfg.recover,
+		Middleware: c.cfg.resolverHook,
 		Builder: errors.Builder{
-			ErrorMessageFn: c.formatError,
+			ErrorMessageFn: c.cfg.formatError,
 		},
 	})
 
@@ -185,7 +185,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := c.recover(r)
+				userErr := c.cfg.recover(r)
 				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
 			}
 		}()

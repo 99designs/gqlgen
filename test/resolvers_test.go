@@ -71,6 +71,9 @@ func TestErrorConverter(t *testing.T) {
 func mkctx(doc *query.Document, errFn func(e error) string) context.Context {
 	return graphql.WithRequestContext(context.Background(), &graphql.RequestContext{
 		Doc: doc,
+		Middleware: func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			return next(ctx)
+		},
 		Builder: gqlerrors.Builder{
 			ErrorMessageFn: errFn,
 		},

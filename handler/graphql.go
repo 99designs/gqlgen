@@ -1,13 +1,11 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-
 	"strings"
-
-	"context"
 
 	"github.com/gorilla/websocket"
 	"github.com/vektah/gqlgen/graphql"

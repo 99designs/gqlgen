@@ -89,8 +89,8 @@ func (f *Field) CallArgs() string {
 		}
 	}
 
-	for i := range f.Args {
-		args = append(args, "arg"+strconv.Itoa(i))
+	for _, arg := range f.Args {
+		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+arg.Signature()+")")
 	}
 
 	return strings.Join(args, ", ")

@@ -205,12 +205,22 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_events(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_events(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Event)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Event(ctx, field.Selections, &res[idx1]) }())
@@ -228,6 +238,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
@@ -237,7 +248,8 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	}
-	res := ec.introspectType(arg0)
+	args["name"] = arg0
+	res := ec.introspectType(args["name"].(string))
 	if res == nil {
 		return graphql.Null
 	}
@@ -641,6 +653,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -650,7 +663,8 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
-	res := obj.Fields(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.Fields(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -692,6 +706,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -701,7 +716,8 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 			return graphql.Null
 		}
 	}
-	res := obj.EnumValues(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.EnumValues(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {

@@ -137,12 +137,22 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Droid_friends(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Droid",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Droid_friends(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Character)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Character(ctx, field.Selections, &res[idx1]) }())
@@ -152,6 +162,7 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field graphql.CollectedField, obj *Droid) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := field.Args["first"]; ok {
 		var err error
@@ -166,6 +177,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 			return graphql.Null
 		}
 	}
+	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := field.Args["after"]; ok {
 		var err error
@@ -180,6 +192,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 			return graphql.Null
 		}
 	}
+	args["after"] = arg1
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -188,12 +201,22 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Droid_friendsConnection(rctx, obj, arg0, arg1)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Droid",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Droid_friendsConnection(rctx, obj, args["first"].(*int), args["after"].(*string))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(FriendsConnection)
 		return ec._FriendsConnection(ctx, field.Selections, &res)
 	})
 }
@@ -254,12 +277,22 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.FriendsConnection_edges(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "FriendsConnection",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.FriendsConnection_edges(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]FriendsEdge)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._FriendsEdge(ctx, field.Selections, &res[idx1]) }())
@@ -277,12 +310,22 @@ func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, fiel
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.FriendsConnection_friends(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "FriendsConnection",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.FriendsConnection_friends(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Character)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Character(ctx, field.Selections, &res[idx1]) }())
@@ -377,6 +420,7 @@ func (ec *executionContext) _Human_name(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) _Human_height(ctx context.Context, field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 LengthUnit
 	if tmp, ok := field.Args["unit"]; ok {
 		var err error
@@ -395,7 +439,8 @@ func (ec *executionContext) _Human_height(ctx context.Context, field graphql.Col
 		}
 	}
 
-	res := obj.Height(arg0)
+	args["unit"] = arg0
+	res := obj.Height(args["unit"].(LengthUnit))
 	return graphql.MarshalFloat(res)
 }
 
@@ -413,12 +458,22 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Human_friends(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Human",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Human_friends(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Character)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Character(ctx, field.Selections, &res[idx1]) }())
@@ -428,6 +483,7 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field graphql.CollectedField, obj *Human) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := field.Args["first"]; ok {
 		var err error
@@ -442,6 +498,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 			return graphql.Null
 		}
 	}
+	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := field.Args["after"]; ok {
 		var err error
@@ -456,6 +513,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 			return graphql.Null
 		}
 	}
+	args["after"] = arg1
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -464,12 +522,22 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Human_friendsConnection(rctx, obj, arg0, arg1)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Human",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Human_friendsConnection(rctx, obj, args["first"].(*int), args["after"].(*string))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(FriendsConnection)
 		return ec._FriendsConnection(ctx, field.Selections, &res)
 	})
 }
@@ -492,12 +560,22 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Human_starships(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Human",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Human_starships(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Starship)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Starship(ctx, field.Selections, &res[idx1]) }())
@@ -529,6 +607,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel []query.Selection
 }
 
 func (ec *executionContext) _Mutation_createReview(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 Episode
 	if tmp, ok := field.Args["episode"]; ok {
 		var err error
@@ -538,6 +617,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 			return graphql.Null
 		}
 	}
+	args["episode"] = arg0
 	var arg1 Review
 	if tmp, ok := field.Args["review"]; ok {
 		var err error
@@ -547,12 +627,23 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 			return graphql.Null
 		}
 	}
-	rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-	res, err := ec.resolvers.Mutation_createReview(rctx, arg0, arg1)
+	args["review"] = arg1
+	rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	})
+	resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		return ec.resolvers.Mutation_createReview(rctx, args["episode"].(Episode), args["review"].(Review))
+	})
 	if err != nil {
 		ec.Error(err)
 		return graphql.Null
 	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Review)
 	if res == nil {
 		return graphql.Null
 	}
@@ -639,6 +730,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 }
 
 func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 Episode
 	if tmp, ok := field.Args["episode"]; ok {
 		var err error
@@ -657,6 +749,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 		}
 	}
 
+	args["episode"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -665,17 +758,28 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_hero(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_hero(rctx, args["episode"].(Episode))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(Character)
 		return ec._Character(ctx, field.Selections, &res)
 	})
 }
 
 func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 Episode
 	if tmp, ok := field.Args["episode"]; ok {
 		var err error
@@ -685,6 +789,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
+	args["episode"] = arg0
 	var arg1 *time.Time
 	if tmp, ok := field.Args["since"]; ok {
 		var err error
@@ -699,6 +804,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
+	args["since"] = arg1
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -707,12 +813,22 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_reviews(rctx, arg0, arg1)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_reviews(rctx, args["episode"].(Episode), args["since"].(*time.Time))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Review)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Review(ctx, field.Selections, &res[idx1]) }())
@@ -722,6 +838,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["text"]; ok {
 		var err error
@@ -731,6 +848,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	}
+	args["text"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -739,12 +857,22 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_search(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_search(rctx, args["text"].(string))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]SearchResult)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._SearchResult(ctx, field.Selections, &res[idx1]) }())
@@ -754,6 +882,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query_character(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
@@ -763,6 +892,7 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 			return graphql.Null
 		}
 	}
+	args["id"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -771,17 +901,28 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_character(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_character(rctx, args["id"].(string))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(Character)
 		return ec._Character(ctx, field.Selections, &res)
 	})
 }
 
 func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
@@ -791,6 +932,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 			return graphql.Null
 		}
 	}
+	args["id"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -799,12 +941,22 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_droid(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_droid(rctx, args["id"].(string))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Droid)
 		if res == nil {
 			return graphql.Null
 		}
@@ -813,6 +965,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) _Query_human(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
@@ -822,6 +975,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 			return graphql.Null
 		}
 	}
+	args["id"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -830,12 +984,22 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_human(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_human(rctx, args["id"].(string))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Human)
 		if res == nil {
 			return graphql.Null
 		}
@@ -844,6 +1008,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
@@ -853,6 +1018,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 			return graphql.Null
 		}
 	}
+	args["id"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -861,12 +1027,22 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_starship(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_starship(rctx, args["id"].(string))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Starship)
 		if res == nil {
 			return graphql.Null
 		}
@@ -883,6 +1059,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
@@ -892,7 +1069,8 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	}
-	res := ec.introspectType(arg0)
+	args["name"] = arg0
+	res := ec.introspectType(args["name"].(string))
 	if res == nil {
 		return graphql.Null
 	}
@@ -982,6 +1160,7 @@ func (ec *executionContext) _Starship_name(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.CollectedField, obj *Starship) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 LengthUnit
 	if tmp, ok := field.Args["unit"]; ok {
 		var err error
@@ -1000,7 +1179,8 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 		}
 	}
 
-	res := obj.Length(arg0)
+	args["unit"] = arg0
+	res := obj.Length(args["unit"].(LengthUnit))
 	return graphql.MarshalFloat(res)
 }
 
@@ -1416,6 +1596,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -1425,7 +1606,8 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
-	res := obj.Fields(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.Fields(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -1467,6 +1649,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -1476,7 +1659,8 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 			return graphql.Null
 		}
 	}
-	res := obj.EnumValues(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.EnumValues(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {

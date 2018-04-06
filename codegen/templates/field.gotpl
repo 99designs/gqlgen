@@ -48,12 +48,22 @@
 					}
 				{{- end }}
 			{{- else }}
-				rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-				res, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
+				rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+					Object: {{$object.GQLType|quote}},
+					Args: {{if $field.Args }}args{{else}}nil{{end}},
+					Field: field,
+				})
+				resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+					return ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
+				})
 				if err != nil {
 					ec.Error(err)
 					return graphql.Null
 				}
+				if resTmp == nil {
+					return graphql.Null
+				}
+				res := resTmp.({{$field.Signature}})
 			{{- end }}
 			{{ $field.WriteJson }}
 		{{- if $field.IsConcurrent }}

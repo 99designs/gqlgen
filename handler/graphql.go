@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -21,9 +21,10 @@ type params struct {
 }
 
 type Config struct {
-	upgrader    websocket.Upgrader
-	recover     graphql.RecoverFunc
-	formatError func(error) string
+	upgrader     websocket.Upgrader
+	recover      graphql.RecoverFunc
+	formatError  func(error) string
+	resolverHook graphql.ResolverMiddleware
 }
 
 type Option func(cfg *Config)
@@ -46,6 +47,22 @@ func FormatErrorFunc(f func(error) string) Option {
 	}
 }
 
+func Use(middleware graphql.ResolverMiddleware) Option {
+	return func(cfg *Config) {
+		if cfg.resolverHook == nil {
+			cfg.resolverHook = middleware
+			return
+		}
+
+		lastResolve := cfg.resolverHook
+		cfg.resolverHook = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			return lastResolve(ctx, func(ctx context.Context) (res interface{}, err error) {
+				return middleware(ctx, next)
+			})
+		}
+	}
+}
+
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := Config{
 		recover: graphql.DefaultRecoverFunc,
@@ -59,6 +76,12 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		option(&cfg)
 	}
 
+	if cfg.resolverHook == nil {
+		cfg.resolverHook = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			return next(ctx)
+		}
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
 			w.Header().Set("Allow", "OPTIONS, GET, POST")
@@ -67,7 +90,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}
 
 		if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
-			connectWs(exec, w, r, cfg.upgrader, cfg.recover)
+			connectWs(exec, w, r, &cfg)
 			return
 		}
 
@@ -113,9 +136,10 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}
 
 		ctx := graphql.WithRequestContext(r.Context(), &graphql.RequestContext{
-			Doc:       doc,
-			Variables: reqParams.Variables,
-			Recover:   cfg.recover,
+			Doc:        doc,
+			Variables:  reqParams.Variables,
+			Recover:    cfg.recover,
+			Middleware: cfg.resolverHook,
 			Builder: errors.Builder{
 				ErrorMessageFn: cfg.formatError,
 			},

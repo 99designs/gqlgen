@@ -214,12 +214,22 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.OuterObject_inner(rctx, obj)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "OuterObject",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.OuterObject_inner(rctx, obj)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(models.InnerObject)
 		return ec._InnerObject(ctx, field.Selections, &res)
 	})
 }
@@ -263,6 +273,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 }
 
 func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 [][]models.OuterInput
 	if tmp, ok := field.Args["input"]; ok {
 		var err error
@@ -297,6 +308,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		}
 	}
 
+	args["input"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -305,12 +317,22 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_nestedInputs(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_nestedInputs(rctx, args["input"].([][]models.OuterInput))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*bool)
 		if res == nil {
 			return graphql.Null
 		}
@@ -327,12 +349,22 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_nestedOutputs(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_nestedOutputs(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([][]models.OuterObject)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler {
@@ -356,12 +388,22 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_shapes(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_shapes(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Shape)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler { return ec._Shape(ctx, field.Selections, &res[idx1]) }())
@@ -371,6 +413,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 *RecursiveInputSlice
 	if tmp, ok := field.Args["input"]; ok {
 		var err error
@@ -385,6 +428,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 			return graphql.Null
 		}
 	}
+	args["input"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -393,12 +437,22 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_recursive(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_recursive(rctx, args["input"].(*RecursiveInputSlice))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*bool)
 		if res == nil {
 			return graphql.Null
 		}
@@ -407,6 +461,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 *map[string]interface{}
 	if tmp, ok := field.Args["input"]; ok {
 		var err error
@@ -421,6 +476,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 			return graphql.Null
 		}
 	}
+	args["input"] = arg0
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -429,12 +485,22 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_mapInput(rctx, arg0)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   args,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_mapInput(rctx, args["input"].(*map[string]interface{}))
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*bool)
 		if res == nil {
 			return graphql.Null
 		}
@@ -451,12 +517,22 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_collision(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_collision(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*introspection1.It)
 		if res == nil {
 			return graphql.Null
 		}
@@ -473,12 +549,22 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 				ret = graphql.Null
 			}
 		}()
-		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		res, err := ec.resolvers.Query_invalidIdentifier(rctx)
+		rctx := graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: "Query",
+			Args:   nil,
+			Field:  field,
+		})
+		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_invalidIdentifier(rctx)
+		})
 		if err != nil {
 			ec.Error(err)
 			return graphql.Null
 		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*invalid_identifier.InvalidIdentifier)
 		if res == nil {
 			return graphql.Null
 		}
@@ -495,6 +581,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := field.Args["name"]; ok {
 		var err error
@@ -504,7 +591,8 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	}
-	res := ec.introspectType(arg0)
+	args["name"] = arg0
+	res := ec.introspectType(args["name"].(string))
 	if res == nil {
 		return graphql.Null
 	}
@@ -949,6 +1037,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -958,7 +1047,8 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 			return graphql.Null
 		}
 	}
-	res := obj.Fields(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.Fields(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -1000,6 +1090,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := field.Args["includeDeprecated"]; ok {
 		var err error
@@ -1009,7 +1100,8 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 			return graphql.Null
 		}
 	}
-	res := obj.EnumValues(arg0)
+	args["includeDeprecated"] = arg0
+	res := obj.EnumValues(args["includeDeprecated"].(bool))
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {

@@ -223,4 +223,20 @@ func TestStarwars(t *testing.T) {
 		var resp interface{}
 		c.MustPost(introspection.Query, &resp)
 	})
+
+	t.Run("aliased field and non-aliased field", func(t *testing.T) {
+		var resp struct {
+			Character struct {
+				Name string
+			}
+			AliasedCharacter struct {
+				Name string
+			}
+		}
+		c.MustPost(`{
+			character(id: 2001) { name }
+			aliasedCharacter: character(id: 2001) { name }
+		}`, &resp)
+		require.Equal(t, resp.Character, resp.AliasedCharacter)
+	})
 }

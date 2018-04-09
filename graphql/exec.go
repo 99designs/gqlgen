@@ -27,7 +27,7 @@ func collectFields(doc *query.Document, selSet []query.Selection, satisfies []st
 	for _, sel := range selSet {
 		switch sel := sel.(type) {
 		case *query.Field:
-			f := getOrCreateField(&groupedFields, sel.Name.Name, func() CollectedField {
+			f := getOrCreateField(&groupedFields, sel.Alias.Name, func() CollectedField {
 				f := CollectedField{
 					Alias: sel.Alias.Name,
 					Name:  sel.Name.Name,

@@ -141,13 +141,13 @@ func fullPackageName(file string, override string) string {
 		pkgName = filepath.Join(filepath.Dir(pkgName), override)
 	}
 
-	for _, gopath := range strings.Split(build.Default.GOPATH, ":") {
-		gopath += "/src/"
+	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
+		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
 		if strings.HasPrefix(pkgName, gopath) {
 			pkgName = pkgName[len(gopath):]
 		}
 	}
-	return pkgName
+	return filepath.ToSlash(pkgName)
 }
 
 func dirName(path string) string {

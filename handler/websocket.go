@@ -191,7 +191,6 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		}()
 		next := c.exec.Subscription(ctx, op)
 		for result := next(); result != nil; result = next() {
-			fmt.Println(result)
 			c.sendData(message.ID, result)
 		}
 

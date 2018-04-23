@@ -9,14 +9,17 @@ import (
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
 type ResolverMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
+type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 
 type RequestContext struct {
 	errors.Builder
 
-	Variables  map[string]interface{}
-	Doc        *query.Document
-	Recover    RecoverFunc
-	Middleware ResolverMiddleware
+	RawQuery           string
+	Variables          map[string]interface{}
+	Doc                *query.Document
+	Recover            RecoverFunc
+	ResolverMiddleware ResolverMiddleware
+	RequestMiddleware  RequestMiddleware
 }
 
 type key string

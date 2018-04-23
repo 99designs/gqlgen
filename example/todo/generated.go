@@ -37,12 +37,15 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._MyQuery(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._MyQuery(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -50,12 +53,15 @@ func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *grap
 func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._MyMutation(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._MyMutation(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -111,7 +117,7 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 		Args:   args,
 		Field:  field,
 	})
-	resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 		return ec.resolvers.MyMutation_createTodo(rctx, args["todo"].(TodoInput))
 	})
 	if err != nil {
@@ -152,7 +158,7 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 		Args:   args,
 		Field:  field,
 	})
-	resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 		return ec.resolvers.MyMutation_updateTodo(rctx, args["id"].(int), args["changes"].(map[string]interface{}))
 	})
 	if err != nil {
@@ -224,7 +230,7 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.MyQuery_todo(rctx, args["id"].(int))
 		})
 		if err != nil {
@@ -256,7 +262,7 @@ func (ec *executionContext) _MyQuery_lastTodo(ctx context.Context, field graphql
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.MyQuery_lastTodo(rctx)
 		})
 		if err != nil {
@@ -288,7 +294,7 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.MyQuery_todos(rctx)
 		})
 		if err != nil {

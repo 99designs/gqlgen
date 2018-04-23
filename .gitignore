@@ -1,3 +1,5 @@
 /internal/tests/testdata/graphql-js
 /vendor
 /docs/public
+/example/chat/node_modules
+/example/chat/package-lock.json

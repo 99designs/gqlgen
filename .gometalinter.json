@@ -1,6 +1,6 @@
 {
   "sort": ["path"],
-  "Deadline": "2m",
+  "Deadline": "5m",
   "Linters": {
     "errcheck": {
       "Command":           "errcheck -abspath -ignore '[rR]ead|[wW]rite|Close'",

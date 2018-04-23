@@ -176,6 +176,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			},
 		})
 
+		defer func() {
+			if err := recover(); err != nil {
+				userErr := cfg.recover(ctx, err)
+				sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
+			}
+		}()
+
 		switch op.Type {
 		case query.Query:
 			b, err := json.Marshal(exec.Query(ctx, op))

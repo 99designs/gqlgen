@@ -187,7 +187,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := c.cfg.recover(r)
+				userErr := c.cfg.recover(ctx, r)
 				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
 			}
 		}()

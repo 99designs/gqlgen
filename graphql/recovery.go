@@ -1,15 +1,16 @@
 package graphql
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"runtime/debug"
 )
 
-type RecoverFunc func(err interface{}) (userMessage error)
+type RecoverFunc func(ctx context.Context, err interface{}) (userMessage error)
 
-func DefaultRecoverFunc(err interface{}) error {
+func DefaultRecoverFunc(ctx context.Context, err interface{}) error {
 	fmt.Fprintln(os.Stderr, err)
 	fmt.Fprintln(os.Stderr)
 	debug.PrintStack()

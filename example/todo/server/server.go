@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -14,7 +15,7 @@ func main() {
 	http.Handle("/", handler.Playground("Todo", "/query"))
 	http.Handle("/query", handler.GraphQL(
 		todo.MakeExecutableSchema(todo.New()),
-		handler.RecoverFunc(func(err interface{}) error {
+		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
 			log.Printf("send this panic somewhere")
 			debug.PrintStack()
 			return errors.New("user message on panic")

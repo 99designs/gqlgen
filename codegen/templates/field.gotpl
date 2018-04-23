@@ -28,7 +28,7 @@
 			return graphql.Defer(func() (ret graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
-						userErr := ec.Recover(r)
+						userErr := ec.Recover(ctx, r)
 						ec.Error(userErr)
 						ret = graphql.Null
 					}
@@ -53,7 +53,7 @@
 					Args: {{if $field.Args }}args{{else}}nil{{end}},
 					Field: field,
 				})
-				resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+				resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 					return ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
 				})
 				if err != nil {

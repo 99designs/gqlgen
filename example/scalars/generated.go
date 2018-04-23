@@ -39,12 +39,15 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Query(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -143,7 +146,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -153,7 +156,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_user(rctx, args["id"].(external.ObjectID))
 		})
 		if err != nil {
@@ -195,7 +198,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -205,7 +208,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_search(rctx, args["input"].(SearchArgs))
 		})
 		if err != nil {
@@ -311,7 +314,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -321,7 +324,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.User_primitiveResolver(rctx, obj)
 		})
 		if err != nil {
@@ -340,7 +343,7 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -350,7 +353,7 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.User_customResolver(rctx, obj)
 		})
 		if err != nil {

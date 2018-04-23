@@ -35,12 +35,15 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Query(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -48,12 +51,15 @@ func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *grap
 func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Mutation(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Mutation(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -68,18 +74,20 @@ func (e *executableSchema) Subscription(ctx context.Context, op *query.Operation
 
 	var buf bytes.Buffer
 	return func() *graphql.Response {
-		buf.Reset()
-		data := next()
-		if data == nil {
-			return nil
-		}
-		data.MarshalGQL(&buf)
+		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+			buf.Reset()
+			data := next()
 
-		errs := ec.Errors
-		ec.Errors = nil
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+			return buf.Bytes()
+		})
+
 		return &graphql.Response{
-			Data:   buf.Bytes(),
-			Errors: errs,
+			Data:   buf,
+			Errors: ec.Errors,
 		}
 	}
 }
@@ -235,7 +243,7 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 		Args:   args,
 		Field:  field,
 	})
-	resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 		return ec.resolvers.Mutation_post(rctx, args["text"].(string), args["username"].(string), args["roomName"].(string))
 	})
 	if err != nil {
@@ -290,7 +298,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -300,7 +308,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_room(rctx, args["name"].(string))
 		})
 		if err != nil {

@@ -49,7 +49,7 @@ func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Req
 		"Sec-Websocket-Protocol": []string{"graphql-ws"},
 	})
 	if err != nil {
-		log.Printf("unable to upgrade connection to websocket %s: ", err.Error())
+		log.Printf("unable to upgrade %T to websocket %s: ", w, err.Error())
 		sendErrorf(w, http.StatusBadRequest, "unable to upgrade")
 		return
 	}
@@ -156,10 +156,12 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	}
 
 	ctx := graphql.WithRequestContext(c.ctx, &graphql.RequestContext{
-		Doc:        doc,
-		Variables:  reqParams.Variables,
-		Recover:    c.cfg.recover,
-		Middleware: c.cfg.resolverHook,
+		Doc:                doc,
+		Variables:          reqParams.Variables,
+		RawQuery:           reqParams.Query,
+		Recover:            c.cfg.recover,
+		ResolverMiddleware: c.cfg.resolverHook,
+		RequestMiddleware:  c.cfg.requestHook,
 		Builder: errors.Builder{
 			ErrorMessageFn: c.cfg.formatError,
 		},
@@ -185,7 +187,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := c.cfg.recover(r)
+				userErr := c.cfg.recover(ctx, r)
 				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
 			}
 		}()

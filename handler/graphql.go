@@ -25,6 +25,7 @@ type Config struct {
 	recover      graphql.RecoverFunc
 	formatError  func(error) string
 	resolverHook graphql.ResolverMiddleware
+	requestHook  graphql.RequestMiddleware
 }
 
 type Option func(cfg *Config)
@@ -47,7 +48,11 @@ func FormatErrorFunc(f func(error) string) Option {
 	}
 }
 
-func Use(middleware graphql.ResolverMiddleware) Option {
+// ResolverMiddleware allows you to define a function that will be called around every resolver,
+// useful for tracing and logging.
+// It will only be called for user defined resolvers, any direct binding to models is assumed
+// to cost nothing.
+func ResolverMiddleware(middleware graphql.ResolverMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.resolverHook == nil {
 			cfg.resolverHook = middleware
@@ -57,6 +62,24 @@ func Use(middleware graphql.ResolverMiddleware) Option {
 		lastResolve := cfg.resolverHook
 		cfg.resolverHook = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			return lastResolve(ctx, func(ctx context.Context) (res interface{}, err error) {
+				return middleware(ctx, next)
+			})
+		}
+	}
+}
+
+// RequestMiddleware allows you to define a function that will be called around the root request,
+// after the query has been parsed. This is useful for logging and tracing
+func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
+	return func(cfg *Config) {
+		if cfg.requestHook == nil {
+			cfg.requestHook = middleware
+			return
+		}
+
+		lastResolve := cfg.requestHook
+		cfg.requestHook = func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+			return lastResolve(ctx, func(ctx context.Context) []byte {
 				return middleware(ctx, next)
 			})
 		}
@@ -78,6 +101,12 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 	if cfg.resolverHook == nil {
 		cfg.resolverHook = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			return next(ctx)
+		}
+	}
+
+	if cfg.requestHook == nil {
+		cfg.requestHook = func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
 			return next(ctx)
 		}
 	}
@@ -136,14 +165,23 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}
 
 		ctx := graphql.WithRequestContext(r.Context(), &graphql.RequestContext{
-			Doc:        doc,
-			Variables:  reqParams.Variables,
-			Recover:    cfg.recover,
-			Middleware: cfg.resolverHook,
+			Doc:                doc,
+			RawQuery:           reqParams.Query,
+			Variables:          reqParams.Variables,
+			Recover:            cfg.recover,
+			ResolverMiddleware: cfg.resolverHook,
+			RequestMiddleware:  cfg.requestHook,
 			Builder: errors.Builder{
 				ErrorMessageFn: cfg.formatError,
 			},
 		})
+
+		defer func() {
+			if err := recover(); err != nil {
+				userErr := cfg.recover(ctx, err)
+				sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
+			}
+		}()
 
 		switch op.Type {
 		case query.Query:

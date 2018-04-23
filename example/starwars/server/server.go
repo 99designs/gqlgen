@@ -14,7 +14,7 @@ import (
 func main() {
 	http.Handle("/", handler.Playground("Starwars", "/query"))
 	http.Handle("/query", handler.GraphQL(starwars.MakeExecutableSchema(starwars.NewResolver()),
-		handler.Use(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			rc := graphql.GetResolverContext(ctx)
 			fmt.Println("Entered", rc.Object, rc.Field.Name)
 			res, err = next(ctx)

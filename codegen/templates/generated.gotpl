@@ -32,12 +32,15 @@ func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *grap
 	{{- if .QueryRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-		data := ec._{{.QueryRoot.GQLType}}(ctx, op.Selections)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
+		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+			data := ec._{{.QueryRoot.GQLType}}(ctx, op.Selections)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+			return buf.Bytes()
+		})
 
 		return &graphql.Response{
-			Data:   buf.Bytes(),
+			Data:   buf,
 			Errors: ec.Errors,
 		}
 	{{- else }}
@@ -49,12 +52,15 @@ func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *g
 	{{- if .MutationRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-		data := ec._{{.MutationRoot.GQLType}}(ctx, op.Selections)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
+		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+			data := ec._{{.MutationRoot.GQLType}}(ctx, op.Selections)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+			return buf.Bytes()
+		})
 
 		return &graphql.Response{
-			Data:   buf.Bytes(),
+			Data:   buf,
 			Errors: ec.Errors,
 		}
 	{{- else }}
@@ -73,18 +79,20 @@ func (e *executableSchema) Subscription(ctx context.Context, op *query.Operation
 
 		var buf bytes.Buffer
 		return func() *graphql.Response {
-			buf.Reset()
-			data := next()
-			if data == nil {
-				return nil
-			}
-			data.MarshalGQL(&buf)
+			buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+				buf.Reset()
+				data := next()
 
-			errs := ec.Errors
-			ec.Errors = nil
+				if data == nil {
+					return nil
+				}
+				data.MarshalGQL(&buf)
+				return buf.Bytes()
+			})
+
 			return &graphql.Response{
-				Data:   buf.Bytes(),
-				Errors: errs,
+				Data:   buf,
+				Errors: ec.Errors,
 			}
 		}
 	{{- else }}

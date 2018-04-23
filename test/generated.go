@@ -44,12 +44,15 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Query(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -209,7 +212,7 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -219,7 +222,7 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.OuterObject_inner(rctx, obj)
 		})
 		if err != nil {
@@ -312,7 +315,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -322,7 +325,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_nestedInputs(rctx, args["input"].([][]models.OuterInput))
 		})
 		if err != nil {
@@ -344,7 +347,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -354,7 +357,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_nestedOutputs(rctx)
 		})
 		if err != nil {
@@ -383,7 +386,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -393,7 +396,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_shapes(rctx)
 		})
 		if err != nil {
@@ -432,7 +435,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -442,7 +445,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_recursive(rctx, args["input"].(*RecursiveInputSlice))
 		})
 		if err != nil {
@@ -480,7 +483,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -490,7 +493,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_mapInput(rctx, args["input"].(*map[string]interface{}))
 		})
 		if err != nil {
@@ -512,7 +515,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -522,7 +525,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_collision(rctx)
 		})
 		if err != nil {
@@ -544,7 +547,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -554,7 +557,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_invalidIdentifier(rctx)
 		})
 		if err != nil {

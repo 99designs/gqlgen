@@ -34,12 +34,15 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Query(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -200,7 +203,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -210,7 +213,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_events(rctx)
 		})
 		if err != nil {

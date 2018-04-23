@@ -38,12 +38,15 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Query(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -145,7 +148,7 @@ func (ec *executionContext) _Customer_address(ctx context.Context, field graphql
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -155,7 +158,7 @@ func (ec *executionContext) _Customer_address(ctx context.Context, field graphql
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Customer_address(rctx, obj)
 		})
 		if err != nil {
@@ -177,7 +180,7 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -187,7 +190,7 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Customer_orders(rctx, obj)
 		})
 		if err != nil {
@@ -280,7 +283,7 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -290,7 +293,7 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Order_items(rctx, obj)
 		})
 		if err != nil {
@@ -341,7 +344,7 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -351,7 +354,7 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_customers(rctx)
 		})
 		if err != nil {
@@ -393,7 +396,7 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -403,7 +406,7 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_torture(rctx, args["customerIds"].([][]int))
 		})
 		if err != nil {

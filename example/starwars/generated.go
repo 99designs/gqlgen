@@ -53,12 +53,15 @@ func (e *executableSchema) Schema() *schema.Schema {
 func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Query(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -66,12 +69,15 @@ func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *grap
 func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-	data := ec._Mutation(ctx, op.Selections)
-	var buf bytes.Buffer
-	data.MarshalGQL(&buf)
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Mutation(ctx, op.Selections)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
 
 	return &graphql.Response{
-		Data:   buf.Bytes(),
+		Data:   buf,
 		Errors: ec.Errors,
 	}
 }
@@ -132,7 +138,7 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -142,7 +148,7 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Droid_friends(rctx, obj)
 		})
 		if err != nil {
@@ -196,7 +202,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -206,7 +212,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Droid_friendsConnection(rctx, obj, args["first"].(*int), args["after"].(*string))
 		})
 		if err != nil {
@@ -272,7 +278,7 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -282,7 +288,7 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.FriendsConnection_edges(rctx, obj)
 		})
 		if err != nil {
@@ -305,7 +311,7 @@ func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, fiel
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -315,7 +321,7 @@ func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, fiel
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.FriendsConnection_friends(rctx, obj)
 		})
 		if err != nil {
@@ -453,7 +459,7 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -463,7 +469,7 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Human_friends(rctx, obj)
 		})
 		if err != nil {
@@ -517,7 +523,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -527,7 +533,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Human_friendsConnection(rctx, obj, args["first"].(*int), args["after"].(*string))
 		})
 		if err != nil {
@@ -555,7 +561,7 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -565,7 +571,7 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 			Args:   nil,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Human_starships(rctx, obj)
 		})
 		if err != nil {
@@ -633,7 +639,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 		Args:   args,
 		Field:  field,
 	})
-	resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 		return ec.resolvers.Mutation_createReview(rctx, args["episode"].(Episode), args["review"].(Review))
 	})
 	if err != nil {
@@ -753,7 +759,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -763,7 +769,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_hero(rctx, args["episode"].(Episode))
 		})
 		if err != nil {
@@ -808,7 +814,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -818,7 +824,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_reviews(rctx, args["episode"].(Episode), args["since"].(*time.Time))
 		})
 		if err != nil {
@@ -852,7 +858,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -862,7 +868,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_search(rctx, args["text"].(string))
 		})
 		if err != nil {
@@ -896,7 +902,7 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -906,7 +912,7 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_character(rctx, args["id"].(string))
 		})
 		if err != nil {
@@ -936,7 +942,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -946,7 +952,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_droid(rctx, args["id"].(string))
 		})
 		if err != nil {
@@ -979,7 +985,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -989,7 +995,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_human(rctx, args["id"].(string))
 		})
 		if err != nil {
@@ -1022,7 +1028,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 	return graphql.Defer(func() (ret graphql.Marshaler) {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := ec.Recover(r)
+				userErr := ec.Recover(ctx, r)
 				ec.Error(userErr)
 				ret = graphql.Null
 			}
@@ -1032,7 +1038,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 			Args:   args,
 			Field:  field,
 		})
-		resTmp, err := ec.Middleware(rctx, func(rctx context.Context) (interface{}, error) {
+		resTmp, err := ec.ResolverMiddleware(rctx, func(rctx context.Context) (interface{}, error) {
 			return ec.resolvers.Query_starship(rctx, args["id"].(string))
 		})
 		if err != nil {

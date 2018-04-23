@@ -25,7 +25,11 @@ func main() {
 	router.Use(dataloader.LoaderMiddleware)
 
 	router.Handle("/", handler.Playground("Dataloader", "/query"))
-	router.Handle("/query", handler.GraphQL(dataloader.MakeExecutableSchema(&dataloader.Resolver{}), handler.Use(gqlopentracing.Middleware())))
+	router.Handle("/query", handler.GraphQL(
+		dataloader.MakeExecutableSchema(&dataloader.Resolver{}),
+		handler.ResolverMiddleware(gqlopentracing.ResolverMiddleware()),
+		handler.RequestMiddleware(gqlopentracing.RequestMiddleware()),
+	))
 
 	log.Println("connect to http://localhost:8082/ for graphql playground")
 	log.Fatal(http.ListenAndServe(":8082", router))

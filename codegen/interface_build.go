@@ -11,12 +11,12 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func buildInterfaces(types NamedTypes, s *schema.Schema, prog *loader.Program) []*Interface {
+func (cfg *Config) buildInterfaces(types NamedTypes, prog *loader.Program) []*Interface {
 	var interfaces []*Interface
-	for _, typ := range s.Types {
+	for _, typ := range cfg.schema.Types {
 		switch typ := typ.(type) {
 		case *schema.Union, *schema.Interface:
-			interfaces = append(interfaces, buildInterface(types, typ, prog))
+			interfaces = append(interfaces, cfg.buildInterface(types, typ, prog))
 		default:
 			continue
 		}
@@ -29,7 +29,7 @@ func buildInterfaces(types NamedTypes, s *schema.Schema, prog *loader.Program) [
 	return interfaces
 }
 
-func buildInterface(types NamedTypes, typ schema.NamedType, prog *loader.Program) *Interface {
+func (cfg *Config) buildInterface(types NamedTypes, typ schema.NamedType, prog *loader.Program) *Interface {
 	switch typ := typ.(type) {
 
 	case *schema.Union:
@@ -40,7 +40,7 @@ func buildInterface(types NamedTypes, typ schema.NamedType, prog *loader.Program
 
 			i.Implementors = append(i.Implementors, InterfaceImplementor{
 				NamedType:     t,
-				ValueReceiver: isValueReceiver(types[typ.Name], t, prog),
+				ValueReceiver: cfg.isValueReceiver(types[typ.Name], t, prog),
 			})
 		}
 
@@ -54,7 +54,7 @@ func buildInterface(types NamedTypes, typ schema.NamedType, prog *loader.Program
 
 			i.Implementors = append(i.Implementors, InterfaceImplementor{
 				NamedType:     t,
-				ValueReceiver: isValueReceiver(types[typ.Name], t, prog),
+				ValueReceiver: cfg.isValueReceiver(types[typ.Name], t, prog),
 			})
 		}
 
@@ -64,11 +64,14 @@ func buildInterface(types NamedTypes, typ schema.NamedType, prog *loader.Program
 	}
 }
 
-func isValueReceiver(intf *NamedType, implementor *NamedType, prog *loader.Program) bool {
-	interfaceType := findGoInterface(prog, intf.Package, intf.GoType)
-	implementorType := findGoNamedType(prog, implementor.Package, implementor.GoType)
+func (cfg *Config) isValueReceiver(intf *NamedType, implementor *NamedType, prog *loader.Program) bool {
+	interfaceType, err := findGoInterface(prog, intf.Package, intf.GoType)
+	if interfaceType == nil || err != nil {
+		return true
+	}
 
-	if interfaceType == nil || implementorType == nil {
+	implementorType, err := findGoNamedType(prog, implementor.Package, implementor.GoType)
+	if implementorType == nil || err != nil {
 		return true
 	}
 

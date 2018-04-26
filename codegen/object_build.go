@@ -1,8 +1,6 @@
 package codegen
 
 import (
-	"fmt"
-	"os"
 	"sort"
 	"strings"
 
@@ -10,17 +8,17 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program, imports Imports) Objects {
+func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports Imports) (Objects, error) {
 	var objects Objects
 
-	for _, typ := range s.Types {
+	for _, typ := range cfg.schema.Types {
 		switch typ := typ.(type) {
 		case *schema.Object:
-			obj := buildObject(types, typ, s)
+			obj := cfg.buildObject(types, typ)
 
 			def, err := findGoType(prog, obj.Package, obj.GoType)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, err.Error())
+				return nil, err
 			}
 			if def != nil {
 				bindObject(def.Type(), obj, imports)
@@ -34,10 +32,10 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program, impo
 		return strings.Compare(objects[i].GQLType, objects[j].GQLType) == -1
 	})
 
-	return objects
+	return objects, nil
 }
 
-func buildObject(types NamedTypes, typ *schema.Object, s *schema.Schema) *Object {
+func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) *Object {
 	obj := &Object{NamedType: types[typ.TypeName()]}
 
 	for _, i := range typ.Interfaces {
@@ -68,7 +66,7 @@ func buildObject(types NamedTypes, typ *schema.Object, s *schema.Schema) *Object
 		})
 	}
 
-	for name, typ := range s.EntryPoints {
+	for name, typ := range cfg.schema.EntryPoints {
 		schemaObj := typ.(*schema.Object)
 		if schemaObj.TypeName() != obj.GQLType {
 			continue

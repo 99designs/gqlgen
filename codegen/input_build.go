@@ -1,27 +1,26 @@
 package codegen
 
 import (
-	"fmt"
 	"go/types"
-	"os"
 	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/neelance/schema"
 	"golang.org/x/tools/go/loader"
 )
 
-func buildInputs(namedTypes NamedTypes, s *schema.Schema, prog *loader.Program, imports Imports) Objects {
+func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, imports Imports) (Objects, error) {
 	var inputs Objects
 
-	for _, typ := range s.Types {
+	for _, typ := range cfg.schema.Types {
 		switch typ := typ.(type) {
 		case *schema.InputObject:
 			input := buildInput(namedTypes, typ)
 
 			def, err := findGoType(prog, input.Package, input.GoType)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, err.Error())
+				return nil, errors.Wrap(err, "cannot find type")
 			}
 			if def != nil {
 				input.Marshaler = buildInputMarshaler(typ, def)
@@ -36,7 +35,7 @@ func buildInputs(namedTypes NamedTypes, s *schema.Schema, prog *loader.Program, 
 		return strings.Compare(inputs[i].GQLType, inputs[j].GQLType) == -1
 	})
 
-	return inputs
+	return inputs, nil
 }
 
 func buildInput(types NamedTypes, typ *schema.InputObject) *Object {

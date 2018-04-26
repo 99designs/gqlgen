@@ -18,6 +18,8 @@ import (
 	"github.com/vektah/gqlgen/test/models"
 )
 
+type fErr = gqlerrors.FormattedError
+
 func TestCompiles(t *testing.T) {}
 
 func TestErrorConverter(t *testing.T) {
@@ -28,11 +30,11 @@ func TestErrorConverter(t *testing.T) {
 	require.Nil(t, errs)
 
 	t.Run("with", func(t *testing.T) {
-		testConvErr := func(e error) string {
+		testConvErr := func(e error) fErr {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
-				return "override special error message"
+				return fErr{Message: "override special error message"}
 			}
-			return e.Error()
+			return fErr{Message: e.Error()}
 		}
 		t.Run("special error", func(t *testing.T) {
 			resolvers.nestedOutputsErr = &specialErr{}
@@ -68,7 +70,7 @@ func TestErrorConverter(t *testing.T) {
 	})
 }
 
-func mkctx(doc *query.Document, errFn func(e error) string) context.Context {
+func mkctx(doc *query.Document, errFn gqlerrors.ErrorMessageFunc) context.Context {
 	return graphql.WithRequestContext(context.Background(), &graphql.RequestContext{
 		Doc: doc,
 		ResolverMiddleware: func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {

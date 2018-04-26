@@ -23,7 +23,7 @@ type params struct {
 type Config struct {
 	upgrader     websocket.Upgrader
 	recover      graphql.RecoverFunc
-	formatError  func(error) string
+	formatError  errors.ErrorMessageFunc
 	resolverHook graphql.ResolverMiddleware
 	requestHook  graphql.RequestMiddleware
 }
@@ -42,7 +42,7 @@ func RecoverFunc(recover graphql.RecoverFunc) Option {
 	}
 }
 
-func FormatErrorFunc(f func(error) string) Option {
+func FormatErrorFunc(f errors.ErrorMessageFunc) Option {
 	return func(cfg *Config) {
 		cfg.formatError = f
 	}

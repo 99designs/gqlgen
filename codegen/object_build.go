@@ -25,7 +25,10 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 				return nil, err
 			}
 			if def != nil {
-				bindObject(def.Type(), obj, imports)
+				err = bindObject(def.Type(), obj, imports)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			objects = append(objects, obj)

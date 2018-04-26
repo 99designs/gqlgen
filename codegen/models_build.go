@@ -24,7 +24,10 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model,
 			}
 			model = cfg.obj2Model(obj)
 		case *schema.InputObject:
-			obj := buildInput(types, typ)
+			obj, err := buildInput(types, typ)
+			if err != nil {
+				return nil, err
+			}
 			if obj.IsUserDefined {
 				continue
 			}

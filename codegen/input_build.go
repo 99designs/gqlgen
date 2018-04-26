@@ -16,7 +16,10 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 	for _, typ := range cfg.schema.Types {
 		switch typ := typ.(type) {
 		case *schema.InputObject:
-			input := buildInput(namedTypes, typ)
+			input, err := buildInput(namedTypes, typ)
+			if err != nil {
+				return nil, err
+			}
 
 			def, err := findGoType(prog, input.Package, input.GoType)
 			if err != nil {
@@ -24,7 +27,10 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 			}
 			if def != nil {
 				input.Marshaler = buildInputMarshaler(typ, def)
-				bindObject(def.Type(), input, imports)
+				err = bindObject(def.Type(), input, imports)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			inputs = append(inputs, input)
@@ -38,17 +44,24 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 	return inputs, nil
 }
 
-func buildInput(types NamedTypes, typ *schema.InputObject) *Object {
+func buildInput(types NamedTypes, typ *schema.InputObject) (*Object, error) {
 	obj := &Object{NamedType: types[typ.TypeName()]}
 
 	for _, field := range typ.Values {
-		obj.Fields = append(obj.Fields, Field{
+		newField := Field{
 			GQLName: field.Name.Name,
 			Type:    types.getType(field.Type),
 			Object:  obj,
-		})
+		}
+
+		if !newField.Type.IsInput && !newField.Type.IsScalar {
+			return nil, errors.Errorf("%s cannot be used as a field of %s. only input and scalar types are allowed", newField.GQLType, obj.GQLType)
+		}
+
+		obj.Fields = append(obj.Fields, newField)
+
 	}
-	return obj
+	return obj, nil
 }
 
 // if user has implemented an UnmarshalGQL method on the input type manually, use it

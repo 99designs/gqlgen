@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"bytes"
 	"fmt"
 	"go/build"
 	"io/ioutil"
@@ -21,15 +22,15 @@ type Config struct {
 
 	schema *schema.Schema
 
-	ExecFilename        string
-	ExecPackageName     string
-	execDir             string
-	fullExecPackageName string
+	ExecFilename    string
+	ExecPackageName string
+	execPackagePath string
+	execDir         string
 
-	ModelFilename        string
-	ModelPackageName     string
-	modelDir             string
-	fullModelPackageName string
+	ModelFilename    string
+	ModelPackageName string
+	modelPackagePath string
+	modelDir         string
 }
 
 func Generate(cfg Config) error {
@@ -46,8 +47,8 @@ func Generate(cfg Config) error {
 	}
 	if len(modelsBuild.Models) > 0 {
 		modelsBuild.PackageName = cfg.ModelPackageName
-
-		buf, err := templates.Run("models.gotpl", modelsBuild)
+		var buf *bytes.Buffer
+		buf, err = templates.Run("models.gotpl", modelsBuild)
 		if err != nil {
 			return errors.Wrap(err, "model generation failed")
 		}
@@ -56,11 +57,11 @@ func Generate(cfg Config) error {
 			return err
 		}
 		for _, model := range modelsBuild.Models {
-			cfg.Typemap[model.GQLType] = cfg.fullModelPackageName + "." + model.GoType
+			cfg.Typemap[model.GQLType] = cfg.modelPackagePath + "." + model.GoType
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			cfg.Typemap[enum.GQLType] = cfg.fullModelPackageName + "." + enum.GoType
+			cfg.Typemap[enum.GQLType] = cfg.modelPackagePath + "." + enum.GoType
 		}
 	}
 
@@ -71,7 +72,8 @@ func Generate(cfg Config) error {
 	build.SchemaRaw = cfg.SchemaStr
 	build.PackageName = cfg.ExecPackageName
 
-	buf, err := templates.Run("generated.gotpl", build)
+	var buf *bytes.Buffer
+	buf, err = templates.Run("generated.gotpl", build)
 	if err != nil {
 		return errors.Wrap(err, "exec codegen failed")
 	}
@@ -91,7 +93,7 @@ func (cfg *Config) normalize() error {
 	if cfg.ModelPackageName == "" {
 		cfg.ModelPackageName = filepath.Base(cfg.modelDir)
 	}
-	cfg.fullModelPackageName = fullPackageName(cfg.modelDir, cfg.ModelPackageName)
+	cfg.modelPackagePath = fullPackageName(cfg.modelDir, cfg.ModelPackageName)
 
 	if cfg.ExecFilename == "" {
 		return errors.New("ModelFilename is required")
@@ -101,7 +103,7 @@ func (cfg *Config) normalize() error {
 	if cfg.ExecPackageName == "" {
 		cfg.ExecPackageName = filepath.Base(cfg.execDir)
 	}
-	cfg.fullExecPackageName = fullPackageName(cfg.execDir, cfg.ExecPackageName)
+	cfg.execPackagePath = fullPackageName(cfg.execDir, cfg.ExecPackageName)
 
 	builtins := map[string]string{
 		"__Directive":  "github.com/vektah/gqlgen/neelance/introspection.Directive",
@@ -145,9 +147,7 @@ func fullPackageName(dir string, pkgName string) string {
 
 	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
 		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
-		if strings.HasPrefix(fullPkgName, gopath) {
-			fullPkgName = fullPkgName[len(gopath):]
-		}
+		fullPkgName = strings.TrimPrefix(fullPkgName, gopath)
 	}
 	return filepath.ToSlash(fullPkgName)
 }

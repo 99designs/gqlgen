@@ -10,6 +10,7 @@ type QueryError struct {
 	Path          []interface{} `json:"path,omitempty"`
 	Rule          string        `json:"-"`
 	ResolverError error         `json:"-"`
+	ExtraInfo     interface{}   `json:"extraInfo,omitempty"`
 }
 
 type Location struct {
@@ -29,10 +30,11 @@ func Errorf(format string, a ...interface{}) *QueryError {
 
 // WithMessagef is the same as Errorf, except it will store the err inside
 // the ResolverError field.
-func WithMessagef(err error, format string, a ...interface{}) *QueryError {
+func WithMessagef(err error, extra interface{}, format string, a ...interface{}) *QueryError {
 	return &QueryError{
 		Message:       fmt.Sprintf(format, a...),
 		ResolverError: err,
+		ExtraInfo:     extra,
 	}
 }
 
@@ -49,13 +51,23 @@ func (err *QueryError) Error() string {
 
 var _ error = &QueryError{}
 
+// FormattedError a formatted error which includes the error message and extra information
+// which is JSON encoded and passed with the error.
+type FormattedError struct {
+	Message string
+	Extra   interface{}
+}
+
+// ErrorMessageFunc a func which given an error returns a formatted error.
+type ErrorMessageFunc func(err error) FormattedError
+
 type Builder struct {
 	Errors []*QueryError
 	// ErrorMessageFn will be used to generate the error
 	// message from errors given to Error().
 	//
 	// If ErrorMessageFn is nil, err.Error() will be used.
-	ErrorMessageFn func(error) string
+	ErrorMessageFn ErrorMessageFunc
 }
 
 func (c *Builder) Errorf(format string, args ...interface{}) {
@@ -63,11 +75,11 @@ func (c *Builder) Errorf(format string, args ...interface{}) {
 }
 
 func (c *Builder) Error(err error) {
-	var gqlErrMessage string
+	fErr := FormattedError{Message: err.Error()}
+
 	if c.ErrorMessageFn != nil {
-		gqlErrMessage = c.ErrorMessageFn(err)
-	} else {
-		gqlErrMessage = err.Error()
+		fErr = c.ErrorMessageFn(err)
 	}
-	c.Errors = append(c.Errors, WithMessagef(err, gqlErrMessage))
+
+	c.Errors = append(c.Errors, WithMessagef(err, fErr.Extra, fErr.Message))
 }

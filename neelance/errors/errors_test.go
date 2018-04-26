@@ -55,9 +55,10 @@ func (err *publicErr) PublicError() string {
 	return err.public
 }
 
-func convertErr(err error) string {
+func convertErr(err error) FormattedError {
 	if errConv, ok := err.(*publicErr); ok {
-		return errConv.public
+		return FormattedError{Message: errConv.public}
 	}
-	return err.Error()
+
+	return FormattedError{Message: err.Error()}
 }

@@ -32,5 +32,10 @@ func MarshalError(err *errors.QueryError) Marshaler {
 
 		errObj.Add("locations", locations)
 	}
+
+	if err.ExtraInfo != nil {
+		errObj.Add(`extraInfo`, MarshalJSON(err.ExtraInfo))
+	}
+
 	return errObj
 }

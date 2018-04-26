@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"encoding/json"
 	"io"
 	"strconv"
 )
@@ -79,5 +80,12 @@ func (a Array) MarshalGQL(writer io.Writer) {
 func lit(b []byte) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		w.Write(b)
+	})
+}
+
+// MarshalJSON marshals an interface into JSON.
+func MarshalJSON(i interface{}) Marshaler {
+	return WriterFunc(func(w io.Writer) {
+		json.NewEncoder(w).Encode(i)
 	})
 }

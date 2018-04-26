@@ -8,26 +8,32 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func buildModels(types NamedTypes, s *schema.Schema, prog *loader.Program) []Model {
+func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
 	var models []Model
 
-	for _, typ := range s.Types {
+	for _, typ := range cfg.schema.Types {
 		var model Model
 		switch typ := typ.(type) {
 		case *schema.Object:
-			obj := buildObject(types, typ, s)
+			obj, err := cfg.buildObject(types, typ)
+			if err != nil {
+				return nil, err
+			}
 			if obj.Root || obj.IsUserDefined {
 				continue
 			}
-			model = obj2Model(s, obj)
+			model = cfg.obj2Model(obj)
 		case *schema.InputObject:
-			obj := buildInput(types, typ)
+			obj, err := buildInput(types, typ)
+			if err != nil {
+				return nil, err
+			}
 			if obj.IsUserDefined {
 				continue
 			}
-			model = obj2Model(s, obj)
+			model = cfg.obj2Model(obj)
 		case *schema.Interface, *schema.Union:
-			intf := buildInterface(types, typ, prog)
+			intf := cfg.buildInterface(types, typ, prog)
 			if intf.IsUserDefined {
 				continue
 			}
@@ -43,10 +49,10 @@ func buildModels(types NamedTypes, s *schema.Schema, prog *loader.Program) []Mod
 		return strings.Compare(models[i].GQLType, models[j].GQLType) == -1
 	})
 
-	return models
+	return models, nil
 }
 
-func obj2Model(s *schema.Schema, obj *Object) Model {
+func (cfg *Config) obj2Model(obj *Object) Model {
 	model := Model{
 		NamedType: obj.NamedType,
 		Fields:    []ModelField{},
@@ -72,7 +78,7 @@ func obj2Model(s *schema.Schema, obj *Object) Model {
 			mf.GoFKName = ucFirst(field.GQLName) + "ID"
 			mf.GoFKType = "string"
 
-			if obj, ok := s.Types[field.GQLType].(*schema.Object); ok {
+			if obj, ok := cfg.schema.Types[field.GQLType].(*schema.Object); ok {
 				for _, f := range obj.Fields {
 					if strings.EqualFold(f.Name, "id") {
 						if strings.Contains(f.Type.String(), "Int") {

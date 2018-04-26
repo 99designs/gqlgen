@@ -4,18 +4,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"go/build"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-	"syscall"
-
-	"strings"
 
 	"github.com/vektah/gqlgen/codegen"
-	"github.com/vektah/gqlgen/codegen/templates"
-	"github.com/vektah/gqlgen/neelance/schema"
-	"golang.org/x/tools/imports"
 )
 
 var output = flag.String("out", "generated.go", "the file to write to")
@@ -39,143 +31,38 @@ func main() {
 		os.Exit(1)
 	}
 
-	schema := schema.New()
 	schemaRaw, err := ioutil.ReadFile(*schemaFilename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
 		os.Exit(1)
 	}
 
-	if err = schema.Parse(string(schemaRaw)); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to parse schema: "+err.Error())
-		os.Exit(1)
-	}
-
-	_ = syscall.Unlink(*output)
-	_ = syscall.Unlink(*models)
-
 	types := loadTypeMap()
 
-	modelsBuild := codegen.Models(schema, types, dirName(*models))
-	if len(modelsBuild.Models) > 0 {
-		if *packageName != "" {
-			modelsBuild.PackageName = *packageName
-		}
+	err = codegen.Generate(codegen.Config{
+		ModelFilename:    *models,
+		ExecFilename:     *output,
+		ExecPackageName:  *packageName,
+		ModelPackageName: *modelPackageName,
+		SchemaStr:        string(schemaRaw),
+		Typemap:          types,
+	})
 
-		buf, err := templates.Run("models.gotpl", modelsBuild)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
-			os.Exit(1)
-		}
-
-		write(*models, buf.Bytes())
-		pkgName := fullPackageName(*models, *modelPackageName)
-
-		for _, model := range modelsBuild.Models {
-			types[model.GQLType] = pkgName + "." + model.GoType
-		}
-
-		for _, enum := range modelsBuild.Enums {
-			types[enum.GQLType] = pkgName + "." + enum.GoType
-		}
-	}
-
-	build, err := codegen.Bind(schema, types, dirName(*output))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "failed to generate code: "+err.Error())
-		os.Exit(1)
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(2)
 	}
-	build.SchemaRaw = string(schemaRaw)
-
-	if *packageName != "" {
-		build.PackageName = *packageName
-	}
-
-	buf, err := templates.Run("generated.gotpl", build)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to generate code: "+err.Error())
-		os.Exit(1)
-	}
-
-	write(*output, buf.Bytes())
-}
-
-func gofmt(filename string, b []byte) []byte {
-	out, err := imports.Process(filename, b, nil)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to gofmt: "+err.Error())
-		return b
-	}
-	return out
-}
-
-func write(filename string, b []byte) {
-	err := os.MkdirAll(filepath.Dir(filename), 0755)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "failed to create directory: ", err.Error())
-		os.Exit(1)
-	}
-
-	err = ioutil.WriteFile(filename, gofmt(filename, b), 0644)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to write %s: %s", filename, err.Error())
-		os.Exit(1)
-	}
-}
-
-func abs(path string) string {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		panic(err)
-	}
-	return absPath
-}
-
-func fullPackageName(file string, override string) string {
-	absPath, err := filepath.Abs(file)
-	if err != nil {
-		panic(err)
-	}
-	pkgName := filepath.Dir(absPath)
-	if override != "" {
-		pkgName = filepath.Join(filepath.Dir(pkgName), override)
-	}
-
-	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
-		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
-		if strings.HasPrefix(pkgName, gopath) {
-			pkgName = pkgName[len(gopath):]
-		}
-	}
-	return filepath.ToSlash(pkgName)
-}
-
-func dirName(path string) string {
-	return filepath.Dir(abs(path))
 }
 
 func loadTypeMap() map[string]string {
-	goTypes := map[string]string{
-		"__Directive":  "github.com/vektah/gqlgen/neelance/introspection.Directive",
-		"__Type":       "github.com/vektah/gqlgen/neelance/introspection.Type",
-		"__Field":      "github.com/vektah/gqlgen/neelance/introspection.Field",
-		"__EnumValue":  "github.com/vektah/gqlgen/neelance/introspection.EnumValue",
-		"__InputValue": "github.com/vektah/gqlgen/neelance/introspection.InputValue",
-		"__Schema":     "github.com/vektah/gqlgen/neelance/introspection.Schema",
-		"Int":          "github.com/vektah/gqlgen/graphql.Int",
-		"Float":        "github.com/vektah/gqlgen/graphql.Float",
-		"String":       "github.com/vektah/gqlgen/graphql.String",
-		"Boolean":      "github.com/vektah/gqlgen/graphql.Boolean",
-		"ID":           "github.com/vektah/gqlgen/graphql.ID",
-		"Time":         "github.com/vektah/gqlgen/graphql.Time",
-		"Map":          "github.com/vektah/gqlgen/graphql.Map",
-	}
+	var goTypes map[string]string
 	if *typemap != "" {
 		b, err := ioutil.ReadFile(*typemap)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
-			return goTypes
+			return nil
 		}
+
 		if err = json.Unmarshal(b, &goTypes); err != nil {
 			fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
 			os.Exit(1)

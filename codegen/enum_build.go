@@ -7,10 +7,10 @@ import (
 	"github.com/vektah/gqlgen/neelance/schema"
 )
 
-func buildEnums(types NamedTypes, s *schema.Schema) []Enum {
+func (cfg *Config) buildEnums(types NamedTypes) []Enum {
 	var enums []Enum
 
-	for _, typ := range s.Types {
+	for _, typ := range cfg.schema.Types {
 		namedType := types[typ.TypeName()]
 		e, isEnum := typ.(*schema.Enum)
 		if !isEnum || strings.HasPrefix(typ.TypeName(), "__") || namedType.IsUserDefined {

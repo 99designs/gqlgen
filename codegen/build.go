@@ -5,9 +5,8 @@ import (
 	"go/build"
 	"go/types"
 	"os"
-	"path/filepath"
 
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/pkg/errors"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -31,58 +30,68 @@ type ModelBuild struct {
 }
 
 // Create a list of models that need to be generated
-func Models(schema *schema.Schema, userTypes map[string]string, destDir string) *ModelBuild {
-	namedTypes := buildNamedTypes(schema, userTypes)
+func (cfg *Config) models() (*ModelBuild, error) {
+	namedTypes := cfg.buildNamedTypes()
 
-	imports := buildImports(namedTypes, destDir)
-	prog, err := loadProgram(imports, true)
+	imports := buildImports(namedTypes, cfg.modelDir)
+	prog, err := cfg.loadProgram(imports, true)
 	if err != nil {
-		panic(err)
+		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	bindTypes(imports, namedTypes, destDir, prog)
+	cfg.bindTypes(imports, namedTypes, cfg.modelDir, prog)
 
-	models := buildModels(namedTypes, schema, prog)
+	models, err := cfg.buildModels(namedTypes, prog)
+	if err != nil {
+		return nil, err
+	}
 	return &ModelBuild{
-		PackageName: filepath.Base(destDir),
+		PackageName: cfg.ModelPackageName,
 		Models:      models,
-		Enums:       buildEnums(namedTypes, schema),
-		Imports:     buildImports(namedTypes, destDir),
-	}
+		Enums:       cfg.buildEnums(namedTypes),
+		Imports:     buildImports(namedTypes, cfg.modelDir),
+	}, nil
 }
 
-// Bind a schema together with some code to generate a Build
-func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*Build, error) {
-	namedTypes := buildNamedTypes(schema, userTypes)
+// bind a schema together with some code to generate a Build
+func (cfg *Config) bind() (*Build, error) {
+	namedTypes := cfg.buildNamedTypes()
 
-	imports := buildImports(namedTypes, destDir)
-	prog, err := loadProgram(imports, false)
+	imports := buildImports(namedTypes, cfg.execDir)
+	prog, err := cfg.loadProgram(imports, false)
+	if err != nil {
+		return nil, errors.Wrap(err, "loading failed")
+	}
+
+	imports = cfg.bindTypes(imports, namedTypes, cfg.execDir, prog)
+
+	objects, err := cfg.buildObjects(namedTypes, prog, imports)
 	if err != nil {
 		return nil, err
 	}
 
-	imports = bindTypes(imports, namedTypes, destDir, prog)
-
-	objects := buildObjects(namedTypes, schema, prog, imports)
-	inputs := buildInputs(namedTypes, schema, prog, imports)
+	inputs, err := cfg.buildInputs(namedTypes, prog, imports)
+	if err != nil {
+		return nil, err
+	}
 
 	b := &Build{
-		PackageName: filepath.Base(destDir),
+		PackageName: cfg.ExecPackageName,
 		Objects:     objects,
-		Interfaces:  buildInterfaces(namedTypes, schema, prog),
+		Interfaces:  cfg.buildInterfaces(namedTypes, prog),
 		Inputs:      inputs,
 		Imports:     imports,
 	}
 
-	if qr, ok := schema.EntryPoints["query"]; ok {
+	if qr, ok := cfg.schema.EntryPoints["query"]; ok {
 		b.QueryRoot = b.Objects.ByName(qr.TypeName())
 	}
 
-	if mr, ok := schema.EntryPoints["mutation"]; ok {
+	if mr, ok := cfg.schema.EntryPoints["mutation"]; ok {
 		b.MutationRoot = b.Objects.ByName(mr.TypeName())
 	}
 
-	if sr, ok := schema.EntryPoints["subscription"]; ok {
+	if sr, ok := cfg.schema.EntryPoints["subscription"]; ok {
 		b.SubscriptionRoot = b.Objects.ByName(sr.TypeName())
 	}
 
@@ -113,7 +122,7 @@ func Bind(schema *schema.Schema, userTypes map[string]string, destDir string) (*
 	return b, nil
 }
 
-func loadProgram(imports Imports, allowErrors bool) (*loader.Program, error) {
+func (cfg *Config) loadProgram(imports Imports, allowErrors bool) (*loader.Program, error) {
 	conf := loader.Config{}
 	if allowErrors {
 		conf = loader.Config{

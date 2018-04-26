@@ -1,29 +1,34 @@
 package codegen
 
 import (
-	"fmt"
-	"os"
 	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/neelance/schema"
 	"golang.org/x/tools/go/loader"
 )
 
-func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program, imports Imports) Objects {
+func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports Imports) (Objects, error) {
 	var objects Objects
 
-	for _, typ := range s.Types {
+	for _, typ := range cfg.schema.Types {
 		switch typ := typ.(type) {
 		case *schema.Object:
-			obj := buildObject(types, typ, s)
+			obj, err := cfg.buildObject(types, typ)
+			if err != nil {
+				return nil, err
+			}
 
 			def, err := findGoType(prog, obj.Package, obj.GoType)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, err.Error())
+				return nil, err
 			}
 			if def != nil {
-				bindObject(def.Type(), obj, imports)
+				err = bindObject(def.Type(), obj, imports)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			objects = append(objects, obj)
@@ -34,10 +39,10 @@ func buildObjects(types NamedTypes, s *schema.Schema, prog *loader.Program, impo
 		return strings.Compare(objects[i].GQLType, objects[j].GQLType) == -1
 	})
 
-	return objects
+	return objects, nil
 }
 
-func buildObject(types NamedTypes, typ *schema.Object, s *schema.Schema) *Object {
+func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) (*Object, error) {
 	obj := &Object{NamedType: types[typ.TypeName()]}
 
 	for _, i := range typ.Interfaces {
@@ -51,6 +56,10 @@ func buildObject(types NamedTypes, typ *schema.Object, s *schema.Schema) *Object
 				GQLName: arg.Name.Name,
 				Type:    types.getType(arg.Type),
 				Object:  obj,
+			}
+
+			if !newArg.Type.IsInput && !newArg.Type.IsScalar {
+				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.GQLType, field.Name)
 			}
 
 			if arg.Default != nil {
@@ -68,7 +77,7 @@ func buildObject(types NamedTypes, typ *schema.Object, s *schema.Schema) *Object
 		})
 	}
 
-	for name, typ := range s.EntryPoints {
+	for name, typ := range cfg.schema.EntryPoints {
 		schemaObj := typ.(*schema.Object)
 		if schemaObj.TypeName() != obj.GQLType {
 			continue
@@ -82,5 +91,5 @@ func buildObject(types NamedTypes, typ *schema.Object, s *schema.Schema) *Object
 			obj.Stream = true
 		}
 	}
-	return obj
+	return obj, nil
 }

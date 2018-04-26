@@ -11,12 +11,12 @@ import (
 )
 
 // namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of Type for each thing
-func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
+func (cfg *Config) buildNamedTypes() NamedTypes {
 	types := map[string]*NamedType{}
-	for _, schemaType := range s.Types {
+	for _, schemaType := range cfg.schema.Types {
 		t := namedTypeFromSchema(schemaType)
 
-		userType := userTypes[t.GQLType]
+		userType := cfg.Typemap[t.GQLType]
 		t.IsUserDefined = userType != ""
 		if userType == "" && t.IsScalar {
 			userType = "github.com/vektah/gqlgen/graphql.String"
@@ -31,7 +31,7 @@ func buildNamedTypes(s *schema.Schema, userTypes map[string]string) NamedTypes {
 	return types
 }
 
-func bindTypes(imports Imports, namedTypes NamedTypes, destDir string, prog *loader.Program) Imports {
+func (cfg *Config) bindTypes(imports Imports, namedTypes NamedTypes, destDir string, prog *loader.Program) Imports {
 	for _, t := range namedTypes {
 		if t.Package == "" {
 			continue

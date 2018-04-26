@@ -1,11 +1,10 @@
 package codegen
 
 import (
-	"fmt"
 	"go/types"
-	"os"
 	"strings"
 
+	"github.com/pkg/errors"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -20,12 +19,12 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Ob
 
 	pkgName, err := resolvePkg(pkgName)
 	if err != nil {
-		return nil, fmt.Errorf("unable to resolve package for %s: %s\n", fullName, err.Error())
+		return nil, errors.Errorf("unable to resolve package for %s: %s\n", fullName, err.Error())
 	}
 
 	pkg := prog.Imported[pkgName]
 	if pkg == nil {
-		return nil, fmt.Errorf("required package was not loaded: %s", fullName)
+		return nil, errors.Errorf("required package was not loaded: %s", fullName)
 	}
 
 	for astNode, def := range pkg.Defs {
@@ -35,40 +34,42 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Ob
 
 		return def, nil
 	}
-	return nil, fmt.Errorf("unable to find type %s\n", fullName)
+
+	return nil, errors.Errorf("unable to find type %s\n", fullName)
 }
 
-func findGoNamedType(prog *loader.Program, pkgName string, typeName string) *types.Named {
+func findGoNamedType(prog *loader.Program, pkgName string, typeName string) (*types.Named, error) {
 	def, err := findGoType(prog, pkgName, typeName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		return nil, err
 	}
 	if def == nil {
-		return nil
+		return nil, nil
 	}
 
 	namedType, ok := def.Type().(*types.Named)
 	if !ok {
-		fmt.Fprintf(os.Stderr, "expected %s to be a named type, instead found %T\n", typeName, def.Type())
-		return nil
+		return nil, errors.Errorf("expected %s to be a named type, instead found %T\n", typeName, def.Type())
 	}
 
-	return namedType
+	return namedType, nil
 }
 
-func findGoInterface(prog *loader.Program, pkgName string, typeName string) *types.Interface {
-	namedType := findGoNamedType(prog, pkgName, typeName)
+func findGoInterface(prog *loader.Program, pkgName string, typeName string) (*types.Interface, error) {
+	namedType, err := findGoNamedType(prog, pkgName, typeName)
+	if err != nil {
+		return nil, err
+	}
 	if namedType == nil {
-		return nil
+		return nil, nil
 	}
 
 	underlying, ok := namedType.Underlying().(*types.Interface)
 	if !ok {
-		fmt.Fprintf(os.Stderr, "expected %s to be a named interface, instead found %s", typeName, namedType.String())
-		return nil
+		return nil, errors.Errorf("expected %s to be a named interface, instead found %s", typeName, namedType.String())
 	}
 
-	return underlying
+	return underlying, nil
 }
 
 func findMethod(typ *types.Named, name string) *types.Func {
@@ -129,17 +130,15 @@ func findField(typ *types.Struct, name string) *types.Var {
 	return nil
 }
 
-func bindObject(t types.Type, object *Object, imports Imports) {
+func bindObject(t types.Type, object *Object, imports Imports) error {
 	namedType, ok := t.(*types.Named)
 	if !ok {
-		fmt.Fprintf(os.Stderr, "expected %s to be a named struct, instead found %s", object.FullName(), t.String())
-		return
+		return errors.Errorf("expected %s to be a named struct, instead found %s", object.FullName(), t.String())
 	}
 
 	underlying, ok := t.Underlying().(*types.Struct)
 	if !ok {
-		fmt.Fprintf(os.Stderr, "expected %s to be a named struct, instead found %s", object.FullName(), t.String())
-		return
+		return errors.Errorf("expected %s to be a named struct, instead found %s", object.FullName(), t.String())
 	}
 
 	for i := range object.Fields {
@@ -161,14 +160,14 @@ func bindObject(t types.Type, object *Object, imports Imports) {
 						continue l2
 					}
 				}
-				fmt.Fprintln(os.Stderr, "cannot match argument "+param.Name()+" to any argument in "+t.String())
+				return errors.Errorf("cannot match argument " + param.Name() + " to any argument in " + t.String())
 			}
 			field.Args = newArgs
 
 			if sig.Results().Len() == 1 {
 				field.NoErr = true
 			} else if sig.Results().Len() != 2 {
-				fmt.Fprintf(os.Stderr, "weird number of results on %s. expected either (result), or (result, error)\n", method.Name())
+				return errors.Errorf("weird number of results on %s. expected either (result), or (result, error)\n", method.Name())
 			}
 			continue
 		}
@@ -190,11 +189,12 @@ func bindObject(t types.Type, object *Object, imports Imports) {
 				}
 
 			default:
-				fmt.Fprintf(os.Stderr, "type mismatch on %s.%s, expected %s got %s\n", object.GQLType, field.GQLName, field.Type.FullSignature(), structField.Type())
+				return errors.Errorf("type mismatch on %s.%s, expected %s got %s\n", object.GQLType, field.GQLName, field.Type.FullSignature(), structField.Type())
 			}
 			continue
 		}
 	}
+	return nil
 }
 
 func modifiersFromGoType(t types.Type) []string {

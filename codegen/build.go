@@ -41,7 +41,10 @@ func (cfg *Config) models() (*ModelBuild, error) {
 
 	cfg.bindTypes(imports, namedTypes, cfg.modelDir, prog)
 
-	models := cfg.buildModels(namedTypes, prog)
+	models, err := cfg.buildModels(namedTypes, prog)
+	if err != nil {
+		return nil, err
+	}
 	return &ModelBuild{
 		PackageName: cfg.ModelPackageName,
 		Models:      models,

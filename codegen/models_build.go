@@ -8,14 +8,17 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) []Model {
+func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
 	var models []Model
 
 	for _, typ := range cfg.schema.Types {
 		var model Model
 		switch typ := typ.(type) {
 		case *schema.Object:
-			obj := cfg.buildObject(types, typ)
+			obj, err := cfg.buildObject(types, typ)
+			if err != nil {
+				return nil, err
+			}
 			if obj.Root || obj.IsUserDefined {
 				continue
 			}
@@ -43,7 +46,7 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) []Model {
 		return strings.Compare(models[i].GQLType, models[j].GQLType) == -1
 	})
 
-	return models
+	return models, nil
 }
 
 func (cfg *Config) obj2Model(obj *Object) Model {

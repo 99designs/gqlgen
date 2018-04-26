@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"syscall"
 
 	"github.com/vektah/gqlgen/codegen"
 )
@@ -37,9 +36,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
 		os.Exit(1)
 	}
-
-	_ = syscall.Unlink(*output)
-	_ = syscall.Unlink(*models)
 
 	types := loadTypeMap()
 

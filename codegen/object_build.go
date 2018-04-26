@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/neelance/schema"
 	"golang.org/x/tools/go/loader"
 )
@@ -14,7 +15,10 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 	for _, typ := range cfg.schema.Types {
 		switch typ := typ.(type) {
 		case *schema.Object:
-			obj := cfg.buildObject(types, typ)
+			obj, err := cfg.buildObject(types, typ)
+			if err != nil {
+				return nil, err
+			}
 
 			def, err := findGoType(prog, obj.Package, obj.GoType)
 			if err != nil {
@@ -35,7 +39,7 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 	return objects, nil
 }
 
-func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) *Object {
+func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) (*Object, error) {
 	obj := &Object{NamedType: types[typ.TypeName()]}
 
 	for _, i := range typ.Interfaces {
@@ -49,6 +53,10 @@ func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) *Object {
 				GQLName: arg.Name.Name,
 				Type:    types.getType(arg.Type),
 				Object:  obj,
+			}
+
+			if !newArg.Type.IsInput && !newArg.Type.IsScalar {
+				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.GQLType, field.Name)
 			}
 
 			if arg.Default != nil {
@@ -80,5 +88,5 @@ func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) *Object {
 			obj.Stream = true
 		}
 	}
-	return obj
+	return obj, nil
 }

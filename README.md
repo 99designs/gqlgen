@@ -23,5 +23,5 @@ See the [docs](https://gqlgen.com/) for a getting started guide.
 | Stitching gql | :clock1: [is](https://github.com/vektah/gqlgen/issues/5) | :no_entry: | :no_entry: | :no_entry: |
 | Opentracing | :+1: | :+1: | :no_entry: | :scissors:[pr](https://github.com/samsarahq/thunder/pull/77) |
 | Hooks for error logging | :+1: | :no_entry: | :no_entry: | :no_entry: |
-| Dataloading | :+1: | :+1: | :warning: | :warning: |
+| Dataloading | :+1: | :+1: | :no_entry: | :warning: |
 | Concurrency | :+1: | :+1: | :no_entry: [pr](https://github.com/graphql-go/graphql/pull/132) | :+1: |

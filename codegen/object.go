@@ -82,7 +82,7 @@ func (f *Field) CallArgs() string {
 	var args []string
 
 	if f.GoMethodName == "" {
-		args = append(args, "rctx")
+		args = append(args, "ctx")
 
 		if !f.Object.Root {
 			args = append(args, "obj")
@@ -115,7 +115,12 @@ func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool, dept
 
 		return tpl(`{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
-				{{.arr}} = append({{.arr}}, func() graphql.Marshaler { {{ .next }} }())
+				{{.arr}} = append({{.arr}}, func() graphql.Marshaler {
+					rctx := graphql.GetResolverContext(ctx)
+					rctx.PushIndex({{.index}})
+					defer rctx.Pop()
+					{{ .next }} 
+				}())
 			}
 			return {{.arr}}`, map[string]interface{}{
 			"val":   val,

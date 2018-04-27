@@ -25,3 +25,4 @@ See the [docs](https://gqlgen.com/) for a getting started guide.
 | Hooks for error logging | :+1: | :no_entry: | :no_entry: | :no_entry: |
 | Dataloading | :+1: | :+1: | :no_entry: | :warning: |
 | Concurrency | :+1: | :+1: | :no_entry: [pr](https://github.com/graphql-go/graphql/pull/132) | :+1: |
+| Custom errors & error.path | :+1: | :no_entry: [is](https://github.com/graphql-go/graphql/issues/259) | :no_entry: | :no_entry: |

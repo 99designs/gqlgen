@@ -6,9 +6,11 @@ var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 {{- if .Stream }}
 func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []query.Selection) func() graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
-
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: {{$object.GQLType|quote}},
+	})
 	if len(fields) != 1 {
-		ec.Errorf("must subscribe to exactly one stream")
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
 		return nil
 	}
 
@@ -24,6 +26,11 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []quer
 {{- else }}
 func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []query.Selection{{if not $object.Root}}, obj *{{$object.FullName}} {{end}}) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
+	{{if $object.Root}}
+		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Object: {{$object.GQLType|quote}},
+		})
+	{{end}}
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias

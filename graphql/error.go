@@ -1,36 +1,49 @@
 package graphql
 
 import (
-	"github.com/vektah/gqlgen/neelance/errors"
+	"context"
+	"fmt"
+	"sync"
 )
 
-func MarshalErrors(errs []*errors.QueryError) Marshaler {
-	res := Array{}
-	for _, err := range errs {
-		res = append(res, MarshalError(err))
+type ErrorPresenterFunc func(context.Context, error) error
+
+func DefaultErrorPresenter(ctx context.Context, err error) error {
+	return &ResolverError{
+		Message: err.Error(),
+		Path:    GetResolverContext(ctx).Path,
 	}
-	return res
 }
 
-func MarshalError(err *errors.QueryError) Marshaler {
-	if err == nil {
-		return Null
-	}
+// ResolverError is the default error type returned by ErrorPresenter. You can replace it with your own by returning
+// something different from the ErrorPresenter
+type ResolverError struct {
+	Message string        `json:"message"`
+	Path    []interface{} `json:"path,omitempty"`
+}
 
-	errObj := &OrderedMap{}
-	errObj.Add("message", MarshalString(err.Message))
+func (r *ResolverError) Error() string {
+	return r.Message
+}
 
-	if len(err.Locations) > 0 {
-		locations := Array{}
-		for _, location := range err.Locations {
-			locationObj := &OrderedMap{}
-			locationObj.Add("line", MarshalInt(location.Line))
-			locationObj.Add("column", MarshalInt(location.Column))
+type ErrorBuilder struct {
+	Errors []error
+	// ErrorPresenter will be used to generate the error
+	// message from errors given to Error().
+	ErrorPresenter ErrorPresenterFunc
+	mu             sync.Mutex
+}
 
-			locations = append(locations, locationObj)
-		}
+func (c *ErrorBuilder) Errorf(ctx context.Context, format string, args ...interface{}) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-		errObj.Add("locations", locations)
-	}
-	return errObj
+	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, fmt.Errorf(format, args...)))
+}
+
+func (c *ErrorBuilder) Error(ctx context.Context, err error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
 }

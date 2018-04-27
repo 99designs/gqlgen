@@ -5,82 +5,56 @@ package test
 import (
 	"context"
 	fmt "fmt"
+	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlgen/client"
 	"github.com/vektah/gqlgen/graphql"
-	gqlerrors "github.com/vektah/gqlgen/neelance/errors"
-	"github.com/vektah/gqlgen/neelance/query"
+	"github.com/vektah/gqlgen/handler"
 	"github.com/vektah/gqlgen/test/introspection"
 	invalid_identifier "github.com/vektah/gqlgen/test/invalid-identifier"
 	"github.com/vektah/gqlgen/test/models"
 )
 
-func TestCompiles(t *testing.T) {}
-
-func TestErrorConverter(t *testing.T) {
+func TestCustomErrorPresenter(t *testing.T) {
 	resolvers := &testResolvers{}
-	s := MakeExecutableSchema(resolvers)
-
-	doc, errs := query.Parse(`query { nestedOutputs { inner { id } } } `)
-	require.Nil(t, errs)
-
-	t.Run("with", func(t *testing.T) {
-		testConvErr := func(e error) string {
+	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(resolvers),
+		handler.ErrorPresenter(func(i context.Context, e error) error {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
-				return "override special error message"
+				return &graphql.ResolverError{Message: "override special error message"}
 			}
-			return e.Error()
-		}
-		t.Run("special error", func(t *testing.T) {
-			resolvers.nestedOutputsErr = &specialErr{}
+			return &graphql.ResolverError{Message: e.Error()}
+		}),
+	))
+	c := client.New(srv.URL)
 
-			resp := s.Query(mkctx(doc, testConvErr), doc.Operations[0])
-			require.Len(t, resp.Errors, 1)
-			assert.Equal(t, "override special error message", resp.Errors[0].Message)
-		})
-		t.Run("normal error", func(t *testing.T) {
-			resolvers.nestedOutputsErr = fmt.Errorf("a normal error")
+	t.Run("special error", func(t *testing.T) {
+		resolvers.nestedOutputsErr = &specialErr{}
+		var resp struct{}
+		err := c.Post(`query { nestedOutputs { inner { id } } }`, &resp)
 
-			resp := s.Query(mkctx(doc, testConvErr), doc.Operations[0])
-			require.Len(t, resp.Errors, 1)
-			assert.Equal(t, "a normal error", resp.Errors[0].Message)
-		})
+		assert.EqualError(t, err, `[{"message":"override special error message"}]`)
 	})
+	t.Run("normal error", func(t *testing.T) {
+		resolvers.nestedOutputsErr = fmt.Errorf("a normal error")
+		var resp struct{}
+		err := c.Post(`query { nestedOutputs { inner { id } } }`, &resp)
 
-	t.Run("without", func(t *testing.T) {
-		t.Run("special error", func(t *testing.T) {
-			resolvers.nestedOutputsErr = &specialErr{}
-
-			resp := s.Query(mkctx(doc, nil), doc.Operations[0])
-			require.Len(t, resp.Errors, 1)
-			assert.Equal(t, "original special error message", resp.Errors[0].Message)
-		})
-		t.Run("normal error", func(t *testing.T) {
-			resolvers.nestedOutputsErr = fmt.Errorf("a normal error")
-
-			resp := s.Query(mkctx(doc, nil), doc.Operations[0])
-			require.Len(t, resp.Errors, 1)
-			assert.Equal(t, "a normal error", resp.Errors[0].Message)
-		})
+		assert.EqualError(t, err, `[{"message":"a normal error"}]`)
 	})
 }
 
-func mkctx(doc *query.Document, errFn func(e error) string) context.Context {
-	return graphql.WithRequestContext(context.Background(), &graphql.RequestContext{
-		Doc: doc,
-		ResolverMiddleware: func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			return next(ctx)
-		},
-		RequestMiddleware: func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-			return next(ctx)
-		},
-		Builder: gqlerrors.Builder{
-			ErrorMessageFn: errFn,
-		},
-	})
+func TestErrorPath(t *testing.T) {
+	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{})))
+	c := client.New(srv.URL)
+
+	var resp struct{}
+	err := c.Post(`{ path { cc:child { error(message: "boom") } } }`, &resp)
+
+	assert.EqualError(t, err, `[{"message":"boom","path":["path",0,"cc","error"]},{"message":"boom","path":["path",1,"cc","error"]},{"message":"boom","path":["path",2,"cc","error"]},{"message":"boom","path":["path",3,"cc","error"]}]`)
 }
 
 type testResolvers struct {
@@ -123,6 +97,24 @@ func (r *testResolvers) Query_nestedOutputs(ctx context.Context) ([][]models.Out
 
 func (r *testResolvers) Query_invalidIdentifier(ctx context.Context) (*invalid_identifier.InvalidIdentifier, error) {
 	return r.invalidIdentifier, nil
+}
+
+func (r *testResolvers) Query_path(ctx context.Context) ([]Element, error) {
+	return []Element{{1}, {2}, {3}, {4}}, nil
+}
+
+func (r *testResolvers) Element_child(ctx context.Context, obj *Element) (Element, error) {
+	return Element{obj.ID * 10}, nil
+}
+
+func (r *testResolvers) Element_error(ctx context.Context, obj *Element, message *string) (bool, error) {
+	// A silly hack to make the result order stable
+	time.Sleep(time.Duration(obj.ID) * 10 * time.Millisecond)
+
+	if message != nil {
+		return true, errors.New(*message)
+	}
+	return false, nil
 }
 
 type specialErr struct{}

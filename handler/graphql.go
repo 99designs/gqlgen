@@ -21,11 +21,11 @@ type params struct {
 }
 
 type Config struct {
-	upgrader     websocket.Upgrader
-	recover      graphql.RecoverFunc
-	formatError  func(error) string
-	resolverHook graphql.ResolverMiddleware
-	requestHook  graphql.RequestMiddleware
+	upgrader       websocket.Upgrader
+	recover        graphql.RecoverFunc
+	errorPresenter graphql.ErrorPresenterFunc
+	resolverHook   graphql.ResolverMiddleware
+	requestHook    graphql.RequestMiddleware
 }
 
 type Option func(cfg *Config)
@@ -42,9 +42,12 @@ func RecoverFunc(recover graphql.RecoverFunc) Option {
 	}
 }
 
-func FormatErrorFunc(f func(error) string) Option {
+// ErrorPresenter transforms errors found while resolving into errors that will be returned to the user. It provides
+// a good place to add any extra fields, like error.type, that might be desired by your frontend. Check the default
+// implementation in graphql.DefaultErrorPresenter for an example.
+func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 	return func(cfg *Config) {
-		cfg.formatError = f
+		cfg.errorPresenter = f
 	}
 }
 
@@ -88,7 +91,8 @@ func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := Config{
-		recover: graphql.DefaultRecoverFunc,
+		recover:        graphql.DefaultRecoverFunc,
+		errorPresenter: graphql.DefaultErrorPresenter,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
@@ -171,8 +175,8 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			Recover:            cfg.recover,
 			ResolverMiddleware: cfg.resolverHook,
 			RequestMiddleware:  cfg.requestHook,
-			Builder: errors.Builder{
-				ErrorMessageFn: cfg.formatError,
+			ErrorBuilder: graphql.ErrorBuilder{
+				ErrorPresenter: cfg.errorPresenter,
 			},
 		})
 
@@ -202,8 +206,12 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	})
 }
 
-func sendError(w http.ResponseWriter, code int, errs ...*errors.QueryError) {
+func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
 	w.WriteHeader(code)
+	var errs []error
+	for _, err := range errors {
+		errs = append(errs, err)
+	}
 	b, err := json.Marshal(&graphql.Response{Errors: errs})
 	if err != nil {
 		panic(err)

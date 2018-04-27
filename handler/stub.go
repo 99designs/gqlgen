@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/vektah/gqlgen/graphql"
-	"github.com/vektah/gqlgen/neelance/errors"
 	"github.com/vektah/gqlgen/neelance/query"
 	"github.com/vektah/gqlgen/neelance/schema"
 )
@@ -28,9 +27,7 @@ func (e *executableSchemaStub) Query(ctx context.Context, op *query.Operation) *
 }
 
 func (e *executableSchemaStub) Mutation(ctx context.Context, op *query.Operation) *graphql.Response {
-	return &graphql.Response{
-		Errors: []*errors.QueryError{{Message: "mutations are not supported"}},
-	}
+	return graphql.ErrorResponse(ctx, "mutations are not supported")
 }
 
 func (e *executableSchemaStub) Subscription(ctx context.Context, op *query.Operation) func() *graphql.Response {

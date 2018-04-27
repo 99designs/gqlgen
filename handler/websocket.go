@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -162,8 +161,8 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		Recover:            c.cfg.recover,
 		ResolverMiddleware: c.cfg.resolverHook,
 		RequestMiddleware:  c.cfg.requestHook,
-		Builder: errors.Builder{
-			ErrorMessageFn: c.cfg.formatError,
+		ErrorBuilder: graphql.ErrorBuilder{
+			ErrorPresenter: c.cfg.errorPresenter,
 		},
 	})
 
@@ -218,19 +217,24 @@ func (c *wsConnection) sendData(id string, response *graphql.Response) {
 }
 
 func (c *wsConnection) sendError(id string, errors ...*errors.QueryError) {
-	writer := graphql.MarshalErrors(errors)
-	var b bytes.Buffer
-	writer.MarshalGQL(&b)
-
-	c.write(&operationMessage{Type: errorMsg, ID: id, Payload: b.Bytes()})
+	var errs []error
+	for _, err := range errors {
+		errs = append(errs, err)
+	}
+	b, err := json.Marshal(errs)
+	if err != nil {
+		panic(err)
+	}
+	c.write(&operationMessage{Type: errorMsg, ID: id, Payload: b})
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
-	writer := graphql.MarshalError(&errors.QueryError{Message: fmt.Sprintf(format, args...)})
-	var b bytes.Buffer
-	writer.MarshalGQL(&b)
+	b, err := json.Marshal(&graphql.ResolverError{Message: fmt.Sprintf(format, args...)})
+	if err != nil {
+		panic(err)
+	}
 
-	c.write(&operationMessage{Type: connectionErrorMsg, Payload: b.Bytes()})
+	c.write(&operationMessage{Type: connectionErrorMsg, Payload: b})
 }
 
 func (c *wsConnection) readOp() *operationMessage {

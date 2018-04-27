@@ -168,7 +168,7 @@ func write(filename string, b []byte) error {
 
 	formatted, err := gofmt(filename, b)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "gofmt failed: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "gofmt failed: %s\n", err.Error())
 		formatted = b
 	}
 

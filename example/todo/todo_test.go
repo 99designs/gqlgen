@@ -80,7 +80,7 @@ func TestTodo(t *testing.T) {
 		}
 		err := c.Post(`{ todo(id:666) { text } }`, &resp)
 
-		require.EqualError(t, err, "errors: [graphql: internal system error]")
+		require.EqualError(t, err, `[{"message":"internal system error","path":["todo"]}]`)
 	})
 
 	t.Run("select all", func(t *testing.T) {

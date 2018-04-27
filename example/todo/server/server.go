@@ -16,7 +16,8 @@ func main() {
 	http.Handle("/query", handler.GraphQL(
 		todo.MakeExecutableSchema(todo.New()),
 		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
-			log.Printf("send this panic somewhere")
+			// send this panic somewhere
+			log.Print(err)
 			debug.PrintStack()
 			return errors.New("user message on panic")
 		}),

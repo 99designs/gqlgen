@@ -48,6 +48,11 @@ type InvalidIdentifier {
     id: Int!
 }
 
+type Element {
+    child: Element!
+    error(message: String): Boolean!
+}
+
 type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
@@ -56,4 +61,5 @@ type Query {
     mapInput(input: Changes): Boolean
     collision: It
     invalidIdentifier: InvalidIdentifier
+    path: [Element]
 }

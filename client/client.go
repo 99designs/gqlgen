@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/vektah/gqlgen/neelance/errors"
 )
 
 // Client for graphql requests
@@ -101,23 +100,28 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 
 	// decode it into map string first, let mapstructure do the final decode
 	// because it can be much stricter about unknown fields.
-	respDataRaw := map[string]interface{}{}
+	respDataRaw := struct {
+		Data   interface{}
+		Errors json.RawMessage
+	}{}
 	err = json.Unmarshal(responseBody, &respDataRaw)
 	if err != nil {
 		return fmt.Errorf("decode: %s", err.Error())
 	}
 
-	if respDataRaw["errors"] != nil {
-		var errs []*errors.QueryError
-		if err := unpack(respDataRaw["errors"], &errs); err != nil {
-			return err
-		}
-		if len(errs) > 0 {
-			return fmt.Errorf("errors: %s", errs)
-		}
+	if respDataRaw.Errors != nil {
+		return RawJsonError{respDataRaw.Errors}
 	}
 
-	return unpack(respDataRaw["data"], response)
+	return unpack(respDataRaw.Data, response)
+}
+
+type RawJsonError struct {
+	json.RawMessage
+}
+
+func (r RawJsonError) Error() string {
+	return string(r.RawMessage)
 }
 
 func unpack(data interface{}, into interface{}) error {

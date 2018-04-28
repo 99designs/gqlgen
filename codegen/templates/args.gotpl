@@ -5,7 +5,7 @@
 			var err error
 			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 			if err != nil {
-				ec.Error(err)
+				ec.Error(ctx, err)
 				{{- if $arg.Object.Stream }}
 					return nil
 				{{- else }}
@@ -17,7 +17,7 @@
 			var err error
 			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 			if err != nil {
-				ec.Error(err)
+				ec.Error(ctx, err)
 				{{- if $arg.Object.Stream }}
 					return nil
 				{{- else }}

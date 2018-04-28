@@ -3,7 +3,6 @@ package graphql
 import (
 	"context"
 
-	"github.com/vektah/gqlgen/neelance/errors"
 	"github.com/vektah/gqlgen/neelance/query"
 )
 
@@ -12,7 +11,7 @@ type ResolverMiddleware func(ctx context.Context, next Resolver) (res interface{
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 
 type RequestContext struct {
-	errors.Builder
+	ErrorBuilder
 
 	RawQuery           string
 	Variables          map[string]interface{}
@@ -49,6 +48,20 @@ type ResolverContext struct {
 	Args map[string]interface{}
 	// The raw field
 	Field CollectedField
+	// The path of fields to get to this resolver
+	Path []interface{}
+}
+
+func (r *ResolverContext) PushField(alias string) {
+	r.Path = append(r.Path, alias)
+}
+
+func (r *ResolverContext) PushIndex(index int) {
+	r.Path = append(r.Path, index)
+}
+
+func (r *ResolverContext) Pop() {
+	r.Path = r.Path[0 : len(r.Path)-1]
 }
 
 func GetResolverContext(ctx context.Context) *ResolverContext {
@@ -61,6 +74,14 @@ func GetResolverContext(ctx context.Context) *ResolverContext {
 }
 
 func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Context {
+	parent := GetResolverContext(ctx)
+	rc.Path = nil
+	if parent != nil {
+		rc.Path = append(rc.Path, parent.Path...)
+	}
+	if rc.Field.Alias != "" {
+		rc.PushField(rc.Field.Alias)
+	}
 	return context.WithValue(ctx, resolver, rc)
 }
 

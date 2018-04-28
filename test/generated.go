@@ -5,16 +5,12 @@ package test
 import (
 	"bytes"
 	context "context"
-	fmt "fmt"
 	strconv "strconv"
 
 	graphql "github.com/vektah/gqlgen/graphql"
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
-	introspection1 "github.com/vektah/gqlgen/test/introspection"
-	invalid_identifier "github.com/vektah/gqlgen/test/invalid-identifier"
-	models "github.com/vektah/gqlgen/test/models"
 )
 
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
@@ -23,16 +19,7 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 
 type Resolvers interface {
 	Element_child(ctx context.Context, obj *Element) (Element, error)
-	Element_error(ctx context.Context, obj *Element, message *string) (bool, error)
-
-	OuterObject_inner(ctx context.Context, obj *models.OuterObject) (models.InnerObject, error)
-	Query_nestedInputs(ctx context.Context, input [][]models.OuterInput) (*bool, error)
-	Query_nestedOutputs(ctx context.Context) ([][]models.OuterObject, error)
-	Query_shapes(ctx context.Context) ([]Shape, error)
-	Query_recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
-	Query_mapInput(ctx context.Context, input *map[string]interface{}) (*bool, error)
-	Query_collision(ctx context.Context) (*introspection1.It, error)
-	Query_invalidIdentifier(ctx context.Context) (*invalid_identifier.InvalidIdentifier, error)
+	Element_error(ctx context.Context, obj *Element) (bool, error)
 	Query_path(ctx context.Context) ([]Element, error)
 }
 
@@ -72,53 +59,6 @@ type executionContext struct {
 	*graphql.RequestContext
 
 	resolvers Resolvers
-}
-
-var circleImplementors = []string{"Circle", "Shape"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Circle(ctx context.Context, sel []query.Selection, obj *Circle) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, circleImplementors, ec.Variables)
-
-	out := graphql.NewOrderedMap(len(fields))
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Circle")
-		case "radius":
-			out.Values[i] = ec._Circle_radius(ctx, field, obj)
-		case "area":
-			out.Values[i] = ec._Circle_area(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return out
-}
-
-func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.CollectedField, obj *Circle) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "Circle"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.Radius
-	return graphql.MarshalFloat(res)
-}
-
-func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.CollectedField, obj *Circle) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "Circle"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.Area()
-	return graphql.MarshalFloat(res)
 }
 
 var elementImplementors = []string{"Element"}
@@ -177,179 +117,8 @@ func (ec *executionContext) _Element_child(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Element_error(ctx context.Context, field graphql.CollectedField, obj *Element) graphql.Marshaler {
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := field.Args["message"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["message"] = arg0
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "Element",
-		Args:   args,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Element_error(ctx, obj, args["message"].(*string))
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.(bool)
-		return graphql.MarshalBoolean(res)
-	})
-}
-
-var innerObjectImplementors = []string{"InnerObject"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _InnerObject(ctx context.Context, sel []query.Selection, obj *models.InnerObject) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, innerObjectImplementors, ec.Variables)
-
-	out := graphql.NewOrderedMap(len(fields))
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("InnerObject")
-		case "id":
-			out.Values[i] = ec._InnerObject_id(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return out
-}
-
-func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.CollectedField, obj *models.InnerObject) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "InnerObject"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.ID
-	return graphql.MarshalInt(res)
-}
-
-var invalidIdentifierImplementors = []string{"InvalidIdentifier"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel []query.Selection, obj *invalid_identifier.InvalidIdentifier) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, invalidIdentifierImplementors, ec.Variables)
-
-	out := graphql.NewOrderedMap(len(fields))
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("InvalidIdentifier")
-		case "id":
-			out.Values[i] = ec._InvalidIdentifier_id(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return out
-}
-
-func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field graphql.CollectedField, obj *invalid_identifier.InvalidIdentifier) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "InvalidIdentifier"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.ID
-	return graphql.MarshalInt(res)
-}
-
-var itImplementors = []string{"It"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _It(ctx context.Context, sel []query.Selection, obj *introspection1.It) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, itImplementors, ec.Variables)
-
-	out := graphql.NewOrderedMap(len(fields))
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("It")
-		case "id":
-			out.Values[i] = ec._It_id(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return out
-}
-
-func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedField, obj *introspection1.It) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "It"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.ID
-	return graphql.MarshalID(res)
-}
-
-var outerObjectImplementors = []string{"OuterObject"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _OuterObject(ctx context.Context, sel []query.Selection, obj *models.OuterObject) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, outerObjectImplementors, ec.Variables)
-
-	out := graphql.NewOrderedMap(len(fields))
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("OuterObject")
-		case "inner":
-			out.Values[i] = ec._OuterObject_inner(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return out
-}
-
-func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *models.OuterObject) graphql.Marshaler {
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "OuterObject",
 		Args:   nil,
 		Field:  field,
 	})
@@ -363,7 +132,7 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.OuterObject_inner(ctx, obj)
+			return ec.resolvers.Element_error(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -372,8 +141,8 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.(models.InnerObject)
-		return ec._InnerObject(ctx, field.Selections, &res)
+		res := resTmp.(bool)
+		return graphql.MarshalBoolean(res)
 	})
 }
 
@@ -394,20 +163,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "nestedInputs":
-			out.Values[i] = ec._Query_nestedInputs(ctx, field)
-		case "nestedOutputs":
-			out.Values[i] = ec._Query_nestedOutputs(ctx, field)
-		case "shapes":
-			out.Values[i] = ec._Query_shapes(ctx, field)
-		case "recursive":
-			out.Values[i] = ec._Query_recursive(ctx, field)
-		case "mapInput":
-			out.Values[i] = ec._Query_mapInput(ctx, field)
-		case "collision":
-			out.Values[i] = ec._Query_collision(ctx, field)
-		case "invalidIdentifier":
-			out.Values[i] = ec._Query_invalidIdentifier(ctx, field)
 		case "path":
 			out.Values[i] = ec._Query_path(ctx, field)
 		case "__schema":
@@ -420,326 +175,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 	}
 
 	return out
-}
-
-func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	args := map[string]interface{}{}
-	var arg0 [][]models.OuterInput
-	if tmp, ok := field.Args["input"]; ok {
-		var err error
-		rawIf1 := tmp.([]interface{})
-		arg0 = make([][]models.OuterInput, len(rawIf1))
-		for idx1 := range rawIf1 {
-			rawIf2 := rawIf1[idx1].([]interface{})
-			arg0[idx1] = make([]models.OuterInput, len(rawIf2))
-			for idx2 := range rawIf2 {
-				arg0[idx1][idx2], err = UnmarshalOuterInput(rawIf2[idx2])
-			}
-		}
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	} else {
-		var tmp interface{} = []interface{}{[]interface{}{map[string]interface{}{"inner": map[string]interface{}{"id": 1}}}}
-		var err error
-		rawIf1 := tmp.([]interface{})
-		arg0 = make([][]models.OuterInput, len(rawIf1))
-		for idx1 := range rawIf1 {
-			rawIf2 := rawIf1[idx1].([]interface{})
-			arg0[idx1] = make([]models.OuterInput, len(rawIf2))
-			for idx2 := range rawIf2 {
-				arg0[idx1][idx2], err = UnmarshalOuterInput(rawIf2[idx2])
-			}
-		}
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-
-	args["input"] = arg0
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_nestedInputs(ctx, args["input"].([][]models.OuterInput))
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.(*bool)
-		if res == nil {
-			return graphql.Null
-		}
-		return graphql.MarshalBoolean(*res)
-	})
-}
-
-func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-		Args:   nil,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_nestedOutputs(ctx)
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.([][]models.OuterObject)
-		arr1 := graphql.Array{}
-		for idx1 := range res {
-			arr1 = append(arr1, func() graphql.Marshaler {
-				rctx := graphql.GetResolverContext(ctx)
-				rctx.PushIndex(idx1)
-				defer rctx.Pop()
-				arr2 := graphql.Array{}
-				for idx2 := range res[idx1] {
-					arr2 = append(arr2, func() graphql.Marshaler {
-						rctx := graphql.GetResolverContext(ctx)
-						rctx.PushIndex(idx2)
-						defer rctx.Pop()
-						return ec._OuterObject(ctx, field.Selections, &res[idx1][idx2])
-					}())
-				}
-				return arr2
-			}())
-		}
-		return arr1
-	})
-}
-
-func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-		Args:   nil,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_shapes(ctx)
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.([]Shape)
-		arr1 := graphql.Array{}
-		for idx1 := range res {
-			arr1 = append(arr1, func() graphql.Marshaler {
-				rctx := graphql.GetResolverContext(ctx)
-				rctx.PushIndex(idx1)
-				defer rctx.Pop()
-				return ec._Shape(ctx, field.Selections, &res[idx1])
-			}())
-		}
-		return arr1
-	})
-}
-
-func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	args := map[string]interface{}{}
-	var arg0 *RecursiveInputSlice
-	if tmp, ok := field.Args["input"]; ok {
-		var err error
-		var ptr1 RecursiveInputSlice
-		if tmp != nil {
-			ptr1, err = UnmarshalRecursiveInputSlice(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["input"] = arg0
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_recursive(ctx, args["input"].(*RecursiveInputSlice))
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.(*bool)
-		if res == nil {
-			return graphql.Null
-		}
-		return graphql.MarshalBoolean(*res)
-	})
-}
-
-func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	args := map[string]interface{}{}
-	var arg0 *map[string]interface{}
-	if tmp, ok := field.Args["input"]; ok {
-		var err error
-		var ptr1 map[string]interface{}
-		if tmp != nil {
-			ptr1 = tmp.(map[string]interface{})
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["input"] = arg0
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_mapInput(ctx, args["input"].(*map[string]interface{}))
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.(*bool)
-		if res == nil {
-			return graphql.Null
-		}
-		return graphql.MarshalBoolean(*res)
-	})
-}
-
-func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-		Args:   nil,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_collision(ctx)
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.(*introspection1.It)
-		if res == nil {
-			return graphql.Null
-		}
-		return ec._It(ctx, field.Selections, res)
-	})
-}
-
-func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-		Args:   nil,
-		Field:  field,
-	})
-	return graphql.Defer(func() (ret graphql.Marshaler) {
-		defer func() {
-			if r := recover(); r != nil {
-				userErr := ec.Recover(ctx, r)
-				ec.Error(ctx, userErr)
-				ret = graphql.Null
-			}
-		}()
-
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_invalidIdentifier(ctx)
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-		if resTmp == nil {
-			return graphql.Null
-		}
-		res := resTmp.(*invalid_identifier.InvalidIdentifier)
-		if res == nil {
-			return graphql.Null
-		}
-		return ec._InvalidIdentifier(ctx, field.Selections, res)
-	})
 }
 
 func (ec *executionContext) _Query_path(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -818,66 +253,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
-}
-
-var rectangleImplementors = []string{"Rectangle", "Shape"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Rectangle(ctx context.Context, sel []query.Selection, obj *Rectangle) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, rectangleImplementors, ec.Variables)
-
-	out := graphql.NewOrderedMap(len(fields))
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Rectangle")
-		case "length":
-			out.Values[i] = ec._Rectangle_length(ctx, field, obj)
-		case "width":
-			out.Values[i] = ec._Rectangle_width(ctx, field, obj)
-		case "area":
-			out.Values[i] = ec._Rectangle_area(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	return out
-}
-
-func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "Rectangle"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.Length
-	return graphql.MarshalFloat(res)
-}
-
-func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "Rectangle"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.Width
-	return graphql.MarshalFloat(res)
-}
-
-func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "Rectangle"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.Area()
-	return graphql.MarshalFloat(res)
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -1606,96 +981,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Shape(ctx context.Context, sel []query.Selection, obj *Shape) graphql.Marshaler {
-	switch obj := (*obj).(type) {
-	case nil:
-		return graphql.Null
-	case *Circle:
-		return ec._Circle(ctx, sel, obj)
-	case *Rectangle:
-		return ec._Rectangle(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func (ec *executionContext) _ShapeUnion(ctx context.Context, sel []query.Selection, obj *ShapeUnion) graphql.Marshaler {
-	switch obj := (*obj).(type) {
-	case nil:
-		return graphql.Null
-	case *Circle:
-		return ec._Circle(ctx, sel, obj)
-	case *Rectangle:
-		return ec._Rectangle(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func UnmarshalInnerInput(v interface{}) (models.InnerInput, error) {
-	var it models.InnerInput
-
-	for k, v := range v.(map[string]interface{}) {
-		switch k {
-		case "id":
-			var err error
-			it.ID, err = graphql.UnmarshalInt(v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func UnmarshalOuterInput(v interface{}) (models.OuterInput, error) {
-	var it models.OuterInput
-
-	for k, v := range v.(map[string]interface{}) {
-		switch k {
-		case "inner":
-			var err error
-			it.Inner, err = UnmarshalInnerInput(v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func UnmarshalRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
-	var it RecursiveInputSlice
-
-	for k, v := range v.(map[string]interface{}) {
-		switch k {
-		case "self":
-			var err error
-			var ptr1 []*RecursiveInputSlice
-			if v != nil {
-				rawIf2 := v.([]interface{})
-				ptr1 = make([]*RecursiveInputSlice, len(rawIf2))
-				for idx2 := range rawIf2 {
-					var ptr3 RecursiveInputSlice
-					if rawIf2[idx2] != nil {
-						ptr3, err = UnmarshalRecursiveInputSlice(rawIf2[idx2])
-						ptr1[idx2] = &ptr3
-					}
-				}
-				it.Self = &ptr1
-			}
-
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -1708,69 +993,12 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapType(t)
 }
 
-var parsedSchema = schema.MustParse(`input InnerInput {
-    id:Int!
-}
-
-input OuterInput {
-    inner: InnerInput!
-}
-
-type OuterObject {
-    inner: InnerObject!
-}
-
-type InnerObject {
-    id: Int!
-}
-
-interface Shape {
-    area: Float
-}
-
-type Circle implements Shape {
-    radius: Float
-    area: Float
-}
-
-type Rectangle implements Shape {
-    length: Float
-    width: Float
-    area: Float
-}
-
-input RecursiveInputSlice {
-    self: [RecursiveInputSlice!]
-}
-
-union ShapeUnion = Circle | Rectangle
-
-input Changes {
-    a: Int
-    b: Int
-}
-
-type It {
-    id: ID!
-}
-
-type InvalidIdentifier {
-    id: Int!
-}
-
-type Element {
+var parsedSchema = schema.MustParse(`type Element {
     child: Element!
-    error(message: String): Boolean!
+    error: Boolean!
 }
 
 type Query {
-    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
-    nestedOutputs: [[OuterObject]]
-    shapes: [Shape]
-    recursive(input: RecursiveInputSlice): Boolean
-    mapInput(input: Changes): Boolean
-    collision: It
-    invalidIdentifier: InvalidIdentifier
     path: [Element]
 }
 `)

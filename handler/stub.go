@@ -32,7 +32,7 @@ func (e *executableSchemaStub) Mutation(ctx context.Context, op *query.Operation
 
 func (e *executableSchemaStub) Subscription(ctx context.Context, op *query.Operation) func() *graphql.Response {
 	return func() *graphql.Response {
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 		select {
 		case <-ctx.Done():
 			return nil

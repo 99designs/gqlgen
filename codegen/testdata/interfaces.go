@@ -1,4 +1,4 @@
-package test
+package testdata
 
 import "math"
 
@@ -24,8 +24,4 @@ type Rectangle struct {
 
 func (r *Rectangle) Area() float64 {
 	return r.Length * r.Width
-}
-
-type RecursiveInputSlice struct {
-	Self *[]*RecursiveInputSlice
 }

@@ -1,65 +1,8 @@
-input InnerInput {
-    id:Int!
-}
-
-input OuterInput {
-    inner: InnerInput!
-}
-
-type OuterObject {
-    inner: InnerObject!
-}
-
-type InnerObject {
-    id: Int!
-}
-
-interface Shape {
-    area: Float
-}
-
-type Circle implements Shape {
-    radius: Float
-    area: Float
-}
-
-type Rectangle implements Shape {
-    length: Float
-    width: Float
-    area: Float
-}
-
-input RecursiveInputSlice {
-    self: [RecursiveInputSlice!]
-}
-
-union ShapeUnion = Circle | Rectangle
-
-input Changes {
-    a: Int
-    b: Int
-}
-
-type It {
-    id: ID!
-}
-
-type InvalidIdentifier {
-    id: Int!
-}
-
 type Element {
     child: Element!
-    error(message: String): Boolean!
+    error: Boolean!
 }
 
 type Query {
-    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
-    nestedOutputs: [[OuterObject]]
-    shapes: [Shape]
-    recursive(input: RecursiveInputSlice): Boolean
-    mapInput(input: Changes): Boolean
-    collision: It
-    invalidIdentifier: InvalidIdentifier
     path: [Element]
 }

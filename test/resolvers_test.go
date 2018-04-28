@@ -11,9 +11,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlgen/client"
 	"github.com/vektah/gqlgen/graphql"
 	"github.com/vektah/gqlgen/handler"
+	models "github.com/vektah/gqlgen/test/models"
 )
 
 func TestCustomErrorPresenter(t *testing.T) {
@@ -45,7 +47,7 @@ func TestCustomErrorPresenter(t *testing.T) {
 }
 
 func TestErrorPath(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{fmt.Errorf("boom")})))
+	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{err: fmt.Errorf("boom")})))
 	c := client.New(srv.URL)
 
 	var resp struct{}
@@ -54,8 +56,37 @@ func TestErrorPath(t *testing.T) {
 	assert.EqualError(t, err, `[{"message":"boom","path":["path",0,"cc","error"]},{"message":"boom","path":["path",1,"cc","error"]},{"message":"boom","path":["path",2,"cc","error"]},{"message":"boom","path":["path",3,"cc","error"]}]`)
 }
 
+func TestInputDefaults(t *testing.T) {
+	called := false
+	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{
+		queryDate: func(ctx context.Context, filter models.DateFilter) (bool, error) {
+			assert.Equal(t, "asdf", filter.Value)
+			assert.Equal(t, "UTC", *filter.Timezone)
+			assert.Equal(t, models.DateFilterOpEq, *filter.Op)
+			called = true
+
+			return false, nil
+		},
+	})))
+	c := client.New(srv.URL)
+
+	var resp struct {
+		Date bool
+	}
+
+	err := c.Post(`{ date(filter:{value: "asdf"}) }`, &resp)
+
+	require.NoError(t, err)
+	require.True(t, called)
+}
+
 type testResolvers struct {
-	err error
+	err       error
+	queryDate func(ctx context.Context, filter models.DateFilter) (bool, error)
+}
+
+func (r *testResolvers) Query_date(ctx context.Context, filter models.DateFilter) (bool, error) {
+	return r.queryDate(ctx, filter)
 }
 
 func (r *testResolvers) Query_path(ctx context.Context) ([]Element, error) {

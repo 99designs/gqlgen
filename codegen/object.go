@@ -28,6 +28,7 @@ type Field struct {
 	Args         []FieldArgument // A list of arguments to be passed to this field
 	NoErr        bool            // If this is bound to a go method, does that method have an error as the second argument
 	Object       *Object         // A link back to the parent object
+	Default      interface{}     // The default value
 }
 
 type FieldArgument struct {

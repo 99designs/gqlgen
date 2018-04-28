@@ -1181,8 +1181,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 	var it SearchArgs
+	var asMap = v.(map[string]interface{})
 
-	for k, v := range v.(map[string]interface{}) {
+	for k, v := range asMap {
 		switch k {
 		case "location":
 			var err error

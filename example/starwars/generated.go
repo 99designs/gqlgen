@@ -2206,8 +2206,9 @@ func (ec *executionContext) _SearchResult(ctx context.Context, sel []query.Selec
 
 func UnmarshalReviewInput(v interface{}) (Review, error) {
 	var it Review
+	var asMap = v.(map[string]interface{})
 
-	for k, v := range v.(map[string]interface{}) {
+	for k, v := range asMap {
 		switch k {
 		case "stars":
 			var err error

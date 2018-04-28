@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/vektah/gqlgen/codegen/templates"
 	"github.com/vektah/gqlgen/neelance/schema"
 )
 
@@ -26,7 +27,7 @@ func (cfg *Config) buildEnums(types NamedTypes) []Enum {
 			NamedType: namedType,
 			Values:    values,
 		}
-		enum.GoType = ucFirst(enum.GQLType)
+		enum.GoType = templates.ToCamel(enum.GQLType)
 		enums = append(enums, enum)
 	}
 

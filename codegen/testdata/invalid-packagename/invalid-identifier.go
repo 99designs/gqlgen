@@ -1,4 +1,4 @@
-package invalid_identifier
+package invalid_packagename
 
 type InvalidIdentifier struct {
 	ID int

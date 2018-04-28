@@ -32,6 +32,10 @@ func buildImports(types NamedTypes, destDir string) Imports {
 
 var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
 
+func sanitizePackageName(pkg string) string {
+	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
+}
+
 func (s Imports) addPkg(types NamedTypes, destDir string, pkg string) (Imports, *Import) {
 	if pkg == "" {
 		return s, nil
@@ -43,11 +47,11 @@ func (s Imports) addPkg(types NamedTypes, destDir string, pkg string) (Imports, 
 
 	localName := ""
 	if !strings.HasSuffix(destDir, pkg) {
-		localName = invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
+		localName = sanitizePackageName(filepath.Base(pkg))
 		i := 1
 		imp := s.findByName(localName)
 		for imp != nil && imp.Package != pkg {
-			localName = invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_") + strconv.Itoa(i)
+			localName = sanitizePackageName(filepath.Base(pkg)) + strconv.Itoa(i)
 			imp = s.findByName(localName)
 			i++
 			if i > 10 {

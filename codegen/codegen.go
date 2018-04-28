@@ -93,6 +93,7 @@ func (cfg *Config) normalize() error {
 	if cfg.ModelPackageName == "" {
 		cfg.ModelPackageName = filepath.Base(cfg.modelDir)
 	}
+	cfg.ModelPackageName = sanitizePackageName(cfg.ModelPackageName)
 	cfg.modelPackagePath = fullPackageName(cfg.modelDir, cfg.ModelPackageName)
 
 	if cfg.ExecFilename == "" {
@@ -103,6 +104,7 @@ func (cfg *Config) normalize() error {
 	if cfg.ExecPackageName == "" {
 		cfg.ExecPackageName = filepath.Base(cfg.execDir)
 	}
+	cfg.ExecPackageName = sanitizePackageName(cfg.ExecPackageName)
 	cfg.execPackagePath = fullPackageName(cfg.execDir, cfg.ExecPackageName)
 
 	builtins := map[string]string{

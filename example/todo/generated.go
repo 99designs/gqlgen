@@ -1161,8 +1161,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 	var it TodoInput
+	var asMap = v.(map[string]interface{})
 
-	for k, v := range v.(map[string]interface{}) {
+	for k, v := range asMap {
 		switch k {
 		case "text":
 			var err error

@@ -11,6 +11,7 @@ import (
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
+	models "github.com/vektah/gqlgen/test/models"
 )
 
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
@@ -21,6 +22,7 @@ type Resolvers interface {
 	Element_child(ctx context.Context, obj *Element) (Element, error)
 	Element_error(ctx context.Context, obj *Element) (bool, error)
 	Query_path(ctx context.Context) ([]Element, error)
+	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
 }
 
 type executableSchema struct {
@@ -165,6 +167,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = graphql.MarshalString("Query")
 		case "path":
 			out.Values[i] = ec._Query_path(ctx, field)
+		case "date":
+			out.Values[i] = ec._Query_date(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
 		case "__type":
@@ -213,6 +217,47 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 			}())
 		}
 		return arr1
+	})
+}
+
+func (ec *executionContext) _Query_date(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 models.DateFilter
+	if tmp, ok := field.Args["filter"]; ok {
+		var err error
+		arg0, err = UnmarshalDateFilter(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["filter"] = arg0
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_date(ctx, args["filter"].(models.DateFilter))
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(bool)
+		return graphql.MarshalBoolean(res)
 	})
 }
 
@@ -981,6 +1026,53 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+func UnmarshalDateFilter(v interface{}) (models.DateFilter, error) {
+	var it models.DateFilter
+	var asMap = v.(map[string]interface{})
+
+	if _, present := asMap["timezone"]; !present {
+		asMap["timezone"] = "UTC"
+	}
+	if _, present := asMap["op"]; !present {
+		asMap["op"] = "EQ"
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "value":
+			var err error
+			it.Value, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "timezone":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Timezone = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "op":
+			var err error
+			var ptr1 models.DateFilterOp
+			if v != nil {
+				err = (&ptr1).UnmarshalGQL(v)
+				it.Op = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -998,7 +1090,23 @@ var parsedSchema = schema.MustParse(`type Element {
     error: Boolean!
 }
 
+enum DATE_FILTER_OP {
+    EQ
+    NEQ
+    GT
+    GTE
+    LT
+    LTE
+}
+
+input DateFilter {
+    value: String!
+    timezone: String = "UTC"
+    op: DATE_FILTER_OP = EQ
+}
+
 type Query {
     path: [Element]
+    date(filter: DateFilter!): Boolean!
 }
 `)

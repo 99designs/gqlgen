@@ -17,7 +17,7 @@ func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 		"lcFirst":  lcFirst,
 		"quote":    strconv.Quote,
 		"rawQuote": rawQuote,
-		"toCamel":  toCamel,
+		"toCamel":  ToCamel,
 		"dump":     dump,
 	})
 
@@ -60,14 +60,18 @@ func isDelimiter(c rune) bool {
 	return c == '-' || c == '_' || unicode.IsSpace(c)
 }
 
-func toCamel(s string) string {
+func ToCamel(s string) string {
 	buffer := make([]rune, 0, len(s))
 	upper := true
+	lastWasUpper := false
 
 	for _, c := range s {
 		if isDelimiter(c) {
 			upper = true
 			continue
+		}
+		if !lastWasUpper && unicode.IsUpper(c) {
+			upper = true
 		}
 
 		if upper {
@@ -76,6 +80,7 @@ func toCamel(s string) string {
 			buffer = append(buffer, unicode.ToLower(c))
 		}
 		upper = false
+		lastWasUpper = unicode.IsUpper(c)
 	}
 
 	return string(buffer)

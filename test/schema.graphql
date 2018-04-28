@@ -3,6 +3,22 @@ type Element {
     error: Boolean!
 }
 
+enum DATE_FILTER_OP {
+    EQ
+    NEQ
+    GT
+    GTE
+    LT
+    LTE
+}
+
+input DateFilter {
+    value: String!
+    timezone: String = "UTC"
+    op: DATE_FILTER_OP = EQ
+}
+
 type Query {
     path: [Element]
+    date(filter: DateFilter!): Boolean!
 }

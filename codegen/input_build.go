@@ -54,6 +54,10 @@ func buildInput(types NamedTypes, typ *schema.InputObject) (*Object, error) {
 			Object:  obj,
 		}
 
+		if field.Default != nil {
+			newField.Default = field.Default.Value(nil)
+		}
+
 		if !newField.Type.IsInput && !newField.Type.IsScalar {
 			return nil, errors.Errorf("%s cannot be used as a field of %s. only input and scalar types are allowed", newField.GQLType, obj.GQLType)
 		}

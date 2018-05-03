@@ -90,3 +90,76 @@ func TestComplexInputTypes(t *testing.T) {
 
 	require.NoError(t, err)
 }
+
+func TestKeywordInputFields(t *testing.T) {
+	err := generate("input_keywords_fields", `
+		input Object {
+			break:       String!
+			default:     String!
+			func:        String!
+			interface:   String!
+			select:      String!
+			case:        String!
+			defer:       String!
+			go:          String!
+			map:         String!
+			struct:      String!
+			chan:        String!
+			else:        String!
+			goto:        String!
+			package:     String!
+			switch:      String!
+			const:       String!
+			fallthrough: String!
+			if:          String!
+			range:       String!
+			type:        String!
+			continue:    String!
+			for:         String!
+			import:      String!
+			return:      String!
+			var:         String!
+		}
+		type Query {
+			test(input: Object): Boolean!
+		}
+	`)
+
+	require.NoError(t, err)
+}
+
+func TestInputKeywordArgs(t *testing.T) {
+	err := generate("input_keyword_args", `
+		type Query {
+			test(
+				break:       String!,
+				default:     String!,
+				func:        String!,
+				interface:   String!,
+				select:      String!,
+				case:        String!,
+				defer:       String!,
+				go:          String!,
+				map:         String!,
+				struct:      String!,
+				chan:        String!,
+				else:        String!,
+				goto:        String!,
+				package:     String!,
+				switch:      String!,
+				const:       String!,
+				fallthrough: String!,
+				if:          String!,
+				range:       String!,
+				type:        String!,
+				continue:    String!,
+				for:         String!,
+				import:      String!,
+				return:      String!,
+				var:         String!,
+			): Boolean!
+		}
+	`)
+
+	require.NoError(t, err)
+}

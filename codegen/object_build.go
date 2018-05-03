@@ -42,6 +42,43 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 	return objects, nil
 }
 
+var keywords = []string{
+	"break",
+	"default",
+	"func",
+	"interface",
+	"select",
+	"case",
+	"defer",
+	"go",
+	"map",
+	"struct",
+	"chan",
+	"else",
+	"goto",
+	"package",
+	"switch",
+	"const",
+	"fallthrough",
+	"if",
+	"range",
+	"type",
+	"continue",
+	"for",
+	"import",
+	"return",
+	"var",
+}
+
+func sanitizeGoName(name string) string {
+	for _, k := range keywords {
+		if name == k {
+			return name + "_"
+		}
+	}
+	return name
+}
+
 func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) (*Object, error) {
 	obj := &Object{NamedType: types[typ.TypeName()]}
 
@@ -53,9 +90,10 @@ func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) (*Object, e
 		var args []FieldArgument
 		for _, arg := range field.Args {
 			newArg := FieldArgument{
-				GQLName: arg.Name.Name,
-				Type:    types.getType(arg.Type),
-				Object:  obj,
+				GQLName:   arg.Name.Name,
+				Type:      types.getType(arg.Type),
+				Object:    obj,
+				GoVarName: sanitizeGoName(arg.Name.Name),
 			}
 
 			if !newArg.Type.IsInput && !newArg.Type.IsScalar {

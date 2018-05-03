@@ -34,9 +34,10 @@ type Field struct {
 type FieldArgument struct {
 	*Type
 
-	GQLName string      // The name of the argument in graphql
-	Object  *Object     // A link back to the parent object
-	Default interface{} // The default value
+	GQLName   string      // The name of the argument in graphql
+	GoVarName string      // The name of the var in go
+	Object    *Object     // A link back to the parent object
+	Default   interface{} // The default value
 }
 
 type Objects []*Object
@@ -67,7 +68,7 @@ func (f *Field) ResolverDeclaration() string {
 		res += fmt.Sprintf(", obj *%s", f.Object.FullName())
 	}
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GQLName, arg.Signature())
+		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
 	}
 
 	result := f.Signature()

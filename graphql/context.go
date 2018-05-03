@@ -21,6 +21,28 @@ type RequestContext struct {
 	RequestMiddleware  RequestMiddleware
 }
 
+func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
+	return next(ctx)
+}
+
+func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+	return next(ctx)
+}
+
+func NewRequestContext(doc *query.Document, query string, variables map[string]interface{}) *RequestContext {
+	return &RequestContext{
+		Doc:                doc,
+		RawQuery:           query,
+		Variables:          variables,
+		ResolverMiddleware: DefaultResolverMiddleware,
+		RequestMiddleware:  DefaultRequestMiddleware,
+		Recover:            DefaultRecover,
+		ErrorBuilder: ErrorBuilder{
+			ErrorPresenter: DefaultErrorPresenter,
+		},
+	}
+}
+
 type key string
 
 const (

@@ -10,7 +10,7 @@ import (
 
 type RecoverFunc func(ctx context.Context, err interface{}) (userMessage error)
 
-func DefaultRecoverFunc(ctx context.Context, err interface{}) error {
+func DefaultRecover(ctx context.Context, err interface{}) error {
 	fmt.Fprintln(os.Stderr, err)
 	fmt.Fprintln(os.Stderr)
 	debug.PrintStack()

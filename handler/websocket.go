@@ -154,17 +154,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return true
 	}
 
-	ctx := graphql.WithRequestContext(c.ctx, &graphql.RequestContext{
-		Doc:                doc,
-		Variables:          reqParams.Variables,
-		RawQuery:           reqParams.Query,
-		Recover:            c.cfg.recover,
-		ResolverMiddleware: c.cfg.resolverHook,
-		RequestMiddleware:  c.cfg.requestHook,
-		ErrorBuilder: graphql.ErrorBuilder{
-			ErrorPresenter: c.cfg.errorPresenter,
-		},
-	})
+	ctx := graphql.WithRequestContext(c.ctx, c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables))
 
 	if op.Type != query.Subscription {
 		var result *graphql.Response

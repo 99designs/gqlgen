@@ -28,6 +28,27 @@ type Config struct {
 	requestHook    graphql.RequestMiddleware
 }
 
+func (c *Config) newRequestContext(doc *query.Document, query string, variables map[string]interface{}) *graphql.RequestContext {
+	reqCtx := graphql.NewRequestContext(doc, query, variables)
+	if hook := c.recover; hook != nil {
+		reqCtx.Recover = hook
+	}
+
+	if hook := c.errorPresenter; hook != nil {
+		reqCtx.ErrorPresenter = hook
+	}
+
+	if hook := c.resolverHook; hook != nil {
+		reqCtx.ResolverMiddleware = hook
+	}
+
+	if hook := c.requestHook; hook != nil {
+		reqCtx.RequestMiddleware = hook
+	}
+
+	return reqCtx
+}
+
 type Option func(cfg *Config)
 
 func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
@@ -91,8 +112,6 @@ func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := Config{
-		recover:        graphql.DefaultRecoverFunc,
-		errorPresenter: graphql.DefaultErrorPresenter,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
@@ -101,18 +120,6 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 	for _, option := range options {
 		option(&cfg)
-	}
-
-	if cfg.resolverHook == nil {
-		cfg.resolverHook = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			return next(ctx)
-		}
-	}
-
-	if cfg.requestHook == nil {
-		cfg.requestHook = func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-			return next(ctx)
-		}
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -168,17 +175,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			return
 		}
 
-		ctx := graphql.WithRequestContext(r.Context(), &graphql.RequestContext{
-			Doc:                doc,
-			RawQuery:           reqParams.Query,
-			Variables:          reqParams.Variables,
-			Recover:            cfg.recover,
-			ResolverMiddleware: cfg.resolverHook,
-			RequestMiddleware:  cfg.requestHook,
-			ErrorBuilder: graphql.ErrorBuilder{
-				ErrorPresenter: cfg.errorPresenter,
-			},
-		})
+		ctx := graphql.WithRequestContext(r.Context(), cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables))
 
 		defer func() {
 			if err := recover(); err != nil {

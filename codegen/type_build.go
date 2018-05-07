@@ -76,11 +76,6 @@ func pkgAndType(name string) (string, string) {
 	return normalizeVendor(strings.Join(parts[:len(parts)-1], ".")), parts[len(parts)-1]
 }
 
-func normalizeVendor(pkg string) string {
-	parts := strings.Split(pkg, "/vendor/")
-	return parts[len(parts)-1]
-}
-
 func (n NamedTypes) getType(t common.Type) *Type {
 	var modifiers []string
 	usePtr := true

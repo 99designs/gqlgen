@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"go/types"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -176,7 +177,7 @@ func bindObject(t types.Type, object *Object, imports Imports) error {
 			field.Type.Modifiers = modifiersFromGoType(structField.Type())
 			field.GoVarName = structField.Name()
 
-			switch field.Type.FullSignature() {
+			switch normalizeVendor(field.Type.FullSignature()) {
 			case normalizeVendor(structField.Type().String()):
 				// everything is fine
 
@@ -214,4 +215,13 @@ func modifiersFromGoType(t types.Type) []string {
 			return modifiers
 		}
 	}
+}
+
+var modsRegex = regexp.MustCompile(`^(\*|\[\])*`)
+
+func normalizeVendor(pkg string) string {
+	modifiers := modsRegex.FindAllString(pkg, 1)[0]
+	pkg = strings.TrimPrefix(pkg, modifiers)
+	parts := strings.Split(pkg, "/vendor/")
+	return modifiers + parts[len(parts)-1]
 }

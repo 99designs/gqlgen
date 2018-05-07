@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"remote_api"
+
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,6 +85,12 @@ func TestInputDefaults(t *testing.T) {
 type testResolvers struct {
 	err       error
 	queryDate func(ctx context.Context, filter models.DateFilter) (bool, error)
+}
+
+func (r *testResolvers) Query_viewer(ctx context.Context) (*Viewer, error) {
+	return &Viewer{
+		User: &remote_api.User{"Bob"},
+	}, nil
 }
 
 func (r *testResolvers) Query_date(ctx context.Context, filter models.DateFilter) (bool, error) {

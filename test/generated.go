@@ -5,6 +5,7 @@ package test
 import (
 	"bytes"
 	context "context"
+	remote_api "remote_api"
 	strconv "strconv"
 
 	graphql "github.com/vektah/gqlgen/graphql"
@@ -23,6 +24,7 @@ type Resolvers interface {
 	Element_error(ctx context.Context, obj *Element) (bool, error)
 	Query_path(ctx context.Context) ([]Element, error)
 	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
+	Query_viewer(ctx context.Context) (*Viewer, error)
 }
 
 type executableSchema struct {
@@ -169,6 +171,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = ec._Query_path(ctx, field)
 		case "date":
 			out.Values[i] = ec._Query_date(ctx, field)
+		case "viewer":
+			out.Values[i] = ec._Query_viewer(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
 		case "__type":
@@ -261,6 +265,39 @@ func (ec *executionContext) _Query_date(ctx context.Context, field graphql.Colle
 	})
 }
 
+func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_viewer(ctx)
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Viewer)
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._Viewer(ctx, field.Selections, res)
+	})
+}
+
 func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "Query"
@@ -298,6 +335,77 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
+}
+
+var userImplementors = []string{"User"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _User(ctx context.Context, sel []query.Selection, obj *remote_api.User) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, userImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("User")
+		case "name":
+			out.Values[i] = ec._User_name(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *remote_api.User) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "User"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+var viewerImplementors = []string{"Viewer"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Viewer(ctx context.Context, sel []query.Selection, obj *Viewer) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, viewerImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Viewer")
+		case "user":
+			out.Values[i] = ec._Viewer_user(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.CollectedField, obj *Viewer) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "Viewer"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.User
+	if res == nil {
+		return graphql.Null
+	}
+	return ec._User(ctx, field.Selections, res)
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -1105,8 +1213,16 @@ input DateFilter {
     op: DATE_FILTER_OP = EQ
 }
 
+type User {
+    name: String
+}
+type Viewer {
+    user: User
+}
+
 type Query {
     path: [Element]
     date(filter: DateFilter!): Boolean!
+    viewer: Viewer
 }
 `)

@@ -18,7 +18,15 @@ input DateFilter {
     op: DATE_FILTER_OP = EQ
 }
 
+type User {
+    name: String
+}
+type Viewer {
+    user: User
+}
+
 type Query {
     path: [Element]
     date(filter: DateFilter!): Boolean!
+    viewer: Viewer
 }

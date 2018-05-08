@@ -63,7 +63,7 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 
 	for i := range obj.Fields {
 		field := &obj.Fields[i]
-		mf := ModelField{Type: field.Type}
+		mf := ModelField{Type: field.Type,GQLName:field.GQLName}
 
 		if mf.IsScalar {
 			mf.GoVarName = ucFirst(field.GQLName)

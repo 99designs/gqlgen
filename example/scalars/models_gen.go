@@ -7,6 +7,6 @@ import (
 )
 
 type Address struct {
-	ID       external.ObjectID
-	Location *Point
+	ID       external.ObjectID `json:"id"`
+	Location *Point            `json:"location"`
 }

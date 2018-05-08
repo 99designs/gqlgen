@@ -3,11 +3,11 @@
 package todo
 
 type Todo struct {
-	ID   int
-	Text string
-	Done bool
+	ID   int    `json:"id"`
+	Text string `json:"text"`
+	Done bool   `json:"done"`
 }
 type TodoInput struct {
-	Text string
-	Done *bool
+	Text string `json:"text"`
+	Done *bool  `json:"done"`
 }

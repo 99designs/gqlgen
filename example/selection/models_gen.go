@@ -8,14 +8,14 @@ import (
 
 type Event interface{}
 type Like struct {
-	Reaction  string
-	Sent      time.Time
-	Selection []string
-	Collected []string
+	Reaction  string    `json:"reaction"`
+	Sent      time.Time `json:"sent"`
+	Selection []string  `json:"selection"`
+	Collected []string  `json:"collected"`
 }
 type Post struct {
-	Message   string
-	Sent      time.Time
-	Selection []string
-	Collected []string
+	Message   string    `json:"message"`
+	Sent      time.Time `json:"sent"`
+	Selection []string  `json:"selection"`
+	Collected []string  `json:"collected"`
 }

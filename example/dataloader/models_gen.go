@@ -7,20 +7,20 @@ import (
 )
 
 type Address struct {
-	ID      int
-	Street  string
-	Country string
+	ID      int    `json:"id"`
+	Street  string `json:"street"`
+	Country string `json:"country"`
 }
 type Customer struct {
-	ID        int
-	Name      string
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
 	AddressID int
 }
 type Item struct {
-	Name string
+	Name string `json:"name"`
 }
 type Order struct {
-	ID     int
-	Date   time.Time
-	Amount float64
+	ID     int       `json:"id"`
+	Date   time.Time `json:"date"`
+	Amount float64   `json:"amount"`
 }

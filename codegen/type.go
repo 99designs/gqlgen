@@ -105,7 +105,10 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 		var rawIf = "rawIf" + strconv.Itoa(depth)
 		var index = "idx" + strconv.Itoa(depth)
 
-		return tpl(`{{.rawSlice}} := {{.raw}}.([]interface{})
+		return tpl(`var {{.rawSlice}} []interface{}
+			if {{.raw}} != nil {
+				{{.rawSlice}} = {{.raw}}.([]interface{})
+			}
 			{{.result}} = make({{.type}}, len({{.rawSlice}}))
 			for {{.index}} := range {{.rawSlice}} {
 				{{ .next -}}

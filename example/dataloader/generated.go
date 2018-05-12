@@ -459,10 +459,16 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 	var arg0 [][]int
 	if tmp, ok := field.Args["customerIds"]; ok {
 		var err error
-		rawIf1 := tmp.([]interface{})
+		var rawIf1 []interface{}
+		if tmp != nil {
+			rawIf1 = tmp.([]interface{})
+		}
 		arg0 = make([][]int, len(rawIf1))
 		for idx1 := range rawIf1 {
-			rawIf2 := rawIf1[idx1].([]interface{})
+			var rawIf2 []interface{}
+			if rawIf1[idx1] != nil {
+				rawIf2 = rawIf1[idx1].([]interface{})
+			}
 			arg0[idx1] = make([]int, len(rawIf2))
 			for idx2 := range rawIf2 {
 				arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])

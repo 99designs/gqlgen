@@ -75,7 +75,7 @@ What we need is a way to group up all of those concurrent requests, take out any
 store them in case they are needed later on in request. The dataloader is just that, a request-scoped 
 batching and caching solution popularised by [facebook](https://github.com/facebook/dataloader). 
 
-We're going to use [dataloaden](ttps://github.com/vektah/dataloaden) to build our dataloaders. 
+We're going to use [dataloaden](https://github.com/vektah/dataloaden) to build our dataloaders. 
 In languages with generics, we could probably just create a DataLoader<User>, but golang 
 doesnt have generics. Instead we generate the code manually for our instance. 
 

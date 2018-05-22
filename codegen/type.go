@@ -107,7 +107,9 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 
 		return tpl(`var {{.rawSlice}} []interface{}
 			if {{.raw}} != nil {
-				{{.rawSlice}} = {{.raw}}.([]interface{})
+				if tmp1, ok := {{.raw}}.([]interface{}); ok {
+					{{.rawSlice}} = tmp1
+				}
 			}
 			{{.result}} = make({{.type}}, len({{.rawSlice}}))
 			for {{.index}} := range {{.rawSlice}} {

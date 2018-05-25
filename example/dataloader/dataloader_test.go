@@ -51,4 +51,14 @@ func TestTodo(t *testing.T) {
 		var resp interface{}
 		c.MustPost(introspection.Query, &resp)
 	})
+
+	t.Run("customer array torture malformed array query", func(t *testing.T) {
+		var resp struct {
+			Torture [][]Customer
+		}
+		c.MustPost(`{ torture(customerIds:{}) { id name } }`, &resp)
+
+		require.EqualValues(t, [][]Customer{}, resp.Torture)
+	})
+
 }

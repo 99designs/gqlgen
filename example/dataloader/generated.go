@@ -461,13 +461,17 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 		var err error
 		var rawIf1 []interface{}
 		if tmp != nil {
-			rawIf1 = tmp.([]interface{})
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			}
 		}
 		arg0 = make([][]int, len(rawIf1))
 		for idx1 := range rawIf1 {
 			var rawIf2 []interface{}
 			if rawIf1[idx1] != nil {
-				rawIf2 = rawIf1[idx1].([]interface{})
+				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
+					rawIf2 = tmp1
+				}
 			}
 			arg0[idx1] = make([]int, len(rawIf2))
 			for idx2 := range rawIf2 {

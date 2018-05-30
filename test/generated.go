@@ -1225,4 +1225,6 @@ type Query {
     date(filter: DateFilter!): Boolean!
     viewer: Viewer
 }
+
+// this is a comment with a ` + "`" + `backtick` + "`" + `
 `)

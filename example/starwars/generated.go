@@ -2304,7 +2304,7 @@ type Human implements Character {
     height(unit: LengthUnit = METER): Float!
     # Mass in kilograms, or null if unknown
     mass: Float
-    # This human` + "`" + `s friends, or an empty list if they have none
+    # This human's friends, or an empty list if they have none
     friends: [Character]
     # The friends of the human exposed as a connection with edges
     friendsConnection(first: Int, after: ID): FriendsConnection!
@@ -2319,27 +2319,27 @@ type Droid implements Character {
     id: ID!
     # What others call this droid
     name: String!
-    # This droid` + "`" + `s friends, or an empty list if they have none
+    # This droid's friends, or an empty list if they have none
     friends: [Character]
     # The friends of the droid exposed as a connection with edges
     friendsConnection(first: Int, after: ID): FriendsConnection!
     # The movies this droid appears in
     appearsIn: [Episode!]!
-    # This droid` + "`" + `s primary function
+    # This droid's primary function
     primaryFunction: String
 }
-# A connection object for a character` + "`" + `s friends
+# A connection object for a character's friends
 type FriendsConnection {
     # The total number of friends
     totalCount: Int!
-    # The edges for each of the character` + "`" + `s friends.
+    # The edges for each of the character's friends.
     edges: [FriendsEdge]
     # A list of the friends, as a convenience when edges are not needed.
     friends: [Character]
     # Information for paginating this connection
     pageInfo: PageInfo!
 }
-# An edge object for a character` + "`" + `s friends
+# An edge object for a character's friends
 type FriendsEdge {
     # A cursor used for pagination
     cursor: ID!

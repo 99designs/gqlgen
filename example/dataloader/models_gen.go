@@ -2,25 +2,11 @@
 
 package dataloader
 
-import (
-	time "time"
-)
-
 type Address struct {
 	ID      int    `json:"id"`
 	Street  string `json:"street"`
 	Country string `json:"country"`
 }
-type Customer struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	AddressID int
-}
 type Item struct {
 	Name string `json:"name"`
-}
-type Order struct {
-	ID     int       `json:"id"`
-	Date   time.Time `json:"date"`
-	Amount float64   `json:"amount"`
 }

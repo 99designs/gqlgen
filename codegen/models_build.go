@@ -63,29 +63,12 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 
 	for i := range obj.Fields {
 		field := &obj.Fields[i]
-		mf := ModelField{Type: field.Type,GQLName:field.GQLName}
+		mf := ModelField{Type: field.Type, GQLName: field.GQLName}
 
+		mf.GoVarName = ucFirst(field.GQLName)
 		if mf.IsScalar {
-			mf.GoVarName = ucFirst(field.GQLName)
 			if mf.GoVarName == "Id" {
 				mf.GoVarName = "ID"
-			}
-		} else if mf.IsInput {
-			mf.GoVarName = ucFirst(field.GQLName)
-		} else if mf.IsSlice() {
-			// one to many, we don't need a prop, we need a resolver
-		} else {
-			mf.GoFKName = ucFirst(field.GQLName) + "ID"
-			mf.GoFKType = "string"
-
-			if obj, ok := cfg.schema.Types[field.GQLType].(*schema.Object); ok {
-				for _, f := range obj.Fields {
-					if strings.EqualFold(f.Name, "id") {
-						if strings.Contains(f.Type.String(), "Int") {
-							mf.GoFKType = "int"
-						}
-					}
-				}
 			}
 		}
 

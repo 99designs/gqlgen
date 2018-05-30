@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go
+//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go -typemap types.json
 
 package dataloader
 
@@ -8,6 +8,17 @@ import (
 	"math/rand"
 	"time"
 )
+
+type Customer struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	AddressID int
+}
+type Order struct {
+	ID     int       `json:"id"`
+	Date   time.Time `json:"date"`
+	Amount float64   `json:"amount"`
+}
 
 type Resolver struct{}
 

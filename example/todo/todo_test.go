@@ -4,11 +4,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/vektah/gqlgen/client"
-	"github.com/vektah/gqlgen/neelance/introspection"
-
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlgen/client"
 	"github.com/vektah/gqlgen/handler"
+	"github.com/vektah/gqlgen/neelance/introspection"
 )
 
 func TestTodo(t *testing.T) {

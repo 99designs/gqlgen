@@ -29,6 +29,7 @@ type Query {
     path: [Element]
     date(filter: DateFilter!): Boolean!
     viewer: Viewer
+    jsonEncoding: String!
 }
 
 // this is a comment with a `backtick`

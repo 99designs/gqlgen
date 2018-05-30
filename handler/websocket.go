@@ -154,7 +154,8 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return true
 	}
 
-	ctx := graphql.WithRequestContext(c.ctx, c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables))
+	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
 
 	if op.Type != query.Subscription {
 		var result *graphql.Response
@@ -176,7 +177,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := c.cfg.recover(ctx, r)
+				userErr := reqCtx.Recover(ctx, r)
 				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
 			}
 		}()

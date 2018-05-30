@@ -87,7 +87,7 @@ func ToCamel(s string) string {
 }
 
 func rawQuote(s string) string {
-	return "`" + strings.Replace(s, "'", "`+\"`\"+`", -1) + "`"
+	return "`" + strings.Replace(s, "`", "`+\"`\"+`", -1) + "`"
 }
 
 func dump(val interface{}) string {

@@ -175,11 +175,12 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			return
 		}
 
-		ctx := graphql.WithRequestContext(r.Context(), cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables))
+		reqCtx := cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+		ctx := graphql.WithRequestContext(r.Context(), reqCtx)
 
 		defer func() {
 			if err := recover(); err != nil {
-				userErr := cfg.recover(ctx, err)
+				userErr := reqCtx.Recover(ctx, err)
 				sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
 			}
 		}()

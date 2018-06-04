@@ -6,16 +6,14 @@ import (
 	"strconv"
 )
 
-const alphabet = "0123456789ABCDEF"
+const encodeHex = "0123456789ABCDEF"
 
 func MarshalString(s string) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		start := 0
 		io.WriteString(w, `"`)
 
-		for i := 0; i < len(s); i++ {
-			c := s[i]
-
+		for i, c := range s {
 			if c < 0x20 || c == '\\' || c == '"' {
 				io.WriteString(w, s[start:i])
 
@@ -32,7 +30,7 @@ func MarshalString(s string) Marshaler {
 					io.WriteString(w, `\"`)
 				default:
 					io.WriteString(w, `\u00`)
-					w.Write([]byte{alphabet[c>>4], alphabet[c&0xf]})
+					w.Write([]byte{encodeHex[c>>4], encodeHex[c&0xf]})
 				}
 
 				start = i + 1

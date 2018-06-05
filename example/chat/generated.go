@@ -466,10 +466,13 @@ func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, fiel
 			return nil
 		}
 		var out graphql.OrderedMap
-		ec.OnOperationMiddleware(ctx, func(ctx context.Context) error {
+		err := ec.OnOperationMiddleware(ctx, func(ctx context.Context) error {
 			out.Add(field.Alias, func() graphql.Marshaler { return ec._Message(ctx, field.Selections, &res) }())
 			return nil
 		})
+		if err != nil {
+			return nil
+		}
 		return &out
 	}
 }

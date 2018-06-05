@@ -70,9 +70,11 @@ func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Req
 	// function is defined, then we should pass the payload data up to
 	// the handler.
 	connectionParams := map[string]interface{}{}
-	if err := json.Unmarshal(initMessage.Payload, &connectionParams); err != nil {
-		conn.sendConnectionError("invalid json")
-		return
+	if initMessage.Payload != nil {
+		if err := json.Unmarshal(initMessage.Payload, &connectionParams); err != nil {
+			conn.sendConnectionError("invalid json")
+			return
+		}
 	}
 
 	next := func(ctx context.Context, params map[string]interface{}) error {

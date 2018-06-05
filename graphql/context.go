@@ -6,6 +6,8 @@ import (
 	"github.com/vektah/gqlgen/neelance/query"
 )
 
+type OnConnect func(ctx context.Context, params map[string]interface{}) error
+type OnConnectMiddleware func(ctx context.Context, params map[string]interface{}, next OnConnect) error
 type Resolver func(ctx context.Context) (res interface{}, err error)
 type ResolverMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
@@ -19,6 +21,10 @@ type RequestContext struct {
 	Recover            RecoverFunc
 	ResolverMiddleware ResolverMiddleware
 	RequestMiddleware  RequestMiddleware
+}
+
+func DefaultOnConnectMiddleware(ctx context.Context, params map[string]interface{}, next OnConnect) error {
+	return next(ctx, params)
 }
 
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {

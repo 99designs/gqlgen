@@ -21,7 +21,9 @@ type params struct {
 }
 
 type Config struct {
-	upgrader       websocket.Upgrader
+	upgrader      websocket.Upgrader
+	onConnectHook graphql.OnConnectMiddleware
+	// onOperationHook
 	recover        graphql.RecoverFunc
 	errorPresenter graphql.ErrorPresenterFunc
 	resolverHook   graphql.ResolverMiddleware
@@ -54,6 +56,26 @@ type Option func(cfg *Config)
 func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 	return func(cfg *Config) {
 		cfg.upgrader = upgrader
+	}
+}
+
+// WebsocketOnConnectMiddleware attaches a method to execute when the client
+// sends the `GQL_CONNECTION_INIT` message. This provides the handler the
+// opportunity to add additional context values based on the payload received
+// during that event.
+func WebsocketOnConnectMiddleware(middleware graphql.OnConnectMiddleware) Option {
+	return func(cfg *Config) {
+		if cfg.onConnectHook == nil {
+			cfg.onConnectHook = middleware
+			return
+		}
+
+		lastResolve := cfg.onConnectHook
+		cfg.onConnectHook = func(ctx context.Context, params map[string]interface{}, next graphql.OnConnect) error {
+			return lastResolve(ctx, params, graphql.OnConnect(func(ctx context.Context, params map[string]interface{}) error {
+				return middleware(ctx, params, next)
+			}))
+		}
 	}
 }
 
@@ -116,6 +138,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 		},
+		onConnectHook: graphql.DefaultOnConnectMiddleware,
 	}
 
 	for _, option := range options {

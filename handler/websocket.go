@@ -29,8 +29,6 @@ const (
 	connectionKeepAliveMsg = "ka"                   // Server -> Client
 )
 
-const connectionKeepAliveTimeout = 30 * time.Second
-
 type operationMessage struct {
 	Payload json.RawMessage `json:"payload,omitempty"`
 	ID      string          `json:"id,omitempty"`
@@ -116,11 +114,27 @@ func (c *wsConnection) write(msg *operationMessage) {
 	c.conn.WriteJSON(msg) // TODO: handle error
 
 	// Reset the keep alive timer if it's been setup.
-	if c.keepAliveTimer != nil {
-		c.keepAliveTimer.Reset(connectionKeepAliveTimeout)
+	if c.cfg.connectionKeepAliveTimeout != 0 && c.keepAliveTimer != nil {
+		c.keepAliveTimer.Reset(c.cfg.connectionKeepAliveTimeout)
 	}
 
 	c.mu.Unlock()
+}
+
+func (c *wsConnection) keepAlive(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			if !c.keepAliveTimer.Stop() {
+				<-c.keepAliveTimer.C
+			}
+			return
+		case <-c.keepAliveTimer.C:
+			// We don't reset the timer here, because the `c.write` command
+			// will reset the timer anyways.
+			c.write(&operationMessage{Type: connectionKeepAliveMsg})
+		}
+	}
 }
 
 func (c *wsConnection) run(ctx context.Context) error {
@@ -131,25 +145,17 @@ func (c *wsConnection) run(ctx context.Context) error {
 
 	// Create a timer that will fire every interval if a write hasn't been made
 	// to keep the connection alive.
-	c.mu.Lock()
-	c.keepAliveTimer = time.NewTimer(connectionKeepAliveTimeout)
-	c.mu.Unlock()
+	if c.cfg.connectionKeepAliveTimeout != 0 {
+		// Create the new timer that will fire `c.cfg.connectionKeepAliveTimeout`
+		// from now.
+		c.mu.Lock()
+		c.keepAliveTimer = time.NewTimer(c.cfg.connectionKeepAliveTimeout)
+		c.mu.Unlock()
 
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				if !c.keepAliveTimer.Stop() {
-					<-c.keepAliveTimer.C
-				}
-				return
-			case <-c.keepAliveTimer.C:
-				// We don't reset the timer here, because the `c.write` command
-				// will reset the timer anyways.
-				c.write(&operationMessage{Type: connectionKeepAliveMsg})
-			}
-		}
-	}()
+		// Launch the keepAlive manager. This will exit when the context is
+		// canceled.
+		go c.keepAlive(ctx)
+	}
 
 	for {
 		message := c.readOp()

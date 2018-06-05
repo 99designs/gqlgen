@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/vektah/gqlgen/graphql"
@@ -21,13 +22,14 @@ type params struct {
 }
 
 type Config struct {
-	upgrader        websocket.Upgrader
-	onConnectHook   graphql.OnConnectMiddleware
-	onOperationHook graphql.OnOperationMiddleware
-	recover         graphql.RecoverFunc
-	errorPresenter  graphql.ErrorPresenterFunc
-	resolverHook    graphql.ResolverMiddleware
-	requestHook     graphql.RequestMiddleware
+	upgrader                   websocket.Upgrader
+	onConnectHook              graphql.OnConnectMiddleware
+	onOperationHook            graphql.OnOperationMiddleware
+	recover                    graphql.RecoverFunc
+	errorPresenter             graphql.ErrorPresenterFunc
+	resolverHook               graphql.ResolverMiddleware
+	requestHook                graphql.RequestMiddleware
+	connectionKeepAliveTimeout time.Duration
 }
 
 func (c *Config) newRequestContext(doc *query.Document, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -99,6 +101,14 @@ func WebsocketOnOperationMiddleware(middleware graphql.OnOperationMiddleware) Op
 				return middleware(ctx, next)
 			}))
 		}
+	}
+}
+
+// WebsocketKeepAliveDuration allows you to reconfigure the keepAlive behavior.
+// By default, keep-alive is disabled.
+func WebsocketKeepAliveDuration(duration time.Duration) Option {
+	return func(cfg *Config) {
+		cfg.connectionKeepAliveTimeout = duration
 	}
 }
 

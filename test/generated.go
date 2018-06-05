@@ -25,6 +25,7 @@ type Resolvers interface {
 	Query_path(ctx context.Context) ([]Element, error)
 	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Query_viewer(ctx context.Context) (*Viewer, error)
+	Query_jsonEncoding(ctx context.Context) (string, error)
 }
 
 type executableSchema struct {
@@ -173,6 +174,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = ec._Query_date(ctx, field)
 		case "viewer":
 			out.Values[i] = ec._Query_viewer(ctx, field)
+		case "jsonEncoding":
+			out.Values[i] = ec._Query_jsonEncoding(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
 		case "__type":
@@ -295,6 +298,36 @@ func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 		return ec._Viewer(ctx, field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _Query_jsonEncoding(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_jsonEncoding(ctx)
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(string)
+		return graphql.MarshalString(res)
 	})
 }
 
@@ -1224,6 +1257,7 @@ type Query {
     path: [Element]
     date(filter: DateFilter!): Boolean!
     viewer: Viewer
+    jsonEncoding: String!
 }
 
 // this is a comment with a ` + "`" + `backtick` + "`" + `

@@ -82,9 +82,26 @@ func TestInputDefaults(t *testing.T) {
 	require.True(t, called)
 }
 
+func TestJsonEncoding(t *testing.T) {
+	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{})))
+	c := client.New(srv.URL)
+
+	var resp struct {
+		JsonEncoding string
+	}
+
+	err := c.Post(`{ jsonEncoding }`, &resp)
+	require.NoError(t, err)
+	require.Equal(t, "\U000fe4ed", resp.JsonEncoding)
+}
+
 type testResolvers struct {
 	err       error
 	queryDate func(ctx context.Context, filter models.DateFilter) (bool, error)
+}
+
+func (r *testResolvers) Query_jsonEncoding(ctx context.Context) (string, error) {
+	return "\U000fe4ed", nil
 }
 
 func (r *testResolvers) Query_viewer(ctx context.Context) (*Viewer, error) {

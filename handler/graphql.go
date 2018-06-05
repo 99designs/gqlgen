@@ -21,13 +21,13 @@ type params struct {
 }
 
 type Config struct {
-	upgrader      websocket.Upgrader
-	onConnectHook graphql.OnConnectMiddleware
-	// onOperationHook
-	recover        graphql.RecoverFunc
-	errorPresenter graphql.ErrorPresenterFunc
-	resolverHook   graphql.ResolverMiddleware
-	requestHook    graphql.RequestMiddleware
+	upgrader        websocket.Upgrader
+	onConnectHook   graphql.OnConnectMiddleware
+	onOperationHook graphql.OnOperationMiddleware
+	recover         graphql.RecoverFunc
+	errorPresenter  graphql.ErrorPresenterFunc
+	resolverHook    graphql.ResolverMiddleware
+	requestHook     graphql.RequestMiddleware
 }
 
 func (c *Config) newRequestContext(doc *query.Document, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -46,6 +46,10 @@ func (c *Config) newRequestContext(doc *query.Document, query string, variables 
 
 	if hook := c.requestHook; hook != nil {
 		reqCtx.RequestMiddleware = hook
+	}
+
+	if hook := c.onOperationHook; hook != nil {
+		reqCtx.OnOperationMiddleware = hook
 	}
 
 	return reqCtx
@@ -74,6 +78,25 @@ func WebsocketOnConnectMiddleware(middleware graphql.OnConnectMiddleware) Option
 		cfg.onConnectHook = func(ctx context.Context, params map[string]interface{}, next graphql.OnConnect) error {
 			return lastResolve(ctx, params, graphql.OnConnect(func(ctx context.Context, params map[string]interface{}) error {
 				return middleware(ctx, params, next)
+			}))
+		}
+	}
+}
+
+// WebsocketOnOperationMiddleware attaches a method to execute when the client
+// will be sent a payload. This lets the instantiator to define operations that
+// load the context with a context every operation.
+func WebsocketOnOperationMiddleware(middleware graphql.OnOperationMiddleware) Option {
+	return func(cfg *Config) {
+		if cfg.onOperationHook == nil {
+			cfg.onOperationHook = middleware
+			return
+		}
+
+		lastResolve := cfg.onOperationHook
+		cfg.onOperationHook = func(ctx context.Context, next graphql.OnOperation) error {
+			return lastResolve(ctx, graphql.OnOperation(func(ctx context.Context) error {
+				return middleware(ctx, next)
 			}))
 		}
 	}

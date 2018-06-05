@@ -6,6 +6,8 @@ import (
 	"github.com/vektah/gqlgen/neelance/query"
 )
 
+type OnOperation func(ctx context.Context) error
+type OnOperationMiddleware func(ctx context.Context, next OnOperation) error
 type OnConnect func(ctx context.Context, params map[string]interface{}) error
 type OnConnectMiddleware func(ctx context.Context, params map[string]interface{}, next OnConnect) error
 type Resolver func(ctx context.Context) (res interface{}, err error)
@@ -15,12 +17,17 @@ type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) 
 type RequestContext struct {
 	ErrorBuilder
 
-	RawQuery           string
-	Variables          map[string]interface{}
-	Doc                *query.Document
-	Recover            RecoverFunc
-	ResolverMiddleware ResolverMiddleware
-	RequestMiddleware  RequestMiddleware
+	RawQuery              string
+	Variables             map[string]interface{}
+	Doc                   *query.Document
+	Recover               RecoverFunc
+	ResolverMiddleware    ResolverMiddleware
+	RequestMiddleware     RequestMiddleware
+	OnOperationMiddleware OnOperationMiddleware
+}
+
+func DefaultOnOperationMiddleware(ctx context.Context, next OnOperation) error {
+	return next(ctx)
 }
 
 func DefaultOnConnectMiddleware(ctx context.Context, params map[string]interface{}, next OnConnect) error {
@@ -37,12 +44,13 @@ func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context
 
 func NewRequestContext(doc *query.Document, query string, variables map[string]interface{}) *RequestContext {
 	return &RequestContext{
-		Doc:                doc,
-		RawQuery:           query,
-		Variables:          variables,
-		ResolverMiddleware: DefaultResolverMiddleware,
-		RequestMiddleware:  DefaultRequestMiddleware,
-		Recover:            DefaultRecover,
+		Doc:                   doc,
+		RawQuery:              query,
+		Variables:             variables,
+		ResolverMiddleware:    DefaultResolverMiddleware,
+		RequestMiddleware:     DefaultRequestMiddleware,
+		OnOperationMiddleware: DefaultOnOperationMiddleware,
+		Recover:               DefaultRecover,
 		ErrorBuilder: ErrorBuilder{
 			ErrorPresenter: DefaultErrorPresenter,
 		},

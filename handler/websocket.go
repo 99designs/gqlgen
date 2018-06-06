@@ -244,8 +244,6 @@ func (c *wsConnection) subscribe(ctx context.Context, message *operationMessage)
 			}
 		}()
 
-		// TODO: create new context per subscription operation
-
 		next := c.exec.Subscription(ctx, op)
 		for result := next(); result != nil; result = next() {
 			c.sendData(message.ID, result)

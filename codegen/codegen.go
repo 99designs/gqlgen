@@ -89,7 +89,7 @@ func (cfg *Config) normalize() error {
 		return errors.New("ModelFilename is required")
 	}
 	cfg.ModelFilename = abs(cfg.ModelFilename)
-	cfg.modelDir = filepath.Dir(cfg.ModelFilename)
+	cfg.modelDir = filepath.ToSlash(filepath.Dir(cfg.ModelFilename))
 	if cfg.ModelPackageName == "" {
 		cfg.ModelPackageName = filepath.Base(cfg.modelDir)
 	}
@@ -100,7 +100,7 @@ func (cfg *Config) normalize() error {
 		return errors.New("ModelFilename is required")
 	}
 	cfg.ExecFilename = abs(cfg.ExecFilename)
-	cfg.execDir = filepath.Dir(cfg.ExecFilename)
+	cfg.execDir = filepath.ToSlash(filepath.Dir(cfg.ExecFilename))
 	if cfg.ExecPackageName == "" {
 		cfg.ExecPackageName = filepath.Base(cfg.execDir)
 	}
@@ -141,7 +141,7 @@ func abs(path string) string {
 	if err != nil {
 		panic(err)
 	}
-	return absPath
+	return filepath.ToSlash(absPath)
 }
 
 func fullPackageName(dir string, pkgName string) string {

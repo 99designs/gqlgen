@@ -72,10 +72,9 @@ func populateVariables(operation *query.Operation, variables map[string]interfac
 func collectFields(doc *query.Document, selSet []query.Selection, satisfies []string, variables map[string]interface{}, visited map[string]bool) []CollectedField {
 	var groupedFields []CollectedField
 	oop, err := doc.GetOperation("")
-	if err != nil {
-		panic(err)
+	if err == nil {
+		variables = populateVariables(oop, variables)
 	}
-	variables = populateVariables(oop, variables)
 	for _, sel := range selSet {
 		switch sel := sel.(type) {
 		case *query.Field:

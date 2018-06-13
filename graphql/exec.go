@@ -35,33 +35,25 @@ func runSingleDirective(directive *common.Directive, variables map[string]interf
 	fieldAllowed := true
 	switch arg.(type) {
 	case *common.Variable:
-		{
-			value := arg.Value(variables)
-			if realValue, ok := value.(bool); ok {
-				fieldAllowed = realValue
-			}
+		value := arg.Value(variables)
+		if realValue, ok := value.(bool); ok {
+			fieldAllowed = realValue
 		}
 	case *common.BasicLit:
-		{
-			value := arg.Value(nil)
-			if realValue, ok := value.(bool); ok {
-				fieldAllowed = realValue
-			}
+		value := arg.Value(nil)
+		if realValue, ok := value.(bool); ok {
+			fieldAllowed = realValue
 		}
 	}
 
 	switch directive.Name.Name {
 	case "skip":
-		{
-			return !fieldAllowed
-		}
+		return !fieldAllowed
 	case "include":
-		{
-			return fieldAllowed
-		}
+		return fieldAllowed
 	default:
 		// Custom directives are not supported yet
-		return fieldAllowed
+		return true
 	}
 }
 

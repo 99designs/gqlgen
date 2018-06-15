@@ -20,6 +20,40 @@ type Resolvers interface {
 {{- end }}
 }
 
+type ShortResolver interface {
+{{- range $object := .Objects -}}
+	{{ if $object.HasResolvers -}}
+		{{$object.GQLType}}() {{$object.GQLType}}Resolver
+	{{ end }}
+{{- end }}
+}
+
+{{- range $object := .Objects -}}
+{{ if $object.HasResolvers }}
+type {{$object.GQLType}}Resolver interface {
+	{{ range $field := $object.Fields -}}
+		{{ $field.ShortResolverDeclaration }}
+	{{ end }}
+}
+{{- end }}
+{{- end }}
+
+func WithShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+{{- range $object := .Objects -}}
+	{{ range $field := $object.Fields -}}
+		{{- if $field.IsResolver }}
+			func (s shortMapper) {{ $field.ResolverDeclaration }} {
+				return s.r.{{$field.ShortInvocation}}
+			}
+		{{- end }}
+	{{ end }}
+{{- end }}
+
 type executableSchema struct {
 	resolvers      Resolvers
 }

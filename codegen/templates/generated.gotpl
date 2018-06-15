@@ -38,7 +38,7 @@ type {{$object.GQLType}}Resolver interface {
 {{- end }}
 {{- end }}
 
-func WithShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
 	r ShortResolver

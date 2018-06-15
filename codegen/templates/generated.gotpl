@@ -29,13 +29,13 @@ type ShortResolver interface {
 }
 
 {{- range $object := .Objects -}}
-{{ if $object.HasResolvers }}
-type {{$object.GQLType}}Resolver interface {
-	{{ range $field := $object.Fields -}}
-		{{ $field.ShortResolverDeclaration }}
-	{{ end }}
-}
-{{- end }}
+	{{ if $object.HasResolvers }}
+		type {{$object.GQLType}}Resolver interface {
+		{{ range $field := $object.Fields -}}
+			{{ $field.ShortResolverDeclaration }}
+		{{ end }}
+		}
+	{{- end }}
 {{- end }}
 
 func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }

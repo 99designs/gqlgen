@@ -174,6 +174,7 @@ func bindObject(t types.Type, object *Object, imports Imports) error {
 		}
 
 		if structField := findField(underlying, field.GQLName); structField != nil {
+			prevModifiers := field.Type.Modifiers
 			field.Type.Modifiers = modifiersFromGoType(structField.Type())
 			field.GoVarName = structField.Name()
 
@@ -190,7 +191,9 @@ func bindObject(t types.Type, object *Object, imports Imports) error {
 				}
 
 			default:
-				return errors.Errorf("type mismatch on %s.%s, expected %s got %s\n", object.GQLType, field.GQLName, field.Type.FullSignature(), structField.Type())
+				// type mismatch, require custom resolver for field
+				field.GoVarName = ""
+				field.Type.Modifiers = prevModifiers
 			}
 			continue
 		}

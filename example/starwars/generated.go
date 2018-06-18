@@ -41,7 +41,7 @@ type Resolvers interface {
 	Query_starship(ctx context.Context, id string) (*Starship, error)
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 	Droid() DroidResolver
 	FriendsConnection() FriendsConnectionResolver
 	Human() HumanResolver
@@ -75,10 +75,10 @@ type QueryResolver interface {
 	Starship(ctx context.Context, id string) (*Starship, error)
 }
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 func (s shortMapper) Droid_friends(ctx context.Context, obj *Droid) ([]Character, error) {

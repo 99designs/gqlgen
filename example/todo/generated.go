@@ -25,7 +25,7 @@ type Resolvers interface {
 	MyQuery_todos(ctx context.Context) ([]Todo, error)
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 	MyMutation() MyMutationResolver
 	MyQuery() MyQueryResolver
 }
@@ -39,10 +39,10 @@ type MyQueryResolver interface {
 	Todos(ctx context.Context) ([]Todo, error)
 }
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 func (s shortMapper) MyMutation_createTodo(ctx context.Context, todo TodoInput) (Todo, error) {

@@ -22,6 +22,23 @@ type Resolvers interface {
 	Query_events(ctx context.Context) ([]Event, error)
 }
 
+type ShortResolver interface {
+	Query() QueryResolver
+}
+type QueryResolver interface {
+	Events(ctx context.Context) ([]Event, error)
+}
+
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+func (s shortMapper) Query_events(ctx context.Context) ([]Event, error) {
+	return s.r.Query().Events(ctx)
+}
+
 type executableSchema struct {
 	resolvers Resolvers
 }

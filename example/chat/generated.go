@@ -24,6 +24,39 @@ type Resolvers interface {
 	Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error)
 }
 
+type ShortResolver interface {
+	Mutation() MutationResolver
+	Query() QueryResolver
+	Subscription() SubscriptionResolver
+}
+type MutationResolver interface {
+	Post(ctx context.Context, text string, username string, roomName string) (Message, error)
+}
+type QueryResolver interface {
+	Room(ctx context.Context, name string) (*Chatroom, error)
+}
+type SubscriptionResolver interface {
+	MessageAdded(ctx context.Context, roomName string) (<-chan Message, error)
+}
+
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+func (s shortMapper) Mutation_post(ctx context.Context, text string, username string, roomName string) (Message, error) {
+	return s.r.Mutation().Post(ctx, text, username, roomName)
+}
+
+func (s shortMapper) Query_room(ctx context.Context, name string) (*Chatroom, error) {
+	return s.r.Query().Room(ctx, name)
+}
+
+func (s shortMapper) Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error) {
+	return s.r.Subscription().MessageAdded(ctx, roomName)
+}
+
 type executableSchema struct {
 	resolvers Resolvers
 }

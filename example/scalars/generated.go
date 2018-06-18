@@ -27,6 +27,41 @@ type Resolvers interface {
 	User_customResolver(ctx context.Context, obj *User) (Point, error)
 }
 
+type ShortResolver interface {
+	Query() QueryResolver
+	User() UserResolver
+}
+type QueryResolver interface {
+	User(ctx context.Context, id external.ObjectID) (*User, error)
+	Search(ctx context.Context, input SearchArgs) ([]User, error)
+}
+type UserResolver interface {
+	PrimitiveResolver(ctx context.Context, obj *User) (string, error)
+	CustomResolver(ctx context.Context, obj *User) (Point, error)
+}
+
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+func (s shortMapper) Query_user(ctx context.Context, id external.ObjectID) (*User, error) {
+	return s.r.Query().User(ctx, id)
+}
+
+func (s shortMapper) Query_search(ctx context.Context, input SearchArgs) ([]User, error) {
+	return s.r.Query().Search(ctx, input)
+}
+
+func (s shortMapper) User_primitiveResolver(ctx context.Context, obj *User) (string, error) {
+	return s.r.User().PrimitiveResolver(ctx, obj)
+}
+
+func (s shortMapper) User_customResolver(ctx context.Context, obj *User) (Point, error) {
+	return s.r.User().CustomResolver(ctx, obj)
+}
+
 type executableSchema struct {
 	resolvers Resolvers
 }

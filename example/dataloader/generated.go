@@ -26,6 +26,49 @@ type Resolvers interface {
 	Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
 }
 
+type ShortResolver interface {
+	Customer() CustomerResolver
+	Order() OrderResolver
+	Query() QueryResolver
+}
+type CustomerResolver interface {
+	Address(ctx context.Context, obj *Customer) (*Address, error)
+	Orders(ctx context.Context, obj *Customer) ([]Order, error)
+}
+type OrderResolver interface {
+	Items(ctx context.Context, obj *Order) ([]Item, error)
+}
+type QueryResolver interface {
+	Customers(ctx context.Context) ([]Customer, error)
+	Torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
+}
+
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+func (s shortMapper) Customer_address(ctx context.Context, obj *Customer) (*Address, error) {
+	return s.r.Customer().Address(ctx, obj)
+}
+
+func (s shortMapper) Customer_orders(ctx context.Context, obj *Customer) ([]Order, error) {
+	return s.r.Customer().Orders(ctx, obj)
+}
+
+func (s shortMapper) Order_items(ctx context.Context, obj *Order) ([]Item, error) {
+	return s.r.Order().Items(ctx, obj)
+}
+
+func (s shortMapper) Query_customers(ctx context.Context) ([]Customer, error) {
+	return s.r.Query().Customers(ctx)
+}
+
+func (s shortMapper) Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
+	return s.r.Query().Torture(ctx, customerIds)
+}
+
 type executableSchema struct {
 	resolvers Resolvers
 }

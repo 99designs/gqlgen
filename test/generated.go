@@ -28,6 +28,51 @@ type Resolvers interface {
 	Query_jsonEncoding(ctx context.Context) (string, error)
 }
 
+type ShortResolver interface {
+	Element() ElementResolver
+	Query() QueryResolver
+}
+type ElementResolver interface {
+	Child(ctx context.Context, obj *Element) (Element, error)
+	Error(ctx context.Context, obj *Element) (bool, error)
+}
+type QueryResolver interface {
+	Path(ctx context.Context) ([]Element, error)
+	Date(ctx context.Context, filter models.DateFilter) (bool, error)
+	Viewer(ctx context.Context) (*Viewer, error)
+	JsonEncoding(ctx context.Context) (string, error)
+}
+
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+func (s shortMapper) Element_child(ctx context.Context, obj *Element) (Element, error) {
+	return s.r.Element().Child(ctx, obj)
+}
+
+func (s shortMapper) Element_error(ctx context.Context, obj *Element) (bool, error) {
+	return s.r.Element().Error(ctx, obj)
+}
+
+func (s shortMapper) Query_path(ctx context.Context) ([]Element, error) {
+	return s.r.Query().Path(ctx)
+}
+
+func (s shortMapper) Query_date(ctx context.Context, filter models.DateFilter) (bool, error) {
+	return s.r.Query().Date(ctx, filter)
+}
+
+func (s shortMapper) Query_viewer(ctx context.Context) (*Viewer, error) {
+	return s.r.Query().Viewer(ctx)
+}
+
+func (s shortMapper) Query_jsonEncoding(ctx context.Context) (string, error) {
+	return s.r.Query().JsonEncoding(ctx)
+}
+
 type executableSchema struct {
 	resolvers Resolvers
 }

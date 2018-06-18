@@ -41,6 +41,106 @@ type Resolvers interface {
 	Query_starship(ctx context.Context, id string) (*Starship, error)
 }
 
+type ShortResolver interface {
+	Droid() DroidResolver
+	FriendsConnection() FriendsConnectionResolver
+	Human() HumanResolver
+	Mutation() MutationResolver
+	Query() QueryResolver
+}
+type DroidResolver interface {
+	Friends(ctx context.Context, obj *Droid) ([]Character, error)
+	FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error)
+}
+type FriendsConnectionResolver interface {
+	Edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error)
+	Friends(ctx context.Context, obj *FriendsConnection) ([]Character, error)
+}
+type HumanResolver interface {
+	Friends(ctx context.Context, obj *Human) ([]Character, error)
+	FriendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error)
+
+	Starships(ctx context.Context, obj *Human) ([]Starship, error)
+}
+type MutationResolver interface {
+	CreateReview(ctx context.Context, episode Episode, review Review) (*Review, error)
+}
+type QueryResolver interface {
+	Hero(ctx context.Context, episode Episode) (Character, error)
+	Reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error)
+	Search(ctx context.Context, text string) ([]SearchResult, error)
+	Character(ctx context.Context, id string) (Character, error)
+	Droid(ctx context.Context, id string) (*Droid, error)
+	Human(ctx context.Context, id string) (*Human, error)
+	Starship(ctx context.Context, id string) (*Starship, error)
+}
+
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+func (s shortMapper) Droid_friends(ctx context.Context, obj *Droid) ([]Character, error) {
+	return s.r.Droid().Friends(ctx, obj)
+}
+
+func (s shortMapper) Droid_friendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error) {
+	return s.r.Droid().FriendsConnection(ctx, obj, first, after)
+}
+
+func (s shortMapper) FriendsConnection_edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error) {
+	return s.r.FriendsConnection().Edges(ctx, obj)
+}
+
+func (s shortMapper) FriendsConnection_friends(ctx context.Context, obj *FriendsConnection) ([]Character, error) {
+	return s.r.FriendsConnection().Friends(ctx, obj)
+}
+
+func (s shortMapper) Human_friends(ctx context.Context, obj *Human) ([]Character, error) {
+	return s.r.Human().Friends(ctx, obj)
+}
+
+func (s shortMapper) Human_friendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error) {
+	return s.r.Human().FriendsConnection(ctx, obj, first, after)
+}
+
+func (s shortMapper) Human_starships(ctx context.Context, obj *Human) ([]Starship, error) {
+	return s.r.Human().Starships(ctx, obj)
+}
+
+func (s shortMapper) Mutation_createReview(ctx context.Context, episode Episode, review Review) (*Review, error) {
+	return s.r.Mutation().CreateReview(ctx, episode, review)
+}
+
+func (s shortMapper) Query_hero(ctx context.Context, episode Episode) (Character, error) {
+	return s.r.Query().Hero(ctx, episode)
+}
+
+func (s shortMapper) Query_reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error) {
+	return s.r.Query().Reviews(ctx, episode, since)
+}
+
+func (s shortMapper) Query_search(ctx context.Context, text string) ([]SearchResult, error) {
+	return s.r.Query().Search(ctx, text)
+}
+
+func (s shortMapper) Query_character(ctx context.Context, id string) (Character, error) {
+	return s.r.Query().Character(ctx, id)
+}
+
+func (s shortMapper) Query_droid(ctx context.Context, id string) (*Droid, error) {
+	return s.r.Query().Droid(ctx, id)
+}
+
+func (s shortMapper) Query_human(ctx context.Context, id string) (*Human, error) {
+	return s.r.Query().Human(ctx, id)
+}
+
+func (s shortMapper) Query_starship(ctx context.Context, id string) (*Starship, error) {
+	return s.r.Query().Starship(ctx, id)
+}
+
 type executableSchema struct {
 	resolvers Resolvers
 }

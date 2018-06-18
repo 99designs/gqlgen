@@ -25,6 +25,46 @@ type Resolvers interface {
 	MyQuery_todos(ctx context.Context) ([]Todo, error)
 }
 
+type ShortResolver interface {
+	MyMutation() MyMutationResolver
+	MyQuery() MyQueryResolver
+}
+type MyMutationResolver interface {
+	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
+	UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
+}
+type MyQueryResolver interface {
+	Todo(ctx context.Context, id int) (*Todo, error)
+	LastTodo(ctx context.Context) (*Todo, error)
+	Todos(ctx context.Context) ([]Todo, error)
+}
+
+func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+
+type shortMapper struct {
+	r ShortResolver
+}
+
+func (s shortMapper) MyMutation_createTodo(ctx context.Context, todo TodoInput) (Todo, error) {
+	return s.r.MyMutation().CreateTodo(ctx, todo)
+}
+
+func (s shortMapper) MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {
+	return s.r.MyMutation().UpdateTodo(ctx, id, changes)
+}
+
+func (s shortMapper) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
+	return s.r.MyQuery().Todo(ctx, id)
+}
+
+func (s shortMapper) MyQuery_lastTodo(ctx context.Context) (*Todo, error) {
+	return s.r.MyQuery().LastTodo(ctx)
+}
+
+func (s shortMapper) MyQuery_todos(ctx context.Context) ([]Todo, error) {
+	return s.r.MyQuery().Todos(ctx)
+}
+
 type executableSchema struct {
 	resolvers Resolvers
 }

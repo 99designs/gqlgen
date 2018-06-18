@@ -24,7 +24,7 @@ type Resolvers interface {
 	Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error)
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
@@ -39,10 +39,10 @@ type SubscriptionResolver interface {
 	MessageAdded(ctx context.Context, roomName string) (<-chan Message, error)
 }
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 func (s shortMapper) Mutation_post(ctx context.Context, text string, username string, roomName string) (Message, error) {

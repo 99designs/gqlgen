@@ -22,17 +22,17 @@ type Resolvers interface {
 	Query_events(ctx context.Context) ([]Event, error)
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 	Query() QueryResolver
 }
 type QueryResolver interface {
 	Events(ctx context.Context) ([]Event, error)
 }
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 func (s shortMapper) Query_events(ctx context.Context) ([]Event, error) {

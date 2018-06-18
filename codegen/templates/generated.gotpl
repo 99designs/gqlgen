@@ -20,7 +20,7 @@ type Resolvers interface {
 {{- end }}
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 {{- range $object := .Objects -}}
 	{{ if $object.HasResolvers -}}
 		{{$object.GQLType}}() {{$object.GQLType}}Resolver
@@ -38,10 +38,10 @@ type ShortResolver interface {
 	{{- end }}
 {{- end }}
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 {{- range $object := .Objects -}}

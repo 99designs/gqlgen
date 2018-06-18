@@ -28,7 +28,7 @@ type Resolvers interface {
 	Query_jsonEncoding(ctx context.Context) (string, error)
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 	Element() ElementResolver
 	Query() QueryResolver
 }
@@ -43,10 +43,10 @@ type QueryResolver interface {
 	JsonEncoding(ctx context.Context) (string, error)
 }
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 func (s shortMapper) Element_child(ctx context.Context, obj *Element) (Element, error) {

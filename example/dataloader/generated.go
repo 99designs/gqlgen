@@ -26,7 +26,7 @@ type Resolvers interface {
 	Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 	Customer() CustomerResolver
 	Order() OrderResolver
 	Query() QueryResolver
@@ -43,10 +43,10 @@ type QueryResolver interface {
 	Torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
 }
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 func (s shortMapper) Customer_address(ctx context.Context, obj *Customer) (*Address, error) {

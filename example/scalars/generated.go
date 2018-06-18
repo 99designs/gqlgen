@@ -27,7 +27,7 @@ type Resolvers interface {
 	User_customResolver(ctx context.Context, obj *User) (Point, error)
 }
 
-type ShortResolver interface {
+type ShortResolvers interface {
 	Query() QueryResolver
 	User() UserResolver
 }
@@ -40,10 +40,10 @@ type UserResolver interface {
 	CustomResolver(ctx context.Context, obj *User) (Point, error)
 }
 
-func FromShort(r ShortResolver) Resolvers { return shortMapper{r: r} }
+func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
 
 type shortMapper struct {
-	r ShortResolver
+	r ShortResolvers
 }
 
 func (s shortMapper) Query_user(ctx context.Context, id external.ObjectID) (*User, error) {

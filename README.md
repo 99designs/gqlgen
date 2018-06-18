@@ -10,7 +10,7 @@ See the [docs](https://gqlgen.com/) for a getting started guide.
 | --------: | :-------- | :-------- | :-------- | :-------- |
 | Kind | schema first | schema first | run time types | struct first |
 | Boilerplate | less | more | more | some |
-| Docs | [docs](https://gqlgen.com) & [examples](https://github.com/vektah/gqlgen/tree/master/example) | [example](https://github.com/vektah/gqlgen/tree/master/example) | [examples](https://github.com/graph-gophers/graphql-go/tree/master/example/starwars) | [examples](https://github.com/graphql-go/graphql/tree/master/examples) | [example](https://github.com/samsarahq/thunder/tree/master/example)|
+| Docs | [docs](https://gqlgen.com) & [examples](https://github.com/vektah/gqlgen/tree/master/example) | [examples](https://github.com/graph-gophers/graphql-go/tree/master/example/starwars) | [examples](https://github.com/graphql-go/graphql/tree/master/examples) | [examples](https://github.com/samsarahq/thunder/tree/master/example)|
 | Query | :+1: | :+1: | :+1: | :+1: |
 | Mutation | :+1: | :construction: [pr](https://github.com/graph-gophers/graphql-go/pull/182) | :+1: | :+1: |
 | Subscription | :+1: | :construction: [pr](https://github.com/graph-gophers/graphql-go/pull/132) | :no_entry: [is](https://github.com/graphql-go/graphql/issues/207) | :+1: |

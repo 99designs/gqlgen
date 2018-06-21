@@ -3,4 +3,4 @@
 set -euo pipefail
 
 hugo
-gsutil rsync -d public gs://gqlgen.com
+gsutil -m rsync -dr public gs://gqlgen.com

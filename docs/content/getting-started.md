@@ -21,7 +21,7 @@ You can find the finished code for this tutorial [here](https://github.com/vekta
 Assuming you already have a working [go environment](https://golang.org/doc/install) you can simply go get:
 
 ```sh
-go get github.com/vektah/gqlgen
+go get -u github.com/vektah/gqlgen
 ```
 
 
@@ -39,22 +39,67 @@ type Todo {
 }
 
 type User {
-    id: ID!
-    name: String!
+  id: ID!
+  name: String!
 }
 
 type Query {
   todos: [Todo!]!
 }
 
+input NewTodo {
+  text: String!
+  userId: String!
+}
+
 type Mutation {
-  createTodo(text: String!): Todo!
+  createTodo(input: NewTodo!): Todo!
 }
 ```
 
+Now lets write out our models:
+graph/graph.go
+`graph/graph.go`
+```go
+package graph
+
+
+type User struct {
+	ID   string `json:"id"`
+	Name string
+}
+
+type Todo struct {
+	ID     string
+	Text   string
+	Done   bool
+	UserID User 
+}
+
+```
+
+So we have our schema and our models. now we need to link them up:
+
+`graph/types.json`
+```json
+{
+  "User": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User",
+  "Todo": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.Todo"
+}
+``` 
+This simply says, `User` in schema is backed by `graph.User` in go.
+
+
+gqlgen then follows some pretty simple rules to match up all the fields:
+ 1. If there is a property with that name and type, use it
+ 2. If there is a method with that name and type, use it
+ 3. Otherwise, add it to the Resolvers interface. This is the magic.
+
 ## Generate the bindings
 
-Now that we have defined the shape of our data, and what actions can be taken we can ask gqlgen to convert the schema into code:
+
+Lets generate the server now: 
+
 ```bash
 mkdir graph
 cd graph
@@ -70,37 +115,29 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	Mutation_createTodo(ctx context.Context, text string) (Todo, error)
+	Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, error)
 	Query_todos(ctx context.Context) ([]Todo, error)
-	Todo_user(ctx context.Context, it *Todo) (User, error)
+
+	Todo_user(ctx context.Context, obj *Todo) (User, error) 
 }
 
 // graph/models_gen.go
-type Todo struct {
-	ID     string
-	Text   string
-	Done   bool
-	UserID string
+type NewTodo struct {
+	Text string `json:"text"`
+	User int    `json:"user"`
 }
-
-type User struct {
-	ID   string
-	Name string
-}
-
 ```
 
-**Note**: ctx here is the golang context.Context, its used to pass per-request context like url params, tracing 
-information, cancellation, and also the current selection set. This makes it more like the `info` argument in 
-`graphql-js`. Because the caller will create an object to satisfy the interface, they can inject any dependencies in 
-directly.
+Notice the `Todo_user` resolver? Thats gqlgen saying "I dont know how to get a User from a Todo, you tell me.". Its worked out everything else, for us.
+
+For any missing models (like NewTodo) gqlgen will generate a go struct. This is usually only used for input types and one-off return values. Most of the time your types will be coming from the database, or an API client so binding is better than generating. 
 
 ## Write the resolvers
 
-Finally, we get to write some code! 
+All thats left for us to do now is fill in the blanks in that interface:
 
+`graph/graph.go`
 ```go
-// graph/graph.go
 package graph
 
 import (
@@ -108,6 +145,18 @@ import (
 	"fmt"
 	"math/rand"
 )
+
+type User struct {
+	ID   string
+	Name string
+}
+
+type Todo struct {
+	ID     string
+	Text   string
+	Done   bool
+	UserID string
+}
 
 type MyApp struct {
 	todos []Todo
@@ -132,8 +181,8 @@ func (a *MyApp) Todo_user(ctx context.Context, it *Todo) (User, error) {
 }
 ```
 
+`main.go`
 ```go
-// main.go
 package main
 
 import (
@@ -158,13 +207,13 @@ func main() {
 
 We now have a working server, to start it:
 ```bash
-go run *.go
+go run main.go
 ```
 
 then open http://localhost:8080 in a browser. here are some queries to try:
 ```graphql
 mutation createTodo {
-  createTodo(text:"test") {
+  createTodo(input:{text:"todo", user:"1"}) {
     user {
       id
     }
@@ -174,43 +223,15 @@ mutation createTodo {
 }
 
 query findTodos {
-  todos {
-    text
-    done
-    user {
-      name
+  	todos {
+      text
+      done
+      user {
+        name
+      }
     }
-  }
 }
 ```
-
-## Customizing the models
-
-Generated models are nice to get moving quickly, but you probably want control over them at some point. To do that
-create a `graph/types.json`:
-```json
-{
-  "User": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User"
-}
-```
-
-and create the model yourself:
-```go
-// graph/graph.go
-type User struct {
-	ID   string
-	Name string
-}
-```
-
-then regenerate, this time specifying the type map:
-
-```bash
-gqlgen -typemap types.json -schema ../schema.graphql
-```
-
-gqlgen will look at the user defined types and match the fields up finding fields and functions by matching names.
-
 
 ## Finishing touches
 
@@ -219,17 +240,26 @@ to lock your dependencies:
 
 *Note*: If you dont have dep installed yet, you can get it [here](https://github.com/golang/dep)
 
+First uninstall the global version we grabbed earlier. This is a good way to prevent version mismatch footguns.
+
+```bash
+rm ~/go/bin/gqlgen
+rm -rf ~/go/src/github.com/vektah/gqlgen
+``` 
+
+Next install gorunpkg, its kind of like npx but only searches vendor.
+
 ```bash
 dep init
 dep ensure
 go get github.com/vektah/gorunpkg
 ```
 
-at the top of our main.go:
+Now at the top of our graph.go:
 ```go
-//go:generate gorunpkg github.com/vektah/gqlgen -typemap types.json -out generated.go -package main
+//go:generate gorunpkg gqlgen -typemap types.json -schema ../schema.graphql
 
-package main
+package graph
 ```
 **Note:** be careful formatting this, there must no space between the `//` and `go:generate`, and one empty line
 between it and the `package main`.
@@ -237,7 +267,7 @@ between it and the `package main`.
 
 This magic comment tells `go generate` what command to run when we want to regenerate our code. to do so run:
 ```go
-go generate ./..
+go generate ./...
 ``` 
 
 *gorunpkg* will build and run the version of gqlgen we just installed into vendor with dep. This makes sure

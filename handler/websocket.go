@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/vektah/gqlgen/graphql"
@@ -25,7 +26,7 @@ const (
 	dataMsg                = "data"                 // Server -> Client
 	errorMsg               = "error"                // Server -> Client
 	completeMsg            = "complete"             // Server -> Client
-	//connectionKeepAliveMsg = "ka"                 // Server -> Client  TODO: keepalives
+	connectionKeepAliveMsg = "ka"                   // Server -> Client
 )
 
 type operationMessage struct {
@@ -35,12 +36,12 @@ type operationMessage struct {
 }
 
 type wsConnection struct {
-	ctx    context.Context
-	conn   *websocket.Conn
-	exec   graphql.ExecutableSchema
-	active map[string]context.CancelFunc
-	mu     sync.Mutex
-	cfg    *Config
+	conn           *websocket.Conn
+	exec           graphql.ExecutableSchema
+	active         map[string]context.CancelFunc
+	keepAliveTimer *time.Timer
+	mu             sync.Mutex
+	cfg            *Config
 }
 
 func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, cfg *Config) {
@@ -57,22 +58,42 @@ func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Req
 		active: map[string]context.CancelFunc{},
 		exec:   exec,
 		conn:   ws,
-		ctx:    r.Context(),
 		cfg:    cfg,
 	}
 
-	if !conn.init() {
+	initMessage, ok := conn.init()
+	if !ok {
 		return
 	}
 
-	conn.run()
+	// When the websocket connection is initialized, and a onConnect
+	// function is defined, then we should pass the payload data up to
+	// the handler.
+	connectionParams := map[string]interface{}{}
+	if initMessage.Payload != nil {
+		if err := json.Unmarshal(initMessage.Payload, &connectionParams); err != nil {
+			conn.sendConnectionError("invalid json")
+			return
+		}
+	}
+
+	next := func(ctx context.Context, params map[string]interface{}) error {
+		return conn.run(ctx)
+	}
+
+	if err := cfg.onConnectHook(r.Context(), connectionParams, next); err != nil {
+		// TODO: handle the error somehow?
+		return
+	}
 }
 
-func (c *wsConnection) init() bool {
+// init retrieves the connection init message that signifies a valid established
+// subscription connection.
+func (c *wsConnection) init() (*operationMessage, bool) {
 	message := c.readOp()
 	if message == nil {
 		c.close(websocket.CloseProtocolError, "decoding error")
-		return false
+		return nil, false
 	}
 
 	switch message.Type {
@@ -80,33 +101,74 @@ func (c *wsConnection) init() bool {
 		c.write(&operationMessage{Type: connectionAckMsg})
 	case connectionTerminateMsg:
 		c.close(websocket.CloseNormalClosure, "terminated")
-		return false
+		return nil, false
 	default:
 		c.sendConnectionError("unexpected message %s", message.Type)
 		c.close(websocket.CloseProtocolError, "unexpected message")
-		return false
+		return nil, false
 	}
 
-	return true
+	return message, true
 }
 
 func (c *wsConnection) write(msg *operationMessage) {
 	c.mu.Lock()
-	c.conn.WriteJSON(msg)
+	c.conn.WriteJSON(msg) // TODO: handle error
+
+	// Reset the keep alive timer if it's been setup.
+	if c.cfg.connectionKeepAliveTimeout != 0 && c.keepAliveTimer != nil {
+		c.keepAliveTimer.Reset(c.cfg.connectionKeepAliveTimeout)
+	}
+
 	c.mu.Unlock()
 }
 
-func (c *wsConnection) run() {
+func (c *wsConnection) keepAlive(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			if !c.keepAliveTimer.Stop() {
+				<-c.keepAliveTimer.C
+			}
+			return
+		case <-c.keepAliveTimer.C:
+			// We don't reset the timer here, because the `c.write` command
+			// will reset the timer anyways.
+			c.write(&operationMessage{Type: connectionKeepAliveMsg})
+		}
+	}
+}
+
+func (c *wsConnection) run(ctx context.Context) error {
+	// We create a cancellation that will shutdown the keep-alive when we leave
+	// this function.
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Create a timer that will fire every interval if a write hasn't been made
+	// to keep the connection alive.
+	if c.cfg.connectionKeepAliveTimeout != 0 {
+		// Create the new timer that will fire `c.cfg.connectionKeepAliveTimeout`
+		// from now.
+		c.mu.Lock()
+		c.keepAliveTimer = time.NewTimer(c.cfg.connectionKeepAliveTimeout)
+		c.mu.Unlock()
+
+		// Launch the keepAlive manager. This will exit when the context is
+		// canceled.
+		go c.keepAlive(ctx)
+	}
+
 	for {
 		message := c.readOp()
 		if message == nil {
-			return
+			return errors.Errorf("message was nil")
 		}
 
 		switch message.Type {
 		case startMsg:
-			if !c.subscribe(message) {
-				return
+			if !c.subscribe(ctx, message) {
+				return errors.Errorf("subscription failed")
 			}
 		case stopMsg:
 			c.mu.Lock()
@@ -120,16 +182,16 @@ func (c *wsConnection) run() {
 			closer()
 		case connectionTerminateMsg:
 			c.close(websocket.CloseNormalClosure, "terminated")
-			return
+			return nil
 		default:
 			c.sendConnectionError("unexpected message %s", message.Type)
 			c.close(websocket.CloseProtocolError, "unexpected message")
-			return
+			return errors.Errorf("unexpected message: %s", message.Type)
 		}
 	}
 }
 
-func (c *wsConnection) subscribe(message *operationMessage) bool {
+func (c *wsConnection) subscribe(ctx context.Context, message *operationMessage) bool {
 	var reqParams params
 	if err := json.Unmarshal(message.Payload, &reqParams); err != nil {
 		c.sendConnectionError("invalid json")
@@ -155,7 +217,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	}
 
 	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
-	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
+	ctx = graphql.WithRequestContext(ctx, reqCtx)
 
 	if op.Type != query.Subscription {
 		var result *graphql.Response
@@ -181,6 +243,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
 			}
 		}()
+
 		next := c.exec.Subscription(ctx, op)
 		for result := next(); result != nil; result = next() {
 			c.sendData(message.ID, result)

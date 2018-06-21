@@ -16,7 +16,13 @@
 				return nil
 			}
 			var out graphql.OrderedMap
-			out.Add(field.Alias, func() graphql.Marshaler { {{ $field.WriteJson }} }())
+			err := ec.OnOperationMiddleware(ctx, func(ctx context.Context) error {
+				out.Add(field.Alias, func() graphql.Marshaler { {{ $field.WriteJson }} }())
+				return nil
+			})
+			if err != nil {
+				return nil
+			}
 			return &out
 		}
 	}

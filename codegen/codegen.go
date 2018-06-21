@@ -149,7 +149,9 @@ func fullPackageName(dir string, pkgName string) string {
 
 	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
 		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
-		fullPkgName = strings.TrimPrefix(fullPkgName, gopath)
+		if strings.EqualFold(gopath, fullPkgName[0:len(gopath)]) {
+			fullPkgName = fullPkgName[len(gopath):]
+		}
 	}
 	return filepath.ToSlash(fullPkgName)
 }

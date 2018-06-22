@@ -115,7 +115,7 @@ func dump(val interface{}) string {
 			buf.WriteString(strconv.Quote(key))
 			buf.WriteString(":")
 			buf.WriteString(dump(data))
-                        buf.WriteString(",")
+			buf.WriteString(",")
 		}
 		buf.WriteString("}")
 		return buf.String()

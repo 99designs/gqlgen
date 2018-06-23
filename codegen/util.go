@@ -186,7 +186,7 @@ func bindObject(t types.Type, object *Object, imports *Imports) error {
 				pkg, typ := pkgAndType(structField.Type().String())
 				imp := imports.findByPath(pkg)
 				field.CastType = typ
-				if imp.Alias != "" {
+				if imp != nil {
 					field.CastType = imp.Alias + "." + typ
 				}
 

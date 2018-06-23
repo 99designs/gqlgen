@@ -15,7 +15,7 @@ type Build struct {
 	Objects          Objects
 	Inputs           Objects
 	Interfaces       []*Interface
-	Imports          Imports
+	Imports          []*Import
 	QueryRoot        *Object
 	MutationRoot     *Object
 	SubscriptionRoot *Object
@@ -24,7 +24,7 @@ type Build struct {
 
 type ModelBuild struct {
 	PackageName string
-	Imports     Imports
+	Imports     []*Import
 	Models      []Model
 	Enums       []Enum
 }
@@ -33,11 +33,11 @@ type ModelBuild struct {
 func (cfg *Config) models() (*ModelBuild, error) {
 	namedTypes := cfg.buildNamedTypes()
 
-	imports := buildImports(namedTypes, cfg.modelDir)
-	prog, err := cfg.loadProgram(imports, true)
+	prog, err := cfg.loadProgram(namedTypes, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
+	imports := buildImports(namedTypes, cfg.modelDir)
 
 	cfg.bindTypes(imports, namedTypes, cfg.modelDir, prog)
 
@@ -49,7 +49,7 @@ func (cfg *Config) models() (*ModelBuild, error) {
 		PackageName: cfg.ModelPackageName,
 		Models:      models,
 		Enums:       cfg.buildEnums(namedTypes),
-		Imports:     buildImports(namedTypes, cfg.modelDir),
+		Imports:     imports.imports,
 	}, nil
 }
 
@@ -57,13 +57,13 @@ func (cfg *Config) models() (*ModelBuild, error) {
 func (cfg *Config) bind() (*Build, error) {
 	namedTypes := cfg.buildNamedTypes()
 
-	imports := buildImports(namedTypes, cfg.execDir)
-	prog, err := cfg.loadProgram(imports, false)
+	prog, err := cfg.loadProgram(namedTypes, false)
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	imports = cfg.bindTypes(imports, namedTypes, cfg.execDir, prog)
+	imports := buildImports(namedTypes, cfg.execDir)
+	cfg.bindTypes(imports, namedTypes, cfg.execDir, prog)
 
 	objects, err := cfg.buildObjects(namedTypes, prog, imports)
 	if err != nil {
@@ -80,7 +80,7 @@ func (cfg *Config) bind() (*Build, error) {
 		Objects:     objects,
 		Interfaces:  cfg.buildInterfaces(namedTypes, prog),
 		Inputs:      inputs,
-		Imports:     imports,
+		Imports:     imports.imports,
 	}
 
 	if qr, ok := cfg.schema.EntryPoints["query"]; ok {
@@ -122,7 +122,7 @@ func (cfg *Config) bind() (*Build, error) {
 	return b, nil
 }
 
-func (cfg *Config) loadProgram(imports Imports, allowErrors bool) (*loader.Program, error) {
+func (cfg *Config) loadProgram(namedTypes NamedTypes, allowErrors bool) (*loader.Program, error) {
 	conf := loader.Config{}
 	if allowErrors {
 		conf = loader.Config{
@@ -132,7 +132,11 @@ func (cfg *Config) loadProgram(imports Imports, allowErrors bool) (*loader.Progr
 			},
 		}
 	}
-	for _, imp := range imports {
+	for _, imp := range ambientImports {
+		conf.Import(imp)
+	}
+
+	for _, imp := range namedTypes {
 		if imp.Package != "" {
 			conf.Import(imp.Package)
 		}

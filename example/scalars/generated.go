@@ -5,10 +5,10 @@ package scalars
 import (
 	"bytes"
 	context "context"
-	external "external"
 	strconv "strconv"
 	time "time"
 
+	external "github.com/vektah/gqlgen/example/scalars/vendor/external"
 	graphql "github.com/vektah/gqlgen/graphql"
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"

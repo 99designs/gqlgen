@@ -5,12 +5,15 @@ import (
 )
 
 type Import struct {
-	Name    string
-	Package string
+	Alias string
+	Path  string
 }
 
-type Imports []*Import
+type Imports struct {
+	imports []*Import
+	destDir string
+}
 
 func (i *Import) Write() string {
-	return i.Name + " " + strconv.Quote(i.Package)
+	return i.Alias + " " + strconv.Quote(i.Path)
 }

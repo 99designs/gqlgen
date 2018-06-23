@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports Imports) (Objects, error) {
+func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports *Imports) (Objects, error) {
 	var objects Objects
 
 	for _, typ := range cfg.schema.Types {

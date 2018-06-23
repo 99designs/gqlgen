@@ -1,6 +1,6 @@
 type Query {
     user(id: ID!): User
-    search(input: SearchArgs = {location: "37,144"}): [User!]!
+    search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
 }
 
 type User {

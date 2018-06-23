@@ -65,7 +65,7 @@ package graph
 
 
 type User struct {
-	ID   string `json:"id"`
+	ID   string
 	Name string
 }
 

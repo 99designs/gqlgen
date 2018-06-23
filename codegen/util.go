@@ -131,7 +131,7 @@ func findField(typ *types.Struct, name string) *types.Var {
 	return nil
 }
 
-func bindObject(t types.Type, object *Object, imports Imports) error {
+func bindObject(t types.Type, object *Object, imports *Imports) error {
 	namedType, ok := t.(*types.Named)
 	if !ok {
 		return errors.Errorf("expected %s to be a named struct, instead found %s", object.FullName(), t.String())
@@ -184,10 +184,10 @@ func bindObject(t types.Type, object *Object, imports Imports) error {
 
 			case normalizeVendor(structField.Type().Underlying().String()):
 				pkg, typ := pkgAndType(structField.Type().String())
-				imp := imports.findByPkg(pkg)
+				imp := imports.findByPath(pkg)
 				field.CastType = typ
-				if imp.Name != "" {
-					field.CastType = imp.Name + "." + typ
+				if imp.Alias != "" {
+					field.CastType = imp.Alias + "." + typ
 				}
 
 			default:

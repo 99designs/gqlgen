@@ -31,7 +31,7 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 	return types
 }
 
-func (cfg *Config) bindTypes(imports Imports, namedTypes NamedTypes, destDir string, prog *loader.Program) Imports {
+func (cfg *Config) bindTypes(imports *Imports, namedTypes NamedTypes, destDir string, prog *loader.Program) {
 	for _, t := range namedTypes {
 		if t.Package == "" {
 			continue
@@ -45,10 +45,9 @@ func (cfg *Config) bindTypes(imports Imports, namedTypes NamedTypes, destDir str
 			t.Marshaler = &cpy
 
 			t.Package, t.GoType = pkgAndType(sig.Params().At(0).Type().String())
-			imports, t.Import = imports.addPkg(namedTypes, destDir, t.Package)
+			t.Import = imports.add(t.Package)
 		}
 	}
-	return imports
 }
 
 // namedTypeFromSchema objects for every graphql type, including primitives.

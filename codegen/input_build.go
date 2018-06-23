@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, imports Imports) (Objects, error) {
+func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, imports *Imports) (Objects, error) {
 	var inputs Objects
 
 	for _, typ := range cfg.schema.Types {

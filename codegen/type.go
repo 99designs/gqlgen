@@ -40,10 +40,10 @@ func (t Ref) FullName() string {
 }
 
 func (t Ref) PkgDot() string {
-	if t.Import == nil || t.Import.Name == "" {
+	if t.Import == nil || t.Import.Alias == "" {
 		return ""
 	}
-	return t.Import.Name + "."
+	return t.Import.Alias + "."
 }
 
 func (t Type) Signature() string {

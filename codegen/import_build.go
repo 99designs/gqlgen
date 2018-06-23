@@ -48,6 +48,10 @@ func (s *Imports) add(path string) *Import {
 		return nil
 	}
 
+	if stringHasSuffixFold(s.destDir, path) {
+		return nil
+	}
+
 	if existing := s.findByPath(path); existing != nil {
 		return existing
 	}
@@ -66,6 +70,10 @@ func (s *Imports) add(path string) *Import {
 	return imp
 }
 
+func stringHasSuffixFold(s, suffix string) bool {
+	return len(s) >= len(suffix) && strings.EqualFold(s[len(s)-len(suffix):], suffix)
+}
+
 func (s Imports) finalize() []*Import {
 	// ensure stable ordering by sorting
 	sort.Slice(s.imports, func(i, j int) bool {
@@ -73,10 +81,6 @@ func (s Imports) finalize() []*Import {
 	})
 
 	for _, imp := range s.imports {
-		if strings.HasSuffix(s.destDir, imp.Path) {
-			imp.Alias = ""
-			continue
-		}
 		alias := imp.Name
 
 		i := 1

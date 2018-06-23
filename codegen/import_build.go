@@ -1,9 +1,8 @@
 package codegen
 
 import (
+	"fmt"
 	"go/build"
-	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -44,12 +43,6 @@ func buildImports(types NamedTypes, destDir string) *Imports {
 	return &imports
 }
 
-var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
-
-func sanitizePackageName(pkg string) string {
-	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
-}
-
 func (s *Imports) add(path string) *Import {
 	if path == "" {
 		return nil
@@ -64,35 +57,40 @@ func (s *Imports) add(path string) *Import {
 		panic(err)
 	}
 
-	alias := ""
-	if !strings.HasSuffix(s.destDir, path) {
-		if pkg == nil {
-			panic(path + " was not loaded")
-		}
-
-		alias = pkg.Name
-		i := 1
-		imp := s.findByAlias(alias)
-		for imp != nil && imp.Path != path {
-			alias = pkg.Name + strconv.Itoa(i)
-			imp = s.findByAlias(alias)
-			i++
-			if i > 10 {
-				panic("too many collisions")
-			}
-		}
-	}
-
 	imp := &Import{
-		Alias: alias,
-		Path:  path,
+		Name: pkg.Name,
+		Path: path,
 	}
 	s.imports = append(s.imports, imp)
-	sort.Slice(s.imports, func(i, j int) bool {
-		return s.imports[i].Alias > s.imports[j].Alias
-	})
 
 	return imp
+}
+
+func (s Imports) finalize() []*Import {
+	// ensure stable ordering by sorting
+	sort.Slice(s.imports, func(i, j int) bool {
+		return s.imports[i].Path > s.imports[j].Path
+	})
+
+	for _, imp := range s.imports {
+		if strings.HasSuffix(s.destDir, imp.Path) {
+			imp.Alias = ""
+			continue
+		}
+		alias := imp.Name
+
+		i := 1
+		for s.findByAlias(alias) != nil {
+			alias = imp.Name + strconv.Itoa(i)
+			i++
+			if i > 10 {
+				panic(fmt.Errorf("too many collisions, last attempt was %s", imp.Alias))
+			}
+		}
+		imp.Alias = alias
+	}
+
+	return s.imports
 }
 
 func (s Imports) findByPath(importPath string) *Import {

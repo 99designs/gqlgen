@@ -3,7 +3,7 @@
 package scalars
 
 import (
-	external "github.com/vektah/gqlgen/example/scalars/vendor/external"
+	external "external"
 )
 
 type Address struct {

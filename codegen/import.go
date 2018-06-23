@@ -5,6 +5,7 @@ import (
 )
 
 type Import struct {
+	Name  string
 	Alias string
 	Path  string
 }

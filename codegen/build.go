@@ -49,7 +49,7 @@ func (cfg *Config) models() (*ModelBuild, error) {
 		PackageName: cfg.ModelPackageName,
 		Models:      models,
 		Enums:       cfg.buildEnums(namedTypes),
-		Imports:     imports.imports,
+		Imports:     imports.finalize(),
 	}, nil
 }
 
@@ -80,7 +80,7 @@ func (cfg *Config) bind() (*Build, error) {
 		Objects:     objects,
 		Interfaces:  cfg.buildInterfaces(namedTypes, prog),
 		Inputs:      inputs,
-		Imports:     imports.imports,
+		Imports:     imports.finalize(),
 	}
 
 	if qr, ok := cfg.schema.EntryPoints["query"]; ok {

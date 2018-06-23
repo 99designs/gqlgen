@@ -5,6 +5,7 @@ package test
 import (
 	"bytes"
 	context "context"
+	remote_api "remote_api"
 	strconv "strconv"
 
 	graphql "github.com/vektah/gqlgen/graphql"
@@ -12,7 +13,6 @@ import (
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
 	models "github.com/vektah/gqlgen/test/models"
-	remote_api "github.com/vektah/gqlgen/test/vendor/remote_api"
 )
 
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {

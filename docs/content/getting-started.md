@@ -73,7 +73,7 @@ type Todo struct {
 	ID     string
 	Text   string
 	Done   bool
-	UserID User 
+	UserID string
 }
 
 ```
@@ -91,6 +91,7 @@ This simply says, `User` in schema is backed by `graph.User` in go.
 
 
 gqlgen then follows some pretty simple rules to match up all the fields:
+
  1. If there is a property with that name and type, use it
  2. If there is a method with that name and type, use it
  3. Otherwise, add it to the Resolvers interface. This is the magic.
@@ -103,7 +104,7 @@ Lets generate the server now:
 ```bash
 mkdir graph
 cd graph
-gqlgen -schema ../schema.graphql
+gqlgen -types types.json -schema ../schema.graphql
 ```
 
 gqlgen should have created two new files `generated.go` and `models_gen.go`. If we take a peek in both we can see what the server has generated:

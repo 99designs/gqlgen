@@ -71,15 +71,18 @@ func populateVariables(operation *query.Operation, variables map[string]interfac
 
 func collectFields(doc *query.Document, selSet []query.Selection, satisfies []string, variables map[string]interface{}, visited map[string]bool) []CollectedField {
 	var groupedFields []CollectedField
-	oop, err := doc.GetOperation("")
-	if err == nil {
-		variables = populateVariables(oop, variables)
-	}
 	for _, sel := range selSet {
 		switch sel := sel.(type) {
 		case *query.Field:
-			if len(sel.Directives) > 0 && !runDirectives(sel.Directives, variables) {
-				continue
+			if len(sel.Directives) > 0 {
+				oop, err := doc.GetOperation("")
+				if err != nil {
+					continue
+				}
+				variables = populateVariables(oop, variables)
+				if !runDirectives(sel.Directives, variables) {
+					continue
+				}
 			}
 			f := getOrCreateField(&groupedFields, sel.Alias.Name, func() CollectedField {
 				f := CollectedField{

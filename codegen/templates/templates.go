@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
+	"sort"
 )
 
 func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
@@ -111,7 +112,15 @@ func dump(val interface{}) string {
 	case map[string]interface{}:
 		buf := bytes.Buffer{}
 		buf.WriteString("map[string]interface{}{")
-		for key, data := range val {
+		var keys []string
+		for key := range val {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+
+		for _, key := range keys {
+			data := val[key]
+			
 			buf.WriteString(strconv.Quote(key))
 			buf.WriteString(":")
 			buf.WriteString(dump(data))

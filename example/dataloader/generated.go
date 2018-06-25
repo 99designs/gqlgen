@@ -14,9 +14,6 @@ import (
 )
 
 // MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-//
-// Deprecated: Use NewExecutableSchema instead.
-// See: https://github.com/vektah/gqlgen/issues/106 and https://github.com/vektah/gqlgen/pull/134
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
 }

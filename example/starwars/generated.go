@@ -15,8 +15,17 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
+//
+// Deprecated: Use NewExecutableSchema instead.
+// See: https://github.com/vektah/gqlgen/issues/106 and https://github.com/vektah/gqlgen/pull/134
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -41,7 +50,7 @@ type Resolvers interface {
 	Query_starship(ctx context.Context, id string) (*Starship, error)
 }
 
-type ShortResolvers interface {
+type ResolverRoot interface {
 	Droid() DroidResolver
 	FriendsConnection() FriendsConnectionResolver
 	Human() HumanResolver
@@ -75,10 +84,8 @@ type QueryResolver interface {
 	Starship(ctx context.Context, id string) (*Starship, error)
 }
 
-func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
-
 type shortMapper struct {
-	r ShortResolvers
+	r ResolverRoot
 }
 
 func (s shortMapper) Droid_friends(ctx context.Context, obj *Droid) ([]Character, error) {

@@ -15,8 +15,17 @@ import (
 	models "github.com/vektah/gqlgen/test/models"
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
+//
+// Deprecated: Use NewExecutableSchema instead.
+// See: https://github.com/vektah/gqlgen/issues/106 and https://github.com/vektah/gqlgen/pull/134
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -28,7 +37,7 @@ type Resolvers interface {
 	Query_jsonEncoding(ctx context.Context) (string, error)
 }
 
-type ShortResolvers interface {
+type ResolverRoot interface {
 	Element() ElementResolver
 	Query() QueryResolver
 }
@@ -43,10 +52,8 @@ type QueryResolver interface {
 	JsonEncoding(ctx context.Context) (string, error)
 }
 
-func FromShort(r ShortResolvers) Resolvers { return shortMapper{r: r} }
-
 type shortMapper struct {
-	r ShortResolvers
+	r ResolverRoot
 }
 
 func (s shortMapper) Element_child(ctx context.Context, obj *Element) (Element, error) {

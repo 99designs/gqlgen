@@ -42,7 +42,7 @@ func TestScalars(t *testing.T) {
 
 		require.Equal(t, "1,2", resp.User.Address.Location)
 		// There can be a delay between creation and test assertion, so we
-		// give some leeway to eliminate false positives.S
+		// give some leeway to eliminate false positives.
 		require.WithinDuration(t, time.Now(), time.Unix(resp.User.Created, 0), 5*time.Second)
 		require.Equal(t, "6,66", resp.Search[0].Address.Location)
 		require.Equal(t, int64(666), resp.Search[0].Created)

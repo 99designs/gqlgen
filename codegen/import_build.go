@@ -1,85 +1,114 @@
 package codegen
 
 import (
-	"path/filepath"
-	"regexp"
+	"fmt"
+	"go/build"
+	"sort"
 	"strconv"
 	"strings"
 )
 
-func buildImports(types NamedTypes, destDir string) Imports {
+// These imports are referenced by the generated code, and are assumed to have the
+// default alias. So lets make sure they get added first, and any later collisions get
+// renamed.
+var ambientImports = []string{
+	"context",
+	"fmt",
+	"io",
+	"strconv",
+	"time",
+	"sync",
+	"github.com/vektah/gqlgen/neelance/introspection",
+	"github.com/vektah/gqlgen/neelance/errors",
+	"github.com/vektah/gqlgen/neelance/query",
+	"github.com/vektah/gqlgen/neelance/schema",
+	"github.com/vektah/gqlgen/neelance/validation",
+	"github.com/vektah/gqlgen/graphql",
+}
+
+func buildImports(types NamedTypes, destDir string) *Imports {
 	imports := Imports{
-		{"context", "context"},
-		{"fmt", "fmt"},
-		{"io", "io"},
-		{"strconv", "strconv"},
-		{"time", "time"},
-		{"sync", "sync"},
-		{"introspection", "github.com/vektah/gqlgen/neelance/introspection"},
-		{"errors", "github.com/vektah/gqlgen/neelance/errors"},
-		{"query", "github.com/vektah/gqlgen/neelance/query"},
-		{"schema", "github.com/vektah/gqlgen/neelance/schema"},
-		{"validation", "github.com/vektah/gqlgen/neelance/validation"},
-		{"graphql", "github.com/vektah/gqlgen/graphql"},
+		destDir: destDir,
 	}
 
+	for _, ambient := range ambientImports {
+		imports.add(ambient)
+	}
+
+	// Imports from top level user types
 	for _, t := range types {
-		imports, t.Import = imports.addPkg(types, destDir, t.Package)
+		t.Import = imports.add(t.Package)
 	}
 
-	return imports
+	return &imports
 }
 
-var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
-
-func sanitizePackageName(pkg string) string {
-	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
-}
-
-func (s Imports) addPkg(types NamedTypes, destDir string, pkg string) (Imports, *Import) {
-	if pkg == "" {
-		return s, nil
+func (s *Imports) add(path string) *Import {
+	if path == "" {
+		return nil
 	}
 
-	if existing := s.findByPkg(pkg); existing != nil {
-		return s, existing
+	if stringHasSuffixFold(s.destDir, path) {
+		return nil
 	}
 
-	localName := ""
-	if !strings.HasSuffix(destDir, pkg) {
-		localName = sanitizePackageName(filepath.Base(pkg))
-		i := 1
-		imp := s.findByName(localName)
-		for imp != nil && imp.Package != pkg {
-			localName = sanitizePackageName(filepath.Base(pkg)) + strconv.Itoa(i)
-			imp = s.findByName(localName)
-			i++
-			if i > 10 {
-				panic("too many collisions")
-			}
-		}
+	if existing := s.findByPath(path); existing != nil {
+		return existing
+	}
+
+	pkg, err := build.Default.Import(path, s.destDir, 0)
+	if err != nil {
+		panic(err)
 	}
 
 	imp := &Import{
-		Name:    localName,
-		Package: pkg,
+		Name: pkg.Name,
+		Path: path,
 	}
-	s = append(s, imp)
-	return s, imp
+	s.imports = append(s.imports, imp)
+
+	return imp
 }
 
-func (s Imports) findByPkg(pkg string) *Import {
-	for _, imp := range s {
-		if imp.Package == pkg {
+func stringHasSuffixFold(s, suffix string) bool {
+	return len(s) >= len(suffix) && strings.EqualFold(s[len(s)-len(suffix):], suffix)
+}
+
+func (s Imports) finalize() []*Import {
+	// ensure stable ordering by sorting
+	sort.Slice(s.imports, func(i, j int) bool {
+		return s.imports[i].Path > s.imports[j].Path
+	})
+
+	for _, imp := range s.imports {
+		alias := imp.Name
+
+		i := 1
+		for s.findByAlias(alias) != nil {
+			alias = imp.Name + strconv.Itoa(i)
+			i++
+			if i > 10 {
+				panic(fmt.Errorf("too many collisions, last attempt was %s", imp.Alias))
+			}
+		}
+		imp.Alias = alias
+	}
+
+	return s.imports
+}
+
+func (s Imports) findByPath(importPath string) *Import {
+	for _, imp := range s.imports {
+		if imp.Path == importPath {
 			return imp
 		}
 	}
 	return nil
 }
 
-func (s Imports) findByName(name string) *Import {
-	for _, imp := range s {
-		if imp.Name == name {
+func (s Imports) findByAlias(alias string) *Import {
+	for _, imp := range s.imports {
+		if imp.Alias == alias {
 			return imp
 		}
 	}

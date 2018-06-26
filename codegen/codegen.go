@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 
@@ -134,6 +135,12 @@ func (cfg *Config) normalize() error {
 
 	cfg.schema = schema.New()
 	return cfg.schema.Parse(cfg.SchemaStr)
+}
+
+var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
+
+func sanitizePackageName(pkg string) string {
+	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
 }
 
 func abs(path string) string {

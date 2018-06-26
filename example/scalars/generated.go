@@ -203,7 +203,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	} else {
-		var tmp interface{} = map[string]interface{}{"location": "37,144"}
+		var tmp interface{} = map[string]interface{}{"isBanned": false, "location": "37,144"}
 		var err error
 		arg0, err = UnmarshalSearchArgs(tmp)
 		if err != nil {
@@ -1236,7 +1236,7 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 
 var parsedSchema = schema.MustParse(`type Query {
     user(id: ID!): User
-    search(input: SearchArgs = {location: "37,144"}): [User!]!
+    search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
 }
 
 type User {

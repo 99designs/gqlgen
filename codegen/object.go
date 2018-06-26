@@ -50,12 +50,43 @@ func (o *Object) Implementors() string {
 	return "[]string{" + satisfiedBy + "}"
 }
 
+func (o *Object) HasResolvers() bool {
+	for _, f := range o.Fields {
+		if f.IsResolver() {
+			return true
+		}
+	}
+	return false
+}
+
 func (f *Field) IsResolver() bool {
 	return f.GoMethodName == "" && f.GoVarName == ""
 }
 
 func (f *Field) IsConcurrent() bool {
 	return f.IsResolver() && !f.Object.DisableConcurrency
+}
+func (f *Field) ShortInvocation() string {
+	if !f.IsResolver() {
+		return ""
+	}
+	shortName := strings.ToUpper(f.GQLName[:1]) + f.GQLName[1:]
+	res := fmt.Sprintf("%s().%s(ctx", f.Object.GQLType, shortName)
+	if !f.Object.Root {
+		res += fmt.Sprintf(", obj")
+	}
+	for _, arg := range f.Args {
+		res += fmt.Sprintf(", %s", arg.GoVarName)
+	}
+	res += ")"
+	return res
+}
+func (f *Field) ShortResolverDeclaration() string {
+	if !f.IsResolver() {
+		return ""
+	}
+	decl := strings.TrimPrefix(f.ResolverDeclaration(), f.Object.GQLType+"_")
+	return strings.ToUpper(decl[:1]) + decl[1:]
 }
 
 func (f *Field) ResolverDeclaration() string {

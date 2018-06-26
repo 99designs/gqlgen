@@ -13,8 +13,14 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -22,6 +28,37 @@ type Resolvers interface {
 	Query_room(ctx context.Context, name string) (*Chatroom, error)
 
 	Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error)
+}
+
+type ResolverRoot interface {
+	Mutation() MutationResolver
+	Query() QueryResolver
+	Subscription() SubscriptionResolver
+}
+type MutationResolver interface {
+	Post(ctx context.Context, text string, username string, roomName string) (Message, error)
+}
+type QueryResolver interface {
+	Room(ctx context.Context, name string) (*Chatroom, error)
+}
+type SubscriptionResolver interface {
+	MessageAdded(ctx context.Context, roomName string) (<-chan Message, error)
+}
+
+type shortMapper struct {
+	r ResolverRoot
+}
+
+func (s shortMapper) Mutation_post(ctx context.Context, text string, username string, roomName string) (Message, error) {
+	return s.r.Mutation().Post(ctx, text, username, roomName)
+}
+
+func (s shortMapper) Query_room(ctx context.Context, name string) (*Chatroom, error) {
+	return s.r.Query().Room(ctx, name)
+}
+
+func (s shortMapper) Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error) {
+	return s.r.Subscription().MessageAdded(ctx, roomName)
 }
 
 type executableSchema struct {

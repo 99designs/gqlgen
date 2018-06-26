@@ -13,8 +13,14 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -24,6 +30,47 @@ type Resolvers interface {
 	Order_items(ctx context.Context, obj *Order) ([]Item, error)
 	Query_customers(ctx context.Context) ([]Customer, error)
 	Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
+}
+
+type ResolverRoot interface {
+	Customer() CustomerResolver
+	Order() OrderResolver
+	Query() QueryResolver
+}
+type CustomerResolver interface {
+	Address(ctx context.Context, obj *Customer) (*Address, error)
+	Orders(ctx context.Context, obj *Customer) ([]Order, error)
+}
+type OrderResolver interface {
+	Items(ctx context.Context, obj *Order) ([]Item, error)
+}
+type QueryResolver interface {
+	Customers(ctx context.Context) ([]Customer, error)
+	Torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
+}
+
+type shortMapper struct {
+	r ResolverRoot
+}
+
+func (s shortMapper) Customer_address(ctx context.Context, obj *Customer) (*Address, error) {
+	return s.r.Customer().Address(ctx, obj)
+}
+
+func (s shortMapper) Customer_orders(ctx context.Context, obj *Customer) ([]Order, error) {
+	return s.r.Customer().Orders(ctx, obj)
+}
+
+func (s shortMapper) Order_items(ctx context.Context, obj *Order) ([]Item, error) {
+	return s.r.Order().Items(ctx, obj)
+}
+
+func (s shortMapper) Query_customers(ctx context.Context) ([]Customer, error) {
+	return s.r.Query().Customers(ctx)
+}
+
+func (s shortMapper) Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
+	return s.r.Query().Torture(ctx, customerIds)
 }
 
 type executableSchema struct {

@@ -8,8 +8,14 @@ import (
 {{ end }}
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -19,6 +25,38 @@ type Resolvers interface {
 	{{ end }}
 {{- end }}
 }
+
+type ResolverRoot interface {
+{{- range $object := .Objects -}}
+	{{ if $object.HasResolvers -}}
+		{{$object.GQLType}}() {{$object.GQLType}}Resolver
+	{{ end }}
+{{- end }}
+}
+
+{{- range $object := .Objects -}}
+	{{ if $object.HasResolvers }}
+		type {{$object.GQLType}}Resolver interface {
+		{{ range $field := $object.Fields -}}
+			{{ $field.ShortResolverDeclaration }}
+		{{ end }}
+		}
+	{{- end }}
+{{- end }}
+
+type shortMapper struct {
+	r ResolverRoot
+}
+
+{{- range $object := .Objects -}}
+	{{ range $field := $object.Fields -}}
+		{{- if $field.IsResolver }}
+			func (s shortMapper) {{ $field.ResolverDeclaration }} {
+				return s.r.{{$field.ShortInvocation}}
+			}
+		{{- end }}
+	{{ end }}
+{{- end }}
 
 type executableSchema struct {
 	resolvers      Resolvers

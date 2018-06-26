@@ -15,8 +15,14 @@ import (
 	models "github.com/vektah/gqlgen/test/models"
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -26,6 +32,49 @@ type Resolvers interface {
 	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Query_viewer(ctx context.Context) (*Viewer, error)
 	Query_jsonEncoding(ctx context.Context) (string, error)
+}
+
+type ResolverRoot interface {
+	Element() ElementResolver
+	Query() QueryResolver
+}
+type ElementResolver interface {
+	Child(ctx context.Context, obj *Element) (Element, error)
+	Error(ctx context.Context, obj *Element) (bool, error)
+}
+type QueryResolver interface {
+	Path(ctx context.Context) ([]Element, error)
+	Date(ctx context.Context, filter models.DateFilter) (bool, error)
+	Viewer(ctx context.Context) (*Viewer, error)
+	JsonEncoding(ctx context.Context) (string, error)
+}
+
+type shortMapper struct {
+	r ResolverRoot
+}
+
+func (s shortMapper) Element_child(ctx context.Context, obj *Element) (Element, error) {
+	return s.r.Element().Child(ctx, obj)
+}
+
+func (s shortMapper) Element_error(ctx context.Context, obj *Element) (bool, error) {
+	return s.r.Element().Error(ctx, obj)
+}
+
+func (s shortMapper) Query_path(ctx context.Context) ([]Element, error) {
+	return s.r.Query().Path(ctx)
+}
+
+func (s shortMapper) Query_date(ctx context.Context, filter models.DateFilter) (bool, error) {
+	return s.r.Query().Date(ctx, filter)
+}
+
+func (s shortMapper) Query_viewer(ctx context.Context) (*Viewer, error) {
+	return s.r.Query().Viewer(ctx)
+}
+
+func (s shortMapper) Query_jsonEncoding(ctx context.Context) (string, error) {
+	return s.r.Query().JsonEncoding(ctx)
 }
 
 type executableSchema struct {

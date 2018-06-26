@@ -13,8 +13,14 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -23,6 +29,44 @@ type Resolvers interface {
 	MyQuery_todo(ctx context.Context, id int) (*Todo, error)
 	MyQuery_lastTodo(ctx context.Context) (*Todo, error)
 	MyQuery_todos(ctx context.Context) ([]Todo, error)
+}
+
+type ResolverRoot interface {
+	MyMutation() MyMutationResolver
+	MyQuery() MyQueryResolver
+}
+type MyMutationResolver interface {
+	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
+	UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
+}
+type MyQueryResolver interface {
+	Todo(ctx context.Context, id int) (*Todo, error)
+	LastTodo(ctx context.Context) (*Todo, error)
+	Todos(ctx context.Context) ([]Todo, error)
+}
+
+type shortMapper struct {
+	r ResolverRoot
+}
+
+func (s shortMapper) MyMutation_createTodo(ctx context.Context, todo TodoInput) (Todo, error) {
+	return s.r.MyMutation().CreateTodo(ctx, todo)
+}
+
+func (s shortMapper) MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {
+	return s.r.MyMutation().UpdateTodo(ctx, id, changes)
+}
+
+func (s shortMapper) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
+	return s.r.MyQuery().Todo(ctx, id)
+}
+
+func (s shortMapper) MyQuery_lastTodo(ctx context.Context) (*Todo, error) {
+	return s.r.MyQuery().LastTodo(ctx)
+}
+
+func (s shortMapper) MyQuery_todos(ctx context.Context) ([]Todo, error) {
+	return s.r.MyQuery().Todos(ctx)
 }
 
 type executableSchema struct {

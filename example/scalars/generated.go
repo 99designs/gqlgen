@@ -15,8 +15,14 @@ import (
 	schema "github.com/vektah/gqlgen/neelance/schema"
 )
 
+// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
 func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
+}
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
 type Resolvers interface {
@@ -25,6 +31,39 @@ type Resolvers interface {
 
 	User_primitiveResolver(ctx context.Context, obj *User) (string, error)
 	User_customResolver(ctx context.Context, obj *User) (Point, error)
+}
+
+type ResolverRoot interface {
+	Query() QueryResolver
+	User() UserResolver
+}
+type QueryResolver interface {
+	User(ctx context.Context, id external.ObjectID) (*User, error)
+	Search(ctx context.Context, input SearchArgs) ([]User, error)
+}
+type UserResolver interface {
+	PrimitiveResolver(ctx context.Context, obj *User) (string, error)
+	CustomResolver(ctx context.Context, obj *User) (Point, error)
+}
+
+type shortMapper struct {
+	r ResolverRoot
+}
+
+func (s shortMapper) Query_user(ctx context.Context, id external.ObjectID) (*User, error) {
+	return s.r.Query().User(ctx, id)
+}
+
+func (s shortMapper) Query_search(ctx context.Context, input SearchArgs) ([]User, error) {
+	return s.r.Query().Search(ctx, input)
+}
+
+func (s shortMapper) User_primitiveResolver(ctx context.Context, obj *User) (string, error) {
+	return s.r.User().PrimitiveResolver(ctx, obj)
+}
+
+func (s shortMapper) User_customResolver(ctx context.Context, obj *User) (Point, error) {
+	return s.r.User().CustomResolver(ctx, obj)
 }
 
 type executableSchema struct {

@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-// AddressLoader batches and caches requests
-type AddressLoader struct {
+// OrderSliceLoader batches and caches requests
+type OrderSliceLoader struct {
 	// this method provides the data for the loader
-	fetch func(keys []int) ([]*Address, []error)
+	fetch func(keys []int) ([][]Order, []error)
 
 	// how long to done before sending a batch
 	wait time.Duration
@@ -21,51 +21,51 @@ type AddressLoader struct {
 	// INTERNAL
 
 	// lazily created cache
-	cache map[int]*Address
+	cache map[int][]Order
 
 	// the current batch. keys will continue to be collected until timeout is hit,
 	// then everything will be sent to the fetch method and out to the listeners
-	batch *addressBatch
+	batch *orderSliceBatch
 
 	// mutex to prevent races
 	mu sync.Mutex
 }
 
-type addressBatch struct {
+type orderSliceBatch struct {
 	keys    []int
-	data    []*Address
+	data    [][]Order
 	error   []error
 	closing bool
 	done    chan struct{}
 }
 
-// Load a address by key, batching and caching will be applied automatically
-func (l *AddressLoader) Load(key int) (*Address, error) {
+// Load a order by key, batching and caching will be applied automatically
+func (l *OrderSliceLoader) Load(key int) ([]Order, error) {
 	return l.LoadThunk(key)()
 }
 
-// LoadThunk returns a function that when called will block waiting for a address.
+// LoadThunk returns a function that when called will block waiting for a order.
 // This method should be used if you want one goroutine to make requests to many
 // different data loaders without blocking until the thunk is called.
-func (l *AddressLoader) LoadThunk(key int) func() (*Address, error) {
+func (l *OrderSliceLoader) LoadThunk(key int) func() ([]Order, error) {
 	l.mu.Lock()
 	if it, ok := l.cache[key]; ok {
 		l.mu.Unlock()
-		return func() (*Address, error) {
+		return func() ([]Order, error) {
 			return it, nil
 		}
 	}
 	if l.batch == nil {
-		l.batch = &addressBatch{done: make(chan struct{})}
+		l.batch = &orderSliceBatch{done: make(chan struct{})}
 	}
 	batch := l.batch
 	pos := batch.keyIndex(l, key)
 	l.mu.Unlock()
 
-	return func() (*Address, error) {
+	return func() ([]Order, error) {
 		<-batch.done
 
-		var data *Address
+		var data []Order
 		if pos < len(batch.data) {
 			data = batch.data[pos]
 		}
@@ -73,17 +73,14 @@ func (l *AddressLoader) LoadThunk(key int) func() (*Address, error) {
 		var err error
 		// its convenient to be able to return a single error for everything
 		if len(batch.error) == 1 {
-			err = batch.error[pos]
+			err = batch.error[0]
 		} else if batch.error != nil {
 			err = batch.error[pos]
 		}
 
 		if err == nil {
 			l.mu.Lock()
-			if l.cache == nil {
-				l.cache = map[int]*Address{}
-			}
-			l.cache[key] = data
+			l.unsafeSet(key, data)
 			l.mu.Unlock()
 		}
 
@@ -93,41 +90,48 @@ func (l *AddressLoader) LoadThunk(key int) func() (*Address, error) {
 
 // LoadAll fetches many keys at once. It will be broken into appropriate sized
 // sub batches depending on how the loader is configured
-func (l *AddressLoader) LoadAll(keys []int) ([]*Address, []error) {
-	results := make([]func() (*Address, error), len(keys))
+func (l *OrderSliceLoader) LoadAll(keys []int) ([][]Order, []error) {
+	results := make([]func() ([]Order, error), len(keys))
 
 	for i, key := range keys {
 		results[i] = l.LoadThunk(key)
 	}
 
-	addresss := make([]*Address, len(keys))
+	orders := make([][]Order, len(keys))
 	errors := make([]error, len(keys))
 	for i, thunk := range results {
-		addresss[i], errors[i] = thunk()
+		orders[i], errors[i] = thunk()
 	}
-	return addresss, errors
+	return orders, errors
 }
 
 // Prime the cache with the provided key and value. If the key already exists, no change is made.
 // (To forcefully prime the cache, clear the key first with loader.clear(key).prime(key, value).)
-func (l *AddressLoader) Prime(key int, value *Address) {
+func (l *OrderSliceLoader) Prime(key int, value []Order) {
 	l.mu.Lock()
 	if _, found := l.cache[key]; !found {
-		l.cache[key] = value
+		l.unsafeSet(key, value)
 	}
 	l.mu.Unlock()
 }
 
 // Clear the value at key from the cache, if it exists
-func (l *AddressLoader) Clear(key int) {
+func (l *OrderSliceLoader) Clear(key int) {
 	l.mu.Lock()
 	delete(l.cache, key)
 	l.mu.Unlock()
 }
 
+func (l *OrderSliceLoader) unsafeSet(key int, value []Order) {
+	if l.cache == nil {
+		l.cache = map[int][]Order{}
+	}
+	l.cache[key] = value
+}
+
 // keyIndex will return the location of the key in the batch, if its not found
 // it will add the key to the batch
-func (b *addressBatch) keyIndex(l *AddressLoader, key int) int {
+func (b *orderSliceBatch) keyIndex(l *OrderSliceLoader, key int) int {
 	for i, existingKey := range b.keys {
 		if key == existingKey {
 			return i
@@ -151,7 +155,7 @@ func (b *addressBatch) keyIndex(l *AddressLoader, key int) int {
 	return pos
 }
 
-func (b *addressBatch) startTimer(l *AddressLoader) {
+func (b *orderSliceBatch) startTimer(l *OrderSliceLoader) {
 	time.Sleep(l.wait)
 	l.mu.Lock()
 
@@ -167,7 +171,7 @@ func (b *addressBatch) startTimer(l *AddressLoader) {
 	b.end(l)
 }
 
-func (b *addressBatch) end(l *AddressLoader) {
+func (b *orderSliceBatch) end(l *OrderSliceLoader) {
 	b.data, b.error = l.fetch(b.keys)
 	close(b.done)
 }

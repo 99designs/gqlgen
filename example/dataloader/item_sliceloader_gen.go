@@ -73,17 +73,14 @@ func (l *ItemSliceLoader) LoadThunk(key int) func() ([]Item, error) {
 		var err error
 		// its convenient to be able to return a single error for everything
 		if len(batch.error) == 1 {
-			err = batch.error[pos]
+			err = batch.error[0]
 		} else if batch.error != nil {
 			err = batch.error[pos]
 		}
 
 		if err == nil {
 			l.mu.Lock()
-			if l.cache == nil {
-				l.cache = map[int][]Item{}
-			}
-			l.cache[key] = data
+			l.unsafeSet(key, data)
 			l.mu.Unlock()
 		}
 
@@ -113,7 +110,7 @@ func (l *ItemSliceLoader) LoadAll(keys []int) ([][]Item, []error) {
 func (l *ItemSliceLoader) Prime(key int, value []Item) {
 	l.mu.Lock()
 	if _, found := l.cache[key]; !found {
-		l.cache[key] = value
+		l.unsafeSet(key, value)
 	}
 	l.mu.Unlock()
 }
@@ -123,6 +120,13 @@ func (l *ItemSliceLoader) Clear(key int) {
 	l.mu.Lock()
 	delete(l.cache, key)
 	l.mu.Unlock()
+}
+
+func (l *ItemSliceLoader) unsafeSet(key int, value []Item) {
+	if l.cache == nil {
+		l.cache = map[int][]Item{}
+	}
+	l.cache[key] = value
 }
 
 // keyIndex will return the location of the key in the batch, if its not found

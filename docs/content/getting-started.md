@@ -167,11 +167,11 @@ func (a *MyApp) Query_todos(ctx context.Context) ([]Todo, error) {
 	return a.todos, nil
 }
 
-func (a *MyApp) Mutation_createTodo(ctx context.Context, text string) (Todo, error) {
+func (a *MyApp) Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, error) {
 	todo := Todo{
-		Text:   text,
+		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
-		UserID: fmt.Sprintf("U%d", rand.Int()),
+		UserID: input.UserId,
 	}
 	a.todos = append(a.todos, todo)
 	return todo, nil
@@ -214,7 +214,7 @@ go run main.go
 then open http://localhost:8080 in a browser. here are some queries to try:
 ```graphql
 mutation createTodo {
-  createTodo(input:{text:"todo", user:"1"}) {
+  createTodo(input:{text:"todo", userId:"1"}) {
     user {
       id
     }

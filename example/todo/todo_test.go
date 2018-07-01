@@ -11,7 +11,7 @@ import (
 )
 
 func TestTodo(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(New())))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
 	c := client.New(srv.URL)
 
 	t.Run("create a new todo", func(t *testing.T) {

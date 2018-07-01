@@ -14,7 +14,7 @@ import (
 func main() {
 	http.Handle("/", handler.Playground("Todo", "/query"))
 	http.Handle("/query", handler.GraphQL(
-		todo.MakeExecutableSchema(todo.New()),
+		todo.NewExecutableSchema(todo.New()),
 		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
 			// send this panic somewhere
 			log.Print(err)

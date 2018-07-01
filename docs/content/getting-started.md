@@ -104,7 +104,7 @@ Lets generate the server now:
 ```bash
 mkdir graph
 cd graph
-gqlgen -types types.json -schema ../schema.graphql
+gqlgen -typemap types.json -schema ../schema.graphql
 ```
 
 gqlgen should have created two new files `generated.go` and `models_gen.go`. If we take a peek in both we can see what the server has generated:

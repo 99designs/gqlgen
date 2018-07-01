@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"bytes"
 	"fmt"
 	"go/build"
 	"io/ioutil"
@@ -42,13 +41,21 @@ func Generate(cfg Config) error {
 	_ = syscall.Unlink(cfg.ExecFilename)
 	_ = syscall.Unlink(cfg.ModelFilename)
 
+	buf, err := templates.Run("stubs.gotpl", cfg.stub())
+	if err != nil {
+		return errors.Wrap(err, "model generation failed")
+	}
+
+	if err = write(cfg.ExecFilename, buf.Bytes()); err != nil {
+		return err
+	}
+
 	modelsBuild, err := cfg.models()
 	if err != nil {
 		return errors.Wrap(err, "model plan failed")
 	}
 	if len(modelsBuild.Models) > 0 || len(modelsBuild.Enums) > 0 {
 		modelsBuild.PackageName = cfg.ModelPackageName
-		var buf *bytes.Buffer
 		buf, err = templates.Run("models.gotpl", modelsBuild)
 		if err != nil {
 			return errors.Wrap(err, "model generation failed")
@@ -73,7 +80,6 @@ func Generate(cfg Config) error {
 	build.SchemaRaw = cfg.SchemaStr
 	build.PackageName = cfg.ExecPackageName
 
-	var buf *bytes.Buffer
 	buf, err = templates.Run("generated.gotpl", build)
 	if err != nil {
 		return errors.Wrap(err, "exec codegen failed")

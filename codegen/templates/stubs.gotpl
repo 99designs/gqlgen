@@ -1,0 +1,25 @@
+// If you are see this file it means code generation has failed.
+//
+// It is created to satisfy all interfaces that might be generated, before codegen runs. This ensures that any code
+// relying on these interfaces will still compile without the generated code, so that we can load the packages during
+// codegen.
+
+package {{ .PackageName }}
+
+
+func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
+	return nil
+}
+
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return nil
+}
+
+type (
+    Resolvers interface{}
+    ResolverRoot interface{}
+
+    {{ range $type := .Types -}}
+        {{$type}}Resolver interface{}
+    {{ end}}
+)

@@ -5,6 +5,7 @@ import (
 	"go/build"
 	"go/types"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/loader"
@@ -27,6 +28,11 @@ type ModelBuild struct {
 	Imports     []*Import
 	Models      []Model
 	Enums       []Enum
+}
+
+type StubBuild struct {
+	PackageName string
+	Types       []string
 }
 
 // Create a list of models that need to be generated
@@ -120,6 +126,22 @@ func (cfg *Config) bind() (*Build, error) {
 	})
 
 	return b, nil
+}
+
+func (cfg *Config) stub() *StubBuild {
+	namedTypes := cfg.buildNamedTypes()
+	var stubTypes []string
+	for name, a := range namedTypes {
+		if strings.HasPrefix(name, "_") || a.IsScalar || a.IsInput {
+			continue
+		}
+		stubTypes = append(stubTypes, name)
+	}
+
+	return &StubBuild{
+		PackageName: cfg.ExecPackageName,
+		Types:       stubTypes,
+	}
 }
 
 func (cfg *Config) loadProgram(namedTypes NamedTypes, allowErrors bool) (*loader.Program, error) {

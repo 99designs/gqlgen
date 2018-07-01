@@ -5,11 +5,11 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
 	"unicode"
-	"sort"
 )
 
 func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
@@ -30,7 +30,12 @@ func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 	}
 
 	buf := &bytes.Buffer{}
-	err := t.Lookup(name).Execute(buf, tpldata)
+	tpl := t.Lookup(name)
+	if tpl == nil {
+		return nil, fmt.Errorf("Unable to load %s, did you forget to go generate ./codegen/...?", name)
+	}
+
+	err := tpl.Execute(buf, tpldata)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +125,7 @@ func dump(val interface{}) string {
 
 		for _, key := range keys {
 			data := val[key]
-			
+
 			buf.WriteString(strconv.Quote(key))
 			buf.WriteString(":")
 			buf.WriteString(dump(data))

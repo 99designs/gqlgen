@@ -19,7 +19,7 @@ import (
 
 type Config struct {
 	SchemaStr string
-	Typemap   map[string]string
+	Typemap   TypeMap
 
 	schema *schema.Schema
 
@@ -32,6 +32,32 @@ type Config struct {
 	ModelPackageName string
 	modelPackagePath string
 	modelDir         string
+}
+
+type TypeMap []TypeMapEntry
+
+func (tm TypeMap) Exists(typeName string) bool {
+	return tm.Get(typeName) != nil
+}
+
+func (tm TypeMap) Get(typeName string) *TypeMapEntry {
+	for _, entry := range tm {
+		if entry.TypeName == typeName {
+			return &entry
+		}
+	}
+
+	return nil
+}
+
+type TypeMapEntry struct {
+	TypeName   string
+	EntityPath string
+	Fields     []TypeMapField
+}
+
+type TypeMapField struct {
+	FieldName string
 }
 
 func Generate(cfg Config) error {
@@ -58,11 +84,17 @@ func Generate(cfg Config) error {
 			return err
 		}
 		for _, model := range modelsBuild.Models {
-			cfg.Typemap[model.GQLType] = cfg.modelPackagePath + "." + model.GoType
+			cfg.Typemap = append(cfg.Typemap, TypeMapEntry{
+				TypeName:   model.GQLType,
+				EntityPath: cfg.modelPackagePath + "." + model.GoType,
+			})
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			cfg.Typemap[enum.GQLType] = cfg.modelPackagePath + "." + enum.GoType
+			cfg.Typemap = append(cfg.Typemap, TypeMapEntry{
+				TypeName:   enum.GQLType,
+				EntityPath: cfg.modelPackagePath + "." + enum.GoType,
+			})
 		}
 	}
 
@@ -108,28 +140,28 @@ func (cfg *Config) normalize() error {
 	cfg.ExecPackageName = sanitizePackageName(cfg.ExecPackageName)
 	cfg.execPackagePath = fullPackageName(cfg.execDir, cfg.ExecPackageName)
 
-	builtins := map[string]string{
-		"__Directive":  "github.com/vektah/gqlgen/neelance/introspection.Directive",
-		"__Type":       "github.com/vektah/gqlgen/neelance/introspection.Type",
-		"__Field":      "github.com/vektah/gqlgen/neelance/introspection.Field",
-		"__EnumValue":  "github.com/vektah/gqlgen/neelance/introspection.EnumValue",
-		"__InputValue": "github.com/vektah/gqlgen/neelance/introspection.InputValue",
-		"__Schema":     "github.com/vektah/gqlgen/neelance/introspection.Schema",
-		"Int":          "github.com/vektah/gqlgen/graphql.Int",
-		"Float":        "github.com/vektah/gqlgen/graphql.Float",
-		"String":       "github.com/vektah/gqlgen/graphql.String",
-		"Boolean":      "github.com/vektah/gqlgen/graphql.Boolean",
-		"ID":           "github.com/vektah/gqlgen/graphql.ID",
-		"Time":         "github.com/vektah/gqlgen/graphql.Time",
-		"Map":          "github.com/vektah/gqlgen/graphql.Map",
+	builtins := TypeMap{
+		{TypeName: "__Directive", EntityPath: "github.com/vektah/gqlgen/neelance/introspection.Directive"},
+		{TypeName: "__Type", EntityPath: "github.com/vektah/gqlgen/neelance/introspection.Type"},
+		{TypeName: "__Field", EntityPath: "github.com/vektah/gqlgen/neelance/introspection.Field"},
+		{TypeName: "__EnumValue", EntityPath: "github.com/vektah/gqlgen/neelance/introspection.EnumValue"},
+		{TypeName: "__InputValue", EntityPath: "github.com/vektah/gqlgen/neelance/introspection.InputValue"},
+		{TypeName: "__Schema", EntityPath: "github.com/vektah/gqlgen/neelance/introspection.Schema"},
+		{TypeName: "Int", EntityPath: "github.com/vektah/gqlgen/graphql.Int"},
+		{TypeName: "Float", EntityPath: "github.com/vektah/gqlgen/graphql.Float"},
+		{TypeName: "String", EntityPath: "github.com/vektah/gqlgen/graphql.String"},
+		{TypeName: "Boolean", EntityPath: "github.com/vektah/gqlgen/graphql.Boolean"},
+		{TypeName: "ID", EntityPath: "github.com/vektah/gqlgen/graphql.ID"},
+		{TypeName: "Time", EntityPath: "github.com/vektah/gqlgen/graphql.Time"},
+		{TypeName: "Map", EntityPath: "github.com/vektah/gqlgen/graphql.Map"},
 	}
 
 	if cfg.Typemap == nil {
-		cfg.Typemap = map[string]string{}
+		cfg.Typemap = TypeMap{}
 	}
-	for k, v := range builtins {
-		if _, ok := cfg.Typemap[k]; !ok {
-			cfg.Typemap[k] = v
+	for _, entry := range builtins {
+		if !cfg.Typemap.Exists(entry.TypeName) {
+			cfg.Typemap = append(cfg.Typemap, entry)
 		}
 	}
 

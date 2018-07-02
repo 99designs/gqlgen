@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go -typemap types.json -models models/generated.go
+//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go -typemap types.yaml -models models/generated.go
 
 package test
 

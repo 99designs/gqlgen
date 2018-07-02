@@ -51,13 +51,13 @@ func (tm TypeMap) Get(typeName string) *TypeMapEntry {
 }
 
 type TypeMapEntry struct {
-	TypeName   string
-	EntityPath string
+	TypeName   string `yaml:"typeName"`
+	EntityPath string `yaml:"entityPath"`
 	Fields     []TypeMapField
 }
 
 type TypeMapField struct {
-	FieldName string
+	FieldName string `yaml:"fieldName"`
 }
 
 func Generate(cfg Config) error {

@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/vektah/gqlgen/codegen"
+	"gopkg.in/yaml.v2"
 )
 
 var output = flag.String("out", "generated.go", "the file to write to")
@@ -58,6 +60,19 @@ func loadTypeMap() codegen.TypeMap {
 	if *typemap == "" {
 		return nil
 	}
+
+	if strings.HasSuffix(*typemap, ".json") {
+		return loadTypeMapJSON()
+	}
+
+	return loadTypeMapYAML()
+}
+
+func loadTypeMapJSON() codegen.TypeMap {
+	if *typemap == "" {
+		return nil
+	}
+
 	b, err := ioutil.ReadFile(*typemap)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
@@ -85,6 +100,26 @@ func loadTypeMap() codegen.TypeMap {
 	for typeName, goType := range goTypes {
 		goType.TypeName = typeName
 		typeMap = append(typeMap, goType)
+	}
+
+	return typeMap
+}
+
+func loadTypeMapYAML() codegen.TypeMap {
+	if *typemap == "" {
+		return nil
+	}
+
+	b, err := ioutil.ReadFile(*typemap)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
+		return nil
+	}
+
+	var typeMap codegen.TypeMap
+	if err = yaml.Unmarshal(b, &typeMap); err != nil {
+		fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
+		os.Exit(1)
 	}
 
 	return typeMap

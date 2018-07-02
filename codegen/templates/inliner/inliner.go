@@ -1,3 +1,8 @@
+/*
+	Inliner used to generate const string templates from .gotpl files.
+	Notice that working directory must be vektah/gqlgen/codegen/templates
+*/
+
 package main
 
 import (

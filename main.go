@@ -40,6 +40,11 @@ func main() {
 	}
 
 	types := loadTypeMap()
+	err = types.Check()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "invalid typemap format: "+err.Error())
+		os.Exit(1)
+	}
 
 	err = codegen.Generate(codegen.Config{
 		ModelFilename:    *models,

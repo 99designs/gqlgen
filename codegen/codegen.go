@@ -50,6 +50,18 @@ func (tm TypeMap) Get(typeName string) *TypeMapEntry {
 	return nil
 }
 
+func (tm TypeMap) Check() error {
+	for idx, entry := range tm {
+		if entry.TypeName == "" {
+			return fmt.Errorf("entity #%d: typeName is not defined", idx+1)
+		}
+		if entry.EntityPath == "" {
+			return fmt.Errorf("entity #%d: entityPath is not defined", idx+1)
+		}
+	}
+	return nil
+}
+
 type TypeMapEntry struct {
 	TypeName   string `yaml:"typeName"`
 	EntityPath string `yaml:"entityPath"`

@@ -54,20 +54,38 @@ func main() {
 	}
 }
 
-func loadTypeMap() map[string]string {
-	var goTypes map[string]string
-	if *typemap != "" {
-		b, err := ioutil.ReadFile(*typemap)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
-			return nil
-		}
+func loadTypeMap() codegen.TypeMap {
+	if *typemap == "" {
+		return nil
+	}
+	b, err := ioutil.ReadFile(*typemap)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
+		return nil
+	}
 
-		if err = json.Unmarshal(b, &goTypes); err != nil {
+	var typeMap codegen.TypeMap
+
+	var goTypes map[string]codegen.TypeMapEntry
+	if err = json.Unmarshal(b, &goTypes); err != nil {
+		var oldGoTypes map[string]string
+		if err = json.Unmarshal(b, &oldGoTypes); err != nil {
 			fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
 			os.Exit(1)
 		}
+		for typeName, entityPath := range oldGoTypes {
+			typeMap = append(typeMap, codegen.TypeMapEntry{
+				TypeName:   typeName,
+				EntityPath: entityPath,
+			})
+		}
+
+		return typeMap
+	}
+	for typeName, goType := range goTypes {
+		goType.TypeName = typeName
+		typeMap = append(typeMap, goType)
 	}
 
-	return goTypes
+	return typeMap
 }

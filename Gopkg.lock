@@ -128,6 +128,12 @@
   revision = "ce871d178848e3eea1e8795e5cfb74053dde4bb9"
 
 [[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
+
+[[projects]]
   branch = "master"
   name = "sourcegraph.com/sourcegraph/appdash"
   packages = [
@@ -150,6 +156,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5275b6a5c88fd233faf5afa8f59f3a36ae9fe6538ee6331fac3c1078fecd6df5"
+  inputs-digest = "ee97741e2ec373079694c0adc517dd7bb0dc3271ec459281fa0209d066f04995"
   solver-name = "gps-cdcl"
   solver-version = 1

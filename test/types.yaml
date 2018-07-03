@@ -1,8 +1,0 @@
-- typeName:   Element
-  entityPath: github.com/vektah/gqlgen/test.Element
-
-- typeName:   Viewer
-  entityPath: github.com/vektah/gqlgen/test.Viewer
-
-- typeName:   User
-  entityPath: remote_api.User

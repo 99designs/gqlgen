@@ -26,10 +26,10 @@ func TestShapes(t *testing.T) {
 			}
 			union ShapeUnion = Circle | Rectangle
 	`, TypeMap{
-		{TypeName: "Shape", EntityPath: "github.com/vektah/gqlgen/codegen/testdata.Shape"},
-		{TypeName: "ShapeUnion", EntityPath: "github.com/vektah/gqlgen/codegen/testdata.ShapeUnion"},
-		{TypeName: "Circle", EntityPath: "github.com/vektah/gqlgen/codegen/testdata.Circle"},
-		{TypeName: "Rectangle", EntityPath: "github.com/vektah/gqlgen/codegen/testdata.Rectangle"},
+		"Shape":      {Model: "github.com/vektah/gqlgen/codegen/testdata.Shape"},
+		"ShapeUnion": {Model: "github.com/vektah/gqlgen/codegen/testdata.ShapeUnion"},
+		"Circle":     {Model: "github.com/vektah/gqlgen/codegen/testdata.Circle"},
+		"Rectangle":  {Model: "github.com/vektah/gqlgen/codegen/testdata.Rectangle"},
 	})
 
 	require.NoError(t, err)

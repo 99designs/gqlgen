@@ -68,7 +68,8 @@ var addressImplementors = []string{"Address"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _Address(ctx context.Context, sel []query.Selection, obj *Address) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, addressImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, addressImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -128,7 +129,8 @@ var customerImplementors = []string{"Customer"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _Customer(ctx context.Context, sel []query.Selection, obj *Customer) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, customerImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, customerImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -251,7 +253,8 @@ var itemImplementors = []string{"Item"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _Item(ctx context.Context, sel []query.Selection, obj *Item) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, itemImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, itemImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -285,7 +288,8 @@ var orderImplementors = []string{"Order"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _Order(ctx context.Context, sel []query.Selection, obj *Order) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, orderImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, orderImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -386,7 +390,8 @@ var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, queryImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, queryImplementors, ec.Variables)
 
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "Query",
@@ -574,7 +579,8 @@ var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Directive(ctx context.Context, sel []query.Selection, obj *introspection.Directive) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, __DirectiveImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, __DirectiveImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -671,7 +677,8 @@ var __EnumValueImplementors = []string{"__EnumValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___EnumValue(ctx context.Context, sel []query.Selection, obj *introspection.EnumValue) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, __EnumValueImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, __EnumValueImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -750,7 +757,8 @@ var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Field(ctx context.Context, sel []query.Selection, obj *introspection.Field) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, __FieldImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, __FieldImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -870,7 +878,8 @@ var __InputValueImplementors = []string{"__InputValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___InputValue(ctx context.Context, sel []query.Selection, obj *introspection.InputValue) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, __InputValueImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, __InputValueImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -952,7 +961,8 @@ var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Schema(ctx context.Context, sel []query.Selection, obj *introspection.Schema) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, __SchemaImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, __SchemaImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
@@ -1071,7 +1081,8 @@ var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Type(ctx context.Context, sel []query.Selection, obj *introspection.Type) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, __TypeImplementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, __TypeImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {

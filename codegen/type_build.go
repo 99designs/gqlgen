@@ -18,7 +18,7 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 
 		userType := ""
 		if userEntry := cfg.Typemap.Get(t.GQLType); userEntry != nil {
-			userType = userEntry.EntityPath
+			userType = userEntry.Model
 		}
 		t.IsUserDefined = userType != ""
 		if userType == "" && t.IsScalar {

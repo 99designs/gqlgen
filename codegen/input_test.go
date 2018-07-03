@@ -42,7 +42,7 @@ func TestRawMapInputs(t *testing.T) {
 			b: Int
 		}
 	`, TypeMap{
-		{TypeName: "Changes", EntityPath: "map[string]interface{}"},
+		"Changes": {Model: "map[string]interface{}"},
 	})
 
 	require.NoError(t, err)
@@ -57,7 +57,7 @@ func TestRecursiveInputType(t *testing.T) {
 			self: [RecursiveInputSlice!]
 		}
 	`, TypeMap{
-		{TypeName: "RecursiveInputSlice", EntityPath: "github.com/vektah/gqlgen/codegen/testdata.RecursiveInputSlice"},
+		"RecursiveInputSlice": {Model: "github.com/vektah/gqlgen/codegen/testdata.RecursiveInputSlice"},
 	})
 
 	require.NoError(t, err)
@@ -85,7 +85,7 @@ func TestComplexInputTypes(t *testing.T) {
 			id: Int!
 		}
 	`, TypeMap{
-		{TypeName: "Changes", EntityPath: "map[string]interface{}"},
+		"Changes": {Model: "map[string]interface{}"},
 	})
 
 	require.NoError(t, err)

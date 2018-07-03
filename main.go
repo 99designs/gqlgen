@@ -1,20 +1,19 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/vektah/gqlgen/codegen"
 	"gopkg.in/yaml.v2"
 )
 
-var output = flag.String("out", "generated.go", "the file to write to")
-var models = flag.String("models", "models_gen.go", "the file to write the models to")
-var schemaFilename = flag.String("schema", "schema.graphql", "the graphql schema to generate types from")
+var configFilename = flag.String("config", ".gqlgen.yml", "the file to configuration to")
+var output = flag.String("out", "", "the file to write to")
+var models = flag.String("models", "", "the file to write the models to")
+var schemaFilename = flag.String("schema", "", "the graphql schema to generate types from")
 var typemap = flag.String("typemap", "", "a json map going from graphql to golang types")
 var packageName = flag.String("package", "", "the package name")
 var modelPackageName = flag.String("modelpackage", "", "the package name to use for models")
@@ -33,98 +32,101 @@ func main() {
 		os.Exit(1)
 	}
 
-	schemaRaw, err := ioutil.ReadFile(*schemaFilename)
+	config := loadConfig()
+
+	// overwrite by commandline options
+	var emitYamlGuidance bool
+	if *schemaFilename != "" {
+		config.SchemaFilename = *schemaFilename
+	}
+	if *models != "" {
+		config.ModelFilename = *models
+	}
+	if *output != "" {
+		config.ExecFilename = *output
+	}
+	if *packageName != "" {
+		config.ExecPackageName = *packageName
+	}
+	if *modelPackageName != "" {
+		config.ModelPackageName = *modelPackageName
+	}
+	if *typemap != "" {
+		config.Typemap = loadModelMap()
+		emitYamlGuidance = true
+	}
+
+	schemaRaw, err := ioutil.ReadFile(config.SchemaFilename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
 		os.Exit(1)
 	}
+	config.SchemaStr = string(schemaRaw)
 
-	types := loadTypeMap()
-	err = types.Check()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "invalid typemap format: "+err.Error())
+	if err := config.Check(); err != nil {
+		fmt.Fprintln(os.Stderr, "invalid config format: "+err.Error())
 		os.Exit(1)
 	}
 
-	err = codegen.Generate(codegen.Config{
-		ModelFilename:    *models,
-		ExecFilename:     *output,
-		ExecPackageName:  *packageName,
-		ModelPackageName: *modelPackageName,
-		SchemaStr:        string(schemaRaw),
-		Typemap:          types,
-	})
+	if emitYamlGuidance {
+		b, err := yaml.Marshal(config)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "unable to marshal yaml: "+err.Error())
+			os.Exit(1)
+		}
 
+		fmt.Fprintf(os.Stderr, "you should use .gqlgen.yml with below content.\n\n%s\n", string(b))
+	}
+
+	err = codegen.Generate(*config)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(2)
 	}
 }
 
-func loadTypeMap() codegen.TypeMap {
-	if *typemap == "" {
-		return nil
+func loadConfig() *codegen.Config {
+
+	config := &codegen.Config{
+		SchemaFilename: "schema.graphql",
+		ModelFilename:  "models_gen.go",
+		ExecFilename:   "generated.go",
 	}
 
-	if strings.HasSuffix(*typemap, ".json") {
-		return loadTypeMapJSON()
+	b, err := ioutil.ReadFile(*configFilename)
+	if os.IsNotExist(err) {
+		return config
+	} else if err != nil {
+		fmt.Fprintln(os.Stderr, "unable to open config: "+err.Error())
+		os.Exit(1)
 	}
 
-	return loadTypeMapYAML()
+	if err := yaml.Unmarshal(b, config); err != nil {
+		fmt.Fprintln(os.Stderr, "unable to parse config: "+err.Error())
+		os.Exit(1)
+	}
+
+	return config
 }
 
-func loadTypeMapJSON() codegen.TypeMap {
-	if *typemap == "" {
-		return nil
-	}
-
+func loadModelMap() codegen.TypeMap {
+	var goTypes map[string]string
 	b, err := ioutil.ReadFile(*typemap)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
 		return nil
 	}
 
-	var typeMap codegen.TypeMap
-
-	var goTypes map[string]codegen.TypeMapEntry
-	if err = json.Unmarshal(b, &goTypes); err != nil {
-		var oldGoTypes map[string]string
-		if err = json.Unmarshal(b, &oldGoTypes); err != nil {
-			fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
-			os.Exit(1)
-		}
-		for typeName, entityPath := range oldGoTypes {
-			typeMap = append(typeMap, codegen.TypeMapEntry{
-				TypeName:   typeName,
-				EntityPath: entityPath,
-			})
-		}
-
-		return typeMap
-	}
-	for typeName, goType := range goTypes {
-		goType.TypeName = typeName
-		typeMap = append(typeMap, goType)
-	}
-
-	return typeMap
-}
-
-func loadTypeMapYAML() codegen.TypeMap {
-	if *typemap == "" {
-		return nil
-	}
-
-	b, err := ioutil.ReadFile(*typemap)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
-		return nil
-	}
-
-	var typeMap codegen.TypeMap
-	if err = yaml.Unmarshal(b, &typeMap); err != nil {
+	if err = yaml.Unmarshal(b, &goTypes); err != nil {
 		fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
 		os.Exit(1)
+	}
+
+	typeMap := make(codegen.TypeMap)
+	for typeName, entityPath := range goTypes {
+		typeMap[typeName] = codegen.TypeMapEntry{
+			Model: entityPath,
+		}
 	}
 
 	return typeMap

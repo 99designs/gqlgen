@@ -3,7 +3,7 @@
   "Deadline": "5m",
   "Linters": {
     "errcheck": {
-      "Command":           "errcheck -abspath -ignore '[rR]ead|[wW]rite|Close'",
+      "Command":           "errcheck -abspath -ignore '[rR]ead|[wW]rite|Close|[fF]print'",
       "Pattern":           "PATH:LINE:COL:MESSAGE",
       "InstallFrom":       "github.com/kisielk/errcheck",
       "PartitionStrategy": "packages"

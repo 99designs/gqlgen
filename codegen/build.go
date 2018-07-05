@@ -57,7 +57,7 @@ func (cfg *Config) models() (*ModelBuild, error) {
 func (cfg *Config) bind() (*Build, error) {
 	namedTypes := cfg.buildNamedTypes()
 
-	prog, err := cfg.loadProgram(namedTypes, false)
+	prog, err := cfg.loadProgram(namedTypes, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
@@ -120,6 +120,13 @@ func (cfg *Config) bind() (*Build, error) {
 	})
 
 	return b, nil
+}
+
+func (cfg *Config) validate() error {
+	namedTypes := cfg.buildNamedTypes()
+
+	_, err := cfg.loadProgram(namedTypes, false)
+	return err
 }
 
 func (cfg *Config) loadProgram(namedTypes NamedTypes, allowErrors bool) (*loader.Program, error) {

@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"syscall"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/codegen/templates"
@@ -38,9 +37,6 @@ func Generate(cfg Config) error {
 	if err := cfg.normalize(); err != nil {
 		return err
 	}
-
-	_ = syscall.Unlink(cfg.ExecFilename)
-	_ = syscall.Unlink(cfg.ModelFilename)
 
 	modelsBuild, err := cfg.models()
 	if err != nil {

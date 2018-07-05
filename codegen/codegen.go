@@ -126,6 +126,11 @@ func Generate(cfg Config) error {
 	if err = write(cfg.ExecFilename, buf.Bytes()); err != nil {
 		return err
 	}
+
+	if err = cfg.validate(); err != nil {
+		return errors.Wrap(err, "validation failed")
+	}
+
 	return nil
 }
 

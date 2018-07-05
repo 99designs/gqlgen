@@ -1,5 +1,0 @@
-{
-    "Element": "github.com/vektah/gqlgen/test.Element",
-    "Viewer": "github.com/vektah/gqlgen/test.Viewer",
-    "User": "remote_api.User"
-}

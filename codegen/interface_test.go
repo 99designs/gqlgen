@@ -25,18 +25,18 @@ func TestShapes(t *testing.T) {
 				area: Float
 			}
 			union ShapeUnion = Circle | Rectangle
-	`, map[string]string{
-		"Shape":      "github.com/vektah/gqlgen/codegen/testdata.Shape",
-		"ShapeUnion": "github.com/vektah/gqlgen/codegen/testdata.ShapeUnion",
-		"Circle":     "github.com/vektah/gqlgen/codegen/testdata.Circle",
-		"Rectangle":  "github.com/vektah/gqlgen/codegen/testdata.Rectangle",
+	`, TypeMap{
+		"Shape":      {Model: "github.com/vektah/gqlgen/codegen/testdata.Shape"},
+		"ShapeUnion": {Model: "github.com/vektah/gqlgen/codegen/testdata.ShapeUnion"},
+		"Circle":     {Model: "github.com/vektah/gqlgen/codegen/testdata.Circle"},
+		"Rectangle":  {Model: "github.com/vektah/gqlgen/codegen/testdata.Rectangle"},
 	})
 
 	require.NoError(t, err)
 
 }
 
-func generate(name string, schema string, typemap ...map[string]string) error {
+func generate(name string, schema string, typemap ...TypeMap) error {
 	cfg := Config{
 		SchemaStr:     schema,
 		ExecFilename:  "testdata/gen/" + name + "/exec.go",

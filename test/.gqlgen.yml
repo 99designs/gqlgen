@@ -1,0 +1,11 @@
+schema: schema.graphql
+output: generated.go
+modeloutput: models/generated.go
+
+models:
+  Element:
+    model: github.com/vektah/gqlgen/test.Element
+  Viewer:
+    model: github.com/vektah/gqlgen/test.Viewer
+  User:
+    model: remote_api.User

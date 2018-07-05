@@ -16,7 +16,10 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 	for _, schemaType := range cfg.schema.Types {
 		t := namedTypeFromSchema(schemaType)
 
-		userType := cfg.Typemap[t.GQLType]
+		userType := ""
+		if userEntry := cfg.Typemap.Get(t.GQLType); userEntry != nil {
+			userType = userEntry.Model
+		}
 		t.IsUserDefined = userType != ""
 		if userType == "" && t.IsScalar {
 			userType = "github.com/vektah/gqlgen/graphql.String"

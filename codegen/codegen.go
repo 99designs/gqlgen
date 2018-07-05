@@ -18,20 +18,60 @@ import (
 )
 
 type Config struct {
-	SchemaStr string
-	Typemap   map[string]string
+	SchemaFilename string  `yaml:"schema,omitempty"`
+	SchemaStr      string  `yaml:"-"`
+	Typemap        TypeMap `yaml:"models,omitempty"`
 
-	schema *schema.Schema
+	schema *schema.Schema `yaml:"-"`
 
-	ExecFilename    string
-	ExecPackageName string
-	execPackagePath string
-	execDir         string
+	ExecFilename    string `yaml:"output,omitempty"`
+	ExecPackageName string `yaml:"package,omitempty"`
+	execPackagePath string `yaml:"-"`
+	execDir         string `yaml:"-"`
 
-	ModelFilename    string
-	ModelPackageName string
-	modelPackagePath string
-	modelDir         string
+	ModelFilename    string `yaml:"modeloutput,omitempty"`
+	ModelPackageName string `yaml:"modelpackage,omitempty"`
+	modelPackagePath string `yaml:"-"`
+	modelDir         string `yaml:"-"`
+}
+
+func (cfg *Config) Check() error {
+	err := cfg.Typemap.Check()
+	if err != nil {
+		return fmt.Errorf("config: %s", err.Error())
+	}
+	return nil
+}
+
+type TypeMap map[string]TypeMapEntry
+
+func (tm TypeMap) Exists(typeName string) bool {
+	return tm.Get(typeName) != nil
+}
+
+func (tm TypeMap) Get(typeName string) *TypeMapEntry {
+	entry, ok := tm[typeName]
+	if !ok {
+		return nil
+	}
+	return &entry
+}
+
+func (tm TypeMap) Check() error {
+	for typeName, entry := range tm {
+		if entry.Model == "" {
+			return fmt.Errorf("model %s: entityPath is not defined", typeName)
+		}
+	}
+	return nil
+}
+
+type TypeMapEntry struct {
+	Model  string                  `yaml:"model"`
+	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
+}
+
+type TypeMapField struct {
 }
 
 func Generate(cfg Config) error {
@@ -58,11 +98,15 @@ func Generate(cfg Config) error {
 			return err
 		}
 		for _, model := range modelsBuild.Models {
-			cfg.Typemap[model.GQLType] = cfg.modelPackagePath + "." + model.GoType
+			cfg.Typemap[model.GQLType] = TypeMapEntry{
+				Model: cfg.modelPackagePath + "." + model.GoType,
+			}
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			cfg.Typemap[enum.GQLType] = cfg.modelPackagePath + "." + enum.GoType
+			cfg.Typemap[enum.GQLType] = TypeMapEntry{
+				Model: cfg.modelPackagePath + "." + enum.GoType,
+			}
 		}
 	}
 
@@ -113,28 +157,28 @@ func (cfg *Config) normalize() error {
 	cfg.ExecPackageName = sanitizePackageName(cfg.ExecPackageName)
 	cfg.execPackagePath = fullPackageName(cfg.execDir, cfg.ExecPackageName)
 
-	builtins := map[string]string{
-		"__Directive":  "github.com/vektah/gqlgen/neelance/introspection.Directive",
-		"__Type":       "github.com/vektah/gqlgen/neelance/introspection.Type",
-		"__Field":      "github.com/vektah/gqlgen/neelance/introspection.Field",
-		"__EnumValue":  "github.com/vektah/gqlgen/neelance/introspection.EnumValue",
-		"__InputValue": "github.com/vektah/gqlgen/neelance/introspection.InputValue",
-		"__Schema":     "github.com/vektah/gqlgen/neelance/introspection.Schema",
-		"Int":          "github.com/vektah/gqlgen/graphql.Int",
-		"Float":        "github.com/vektah/gqlgen/graphql.Float",
-		"String":       "github.com/vektah/gqlgen/graphql.String",
-		"Boolean":      "github.com/vektah/gqlgen/graphql.Boolean",
-		"ID":           "github.com/vektah/gqlgen/graphql.ID",
-		"Time":         "github.com/vektah/gqlgen/graphql.Time",
-		"Map":          "github.com/vektah/gqlgen/graphql.Map",
+	builtins := TypeMap{
+		"__Directive":  {Model: "github.com/vektah/gqlgen/neelance/introspection.Directive"},
+		"__Type":       {Model: "github.com/vektah/gqlgen/neelance/introspection.Type"},
+		"__Field":      {Model: "github.com/vektah/gqlgen/neelance/introspection.Field"},
+		"__EnumValue":  {Model: "github.com/vektah/gqlgen/neelance/introspection.EnumValue"},
+		"__InputValue": {Model: "github.com/vektah/gqlgen/neelance/introspection.InputValue"},
+		"__Schema":     {Model: "github.com/vektah/gqlgen/neelance/introspection.Schema"},
+		"Int":          {Model: "github.com/vektah/gqlgen/graphql.Int"},
+		"Float":        {Model: "github.com/vektah/gqlgen/graphql.Float"},
+		"String":       {Model: "github.com/vektah/gqlgen/graphql.String"},
+		"Boolean":      {Model: "github.com/vektah/gqlgen/graphql.Boolean"},
+		"ID":           {Model: "github.com/vektah/gqlgen/graphql.ID"},
+		"Time":         {Model: "github.com/vektah/gqlgen/graphql.Time"},
+		"Map":          {Model: "github.com/vektah/gqlgen/graphql.Map"},
 	}
 
 	if cfg.Typemap == nil {
-		cfg.Typemap = map[string]string{}
+		cfg.Typemap = TypeMap{}
 	}
-	for k, v := range builtins {
-		if _, ok := cfg.Typemap[k]; !ok {
-			cfg.Typemap[k] = v
+	for typeName, entry := range builtins {
+		if !cfg.Typemap.Exists(typeName) {
+			cfg.Typemap[typeName] = entry
 		}
 	}
 

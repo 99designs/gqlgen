@@ -17,95 +17,38 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-type Config struct {
-	SchemaFilename string  `yaml:"schema,omitempty"`
-	SchemaStr      string  `yaml:"-"`
-	Typemap        TypeMap `yaml:"models,omitempty"`
-
-	schema *schema.Schema `yaml:"-"`
-
-	ExecFilename    string `yaml:"output,omitempty"`
-	ExecPackageName string `yaml:"package,omitempty"`
-	execPackagePath string `yaml:"-"`
-	execDir         string `yaml:"-"`
-
-	ModelFilename    string `yaml:"modeloutput,omitempty"`
-	ModelPackageName string `yaml:"modelpackage,omitempty"`
-	modelPackagePath string `yaml:"-"`
-	modelDir         string `yaml:"-"`
-}
-
-func (cfg *Config) Check() error {
-	err := cfg.Typemap.Check()
-	if err != nil {
-		return fmt.Errorf("config: %s", err.Error())
-	}
-	return nil
-}
-
-type TypeMap map[string]TypeMapEntry
-
-func (tm TypeMap) Exists(typeName string) bool {
-	return tm.Get(typeName) != nil
-}
-
-func (tm TypeMap) Get(typeName string) *TypeMapEntry {
-	entry, ok := tm[typeName]
-	if !ok {
-		return nil
-	}
-	return &entry
-}
-
-func (tm TypeMap) Check() error {
-	for typeName, entry := range tm {
-		if entry.Model == "" {
-			return fmt.Errorf("model %s: entityPath is not defined", typeName)
-		}
-	}
-	return nil
-}
-
-type TypeMapEntry struct {
-	Model  string                  `yaml:"model"`
-	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
-}
-
-type TypeMapField struct {
-}
-
 func Generate(cfg Config) error {
 	if err := cfg.normalize(); err != nil {
 		return err
 	}
 
-	_ = syscall.Unlink(cfg.ExecFilename)
-	_ = syscall.Unlink(cfg.ModelFilename)
+	_ = syscall.Unlink(cfg.Exec.Filename)
+	_ = syscall.Unlink(cfg.Model.Filename)
 
 	modelsBuild, err := cfg.models()
 	if err != nil {
 		return errors.Wrap(err, "model plan failed")
 	}
 	if len(modelsBuild.Models) > 0 || len(modelsBuild.Enums) > 0 {
-		modelsBuild.PackageName = cfg.ModelPackageName
+		modelsBuild.PackageName = cfg.Model.Package
 		var buf *bytes.Buffer
 		buf, err = templates.Run("models.gotpl", modelsBuild)
 		if err != nil {
 			return errors.Wrap(err, "model generation failed")
 		}
 
-		if err = write(cfg.ModelFilename, buf.Bytes()); err != nil {
+		if err = write(cfg.Model.Filename, buf.Bytes()); err != nil {
 			return err
 		}
 		for _, model := range modelsBuild.Models {
-			cfg.Typemap[model.GQLType] = TypeMapEntry{
-				Model: cfg.modelPackagePath + "." + model.GoType,
+			cfg.Models[model.GQLType] = TypeMapEntry{
+				Model: cfg.Model.ImportPath() + "." + model.GoType,
 			}
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			cfg.Typemap[enum.GQLType] = TypeMapEntry{
-				Model: cfg.modelPackagePath + "." + enum.GoType,
+			cfg.Models[enum.GQLType] = TypeMapEntry{
+				Model: cfg.Model.ImportPath() + "." + enum.GoType,
 			}
 		}
 	}
@@ -115,7 +58,7 @@ func Generate(cfg Config) error {
 		return errors.Wrap(err, "exec plan failed")
 	}
 	build.SchemaRaw = cfg.SchemaStr
-	build.PackageName = cfg.ExecPackageName
+	build.PackageName = cfg.Exec.Package
 
 	var buf *bytes.Buffer
 	buf, err = templates.Run("generated.gotpl", build)
@@ -123,7 +66,7 @@ func Generate(cfg Config) error {
 		return errors.Wrap(err, "exec codegen failed")
 	}
 
-	if err = write(cfg.ExecFilename, buf.Bytes()); err != nil {
+	if err = write(cfg.Exec.Filename, buf.Bytes()); err != nil {
 		return err
 	}
 
@@ -135,27 +78,13 @@ func Generate(cfg Config) error {
 }
 
 func (cfg *Config) normalize() error {
-	if cfg.ModelFilename == "" {
-		return errors.New("ModelFilename is required")
+	if err := cfg.Model.normalize(); err != nil {
+		return errors.Wrap(err, "model")
 	}
-	cfg.ModelFilename = abs(cfg.ModelFilename)
-	cfg.modelDir = filepath.ToSlash(filepath.Dir(cfg.ModelFilename))
-	if cfg.ModelPackageName == "" {
-		cfg.ModelPackageName = filepath.Base(cfg.modelDir)
-	}
-	cfg.ModelPackageName = sanitizePackageName(cfg.ModelPackageName)
-	cfg.modelPackagePath = fullPackageName(cfg.modelDir, cfg.ModelPackageName)
 
-	if cfg.ExecFilename == "" {
-		return errors.New("ModelFilename is required")
+	if err := cfg.Exec.normalize(); err != nil {
+		return errors.Wrap(err, "exec")
 	}
-	cfg.ExecFilename = abs(cfg.ExecFilename)
-	cfg.execDir = filepath.ToSlash(filepath.Dir(cfg.ExecFilename))
-	if cfg.ExecPackageName == "" {
-		cfg.ExecPackageName = filepath.Base(cfg.execDir)
-	}
-	cfg.ExecPackageName = sanitizePackageName(cfg.ExecPackageName)
-	cfg.execPackagePath = fullPackageName(cfg.execDir, cfg.ExecPackageName)
 
 	builtins := TypeMap{
 		"__Directive":  {Model: "github.com/vektah/gqlgen/neelance/introspection.Directive"},
@@ -173,12 +102,12 @@ func (cfg *Config) normalize() error {
 		"Map":          {Model: "github.com/vektah/gqlgen/graphql.Map"},
 	}
 
-	if cfg.Typemap == nil {
-		cfg.Typemap = TypeMap{}
+	if cfg.Models == nil {
+		cfg.Models = TypeMap{}
 	}
 	for typeName, entry := range builtins {
-		if !cfg.Typemap.Exists(typeName) {
-			cfg.Typemap[typeName] = entry
+		if !cfg.Models.Exists(typeName) {
+			cfg.Models[typeName] = entry
 		}
 	}
 
@@ -200,7 +129,7 @@ func abs(path string) string {
 	return filepath.ToSlash(absPath)
 }
 
-func fullPackageName(dir string, pkgName string) string {
+func importPath(dir string, pkgName string) string {
 	fullPkgName := filepath.Join(filepath.Dir(dir), pkgName)
 
 	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {

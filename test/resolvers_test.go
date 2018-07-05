@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen
+//go:generate gorunpkg github.com/vektah/gqlgen -models models/generated.go
 
 package test
 

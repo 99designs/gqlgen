@@ -40,19 +40,19 @@ func main() {
 		config.SchemaFilename = *schemaFilename
 	}
 	if *models != "" {
-		config.ModelFilename = *models
+		config.Model.Filename = *models
 	}
 	if *output != "" {
-		config.ExecFilename = *output
+		config.Exec.Filename = *output
 	}
 	if *packageName != "" {
-		config.ExecPackageName = *packageName
+		config.Exec.Package = *packageName
 	}
 	if *modelPackageName != "" {
-		config.ModelPackageName = *modelPackageName
+		config.Model.Package = *modelPackageName
 	}
 	if *typemap != "" {
-		config.Typemap = loadModelMap()
+		config.Models = loadModelMap()
 		emitYamlGuidance = true
 	}
 
@@ -75,7 +75,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Fprintf(os.Stderr, "you should use .gqlgen.yml with below content.\n\n%s\n", string(b))
+		fmt.Fprintf(os.Stderr, "DEPRECATION WARNING: we are moving away from the json typemap, instead create a .gqlgen.yml with the following content:\n\n%s\n", string(b))
 	}
 
 	err = codegen.Generate(*config)
@@ -86,11 +86,10 @@ func main() {
 }
 
 func loadConfig() *codegen.Config {
-
 	config := &codegen.Config{
 		SchemaFilename: "schema.graphql",
-		ModelFilename:  "models_gen.go",
-		ExecFilename:   "generated.go",
+		Model:          codegen.PackageConfig{Filename: "models_gen.go"},
+		Exec:           codegen.PackageConfig{Filename: "generated.go"},
 	}
 
 	b, err := ioutil.ReadFile(*configFilename)

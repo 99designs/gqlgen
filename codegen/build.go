@@ -37,16 +37,16 @@ func (cfg *Config) models() (*ModelBuild, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
-	imports := buildImports(namedTypes, cfg.modelDir)
+	imports := buildImports(namedTypes, cfg.Model.Dir())
 
-	cfg.bindTypes(imports, namedTypes, cfg.modelDir, prog)
+	cfg.bindTypes(imports, namedTypes, cfg.Model.Dir(), prog)
 
 	models, err := cfg.buildModels(namedTypes, prog)
 	if err != nil {
 		return nil, err
 	}
 	return &ModelBuild{
-		PackageName: cfg.ModelPackageName,
+		PackageName: cfg.Model.Package,
 		Models:      models,
 		Enums:       cfg.buildEnums(namedTypes),
 		Imports:     imports.finalize(),
@@ -62,8 +62,8 @@ func (cfg *Config) bind() (*Build, error) {
 		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	imports := buildImports(namedTypes, cfg.execDir)
-	cfg.bindTypes(imports, namedTypes, cfg.execDir, prog)
+	imports := buildImports(namedTypes, cfg.Exec.Dir())
+	cfg.bindTypes(imports, namedTypes, cfg.Exec.Dir(), prog)
 
 	objects, err := cfg.buildObjects(namedTypes, prog, imports)
 	if err != nil {
@@ -76,7 +76,7 @@ func (cfg *Config) bind() (*Build, error) {
 	}
 
 	b := &Build{
-		PackageName: cfg.ExecPackageName,
+		PackageName: cfg.Exec.Package,
 		Objects:     objects,
 		Interfaces:  cfg.buildInterfaces(namedTypes, prog),
 		Inputs:      inputs,

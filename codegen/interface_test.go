@@ -38,12 +38,12 @@ func TestShapes(t *testing.T) {
 
 func generate(name string, schema string, typemap ...TypeMap) error {
 	cfg := Config{
-		SchemaStr:     schema,
-		ExecFilename:  "testdata/gen/" + name + "/exec.go",
-		ModelFilename: "testdata/gen/" + name + "/model.go",
+		SchemaStr: schema,
+		Exec:      PackageConfig{Filename: "testdata/gen/" + name + "/exec.go"},
+		Model:     PackageConfig{Filename: "testdata/gen/" + name + "/model.go"},
 	}
 	if len(typemap) > 0 {
-		cfg.Typemap = typemap[0]
+		cfg.Models = typemap[0]
 	}
 	err := Generate(cfg)
 	if err == nil {

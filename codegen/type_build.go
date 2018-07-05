@@ -17,7 +17,7 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 		t := namedTypeFromSchema(schemaType)
 
 		userType := ""
-		if userEntry := cfg.Typemap.Get(t.GQLType); userEntry != nil {
+		if userEntry, ok := cfg.Models[t.GQLType]; ok {
 			userType = userEntry.Model
 		}
 		t.IsUserDefined = userType != ""

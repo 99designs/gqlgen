@@ -14,7 +14,7 @@ func Test_fullPackageName(t *testing.T) {
 	t.Run("gopath longer than package name", func(t *testing.T) {
 		build.Default.GOPATH = "/a/src/xxxxxxxxxxxxxxxxxxxxxxxx:/b/src/y"
 		var got string
-		ok := assert.NotPanics(t, func() { got = fullPackageName("/b/src/y/foo/bar", "bar") })
+		ok := assert.NotPanics(t, func() { got = importPath("/b/src/y/foo/bar", "bar") })
 		if ok {
 			assert.Equal(t, "/b/src/y/foo/bar", got)
 		}
@@ -23,7 +23,7 @@ func Test_fullPackageName(t *testing.T) {
 		build.Default.GOPATH = "/a/src/x:/b/src/y"
 
 		var got string
-		ok := assert.NotPanics(t, func() { got = fullPackageName("/a/src/x/foo/bar", "bar") })
+		ok := assert.NotPanics(t, func() { got = importPath("/a/src/x/foo/bar", "bar") })
 		if ok {
 			assert.Equal(t, "/a/src/x/foo/bar", got)
 		}

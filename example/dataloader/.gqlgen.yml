@@ -1,0 +1,5 @@
+models:
+  Order:
+    model: github.com/vektah/gqlgen/example/dataloader.Order
+  Customer:
+    model: github.com/vektah/gqlgen/example/dataloader.Customer

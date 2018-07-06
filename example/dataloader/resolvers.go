@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go -typemap types.json
+//go:generate gorunpkg github.com/vektah/gqlgen
 
 package dataloader
 

@@ -4,3 +4,5 @@
 /example/chat/node_modules
 /example/chat/package-lock.json
 /codegen/testdata/gen
+
+.idea/

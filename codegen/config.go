@@ -29,6 +29,7 @@ type TypeMapEntry struct {
 }
 
 type TypeMapField struct {
+	Resolver bool `yaml:"resolver"`
 }
 
 func (c *PackageConfig) normalize() error {

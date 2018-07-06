@@ -106,7 +106,7 @@ func (r *testResolvers) Query_jsonEncoding(ctx context.Context) (string, error) 
 
 func (r *testResolvers) Query_viewer(ctx context.Context) (*Viewer, error) {
 	return &Viewer{
-		User: &remote_api.User{"Bob"},
+		User: &remote_api.User{Name: "Bob"},
 	}, nil
 }
 
@@ -127,6 +127,10 @@ func (r *testResolvers) Element_error(ctx context.Context, obj *Element) (bool, 
 	time.Sleep(time.Duration(obj.ID) * 10 * time.Millisecond)
 
 	return false, r.err
+}
+
+func (r *testResolvers) User_likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
+	return obj.Likes, nil
 }
 
 type specialErr struct{}

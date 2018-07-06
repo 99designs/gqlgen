@@ -81,12 +81,21 @@ func sanitizeGoName(name string) string {
 
 func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) (*Object, error) {
 	obj := &Object{NamedType: types[typ.TypeName()]}
+	typeEntry, entryExists := cfg.Models[typ.TypeName()]
 
 	for _, i := range typ.Interfaces {
 		obj.Satisfies = append(obj.Satisfies, i.Name)
 	}
 
 	for _, field := range typ.Fields {
+
+		var forceResolver bool
+		if entryExists {
+			if typeField, ok := typeEntry.Fields[field.Name]; ok {
+				forceResolver = typeField.Resolver
+			}
+		}
+
 		var args []FieldArgument
 		for _, arg := range field.Args {
 			newArg := FieldArgument{
@@ -108,10 +117,11 @@ func (cfg *Config) buildObject(types NamedTypes, typ *schema.Object) (*Object, e
 		}
 
 		obj.Fields = append(obj.Fields, Field{
-			GQLName: field.Name,
-			Type:    types.getType(field.Type),
-			Args:    args,
-			Object:  obj,
+			GQLName:       field.Name,
+			Type:          types.getType(field.Type),
+			Args:          args,
+			Object:        obj,
+			ForceResolver: forceResolver,
 		})
 	}
 

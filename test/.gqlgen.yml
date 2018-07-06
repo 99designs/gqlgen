@@ -1,6 +1,11 @@
 schema: schema.graphql
-output: generated.go
-modeloutput: models/generated.go
+
+exec:
+  filename: generated.go
+  # package:
+model:
+  filename: models/generated.go
+  # package:
 
 models:
   Element:

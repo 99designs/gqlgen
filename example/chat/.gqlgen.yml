@@ -1,0 +1,3 @@
+models:
+  Chatroom:
+    model: github.com/vektah/gqlgen/example/chat.Chatroom

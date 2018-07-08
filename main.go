@@ -63,13 +63,14 @@ func main() {
 	}
 	config.SchemaStr = string(schemaRaw)
 
-	if err := config.Check(); err != nil {
+	if err = config.Check(); err != nil {
 		fmt.Fprintln(os.Stderr, "invalid config format: "+err.Error())
 		os.Exit(1)
 	}
 
 	if emitYamlGuidance {
-		b, err := yaml.Marshal(config)
+		var b []byte
+		b, err = yaml.Marshal(config)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "unable to marshal yaml: "+err.Error())
 			os.Exit(1)

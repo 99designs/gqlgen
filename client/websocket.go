@@ -10,16 +10,10 @@ import (
 )
 
 const (
-	connectionInitMsg      = "connection_init"      // Client -> Server
-	connectionTerminateMsg = "connection_terminate" // Client -> Server
-	startMsg               = "start"                // Client -> Server
-	stopMsg                = "stop"                 // Client -> Server
-	connectionAckMsg       = "connection_ack"       // Server -> Client
-	connectionErrorMsg     = "connection_error"     // Server -> Client
-	connectionKeepAliveMsg = "ka"                   // Server -> Client
-	dataMsg                = "data"                 // Server -> Client
-	errorMsg               = "error"                // Server -> Client
-	completeMsg            = "complete"             // Server -> Client
+	connectionInitMsg = "connection_init" // Client -> Server
+	startMsg          = "start"           // Client -> Server
+	connectionAckMsg  = "connection_ack"  // Server -> Client
+	dataMsg           = "data"            // Server -> Client
 )
 
 type operationMessage struct {
@@ -62,7 +56,7 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 	}
 
 	var ack operationMessage
-	if err := c.ReadJSON(&ack); err != nil {
+	if err = c.ReadJSON(&ack); err != nil {
 		return errorSubscription(fmt.Errorf("ack: %s", err.Error()))
 	}
 	if ack.Type != connectionAckMsg {
@@ -90,7 +84,7 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 
 			if respDataRaw["errors"] != nil {
 				var errs []*errors.QueryError
-				if err := unpack(respDataRaw["errors"], errs); err != nil {
+				if err = unpack(respDataRaw["errors"], errs); err != nil {
 					return err
 				}
 				if len(errs) > 0 {

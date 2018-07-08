@@ -20,7 +20,9 @@ input DateFilter {
 
 type User {
     name: String
+    likes: [String]
 }
+
 type Viewer {
     user: User
 }

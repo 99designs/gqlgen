@@ -14,3 +14,6 @@ models:
     model: github.com/vektah/gqlgen/test.Viewer
   User:
     model: remote_api.User
+    fields:
+      likes:
+        resolver: true

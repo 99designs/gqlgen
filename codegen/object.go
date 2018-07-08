@@ -22,13 +22,14 @@ type Object struct {
 type Field struct {
 	*Type
 
-	GQLName      string          // The name of the field in graphql
-	GoMethodName string          // The name of the method in go, if any
-	GoVarName    string          // The name of the var in go, if any
-	Args         []FieldArgument // A list of arguments to be passed to this field
-	NoErr        bool            // If this is bound to a go method, does that method have an error as the second argument
-	Object       *Object         // A link back to the parent object
-	Default      interface{}     // The default value
+	GQLName       string          // The name of the field in graphql
+	GoMethodName  string          // The name of the method in go, if any
+	GoVarName     string          // The name of the var in go, if any
+	Args          []FieldArgument // A list of arguments to be passed to this field
+	ForceResolver bool            // Should be emit Resolver method
+	NoErr         bool            // If this is bound to a go method, does that method have an error as the second argument
+	Object        *Object         // A link back to the parent object
+	Default       interface{}     // The default value
 }
 
 type FieldArgument struct {
@@ -60,7 +61,7 @@ func (o *Object) HasResolvers() bool {
 }
 
 func (f *Field) IsResolver() bool {
-	return f.GoMethodName == "" && f.GoVarName == ""
+	return f.ForceResolver || f.GoMethodName == "" && f.GoVarName == ""
 }
 
 func (f *Field) IsConcurrent() bool {

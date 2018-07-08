@@ -32,11 +32,14 @@ type Resolvers interface {
 	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Query_viewer(ctx context.Context) (*Viewer, error)
 	Query_jsonEncoding(ctx context.Context) (string, error)
+
+	User_likes(ctx context.Context, obj *remote_api.User) ([]string, error)
 }
 
 type ResolverRoot interface {
 	Element() ElementResolver
 	Query() QueryResolver
+	User() UserResolver
 }
 type ElementResolver interface {
 	Child(ctx context.Context, obj *Element) (Element, error)
@@ -47,6 +50,9 @@ type QueryResolver interface {
 	Date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Viewer(ctx context.Context) (*Viewer, error)
 	JsonEncoding(ctx context.Context) (string, error)
+}
+type UserResolver interface {
+	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
 }
 
 type shortMapper struct {
@@ -75,6 +81,10 @@ func (s shortMapper) Query_viewer(ctx context.Context) (*Viewer, error) {
 
 func (s shortMapper) Query_jsonEncoding(ctx context.Context) (string, error) {
 	return s.r.Query().JsonEncoding(ctx)
+}
+
+func (s shortMapper) User_likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
+	return s.r.User().Likes(ctx, obj)
 }
 
 type executableSchema struct {
@@ -434,6 +444,8 @@ func (ec *executionContext) _User(ctx context.Context, sel []query.Selection, ob
 			out.Values[i] = graphql.MarshalString("User")
 		case "name":
 			out.Values[i] = ec._User_name(ctx, field, obj)
+		case "likes":
+			out.Values[i] = ec._User_likes(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -451,6 +463,35 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	defer rctx.Pop()
 	res := obj.Name
 	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _User_likes(ctx context.Context, field graphql.CollectedField, obj *remote_api.User) graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "User",
+		Args:   nil,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		res := obj.Likes
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler {
+				rctx := graphql.GetResolverContext(ctx)
+				rctx.PushIndex(idx1)
+				defer rctx.Pop()
+				return graphql.MarshalString(res[idx1])
+			}())
+		}
+		return arr1
+	})
 }
 
 var viewerImplementors = []string{"Viewer"}
@@ -1297,7 +1338,9 @@ input DateFilter {
 
 type User {
     name: String
+    likes: [String]
 }
+
 type Viewer {
     user: User
 }

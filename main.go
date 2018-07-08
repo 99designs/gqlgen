@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var configFilename = flag.String("config", ".gqlgen.yml", "the file to configuration to")
+var configFilename = flag.String("config", "", "the file to configuration to")
 var output = flag.String("out", "", "the file to write to")
 var models = flag.String("models", "", "the file to write the models to")
 var schemaFilename = flag.String("schema", "", "the graphql schema to generate types from")
@@ -32,7 +32,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	config := loadConfig()
+	var config *codegen.Config
+	var err error
+	if *configFilename != "" {
+		config, err = codegen.LoadConfig(*configFilename)
+	} else {
+		config, err = codegen.LoadDefaultConfig()
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
 
 	// overwrite by commandline options
 	var emitYamlGuidance bool
@@ -76,7 +86,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Fprintf(os.Stderr, "DEPRECATION WARNING: we are moving away from the json typemap, instead create a .gqlgen.yml with the following content:\n\n%s\n", string(b))
+		fmt.Fprintf(os.Stderr, "DEPRECATION WARNING: we are moving away from the json typemap, instead create a gqlgen.yml with the following content:\n\n%s\n", string(b))
 	}
 
 	err = codegen.Generate(*config)
@@ -84,29 +94,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(2)
 	}
-}
-
-func loadConfig() *codegen.Config {
-	config := &codegen.Config{
-		SchemaFilename: "schema.graphql",
-		Model:          codegen.PackageConfig{Filename: "models_gen.go"},
-		Exec:           codegen.PackageConfig{Filename: "generated.go"},
-	}
-
-	b, err := ioutil.ReadFile(*configFilename)
-	if os.IsNotExist(err) {
-		return config
-	} else if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to open config: "+err.Error())
-		os.Exit(1)
-	}
-
-	if err := yaml.Unmarshal(b, config); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to parse config: "+err.Error())
-		os.Exit(1)
-	}
-
-	return config
 }
 
 func loadModelMap() codegen.TypeMap {

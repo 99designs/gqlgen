@@ -267,7 +267,7 @@ go get github.com/vektah/gorunpkg
 
 Now at the top of our graph.go:
 ```go
-//go:generate gorunpkg gqlgen
+//go:generate gorunpkg github.com/vektah/gqlgen
 
 package graph
 ```

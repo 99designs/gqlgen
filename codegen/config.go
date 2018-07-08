@@ -2,11 +2,54 @@ package codegen
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/neelance/schema"
+	"gopkg.in/yaml.v2"
 )
+
+var defaults = Config{
+	SchemaFilename: "schema.graphql",
+	Model:          PackageConfig{Filename: "models_gen.go"},
+	Exec:           PackageConfig{Filename: "generated.go"},
+}
+
+var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
+
+// LoadDefaultConfig looks for a config file in the current directory, and all parent directories
+// walking up the tree. The closest config file will be returned.
+func LoadDefaultConfig() (*Config, error) {
+	cfgFile, err := findCfg()
+	if err != nil || cfgFile == "" {
+		cpy := defaults
+		return &cpy, err
+	}
+
+	err = os.Chdir(filepath.Dir(cfgFile))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to enter config dir")
+	}
+	return LoadConfig(cfgFile)
+}
+
+// LoadConfig reads the gqlgen.yml config file
+func LoadConfig(filename string) (*Config, error) {
+	config := defaults
+
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read config")
+	}
+
+	if err := yaml.Unmarshal(b, &config); err != nil {
+		return nil, errors.Wrap(err, "unable to parse config")
+	}
+
+	return &config, nil
+}
 
 type Config struct {
 	SchemaFilename string        `yaml:"schema,omitempty"`
@@ -74,4 +117,31 @@ func (tm TypeMap) Check() error {
 		}
 	}
 	return nil
+}
+
+// findCfg searches for the config file in this directory and all parents up the tree
+// looking for the closest match
+func findCfg() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to get working dir to findCfg")
+	}
+
+	cfg := findCfgInDir(dir)
+	for cfg == "" && dir != "/" {
+		dir = filepath.Dir(dir)
+		cfg = findCfgInDir(dir)
+	}
+
+	return cfg, nil
+}
+
+func findCfgInDir(dir string) string {
+	for _, cfgName := range cfgFilenames {
+		path := filepath.Join(dir, cfgName)
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+	return ""
 }

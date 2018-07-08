@@ -17,8 +17,8 @@ func TestBuilder_Error(t *testing.T) {
 	})
 
 	require.Len(t, b.Errors, 2)
-	assert.EqualError(t, b.Errors[0], "err1")
-	assert.EqualError(t, b.Errors[1], "err2 public")
+	assert.Equal(t, b.Errors[0], &ResolverError{Message: "err1"})
+	assert.Equal(t, b.Errors[1], &ResolverError{Message: "err2 public"})
 }
 
 type testErr struct {
@@ -42,7 +42,7 @@ func (err *publicErr) PublicError() string {
 	return err.public
 }
 
-func convertErr(ctx context.Context, err error) error {
+func convertErr(ctx context.Context, err error) MarshalableError {
 	if errConv, ok := err.(*publicErr); ok {
 		return &ResolverError{Message: errConv.public}
 	}

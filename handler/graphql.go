@@ -206,7 +206,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
 	w.WriteHeader(code)
-	var errs []error
+	var errs []graphql.MarshalableError
 	for _, err := range errors {
 		errs = append(errs, err)
 	}

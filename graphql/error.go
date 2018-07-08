@@ -6,9 +6,16 @@ import (
 	"sync"
 )
 
-type ErrorPresenterFunc func(context.Context, error) error
+// MarshalableError represents an error that can be encoded by the transport layer and sent to the client. In this
+// package everything should be transport-agnostic, so we cant make any assertions on what is expected.
+//
+// For the packaged handler implementation the errors must be json.Marshall'able, for a custom protobuf based transport
+// the returned type should be protobufable
+type MarshalableError interface{}
 
-func DefaultErrorPresenter(ctx context.Context, err error) error {
+type ErrorPresenterFunc func(context.Context, error) MarshalableError
+
+func DefaultErrorPresenter(ctx context.Context, err error) MarshalableError {
 	return &ResolverError{
 		Message: err.Error(),
 		Path:    GetResolverContext(ctx).Path,
@@ -22,12 +29,8 @@ type ResolverError struct {
 	Path    []interface{} `json:"path,omitempty"`
 }
 
-func (r *ResolverError) Error() string {
-	return r.Message
-}
-
 type ErrorBuilder struct {
-	Errors []error
+	Errors []MarshalableError
 	// ErrorPresenter will be used to generate the error
 	// message from errors given to Error().
 	ErrorPresenter ErrorPresenterFunc

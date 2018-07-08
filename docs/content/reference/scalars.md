@@ -47,11 +47,11 @@ func (y YesNo) MarshalGQL(w io.Writer) {
 }
 ```
 
-and then in types.json point to the name without the Marshal|Unmarshal in front:
-```json
-{
-    "YesNo": "github.com/me/mypkg.YesNo"
-}
+and then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+```yaml
+models:
+  YesNo:
+    model: github.com/me/mypkg.YesNo
 ```
 
 
@@ -96,11 +96,11 @@ func UnmarshalMyCustomBooleanScalar(v interface{}) (bool, error) {
 }
 ```
 
-and then in types.json point to the name without the Marshal|Unmarshal in front:
-```json
-{
-    "MyCustomBooleanScalar": "github.com/me/mypkg.MyCustomBooleanScalar"
-}
+and then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+```yaml
+models:
+  MyCustomBooleanScalar:
+    model: github.com/me/mypkg.MyCustomBooleanScalar
 ```
 
 see the [example/scalars](https://github.com/vektah/gqlgen/tree/master/example/scalars) package for more examples.

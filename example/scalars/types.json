@@ -1,8 +1,0 @@
-{
-    "User": "github.com/vektah/gqlgen/example/scalars.User",
-    "Timestamp": "github.com/vektah/gqlgen/example/scalars.Timestamp",
-    "SearchArgs": "github.com/vektah/gqlgen/example/scalars.SearchArgs",
-    "Point": "github.com/vektah/gqlgen/example/scalars.Point",
-    "ID": "github.com/vektah/gqlgen/example/scalars.ID",
-    "Tier": "github.com/vektah/gqlgen/example/scalars.Tier"
-}

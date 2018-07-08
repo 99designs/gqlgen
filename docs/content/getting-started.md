@@ -80,12 +80,21 @@ type Todo struct {
 
 So we have our schema and our models. now we need to link them up:
 
-`graph/types.json`
-```json
-{
-  "User": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User",
-  "Todo": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.Todo"
-}
+`graph/.gqlgen.yml`
+```yaml
+schema: ../schema.graphql
+exec:
+  # filename: generated.go
+  # package:
+model:
+  # filename: models_gen.go
+  # package:
+
+models:
+  Todo:
+    model: github.com/vektah/gqlgen-tutorials/gettingstarted/graph.Todo
+  User:
+    model: github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User
 ``` 
 This simply says, `User` in schema is backed by `graph.User` in go.
 
@@ -104,7 +113,7 @@ Lets generate the server now:
 ```bash
 mkdir graph
 cd graph
-gqlgen -typemap types.json -schema ../schema.graphql
+gqlgen
 ```
 
 gqlgen should have created two new files `generated.go` and `models_gen.go`. If we take a peek in both we can see what the server has generated:
@@ -258,7 +267,7 @@ go get github.com/vektah/gorunpkg
 
 Now at the top of our graph.go:
 ```go
-//go:generate gorunpkg gqlgen -typemap types.json -schema ../schema.graphql
+//go:generate gorunpkg gqlgen
 
 package graph
 ```

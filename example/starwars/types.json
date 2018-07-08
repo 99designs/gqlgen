@@ -1,9 +1,0 @@
-{
-    "Droid": "github.com/vektah/gqlgen/example/starwars.Droid",
-    "FriendsConnection": "github.com/vektah/gqlgen/example/starwars.FriendsConnection",
-    "FriendsEdge": "github.com/vektah/gqlgen/example/starwars.FriendsEdge",
-    "Human": "github.com/vektah/gqlgen/example/starwars.Human",
-    "Review": "github.com/vektah/gqlgen/example/starwars.Review",
-    "ReviewInput": "github.com/vektah/gqlgen/example/starwars.Review",
-    "Starship": "github.com/vektah/gqlgen/example/starwars.Starship"
-}

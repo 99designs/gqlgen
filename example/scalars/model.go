@@ -57,7 +57,7 @@ func (p Point) MarshalGQL(w io.Writer) {
 	fmt.Fprintf(w, `"%d,%d"`, p.X, p.Y)
 }
 
-// if the type referenced in types.json is a function that returns a marshaller we can use it to encode and decode
+// if the type referenced in .gqlgen.yml is a function that returns a marshaller we can use it to encode and decode
 // onto any existing go type.
 func MarshalTimestamp(t time.Time) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {

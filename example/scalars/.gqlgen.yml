@@ -1,0 +1,13 @@
+models:
+  User:
+    model: github.com/vektah/gqlgen/example/scalars.User
+  Timestamp:
+    model: github.com/vektah/gqlgen/example/scalars.Timestamp
+  SearchArgs:
+    model: github.com/vektah/gqlgen/example/scalars.SearchArgs
+  Point:
+    model: github.com/vektah/gqlgen/example/scalars.Point
+  ID:
+    model: github.com/vektah/gqlgen/example/scalars.ID
+  Tier:
+    model: github.com/vektah/gqlgen/example/scalars.Tier

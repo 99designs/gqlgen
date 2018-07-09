@@ -96,9 +96,21 @@ func (c *PackageConfig) Dir() string {
 	return filepath.ToSlash(filepath.Dir(c.Filename))
 }
 
+func (c *PackageConfig) Check() error {
+	if strings.ContainsAny(c.Package, "./") {
+		return fmt.Errorf("package should be the output package name only, do not include the output filename")
+	}
+	return nil
+}
+
 func (cfg *Config) Check() error {
-	err := cfg.Models.Check()
-	if err != nil {
+	if err := cfg.Models.Check(); err != nil {
+		return fmt.Errorf("config: %s", err.Error())
+	}
+	if err := cfg.Exec.Check(); err != nil {
+		return fmt.Errorf("config: %s", err.Error())
+	}
+	if err := cfg.Model.Check(); err != nil {
 		return fmt.Errorf("config: %s", err.Error())
 	}
 	return nil

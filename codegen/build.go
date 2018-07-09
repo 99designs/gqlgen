@@ -81,6 +81,7 @@ func (cfg *Config) bind() (*Build, error) {
 		Interfaces:  cfg.buildInterfaces(namedTypes, prog),
 		Inputs:      inputs,
 		Imports:     imports.finalize(),
+		SchemaRaw:   cfg.SchemaStr,
 	}
 
 	if qr, ok := cfg.schema.EntryPoints["query"]; ok {

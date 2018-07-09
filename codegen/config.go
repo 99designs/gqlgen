@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -80,16 +81,24 @@ func (c *PackageConfig) normalize() error {
 	if c.Filename == "" {
 		return errors.New("Filename is required")
 	}
-	c.Filename = abs(c.Filename)
+	// If Package is not set, first attempt to load the package at the output dir. If that fails
+	// fallback to just the base dir name of the output filename.
 	if c.Package == "" {
-		c.Package = filepath.Base(c.Dir())
+		cwd, _ := os.Getwd()
+		pkg, err := build.Default.Import(c.Dir(), cwd, 0)
+		if err != nil {
+			c.Package = filepath.Base(c.Dir())
+		} else {
+			c.Package = pkg.Name
+		}
 	}
 	c.Package = sanitizePackageName(c.Package)
+	c.Filename = abs(c.Filename)
 	return nil
 }
 
 func (c *PackageConfig) ImportPath() string {
-	return importPath(c.Dir(), c.Package)
+	return importPath(c.Dir())
 }
 
 func (c *PackageConfig) Dir() string {
@@ -97,7 +106,7 @@ func (c *PackageConfig) Dir() string {
 }
 
 func (c *PackageConfig) Check() error {
-	if strings.ContainsAny(c.Package, "./") {
+	if strings.ContainsAny(c.Package, "./\\") {
 		return fmt.Errorf("package should be the output package name only, do not include the output filename")
 	}
 	return nil

@@ -30,7 +30,6 @@ func Generate(cfg Config) error {
 		return errors.Wrap(err, "model plan failed")
 	}
 	if len(modelsBuild.Models) > 0 || len(modelsBuild.Enums) > 0 {
-		modelsBuild.PackageName = cfg.Model.Package
 		var buf *bytes.Buffer
 		buf, err = templates.Run("models.gotpl", modelsBuild)
 		if err != nil {
@@ -57,8 +56,6 @@ func Generate(cfg Config) error {
 	if err != nil {
 		return errors.Wrap(err, "exec plan failed")
 	}
-	build.SchemaRaw = cfg.SchemaStr
-	build.PackageName = cfg.Exec.Package
 
 	var buf *bytes.Buffer
 	buf, err = templates.Run("generated.gotpl", build)
@@ -129,20 +126,18 @@ func abs(path string) string {
 	return filepath.ToSlash(absPath)
 }
 
-func importPath(dir string, pkgName string) string {
-	fullPkgName := filepath.Join(filepath.Dir(dir), pkgName)
-
+func importPath(dir string) string {
 	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
 		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
-		if len(gopath) > len(fullPkgName) {
+		if len(gopath) > len(dir) {
 			continue
 		}
-		if strings.EqualFold(gopath, fullPkgName[0:len(gopath)]) {
-			fullPkgName = fullPkgName[len(gopath):]
+		if strings.EqualFold(gopath, dir[0:len(gopath)]) {
+			dir = dir[len(gopath):]
 			break
 		}
 	}
-	return filepath.ToSlash(fullPkgName)
+	return filepath.ToSlash(dir)
 }
 
 func gofmt(filename string, b []byte) ([]byte, error) {

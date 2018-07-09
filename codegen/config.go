@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/neelance/schema"
@@ -114,6 +115,9 @@ func (tm TypeMap) Check() error {
 	for typeName, entry := range tm {
 		if entry.Model == "" {
 			return fmt.Errorf("model %s: entityPath is not defined", typeName)
+		}
+		if strings.LastIndex(entry.Model, ".") < strings.LastIndex(entry.Model, "/") {
+			return fmt.Errorf("model %s: invalid type specifier \"%s\" - you need to specify a struct to map to", typeName, entry.Model)
 		}
 	}
 	return nil

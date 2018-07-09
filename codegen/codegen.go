@@ -3,12 +3,10 @@ package codegen
 import (
 	"bytes"
 	"fmt"
-	"go/build"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"syscall"
 
 	"github.com/pkg/errors"
@@ -124,20 +122,6 @@ func abs(path string) string {
 		panic(err)
 	}
 	return filepath.ToSlash(absPath)
-}
-
-func importPath(dir string) string {
-	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
-		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
-		if len(gopath) > len(dir) {
-			continue
-		}
-		if strings.EqualFold(gopath, dir[0:len(gopath)]) {
-			dir = dir[len(gopath):]
-			break
-		}
-	}
-	return filepath.ToSlash(dir)
 }
 
 func gofmt(filename string, b []byte) ([]byte, error) {

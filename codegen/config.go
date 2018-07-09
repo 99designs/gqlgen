@@ -98,7 +98,18 @@ func (c *PackageConfig) normalize() error {
 }
 
 func (c *PackageConfig) ImportPath() string {
-	return importPath(c.Dir())
+	dir := c.Dir()
+	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
+		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
+		if len(gopath) > len(dir) {
+			continue
+		}
+		if strings.EqualFold(gopath, dir[0:len(gopath)]) {
+			dir = dir[len(gopath):]
+			break
+		}
+	}
+	return filepath.ToSlash(dir)
 }
 
 func (c *PackageConfig) Dir() string {

@@ -109,18 +109,21 @@ func (c *PackageConfig) Check() error {
 	if strings.ContainsAny(c.Package, "./\\") {
 		return fmt.Errorf("package should be the output package name only, do not include the output filename")
 	}
+	if c.Filename != "" && !strings.HasSuffix(c.Filename, ".go") {
+		return fmt.Errorf("filename should be path to a go source file")
+	}
 	return nil
 }
 
 func (cfg *Config) Check() error {
 	if err := cfg.Models.Check(); err != nil {
-		return fmt.Errorf("config: %s", err.Error())
+		return errors.Wrap(err, "config.models")
 	}
 	if err := cfg.Exec.Check(); err != nil {
-		return fmt.Errorf("config: %s", err.Error())
+		return errors.Wrap(err, "config.exec")
 	}
 	if err := cfg.Model.Check(); err != nil {
-		return fmt.Errorf("config: %s", err.Error())
+		return errors.Wrap(err, "config.model")
 	}
 	return nil
 }

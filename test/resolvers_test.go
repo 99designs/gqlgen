@@ -23,7 +23,7 @@ import (
 func TestCustomErrorPresenter(t *testing.T) {
 	resolvers := &testResolvers{}
 	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(resolvers),
-		handler.ErrorPresenter(func(i context.Context, e error) error {
+		handler.ErrorPresenter(func(i context.Context, e error) graphql.MarshalableError {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
 				return &graphql.ResolverError{Message: "override special error message"}
 			}

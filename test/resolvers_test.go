@@ -17,7 +17,7 @@ import (
 	"github.com/vektah/gqlgen/client"
 	"github.com/vektah/gqlgen/graphql"
 	"github.com/vektah/gqlgen/handler"
-	models "github.com/vektah/gqlgen/test/models"
+	"github.com/vektah/gqlgen/test/models-go"
 )
 
 func TestCustomErrorPresenter(t *testing.T) {
@@ -104,8 +104,8 @@ func (r *testResolvers) Query_jsonEncoding(ctx context.Context) (string, error) 
 	return "\U000fe4ed", nil
 }
 
-func (r *testResolvers) Query_viewer(ctx context.Context) (*Viewer, error) {
-	return &Viewer{
+func (r *testResolvers) Query_viewer(ctx context.Context) (*models.Viewer, error) {
+	return &models.Viewer{
 		User: &remote_api.User{Name: "Bob"},
 	}, nil
 }
@@ -114,15 +114,15 @@ func (r *testResolvers) Query_date(ctx context.Context, filter models.DateFilter
 	return r.queryDate(ctx, filter)
 }
 
-func (r *testResolvers) Query_path(ctx context.Context) ([]Element, error) {
-	return []Element{{1}, {2}, {3}, {4}}, nil
+func (r *testResolvers) Query_path(ctx context.Context) ([]models.Element, error) {
+	return []models.Element{{1}, {2}, {3}, {4}}, nil
 }
 
-func (r *testResolvers) Element_child(ctx context.Context, obj *Element) (Element, error) {
-	return Element{obj.ID * 10}, nil
+func (r *testResolvers) Element_child(ctx context.Context, obj *models.Element) (models.Element, error) {
+	return models.Element{obj.ID * 10}, nil
 }
 
-func (r *testResolvers) Element_error(ctx context.Context, obj *Element) (bool, error) {
+func (r *testResolvers) Element_error(ctx context.Context, obj *models.Element) (bool, error) {
 	// A silly hack to make the result order stable
 	time.Sleep(time.Duration(obj.ID) * 10 * time.Millisecond)
 

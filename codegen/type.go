@@ -27,7 +27,7 @@ type Type struct {
 	*NamedType
 
 	Modifiers []string
-	CastType  string // the type to cast to when unmarshalling
+	CastType  *Ref // the type to cast to when unmarshalling
 }
 
 const (
@@ -40,10 +40,10 @@ func (t Ref) FullName() string {
 }
 
 func (t Ref) PkgDot() string {
-	if t.Import == nil || t.Import.Alias == "" {
+	if t.Import == nil || t.Import.Alias() == "" {
 		return ""
 	}
-	return t.Import.Alias + "."
+	return t.Import.Alias() + "."
 }
 
 func (t Type) Signature() string {
@@ -125,7 +125,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	}
 
 	realResult := result
-	if t.CastType != "" {
+	if t.CastType != nil {
 		result = "castTmp"
 	}
 
@@ -140,7 +140,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 				err = (&{{.result}}).UnmarshalGQL({{.raw}})
 			{{- end }}
 		{{- if .t.CastType }}
-			{{ .realResult }} = {{.t.CastType}}(castTmp)
+			{{ .realResult }} = {{.t.CastType.FullName}}(castTmp)
 		{{- end }}`, map[string]interface{}{
 		"realResult": realResult,
 		"result":     result,
@@ -150,7 +150,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 }
 
 func (t Type) Marshal(val string) string {
-	if t.CastType != "" {
+	if t.CastType != nil {
 		val = t.GoType + "(" + val + ")"
 	}
 

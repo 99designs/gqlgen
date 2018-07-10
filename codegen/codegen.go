@@ -3,12 +3,10 @@ package codegen
 import (
 	"bytes"
 	"fmt"
-	"go/build"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"syscall"
 
 	"github.com/pkg/errors"
@@ -30,7 +28,6 @@ func Generate(cfg Config) error {
 		return errors.Wrap(err, "model plan failed")
 	}
 	if len(modelsBuild.Models) > 0 || len(modelsBuild.Enums) > 0 {
-		modelsBuild.PackageName = cfg.Model.Package
 		var buf *bytes.Buffer
 		buf, err = templates.Run("models.gotpl", modelsBuild)
 		if err != nil {
@@ -57,8 +54,6 @@ func Generate(cfg Config) error {
 	if err != nil {
 		return errors.Wrap(err, "exec plan failed")
 	}
-	build.SchemaRaw = cfg.SchemaStr
-	build.PackageName = cfg.Exec.Package
 
 	var buf *bytes.Buffer
 	buf, err = templates.Run("generated.gotpl", build)
@@ -127,22 +122,6 @@ func abs(path string) string {
 		panic(err)
 	}
 	return filepath.ToSlash(absPath)
-}
-
-func importPath(dir string, pkgName string) string {
-	fullPkgName := filepath.Join(filepath.Dir(dir), pkgName)
-
-	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
-		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
-		if len(gopath) > len(fullPkgName) {
-			continue
-		}
-		if strings.EqualFold(gopath, fullPkgName[0:len(gopath)]) {
-			fullPkgName = fullPkgName[len(gopath):]
-			break
-		}
-	}
-	return filepath.ToSlash(fullPkgName)
 }
 
 func gofmt(filename string, b []byte) ([]byte, error) {

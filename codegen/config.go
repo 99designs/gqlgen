@@ -2,9 +2,11 @@ package codegen
 
 import (
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/neelance/schema"
@@ -80,25 +82,59 @@ func (c *PackageConfig) normalize() error {
 		return errors.New("Filename is required")
 	}
 	c.Filename = abs(c.Filename)
+	// If Package is not set, first attempt to load the package at the output dir. If that fails
+	// fallback to just the base dir name of the output filename.
 	if c.Package == "" {
-		c.Package = filepath.Base(c.Dir())
+		cwd, _ := os.Getwd()
+		pkg, _ := build.Default.Import(c.ImportPath(), cwd, 0)
+		if pkg.Name != "" {
+			c.Package = pkg.Name
+		} else {
+			c.Package = filepath.Base(c.Dir())
+		}
 	}
 	c.Package = sanitizePackageName(c.Package)
 	return nil
 }
 
 func (c *PackageConfig) ImportPath() string {
-	return importPath(c.Dir(), c.Package)
+	dir := c.Dir()
+	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
+		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
+		if len(gopath) > len(dir) {
+			continue
+		}
+		if strings.EqualFold(gopath, dir[0:len(gopath)]) {
+			dir = dir[len(gopath):]
+			break
+		}
+	}
+	return filepath.ToSlash(dir)
 }
 
 func (c *PackageConfig) Dir() string {
 	return filepath.ToSlash(filepath.Dir(c.Filename))
 }
 
+func (c *PackageConfig) Check() error {
+	if strings.ContainsAny(c.Package, "./\\") {
+		return fmt.Errorf("package should be the output package name only, do not include the output filename")
+	}
+	if c.Filename != "" && !strings.HasSuffix(c.Filename, ".go") {
+		return fmt.Errorf("filename should be path to a go source file")
+	}
+	return nil
+}
+
 func (cfg *Config) Check() error {
-	err := cfg.Models.Check()
-	if err != nil {
-		return fmt.Errorf("config: %s", err.Error())
+	if err := cfg.Models.Check(); err != nil {
+		return errors.Wrap(err, "config.models")
+	}
+	if err := cfg.Exec.Check(); err != nil {
+		return errors.Wrap(err, "config.exec")
+	}
+	if err := cfg.Model.Check(); err != nil {
+		return errors.Wrap(err, "config.model")
 	}
 	return nil
 }
@@ -114,6 +150,9 @@ func (tm TypeMap) Check() error {
 	for typeName, entry := range tm {
 		if entry.Model == "" {
 			return fmt.Errorf("model %s: entityPath is not defined", typeName)
+		}
+		if strings.LastIndex(entry.Model, ".") < strings.LastIndex(entry.Model, "/") {
+			return fmt.Errorf("model %s: invalid type specifier \"%s\" - you need to specify a struct to map to", typeName, entry.Model)
 		}
 	}
 	return nil

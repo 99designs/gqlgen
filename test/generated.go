@@ -12,7 +12,7 @@ import (
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
 	schema "github.com/vektah/gqlgen/neelance/schema"
-	models "github.com/vektah/gqlgen/test/models"
+	models "github.com/vektah/gqlgen/test/models-go"
 )
 
 // MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
@@ -26,11 +26,11 @@ func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	Element_child(ctx context.Context, obj *Element) (Element, error)
-	Element_error(ctx context.Context, obj *Element) (bool, error)
-	Query_path(ctx context.Context) ([]Element, error)
+	Element_child(ctx context.Context, obj *models.Element) (models.Element, error)
+	Element_error(ctx context.Context, obj *models.Element) (bool, error)
+	Query_path(ctx context.Context) ([]models.Element, error)
 	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
-	Query_viewer(ctx context.Context) (*Viewer, error)
+	Query_viewer(ctx context.Context) (*models.Viewer, error)
 	Query_jsonEncoding(ctx context.Context) (string, error)
 
 	User_likes(ctx context.Context, obj *remote_api.User) ([]string, error)
@@ -42,13 +42,13 @@ type ResolverRoot interface {
 	User() UserResolver
 }
 type ElementResolver interface {
-	Child(ctx context.Context, obj *Element) (Element, error)
-	Error(ctx context.Context, obj *Element) (bool, error)
+	Child(ctx context.Context, obj *models.Element) (models.Element, error)
+	Error(ctx context.Context, obj *models.Element) (bool, error)
 }
 type QueryResolver interface {
-	Path(ctx context.Context) ([]Element, error)
+	Path(ctx context.Context) ([]models.Element, error)
 	Date(ctx context.Context, filter models.DateFilter) (bool, error)
-	Viewer(ctx context.Context) (*Viewer, error)
+	Viewer(ctx context.Context) (*models.Viewer, error)
 	JsonEncoding(ctx context.Context) (string, error)
 }
 type UserResolver interface {
@@ -59,15 +59,15 @@ type shortMapper struct {
 	r ResolverRoot
 }
 
-func (s shortMapper) Element_child(ctx context.Context, obj *Element) (Element, error) {
+func (s shortMapper) Element_child(ctx context.Context, obj *models.Element) (models.Element, error) {
 	return s.r.Element().Child(ctx, obj)
 }
 
-func (s shortMapper) Element_error(ctx context.Context, obj *Element) (bool, error) {
+func (s shortMapper) Element_error(ctx context.Context, obj *models.Element) (bool, error) {
 	return s.r.Element().Error(ctx, obj)
 }
 
-func (s shortMapper) Query_path(ctx context.Context) ([]Element, error) {
+func (s shortMapper) Query_path(ctx context.Context) ([]models.Element, error) {
 	return s.r.Query().Path(ctx)
 }
 
@@ -75,7 +75,7 @@ func (s shortMapper) Query_date(ctx context.Context, filter models.DateFilter) (
 	return s.r.Query().Date(ctx, filter)
 }
 
-func (s shortMapper) Query_viewer(ctx context.Context) (*Viewer, error) {
+func (s shortMapper) Query_viewer(ctx context.Context) (*models.Viewer, error) {
 	return s.r.Query().Viewer(ctx)
 }
 
@@ -151,7 +151,7 @@ func (ec *executionContext) _Element(ctx context.Context, sel []query.Selection,
 	return out
 }
 
-func (ec *executionContext) _Element_child(ctx context.Context, field graphql.CollectedField, obj *Element) graphql.Marshaler {
+func (ec *executionContext) _Element_child(ctx context.Context, field graphql.CollectedField, obj *models.Element) graphql.Marshaler {
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "Element",
 		Args:   nil,
@@ -176,12 +176,12 @@ func (ec *executionContext) _Element_child(ctx context.Context, field graphql.Co
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.(Element)
+		res := resTmp.(models.Element)
 		return ec._Element(ctx, field.Selections, &res)
 	})
 }
 
-func (ec *executionContext) _Element_error(ctx context.Context, field graphql.CollectedField, obj *Element) graphql.Marshaler {
+func (ec *executionContext) _Element_error(ctx context.Context, field graphql.CollectedField, obj *models.Element) graphql.Marshaler {
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "Element",
 		Args:   nil,
@@ -274,7 +274,7 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.([]Element)
+		res := resTmp.([]models.Element)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler {
@@ -354,7 +354,7 @@ func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.Col
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.(*Viewer)
+		res := resTmp.(*models.Viewer)
 		if res == nil {
 			return graphql.Null
 		}
@@ -521,7 +521,7 @@ func (ec *executionContext) _Viewer(ctx context.Context, sel []query.Selection, 
 	return out
 }
 
-func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.CollectedField, obj *Viewer) graphql.Marshaler {
+func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.CollectedField, obj *models.Viewer) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "Viewer"
 	rctx.Args = nil

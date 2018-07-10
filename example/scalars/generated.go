@@ -9,6 +9,7 @@ import (
 	strconv "strconv"
 	time "time"
 
+	model "github.com/vektah/gqlgen/example/scalars/model"
 	graphql "github.com/vektah/gqlgen/graphql"
 	introspection "github.com/vektah/gqlgen/neelance/introspection"
 	query "github.com/vektah/gqlgen/neelance/query"
@@ -26,11 +27,11 @@ func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	Query_user(ctx context.Context, id external.ObjectID) (*User, error)
-	Query_search(ctx context.Context, input SearchArgs) ([]User, error)
+	Query_user(ctx context.Context, id external.ObjectID) (*model.User, error)
+	Query_search(ctx context.Context, input model.SearchArgs) ([]model.User, error)
 
-	User_primitiveResolver(ctx context.Context, obj *User) (string, error)
-	User_customResolver(ctx context.Context, obj *User) (Point, error)
+	User_primitiveResolver(ctx context.Context, obj *model.User) (string, error)
+	User_customResolver(ctx context.Context, obj *model.User) (model.Point, error)
 }
 
 type ResolverRoot interface {
@@ -38,31 +39,31 @@ type ResolverRoot interface {
 	User() UserResolver
 }
 type QueryResolver interface {
-	User(ctx context.Context, id external.ObjectID) (*User, error)
-	Search(ctx context.Context, input SearchArgs) ([]User, error)
+	User(ctx context.Context, id external.ObjectID) (*model.User, error)
+	Search(ctx context.Context, input model.SearchArgs) ([]model.User, error)
 }
 type UserResolver interface {
-	PrimitiveResolver(ctx context.Context, obj *User) (string, error)
-	CustomResolver(ctx context.Context, obj *User) (Point, error)
+	PrimitiveResolver(ctx context.Context, obj *model.User) (string, error)
+	CustomResolver(ctx context.Context, obj *model.User) (model.Point, error)
 }
 
 type shortMapper struct {
 	r ResolverRoot
 }
 
-func (s shortMapper) Query_user(ctx context.Context, id external.ObjectID) (*User, error) {
+func (s shortMapper) Query_user(ctx context.Context, id external.ObjectID) (*model.User, error) {
 	return s.r.Query().User(ctx, id)
 }
 
-func (s shortMapper) Query_search(ctx context.Context, input SearchArgs) ([]User, error) {
+func (s shortMapper) Query_search(ctx context.Context, input model.SearchArgs) ([]model.User, error) {
 	return s.r.Query().Search(ctx, input)
 }
 
-func (s shortMapper) User_primitiveResolver(ctx context.Context, obj *User) (string, error) {
+func (s shortMapper) User_primitiveResolver(ctx context.Context, obj *model.User) (string, error) {
 	return s.r.User().PrimitiveResolver(ctx, obj)
 }
 
-func (s shortMapper) User_customResolver(ctx context.Context, obj *User) (Point, error) {
+func (s shortMapper) User_customResolver(ctx context.Context, obj *model.User) (model.Point, error) {
 	return s.r.User().CustomResolver(ctx, obj)
 }
 
@@ -130,7 +131,7 @@ func (ec *executionContext) _Address(ctx context.Context, sel []query.Selection,
 	return out
 }
 
-func (ec *executionContext) _Address_id(ctx context.Context, field graphql.CollectedField, obj *Address) graphql.Marshaler {
+func (ec *executionContext) _Address_id(ctx context.Context, field graphql.CollectedField, obj *model.Address) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "Address"
 	rctx.Args = nil
@@ -138,10 +139,10 @@ func (ec *executionContext) _Address_id(ctx context.Context, field graphql.Colle
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.ID
-	return MarshalID(res)
+	return model.MarshalID(res)
 }
 
-func (ec *executionContext) _Address_location(ctx context.Context, field graphql.CollectedField, obj *Address) graphql.Marshaler {
+func (ec *executionContext) _Address_location(ctx context.Context, field graphql.CollectedField, obj *model.Address) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "Address"
 	rctx.Args = nil
@@ -194,7 +195,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	var arg0 external.ObjectID
 	if tmp, ok := field.Args["id"]; ok {
 		var err error
-		arg0, err = UnmarshalID(tmp)
+		arg0, err = model.UnmarshalID(tmp)
 		if err != nil {
 			ec.Error(ctx, err)
 			return graphql.Null
@@ -225,7 +226,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.(*User)
+		res := resTmp.(*model.User)
 		if res == nil {
 			return graphql.Null
 		}
@@ -235,7 +236,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 
 func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	args := map[string]interface{}{}
-	var arg0 SearchArgs
+	var arg0 model.SearchArgs
 	if tmp, ok := field.Args["input"]; ok {
 		var err error
 		arg0, err = UnmarshalSearchArgs(tmp)
@@ -269,7 +270,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_search(ctx, args["input"].(SearchArgs))
+			return ec.resolvers.Query_search(ctx, args["input"].(model.SearchArgs))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -278,7 +279,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.([]User)
+		res := resTmp.([]model.User)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler {
@@ -369,7 +370,7 @@ func (ec *executionContext) _User(ctx context.Context, sel []query.Selection, ob
 	return out
 }
 
-func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "User"
 	rctx.Args = nil
@@ -377,10 +378,10 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.ID
-	return MarshalID(res)
+	return model.MarshalID(res)
 }
 
-func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "User"
 	rctx.Args = nil
@@ -391,7 +392,7 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	return graphql.MarshalString(res)
 }
 
-func (ec *executionContext) _User_created(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_created(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "User"
 	rctx.Args = nil
@@ -399,10 +400,10 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Created
-	return MarshalTimestamp(res)
+	return model.MarshalTimestamp(res)
 }
 
-func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "User"
 	rctx.Args = nil
@@ -413,7 +414,7 @@ func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.Co
 	return graphql.MarshalBoolean(bool(res))
 }
 
-func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "User",
 		Args:   nil,
@@ -443,7 +444,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 	})
 }
 
-func (ec *executionContext) _User_customResolver(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_customResolver(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "User",
 		Args:   nil,
@@ -468,12 +469,12 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.(Point)
+		res := resTmp.(model.Point)
 		return res
 	})
 }
 
-func (ec *executionContext) _User_address(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_address(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "User"
 	rctx.Args = nil
@@ -484,7 +485,7 @@ func (ec *executionContext) _User_address(ctx context.Context, field graphql.Col
 	return ec._Address(ctx, field.Selections, &res)
 }
 
-func (ec *executionContext) _User_tier(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_tier(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "User"
 	rctx.Args = nil
@@ -1227,15 +1228,15 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
-	var it SearchArgs
+func UnmarshalSearchArgs(v interface{}) (model.SearchArgs, error) {
+	var it model.SearchArgs
 	var asMap = v.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
 		case "location":
 			var err error
-			var ptr1 Point
+			var ptr1 model.Point
 			if v != nil {
 				err = (&ptr1).UnmarshalGQL(v)
 				it.Location = &ptr1
@@ -1248,7 +1249,7 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 			var err error
 			var ptr1 time.Time
 			if v != nil {
-				ptr1, err = UnmarshalTimestamp(v)
+				ptr1, err = model.UnmarshalTimestamp(v)
 				it.CreatedAfter = &ptr1
 			}
 
@@ -1260,7 +1261,7 @@ func UnmarshalSearchArgs(v interface{}) (SearchArgs, error) {
 
 			var castTmp bool
 			castTmp, err = graphql.UnmarshalBoolean(v)
-			it.IsBanned = Banned(castTmp)
+			it.IsBanned = model.Banned(castTmp)
 			if err != nil {
 				return it, err
 			}

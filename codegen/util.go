@@ -185,10 +185,7 @@ func bindObject(t types.Type, object *Object, imports *Imports) error {
 			case normalizeVendor(structField.Type().Underlying().String()):
 				pkg, typ := pkgAndType(structField.Type().String())
 				imp := imports.findByPath(pkg)
-				field.CastType = typ
-				if imp != nil {
-					field.CastType = imp.Alias + "." + typ
-				}
+				field.CastType = &Ref{GoType: typ, Import: imp}
 
 			default:
 				// type mismatch, require custom resolver for field

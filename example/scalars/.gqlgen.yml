@@ -1,13 +1,16 @@
+model:
+  filename: model/generated.go
+
 models:
   User:
-    model: github.com/vektah/gqlgen/example/scalars.User
+    model: github.com/vektah/gqlgen/example/scalars/model.User
   Timestamp:
-    model: github.com/vektah/gqlgen/example/scalars.Timestamp
+    model: github.com/vektah/gqlgen/example/scalars/model.Timestamp
   SearchArgs:
-    model: github.com/vektah/gqlgen/example/scalars.SearchArgs
+    model: github.com/vektah/gqlgen/example/scalars/model.SearchArgs
   Point:
-    model: github.com/vektah/gqlgen/example/scalars.Point
+    model: github.com/vektah/gqlgen/example/scalars/model.Point
   ID:
-    model: github.com/vektah/gqlgen/example/scalars.ID
+    model: github.com/vektah/gqlgen/example/scalars/model.ID
   Tier:
-    model: github.com/vektah/gqlgen/example/scalars.Tier
+    model: github.com/vektah/gqlgen/example/scalars/model.Tier

@@ -103,19 +103,19 @@ func (cfg *Config) bind() (*Build, error) {
 	// Poke a few magic methods into query
 	q := b.Objects.ByName(b.QueryRoot.GQLType)
 	q.Fields = append(q.Fields, Field{
-		Type:         &Type{namedTypes["__Schema"], []string{modPtr}, ""},
+		Type:         &Type{namedTypes["__Schema"], []string{modPtr}, nil},
 		GQLName:      "__schema",
 		NoErr:        true,
 		GoMethodName: "ec.introspectSchema",
 		Object:       q,
 	})
 	q.Fields = append(q.Fields, Field{
-		Type:         &Type{namedTypes["__Type"], []string{modPtr}, ""},
+		Type:         &Type{namedTypes["__Type"], []string{modPtr}, nil},
 		GQLName:      "__type",
 		NoErr:        true,
 		GoMethodName: "ec.introspectType",
 		Args: []FieldArgument{
-			{GQLName: "name", Type: &Type{namedTypes["String"], []string{}, ""}, Object: &Object{}},
+			{GQLName: "name", Type: &Type{namedTypes["String"], []string{}, nil}, Object: &Object{}},
 		},
 		Object: q,
 	})

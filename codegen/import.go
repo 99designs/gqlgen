@@ -5,9 +5,10 @@ import (
 )
 
 type Import struct {
-	Name  string
-	Alias string
-	Path  string
+	Name string
+	Path string
+
+	alias string
 }
 
 type Imports struct {
@@ -16,5 +17,13 @@ type Imports struct {
 }
 
 func (i *Import) Write() string {
-	return i.Alias + " " + strconv.Quote(i.Path)
+	return i.Alias() + " " + strconv.Quote(i.Path)
+}
+
+func (i *Import) Alias() string {
+	if i.alias == "" {
+		panic("alias called before imports are finalized")
+	}
+
+	return i.alias
 }

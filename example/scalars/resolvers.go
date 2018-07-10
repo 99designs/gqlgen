@@ -4,27 +4,28 @@ package scalars
 
 import (
 	context "context"
-	"fmt"
-	"time"
-
 	"external"
+	"fmt"
+	time "time"
+
+	"github.com/vektah/gqlgen/example/scalars/model"
 )
 
 type Resolver struct {
 }
 
-func (r *Resolver) Query_user(ctx context.Context, id external.ObjectID) (*User, error) {
-	return &User{
+func (r *Resolver) Query_user(ctx context.Context, id external.ObjectID) (*model.User, error) {
+	return &model.User{
 		ID:      id,
 		Name:    fmt.Sprintf("Test User %d", id),
 		Created: time.Now(),
-		Address: Address{ID: 1, Location: &Point{1, 2}},
-		Tier:    TierC,
+		Address: model.Address{ID: 1, Location: &model.Point{1, 2}},
+		Tier:    model.TierC,
 	}, nil
 }
 
-func (r *Resolver) Query_search(ctx context.Context, input SearchArgs) ([]User, error) {
-	location := Point{1, 2}
+func (r *Resolver) Query_search(ctx context.Context, input model.SearchArgs) ([]model.User, error) {
+	location := model.Point{1, 2}
 	if input.Location != nil {
 		location = *input.Location
 	}
@@ -34,28 +35,28 @@ func (r *Resolver) Query_search(ctx context.Context, input SearchArgs) ([]User, 
 		created = *input.CreatedAfter
 	}
 
-	return []User{
+	return []model.User{
 		{
 			ID:      1,
 			Name:    "Test User 1",
 			Created: created,
-			Address: Address{ID: 2, Location: &location},
-			Tier:    TierA,
+			Address: model.Address{ID: 2, Location: &location},
+			Tier:    model.TierA,
 		},
 		{
 			ID:      2,
 			Name:    "Test User 2",
 			Created: created,
-			Address: Address{ID: 1, Location: &location},
-			Tier:    TierC,
+			Address: model.Address{ID: 1, Location: &location},
+			Tier:    model.TierC,
 		},
 	}, nil
 }
 
-func (r *Resolver) User_primitiveResolver(ctx context.Context, obj *User) (string, error) {
+func (r *Resolver) User_primitiveResolver(ctx context.Context, obj *model.User) (string, error) {
 	return "test", nil
 }
 
-func (r *Resolver) User_customResolver(ctx context.Context, obj *User) (Point, error) {
-	return Point{5, 1}, nil
+func (r *Resolver) User_customResolver(ctx context.Context, obj *model.User) (model.Point, error) {
+	return model.Point{5, 1}, nil
 }

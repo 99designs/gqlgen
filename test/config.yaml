@@ -2,16 +2,14 @@ schema: schema.graphql
 
 exec:
   filename: generated.go
-  # package:
 model:
-  filename: models/generated.go
-  # package:
+  filename: models-go/generated.go
 
 models:
   Element:
-    model: github.com/vektah/gqlgen/test.Element
+    model: github.com/vektah/gqlgen/test/models-go.Element
   Viewer:
-    model: github.com/vektah/gqlgen/test.Viewer
+    model: github.com/vektah/gqlgen/test/models-go.Viewer
   User:
     model: remote_api.User
     fields:

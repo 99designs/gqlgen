@@ -88,10 +88,10 @@ func (s Imports) finalize() []*Import {
 			alias = imp.Name + strconv.Itoa(i)
 			i++
 			if i > 10 {
-				panic(fmt.Errorf("too many collisions, last attempt was %s", imp.Alias))
+				panic(fmt.Errorf("too many collisions, last attempt was %s", alias))
 			}
 		}
-		imp.Alias = alias
+		imp.alias = alias
 	}
 
 	return s.imports
@@ -108,7 +108,7 @@ func (s Imports) findByPath(importPath string) *Import {
 
 func (s Imports) findByAlias(alias string) *Import {
 	for _, imp := range s.imports {
-		if imp.Alias == alias {
+		if imp.alias == alias {
 			return imp
 		}
 	}

@@ -81,19 +81,19 @@ func (c *PackageConfig) normalize() error {
 	if c.Filename == "" {
 		return errors.New("Filename is required")
 	}
+	c.Filename = abs(c.Filename)
 	// If Package is not set, first attempt to load the package at the output dir. If that fails
 	// fallback to just the base dir name of the output filename.
 	if c.Package == "" {
 		cwd, _ := os.Getwd()
-		pkg, err := build.Default.Import(c.Dir(), cwd, 0)
-		if err != nil {
-			c.Package = filepath.Base(c.Dir())
-		} else {
+		pkg, _ := build.Default.Import(c.ImportPath(), cwd, 0)
+		if pkg.Name != "" {
 			c.Package = pkg.Name
+		} else {
+			c.Package = filepath.Base(c.Dir())
 		}
 	}
 	c.Package = sanitizePackageName(c.Package)
-	c.Filename = abs(c.Filename)
 	return nil
 }
 

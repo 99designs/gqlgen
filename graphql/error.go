@@ -26,6 +26,11 @@ func (r *ResolverError) Error() string {
 	return r.Message
 }
 
+type Errors interface {
+	Errors() []error
+	Error() string
+}
+
 type ErrorBuilder struct {
 	Errors []error
 	// ErrorPresenter will be used to generate the error
@@ -45,5 +50,12 @@ func (c *ErrorBuilder) Error(ctx context.Context, err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
+	switch err := err.(type) {
+	case Errors:
+		for _, err := range err.Errors() {
+			c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
+		}
+	default:
+		c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
+	}
 }

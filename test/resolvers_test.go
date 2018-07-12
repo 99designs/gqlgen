@@ -23,11 +23,11 @@ import (
 func TestCustomErrorPresenter(t *testing.T) {
 	resolvers := &testResolvers{}
 	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(resolvers),
-		handler.ErrorPresenter(func(i context.Context, e error) error {
+		handler.ErrorPresenter(func(i context.Context, e error) *graphql.Error {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
-				return &graphql.ResolverError{Message: "override special error message"}
+				return &graphql.Error{Message: "override special error message"}
 			}
-			return &graphql.ResolverError{Message: e.Error()}
+			return &graphql.Error{Message: e.Error()}
 		}),
 	))
 	c := client.New(srv.URL)
@@ -45,6 +45,19 @@ func TestCustomErrorPresenter(t *testing.T) {
 		err := c.Post(`{ path { cc:child { error } } }`, &resp)
 
 		assert.EqualError(t, err, `[{"message":"a normal error"},{"message":"a normal error"},{"message":"a normal error"},{"message":"a normal error"}]`)
+	})
+	t.Run("multiple errors", func(t *testing.T) {
+		resolvers.queryDate = func(ctx context.Context, filter models.DateFilter) (bool, error) {
+			graphql.AddErrorf(ctx, "Error 1")
+			graphql.AddErrorf(ctx, "Error 2")
+			graphql.AddError(ctx, &specialErr{})
+			return false, nil
+		}
+
+		var resp struct{ Date bool }
+		err := c.Post(`{ date(filter:{value: "asdf"}) }`, &resp)
+
+		assert.EqualError(t, err, `[{"message":"Error 1"},{"message":"Error 2"},{"message":"override special error message"}]`)
 	})
 }
 

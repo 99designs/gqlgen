@@ -2,48 +2,36 @@ package graphql
 
 import (
 	"context"
-	"fmt"
-	"sync"
 )
 
-type ErrorPresenterFunc func(context.Context, error) error
+// Error is the standard graphql error type described in https://facebook.github.io/graphql/draft/#sec-Errors
+type Error struct {
+	Message    string                 `json:"message"`
+	Path       []interface{}          `json:"path,omitempty"`
+	Locations  []ErrorLocation        `json:"locations,omitempty"`
+	Extensions map[string]interface{} `json:"extensions,omitempty"`
+}
 
-func DefaultErrorPresenter(ctx context.Context, err error) error {
-	return &ResolverError{
-		Message: err.Error(),
-		Path:    GetResolverContext(ctx).Path,
+type ErrorLocation struct {
+	Line   int `json:"line,omitempty"`
+	Column int `json:"column,omitempty"`
+}
+
+type ErrorPresenterFunc func(context.Context, error) *Error
+
+type ExtendedError interface {
+	Extensions() map[string]interface{}
+}
+
+func DefaultErrorPresenter(ctx context.Context, err error) *Error {
+	var extensions map[string]interface{}
+	if ee, ok := err.(ExtendedError); ok {
+		extensions = ee.Extensions()
 	}
-}
 
-// ResolverError is the default error type returned by ErrorPresenter. You can replace it with your own by returning
-// something different from the ErrorPresenter
-type ResolverError struct {
-	Message string        `json:"message"`
-	Path    []interface{} `json:"path,omitempty"`
-}
-
-func (r *ResolverError) Error() string {
-	return r.Message
-}
-
-type ErrorBuilder struct {
-	Errors []error
-	// ErrorPresenter will be used to generate the error
-	// message from errors given to Error().
-	ErrorPresenter ErrorPresenterFunc
-	mu             sync.Mutex
-}
-
-func (c *ErrorBuilder) Errorf(ctx context.Context, format string, args ...interface{}) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, fmt.Errorf(format, args...)))
-}
-
-func (c *ErrorBuilder) Error(ctx context.Context, err error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
+	return &Error{
+		Message:    err.Error(),
+		Path:       GetResolverContext(ctx).Path,
+		Extensions: extensions,
+	}
 }

@@ -13,7 +13,7 @@ import (
 func TestLoadConfig(t *testing.T) {
 	t.Run("config does not exist", func(t *testing.T) {
 		_, err := LoadConfig("doesnotexist.yml")
-		require.EqualError(t, err, "unable to read config: open doesnotexist.yml: no such file or directory")
+		require.Error(t, err)
 	})
 
 	t.Run("malformed config", func(t *testing.T) {

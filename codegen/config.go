@@ -98,9 +98,9 @@ func (c *PackageConfig) normalize() error {
 }
 
 func (c *PackageConfig) ImportPath() string {
-	dir := c.Dir()
+	dir := filepath.ToSlash(c.Dir())
 	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
-		gopath = filepath.Join(gopath, "src") + string(os.PathSeparator)
+		gopath = filepath.ToSlash(gopath) + "/src/"
 		if len(gopath) > len(dir) {
 			continue
 		}
@@ -109,7 +109,7 @@ func (c *PackageConfig) ImportPath() string {
 			break
 		}
 	}
-	return filepath.ToSlash(dir)
+	return dir
 }
 
 func (c *PackageConfig) Dir() string {
@@ -167,7 +167,8 @@ func findCfg() (string, error) {
 	}
 
 	cfg := findCfgInDir(dir)
-	for cfg == "" && dir != "/" {
+
+	for cfg == "" && dir != filepath.Dir(dir) {
 		dir = filepath.Dir(dir)
 		cfg = findCfgInDir(dir)
 	}

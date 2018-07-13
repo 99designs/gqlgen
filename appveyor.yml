@@ -1,0 +1,34 @@
+version: "{build}"
+
+# Source Config
+
+skip_branch_with_pr: true
+clone_folder: c:\gopath\src\github.com\vektah\gqlgen
+
+# Build host
+
+environment:
+  GOPATH: c:\gopath
+  GOVERSION: 1.10
+  PATH: '%PATH%;c:\gopath\bin'
+
+init:
+  - git config --global core.autocrlf input
+
+# Build
+
+install:
+  # Install the specific Go version.
+  - rmdir c:\go /s /q
+  - appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-amd64.msi
+  - msiexec /i go%GOVERSION%.windows-amd64.msi /q
+  - go version
+
+build: false
+deploy: false
+
+test_script:
+  - go get -u github.com/vektah/gorunpkg github.com/golang/dep/cmd/dep
+  - dep ensure -vendor-only
+  - go generate ./...
+  - go test ./...

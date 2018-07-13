@@ -167,7 +167,8 @@ func findCfg() (string, error) {
 	}
 
 	cfg := findCfgInDir(dir)
-	for cfg == "" && dir != "/" {
+
+	for cfg == "" && dir != filepath.Dir(dir) {
 		dir = filepath.Dir(dir)
 		cfg = findCfgInDir(dir)
 	}

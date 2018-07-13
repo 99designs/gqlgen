@@ -2,139 +2,178 @@
 
 
 [[projects]]
+  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = "UT"
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:66ddebb274faa160a4a23394a17ad3c8e15fee9bf5408d13f77d22b61bc7f072"
   name = "github.com/go-chi/chi"
   packages = ["."]
+  pruneopts = "UT"
   revision = "e83ac2304db3c50cf03d96a2fcd39009d458bc35"
   version = "v3.3.2"
 
 [[projects]]
+  digest = "1:78907d832e27dbfc6e3fdfc52bd2e5e2e05c1d0e3789d4825b824489fbeab233"
   name = "github.com/gogo/protobuf"
   packages = [
     "io",
-    "proto"
+    "proto",
   ]
+  pruneopts = "UT"
   revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:160eabf7a69910fd74f29c692718bc2437c1c1c7d4c9dea9712357752a70e5df"
   name = "github.com/gorilla/context"
   packages = ["."]
+  pruneopts = "UT"
   revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
   version = "v1.1"
 
 [[projects]]
+  digest = "1:88aa9e326e2bd6045a46e00a922954b3e1a9ac5787109f49ac85366df370e1e5"
   name = "github.com/gorilla/mux"
   packages = ["."]
+  pruneopts = "UT"
   revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
   version = "v1.6.1"
 
 [[projects]]
+  digest = "1:43dd08a10854b2056e615d1b1d22ac94559d822e1f8b6fcc92c1a1057e85188e"
   name = "github.com/gorilla/websocket"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
   version = "v1.2.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:ab9cfaf00fc5db5fd9d8e5f33da52e62bcc977d1976503dcc2a1492f391bd9ed"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
+  pruneopts = "UT"
   revision = "a4e142e9c047c904fa2f1e144d9a84e6133024bc"
 
 [[projects]]
   branch = "master"
+  digest = "1:f0157668c753bf20253dc027a7698d170c8c65253c0ffcbdf8e310ee14184a7b"
   name = "github.com/opentracing-contrib/go-stdlib"
   packages = ["nethttp"]
+  pruneopts = "UT"
   revision = "36723135187404d2f4002f4f189938565e64cc5c"
 
 [[projects]]
+  digest = "1:d07bd28263c09c5d7f6502e8ddac63e027eca0eafcd07632790d958b50360317"
   name = "github.com/opentracing/basictracer-go"
   packages = [
     ".",
-    "wire"
+    "wire",
   ]
+  pruneopts = "UT"
   revision = "1b32af207119a14b1b231d451df3ed04a72efebf"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:27af6024faa3c28426a698b8c653be0fd908bc96e25b7d76f2192eb342427db6"
   name = "github.com/opentracing/opentracing-go"
   packages = [
     ".",
     "ext",
-    "log"
+    "log",
   ]
+  pruneopts = "UT"
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
   version = "v1.0.2"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = "UT"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:7ca2584fa7da0520cd2d1136a10194fe5a5b220bdb215074ab6f7b5ad91115f4"
   name = "github.com/shurcooL/httpfs"
   packages = ["vfsutil"]
+  pruneopts = "UT"
   revision = "809beceb23714880abc4a382a00c05f89d13b1cc"
 
 [[projects]]
   branch = "master"
+  digest = "1:a3f0c6930421c8a4c02aaf2a00c5e7b808204b15a47b1d8c285c1e9cbda886b5"
   name = "github.com/shurcooL/vfsgen"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ffb13db8def02f545acc58bd288ec6057c2bbfb9"
 
 [[projects]]
+  digest = "1:73697231b93fb74a73ebd8384b68b9a60c57ea6b13c56d2425414566a72c8e6d"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
-    "require"
+    "require",
   ]
+  pruneopts = "UT"
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
 
 [[projects]]
   branch = "master"
+  digest = "1:3684f335059f8441260c3e949c0b99de97ea1057ecc493fdbd72ff3c27863277"
   name = "github.com/vektah/dataloaden"
   packages = ["."]
-  revision = "92d08f61dc2b9f5c37f5eea31a8558d64c2ed6a7"
+  pruneopts = "UT"
+  revision = "314ac81052eedc03ac0a79bdc89d05a49a2a5814"
 
 [[projects]]
   branch = "master"
+  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
   name = "golang.org/x/net"
   packages = ["context"]
+  pruneopts = "UT"
   revision = "b3c676e531a6dc479fa1b35ac961c13f5e2b4d2e"
 
 [[projects]]
   branch = "master"
+  digest = "1:77fe642412bfed48743e2b75163e3ab5c430cfe22dd488788647b89b28794635"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
     "go/buildutil",
     "go/loader",
-    "imports"
+    "imports",
   ]
+  pruneopts = "UT"
   revision = "ce871d178848e3eea1e8795e5cfb74053dde4bb9"
 
 [[projects]]
+  digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
+  pruneopts = "UT"
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
   version = "v2.2.1"
 
 [[projects]]
   branch = "master"
+  digest = "1:7ddb3a7b35cc853fe0db36a1b2473bdff03f28add7d28e4725e692603111266e"
   name = "sourcegraph.com/sourcegraph/appdash"
   packages = [
     ".",
@@ -143,19 +182,40 @@
     "opentracing",
     "sqltrace",
     "traceapp",
-    "traceapp/tmpl"
+    "traceapp/tmpl",
   ]
+  pruneopts = "UT"
   revision = "2cc67fd647551af94593ecaaa89fe4e5b2940a3e"
 
 [[projects]]
   branch = "master"
+  digest = "1:be108b48d79c3b3c345811a57a47ee87fdbe895beb4bb56239da71d4943e5be7"
   name = "sourcegraph.com/sourcegraph/appdash-data"
   packages = ["."]
+  pruneopts = "UT"
   revision = "73f23eafcf67cad684fba328dd545a116ac273ff"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ee97741e2ec373079694c0adc517dd7bb0dc3271ec459281fa0209d066f04995"
+  input-imports = [
+    "github.com/go-chi/chi",
+    "github.com/gorilla/websocket",
+    "github.com/mitchellh/mapstructure",
+    "github.com/opentracing-contrib/go-stdlib/nethttp",
+    "github.com/opentracing/opentracing-go",
+    "github.com/opentracing/opentracing-go/ext",
+    "github.com/opentracing/opentracing-go/log",
+    "github.com/pkg/errors",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/require",
+    "github.com/vektah/dataloaden",
+    "golang.org/x/tools/go/loader",
+    "golang.org/x/tools/imports",
+    "gopkg.in/yaml.v2",
+    "sourcegraph.com/sourcegraph/appdash",
+    "sourcegraph.com/sourcegraph/appdash/opentracing",
+    "sourcegraph.com/sourcegraph/appdash/traceapp",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

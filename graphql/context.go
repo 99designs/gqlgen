@@ -134,14 +134,6 @@ func (c *RequestContext) Error(ctx context.Context, err error) {
 	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
 }
 
-// GraphqlError bypasses the error presenter, allowing you to directly taylor an error response from a resolver
-func (c *RequestContext) GraphqlError(ctx context.Context, err *Error) {
-	c.errorsMu.Lock()
-	defer c.errorsMu.Unlock()
-
-	c.Errors = append(c.Errors, err)
-}
-
 // AddError is a convenience method for adding an error to the current response
 func AddError(ctx context.Context, err error) {
 	GetRequestContext(ctx).Error(ctx, err)
@@ -150,9 +142,4 @@ func AddError(ctx context.Context, err error) {
 // AddErrorf is a convenience method for adding an error to the current response
 func AddErrorf(ctx context.Context, format string, args ...interface{}) {
 	GetRequestContext(ctx).Errorf(ctx, format, args...)
-}
-
-// AddGraphqlError is a convenience method for adding an error to the current response, bypassing the formatter
-func AddGraphqlError(ctx context.Context, err *Error) {
-	GetRequestContext(ctx).GraphqlError(ctx, err)
 }

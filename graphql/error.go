@@ -12,6 +12,10 @@ type Error struct {
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }
 
+func (e *Error) Error() string {
+	return e.Message
+}
+
 type ErrorLocation struct {
 	Line   int `json:"line,omitempty"`
 	Column int `json:"column,omitempty"`
@@ -24,6 +28,11 @@ type ExtendedError interface {
 }
 
 func DefaultErrorPresenter(ctx context.Context, err error) *Error {
+	if gqlerr, ok := err.(*Error); ok {
+		gqlerr.Path = GetResolverContext(ctx).Path
+		return gqlerr
+	}
+
 	var extensions map[string]interface{}
 	if ee, ok := err.(ExtendedError); ok {
 		extensions = ee.Extensions()

@@ -22,11 +22,9 @@ func (r Query) DoThings(ctx context.Context) (bool, error) {
 	// Pass an existing error out
 	graphql.AddError(ctx, err)
 
-	// Fully customize the error, bypassing the presenter. You
-	// wont get path information unless you add it yourself
-	graphql.AddGraphqlError(ctx, &graphql.Error{
+	// Or fully customize the error
+	graphql.AddError(ctx, &graphql.Error{
 		Message: "A descriptive error message",
-		Path: GetResolverContext(ctx).Path,
 		Extensions: map[string]interface{}{
 			"code": "10-4",
 		}

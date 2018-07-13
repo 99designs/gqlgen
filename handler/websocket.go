@@ -154,7 +154,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return true
 	}
 
-	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables, reqParams.OperationName)
 	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
 
 	if op.Type != query.Subscription {

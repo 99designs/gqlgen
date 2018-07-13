@@ -5,7 +5,8 @@ var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 // nolint: gocyclo, errcheck, gas, goconst
 {{- if .Stream }}
 func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []query.Selection) func() graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: {{$object.GQLType|quote}},
 	})
@@ -25,7 +26,8 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []quer
 }
 {{- else }}
 func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel []query.Selection{{if not $object.Root}}, obj *{{$object.FullName}} {{end}}) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.Doc, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
+	reqctx := graphql.GetRequestContext(ctx)
+	fields := graphql.CollectFields(reqctx, sel, {{$object.GQLType|lcFirst}}Implementors, ec.Variables)
 	{{if $object.Root}}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Object: {{$object.GQLType|quote}},

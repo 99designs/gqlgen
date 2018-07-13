@@ -19,6 +19,7 @@ type RequestContext struct {
 	Recover            RecoverFunc
 	ResolverMiddleware ResolverMiddleware
 	RequestMiddleware  RequestMiddleware
+	OperationName      string
 }
 
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
@@ -29,7 +30,7 @@ func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context
 	return next(ctx)
 }
 
-func NewRequestContext(doc *query.Document, query string, variables map[string]interface{}) *RequestContext {
+func NewRequestContext(doc *query.Document, query string, variables map[string]interface{}, operationName string) *RequestContext {
 	return &RequestContext{
 		Doc:                doc,
 		RawQuery:           query,
@@ -40,6 +41,7 @@ func NewRequestContext(doc *query.Document, query string, variables map[string]i
 		ErrorBuilder: ErrorBuilder{
 			ErrorPresenter: DefaultErrorPresenter,
 		},
+		OperationName: operationName,
 	}
 }
 
@@ -111,5 +113,5 @@ func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Conte
 func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
 	reqctx := GetRequestContext(ctx)
 	resctx := GetResolverContext(ctx)
-	return CollectFields(reqctx.Doc, resctx.Field.Selections, satisfies, reqctx.Variables)
+	return CollectFields(reqctx, resctx.Field.Selections, satisfies, reqctx.Variables)
 }

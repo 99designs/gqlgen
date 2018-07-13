@@ -28,8 +28,8 @@ type Config struct {
 	requestHook    graphql.RequestMiddleware
 }
 
-func (c *Config) newRequestContext(doc *query.Document, query string, variables map[string]interface{}) *graphql.RequestContext {
-	reqCtx := graphql.NewRequestContext(doc, query, variables)
+func (c *Config) newRequestContext(doc *query.Document, query string, variables map[string]interface{}, operationName string) *graphql.RequestContext {
+	reqCtx := graphql.NewRequestContext(doc, query, variables, operationName)
 	if hook := c.recover; hook != nil {
 		reqCtx.Recover = hook
 	}
@@ -175,7 +175,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			return
 		}
 
-		reqCtx := cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+		reqCtx := cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables, reqParams.OperationName)
 		ctx := graphql.WithRequestContext(r.Context(), reqCtx)
 
 		defer func() {

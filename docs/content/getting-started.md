@@ -25,7 +25,9 @@ go get -u github.com/vektah/gqlgen
 ```
 
 
-## Define the schema
+## Building the server
+
+### Define the schema first
 
 gqlgen is a schema-first library, so before touching any code we write out the API we want using the graphql 
 [Schema Definition Language](http://graphql.org/learn/schema/). This usually goes into a file called schema.graphql  
@@ -57,17 +59,24 @@ type Mutation {
 }
 ```
 
-Now lets write out our models:
-graph/graph.go
-`graph/graph.go`
-```go
-package graph
+### Create the database models
 
+Now we define some types, these are stand-ins for your database layer. Feel free to use whatever ORM you are familiar 
+with, or roll it yourself. For this example we are just going to use some structs and keep them in memory.
+
+`model/user.go`
+```go
+package model
 
 type User struct {
 	ID   string
 	Name string
 }
+```
+
+`model/todo.go`
+```go
+package model
 
 type Todo struct {
 	ID     string
@@ -78,71 +87,84 @@ type Todo struct {
 
 ```
 
-So we have our schema and our models. now we need to link them up:
+### Generate the graphql runtime
 
-`graph/.gqlgen.yml`
+So we have our schema and our models, now we need to link them up:
+
+`gqlgen.yml` - [Read more about the config]({{< ref "config.md" >}})
 ```yaml
-schema: ../schema.graphql
+schema: schema.graphql
 exec:
-  # filename: generated.go
-  # package:
+  filename: graph/generated.go
 model:
-  # filename: models_gen.go
-  # package:
+  filename: model/generated.go
 
 models:
   Todo:
-    model: github.com/vektah/gqlgen-tutorials/gettingstarted/graph.Todo
+    model: github.com/vektah/gqlgen-tutorials/gettingstarted/model.Todo
   User:
-    model: github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User
-``` 
-This simply says, `User` in schema is backed by `graph.User` in go.
-
-
-gqlgen then follows some pretty simple rules to match up all the fields:
-
- 1. If there is a property with that name and type, use it
- 2. If there is a method with that name and type, use it
- 3. Otherwise, add it to the Resolvers interface. This is the magic.
-
-## Generate the bindings
-
-
-Lets generate the server now: 
-
-```bash
-mkdir graph
-cd graph
-gqlgen
+    model: github.com/vektah/gqlgen-tutorials/gettingstarted/model.User
 ```
 
-gqlgen should have created two new files `generated.go` and `models_gen.go`. If we take a peek in both we can see what the server has generated:
+This simply says, `User` in schema is backed by `graph.User` in go.
+
+gqlgen is going to look at all the models in the schema and see if they are in this map, if they arent
+it will create a struct for us. For the models that are there its going to match up each field in the
+struct with fields in the schema:
+
+ 1. If there is a property that matches, use it
+ 2. If there is a method that matches, use it
+ 3. Otherwise, add it to the Resolvers interface. This is the magic.
+
+### Generate the bindings
+
+
+Lets generate the server now:
+
+```bash
+$ gqlgen
+```
+
+gqlgen should have created two new files `graph/generated.go` and `models/generated.go`. If we take a peek in both 
+we can see what the server has generated:
 
 ```go
 // graph/generated.go
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers}
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
+	return MakeExecutableSchema(shortMapper{r: resolvers})
 }
 
-type Resolvers interface {
-	Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, error)
-	Query_todos(ctx context.Context) ([]Todo, error)
-
-	Todo_user(ctx context.Context, obj *Todo) (User, error) 
+type ResolverRoot interface {
+	Mutation() MutationResolver
+	Query() QueryResolver
+	Todo() TodoResolver
+}
+type MutationResolver interface {
+	CreateTodo(ctx context.Context, input models.NewTodo) (model.Todo, error)
+}
+type QueryResolver interface {
+	Todos(ctx context.Context) ([]model.Todo, error)
+}
+type TodoResolver interface {
+	User(ctx context.Context, obj *model.Todo) (model.User, error)
 }
 
 // graph/models_gen.go
 type NewTodo struct {
 	Text string `json:"text"`
-	User int    `json:"user"`
+	User string `json:"user"`
 }
 ```
 
-Notice the `Todo_user` resolver? Thats gqlgen saying "I dont know how to get a User from a Todo, you tell me.". Its worked out everything else, for us.
+Notice the `TodoResolver.User` method? Thats gqlgen saying "I dont know how to get a User from a Todo, you tell me.".
+Its worked out everything else for us.
 
-For any missing models (like NewTodo) gqlgen will generate a go struct. This is usually only used for input types and one-off return values. Most of the time your types will be coming from the database, or an API client so binding is better than generating. 
+For any missing models (like NewTodo) gqlgen will generate a go struct. This is usually only used for input types and 
+one-off return values. Most of the time your types will be coming from the database, or an API client so binding is
+better than generating.
 
-## Write the resolvers
+### Write the resolvers
 
 All thats left for us to do now is fill in the blanks in that interface:
 
@@ -154,40 +176,48 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+
+	"github.com/vektah/gqlgen-tutorials/gettingstarted/model"
 )
 
-type User struct {
-	ID   string
-	Name string
+type App struct {
+	todos []model.Todo
 }
 
-type Todo struct {
-	ID     string
-	Text   string
-	Done   bool
-	UserID string
+func (a *App) Mutation() MutationResolver {
+	return &mutationResolver{a}
 }
 
-type MyApp struct {
-	todos []Todo
+func (a *App) Query() QueryResolver {
+	return &queryResolver{a}
 }
 
-func (a *MyApp) Query_todos(ctx context.Context) ([]Todo, error) {
+func (a *App) Todo() TodoResolver {
+	return &todoResolver{a}
+}
+
+type queryResolver struct{ *App }
+
+func (a *queryResolver) Todos(ctx context.Context) ([]model.Todo, error) {
 	return a.todos, nil
 }
 
-func (a *MyApp) Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, error) {
-	todo := Todo{
+type mutationResolver struct{ *App }
+
+func (a *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (model.Todo, error) {
+	todo := model.Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
-		UserID: input.UserId,
+		UserID: input.User,
 	}
 	a.todos = append(a.todos, todo)
 	return todo, nil
 }
 
-func (a *MyApp) Todo_user(ctx context.Context, it *Todo) (User, error) {
-	return User{ID: it.UserID, Name: "user " + it.UserID}, nil
+type todoResolver struct{ *App }
+
+func (a *todoResolver) User(ctx context.Context, it *model.Todo) (model.User, error) {
+	return model.User{ID: it.UserID, Name: "user " + it.UserID}, nil
 }
 ```
 
@@ -205,14 +235,12 @@ import (
 )
 
 func main() {
-	app := &graph.MyApp{}
 	http.Handle("/", handler.Playground("Todo", "/query"))
-	http.Handle("/query", handler.GraphQL(graph.MakeExecutableSchema(app)))
+	http.Handle("/query", handler.GraphQL(graph.NewExecutableSchema(&graph.App{})))
 
 	fmt.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
-
 ```
 
 We now have a working server, to start it:
@@ -223,7 +251,7 @@ go run main.go
 then open http://localhost:8080 in a browser. here are some queries to try:
 ```graphql
 mutation createTodo {
-  createTodo(input:{text:"todo", userId:"1"}) {
+  createTodo(input:{text:"todo", user:"1"}) {
     user {
       id
     }

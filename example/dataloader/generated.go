@@ -1359,7 +1359,7 @@ var parsedSchema = schema.MustParse(`type Query {
     customers: [Customer!]
 
     # this method is here to test code generation of nested arrays
-    torture(customerIds: [[Int]]): [[Customer!]]
+    torture(customerIds: [[Int!]]): [[Customer!]]
 }
 
 type Customer {

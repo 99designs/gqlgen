@@ -127,8 +127,8 @@ func (r *testResolvers) Query_date(ctx context.Context, filter models.DateFilter
 	return r.queryDate(ctx, filter)
 }
 
-func (r *testResolvers) Query_path(ctx context.Context) ([]models.Element, error) {
-	return []models.Element{{1}, {2}, {3}, {4}}, nil
+func (r *testResolvers) Query_path(ctx context.Context) ([]*models.Element, error) {
+	return []*models.Element{{1}, {2}, {3}, {4}}, nil
 }
 
 func (r *testResolvers) Element_child(ctx context.Context, obj *models.Element) (models.Element, error) {

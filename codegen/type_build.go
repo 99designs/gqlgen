@@ -80,7 +80,7 @@ func (n NamedTypes) getType(t common.Type) *Type {
 		if _, nonNull := t.(*common.NonNull); nonNull {
 			usePtr = false
 		} else if _, nonNull := t.(*common.List); nonNull {
-			usePtr = false
+			usePtr = true
 		} else {
 			if usePtr {
 				modifiers = append(modifiers, modPtr)

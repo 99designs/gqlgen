@@ -220,7 +220,7 @@ func (c *wsConnection) sendError(id string, errors ...*errors.QueryError) {
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
-	b, err := json.Marshal(&graphql.ResolverError{Message: fmt.Sprintf(format, args...)})
+	b, err := json.Marshal(&graphql.Error{Message: fmt.Sprintf(format, args...)})
 	if err != nil {
 		panic(err)
 	}

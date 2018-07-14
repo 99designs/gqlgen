@@ -206,9 +206,22 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
 	w.WriteHeader(code)
-	var errs []error
+	var errs []*graphql.Error
 	for _, err := range errors {
-		errs = append(errs, err)
+		var locations []graphql.ErrorLocation
+		for _, l := range err.Locations {
+			fmt.Println(graphql.ErrorLocation(l))
+			locations = append(locations, graphql.ErrorLocation{
+				Line:   l.Line,
+				Column: l.Column,
+			})
+		}
+
+		errs = append(errs, &graphql.Error{
+			Message:   err.Message,
+			Path:      err.Path,
+			Locations: locations,
+		})
 	}
 	b, err := json.Marshal(&graphql.Response{Errors: errs})
 	if err != nil {

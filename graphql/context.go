@@ -2,6 +2,8 @@ package graphql
 
 import (
 	"context"
+	"fmt"
+	"sync"
 
 	"github.com/vektah/gqlgen/neelance/query"
 )
@@ -11,14 +13,18 @@ type ResolverMiddleware func(ctx context.Context, next Resolver) (res interface{
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 
 type RequestContext struct {
-	ErrorBuilder
-
-	RawQuery           string
-	Variables          map[string]interface{}
-	Doc                *query.Document
+	RawQuery  string
+	Variables map[string]interface{}
+	Doc       *query.Document
+	// ErrorPresenter will be used to generate the error
+	// message from errors given to Error().
+	ErrorPresenter     ErrorPresenterFunc
 	Recover            RecoverFunc
 	ResolverMiddleware ResolverMiddleware
 	RequestMiddleware  RequestMiddleware
+
+	errorsMu sync.Mutex
+	Errors   []*Error
 }
 
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
@@ -37,9 +43,7 @@ func NewRequestContext(doc *query.Document, query string, variables map[string]i
 		ResolverMiddleware: DefaultResolverMiddleware,
 		RequestMiddleware:  DefaultRequestMiddleware,
 		Recover:            DefaultRecover,
-		ErrorBuilder: ErrorBuilder{
-			ErrorPresenter: DefaultErrorPresenter,
-		},
+		ErrorPresenter:     DefaultErrorPresenter,
 	}
 }
 
@@ -112,4 +116,30 @@ func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField 
 	reqctx := GetRequestContext(ctx)
 	resctx := GetResolverContext(ctx)
 	return CollectFields(reqctx.Doc, resctx.Field.Selections, satisfies, reqctx.Variables)
+}
+
+// Errorf sends an error string to the client, passing it through the formatter.
+func (c *RequestContext) Errorf(ctx context.Context, format string, args ...interface{}) {
+	c.errorsMu.Lock()
+	defer c.errorsMu.Unlock()
+
+	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, fmt.Errorf(format, args...)))
+}
+
+// Error sends an error to the client, passing it through the formatter.
+func (c *RequestContext) Error(ctx context.Context, err error) {
+	c.errorsMu.Lock()
+	defer c.errorsMu.Unlock()
+
+	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
+}
+
+// AddError is a convenience method for adding an error to the current response
+func AddError(ctx context.Context, err error) {
+	GetRequestContext(ctx).Error(ctx, err)
+}
+
+// AddErrorf is a convenience method for adding an error to the current response
+func AddErrorf(ctx context.Context, format string, args ...interface{}) {
+	GetRequestContext(ctx).Errorf(ctx, format, args...)
 }

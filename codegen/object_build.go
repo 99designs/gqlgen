@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"log"
 	"sort"
 	"strings"
 
@@ -25,9 +26,9 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 				return nil, err
 			}
 			if def != nil {
-				err = bindObject(def.Type(), obj, imports)
-				if err != nil {
-					return nil, err
+				for _, bindErr := range bindObject(def.Type(), obj, imports) {
+					log.Println(bindErr.Error())
+					log.Println("  Adding resolver method")
 				}
 			}
 

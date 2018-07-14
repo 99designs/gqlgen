@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/vektah/gqlgen/codegen"
@@ -18,6 +19,7 @@ var typemap = flag.String("typemap", "", "a json map going from graphql to golan
 var packageName = flag.String("package", "", "the package name")
 var modelPackageName = flag.String("modelpackage", "", "the package name to use for models")
 var help = flag.Bool("h", false, "this usage text")
+var verbose = flag.Bool("v", false, "show logs")
 
 func main() {
 	flag.Usage = func() {
@@ -30,6 +32,11 @@ func main() {
 	if *help {
 		flag.Usage()
 		os.Exit(1)
+	}
+	if *verbose {
+		log.SetFlags(0)
+	} else {
+		log.SetOutput(ioutil.Discard)
 	}
 
 	var config *codegen.Config

@@ -1,6 +1,7 @@
 type Element {
     child: Element!
     error: Boolean!
+    mismatched: [Boolean!]
 }
 
 enum DATE_FILTER_OP {
@@ -19,8 +20,8 @@ input DateFilter {
 }
 
 type User {
-    name: String
-    likes: [String]
+    name: String!
+    likes: [String!]!
 }
 
 type Viewer {

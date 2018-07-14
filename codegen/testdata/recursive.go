@@ -1,5 +1,5 @@
 package testdata
 
 type RecursiveInputSlice struct {
-	Self *[]*RecursiveInputSlice
+	Self []RecursiveInputSlice
 }

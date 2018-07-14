@@ -1147,7 +1147,7 @@ type Like implements Event {
 }
 
 type Query {
-    events: [Event]
+    events: [Event!]
 }
 
 scalar Time

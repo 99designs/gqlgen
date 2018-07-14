@@ -2386,8 +2386,8 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 var parsedSchema = schema.MustParse(`# The query type, represents all of the entry points into our object graph
 type Query {
     hero(episode: Episode = NEWHOPE): Character
-    reviews(episode: Episode!, since: Time): [Review]!
-    search(text: String!): [SearchResult]!
+    reviews(episode: Episode!, since: Time): [Review!]!
+    search(text: String!): [SearchResult!]!
     character(id: ID!): Character
     droid(id: ID!): Droid
     human(id: ID!): Human
@@ -2413,7 +2413,7 @@ interface Character {
     # The name of the character
     name: String!
     # The friends of the character, or an empty list if they have none
-    friends: [Character]
+    friends: [Character!]
     # The friends of the character exposed as a connection with edges
     friendsConnection(first: Int, after: ID): FriendsConnection!
     # The movies this character appears in
@@ -2437,13 +2437,13 @@ type Human implements Character {
     # Mass in kilograms, or null if unknown
     mass: Float
     # This human's friends, or an empty list if they have none
-    friends: [Character]
+    friends: [Character!]
     # The friends of the human exposed as a connection with edges
     friendsConnection(first: Int, after: ID): FriendsConnection!
     # The movies this human appears in
     appearsIn: [Episode!]!
     # A list of starships this person has piloted, or an empty list if none
-    starships: [Starship]
+    starships: [Starship!]
 }
 # An autonomous mechanical character in the Star Wars universe
 type Droid implements Character {
@@ -2452,7 +2452,7 @@ type Droid implements Character {
     # What others call this droid
     name: String!
     # This droid's friends, or an empty list if they have none
-    friends: [Character]
+    friends: [Character!]
     # The friends of the droid exposed as a connection with edges
     friendsConnection(first: Int, after: ID): FriendsConnection!
     # The movies this droid appears in
@@ -2465,9 +2465,9 @@ type FriendsConnection {
     # The total number of friends
     totalCount: Int!
     # The edges for each of the character's friends.
-    edges: [FriendsEdge]
+    edges: [FriendsEdge!]
     # A list of the friends, as a convenience when edges are not needed.
-    friends: [Character]
+    friends: [Character!]
     # Information for paginating this connection
     pageInfo: PageInfo!
 }
@@ -2510,7 +2510,7 @@ type Starship {
     # Length of the starship, along the longest axis
     length(unit: LengthUnit = METER): Float!
     # coordinates tracking this ship
-    history: [[Int]]
+    history: [[Int!]!]!
 }
 union SearchResult = Human | Droid | Starship
 scalar Time

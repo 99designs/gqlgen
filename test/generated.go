@@ -28,7 +28,7 @@ func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
 type Resolvers interface {
 	Element_child(ctx context.Context, obj *models.Element) (models.Element, error)
 	Element_error(ctx context.Context, obj *models.Element) (bool, error)
-	Query_path(ctx context.Context) ([]models.Element, error)
+	Query_path(ctx context.Context) ([]*models.Element, error)
 	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Query_viewer(ctx context.Context) (*models.Viewer, error)
 	Query_jsonEncoding(ctx context.Context) (string, error)
@@ -46,7 +46,7 @@ type ElementResolver interface {
 	Error(ctx context.Context, obj *models.Element) (bool, error)
 }
 type QueryResolver interface {
-	Path(ctx context.Context) ([]models.Element, error)
+	Path(ctx context.Context) ([]*models.Element, error)
 	Date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Viewer(ctx context.Context) (*models.Viewer, error)
 	JsonEncoding(ctx context.Context) (string, error)
@@ -67,7 +67,7 @@ func (s shortMapper) Element_error(ctx context.Context, obj *models.Element) (bo
 	return s.r.Element().Error(ctx, obj)
 }
 
-func (s shortMapper) Query_path(ctx context.Context) ([]models.Element, error) {
+func (s shortMapper) Query_path(ctx context.Context) ([]*models.Element, error) {
 	return s.r.Query().Path(ctx)
 }
 
@@ -272,14 +272,17 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 		if resTmp == nil {
 			return graphql.Null
 		}
-		res := resTmp.([]models.Element)
+		res := resTmp.([]*models.Element)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler {
 				rctx := graphql.GetResolverContext(ctx)
 				rctx.PushIndex(idx1)
 				defer rctx.Pop()
-				return ec._Element(ctx, field.Selections, &res[idx1])
+				if res[idx1] == nil {
+					return graphql.Null
+				}
+				return ec._Element(ctx, field.Selections, res[idx1])
 			}())
 		}
 		return arr1

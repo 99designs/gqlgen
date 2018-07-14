@@ -460,10 +460,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___InputValue(ctx, field.Selections, res[idx1])
+			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -620,10 +617,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___InputValue(ctx, field.Selections, res[idx1])
+			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -637,10 +631,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Type()
-	if res == nil {
-		return graphql.Null
-	}
-	return ec.___Type(ctx, field.Selections, res)
+	return ec.___Type(ctx, field.Selections, &res)
 }
 
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
@@ -730,10 +721,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Type()
-	if res == nil {
-		return graphql.Null
-	}
-	return ec.___Type(ctx, field.Selections, res)
+	return ec.___Type(ctx, field.Selections, &res)
 }
 
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
@@ -795,10 +783,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Type(ctx, field.Selections, res[idx1])
+			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -812,10 +797,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.QueryType()
-	if res == nil {
-		return graphql.Null
-	}
-	return ec.___Type(ctx, field.Selections, res)
+	return ec.___Type(ctx, field.Selections, &res)
 }
 
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
@@ -860,10 +842,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Directive(ctx, field.Selections, res[idx1])
+			return ec.___Directive(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -972,10 +951,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Field(ctx, field.Selections, res[idx1])
+			return ec.___Field(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -995,10 +971,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Type(ctx, field.Selections, res[idx1])
+			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1018,10 +991,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Type(ctx, field.Selections, res[idx1])
+			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1052,10 +1022,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___EnumValue(ctx, field.Selections, res[idx1])
+			return ec.___EnumValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1075,10 +1042,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___InputValue(ctx, field.Selections, res[idx1])
+			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1

@@ -16,40 +16,40 @@ func WrapSchema(schema *schema.Schema) *Schema {
 	return &Schema{schema}
 }
 
-func (r *Schema) Types() []*Type {
+func (r *Schema) Types() []Type {
 	var names []string
 	for name := range r.schema.Types {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 
-	l := make([]*Type, len(names))
+	l := make([]Type, len(names))
 	for i, name := range names {
-		l[i] = &Type{r.schema.Types[name]}
+		l[i] = Type{r.schema.Types[name]}
 	}
 	return l
 }
 
-func (r *Schema) Directives() []*Directive {
+func (r *Schema) Directives() []Directive {
 	var names []string
 	for name := range r.schema.Directives {
 		names = append(names, name)
 	}
 	sort.Strings(names)
 
-	l := make([]*Directive, len(names))
+	l := make([]Directive, len(names))
 	for i, name := range names {
-		l[i] = &Directive{r.schema.Directives[name]}
+		l[i] = Directive{r.schema.Directives[name]}
 	}
 	return l
 }
 
-func (r *Schema) QueryType() *Type {
+func (r *Schema) QueryType() Type {
 	t, ok := r.schema.EntryPoints["query"]
 	if !ok {
-		return nil
+		return Type{}
 	}
-	return &Type{t}
+	return Type{t}
 }
 
 func (r *Schema) MutationType() *Type {
@@ -100,7 +100,7 @@ func (r *Type) Description() *string {
 	return nil
 }
 
-func (r *Type) Fields(includeDeprecated bool) []*Field {
+func (r *Type) Fields(includeDeprecated bool) []Field {
 	var fields schema.FieldList
 	switch t := r.typ.(type) {
 	case *schema.Object:
@@ -111,29 +111,29 @@ func (r *Type) Fields(includeDeprecated bool) []*Field {
 		return nil
 	}
 
-	var l []*Field
+	var l []Field
 	for _, f := range fields {
 		if d := f.Directives.Get("deprecated"); d == nil || includeDeprecated {
-			l = append(l, &Field{f})
+			l = append(l, Field{f})
 		}
 	}
 	return l
 }
 
-func (r *Type) Interfaces() []*Type {
+func (r *Type) Interfaces() []Type {
 	t, ok := r.typ.(*schema.Object)
 	if !ok {
 		return nil
 	}
 
-	l := make([]*Type, len(t.Interfaces))
+	l := make([]Type, len(t.Interfaces))
 	for i, intf := range t.Interfaces {
-		l[i] = &Type{intf}
+		l[i] = Type{intf}
 	}
 	return l
 }
 
-func (r *Type) PossibleTypes() []*Type {
+func (r *Type) PossibleTypes() []Type {
 	var possibleTypes []*schema.Object
 	switch t := r.typ.(type) {
 	case *schema.Interface:
@@ -144,37 +144,37 @@ func (r *Type) PossibleTypes() []*Type {
 		return nil
 	}
 
-	l := make([]*Type, len(possibleTypes))
+	l := make([]Type, len(possibleTypes))
 	for i, intf := range possibleTypes {
-		l[i] = &Type{intf}
+		l[i] = Type{intf}
 	}
 	return l
 }
 
-func (r *Type) EnumValues(includeDeprecated bool) []*EnumValue {
+func (r *Type) EnumValues(includeDeprecated bool) []EnumValue {
 	t, ok := r.typ.(*schema.Enum)
 	if !ok {
 		return nil
 	}
 
-	var l []*EnumValue
+	var l []EnumValue
 	for _, v := range t.Values {
 		if d := v.Directives.Get("deprecated"); d == nil || includeDeprecated {
-			l = append(l, &EnumValue{v})
+			l = append(l, EnumValue{v})
 		}
 	}
 	return l
 }
 
-func (r *Type) InputFields() []*InputValue {
+func (r *Type) InputFields() []InputValue {
 	t, ok := r.typ.(*schema.InputObject)
 	if !ok {
 		return nil
 	}
 
-	l := make([]*InputValue, len(t.Values))
+	l := make([]InputValue, len(t.Values))
 	for i, v := range t.Values {
-		l[i] = &InputValue{v}
+		l[i] = InputValue{v}
 	}
 	return l
 }
@@ -205,16 +205,16 @@ func (r *Field) Description() *string {
 	return &r.field.Desc
 }
 
-func (r *Field) Args() []*InputValue {
-	l := make([]*InputValue, len(r.field.Args))
+func (r *Field) Args() []InputValue {
+	l := make([]InputValue, len(r.field.Args))
 	for i, v := range r.field.Args {
-		l[i] = &InputValue{v}
+		l[i] = InputValue{v}
 	}
 	return l
 }
 
-func (r *Field) Type() *Type {
-	return &Type{r.field.Type}
+func (r *Field) Type() Type {
+	return Type{r.field.Type}
 }
 
 func (r *Field) IsDeprecated() bool {
@@ -245,8 +245,8 @@ func (r *InputValue) Description() *string {
 	return &r.value.Desc
 }
 
-func (r *InputValue) Type() *Type {
-	return &Type{r.value.Type}
+func (r *InputValue) Type() Type {
+	return Type{r.value.Type}
 }
 
 func (r *InputValue) DefaultValue() *string {
@@ -304,10 +304,10 @@ func (r *Directive) Locations() []string {
 	return r.directive.Locs
 }
 
-func (r *Directive) Args() []*InputValue {
-	l := make([]*InputValue, len(r.directive.Args))
+func (r *Directive) Args() []InputValue {
+	l := make([]InputValue, len(r.directive.Args))
 	for i, v := range r.directive.Args {
-		l[i] = &InputValue{v}
+		l[i] = InputValue{v}
 	}
 	return l
 }

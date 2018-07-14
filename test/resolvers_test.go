@@ -142,6 +142,10 @@ func (r *testResolvers) Element_error(ctx context.Context, obj *models.Element) 
 	return false, r.err
 }
 
+func (r *testResolvers) Element_mismatched(ctx context.Context, obj *models.Element) ([]bool, error) {
+	return []bool{true}, nil
+}
+
 func (r *testResolvers) User_likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
 	return obj.Likes, nil
 }

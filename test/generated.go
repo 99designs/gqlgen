@@ -28,6 +28,7 @@ func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
 type Resolvers interface {
 	Element_child(ctx context.Context, obj *models.Element) (models.Element, error)
 	Element_error(ctx context.Context, obj *models.Element) (bool, error)
+	Element_mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
 	Query_path(ctx context.Context) ([]*models.Element, error)
 	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Query_viewer(ctx context.Context) (*models.Viewer, error)
@@ -44,6 +45,7 @@ type ResolverRoot interface {
 type ElementResolver interface {
 	Child(ctx context.Context, obj *models.Element) (models.Element, error)
 	Error(ctx context.Context, obj *models.Element) (bool, error)
+	Mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
 }
 type QueryResolver interface {
 	Path(ctx context.Context) ([]*models.Element, error)
@@ -65,6 +67,10 @@ func (s shortMapper) Element_child(ctx context.Context, obj *models.Element) (mo
 
 func (s shortMapper) Element_error(ctx context.Context, obj *models.Element) (bool, error) {
 	return s.r.Element().Error(ctx, obj)
+}
+
+func (s shortMapper) Element_mismatched(ctx context.Context, obj *models.Element) ([]bool, error) {
+	return s.r.Element().Mismatched(ctx, obj)
 }
 
 func (s shortMapper) Query_path(ctx context.Context) ([]*models.Element, error) {
@@ -142,6 +148,8 @@ func (ec *executionContext) _Element(ctx context.Context, sel []query.Selection,
 			out.Values[i] = ec._Element_child(ctx, field, obj)
 		case "error":
 			out.Values[i] = ec._Element_error(ctx, field, obj)
+		case "mismatched":
+			out.Values[i] = ec._Element_mismatched(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -207,6 +215,45 @@ func (ec *executionContext) _Element_error(ctx context.Context, field graphql.Co
 		}
 		res := resTmp.(bool)
 		return graphql.MarshalBoolean(res)
+	})
+}
+
+func (ec *executionContext) _Element_mismatched(ctx context.Context, field graphql.CollectedField, obj *models.Element) graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Element",
+		Args:   nil,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Element_mismatched(ctx, obj)
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]bool)
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler {
+				rctx := graphql.GetResolverContext(ctx)
+				rctx.PushIndex(idx1)
+				defer rctx.Pop()
+				return graphql.MarshalBoolean(res[idx1])
+			}())
+		}
+		return arr1
 	})
 }
 
@@ -632,10 +679,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___InputValue(ctx, field.Selections, res[idx1])
+			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -792,10 +836,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___InputValue(ctx, field.Selections, res[idx1])
+			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -809,10 +850,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Type()
-	if res == nil {
-		return graphql.Null
-	}
-	return ec.___Type(ctx, field.Selections, res)
+	return ec.___Type(ctx, field.Selections, &res)
 }
 
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
@@ -902,10 +940,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Type()
-	if res == nil {
-		return graphql.Null
-	}
-	return ec.___Type(ctx, field.Selections, res)
+	return ec.___Type(ctx, field.Selections, &res)
 }
 
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
@@ -967,10 +1002,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Type(ctx, field.Selections, res[idx1])
+			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -984,10 +1016,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.QueryType()
-	if res == nil {
-		return graphql.Null
-	}
-	return ec.___Type(ctx, field.Selections, res)
+	return ec.___Type(ctx, field.Selections, &res)
 }
 
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
@@ -1032,10 +1061,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Directive(ctx, field.Selections, res[idx1])
+			return ec.___Directive(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1144,10 +1170,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Field(ctx, field.Selections, res[idx1])
+			return ec.___Field(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1167,10 +1190,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Type(ctx, field.Selections, res[idx1])
+			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1190,10 +1210,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___Type(ctx, field.Selections, res[idx1])
+			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1224,10 +1241,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___EnumValue(ctx, field.Selections, res[idx1])
+			return ec.___EnumValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1247,10 +1261,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
-			if res[idx1] == nil {
-				return graphql.Null
-			}
-			return ec.___InputValue(ctx, field.Selections, res[idx1])
+			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
@@ -1332,6 +1343,7 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 var parsedSchema = schema.MustParse(`type Element {
     child: Element!
     error: Boolean!
+    mismatched: [Boolean!]
 }
 
 enum DATE_FILTER_OP {
@@ -1350,8 +1362,8 @@ input DateFilter {
 }
 
 type User {
-    name: String
-    likes: [String]
+    name: String!
+    likes: [String!]!
 }
 
 type Viewer {

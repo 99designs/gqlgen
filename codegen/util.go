@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"go/types"
 	"regexp"
 	"strings"
@@ -131,71 +132,155 @@ func findField(typ *types.Struct, name string) *types.Var {
 	return nil
 }
 
-func bindObject(t types.Type, object *Object, imports *Imports) error {
-	namedType, ok := t.(*types.Named)
-	if !ok {
-		return errors.Errorf("expected %s to be a named struct, instead found %s", object.FullName(), t.String())
-	}
+type BindError struct {
+	object    *Object
+	field     *Field
+	typ       types.Type
+	methodErr error
+	varErr    error
+}
 
-	underlying, ok := t.Underlying().(*types.Struct)
-	if !ok {
-		return errors.Errorf("expected %s to be a named struct, instead found %s", object.FullName(), t.String())
-	}
+func (b BindError) Error() string {
+	return fmt.Sprintf(
+		"Unable to bind %s.%s to %s\n  %s\n  %s",
+		b.object.GQLType,
+		b.field.GQLName,
+		b.typ.String(),
+		b.methodErr.Error(),
+		b.varErr.Error(),
+	)
+}
 
+type BindErrors []BindError
+
+func (b BindErrors) Error() string {
+	var errs []string
+	for _, err := range b {
+		errs = append(errs, err.Error())
+	}
+	return strings.Join(errs, "\n\n")
+}
+
+func bindObject(t types.Type, object *Object, imports *Imports) BindErrors {
+	var errs BindErrors
 	for i := range object.Fields {
 		field := &object.Fields[i]
-		if method := findMethod(namedType, field.GQLName); method != nil {
-			sig := method.Type().(*types.Signature)
-			field.GoMethodName = "obj." + method.Name()
-			field.Type.Modifiers = modifiersFromGoType(sig.Results().At(0).Type())
 
-			// check arg order matches code, not gql
-			var newArgs []FieldArgument
-		l2:
-			for j := 0; j < sig.Params().Len(); j++ {
-				param := sig.Params().At(j)
-				for _, oldArg := range field.Args {
-					if strings.EqualFold(oldArg.GQLName, param.Name()) {
-						oldArg.Type.Modifiers = modifiersFromGoType(param.Type())
-						newArgs = append(newArgs, oldArg)
-						continue l2
-					}
-				}
-				return errors.Errorf("cannot match argument " + param.Name() + " to any argument in " + t.String())
-			}
-			field.Args = newArgs
-
-			if sig.Results().Len() == 1 {
-				field.NoErr = true
-			} else if sig.Results().Len() != 2 {
-				return errors.Errorf("weird number of results on %s. expected either (result), or (result, error)\n", method.Name())
-			}
+		// first try binding to a method
+		methodErr := bindMethod(imports, t, field)
+		if methodErr == nil {
 			continue
 		}
 
-		if structField := findField(underlying, field.GQLName); structField != nil {
-			prevModifiers := field.Type.Modifiers
-			field.Type.Modifiers = modifiersFromGoType(structField.Type())
-			field.GoVarName = structField.Name()
+		// otherwise try binding to a var
+		varErr := bindVar(imports, t, field)
 
-			switch normalizeVendor(field.Type.FullSignature()) {
-			case normalizeVendor(structField.Type().String()):
-				// everything is fine
-
-			case normalizeVendor(structField.Type().Underlying().String()):
-				pkg, typ := pkgAndType(structField.Type().String())
-				imp := imports.findByPath(pkg)
-				field.CastType = &Ref{GoType: typ, Import: imp}
-
-			default:
-				// type mismatch, require custom resolver for field
-				field.GoVarName = ""
-				field.Type.Modifiers = prevModifiers
-			}
-			continue
+		if varErr != nil {
+			errs = append(errs, BindError{
+				object:    object,
+				typ:       t,
+				field:     field,
+				varErr:    varErr,
+				methodErr: methodErr,
+			})
 		}
 	}
+	return errs
+}
+
+func bindMethod(imports *Imports, t types.Type, field *Field) error {
+	namedType, ok := t.(*types.Named)
+	if !ok {
+		return fmt.Errorf("not a named type")
+	}
+
+	method := findMethod(namedType, field.GQLName)
+	if method == nil {
+		return fmt.Errorf("no method named %s", field.GQLName)
+	}
+	sig := method.Type().(*types.Signature)
+
+	if sig.Results().Len() == 1 {
+		field.NoErr = true
+	} else if sig.Results().Len() != 2 {
+		return fmt.Errorf("method has wrong number of args")
+	}
+	newArgs, err := matchArgs(field, sig.Params())
+	if err != nil {
+		return err
+	}
+
+	result := sig.Results().At(0)
+	if err := validateTypeBinding(imports, field, result.Type()); err != nil {
+		return errors.Wrap(err, "method has wrong return type")
+	}
+
+	// success, args and return type match. Bind to method
+	field.GoMethodName = "obj." + method.Name()
+	field.Args = newArgs
 	return nil
+}
+
+func bindVar(imports *Imports, t types.Type, field *Field) error {
+	underlying, ok := t.Underlying().(*types.Struct)
+	if !ok {
+		return fmt.Errorf("not a struct")
+	}
+
+	structField := findField(underlying, field.GQLName)
+	if structField == nil {
+		return fmt.Errorf("no field named %s", field.GQLName)
+	}
+
+	if err := validateTypeBinding(imports, field, structField.Type()); err != nil {
+		return errors.Wrap(err, "field has wrong type")
+	}
+
+	// success, bind to var
+	field.GoVarName = structField.Name()
+	return nil
+}
+
+func matchArgs(field *Field, params *types.Tuple) ([]FieldArgument, error) {
+	var newArgs []FieldArgument
+
+nextArg:
+	for j := 0; j < params.Len(); j++ {
+		param := params.At(j)
+		for _, oldArg := range field.Args {
+			if strings.EqualFold(oldArg.GQLName, param.Name()) {
+				oldArg.Type.Modifiers = modifiersFromGoType(param.Type())
+				newArgs = append(newArgs, oldArg)
+				continue nextArg
+			}
+		}
+
+		// no matching arg found, abort
+		return nil, fmt.Errorf("arg %s not found on method", param.Name())
+	}
+	return newArgs, nil
+}
+
+func validateTypeBinding(imports *Imports, field *Field, goType types.Type) error {
+	gqlType := normalizeVendor(field.Type.FullSignature())
+	goTypeStr := normalizeVendor(goType.String())
+
+	if goTypeStr == gqlType || "*"+goTypeStr == gqlType || goTypeStr == "*"+gqlType {
+		field.Type.Modifiers = modifiersFromGoType(goType)
+		return nil
+	}
+
+	// deal with type aliases
+	underlyingStr := normalizeVendor(goType.Underlying().String())
+	if underlyingStr == gqlType || "*"+underlyingStr == gqlType || underlyingStr == "*"+gqlType {
+		field.Type.Modifiers = modifiersFromGoType(goType)
+		pkg, typ := pkgAndType(goType.String())
+		imp := imports.findByPath(pkg)
+		field.CastType = &Ref{GoType: typ, Import: imp}
+		return nil
+	}
+
+	return fmt.Errorf("%s is not compatible with %s", gqlType, goTypeStr)
 }
 
 func modifiersFromGoType(t types.Type) []string {

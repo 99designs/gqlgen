@@ -20,6 +20,11 @@ func TestLoadConfig(t *testing.T) {
 		_, err := LoadConfig("testdata/cfg/malformedconfig.yml")
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `asdf` into codegen.Config")
 	})
+
+	t.Run("unknown keys", func(t *testing.T) {
+		_, err := LoadConfig("testdata/cfg/unknownkeys.yml")
+		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 2: field unknown not found in type codegen.Config")
+	})
 }
 
 func TestLoadDefaultConfig(t *testing.T) {

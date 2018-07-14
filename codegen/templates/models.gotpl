@@ -27,8 +27,9 @@ import (
 {{ range $enum := .Enums }}
 	type {{.GoType}} string
 	const (
-	{{ range $value := .Values }}
-		{{$enum.GoType}}{{ .Name|toCamel }} {{$enum.GoType}} = {{.Name|quote}} {{with .Description}} // {{.}} {{end}}
+	{{ range $value := .Values -}}
+		{{with .Description}} {{.|prefixLines "// "}} {{end}}
+		{{$enum.GoType}}{{ .Name|toCamel }} {{$enum.GoType}} = {{.Name|quote}}
 	{{- end }}
 	)
 

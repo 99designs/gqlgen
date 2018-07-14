@@ -3,8 +3,6 @@ models:
     model: github.com/vektah/gqlgen/example/starwars.Droid
   FriendsConnection:
     model: github.com/vektah/gqlgen/example/starwars.FriendsConnection
-  FriendsEdge:
-    model: github.com/vektah/gqlgen/example/starwars.FriendsEdge
   Human:
     model: github.com/vektah/gqlgen/example/starwars.Human
   Review:
@@ -12,4 +10,6 @@ models:
   ReviewInput:
     model: github.com/vektah/gqlgen/example/starwars.Review
   Starship:
-    model: github.com/vektah/gqlgen/example/starwars.Starship
+    fields:
+      length:
+        resolver: true

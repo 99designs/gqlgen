@@ -45,6 +45,8 @@ type Resolvers interface {
 	Query_droid(ctx context.Context, id string) (*Droid, error)
 	Query_human(ctx context.Context, id string) (*Human, error)
 	Query_starship(ctx context.Context, id string) (*Starship, error)
+
+	Starship_length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error)
 }
 
 type ResolverRoot interface {
@@ -53,6 +55,7 @@ type ResolverRoot interface {
 	Human() HumanResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Starship() StarshipResolver
 }
 type DroidResolver interface {
 	Friends(ctx context.Context, obj *Droid) ([]Character, error)
@@ -79,6 +82,9 @@ type QueryResolver interface {
 	Droid(ctx context.Context, id string) (*Droid, error)
 	Human(ctx context.Context, id string) (*Human, error)
 	Starship(ctx context.Context, id string) (*Starship, error)
+}
+type StarshipResolver interface {
+	Length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error)
 }
 
 type shortMapper struct {
@@ -143,6 +149,10 @@ func (s shortMapper) Query_human(ctx context.Context, id string) (*Human, error)
 
 func (s shortMapper) Query_starship(ctx context.Context, id string) (*Starship, error) {
 	return s.r.Query().Starship(ctx, id)
+}
+
+func (s shortMapper) Starship_length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error) {
+	return s.r.Starship().Length(ctx, obj, unit)
 }
 
 type executableSchema struct {
@@ -872,7 +882,6 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.Mutation_createReview(ctx, args["episode"].(Episode), args["review"].(Review))
 	})
@@ -1505,14 +1514,33 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 	}
 
 	args["unit"] = arg0
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "Starship"
-	rctx.Args = args
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := obj.Length(args["unit"].(LengthUnit))
-	return graphql.MarshalFloat(res)
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Starship",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Starship_length(ctx, obj, args["unit"].(LengthUnit))
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(float64)
+		return graphql.MarshalFloat(res)
+	})
 }
 
 func (ec *executionContext) _Starship_history(ctx context.Context, field graphql.CollectedField, obj *Starship) graphql.Marshaler {

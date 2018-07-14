@@ -38,15 +38,15 @@ func Generate(cfg Config) error {
 			return err
 		}
 		for _, model := range modelsBuild.Models {
-			cfg.Models[model.GQLType] = TypeMapEntry{
-				Model: cfg.Model.ImportPath() + "." + model.GoType,
-			}
+			modelCfg := cfg.Models[model.GQLType]
+			modelCfg.Model = cfg.Model.ImportPath() + "." + model.GoType
+			cfg.Models[model.GQLType] = modelCfg
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			cfg.Models[enum.GQLType] = TypeMapEntry{
-				Model: cfg.Model.ImportPath() + "." + enum.GoType,
-			}
+			modelCfg := cfg.Models[enum.GQLType]
+			modelCfg.Model = cfg.Model.ImportPath() + "." + enum.GoType
+			cfg.Models[enum.GQLType] = modelCfg
 		}
 	}
 

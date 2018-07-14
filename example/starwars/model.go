@@ -34,24 +34,6 @@ func (h *Human) Height(unit LengthUnit) float64 {
 	}
 }
 
-type Starship struct {
-	ID           string
-	Name         string
-	History      [][]int
-	lengthMeters float64
-}
-
-func (s *Starship) Length(unit LengthUnit) float64 {
-	switch unit {
-	case "METER", "":
-		return s.lengthMeters
-	case "FOOT":
-		return s.lengthMeters * 3.28084
-	default:
-		panic("invalid unit")
-	}
-}
-
 type Review struct {
 	Stars      int
 	Commentary *string
@@ -112,9 +94,4 @@ func (f *FriendsConnection) PageInfo() PageInfo {
 
 func encodeCursor(i int) string {
 	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i+1)))
-}
-
-type FriendsEdge struct {
-	Cursor string
-	Node   Character
 }

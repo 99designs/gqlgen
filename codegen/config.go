@@ -148,9 +148,6 @@ func (tm TypeMap) Exists(typeName string) bool {
 
 func (tm TypeMap) Check() error {
 	for typeName, entry := range tm {
-		if entry.Model == "" {
-			return fmt.Errorf("model %s: entityPath is not defined", typeName)
-		}
 		if strings.LastIndex(entry.Model, ".") < strings.LastIndex(entry.Model, "/") {
 			return fmt.Errorf("model %s: invalid type specifier \"%s\" - you need to specify a struct to map to", typeName, entry.Model)
 		}

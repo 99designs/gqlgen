@@ -16,17 +16,12 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 	for _, schemaType := range cfg.schema.Types {
 		t := namedTypeFromSchema(schemaType)
 
-		userType := ""
-		if userEntry, ok := cfg.Models[t.GQLType]; ok {
-			userType = userEntry.Model
-		}
-		t.IsUserDefined = userType != ""
-		if userType == "" && t.IsScalar {
-			userType = "github.com/vektah/gqlgen/graphql.String"
-		}
-
-		if userType != "" {
-			t.Package, t.GoType = pkgAndType(userType)
+		if userEntry, ok := cfg.Models[t.GQLType]; ok && userEntry.Model != "" {
+			t.IsUserDefined = true
+			t.Package, t.GoType = pkgAndType(userEntry.Model)
+		} else if t.IsScalar {
+			t.Package = "github.com/vektah/gqlgen/graphql"
+			t.GoType = "String"
 		}
 
 		types[t.GQLType] = t

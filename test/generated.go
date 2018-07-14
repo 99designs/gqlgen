@@ -480,7 +480,17 @@ func (ec *executionContext) _User_likes(ctx context.Context, field graphql.Colle
 			}
 		}()
 
-		res := obj.Likes
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.User_likes(ctx, obj)
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]string)
 		arr1 := graphql.Array{}
 		for idx1 := range res {
 			arr1 = append(arr1, func() graphql.Marshaler {

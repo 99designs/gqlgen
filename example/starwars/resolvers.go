@@ -4,6 +4,7 @@ package starwars
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 )
@@ -154,6 +155,17 @@ func (r *Resolver) Query_starship(ctx context.Context, id string) (*Starship, er
 	return nil, nil
 }
 
+func (r *Resolver) Starship_length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error) {
+	switch unit {
+	case LengthUnitMeter, "":
+		return obj.Length, nil
+	case LengthUnitFoot:
+		return obj.Length * 3.28084, nil
+	default:
+		return 0, errors.New("invalid unit")
+	}
+}
+
 func NewResolver() *Resolver {
 	r := Resolver{}
 	r.humans = map[string]Human{
@@ -243,7 +255,7 @@ func NewResolver() *Resolver {
 				{1, 2},
 				{3, 2},
 			},
-			lengthMeters: 34.37,
+			Length: 34.37,
 		},
 		"3001": {
 			ID:   "3001",
@@ -254,7 +266,7 @@ func NewResolver() *Resolver {
 				{2, 3},
 				{5, 1},
 			},
-			lengthMeters: 12.5,
+			Length: 12.5,
 		},
 		"3002": {
 			ID:   "3002",
@@ -265,7 +277,7 @@ func NewResolver() *Resolver {
 				{6, 4},
 				{3, 2},
 			},
-			lengthMeters: 9.2,
+			Length: 9.2,
 		},
 		"3003": {
 			ID:   "3003",
@@ -276,7 +288,7 @@ func NewResolver() *Resolver {
 				{5, 3},
 				{7, 1},
 			},
-			lengthMeters: 20,
+			Length: 20,
 		},
 	}
 

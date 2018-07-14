@@ -166,7 +166,6 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.MyMutation_createTodo(ctx, args["todo"].(TodoInput))
 	})
@@ -209,7 +208,6 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.MyMutation_updateTodo(ctx, args["id"].(int), args["changes"].(map[string]interface{}))
 	})

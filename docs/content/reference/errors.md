@@ -20,18 +20,33 @@ func (r Query) DoThings(ctx context.Context) (bool, error) {
 	graphql.AddErrorf(ctx, "Error %d", 1)
 
 	// Pass an existing error out
-	graphql.AddError(ctx, err)
+	graphql.AddError(ctx, errors.New("zzzzzt"))
 
 	// Or fully customize the error
 	graphql.AddError(ctx, &graphql.Error{
 		Message: "A descriptive error message",
 		Extensions: map[string]interface{}{
 			"code": "10-4",
-		}
+		},
 	})
 
 	// And you can still return an error if you need
-	return false, errors.New("BOOM! Headshot")
+	return nil, errors.New("BOOM! Headshot")
+}
+```
+
+They will be returned in the same order in the response, eg:
+```json
+{
+  "data": {
+    "todo": null
+  },
+  "errors": [
+    { "message": "Error 1", "path": [ "todo" ] },
+    { "message": "zzzzzt", "path": [ "todo" ] },
+    { "message": "A descriptive error message", "path": [ "todo" ], "extensions": { "code": "10-4" } },
+    { "message": "BOOM! Headshot", "path": [ "todo" ] }
+  ]
 }
 ```
 

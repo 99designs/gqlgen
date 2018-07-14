@@ -47,20 +47,7 @@
 			defer rctx.Pop()
 		{{- end }}
 
-			{{- if $field.GoVarName }}
-				res := obj.{{$field.GoVarName}}
-			{{- else if $field.GoMethodName }}
-				{{- if $field.NoErr }}
-					res := {{$field.GoMethodName}}({{ $field.CallArgs }})
-				{{- else }}
-					res, err := {{$field.GoMethodName}}({{ $field.CallArgs }})
-					if err != nil {
-						ec.Error(ctx, err)
-						return graphql.Null
-					}
-				{{- end }}
-			{{- else }}
-
+			{{- if $field.IsResolver }}
 				resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 					return ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
 				})
@@ -72,6 +59,18 @@
 					return graphql.Null
 				}
 				res := resTmp.({{$field.Signature}})
+			{{- else if $field.GoVarName }}
+				res := obj.{{$field.GoVarName}}
+			{{- else if $field.GoMethodName }}
+				{{- if $field.NoErr }}
+					res := {{$field.GoMethodName}}({{ $field.CallArgs }})
+				{{- else }}
+					res, err := {{$field.GoMethodName}}({{ $field.CallArgs }})
+					if err != nil {
+						ec.Error(ctx, err)
+						return graphql.Null
+					}
+				{{- end }}
 			{{- end }}
 			{{ $field.WriteJson }}
 		{{- if $field.IsConcurrent }}

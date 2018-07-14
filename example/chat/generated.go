@@ -329,7 +329,6 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.Mutation_post(ctx, args["text"].(string), args["username"].(string), args["roomName"].(string))
 	})

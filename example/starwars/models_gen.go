@@ -9,12 +9,22 @@ import (
 )
 
 type Character interface{}
+type FriendsEdge struct {
+	Cursor string    `json:"cursor"`
+	Node   Character `json:"node"`
+}
 type PageInfo struct {
 	StartCursor string `json:"startCursor"`
 	EndCursor   string `json:"endCursor"`
 	HasNextPage bool   `json:"hasNextPage"`
 }
 type SearchResult interface{}
+type Starship struct {
+	ID      string  `json:"id"`
+	Name    string  `json:"name"`
+	Length  float64 `json:"length"`
+	History [][]int `json:"history"`
+}
 
 type Episode string
 

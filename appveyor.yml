@@ -12,6 +12,9 @@ environment:
   GOVERSION: 1.10
   PATH: '%PATH%;c:\gopath\bin'
 
+branches:
+  only: ["master"]
+
 init:
   - git config --global core.autocrlf input
 

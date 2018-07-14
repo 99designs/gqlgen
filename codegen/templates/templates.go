@@ -14,12 +14,13 @@ import (
 
 func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 	t := template.New("").Funcs(template.FuncMap{
-		"ucFirst":  ucFirst,
-		"lcFirst":  lcFirst,
-		"quote":    strconv.Quote,
-		"rawQuote": rawQuote,
-		"toCamel":  ToCamel,
-		"dump":     dump,
+		"ucFirst":     ucFirst,
+		"lcFirst":     lcFirst,
+		"quote":       strconv.Quote,
+		"rawQuote":    rawQuote,
+		"toCamel":     ToCamel,
+		"dump":        dump,
+		"prefixLines": prefixLines,
 	})
 
 	for filename, data := range data {
@@ -131,4 +132,8 @@ func dump(val interface{}) string {
 	default:
 		panic(fmt.Errorf("unsupported type %T", val))
 	}
+}
+
+func prefixLines(prefix, s string) string {
+	return prefix + strings.Replace(s, "\n", "\n"+prefix, -1)
 }

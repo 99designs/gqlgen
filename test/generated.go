@@ -1347,6 +1347,9 @@ var parsedSchema = schema.MustParse(`type Element {
 }
 
 enum DATE_FILTER_OP {
+    # multi
+    # line
+    # comment
     EQ
     NEQ
     GT

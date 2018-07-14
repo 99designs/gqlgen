@@ -29,9 +29,10 @@ type Starship struct {
 type Episode string
 
 const (
-	EpisodeNewhope Episode = "NEWHOPE" // Star Wars Episode IV: A New Hope, released in 1977.
-	EpisodeEmpire  Episode = "EMPIRE"  // Star Wars Episode V: The Empire Strikes Back, released in 1980.
-	EpisodeJedi    Episode = "JEDI"    // Star Wars Episode VI: Return of the Jedi, released in 1983.
+	// Star Wars Episode IV: A New Hope, released in 1977.
+	EpisodeNewhope Episode = "NEWHOPE" // Star Wars Episode V: The Empire Strikes Back, released in 1980.
+	EpisodeEmpire  Episode = "EMPIRE"  // Star Wars Episode VI: Return of the Jedi, released in 1983.
+	EpisodeJedi    Episode = "JEDI"
 )
 
 func (e Episode) IsValid() bool {
@@ -66,8 +67,9 @@ func (e Episode) MarshalGQL(w io.Writer) {
 type LengthUnit string
 
 const (
-	LengthUnitMeter LengthUnit = "METER" // The standard unit around the world
-	LengthUnitFoot  LengthUnit = "FOOT"  // Primarily used in the United States
+	// The standard unit around the world
+	LengthUnitMeter LengthUnit = "METER" // Primarily used in the United States
+	LengthUnitFoot  LengthUnit = "FOOT"
 )
 
 func (e LengthUnit) IsValid() bool {

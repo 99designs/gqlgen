@@ -18,12 +18,12 @@ var ambientImports = []string{
 	"strconv",
 	"time",
 	"sync",
-	"github.com/vektah/gqlgen/neelance/introspection",
-	"github.com/vektah/gqlgen/neelance/errors",
-	"github.com/vektah/gqlgen/neelance/query",
-	"github.com/vektah/gqlgen/neelance/schema",
-	"github.com/vektah/gqlgen/neelance/validation",
+	"errors",
+
+	"github.com/vektah/gqlparser",
+	"github.com/vektah/gqlparser/ast",
 	"github.com/vektah/gqlgen/graphql",
+	"github.com/vektah/gqlgen/graphql/introspection",
 }
 
 func buildImports(types NamedTypes, destDir string) *Imports {

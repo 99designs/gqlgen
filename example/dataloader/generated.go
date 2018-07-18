@@ -8,9 +8,9 @@ import (
 	strconv "strconv"
 
 	graphql "github.com/vektah/gqlgen/graphql"
-	introspection "github.com/vektah/gqlgen/neelance/introspection"
-	query "github.com/vektah/gqlgen/neelance/query"
-	schema "github.com/vektah/gqlgen/neelance/schema"
+	introspection "github.com/vektah/gqlgen/graphql/introspection"
+	gqlparser "github.com/vektah/gqlparser"
+	ast "github.com/vektah/gqlparser/ast"
 )
 
 // MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
@@ -77,15 +77,15 @@ type executableSchema struct {
 	resolvers Resolvers
 }
 
-func (e *executableSchema) Schema() *schema.Schema {
+func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._Query(ctx, op.Selections)
+		data := ec._Query(ctx, op.SelectionSet)
 		var buf bytes.Buffer
 		data.MarshalGQL(&buf)
 		return buf.Bytes()
@@ -97,11 +97,11 @@ func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *grap
 	}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 	return graphql.ErrorResponse(ctx, "mutations are not supported")
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, op *query.Operation) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
 	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
 }
 
@@ -114,7 +114,7 @@ type executionContext struct {
 var addressImplementors = []string{"Address"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Address(ctx context.Context, sel []query.Selection, obj *Address) graphql.Marshaler {
+func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, obj *Address) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, addressImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -174,7 +174,7 @@ func (ec *executionContext) _Address_country(ctx context.Context, field graphql.
 var customerImplementors = []string{"Customer"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Customer(ctx context.Context, sel []query.Selection, obj *Customer) graphql.Marshaler {
+func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet, obj *Customer) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, customerImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -297,7 +297,7 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 var itemImplementors = []string{"Item"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Item(ctx context.Context, sel []query.Selection, obj *Item) graphql.Marshaler {
+func (ec *executionContext) _Item(ctx context.Context, sel ast.SelectionSet, obj *Item) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, itemImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -331,7 +331,7 @@ func (ec *executionContext) _Item_name(ctx context.Context, field graphql.Collec
 var orderImplementors = []string{"Order"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Order(ctx context.Context, sel []query.Selection, obj *Order) graphql.Marshaler {
+func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, obj *Order) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, orderImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -432,7 +432,7 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 var queryImplementors = []string{"Query"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) graphql.Marshaler {
+func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, queryImplementors, ec.Variables)
 
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
@@ -450,10 +450,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = ec._Query_customers(ctx, field)
 		case "torture":
 			out.Values[i] = ec._Query_torture(ctx, field)
-		case "__schema":
-			out.Values[i] = ec._Query___schema(ctx, field)
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
+		case "__schema":
+			out.Values[i] = ec._Query___schema(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -578,20 +578,6 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 	})
 }
 
-func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	rctx := graphql.GetResolverContext(ctx)
-	rctx.Object = "Query"
-	rctx.Args = nil
-	rctx.Field = field
-	rctx.PushField(field.Alias)
-	defer rctx.Pop()
-	res := ec.introspectSchema()
-	if res == nil {
-		return graphql.Null
-	}
-	return ec.___Schema(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -617,10 +603,24 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "Query"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := ec.introspectSchema()
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Schema(ctx, field.Selections, res)
+}
+
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(ctx context.Context, sel []query.Selection, obj *introspection.Directive) graphql.Marshaler {
+func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, __DirectiveImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -653,7 +653,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Name()
+	res := obj.Name
 	return graphql.MarshalString(res)
 }
 
@@ -664,11 +664,8 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Description()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	res := obj.Description
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
@@ -678,7 +675,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Locations()
+	res := obj.Locations
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -698,7 +695,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Args()
+	res := obj.Args
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -714,7 +711,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 var __EnumValueImplementors = []string{"__EnumValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(ctx context.Context, sel []query.Selection, obj *introspection.EnumValue) graphql.Marshaler {
+func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, __EnumValueImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -747,7 +744,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Name()
+	res := obj.Name
 	return graphql.MarshalString(res)
 }
 
@@ -758,11 +755,8 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Description()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	res := obj.Description
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
@@ -772,7 +766,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.IsDeprecated()
+	res := obj.IsDeprecated
 	return graphql.MarshalBoolean(res)
 }
 
@@ -783,17 +777,14 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.DeprecationReason()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	res := obj.DeprecationReason
+	return graphql.MarshalString(res)
 }
 
 var __FieldImplementors = []string{"__Field"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(ctx context.Context, sel []query.Selection, obj *introspection.Field) graphql.Marshaler {
+func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, __FieldImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -830,7 +821,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Name()
+	res := obj.Name
 	return graphql.MarshalString(res)
 }
 
@@ -841,11 +832,8 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Description()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	res := obj.Description
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
@@ -855,7 +843,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Args()
+	res := obj.Args
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -875,8 +863,11 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Type()
-	return ec.___Type(ctx, field.Selections, &res)
+	res := obj.Type
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
@@ -886,7 +877,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.IsDeprecated()
+	res := obj.IsDeprecated
 	return graphql.MarshalBoolean(res)
 }
 
@@ -897,17 +888,14 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.DeprecationReason()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	res := obj.DeprecationReason
+	return graphql.MarshalString(res)
 }
 
 var __InputValueImplementors = []string{"__InputValue"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(ctx context.Context, sel []query.Selection, obj *introspection.InputValue) graphql.Marshaler {
+func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, __InputValueImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -940,7 +928,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Name()
+	res := obj.Name
 	return graphql.MarshalString(res)
 }
 
@@ -951,11 +939,8 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Description()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	res := obj.Description
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
@@ -965,8 +950,11 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Type()
-	return ec.___Type(ctx, field.Selections, &res)
+	res := obj.Type
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
@@ -976,17 +964,14 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.DefaultValue()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	res := obj.DefaultValue
+	return graphql.MarshalString(res)
 }
 
 var __SchemaImplementors = []string{"__Schema"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(ctx context.Context, sel []query.Selection, obj *introspection.Schema) graphql.Marshaler {
+func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, __SchemaImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -1042,7 +1027,10 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.QueryType()
-	return ec.___Type(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+	return ec.___Type(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
@@ -1096,7 +1084,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 var __TypeImplementors = []string{"__Type"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(ctx context.Context, sel []query.Selection, obj *introspection.Type) graphql.Marshaler {
+func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.Doc, sel, __TypeImplementors, ec.Variables)
 
 	out := graphql.NewOrderedMap(len(fields))
@@ -1151,10 +1139,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Name()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) ___Type_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
@@ -1165,10 +1150,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Description()
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
@@ -1312,14 +1294,10 @@ func (ec *executionContext) introspectSchema() *introspection.Schema {
 }
 
 func (ec *executionContext) introspectType(name string) *introspection.Type {
-	t := parsedSchema.Resolve(name)
-	if t == nil {
-		return nil
-	}
-	return introspection.WrapType(t)
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = schema.MustParse(`type Query {
+var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + `type Query {
     customers: [Customer!]
 
     # this method is here to test code generation of nested arrays

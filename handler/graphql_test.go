@@ -27,13 +27,13 @@ func TestHandlerPOST(t *testing.T) {
 	t.Run("parse failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "!"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-		assert.Equal(t, `{"data":null,"errors":[{"message":"syntax error: unexpected \"!\", expecting Ident","locations":[{"line":1,"column":1}]}]}`, resp.Body.String())
+		assert.Equal(t, `{"data":null,"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}]}`, resp.Body.String())
 	})
 
 	t.Run("validation failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "{ me { title }}"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-		assert.Equal(t, `{"data":null,"errors":[{"message":"Cannot query field \"title\" on type \"User\".","locations":[{"line":1,"column":8}]}]}`, resp.Body.String())
+		assert.Equal(t, `{"data":null,"errors":[{"message":"Cannot query field \"title\" on type \"User\"."}]}`, resp.Body.String())
 	})
 
 	t.Run("execution failure", func(t *testing.T) {
@@ -61,7 +61,7 @@ func TestHandlerGET(t *testing.T) {
 	t.Run("parse failure", func(t *testing.T) {
 		resp := doRequest(h, "GET", "/graphql?query=!", "")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-		assert.Equal(t, `{"data":null,"errors":[{"message":"syntax error: unexpected \"!\", expecting Ident","locations":[{"line":1,"column":1}]}]}`, resp.Body.String())
+		assert.Equal(t, `{"data":null,"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}]}`, resp.Body.String())
 	})
 }
 

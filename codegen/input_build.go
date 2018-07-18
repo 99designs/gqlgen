@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -14,8 +14,8 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 	var inputs Objects
 
 	for _, typ := range cfg.schema.Types {
-		switch typ := typ.(type) {
-		case *schema.InputObject:
+		switch typ.Kind {
+		case ast.InputObject:
 			input, err := buildInput(namedTypes, typ)
 			if err != nil {
 				return nil, err
@@ -44,18 +44,22 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 	return inputs, nil
 }
 
-func buildInput(types NamedTypes, typ *schema.InputObject) (*Object, error) {
-	obj := &Object{NamedType: types[typ.TypeName()]}
+func buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
+	obj := &Object{NamedType: types[typ.Name]}
 
-	for _, field := range typ.Values {
+	for _, field := range typ.Fields {
 		newField := Field{
-			GQLName: field.Name.Name,
+			GQLName: field.Name,
 			Type:    types.getType(field.Type),
 			Object:  obj,
 		}
 
-		if field.Default != nil {
-			newField.Default = field.Default.Value(nil)
+		if field.DefaultValue != nil {
+			var err error
+			newField.Default, err = field.DefaultValue.Value(nil)
+			if err != nil {
+				return nil, errors.Errorf("default value for %s.%s is not valid: %s", typ.Name, field.Name, err.Error())
+			}
 		}
 
 		if !newField.Type.IsInput && !newField.Type.IsScalar {
@@ -70,7 +74,7 @@ func buildInput(types NamedTypes, typ *schema.InputObject) (*Object, error) {
 
 // if user has implemented an UnmarshalGQL method on the input type manually, use it
 // otherwise we will generate one.
-func buildInputMarshaler(typ *schema.InputObject, def types.Object) *Ref {
+func buildInputMarshaler(typ *ast.Definition, def types.Object) *Ref {
 	switch def := def.(type) {
 	case *types.TypeName:
 		namedType := def.Type().(*types.Named)

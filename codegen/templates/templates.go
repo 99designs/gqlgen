@@ -96,6 +96,8 @@ func dump(val interface{}) string {
 	switch val := val.(type) {
 	case int:
 		return strconv.Itoa(val)
+	case int64:
+		return fmt.Sprintf("%d", val)
 	case float64:
 		return fmt.Sprintf("%f", val)
 	case string:

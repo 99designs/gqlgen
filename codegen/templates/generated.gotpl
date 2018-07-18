@@ -62,16 +62,16 @@ type executableSchema struct {
 	resolvers      Resolvers
 }
 
-func (e *executableSchema) Schema() *schema.Schema {
+func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 	{{- if .QueryRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-			data := ec._{{.QueryRoot.GQLType}}(ctx, op.Selections)
+			data := ec._{{.QueryRoot.GQLType}}(ctx, op.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			return buf.Bytes()
@@ -86,12 +86,12 @@ func (e *executableSchema) Query(ctx context.Context, op *query.Operation) *grap
 	{{- end }}
 }
 
-func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *graphql.Response {
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 	{{- if .MutationRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-			data := ec._{{.MutationRoot.GQLType}}(ctx, op.Selections)
+			data := ec._{{.MutationRoot.GQLType}}(ctx, op.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			return buf.Bytes()
@@ -106,11 +106,11 @@ func (e *executableSchema) Mutation(ctx context.Context, op *query.Operation) *g
 	{{- end }}
 }
 
-func (e *executableSchema) Subscription(ctx context.Context, op *query.Operation) func() *graphql.Response {
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
 	{{- if .SubscriptionRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
 
-		next := ec._{{.SubscriptionRoot.GQLType}}(ctx, op.Selections)
+		next := ec._{{.SubscriptionRoot.GQLType}}(ctx, op.SelectionSet)
 		if ec.Errors != nil {
 			return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
 		}
@@ -165,11 +165,7 @@ func (ec *executionContext) introspectSchema() *introspection.Schema {
 }
 
 func (ec *executionContext) introspectType(name string) *introspection.Type {
-	t := parsedSchema.Resolve(name)
-	if t == nil {
-		return nil
-	}
-	return introspection.WrapType(t)
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = schema.MustParse({{.SchemaRaw|rawQuote}})
+var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + {{.SchemaRaw|rawQuote}})

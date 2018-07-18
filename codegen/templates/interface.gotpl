@@ -1,6 +1,6 @@
 {{- $interface := . }}
 
-func (ec *executionContext) _{{$interface.GQLType}}(ctx context.Context, sel []query.Selection, obj *{{$interface.FullName}}) graphql.Marshaler {
+func (ec *executionContext) _{{$interface.GQLType}}(ctx context.Context, sel ast.SelectionSet, obj *{{$interface.FullName}}) graphql.Marshaler {
 	switch obj := (*obj).(type) {
 	case nil:
 		return graphql.Null

@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -13,8 +13,8 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model,
 
 	for _, typ := range cfg.schema.Types {
 		var model Model
-		switch typ := typ.(type) {
-		case *schema.Object:
+		switch typ.Kind {
+		case ast.Object:
 			obj, err := cfg.buildObject(types, typ)
 			if err != nil {
 				return nil, err
@@ -23,7 +23,7 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model,
 				continue
 			}
 			model = cfg.obj2Model(obj)
-		case *schema.InputObject:
+		case ast.InputObject:
 			obj, err := buildInput(types, typ)
 			if err != nil {
 				return nil, err
@@ -32,7 +32,7 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model,
 				continue
 			}
 			model = cfg.obj2Model(obj)
-		case *schema.Interface, *schema.Union:
+		case ast.Interface, ast.Union:
 			intf := cfg.buildInterface(types, typ, prog)
 			if intf.IsUserDefined {
 				continue

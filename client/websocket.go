@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"github.com/vektah/gqlgen/neelance/errors"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 const (
@@ -83,7 +83,7 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 			}
 
 			if respDataRaw["errors"] != nil {
-				var errs []*errors.QueryError
+				var errs []*gqlerror.Error
 				if err = unpack(respDataRaw["errors"], errs); err != nil {
 					return err
 				}

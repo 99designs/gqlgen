@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/vektah/gqlparser/ast"
 	"gopkg.in/yaml.v2"
 )
 
@@ -60,7 +60,7 @@ type Config struct {
 	Model          PackageConfig `yaml:"model"`
 	Models         TypeMap       `yaml:"models,omitempty"`
 
-	schema *schema.Schema `yaml:"-"`
+	schema *ast.Schema `yaml:"-"`
 }
 
 type PackageConfig struct {

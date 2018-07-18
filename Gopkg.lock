@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:99b2e09d42b4d0929e9e6ac496922f5221baa79b60968576d5ce310b44640c3b"
+  name = "github.com/agnivade/levenshtein"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1787a73e302ce294513cfab1982e186f5cf8985f"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -144,6 +152,22 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:f03ae2a33628fa4fc2d6b9e5ea9630ace11ba730a808dff0674f6ee7137c2bc1"
+  name = "github.com/vektah/gqlparser"
+  packages = [
+    ".",
+    "ast",
+    "gqlerror",
+    "lexer",
+    "parser",
+    "validator",
+    "validator/rules",
+  ]
+  pruneopts = "UT"
+  revision = "8236ac024f533cfa991e494ac0e4ead587c10f8e"
+
+[[projects]]
+  branch = "master"
   digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
   name = "golang.org/x/net"
   packages = ["context"]
@@ -210,6 +234,9 @@
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/vektah/dataloaden",
+    "github.com/vektah/gqlparser",
+    "github.com/vektah/gqlparser/ast",
+    "github.com/vektah/gqlparser/gqlerror",
     "golang.org/x/tools/go/loader",
     "golang.org/x/tools/imports",
     "gopkg.in/yaml.v2",

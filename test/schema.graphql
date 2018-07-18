@@ -38,4 +38,4 @@ type Query {
     jsonEncoding: String!
 }
 
-// this is a comment with a `backtick`
+# this is a comment with a `backtick`

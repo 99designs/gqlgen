@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/vektah/gqlgen/neelance/query"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
@@ -15,7 +16,7 @@ type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) 
 type RequestContext struct {
 	RawQuery  string
 	Variables map[string]interface{}
-	Doc       *query.Document
+	Doc       *ast.QueryDocument
 	// ErrorPresenter will be used to generate the error
 	// message from errors given to Error().
 	ErrorPresenter     ErrorPresenterFunc
@@ -24,7 +25,7 @@ type RequestContext struct {
 	RequestMiddleware  RequestMiddleware
 
 	errorsMu sync.Mutex
-	Errors   []*Error
+	Errors   gqlerror.List
 }
 
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
@@ -35,7 +36,7 @@ func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context
 	return next(ctx)
 }
 
-func NewRequestContext(doc *query.Document, query string, variables map[string]interface{}) *RequestContext {
+func NewRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *RequestContext {
 	return &RequestContext{
 		Doc:                doc,
 		RawQuery:           query,

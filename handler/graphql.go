@@ -9,9 +9,9 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/vektah/gqlgen/graphql"
-	"github.com/vektah/gqlgen/neelance/errors"
-	"github.com/vektah/gqlgen/neelance/query"
-	"github.com/vektah/gqlgen/neelance/validation"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 type params struct {
@@ -28,7 +28,7 @@ type Config struct {
 	requestHook    graphql.RequestMiddleware
 }
 
-func (c *Config) newRequestContext(doc *query.Document, query string, variables map[string]interface{}) *graphql.RequestContext {
+func (c *Config) newRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *graphql.RequestContext {
 	reqCtx := graphql.NewRequestContext(doc, query, variables)
 	if hook := c.recover; hook != nil {
 		reqCtx.Recover = hook
@@ -157,21 +157,15 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}
 		w.Header().Set("Content-Type", "application/json")
 
-		doc, qErr := query.Parse(reqParams.Query)
-		if qErr != nil {
-			sendError(w, http.StatusUnprocessableEntity, qErr)
+		doc, qErr := gqlparser.LoadQuery(exec.Schema(), reqParams.Query)
+		if len(qErr) > 0 {
+			sendError(w, http.StatusUnprocessableEntity, qErr...)
 			return
 		}
 
-		errs := validation.Validate(exec.Schema(), doc)
-		if len(errs) != 0 {
-			sendError(w, http.StatusUnprocessableEntity, errs...)
-			return
-		}
-
-		op, err := doc.GetOperation(reqParams.OperationName)
-		if err != nil {
-			sendErrorf(w, http.StatusUnprocessableEntity, err.Error())
+		op := doc.Operations.ForName(reqParams.OperationName)
+		if op == nil {
+			sendErrorf(w, http.StatusUnprocessableEntity, "operation %s not found", reqParams.OperationName)
 			return
 		}
 
@@ -185,14 +179,14 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			}
 		}()
 
-		switch op.Type {
-		case query.Query:
+		switch op.Operation {
+		case ast.Query:
 			b, err := json.Marshal(exec.Query(ctx, op))
 			if err != nil {
 				panic(err)
 			}
 			w.Write(b)
-		case query.Mutation:
+		case ast.Mutation:
 			b, err := json.Marshal(exec.Mutation(ctx, op))
 			if err != nil {
 				panic(err)
@@ -204,26 +198,9 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	})
 }
 
-func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
+func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 	w.WriteHeader(code)
-	var errs []*graphql.Error
-	for _, err := range errors {
-		var locations []graphql.ErrorLocation
-		for _, l := range err.Locations {
-			fmt.Println(graphql.ErrorLocation(l))
-			locations = append(locations, graphql.ErrorLocation{
-				Line:   l.Line,
-				Column: l.Column,
-			})
-		}
-
-		errs = append(errs, &graphql.Error{
-			Message:   err.Message,
-			Path:      err.Path,
-			Locations: locations,
-		})
-	}
-	b, err := json.Marshal(&graphql.Response{Errors: errs})
+	b, err := json.Marshal(&graphql.Response{Errors: errors})
 	if err != nil {
 		panic(err)
 	}
@@ -231,5 +208,5 @@ func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
 }
 
 func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
-	sendError(w, code, &errors.QueryError{Message: fmt.Sprintf(format, args...)})
+	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }

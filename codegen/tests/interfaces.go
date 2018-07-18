@@ -1,4 +1,4 @@
-package testdata
+package tests
 
 import "math"
 

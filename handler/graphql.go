@@ -210,7 +210,6 @@ func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
 	for _, err := range errors {
 		var locations []graphql.ErrorLocation
 		for _, l := range err.Locations {
-			fmt.Println(graphql.ErrorLocation(l))
 			locations = append(locations, graphql.ErrorLocation{
 				Line:   l.Line,
 				Column: l.Column,

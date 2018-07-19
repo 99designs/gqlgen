@@ -15,11 +15,11 @@ type ExecutableSchema interface {
 	Subscription(ctx context.Context, op *ast.OperationDefinition) func() *Response
 }
 
-func CollectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []string, variables map[string]interface{}) []CollectedField {
-	return collectFields(doc, selSet, satisfies, variables, map[string]bool{})
+func CollectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
+	return collectFields(reqCtx, selSet, satisfies, map[string]bool{})
 }
 
-func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []string, variables map[string]interface{}, visited map[string]bool) []CollectedField {
+func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
 	var groupedFields []CollectedField
 
 	for _, sel := range selSet {
@@ -34,12 +34,12 @@ func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []
 					f.Args = map[string]interface{}{}
 					for _, arg := range sel.Arguments {
 						if arg.Value.Kind == ast.Variable {
-							if val, ok := variables[arg.Value.Raw]; ok {
+							if val, ok := reqCtx.Variables[arg.Value.Raw]; ok {
 								f.Args[arg.Name] = val
 							}
 						} else {
 							var err error
-							f.Args[arg.Name], err = arg.Value.Value(variables)
+							f.Args[arg.Name], err = arg.Value.Value(reqCtx.Variables)
 							if err != nil {
 								panic(err)
 							}
@@ -54,8 +54,7 @@ func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []
 			if !instanceOf(sel.TypeCondition, satisfies) {
 				continue
 			}
-
-			for _, childField := range collectFields(doc, sel.SelectionSet, satisfies, variables, visited) {
+			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
@@ -67,7 +66,7 @@ func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []
 			}
 			visited[fragmentName] = true
 
-			fragment := doc.Fragments.ForName(fragmentName)
+			fragment := reqCtx.Doc.Fragments.ForName(fragmentName)
 			if fragment == nil {
 				// should never happen, validator has already run
 				panic(fmt.Errorf("missing fragment %s", fragmentName))
@@ -77,7 +76,7 @@ func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []
 				continue
 			}
 
-			for _, childField := range collectFields(doc, fragment.SelectionSet, satisfies, variables, visited) {
+			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}

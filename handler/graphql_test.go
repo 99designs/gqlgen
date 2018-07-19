@@ -33,7 +33,7 @@ func TestHandlerPOST(t *testing.T) {
 	t.Run("validation failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "{ me { title }}"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
-		assert.Equal(t, `{"data":null,"errors":[{"message":"Cannot query field \"title\" on type \"User\"."}]}`, resp.Body.String())
+		assert.Equal(t, `{"data":null,"errors":[{"message":"Cannot query field \"title\" on type \"User\".","locations":[{"line":1,"column":8}]}]}`, resp.Body.String())
 	})
 
 	t.Run("execution failure", func(t *testing.T) {

@@ -2325,7 +2325,8 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + `# The query type, represents all of the entry points into our object graph
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `# The query type, represents all of the entry points into our object graph
 type Query {
     hero(episode: Episode = NEWHOPE): Character
     reviews(episode: Episode!, since: Time): [Review!]!
@@ -2456,4 +2457,5 @@ type Starship {
 }
 union SearchResult = Human | Droid | Starship
 scalar Time
-`)
+`},
+)

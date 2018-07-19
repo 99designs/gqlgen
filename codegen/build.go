@@ -20,6 +20,7 @@ type Build struct {
 	MutationRoot     *Object
 	SubscriptionRoot *Object
 	SchemaRaw        string
+	SchemaFilename   string
 }
 
 type ModelBuild struct {
@@ -76,12 +77,13 @@ func (cfg *Config) bind() (*Build, error) {
 	}
 
 	b := &Build{
-		PackageName: cfg.Exec.Package,
-		Objects:     objects,
-		Interfaces:  cfg.buildInterfaces(namedTypes, prog),
-		Inputs:      inputs,
-		Imports:     imports.finalize(),
-		SchemaRaw:   cfg.SchemaStr,
+		PackageName:    cfg.Exec.Package,
+		Objects:        objects,
+		Interfaces:     cfg.buildInterfaces(namedTypes, prog),
+		Inputs:         inputs,
+		Imports:        imports.finalize(),
+		SchemaRaw:      cfg.SchemaStr,
+		SchemaFilename: cfg.SchemaFilename,
 	}
 
 	if cfg.schema.Query != nil {

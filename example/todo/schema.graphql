@@ -24,3 +24,5 @@ input TodoInput {
 	text: String!
 	done: Boolean
 }
+
+scalar Map

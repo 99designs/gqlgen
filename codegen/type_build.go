@@ -81,6 +81,9 @@ func (n NamedTypes) getType(t *ast.Type) *Type {
 			if !t.NonNull {
 				modifiers = append(modifiers, modPtr)
 			}
+			if n[t.NamedType] == nil {
+				panic("missing type " + t.NamedType)
+			}
 			res := &Type{
 				NamedType: n[t.NamedType],
 				Modifiers: modifiers,

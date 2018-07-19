@@ -11,8 +11,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/codegen/templates"
-	"github.com/vektah/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 	"golang.org/x/tools/imports"
 )
 
@@ -107,9 +108,12 @@ func (cfg *Config) normalize() error {
 		}
 	}
 
-	var err error
-	cfg.schema, err = gqlparser.LoadSchema(introspection.Prelude + cfg.SchemaStr)
-	return err
+	var err *gqlerror.Error
+	cfg.schema, err = gqlparser.LoadSchema(&ast.Source{Name: cfg.SchemaFilename, Input: cfg.SchemaStr})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)

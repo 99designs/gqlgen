@@ -15,11 +15,11 @@ type executableSchemaStub struct {
 var _ graphql.ExecutableSchema = &executableSchemaStub{}
 
 func (e *executableSchemaStub) Schema() *ast.Schema {
-	return gqlparser.MustLoadSchema(`
+	return gqlparser.MustLoadSchema(&ast.Source{Input: `
 		schema { query: Query }
 		type Query { me: User! }
 		type User { name: String! }
-	`)
+	`})
 }
 
 func (e *executableSchemaStub) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

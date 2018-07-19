@@ -1184,7 +1184,8 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + `schema {
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `schema {
 	query: MyQuery
 	mutation: MyMutation
 }
@@ -1210,4 +1211,7 @@ input TodoInput {
 	text: String!
 	done: Boolean
 }
-`)
+
+scalar Map
+`},
+)

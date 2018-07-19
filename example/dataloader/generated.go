@@ -1297,7 +1297,8 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + `type Query {
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `type Query {
     customers: [Customer!]
 
     # this method is here to test code generation of nested arrays
@@ -1328,4 +1329,5 @@ type Item {
     name: String!
 }
 scalar Time
-`)
+`},
+)

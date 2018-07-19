@@ -1318,7 +1318,8 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + `type Element {
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `type Element {
     child: Element!
     error: Boolean!
     mismatched: [Boolean!]
@@ -1359,4 +1360,5 @@ type Query {
 }
 
 # this is a comment with a ` + "`" + `backtick` + "`" + `
-`)
+`},
+)

@@ -1187,7 +1187,8 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + `type Chatroom {
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `type Chatroom {
     name: String!
     messages: [Message!]!
 }
@@ -1212,4 +1213,5 @@ type Subscription {
 }
 
 scalar Time
-`)
+`},
+)

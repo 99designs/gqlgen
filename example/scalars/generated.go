@@ -1216,7 +1216,8 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(introspection.Prelude + `type Query {
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `type Query {
     user(id: ID!): User
     search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
 }
@@ -1251,4 +1252,5 @@ enum Tier {
 
 scalar Timestamp
 scalar Point
-`)
+`},
+)

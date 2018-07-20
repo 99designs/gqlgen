@@ -125,15 +125,17 @@ func getOrCreateField(c *[]CollectedField, name string, creator func() Collected
 }
 
 func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interface{}) bool {
+	skip, include := false, true
+
 	if d := directives.ForName("skip"); d != nil {
-		return !resolveIfArgument(d, variables)
+		skip = resolveIfArgument(d, variables)
 	}
 
 	if d := directives.ForName("include"); d != nil {
-		return resolveIfArgument(d, variables)
+		include = resolveIfArgument(d, variables)
 	}
 
-	return true
+	return !skip && include
 }
 
 func resolveIfArgument(d *ast.Directive, variables map[string]interface{}) bool {

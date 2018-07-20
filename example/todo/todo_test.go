@@ -128,3 +128,96 @@ func TestTodo(t *testing.T) {
 		require.Equal(t, "Completed todo", resp.CreateTodo.Text)
 	})
 }
+
+func TestSkipAndIncludeDirectives(t *testing.T) {
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
+	c := client.New(srv.URL)
+
+	t.Run("skip on field", func(t *testing.T) {
+		var resp map[string]interface{}
+		c.MustPost(`{ todo(id: 1) @skip(if:true) { __typename } }`, &resp)
+		_, ok := resp["todo"]
+		require.False(t, ok)
+	})
+
+	t.Run("skip on variable", func(t *testing.T) {
+		q := `query Test($cond: Boolean!) { todo(id: 1) @skip(if: $cond) { __typename } }`
+		var resp map[string]interface{}
+
+		c.MustPost(q, &resp, client.Var("cond", true))
+		_, ok := resp["todo"]
+		require.False(t, ok)
+
+		c.MustPost(q, &resp, client.Var("cond", false))
+		_, ok = resp["todo"]
+		require.True(t, ok)
+	})
+
+	t.Run("skip on inline fragment", func(t *testing.T) {
+		var resp struct {
+			Todo struct {
+				Typename string `json:"__typename"`
+			}
+		}
+		c.MustPost(`{ todo(id: 1) {
+				...@skip(if:true) {
+					__typename
+				}
+			}
+		}`, &resp)
+		require.Empty(t, resp.Todo.Typename)
+	})
+
+	t.Run("skip on fragment", func(t *testing.T) {
+		var resp struct {
+			Todo struct {
+				Typename string `json:"__typename"`
+			}
+		}
+		c.MustPost(`
+		{
+			todo(id: 1) {
+				...todoFragment @skip(if:true)
+			}
+		}
+		fragment todoFragment on Todo {
+			__typename
+		}
+		`, &resp)
+		require.Empty(t, resp.Todo.Typename)
+	})
+
+	t.Run("include on field", func(t *testing.T) {
+		q := `query Test($cond: Boolean!) { todo(id: 1) @include(if: $cond) { __typename } }`
+		var resp map[string]interface{}
+
+		c.MustPost(q, &resp, client.Var("cond", true))
+		_, ok := resp["todo"]
+		require.True(t, ok)
+
+		c.MustPost(q, &resp, client.Var("cond", false))
+		_, ok = resp["todo"]
+		require.False(t, ok)
+	})
+
+	t.Run("both skip and include defined", func(t *testing.T) {
+		type TestCase struct {
+			Skip     bool
+			Include  bool
+			Expected bool
+		}
+		table := []TestCase{
+			TestCase{Skip: true, Include: true, Expected: false},
+			TestCase{Skip: true, Include: false, Expected: false},
+			TestCase{Skip: false, Include: true, Expected: true},
+			TestCase{Skip: false, Include: false, Expected: false},
+		}
+		q := `query Test($skip: Boolean!, $include: Boolean!) { todo(id: 1) @skip(if: $skip) @include(if: $include) { __typename } }`
+		for _, tc := range table {
+			var resp map[string]interface{}
+			c.MustPost(q, &resp, client.Var("skip", tc.Skip), client.Var("include", tc.Include))
+			_, ok := resp["todo"]
+			require.Equal(t, tc.Expected, ok)
+		}
+	})
+}

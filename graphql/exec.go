@@ -25,6 +25,9 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 	for _, sel := range selSet {
 		switch sel := sel.(type) {
 		case *ast.Field:
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
 			f := getOrCreateField(&groupedFields, sel.Alias, func() CollectedField {
 				f := CollectedField{
 					Alias: sel.Alias,
@@ -51,7 +54,7 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 		case *ast.InlineFragment:
-			if !instanceOf(sel.TypeCondition, satisfies) {
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) || !instanceOf(sel.TypeCondition, satisfies) {
 				continue
 			}
 			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
@@ -60,6 +63,9 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 			}
 
 		case *ast.FragmentSpread:
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
 			fragmentName := sel.Name
 			if _, seen := visited[fragmentName]; seen {
 				continue
@@ -116,4 +122,32 @@ func getOrCreateField(c *[]CollectedField, name string, creator func() Collected
 
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
+}
+
+func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interface{}) bool {
+	if d := directives.ForName("skip"); d != nil {
+		return !resolveIfArgument(d, variables)
+	}
+
+	if d := directives.ForName("include"); d != nil {
+		return resolveIfArgument(d, variables)
+	}
+
+	return true
+}
+
+func resolveIfArgument(d *ast.Directive, variables map[string]interface{}) bool {
+	arg := d.Arguments.ForName("if")
+	if arg == nil {
+		panic(fmt.Sprintf("%s: argument 'if' not defined", d.Name))
+	}
+	value, err := arg.Value.Value(variables)
+	if err != nil {
+		panic(err)
+	}
+	ret, ok := value.(bool)
+	if !ok {
+		panic(fmt.Sprintf("%s: argument 'if' is not a boolean", d.Name))
+	}
+	return ret
 }

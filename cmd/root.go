@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -19,8 +18,6 @@ var schemaFilename string
 var typemap string
 var packageName string
 var modelPackageName string
-
-var help = flag.Bool("h", false, "this usage text")
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&configFilename, "config", "", "the file to configuration to")

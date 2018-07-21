@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -config config.yaml
+//go:generate gorunpkg github.com/vektah/gqlgen --config config.yaml
 
 package test
 

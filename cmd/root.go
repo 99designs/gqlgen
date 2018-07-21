@@ -20,7 +20,7 @@ var packageName string
 var modelPackageName string
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&configFilename, "config", "", "the file to configuration to")
+	rootCmd.PersistentFlags().StringVarP(&configFilename, "config", "c", "", "the file to configuration to")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "show logs")
 
 	rootCmd.PersistentFlags().StringVar(&output, "out", "", "the file to write to")

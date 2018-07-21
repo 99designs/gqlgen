@@ -85,7 +85,7 @@ func TestWebsocket(t *testing.T) {
 
 		msg := readOp(c)
 		require.Equal(t, errorMsg, msg.Type)
-		require.Equal(t, `[{"message":"syntax error: unexpected \"!\", expecting Ident","locations":[{"line":1,"column":1}]}]`, string(msg.Payload))
+		require.Equal(t, `[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}]`, string(msg.Payload))
 	})
 
 	t.Run("client can receive data", func(t *testing.T) {

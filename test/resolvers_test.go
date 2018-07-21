@@ -6,10 +6,9 @@ import (
 	"context"
 	"fmt"
 	"net/http/httptest"
+	"remote_api"
 	"testing"
 	"time"
-
-	"remote_api"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -18,16 +17,17 @@ import (
 	"github.com/vektah/gqlgen/graphql"
 	"github.com/vektah/gqlgen/handler"
 	"github.com/vektah/gqlgen/test/models-go"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func TestCustomErrorPresenter(t *testing.T) {
 	resolvers := &testResolvers{}
 	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(resolvers),
-		handler.ErrorPresenter(func(i context.Context, e error) *graphql.Error {
+		handler.ErrorPresenter(func(i context.Context, e error) *gqlerror.Error {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
-				return &graphql.Error{Message: "override special error message"}
+				return &gqlerror.Error{Message: "override special error message"}
 			}
-			return &graphql.Error{Message: e.Error()}
+			return &gqlerror.Error{Message: e.Error()}
 		}),
 	))
 	c := client.New(srv.URL)

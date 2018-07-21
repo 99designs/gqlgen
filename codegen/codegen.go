@@ -11,7 +11,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlgen/codegen/templates"
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 	"golang.org/x/tools/imports"
 )
 
@@ -82,12 +84,12 @@ func (cfg *Config) normalize() error {
 	}
 
 	builtins := TypeMap{
-		"__Directive":  {Model: "github.com/vektah/gqlgen/neelance/introspection.Directive"},
-		"__Type":       {Model: "github.com/vektah/gqlgen/neelance/introspection.Type"},
-		"__Field":      {Model: "github.com/vektah/gqlgen/neelance/introspection.Field"},
-		"__EnumValue":  {Model: "github.com/vektah/gqlgen/neelance/introspection.EnumValue"},
-		"__InputValue": {Model: "github.com/vektah/gqlgen/neelance/introspection.InputValue"},
-		"__Schema":     {Model: "github.com/vektah/gqlgen/neelance/introspection.Schema"},
+		"__Directive":  {Model: "github.com/vektah/gqlgen/graphql/introspection.Directive"},
+		"__Type":       {Model: "github.com/vektah/gqlgen/graphql/introspection.Type"},
+		"__Field":      {Model: "github.com/vektah/gqlgen/graphql/introspection.Field"},
+		"__EnumValue":  {Model: "github.com/vektah/gqlgen/graphql/introspection.EnumValue"},
+		"__InputValue": {Model: "github.com/vektah/gqlgen/graphql/introspection.InputValue"},
+		"__Schema":     {Model: "github.com/vektah/gqlgen/graphql/introspection.Schema"},
 		"Int":          {Model: "github.com/vektah/gqlgen/graphql.Int"},
 		"Float":        {Model: "github.com/vektah/gqlgen/graphql.Float"},
 		"String":       {Model: "github.com/vektah/gqlgen/graphql.String"},
@@ -106,8 +108,12 @@ func (cfg *Config) normalize() error {
 		}
 	}
 
-	cfg.schema = schema.New()
-	return cfg.schema.Parse(cfg.SchemaStr)
+	var err *gqlerror.Error
+	cfg.schema, err = gqlparser.LoadSchema(&ast.Source{Name: cfg.SchemaFilename, Input: cfg.SchemaStr})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)

@@ -18,6 +18,8 @@ func UnmarshalInt(v interface{}) (int, error) {
 		return strconv.Atoi(v)
 	case int:
 		return v, nil
+	case int64:
+		return int(v), nil
 	case float64:
 		return int(v), nil
 	default:

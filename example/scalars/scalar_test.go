@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlgen/client"
+	"github.com/vektah/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlgen/handler"
-	introspection "github.com/vektah/gqlgen/neelance/introspection"
 )
 
 type RawUser struct {

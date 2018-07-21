@@ -17,9 +17,6 @@ type DateFilter struct {
 type DateFilterOp string
 
 const (
-	// multi
-	// line
-	// comment
 	DateFilterOpEq  DateFilterOp = "EQ"
 	DateFilterOpNeq DateFilterOp = "NEQ"
 	DateFilterOpGt  DateFilterOp = "GT"

@@ -20,6 +20,7 @@ type Build struct {
 	MutationRoot     *Object
 	SubscriptionRoot *Object
 	SchemaRaw        string
+	SchemaFilename   string
 }
 
 type ModelBuild struct {
@@ -76,50 +77,28 @@ func (cfg *Config) bind() (*Build, error) {
 	}
 
 	b := &Build{
-		PackageName: cfg.Exec.Package,
-		Objects:     objects,
-		Interfaces:  cfg.buildInterfaces(namedTypes, prog),
-		Inputs:      inputs,
-		Imports:     imports.finalize(),
-		SchemaRaw:   cfg.SchemaStr,
+		PackageName:    cfg.Exec.Package,
+		Objects:        objects,
+		Interfaces:     cfg.buildInterfaces(namedTypes, prog),
+		Inputs:         inputs,
+		Imports:        imports.finalize(),
+		SchemaRaw:      cfg.SchemaStr,
+		SchemaFilename: cfg.SchemaFilename,
 	}
 
-	if qr, ok := cfg.schema.EntryPoints["query"]; ok {
-		b.QueryRoot = b.Objects.ByName(qr.TypeName())
-	}
-
-	if mr, ok := cfg.schema.EntryPoints["mutation"]; ok {
-		b.MutationRoot = b.Objects.ByName(mr.TypeName())
-	}
-
-	if sr, ok := cfg.schema.EntryPoints["subscription"]; ok {
-		b.SubscriptionRoot = b.Objects.ByName(sr.TypeName())
-	}
-
-	if b.QueryRoot == nil {
+	if cfg.schema.Query != nil {
+		b.QueryRoot = b.Objects.ByName(cfg.schema.Query.Name)
+	} else {
 		return b, fmt.Errorf("query entry point missing")
 	}
 
-	// Poke a few magic methods into query
-	q := b.Objects.ByName(b.QueryRoot.GQLType)
-	q.Fields = append(q.Fields, Field{
-		Type:         &Type{namedTypes["__Schema"], []string{modPtr}, nil},
-		GQLName:      "__schema",
-		NoErr:        true,
-		GoMethodName: "ec.introspectSchema",
-		Object:       q,
-	})
-	q.Fields = append(q.Fields, Field{
-		Type:         &Type{namedTypes["__Type"], []string{modPtr}, nil},
-		GQLName:      "__type",
-		NoErr:        true,
-		GoMethodName: "ec.introspectType",
-		Args: []FieldArgument{
-			{GQLName: "name", Type: &Type{namedTypes["String"], []string{}, nil}, Object: &Object{}},
-		},
-		Object: q,
-	})
+	if cfg.schema.Mutation != nil {
+		b.MutationRoot = b.Objects.ByName(cfg.schema.Mutation.Name)
+	}
 
+	if cfg.schema.Subscription != nil {
+		b.SubscriptionRoot = b.Objects.ByName(cfg.schema.Subscription.Name)
+	}
 	return b, nil
 }
 

@@ -15,16 +15,19 @@ type ExecutableSchema interface {
 	Subscription(ctx context.Context, op *ast.OperationDefinition) func() *Response
 }
 
-func CollectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []string, variables map[string]interface{}) []CollectedField {
-	return collectFields(doc, selSet, satisfies, variables, map[string]bool{})
+func CollectFields(ctx context.Context, selSet ast.SelectionSet, satisfies []string) []CollectedField {
+	return collectFields(GetRequestContext(ctx), selSet, satisfies, map[string]bool{})
 }
 
-func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []string, variables map[string]interface{}, visited map[string]bool) []CollectedField {
+func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
 	var groupedFields []CollectedField
 
 	for _, sel := range selSet {
 		switch sel := sel.(type) {
 		case *ast.Field:
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
 			f := getOrCreateField(&groupedFields, sel.Alias, func() CollectedField {
 				f := CollectedField{
 					Alias: sel.Alias,
@@ -34,12 +37,12 @@ func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []
 					f.Args = map[string]interface{}{}
 					for _, arg := range sel.Arguments {
 						if arg.Value.Kind == ast.Variable {
-							if val, ok := variables[arg.Value.Raw]; ok {
+							if val, ok := reqCtx.Variables[arg.Value.Raw]; ok {
 								f.Args[arg.Name] = val
 							}
 						} else {
 							var err error
-							f.Args[arg.Name], err = arg.Value.Value(variables)
+							f.Args[arg.Name], err = arg.Value.Value(reqCtx.Variables)
 							if err != nil {
 								panic(err)
 							}
@@ -51,23 +54,25 @@ func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []
 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 		case *ast.InlineFragment:
-			if !instanceOf(sel.TypeCondition, satisfies) {
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) || !instanceOf(sel.TypeCondition, satisfies) {
 				continue
 			}
-
-			for _, childField := range collectFields(doc, sel.SelectionSet, satisfies, variables, visited) {
+			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
 
 		case *ast.FragmentSpread:
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
 			fragmentName := sel.Name
 			if _, seen := visited[fragmentName]; seen {
 				continue
 			}
 			visited[fragmentName] = true
 
-			fragment := doc.Fragments.ForName(fragmentName)
+			fragment := reqCtx.Doc.Fragments.ForName(fragmentName)
 			if fragment == nil {
 				// should never happen, validator has already run
 				panic(fmt.Errorf("missing fragment %s", fragmentName))
@@ -77,7 +82,7 @@ func collectFields(doc *ast.QueryDocument, selSet ast.SelectionSet, satisfies []
 				continue
 			}
 
-			for _, childField := range collectFields(doc, fragment.SelectionSet, satisfies, variables, visited) {
+			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
@@ -117,4 +122,34 @@ func getOrCreateField(c *[]CollectedField, name string, creator func() Collected
 
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
+}
+
+func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interface{}) bool {
+	skip, include := false, true
+
+	if d := directives.ForName("skip"); d != nil {
+		skip = resolveIfArgument(d, variables)
+	}
+
+	if d := directives.ForName("include"); d != nil {
+		include = resolveIfArgument(d, variables)
+	}
+
+	return !skip && include
+}
+
+func resolveIfArgument(d *ast.Directive, variables map[string]interface{}) bool {
+	arg := d.Arguments.ForName("if")
+	if arg == nil {
+		panic(fmt.Sprintf("%s: argument 'if' not defined", d.Name))
+	}
+	value, err := arg.Value.Value(variables)
+	if err != nil {
+		panic(err)
+	}
+	ret, ok := value.(bool)
+	if !ok {
+		panic(fmt.Sprintf("%s: argument 'if' is not a boolean", d.Name))
+	}
+	return ret
 }

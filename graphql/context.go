@@ -114,9 +114,8 @@ func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Conte
 
 // This is just a convenient wrapper method for CollectFields
 func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
-	reqCtx := GetRequestContext(ctx)
 	resctx := GetResolverContext(ctx)
-	return CollectFields(reqCtx, resctx.Field.Selections, satisfies)
+	return CollectFields(ctx, resctx.Field.Selections, satisfies)
 }
 
 // Errorf sends an error string to the client, passing it through the formatter.

@@ -15,8 +15,8 @@ type ExecutableSchema interface {
 	Subscription(ctx context.Context, op *ast.OperationDefinition) func() *Response
 }
 
-func CollectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
-	return collectFields(reqCtx, selSet, satisfies, map[string]bool{})
+func CollectFields(ctx context.Context, selSet ast.SelectionSet, satisfies []string) []CollectedField {
+	return collectFields(GetRequestContext(ctx), selSet, satisfies, map[string]bool{})
 }
 
 func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {

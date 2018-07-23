@@ -220,4 +220,11 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 			require.Equal(t, tc.Expected, ok)
 		}
 	})
+
+	t.Run("skip with default query argument", func(t *testing.T) {
+		var resp map[string]interface{}
+		c.MustPost(`query Test($skip: Boolean = true) { todo(id: 1) @skip(if: $skip) { __typename } }`, &resp)
+		_, ok := resp["todo"]
+		require.False(t, ok)
+	})
 }

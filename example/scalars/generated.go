@@ -454,7 +454,7 @@ func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(model.Banned)
 	return graphql.MarshalBoolean(bool(res))
 }
 

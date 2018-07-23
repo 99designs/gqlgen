@@ -26,8 +26,8 @@ type Ref struct {
 type Type struct {
 	*NamedType
 
-	Modifiers []string
-	CastType  *Ref // the type to cast to when unmarshalling
+	Modifiers   []string
+	AliasedType *Ref
 }
 
 const (
@@ -47,6 +47,9 @@ func (t Ref) PkgDot() string {
 }
 
 func (t Type) Signature() string {
+	if t.AliasedType != nil {
+		return strings.Join(t.Modifiers, "") + t.AliasedType.FullName()
+	}
 	return strings.Join(t.Modifiers, "") + t.FullName()
 }
 
@@ -125,11 +128,11 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	}
 
 	realResult := result
-	if t.CastType != nil {
+	if t.AliasedType != nil {
 		result = "castTmp"
 	}
 
-	return tpl(`{{- if .t.CastType }}
+	return tpl(`{{- if .t.AliasedType }}
 			var castTmp {{.t.FullName}}
 		{{ end }}
 			{{- if eq .t.GoType "map[string]interface{}" }}
@@ -139,8 +142,8 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 			{{- else -}}
 				err = (&{{.result}}).UnmarshalGQL({{.raw}})
 			{{- end }}
-		{{- if .t.CastType }}
-			{{ .realResult }} = {{.t.CastType.FullName}}(castTmp)
+		{{- if .t.AliasedType }}
+			{{ .realResult }} = {{.t.AliasedType.FullName}}(castTmp)
 		{{- end }}`, map[string]interface{}{
 		"realResult": realResult,
 		"result":     result,
@@ -150,7 +153,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 }
 
 func (t Type) Marshal(val string) string {
-	if t.CastType != nil {
+	if t.AliasedType != nil {
 		val = t.GoType + "(" + val + ")"
 	}
 

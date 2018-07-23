@@ -276,7 +276,7 @@ func validateTypeBinding(imports *Imports, field *Field, goType types.Type) erro
 		field.Type.Modifiers = modifiersFromGoType(goType)
 		pkg, typ := pkgAndType(goType.String())
 		imp := imports.findByPath(pkg)
-		field.CastType = &Ref{GoType: typ, Import: imp}
+		field.AliasedType = &Ref{GoType: typ, Import: imp}
 		return nil
 	}
 

@@ -68,11 +68,11 @@ func (f *Field) IsConcurrent() bool {
 	return f.IsResolver() && !f.Object.DisableConcurrency
 }
 func (f *Field) ShortInvocation() string {
-	if !f.IsResolver() {
+	methodName := f.MethodName()
+	if methodName == "" {
 		return ""
 	}
-	shortName := strings.ToUpper(f.GQLName[:1]) + f.GQLName[1:]
-	res := fmt.Sprintf("%s().%s(ctx", f.Object.GQLType, shortName)
+	res := fmt.Sprintf("%s(ctx", methodName)
 	if !f.Object.Root {
 		res += fmt.Sprintf(", obj")
 	}
@@ -82,6 +82,15 @@ func (f *Field) ShortInvocation() string {
 	res += ")"
 	return res
 }
+func (f *Field) MethodName() string {
+	if !f.IsResolver() {
+		return ""
+	}
+	shortName := strings.ToUpper(f.GQLName[:1]) + f.GQLName[1:]
+
+	return fmt.Sprintf("%s().%s", f.Object.GQLType, shortName)
+}
+
 func (f *Field) ShortResolverDeclaration() string {
 	if !f.IsResolver() {
 		return ""

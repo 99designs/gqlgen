@@ -13,22 +13,9 @@ import (
 	ast "github.com/vektah/gqlparser/ast"
 )
 
-// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
-}
-
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
-}
-
-type Resolvers interface {
-	MyMutation_createTodo(ctx context.Context, todo TodoInput) (Todo, error)
-	MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
-	MyQuery_todo(ctx context.Context, id int) (*Todo, error)
-	MyQuery_lastTodo(ctx context.Context) (*Todo, error)
-	MyQuery_todos(ctx context.Context) ([]Todo, error)
+	return &executableSchema{resolvers: resolvers}
 }
 
 type ResolverRoot interface {
@@ -45,32 +32,8 @@ type MyQueryResolver interface {
 	Todos(ctx context.Context) ([]Todo, error)
 }
 
-type shortMapper struct {
-	r ResolverRoot
-}
-
-func (s shortMapper) MyMutation_createTodo(ctx context.Context, todo TodoInput) (Todo, error) {
-	return s.r.MyMutation().CreateTodo(ctx, todo)
-}
-
-func (s shortMapper) MyMutation_updateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {
-	return s.r.MyMutation().UpdateTodo(ctx, id, changes)
-}
-
-func (s shortMapper) MyQuery_todo(ctx context.Context, id int) (*Todo, error) {
-	return s.r.MyQuery().Todo(ctx, id)
-}
-
-func (s shortMapper) MyQuery_lastTodo(ctx context.Context) (*Todo, error) {
-	return s.r.MyQuery().LastTodo(ctx)
-}
-
-func (s shortMapper) MyQuery_todos(ctx context.Context) ([]Todo, error) {
-	return s.r.MyQuery().Todos(ctx)
-}
-
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -116,7 +79,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 var myMutationImplementors = []string{"MyMutation"}
@@ -167,7 +130,7 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.MyMutation_createTodo(ctx, args["todo"].(TodoInput))
+		return ec.resolvers.MyMutation().CreateTodo(ctx, args["todo"].(TodoInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -209,7 +172,7 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.MyMutation_updateTodo(ctx, args["id"].(int), args["changes"].(map[string]interface{}))
+		return ec.resolvers.MyMutation().UpdateTodo(ctx, args["id"].(int), args["changes"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -287,7 +250,7 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.MyQuery_todo(ctx, args["id"].(int))
+			return ec.resolvers.MyQuery().Todo(ctx, args["id"].(int))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -320,7 +283,7 @@ func (ec *executionContext) _MyQuery_lastTodo(ctx context.Context, field graphql
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.MyQuery_lastTodo(ctx)
+			return ec.resolvers.MyQuery().LastTodo(ctx)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -353,7 +316,7 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.MyQuery_todos(ctx)
+			return ec.resolvers.MyQuery().Todos(ctx)
 		})
 		if err != nil {
 			ec.Error(ctx, err)

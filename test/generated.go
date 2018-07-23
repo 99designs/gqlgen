@@ -15,26 +15,9 @@ import (
 	ast "github.com/vektah/gqlparser/ast"
 )
 
-// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
-}
-
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
-}
-
-type Resolvers interface {
-	Element_child(ctx context.Context, obj *models.Element) (models.Element, error)
-	Element_error(ctx context.Context, obj *models.Element) (bool, error)
-	Element_mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
-	Query_path(ctx context.Context) ([]*models.Element, error)
-	Query_date(ctx context.Context, filter models.DateFilter) (bool, error)
-	Query_viewer(ctx context.Context) (*models.Viewer, error)
-	Query_jsonEncoding(ctx context.Context) (string, error)
-
-	User_likes(ctx context.Context, obj *remote_api.User) ([]string, error)
+	return &executableSchema{resolvers: resolvers}
 }
 
 type ResolverRoot interface {
@@ -57,44 +40,8 @@ type UserResolver interface {
 	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
 }
 
-type shortMapper struct {
-	r ResolverRoot
-}
-
-func (s shortMapper) Element_child(ctx context.Context, obj *models.Element) (models.Element, error) {
-	return s.r.Element().Child(ctx, obj)
-}
-
-func (s shortMapper) Element_error(ctx context.Context, obj *models.Element) (bool, error) {
-	return s.r.Element().Error(ctx, obj)
-}
-
-func (s shortMapper) Element_mismatched(ctx context.Context, obj *models.Element) ([]bool, error) {
-	return s.r.Element().Mismatched(ctx, obj)
-}
-
-func (s shortMapper) Query_path(ctx context.Context) ([]*models.Element, error) {
-	return s.r.Query().Path(ctx)
-}
-
-func (s shortMapper) Query_date(ctx context.Context, filter models.DateFilter) (bool, error) {
-	return s.r.Query().Date(ctx, filter)
-}
-
-func (s shortMapper) Query_viewer(ctx context.Context) (*models.Viewer, error) {
-	return s.r.Query().Viewer(ctx)
-}
-
-func (s shortMapper) Query_jsonEncoding(ctx context.Context) (string, error) {
-	return s.r.Query().JsonEncoding(ctx)
-}
-
-func (s shortMapper) User_likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
-	return s.r.User().Likes(ctx, obj)
-}
-
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -128,7 +75,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 var elementImplementors = []string{"Element"}
@@ -174,7 +121,7 @@ func (ec *executionContext) _Element_child(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Element_child(ctx, obj)
+			return ec.resolvers.Element().Child(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -204,7 +151,7 @@ func (ec *executionContext) _Element_error(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Element_error(ctx, obj)
+			return ec.resolvers.Element().Error(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -234,7 +181,7 @@ func (ec *executionContext) _Element_mismatched(ctx context.Context, field graph
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Element_mismatched(ctx, obj)
+			return ec.resolvers.Element().Mismatched(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -310,7 +257,7 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_path(ctx)
+			return ec.resolvers.Query().Path(ctx)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -363,7 +310,7 @@ func (ec *executionContext) _Query_date(ctx context.Context, field graphql.Colle
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_date(ctx, args["filter"].(models.DateFilter))
+			return ec.resolvers.Query().Date(ctx, args["filter"].(models.DateFilter))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -393,7 +340,7 @@ func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.Col
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_viewer(ctx)
+			return ec.resolvers.Query().Viewer(ctx)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -426,7 +373,7 @@ func (ec *executionContext) _Query_jsonEncoding(ctx context.Context, field graph
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_jsonEncoding(ctx)
+			return ec.resolvers.Query().JsonEncoding(ctx)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -531,7 +478,7 @@ func (ec *executionContext) _User_likes(ctx context.Context, field graphql.Colle
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.User_likes(ctx, obj)
+			return ec.resolvers.User().Likes(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)

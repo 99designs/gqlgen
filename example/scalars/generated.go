@@ -16,22 +16,9 @@ import (
 	ast "github.com/vektah/gqlparser/ast"
 )
 
-// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
-}
-
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
-}
-
-type Resolvers interface {
-	Query_user(ctx context.Context, id external.ObjectID) (*model.User, error)
-	Query_search(ctx context.Context, input model.SearchArgs) ([]model.User, error)
-
-	User_primitiveResolver(ctx context.Context, obj *model.User) (string, error)
-	User_customResolver(ctx context.Context, obj *model.User) (model.Point, error)
+	return &executableSchema{resolvers: resolvers}
 }
 
 type ResolverRoot interface {
@@ -47,28 +34,8 @@ type UserResolver interface {
 	CustomResolver(ctx context.Context, obj *model.User) (model.Point, error)
 }
 
-type shortMapper struct {
-	r ResolverRoot
-}
-
-func (s shortMapper) Query_user(ctx context.Context, id external.ObjectID) (*model.User, error) {
-	return s.r.Query().User(ctx, id)
-}
-
-func (s shortMapper) Query_search(ctx context.Context, input model.SearchArgs) ([]model.User, error) {
-	return s.r.Query().Search(ctx, input)
-}
-
-func (s shortMapper) User_primitiveResolver(ctx context.Context, obj *model.User) (string, error) {
-	return s.r.User().PrimitiveResolver(ctx, obj)
-}
-
-func (s shortMapper) User_customResolver(ctx context.Context, obj *model.User) (model.Point, error) {
-	return s.r.User().CustomResolver(ctx, obj)
-}
-
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -102,7 +69,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 var addressImplementors = []string{"Address"}
@@ -215,7 +182,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_user(ctx, args["id"].(external.ObjectID))
+			return ec.resolvers.Query().User(ctx, args["id"].(external.ObjectID))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -268,7 +235,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_search(ctx, args["input"].(model.SearchArgs))
+			return ec.resolvers.Query().Search(ctx, args["input"].(model.SearchArgs))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -427,7 +394,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.User_primitiveResolver(ctx, obj)
+			return ec.resolvers.User().PrimitiveResolver(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -457,7 +424,7 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.User_customResolver(ctx, obj)
+			return ec.resolvers.User().CustomResolver(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)

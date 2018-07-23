@@ -11,9 +11,15 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-type SelectionResolver struct{}
+type Resolver struct{}
 
-func (r *SelectionResolver) Query_events(ctx context.Context) ([]Event, error) {
+func (r *Resolver) Query() QueryResolver {
+	return &queryResolver{r}
+}
+
+type queryResolver struct{ *Resolver }
+
+func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 	var sels []string
 
 	reqCtx := graphql.GetRequestContext(ctx)

@@ -21,8 +21,8 @@ import (
 )
 
 func TestCustomErrorPresenter(t *testing.T) {
-	resolvers := &testResolvers{}
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(resolvers),
+	resolvers := &testResolver{}
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(resolvers),
 		handler.ErrorPresenter(func(i context.Context, e error) *gqlerror.Error {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
 				return &gqlerror.Error{Message: "override special error message"}
@@ -62,7 +62,7 @@ func TestCustomErrorPresenter(t *testing.T) {
 }
 
 func TestErrorPath(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{err: fmt.Errorf("boom")})))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(&testResolver{err: fmt.Errorf("boom")})))
 	c := client.New(srv.URL)
 
 	var resp struct{}
@@ -73,7 +73,7 @@ func TestErrorPath(t *testing.T) {
 
 func TestInputDefaults(t *testing.T) {
 	called := false
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(&testResolver{
 		queryDate: func(ctx context.Context, filter models.DateFilter) (bool, error) {
 			assert.Equal(t, "asdf", filter.Value)
 			assert.Equal(t, "UTC", *filter.Timezone)
@@ -96,7 +96,7 @@ func TestInputDefaults(t *testing.T) {
 }
 
 func TestJsonEncoding(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&testResolvers{})))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(&testResolver{})))
 	c := client.New(srv.URL)
 
 	var resp struct {
@@ -108,45 +108,63 @@ func TestJsonEncoding(t *testing.T) {
 	require.Equal(t, "\U000fe4ed", resp.JsonEncoding)
 }
 
-type testResolvers struct {
+type testResolver struct {
 	err       error
 	queryDate func(ctx context.Context, filter models.DateFilter) (bool, error)
 }
 
-func (r *testResolvers) Query_jsonEncoding(ctx context.Context) (string, error) {
-	return "\U000fe4ed", nil
+func (r *testResolver) Element() ElementResolver {
+	return &elementResolver{r}
 }
 
-func (r *testResolvers) Query_viewer(ctx context.Context) (*models.Viewer, error) {
-	return &models.Viewer{
-		User: &remote_api.User{Name: "Bob"},
-	}, nil
+func (r *testResolver) Query() QueryResolver {
+	return &queryResolver{r}
 }
 
-func (r *testResolvers) Query_date(ctx context.Context, filter models.DateFilter) (bool, error) {
-	return r.queryDate(ctx, filter)
+func (r *testResolver) User() UserResolver {
+	return &userResolver{r}
 }
 
-func (r *testResolvers) Query_path(ctx context.Context) ([]*models.Element, error) {
-	return []*models.Element{{1}, {2}, {3}, {4}}, nil
-}
+type elementResolver struct{ *testResolver }
 
-func (r *testResolvers) Element_child(ctx context.Context, obj *models.Element) (models.Element, error) {
+func (r *elementResolver) Child(ctx context.Context, obj *models.Element) (models.Element, error) {
 	return models.Element{obj.ID * 10}, nil
 }
 
-func (r *testResolvers) Element_error(ctx context.Context, obj *models.Element) (bool, error) {
+func (r *elementResolver) Error(ctx context.Context, obj *models.Element) (bool, error) {
 	// A silly hack to make the result order stable
 	time.Sleep(time.Duration(obj.ID) * 10 * time.Millisecond)
 
 	return false, r.err
 }
 
-func (r *testResolvers) Element_mismatched(ctx context.Context, obj *models.Element) ([]bool, error) {
+func (r *elementResolver) Mismatched(ctx context.Context, obj *models.Element) ([]bool, error) {
 	return []bool{true}, nil
 }
 
-func (r *testResolvers) User_likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
+type queryResolver struct{ *testResolver }
+
+func (r *queryResolver) Path(ctx context.Context) ([]*models.Element, error) {
+	return []*models.Element{{1}, {2}, {3}, {4}}, nil
+}
+
+func (r *queryResolver) Date(ctx context.Context, filter models.DateFilter) (bool, error) {
+	return r.queryDate(ctx, filter)
+}
+
+func (r *queryResolver) Viewer(ctx context.Context) (*models.Viewer, error) {
+	return &models.Viewer{
+		User: &remote_api.User{Name: "Bob"},
+	}, nil
+}
+
+func (r *queryResolver) JsonEncoding(ctx context.Context) (string, error) {
+	return "\U000fe4ed", nil
+}
+
+type userResolver struct{ *testResolver }
+
+func (r *userResolver) Likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
 	return obj.Likes, nil
 }
 

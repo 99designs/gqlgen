@@ -13,21 +13,9 @@ import (
 	ast "github.com/vektah/gqlparser/ast"
 )
 
-// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
-}
-
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
-}
-
-type Resolvers interface {
-	Mutation_post(ctx context.Context, text string, username string, roomName string) (Message, error)
-	Query_room(ctx context.Context, name string) (*Chatroom, error)
-
-	Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error)
+	return &executableSchema{resolvers: resolvers}
 }
 
 type ResolverRoot interface {
@@ -45,24 +33,8 @@ type SubscriptionResolver interface {
 	MessageAdded(ctx context.Context, roomName string) (<-chan Message, error)
 }
 
-type shortMapper struct {
-	r ResolverRoot
-}
-
-func (s shortMapper) Mutation_post(ctx context.Context, text string, username string, roomName string) (Message, error) {
-	return s.r.Mutation().Post(ctx, text, username, roomName)
-}
-
-func (s shortMapper) Query_room(ctx context.Context, name string) (*Chatroom, error) {
-	return s.r.Query().Room(ctx, name)
-}
-
-func (s shortMapper) Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error) {
-	return s.r.Subscription().MessageAdded(ctx, roomName)
-}
-
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -132,7 +104,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 var chatroomImplementors = []string{"Chatroom"}
@@ -330,7 +302,7 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Mutation_post(ctx, args["text"].(string), args["username"].(string), args["roomName"].(string))
+		return ec.resolvers.Mutation().Post(ctx, args["text"].(string), args["username"].(string), args["roomName"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -401,7 +373,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_room(ctx, args["name"].(string))
+			return ec.resolvers.Query().Room(ctx, args["name"].(string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -491,7 +463,7 @@ func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, fiel
 	}
 	args["roomName"] = arg0
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-	results, err := ec.resolvers.Subscription_messageAdded(ctx, args["roomName"].(string))
+	results, err := ec.resolvers.Subscription().MessageAdded(ctx, args["roomName"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil

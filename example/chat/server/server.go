@@ -20,7 +20,7 @@ func main() {
 	startAppdashServer()
 
 	http.Handle("/", handler.Playground("Todo", "/query"))
-	http.Handle("/query", handler.GraphQL(chat.MakeExecutableSchema(chat.New()),
+	http.Handle("/query", handler.GraphQL(chat.NewExecutableSchema(chat.New()),
 		handler.ResolverMiddleware(gqlopentracing.ResolverMiddleware()),
 		handler.RequestMiddleware(gqlopentracing.RequestMiddleware()),
 		handler.WebsocketUpgrader(websocket.Upgrader{

@@ -11,7 +11,7 @@ import (
 )
 
 func TestStarwars(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(NewResolver())))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(NewResolver())))
 	c := client.New(srv.URL)
 
 	t.Run("Lukes starships", func(t *testing.T) {

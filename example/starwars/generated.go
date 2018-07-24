@@ -15,38 +15,9 @@ import (
 	ast "github.com/vektah/gqlparser/ast"
 )
 
-// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
-}
-
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
-}
-
-type Resolvers interface {
-	Droid_friends(ctx context.Context, obj *Droid) ([]Character, error)
-	Droid_friendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error)
-
-	FriendsConnection_edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error)
-	FriendsConnection_friends(ctx context.Context, obj *FriendsConnection) ([]Character, error)
-
-	Human_friends(ctx context.Context, obj *Human) ([]Character, error)
-	Human_friendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error)
-
-	Human_starships(ctx context.Context, obj *Human) ([]Starship, error)
-	Mutation_createReview(ctx context.Context, episode Episode, review Review) (*Review, error)
-
-	Query_hero(ctx context.Context, episode Episode) (Character, error)
-	Query_reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error)
-	Query_search(ctx context.Context, text string) ([]SearchResult, error)
-	Query_character(ctx context.Context, id string) (Character, error)
-	Query_droid(ctx context.Context, id string) (*Droid, error)
-	Query_human(ctx context.Context, id string) (*Human, error)
-	Query_starship(ctx context.Context, id string) (*Starship, error)
-
-	Starship_length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error)
+	return &executableSchema{resolvers: resolvers}
 }
 
 type ResolverRoot interface {
@@ -87,76 +58,8 @@ type StarshipResolver interface {
 	Length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error)
 }
 
-type shortMapper struct {
-	r ResolverRoot
-}
-
-func (s shortMapper) Droid_friends(ctx context.Context, obj *Droid) ([]Character, error) {
-	return s.r.Droid().Friends(ctx, obj)
-}
-
-func (s shortMapper) Droid_friendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error) {
-	return s.r.Droid().FriendsConnection(ctx, obj, first, after)
-}
-
-func (s shortMapper) FriendsConnection_edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error) {
-	return s.r.FriendsConnection().Edges(ctx, obj)
-}
-
-func (s shortMapper) FriendsConnection_friends(ctx context.Context, obj *FriendsConnection) ([]Character, error) {
-	return s.r.FriendsConnection().Friends(ctx, obj)
-}
-
-func (s shortMapper) Human_friends(ctx context.Context, obj *Human) ([]Character, error) {
-	return s.r.Human().Friends(ctx, obj)
-}
-
-func (s shortMapper) Human_friendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error) {
-	return s.r.Human().FriendsConnection(ctx, obj, first, after)
-}
-
-func (s shortMapper) Human_starships(ctx context.Context, obj *Human) ([]Starship, error) {
-	return s.r.Human().Starships(ctx, obj)
-}
-
-func (s shortMapper) Mutation_createReview(ctx context.Context, episode Episode, review Review) (*Review, error) {
-	return s.r.Mutation().CreateReview(ctx, episode, review)
-}
-
-func (s shortMapper) Query_hero(ctx context.Context, episode Episode) (Character, error) {
-	return s.r.Query().Hero(ctx, episode)
-}
-
-func (s shortMapper) Query_reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error) {
-	return s.r.Query().Reviews(ctx, episode, since)
-}
-
-func (s shortMapper) Query_search(ctx context.Context, text string) ([]SearchResult, error) {
-	return s.r.Query().Search(ctx, text)
-}
-
-func (s shortMapper) Query_character(ctx context.Context, id string) (Character, error) {
-	return s.r.Query().Character(ctx, id)
-}
-
-func (s shortMapper) Query_droid(ctx context.Context, id string) (*Droid, error) {
-	return s.r.Query().Droid(ctx, id)
-}
-
-func (s shortMapper) Query_human(ctx context.Context, id string) (*Human, error) {
-	return s.r.Query().Human(ctx, id)
-}
-
-func (s shortMapper) Query_starship(ctx context.Context, id string) (*Starship, error) {
-	return s.r.Query().Starship(ctx, id)
-}
-
-func (s shortMapper) Starship_length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error) {
-	return s.r.Starship().Length(ctx, obj, unit)
-}
-
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -202,7 +105,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 var droidImplementors = []string{"Droid", "Character"}
@@ -276,7 +179,7 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Droid_friends(ctx, obj)
+			return ec.resolvers.Droid().Friends(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -346,7 +249,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Droid_friendsConnection(ctx, obj, args["first"].(*int), args["after"].(*string))
+			return ec.resolvers.Droid().FriendsConnection(ctx, obj, args["first"].(*int), args["after"].(*string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -447,7 +350,7 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.FriendsConnection_edges(ctx, obj)
+			return ec.resolvers.FriendsConnection().Edges(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -486,7 +389,7 @@ func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, fiel
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.FriendsConnection_friends(ctx, obj)
+			return ec.resolvers.FriendsConnection().Friends(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -684,7 +587,7 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Human_friends(ctx, obj)
+			return ec.resolvers.Human().Friends(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -754,7 +657,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Human_friendsConnection(ctx, obj, args["first"].(*int), args["after"].(*string))
+			return ec.resolvers.Human().FriendsConnection(ctx, obj, args["first"].(*int), args["after"].(*string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -804,7 +707,7 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Human_starships(ctx, obj)
+			return ec.resolvers.Human().Starships(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -883,7 +786,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Mutation_createReview(ctx, args["episode"].(Episode), args["review"].(Review))
+		return ec.resolvers.Mutation().CreateReview(ctx, args["episode"].(Episode), args["review"].(Review))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1038,7 +941,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_hero(ctx, args["episode"].(Episode))
+			return ec.resolvers.Query().Hero(ctx, args["episode"].(Episode))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -1094,7 +997,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_reviews(ctx, args["episode"].(Episode), args["since"].(*time.Time))
+			return ec.resolvers.Query().Reviews(ctx, args["episode"].(Episode), args["since"].(*time.Time))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -1144,7 +1047,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_search(ctx, args["text"].(string))
+			return ec.resolvers.Query().Search(ctx, args["text"].(string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -1194,7 +1097,7 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_character(ctx, args["id"].(string))
+			return ec.resolvers.Query().Character(ctx, args["id"].(string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -1235,7 +1138,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_droid(ctx, args["id"].(string))
+			return ec.resolvers.Query().Droid(ctx, args["id"].(string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -1279,7 +1182,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_human(ctx, args["id"].(string))
+			return ec.resolvers.Query().Human(ctx, args["id"].(string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -1323,7 +1226,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_starship(ctx, args["id"].(string))
+			return ec.resolvers.Query().Starship(ctx, args["id"].(string))
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -1529,7 +1432,7 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Starship_length(ctx, obj, args["unit"].(LengthUnit))
+			return ec.resolvers.Starship().Length(ctx, obj, args["unit"].(LengthUnit))
 		})
 		if err != nil {
 			ec.Error(ctx, err)

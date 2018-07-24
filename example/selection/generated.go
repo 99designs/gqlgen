@@ -14,18 +14,9 @@ import (
 	ast "github.com/vektah/gqlparser/ast"
 )
 
-// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
-}
-
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
-}
-
-type Resolvers interface {
-	Query_events(ctx context.Context) ([]Event, error)
+	return &executableSchema{resolvers: resolvers}
 }
 
 type ResolverRoot interface {
@@ -35,16 +26,8 @@ type QueryResolver interface {
 	Events(ctx context.Context) ([]Event, error)
 }
 
-type shortMapper struct {
-	r ResolverRoot
-}
-
-func (s shortMapper) Query_events(ctx context.Context) ([]Event, error) {
-	return s.r.Query().Events(ctx)
-}
-
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -78,7 +61,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 var likeImplementors = []string{"Like", "Event"}
@@ -310,7 +293,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_events(ctx)
+			return ec.resolvers.Query().Events(ctx)
 		})
 		if err != nil {
 			ec.Error(ctx, err)

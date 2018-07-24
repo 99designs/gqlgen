@@ -10,6 +10,6 @@ import (
 
 func main() {
 	http.Handle("/", handler.Playground("Selection Demo", "/query"))
-	http.Handle("/query", handler.GraphQL(selection.MakeExecutableSchema(&selection.SelectionResolver{})))
+	http.Handle("/query", handler.GraphQL(selection.NewExecutableSchema(&selection.Resolver{})))
 	log.Fatal(http.ListenAndServe(":8086", nil))
 }

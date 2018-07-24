@@ -13,23 +13,9 @@ import (
 	ast "github.com/vektah/gqlparser/ast"
 )
 
-// MakeExecutableSchema creates an ExecutableSchema from the Resolvers interface.
-func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
-}
-
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
-}
-
-type Resolvers interface {
-	Customer_address(ctx context.Context, obj *Customer) (*Address, error)
-	Customer_orders(ctx context.Context, obj *Customer) ([]Order, error)
-
-	Order_items(ctx context.Context, obj *Order) ([]Item, error)
-	Query_customers(ctx context.Context) ([]Customer, error)
-	Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
+	return &executableSchema{resolvers: resolvers}
 }
 
 type ResolverRoot interface {
@@ -49,32 +35,8 @@ type QueryResolver interface {
 	Torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
 }
 
-type shortMapper struct {
-	r ResolverRoot
-}
-
-func (s shortMapper) Customer_address(ctx context.Context, obj *Customer) (*Address, error) {
-	return s.r.Customer().Address(ctx, obj)
-}
-
-func (s shortMapper) Customer_orders(ctx context.Context, obj *Customer) ([]Order, error) {
-	return s.r.Customer().Orders(ctx, obj)
-}
-
-func (s shortMapper) Order_items(ctx context.Context, obj *Order) ([]Item, error) {
-	return s.r.Order().Items(ctx, obj)
-}
-
-func (s shortMapper) Query_customers(ctx context.Context) ([]Customer, error) {
-	return s.r.Query().Customers(ctx)
-}
-
-func (s shortMapper) Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
-	return s.r.Query().Torture(ctx, customerIds)
-}
-
 type executableSchema struct {
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -108,7 +70,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 
-	resolvers Resolvers
+	resolvers ResolverRoot
 }
 
 var addressImplementors = []string{"Address"}
@@ -238,7 +200,7 @@ func (ec *executionContext) _Customer_address(ctx context.Context, field graphql
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Customer_address(ctx, obj)
+			return ec.resolvers.Customer().Address(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -271,7 +233,7 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Customer_orders(ctx, obj)
+			return ec.resolvers.Customer().Orders(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -406,7 +368,7 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Order_items(ctx, obj)
+			return ec.resolvers.Order().Items(ctx, obj)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -478,7 +440,7 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_customers(ctx)
+			return ec.resolvers.Query().Customers(ctx)
 		})
 		if err != nil {
 			ec.Error(ctx, err)
@@ -546,7 +508,7 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query_torture(ctx, args["customerIds"].([][]int))
+			return ec.resolvers.Query().Torture(ctx, args["customerIds"].([][]int))
 		})
 		if err != nil {
 			ec.Error(ctx, err)

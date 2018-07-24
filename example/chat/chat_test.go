@@ -10,7 +10,7 @@ import (
 )
 
 func TestChat(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(New())))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
 	c := client.New(srv.URL)
 
 	t.Run("subscribe to chat events", func(t *testing.T) {

@@ -24,7 +24,7 @@ type Config struct {
 	upgrader       websocket.Upgrader
 	recover        graphql.RecoverFunc
 	errorPresenter graphql.ErrorPresenterFunc
-	resolverHook   graphql.ResolverMiddleware
+	resolverHook   graphql.FieldMiddleware
 	requestHook    graphql.RequestMiddleware
 }
 
@@ -74,7 +74,7 @@ func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 
 // ResolverMiddleware allows you to define a function that will be called around every resolver,
 // useful for tracing and logging.
-func ResolverMiddleware(middleware graphql.ResolverMiddleware) Option {
+func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.resolverHook == nil {
 			cfg.resolverHook = middleware

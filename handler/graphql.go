@@ -74,8 +74,6 @@ func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 
 // ResolverMiddleware allows you to define a function that will be called around every resolver,
 // useful for tracing and logging.
-// It will only be called for user defined resolvers, any direct binding to models is assumed
-// to cost nothing.
 func ResolverMiddleware(middleware graphql.ResolverMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.resolverHook == nil {

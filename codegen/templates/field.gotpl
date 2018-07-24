@@ -46,32 +46,27 @@
 			rctx.PushField(field.Alias)
 			defer rctx.Pop()
 		{{- end }}
-
-			{{- if $field.IsResolver }}
-				resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+				{{- if $field.IsResolver }}
 					return ec.resolvers.{{ $field.ShortInvocation }}
-				})
-				if err != nil {
-					ec.Error(ctx, err)
-					return graphql.Null
-				}
-				if resTmp == nil {
-					return graphql.Null
-				}
-				res := resTmp.({{$field.Signature}})
-			{{- else if $field.GoVarName }}
-				res := obj.{{$field.GoVarName}}
-			{{- else if $field.GoMethodName }}
-				{{- if $field.NoErr }}
-					res := {{$field.GoMethodName}}({{ $field.CallArgs }})
-				{{- else }}
-					res, err := {{$field.GoMethodName}}({{ $field.CallArgs }})
-					if err != nil {
-						ec.Error(ctx, err)
-						return graphql.Null
-					}
+				{{- else if $field.GoVarName }}
+					return obj.{{$field.GoVarName}}, nil
+				{{- else if $field.GoMethodName }}
+					{{- if $field.NoErr }}
+						return {{$field.GoMethodName}}({{ $field.CallArgs }}), nil
+					{{- else }}
+						return {{$field.GoMethodName}}({{ $field.CallArgs }})
+					{{- end }}
 				{{- end }}
-			{{- end }}
+			})
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+			if resTmp == nil {
+				return graphql.Null
+			}
+			res := resTmp.({{$field.Signature}})
 			{{ $field.WriteJson }}
 		{{- if $field.IsConcurrent }}
 			})

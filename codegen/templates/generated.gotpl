@@ -13,6 +13,11 @@ func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
 	return &executableSchema{resolvers: resolvers}
 }
 
+type Config struct {
+	resolvers ResolverRoot
+	{{ if .Directives }}directive DirectiveRoot{{ end }}
+}
+
 type ResolverRoot interface {
 {{- range $object := .Objects -}}
 	{{ if $object.HasResolvers -}}
@@ -20,6 +25,14 @@ type ResolverRoot interface {
 	{{ end }}
 {{- end }}
 }
+
+{{ if .Directives }}
+type DirectiveRoot struct {
+{{ range $directive := .Directives }}
+	{{$directive.Name}} graphql.FieldMiddleware
+{{ end }}
+}
+{{ end }}
 
 {{- range $object := .Objects -}}
 	{{ if $object.HasResolvers }}

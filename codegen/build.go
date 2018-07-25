@@ -21,6 +21,7 @@ type Build struct {
 	SubscriptionRoot *Object
 	SchemaRaw        string
 	SchemaFilename   string
+	Directives       []*Directive
 }
 
 type ModelBuild struct {
@@ -84,6 +85,7 @@ func (cfg *Config) bind() (*Build, error) {
 		Imports:        imports.finalize(),
 		SchemaRaw:      cfg.SchemaStr,
 		SchemaFilename: cfg.SchemaFilename,
+		Directives:     cfg.buildDirectives(),
 	}
 
 	if cfg.schema.Query != nil {

@@ -26,3 +26,5 @@ input TodoInput {
 }
 
 scalar Map
+
+directive @isAuthenticated on FIELD_DEFINITION

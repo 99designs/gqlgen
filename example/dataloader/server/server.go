@@ -26,7 +26,7 @@ func main() {
 
 	router.Handle("/", handler.Playground("Dataloader", "/query"))
 	router.Handle("/query", handler.GraphQL(
-		dataloader.NewExecutableSchema(&dataloader.Resolver{}),
+		dataloader.NewExecutableSchema(dataloader.Config{Resolvers: &dataloader.Resolver{}}),
 		handler.ResolverMiddleware(gqlopentracing.ResolverMiddleware()),
 		handler.RequestMiddleware(gqlopentracing.RequestMiddleware()),
 	))

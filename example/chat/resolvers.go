@@ -26,9 +26,11 @@ func (r *resolver) Subscription() SubscriptionResolver {
 	return &subscriptionResolver{r}
 }
 
-func New() *resolver {
-	return &resolver{
-		Rooms: map[string]*Chatroom{},
+func New() Config {
+	return Config{
+		Resolvers: &resolver{
+			Rooms: map[string]*Chatroom{},
+		},
 	}
 }
 

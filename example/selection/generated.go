@@ -16,19 +16,31 @@ import (
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
 }
 
 type ResolverRoot interface {
 	Query() QueryResolver
+}
+
+type DirectiveRoot struct {
 }
 type QueryResolver interface {
 	Events(ctx context.Context) ([]Event, error)
 }
 
 type executableSchema struct {
-	resolvers ResolverRoot
+	resolvers  ResolverRoot
+	directives DirectiveRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {

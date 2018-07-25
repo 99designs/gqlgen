@@ -10,8 +10,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-func New() *resolvers {
-	return &resolvers{
+func New() Config {
+	r := &resolvers{
 		todos: []Todo{
 			{ID: 1, Text: "A todo not to forget", Done: false},
 			{ID: 2, Text: "This is the most important", Done: false},
@@ -19,6 +19,7 @@ func New() *resolvers {
 		},
 		lastID: 3,
 	}
+	return Config{Resolvers: r}
 }
 
 type resolvers struct {

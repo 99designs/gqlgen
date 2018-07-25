@@ -204,7 +204,7 @@ func (r *starshipResolver) Length(ctx context.Context, obj *Starship, unit Lengt
 	}
 }
 
-func NewResolver() *Resolver {
+func NewResolver() Config {
 	r := Resolver{}
 	r.humans = map[string]Human{
 		"1000": {
@@ -332,5 +332,7 @@ func NewResolver() *Resolver {
 
 	r.reviews = map[Episode][]Review{}
 
-	return &r
+	return Config{
+		Resolvers: &r,
+	}
 }

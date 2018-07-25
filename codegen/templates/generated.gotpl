@@ -9,13 +9,16 @@ import (
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers: cfg.Resolvers,
+		directives: cfg.Directives,
+	}
 }
 
 type Config struct {
-	resolvers ResolverRoot
-	{{ if .Directives }}directive DirectiveRoot{{ end }}
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
 }
 
 type ResolverRoot interface {
@@ -26,13 +29,11 @@ type ResolverRoot interface {
 {{- end }}
 }
 
-{{ if .Directives }}
 type DirectiveRoot struct {
 {{ range $directive := .Directives }}
 	{{$directive.Name}} graphql.FieldMiddleware
 {{ end }}
 }
-{{ end }}
 
 {{- range $object := .Objects -}}
 	{{ if $object.HasResolvers }}
@@ -45,7 +46,8 @@ type DirectiveRoot struct {
 {{- end }}
 
 type executableSchema struct {
-	resolvers      ResolverRoot
+	resolvers  ResolverRoot
+	directives DirectiveRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {

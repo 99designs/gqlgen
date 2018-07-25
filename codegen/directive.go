@@ -3,9 +3,9 @@ package codegen
 import "strings"
 
 type Directive struct {
-	name string
+	Name string
 }
 
-func (d *Directive) Name() string {
-	return strings.Title(d.name)
+func (d *Directive) GoName() string {
+	return strings.Title(d.Name)
 }

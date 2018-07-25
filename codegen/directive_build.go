@@ -6,7 +6,7 @@ func (cfg *Config) buildDirectives() (directives []*Directive) {
 			continue
 		}
 		directives = append(directives, &Directive{
-			name: name,
+			Name: name,
 		})
 	}
 	return directives

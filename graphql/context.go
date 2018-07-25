@@ -41,15 +41,6 @@ func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context
 	return next(ctx)
 }
 
-func (c *RequestContext) FieldMiddleware(ctx context.Context, next Resolver) interface{} {
-	res, err := c.ResolverMiddleware(ctx, next)
-	if err != nil {
-		c.Error(ctx, err)
-		return nil
-	}
-	return res
-}
-
 func NewRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *RequestContext {
 	return &RequestContext{
 		Doc:                 doc,

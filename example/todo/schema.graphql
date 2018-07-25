@@ -5,6 +5,7 @@ schema {
 
 type MyQuery {
 	todo(id: Int!): Todo
+	authenticatedTodo(id: Int!): Todo @isAuthenticated
 	lastTodo: Todo
 	todos: [Todo!]!
 }

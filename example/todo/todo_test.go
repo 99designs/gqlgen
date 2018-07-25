@@ -127,6 +127,19 @@ func TestTodo(t *testing.T) {
 
 		require.Equal(t, "Completed todo", resp.CreateTodo.Text)
 	})
+
+	t.Run("isAuthenticated directive middleware", func(t *testing.T) {
+		var resp map[string]interface{}
+		c.MustPost(`{ authenticatedTodo(id: 1) { __typename } }`, &resp)
+		val, ok := resp["authenticatedTodo"]
+		require.True(t, ok)
+		require.Nil(t, val)
+
+		c.MustPost(`{ authenticatedTodo(id: 2) { __typename } }`, &resp)
+		val, ok = resp["authenticatedTodo"]
+		require.True(t, ok)
+		require.NotNil(t, val)
+	})
 }
 
 func TestSkipAndIncludeDirectives(t *testing.T) {

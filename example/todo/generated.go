@@ -40,6 +40,7 @@ type MyMutationResolver interface {
 }
 type MyQueryResolver interface {
 	Todo(ctx context.Context, id int) (*Todo, error)
+	AuthenticatedTodo(ctx context.Context, id int) (*Todo, error)
 	LastTodo(ctx context.Context) (*Todo, error)
 	Todos(ctx context.Context) ([]Todo, error)
 }
@@ -211,6 +212,8 @@ func (ec *executionContext) _MyQuery(ctx context.Context, sel ast.SelectionSet) 
 			out.Values[i] = graphql.MarshalString("MyQuery")
 		case "todo":
 			out.Values[i] = ec._MyQuery_todo(ctx, field)
+		case "authenticatedTodo":
+			out.Values[i] = ec._MyQuery_authenticatedTodo(ctx, field)
 		case "lastTodo":
 			out.Values[i] = ec._MyQuery_lastTodo(ctx, field)
 		case "todos":
@@ -255,6 +258,46 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 
 		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 			return ec.resolvers.MyQuery().Todo(ctx, args["id"].(int))
+		})
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Todo)
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._Todo(ctx, field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _MyQuery_authenticatedTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalInt(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["id"] = arg0
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "MyQuery",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.MyQuery().AuthenticatedTodo(ctx, args["id"].(int))
 		})
 		if resTmp == nil {
 			return graphql.Null
@@ -1355,13 +1398,12 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Resolver) interface{} {
 	rctx := graphql.GetResolverContext(ctx)
-	if len(rctx.Field.Directives) != 0 {
-		for _, d := range rctx.Field.Directives {
-			switch d.Name {
-			case "isAuthenticated":
-				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.IsAuthenticated(ctx, next)
-				}
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "isAuthenticated":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return ec.directives.IsAuthenticated(ctx, n)
 			}
 		}
 	}
@@ -1389,6 +1431,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type MyQuery {
 	todo(id: Int!): Todo
+	authenticatedTodo(id: Int!): Todo @isAuthenticated
 	lastTodo: Todo
 	todos: [Todo!]!
 }

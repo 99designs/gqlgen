@@ -29,10 +29,7 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 				continue
 			}
 			f := getOrCreateField(&groupedFields, sel.Alias, func() CollectedField {
-				f := CollectedField{
-					Alias: sel.Alias,
-					Name:  sel.Name,
-				}
+				f := CollectedField{Field: sel}
 				if len(sel.Arguments) > 0 {
 					f.Args = map[string]interface{}{}
 					for _, arg := range sel.Arguments {
@@ -96,8 +93,8 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 }
 
 type CollectedField struct {
-	Alias      string
-	Name       string
+	*ast.Field
+
 	Args       map[string]interface{}
 	Selections ast.SelectionSet
 }

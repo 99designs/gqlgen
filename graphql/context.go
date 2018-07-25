@@ -121,7 +121,7 @@ func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Conte
 	if parent != nil {
 		rc.Path = append(rc.Path, parent.Path...)
 	}
-	if rc.Field.Alias != "" {
+	if rc.Field.Field != nil && rc.Field.Alias != "" {
 		rc.PushField(rc.Field.Alias)
 	}
 	return context.WithValue(ctx, resolver, rc)

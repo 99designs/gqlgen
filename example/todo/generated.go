@@ -54,7 +54,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
 		data := ec._MyQuery(ctx, op.SelectionSet)
@@ -70,7 +70,7 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 }
 
 func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
 		data := ec._MyMutation(ctx, op.SelectionSet)
@@ -91,8 +91,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 
 type executionContext struct {
 	*graphql.RequestContext
-
-	resolvers ResolverRoot
+	*executableSchema
 }
 
 var myMutationImplementors = []string{"MyMutation"}
@@ -1352,6 +1351,26 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 	}
 
 	return it, nil
+}
+
+func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Resolver) interface{} {
+	rctx := graphql.GetResolverContext(ctx)
+	if len(rctx.Field.Directives) != 0 {
+		for _, d := range rctx.Field.Directives {
+			switch d.Name {
+			case "isAuthenticated":
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.IsAuthenticated(ctx, next)
+				}
+			}
+		}
+	}
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
 }
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {

@@ -55,7 +55,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
 		data := ec._Query(ctx, op.SelectionSet)
@@ -71,7 +71,7 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 }
 
 func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
 		data := ec._Mutation(ctx, op.SelectionSet)
@@ -87,7 +87,7 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 }
 
 func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	next := ec._Subscription(ctx, op.SelectionSet)
 	if ec.Errors != nil {
@@ -116,8 +116,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 
 type executionContext struct {
 	*graphql.RequestContext
-
-	resolvers ResolverRoot
+	*executableSchema
 }
 
 var chatroomImplementors = []string{"Chatroom"}
@@ -1394,6 +1393,15 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Resolver) interface{} {
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
 }
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {

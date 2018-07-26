@@ -22,7 +22,7 @@ import (
 
 func TestCustomErrorPresenter(t *testing.T) {
 	resolvers := &testResolver{}
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(resolvers),
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers}),
 		handler.ErrorPresenter(func(i context.Context, e error) *gqlerror.Error {
 			if _, ok := errors.Cause(e).(*specialErr); ok {
 				return &gqlerror.Error{Message: "override special error message"}
@@ -62,7 +62,7 @@ func TestCustomErrorPresenter(t *testing.T) {
 }
 
 func TestErrorPath(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(&testResolver{err: fmt.Errorf("boom")})))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &testResolver{err: fmt.Errorf("boom")}})))
 	c := client.New(srv.URL)
 
 	var resp struct{}
@@ -73,7 +73,7 @@ func TestErrorPath(t *testing.T) {
 
 func TestInputDefaults(t *testing.T) {
 	called := false
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(&testResolver{
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &testResolver{
 		queryDate: func(ctx context.Context, filter models.DateFilter) (bool, error) {
 			assert.Equal(t, "asdf", filter.Value)
 			assert.Equal(t, "UTC", *filter.Timezone)
@@ -82,7 +82,7 @@ func TestInputDefaults(t *testing.T) {
 
 			return false, nil
 		},
-	})))
+	}})))
 	c := client.New(srv.URL)
 
 	var resp struct {
@@ -96,7 +96,7 @@ func TestInputDefaults(t *testing.T) {
 }
 
 func TestJsonEncoding(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(&testResolver{})))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &testResolver{}})))
 	c := client.New(srv.URL)
 
 	var resp struct {

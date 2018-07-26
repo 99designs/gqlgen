@@ -11,7 +11,7 @@ import (
 )
 
 func TestSelection(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(&Resolver{})))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
 	c := client.New(srv.URL)
 
 	query := `{

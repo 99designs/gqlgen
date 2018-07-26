@@ -10,7 +10,7 @@ import (
 )
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
-type ResolverMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
+type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 
 type RequestContext struct {
@@ -19,10 +19,11 @@ type RequestContext struct {
 	Doc       *ast.QueryDocument
 	// ErrorPresenter will be used to generate the error
 	// message from errors given to Error().
-	ErrorPresenter     ErrorPresenterFunc
-	Recover            RecoverFunc
-	ResolverMiddleware ResolverMiddleware
-	RequestMiddleware  RequestMiddleware
+	ErrorPresenter      ErrorPresenterFunc
+	Recover             RecoverFunc
+	ResolverMiddleware  FieldMiddleware
+	DirectiveMiddleware FieldMiddleware
+	RequestMiddleware   RequestMiddleware
 
 	errorsMu sync.Mutex
 	Errors   gqlerror.List
@@ -32,19 +33,24 @@ func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interfac
 	return next(ctx)
 }
 
+func DefaultDirectiveMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
+	return next(ctx)
+}
+
 func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context) []byte) []byte {
 	return next(ctx)
 }
 
 func NewRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *RequestContext {
 	return &RequestContext{
-		Doc:                doc,
-		RawQuery:           query,
-		Variables:          variables,
-		ResolverMiddleware: DefaultResolverMiddleware,
-		RequestMiddleware:  DefaultRequestMiddleware,
-		Recover:            DefaultRecover,
-		ErrorPresenter:     DefaultErrorPresenter,
+		Doc:                 doc,
+		RawQuery:            query,
+		Variables:           variables,
+		ResolverMiddleware:  DefaultResolverMiddleware,
+		DirectiveMiddleware: DefaultDirectiveMiddleware,
+		RequestMiddleware:   DefaultRequestMiddleware,
+		Recover:             DefaultRecover,
+		ErrorPresenter:      DefaultErrorPresenter,
 	}
 }
 
@@ -106,7 +112,7 @@ func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Conte
 	if parent != nil {
 		rc.Path = append(rc.Path, parent.Path...)
 	}
-	if rc.Field.Alias != "" {
+	if rc.Field.Field != nil && rc.Field.Alias != "" {
 		rc.PushField(rc.Field.Alias)
 	}
 	return context.WithValue(ctx, resolver, rc)

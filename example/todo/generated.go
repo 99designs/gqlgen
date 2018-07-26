@@ -14,13 +14,25 @@ import (
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return &executableSchema{resolvers: resolvers}
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
 }
 
 type ResolverRoot interface {
 	MyMutation() MyMutationResolver
 	MyQuery() MyQueryResolver
+}
+
+type DirectiveRoot struct {
+	IsAuthenticated graphql.FieldMiddleware
 }
 type MyMutationResolver interface {
 	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
@@ -28,12 +40,14 @@ type MyMutationResolver interface {
 }
 type MyQueryResolver interface {
 	Todo(ctx context.Context, id int) (*Todo, error)
+	AuthenticatedTodo(ctx context.Context, id int) (*Todo, error)
 	LastTodo(ctx context.Context) (*Todo, error)
 	Todos(ctx context.Context) ([]Todo, error)
 }
 
 type executableSchema struct {
-	resolvers ResolverRoot
+	resolvers  ResolverRoot
+	directives DirectiveRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -41,7 +55,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
 		data := ec._MyQuery(ctx, op.SelectionSet)
@@ -57,7 +71,7 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 }
 
 func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e.resolvers}
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
 		data := ec._MyMutation(ctx, op.SelectionSet)
@@ -78,8 +92,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 
 type executionContext struct {
 	*graphql.RequestContext
-
-	resolvers ResolverRoot
+	*executableSchema
 }
 
 var myMutationImplementors = []string{"MyMutation"}
@@ -129,13 +142,9 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.MyMutation().CreateTodo(ctx, args["todo"].(TodoInput))
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -171,13 +180,9 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.MyMutation().UpdateTodo(ctx, args["id"].(int), args["changes"].(map[string]interface{}))
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -207,6 +212,8 @@ func (ec *executionContext) _MyQuery(ctx context.Context, sel ast.SelectionSet) 
 			out.Values[i] = graphql.MarshalString("MyQuery")
 		case "todo":
 			out.Values[i] = ec._MyQuery_todo(ctx, field)
+		case "authenticatedTodo":
+			out.Values[i] = ec._MyQuery_authenticatedTodo(ctx, field)
 		case "lastTodo":
 			out.Values[i] = ec._MyQuery_lastTodo(ctx, field)
 		case "todos":
@@ -249,13 +256,49 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 			}
 		}()
 
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 			return ec.resolvers.MyQuery().Todo(ctx, args["id"].(int))
 		})
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Todo)
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._Todo(ctx, field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _MyQuery_authenticatedTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := field.Args["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
 			ec.Error(ctx, err)
 			return graphql.Null
 		}
+	}
+	args["id"] = arg0
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "MyQuery",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.MyQuery().AuthenticatedTodo(ctx, args["id"].(int))
+		})
 		if resTmp == nil {
 			return graphql.Null
 		}
@@ -282,13 +325,9 @@ func (ec *executionContext) _MyQuery_lastTodo(ctx context.Context, field graphql
 			}
 		}()
 
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 			return ec.resolvers.MyQuery().LastTodo(ctx)
 		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
 		if resTmp == nil {
 			return graphql.Null
 		}
@@ -315,13 +354,9 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 			}
 		}()
 
-		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 			return ec.resolvers.MyQuery().Todos(ctx)
 		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
 		if resTmp == nil {
 			return graphql.Null
 		}
@@ -357,13 +392,9 @@ func (ec *executionContext) _MyQuery___type(ctx context.Context, field graphql.C
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.introspectType(args["name"].(string)), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -381,13 +412,9 @@ func (ec *executionContext) _MyQuery___schema(ctx context.Context, field graphql
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return ec.introspectSchema(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -432,13 +459,9 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.ID, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -453,13 +476,9 @@ func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.Collec
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Text, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -474,13 +493,9 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Done, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -524,13 +539,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -545,13 +556,9 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -566,13 +573,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Locations, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -596,13 +599,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Args, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -655,13 +654,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -676,13 +671,9 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -697,13 +688,9 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.IsDeprecated, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -718,13 +705,9 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.DeprecationReason, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -772,13 +755,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -793,13 +772,9 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -814,13 +789,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Args, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -844,13 +815,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Type, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -868,13 +835,9 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.IsDeprecated, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -889,13 +852,9 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.DeprecationReason, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -939,13 +898,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -960,13 +915,9 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -981,13 +932,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Type, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1005,13 +952,9 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.DefaultValue, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1057,13 +1000,9 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Types(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1087,13 +1026,9 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.QueryType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1111,13 +1046,9 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.MutationType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1135,13 +1066,9 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.SubscriptionType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1159,13 +1086,9 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Directives(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1228,13 +1151,9 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Kind(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1249,13 +1168,9 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Name(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1270,13 +1185,9 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Description(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1302,13 +1213,9 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Fields(args["includeDeprecated"].(bool)), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1332,13 +1239,9 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.Interfaces(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1362,13 +1265,9 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.PossibleTypes(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1403,13 +1302,9 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.EnumValues(args["includeDeprecated"].(bool)), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1433,13 +1328,9 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.InputFields(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1463,13 +1354,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 		return obj.OfType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1509,6 +1396,27 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 	return it, nil
 }
 
+func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Resolver) interface{} {
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "isAuthenticated":
+			if ec.directives.IsAuthenticated != nil {
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.IsAuthenticated(ctx, n)
+				}
+			}
+		}
+	}
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
+}
+
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -1525,6 +1433,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type MyQuery {
 	todo(id: Int!): Todo
+	authenticatedTodo(id: Int!): Todo @isAuthenticated
 	lastTodo: Todo
 	todos: [Todo!]!
 }
@@ -1546,5 +1455,7 @@ input TodoInput {
 }
 
 scalar Map
+
+directive @isAuthenticated on FIELD_DEFINITION
 `},
 )

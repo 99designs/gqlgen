@@ -46,7 +46,7 @@
 			rctx.PushField(field.Alias)
 			defer rctx.Pop()
 		{{- end }}
-			resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 				{{- if $field.IsResolver }}
 					return ec.resolvers.{{ $field.ShortInvocation }}
 				{{- else if $field.GoVarName }}
@@ -59,10 +59,6 @@
 					{{- end }}
 				{{- end }}
 			})
-			if err != nil {
-				ec.Error(ctx, err)
-				return graphql.Null
-			}
 			if resTmp == nil {
 				return graphql.Null
 			}

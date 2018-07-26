@@ -10,7 +10,7 @@ import (
 	"github.com/vektah/gqlgen/graphql"
 )
 
-func ResolverMiddleware() graphql.ResolverMiddleware {
+func ResolverMiddleware() graphql.FieldMiddleware {
 	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
 		rctx := graphql.GetResolverContext(ctx)
 		span, ctx := opentracing.StartSpanFromContext(ctx, rctx.Object+"_"+rctx.Field.Name,

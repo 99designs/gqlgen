@@ -14,6 +14,7 @@ type Object struct {
 
 	Fields             []Field
 	Satisfies          []string
+	ResolverInterface  *Ref
 	Root               bool
 	DisableConcurrency bool
 	Stream             bool
@@ -69,6 +70,15 @@ func (f *Field) IsConcurrent() bool {
 }
 
 func (f *Field) ShortInvocation() string {
+	if !f.IsResolver() {
+		return ""
+	}
+	shortName := strings.ToUpper(f.GQLName[:1]) + f.GQLName[1:]
+
+	return fmt.Sprintf("%s().%s(%s)", f.Object.GQLType, shortName, f.CallArgs())
+}
+
+func (f *Field) ResolverType() string {
 	if !f.IsResolver() {
 		return ""
 	}

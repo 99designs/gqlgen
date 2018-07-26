@@ -8,14 +8,14 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
+func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program, imports *Imports) ([]Model, error) {
 	var models []Model
 
 	for _, typ := range cfg.schema.Types {
 		var model Model
 		switch typ.Kind {
 		case ast.Object:
-			obj, err := cfg.buildObject(types, typ)
+			obj, err := cfg.buildObject(types, typ, imports)
 			if err != nil {
 				return nil, err
 			}

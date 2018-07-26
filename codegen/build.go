@@ -31,11 +31,20 @@ type ModelBuild struct {
 	Enums       []Enum
 }
 
+type ResolverBuild struct {
+	PackageName   string
+	Imports       []*Import
+	ResolverType  string
+	Objects       Objects
+	ResolverFound bool
+}
+
 // Create a list of models that need to be generated
 func (cfg *Config) models() (*ModelBuild, error) {
 	namedTypes := cfg.buildNamedTypes()
 
-	prog, err := cfg.loadProgram(namedTypes, true)
+	progLoader := newLoader(namedTypes, true)
+	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
@@ -43,7 +52,7 @@ func (cfg *Config) models() (*ModelBuild, error) {
 
 	cfg.bindTypes(imports, namedTypes, cfg.Model.Dir(), prog)
 
-	models, err := cfg.buildModels(namedTypes, prog)
+	models, err := cfg.buildModels(namedTypes, prog, imports)
 	if err != nil {
 		return nil, err
 	}
@@ -56,10 +65,46 @@ func (cfg *Config) models() (*ModelBuild, error) {
 }
 
 // bind a schema together with some code to generate a Build
+func (cfg *Config) resolver() (*ResolverBuild, error) {
+	progLoader := newLoader(cfg.buildNamedTypes(), true)
+	progLoader.Import(cfg.Resolver.ImportPath())
+
+	prog, err := progLoader.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	destDir := cfg.Resolver.Dir()
+
+	namedTypes := cfg.buildNamedTypes()
+	imports := buildImports(namedTypes, destDir)
+	imports.add(cfg.Exec.ImportPath())
+
+	cfg.bindTypes(imports, namedTypes, destDir, prog)
+
+	objects, err := cfg.buildObjects(namedTypes, prog, imports)
+	if err != nil {
+		return nil, err
+	}
+
+	def, _ := findGoType(prog, cfg.Resolver.ImportPath(), cfg.Resolver.Type)
+	resolverFound := def != nil
+
+	return &ResolverBuild{
+		PackageName:   cfg.Resolver.Package,
+		Imports:       imports.finalize(),
+		Objects:       objects,
+		ResolverType:  cfg.Resolver.Type,
+		ResolverFound: resolverFound,
+	}, nil
+}
+
+// bind a schema together with some code to generate a Build
 func (cfg *Config) bind() (*Build, error) {
 	namedTypes := cfg.buildNamedTypes()
 
-	prog, err := cfg.loadProgram(namedTypes, true)
+	progLoader := newLoader(namedTypes, true)
+	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
@@ -105,13 +150,12 @@ func (cfg *Config) bind() (*Build, error) {
 }
 
 func (cfg *Config) validate() error {
-	namedTypes := cfg.buildNamedTypes()
-
-	_, err := cfg.loadProgram(namedTypes, false)
+	progLoader := newLoader(cfg.buildNamedTypes(), false)
+	_, err := progLoader.Load()
 	return err
 }
 
-func (cfg *Config) loadProgram(namedTypes NamedTypes, allowErrors bool) (*loader.Program, error) {
+func newLoader(namedTypes NamedTypes, allowErrors bool) loader.Config {
 	conf := loader.Config{}
 	if allowErrors {
 		conf = loader.Config{
@@ -130,8 +174,7 @@ func (cfg *Config) loadProgram(namedTypes NamedTypes, allowErrors bool) (*loader
 			conf.Import(imp.Package)
 		}
 	}
-
-	return conf.Load()
+	return conf
 }
 
 func resolvePkg(pkgName string) (string, error) {

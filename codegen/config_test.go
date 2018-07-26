@@ -36,7 +36,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 		err = os.Chdir(filepath.Join(testDir, "tests", "cfg", "subdir"))
 		require.NoError(t, err)
 
-		cfg, err = LoadDefaultConfig()
+		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
 		require.Equal(t, cfg.SchemaFilename, "inner")
 	})
@@ -45,18 +45,17 @@ func TestLoadDefaultConfig(t *testing.T) {
 		err = os.Chdir(filepath.Join(testDir, "tests", "cfg", "otherdir"))
 		require.NoError(t, err)
 
-		cfg, err = LoadDefaultConfig()
+		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
 		require.Equal(t, cfg.SchemaFilename, "outer")
 	})
 
-	t.Run("will fallback to defaults", func(t *testing.T) {
+	t.Run("will return error if config doesn't exist", func(t *testing.T) {
 		err = os.Chdir(testDir)
 		require.NoError(t, err)
 
-		cfg, err = LoadDefaultConfig()
-		require.NoError(t, err)
-		require.Equal(t, cfg.SchemaFilename, "schema.graphql")
+		cfg, err = LoadConfigFromDefaultLocations()
+		require.True(t, os.IsNotExist(err))
 	})
 }
 

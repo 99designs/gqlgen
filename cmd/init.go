@@ -60,8 +60,8 @@ var initCmd = &cobra.Command{
 	Short: "Generate .gqlgen.yml",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig()
 		initSchema()
+		initConfig()
 	},
 }
 
@@ -70,26 +70,27 @@ func initConfig() {
 	var err error
 	if configFilename != "" {
 		config, err = codegen.LoadConfig(configFilename)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		} else if config != nil {
+			fmt.Fprintln(os.Stderr, "config file is already exists")
+			os.Exit(0)
+		}
 	} else {
-		config, err = codegen.LoadDefaultConfig()
-	}
-	if os.IsNotExist(errors.Cause(err)) {
-		// ok
-		if configFilename == "" {
-			configFilename = ".gqlgen.yml"
+		config, err = codegen.LoadConfigFromDefaultLocations()
+		if os.IsNotExist(errors.Cause(err)) {
+			if configFilename == "" {
+				configFilename = ".gqlgen.yml"
+			}
+			config = codegen.DefaultConfig()
+		} else if config != nil {
+			fmt.Fprintln(os.Stderr, "config file is already exists")
+			os.Exit(0)
+		} else if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
 		}
-		config = &codegen.Config{
-			SchemaFilename: "schema.graphql",
-			Model:          codegen.PackageConfig{Filename: "models_gen.go"},
-			Exec:           codegen.PackageConfig{Filename: "generated.go"},
-		}
-
-	} else if !os.IsNotExist(errors.Cause(err)) {
-		fmt.Fprintln(os.Stderr, "config file is already exists")
-		os.Exit(0)
-	} else if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
 	}
 
 	if schemaFilename != "" {

@@ -1401,9 +1401,11 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Re
 	for _, d := range rctx.Field.Definition.Directives {
 		switch d.Name {
 		case "isAuthenticated":
-			n := next
-			next = func(ctx context.Context) (interface{}, error) {
-				return ec.directives.IsAuthenticated(ctx, n)
+			if ec.directives.IsAuthenticated != nil {
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.IsAuthenticated(ctx, n)
+				}
 			}
 		}
 	}

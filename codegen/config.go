@@ -13,21 +13,23 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var defaults = Config{
-	SchemaFilename: "schema.graphql",
-	Model:          PackageConfig{Filename: "models_gen.go"},
-	Exec:           PackageConfig{Filename: "generated.go"},
-}
-
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 
-// LoadDefaultConfig looks for a config file in the current directory, and all parent directories
+// DefaultConfig creates a copy of the default config
+func DefaultConfig() *Config {
+	return &Config{
+		SchemaFilename: "schema.graphql",
+		Model:          PackageConfig{Filename: "models_gen.go"},
+		Exec:           PackageConfig{Filename: "generated.go"},
+	}
+}
+
+// LoadConfigFromDefaultLocations looks for a config file in the current directory, and all parent directories
 // walking up the tree. The closest config file will be returned.
-func LoadDefaultConfig() (*Config, error) {
+func LoadConfigFromDefaultLocations() (*Config, error) {
 	cfgFile, err := findCfg()
-	if err != nil || cfgFile == "" {
-		cpy := defaults
-		return &cpy, err
+	if err != nil {
+		return nil, err
 	}
 
 	err = os.Chdir(filepath.Dir(cfgFile))
@@ -39,18 +41,18 @@ func LoadDefaultConfig() (*Config, error) {
 
 // LoadConfig reads the gqlgen.yml config file
 func LoadConfig(filename string) (*Config, error) {
-	config := defaults
+	config := DefaultConfig()
 
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to read config")
 	}
 
-	if err := yaml.UnmarshalStrict(b, &config); err != nil {
+	if err := yaml.UnmarshalStrict(b, config); err != nil {
 		return nil, errors.Wrap(err, "unable to parse config")
 	}
 
-	return &config, nil
+	return config, nil
 }
 
 type Config struct {
@@ -168,6 +170,10 @@ func findCfg() (string, error) {
 	for cfg == "" && dir != filepath.Dir(dir) {
 		dir = filepath.Dir(dir)
 		cfg = findCfgInDir(dir)
+	}
+
+	if cfg == "" {
+		return "", os.ErrNotExist
 	}
 
 	return cfg, nil

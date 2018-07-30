@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/vektah/gqlgen/codegen"
 	"gopkg.in/yaml.v2"
@@ -19,17 +20,22 @@ var genCmd = &cobra.Command{
 	Short: "Generate models & resolvers .go",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		var config *codegen.Config
 		var err error
 		if configFilename != "" {
 			config, err = codegen.LoadConfig(configFilename)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(1)
+			}
 		} else {
-			config, err = codegen.LoadDefaultConfig()
-		}
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(1)
+			config, err = codegen.LoadConfigFromDefaultLocations()
+			if os.IsNotExist(errors.Cause(err)) {
+				config = codegen.DefaultConfig()
+			} else if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(1)
+			}
 		}
 
 		// overwrite by commandline options

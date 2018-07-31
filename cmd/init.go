@@ -63,11 +63,11 @@ var initCmd = &cobra.Command{
 		initSchema()
 		config := initConfig()
 
-		generateGraph(config)
+		GenerateGraphServer(config)
 	},
 }
 
-func generateGraph(config *codegen.Config) {
+func GenerateGraphServer(config *codegen.Config) {
 	schemaRaw, err := ioutil.ReadFile(config.SchemaFilename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
@@ -80,10 +80,21 @@ func generateGraph(config *codegen.Config) {
 		os.Exit(1)
 	}
 
+	if serverFilename == "" {
+		serverFilename = "server/server.go"
+	}
+
 	if err := codegen.Generate(*config); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
+
+	if err := codegen.GenerateServer(*config, serverFilename); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Fprintln(os.Stdout, `Exec "go run ./server/server.go" to start GraphQL server`)
 }
 
 func initConfig() *codegen.Config {

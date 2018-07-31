@@ -12,6 +12,7 @@ import (
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/validator"
 )
 
 type params struct {
@@ -167,7 +168,11 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			return
 		}
 
-		reqCtx := cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+		vars, err := validator.VariableValues(exec.Schema(), op, reqParams.Variables)
+		if err != nil {
+			sendError(w, http.StatusUnprocessableEntity, err)
+		}
+		reqCtx := cfg.newRequestContext(doc, reqParams.Query, vars)
 		ctx := graphql.WithRequestContext(r.Context(), reqCtx)
 
 		defer func() {

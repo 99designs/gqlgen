@@ -4,6 +4,7 @@
 
 type Todo {
   id: ID!
+  databaseId: Int!
   text: String!
   done: Boolean!
   user: User!

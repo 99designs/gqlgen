@@ -1,6 +1,6 @@
 package config
 
 type User struct {
-	ID   string
+	ID       string
 	FullName string
 }

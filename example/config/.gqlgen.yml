@@ -16,13 +16,13 @@ models:
   Todo:    # Object
     fields:
       text:
-        govarname: Description
+        modelField: Description
   NewTodo: # Input
     fields:
       userId:
-        govarname: UserID
+        modelField: UserID
   User:
     model: github.com/vektah/gqlgen/example/config.User
     fields:
       name:
-        govarname: FullName
+        modelField: FullName

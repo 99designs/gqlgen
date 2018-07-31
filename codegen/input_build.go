@@ -52,7 +52,7 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 		var goVarName string
 		if entryExists {
 			if typeField, ok := typeEntry.Fields[field.Name]; ok {
-				goVarName = typeField.GoVarName
+				goVarName = typeField.ModelName
 			}
 		}
 

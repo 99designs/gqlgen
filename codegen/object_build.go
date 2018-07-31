@@ -130,8 +130,10 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 		}
 
 		var forceResolver bool
+		var goVarName string
 		if entryExists {
 			if typeField, ok := typeEntry.Fields[field.Name]; ok {
+				goVarName = typeField.GoVarName
 				forceResolver = typeField.Resolver
 			}
 		}
@@ -165,6 +167,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 			Type:          types.getType(field.Type),
 			Args:          args,
 			Object:        obj,
+			GoVarName:     goVarName,
 			ForceResolver: forceResolver,
 		})
 	}

@@ -3,6 +3,8 @@ package codegen
 import (
 	"testing"
 
+	"syscall"
+
 	"github.com/stretchr/testify/require"
 	"golang.org/x/tools/go/loader"
 )
@@ -41,7 +43,11 @@ func generate(name string, schema string, typemap ...TypeMap) error {
 		SchemaStr: schema,
 		Exec:      PackageConfig{Filename: "tests/gen/" + name + "/exec.go"},
 		Model:     PackageConfig{Filename: "tests/gen/" + name + "/model.go"},
+		Resolver:  PackageConfig{Filename: "tests/gen/" + name + "/resolver.go", Type: "Resolver"},
 	}
+
+	_ = syscall.Unlink(cfg.Resolver.Filename)
+
 	if len(typemap) > 0 {
 		cfg.Models = typemap[0]
 	}

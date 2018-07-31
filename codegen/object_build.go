@@ -18,7 +18,7 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 			continue
 		}
 
-		obj, err := cfg.buildObject(types, typ)
+		obj, err := cfg.buildObject(types, typ, imports)
 		if err != nil {
 			return nil, err
 		}
@@ -81,9 +81,12 @@ func sanitizeGoName(name string) string {
 	return name
 }
 
-func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
+func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *Imports) (*Object, error) {
 	obj := &Object{NamedType: types[typ.Name]}
 	typeEntry, entryExists := cfg.Models[typ.Name]
+
+	imp := imports.findByPath(cfg.Exec.ImportPath())
+	obj.ResolverInterface = &Ref{GoType: obj.GQLType + "Resolver", Import: imp}
 
 	if typ == cfg.schema.Query {
 		obj.Root = true

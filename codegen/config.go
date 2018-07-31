@@ -60,6 +60,7 @@ type Config struct {
 	SchemaStr      string        `yaml:"-"`
 	Exec           PackageConfig `yaml:"exec"`
 	Model          PackageConfig `yaml:"model"`
+	Resolver       PackageConfig `yaml:"resolver,omitempty"`
 	Models         TypeMap       `yaml:"models,omitempty"`
 
 	schema *ast.Schema `yaml:"-"`
@@ -68,6 +69,7 @@ type Config struct {
 type PackageConfig struct {
 	Filename string `yaml:"filename,omitempty"`
 	Package  string `yaml:"package,omitempty"`
+	Type     string `yaml:"type,omitempty"`
 }
 
 type TypeMapEntry struct {
@@ -128,6 +130,10 @@ func (c *PackageConfig) Check() error {
 	return nil
 }
 
+func (c *PackageConfig) IsDefined() bool {
+	return c.Filename != ""
+}
+
 func (cfg *Config) Check() error {
 	if err := cfg.Models.Check(); err != nil {
 		return errors.Wrap(err, "config.models")
@@ -137,6 +143,9 @@ func (cfg *Config) Check() error {
 	}
 	if err := cfg.Model.Check(); err != nil {
 		return errors.Wrap(err, "config.model")
+	}
+	if err := cfg.Resolver.Check(); err != nil {
+		return errors.Wrap(err, "config.resolver")
 	}
 	return nil
 }

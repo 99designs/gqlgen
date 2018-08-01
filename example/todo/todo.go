@@ -22,11 +22,11 @@ func New() Config {
 			lastID: 3,
 		},
 	}
-	c.Directives.IsAuthenticated = func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+	c.Directives.HasRole = func(ctx context.Context, next graphql.Resolver, role Role) (interface{}, error) {
 		rctx := graphql.GetResolverContext(ctx)
 		idVal := rctx.Field.Arguments.ForName("id").Value
 		id, _ := idVal.Value(make(map[string]interface{}))
-		if id.(int64) == 1 {
+		if id.(int64) == 1 && role == RoleAdmin {
 			return nil, nil
 		}
 		return next(ctx)

@@ -141,6 +141,10 @@ func (cfg *Config) bind() (*Build, error) {
 	if err != nil {
 		return nil, err
 	}
+	directives, err := cfg.buildDirectives(namedTypes)
+	if err != nil {
+		return nil, err
+	}
 
 	b := &Build{
 		PackageName:    cfg.Exec.Package,
@@ -150,7 +154,7 @@ func (cfg *Config) bind() (*Build, error) {
 		Imports:        imports.finalize(),
 		SchemaRaw:      cfg.SchemaStr,
 		SchemaFilename: cfg.SchemaFilename,
-		Directives:     cfg.buildDirectives(),
+		Directives:     directives,
 	}
 
 	if cfg.schema.Query != nil {

@@ -32,7 +32,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	IsAuthenticated graphql.FieldMiddleware
+	HasRole func(ctx context.Context, next graphql.Resolver, role string) (res interface{}, err error)
 }
 type MyMutationResolver interface {
 	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
@@ -125,9 +125,10 @@ func (ec *executionContext) _MyMutation(ctx context.Context, sel ast.SelectionSe
 }
 
 func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 TodoInput
-	if tmp, ok := field.Args["todo"]; ok {
+	if tmp, ok := rawArgs["todo"]; ok {
 		var err error
 		arg0, err = UnmarshalTodoInput(tmp)
 		if err != nil {
@@ -153,9 +154,10 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := field.Args["id"]; ok {
+	if tmp, ok := rawArgs["id"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
@@ -165,7 +167,7 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 	}
 	args["id"] = arg0
 	var arg1 map[string]interface{}
-	if tmp, ok := field.Args["changes"]; ok {
+	if tmp, ok := rawArgs["changes"]; ok {
 		var err error
 		arg1 = tmp.(map[string]interface{})
 		if err != nil {
@@ -231,9 +233,10 @@ func (ec *executionContext) _MyQuery(ctx context.Context, sel ast.SelectionSet) 
 }
 
 func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := field.Args["id"]; ok {
+	if tmp, ok := rawArgs["id"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
@@ -271,9 +274,10 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _MyQuery_authenticatedTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := field.Args["id"]; ok {
+	if tmp, ok := rawArgs["id"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
@@ -375,9 +379,10 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _MyQuery___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := field.Args["name"]; ok {
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -1196,9 +1201,10 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
@@ -1285,9 +1291,10 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
@@ -1400,11 +1407,23 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Re
 	rctx := graphql.GetResolverContext(ctx)
 	for _, d := range rctx.Field.Definition.Directives {
 		switch d.Name {
-		case "isAuthenticated":
-			if ec.directives.IsAuthenticated != nil {
+		case "hasRole":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args := map[string]interface{}{}
+			var arg0 string
+			if tmp, ok := rawArgs["role"]; ok {
+				var err error
+				arg0, err = graphql.UnmarshalString(tmp)
+				if err != nil {
+					ec.Error(ctx, err)
+					return graphql.Null
+				}
+			}
+			args["role"] = arg0
+			if ec.directives.HasRole != nil {
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.IsAuthenticated(ctx, n)
+					return ec.directives.HasRole(ctx, n, args["role"].(string))
 				}
 			}
 		}
@@ -1433,7 +1452,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type MyQuery {
 	todo(id: Int!): Todo
-	authenticatedTodo(id: Int!): Todo @isAuthenticated
+	authenticatedTodo(id: Int!): Todo @hasRole(role: ADMIN)
 	lastTodo: Todo
 	todos: [Todo!]!
 }
@@ -1456,6 +1475,11 @@ input TodoInput {
 
 scalar Map
 
-directive @isAuthenticated on FIELD_DEFINITION
+directive @hasRole(role: String!) on FIELD_DEFINITION
+
+enum Role {
+    ADMIN
+    USER
+}
 `},
 )

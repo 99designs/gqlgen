@@ -29,24 +29,7 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 				continue
 			}
 			f := getOrCreateField(&groupedFields, sel.Alias, func() CollectedField {
-				f := CollectedField{Field: sel}
-				if len(sel.Arguments) > 0 {
-					f.Args = map[string]interface{}{}
-					for _, arg := range sel.Arguments {
-						if arg.Value.Kind == ast.Variable {
-							if val, ok := reqCtx.Variables[arg.Value.Raw]; ok {
-								f.Args[arg.Name] = val
-							}
-						} else {
-							var err error
-							f.Args[arg.Name], err = arg.Value.Value(reqCtx.Variables)
-							if err != nil {
-								panic(err)
-							}
-						}
-					}
-				}
-				return f
+				return CollectedField{Field: sel}
 			})
 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
@@ -95,7 +78,6 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 type CollectedField struct {
 	*ast.Field
 
-	Args       map[string]interface{}
 	Selections ast.SelectionSet
 }
 

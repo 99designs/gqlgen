@@ -219,6 +219,10 @@ func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool, dept
 	}
 }
 
+func (f *FieldArgument) Stream() bool {
+	return f.Object != nil && f.Object.Stream
+}
+
 func (os Objects) ByName(name string) *Object {
 	for i, o := range os {
 		if strings.EqualFold(o.GQLType, name) {

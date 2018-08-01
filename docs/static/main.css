@@ -42,10 +42,9 @@ table {
 }
 
 body {
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Roboto', sans-serif;
     font-size: 15px;
-    line-height: 1.5em;
-    padding-bottom: -5px;
+    line-height: 1.55em;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -92,13 +91,19 @@ footer {
     color: #222;
 }
 
+h1,h2,h3,h4,h5,h6 {
+    font-family: 'Work Sans', sans-serif;
+}
+
 h1 {
     font-size: 25px;
-    font-weight: bold;
-    margin: 10px 0;
+    font-weight: 700;
+    margin: 15px 0 10px 0;
+    position: relative;
 }
 
 .description {
+    font-family: 'Work Sans', sans-serif;
     font-size: 18px;
     color: #555;
 }
@@ -108,15 +113,17 @@ h1 {
 }
 
 h2 {
+    margin-top: 2em;
     margin-bottom: 1em;
     font-size: 19px;
-    font-weight: bold;
+    font-weight: 700;
 }
 
 h3 {
+    margin-top: 1.5em;
     margin-bottom: 1em;
-    font-size: 17px;
-    font-weight: bold;
+    font-size: 16px;
+    font-weight: 500;
 }
 
 p {
@@ -130,6 +137,7 @@ nav {
 }
 
 .menu {
+    font-family: 'Work Sans', sans-serif;
     font-weight: 700;
 }
 
@@ -183,10 +191,31 @@ ul.menu li:hover {
 
 code {
     padding:2px;
-    font-family: 'Space Mono', monospace;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 500;
     color: #996666;
 }
 
 strong {
     font-weight: 700;
+}
+
+.anchor-link {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.anchor-link:hover {
+    border-bottom: none;
+}
+
+.anchor-icon {
+    fill: #DDD;
+    display: inline-block;
+    vertical-align: middle;
+    padding: 5px;
+}
+
+.anchor-icon:hover {
+    fill: #666;
 }

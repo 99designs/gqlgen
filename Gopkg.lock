@@ -176,7 +176,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a59dc1530d6a590c18eca216936bace5fefc6fb4af18fb5a1cb44a9c5e0c6bc5"
+  digest = "1:80b5cf44d45e12f0e9b1665cf564b123a292850ce80128342e4c74b57a42c3b1"
   name = "github.com/vektah/gqlparser"
   packages = [
     ".",
@@ -188,7 +188,7 @@
     "validator/rules",
   ]
   pruneopts = "UT"
-  revision = "8098ed8dcb1ed81bd39ac117a2fc33b08d5eaaf0"
+  revision = "9d2a87e05c6d27ae2bab1bc914aaa9c21cf35d9a"
 
 [[projects]]
   branch = "master"
@@ -262,6 +262,7 @@
     "github.com/vektah/gqlparser",
     "github.com/vektah/gqlparser/ast",
     "github.com/vektah/gqlparser/gqlerror",
+    "github.com/vektah/gqlparser/validator",
     "golang.org/x/tools/go/loader",
     "golang.org/x/tools/imports",
     "gopkg.in/yaml.v2",

@@ -24,7 +24,7 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program, imports *
 			}
 			model = cfg.obj2Model(obj)
 		case ast.InputObject:
-			obj, err := buildInput(types, typ)
+			obj, err := cfg.buildInput(types, typ)
 			if err != nil {
 				return nil, err
 			}
@@ -65,10 +65,14 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 		field := &obj.Fields[i]
 		mf := ModelField{Type: field.Type, GQLName: field.GQLName}
 
-		mf.GoVarName = ucFirst(field.GQLName)
-		if mf.IsScalar {
-			if mf.GoVarName == "Id" {
-				mf.GoVarName = "ID"
+		if field.GoFieldName != "" {
+			mf.GoFieldName = field.GoFieldName
+		} else {
+			mf.GoFieldName = ucFirst(field.GQLName)
+			if mf.IsScalar {
+				if mf.GoFieldName == "Id" {
+					mf.GoFieldName = "ID"
+				}
 			}
 		}
 

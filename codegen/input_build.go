@@ -16,7 +16,7 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 	for _, typ := range cfg.schema.Types {
 		switch typ.Kind {
 		case ast.InputObject:
-			input, err := buildInput(namedTypes, typ)
+			input, err := cfg.buildInput(namedTypes, typ)
 			if err != nil {
 				return nil, err
 			}
@@ -44,14 +44,21 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 	return inputs, nil
 }
 
-func buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
+func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
 	obj := &Object{NamedType: types[typ.Name]}
+	typeEntry, entryExists := cfg.Models[typ.Name]
 
 	for _, field := range typ.Fields {
 		newField := Field{
 			GQLName: field.Name,
 			Type:    types.getType(field.Type),
 			Object:  obj,
+		}
+
+		if entryExists {
+			if typeField, ok := typeEntry.Fields[field.Name]; ok {
+				newField.GoFieldName = typeField.FieldName
+			}
 		}
 
 		if field.DefaultValue != nil {

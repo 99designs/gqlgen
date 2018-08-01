@@ -8,8 +8,8 @@ type Model struct {
 
 type ModelField struct {
 	*Type
-	GQLName   string
-	GoVarName string
-	GoFKName  string
-	GoFKType  string
+	GQLName     string
+	GoFieldName string
+	GoFKName    string
+	GoFKType    string
 }

@@ -79,7 +79,7 @@ type TypeMapEntry struct {
 
 type TypeMapField struct {
 	Resolver  bool   `yaml:"resolver"`
-	ModelName string `yaml:"modelField"`
+	FieldName string `yaml:"fieldName"`
 }
 
 func (c *PackageConfig) normalize() error {

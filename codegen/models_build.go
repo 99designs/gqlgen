@@ -65,10 +65,10 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 		field := &obj.Fields[i]
 		mf := ModelField{Type: field.Type, GQLName: field.GQLName}
 
-		if field.GoVarName != "" {
-			mf.GoVarName = field.GoVarName
+		if field.GoFieldName != "" {
+			mf.GoFieldName = field.GoFieldName
 		} else {
-			mf.GoVarName = field.GoNameExported()
+			mf.GoFieldName = field.GoNameExported()
 		}
 
 		model.Fields = append(model.Fields, mf)

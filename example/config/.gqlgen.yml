@@ -18,13 +18,13 @@ models:
       id:
         resolver: true
       text:
-        govarname: Description
+        fieldName: Description # Field
   NewTodo: # Input
     fields:
       userId:
-        govarname: UserID
+        fieldName: UserID      # Field
   User:
     model: github.com/vektah/gqlgen/example/config.User
     fields:
       name:
-        govarname: FullName
+        fieldName: FullName    # Method

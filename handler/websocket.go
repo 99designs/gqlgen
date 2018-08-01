@@ -13,6 +13,7 @@ import (
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/validator"
 )
 
 const (
@@ -148,7 +149,11 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return true
 	}
 
-	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+	vars, err := validator.VariableValues(c.exec.Schema(), op, reqParams.Variables)
+	if err != nil {
+		c.sendError(message.ID, err)
+	}
+	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, vars)
 	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
 
 	if op.Operation != ast.Subscription {

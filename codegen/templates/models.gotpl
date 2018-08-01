@@ -14,8 +14,8 @@ import (
 	{{- else }}
 		type {{.GoType}} struct {
 			{{- range $field := .Fields }}
-				{{- if $field.GoVarName }}
-					{{ $field.GoVarName }} {{$field.Signature}} `json:"{{$field.GQLName}}"`
+				{{- if $field.GoFieldName }}
+					{{ $field.GoFieldName }} {{$field.Signature}} `json:"{{$field.GQLName}}"`
 				{{- else }}
 					{{ $field.GoFKName }} {{$field.GoFKType}}
 				{{- end }}

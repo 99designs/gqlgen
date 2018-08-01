@@ -49,18 +49,16 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 	typeEntry, entryExists := cfg.Models[typ.Name]
 
 	for _, field := range typ.Fields {
-		var goVarName string
-		if entryExists {
-			if typeField, ok := typeEntry.Fields[field.Name]; ok {
-				goVarName = typeField.GoVarName
-			}
+		newField := Field{
+			GQLName: field.Name,
+			Type:    types.getType(field.Type),
+			Object:  obj,
 		}
 
-		newField := Field{
-			GQLName:   field.Name,
-			Type:      types.getType(field.Type),
-			Object:    obj,
-			GoVarName: goVarName,
+		if entryExists {
+			if typeField, ok := typeEntry.Fields[field.Name]; ok {
+				newField.GoFieldName = typeField.FieldName
+			}
 		}
 
 		if field.DefaultValue != nil {

@@ -18,9 +18,11 @@ var schemaFilename string
 var typemap string
 var packageName string
 var modelPackageName string
+var serverFilename string
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&configFilename, "config", "c", "", "the file to configuration to")
+	rootCmd.PersistentFlags().StringVarP(&serverFilename, "server", "s", "", "the file to write server to")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "show logs")
 
 	rootCmd.PersistentFlags().StringVar(&output, "out", "", "the file to write to")

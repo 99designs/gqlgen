@@ -441,7 +441,7 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-		return obj.FullName, nil
+		return obj.FullName(), nil
 	})
 	if resTmp == nil {
 		return graphql.Null

@@ -107,20 +107,24 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 	for _, field := range typ.Fields {
 		if typ == cfg.schema.Query && field.Name == "__type" {
 			obj.Fields = append(obj.Fields, Field{
-				Type:         &Type{types["__Schema"], []string{modPtr}, nil},
-				GQLName:      "__schema",
-				NoErr:        true,
-				GoMethodName: "ec.introspectSchema",
-				Object:       obj,
+				Type:           &Type{types["__Schema"], []string{modPtr}, nil},
+				GQLName:        "__schema",
+				NoErr:          true,
+				GoFieldType:    GoFieldMethod,
+				GoReceiverName: "ec",
+				GoFieldName:    "introspectSchema",
+				Object:         obj,
 			})
 			continue
 		}
 		if typ == cfg.schema.Query && field.Name == "__schema" {
 			obj.Fields = append(obj.Fields, Field{
-				Type:         &Type{types["__Type"], []string{modPtr}, nil},
-				GQLName:      "__type",
-				NoErr:        true,
-				GoMethodName: "ec.introspectType",
+				Type:           &Type{types["__Type"], []string{modPtr}, nil},
+				GQLName:        "__type",
+				NoErr:          true,
+				GoFieldType:    GoFieldMethod,
+				GoReceiverName: "ec",
+				GoFieldName:    "introspectType",
 				Args: []FieldArgument{
 					{GQLName: "name", Type: &Type{types["String"], []string{}, nil}, Object: &Object{}},
 				},
@@ -130,10 +134,10 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 		}
 
 		var forceResolver bool
-		var goVarName string
+		var goName string
 		if entryExists {
 			if typeField, ok := typeEntry.Fields[field.Name]; ok {
-				goVarName = typeField.GoVarName
+				goName = typeField.FieldName
 				forceResolver = typeField.Resolver
 			}
 		}
@@ -167,7 +171,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 			Type:          types.getType(field.Type),
 			Args:          args,
 			Object:        obj,
-			GoVarName:     goVarName,
+			GoFieldName:   goName,
 			ForceResolver: forceResolver,
 		})
 	}

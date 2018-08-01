@@ -195,14 +195,13 @@ func bindMethod(imports *Imports, t types.Type, field *Field) error {
 	}
 
 	goName := field.GQLName
-	if field.GoVarName != "" {
-		goName = field.GoVarName
+	if field.GoFieldName != "" {
+		goName = field.GoFieldName
 	}
 	method := findMethod(namedType, goName)
 	if method == nil {
 		return fmt.Errorf("no method named %s", field.GQLName)
 	}
-	field.GoVarName = "" // found it to be a method, not a variable
 	sig := method.Type().(*types.Signature)
 
 	if sig.Results().Len() == 1 {
@@ -221,7 +220,9 @@ func bindMethod(imports *Imports, t types.Type, field *Field) error {
 	}
 
 	// success, args and return type match. Bind to method
-	field.GoMethodName = "obj." + method.Name()
+	field.GoFieldType = GoFieldMethod
+	field.GoReceiverName = "obj"
+	field.GoFieldName = method.Name()
 	field.Args = newArgs
 	return nil
 }
@@ -233,8 +234,8 @@ func bindVar(imports *Imports, t types.Type, field *Field) error {
 	}
 
 	goName := field.GQLName
-	if field.GoVarName != "" {
-		goName = field.GoVarName
+	if field.GoFieldName != "" {
+		goName = field.GoFieldName
 	}
 	structField := findField(underlying, goName)
 	if structField == nil {
@@ -246,7 +247,9 @@ func bindVar(imports *Imports, t types.Type, field *Field) error {
 	}
 
 	// success, bind to var
-	field.GoVarName = structField.Name()
+	field.GoFieldType = GoFieldVariable
+	field.GoReceiverName = "obj"
+	field.GoFieldName = structField.Name()
 	return nil
 }
 

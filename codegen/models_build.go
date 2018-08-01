@@ -65,13 +65,13 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 		field := &obj.Fields[i]
 		mf := ModelField{Type: field.Type, GQLName: field.GQLName}
 
-		if field.GoVarName != "" {
-			mf.GoVarName = field.GoVarName
+		if field.GoFieldName != "" {
+			mf.GoFieldName = field.GoFieldName
 		} else {
-			mf.GoVarName = ucFirst(field.GQLName)
+			mf.GoFieldName = ucFirst(field.GQLName)
 			if mf.IsScalar {
-				if mf.GoVarName == "Id" {
-					mf.GoVarName = "ID"
+				if mf.GoFieldName == "Id" {
+					mf.GoFieldName = "ID"
 				}
 			}
 		}

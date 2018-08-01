@@ -208,7 +208,7 @@ func (a *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 	todo := model.Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
-		UserID: input.User,
+		UserID: input.UserId,
 	}
 	a.todos = append(a.todos, todo)
 	return todo, nil

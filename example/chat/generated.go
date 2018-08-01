@@ -312,9 +312,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 }
 
 func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := field.Args["text"]; ok {
+	if tmp, ok := rawArgs["text"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -324,7 +325,7 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 	}
 	args["text"] = arg0
 	var arg1 string
-	if tmp, ok := field.Args["username"]; ok {
+	if tmp, ok := rawArgs["username"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -334,7 +335,7 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 	}
 	args["username"] = arg1
 	var arg2 string
-	if tmp, ok := field.Args["roomName"]; ok {
+	if tmp, ok := rawArgs["roomName"]; ok {
 		var err error
 		arg2, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -391,9 +392,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 }
 
 func (ec *executionContext) _Query_room(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := field.Args["name"]; ok {
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -431,9 +433,10 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := field.Args["name"]; ok {
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -503,9 +506,10 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 }
 
 func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := field.Args["roomName"]; ok {
+	if tmp, ok := rawArgs["roomName"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -1224,9 +1228,10 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
@@ -1313,9 +1318,10 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {

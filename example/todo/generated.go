@@ -32,7 +32,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	HasRole func(ctx context.Context, next graphql.Resolver, role string) (res interface{}, err error)
+	HasRole func(ctx context.Context, next graphql.Resolver, role Role) (res interface{}, err error)
 }
 type MyMutationResolver interface {
 	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
@@ -1408,22 +1408,22 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Re
 	for _, d := range rctx.Field.Definition.Directives {
 		switch d.Name {
 		case "hasRole":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args := map[string]interface{}{}
-			var arg0 string
-			if tmp, ok := rawArgs["role"]; ok {
-				var err error
-				arg0, err = graphql.UnmarshalString(tmp)
-				if err != nil {
-					ec.Error(ctx, err)
-					return graphql.Null
-				}
-			}
-			args["role"] = arg0
 			if ec.directives.HasRole != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args := map[string]interface{}{}
+				var arg0 Role
+				if tmp, ok := rawArgs["role"]; ok {
+					var err error
+					err = (&arg0).UnmarshalGQL(tmp)
+					if err != nil {
+						ec.Error(ctx, err)
+						return graphql.Null
+					}
+				}
+				args["role"] = arg0
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.HasRole(ctx, n, args["role"].(string))
+					return ec.directives.HasRole(ctx, n, args["role"].(Role))
 				}
 			}
 		}
@@ -1475,7 +1475,7 @@ input TodoInput {
 
 scalar Map
 
-directive @hasRole(role: String!) on FIELD_DEFINITION
+directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {
     ADMIN

@@ -194,10 +194,15 @@ func bindMethod(imports *Imports, t types.Type, field *Field) error {
 		return fmt.Errorf("not a named type")
 	}
 
-	method := findMethod(namedType, field.GQLName)
+	goName := field.GQLName
+	if field.GoVarName != "" {
+		goName = field.GoVarName
+	}
+	method := findMethod(namedType, goName)
 	if method == nil {
 		return fmt.Errorf("no method named %s", field.GQLName)
 	}
+	field.GoVarName = "" // found it to be a method, not a variable
 	sig := method.Type().(*types.Signature)
 
 	if sig.Results().Len() == 1 {
@@ -227,7 +232,11 @@ func bindVar(imports *Imports, t types.Type, field *Field) error {
 		return fmt.Errorf("not a struct")
 	}
 
-	structField := findField(underlying, field.GQLName)
+	goName := field.GQLName
+	if field.GoVarName != "" {
+		goName = field.GoVarName
+	}
+	structField := findField(underlying, goName)
 	if structField == nil {
 		return fmt.Errorf("no field named %s", field.GQLName)
 	}

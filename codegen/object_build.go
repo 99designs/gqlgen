@@ -133,6 +133,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 		var goVarName string
 		if entryExists {
 			if typeField, ok := typeEntry.Fields[field.Name]; ok {
+				// It may be a method but treat it as a variable now
 				goVarName = typeField.ModelName
 				forceResolver = typeField.Resolver
 			}

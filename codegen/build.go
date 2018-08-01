@@ -39,6 +39,13 @@ type ResolverBuild struct {
 	ResolverFound bool
 }
 
+type ServerBuild struct {
+	PackageName         string
+	Imports             []*Import
+	ExecPackageName     string
+	ResolverPackageName string
+}
+
 // Create a list of models that need to be generated
 func (cfg *Config) models() (*ModelBuild, error) {
 	namedTypes := cfg.buildNamedTypes()
@@ -97,6 +104,19 @@ func (cfg *Config) resolver() (*ResolverBuild, error) {
 		ResolverType:  cfg.Resolver.Type,
 		ResolverFound: resolverFound,
 	}, nil
+}
+
+func (cfg *Config) server(destDir string) *ServerBuild {
+	imports := buildImports(NamedTypes{}, destDir)
+	imports.add(cfg.Exec.ImportPath())
+	imports.add(cfg.Resolver.ImportPath())
+
+	return &ServerBuild{
+		PackageName:         cfg.Resolver.Package,
+		Imports:             imports.finalize(),
+		ExecPackageName:     cfg.Exec.Package,
+		ResolverPackageName: cfg.Resolver.Package,
+	}
 }
 
 // bind a schema together with some code to generate a Build

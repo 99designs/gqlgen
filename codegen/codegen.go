@@ -66,6 +66,28 @@ func Generate(cfg Config) error {
 	return nil
 }
 
+func GenerateServer(cfg Config, filename string) error {
+	if err := cfg.Exec.normalize(); err != nil {
+		return errors.Wrap(err, "exec")
+	}
+	if err := cfg.Resolver.normalize(); err != nil {
+		return errors.Wrap(err, "resolver")
+	}
+
+	serverFilename := abs(filename)
+	serverBuild := cfg.server(filepath.Dir(serverFilename))
+
+	if _, err := os.Stat(serverFilename); os.IsNotExist(errors.Cause(err)) {
+		err = templates.RenderToFile("server.gotpl", serverFilename, serverBuild)
+		if err != nil {
+			return errors.Wrap(err, "generate server failed")
+		}
+	} else {
+		log.Printf("Skipped server: %s already exists\n", serverFilename)
+	}
+	return nil
+}
+
 func generateResolver(cfg Config) error {
 	resolverBuild, err := cfg.resolver()
 	if err != nil {

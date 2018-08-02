@@ -1,6 +1,8 @@
 package introspection
 
 import (
+	"strings"
+
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -63,6 +65,10 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 	}
 	var fields []Field
 	for _, f := range t.def.Fields {
+		if strings.HasPrefix(f.Name, "__") {
+			continue
+		}
+
 		fields = append(fields, Field{
 			Name:              f.Name,
 			Description:       f.Description,

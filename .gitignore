@@ -1,4 +1,5 @@
-/vendor
+/vendor/*/*/*
+!/vendor/github.com/vektah/gqlparser
 /docs/public
 /example/chat/node_modules
 /example/chat/package-lock.json

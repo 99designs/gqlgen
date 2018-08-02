@@ -14,20 +14,23 @@ func TestTodo(t *testing.T) {
 	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
 	c := client.New(srv.URL)
 
-	t.Run("create a new todo", func(t *testing.T) {
-		var resp struct {
-			CreateTodo struct{ ID int }
-		}
-		c.MustPost(`mutation { createTodo(todo:{text:"Fery important"}) { id } }`, &resp)
+	var resp struct {
+		CreateTodo struct{ ID int }
+	}
+	c.MustPost(`mutation { createTodo(todo:{text:"Fery important"}) { id } }`, &resp)
 
-		require.Equal(t, 4, resp.CreateTodo.ID)
-	})
+	require.Equal(t, 4, resp.CreateTodo.ID)
 
 	t.Run("update the todo text", func(t *testing.T) {
 		var resp struct {
 			UpdateTodo struct{ Text string }
 		}
-		c.MustPost(`mutation { updateTodo(id: 4, changes:{text:"Very important"}) { text } }`, &resp)
+		c.MustPost(
+			`mutation($id: Int!, $text: String!) { updateTodo(id: $id, changes:{text:$text}) { text } }`,
+			&resp,
+			client.Var("id", 4),
+			client.Var("text", "Very important"),
+		)
 
 		require.Equal(t, "Very important", resp.UpdateTodo.Text)
 	})

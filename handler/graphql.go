@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -140,13 +141,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			reqParams.OperationName = r.URL.Query().Get("operationName")
 
 			if variables := r.URL.Query().Get("variables"); variables != "" {
-				if err := json.Unmarshal([]byte(variables), &reqParams.Variables); err != nil {
+				if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
 					sendErrorf(w, http.StatusBadRequest, "variables could not be decoded")
 					return
 				}
 			}
 		case http.MethodPost:
-			if err := json.NewDecoder(r.Body).Decode(&reqParams); err != nil {
+			if err := jsonDecode(r.Body, &reqParams); err != nil {
 				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
 				return
 			}
@@ -199,6 +200,12 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			sendErrorf(w, http.StatusBadRequest, "unsupported operation type")
 		}
 	})
+}
+
+func jsonDecode(r io.Reader, val interface{}) error {
+	dec := json.NewDecoder(r)
+	dec.UseNumber()
+	return dec.Decode(val)
 }
 
 func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {

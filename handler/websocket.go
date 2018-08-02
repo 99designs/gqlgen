@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -132,7 +133,7 @@ func (c *wsConnection) run() {
 
 func (c *wsConnection) subscribe(message *operationMessage) bool {
 	var reqParams params
-	if err := json.Unmarshal(message.Payload, &reqParams); err != nil {
+	if err := jsonDecode(bytes.NewReader(message.Payload), &reqParams); err != nil {
 		c.sendConnectionError("invalid json")
 		return false
 	}
@@ -228,11 +229,17 @@ func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
 }
 
 func (c *wsConnection) readOp() *operationMessage {
-	message := operationMessage{}
-	if err := c.conn.ReadJSON(&message); err != nil {
+	_, r, err := c.conn.NextReader()
+	if err != nil {
 		c.sendConnectionError("invalid json")
 		return nil
 	}
+	message := operationMessage{}
+	if err := jsonDecode(r, &message); err != nil {
+		c.sendConnectionError("invalid json")
+		return nil
+	}
+
 	return &message
 }
 

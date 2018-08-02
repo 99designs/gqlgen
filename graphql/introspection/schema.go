@@ -19,11 +19,11 @@ func (s *Schema) QueryType() *Type {
 }
 
 func (s *Schema) MutationType() *Type {
-	return WrapTypeFromDef(s.schema, s.schema.Query)
+	return WrapTypeFromDef(s.schema, s.schema.Mutation)
 }
 
 func (s *Schema) SubscriptionType() *Type {
-	return WrapTypeFromDef(s.schema, s.schema.Query)
+	return WrapTypeFromDef(s.schema, s.schema.Subscription)
 }
 
 func (s *Schema) Directives() []Directive {

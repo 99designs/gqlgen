@@ -3,7 +3,10 @@
 
 {{- if $object.Stream }}
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
-		{{- template "args.gotpl" $field.Args }}
+		{{- if $field.Args }}
+			rawArgs := field.ArgumentMap(ec.Variables)
+			{{ template "args.gotpl" $field.Args }}
+		{{- end }}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
 		results, err := ec.resolvers.{{ $field.ShortInvocation }}
 		if err != nil {
@@ -22,7 +25,10 @@
 	}
 {{ else }}
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
-		{{- template "args.gotpl" $field.Args }}
+		{{- if $field.Args }}
+			rawArgs := field.ArgumentMap(ec.Variables)
+			{{ template "args.gotpl" $field.Args }}
+		{{- end }}
 
 		{{- if $field.IsConcurrent }}
 			ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{

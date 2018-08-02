@@ -179,9 +179,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 external.ObjectID
-	if tmp, ok := field.Args["id"]; ok {
+	if tmp, ok := rawArgs["id"]; ok {
 		var err error
 		arg0, err = model.UnmarshalID(tmp)
 		if err != nil {
@@ -219,17 +220,10 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 model.SearchArgs
-	if tmp, ok := field.Args["input"]; ok {
-		var err error
-		arg0, err = UnmarshalSearchArgs(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	} else {
-		var tmp interface{} = map[string]interface{}{"isBanned": false, "location": "37,144"}
+	if tmp, ok := rawArgs["input"]; ok {
 		var err error
 		arg0, err = UnmarshalSearchArgs(tmp)
 		if err != nil {
@@ -237,7 +231,6 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 			return graphql.Null
 		}
 	}
-
 	args["input"] = arg0
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: "Query",
@@ -274,9 +267,10 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := field.Args["name"]; ok {
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -1208,9 +1202,10 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
@@ -1297,9 +1292,10 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {

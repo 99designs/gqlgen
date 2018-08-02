@@ -514,9 +514,10 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 [][]int
-	if tmp, ok := field.Args["customerIds"]; ok {
+	if tmp, ok := rawArgs["customerIds"]; ok {
 		var err error
 		var rawIf1 []interface{}
 		if tmp != nil {
@@ -587,9 +588,10 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := field.Args["name"]; ok {
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
@@ -1330,9 +1332,10 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
@@ -1419,9 +1422,10 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := field.Args["includeDeprecated"]; ok {
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {

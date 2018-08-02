@@ -57,7 +57,7 @@ type Mutation {
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Generate .gqlgen.yml",
+	Short: "Generate gqlgen skeleton",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		initSchema()
@@ -106,14 +106,14 @@ func initConfig() *codegen.Config {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		} else if config != nil {
-			fmt.Fprintln(os.Stderr, "config file is already exists")
+			fmt.Fprintln(os.Stderr, "config file already exists")
 			os.Exit(0)
 		}
 	} else {
 		config, err = codegen.LoadConfigFromDefaultLocations()
 		if os.IsNotExist(errors.Cause(err)) {
 			if configFilename == "" {
-				configFilename = ".gqlgen.yml"
+				configFilename = "gqlgen.yml"
 			}
 			config = codegen.DefaultConfig()
 			config.Resolver = codegen.PackageConfig{
@@ -121,7 +121,7 @@ func initConfig() *codegen.Config {
 				Type:     "Resolver",
 			}
 		} else if config != nil {
-			fmt.Fprintln(os.Stderr, "config file is already exists")
+			fmt.Fprintln(os.Stderr, "config file already exists")
 			os.Exit(0)
 		} else if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())

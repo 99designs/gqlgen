@@ -112,6 +112,8 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 			if {{.raw}} != nil {
 				if tmp1, ok := {{.raw}}.([]interface{}); ok {
 					{{.rawSlice}} = tmp1
+				} else {
+					{{.rawSlice}} = []interface{}{ {{.raw}} }
 				}
 			}
 			{{.result}} = make({{.type}}, len({{.rawSlice}}))

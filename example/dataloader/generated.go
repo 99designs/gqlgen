@@ -44,7 +44,8 @@ type OrderResolver interface {
 }
 type QueryResolver interface {
 	Customers(ctx context.Context) ([]Customer, error)
-	Torture(ctx context.Context, customerIds [][]int) ([][]Customer, error)
+	Torture1d(ctx context.Context, customerIds []int) ([]Customer, error)
+	Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error)
 }
 
 type executableSchema struct {
@@ -464,8 +465,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = graphql.MarshalString("Query")
 		case "customers":
 			out.Values[i] = ec._Query_customers(ctx, field)
-		case "torture":
-			out.Values[i] = ec._Query_torture(ctx, field)
+		case "torture1d":
+			out.Values[i] = ec._Query_torture1d(ctx, field)
+		case "torture2d":
+			out.Values[i] = ec._Query_torture2d(ctx, field)
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -513,7 +516,65 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 	})
 }
 
-func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args := map[string]interface{}{}
+	var arg0 []int
+	if tmp, ok := rawArgs["customerIds"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]int, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = graphql.UnmarshalInt(rawIf1[idx1])
+		}
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["customerIds"] = arg0
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query().Torture1d(ctx, args["customerIds"].([]int))
+		})
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]Customer)
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler {
+				rctx := graphql.GetResolverContext(ctx)
+				rctx.PushIndex(idx1)
+				defer rctx.Pop()
+				return ec._Customer(ctx, field.Selections, &res[idx1])
+			}())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
 	var arg0 [][]int
@@ -523,6 +584,8 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 		if tmp != nil {
 			if tmp1, ok := tmp.([]interface{}); ok {
 				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
 			}
 		}
 		arg0 = make([][]int, len(rawIf1))
@@ -531,6 +594,8 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 			if rawIf1[idx1] != nil {
 				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
 					rawIf2 = tmp1
+				} else {
+					rawIf2 = []interface{}{rawIf1[idx1]}
 				}
 			}
 			arg0[idx1] = make([]int, len(rawIf2))
@@ -559,7 +624,7 @@ func (ec *executionContext) _Query_torture(ctx context.Context, field graphql.Co
 		}()
 
 		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query().Torture(ctx, args["customerIds"].([][]int))
+			return ec.resolvers.Query().Torture2d(ctx, args["customerIds"].([][]int))
 		})
 		if resTmp == nil {
 			return graphql.Null
@@ -1526,8 +1591,9 @@ var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `type Query {
     customers: [Customer!]
 
-    # this method is here to test code generation of nested arrays
-    torture(customerIds: [[Int!]]): [[Customer!]]
+    # these methods are here to test code generation of nested arrays
+    torture1d(customerIds: [Int!]): [Customer!]
+    torture2d(customerIds: [[Int!]]): [[Customer!]]
 }
 
 type Customer {

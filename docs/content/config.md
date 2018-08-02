@@ -32,6 +32,7 @@ models:
     fields:
       id:
         resolver: true # force a resolver to be generated
+        fieldName: todoId # bind to a different go field name 
 ```
 
 Everything has defaults, so add things as you need.

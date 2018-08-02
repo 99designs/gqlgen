@@ -70,11 +70,11 @@ a:hover {
 main {
     flex: 1;
     padding: 20px;
-    color: #445;
+    color: #556;
 }
 
 .content {
-    max-width: 760px;
+    max-width: 860px;
     margin: auto;
 }
 

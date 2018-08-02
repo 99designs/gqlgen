@@ -158,7 +158,7 @@ func (r *queryResolver) Viewer(ctx context.Context) (*models.Viewer, error) {
 	}, nil
 }
 
-func (r *queryResolver) JsonEncoding(ctx context.Context) (string, error) {
+func (r *queryResolver) JSONEncoding(ctx context.Context) (string, error) {
 	return "\U000fe4ed", nil
 }
 

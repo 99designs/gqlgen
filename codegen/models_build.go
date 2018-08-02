@@ -68,12 +68,7 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 		if field.GoFieldName != "" {
 			mf.GoFieldName = field.GoFieldName
 		} else {
-			mf.GoFieldName = ucFirst(field.GQLName)
-			if mf.IsScalar {
-				if mf.GoFieldName == "Id" {
-					mf.GoFieldName = "ID"
-				}
-			}
+			mf.GoFieldName = field.GoNameExported()
 		}
 
 		model.Fields = append(model.Fields, mf)

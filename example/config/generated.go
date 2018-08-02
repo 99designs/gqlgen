@@ -29,6 +29,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Todo() TodoResolver
 }
 
 type DirectiveRoot struct {
@@ -38,6 +39,9 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]Todo, error)
+}
+type TodoResolver interface {
+	ID(ctx context.Context, obj *Todo) (string, error)
 }
 
 type executableSchema struct {
@@ -277,6 +281,8 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = graphql.MarshalString("Todo")
 		case "id":
 			out.Values[i] = ec._Todo_id(ctx, field, obj)
+		case "databaseId":
+			out.Values[i] = ec._Todo_databaseId(ctx, field, obj)
 		case "text":
 			out.Values[i] = ec._Todo_text(ctx, field, obj)
 		case "done":
@@ -292,6 +298,32 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 }
 
 func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Todo",
+		Args:   nil,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Todo().ID(ctx, obj)
+		})
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(string)
+		return graphql.MarshalID(res)
+	})
+}
+
+func (ec *executionContext) _Todo_databaseId(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "Todo"
 	rctx.Args = nil
@@ -299,13 +331,13 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-		return obj.ID, nil
+		return obj.DatabaseID, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
-	return graphql.MarshalID(res)
+	res := resTmp.(int)
+	return graphql.MarshalInt(res)
 }
 
 func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
@@ -1330,6 +1362,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type Todo {
   id: ID!
+  databaseId: Int!
   text: String!
   done: Boolean!
   user: User!

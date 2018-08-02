@@ -45,7 +45,7 @@ type QueryResolver interface {
 	Path(ctx context.Context) ([]*models.Element, error)
 	Date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Viewer(ctx context.Context) (*models.Viewer, error)
-	JsonEncoding(ctx context.Context) (string, error)
+	JSONEncoding(ctx context.Context) (string, error)
 }
 type UserResolver interface {
 	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
@@ -360,7 +360,7 @@ func (ec *executionContext) _Query_jsonEncoding(ctx context.Context, field graph
 		}()
 
 		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-			return ec.resolvers.Query().JsonEncoding(ctx)
+			return ec.resolvers.Query().JSONEncoding(ctx)
 		})
 		if resTmp == nil {
 			return graphql.Null

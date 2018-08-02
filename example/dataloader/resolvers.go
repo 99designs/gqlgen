@@ -65,7 +65,16 @@ func (r *queryResolver) Customers(ctx context.Context) ([]Customer, error) {
 }
 
 // this method is here to test code generation of nested arrays
-func (r *queryResolver) Torture(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
+func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]Customer, error) {
+	result := make([]Customer, len(customerIds))
+	for i, id := range customerIds {
+		result[i] = Customer{ID: id, Name: fmt.Sprintf("%d", i), AddressID: rand.Int() % 10}
+	}
+	return result, nil
+}
+
+// this method is here to test code generation of nested arrays
+func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
 	result := make([][]Customer, len(customerIds))
 	for i := range customerIds {
 		inner := make([]Customer, len(customerIds[i]))

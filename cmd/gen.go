@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/vektah/gqlgen/codegen"
 	"gopkg.in/yaml.v2"
 )
 

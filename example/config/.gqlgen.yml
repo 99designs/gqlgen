@@ -24,7 +24,7 @@ models:
       userId:
         fieldName: UserID      # Field
   User:
-    model: github.com/vektah/gqlgen/example/config.User
+    model: github.com/99designs/gqlgen/example/config.User
     fields:
       name:
         fieldName: FullName    # Method

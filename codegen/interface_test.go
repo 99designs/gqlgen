@@ -28,10 +28,10 @@ func TestShapes(t *testing.T) {
 			}
 			union ShapeUnion = Circle | Rectangle
 	`, TypeMap{
-		"Shape":      {Model: "github.com/vektah/gqlgen/codegen/tests.Shape"},
-		"ShapeUnion": {Model: "github.com/vektah/gqlgen/codegen/tests.ShapeUnion"},
-		"Circle":     {Model: "github.com/vektah/gqlgen/codegen/tests.Circle"},
-		"Rectangle":  {Model: "github.com/vektah/gqlgen/codegen/tests.Rectangle"},
+		"Shape":      {Model: "github.com/99designs/gqlgen/codegen/tests.Shape"},
+		"ShapeUnion": {Model: "github.com/99designs/gqlgen/codegen/tests.ShapeUnion"},
+		"Circle":     {Model: "github.com/99designs/gqlgen/codegen/tests.Circle"},
+		"Rectangle":  {Model: "github.com/99designs/gqlgen/codegen/tests.Rectangle"},
 	})
 
 	require.NoError(t, err)
@@ -54,7 +54,7 @@ func generate(name string, schema string, typemap ...TypeMap) error {
 	err := Generate(cfg)
 	if err == nil {
 		conf := loader.Config{}
-		conf.Import("github.com/vektah/gqlgen/codegen/tests/gen/" + name)
+		conf.Import("github.com/99designs/gqlgen/codegen/tests/gen/" + name)
 
 		_, err = conf.Load()
 		if err != nil {

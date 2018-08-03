@@ -22,8 +22,8 @@ var ambientImports = []string{
 
 	"github.com/vektah/gqlparser",
 	"github.com/vektah/gqlparser/ast",
-	"github.com/vektah/gqlgen/graphql",
-	"github.com/vektah/gqlgen/graphql/introspection",
+	"github.com/99designs/gqlgen/graphql",
+	"github.com/99designs/gqlgen/graphql/introspection",
 }
 
 func buildImports(types NamedTypes, destDir string) *Imports {

@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen --config config.yaml
+//go:generate gorunpkg github.com/99designs/gqlgen --config config.yaml
 
 package test
 
@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/test/models-go"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlgen/client"
-	"github.com/vektah/gqlgen/graphql"
-	"github.com/vektah/gqlgen/handler"
-	"github.com/vektah/gqlgen/test/models-go"
 	"github.com/vektah/gqlparser/gqlerror"
 )
 

@@ -10,7 +10,7 @@ import (
 
 	"external"
 
-	"github.com/vektah/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Banned bool

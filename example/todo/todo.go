@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen --out generated.go
+//go:generate gorunpkg github.com/99designs/gqlgen --out generated.go
 
 package todo
 
@@ -7,8 +7,8 @@ import (
 	"errors"
 	"time"
 
+	graphql "github.com/99designs/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
-	graphql "github.com/vektah/gqlgen/graphql"
 )
 
 func New() Config {

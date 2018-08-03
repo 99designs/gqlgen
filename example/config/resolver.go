@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen
+//go:generate gorunpkg github.com/99designs/gqlgen
 
 package config
 

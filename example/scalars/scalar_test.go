@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlgen/client"
-	"github.com/vektah/gqlgen/graphql/introspection"
-	"github.com/vektah/gqlgen/handler"
 )
 
 type RawUser struct {

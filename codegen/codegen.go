@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"syscall"
 
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/pkg/errors"
-	"github.com/vektah/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
@@ -127,19 +127,19 @@ func (cfg *Config) normalize() error {
 	}
 
 	builtins := TypeMap{
-		"__Directive":  {Model: "github.com/vektah/gqlgen/graphql/introspection.Directive"},
-		"__Type":       {Model: "github.com/vektah/gqlgen/graphql/introspection.Type"},
-		"__Field":      {Model: "github.com/vektah/gqlgen/graphql/introspection.Field"},
-		"__EnumValue":  {Model: "github.com/vektah/gqlgen/graphql/introspection.EnumValue"},
-		"__InputValue": {Model: "github.com/vektah/gqlgen/graphql/introspection.InputValue"},
-		"__Schema":     {Model: "github.com/vektah/gqlgen/graphql/introspection.Schema"},
-		"Int":          {Model: "github.com/vektah/gqlgen/graphql.Int"},
-		"Float":        {Model: "github.com/vektah/gqlgen/graphql.Float"},
-		"String":       {Model: "github.com/vektah/gqlgen/graphql.String"},
-		"Boolean":      {Model: "github.com/vektah/gqlgen/graphql.Boolean"},
-		"ID":           {Model: "github.com/vektah/gqlgen/graphql.ID"},
-		"Time":         {Model: "github.com/vektah/gqlgen/graphql.Time"},
-		"Map":          {Model: "github.com/vektah/gqlgen/graphql.Map"},
+		"__Directive":  {Model: "github.com/99designs/gqlgen/graphql/introspection.Directive"},
+		"__Type":       {Model: "github.com/99designs/gqlgen/graphql/introspection.Type"},
+		"__Field":      {Model: "github.com/99designs/gqlgen/graphql/introspection.Field"},
+		"__EnumValue":  {Model: "github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
+		"__InputValue": {Model: "github.com/99designs/gqlgen/graphql/introspection.InputValue"},
+		"__Schema":     {Model: "github.com/99designs/gqlgen/graphql/introspection.Schema"},
+		"Int":          {Model: "github.com/99designs/gqlgen/graphql.Int"},
+		"Float":        {Model: "github.com/99designs/gqlgen/graphql.Float"},
+		"String":       {Model: "github.com/99designs/gqlgen/graphql.String"},
+		"Boolean":      {Model: "github.com/99designs/gqlgen/graphql.Boolean"},
+		"ID":           {Model: "github.com/99designs/gqlgen/graphql.ID"},
+		"Time":         {Model: "github.com/99designs/gqlgen/graphql.Time"},
+		"Map":          {Model: "github.com/99designs/gqlgen/graphql.Map"},
 	}
 
 	if cfg.Models == nil {

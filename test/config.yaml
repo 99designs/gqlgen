@@ -7,9 +7,9 @@ model:
 
 models:
   Element:
-    model: github.com/vektah/gqlgen/test/models-go.Element
+    model: github.com/99designs/gqlgen/test/models-go.Element
   Viewer:
-    model: github.com/vektah/gqlgen/test/models-go.Viewer
+    model: github.com/99designs/gqlgen/test/models-go.Viewer
   User:
     model: remote_api.User
     fields:

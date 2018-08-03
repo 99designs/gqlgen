@@ -1,4 +1,4 @@
-# gqlgen [![CircleCI](https://img.shields.io/circleci/project/github/vektah/gqlgen/master.svg)](https://circleci.com/gh/vektah/gqlgen) [![Read the Docs](https://img.shields.io/readthedocs/pip.svg)](http://gqlgen.com/)
+# gqlgen [![CircleCI](https://badgen.net/circleci/github/99designs/gqlgen)](https://circleci.com/gh/99designs/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
 
 This is a library for quickly creating strictly typed graphql servers in golang.
 

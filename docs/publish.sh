@@ -3,4 +3,4 @@
 set -euo pipefail
 
 hugo
-gsutil -m rsync -dr public gs://gqlgen.com
+aws-vault exec platform -- aws s3 sync public s3://gqlgen-docs

@@ -22,6 +22,11 @@ model:
   filename: models/generated.go
   package: models
 
+# Optional, turns on resolver stub generation
+resolver:
+  filename: resolver.go # where to write them
+  type: Resolver  # whats the resolver root implementation type called?
+
 # Tell gqlgen about any existing models you want to reuse for
 # graphql. These normally come from the db or a remote api.
 models:
@@ -32,6 +37,7 @@ models:
     fields:
       id:
         resolver: true # force a resolver to be generated
+        fieldName: todoId # bind to a different go field name 
 ```
 
 Everything has defaults, so add things as you need.

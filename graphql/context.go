@@ -5,29 +5,35 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/vektah/gqlgen/neelance/query"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
-type ResolverMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
+type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 
 type RequestContext struct {
 	RawQuery  string
 	Variables map[string]interface{}
-	Doc       *query.Document
+	Doc       *ast.QueryDocument
 	// ErrorPresenter will be used to generate the error
 	// message from errors given to Error().
-	ErrorPresenter     ErrorPresenterFunc
-	Recover            RecoverFunc
-	ResolverMiddleware ResolverMiddleware
-	RequestMiddleware  RequestMiddleware
+	ErrorPresenter      ErrorPresenterFunc
+	Recover             RecoverFunc
+	ResolverMiddleware  FieldMiddleware
+	DirectiveMiddleware FieldMiddleware
+	RequestMiddleware   RequestMiddleware
 
 	errorsMu sync.Mutex
-	Errors   []*Error
+	Errors   gqlerror.List
 }
 
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
+	return next(ctx)
+}
+
+func DefaultDirectiveMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
 	return next(ctx)
 }
 
@@ -35,15 +41,16 @@ func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context
 	return next(ctx)
 }
 
-func NewRequestContext(doc *query.Document, query string, variables map[string]interface{}) *RequestContext {
+func NewRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *RequestContext {
 	return &RequestContext{
-		Doc:                doc,
-		RawQuery:           query,
-		Variables:          variables,
-		ResolverMiddleware: DefaultResolverMiddleware,
-		RequestMiddleware:  DefaultRequestMiddleware,
-		Recover:            DefaultRecover,
-		ErrorPresenter:     DefaultErrorPresenter,
+		Doc:                 doc,
+		RawQuery:            query,
+		Variables:           variables,
+		ResolverMiddleware:  DefaultResolverMiddleware,
+		DirectiveMiddleware: DefaultDirectiveMiddleware,
+		RequestMiddleware:   DefaultRequestMiddleware,
+		Recover:             DefaultRecover,
+		ErrorPresenter:      DefaultErrorPresenter,
 	}
 }
 
@@ -105,7 +112,7 @@ func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Conte
 	if parent != nil {
 		rc.Path = append(rc.Path, parent.Path...)
 	}
-	if rc.Field.Alias != "" {
+	if rc.Field.Field != nil && rc.Field.Alias != "" {
 		rc.PushField(rc.Field.Alias)
 	}
 	return context.WithValue(ctx, resolver, rc)
@@ -113,9 +120,8 @@ func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Conte
 
 // This is just a convenient wrapper method for CollectFields
 func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
-	reqctx := GetRequestContext(ctx)
 	resctx := GetResolverContext(ctx)
-	return CollectFields(reqctx.Doc, resctx.Field.Selections, satisfies, reqctx.Variables)
+	return CollectFields(ctx, resctx.Field.Selections, satisfies)
 }
 
 // Errorf sends an error string to the client, passing it through the formatter.

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
-	"github.com/vektah/gqlgen/graphql"
 )
 
-func ResolverMiddleware() graphql.ResolverMiddleware {
+func ResolverMiddleware() graphql.FieldMiddleware {
 	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
 		rctx := graphql.GetResolverContext(ctx)
 		span, ctx := opentracing.StartSpanFromContext(ctx, rctx.Object+"_"+rctx.Field.Name,

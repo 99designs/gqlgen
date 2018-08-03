@@ -3,9 +3,12 @@
 
 {{- if $object.Stream }}
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
-		{{- template "args.gotpl" $field.Args }}
+		{{- if $field.Args }}
+			rawArgs := field.ArgumentMap(ec.Variables)
+			{{ template "args.gotpl" $field.Args }}
+		{{- end }}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		results, err := ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
+		results, err := ec.resolvers.{{ $field.ShortInvocation }}
 		if err != nil {
 			ec.Error(ctx, err)
 			return nil
@@ -22,7 +25,10 @@
 	}
 {{ else }}
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
-		{{- template "args.gotpl" $field.Args }}
+		{{- if $field.Args }}
+			rawArgs := field.ArgumentMap(ec.Variables)
+			{{ template "args.gotpl" $field.Args }}
+		{{- end }}
 
 		{{- if $field.IsConcurrent }}
 			ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
@@ -46,32 +52,23 @@
 			rctx.PushField(field.Alias)
 			defer rctx.Pop()
 		{{- end }}
-
-			{{- if $field.IsResolver }}
-				resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-					return ec.resolvers.{{ $object.GQLType }}_{{ $field.GQLName }}({{ $field.CallArgs }})
-				})
-				if err != nil {
-					ec.Error(ctx, err)
-					return graphql.Null
-				}
-				if resTmp == nil {
-					return graphql.Null
-				}
-				res := resTmp.({{$field.Signature}})
-			{{- else if $field.GoVarName }}
-				res := obj.{{$field.GoVarName}}
-			{{- else if $field.GoMethodName }}
-				{{- if $field.NoErr }}
-					res := {{$field.GoMethodName}}({{ $field.CallArgs }})
-				{{- else }}
-					res, err := {{$field.GoMethodName}}({{ $field.CallArgs }})
-					if err != nil {
-						ec.Error(ctx, err)
-						return graphql.Null
-					}
+			resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+				{{- if $field.IsResolver }}
+					return ec.resolvers.{{ $field.ShortInvocation }}
+				{{- else if $field.IsMethod }}
+					{{- if $field.NoErr }}
+						return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }}), nil
+					{{- else }}
+						return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }})
+					{{- end }}
+				{{- else if $field.IsVariable }}
+					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}, nil
 				{{- end }}
-			{{- end }}
+			})
+			if resTmp == nil {
+				return graphql.Null
+			}
+			res := resTmp.({{$field.Signature}})
 			{{ $field.WriteJson }}
 		{{- if $field.IsConcurrent }}
 			})

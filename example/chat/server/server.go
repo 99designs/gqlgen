@@ -6,11 +6,11 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/99designs/gqlgen/example/chat"
+	"github.com/99designs/gqlgen/handler"
+	gqlopentracing "github.com/99designs/gqlgen/opentracing"
 	"github.com/gorilla/websocket"
 	"github.com/opentracing/opentracing-go"
-	"github.com/vektah/gqlgen/example/chat"
-	"github.com/vektah/gqlgen/handler"
-	gqlopentracing "github.com/vektah/gqlgen/opentracing"
 	"sourcegraph.com/sourcegraph/appdash"
 	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"
 	"sourcegraph.com/sourcegraph/appdash/traceapp"
@@ -20,7 +20,7 @@ func main() {
 	startAppdashServer()
 
 	http.Handle("/", handler.Playground("Todo", "/query"))
-	http.Handle("/query", handler.GraphQL(chat.MakeExecutableSchema(chat.New()),
+	http.Handle("/query", handler.GraphQL(chat.NewExecutableSchema(chat.New()),
 		handler.ResolverMiddleware(gqlopentracing.ResolverMiddleware()),
 		handler.RequestMiddleware(gqlopentracing.RequestMiddleware()),
 		handler.WebsocketUpgrader(websocket.Upgrader{

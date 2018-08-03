@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -18,8 +19,10 @@ func UnmarshalInt(v interface{}) (int, error) {
 		return strconv.Atoi(v)
 	case int:
 		return v, nil
-	case float64:
+	case int64:
 		return int(v), nil
+	case json.Number:
+		return strconv.Atoi(string(v))
 	default:
 		return 0, fmt.Errorf("%T is not an int", v)
 	}

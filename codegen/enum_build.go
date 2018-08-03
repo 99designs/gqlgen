@@ -4,23 +4,22 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/vektah/gqlgen/codegen/templates"
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/vektah/gqlparser/ast"
 )
 
 func (cfg *Config) buildEnums(types NamedTypes) []Enum {
 	var enums []Enum
 
 	for _, typ := range cfg.schema.Types {
-		namedType := types[typ.TypeName()]
-		e, isEnum := typ.(*schema.Enum)
-		if !isEnum || strings.HasPrefix(typ.TypeName(), "__") || namedType.IsUserDefined {
+		namedType := types[typ.Name]
+		if typ.Kind != ast.Enum || strings.HasPrefix(typ.Name, "__") || namedType.IsUserDefined {
 			continue
 		}
 
 		var values []EnumValue
-		for _, v := range e.Values {
-			values = append(values, EnumValue{v.Name, v.Desc})
+		for _, v := range typ.EnumValues {
+			values = append(values, EnumValue{v.Name, v.Description})
 		}
 
 		enum := Enum{

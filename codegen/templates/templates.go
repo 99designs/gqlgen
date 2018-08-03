@@ -5,11 +5,19 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"text/template"
 	"unicode"
+
+	"log"
+
+	"github.com/pkg/errors"
+	"golang.org/x/tools/imports"
 )
 
 func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
@@ -96,6 +104,8 @@ func dump(val interface{}) string {
 	switch val := val.(type) {
 	case int:
 		return strconv.Itoa(val)
+	case int64:
+		return fmt.Sprintf("%d", val)
 	case float64:
 		return fmt.Sprintf("%f", val)
 	case string:
@@ -136,4 +146,48 @@ func dump(val interface{}) string {
 
 func prefixLines(prefix, s string) string {
 	return prefix + strings.Replace(s, "\n", "\n"+prefix, -1)
+}
+
+func RenderToFile(tpl string, filename string, data interface{}) error {
+	var buf *bytes.Buffer
+	buf, err := Run(tpl, data)
+	if err != nil {
+		return errors.Wrap(err, filename+" generation failed")
+	}
+
+	if err := write(filename, buf.Bytes()); err != nil {
+		return err
+	}
+
+	log.Println(filename)
+
+	return nil
+}
+
+func gofmt(filename string, b []byte) ([]byte, error) {
+	out, err := imports.Process(filename, b, nil)
+	if err != nil {
+		return b, errors.Wrap(err, "unable to gofmt")
+	}
+	return out, nil
+}
+
+func write(filename string, b []byte) error {
+	err := os.MkdirAll(filepath.Dir(filename), 0755)
+	if err != nil {
+		return errors.Wrap(err, "failed to create directory")
+	}
+
+	formatted, err := gofmt(filename, b)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "gofmt failed: %s\n", err.Error())
+		formatted = b
+	}
+
+	err = ioutil.WriteFile(filename, formatted, 0644)
+	if err != nil {
+		return errors.Wrapf(err, "failed to write %s", filename)
+	}
+
+	return nil
 }

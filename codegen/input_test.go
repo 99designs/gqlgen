@@ -57,7 +57,7 @@ func TestRecursiveInputType(t *testing.T) {
 			self: [RecursiveInputSlice!]
 		}
 	`, TypeMap{
-		"RecursiveInputSlice": {Model: "github.com/vektah/gqlgen/codegen/testdata.RecursiveInputSlice"},
+		"RecursiveInputSlice": {Model: "github.com/99designs/gqlgen/codegen/tests.RecursiveInputSlice"},
 	})
 
 	require.NoError(t, err)

@@ -4,14 +4,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/vektah/gqlgen/client"
+	"github.com/99designs/gqlgen/client"
 
+	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlgen/handler"
 )
 
 func TestSelection(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&SelectionResolver{})))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
 	c := client.New(srv.URL)
 
 	query := `{

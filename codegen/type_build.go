@@ -1,12 +1,10 @@
 package codegen
 
 import (
-	"fmt"
 	"go/types"
 	"strings"
 
-	"github.com/vektah/gqlgen/neelance/common"
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -20,7 +18,7 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 			t.IsUserDefined = true
 			t.Package, t.GoType = pkgAndType(userEntry.Model)
 		} else if t.IsScalar {
-			t.Package = "github.com/vektah/gqlgen/graphql"
+			t.Package = "github.com/99designs/gqlgen/graphql"
 			t.GoType = "String"
 		}
 
@@ -50,16 +48,16 @@ func (cfg *Config) bindTypes(imports *Imports, namedTypes NamedTypes, destDir st
 
 // namedTypeFromSchema objects for every graphql type, including primitives.
 // don't recurse into object fields or interfaces yet, lets make sure we have collected everything first.
-func namedTypeFromSchema(schemaType schema.NamedType) *NamedType {
-	switch val := schemaType.(type) {
-	case *schema.Scalar, *schema.Enum:
-		return &NamedType{GQLType: val.TypeName(), IsScalar: true}
-	case *schema.Interface, *schema.Union:
-		return &NamedType{GQLType: val.TypeName(), IsInterface: true}
-	case *schema.InputObject:
-		return &NamedType{GQLType: val.TypeName(), IsInput: true}
+func namedTypeFromSchema(schemaType *ast.Definition) *NamedType {
+	switch schemaType.Kind {
+	case ast.Scalar, ast.Enum:
+		return &NamedType{GQLType: schemaType.Name, IsScalar: true}
+	case ast.Interface, ast.Union:
+		return &NamedType{GQLType: schemaType.Name, IsInterface: true}
+	case ast.InputObject:
+		return &NamedType{GQLType: schemaType.Name, IsInput: true}
 	default:
-		return &NamedType{GQLType: val.TypeName()}
+		return &NamedType{GQLType: schemaType.Name}
 	}
 }
 
@@ -73,40 +71,29 @@ func pkgAndType(name string) (string, string) {
 	return normalizeVendor(strings.Join(parts[:len(parts)-1], ".")), parts[len(parts)-1]
 }
 
-func (n NamedTypes) getType(t common.Type) *Type {
+func (n NamedTypes) getType(t *ast.Type) *Type {
 	var modifiers []string
-	usePtr := true
 	for {
-		if _, nonNull := t.(*common.NonNull); nonNull {
-			usePtr = false
-		} else if _, nonNull := t.(*common.List); nonNull {
-			usePtr = true
+		if t.Elem != nil {
+			modifiers = append(modifiers, modList)
+			t = t.Elem
 		} else {
-			if usePtr {
+			if !t.NonNull {
 				modifiers = append(modifiers, modPtr)
 			}
-			usePtr = true
-		}
-
-		switch val := t.(type) {
-		case *common.NonNull:
-			t = val.OfType
-		case *common.List:
-			modifiers = append(modifiers, modList)
-			t = val.OfType
-		case schema.NamedType:
-			t := &Type{
-				NamedType: n[val.TypeName()],
+			if n[t.NamedType] == nil {
+				panic("missing type " + t.NamedType)
+			}
+			res := &Type{
+				NamedType: n[t.NamedType],
 				Modifiers: modifiers,
 			}
 
-			if t.IsInterface {
-				t.StripPtr()
+			if res.IsInterface {
+				res.StripPtr()
 			}
 
-			return t
-		default:
-			panic(fmt.Errorf("unknown type %T", t))
+			return res
 		}
 	}
 }

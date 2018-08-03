@@ -15,7 +15,7 @@ func TestInvalidPackagenames(t *testing.T) {
 			id: Int!
 		}
 	`, TypeMap{
-		"InvalidIdentifier": {Model: "github.com/vektah/gqlgen/codegen/testdata/invalid-packagename.InvalidIdentifier"},
+		"InvalidIdentifier": {Model: "github.com/99designs/gqlgen/codegen/tests/invalid-packagename.InvalidIdentifier"},
 	})
 
 	require.NoError(t, err)
@@ -31,7 +31,7 @@ func TestImportCollisions(t *testing.T) {
 		}
 
 	`, TypeMap{
-		"It": {Model: "github.com/vektah/gqlgen/codegen/testdata/introspection.It"},
+		"It": {Model: "github.com/99designs/gqlgen/codegen/tests/introspection.It"},
 	})
 
 	require.NoError(t, err)

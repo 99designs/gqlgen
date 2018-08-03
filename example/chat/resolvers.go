@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen
+//go:generate gorunpkg github.com/99designs/gqlgen
 
 package chat
 
@@ -9,14 +9,28 @@ import (
 	"time"
 )
 
-type resolvers struct {
+type resolver struct {
 	Rooms map[string]*Chatroom
-	mu    sync.Mutex
+	mu    sync.Mutex // nolint: structcheck
 }
 
-func New() *resolvers {
-	return &resolvers{
-		Rooms: map[string]*Chatroom{},
+func (r *resolver) Mutation() MutationResolver {
+	return &mutationResolver{r}
+}
+
+func (r *resolver) Query() QueryResolver {
+	return &queryResolver{r}
+}
+
+func (r *resolver) Subscription() SubscriptionResolver {
+	return &subscriptionResolver{r}
+}
+
+func New() Config {
+	return Config{
+		Resolvers: &resolver{
+			Rooms: map[string]*Chatroom{},
+		},
 	}
 }
 
@@ -26,7 +40,9 @@ type Chatroom struct {
 	Observers map[string]chan Message
 }
 
-func (r *resolvers) Mutation_post(ctx context.Context, text string, userName string, roomName string) (Message, error) {
+type mutationResolver struct{ *resolver }
+
+func (r *mutationResolver) Post(ctx context.Context, text string, username string, roomName string) (Message, error) {
 	r.mu.Lock()
 	room := r.Rooms[roomName]
 	if room == nil {
@@ -39,7 +55,7 @@ func (r *resolvers) Mutation_post(ctx context.Context, text string, userName str
 		ID:        randString(8),
 		CreatedAt: time.Now(),
 		Text:      text,
-		CreatedBy: userName,
+		CreatedBy: username,
 	}
 
 	room.Messages = append(room.Messages, message)
@@ -51,7 +67,9 @@ func (r *resolvers) Mutation_post(ctx context.Context, text string, userName str
 	return message, nil
 }
 
-func (r *resolvers) Query_room(ctx context.Context, name string) (*Chatroom, error) {
+type queryResolver struct{ *resolver }
+
+func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error) {
 	r.mu.Lock()
 	room := r.Rooms[name]
 	if room == nil {
@@ -63,7 +81,9 @@ func (r *resolvers) Query_room(ctx context.Context, name string) (*Chatroom, err
 	return room, nil
 }
 
-func (r *resolvers) Subscription_messageAdded(ctx context.Context, roomName string) (<-chan Message, error) {
+type subscriptionResolver struct{ *resolver }
+
+func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string) (<-chan Message, error) {
 	r.mu.Lock()
 	room := r.Rooms[roomName]
 	if room == nil {

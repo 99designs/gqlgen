@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -15,6 +16,8 @@ func UnmarshalID(v interface{}) (string, error) {
 	switch v := v.(type) {
 	case string:
 		return v, nil
+	case json.Number:
+		return string(v), nil
 	case int:
 		return strconv.Itoa(v), nil
 	case float64:

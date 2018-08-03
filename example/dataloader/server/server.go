@@ -6,12 +6,12 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/99designs/gqlgen/example/dataloader"
+	"github.com/99designs/gqlgen/handler"
+	gqlopentracing "github.com/99designs/gqlgen/opentracing"
 	"github.com/go-chi/chi"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/opentracing/opentracing-go"
-	"github.com/vektah/gqlgen/example/dataloader"
-	"github.com/vektah/gqlgen/handler"
-	gqlopentracing "github.com/vektah/gqlgen/opentracing"
 	"sourcegraph.com/sourcegraph/appdash"
 	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"
 	"sourcegraph.com/sourcegraph/appdash/traceapp"
@@ -26,7 +26,7 @@ func main() {
 
 	router.Handle("/", handler.Playground("Dataloader", "/query"))
 	router.Handle("/query", handler.GraphQL(
-		dataloader.MakeExecutableSchema(&dataloader.Resolver{}),
+		dataloader.NewExecutableSchema(dataloader.Config{Resolvers: &dataloader.Resolver{}}),
 		handler.ResolverMiddleware(gqlopentracing.ResolverMiddleware()),
 		handler.RequestMiddleware(gqlopentracing.RequestMiddleware()),
 	))

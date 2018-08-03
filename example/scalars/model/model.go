@@ -10,7 +10,7 @@ import (
 
 	"external"
 
-	"github.com/vektah/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Banned bool
@@ -68,8 +68,8 @@ func MarshalTimestamp(t time.Time) graphql.Marshaler {
 // Unmarshal{Typename} is only required if the scalar appears as an input. The raw values have already been decoded
 // from json into int/float64/bool/nil/map[string]interface/[]interface
 func UnmarshalTimestamp(v interface{}) (time.Time, error) {
-	if tmpStr, ok := v.(int); ok {
-		return time.Unix(int64(tmpStr), 0), nil
+	if tmpStr, ok := v.(int64); ok {
+		return time.Unix(tmpStr, 0), nil
 	}
 	return time.Time{}, errors.New("time should be a unix timestamp")
 }

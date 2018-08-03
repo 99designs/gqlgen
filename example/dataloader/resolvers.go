@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen
+//go:generate gorunpkg github.com/99designs/gqlgen
 
 package dataloader
 
@@ -22,19 +22,37 @@ type Order struct {
 
 type Resolver struct{}
 
-func (r *Resolver) Customer_address(ctx context.Context, it *Customer) (*Address, error) {
-	return ctxLoaders(ctx).addressByID.Load(it.AddressID)
+func (r *Resolver) Customer() CustomerResolver {
+	return &customerResolver{r}
 }
 
-func (r *Resolver) Customer_orders(ctx context.Context, it *Customer) ([]Order, error) {
-	return ctxLoaders(ctx).ordersByCustomer.Load(it.ID)
+func (r *Resolver) Order() OrderResolver {
+	return &orderResolver{r}
 }
 
-func (r *Resolver) Order_items(ctx context.Context, it *Order) ([]Item, error) {
-	return ctxLoaders(ctx).itemsByOrder.Load(it.ID)
+func (r *Resolver) Query() QueryResolver {
+	return &queryResolver{r}
 }
 
-func (r *Resolver) Query_customers(ctx context.Context) ([]Customer, error) {
+type customerResolver struct{ *Resolver }
+
+func (r *customerResolver) Address(ctx context.Context, obj *Customer) (*Address, error) {
+	return ctxLoaders(ctx).addressByID.Load(obj.AddressID)
+}
+
+func (r *customerResolver) Orders(ctx context.Context, obj *Customer) ([]Order, error) {
+	return ctxLoaders(ctx).ordersByCustomer.Load(obj.ID)
+}
+
+type orderResolver struct{ *Resolver }
+
+func (r *orderResolver) Items(ctx context.Context, obj *Order) ([]Item, error) {
+	return ctxLoaders(ctx).itemsByOrder.Load(obj.ID)
+}
+
+type queryResolver struct{ *Resolver }
+
+func (r *queryResolver) Customers(ctx context.Context) ([]Customer, error) {
 	fmt.Println("SELECT * FROM customer")
 
 	time.Sleep(5 * time.Millisecond)
@@ -47,7 +65,16 @@ func (r *Resolver) Query_customers(ctx context.Context) ([]Customer, error) {
 }
 
 // this method is here to test code generation of nested arrays
-func (r *Resolver) Query_torture(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
+func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]Customer, error) {
+	result := make([]Customer, len(customerIds))
+	for i, id := range customerIds {
+		result[i] = Customer{ID: id, Name: fmt.Sprintf("%d", i), AddressID: rand.Int() % 10}
+	}
+	return result, nil
+}
+
+// this method is here to test code generation of nested arrays
+func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
 	result := make([][]Customer, len(customerIds))
 	for i := range customerIds {
 		inner := make([]Customer, len(customerIds[i]))

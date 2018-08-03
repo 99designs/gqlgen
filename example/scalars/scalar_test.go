@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlgen/client"
-	"github.com/vektah/gqlgen/handler"
-	introspection "github.com/vektah/gqlgen/neelance/introspection"
 )
 
 type RawUser struct {
@@ -22,7 +22,7 @@ type RawUser struct {
 }
 
 func TestScalars(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(MakeExecutableSchema(&Resolver{})))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
 	c := client.New(srv.URL)
 
 	t.Run("marshaling", func(t *testing.T) {

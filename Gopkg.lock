@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:99b2e09d42b4d0929e9e6ac496922f5221baa79b60968576d5ce310b44640c3b"
+  name = "github.com/agnivade/levenshtein"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1787a73e302ce294513cfab1982e186f5cf8985f"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -51,6 +59,14 @@
   pruneopts = "UT"
   revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
   version = "v1.2.0"
+
+[[projects]]
+  digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
 
 [[projects]]
   branch = "master"
@@ -124,6 +140,22 @@
   revision = "ffb13db8def02f545acc58bd288ec6057c2bbfb9"
 
 [[projects]]
+  digest = "1:872fa275c31e1f9db31d66fa9b1d4a7bb9a080ff184e6977da01f36bfbe07f11"
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
+  version = "v0.0.3"
+
+[[projects]]
+  digest = "1:9424f440bba8f7508b69414634aef3b2b3a877e522d8a4624692412805407bb7"
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:73697231b93fb74a73ebd8384b68b9a60c57ea6b13c56d2425414566a72c8e6d"
   name = "github.com/stretchr/testify"
   packages = [
@@ -141,6 +173,22 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "314ac81052eedc03ac0a79bdc89d05a49a2a5814"
+
+[[projects]]
+  branch = "master"
+  digest = "1:7acc3d2f02aed0095986646435472af4c2e2db42ad730aa78cae780aba5b59f9"
+  name = "github.com/vektah/gqlparser"
+  packages = [
+    ".",
+    "ast",
+    "gqlerror",
+    "lexer",
+    "parser",
+    "validator",
+    "validator/rules",
+  ]
+  pruneopts = "UT"
+  revision = "6298a7d57d3de59879b323d6a8cb66280826906f"
 
 [[projects]]
   branch = "master"
@@ -207,9 +255,14 @@
     "github.com/opentracing/opentracing-go/ext",
     "github.com/opentracing/opentracing-go/log",
     "github.com/pkg/errors",
+    "github.com/spf13/cobra",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/vektah/dataloaden",
+    "github.com/vektah/gqlparser",
+    "github.com/vektah/gqlparser/ast",
+    "github.com/vektah/gqlparser/gqlerror",
+    "github.com/vektah/gqlparser/validator",
     "golang.org/x/tools/go/loader",
     "golang.org/x/tools/imports",
     "gopkg.in/yaml.v2",

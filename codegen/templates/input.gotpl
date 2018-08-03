@@ -15,7 +15,7 @@
 			{{- range $field := .Fields }}
 			case {{$field.GQLName|quote}}:
 				var err error
-				{{ $field.Unmarshal (print "it." $field.GoVarName) "v" }}
+				{{ $field.Unmarshal (print "it." $field.GoFieldName) "v" }}
 				if err != nil {
 					return it, err
 				}

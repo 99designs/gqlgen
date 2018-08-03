@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/vektah/gqlgen -out generated.go
+//go:generate gorunpkg github.com/99designs/gqlgen --out generated.go
 
 package todo
 
@@ -7,18 +7,31 @@ import (
 	"errors"
 	"time"
 
+	graphql "github.com/99designs/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
 )
 
-func New() *resolvers {
-	return &resolvers{
-		todos: []Todo{
-			{ID: 1, Text: "A todo not to forget", Done: false},
-			{ID: 2, Text: "This is the most important", Done: false},
-			{ID: 3, Text: "Please do this or else", Done: false},
+func New() Config {
+	c := Config{
+		Resolvers: &resolvers{
+			todos: []Todo{
+				{ID: 1, Text: "A todo not to forget", Done: false},
+				{ID: 2, Text: "This is the most important", Done: false},
+				{ID: 3, Text: "Please do this or else", Done: false},
+			},
+			lastID: 3,
 		},
-		lastID: 3,
 	}
+	c.Directives.HasRole = func(ctx context.Context, next graphql.Resolver, role Role) (interface{}, error) {
+		rctx := graphql.GetResolverContext(ctx)
+		idVal := rctx.Field.Arguments.ForName("id").Value
+		id, _ := idVal.Value(make(map[string]interface{}))
+		if id.(int64) == 1 && role == RoleAdmin {
+			return nil, nil
+		}
+		return next(ctx)
+	}
+	return c
 }
 
 type resolvers struct {
@@ -60,6 +73,10 @@ func (r *QueryResolver) LastTodo(ctx context.Context) (*Todo, error) {
 
 func (r *QueryResolver) Todos(ctx context.Context) ([]Todo, error) {
 	return r.todos, nil
+}
+
+func (r *QueryResolver) AuthenticatedTodo(ctx context.Context, id int) (*Todo, error) {
+	return r.Todo(ctx, id)
 }
 
 type MutationResolver resolvers

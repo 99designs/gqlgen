@@ -6,14 +6,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/vektah/gqlgen/example/starwars"
-	"github.com/vektah/gqlgen/graphql"
-	"github.com/vektah/gqlgen/handler"
+	"github.com/99designs/gqlgen/example/starwars"
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/handler"
 )
 
 func main() {
 	http.Handle("/", handler.Playground("Starwars", "/query"))
-	http.Handle("/query", handler.GraphQL(starwars.MakeExecutableSchema(starwars.NewResolver()),
+	http.Handle("/query", handler.GraphQL(starwars.NewExecutableSchema(starwars.NewResolver()),
 		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			rc := graphql.GetResolverContext(ctx)
 			fmt.Println("Entered", rc.Object, rc.Field.Name)

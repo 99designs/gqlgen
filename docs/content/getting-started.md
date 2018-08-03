@@ -14,24 +14,24 @@ The aim for this tutorial is to build a "todo" graphql server that can:
  - create new todos
  - mark off todos as they are completed
 
-You can find the finished code for this tutorial [here](https://github.com/vektah/gqlgen-tutorials/tree/master/gettingstarted)
+You can find the finished code for this tutorial [here](https://github.com/99designs/gqlgen-tutorials/tree/master/gettingstarted)
 
 ## Install gqlgen
 
 Assuming you already have a working [go environment](https://golang.org/doc/install) you can simply go get:
 
 ```sh
-go get -u github.com/vektah/gqlgen
+go get -u github.com/99designs/gqlgen github.com/vektah/gorunpkg
 ```
-
 
 ## Building the server
 
-### Define the schema first
+### Define the schema
 
 gqlgen is a schema-first library, so before touching any code we write out the API we want using the graphql 
 [Schema Definition Language](http://graphql.org/learn/schema/). This usually goes into a file called schema.graphql  
 
+`schema.graphql`
 ```graphql
 type Todo {
   id: ID!
@@ -59,24 +59,25 @@ type Mutation {
 }
 ```
 
-### Create the database models
-
-Now we define some types, these are stand-ins for your database layer. Feel free to use whatever ORM you are familiar 
-with, or roll it yourself. For this example we are just going to use some structs and keep them in memory.
-
-`model/user.go`
-```go
-package model
-
-type User struct {
-	ID   string
-	Name string
-}
+### Create the project skeleton
+```bash
+$ gqlgen init
+Exec "go run ./server/server.go" to start GraphQL server
 ```
 
-`model/todo.go`
+This has created an empty skeleton with all files we need:
+ - gqlgen.yml - The gqlgen config file, knobs for controlling the generated code.
+ - generated.go - The graphql execution runtime, the bulk of the generated code
+ - models_gen.go - Generated models required to build the graph. Often you will override these with models you write yourself. Still very useful for input types.
+ - resolver.go - This is where your application code lives. generated.go will call into this to get the data the user has requested. 
+ 
+### Create the database models
+
+The generated model for Todo isnt quite right, it has a user embeded in it but we only want to fetch it if the user actually requested it. So lets make our own.
+
+`todo.go`
 ```go
-package model
+package gettingstarted
 
 type Todo struct {
 	ID     string
@@ -84,55 +85,41 @@ type Todo struct {
 	Done   bool
 	UserID string
 }
-
 ```
 
-### Generate the graphql runtime
-
-So we have our schema and our models, now we need to link them up:
-
-`gqlgen.yml` - [Read more about the config]({{< ref "config.md" >}})
+And then tell gqlgen to use this new struct by adding this to the gqlgen.yml:
 ```yaml
-schema: schema.graphql
-exec:
-  filename: graph/generated.go
-model:
-  filename: model/generated.go
-
 models:
   Todo:
-    model: github.com/vektah/gqlgen-tutorials/gettingstarted/model.Todo
-  User:
-    model: github.com/vektah/gqlgen-tutorials/gettingstarted/model.User
+    model: github.com/99designs/gqlgen-tutorials/gettingstarted.Todo
 ```
 
-This simply says, `User` in schema is backed by `graph.User` in go.
-
-gqlgen is going to look at all the models in the schema and see if they are in this map, if they arent
-it will create a struct for us. For the models that are there its going to match up each field in the
-struct with fields in the schema:
-
- 1. If there is a property that matches, use it
- 2. If there is a method that matches, use it
- 3. Otherwise, add it to the Resolvers interface. This is the magic.
-
-### Generate the bindings
-
-
-Lets generate the server now:
-
+and regenerate by running
 ```bash
-$ gqlgen
+$ gqlgen -v 
+Unable to bind Todo.user to github.com/99designs/gqlgen-tutorials/gettingstarted.Todo
+	no method named user
+	no field named user
+	Adding resolver method
 ```
+*note* we've used the verbose flag here to show what gqlgen is doing. Its looked at all the fields on our model and found matching methods for all of them, except user. For user it added a resolver to the interface we need to implement. This is the magic that makes gqlgen work so well. 
 
-gqlgen should have created two new files `graph/generated.go` and `models/generated.go`. If we take a peek in both 
-we can see what the server has generated:
+### Implement the resolvers
+
+The generated runtime has defined an interface for all the missing resolvers that we need to provide. Lets take a look in `generated.go`
 
 ```go
-// graph/generated.go
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(resolvers ResolverRoot) graphql.ExecutableSchema {
-	return MakeExecutableSchema(shortMapper{r: resolvers})
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
 }
 
 type ResolverRoot interface {
@@ -140,25 +127,22 @@ type ResolverRoot interface {
 	Query() QueryResolver
 	Todo() TodoResolver
 }
+
+type DirectiveRoot struct {
+}
 type MutationResolver interface {
-	CreateTodo(ctx context.Context, input models.NewTodo) (model.Todo, error)
+	CreateTodo(ctx context.Context, input NewTodo) (Todo, error)
 }
 type QueryResolver interface {
-	Todos(ctx context.Context) ([]model.Todo, error)
+	Todos(ctx context.Context) ([]Todo, error)
 }
 type TodoResolver interface {
-	User(ctx context.Context, obj *model.Todo) (model.User, error)
-}
-
-// graph/models_gen.go
-type NewTodo struct {
-	Text string `json:"text"`
-	User string `json:"user"`
+	User(ctx context.Context, obj *Todo) (User, error)
 }
 ```
 
 Notice the `TodoResolver.User` method? Thats gqlgen saying "I dont know how to get a User from a Todo, you tell me.".
-Its worked out everything else for us.
+Its worked out how to build everything else for us.
 
 For any missing models (like NewTodo) gqlgen will generate a go struct. This is usually only used for input types and 
 one-off return values. Most of the time your types will be coming from the database, or an API client so binding is
@@ -166,92 +150,76 @@ better than generating.
 
 ### Write the resolvers
 
-All thats left for us to do now is fill in the blanks in that interface:
+This is a work in progress, we have a way to generate resolver stubs, but it only cant currently update existing code. We can force it to run again by deleting `resolvers.go` and re-running gqlgen:
+```bash
+rm resolvers.go
+gqlgen
+```
+
+Now we just need to fill in the `not implemented` parts
+
 
 `graph/graph.go`
 ```go
-package graph
+//go:generate gorunpkg github.com/99designs/gqlgen
+
+package gettingstarted
 
 import (
-	"context"
+	context "context"
 	"fmt"
 	"math/rand"
-
-	"github.com/vektah/gqlgen-tutorials/gettingstarted/model"
 )
 
-type App struct {
-	todos []model.Todo
+type Resolver struct{
+	todos []Todo
 }
 
-func (a *App) Mutation() MutationResolver {
-	return &mutationResolver{a}
+func (r *Resolver) Mutation() MutationResolver {
+	return &mutationResolver{r}
+}
+func (r *Resolver) Query() QueryResolver {
+	return &queryResolver{r}
+}
+func (r *Resolver) Todo() TodoResolver {
+	return &todoResolver{r}
 }
 
-func (a *App) Query() QueryResolver {
-	return &queryResolver{a}
-}
+type mutationResolver struct{ *Resolver }
 
-func (a *App) Todo() TodoResolver {
-	return &todoResolver{a}
-}
-
-type queryResolver struct{ *App }
-
-func (a *queryResolver) Todos(ctx context.Context) ([]model.Todo, error) {
-	return a.todos, nil
-}
-
-type mutationResolver struct{ *App }
-
-func (a *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (model.Todo, error) {
-	todo := model.Todo{
+func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (Todo, error) {
+	todo := Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
-		UserID: input.UserId,
+		UserID: input.UserID,
 	}
-	a.todos = append(a.todos, todo)
+	r.todos = append(r.todos, todo)
 	return todo, nil
 }
 
-type todoResolver struct{ *App }
+type queryResolver struct{ *Resolver }
 
-func (a *todoResolver) User(ctx context.Context, it *model.Todo) (model.User, error) {
-	return model.User{ID: it.UserID, Name: "user " + it.UserID}, nil
+func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
+	return r.todos, nil
 }
-```
 
-`main.go`
-```go
-package main
+type todoResolver struct{ *Resolver }
 
-import (
-	"fmt"
-	"log"
-	"net/http"
-
-	"github.com/vektah/gqlgen-tutorials/gettingstarted/graph"
-	"github.com/vektah/gqlgen/handler"
-)
-
-func main() {
-	http.Handle("/", handler.Playground("Todo", "/query"))
-	http.Handle("/query", handler.GraphQL(graph.NewExecutableSchema(&graph.App{})))
-
-	fmt.Println("Listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+func (r *todoResolver) User(ctx context.Context, obj *Todo) (User, error) {
+	return User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
 }
+
 ```
 
 We now have a working server, to start it:
 ```bash
-go run main.go
+go run server/server.go
 ```
 
 then open http://localhost:8080 in a browser. here are some queries to try:
 ```graphql
 mutation createTodo {
-  createTodo(input:{text:"todo", user:"1"}) {
+  createTodo(input:{text:"todo", userId:"1"}) {
     user {
       id
     }
@@ -282,7 +250,7 @@ First uninstall the global version we grabbed earlier. This is a good way to pre
 
 ```bash
 rm ~/go/bin/gqlgen
-rm -rf ~/go/src/github.com/vektah/gqlgen
+rm -rf ~/go/src/github.com/99designs/gqlgen
 ``` 
 
 Next install gorunpkg, its kind of like npx but only searches vendor.
@@ -290,24 +258,17 @@ Next install gorunpkg, its kind of like npx but only searches vendor.
 ```bash
 dep init
 dep ensure
-go get github.com/vektah/gorunpkg
 ```
 
-Now at the top of our graph.go:
+At the top of our resolvers.go a go generate command was added that looks like this:
 ```go
-//go:generate gorunpkg github.com/vektah/gqlgen
-
-package graph
+//go:generate gorunpkg github.com/99designs/gqlgen
 ```
-**Note:** be careful formatting this, there must no space between the `//` and `go:generate`, and one empty line
-between it and the `package main`.
-
 
 This magic comment tells `go generate` what command to run when we want to regenerate our code. to do so run:
 ```go
 go generate ./...
 ``` 
 
-*gorunpkg* will build and run the version of gqlgen we just installed into vendor with dep. This makes sure
-that everyone working on your project generates code the same way regardless which binaries are installed in their gopath.
+*gorunpkg* will build and run the version of gqlgen we just installed into vendor with dep. This makes sure that everyone working on your project generates code the same way regardless which binaries are installed in their gopath.
 

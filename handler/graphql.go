@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
-	"github.com/vektah/gqlgen/graphql"
-	"github.com/vektah/gqlgen/neelance/errors"
-	"github.com/vektah/gqlgen/neelance/query"
-	"github.com/vektah/gqlgen/neelance/validation"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/validator"
 )
 
 type params struct {
@@ -24,11 +26,11 @@ type Config struct {
 	upgrader       websocket.Upgrader
 	recover        graphql.RecoverFunc
 	errorPresenter graphql.ErrorPresenterFunc
-	resolverHook   graphql.ResolverMiddleware
+	resolverHook   graphql.FieldMiddleware
 	requestHook    graphql.RequestMiddleware
 }
 
-func (c *Config) newRequestContext(doc *query.Document, query string, variables map[string]interface{}) *graphql.RequestContext {
+func (c *Config) newRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *graphql.RequestContext {
 	reqCtx := graphql.NewRequestContext(doc, query, variables)
 	if hook := c.recover; hook != nil {
 		reqCtx.Recover = hook
@@ -74,9 +76,7 @@ func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 
 // ResolverMiddleware allows you to define a function that will be called around every resolver,
 // useful for tracing and logging.
-// It will only be called for user defined resolvers, any direct binding to models is assumed
-// to cost nothing.
-func ResolverMiddleware(middleware graphql.ResolverMiddleware) Option {
+func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.resolverHook == nil {
 			cfg.resolverHook = middleware
@@ -141,13 +141,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			reqParams.OperationName = r.URL.Query().Get("operationName")
 
 			if variables := r.URL.Query().Get("variables"); variables != "" {
-				if err := json.Unmarshal([]byte(variables), &reqParams.Variables); err != nil {
+				if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
 					sendErrorf(w, http.StatusBadRequest, "variables could not be decoded")
 					return
 				}
 			}
 		case http.MethodPost:
-			if err := json.NewDecoder(r.Body).Decode(&reqParams); err != nil {
+			if err := jsonDecode(r.Body, &reqParams); err != nil {
 				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
 				return
 			}
@@ -157,25 +157,23 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}
 		w.Header().Set("Content-Type", "application/json")
 
-		doc, qErr := query.Parse(reqParams.Query)
-		if qErr != nil {
-			sendError(w, http.StatusUnprocessableEntity, qErr)
+		doc, qErr := gqlparser.LoadQuery(exec.Schema(), reqParams.Query)
+		if len(qErr) > 0 {
+			sendError(w, http.StatusUnprocessableEntity, qErr...)
 			return
 		}
 
-		errs := validation.Validate(exec.Schema(), doc)
-		if len(errs) != 0 {
-			sendError(w, http.StatusUnprocessableEntity, errs...)
+		op := doc.Operations.ForName(reqParams.OperationName)
+		if op == nil {
+			sendErrorf(w, http.StatusUnprocessableEntity, "operation %s not found", reqParams.OperationName)
 			return
 		}
 
-		op, err := doc.GetOperation(reqParams.OperationName)
+		vars, err := validator.VariableValues(exec.Schema(), op, reqParams.Variables)
 		if err != nil {
-			sendErrorf(w, http.StatusUnprocessableEntity, err.Error())
-			return
+			sendError(w, http.StatusUnprocessableEntity, err)
 		}
-
-		reqCtx := cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+		reqCtx := cfg.newRequestContext(doc, reqParams.Query, vars)
 		ctx := graphql.WithRequestContext(r.Context(), reqCtx)
 
 		defer func() {
@@ -185,14 +183,14 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			}
 		}()
 
-		switch op.Type {
-		case query.Query:
+		switch op.Operation {
+		case ast.Query:
 			b, err := json.Marshal(exec.Query(ctx, op))
 			if err != nil {
 				panic(err)
 			}
 			w.Write(b)
-		case query.Mutation:
+		case ast.Mutation:
 			b, err := json.Marshal(exec.Mutation(ctx, op))
 			if err != nil {
 				panic(err)
@@ -204,25 +202,15 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	})
 }
 
-func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
-	w.WriteHeader(code)
-	var errs []*graphql.Error
-	for _, err := range errors {
-		var locations []graphql.ErrorLocation
-		for _, l := range err.Locations {
-			locations = append(locations, graphql.ErrorLocation{
-				Line:   l.Line,
-				Column: l.Column,
-			})
-		}
+func jsonDecode(r io.Reader, val interface{}) error {
+	dec := json.NewDecoder(r)
+	dec.UseNumber()
+	return dec.Decode(val)
+}
 
-		errs = append(errs, &graphql.Error{
-			Message:   err.Message,
-			Path:      err.Path,
-			Locations: locations,
-		})
-	}
-	b, err := json.Marshal(&graphql.Response{Errors: errs})
+func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
+	w.WriteHeader(code)
+	b, err := json.Marshal(&graphql.Response{Errors: errors})
 	if err != nil {
 		panic(err)
 	}
@@ -230,5 +218,5 @@ func sendError(w http.ResponseWriter, code int, errors ...*errors.QueryError) {
 }
 
 func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
-	sendError(w, code, &errors.QueryError{Message: fmt.Sprintf(format, args...)})
+	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }

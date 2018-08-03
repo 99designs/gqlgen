@@ -1,8 +1,9 @@
 type Query {
     customers: [Customer!]
 
-    # this method is here to test code generation of nested arrays
-    torture(customerIds: [[Int!]]): [[Customer!]]
+    # these methods are here to test code generation of nested arrays
+    torture1d(customerIds: [Int!]): [Customer!]
+    torture2d(customerIds: [[Int!]]): [[Customer!]]
 }
 
 type Customer {

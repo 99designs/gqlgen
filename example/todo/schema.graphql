@@ -5,6 +5,7 @@ schema {
 
 type MyQuery {
 	todo(id: Int!): Todo
+	authenticatedTodo(id: Int!): Todo @hasRole(role: ADMIN)
 	lastTodo: Todo
 	todos: [Todo!]!
 }
@@ -23,4 +24,13 @@ type Todo {
 input TodoInput {
 	text: String!
 	done: Boolean
+}
+
+scalar Map
+
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+
+enum Role {
+    ADMIN
+    USER
 }

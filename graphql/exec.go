@@ -4,78 +4,65 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vektah/gqlgen/neelance/common"
-	"github.com/vektah/gqlgen/neelance/query"
-	"github.com/vektah/gqlgen/neelance/schema"
+	"github.com/vektah/gqlparser/ast"
 )
 
 type ExecutableSchema interface {
-	Schema() *schema.Schema
+	Schema() *ast.Schema
 
-	Query(ctx context.Context, op *query.Operation) *Response
-	Mutation(ctx context.Context, op *query.Operation) *Response
-	Subscription(ctx context.Context, op *query.Operation) func() *Response
+	Query(ctx context.Context, op *ast.OperationDefinition) *Response
+	Mutation(ctx context.Context, op *ast.OperationDefinition) *Response
+	Subscription(ctx context.Context, op *ast.OperationDefinition) func() *Response
 }
 
-func CollectFields(doc *query.Document, selSet []query.Selection, satisfies []string, variables map[string]interface{}) []CollectedField {
-	return collectFields(doc, selSet, satisfies, variables, map[string]bool{})
+func CollectFields(ctx context.Context, selSet ast.SelectionSet, satisfies []string) []CollectedField {
+	return collectFields(GetRequestContext(ctx), selSet, satisfies, map[string]bool{})
 }
 
-func collectFields(doc *query.Document, selSet []query.Selection, satisfies []string, variables map[string]interface{}, visited map[string]bool) []CollectedField {
+func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
 	var groupedFields []CollectedField
 
 	for _, sel := range selSet {
 		switch sel := sel.(type) {
-		case *query.Field:
-			f := getOrCreateField(&groupedFields, sel.Alias.Name, func() CollectedField {
-				f := CollectedField{
-					Alias: sel.Alias.Name,
-					Name:  sel.Name.Name,
-				}
-				if len(sel.Arguments) > 0 {
-					f.Args = map[string]interface{}{}
-					for _, arg := range sel.Arguments {
-						if variable, ok := arg.Value.(*common.Variable); ok {
-							if val, ok := variables[variable.Name]; ok {
-								f.Args[arg.Name.Name] = val
-							}
-						} else {
-							f.Args[arg.Name.Name] = arg.Value.Value(variables)
-						}
-					}
-				}
-				return f
-			})
-
-			f.Selections = append(f.Selections, sel.Selections...)
-		case *query.InlineFragment:
-			if !instanceOf(sel.On.Ident.Name, satisfies) {
+		case *ast.Field:
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
 				continue
 			}
+			f := getOrCreateField(&groupedFields, sel.Alias, func() CollectedField {
+				return CollectedField{Field: sel}
+			})
 
-			for _, childField := range collectFields(doc, sel.Selections, satisfies, variables, visited) {
+			f.Selections = append(f.Selections, sel.SelectionSet...)
+		case *ast.InlineFragment:
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) || !instanceOf(sel.TypeCondition, satisfies) {
+				continue
+			}
+			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
 
-		case *query.FragmentSpread:
-			fragmentName := sel.Name.Name
+		case *ast.FragmentSpread:
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
+			fragmentName := sel.Name
 			if _, seen := visited[fragmentName]; seen {
 				continue
 			}
 			visited[fragmentName] = true
 
-			fragment := doc.Fragments.Get(fragmentName)
+			fragment := reqCtx.Doc.Fragments.ForName(fragmentName)
 			if fragment == nil {
 				// should never happen, validator has already run
 				panic(fmt.Errorf("missing fragment %s", fragmentName))
 			}
 
-			if !instanceOf(fragment.On.Ident.Name, satisfies) {
+			if !instanceOf(fragment.TypeCondition, satisfies) {
 				continue
 			}
 
-			for _, childField := range collectFields(doc, fragment.Selections, satisfies, variables, visited) {
+			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
 				f := getOrCreateField(&groupedFields, childField.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
@@ -89,10 +76,9 @@ func collectFields(doc *query.Document, selSet []query.Selection, satisfies []st
 }
 
 type CollectedField struct {
-	Alias      string
-	Name       string
-	Args       map[string]interface{}
-	Selections []query.Selection
+	*ast.Field
+
+	Selections ast.SelectionSet
 }
 
 func instanceOf(val string, satisfies []string) bool {
@@ -115,4 +101,34 @@ func getOrCreateField(c *[]CollectedField, name string, creator func() Collected
 
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
+}
+
+func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interface{}) bool {
+	skip, include := false, true
+
+	if d := directives.ForName("skip"); d != nil {
+		skip = resolveIfArgument(d, variables)
+	}
+
+	if d := directives.ForName("include"); d != nil {
+		include = resolveIfArgument(d, variables)
+	}
+
+	return !skip && include
+}
+
+func resolveIfArgument(d *ast.Directive, variables map[string]interface{}) bool {
+	arg := d.Arguments.ForName("if")
+	if arg == nil {
+		panic(fmt.Sprintf("%s: argument 'if' not defined", d.Name))
+	}
+	value, err := arg.Value.Value(variables)
+	if err != nil {
+		panic(err)
+	}
+	ret, ok := value.(bool)
+	if !ok {
+		panic(fmt.Sprintf("%s: argument 'if' is not a boolean", d.Name))
+	}
+	return ret
 }

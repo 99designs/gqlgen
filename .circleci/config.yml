@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: golang:1.9
-    working_directory: /go/src/github.com/vektah/gqlgen
+    working_directory: /go/src/github.com/99designs/gqlgen
     steps: &steps
       - checkout
       - run: >

@@ -3,7 +3,7 @@ version: "{build}"
 # Source Config
 
 skip_branch_with_pr: true
-clone_folder: c:\gopath\src\github.com\vektah\gqlgen
+clone_folder: c:\gopath\src\github.com\99designs\gqlgen
 
 # Build host
 
@@ -13,7 +13,7 @@ environment:
   PATH: '%PATH%;c:\gopath\bin'
 
 branches:
-  only: ["master"]
+  only: ["master", "next"]
 
 init:
   - git config --global core.autocrlf input

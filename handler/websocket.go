@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -8,11 +9,12 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
-	"github.com/vektah/gqlgen/graphql"
-	"github.com/vektah/gqlgen/neelance/errors"
-	"github.com/vektah/gqlgen/neelance/query"
-	"github.com/vektah/gqlgen/neelance/validation"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/validator"
 )
 
 const (
@@ -113,7 +115,7 @@ func (c *wsConnection) run() {
 			closer := c.active[message.ID]
 			c.mu.Unlock()
 			if closer == nil {
-				c.sendError(message.ID, errors.Errorf("%s is not running, cannot stop", message.ID))
+				c.sendError(message.ID, gqlerror.Errorf("%s is not running, cannot stop", message.ID))
 				continue
 			}
 
@@ -131,35 +133,33 @@ func (c *wsConnection) run() {
 
 func (c *wsConnection) subscribe(message *operationMessage) bool {
 	var reqParams params
-	if err := json.Unmarshal(message.Payload, &reqParams); err != nil {
+	if err := jsonDecode(bytes.NewReader(message.Payload), &reqParams); err != nil {
 		c.sendConnectionError("invalid json")
 		return false
 	}
 
-	doc, qErr := query.Parse(reqParams.Query)
+	doc, qErr := gqlparser.LoadQuery(c.exec.Schema(), reqParams.Query)
 	if qErr != nil {
-		c.sendError(message.ID, qErr)
+		c.sendError(message.ID, qErr...)
 		return true
 	}
 
-	errs := validation.Validate(c.exec.Schema(), doc)
-	if len(errs) != 0 {
-		c.sendError(message.ID, errs...)
+	op := doc.Operations.ForName(reqParams.OperationName)
+	if op == nil {
+		c.sendError(message.ID, gqlerror.Errorf("operation %s not found", reqParams.OperationName))
 		return true
 	}
 
-	op, err := doc.GetOperation(reqParams.OperationName)
+	vars, err := validator.VariableValues(c.exec.Schema(), op, reqParams.Variables)
 	if err != nil {
-		c.sendError(message.ID, errors.Errorf("%s", err.Error()))
-		return true
+		c.sendError(message.ID, err)
 	}
-
-	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, reqParams.Variables)
+	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, vars)
 	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
 
-	if op.Type != query.Subscription {
+	if op.Operation != ast.Subscription {
 		var result *graphql.Response
-		if op.Type == query.Query {
+		if op.Operation == ast.Query {
 			result = c.exec.Query(ctx, op)
 		} else {
 			result = c.exec.Mutation(ctx, op)
@@ -178,7 +178,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		defer func() {
 			if r := recover(); r != nil {
 				userErr := reqCtx.Recover(ctx, r)
-				c.sendError(message.ID, &errors.QueryError{Message: userErr.Error()})
+				c.sendError(message.ID, &gqlerror.Error{Message: userErr.Error()})
 			}
 		}()
 		next := c.exec.Subscription(ctx, op)
@@ -200,14 +200,14 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 func (c *wsConnection) sendData(id string, response *graphql.Response) {
 	b, err := json.Marshal(response)
 	if err != nil {
-		c.sendError(id, errors.Errorf("unable to encode json response: %s", err.Error()))
+		c.sendError(id, gqlerror.Errorf("unable to encode json response: %s", err.Error()))
 		return
 	}
 
 	c.write(&operationMessage{Type: dataMsg, ID: id, Payload: b})
 }
 
-func (c *wsConnection) sendError(id string, errors ...*errors.QueryError) {
+func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 	var errs []error
 	for _, err := range errors {
 		errs = append(errs, err)
@@ -220,7 +220,7 @@ func (c *wsConnection) sendError(id string, errors ...*errors.QueryError) {
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
-	b, err := json.Marshal(&graphql.Error{Message: fmt.Sprintf(format, args...)})
+	b, err := json.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 	if err != nil {
 		panic(err)
 	}
@@ -229,11 +229,17 @@ func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
 }
 
 func (c *wsConnection) readOp() *operationMessage {
-	message := operationMessage{}
-	if err := c.conn.ReadJSON(&message); err != nil {
+	_, r, err := c.conn.NextReader()
+	if err != nil {
 		c.sendConnectionError("invalid json")
 		return nil
 	}
+	message := operationMessage{}
+	if err := jsonDecode(r, &message); err != nil {
+		c.sendConnectionError("invalid json")
+		return nil
+	}
+
 	return &message
 }
 

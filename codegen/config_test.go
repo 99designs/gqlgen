@@ -17,12 +17,12 @@ func TestLoadConfig(t *testing.T) {
 	})
 
 	t.Run("malformed config", func(t *testing.T) {
-		_, err := LoadConfig("testdata/cfg/malformedconfig.yml")
+		_, err := LoadConfig("tests/cfg/malformedconfig.yml")
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `asdf` into codegen.Config")
 	})
 
 	t.Run("unknown keys", func(t *testing.T) {
-		_, err := LoadConfig("testdata/cfg/unknownkeys.yml")
+		_, err := LoadConfig("tests/cfg/unknownkeys.yml")
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 2: field unknown not found in type codegen.Config")
 	})
 }
@@ -33,30 +33,29 @@ func TestLoadDefaultConfig(t *testing.T) {
 	var cfg *Config
 
 	t.Run("will find closest match", func(t *testing.T) {
-		err = os.Chdir(filepath.Join(testDir, "testdata", "cfg", "subdir"))
+		err = os.Chdir(filepath.Join(testDir, "tests", "cfg", "subdir"))
 		require.NoError(t, err)
 
-		cfg, err = LoadDefaultConfig()
+		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
 		require.Equal(t, cfg.SchemaFilename, "inner")
 	})
 
 	t.Run("will find config in parent dirs", func(t *testing.T) {
-		err = os.Chdir(filepath.Join(testDir, "testdata", "cfg", "otherdir"))
+		err = os.Chdir(filepath.Join(testDir, "tests", "cfg", "otherdir"))
 		require.NoError(t, err)
 
-		cfg, err = LoadDefaultConfig()
+		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
 		require.Equal(t, cfg.SchemaFilename, "outer")
 	})
 
-	t.Run("will fallback to defaults", func(t *testing.T) {
+	t.Run("will return error if config doesn't exist", func(t *testing.T) {
 		err = os.Chdir(testDir)
 		require.NoError(t, err)
 
-		cfg, err = LoadDefaultConfig()
-		require.NoError(t, err)
-		require.Equal(t, cfg.SchemaFilename, "schema.graphql")
+		cfg, err = LoadConfigFromDefaultLocations()
+		require.True(t, os.IsNotExist(err))
 	})
 }
 

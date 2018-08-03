@@ -4,14 +4,6 @@ This is a library for quickly creating strictly typed graphql servers in golang.
 
 See the [docs](https://gqlgen.com/) for a getting started guide.
 
-## News 2018-07-19
-
-[99designs](https://99designs.com/) is now sponsoring this project so we will be relocating to 
-github.com/99designs/gqlgen soon. The next few weeks is going to see some heavy work pushing the new parser and 
-directive support forward. Expect exciting things! 
-
-You can follow along on the [project board](https://github.com/99designs/gqlgen/projects/1).  
-
 ### Feature comparison
 
 | | [gqlgen](https://github.com/99designs/gqlgen) | [gophers](https://github.com/graph-gophers/graphql-go) | [graphql-go](https://github.com/graphql-go/graphql) | [thunder](https://github.com/samsarahq/thunder) | 

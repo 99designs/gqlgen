@@ -30,7 +30,7 @@ type (
 	InputValue struct {
 		Name         string
 		Description  string
-		DefaultValue string
+		DefaultValue *string
 		Type         *Type
 	}
 )

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-	introspection "github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )

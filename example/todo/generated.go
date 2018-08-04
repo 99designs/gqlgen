@@ -963,8 +963,11 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
-	return graphql.MarshalString(res)
+	res := resTmp.(*string)
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __SchemaImplementors = []string{"__Schema"}
@@ -1468,13 +1471,17 @@ type Todo {
 	done: Boolean!
 }
 
+"Passed to createTodo to create a new todo"
 input TodoInput {
+	"The body text"
 	text: String!
+	"Is it done already?"
 	done: Boolean
 }
 
 scalar Map
 
+"Prevents access to a field if the user doesnt have the matching role"
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {

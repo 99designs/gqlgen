@@ -69,9 +69,20 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 			continue
 		}
 
+		var args []InputValue
+		for _, arg := range f.Arguments {
+			args = append(args, InputValue{
+				Type:         WrapTypeFromType(t.schema, arg.Type),
+				Name:         arg.Name,
+				Description:  arg.Description,
+				DefaultValue: defaultValue(f.DefaultValue),
+			})
+		}
+
 		fields = append(fields, Field{
 			Name:              f.Name,
 			Description:       f.Description,
+			Args:              args,
 			Type:              WrapTypeFromType(t.schema, f.Type),
 			IsDeprecated:      isDeprecated(f.Directives),
 			DeprecationReason: deprecationReason(f.Directives),
@@ -88,12 +99,21 @@ func (t *Type) InputFields() []InputValue {
 	var res []InputValue
 	for _, f := range t.def.Fields {
 		res = append(res, InputValue{
-			Name:        f.Name,
-			Description: f.Description,
-			Type:        WrapTypeFromType(t.schema, f.Type),
+			Name:         f.Name,
+			Description:  f.Description,
+			Type:         WrapTypeFromType(t.schema, f.Type),
+			DefaultValue: defaultValue(f.DefaultValue),
 		})
 	}
 	return res
+}
+
+func defaultValue(value *ast.Value) *string {
+	if value == nil {
+		return nil
+	}
+	val := value.String()
+	return &val
 }
 
 func (t *Type) Interfaces() []Type {

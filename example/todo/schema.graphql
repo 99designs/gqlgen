@@ -21,13 +21,17 @@ type Todo {
 	done: Boolean!
 }
 
+"Passed to createTodo to create a new todo"
 input TodoInput {
+	"The body text"
 	text: String!
+	"Is it done already?"
 	done: Boolean
 }
 
 scalar Map
 
+"Prevents access to a field if the user doesnt have the matching role"
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {

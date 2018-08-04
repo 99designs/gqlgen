@@ -1,6 +1,10 @@
 package introspection
 
-import "github.com/vektah/gqlparser/ast"
+import (
+	"strings"
+
+	"github.com/vektah/gqlparser/ast"
+)
 
 type Schema struct {
 	schema *ast.Schema
@@ -9,6 +13,9 @@ type Schema struct {
 func (s *Schema) Types() []Type {
 	var types []Type
 	for _, typ := range s.schema.Types {
+		if strings.HasPrefix(typ.Name, "__") {
+			continue
+		}
 		types = append(types, *WrapTypeFromDef(s.schema, typ))
 	}
 	return types

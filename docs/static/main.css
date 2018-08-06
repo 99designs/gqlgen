@@ -1,3 +1,27 @@
+:root {
+    --font-text: 'Roboto', sans-serif;
+    --font-heading: 'Work Sans', sans-serif;
+    --font-code: 'Source Code Pro', monospace;
+
+    --main-bg-color: coral;
+
+    --color-link: #336699;
+    --color-text: #556;
+
+    --color-heading-text: #445;
+    --color-heading-background: #e9ebed;
+
+    --color-nav-text: #eee;
+    --color-nav-background: #0A215C;
+    --color-nav-active: #284578;
+
+    --color-anchor-default: #DDD;
+    --color-anchor-hover: #666;
+
+    --color-code-text: #445;
+    --color-code-background: #f5f9fc;
+}
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -42,7 +66,7 @@ table {
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: var(--font-text);
     font-size: 15px;
     line-height: 1.55em;
     display: flex;
@@ -51,7 +75,7 @@ body {
 }
 
 a {
-    color: #336699;
+    color: var(--color-link);
     text-decoration: none;
 }
 
@@ -62,7 +86,11 @@ a:hover {
 @media (min-width: 768px) {
     body {
         display: grid;
-        grid-template-columns: 220px 1fr;
+        grid-template:
+            'logo header'
+            'nav content'
+            'nav footer';
+        grid-template-columns: 200px 1fr;
         grid-template-rows: min-content auto min-content;
     }
 }
@@ -70,29 +98,32 @@ a:hover {
 main {
     flex: 1;
     padding: 20px;
-    color: #556;
+    color: var(--color-text);
 }
 
 .content {
+    grid-area: content;
     max-width: 920px;
     margin: auto;
 }
 
 header {
-    background: #e9ebed;
+    grid-area: header;
+    background: var(--color-heading-background);
     padding: 45px 20px;
-    overflow:hidden;
+    overflow: hidden;
 }
 
 footer {
     padding: 2px;
     text-align: center;
     font-size: 0.7em;
-    color: #222;
+    color: var(--color-heading-text);
 }
 
 h1,h2,h3,h4,h5,h6 {
-    font-family: 'Work Sans', sans-serif;
+    font-family: var(--font-heading);
+    color: #445;
 }
 
 h1 {
@@ -105,7 +136,7 @@ h1 {
 .description {
     font-family: 'Work Sans', sans-serif;
     font-size: 18px;
-    color: #555;
+    color: var(--color-text);
 }
 
 .header-link {
@@ -131,14 +162,15 @@ p {
 }
 
 nav {
-    color: #eee;
-    background-color: #303538;
-    grid-row: span 3;
+    grid-area: nav;
+    color: var(--color-nav-text);
+    background-color: var(--color-nav-background);
+    font-family: var(--font-heading);
+    font-weight: 500;
 }
 
 .menu {
-    font-family: 'Work Sans', sans-serif;
-    font-weight: 700;
+
 }
 
 .menu a {
@@ -163,26 +195,36 @@ ul.submenu {
 }
 
 ul.menu li {
+    font-weight: 400;
 }
 
-ul.menu li.active {
-    background-color: #576;
+ul.menu li.active,
+ul.menu li:hover  {
+    background-color: var(--color-nav-active);
 }
 
-ul.menu li:hover {
-    background-color: #222;
+.layout--logo {
+    grid-area: logo;
+    background-color: var(--color-nav-background);
 }
 
 .logo {
-    font-family: 'VT323', monospace;
-    font-size: 3em;
-    text-decoration: none;
+    grid-area: logo;
     color: #eee;
-    width: 100%;
+    margin: 15px;
     text-align: center;
-    margin: 70px auto;
-    border-bottom: none;
-    display:block;
+    display: block;
+}
+
+.logo svg {
+    fill: currentColor;
+    max-width: 30px;
+}
+
+.logo--name {
+    vertical-align: top;
+    height: 100%;
+    font-size: 30px;
 }
 
 .logo:hover {
@@ -190,10 +232,11 @@ ul.menu li:hover {
 }
 
 code {
-    padding:2px;
-    font-family: 'Source Code Pro', monospace;
+    padding: 1px 5px;
+    font-family: var(--font-code);
     font-weight: 500;
-    color: #996666;
+    color: var(--color-code-text);
+    background-color: var(--color-code-background);
 }
 
 strong {
@@ -210,12 +253,127 @@ strong {
 }
 
 .anchor-icon {
-    fill: #DDD;
+    fill: var(--color-anchor-default);
     display: inline-block;
     vertical-align: middle;
     padding: 5px;
 }
 
 .anchor-icon:hover {
-    fill: #666;
+    fill: var(--color-anchor-hover);
+}
+
+@media (min-width: 768px) {
+    .logo {
+        margin: 20px 50px;
+
+    }
+    .logo svg {
+        max-width: none;
+        margin: 5px;
+    }
+    nav input {
+        display: none;
+    }
+}
+
+/* pure css hamburger, adapted from https://codepen.io/erikterwan/pen/EVzeRP */
+
+@media (max-width: 767px) {
+    .layout--logo {
+        z-index: 2;
+    }
+
+    nav {
+        -webkit-user-select: none;
+        user-select: none;
+
+    }
+
+    .hamburger {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        margin: 15px;
+        z-index: 3;
+    }
+
+    nav input {
+        display: block;
+        width: 70px;
+        height: 70px;
+        position: absolute;
+        top: -7px;
+        left: -5px;
+
+        cursor: pointer;
+
+        opacity: 0; /* hide this */
+        z-index: 4; /* and place it over the hamburger */
+
+        -webkit-touch-callout: none;
+    }
+
+    .hamburger span {
+        display: block;
+        width: 28px;
+        height: 4px;
+        margin: 5px;
+        position: relative;
+        background: currentColor;
+        border-radius: 3px;
+        z-index: 1;
+        transform-origin: 0 1.5px;
+
+        transition: transform 0.5s cubic-bezier(0.77, 0.2, 0.05, 1.0),
+        background 0.5s cubic-bezier(0.77, 0.2, 0.05, 1.0),
+        opacity 0.55s ease;
+    }
+
+    nav input:checked ~ .hamburger span {
+        opacity: 1;
+        transform: rotate(45deg) translate(-2px, -1px);
+    }
+
+    nav input:checked ~ .hamburger span:nth-last-child(2) {
+        opacity: 0;
+        transform: rotate(0deg) scale(0.2, 0.2);
+    }
+
+    nav input:checked ~ .hamburger span:nth-last-child(1) {
+        transform: rotate(-45deg) translate(0, -1px);
+    }
+
+    .menu {
+        z-index: 1;
+        position: absolute;
+        width: 300px;
+        height: 100%;
+        margin: -100px 0 0 -50px;
+        padding: 150px 0;
+
+        color: var(--color-heading-text);
+        background-color: var(--color-heading-background);
+        font-family: var(--font-heading);
+        font-weight: 500;
+
+        list-style-type: none;
+        -webkit-font-smoothing: antialiased;
+        /* to stop flickering of text in safari */
+
+        transform-origin: 0% 0%;
+        transform: translate(-100%, 0);
+
+        transition: transform 0.5s cubic-bezier(0.77, 0.2, 0.05, 1.0);
+    }
+
+    ul.menu li.active,
+    ul.menu li:hover  {
+        background-color: #d3d5d7;
+    }
+
+    nav input:checked ~ ul {
+        transform: none;
+    }
+
 }

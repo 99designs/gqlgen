@@ -105,28 +105,23 @@ func initConfig() *codegen.Config {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
-		} else if config != nil {
-			fmt.Fprintln(os.Stderr, "config file already exists")
-			os.Exit(0)
 		}
-	} else {
-		config, err = codegen.LoadConfigFromDefaultLocations()
-		if os.IsNotExist(errors.Cause(err)) {
-			if configFilename == "" {
-				configFilename = "gqlgen.yml"
-			}
-			config = codegen.DefaultConfig()
-			config.Resolver = codegen.PackageConfig{
-				Filename: "resolver.go",
-				Type:     "Resolver",
-			}
-		} else if config != nil {
-			fmt.Fprintln(os.Stderr, "config file already exists")
-			os.Exit(0)
-		} else if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(1)
-		}
+		return config
+	}
+
+	config, err = codegen.LoadConfigFromDefaultLocations()
+	if config != nil {
+		return config
+	} else if !os.IsNotExist(errors.Cause(err)) {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	configFilename = "gqlgen.yml"
+	config = codegen.DefaultConfig()
+	config.Resolver = codegen.PackageConfig{
+		Filename: "resolver.go",
+		Type:     "Resolver",
 	}
 
 	if schemaFilename != "" {

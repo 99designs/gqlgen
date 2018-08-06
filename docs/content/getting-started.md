@@ -66,6 +66,7 @@ Exec "go run ./server/server.go" to start GraphQL server
 ```
 
 This has created an empty skeleton with all files we need:
+
  - gqlgen.yml - The gqlgen config file, knobs for controlling the generated code.
  - generated.go - The graphql execution runtime, the bulk of the generated code
  - models_gen.go - Generated models required to build the graph. Often you will override these with models you write yourself. Still very useful for input types.

@@ -59,10 +59,10 @@
 .chroma code {
     overflow: auto;
     display: block;
-    background-color: #e7edef;
-    padding: 5px;
+    padding: 5px 10px;
     margin-bottom: 1em;
-    font-family: 'Source Code Pro', monospace;
+    font-family: var(--font-code);
+    color: var(--color-code-text);
+    background-color: var(--color-code-background);
     font-size: 13px;
-    color: #445;
 }

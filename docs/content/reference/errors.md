@@ -15,15 +15,24 @@ here is safe for users, if certain messages arent safe, customize the error pres
 To return multiple errors you can call the `graphql.Error` functions like so:
 
 ```go
+package foo
+
+import (
+	"context"
+	
+	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/99designs/gqlgen/graphql"
+)
+
 func (r Query) DoThings(ctx context.Context) (bool, error) {
 	// Print a formatted string
 	graphql.AddErrorf(ctx, "Error %d", 1)
 
 	// Pass an existing error out
-	graphql.AddError(ctx, errors.New("zzzzzt"))
+	graphql.AddError(ctx, gqlerror.Errorf("zzzzzt"))
 
 	// Or fully customize the error
-	graphql.AddError(ctx, &graphql.Error{
+	graphql.AddError(ctx, &gqlerror.Error{
 		Message: "A descriptive error message",
 		Extensions: map[string]interface{}{
 			"code": "10-4",
@@ -31,7 +40,7 @@ func (r Query) DoThings(ctx context.Context) (bool, error) {
 	})
 
 	// And you can still return an error if you need
-	return nil, errors.New("BOOM! Headshot")
+	return false, gqlerror.Errorf("BOOM! Headshot")
 }
 ```
 
@@ -64,11 +73,11 @@ You change this when creating the handler:
 ```go
 server := handler.GraphQL(MakeExecutableSchema(resolvers),
 	handler.ErrorPresenter(
-		func(ctx context.Context, e error) *graphql.Error {
+		func(ctx context.Context, e error) *gqlerror.Error {
 			// any special logic you want to do here. This only
 			// requirement is that it can be json encoded
 			if myError, ok := e.(MyError) ; ok {
-				return &graphql.Error{Message: "Eeek!"}
+				return &gqlerror.Errorf("Eeek!")
 			}
 
 			return graphql.DefaultErrorPresenter(ctx, e)

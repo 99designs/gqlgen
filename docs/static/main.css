@@ -245,7 +245,6 @@ strong {
 
 .anchor-link {
     display: inline-block;
-    vertical-align: middle;
 }
 
 .anchor-link:hover {
@@ -256,7 +255,8 @@ strong {
     fill: var(--color-anchor-default);
     display: inline-block;
     vertical-align: middle;
-    padding: 5px;
+    padding: 0 5px;
+    width: 14px;
 }
 
 .anchor-icon:hover {

@@ -15,7 +15,7 @@ func (cfg *Config) buildDirectives(types NamedTypes) ([]*Directive, error) {
 			newArg := FieldArgument{
 				GQLName:   arg.Name,
 				Type:      types.getType(arg.Type),
-				GoVarName: sanitizeGoName(arg.Name),
+				GoVarName: sanitizeArgName(arg.Name),
 			}
 
 			if !newArg.Type.IsInput && !newArg.Type.IsScalar {

@@ -72,10 +72,11 @@ var keywords = []string{
 	"var",
 }
 
-func sanitizeGoName(name string) string {
+// sanitizeArgName prevents collisions with go keywords for arguments to resolver functions
+func sanitizeArgName(name string) string {
 	for _, k := range keywords {
 		if name == k {
-			return name + "_"
+			return name + "Arg"
 		}
 	}
 	return name
@@ -148,7 +149,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 				GQLName:   arg.Name,
 				Type:      types.getType(arg.Type),
 				Object:    obj,
-				GoVarName: sanitizeGoName(arg.Name),
+				GoVarName: sanitizeArgName(arg.Name),
 			}
 
 			if !newArg.Type.IsInput && !newArg.Type.IsScalar {

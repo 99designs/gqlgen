@@ -175,12 +175,23 @@ nav {
 
 .menu a {
     color: inherit;
-    display: block;
-    padding: 5px 10px;
 }
 
 .menu a:hover {
     border-bottom: none;
+}
+
+.menu-item {
+    display: block;
+    padding: 5px 10px;
+}
+
+.submenu .menu-item {
+    padding: 5px 20px;
+}
+
+.submenu-heading {
+    margin-top: 15px;
 }
 
 ul.menu {
@@ -189,9 +200,13 @@ ul.menu {
 }
 
 ul.submenu {
-    margin-left: 15px;
+    margin-left: 0;
     list-style: none;
     margin-bottom: 0;
+}
+
+ul.submenu span {
+    padding: 5px 10px;
 }
 
 ul.menu li {
@@ -199,7 +214,7 @@ ul.menu li {
 }
 
 ul.menu li.active,
-ul.menu li:hover  {
+ul.menu a:hover {
     background-color: var(--color-nav-active);
 }
 

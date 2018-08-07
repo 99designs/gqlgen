@@ -2,7 +2,7 @@
 title: Using schema directives to implement permission checks
 description: Implementing graphql schema directives in golang for permission checks.  
 linkTitle: Schema Directives
-menu: main
+menu: { main: { parent: 'reference' } }
 ---
 
 Directives are a bit like annotations in any other language. They give you a way to specify some behaviour without directly binding to the implementation. This can be really useful for cross cutting concerns like permission checks.

@@ -19,18 +19,18 @@
 	{{- range .Site.Menus.main }}
 		<li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
 			{{ if .URL }}
-				<a href="{{ .URL }}">{{ .Name }}</a>
+				<a class="menu-item" href="{{ .URL }}">{{ .Name }}</a>
 			{{ else }}
-				<span>{{ .Name }}</span>
+				<span class="menu-item submenu-heading">{{ .Name }}</span>
 			{{ end }}
 		{{- if .HasChildren }}
 			<ul class="submenu">
 			{{- range .Children }}
 				<li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
 					{{ if .URL }}
-						<a href="{{ .URL }}">{{ .Name }}</a>
+						<a class="menu-item" href="{{ .URL }}">{{ .Name }}</a>
 					{{ else }}
-						<span>{{ .Name }}</span>
+						<span class="menu-item">{{ .Name }}</span>
 					{{ end }}
 				</li>
 			{{- end }}

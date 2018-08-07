@@ -2,7 +2,7 @@
 linkTitle: Handling Errors
 title: Sending custom error data in the graphql response
 description: Customising graphql error types to send custom error data back to the client using gqlgen.
-menu: main
+menu: { main: { parent: 'reference' } }
 ---
 
 ## Returning errors

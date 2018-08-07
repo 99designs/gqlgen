@@ -2,7 +2,7 @@
 title: "Optimizing N+1 database queries using Dataloaders"
 description: Speeding up your GraphQL requests by reducing the number of round trips to the database.  
 linkTitle: Dataloaders
-menu: main
+menu: { main: { parent: 'reference' } }
 ---
 
 Have you noticed some GraphQL queries end can make hundreds of database 

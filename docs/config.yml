@@ -15,3 +15,9 @@ menu:
     - name: Introduction
       url: /
       weight: -10
+    - name: Reference
+      identifier: reference
+      weight: 5
+    - name: Recipes
+      identifier: recipes
+      weight: 10

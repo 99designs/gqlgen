@@ -94,7 +94,7 @@ func GenerateGraphServer(config *codegen.Config) {
 		os.Exit(1)
 	}
 
-	fmt.Fprintln(os.Stdout, `Exec "go run ./server/server.go" to start GraphQL server`)
+	fmt.Fprintf(os.Stdout, `Exec "go run ./%s" to start GraphQL server`, serverFilename)
 }
 
 func initConfig() *codegen.Config {
@@ -102,31 +102,28 @@ func initConfig() *codegen.Config {
 	var err error
 	if configFilename != "" {
 		config, err = codegen.LoadConfig(configFilename)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(1)
-		} else if config != nil {
-			fmt.Fprintln(os.Stderr, "config file already exists")
-			os.Exit(0)
-		}
 	} else {
 		config, err = codegen.LoadConfigFromDefaultLocations()
-		if os.IsNotExist(errors.Cause(err)) {
-			if configFilename == "" {
-				configFilename = "gqlgen.yml"
-			}
-			config = codegen.DefaultConfig()
-			config.Resolver = codegen.PackageConfig{
-				Filename: "resolver.go",
-				Type:     "Resolver",
-			}
-		} else if config != nil {
-			fmt.Fprintln(os.Stderr, "config file already exists")
-			os.Exit(0)
-		} else if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(1)
-		}
+	}
+
+	if config != nil {
+		fmt.Fprintf(os.Stderr, "init failed: a configuration file already exists at %s\n", config.FilePath)
+		os.Exit(1)
+	}
+
+	if !os.IsNotExist(errors.Cause(err)) {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	if configFilename == "" {
+		configFilename = "gqlgen.yml"
+	}
+	config = codegen.DefaultConfig()
+
+	config.Resolver = codegen.PackageConfig{
+		Filename: "resolver.go",
+		Type:     "Resolver",
 	}
 
 	if schemaFilename != "" {

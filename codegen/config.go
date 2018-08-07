@@ -52,6 +52,8 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, errors.Wrap(err, "unable to parse config")
 	}
 
+	config.FilePath = filename
+
 	return config, nil
 }
 
@@ -62,6 +64,8 @@ type Config struct {
 	Model          PackageConfig `yaml:"model"`
 	Resolver       PackageConfig `yaml:"resolver,omitempty"`
 	Models         TypeMap       `yaml:"models,omitempty"`
+
+	FilePath string `yaml:"-"`
 
 	schema *ast.Schema `yaml:"-"`
 }

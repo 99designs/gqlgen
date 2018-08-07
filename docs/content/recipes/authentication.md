@@ -1,11 +1,11 @@
 ---
-title: "Using context.Context to pass authenticated user details to resolvers"
+title: "Providing authentication details through context"
 description: How to using golang context.Context to authenticate users and pass user data to resolvers.
 linkTitle: Authentication
 menu: { main: { parent: 'recipes' } }
 ---
 
-We have an app where users are authenticated using a cookie in the http request, and we want to check who is logged in somewhere in our graph. Because graphql is transport agnostic we cant assume there will even be a http request, so we need to build some middleware that exposes the user to our graph.
+We have an app where users are authenticated using a cookie in the HTTP request, and we want to check this authentication status in somewhere in our graph. Because GraphQL is transport agnostic we can't assume there will even be an HTTP request, so we need to expose these authention details to our graph using a middleware.
 
 
 ```go
@@ -68,9 +68,9 @@ func ForContext(ctx context.Context) *User {
 }
 ```
 
-**note**: `getUserByID` and `validateAndGetUserID` have been left to the user to implement
+**Note:** `getUserByID` and `validateAndGetUserID` have been left to the user to implement.
 
-Now when we create the server we should wrap it in our auth middleware:
+Now when we create the server we should wrap it in our authentication middleware:
 ```go
 package main
 
@@ -99,7 +99,7 @@ func main() {
 }
 ```
 
-Now in our resolvers (and directives) we can call ForContext:
+And in our resolvers (or directives) we can call `ForContext` to retrieve the data back out:
 ```go
 
 func (r *queryResolver) Hero(ctx context.Context, episode Episode) (Character, error) {

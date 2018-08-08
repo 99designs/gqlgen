@@ -36,6 +36,12 @@ func TestHandlerPOST(t *testing.T) {
 		assert.Equal(t, `{"data":null,"errors":[{"message":"Cannot query field \"title\" on type \"User\".","locations":[{"line":1,"column":8}]}]}`, resp.Body.String())
 	})
 
+	t.Run("invalid variable", func(t *testing.T) {
+		resp := doRequest(h, "POST", "/graphql", `{"query": "query($id:Int!){user(id:$id){name}}","variables":{"id":false}}`)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+		assert.Equal(t, `{"data":null,"errors":[{"message":"cannot use bool as Int","path":["variable","id"]}]}`, resp.Body.String())
+	})
+
 	t.Run("execution failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "mutation { me { name } }"}`)
 		assert.Equal(t, http.StatusOK, resp.Code)
@@ -56,6 +62,12 @@ func TestHandlerGET(t *testing.T) {
 		resp := doRequest(h, "GET", "/graphql?query=me{id}&variables=notjson", "")
 		assert.Equal(t, http.StatusBadRequest, resp.Code)
 		assert.Equal(t, `{"data":null,"errors":[{"message":"variables could not be decoded"}]}`, resp.Body.String())
+	})
+
+	t.Run("invalid variable", func(t *testing.T) {
+		resp := doRequest(h, "GET", `/graphql?query=query($id:Int!){user(id:$id){name}}&variables={"id":false}`, "")
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+		assert.Equal(t, `{"data":null,"errors":[{"message":"cannot use bool as Int","path":["variable","id"]}]}`, resp.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {

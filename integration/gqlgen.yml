@@ -4,12 +4,15 @@ exec:
   filename: generated.go
 model:
   filename: models-go/generated.go
+resolver:
+  filename: resolver.go
+  type: Resolver
 
 models:
   Element:
-    model: github.com/99designs/gqlgen/test/models-go.Element
+    model: github.com/99designs/gqlgen/integration/models-go.Element
   Viewer:
-    model: github.com/99designs/gqlgen/test/models-go.Viewer
+    model: github.com/99designs/gqlgen/integration/models-go.Viewer
   User:
     model: remote_api.User
     fields:

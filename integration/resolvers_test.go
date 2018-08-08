@@ -1,19 +1,17 @@
 //go:generate gorunpkg github.com/99designs/gqlgen --config config.yaml
 
-package test
+package integration
 
 import (
 	"context"
 	"fmt"
 	"net/http/httptest"
-	"remote_api"
 	"testing"
-	"time"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
-	"github.com/99designs/gqlgen/test/models-go"
+	"github.com/99designs/gqlgen/integration/models-go"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -111,65 +109,4 @@ func TestJsonEncoding(t *testing.T) {
 type testResolver struct {
 	err       error
 	queryDate func(ctx context.Context, filter models.DateFilter) (bool, error)
-}
-
-func (r *testResolver) Element() ElementResolver {
-	return &elementResolver{r}
-}
-
-func (r *testResolver) Query() QueryResolver {
-	return &queryResolver{r}
-}
-
-func (r *testResolver) User() UserResolver {
-	return &userResolver{r}
-}
-
-type elementResolver struct{ *testResolver }
-
-func (r *elementResolver) Child(ctx context.Context, obj *models.Element) (models.Element, error) {
-	return models.Element{ID: obj.ID * 10}, nil
-}
-
-func (r *elementResolver) Error(ctx context.Context, obj *models.Element) (bool, error) {
-	// A silly hack to make the result order stable
-	time.Sleep(time.Duration(obj.ID) * 10 * time.Millisecond)
-
-	return false, r.err
-}
-
-func (r *elementResolver) Mismatched(ctx context.Context, obj *models.Element) ([]bool, error) {
-	return []bool{true}, nil
-}
-
-type queryResolver struct{ *testResolver }
-
-func (r *queryResolver) Path(ctx context.Context) ([]*models.Element, error) {
-	return []*models.Element{{1}, {2}, {3}, {4}}, nil
-}
-
-func (r *queryResolver) Date(ctx context.Context, filter models.DateFilter) (bool, error) {
-	return r.queryDate(ctx, filter)
-}
-
-func (r *queryResolver) Viewer(ctx context.Context) (*models.Viewer, error) {
-	return &models.Viewer{
-		User: &remote_api.User{Name: "Bob"},
-	}, nil
-}
-
-func (r *queryResolver) JSONEncoding(ctx context.Context) (string, error) {
-	return "\U000fe4ed", nil
-}
-
-type userResolver struct{ *testResolver }
-
-func (r *userResolver) Likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
-	return obj.Likes, nil
-}
-
-type specialErr struct{}
-
-func (*specialErr) Error() string {
-	return "original special error message"
 }

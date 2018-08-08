@@ -14,3 +14,6 @@ jobs:
       - run:
           name: "golang tests"
           command: docker run --rm gqlgen/golang .circleci/test.sh
+      - run:
+          name: "integration tests"
+          command: ./.circleci/integration.sh

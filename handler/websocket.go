@@ -153,6 +153,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	vars, err := validator.VariableValues(c.exec.Schema(), op, reqParams.Variables)
 	if err != nil {
 		c.sendError(message.ID, err)
+		return true
 	}
 	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, vars)
 	ctx := graphql.WithRequestContext(c.ctx, reqCtx)

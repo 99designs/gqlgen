@@ -172,6 +172,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		vars, err := validator.VariableValues(exec.Schema(), op, reqParams.Variables)
 		if err != nil {
 			sendError(w, http.StatusUnprocessableEntity, err)
+			return
 		}
 		reqCtx := cfg.newRequestContext(doc, reqParams.Query, vars)
 		ctx := graphql.WithRequestContext(r.Context(), reqCtx)

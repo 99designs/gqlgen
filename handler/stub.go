@@ -17,7 +17,10 @@ var _ graphql.ExecutableSchema = &executableSchemaStub{}
 func (e *executableSchemaStub) Schema() *ast.Schema {
 	return gqlparser.MustLoadSchema(&ast.Source{Input: `
 		schema { query: Query }
-		type Query { me: User! }
+		type Query {
+			me: User!
+			user(id: Int): User!
+		}
 		type User { name: String! }
 	`})
 }

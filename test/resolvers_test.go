@@ -128,7 +128,7 @@ func (r *testResolver) User() UserResolver {
 type elementResolver struct{ *testResolver }
 
 func (r *elementResolver) Child(ctx context.Context, obj *models.Element) (models.Element, error) {
-	return models.Element{obj.ID * 10}, nil
+	return models.Element{ID: obj.ID * 10}, nil
 }
 
 func (r *elementResolver) Error(ctx context.Context, obj *models.Element) (bool, error) {

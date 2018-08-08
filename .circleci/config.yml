@@ -1,20 +1,16 @@
 version: 2
 jobs:
   build:
+    working_directory: /app
     docker:
-      - image: golang:1.9
-    working_directory: /go/src/github.com/99designs/gqlgen
-    steps: &steps
+      - image: docker:18
+    steps:
       - checkout
-      - run: >
-          curl -L -o /bin/dep https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 &&
-          chmod +x /bin/dep &&
-          go get -u github.com/alecthomas/gometalinter github.com/vektah/gorunpkg &&
-          gometalinter --install &&
-          dep ensure -vendor-only
-      - run: go install -v . && go get -u github.com/vektah/dataloaden github.com/pkg/errors
-      - run: go generate ./... && if [[ $(git --no-pager diff) ]] ; then echo "you need to run go generate" ; git --no-pager diff ; exit 1 ; fi
-      - run: go vet ./...
-      - run: go test -race ./...
-      - run: gometalinter --vendor ./...
-
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: "docker build"
+          command: docker build -f .circleci/golang.Dockerfile -t gqlgen/golang .
+      - run:
+          name: "golang tests"
+          command: docker run --rm gqlgen/golang .circleci/test.sh

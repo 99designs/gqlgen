@@ -2,16 +2,16 @@
 
 set -eu
 
-echo "+++ generating"
-go generate -v ./...
+echo "### go generating"
+go generate ./...
 if [[ $(git --no-pager diff) ]] ; then
     echo "you need to run go generate"
     git --no-pager diff
     exit 1
 fi
 
-echo "+++ running testsuite"
+echo "### running testsuite"
 go test -race ./...
 
-echo "+++ linting"
+echo "### linting"
 gometalinter --vendor ./...

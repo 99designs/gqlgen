@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "apollo-cache-inmemory": "^1.2.6",
+    "apollo-client": "^2.3.7",
+    "apollo-link-http": "^1.5.4",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.4.2",
+    "graphql": "^0.13.2",
+    "graphql-cli": "^2.16.5",
+    "graphql-tag": "^2.9.2",
+    "jest": "^23.4.2",
+    "node-fetch": "^2.2.0",
+    "regenerator-runtime": "^0.12.1"
+  },
+  "dependencies": {
+    "babel-preset-env": "^1.7.0"
+  }
+}

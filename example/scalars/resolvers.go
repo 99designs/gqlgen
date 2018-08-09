@@ -29,13 +29,13 @@ func (r *queryResolver) User(ctx context.Context, id external.ObjectID) (*model.
 		ID:      id,
 		Name:    fmt.Sprintf("Test User %d", id),
 		Created: time.Now(),
-		Address: model.Address{ID: 1, Location: &model.Point{1, 2}},
+		Address: model.Address{ID: 1, Location: &model.Point{X: 1, Y: 2}},
 		Tier:    model.TierC,
 	}, nil
 }
 
 func (r *queryResolver) Search(ctx context.Context, input model.SearchArgs) ([]model.User, error) {
-	location := model.Point{1, 2}
+	location := model.Point{X: 1, Y: 2}
 	if input.Location != nil {
 		location = *input.Location
 	}
@@ -70,5 +70,5 @@ func (r *userResolver) PrimitiveResolver(ctx context.Context, obj *model.User) (
 }
 
 func (r *userResolver) CustomResolver(ctx context.Context, obj *model.User) (model.Point, error) {
-	return model.Point{5, 1}, nil
+	return model.Point{X: 5, Y: 1}, nil
 }

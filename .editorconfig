@@ -11,7 +11,7 @@ indent_size = 4
 [*.{go,gotpl}]
 indent_style = tab
 
-[*.{yml}]
+[*.yml]
 indent_size = 2
 
 # These often end up with go code inside, so lets keep tabs

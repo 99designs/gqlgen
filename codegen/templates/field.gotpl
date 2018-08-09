@@ -8,11 +8,13 @@
 			{{ template "args.gotpl" $field.Args }}
 		{{- end }}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-		results, err := ec.resolvers.{{ $field.ShortInvocation }}
-		if err != nil {
-			ec.Error(ctx, err)
-			return nil
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.{{ $field.ShortInvocation }}
+		})
+		if resTmp == nil {
+			return func() graphql.Marshaler { return graphql.Null }
 		}
+		results := resTmp.(<-chan {{$field.Signature}})
 		return func() graphql.Marshaler {
 			res, ok := <-results
 			if !ok {

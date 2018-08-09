@@ -11,6 +11,15 @@ import (
 	"github.com/99designs/gqlgen/integration/models-go"
 )
 
+type CustomError struct {
+	UserMessage   string
+	InternalError string
+}
+
+func (e *CustomError) Error() string {
+	return e.InternalError
+}
+
 type Resolver struct{}
 
 func (r *Resolver) User() UserResolver {
@@ -43,6 +52,14 @@ func (r *elementResolver) Child(ctx context.Context, obj *models.Element) (model
 }
 
 type queryResolver struct{ *Resolver }
+
+func (r *queryResolver) Error(ctx context.Context, typeArg models.ErrorType) (bool, error) {
+	if typeArg == models.ErrorTypeCustom {
+		return false, &CustomError{"User message", "Internal Message"}
+	}
+
+	return false, fmt.Errorf("Normal error")
+}
 
 func (r *queryResolver) Path(ctx context.Context) ([]*models.Element, error) {
 	return []*models.Element{{1}, {2}, {3}, {4}}, nil

@@ -36,6 +36,12 @@ type Query {
     date(filter: DateFilter!): Boolean!
     viewer: Viewer
     jsonEncoding: String!
+    error(type: ErrorType = NORMAL): Boolean!
+}
+
+enum ErrorType {
+    CUSTOM
+    NORMAL
 }
 
 # this is a comment with a `backtick`

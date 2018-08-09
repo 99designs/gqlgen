@@ -10,10 +10,14 @@ jobs:
           docker_layer_caching: true
       - run:
           name: "docker build"
-          command: docker build -f .circleci/golang.Dockerfile -t gqlgen/golang .
-      - run:
-          name: "golang tests"
-          command: docker run --rm gqlgen/golang .circleci/test.sh
+          command: |
+            docker build -f .circleci/golang.Dockerfile -t gqlgen/golang .
+            docker build -f .circleci/node.Dockerfile -t gqlgen/node .
+#
+#      - run:
+#          name: "golang tests"
+#          command: docker run --rm gqlgen/golang .circleci/test.sh
+
       - run:
           name: "integration tests"
           command: ./.circleci/integration.sh

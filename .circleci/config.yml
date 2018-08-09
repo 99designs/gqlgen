@@ -36,7 +36,7 @@ jobs:
 
             sleep 2
 
-            docker run -it \
+            docker run \
                 -e SERVER_URL=http://integration_server:1234/query \
                 --link=integration_server \
                 gqlgen/node ../.circleci/integration.sh

@@ -3,7 +3,7 @@
 set -eu
 
 echo "### running jest integration spec"
-./node_modules/.bin/jest
+./node_modules/.bin/jest --color
 
 
 echo "### validating introspected schema"

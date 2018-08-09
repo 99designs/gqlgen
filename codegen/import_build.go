@@ -23,7 +23,6 @@ var ambientImports = []string{
 	"github.com/vektah/gqlparser",
 	"github.com/vektah/gqlparser/ast",
 	"github.com/99designs/gqlgen/graphql",
-	"github.com/99designs/gqlgen/handler",
 	"github.com/99designs/gqlgen/graphql/introspection",
 }
 

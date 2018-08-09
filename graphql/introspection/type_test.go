@@ -21,7 +21,7 @@ func TestType(t *testing.T) {
 	}
 
 	t.Run("name", func(t *testing.T) {
-		require.Equal(t, "Query", schemaType.Name())
+		require.Equal(t, "Query", *schemaType.Name())
 	})
 
 	t.Run("description", func(t *testing.T) {

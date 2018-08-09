@@ -31,25 +31,26 @@ func WrapTypeFromType(s *ast.Schema, typ *ast.Type) *Type {
 }
 
 func (t *Type) Kind() string {
-	if t.def != nil {
+	if t.typ != nil {
+		if t.typ.NonNull {
+			return "NON_NULL"
+		}
+
+		if t.typ.Elem != nil {
+			return "LIST"
+		}
+	} else {
 		return string(t.def.Kind)
 	}
 
-	if t.typ.NonNull {
-		return "NOT_NULL"
-	}
-
-	if t.typ.Elem != nil {
-		return "LIST"
-	}
-	return "UNKNOWN"
+	panic("UNKNOWN")
 }
 
-func (t *Type) Name() string {
+func (t *Type) Name() *string {
 	if t.def == nil {
-		return ""
+		return nil
 	}
-	return t.def.Name
+	return &t.def.Name
 }
 
 func (t *Type) Description() string {
@@ -164,10 +165,10 @@ func (t *Type) OfType() *Type {
 	}
 	if t.typ.NonNull {
 		// fake non null nodes
-		cpy := t.typ
+		cpy := *t.typ
 		cpy.NonNull = false
 
-		return WrapTypeFromType(t.schema, cpy)
+		return WrapTypeFromType(t.schema, &cpy)
 	}
 	return WrapTypeFromType(t.schema, t.typ.Elem)
 }

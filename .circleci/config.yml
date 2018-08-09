@@ -13,11 +13,36 @@ jobs:
           command: |
             docker build -f .circleci/golang.Dockerfile -t gqlgen/golang .
             docker build -f .circleci/node.Dockerfile -t gqlgen/node .
-#
-#      - run:
-#          name: "golang tests"
-#          command: docker run --rm gqlgen/golang .circleci/test.sh
+
+      - run:
+          name: "golang tests"
+          command: docker run --rm gqlgen/golang .circleci/test.sh
 
       - run:
           name: "integration tests"
-          command: ./.circleci/integration.sh
+          command: |
+            function cleanup {
+              echo "Cleaning up containers..."
+              docker kill $SERVER_CONTAINER 1>/dev/null 2>/dev/null || true
+              docker rm --force -v $SERVER_CONTAINER 1>/dev/null 2>/dev/null || true
+            }
+            trap cleanup EXIT
+
+            SERVER_CONTAINER=$(docker run -d \
+                -e PORT=1234 \
+                --name integration_server \
+                gqlgen/golang go run ./integration/server/server.go \
+            )
+
+            sleep 2
+
+            docker run -it \
+                -e SERVER_URL=http://integration_server:1234/query \
+                --link=integration_server \
+                gqlgen/node ../.circleci/integration.sh
+
+            echo "### server logs"
+            docker logs $SERVER_CONTAINER
+
+            exit $(docker inspect $SERVER_CONTAINER --format='{{.State.ExitCode}}')
+

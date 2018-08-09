@@ -9,6 +9,7 @@
     "babel-core": "^6.26.3",
     "babel-jest": "^23.4.2",
     "graphql": "^0.13.2",
+    "graphql-cli": "^2.16.5",
     "graphql-tag": "^2.9.2",
     "jest": "^23.4.2",
     "node-fetch": "^2.2.0",

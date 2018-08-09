@@ -1,0 +1,45 @@
+# source: http://localhost:8080/query
+# timestamp: Thu Aug 09 2018 15:54:55 GMT+1000 (AEST)
+
+enum DATE_FILTER_OP {
+  EQ
+  NEQ
+  GT
+  GTE
+  LT
+  LTE
+}
+
+input DateFilter {
+  value: String!
+  timezone: String = "UTC"
+  op: DATE_FILTER_OP = EQ
+}
+
+type Element {
+  child: Element!
+  error: Boolean!
+  mismatched: [Boolean!]
+}
+
+enum ErrorType {
+  CUSTOM
+  NORMAL
+}
+
+type Query {
+  path: [Element]
+  date(filter: DateFilter!): Boolean!
+  viewer: Viewer
+  jsonEncoding: String!
+  error(type: ErrorType): Boolean!
+}
+
+type User {
+  name: String!
+  likes: [String!]!
+}
+
+type Viewer {
+  user: User
+}

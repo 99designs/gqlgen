@@ -166,6 +166,10 @@ func bindObject(t types.Type, object *Object, imports *Imports) BindErrors {
 	for i := range object.Fields {
 		field := &object.Fields[i]
 
+		if field.ForceResolver {
+			continue
+		}
+
 		// first try binding to a method
 		methodErr := bindMethod(imports, t, field)
 		if methodErr == nil {
@@ -261,7 +265,9 @@ nextArg:
 		param := params.At(j)
 		for _, oldArg := range field.Args {
 			if strings.EqualFold(oldArg.GQLName, param.Name()) {
-				oldArg.Type.Modifiers = modifiersFromGoType(param.Type())
+				if !field.ForceResolver {
+					oldArg.Type.Modifiers = modifiersFromGoType(param.Type())
+				}
 				newArgs = append(newArgs, oldArg)
 				continue nextArg
 			}

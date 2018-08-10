@@ -71,7 +71,7 @@ func (o *Object) HasResolvers() bool {
 }
 
 func (f *Field) IsResolver() bool {
-	return f.ForceResolver || f.GoFieldName == ""
+	return f.GoFieldName == ""
 }
 
 func (f *Field) IsMethod() bool {

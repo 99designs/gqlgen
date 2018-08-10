@@ -11,7 +11,8 @@ import (
 )
 
 func TestWebsocket(t *testing.T) {
-	h := GraphQL(&executableSchemaStub{})
+	next := make(chan struct{})
+	h := GraphQL(&executableSchemaStub{next})
 
 	srv := httptest.NewServer(h)
 	defer srv.Close()
@@ -101,11 +102,13 @@ func TestWebsocket(t *testing.T) {
 			Payload: json.RawMessage(`{"query": "subscription { user { title } }"}`),
 		}))
 
+		next <- struct{}{}
 		msg := readOp(c)
 		require.Equal(t, dataMsg, msg.Type)
 		require.Equal(t, "test_1", msg.ID)
 		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
+		next <- struct{}{}
 		msg = readOp(c)
 		require.Equal(t, dataMsg, msg.Type)
 		require.Equal(t, "test_1", msg.ID)

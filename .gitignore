@@ -4,6 +4,6 @@
 /integration/node_modules
 /integration/schema-fetched.graphql
 /example/chat/package-lock.json
-/codegen/tests/gen
+/codegen/gen
 
 .idea/

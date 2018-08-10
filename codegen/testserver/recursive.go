@@ -1,4 +1,4 @@
-package tests
+package testserver
 
 type RecursiveInputSlice struct {
 	Self []RecursiveInputSlice

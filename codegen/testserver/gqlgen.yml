@@ -1,0 +1,27 @@
+schema: schema.graphql
+
+exec:
+  filename: generated.go
+model:
+  filename: models-gen.go
+resolver:
+  filename: resolver.go
+  type: Resolver
+
+models:
+  It:
+    model: "github.com/99designs/gqlgen/codegen/testserver/introspection.It"
+  InvalidIdentifier:
+    model: "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename.InvalidIdentifier"
+  Changes:
+    model: "map[string]interface{}"
+  RecursiveInputSlice:
+    model: "github.com/99designs/gqlgen/codegen/testserver.RecursiveInputSlice"
+  Shape:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Shape"
+  ShapeUnion:
+    model: "github.com/99designs/gqlgen/codegen/testserver.ShapeUnion"
+  Circle:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Circle"
+  Rectangle:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Rectangle"

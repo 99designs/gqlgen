@@ -18,12 +18,12 @@ func TestGenerateServer(t *testing.T) {
 		id: Int
 	}
 `
-	serverFilename := "tests/gen/" + name + "/server/server.go"
+	serverFilename := "gen/" + name + "/server/server.go"
 	cfg := Config{
 		SchemaStr: schema,
-		Exec:      PackageConfig{Filename: "tests/gen/" + name + "/exec.go"},
-		Model:     PackageConfig{Filename: "tests/gen/" + name + "/model.go"},
-		Resolver:  PackageConfig{Filename: "tests/gen/" + name + "/resolver.go", Type: "Resolver"},
+		Exec:      PackageConfig{Filename: "gen/" + name + "/exec.go"},
+		Model:     PackageConfig{Filename: "gen/" + name + "/model.go"},
+		Resolver:  PackageConfig{Filename: "gen/" + name + "/resolver.go", Type: "Resolver"},
 	}
 
 	_ = syscall.Unlink(cfg.Resolver.Filename)
@@ -36,7 +36,7 @@ func TestGenerateServer(t *testing.T) {
 	require.NoError(t, err)
 
 	conf := loader.Config{}
-	conf.CreateFromFilenames("tests/gen/"+name, serverFilename)
+	conf.CreateFromFilenames("gen/"+name, serverFilename)
 
 	_, err = conf.Load()
 	require.NoError(t, err)

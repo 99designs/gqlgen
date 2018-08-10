@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/loader"
 )
 
 func TestTypeUnionAsInput(t *testing.T) {
@@ -32,134 +33,25 @@ func TestTypeInInput(t *testing.T) {
 	require.EqualError(t, err, "model plan failed: Item cannot be used as a field of BookmarkableInput. only input and scalar types are allowed")
 }
 
-func TestRawMapInputs(t *testing.T) {
-	err := generate("rawmap", `
-		type Query {
-			mapInput(input: Changes): Boolean
-		}
-		input Changes {
-			a: Int
-			b: Int
-		}
-	`, TypeMap{
-		"Changes": {Model: "map[string]interface{}"},
-	})
+func generate(name string, schema string, typemap ...TypeMap) error {
+	cfg := Config{
+		SchemaStr: schema,
+		Exec:      PackageConfig{Filename: "gen/" + name + "/exec.go"},
+		Model:     PackageConfig{Filename: "gen/" + name + "/model.go"},
+	}
 
-	require.NoError(t, err)
-}
+	if len(typemap) > 0 {
+		cfg.Models = typemap[0]
+	}
+	err := Generate(cfg)
+	if err == nil {
+		conf := loader.Config{}
+		conf.Import("github.com/99designs/gqlgen/codegen/testdata/gen/" + name)
 
-func TestRecursiveInputType(t *testing.T) {
-	err := generate("recursiveinput", `
-		type Query {
-			recursive(input: RecursiveInputSlice): Boolean
+		_, err = conf.Load()
+		if err != nil {
+			panic(err)
 		}
-		input RecursiveInputSlice {
-			self: [RecursiveInputSlice!]
-		}
-	`, TypeMap{
-		"RecursiveInputSlice": {Model: "github.com/99designs/gqlgen/codegen/tests.RecursiveInputSlice"},
-	})
-
-	require.NoError(t, err)
-}
-
-func TestComplexInputTypes(t *testing.T) {
-	err := generate("complexinput", `
-		type Query {
-			nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
-			nestedOutputs: [[OuterObject]]
-		}
-		input InnerInput {
-			id:Int!
-		}
-		
-		input OuterInput {
-			inner: InnerInput!
-		}
-		
-		type OuterObject {
-			inner: InnerObject!
-		}
-		
-		type InnerObject {
-			id: Int!
-		}
-	`, TypeMap{
-		"Changes": {Model: "map[string]interface{}"},
-	})
-
-	require.NoError(t, err)
-}
-
-func TestKeywordInputFields(t *testing.T) {
-	err := generate("input_keywords_fields", `
-		input Object {
-			break:       String!
-			default:     String!
-			func:        String!
-			interface:   String!
-			select:      String!
-			case:        String!
-			defer:       String!
-			go:          String!
-			map:         String!
-			struct:      String!
-			chan:        String!
-			else:        String!
-			goto:        String!
-			package:     String!
-			switch:      String!
-			const:       String!
-			fallthrough: String!
-			if:          String!
-			range:       String!
-			type:        String!
-			continue:    String!
-			for:         String!
-			import:      String!
-			return:      String!
-			var:         String!
-		}
-		type Query {
-			test(input: Object): Boolean!
-		}
-	`)
-
-	require.NoError(t, err)
-}
-
-func TestInputKeywordArgs(t *testing.T) {
-	err := generate("input_keyword_args", `
-		type Query {
-			test(
-				break:       String!,
-				default:     String!,
-				func:        String!,
-				interface:   String!,
-				select:      String!,
-				case:        String!,
-				defer:       String!,
-				go:          String!,
-				map:         String!,
-				struct:      String!,
-				chan:        String!,
-				else:        String!,
-				goto:        String!,
-				package:     String!,
-				switch:      String!,
-				const:       String!,
-				fallthrough: String!,
-				if:          String!,
-				range:       String!,
-				type:        String!,
-				continue:    String!,
-				for:         String!,
-				import:      String!,
-				return:      String!,
-				var:         String!,
-			): Boolean!
-		}
-	`)
-
-	require.NoError(t, err)
+	}
+	return err
 }

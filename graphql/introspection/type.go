@@ -76,7 +76,7 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 				Type:         WrapTypeFromType(t.schema, arg.Type),
 				Name:         arg.Name,
 				Description:  arg.Description,
-				DefaultValue: defaultValue(f.DefaultValue),
+				DefaultValue: defaultValue(arg.DefaultValue),
 			})
 		}
 

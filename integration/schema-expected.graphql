@@ -1,5 +1,5 @@
 # source: http://localhost:8080/query
-# timestamp: Thu Aug 09 2018 15:54:55 GMT+1000 (AEST)
+# timestamp: Fri Aug 10 2018 11:50:28 GMT+1000 (AEST)
 
 enum DATE_FILTER_OP {
   EQ
@@ -32,7 +32,7 @@ type Query {
   date(filter: DateFilter!): Boolean!
   viewer: Viewer
   jsonEncoding: String!
-  error(type: ErrorType): Boolean!
+  error(type: ErrorType = NORMAL): Boolean!
 }
 
 type User {

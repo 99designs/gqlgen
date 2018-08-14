@@ -519,11 +519,13 @@ func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, fiel
 	}
 	args["roomName"] = arg0
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
-	results, err := ec.resolvers.Subscription().MessageAdded(ctx, args["roomName"].(string))
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Subscription().MessageAdded(ctx, args["roomName"].(string))
+	})
+	if resTmp == nil {
+		return func() graphql.Marshaler { return graphql.Null }
 	}
+	results := resTmp.(<-chan Message)
 	return func() graphql.Marshaler {
 		res, ok := <-results
 		if !ok {

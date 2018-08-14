@@ -113,3 +113,7 @@ type Rectangle implements Shape {
     area: Float
 }
 union ShapeUnion = Circle | Rectangle
+
+type ForcedResolver {
+    field: Circle
+}

@@ -223,10 +223,10 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 			Expected bool
 		}
 		table := []TestCase{
-			TestCase{Skip: true, Include: true, Expected: false},
-			TestCase{Skip: true, Include: false, Expected: false},
-			TestCase{Skip: false, Include: true, Expected: true},
-			TestCase{Skip: false, Include: false, Expected: false},
+			{Skip: true, Include: true, Expected: false},
+			{Skip: true, Include: false, Expected: false},
+			{Skip: false, Include: true, Expected: true},
+			{Skip: false, Include: false, Expected: false},
 		}
 		q := `query Test($skip: Boolean!, $include: Boolean!) { todo(id: 1) @skip(if: $skip) @include(if: $include) { __typename } }`
 		for _, tc := range table {

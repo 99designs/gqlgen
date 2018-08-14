@@ -25,3 +25,7 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.Circle"
   Rectangle:
     model: "github.com/99designs/gqlgen/codegen/testserver.Rectangle"
+  ForcedResolver:
+    model: "github.com/99designs/gqlgen/codegen/testserver.ForcedResolver"
+    fields:
+      field: { resolver: true }

@@ -11,8 +11,17 @@ import (
 
 type Resolver struct{}
 
+func (r *Resolver) ForcedResolver() ForcedResolverResolver {
+	return &forcedResolverResolver{r}
+}
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
+}
+
+type forcedResolverResolver struct{ *Resolver }
+
+func (r *forcedResolverResolver) Field(ctx context.Context, obj *ForcedResolver) (*Circle, error) {
+	panic("not implemented")
 }
 
 type queryResolver struct{ *Resolver }

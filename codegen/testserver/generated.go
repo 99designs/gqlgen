@@ -30,10 +30,14 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	ForcedResolver() ForcedResolverResolver
 	Query() QueryResolver
 }
 
 type DirectiveRoot struct {
+}
+type ForcedResolverResolver interface {
+	Field(ctx context.Context, obj *ForcedResolver) (*Circle, error)
 }
 type QueryResolver interface {
 	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
@@ -142,6 +146,58 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(float64)
 	return graphql.MarshalFloat(res)
+}
+
+var forcedResolverImplementors = []string{"ForcedResolver"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.SelectionSet, obj *ForcedResolver) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, forcedResolverImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ForcedResolver")
+		case "field":
+			out.Values[i] = ec._ForcedResolver_field(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field graphql.CollectedField, obj *ForcedResolver) graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "ForcedResolver",
+		Args:   nil,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.ForcedResolver().Field(ctx, obj)
+		})
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(*Circle)
+		if res == nil {
+			return graphql.Null
+		}
+		return ec._Circle(ctx, field.Selections, res)
+	})
 }
 
 var innerObjectImplementors = []string{"InnerObject"}
@@ -2362,5 +2418,9 @@ type Rectangle implements Shape {
     area: Float
 }
 union ShapeUnion = Circle | Rectangle
+
+type ForcedResolver {
+    field: Circle
+}
 `},
 )

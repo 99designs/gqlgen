@@ -14,7 +14,7 @@ The aim for this tutorial is to build a "todo" graphql server that can:
  - create new todos
  - mark off todos as they are completed
 
-You can find the finished code for this tutorial [here](https://github.com/99designs/gqlgen-tutorials/tree/master/gettingstarted)
+You can find the finished code for this tutorial [here](https://github.com/vektah/gqlgen-tutorials/tree/master/gettingstarted)
 
 ## Install gqlgen
 
@@ -92,13 +92,13 @@ And then tell gqlgen to use this new struct by adding this to the gqlgen.yml:
 ```yaml
 models:
   Todo:
-    model: github.com/99designs/gqlgen-tutorials/gettingstarted.Todo
+    model: github.com/vektah/gqlgen-tutorials/gettingstarted.Todo
 ```
 
 and regenerate by running
 ```bash
-$ gqlgen -v 
-Unable to bind Todo.user to github.com/99designs/gqlgen-tutorials/gettingstarted.Todo
+$ gqlgen -v
+Unable to bind Todo.user to github.com/vektah/gqlgen-tutorials/gettingstarted.Todo
 	no method named user
 	no field named user
 	Adding resolver method

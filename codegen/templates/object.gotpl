@@ -31,6 +31,8 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 			Object: {{$object.GQLType|quote}},
 		})
 	{{end}}
+
+	{{if $object.IsConcurrent}} var wg sync.WaitGroup {{end}}
 	out := graphql.NewOrderedMap(len(fields))
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
@@ -40,13 +42,21 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 			out.Values[i] = graphql.MarshalString({{$object.GQLType|quote}})
 		{{- range $field := $object.Fields }}
 		case "{{$field.GQLName}}":
-			out.Values[i] = ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
+			{{- if $field.IsConcurrent }}
+				wg.Add(1)
+				go func(i int, field graphql.CollectedField) {
+			{{- end }}
+				out.Values[i] = ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
+			{{- if $field.IsConcurrent }}
+					wg.Done()
+				}(i, field)
+			{{- end }}
 		{{- end }}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	{{if $object.IsConcurrent}} wg.Wait() {{end}}
 	return out
 }
 {{- end }}

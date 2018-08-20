@@ -7,7 +7,7 @@ import (
 	"errors"
 	"time"
 
-	graphql "github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
 )
 

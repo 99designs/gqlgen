@@ -29,49 +29,29 @@
 			rawArgs := field.ArgumentMap(ec.Variables)
 			{{ template "args.gotpl" $field.Args }}
 		{{- end }}
-
-		{{- if $field.IsConcurrent }}
-			ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-				Object: {{$object.GQLType|quote}},
-				Args: {{if $field.Args }}args{{else}}nil{{end}},
-				Field: field,
-			})
-			return graphql.Defer(func() (ret graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						userErr := ec.Recover(ctx, r)
-						ec.Error(ctx, userErr)
-						ret = graphql.Null
-					}
-				}()
-		{{ else }}
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.Object = {{$object.GQLType|quote}}
-			rctx.Args = {{if $field.Args }}args{{else}}nil{{end}}
-			rctx.Field = field
-			rctx.PushField(field.Alias)
-			defer rctx.Pop()
-		{{- end }}
-			resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-				{{- if $field.IsResolver }}
-					return ec.resolvers.{{ $field.ShortInvocation }}
-				{{- else if $field.IsMethod }}
-					{{- if $field.NoErr }}
-						return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }}), nil
-					{{- else }}
-						return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }})
-					{{- end }}
-				{{- else if $field.IsVariable }}
-					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}, nil
+		rctx := &graphql.ResolverContext{
+			Object: {{$object.GQLType|quote}},
+			Args: {{if $field.Args }}args{{else}}nil{{end}},
+			Field: field,
+		}
+		ctx = graphql.WithResolverContext(ctx, rctx)
+		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			{{- if $field.IsResolver }}
+				return ec.resolvers.{{ $field.ShortInvocation }}
+			{{- else if $field.IsMethod }}
+				{{- if $field.NoErr }}
+					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }}), nil
+				{{- else }}
+					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }})
 				{{- end }}
-			})
-			if resTmp == nil {
-				return graphql.Null
-			}
-			res := resTmp.({{$field.Signature}})
-			{{ $field.WriteJson }}
-		{{- if $field.IsConcurrent }}
-			})
-		{{- end }}
+			{{- else if $field.IsVariable }}
+				return {{$field.GoReceiverName}}.{{$field.GoFieldName}}, nil
+			{{- end }}
+		})
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.({{$field.Signature}})
+		{{ $field.WriteJson }}
 	}
 {{ end }}

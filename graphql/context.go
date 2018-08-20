@@ -75,46 +75,54 @@ func WithRequestContext(ctx context.Context, rc *RequestContext) context.Context
 }
 
 type ResolverContext struct {
+	Parent *ResolverContext
 	// The name of the type this field belongs to
 	Object string
 	// These are the args after processing, they can be mutated in middleware to change what the resolver will get.
 	Args map[string]interface{}
 	// The raw field
 	Field CollectedField
-	// The path of fields to get to this resolver
-	Path []interface{}
+
+	// indicies tracks the array indicies only. all field aliases come from the context stack
+	indicies []int
 }
 
-func (r *ResolverContext) PushField(alias string) {
-	r.Path = append(r.Path, alias)
+func (r *ResolverContext) Path() []interface{} {
+	var path []interface{}
+	for it := r; it != nil; it = it.Parent {
+		for i := len(it.indicies) - 1; i >= 0; i-- {
+			path = append(path, it.indicies[i])
+		}
+
+		if it.Field.Field != nil {
+			path = append(path, it.Field.Alias)
+		}
+	}
+
+	// because we are walking up the chain, all the elements are backwards, do an inplace flip.
+	for i := len(path)/2 - 1; i >= 0; i-- {
+		opp := len(path) - 1 - i
+		path[i], path[opp] = path[opp], path[i]
+	}
+
+	return path
 }
 
 func (r *ResolverContext) PushIndex(index int) {
-	r.Path = append(r.Path, index)
+	r.indicies = append(r.indicies, index)
 }
 
 func (r *ResolverContext) Pop() {
-	r.Path = r.Path[0 : len(r.Path)-1]
+	r.indicies = r.indicies[0 : len(r.indicies)-1]
 }
 
 func GetResolverContext(ctx context.Context) *ResolverContext {
-	val := ctx.Value(resolver)
-	if val == nil {
-		return nil
-	}
-
-	return val.(*ResolverContext)
+	val, _ := ctx.Value(resolver).(*ResolverContext)
+	return val
 }
 
 func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Context {
-	parent := GetResolverContext(ctx)
-	rc.Path = nil
-	if parent != nil {
-		rc.Path = append(rc.Path, parent.Path...)
-	}
-	if rc.Field.Field != nil && rc.Field.Alias != "" {
-		rc.PushField(rc.Field.Alias)
-	}
+	rc.Parent = GetResolverContext(ctx)
 	return context.WithValue(ctx, resolver, rc)
 }
 

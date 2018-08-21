@@ -33,6 +33,7 @@
 			Object: {{$object.GQLType|quote}},
 			Args: {{if $field.Args }}args{{else}}nil{{end}},
 			Field: field,
+			{{if not $object.Root}}ParentObject: obj,{{end}}
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
 		resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {

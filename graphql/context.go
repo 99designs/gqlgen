@@ -82,6 +82,8 @@ type ResolverContext struct {
 	Args map[string]interface{}
 	// The raw field
 	Field CollectedField
+	// The parent object of the field
+	ParentObject interface{}
 
 	// indicies tracks the array indicies only. all field aliases come from the context stack
 	indicies []int

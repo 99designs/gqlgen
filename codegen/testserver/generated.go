@@ -117,9 +117,10 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 
 func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.CollectedField, obj *Circle) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "Circle",
-		Args:   nil,
-		Field:  field,
+		Object:       "Circle",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -134,9 +135,10 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.CollectedField, obj *Circle) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "Circle",
-		Args:   nil,
-		Field:  field,
+		Object:       "Circle",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -179,9 +181,10 @@ func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.Selecti
 
 func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field graphql.CollectedField, obj *ForcedResolver) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "ForcedResolver",
-		Args:   nil,
-		Field:  field,
+		Object:       "ForcedResolver",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -222,9 +225,10 @@ func (ec *executionContext) _InnerObject(ctx context.Context, sel ast.SelectionS
 
 func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.CollectedField, obj *InnerObject) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "InnerObject",
-		Args:   nil,
-		Field:  field,
+		Object:       "InnerObject",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -262,9 +266,10 @@ func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel ast.Sele
 
 func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field graphql.CollectedField, obj *invalid_packagename.InvalidIdentifier) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "InvalidIdentifier",
-		Args:   nil,
-		Field:  field,
+		Object:       "InvalidIdentifier",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -302,9 +307,10 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 
 func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedField, obj *introspection1.It) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "It",
-		Args:   nil,
-		Field:  field,
+		Object:       "It",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -342,9 +348,10 @@ func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionS
 
 func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *OuterObject) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "OuterObject",
-		Args:   nil,
-		Field:  field,
+		Object:       "OuterObject",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1064,9 +1071,10 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 
 func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "Rectangle",
-		Args:   nil,
-		Field:  field,
+		Object:       "Rectangle",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1081,9 +1089,10 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 
 func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "Rectangle",
-		Args:   nil,
-		Field:  field,
+		Object:       "Rectangle",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1098,9 +1107,10 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 
 func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "Rectangle",
-		Args:   nil,
-		Field:  field,
+		Object:       "Rectangle",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1144,9 +1154,10 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Directive",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1161,9 +1172,10 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 
 func (ec *executionContext) ___Directive_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Directive",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1178,9 +1190,10 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Directive",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1204,9 +1217,10 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Directive",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1259,9 +1273,10 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__EnumValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1276,9 +1291,10 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 
 func (ec *executionContext) ___EnumValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__EnumValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1293,9 +1309,10 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__EnumValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1310,9 +1327,10 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 
 func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__EnumValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1360,9 +1378,10 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 
 func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Field",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1377,9 +1396,10 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 
 func (ec *executionContext) ___Field_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Field",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1394,9 +1414,10 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Field",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1420,9 +1441,10 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 
 func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Field",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1440,9 +1462,10 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Field",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1457,9 +1480,10 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 
 func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Field",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1503,9 +1527,10 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 
 func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__InputValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1520,9 +1545,10 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 
 func (ec *executionContext) ___InputValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__InputValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1537,9 +1563,10 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__InputValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1557,9 +1584,10 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Args:   nil,
-		Field:  field,
+		Object:       "__InputValue",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1608,9 +1636,10 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 
 func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Schema",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1634,9 +1663,10 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 
 func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Schema",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1654,9 +1684,10 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Schema",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1674,9 +1705,10 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 
 func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Schema",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1694,9 +1726,10 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 
 func (ec *executionContext) ___Schema_directives(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Schema",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1759,9 +1792,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Type",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1776,9 +1810,10 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 
 func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Type",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1796,9 +1831,10 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 
 func (ec *executionContext) ___Type_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Type",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1825,9 +1861,10 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	}
 	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   args,
-		Field:  field,
+		Object:       "__Type",
+		Args:         args,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1851,9 +1888,10 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Type",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1877,9 +1915,10 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 
 func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Type",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1915,9 +1954,10 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	}
 	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   args,
-		Field:  field,
+		Object:       "__Type",
+		Args:         args,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1941,9 +1981,10 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 
 func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Type",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
@@ -1967,9 +2008,10 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 
 func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Args:   nil,
-		Field:  field,
+		Object:       "__Type",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {

@@ -70,6 +70,15 @@ func (o *Object) HasResolvers() bool {
 	return false
 }
 
+func (o *Object) IsConcurrent() bool {
+	for _, f := range o.Fields {
+		if f.IsConcurrent() {
+			return true
+		}
+	}
+	return false
+}
+
 func (f *Field) IsResolver() bool {
 	return f.GoFieldName == ""
 }

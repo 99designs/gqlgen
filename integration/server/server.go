@@ -28,7 +28,7 @@ func main() {
 			if e, ok := errors.Cause(e).(*integration.CustomError); ok {
 				return &gqlerror.Error{
 					Message: e.UserMessage,
-					Path:    graphql.GetResolverContext(ctx).Path,
+					Path:    graphql.GetResolverContext(ctx).Path(),
 				}
 			}
 			return graphql.DefaultErrorPresenter(ctx, e)

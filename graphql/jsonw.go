@@ -15,9 +15,9 @@ var closeBracket = []byte(`]`)
 var colon = []byte(`:`)
 var comma = []byte(`,`)
 
-var Null = lit(nullLit)
-var True = lit(trueLit)
-var False = lit(falseLit)
+var Null = &lit{nullLit}
+var True = &lit{trueLit}
+var False = &lit{falseLit}
 
 type Marshaler interface {
 	MarshalGQL(w io.Writer)
@@ -76,8 +76,8 @@ func (a Array) MarshalGQL(writer io.Writer) {
 	writer.Write(closeBracket)
 }
 
-func lit(b []byte) Marshaler {
-	return WriterFunc(func(w io.Writer) {
-		w.Write(b)
-	})
+type lit struct{ b []byte }
+
+func (l lit) MarshalGQL(w io.Writer) {
+	w.Write(l.b)
 }

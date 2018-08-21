@@ -7,6 +7,8 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
+
+	"github.com/vektah/gqlparser/ast"
 )
 
 type GoFieldType int
@@ -183,13 +185,26 @@ func (f *Field) CallArgs() string {
 
 // should be in the template, but its recursive and has a bunch of args
 func (f *Field) WriteJson() string {
-	return f.doWriteJson("res", f.Type.Modifiers, false, 1)
+	return f.doWriteJson("res", f.Type.Modifiers, f.ASTType, false, 1)
 }
 
-func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool, depth int) string {
+func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Type, isPtr bool, depth int) string {
 	switch {
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
-		return fmt.Sprintf("if %s == nil { return graphql.Null }\n%s", val, f.doWriteJson(val, remainingMods[1:], true, depth+1))
+		return tpl(`
+			if {{.val}} == nil {
+				{{- if .nonNull }}
+					if !ec.HasError(rctx) {
+						ec.Errorf(ctx, "must not be null")
+					}
+				{{- end }}
+				return graphql.Null 
+			}
+			{{.next }}`, map[string]interface{}{
+			"val":     val,
+			"nonNull": astType.NonNull,
+			"next":    f.doWriteJson(val, remainingMods[1:], astType, true, depth+1),
+		})
 
 	case len(remainingMods) > 0 && remainingMods[0] == modList:
 		if isPtr {
@@ -211,7 +226,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool, dept
 			"val":   val,
 			"arr":   arr,
 			"index": index,
-			"next":  f.doWriteJson(val+"["+index+"]", remainingMods[1:], false, depth+1),
+			"next":  f.doWriteJson(val+"["+index+"]", remainingMods[1:], astType.Elem, false, depth+1),
 		})
 
 	case f.IsScalar:

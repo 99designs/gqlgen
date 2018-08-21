@@ -50,6 +50,12 @@ func (r *queryResolver) Keywords(ctx context.Context, input *Keywords) (bool, er
 func (r *queryResolver) Shapes(ctx context.Context) ([]*Shape, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Valid(ctx context.Context) (string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error) {
 	panic("not implemented")
 }

@@ -74,10 +74,10 @@ func findGoInterface(prog *loader.Program, pkgName string, typeName string) (*ty
 	return underlying, nil
 }
 
-func findMethod(typ *types.Named, name string) *types.Func {
+func findMethod(typ *types.Named, name string, onlyExported bool) *types.Func {
 	for i := 0; i < typ.NumMethods(); i++ {
 		method := typ.Method(i)
-		if !method.Exported() {
+		if !method.Exported() && onlyExported {
 			continue
 		}
 
@@ -94,7 +94,7 @@ func findMethod(typ *types.Named, name string) *types.Func {
 			}
 
 			if named, ok := field.Type().(*types.Named); ok {
-				if f := findMethod(named, name); f != nil {
+				if f := findMethod(named, name, onlyExported); f != nil {
 					return f
 				}
 			}
@@ -202,7 +202,7 @@ func bindMethod(imports *Imports, t types.Type, field *Field) error {
 	if field.GoFieldName != "" {
 		goName = field.GoFieldName
 	}
-	method := findMethod(namedType, goName)
+	method := findMethod(namedType, goName, true)
 	if method == nil {
 		return fmt.Errorf("no method named %s", field.GQLName)
 	}

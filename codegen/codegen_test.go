@@ -41,3 +41,26 @@ func TestGenerateServer(t *testing.T) {
 	_, err = conf.Load()
 	require.NoError(t, err)
 }
+
+func generate(name string, schema string, typemap ...TypeMap) error {
+	cfg := Config{
+		SchemaStr: schema,
+		Exec:      PackageConfig{Filename: "gen/" + name + "/exec.go"},
+		Model:     PackageConfig{Filename: "gen/" + name + "/model.go"},
+	}
+
+	if len(typemap) > 0 {
+		cfg.Models = typemap[0]
+	}
+	err := Generate(cfg)
+	if err == nil {
+		conf := loader.Config{}
+		conf.Import("github.com/99designs/gqlgen/codegen/gen/" + name)
+
+		_, err = conf.Load()
+		if err != nil {
+			panic(err)
+		}
+	}
+	return err
+}

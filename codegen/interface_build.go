@@ -1,9 +1,7 @@
 package codegen
 
 import (
-	"fmt"
 	"go/types"
-	"os"
 	"sort"
 	"strings"
 
@@ -55,9 +53,9 @@ func (cfg *Config) isValueReceiver(intf *NamedType, implementor *NamedType, prog
 	for i := 0; i < interfaceType.NumMethods(); i++ {
 		intfMethod := interfaceType.Method(i)
 
-		implMethod := findMethod(implementorType, intfMethod.Name())
+		implMethod := findMethod(implementorType, intfMethod.Name(), false)
 		if implMethod == nil {
-			fmt.Fprintf(os.Stderr, "missing method %s on %s\n", intfMethod.Name(), implementor.GoType)
+			stdErrLog.Printf("missing method %s on %s\n", intfMethod.Name(), implementor.GoType)
 			return false
 		}
 

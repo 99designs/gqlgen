@@ -629,12 +629,14 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 	res := resTmp.([][]*OuterObject)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			arr2 := graphql.Array{}
 			for idx2 := range res[idx1] {
+				idx2 := idx2
 				arr2 = append(arr2, func() graphql.Marshaler {
 					rctx := graphql.GetResolverContext(ctx)
 					rctx.PushIndex(idx2)
@@ -701,6 +703,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 	res := resTmp.([]*Shape)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1192,6 +1195,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	res := resTmp.([]string)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1218,6 +1222,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1408,6 +1413,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	res := resTmp.([]introspection.InputValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1622,6 +1628,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	res := resTmp.([]introspection.Type)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1708,6 +1715,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	res := resTmp.([]introspection.Directive)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1839,6 +1847,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	res := resTmp.([]introspection.Field)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1865,6 +1874,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	res := resTmp.([]introspection.Type)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1891,6 +1901,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	res := resTmp.([]introspection.Type)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1929,6 +1940,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	res := resTmp.([]introspection.EnumValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
@@ -1955,6 +1967,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	res := resTmp.([]introspection.InputValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		idx1 := idx1
 		arr1 = append(arr1, func() graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)

@@ -74,7 +74,7 @@ func (r *friendsConnectionResolver) Edges(ctx context.Context, obj *FriendsConne
 	for i := range edges {
 		edges[i] = FriendsEdge{
 			Cursor: encodeCursor(obj.from + i),
-			Node:   friends[i],
+			Node:   friends[obj.from+i],
 		}
 	}
 	return edges, nil

@@ -7,7 +7,9 @@
 			rawArgs := field.ArgumentMap(ec.Variables)
 			{{ template "args.gotpl" $field.Args }}
 		{{- end }}
-		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Field: field,
+		})
 		results, err := ec.resolvers.{{ $field.ShortInvocation }}
 		if err != nil {
 			ec.Error(ctx, err)
@@ -24,6 +26,7 @@
 		}
 	}
 {{ else }}
+	// nolint: megacheck, ineffassign
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)

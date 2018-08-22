@@ -216,8 +216,9 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 		return tpl(`{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
 				{{.arr}} = append({{.arr}}, func(ctx context.Context) graphql.Marshaler {
-					rctx := graphql.GetResolverContext(ctx).Copy()
-					rctx.PushIndex({{.index}})
+					rctx := &graphql.ResolverContext{
+						Index: &{{.index}},
+					}
 					ctx = graphql.WithResolverContext(ctx, rctx)
 					{{ .next }} 
 				}(ctx))

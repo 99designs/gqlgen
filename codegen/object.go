@@ -215,12 +215,12 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 
 		return tpl(`{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
-				{{.arr}} = append({{.arr}}, func() graphql.Marshaler {
-					rctx := graphql.GetResolverContext(ctx)
+				{{.arr}} = append({{.arr}}, func(ctx context.Context) graphql.Marshaler {
+					rctx := graphql.GetResolverContext(ctx).Copy()
 					rctx.PushIndex({{.index}})
-					defer rctx.Pop()
+					ctx = graphql.WithResolverContext(ctx, rctx)
 					{{ .next }} 
-				}())
+				}(ctx))
 			}
 			return {{.arr}}`, map[string]interface{}{
 			"val":   val,

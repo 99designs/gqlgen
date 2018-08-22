@@ -30,6 +30,8 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Object: {{$object.GQLType|quote}},
 		})
+	{{else}}
+		graphql.GetResolverContext(ctx).Result = obj
 	{{end}}
 
 	{{if $object.IsConcurrent}} var wg sync.WaitGroup {{end}}

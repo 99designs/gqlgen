@@ -73,7 +73,7 @@ func (p *Client) mkRequest(query string, options ...Option) Request {
 	return r
 }
 
-func (p *Client) Post(query string, response interface{}, options ...Option) error {
+func (p *Client) Post(query string, response interface{}, options ...Option) (resperr error) {
 	r := p.mkRequest(query, options...)
 	requestBody, err := json.Marshal(r)
 	if err != nil {
@@ -109,11 +109,13 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 		return fmt.Errorf("decode: %s", err.Error())
 	}
 
+	// we want to unpack even if there is an error, so we can see partial responses
+	unpackErr := unpack(respDataRaw.Data, response)
+
 	if respDataRaw.Errors != nil {
 		return RawJsonError{respDataRaw.Errors}
 	}
-
-	return unpack(respDataRaw.Data, response)
+	return unpackErr
 }
 
 type RawJsonError struct {

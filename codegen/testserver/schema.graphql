@@ -7,6 +7,15 @@ type Query {
     nestedOutputs: [[OuterObject]]
     keywords(input: Keywords): Boolean!
     shapes: [Shape]
+    errorBubble: Error
+    valid: String!
+}
+
+type Error {
+    id: ID!
+    errorOnNonRequiredField: String
+    errorOnRequiredField: String!
+    nilOnRequiredField: String!
 }
 
 type InvalidIdentifier {

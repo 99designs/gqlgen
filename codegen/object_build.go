@@ -108,7 +108,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 	for _, field := range typ.Fields {
 		if typ == cfg.schema.Query && field.Name == "__type" {
 			obj.Fields = append(obj.Fields, Field{
-				Type:           &Type{types["__Schema"], []string{modPtr}, nil},
+				Type:           &Type{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__schema",
 				NoErr:          true,
 				GoFieldType:    GoFieldMethod,
@@ -120,14 +120,14 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 		}
 		if typ == cfg.schema.Query && field.Name == "__schema" {
 			obj.Fields = append(obj.Fields, Field{
-				Type:           &Type{types["__Type"], []string{modPtr}, nil},
+				Type:           &Type{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__type",
 				NoErr:          true,
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectType",
 				Args: []FieldArgument{
-					{GQLName: "name", Type: &Type{types["String"], []string{}, nil}, Object: &Object{}},
+					{GQLName: "name", Type: &Type{types["String"], []string{}, ast.NamedType("String", nil), nil}, Object: &Object{}},
 				},
 				Object: obj,
 			})

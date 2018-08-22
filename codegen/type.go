@@ -3,6 +3,8 @@ package codegen
 import (
 	"strconv"
 	"strings"
+
+	"github.com/vektah/gqlparser/ast"
 )
 
 type NamedTypes map[string]*NamedType
@@ -27,6 +29,7 @@ type Type struct {
 	*NamedType
 
 	Modifiers   []string
+	ASTType     *ast.Type
 	AliasedType *Ref
 }
 

@@ -374,12 +374,12 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 	res := resTmp.([]Todo)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec._Todo(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -636,12 +636,12 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	res := resTmp.([]string)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return graphql.MarshalString(res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -665,12 +665,12 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___InputValue(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -893,12 +893,12 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	res := resTmp.([]introspection.InputValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___InputValue(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -1154,12 +1154,12 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	res := resTmp.([]introspection.Type)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___Type(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -1252,12 +1252,12 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	res := resTmp.([]introspection.Directive)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___Directive(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -1394,12 +1394,12 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	res := resTmp.([]introspection.Field)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___Field(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -1420,12 +1420,12 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	res := resTmp.([]introspection.Type)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___Type(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -1446,12 +1446,12 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	res := resTmp.([]introspection.Type)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___Type(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -1484,12 +1484,12 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	res := resTmp.([]introspection.EnumValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___EnumValue(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }
@@ -1510,12 +1510,12 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	res := resTmp.([]introspection.InputValue)
 	arr1 := graphql.Array{}
 	for idx1 := range res {
-		arr1 = append(arr1, func() graphql.Marshaler {
+		arr1 = append(arr1, func(idx1 int) graphql.Marshaler {
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
 			return ec.___InputValue(ctx, field.Selections, &res[idx1])
-		}())
+		}(idx1))
 	}
 	return arr1
 }

@@ -200,13 +200,12 @@ func (f *Field) doWriteJson(val string, remainingMods []string, isPtr bool, dept
 
 		return tpl(`{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
-				{{.index}} := {{.index}}
-				{{.arr}} = append({{.arr}}, func() graphql.Marshaler {
+				{{.arr}} = append({{.arr}}, func({{.index}} int) graphql.Marshaler {
 					rctx := graphql.GetResolverContext(ctx)
 					rctx.PushIndex({{.index}})
 					defer rctx.Pop()
 					{{ .next }} 
-				}())
+				}({{.index}}))
 			}
 			return {{.arr}}`, map[string]interface{}{
 			"val":   val,

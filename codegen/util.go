@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 	"go/types"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -127,6 +128,14 @@ func findField(typ *types.Struct, name string) *types.Var {
 
 		if strings.EqualFold(field.Name(), name) {
 			return field
+		}
+
+		tags := reflect.StructTag(typ.Tag(i))
+
+		if val, ok := tags.Lookup("json"); ok {
+			if strings.EqualFold(val, name) {
+				return field
+			}
 		}
 	}
 	return nil

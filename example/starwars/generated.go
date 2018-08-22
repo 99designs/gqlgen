@@ -128,6 +128,7 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -136,8 +137,14 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = graphql.MarshalString("Droid")
 		case "id":
 			out.Values[i] = ec._Droid_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "name":
 			out.Values[i] = ec._Droid_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "friends":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -148,10 +155,16 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Droid_friendsConnection(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "appearsIn":
 			out.Values[i] = ec._Droid_appearsIn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "primaryFunction":
 			out.Values[i] = ec._Droid_primaryFunction(ctx, field, obj)
 		default:
@@ -159,6 +172,9 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 		}
 	}
 	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -174,6 +190,9 @@ func (ec *executionContext) _Droid_id(ctx context.Context, field graphql.Collect
 		return obj.ID, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -192,6 +211,9 @@ func (ec *executionContext) _Droid_name(ctx context.Context, field graphql.Colle
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -269,6 +291,9 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 		return ec.resolvers.Droid().FriendsConnection(ctx, obj, args["first"].(*int), args["after"].(*string))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(FriendsConnection)
@@ -287,6 +312,9 @@ func (ec *executionContext) _Droid_appearsIn(ctx context.Context, field graphql.
 		return obj.AppearsIn, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]Episode)
@@ -328,6 +356,7 @@ func (ec *executionContext) _FriendsConnection(ctx context.Context, sel ast.Sele
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -336,6 +365,9 @@ func (ec *executionContext) _FriendsConnection(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("FriendsConnection")
 		case "totalCount":
 			out.Values[i] = ec._FriendsConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "edges":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -350,11 +382,17 @@ func (ec *executionContext) _FriendsConnection(ctx context.Context, sel ast.Sele
 			}(i, field)
 		case "pageInfo":
 			out.Values[i] = ec._FriendsConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -370,6 +408,9 @@ func (ec *executionContext) _FriendsConnection_totalCount(ctx context.Context, f
 		return obj.TotalCount(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(int)
@@ -442,6 +483,9 @@ func (ec *executionContext) _FriendsConnection_pageInfo(ctx context.Context, fie
 		return obj.PageInfo(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(PageInfo)
@@ -455,6 +499,7 @@ func (ec *executionContext) _FriendsEdge(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ctx, sel, friendsEdgeImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -463,6 +508,9 @@ func (ec *executionContext) _FriendsEdge(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("FriendsEdge")
 		case "cursor":
 			out.Values[i] = ec._FriendsEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "node":
 			out.Values[i] = ec._FriendsEdge_node(ctx, field, obj)
 		default:
@@ -470,6 +518,9 @@ func (ec *executionContext) _FriendsEdge(ctx context.Context, sel ast.SelectionS
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -485,6 +536,9 @@ func (ec *executionContext) _FriendsEdge_cursor(ctx context.Context, field graph
 		return obj.Cursor, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -517,6 +571,7 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -525,10 +580,19 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = graphql.MarshalString("Human")
 		case "id":
 			out.Values[i] = ec._Human_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "name":
 			out.Values[i] = ec._Human_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "height":
 			out.Values[i] = ec._Human_height(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "mass":
 			out.Values[i] = ec._Human_mass(ctx, field, obj)
 		case "friends":
@@ -541,10 +605,16 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Human_friendsConnection(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "appearsIn":
 			out.Values[i] = ec._Human_appearsIn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "starships":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -556,6 +626,9 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 		}
 	}
 	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -571,6 +644,9 @@ func (ec *executionContext) _Human_id(ctx context.Context, field graphql.Collect
 		return obj.ID, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -589,6 +665,9 @@ func (ec *executionContext) _Human_name(ctx context.Context, field graphql.Colle
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -619,6 +698,9 @@ func (ec *executionContext) _Human_height(ctx context.Context, field graphql.Col
 		return obj.Height(args["unit"].(LengthUnit)), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(float64)
@@ -714,6 +796,9 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 		return ec.resolvers.Human().FriendsConnection(ctx, obj, args["first"].(*int), args["after"].(*string))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(FriendsConnection)
@@ -732,6 +817,9 @@ func (ec *executionContext) _Human_appearsIn(ctx context.Context, field graphql.
 		return obj.AppearsIn, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]Episode)
@@ -785,6 +873,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	})
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -798,6 +887,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -837,6 +929,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 		return graphql.Null
 	}
 	res := resTmp.(*Review)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -850,6 +943,7 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 	fields := graphql.CollectFields(ctx, sel, pageInfoImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -858,15 +952,27 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("PageInfo")
 		case "startCursor":
 			out.Values[i] = ec._PageInfo_startCursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "endCursor":
 			out.Values[i] = ec._PageInfo_endCursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "hasNextPage":
 			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -882,6 +988,9 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 		return obj.StartCursor, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -900,6 +1009,9 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 		return obj.EndCursor, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -918,6 +1030,9 @@ func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field gra
 		return obj.HasNextPage, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(bool)
@@ -936,6 +1051,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -952,12 +1068,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_reviews(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "search":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_search(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "character":
@@ -993,6 +1115,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		}
 	}
 	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1063,6 +1188,9 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 		return ec.resolvers.Query().Reviews(ctx, args["episode"].(Episode), args["since"].(*time.Time))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]Review)
@@ -1101,6 +1229,9 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		return ec.resolvers.Query().Search(ctx, args["text"].(string))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]SearchResult)
@@ -1171,6 +1302,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(*Droid)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1203,6 +1335,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(*Human)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1235,6 +1368,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(*Starship)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1267,6 +1401,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1287,6 +1422,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Schema)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1300,6 +1436,7 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 	fields := graphql.CollectFields(ctx, sel, reviewImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1308,6 +1445,9 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = graphql.MarshalString("Review")
 		case "stars":
 			out.Values[i] = ec._Review_stars(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "commentary":
 			out.Values[i] = ec._Review_commentary(ctx, field, obj)
 		case "time":
@@ -1317,6 +1457,9 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1332,6 +1475,9 @@ func (ec *executionContext) _Review_stars(ctx context.Context, field graphql.Col
 		return obj.Stars, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(int)
@@ -1353,6 +1499,7 @@ func (ec *executionContext) _Review_commentary(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1385,6 +1532,7 @@ func (ec *executionContext) _Starship(ctx context.Context, sel ast.SelectionSet,
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1393,21 +1541,36 @@ func (ec *executionContext) _Starship(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("Starship")
 		case "id":
 			out.Values[i] = ec._Starship_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "name":
 			out.Values[i] = ec._Starship_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "length":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Starship_length(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "history":
 			out.Values[i] = ec._Starship_history(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1423,6 +1586,9 @@ func (ec *executionContext) _Starship_id(ctx context.Context, field graphql.Coll
 		return obj.ID, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1441,6 +1607,9 @@ func (ec *executionContext) _Starship_name(ctx context.Context, field graphql.Co
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1471,6 +1640,9 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 		return ec.resolvers.Starship().Length(ctx, obj, args["unit"].(LengthUnit))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(float64)
@@ -1489,6 +1661,9 @@ func (ec *executionContext) _Starship_history(ctx context.Context, field graphql
 		return obj.History, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([][]int)
@@ -1520,6 +1695,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ctx, sel, __DirectiveImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1528,17 +1704,29 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
 			out.Values[i] = ec.___Directive_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___Directive_description(ctx, field, obj)
 		case "locations":
 			out.Values[i] = ec.___Directive_locations(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "args":
 			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1554,6 +1742,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1590,6 +1781,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		return obj.Locations, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -1617,6 +1811,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		return obj.Args, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
@@ -1639,6 +1836,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ctx, sel, __EnumValueImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1647,10 +1845,16 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
 			out.Values[i] = ec.___EnumValue_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___EnumValue_description(ctx, field, obj)
 		case "isDeprecated":
 			out.Values[i] = ec.___EnumValue_isDeprecated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "deprecationReason":
 			out.Values[i] = ec.___EnumValue_deprecationReason(ctx, field, obj)
 		default:
@@ -1658,6 +1862,9 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1673,6 +1880,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1709,6 +1919,9 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 		return obj.IsDeprecated, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(bool)
@@ -1740,6 +1953,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 	fields := graphql.CollectFields(ctx, sel, __FieldImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1748,14 +1962,26 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
 			out.Values[i] = ec.___Field_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___Field_description(ctx, field, obj)
 		case "args":
 			out.Values[i] = ec.___Field_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "type":
 			out.Values[i] = ec.___Field_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "isDeprecated":
 			out.Values[i] = ec.___Field_isDeprecated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "deprecationReason":
 			out.Values[i] = ec.___Field_deprecationReason(ctx, field, obj)
 		default:
@@ -1763,6 +1989,9 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1778,6 +2007,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1814,6 +2046,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		return obj.Args, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
@@ -1841,10 +2076,17 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		return obj.Type, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
@@ -1862,6 +2104,9 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 		return obj.IsDeprecated, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(bool)
@@ -1893,6 +2138,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 	fields := graphql.CollectFields(ctx, sel, __InputValueImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1901,10 +2147,16 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
 			out.Values[i] = ec.___InputValue_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___InputValue_description(ctx, field, obj)
 		case "type":
 			out.Values[i] = ec.___InputValue_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "defaultValue":
 			out.Values[i] = ec.___InputValue_defaultValue(ctx, field, obj)
 		default:
@@ -1912,6 +2164,9 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1927,6 +2182,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1963,10 +2221,17 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		return obj.Type, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
@@ -1987,6 +2252,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -2000,6 +2266,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 	fields := graphql.CollectFields(ctx, sel, __SchemaImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -2008,19 +2275,31 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
 			out.Values[i] = ec.___Schema_types(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "queryType":
 			out.Values[i] = ec.___Schema_queryType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "mutationType":
 			out.Values[i] = ec.___Schema_mutationType(ctx, field, obj)
 		case "subscriptionType":
 			out.Values[i] = ec.___Schema_subscriptionType(ctx, field, obj)
 		case "directives":
 			out.Values[i] = ec.___Schema_directives(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -2036,6 +2315,9 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 		return obj.Types(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
@@ -2063,10 +2345,17 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 		return obj.QueryType(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
@@ -2087,6 +2376,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -2108,6 +2398,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -2126,6 +2417,9 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 		return obj.Directives(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Directive)
@@ -2148,6 +2442,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	fields := graphql.CollectFields(ctx, sel, __TypeImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -2156,6 +2451,9 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
 			out.Values[i] = ec.___Type_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "name":
 			out.Values[i] = ec.___Type_name(ctx, field, obj)
 		case "description":
@@ -2177,6 +2475,9 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -2192,6 +2493,9 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 		return obj.Kind(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -2213,6 +2517,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -2411,6 +2716,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}

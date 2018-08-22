@@ -150,6 +150,34 @@ func (c *RequestContext) Error(ctx context.Context, err error) {
 	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
 }
 
+// HasError returns true if the current field has already errored
+func (c *RequestContext) HasError(rctx *ResolverContext) bool {
+	c.errorsMu.Lock()
+	defer c.errorsMu.Unlock()
+	path := rctx.Path()
+
+	for _, err := range c.Errors {
+		if equalPath(err.Path, path) {
+			return true
+		}
+	}
+	return false
+}
+
+func equalPath(a []interface{}, b []interface{}) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 // AddError is a convenience method for adding an error to the current response
 func AddError(ctx context.Context, err error) {
 	GetRequestContext(ctx).Error(ctx, err)

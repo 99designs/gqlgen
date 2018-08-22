@@ -34,6 +34,7 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 
 	{{if $object.IsConcurrent}} var wg sync.WaitGroup {{end}}
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -47,6 +48,11 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 				go func(i int, field graphql.CollectedField) {
 			{{- end }}
 				out.Values[i] = ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
+				{{- if $field.ASTType.NonNull }}
+					if out.Values[i] == graphql.Null {
+						invalid = true
+					}
+				{{- end }}
 			{{- if $field.IsConcurrent }}
 					wg.Done()
 				}(i, field)
@@ -57,6 +63,7 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 		}
 	}
 	{{if $object.IsConcurrent}} wg.Wait() {{end}}
+	if invalid { return graphql.Null }
 	return out
 }
 {{- end }}

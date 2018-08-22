@@ -49,6 +49,8 @@ type QueryResolver interface {
 	NestedOutputs(ctx context.Context) ([][]*OuterObject, error)
 	Keywords(ctx context.Context, input *Keywords) (bool, error)
 	Shapes(ctx context.Context) ([]*Shape, error)
+	ErrorBubble(ctx context.Context) (*Error, error)
+	Valid(ctx context.Context) (string, error)
 	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
 }
 
@@ -97,6 +99,7 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 	fields := graphql.CollectFields(ctx, sel, circleImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -112,6 +115,9 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -151,6 +157,136 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	return graphql.MarshalFloat(res)
 }
 
+var errorImplementors = []string{"Error"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, obj *Error) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, errorImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Error")
+		case "id":
+			out.Values[i] = ec._Error_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "errorOnNonRequiredField":
+			out.Values[i] = ec._Error_errorOnNonRequiredField(ctx, field, obj)
+		case "errorOnRequiredField":
+			out.Values[i] = ec._Error_errorOnRequiredField(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "nilOnRequiredField":
+			out.Values[i] = ec._Error_nilOnRequiredField(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+func (ec *executionContext) _Error_id(ctx context.Context, field graphql.CollectedField, obj *Error) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object:       "Error",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	return graphql.MarshalID(res)
+}
+
+func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object:       "Error",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		return obj.ErrorOnNonRequiredField()
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object:       "Error",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		return obj.ErrorOnRequiredField()
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object:       "Error",
+		Args:         nil,
+		Field:        field,
+		ParentObject: obj,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		return obj.NilOnRequiredField(), nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+
+	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
 var forcedResolverImplementors = []string{"ForcedResolver"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -159,6 +295,7 @@ func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.Selecti
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -176,6 +313,9 @@ func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.Selecti
 		}
 	}
 	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -194,6 +334,7 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		return graphql.Null
 	}
 	res := resTmp.(*Circle)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -207,6 +348,7 @@ func (ec *executionContext) _InnerObject(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ctx, sel, innerObjectImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -215,11 +357,17 @@ func (ec *executionContext) _InnerObject(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("InnerObject")
 		case "id":
 			out.Values[i] = ec._InnerObject_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -235,6 +383,9 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 		return obj.ID, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(int)
@@ -248,6 +399,7 @@ func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel ast.Sele
 	fields := graphql.CollectFields(ctx, sel, invalidIdentifierImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -256,11 +408,17 @@ func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("InvalidIdentifier")
 		case "id":
 			out.Values[i] = ec._InvalidIdentifier_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -276,6 +434,9 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 		return obj.ID, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(int)
@@ -289,6 +450,7 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 	fields := graphql.CollectFields(ctx, sel, itImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -297,11 +459,17 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 			out.Values[i] = graphql.MarshalString("It")
 		case "id":
 			out.Values[i] = ec._It_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -317,6 +485,9 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 		return obj.ID, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -330,6 +501,7 @@ func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ctx, sel, outerObjectImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -338,11 +510,17 @@ func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("OuterObject")
 		case "inner":
 			out.Values[i] = ec._OuterObject_inner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -358,6 +536,9 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		return obj.Inner, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(InnerObject)
@@ -376,6 +557,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -422,6 +604,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_keywords(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "shapes":
@@ -430,10 +615,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				out.Values[i] = ec._Query_shapes(ctx, field)
 				wg.Done()
 			}(i, field)
+		case "errorBubble":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_errorBubble(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "valid":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_valid(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "keywordArgs":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_keywordArgs(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "__type":
@@ -445,6 +648,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		}
 	}
 	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -462,6 +668,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		return graphql.Null
 	}
 	res := resTmp.(*invalid_packagename.InvalidIdentifier)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -482,6 +689,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	res := resTmp.(*introspection1.It)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -519,6 +727,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(*bool)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -556,6 +765,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	res := resTmp.(*bool)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -614,6 +824,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.(*bool)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -646,6 +857,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 					rctx := graphql.GetResolverContext(ctx)
 					rctx.PushIndex(idx2)
 					defer rctx.Pop()
+
 					if res[idx1][idx2] == nil {
 						return graphql.Null
 					}
@@ -686,6 +898,9 @@ func (ec *executionContext) _Query_keywords(ctx context.Context, field graphql.C
 		return ec.resolvers.Query().Keywords(ctx, args["input"].(*Keywords))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(bool)
@@ -712,6 +927,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 			rctx := graphql.GetResolverContext(ctx)
 			rctx.PushIndex(idx1)
 			defer rctx.Pop()
+
 			if res[idx1] == nil {
 				return graphql.Null
 			}
@@ -719,6 +935,47 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		}())
 	}
 	return arr1
+}
+
+func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().ErrorBubble(ctx)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Error)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return ec._Error(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().Valid(ctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) _Query_keywordArgs(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -984,6 +1241,9 @@ func (ec *executionContext) _Query_keywordArgs(ctx context.Context, field graphq
 		return ec.resolvers.Query().KeywordArgs(ctx, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(bool)
@@ -1016,6 +1276,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1036,6 +1297,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Schema)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1049,6 +1311,7 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 	fields := graphql.CollectFields(ctx, sel, rectangleImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1066,6 +1329,9 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1130,6 +1396,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ctx, sel, __DirectiveImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1138,17 +1405,29 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
 			out.Values[i] = ec.___Directive_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___Directive_description(ctx, field, obj)
 		case "locations":
 			out.Values[i] = ec.___Directive_locations(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "args":
 			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1164,6 +1443,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1200,6 +1482,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		return obj.Locations, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -1227,6 +1512,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		return obj.Args, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
@@ -1249,6 +1537,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ctx, sel, __EnumValueImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1257,10 +1546,16 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
 			out.Values[i] = ec.___EnumValue_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___EnumValue_description(ctx, field, obj)
 		case "isDeprecated":
 			out.Values[i] = ec.___EnumValue_isDeprecated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "deprecationReason":
 			out.Values[i] = ec.___EnumValue_deprecationReason(ctx, field, obj)
 		default:
@@ -1268,6 +1563,9 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1283,6 +1581,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1319,6 +1620,9 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 		return obj.IsDeprecated, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(bool)
@@ -1350,6 +1654,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 	fields := graphql.CollectFields(ctx, sel, __FieldImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1358,14 +1663,26 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
 			out.Values[i] = ec.___Field_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___Field_description(ctx, field, obj)
 		case "args":
 			out.Values[i] = ec.___Field_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "type":
 			out.Values[i] = ec.___Field_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "isDeprecated":
 			out.Values[i] = ec.___Field_isDeprecated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "deprecationReason":
 			out.Values[i] = ec.___Field_deprecationReason(ctx, field, obj)
 		default:
@@ -1373,6 +1690,9 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1388,6 +1708,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1424,6 +1747,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		return obj.Args, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
@@ -1451,10 +1777,17 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		return obj.Type, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
@@ -1472,6 +1805,9 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 		return obj.IsDeprecated, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(bool)
@@ -1503,6 +1839,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 	fields := graphql.CollectFields(ctx, sel, __InputValueImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1511,10 +1848,16 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
 			out.Values[i] = ec.___InputValue_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "description":
 			out.Values[i] = ec.___InputValue_description(ctx, field, obj)
 		case "type":
 			out.Values[i] = ec.___InputValue_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "defaultValue":
 			out.Values[i] = ec.___InputValue_defaultValue(ctx, field, obj)
 		default:
@@ -1522,6 +1865,9 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1537,6 +1883,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		return obj.Name, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1573,10 +1922,17 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		return obj.Type, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
@@ -1597,6 +1953,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1610,6 +1967,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 	fields := graphql.CollectFields(ctx, sel, __SchemaImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1618,19 +1976,31 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
 			out.Values[i] = ec.___Schema_types(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "queryType":
 			out.Values[i] = ec.___Schema_queryType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "mutationType":
 			out.Values[i] = ec.___Schema_mutationType(ctx, field, obj)
 		case "subscriptionType":
 			out.Values[i] = ec.___Schema_subscriptionType(ctx, field, obj)
 		case "directives":
 			out.Values[i] = ec.___Schema_directives(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1646,6 +2016,9 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 		return obj.Types(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
@@ -1673,10 +2046,17 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 		return obj.QueryType(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	return ec.___Type(ctx, field.Selections, res)
@@ -1697,6 +2077,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1718,6 +2099,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -1736,6 +2118,9 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 		return obj.Directives(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Directive)
@@ -1758,6 +2143,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	fields := graphql.CollectFields(ctx, sel, __TypeImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
 	for i, field := range fields {
 		out.Keys[i] = field.Alias
 
@@ -1766,6 +2152,9 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
 			out.Values[i] = ec.___Type_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "name":
 			out.Values[i] = ec.___Type_name(ctx, field, obj)
 		case "description":
@@ -1787,6 +2176,9 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		}
 	}
 
+	if invalid {
+		return graphql.Null
+	}
 	return out
 }
 
@@ -1802,6 +2194,9 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 		return obj.Kind(), nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
@@ -1823,6 +2218,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -2021,6 +2417,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+
 	if res == nil {
 		return graphql.Null
 	}
@@ -2313,6 +2710,15 @@ var parsedSchema = gqlparser.MustLoadSchema(
     nestedOutputs: [[OuterObject]]
     keywords(input: Keywords): Boolean!
     shapes: [Shape]
+    errorBubble: Error
+    valid: String!
+}
+
+type Error {
+    id: ID!
+    errorOnNonRequiredField: String
+    errorOnRequiredField: String!
+    nilOnRequiredField: String!
 }
 
 type InvalidIdentifier {

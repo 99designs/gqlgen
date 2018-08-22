@@ -72,6 +72,7 @@ func pkgAndType(name string) (string, string) {
 }
 
 func (n NamedTypes) getType(t *ast.Type) *Type {
+	orig := t
 	var modifiers []string
 	for {
 		if t.Elem != nil {
@@ -87,6 +88,7 @@ func (n NamedTypes) getType(t *ast.Type) *Type {
 			res := &Type{
 				NamedType: n[t.NamedType],
 				Modifiers: modifiers,
+				ASTType:   orig,
 			}
 
 			if res.IsInterface {

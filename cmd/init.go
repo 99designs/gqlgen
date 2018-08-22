@@ -94,7 +94,7 @@ func GenerateGraphServer(config *codegen.Config) {
 		os.Exit(1)
 	}
 
-	fmt.Fprintf(os.Stdout, `Exec "go run ./%s" to start GraphQL server`, serverFilename)
+	fmt.Fprintf(os.Stdout, "Exec \"go run ./%s\" to start GraphQL server\n", serverFilename)
 }
 
 func initConfig() *codegen.Config {

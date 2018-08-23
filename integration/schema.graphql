@@ -1,3 +1,6 @@
+"This directive does magical things"
+directive @magic(kind: Int) on FIELD_DEFINITION
+
 type Element {
     child: Element!
     error: Boolean!

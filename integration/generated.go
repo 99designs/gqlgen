@@ -36,6 +36,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Magic func(ctx context.Context, next graphql.Resolver, kind *int) (res interface{}, err error)
 }
 type ElementResolver interface {
 	Child(ctx context.Context, obj *models.Element) (models.Element, error)
@@ -1663,6 +1664,35 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Re
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "magic":
+			if ec.directives.Magic != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args := map[string]interface{}{}
+				var arg0 *int
+				if tmp, ok := rawArgs["kind"]; ok {
+					var err error
+					var ptr1 int
+					if tmp != nil {
+						ptr1, err = graphql.UnmarshalInt(tmp)
+						arg0 = &ptr1
+					}
+
+					if err != nil {
+						ec.Error(ctx, err)
+						return graphql.Null
+					}
+				}
+				args["kind"] = arg0
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Magic(ctx, n, args["kind"].(*int))
+				}
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1680,7 +1710,10 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Element {
+	&ast.Source{Name: "schema.graphql", Input: `"This directive does magical things"
+directive @magic(kind: Int) on FIELD_DEFINITION
+
+type Element {
     child: Element!
     error: Boolean!
     mismatched: [Boolean!]
@@ -1701,7 +1734,7 @@ enum DATE_FILTER_OP {
 input DateFilter {
     value: String!
     timezone: String = "UTC"
-    op: DATE_FILTER_OP = EQ
+    op: DATE_FILTER_OP = EQ @magic(kind: 1)
 }
 
 type User {
@@ -1710,7 +1743,7 @@ type User {
 }
 
 type Viewer {
-    user: User
+    user: User @magic(kind: 1)
 }
 
 type Query {

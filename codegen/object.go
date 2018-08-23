@@ -215,18 +215,21 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 
 		return tpl(`{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
-				{{.arr}} = append({{.arr}}, func(ctx context.Context) graphql.Marshaler {
+				{{- if not .isScalar }}
 					rctx := &graphql.ResolverContext{
 						Index: &{{.index}},
 					}
-					ctx = graphql.WithResolverContext(ctx, rctx)
+					ctx := graphql.WithResolverContext(ctx, rctx)
+				{{- end}}
+				{{.arr}} = append({{.arr}}, func() graphql.Marshaler {
 					{{ .next }} 
-				}(ctx))
+				}())
 			}
 			return {{.arr}}`, map[string]interface{}{
 			"val":   val,
 			"arr":   arr,
 			"index": index,
+			"isScalar": f.IsScalar,
 			"next":  f.doWriteJson(val+"["+index+"]", remainingMods[1:], astType.Elem, false, depth+1),
 		})
 
@@ -240,7 +243,11 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 		if !isPtr {
 			val = "&" + val
 		}
-		return fmt.Sprintf("return ec._%s(ctx, field.Selections, %s)", f.GQLType, val)
+		return tpl(`
+			return ec._{{.type}}(ctx, field.Selections, {{.val}})`, map[string]interface{}{
+			"type": f.GQLType,
+			"val": val,
+		})
 	}
 }
 

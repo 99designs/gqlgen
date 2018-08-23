@@ -98,8 +98,6 @@ var circleImplementors = []string{"Circle", "Shape"}
 func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, obj *Circle) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, circleImplementors)
 
-	graphql.GetResolverContext(ctx).Result = obj
-
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -138,6 +136,7 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	res := resTmp.(float64)
+	rctx.Result = res
 	return graphql.MarshalFloat(res)
 }
 
@@ -156,6 +155,7 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(float64)
+	rctx.Result = res
 	return graphql.MarshalFloat(res)
 }
 
@@ -164,8 +164,6 @@ var errorImplementors = []string{"Error"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, obj *Error) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, errorImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -221,6 +219,7 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalID(res)
 }
 
@@ -239,6 +238,7 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -260,6 +260,7 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -281,6 +282,7 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+	rctx.Result = res
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -296,8 +298,6 @@ var forcedResolverImplementors = []string{"ForcedResolver"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.SelectionSet, obj *ForcedResolver) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, forcedResolverImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
@@ -340,6 +340,7 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		return graphql.Null
 	}
 	res := resTmp.(*Circle)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -353,8 +354,6 @@ var innerObjectImplementors = []string{"InnerObject"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _InnerObject(ctx context.Context, sel ast.SelectionSet, obj *InnerObject) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, innerObjectImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -398,6 +397,7 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(int)
+	rctx.Result = res
 	return graphql.MarshalInt(res)
 }
 
@@ -406,8 +406,6 @@ var invalidIdentifierImplementors = []string{"InvalidIdentifier"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel ast.SelectionSet, obj *invalid_packagename.InvalidIdentifier) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, invalidIdentifierImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -451,6 +449,7 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 		return graphql.Null
 	}
 	res := resTmp.(int)
+	rctx.Result = res
 	return graphql.MarshalInt(res)
 }
 
@@ -459,8 +458,6 @@ var itImplementors = []string{"It"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *introspection1.It) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, itImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -504,6 +501,7 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalID(res)
 }
 
@@ -512,8 +510,6 @@ var outerObjectImplementors = []string{"OuterObject"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionSet, obj *OuterObject) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, outerObjectImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -557,6 +553,7 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(InnerObject)
+	rctx.Result = res
 
 	return ec._InnerObject(ctx, field.Selections, &res)
 }
@@ -685,6 +682,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		return graphql.Null
 	}
 	res := resTmp.(*invalid_packagename.InvalidIdentifier)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -708,6 +706,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	res := resTmp.(*introspection1.It)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -748,6 +747,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(*bool)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -787,6 +787,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	res := resTmp.(*bool)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -847,6 +848,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.(*bool)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -869,17 +871,20 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		return graphql.Null
 	}
 	res := resTmp.([][]*OuterObject)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
 			arr2 := graphql.Array{}
 			for idx2 := range res[idx1] {
 				rctx := &graphql.ResolverContext{
-					Index: &idx2,
+					Index:  &idx2,
+					Result: res[idx1][idx2],
 				}
 				ctx := graphql.WithResolverContext(ctx, rctx)
 				arr2 = append(arr2, func() graphql.Marshaler {
@@ -932,6 +937,7 @@ func (ec *executionContext) _Query_keywords(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(bool)
+	rctx.Result = res
 	return graphql.MarshalBoolean(res)
 }
 
@@ -950,10 +956,12 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.([]*Shape)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -983,6 +991,7 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(*Error)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -1009,6 +1018,7 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1282,6 +1292,7 @@ func (ec *executionContext) _Query_keywordArgs(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(bool)
+	rctx.Result = res
 	return graphql.MarshalBoolean(res)
 }
 
@@ -1312,6 +1323,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -1335,6 +1347,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Schema)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -1348,8 +1361,6 @@ var rectangleImplementors = []string{"Rectangle", "Shape"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet, obj *Rectangle) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, rectangleImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -1391,6 +1402,7 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	res := resTmp.(float64)
+	rctx.Result = res
 	return graphql.MarshalFloat(res)
 }
 
@@ -1409,6 +1421,7 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	res := resTmp.(float64)
+	rctx.Result = res
 	return graphql.MarshalFloat(res)
 }
 
@@ -1427,6 +1440,7 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(float64)
+	rctx.Result = res
 	return graphql.MarshalFloat(res)
 }
 
@@ -1435,8 +1449,6 @@ var __DirectiveImplementors = []string{"__Directive"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __DirectiveImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -1492,6 +1504,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1510,6 +1523,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1531,6 +1545,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		return graphql.Null
 	}
 	res := resTmp.([]string)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -1558,10 +1573,12 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -1577,8 +1594,6 @@ var __EnumValueImplementors = []string{"__EnumValue"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __EnumValueImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -1631,6 +1646,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1649,6 +1665,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1670,6 +1687,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 		return graphql.Null
 	}
 	res := resTmp.(bool)
+	rctx.Result = res
 	return graphql.MarshalBoolean(res)
 }
 
@@ -1688,6 +1706,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1696,8 +1715,6 @@ var __FieldImplementors = []string{"__Field"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __FieldImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -1760,6 +1777,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1778,6 +1796,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1799,10 +1818,12 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -1831,6 +1852,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -1860,6 +1882,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 		return graphql.Null
 	}
 	res := resTmp.(bool)
+	rctx.Result = res
 	return graphql.MarshalBoolean(res)
 }
 
@@ -1878,6 +1901,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1886,8 +1910,6 @@ var __InputValueImplementors = []string{"__InputValue"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __InputValueImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -1940,6 +1962,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1958,6 +1981,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -1979,6 +2003,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -2005,6 +2030,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -2017,8 +2043,6 @@ var __SchemaImplementors = []string{"__Schema"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __SchemaImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -2076,10 +2100,12 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -2108,6 +2134,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -2134,6 +2161,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -2157,6 +2185,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -2183,10 +2212,12 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Directive)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -2202,8 +2233,6 @@ var __TypeImplementors = []string{"__Type"}
 // nolint: gocyclo, errcheck, gas, goconst
 func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __TypeImplementors)
-
-	graphql.GetResolverContext(ctx).Result = obj
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -2263,6 +2292,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -2281,6 +2311,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -2303,6 +2334,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -2333,10 +2365,12 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Field)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -2362,10 +2396,12 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -2391,10 +2427,12 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -2432,10 +2470,12 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.EnumValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -2461,10 +2501,12 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		rctx := &graphql.ResolverContext{
-			Index: &idx1,
+			Index:  &idx1,
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
@@ -2490,6 +2532,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null

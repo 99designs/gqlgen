@@ -60,6 +60,7 @@
 			return graphql.Null
 		}
 		res := resTmp.({{$field.Signature}})
+		rctx.Result = res
 		{{ $field.WriteJson }}
 	}
 {{ end }}

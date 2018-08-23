@@ -1734,7 +1734,7 @@ enum DATE_FILTER_OP {
 input DateFilter {
     value: String!
     timezone: String = "UTC"
-    op: DATE_FILTER_OP = EQ @magic(kind: 1)
+    op: DATE_FILTER_OP = EQ
 }
 
 type User {
@@ -1743,7 +1743,7 @@ type User {
 }
 
 type Viewer {
-    user: User @magic(kind: 1)
+    user: User
 }
 
 type Query {

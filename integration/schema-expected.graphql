@@ -1,5 +1,8 @@
 # source: http://localhost:8080/query
-# timestamp: Fri Aug 10 2018 11:50:28 GMT+1000 (AEST)
+# timestamp: Thu Aug 23 2018 10:30:37 GMT+1000 (AEST)
+
+"""This directive does magical things"""
+directive @magic(kind: Int) on FIELD_DEFINITION
 
 enum DATE_FILTER_OP {
   EQ

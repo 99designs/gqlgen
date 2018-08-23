@@ -35,16 +35,34 @@ func (s *Schema) SubscriptionType() *Type {
 
 func (s *Schema) Directives() []Directive {
 	var res []Directive
+
 	for _, d := range s.schema.Directives {
-		var locs []string
-		for _, loc := range d.Locations {
-			locs = append(locs, string(loc))
-		}
-		res = append(res, Directive{
-			Name:        d.Name,
-			Description: d.Description,
-			Locations:   locs,
+		res = append(res, s.directiveFromDef(d))
+	}
+
+	return res
+}
+
+func (s *Schema) directiveFromDef(d *ast.DirectiveDefinition) Directive {
+	var locs []string
+	for _, loc := range d.Locations {
+		locs = append(locs, string(loc))
+	}
+
+	var args []InputValue
+	for _, arg := range d.Arguments {
+		args = append(args, InputValue{
+			Name:         arg.Name,
+			Description:  arg.Description,
+			DefaultValue: defaultValue(arg.DefaultValue),
+			Type:         WrapTypeFromType(s.schema, arg.Type),
 		})
 	}
-	return res
+
+	return Directive{
+		Name:        d.Name,
+		Description: d.Description,
+		Locations:   locs,
+		Args:        args,
+	}
 }

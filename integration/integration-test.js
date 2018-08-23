@@ -4,12 +4,10 @@ import {ApolloClient} from "apollo-client";
 import fetch from "node-fetch";
 import gql from 'graphql-tag';
 
-if (!process.env.SERVER_URL) {
-    throw "SERVER_URL must be set"
-}
+var uri = process.env.SERVER_URL || 'http://localhost:8080/query';
 
 const client = new ApolloClient({
-    link: new HttpLink({uri: process.env.SERVER_URL, fetch: fetch}),
+    link: new HttpLink({uri, fetch}),
     cache: new InMemoryCache(),
     defaultOptions: {
         watchQuery: {

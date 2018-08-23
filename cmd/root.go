@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/99designs/gqlgen/internal/gopath"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +40,16 @@ var rootCmd = &cobra.Command{
 	Long: `This is a library for quickly creating strictly typed graphql servers in golang.
 			See https://gqlgen.com/ for a getting started guide.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		pwd, err := os.Getwd()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to determine current workding dir: %s\n", err.Error())
+			os.Exit(1)
+		}
+
+		if !gopath.Contains(pwd) {
+			fmt.Fprintf(os.Stderr, "gqlgen must be run from inside your $GOPATH\n")
+			os.Exit(1)
+		}
 		if verbose {
 			log.SetFlags(0)
 		} else {

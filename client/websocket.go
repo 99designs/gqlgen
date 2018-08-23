@@ -84,7 +84,7 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 
 			if respDataRaw["errors"] != nil {
 				var errs []*gqlerror.Error
-				if err = unpack(respDataRaw["errors"], errs); err != nil {
+				if err = unpack(respDataRaw["errors"], &errs); err != nil {
 					return err
 				}
 				if len(errs) > 0 {

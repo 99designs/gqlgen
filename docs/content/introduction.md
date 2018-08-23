@@ -1,6 +1,7 @@
 ---
 linkTitle: Introduction
 title: Type-safe graphql for golang
+description: Generating GraphQL servers in golang with type safety
 type: homepage
 date: 2018-03-17T13:06:47+11:00
 ---

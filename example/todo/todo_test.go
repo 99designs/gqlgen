@@ -19,7 +19,7 @@ func TestTodo(t *testing.T) {
 	}
 	c.MustPost(`mutation { createTodo(todo:{text:"Fery important"}) { id } }`, &resp)
 
-	require.Equal(t, 4, resp.CreateTodo.ID)
+	require.Equal(t, 5, resp.CreateTodo.ID)
 
 	t.Run("update the todo text", func(t *testing.T) {
 		var resp struct {
@@ -28,7 +28,7 @@ func TestTodo(t *testing.T) {
 		c.MustPost(
 			`mutation($id: Int!, $text: String!) { updateTodo(id: $id, changes:{text:$text}) { text } }`,
 			&resp,
-			client.Var("id", 4),
+			client.Var("id", 5),
 			client.Var("text", "Very important"),
 		)
 
@@ -41,7 +41,7 @@ func TestTodo(t *testing.T) {
 				Typename string `json:"__typename"`
 			}
 		}
-		c.MustPost(`{ todo(id: 4) { __typename } }`, &resp)
+		c.MustPost(`{ todo(id: 5) { __typename } }`, &resp)
 
 		require.Equal(t, "Todo", resp.Todo.Typename)
 	})
@@ -50,7 +50,7 @@ func TestTodo(t *testing.T) {
 		var resp struct {
 			UpdateTodo struct{ Text string }
 		}
-		c.MustPost(`mutation { updateTodo(id: 4, changes:{done:true}) { text } }`, &resp)
+		c.MustPost(`mutation { updateTodo(id: 5, changes:{done:true}) { text } }`, &resp)
 
 		require.Equal(t, "Very important", resp.UpdateTodo.Text)
 	})
@@ -73,6 +73,19 @@ func TestTodo(t *testing.T) {
 		err := c.Post(`{ todo(id:99) { text } }`, &resp)
 
 		require.Error(t, err)
+		require.Nil(t, resp.Todo)
+	})
+
+	t.Run("get done status of unowned todo", func(t *testing.T) {
+		var resp struct {
+			Todo *struct {
+				Text string
+				Done bool
+			}
+		}
+		err := c.Post(`{ todo(id:3) { text, done } }`, &resp)
+
+		require.EqualError(t, err, `[{"message":"you dont own that","path":["todo","done"]}]`)
 		require.Nil(t, resp.Todo)
 	})
 
@@ -100,20 +113,19 @@ func TestTodo(t *testing.T) {
 			Todos []struct {
 				ID   int
 				Text string
-				Done bool
 			}
 		}
 		c.MustPost(`{
 			todo(id:1) { id done text }
 			lastTodo { id text done }
-			todos { id text done }
+			todos { id text }
 		}`, &resp)
 
 		require.Equal(t, 1, resp.Todo.ID)
-		require.Equal(t, 4, resp.LastTodo.ID)
-		require.Len(t, resp.Todos, 4)
+		require.Equal(t, 5, resp.LastTodo.ID)
+		require.Len(t, resp.Todos, 5)
 		require.Equal(t, "Very important", resp.LastTodo.Text)
-		require.Equal(t, 4, resp.LastTodo.ID)
+		require.Equal(t, 5, resp.LastTodo.ID)
 	})
 
 	t.Run("introspection", func(t *testing.T) {
@@ -129,19 +141,6 @@ func TestTodo(t *testing.T) {
 		c.MustPost(`mutation { createTodo(todo:{text:"Completed todo", done: null}) { text } }`, &resp)
 
 		require.Equal(t, "Completed todo", resp.CreateTodo.Text)
-	})
-
-	t.Run("isAuthenticated directive middleware", func(t *testing.T) {
-		var resp map[string]interface{}
-		c.MustPost(`{ authenticatedTodo(id: 1) { __typename } }`, &resp)
-		val, ok := resp["authenticatedTodo"]
-		require.True(t, ok)
-		require.Nil(t, val)
-
-		c.MustPost(`{ authenticatedTodo(id: 2) { __typename } }`, &resp)
-		val, ok = resp["authenticatedTodo"]
-		require.True(t, ok)
-		require.NotNil(t, val)
 	})
 }
 

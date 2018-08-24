@@ -1,0 +1,3 @@
+models:
+  Todo:
+    model: github.com/99designs/gqlgen/example/todo.Todo

@@ -27,6 +27,9 @@ resolver:
   filename: resolver.go # where to write them
   type: Resolver  # whats the resolver root implementation type called?
 
+# Optional, turns on binding to field names by tag provided
+struct_tag: json
+
 # Tell gqlgen about any existing models you want to reuse for
 # graphql. These normally come from the db or a remote api.
 models:

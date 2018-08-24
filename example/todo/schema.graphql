@@ -1,32 +1,31 @@
 schema {
-	query: MyQuery
-	mutation: MyMutation
+    query: MyQuery
+    mutation: MyMutation
 }
 
 type MyQuery {
-	todo(id: Int!): Todo
-	authenticatedTodo(id: Int!): Todo @hasRole(role: ADMIN)
-	lastTodo: Todo
-	todos: [Todo!]!
+    todo(id: Int!): Todo
+    lastTodo: Todo
+    todos: [Todo!]!
 }
 
 type MyMutation {
-	createTodo(todo: TodoInput!): Todo!
-	updateTodo(id: Int!, changes: Map!): Todo
+    createTodo(todo: TodoInput!): Todo!
+    updateTodo(id: Int!, changes: Map!): Todo
 }
 
 type Todo {
-	id: Int!
-	text: String!
-	done: Boolean!
+    id: Int!
+    text: String!
+    done: Boolean! @hasRole(role: OWNER) # only the owner can see if a todo is done
 }
 
 "Passed to createTodo to create a new todo"
 input TodoInput {
-	"The body text"
-	text: String!
-	"Is it done already?"
-	done: Boolean
+    "The body text"
+    text: String!
+    "Is it done already?"
+    done: Boolean
 }
 
 scalar Map
@@ -36,5 +35,5 @@ directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {
     ADMIN
-    USER
+    OWNER
 }

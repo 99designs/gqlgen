@@ -156,6 +156,14 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 		if strings.EqualFold(field.Name(), name) && foundField == nil {
 			foundField = field
 		}
+
+		tags := reflect.StructTag(typ.Tag(i))
+
+		if val, ok := tags.Lookup("json"); ok {
+			if strings.EqualFold(val, name) {
+				return field
+			}
+		}
 	}
 
 	if foundField == nil {

@@ -38,6 +38,10 @@ type Amb struct {
 	Bar string ` + "`" + `gqlgen:"foo"` + "`" + `
 	Foo int    ` + "`" + `gqlgen:"foo"` + "`" + `
 }
+type Embed struct {
+	Std
+	Test string
+}
 `
 	scope, err := parseScope(input, "test")
 	require.NoError(t, err)
@@ -46,6 +50,7 @@ type Amb struct {
 	anon := scope.Lookup("Anon").Type().Underlying().(*types.Struct)
 	tags := scope.Lookup("Tags").Type().Underlying().(*types.Struct)
 	amb := scope.Lookup("Amb").Type().Underlying().(*types.Struct)
+	embed := scope.Lookup("Embed").Type().Underlying().(*types.Struct)
 
 	tests := []struct {
 		Name        string
@@ -61,6 +66,7 @@ type Amb struct {
 		{"Picks field with tag over field name when passed a tag", tags, "foo", "gqlgen", "Bar", false},
 		{"Errors when ambigious", amb, "foo", "gqlgen", "", true},
 		{"Finds a field that is in embedded struct", anon, "bar", "", "Bar", false},
+		{"Finds field that is not in embedded struct", embed, "test", "", "Test", false},
 	}
 
 	for _, tt := range tests {

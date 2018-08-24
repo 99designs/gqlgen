@@ -134,7 +134,7 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 		if field.Anonymous() {
 			if named, ok := field.Type().(*types.Struct); ok {
 				f, err := findField(named, name, structTag)
-				if err != nil {
+				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
 					return nil, err
 				}
 				if f != nil && foundField == nil {
@@ -144,7 +144,7 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 
 			if named, ok := field.Type().Underlying().(*types.Struct); ok {
 				f, err := findField(named, name, structTag)
-				if err != nil {
+				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
 					return nil, err
 				}
 				if f != nil && foundField == nil {

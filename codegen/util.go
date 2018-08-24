@@ -112,6 +112,7 @@ func findMethod(typ *types.Named, name string) *types.Func {
 // 3. Actual Field name
 func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 	var foundField *types.Var
+	foundFieldWasTag := false
 
 	for i := 0; i < typ.NumFields(); i++ {
 		field := typ.Field(i)
@@ -120,9 +121,12 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 			tags := reflect.StructTag(typ.Tag(i))
 			if val, ok := tags.Lookup(structTag); ok {
 				if strings.EqualFold(val, name) {
-					if foundField != nil {
+					if foundField != nil && foundFieldWasTag {
 						return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", structTag, val)
 					}
+
+					foundField = field
+					foundFieldWasTag = true
 				}
 			}
 		}
@@ -155,14 +159,6 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 
 		if strings.EqualFold(field.Name(), name) && foundField == nil {
 			foundField = field
-		}
-
-		tags := reflect.StructTag(typ.Tag(i))
-
-		if val, ok := tags.Lookup("json"); ok {
-			if strings.EqualFold(val, name) {
-				return field
-			}
 		}
 	}
 

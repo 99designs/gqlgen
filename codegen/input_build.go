@@ -27,7 +27,7 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 			}
 			if def != nil {
 				input.Marshaler = buildInputMarshaler(typ, def)
-				bindErrs := bindObject(def.Type(), input, imports)
+				bindErrs := bindObject(def.Type(), input, imports, cfg.StructTag)
 				if len(bindErrs) > 0 {
 					return nil, bindErrs
 				}

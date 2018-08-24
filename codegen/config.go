@@ -64,6 +64,7 @@ type Config struct {
 	Model          PackageConfig `yaml:"model"`
 	Resolver       PackageConfig `yaml:"resolver,omitempty"`
 	Models         TypeMap       `yaml:"models,omitempty"`
+	StructTag      string        `yaml:"struct_tag,omitempty"`
 
 	FilePath string `yaml:"-"`
 

@@ -82,19 +82,18 @@ type ResolverContext struct {
 	Args map[string]interface{}
 	// The raw field
 	Field CollectedField
-
-	// indicies tracks the array indicies only. all field aliases come from the context stack
-	indicies []int
+	// The index of array in path.
+	Index *int
+	// The result object of resolver
+	Result interface{}
 }
 
 func (r *ResolverContext) Path() []interface{} {
 	var path []interface{}
 	for it := r; it != nil; it = it.Parent {
-		for i := len(it.indicies) - 1; i >= 0; i-- {
-			path = append(path, it.indicies[i])
-		}
-
-		if it.Field.Field != nil {
+		if it.Index != nil {
+			path = append(path, *it.Index)
+		} else if it.Field.Field != nil {
 			path = append(path, it.Field.Alias)
 		}
 	}
@@ -106,14 +105,6 @@ func (r *ResolverContext) Path() []interface{} {
 	}
 
 	return path
-}
-
-func (r *ResolverContext) PushIndex(index int) {
-	r.indicies = append(r.indicies, index)
-}
-
-func (r *ResolverContext) Pop() {
-	r.indicies = r.indicies[0 : len(r.indicies)-1]
 }
 
 func GetResolverContext(ctx context.Context) *ResolverContext {

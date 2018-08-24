@@ -129,6 +129,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -158,6 +159,8 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 		return graphql.Null
 	}
 	res := resTmp.(Todo)
+	rctx.Result = res
+
 	return ec._Todo(ctx, field.Selections, &res)
 }
 
@@ -204,6 +207,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
@@ -221,18 +225,23 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.([]Todo)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec._Todo(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -259,13 +268,16 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
 	}
+
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
@@ -280,10 +292,12 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Schema)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
 	}
+
 	return ec.___Schema(ctx, field.Selections, res)
 }
 
@@ -342,6 +356,7 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Todo",
@@ -359,9 +374,11 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalID(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Todo_databaseId(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Todo",
@@ -379,9 +396,11 @@ func (ec *executionContext) _Todo_databaseId(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	res := resTmp.(int)
+	rctx.Result = res
 	return graphql.MarshalInt(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Todo",
@@ -399,9 +418,11 @@ func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.Collec
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Todo",
@@ -419,9 +440,11 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 		return graphql.Null
 	}
 	res := resTmp.(bool)
+	rctx.Result = res
 	return graphql.MarshalBoolean(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Todo",
@@ -439,6 +462,8 @@ func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.Collec
 		return graphql.Null
 	}
 	res := resTmp.(User)
+	rctx.Result = res
+
 	return ec._User(ctx, field.Selections, &res)
 }
 
@@ -477,6 +502,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -494,9 +520,11 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalID(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -514,6 +542,7 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -559,6 +588,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -576,9 +606,11 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Directive_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -593,9 +625,11 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -613,18 +647,17 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		return graphql.Null
 	}
 	res := resTmp.([]string)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
 			return graphql.MarshalString(res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -642,12 +675,16 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
@@ -693,6 +730,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -710,9 +748,11 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___EnumValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -727,9 +767,11 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -747,9 +789,11 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 		return graphql.Null
 	}
 	res := resTmp.(bool)
+	rctx.Result = res
 	return graphql.MarshalBoolean(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -764,6 +808,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -816,6 +861,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -833,9 +879,11 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Field_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -850,9 +898,11 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -870,18 +920,23 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -899,6 +954,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -906,9 +962,11 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
+
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -926,9 +984,11 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 		return graphql.Null
 	}
 	res := resTmp.(bool)
+	rctx.Result = res
 	return graphql.MarshalBoolean(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -943,6 +1003,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
@@ -985,6 +1046,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1002,9 +1064,11 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___InputValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1019,9 +1083,11 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1039,6 +1105,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -1046,9 +1113,11 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
+
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1063,6 +1132,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -1114,6 +1184,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1131,18 +1202,23 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1160,6 +1236,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -1167,9 +1244,11 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
+
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1184,13 +1263,16 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
 	}
+
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1205,13 +1287,16 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
 	}
+
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Schema_directives(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1229,12 +1314,16 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Directive)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___Directive(ctx, field.Selections, &res[idx1])
 		}())
 	}
@@ -1287,6 +1376,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1304,9 +1394,11 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1321,6 +1413,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	res := resTmp.(*string)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
@@ -1328,6 +1421,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	return graphql.MarshalString(*res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1342,9 +1436,11 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.(string)
+	rctx.Result = res
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -1371,18 +1467,23 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Field)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___Field(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1397,18 +1498,23 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1423,18 +1529,23 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.Type)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___Type(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -1461,18 +1572,23 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.EnumValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___EnumValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1487,18 +1603,23 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 		return graphql.Null
 	}
 	res := resTmp.([]introspection.InputValue)
+	rctx.Result = res
 	arr1 := graphql.Array{}
 	for idx1 := range res {
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
 		arr1 = append(arr1, func() graphql.Marshaler {
-			rctx := graphql.GetResolverContext(ctx)
-			rctx.PushIndex(idx1)
-			defer rctx.Pop()
+
 			return ec.___InputValue(ctx, field.Selections, &res[idx1])
 		}())
 	}
 	return arr1
 }
 
+// nolint: vetshadow
 func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1513,10 +1634,12 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
+	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
 	}
+
 	return ec.___Type(ctx, field.Selections, res)
 }
 

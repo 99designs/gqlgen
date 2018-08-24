@@ -212,21 +212,31 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 		}
 		var arr = "arr" + strconv.Itoa(depth)
 		var index = "idx" + strconv.Itoa(depth)
+		var usePtr bool
+		if len(remainingMods) == 1 && !isPtr {
+			usePtr = true
+		}
 
 		return tpl(`{{.arr}} := graphql.Array{}
 			for {{.index}} := range {{.val}} {
+				{{- if not .isScalar }}
+					rctx := &graphql.ResolverContext{
+						Index: &{{.index}},
+						Result: {{ if .usePtr }}&{{end}}{{.val}}[{{.index}}],
+					}
+					ctx := graphql.WithResolverContext(ctx, rctx)
+				{{- end}}
 				{{.arr}} = append({{.arr}}, func() graphql.Marshaler {
-					rctx := graphql.GetResolverContext(ctx)
-					rctx.PushIndex({{.index}})
-					defer rctx.Pop()
 					{{ .next }} 
 				}())
 			}
 			return {{.arr}}`, map[string]interface{}{
-			"val":   val,
-			"arr":   arr,
-			"index": index,
-			"next":  f.doWriteJson(val+"["+index+"]", remainingMods[1:], astType.Elem, false, depth+1),
+			"val":      val,
+			"arr":      arr,
+			"index":    index,
+			"isScalar": f.IsScalar,
+			"usePtr":   usePtr,
+			"next":     f.doWriteJson(val+"["+index+"]", remainingMods[1:], astType.Elem, false, depth+1),
 		})
 
 	case f.IsScalar:
@@ -239,7 +249,11 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 		if !isPtr {
 			val = "&" + val
 		}
-		return fmt.Sprintf("return ec._%s(ctx, field.Selections, %s)", f.GQLType, val)
+		return tpl(`
+			return ec._{{.type}}(ctx, field.Selections, {{.val}})`, map[string]interface{}{
+			"type": f.GQLType,
+			"val":  val,
+		})
 	}
 }
 

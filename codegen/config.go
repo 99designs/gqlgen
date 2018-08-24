@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/99designs/gqlgen/internal/gopath"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 	"gopkg.in/yaml.v2"
@@ -108,22 +109,11 @@ func (c *PackageConfig) normalize() error {
 }
 
 func (c *PackageConfig) ImportPath() string {
-	dir := filepath.ToSlash(c.Dir())
-	for _, gopath := range filepath.SplitList(build.Default.GOPATH) {
-		gopath = filepath.ToSlash(gopath) + "/src/"
-		if len(gopath) > len(dir) {
-			continue
-		}
-		if strings.EqualFold(gopath, dir[0:len(gopath)]) {
-			dir = dir[len(gopath):]
-			break
-		}
-	}
-	return dir
+	return gopath.MustDir2Import(c.Dir())
 }
 
 func (c *PackageConfig) Dir() string {
-	return filepath.ToSlash(filepath.Dir(c.Filename))
+	return filepath.Dir(c.Filename)
 }
 
 func (c *PackageConfig) Check() error {

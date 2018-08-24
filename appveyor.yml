@@ -35,3 +35,12 @@ test_script:
   - dep ensure -vendor-only
   - go generate ./...
   - go test -timeout 20m ./...
+
+  - echo "testing init"
+  - rd /s /q vendor
+  - go get ./...
+  - go install
+  - cd c:\gopath\src\github.com\99designs\
+  - mkdir init-project
+  - cd init-project
+  - gqlgen init

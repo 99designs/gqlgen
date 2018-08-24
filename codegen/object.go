@@ -212,28 +212,37 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 		}
 		var arr = "arr" + strconv.Itoa(depth)
 		var index = "idx" + strconv.Itoa(depth)
+		var wg = "wg" + strconv.Itoa(depth)
 		var usePtr bool
 		if len(remainingMods) == 1 && !isPtr {
 			usePtr = true
 		}
 
-		return tpl(`{{.arr}} := graphql.Array{}
+		return tpl(`
+			{{.arr}} := make(graphql.Array, len({{.val}}))
+			var {{.wg}} sync.WaitGroup
+			{{.wg}}.Add(len({{.val}}))
 			for {{.index}} := range {{.val}} {
-				{{- if not .isScalar }}
-					rctx := &graphql.ResolverContext{
-						Index: &{{.index}},
-						Result: {{ if .usePtr }}&{{end}}{{.val}}[{{.index}}],
-					}
-					ctx := graphql.WithResolverContext(ctx, rctx)
-				{{- end}}
-				{{.arr}} = append({{.arr}}, func() graphql.Marshaler {
-					{{ .next }} 
-				}())
+				go func({{.index}} int) {
+					defer {{.wg}}.Done()
+					{{- if not .isScalar }}
+						rctx := &graphql.ResolverContext{
+							Index: &{{.index}},
+							Result: {{ if .usePtr }}&{{end}}{{.val}}[{{.index}}],
+						}
+						ctx := graphql.WithResolverContext(ctx, rctx)
+					{{- end}}
+					{{.arr}}[{{.index}}] = func() graphql.Marshaler {
+						{{ .next }} 
+					}()
+				}({{.index}})
 			}
+			{{.wg}}.Wait()
 			return {{.arr}}`, map[string]interface{}{
 			"val":      val,
 			"arr":      arr,
 			"index":    index,
+			"wg":       wg,
 			"isScalar": f.IsScalar,
 			"usePtr":   usePtr,
 			"next":     f.doWriteJson(val+"["+index+"]", remainingMods[1:], astType.Elem, false, depth+1),

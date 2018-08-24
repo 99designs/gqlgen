@@ -5,30 +5,48 @@ package todo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
 )
 
+var you = &User{ID: 1, Name: "You"}
+var them = &User{ID: 2, Name: "Them"}
+
 func New() Config {
 	c := Config{
 		Resolvers: &resolvers{
 			todos: []Todo{
-				{ID: 1, Text: "A todo not to forget", Done: false},
-				{ID: 2, Text: "This is the most important", Done: false},
-				{ID: 3, Text: "Please do this or else", Done: false},
+				{ID: 1, Text: "A todo not to forget", Done: false, owner: you},
+				{ID: 2, Text: "This is the most important", Done: false, owner: you},
+				{ID: 3, Text: "Somebody else's todo", Done: true, owner: them},
+				{ID: 4, Text: "Please do this or else", Done: false, owner: you},
 			},
-			lastID: 3,
+			lastID: 4,
 		},
 	}
-	c.Directives.HasRole = func(ctx context.Context, next graphql.Resolver, role Role) (interface{}, error) {
-		rctx := graphql.GetResolverContext(ctx)
-		idVal := rctx.Field.Arguments.ForName("id").Value
-		id, _ := idVal.Value(make(map[string]interface{}))
-		if id.(int64) == 1 && role == RoleAdmin {
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (interface{}, error) {
+		switch role {
+		case RoleAdmin:
+			// No admin for you!
 			return nil, nil
+		case RoleOwner:
+			// This is also available in context
+			if obj != graphql.GetResolverContext(ctx).Parent.Result {
+				return nil, fmt.Errorf("parent type mismatch")
+			}
+			ownable, isOwnable := obj.(Ownable)
+			if !isOwnable {
+				return nil, fmt.Errorf("obj cant be owned")
+			}
+
+			if ownable.Owner().ID != you.ID {
+				return nil, fmt.Errorf("you dont own that")
+			}
 		}
+
 		return next(ctx)
 	}
 	return c
@@ -75,18 +93,15 @@ func (r *QueryResolver) Todos(ctx context.Context) ([]Todo, error) {
 	return r.todos, nil
 }
 
-func (r *QueryResolver) AuthenticatedTodo(ctx context.Context, id int) (*Todo, error) {
-	return r.Todo(ctx, id)
-}
-
 type MutationResolver resolvers
 
 func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (Todo, error) {
 	newID := r.id()
 
 	newTodo := Todo{
-		ID:   newID,
-		Text: todo.Text,
+		ID:    newID,
+		Text:  todo.Text,
+		owner: you,
 	}
 
 	if todo.Done != nil {

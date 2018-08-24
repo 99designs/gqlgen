@@ -25,6 +25,10 @@ func (e *executableSchemaStub) Schema() *ast.Schema {
 	`})
 }
 
+func (e *executableSchemaStub) Complexity(typeName, field string, childComplexity int, args map[string]interface{}) (int, bool) {
+	return 0, false
+}
+
 func (e *executableSchemaStub) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 	return &graphql.Response{Data: []byte(`{"name":"test"}`)}
 }

@@ -10,6 +10,7 @@ import (
 type ExecutableSchema interface {
 	Schema() *ast.Schema
 
+	Complexity(typeName, fieldName string, childComplexity int, args map[string]interface{}) (int, bool)
 	Query(ctx context.Context, op *ast.OperationDefinition) *Response
 	Mutation(ctx context.Context, op *ast.OperationDefinition) *Response
 	Subscription(ctx context.Context, op *ast.OperationDefinition) func() *Response

@@ -33,15 +33,16 @@ type Object struct {
 type Field struct {
 	*Type
 
-	GQLName        string          // The name of the field in graphql
-	GoFieldType    GoFieldType     // The field type in go, if any
-	GoReceiverName string          // The name of method & var receiver in go, if any
-	GoFieldName    string          // The name of the method or var in go, if any
-	Args           []FieldArgument // A list of arguments to be passed to this field
-	ForceResolver  bool            // Should be emit Resolver method
-	NoErr          bool            // If this is bound to a go method, does that method have an error as the second argument
-	Object         *Object         // A link back to the parent object
-	Default        interface{}     // The default value
+	GQLName          string          // The name of the field in graphql
+	GoFieldType      GoFieldType     // The field type in go, if any
+	GoReceiverName   string          // The name of method & var receiver in go, if any
+	GoFieldName      string          // The name of the method or var in go, if any
+	Args             []FieldArgument // A list of arguments to be passed to this field
+	ForceResolver    bool            // Should be emit Resolver method
+	CustomComplexity bool            // Uses a custom complexity calculation
+	NoErr            bool            // If this is bound to a go method, does that method have an error as the second argument
+	Object           *Object         // A link back to the parent object
+	Default          interface{}     // The default value
 }
 
 type FieldArgument struct {
@@ -75,6 +76,15 @@ func (o *Object) HasResolvers() bool {
 func (o *Object) IsConcurrent() bool {
 	for _, f := range o.Fields {
 		if f.IsConcurrent() {
+			return true
+		}
+	}
+	return false
+}
+
+func (o *Object) HasComplexity() bool {
+	for _, f := range o.Fields {
+		if f.CustomComplexity {
 			return true
 		}
 	}
@@ -165,6 +175,24 @@ func (f *Field) ResolverDeclaration() string {
 	return res
 }
 
+func (f *Field) ComplexitySignature() string {
+	res := fmt.Sprintf("func(childComplexity int")
+	for _, arg := range f.Args {
+		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
+	}
+	res += ") int"
+	return res
+}
+
+func (f *Field) ComplexityArgs() string {
+	var args []string
+	for _, arg := range f.Args {
+		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+arg.Signature()+")")
+	}
+
+	return strings.Join(args, ", ")
+}
+
 func (f *Field) CallArgs() string {
 	var args []string
 
@@ -227,7 +255,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 					ctx := graphql.WithResolverContext(ctx, rctx)
 				{{- end}}
 				{{.arr}} = append({{.arr}}, func() graphql.Marshaler {
-					{{ .next }} 
+					{{ .next }}
 				}())
 			}
 			return {{.arr}}`, map[string]interface{}{

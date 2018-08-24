@@ -19,12 +19,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -35,6 +37,10 @@ type ResolverRoot interface {
 type DirectiveRoot struct {
 	HasRole func(ctx context.Context, next graphql.Resolver, role Role) (res interface{}, err error)
 }
+
+type ComplexityRoot struct {
+}
+
 type MyMutationResolver interface {
 	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
 	UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
@@ -49,10 +55,18 @@ type MyQueryResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

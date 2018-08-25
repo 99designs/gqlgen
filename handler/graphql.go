@@ -10,6 +10,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
+	"github.com/hashicorp/golang-lru"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
@@ -23,6 +24,7 @@ type params struct {
 }
 
 type Config struct {
+	cacheSize      int
 	upgrader       websocket.Upgrader
 	recover        graphql.RecoverFunc
 	errorPresenter graphql.ErrorPresenterFunc
@@ -110,8 +112,19 @@ func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 	}
 }
 
+// CacheSize sets the maximum size of the query cache.
+// If size is less than or equal to 0, the cache is disabled.
+func CacheSize(size int) Option {
+	return func(cfg *Config) {
+		cfg.cacheSize = size
+	}
+}
+
+const DefaultCacheSize = 1000
+
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := Config{
+		cacheSize: DefaultCacheSize,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
@@ -120,6 +133,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 
 	for _, option := range options {
 		option(&cfg)
+	}
+
+	var cache *lru.Cache
+	if cfg.cacheSize > 0 {
+		// An error is only returned for non-positive cache size
+		// and we already checked for that.
+		cache, _ = lru.New(DefaultCacheSize)
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -157,10 +177,23 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}
 		w.Header().Set("Content-Type", "application/json")
 
-		doc, qErr := gqlparser.LoadQuery(exec.Schema(), reqParams.Query)
-		if len(qErr) > 0 {
-			sendError(w, http.StatusUnprocessableEntity, qErr...)
-			return
+		var doc *ast.QueryDocument
+		if cache != nil {
+			val, ok := cache.Get(reqParams.Query)
+			if ok {
+				doc = val.(*ast.QueryDocument)
+			}
+		}
+		if doc == nil {
+			var qErr gqlerror.List
+			doc, qErr = gqlparser.LoadQuery(exec.Schema(), reqParams.Query)
+			if len(qErr) > 0 {
+				sendError(w, http.StatusUnprocessableEntity, qErr...)
+				return
+			}
+			if cache != nil {
+				cache.Add(reqParams.Query, doc)
+			}
 		}
 
 		op := doc.Operations.ForName(reqParams.OperationName)

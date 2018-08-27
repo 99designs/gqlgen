@@ -18,7 +18,6 @@ type Role string
 
 const (
 	RoleAdmin Role = "ADMIN"
-
 	RoleOwner Role = "OWNER"
 )
 

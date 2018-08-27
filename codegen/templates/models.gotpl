@@ -10,12 +10,10 @@ import (
 
 {{ range $model := .Models }}
 	{{with .Description}} {{.|prefixLines "// "}} {{end}}
-
 	{{- if .IsInterface }}
 		type {{.GoType}} interface {}
 	{{- else }}
 		type {{.GoType}} struct {
-
 			{{- range $field := .Fields }}
 				{{- if $field.GoFieldName }}
 					{{ $field.GoFieldName }} {{$field.Signature}} `json:"{{$field.GQLName}}"`
@@ -28,13 +26,15 @@ import (
 {{- end}}
 
 {{ range $enum := .Enums }}
-	{{with .Description}} {{.|prefixLines "// "}} {{end}}
+	{{with .Description}}{{.|prefixLines "// "}} {{end}}
 	type {{.GoType}} string
 	const (
-	{{ range $value := .Values}}
-		{{with .Description}} {{.|prefixLines "// "}} {{end}}
+	{{- range $value := .Values}}
+		{{- with .Description}}
+			{{.|prefixLines "// "}}
+		{{- end}}
 		{{$enum.GoType}}{{ .Name|toCamel }} {{$enum.GoType}} = {{.Name|quote}}
-	{{ end }}
+	{{- end }}
 	)
 
 	func (e {{.GoType}}) IsValid() bool {

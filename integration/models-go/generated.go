@@ -17,16 +17,11 @@ type DateFilter struct {
 type DateFilterOp string
 
 const (
-	DateFilterOpEq DateFilterOp = "EQ"
-
+	DateFilterOpEq  DateFilterOp = "EQ"
 	DateFilterOpNeq DateFilterOp = "NEQ"
-
-	DateFilterOpGt DateFilterOp = "GT"
-
+	DateFilterOpGt  DateFilterOp = "GT"
 	DateFilterOpGte DateFilterOp = "GTE"
-
-	DateFilterOpLt DateFilterOp = "LT"
-
+	DateFilterOpLt  DateFilterOp = "LT"
 	DateFilterOpLte DateFilterOp = "LTE"
 )
 
@@ -63,7 +58,6 @@ type ErrorType string
 
 const (
 	ErrorTypeCustom ErrorType = "CUSTOM"
-
 	ErrorTypeNormal ErrorType = "NORMAL"
 )
 

@@ -34,10 +34,8 @@ type Episode string
 
 const (
 	EpisodeNewhope Episode = "NEWHOPE"
-
-	EpisodeEmpire Episode = "EMPIRE"
-
-	EpisodeJedi Episode = "JEDI"
+	EpisodeEmpire  Episode = "EMPIRE"
+	EpisodeJedi    Episode = "JEDI"
 )
 
 func (e Episode) IsValid() bool {
@@ -73,8 +71,7 @@ type LengthUnit string
 
 const (
 	LengthUnitMeter LengthUnit = "METER"
-
-	LengthUnitFoot LengthUnit = "FOOT"
+	LengthUnitFoot  LengthUnit = "FOOT"
 )
 
 func (e LengthUnit) IsValid() bool {

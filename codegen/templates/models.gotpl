@@ -15,6 +15,9 @@ import (
 	{{- else }}
 		type {{.GoType}} struct {
 			{{- range $field := .Fields }}
+				{{- with .Description}}
+					{{.|prefixLines "// "}}
+				{{- end}}
 				{{- if $field.GoFieldName }}
 					{{ $field.GoFieldName }} {{$field.Signature}} `json:"{{$field.GQLName}}"`
 				{{- else }}

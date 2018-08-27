@@ -115,6 +115,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectSchema",
 				Object:         obj,
+				Description:    field.Description,
 			})
 			continue
 		}

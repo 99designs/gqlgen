@@ -16,7 +16,6 @@ var verbose bool
 var output string
 var models string
 var schemaFilename string
-var typemap string
 var packageName string
 var modelPackageName string
 var serverFilename string
@@ -29,7 +28,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&output, "out", "", "the file to write to")
 	rootCmd.PersistentFlags().StringVar(&models, "models", "", "the file to write the models to")
 	rootCmd.PersistentFlags().StringVar(&schemaFilename, "schema", "", "the graphql schema to generate types from")
-	rootCmd.PersistentFlags().StringVar(&typemap, "typemap", "", "a json map going from graphql to golang types")
 	rootCmd.PersistentFlags().StringVar(&packageName, "package", "", "the package name")
 	rootCmd.PersistentFlags().StringVar(&modelPackageName, "modelpackage", "", "the package name to use for models")
 }

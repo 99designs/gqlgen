@@ -141,9 +141,6 @@ func initConfig() *codegen.Config {
 	if modelPackageName != "" {
 		config.Model.Package = modelPackageName
 	}
-	if typemap != "" {
-		config.Models = loadModelMap()
-	}
 
 	var buf bytes.Buffer
 	buf.WriteString(strings.TrimSpace(configComment))

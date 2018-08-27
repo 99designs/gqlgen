@@ -26,7 +26,7 @@
   version = "v3.3.2"
 
 [[projects]]
-  digest = "1:78907d832e27dbfc6e3fdfc52bd2e5e2e05c1d0e3789d4825b824489fbeab233"
+  digest = "1:f3df613325a793ffb3d0ce7644a3bb6f62db45ac744dafe20172fe999c61cdbf"
   name = "github.com/gogo/protobuf"
   packages = [
     "io",
@@ -59,6 +59,17 @@
   pruneopts = "UT"
   revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:cf296baa185baae04a9a7004efee8511d08e2f5f51d4cbe5375da89722d681db"
+  name = "github.com/hashicorp/golang-lru"
+  packages = [
+    ".",
+    "simplelru",
+  ]
+  pruneopts = "UT"
+  revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
 
 [[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
@@ -96,7 +107,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:27af6024faa3c28426a698b8c653be0fd908bc96e25b7d76f2192eb342427db6"
+  digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
   name = "github.com/opentracing/opentracing-go"
   packages = [
     ".",
@@ -140,7 +151,7 @@
   revision = "ffb13db8def02f545acc58bd288ec6057c2bbfb9"
 
 [[projects]]
-  digest = "1:872fa275c31e1f9db31d66fa9b1d4a7bb9a080ff184e6977da01f36bfbe07f11"
+  digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
   name = "github.com/spf13/cobra"
   packages = ["."]
   pruneopts = "UT"
@@ -156,7 +167,7 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:73697231b93fb74a73ebd8384b68b9a60c57ea6b13c56d2425414566a72c8e6d"
+  digest = "1:7e8d267900c7fa7f35129a2a37596e38ed0f11ca746d6d9ba727980ee138f9f6"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
@@ -200,7 +211,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:77fe642412bfed48743e2b75163e3ab5c430cfe22dd488788647b89b28794635"
+  digest = "1:3cbc05413b8aac22b1f6d4350ed696b5a83a8515a4136db8f1ec3a0aee3d76e1"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -221,7 +232,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7ddb3a7b35cc853fe0db36a1b2473bdff03f28add7d28e4725e692603111266e"
+  digest = "1:741ebea9214cc226789d3003baeca9b169e04b5b336fb1a3b2c16e75bd296bb5"
   name = "sourcegraph.com/sourcegraph/appdash"
   packages = [
     ".",
@@ -237,7 +248,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:be108b48d79c3b3c345811a57a47ee87fdbe895beb4bb56239da71d4943e5be7"
+  digest = "1:8e0a2957fe342f22d70a543c3fcdf390f7627419c3d82d87ab4fd715a9ef5716"
   name = "sourcegraph.com/sourcegraph/appdash-data"
   packages = ["."]
   pruneopts = "UT"
@@ -249,6 +260,7 @@
   input-imports = [
     "github.com/go-chi/chi",
     "github.com/gorilla/websocket",
+    "github.com/hashicorp/golang-lru",
     "github.com/mitchellh/mapstructure",
     "github.com/opentracing-contrib/go-stdlib/nethttp",
     "github.com/opentracing/opentracing-go",

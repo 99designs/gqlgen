@@ -212,7 +212,6 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 		}
 		var arr = "arr" + strconv.Itoa(depth)
 		var index = "idx" + strconv.Itoa(depth)
-		var wg = "wg" + strconv.Itoa(depth)
 		var usePtr bool
 		if len(remainingMods) == 1 && !isPtr {
 			usePtr = true
@@ -220,29 +219,47 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 
 		return tpl(`
 			{{.arr}} := make(graphql.Array, len({{.val}}))
-			var {{.wg}} sync.WaitGroup
-			{{.wg}}.Add(len({{.val}}))
+			{{ if and .top (not .isScalar) }} var wg sync.WaitGroup {{ end }}
+			{{ if not .isScalar }}
+				isLen1 := len({{.val}}) == 1 
+				if !isLen1 {
+					wg.Add(len({{.val}}))
+				}
+			{{ end }}
 			for {{.index}} := range {{.val}} {
-				go func({{.index}} int) {
-					defer {{.wg}}.Done()
-					{{- if not .isScalar }}
-						rctx := &graphql.ResolverContext{
-							Index: &{{.index}},
-							Result: {{ if .usePtr }}&{{end}}{{.val}}[{{.index}}],
+				{{- if not .isScalar }}
+					{{.index}} := {{.index}}
+					rctx := &graphql.ResolverContext{
+						Index: &{{.index}},
+						Result: {{ if .usePtr }}&{{end}}{{.val}}[{{.index}}],
+					}
+					ctx := graphql.WithResolverContext(ctx, rctx)
+					f := func({{.index}} int) {
+						if !isLen1 {
+							defer wg.Done()
 						}
-						ctx := graphql.WithResolverContext(ctx, rctx)
-					{{- end}}
+						{{.arr}}[{{.index}}] = func() graphql.Marshaler {
+							{{ .next }} 
+						}()
+					}
+					if isLen1 {
+						f({{.index}})
+					} else {
+						go f({{.index}})
+					}
+				{{ else }}
 					{{.arr}}[{{.index}}] = func() graphql.Marshaler {
 						{{ .next }} 
 					}()
-				}({{.index}})
+				{{- end}}
 			}
-			{{.wg}}.Wait()
+			{{ if and .top (not .isScalar) }} wg.Wait() {{ end }}
 			return {{.arr}}`, map[string]interface{}{
 			"val":      val,
 			"arr":      arr,
 			"index":    index,
-			"wg":       wg,
+			"top":      depth == 1,
+			"arrayLen": len(val),
 			"isScalar": f.IsScalar,
 			"usePtr":   usePtr,
 			"next":     f.doWriteJson(val+"["+index+"]", remainingMods[1:], astType.Elem, false, depth+1),

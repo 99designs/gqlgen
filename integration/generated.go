@@ -205,17 +205,13 @@ func (ec *executionContext) _Element_mismatched(ctx context.Context, field graph
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			arr1[idx1] = func() graphql.Marshaler {
-				return graphql.MarshalBoolean(res[idx1])
-			}()
-		}(idx1)
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalBoolean(res[idx1])
+		}()
 	}
-	wg1.Wait()
+
 	return arr1
 }
 
@@ -310,16 +306,24 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				if res[idx1] == nil {
@@ -328,9 +332,15 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 
 				return ec._Element(ctx, field.Selections, res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -591,17 +601,13 @@ func (ec *executionContext) _User_likes(ctx context.Context, field graphql.Colle
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			arr1[idx1] = func() graphql.Marshaler {
-				return graphql.MarshalString(res[idx1])
-			}()
-		}(idx1)
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
 	}
-	wg1.Wait()
+
 	return arr1
 }
 
@@ -760,17 +766,13 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			arr1[idx1] = func() graphql.Marshaler {
-				return graphql.MarshalString(res[idx1])
-			}()
-		}(idx1)
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
 	}
-	wg1.Wait()
+
 	return arr1
 }
 
@@ -795,23 +797,37 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___InputValue(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1047,23 +1063,37 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___InputValue(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1336,23 +1366,37 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___Type(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1455,23 +1499,37 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___Directive(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1615,23 +1673,37 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___Field(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1653,23 +1725,37 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___Type(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1691,23 +1777,37 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___Type(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1741,23 +1841,37 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___EnumValue(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 
@@ -1779,23 +1893,37 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	rctx.Result = res
 
 	arr1 := make(graphql.Array, len(res))
-	var wg1 sync.WaitGroup
-	wg1.Add(len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
 	for idx1 := range res {
-		go func(idx1 int) {
-			defer wg1.Done()
-			rctx := &graphql.ResolverContext{
-				Index:  &idx1,
-				Result: &res[idx1],
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
 			}
-			ctx := graphql.WithResolverContext(ctx, rctx)
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec.___InputValue(ctx, field.Selections, &res[idx1])
 			}()
-		}(idx1)
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
 	}
-	wg1.Wait()
+	wg.Wait()
 	return arr1
 }
 

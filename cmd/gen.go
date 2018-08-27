@@ -7,21 +7,20 @@ import (
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli"
 )
 
-func init() {
-	rootCmd.AddCommand(genCmd)
-}
-
-var genCmd = &cobra.Command{
-	Use:   "gen",
-	Short: "Generate models & resolvers .go",
-	Long:  "",
-	Run: func(cmd *cobra.Command, args []string) {
+var genCmd = cli.Command{
+	Name:  "generate",
+	Usage: "generate a graphql server based on schema",
+	Flags: []cli.Flag{
+		cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
+		cli.StringFlag{Name: "config, c", Usage: "the config filename"},
+	},
+	Action: func(ctx *cli.Context) {
 		var config *codegen.Config
 		var err error
-		if configFilename != "" {
+		if configFilename := ctx.String("config"); configFilename != "" {
 			config, err = codegen.LoadConfig(configFilename)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error())
@@ -35,23 +34,6 @@ var genCmd = &cobra.Command{
 				fmt.Fprintln(os.Stderr, err.Error())
 				os.Exit(1)
 			}
-		}
-
-		// overwrite by commandline options
-		if schemaFilename != "" {
-			config.SchemaFilename = schemaFilename
-		}
-		if models != "" {
-			config.Model.Filename = models
-		}
-		if output != "" {
-			config.Exec.Filename = output
-		}
-		if packageName != "" {
-			config.Exec.Package = packageName
-		}
-		if modelPackageName != "" {
-			config.Model.Package = modelPackageName
 		}
 
 		schemaRaw, err := ioutil.ReadFile(config.SchemaFilename)

@@ -8,7 +8,6 @@ import (
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 func init() {
@@ -39,7 +38,6 @@ var genCmd = &cobra.Command{
 		}
 
 		// overwrite by commandline options
-		var emitYamlGuidance bool
 		if schemaFilename != "" {
 			config.SchemaFilename = schemaFilename
 		}
@@ -55,10 +53,6 @@ var genCmd = &cobra.Command{
 		if modelPackageName != "" {
 			config.Model.Package = modelPackageName
 		}
-		if typemap != "" {
-			config.Models = loadModelMap()
-			emitYamlGuidance = true
-		}
 
 		schemaRaw, err := ioutil.ReadFile(config.SchemaFilename)
 		if err != nil {
@@ -72,44 +66,10 @@ var genCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if emitYamlGuidance {
-			var b []byte
-			b, err = yaml.Marshal(config)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "unable to marshal yaml: "+err.Error())
-				os.Exit(1)
-			}
-
-			fmt.Fprintf(os.Stderr, "DEPRECATION WARNING: we are moving away from the json typemap, instead create a gqlgen.yml with the following content:\n\n%s\n", string(b))
-		}
-
 		err = codegen.Generate(*config)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(2)
 		}
 	},
-}
-
-func loadModelMap() codegen.TypeMap {
-	var goTypes map[string]string
-	b, err := ioutil.ReadFile(typemap)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to open typemap: "+err.Error())
-		return nil
-	}
-
-	if err = yaml.Unmarshal(b, &goTypes); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to parse typemap: "+err.Error())
-		os.Exit(1)
-	}
-
-	typeMap := make(codegen.TypeMap)
-	for typeName, entityPath := range goTypes {
-		typeMap[typeName] = codegen.TypeMapEntry{
-			Model: entityPath,
-		}
-	}
-
-	return typeMap
 }

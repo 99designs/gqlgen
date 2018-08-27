@@ -28,7 +28,7 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 			return nil, err
 		}
 		if def != nil {
-			for _, bindErr := range bindObject(def.Type(), obj, imports) {
+			for _, bindErr := range bindObject(def.Type(), obj, imports, cfg.StructTag) {
 				log.Println(bindErr.Error())
 				log.Println("  Adding resolver method")
 			}

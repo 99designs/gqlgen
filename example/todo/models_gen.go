@@ -8,6 +8,7 @@ import (
 	strconv "strconv"
 )
 
+// Passed to createTodo to create a new todo
 type TodoInput struct {
 	Text string `json:"text"`
 	Done *bool  `json:"done"`
@@ -17,6 +18,7 @@ type Role string
 
 const (
 	RoleAdmin Role = "ADMIN"
+
 	RoleOwner Role = "OWNER"
 )
 

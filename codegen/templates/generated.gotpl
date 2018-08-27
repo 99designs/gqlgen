@@ -193,7 +193,7 @@ type executionContext struct {
 	{{ template "input.gotpl" $input }}
 {{- end }}
 
-func (ec *executionContext) FieldMiddleware(ctx context.Context, next graphql.Resolver) (ret interface{}) {
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))

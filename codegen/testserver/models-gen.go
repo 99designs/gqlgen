@@ -5,9 +5,11 @@ package testserver
 type InnerInput struct {
 	ID int `json:"id"`
 }
+
 type InnerObject struct {
 	ID int `json:"id"`
 }
+
 type Keywords struct {
 	Break       string `json:"break"`
 	Default     string `json:"default"`
@@ -35,9 +37,11 @@ type Keywords struct {
 	Return      string `json:"return"`
 	Var         string `json:"var"`
 }
+
 type OuterInput struct {
 	Inner InnerInput `json:"inner"`
 }
+
 type OuterObject struct {
 	Inner InnerObject `json:"inner"`
 }

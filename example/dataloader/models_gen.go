@@ -7,6 +7,7 @@ type Address struct {
 	Street  string `json:"street"`
 	Country string `json:"country"`
 }
+
 type Item struct {
 	Name string `json:"name"`
 }

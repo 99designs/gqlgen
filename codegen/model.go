@@ -2,8 +2,8 @@ package codegen
 
 type Model struct {
 	*NamedType
-
-	Fields []ModelField
+	Description string
+	Fields      []ModelField
 }
 
 type ModelField struct {
@@ -12,4 +12,5 @@ type ModelField struct {
 	GoFieldName string
 	GoFKName    string
 	GoFKType    string
+	Description string
 }

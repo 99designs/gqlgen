@@ -9,11 +9,15 @@ import (
 )
 
 {{ range $model := .Models }}
+	{{with .Description}} {{.|prefixLines "// "}} {{end}}
 	{{- if .IsInterface }}
 		type {{.GoType}} interface {}
 	{{- else }}
 		type {{.GoType}} struct {
 			{{- range $field := .Fields }}
+				{{- with .Description}}
+					{{.|prefixLines "// "}}
+				{{- end}}
 				{{- if $field.GoFieldName }}
 					{{ $field.GoFieldName }} {{$field.Signature}} `json:"{{$field.GQLName}}"`
 				{{- else }}
@@ -25,10 +29,13 @@ import (
 {{- end}}
 
 {{ range $enum := .Enums }}
+	{{with .Description}}{{.|prefixLines "// "}} {{end}}
 	type {{.GoType}} string
 	const (
-	{{ range $value := .Values -}}
-		{{with .Description}} {{.|prefixLines "// "}} {{end}}
+	{{- range $value := .Values}}
+		{{- with .Description}}
+			{{.|prefixLines "// "}}
+		{{- end}}
 		{{$enum.GoType}}{{ .Name|toCamel }} {{$enum.GoType}} = {{.Name|quote}}
 	{{- end }}
 	)

@@ -32,7 +32,7 @@ type Object struct {
 
 type Field struct {
 	*Type
-
+	Description    string          // Description of a field
 	GQLName        string          // The name of the field in graphql
 	GoFieldType    GoFieldType     // The field type in go, if any
 	GoReceiverName string          // The name of method & var receiver in go, if any

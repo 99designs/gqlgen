@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/99designs/gqlgen --out generated.go
+//go:generate gorunpkg github.com/99designs/gqlgen
 
 package todo
 

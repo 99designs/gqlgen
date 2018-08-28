@@ -39,13 +39,15 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 {{ range $object := .Objects }}
-	{{ $object.GQLType|toCamel }} struct {
-	{{ range $field := $object.Fields -}}
-	    {{ if $field.IsSystem }}{{ else -}}
-			{{ $field.GQLName|toCamel }} {{ $field.ComplexitySignature }}
-	    {{ end }}
+	{{ if $object.IsReserved }}{{ else -}}
+		{{ $object.GQLType|toCamel }} struct {
+		{{ range $field := $object.Fields -}}
+			{{ if $field.IsReserved }}{{ else -}}
+				{{ $field.GQLName|toCamel }} {{ $field.ComplexitySignature }}
+			{{ end }}
+		{{- end }}
+		}
 	{{- end }}
-	}
 {{ end }}
 }
 
@@ -72,25 +74,27 @@ func (e *executableSchema) Schema() *ast.Schema {
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	switch typeName + "." + field {
 	{{ range $object := .Objects }}
-		{{ range $field := $object.Fields }}
-			{{ if $field.IsSystem }}{{ else }}
-				case "{{$object.GQLType}}.{{$field.GQLName}}":
-					if e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}} == nil {
-						break
-					}
-					{{ if $field.Args }}args := map[string]interface{}{} {{end}}
-					{{ range $i, $arg := $field.Args }}
-						var arg{{$i}} {{$arg.Signature }}
-						if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
-							var err error
-							{{$arg.Unmarshal (print "arg" $i) "tmp" }}
-							if err != nil {
-								return 0, false
-							}
+		{{ if $object.IsReserved }}{{ else }}
+			{{ range $field := $object.Fields }}
+				{{ if $field.IsReserved }}{{ else }}
+					case "{{$object.GQLType}}.{{$field.GQLName}}":
+						if e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}} == nil {
+							break
 						}
-						args[{{$arg.GQLName|quote}}] = arg{{$i}}
-					{{ end }}
-					return e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
+						{{ if $field.Args }}args := map[string]interface{}{} {{end}}
+						{{ range $i, $arg := $field.Args }}
+							var arg{{$i}} {{$arg.Signature }}
+							if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
+								var err error
+								{{$arg.Unmarshal (print "arg" $i) "tmp" }}
+								if err != nil {
+									return 0, false
+								}
+							}
+							args[{{$arg.GQLName|quote}}] = arg{{$i}}
+						{{ end }}
+						return e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
+				{{ end }}
 			{{ end }}
 		{{ end }}
 	{{ end }}

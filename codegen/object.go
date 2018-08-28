@@ -81,11 +81,15 @@ func (o *Object) IsConcurrent() bool {
 	return false
 }
 
+func (o *Object) IsReserved() bool {
+	return strings.HasPrefix(o.GQLType, "__")
+}
+
 func (f *Field) IsResolver() bool {
 	return f.GoFieldName == ""
 }
 
-func (f *Field) IsSystem() bool {
+func (f *Field) IsReserved() bool {
 	return strings.HasPrefix(f.GQLName, "__")
 }
 

@@ -1,3 +1,7 @@
+resolver:
+  filename: todo.go
+  type: resolvers
+
 models:
   Todo:
     model: github.com/99designs/gqlgen/example/todo.Todo

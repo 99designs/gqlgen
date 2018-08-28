@@ -10,7 +10,9 @@ import (
 
 	"github.com/99designs/gqlgen/internal/gopath"
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 	"gopkg.in/yaml.v2"
 )
 
@@ -86,6 +88,54 @@ type TypeMapEntry struct {
 type TypeMapField struct {
 	Resolver  bool   `yaml:"resolver"`
 	FieldName string `yaml:"fieldName"`
+}
+
+func (cfg *Config) Normalize() error {
+	if err := cfg.Model.normalize(); err != nil {
+		return errors.Wrap(err, "model")
+	}
+
+	if err := cfg.Exec.normalize(); err != nil {
+		return errors.Wrap(err, "exec")
+	}
+
+	if cfg.Resolver.IsDefined() {
+		if err := cfg.Resolver.normalize(); err != nil {
+			return errors.Wrap(err, "resolver")
+		}
+	}
+
+	builtins := TypeMap{
+		"__Directive":  {Model: "github.com/99designs/gqlgen/graphql/introspection.Directive"},
+		"__Type":       {Model: "github.com/99designs/gqlgen/graphql/introspection.Type"},
+		"__Field":      {Model: "github.com/99designs/gqlgen/graphql/introspection.Field"},
+		"__EnumValue":  {Model: "github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
+		"__InputValue": {Model: "github.com/99designs/gqlgen/graphql/introspection.InputValue"},
+		"__Schema":     {Model: "github.com/99designs/gqlgen/graphql/introspection.Schema"},
+		"Int":          {Model: "github.com/99designs/gqlgen/graphql.Int"},
+		"Float":        {Model: "github.com/99designs/gqlgen/graphql.Float"},
+		"String":       {Model: "github.com/99designs/gqlgen/graphql.String"},
+		"Boolean":      {Model: "github.com/99designs/gqlgen/graphql.Boolean"},
+		"ID":           {Model: "github.com/99designs/gqlgen/graphql.ID"},
+		"Time":         {Model: "github.com/99designs/gqlgen/graphql.Time"},
+		"Map":          {Model: "github.com/99designs/gqlgen/graphql.Map"},
+	}
+
+	if cfg.Models == nil {
+		cfg.Models = TypeMap{}
+	}
+	for typeName, entry := range builtins {
+		if !cfg.Models.Exists(typeName) {
+			cfg.Models[typeName] = entry
+		}
+	}
+
+	var err *gqlerror.Error
+	cfg.schema, err = gqlparser.LoadSchema(&ast.Source{Name: cfg.SchemaFilename, Input: cfg.SchemaStr})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *PackageConfig) normalize() error {

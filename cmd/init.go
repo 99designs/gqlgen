@@ -81,12 +81,12 @@ func GenerateGraphServer(config *codegen.Config, serverFilename string) {
 		os.Exit(1)
 	}
 
-	if err := codegen.Generate(*config); err != nil {
+	if err := codegen.Generate(config); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
-	if err := codegen.GenerateServer(*config, serverFilename); err != nil {
+	if err := codegen.GenerateServer(config, serverFilename); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}

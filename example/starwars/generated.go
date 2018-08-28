@@ -44,6 +44,120 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Droid struct {
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Friends           func(childComplexity int) int
+		FriendsConnection func(childComplexity int, first *int, after *string) int
+		AppearsIn         func(childComplexity int) int
+		PrimaryFunction   func(childComplexity int) int
+	}
+
+	FriendsConnection struct {
+		TotalCount func(childComplexity int) int
+		Edges      func(childComplexity int) int
+		Friends    func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+	}
+
+	FriendsEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	Human struct {
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Height            func(childComplexity int, unit LengthUnit) int
+		Mass              func(childComplexity int) int
+		Friends           func(childComplexity int) int
+		FriendsConnection func(childComplexity int, first *int, after *string) int
+		AppearsIn         func(childComplexity int) int
+		Starships         func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CreateReview func(childComplexity int, episode Episode, review Review) int
+	}
+
+	PageInfo struct {
+		StartCursor func(childComplexity int) int
+		EndCursor   func(childComplexity int) int
+		HasNextPage func(childComplexity int) int
+	}
+
+	Query struct {
+		Hero      func(childComplexity int, episode Episode) int
+		Reviews   func(childComplexity int, episode Episode, since *time.Time) int
+		Search    func(childComplexity int, text string) int
+		Character func(childComplexity int, id string) int
+		Droid     func(childComplexity int, id string) int
+		Human     func(childComplexity int, id string) int
+		Starship  func(childComplexity int, id string) int
+	}
+
+	Review struct {
+		Stars      func(childComplexity int) int
+		Commentary func(childComplexity int) int
+		Time       func(childComplexity int) int
+	}
+
+	Starship struct {
+		Id      func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Length  func(childComplexity int, unit LengthUnit) int
+		History func(childComplexity int) int
+	}
+
+	Directive struct {
+		Name        func(childComplexity int) int
+		Description func(childComplexity int) int
+		Locations   func(childComplexity int) int
+		Args        func(childComplexity int) int
+	}
+
+	EnumValue struct {
+		Name              func(childComplexity int) int
+		Description       func(childComplexity int) int
+		IsDeprecated      func(childComplexity int) int
+		DeprecationReason func(childComplexity int) int
+	}
+
+	Field struct {
+		Name              func(childComplexity int) int
+		Description       func(childComplexity int) int
+		Args              func(childComplexity int) int
+		Type              func(childComplexity int) int
+		IsDeprecated      func(childComplexity int) int
+		DeprecationReason func(childComplexity int) int
+	}
+
+	InputValue struct {
+		Name         func(childComplexity int) int
+		Description  func(childComplexity int) int
+		Type         func(childComplexity int) int
+		DefaultValue func(childComplexity int) int
+	}
+
+	Schema struct {
+		Types            func(childComplexity int) int
+		QueryType        func(childComplexity int) int
+		MutationType     func(childComplexity int) int
+		SubscriptionType func(childComplexity int) int
+		Directives       func(childComplexity int) int
+	}
+
+	Type struct {
+		Kind          func(childComplexity int) int
+		Name          func(childComplexity int) int
+		Description   func(childComplexity int) int
+		Fields        func(childComplexity int, includeDeprecated bool) int
+		Interfaces    func(childComplexity int) int
+		PossibleTypes func(childComplexity int) int
+		EnumValues    func(childComplexity int, includeDeprecated bool) int
+		InputFields   func(childComplexity int) int
+		OfType        func(childComplexity int) int
+	}
 }
 
 type DroidResolver interface {
@@ -88,6 +202,715 @@ func (e *executableSchema) Schema() *ast.Schema {
 
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	switch typeName + "." + field {
+
+	case "Droid.id":
+		if e.complexity.Droid.Id == nil {
+			break
+		}
+
+		return e.complexity.Droid.Id(childComplexity), true
+
+	case "Droid.name":
+		if e.complexity.Droid.Name == nil {
+			break
+		}
+
+		return e.complexity.Droid.Name(childComplexity), true
+
+	case "Droid.friends":
+		if e.complexity.Droid.Friends == nil {
+			break
+		}
+
+		return e.complexity.Droid.Friends(childComplexity), true
+
+	case "Droid.friendsConnection":
+		if e.complexity.Droid.FriendsConnection == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 *int
+		if tmp, ok := rawArgs["first"]; ok {
+			var err error
+			var ptr1 int
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalInt(tmp)
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["first"] = arg0
+
+		var arg1 *string
+		if tmp, ok := rawArgs["after"]; ok {
+			var err error
+			var ptr1 string
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalID(tmp)
+				arg1 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["after"] = arg1
+
+		return e.complexity.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Droid.appearsIn":
+		if e.complexity.Droid.AppearsIn == nil {
+			break
+		}
+
+		return e.complexity.Droid.AppearsIn(childComplexity), true
+
+	case "Droid.primaryFunction":
+		if e.complexity.Droid.PrimaryFunction == nil {
+			break
+		}
+
+		return e.complexity.Droid.PrimaryFunction(childComplexity), true
+
+	case "FriendsConnection.totalCount":
+		if e.complexity.FriendsConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.TotalCount(childComplexity), true
+
+	case "FriendsConnection.edges":
+		if e.complexity.FriendsConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.Edges(childComplexity), true
+
+	case "FriendsConnection.friends":
+		if e.complexity.FriendsConnection.Friends == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.Friends(childComplexity), true
+
+	case "FriendsConnection.pageInfo":
+		if e.complexity.FriendsConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.PageInfo(childComplexity), true
+
+	case "FriendsEdge.cursor":
+		if e.complexity.FriendsEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.FriendsEdge.Cursor(childComplexity), true
+
+	case "FriendsEdge.node":
+		if e.complexity.FriendsEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.FriendsEdge.Node(childComplexity), true
+
+	case "Human.id":
+		if e.complexity.Human.Id == nil {
+			break
+		}
+
+		return e.complexity.Human.Id(childComplexity), true
+
+	case "Human.name":
+		if e.complexity.Human.Name == nil {
+			break
+		}
+
+		return e.complexity.Human.Name(childComplexity), true
+
+	case "Human.height":
+		if e.complexity.Human.Height == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 LengthUnit
+		if tmp, ok := rawArgs["unit"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["unit"] = arg0
+
+		return e.complexity.Human.Height(childComplexity, args["unit"].(LengthUnit)), true
+
+	case "Human.mass":
+		if e.complexity.Human.Mass == nil {
+			break
+		}
+
+		return e.complexity.Human.Mass(childComplexity), true
+
+	case "Human.friends":
+		if e.complexity.Human.Friends == nil {
+			break
+		}
+
+		return e.complexity.Human.Friends(childComplexity), true
+
+	case "Human.friendsConnection":
+		if e.complexity.Human.FriendsConnection == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 *int
+		if tmp, ok := rawArgs["first"]; ok {
+			var err error
+			var ptr1 int
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalInt(tmp)
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["first"] = arg0
+
+		var arg1 *string
+		if tmp, ok := rawArgs["after"]; ok {
+			var err error
+			var ptr1 string
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalID(tmp)
+				arg1 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["after"] = arg1
+
+		return e.complexity.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Human.appearsIn":
+		if e.complexity.Human.AppearsIn == nil {
+			break
+		}
+
+		return e.complexity.Human.AppearsIn(childComplexity), true
+
+	case "Human.starships":
+		if e.complexity.Human.Starships == nil {
+			break
+		}
+
+		return e.complexity.Human.Starships(childComplexity), true
+
+	case "Mutation.createReview":
+		if e.complexity.Mutation.CreateReview == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 Episode
+		if tmp, ok := rawArgs["episode"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["episode"] = arg0
+
+		var arg1 Review
+		if tmp, ok := rawArgs["review"]; ok {
+			var err error
+			arg1, err = UnmarshalReviewInput(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["review"] = arg1
+
+		return e.complexity.Mutation.CreateReview(childComplexity, args["episode"].(Episode), args["review"].(Review)), true
+
+	case "PageInfo.startCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
+
+	case "PageInfo.endCursor":
+		if e.complexity.PageInfo.EndCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.EndCursor(childComplexity), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "Query.hero":
+		if e.complexity.Query.Hero == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 Episode
+		if tmp, ok := rawArgs["episode"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["episode"] = arg0
+
+		return e.complexity.Query.Hero(childComplexity, args["episode"].(Episode)), true
+
+	case "Query.reviews":
+		if e.complexity.Query.Reviews == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 Episode
+		if tmp, ok := rawArgs["episode"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["episode"] = arg0
+
+		var arg1 *time.Time
+		if tmp, ok := rawArgs["since"]; ok {
+			var err error
+			var ptr1 time.Time
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalTime(tmp)
+				arg1 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["since"] = arg1
+
+		return e.complexity.Query.Reviews(childComplexity, args["episode"].(Episode), args["since"].(*time.Time)), true
+
+	case "Query.search":
+		if e.complexity.Query.Search == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["text"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["text"] = arg0
+
+		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
+
+	case "Query.character":
+		if e.complexity.Query.Character == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Character(childComplexity, args["id"].(string)), true
+
+	case "Query.droid":
+		if e.complexity.Query.Droid == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Droid(childComplexity, args["id"].(string)), true
+
+	case "Query.human":
+		if e.complexity.Query.Human == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Human(childComplexity, args["id"].(string)), true
+
+	case "Query.starship":
+		if e.complexity.Query.Starship == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Starship(childComplexity, args["id"].(string)), true
+
+	case "Review.stars":
+		if e.complexity.Review.Stars == nil {
+			break
+		}
+
+		return e.complexity.Review.Stars(childComplexity), true
+
+	case "Review.commentary":
+		if e.complexity.Review.Commentary == nil {
+			break
+		}
+
+		return e.complexity.Review.Commentary(childComplexity), true
+
+	case "Review.time":
+		if e.complexity.Review.Time == nil {
+			break
+		}
+
+		return e.complexity.Review.Time(childComplexity), true
+
+	case "Starship.id":
+		if e.complexity.Starship.Id == nil {
+			break
+		}
+
+		return e.complexity.Starship.Id(childComplexity), true
+
+	case "Starship.name":
+		if e.complexity.Starship.Name == nil {
+			break
+		}
+
+		return e.complexity.Starship.Name(childComplexity), true
+
+	case "Starship.length":
+		if e.complexity.Starship.Length == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 LengthUnit
+		if tmp, ok := rawArgs["unit"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["unit"] = arg0
+
+		return e.complexity.Starship.Length(childComplexity, args["unit"].(LengthUnit)), true
+
+	case "Starship.history":
+		if e.complexity.Starship.History == nil {
+			break
+		}
+
+		return e.complexity.Starship.History(childComplexity), true
+
+	case "__Directive.name":
+		if e.complexity.Directive.Name == nil {
+			break
+		}
+
+		return e.complexity.Directive.Name(childComplexity), true
+
+	case "__Directive.description":
+		if e.complexity.Directive.Description == nil {
+			break
+		}
+
+		return e.complexity.Directive.Description(childComplexity), true
+
+	case "__Directive.locations":
+		if e.complexity.Directive.Locations == nil {
+			break
+		}
+
+		return e.complexity.Directive.Locations(childComplexity), true
+
+	case "__Directive.args":
+		if e.complexity.Directive.Args == nil {
+			break
+		}
+
+		return e.complexity.Directive.Args(childComplexity), true
+
+	case "__EnumValue.name":
+		if e.complexity.EnumValue.Name == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.Name(childComplexity), true
+
+	case "__EnumValue.description":
+		if e.complexity.EnumValue.Description == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.Description(childComplexity), true
+
+	case "__EnumValue.isDeprecated":
+		if e.complexity.EnumValue.IsDeprecated == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.IsDeprecated(childComplexity), true
+
+	case "__EnumValue.deprecationReason":
+		if e.complexity.EnumValue.DeprecationReason == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.DeprecationReason(childComplexity), true
+
+	case "__Field.name":
+		if e.complexity.Field.Name == nil {
+			break
+		}
+
+		return e.complexity.Field.Name(childComplexity), true
+
+	case "__Field.description":
+		if e.complexity.Field.Description == nil {
+			break
+		}
+
+		return e.complexity.Field.Description(childComplexity), true
+
+	case "__Field.args":
+		if e.complexity.Field.Args == nil {
+			break
+		}
+
+		return e.complexity.Field.Args(childComplexity), true
+
+	case "__Field.type":
+		if e.complexity.Field.Type == nil {
+			break
+		}
+
+		return e.complexity.Field.Type(childComplexity), true
+
+	case "__Field.isDeprecated":
+		if e.complexity.Field.IsDeprecated == nil {
+			break
+		}
+
+		return e.complexity.Field.IsDeprecated(childComplexity), true
+
+	case "__Field.deprecationReason":
+		if e.complexity.Field.DeprecationReason == nil {
+			break
+		}
+
+		return e.complexity.Field.DeprecationReason(childComplexity), true
+
+	case "__InputValue.name":
+		if e.complexity.InputValue.Name == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Name(childComplexity), true
+
+	case "__InputValue.description":
+		if e.complexity.InputValue.Description == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Description(childComplexity), true
+
+	case "__InputValue.type":
+		if e.complexity.InputValue.Type == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Type(childComplexity), true
+
+	case "__InputValue.defaultValue":
+		if e.complexity.InputValue.DefaultValue == nil {
+			break
+		}
+
+		return e.complexity.InputValue.DefaultValue(childComplexity), true
+
+	case "__Schema.types":
+		if e.complexity.Schema.Types == nil {
+			break
+		}
+
+		return e.complexity.Schema.Types(childComplexity), true
+
+	case "__Schema.queryType":
+		if e.complexity.Schema.QueryType == nil {
+			break
+		}
+
+		return e.complexity.Schema.QueryType(childComplexity), true
+
+	case "__Schema.mutationType":
+		if e.complexity.Schema.MutationType == nil {
+			break
+		}
+
+		return e.complexity.Schema.MutationType(childComplexity), true
+
+	case "__Schema.subscriptionType":
+		if e.complexity.Schema.SubscriptionType == nil {
+			break
+		}
+
+		return e.complexity.Schema.SubscriptionType(childComplexity), true
+
+	case "__Schema.directives":
+		if e.complexity.Schema.Directives == nil {
+			break
+		}
+
+		return e.complexity.Schema.Directives(childComplexity), true
+
+	case "__Type.kind":
+		if e.complexity.Type.Kind == nil {
+			break
+		}
+
+		return e.complexity.Type.Kind(childComplexity), true
+
+	case "__Type.name":
+		if e.complexity.Type.Name == nil {
+			break
+		}
+
+		return e.complexity.Type.Name(childComplexity), true
+
+	case "__Type.description":
+		if e.complexity.Type.Description == nil {
+			break
+		}
+
+		return e.complexity.Type.Description(childComplexity), true
+
+	case "__Type.fields":
+		if e.complexity.Type.Fields == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 bool
+		if tmp, ok := rawArgs["includeDeprecated"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalBoolean(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["includeDeprecated"] = arg0
+
+		return e.complexity.Type.Fields(childComplexity, args["includeDeprecated"].(bool)), true
+
+	case "__Type.interfaces":
+		if e.complexity.Type.Interfaces == nil {
+			break
+		}
+
+		return e.complexity.Type.Interfaces(childComplexity), true
+
+	case "__Type.possibleTypes":
+		if e.complexity.Type.PossibleTypes == nil {
+			break
+		}
+
+		return e.complexity.Type.PossibleTypes(childComplexity), true
+
+	case "__Type.enumValues":
+		if e.complexity.Type.EnumValues == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 bool
+		if tmp, ok := rawArgs["includeDeprecated"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalBoolean(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["includeDeprecated"] = arg0
+
+		return e.complexity.Type.EnumValues(childComplexity, args["includeDeprecated"].(bool)), true
+
+	case "__Type.inputFields":
+		if e.complexity.Type.InputFields == nil {
+			break
+		}
+
+		return e.complexity.Type.InputFields(childComplexity), true
+
+	case "__Type.ofType":
+		if e.complexity.Type.OfType == nil {
+			break
+		}
+
+		return e.complexity.Type.OfType(childComplexity), true
 
 	}
 	return 0, false

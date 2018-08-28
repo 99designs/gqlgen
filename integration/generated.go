@@ -42,6 +42,78 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Element struct {
+		Child      func(childComplexity int) int
+		Error      func(childComplexity int) int
+		Mismatched func(childComplexity int) int
+	}
+
+	Query struct {
+		Path         func(childComplexity int) int
+		Date         func(childComplexity int, filter models.DateFilter) int
+		Viewer       func(childComplexity int) int
+		JsonEncoding func(childComplexity int) int
+		Error        func(childComplexity int, typeArg models.ErrorType) int
+	}
+
+	User struct {
+		Name  func(childComplexity int) int
+		Likes func(childComplexity int) int
+	}
+
+	Viewer struct {
+		User func(childComplexity int) int
+	}
+
+	Directive struct {
+		Name        func(childComplexity int) int
+		Description func(childComplexity int) int
+		Locations   func(childComplexity int) int
+		Args        func(childComplexity int) int
+	}
+
+	EnumValue struct {
+		Name              func(childComplexity int) int
+		Description       func(childComplexity int) int
+		IsDeprecated      func(childComplexity int) int
+		DeprecationReason func(childComplexity int) int
+	}
+
+	Field struct {
+		Name              func(childComplexity int) int
+		Description       func(childComplexity int) int
+		Args              func(childComplexity int) int
+		Type              func(childComplexity int) int
+		IsDeprecated      func(childComplexity int) int
+		DeprecationReason func(childComplexity int) int
+	}
+
+	InputValue struct {
+		Name         func(childComplexity int) int
+		Description  func(childComplexity int) int
+		Type         func(childComplexity int) int
+		DefaultValue func(childComplexity int) int
+	}
+
+	Schema struct {
+		Types            func(childComplexity int) int
+		QueryType        func(childComplexity int) int
+		MutationType     func(childComplexity int) int
+		SubscriptionType func(childComplexity int) int
+		Directives       func(childComplexity int) int
+	}
+
+	Type struct {
+		Kind          func(childComplexity int) int
+		Name          func(childComplexity int) int
+		Description   func(childComplexity int) int
+		Fields        func(childComplexity int, includeDeprecated bool) int
+		Interfaces    func(childComplexity int) int
+		PossibleTypes func(childComplexity int) int
+		EnumValues    func(childComplexity int, includeDeprecated bool) int
+		InputFields   func(childComplexity int) int
+		OfType        func(childComplexity int) int
+	}
 }
 
 type ElementResolver interface {
@@ -72,6 +144,351 @@ func (e *executableSchema) Schema() *ast.Schema {
 
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	switch typeName + "." + field {
+
+	case "Element.child":
+		if e.complexity.Element.Child == nil {
+			break
+		}
+
+		return e.complexity.Element.Child(childComplexity), true
+
+	case "Element.error":
+		if e.complexity.Element.Error == nil {
+			break
+		}
+
+		return e.complexity.Element.Error(childComplexity), true
+
+	case "Element.mismatched":
+		if e.complexity.Element.Mismatched == nil {
+			break
+		}
+
+		return e.complexity.Element.Mismatched(childComplexity), true
+
+	case "Query.path":
+		if e.complexity.Query.Path == nil {
+			break
+		}
+
+		return e.complexity.Query.Path(childComplexity), true
+
+	case "Query.date":
+		if e.complexity.Query.Date == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 models.DateFilter
+		if tmp, ok := rawArgs["filter"]; ok {
+			var err error
+			arg0, err = UnmarshalDateFilter(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["filter"] = arg0
+
+		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
+
+	case "Query.viewer":
+		if e.complexity.Query.Viewer == nil {
+			break
+		}
+
+		return e.complexity.Query.Viewer(childComplexity), true
+
+	case "Query.jsonEncoding":
+		if e.complexity.Query.JsonEncoding == nil {
+			break
+		}
+
+		return e.complexity.Query.JsonEncoding(childComplexity), true
+
+	case "Query.error":
+		if e.complexity.Query.Error == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 models.ErrorType
+		if tmp, ok := rawArgs["type"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["type"] = arg0
+
+		return e.complexity.Query.Error(childComplexity, args["type"].(models.ErrorType)), true
+
+	case "User.name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
+
+	case "User.likes":
+		if e.complexity.User.Likes == nil {
+			break
+		}
+
+		return e.complexity.User.Likes(childComplexity), true
+
+	case "Viewer.user":
+		if e.complexity.Viewer.User == nil {
+			break
+		}
+
+		return e.complexity.Viewer.User(childComplexity), true
+
+	case "__Directive.name":
+		if e.complexity.Directive.Name == nil {
+			break
+		}
+
+		return e.complexity.Directive.Name(childComplexity), true
+
+	case "__Directive.description":
+		if e.complexity.Directive.Description == nil {
+			break
+		}
+
+		return e.complexity.Directive.Description(childComplexity), true
+
+	case "__Directive.locations":
+		if e.complexity.Directive.Locations == nil {
+			break
+		}
+
+		return e.complexity.Directive.Locations(childComplexity), true
+
+	case "__Directive.args":
+		if e.complexity.Directive.Args == nil {
+			break
+		}
+
+		return e.complexity.Directive.Args(childComplexity), true
+
+	case "__EnumValue.name":
+		if e.complexity.EnumValue.Name == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.Name(childComplexity), true
+
+	case "__EnumValue.description":
+		if e.complexity.EnumValue.Description == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.Description(childComplexity), true
+
+	case "__EnumValue.isDeprecated":
+		if e.complexity.EnumValue.IsDeprecated == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.IsDeprecated(childComplexity), true
+
+	case "__EnumValue.deprecationReason":
+		if e.complexity.EnumValue.DeprecationReason == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.DeprecationReason(childComplexity), true
+
+	case "__Field.name":
+		if e.complexity.Field.Name == nil {
+			break
+		}
+
+		return e.complexity.Field.Name(childComplexity), true
+
+	case "__Field.description":
+		if e.complexity.Field.Description == nil {
+			break
+		}
+
+		return e.complexity.Field.Description(childComplexity), true
+
+	case "__Field.args":
+		if e.complexity.Field.Args == nil {
+			break
+		}
+
+		return e.complexity.Field.Args(childComplexity), true
+
+	case "__Field.type":
+		if e.complexity.Field.Type == nil {
+			break
+		}
+
+		return e.complexity.Field.Type(childComplexity), true
+
+	case "__Field.isDeprecated":
+		if e.complexity.Field.IsDeprecated == nil {
+			break
+		}
+
+		return e.complexity.Field.IsDeprecated(childComplexity), true
+
+	case "__Field.deprecationReason":
+		if e.complexity.Field.DeprecationReason == nil {
+			break
+		}
+
+		return e.complexity.Field.DeprecationReason(childComplexity), true
+
+	case "__InputValue.name":
+		if e.complexity.InputValue.Name == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Name(childComplexity), true
+
+	case "__InputValue.description":
+		if e.complexity.InputValue.Description == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Description(childComplexity), true
+
+	case "__InputValue.type":
+		if e.complexity.InputValue.Type == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Type(childComplexity), true
+
+	case "__InputValue.defaultValue":
+		if e.complexity.InputValue.DefaultValue == nil {
+			break
+		}
+
+		return e.complexity.InputValue.DefaultValue(childComplexity), true
+
+	case "__Schema.types":
+		if e.complexity.Schema.Types == nil {
+			break
+		}
+
+		return e.complexity.Schema.Types(childComplexity), true
+
+	case "__Schema.queryType":
+		if e.complexity.Schema.QueryType == nil {
+			break
+		}
+
+		return e.complexity.Schema.QueryType(childComplexity), true
+
+	case "__Schema.mutationType":
+		if e.complexity.Schema.MutationType == nil {
+			break
+		}
+
+		return e.complexity.Schema.MutationType(childComplexity), true
+
+	case "__Schema.subscriptionType":
+		if e.complexity.Schema.SubscriptionType == nil {
+			break
+		}
+
+		return e.complexity.Schema.SubscriptionType(childComplexity), true
+
+	case "__Schema.directives":
+		if e.complexity.Schema.Directives == nil {
+			break
+		}
+
+		return e.complexity.Schema.Directives(childComplexity), true
+
+	case "__Type.kind":
+		if e.complexity.Type.Kind == nil {
+			break
+		}
+
+		return e.complexity.Type.Kind(childComplexity), true
+
+	case "__Type.name":
+		if e.complexity.Type.Name == nil {
+			break
+		}
+
+		return e.complexity.Type.Name(childComplexity), true
+
+	case "__Type.description":
+		if e.complexity.Type.Description == nil {
+			break
+		}
+
+		return e.complexity.Type.Description(childComplexity), true
+
+	case "__Type.fields":
+		if e.complexity.Type.Fields == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 bool
+		if tmp, ok := rawArgs["includeDeprecated"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalBoolean(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["includeDeprecated"] = arg0
+
+		return e.complexity.Type.Fields(childComplexity, args["includeDeprecated"].(bool)), true
+
+	case "__Type.interfaces":
+		if e.complexity.Type.Interfaces == nil {
+			break
+		}
+
+		return e.complexity.Type.Interfaces(childComplexity), true
+
+	case "__Type.possibleTypes":
+		if e.complexity.Type.PossibleTypes == nil {
+			break
+		}
+
+		return e.complexity.Type.PossibleTypes(childComplexity), true
+
+	case "__Type.enumValues":
+		if e.complexity.Type.EnumValues == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 bool
+		if tmp, ok := rawArgs["includeDeprecated"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalBoolean(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["includeDeprecated"] = arg0
+
+		return e.complexity.Type.EnumValues(childComplexity, args["includeDeprecated"].(bool)), true
+
+	case "__Type.inputFields":
+		if e.complexity.Type.InputFields == nil {
+			break
+		}
+
+		return e.complexity.Type.InputFields(childComplexity), true
+
+	case "__Type.ofType":
+		if e.complexity.Type.OfType == nil {
+			break
+		}
+
+		return e.complexity.Type.OfType(childComplexity), true
 
 	}
 	return 0, false

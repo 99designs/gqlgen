@@ -41,6 +41,107 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Circle struct {
+		Radius func(childComplexity int) int
+		Area   func(childComplexity int) int
+	}
+
+	Error struct {
+		Id                      func(childComplexity int) int
+		ErrorOnNonRequiredField func(childComplexity int) int
+		ErrorOnRequiredField    func(childComplexity int) int
+		NilOnRequiredField      func(childComplexity int) int
+	}
+
+	ForcedResolver struct {
+		Field func(childComplexity int) int
+	}
+
+	InnerObject struct {
+		Id func(childComplexity int) int
+	}
+
+	InvalidIdentifier struct {
+		Id func(childComplexity int) int
+	}
+
+	It struct {
+		Id func(childComplexity int) int
+	}
+
+	OuterObject struct {
+		Inner func(childComplexity int) int
+	}
+
+	Query struct {
+		InvalidIdentifier func(childComplexity int) int
+		Collision         func(childComplexity int) int
+		MapInput          func(childComplexity int, input *map[string]interface{}) int
+		Recursive         func(childComplexity int, input *RecursiveInputSlice) int
+		NestedInputs      func(childComplexity int, input [][]*OuterInput) int
+		NestedOutputs     func(childComplexity int) int
+		Keywords          func(childComplexity int, input *Keywords) int
+		Shapes            func(childComplexity int) int
+		ErrorBubble       func(childComplexity int) int
+		Valid             func(childComplexity int) int
+		KeywordArgs       func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
+	}
+
+	Rectangle struct {
+		Length func(childComplexity int) int
+		Width  func(childComplexity int) int
+		Area   func(childComplexity int) int
+	}
+
+	Directive struct {
+		Name        func(childComplexity int) int
+		Description func(childComplexity int) int
+		Locations   func(childComplexity int) int
+		Args        func(childComplexity int) int
+	}
+
+	EnumValue struct {
+		Name              func(childComplexity int) int
+		Description       func(childComplexity int) int
+		IsDeprecated      func(childComplexity int) int
+		DeprecationReason func(childComplexity int) int
+	}
+
+	Field struct {
+		Name              func(childComplexity int) int
+		Description       func(childComplexity int) int
+		Args              func(childComplexity int) int
+		Type              func(childComplexity int) int
+		IsDeprecated      func(childComplexity int) int
+		DeprecationReason func(childComplexity int) int
+	}
+
+	InputValue struct {
+		Name         func(childComplexity int) int
+		Description  func(childComplexity int) int
+		Type         func(childComplexity int) int
+		DefaultValue func(childComplexity int) int
+	}
+
+	Schema struct {
+		Types            func(childComplexity int) int
+		QueryType        func(childComplexity int) int
+		MutationType     func(childComplexity int) int
+		SubscriptionType func(childComplexity int) int
+		Directives       func(childComplexity int) int
+	}
+
+	Type struct {
+		Kind          func(childComplexity int) int
+		Name          func(childComplexity int) int
+		Description   func(childComplexity int) int
+		Fields        func(childComplexity int, includeDeprecated bool) int
+		Interfaces    func(childComplexity int) int
+		PossibleTypes func(childComplexity int) int
+		EnumValues    func(childComplexity int, includeDeprecated bool) int
+		InputFields   func(childComplexity int) int
+		OfType        func(childComplexity int) int
+	}
 }
 
 type ForcedResolverResolver interface {
@@ -72,6 +173,763 @@ func (e *executableSchema) Schema() *ast.Schema {
 
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	switch typeName + "." + field {
+
+	case "Circle.radius":
+		if e.complexity.Circle.Radius == nil {
+			break
+		}
+
+		return e.complexity.Circle.Radius(childComplexity), true
+
+	case "Circle.area":
+		if e.complexity.Circle.Area == nil {
+			break
+		}
+
+		return e.complexity.Circle.Area(childComplexity), true
+
+	case "Error.id":
+		if e.complexity.Error.Id == nil {
+			break
+		}
+
+		return e.complexity.Error.Id(childComplexity), true
+
+	case "Error.errorOnNonRequiredField":
+		if e.complexity.Error.ErrorOnNonRequiredField == nil {
+			break
+		}
+
+		return e.complexity.Error.ErrorOnNonRequiredField(childComplexity), true
+
+	case "Error.errorOnRequiredField":
+		if e.complexity.Error.ErrorOnRequiredField == nil {
+			break
+		}
+
+		return e.complexity.Error.ErrorOnRequiredField(childComplexity), true
+
+	case "Error.nilOnRequiredField":
+		if e.complexity.Error.NilOnRequiredField == nil {
+			break
+		}
+
+		return e.complexity.Error.NilOnRequiredField(childComplexity), true
+
+	case "ForcedResolver.field":
+		if e.complexity.ForcedResolver.Field == nil {
+			break
+		}
+
+		return e.complexity.ForcedResolver.Field(childComplexity), true
+
+	case "InnerObject.id":
+		if e.complexity.InnerObject.Id == nil {
+			break
+		}
+
+		return e.complexity.InnerObject.Id(childComplexity), true
+
+	case "InvalidIdentifier.id":
+		if e.complexity.InvalidIdentifier.Id == nil {
+			break
+		}
+
+		return e.complexity.InvalidIdentifier.Id(childComplexity), true
+
+	case "It.id":
+		if e.complexity.It.Id == nil {
+			break
+		}
+
+		return e.complexity.It.Id(childComplexity), true
+
+	case "OuterObject.inner":
+		if e.complexity.OuterObject.Inner == nil {
+			break
+		}
+
+		return e.complexity.OuterObject.Inner(childComplexity), true
+
+	case "Query.invalidIdentifier":
+		if e.complexity.Query.InvalidIdentifier == nil {
+			break
+		}
+
+		return e.complexity.Query.InvalidIdentifier(childComplexity), true
+
+	case "Query.collision":
+		if e.complexity.Query.Collision == nil {
+			break
+		}
+
+		return e.complexity.Query.Collision(childComplexity), true
+
+	case "Query.mapInput":
+		if e.complexity.Query.MapInput == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 *map[string]interface{}
+		if tmp, ok := rawArgs["input"]; ok {
+			var err error
+			var ptr1 map[string]interface{}
+			if tmp != nil {
+				ptr1 = tmp.(map[string]interface{})
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["input"] = arg0
+
+		return e.complexity.Query.MapInput(childComplexity, args["input"].(*map[string]interface{})), true
+
+	case "Query.recursive":
+		if e.complexity.Query.Recursive == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 *RecursiveInputSlice
+		if tmp, ok := rawArgs["input"]; ok {
+			var err error
+			var ptr1 RecursiveInputSlice
+			if tmp != nil {
+				ptr1, err = UnmarshalRecursiveInputSlice(tmp)
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["input"] = arg0
+
+		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
+
+	case "Query.nestedInputs":
+		if e.complexity.Query.NestedInputs == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 [][]*OuterInput
+		if tmp, ok := rawArgs["input"]; ok {
+			var err error
+			var rawIf1 []interface{}
+			if tmp != nil {
+				if tmp1, ok := tmp.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{tmp}
+				}
+			}
+			arg0 = make([][]*OuterInput, len(rawIf1))
+			for idx1 := range rawIf1 {
+				var rawIf2 []interface{}
+				if rawIf1[idx1] != nil {
+					if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
+						rawIf2 = tmp1
+					} else {
+						rawIf2 = []interface{}{rawIf1[idx1]}
+					}
+				}
+				arg0[idx1] = make([]*OuterInput, len(rawIf2))
+				for idx2 := range rawIf2 {
+					var ptr3 OuterInput
+					if rawIf2[idx2] != nil {
+						ptr3, err = UnmarshalOuterInput(rawIf2[idx2])
+						arg0[idx1][idx2] = &ptr3
+					}
+				}
+			}
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["input"] = arg0
+
+		return e.complexity.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
+
+	case "Query.nestedOutputs":
+		if e.complexity.Query.NestedOutputs == nil {
+			break
+		}
+
+		return e.complexity.Query.NestedOutputs(childComplexity), true
+
+	case "Query.keywords":
+		if e.complexity.Query.Keywords == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 *Keywords
+		if tmp, ok := rawArgs["input"]; ok {
+			var err error
+			var ptr1 Keywords
+			if tmp != nil {
+				ptr1, err = UnmarshalKeywords(tmp)
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["input"] = arg0
+
+		return e.complexity.Query.Keywords(childComplexity, args["input"].(*Keywords)), true
+
+	case "Query.shapes":
+		if e.complexity.Query.Shapes == nil {
+			break
+		}
+
+		return e.complexity.Query.Shapes(childComplexity), true
+
+	case "Query.errorBubble":
+		if e.complexity.Query.ErrorBubble == nil {
+			break
+		}
+
+		return e.complexity.Query.ErrorBubble(childComplexity), true
+
+	case "Query.valid":
+		if e.complexity.Query.Valid == nil {
+			break
+		}
+
+		return e.complexity.Query.Valid(childComplexity), true
+
+	case "Query.keywordArgs":
+		if e.complexity.Query.KeywordArgs == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["break"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["break"] = arg0
+
+		var arg1 string
+		if tmp, ok := rawArgs["default"]; ok {
+			var err error
+			arg1, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["default"] = arg1
+
+		var arg2 string
+		if tmp, ok := rawArgs["func"]; ok {
+			var err error
+			arg2, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["func"] = arg2
+
+		var arg3 string
+		if tmp, ok := rawArgs["interface"]; ok {
+			var err error
+			arg3, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["interface"] = arg3
+
+		var arg4 string
+		if tmp, ok := rawArgs["select"]; ok {
+			var err error
+			arg4, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["select"] = arg4
+
+		var arg5 string
+		if tmp, ok := rawArgs["case"]; ok {
+			var err error
+			arg5, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["case"] = arg5
+
+		var arg6 string
+		if tmp, ok := rawArgs["defer"]; ok {
+			var err error
+			arg6, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["defer"] = arg6
+
+		var arg7 string
+		if tmp, ok := rawArgs["go"]; ok {
+			var err error
+			arg7, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["go"] = arg7
+
+		var arg8 string
+		if tmp, ok := rawArgs["map"]; ok {
+			var err error
+			arg8, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["map"] = arg8
+
+		var arg9 string
+		if tmp, ok := rawArgs["struct"]; ok {
+			var err error
+			arg9, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["struct"] = arg9
+
+		var arg10 string
+		if tmp, ok := rawArgs["chan"]; ok {
+			var err error
+			arg10, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["chan"] = arg10
+
+		var arg11 string
+		if tmp, ok := rawArgs["else"]; ok {
+			var err error
+			arg11, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["else"] = arg11
+
+		var arg12 string
+		if tmp, ok := rawArgs["goto"]; ok {
+			var err error
+			arg12, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["goto"] = arg12
+
+		var arg13 string
+		if tmp, ok := rawArgs["package"]; ok {
+			var err error
+			arg13, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["package"] = arg13
+
+		var arg14 string
+		if tmp, ok := rawArgs["switch"]; ok {
+			var err error
+			arg14, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["switch"] = arg14
+
+		var arg15 string
+		if tmp, ok := rawArgs["const"]; ok {
+			var err error
+			arg15, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["const"] = arg15
+
+		var arg16 string
+		if tmp, ok := rawArgs["fallthrough"]; ok {
+			var err error
+			arg16, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["fallthrough"] = arg16
+
+		var arg17 string
+		if tmp, ok := rawArgs["if"]; ok {
+			var err error
+			arg17, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["if"] = arg17
+
+		var arg18 string
+		if tmp, ok := rawArgs["range"]; ok {
+			var err error
+			arg18, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["range"] = arg18
+
+		var arg19 string
+		if tmp, ok := rawArgs["type"]; ok {
+			var err error
+			arg19, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["type"] = arg19
+
+		var arg20 string
+		if tmp, ok := rawArgs["continue"]; ok {
+			var err error
+			arg20, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["continue"] = arg20
+
+		var arg21 string
+		if tmp, ok := rawArgs["for"]; ok {
+			var err error
+			arg21, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["for"] = arg21
+
+		var arg22 string
+		if tmp, ok := rawArgs["import"]; ok {
+			var err error
+			arg22, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["import"] = arg22
+
+		var arg23 string
+		if tmp, ok := rawArgs["return"]; ok {
+			var err error
+			arg23, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["return"] = arg23
+
+		var arg24 string
+		if tmp, ok := rawArgs["var"]; ok {
+			var err error
+			arg24, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["var"] = arg24
+
+		return e.complexity.Query.KeywordArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string)), true
+
+	case "Rectangle.length":
+		if e.complexity.Rectangle.Length == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Length(childComplexity), true
+
+	case "Rectangle.width":
+		if e.complexity.Rectangle.Width == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Width(childComplexity), true
+
+	case "Rectangle.area":
+		if e.complexity.Rectangle.Area == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Area(childComplexity), true
+
+	case "__Directive.name":
+		if e.complexity.Directive.Name == nil {
+			break
+		}
+
+		return e.complexity.Directive.Name(childComplexity), true
+
+	case "__Directive.description":
+		if e.complexity.Directive.Description == nil {
+			break
+		}
+
+		return e.complexity.Directive.Description(childComplexity), true
+
+	case "__Directive.locations":
+		if e.complexity.Directive.Locations == nil {
+			break
+		}
+
+		return e.complexity.Directive.Locations(childComplexity), true
+
+	case "__Directive.args":
+		if e.complexity.Directive.Args == nil {
+			break
+		}
+
+		return e.complexity.Directive.Args(childComplexity), true
+
+	case "__EnumValue.name":
+		if e.complexity.EnumValue.Name == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.Name(childComplexity), true
+
+	case "__EnumValue.description":
+		if e.complexity.EnumValue.Description == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.Description(childComplexity), true
+
+	case "__EnumValue.isDeprecated":
+		if e.complexity.EnumValue.IsDeprecated == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.IsDeprecated(childComplexity), true
+
+	case "__EnumValue.deprecationReason":
+		if e.complexity.EnumValue.DeprecationReason == nil {
+			break
+		}
+
+		return e.complexity.EnumValue.DeprecationReason(childComplexity), true
+
+	case "__Field.name":
+		if e.complexity.Field.Name == nil {
+			break
+		}
+
+		return e.complexity.Field.Name(childComplexity), true
+
+	case "__Field.description":
+		if e.complexity.Field.Description == nil {
+			break
+		}
+
+		return e.complexity.Field.Description(childComplexity), true
+
+	case "__Field.args":
+		if e.complexity.Field.Args == nil {
+			break
+		}
+
+		return e.complexity.Field.Args(childComplexity), true
+
+	case "__Field.type":
+		if e.complexity.Field.Type == nil {
+			break
+		}
+
+		return e.complexity.Field.Type(childComplexity), true
+
+	case "__Field.isDeprecated":
+		if e.complexity.Field.IsDeprecated == nil {
+			break
+		}
+
+		return e.complexity.Field.IsDeprecated(childComplexity), true
+
+	case "__Field.deprecationReason":
+		if e.complexity.Field.DeprecationReason == nil {
+			break
+		}
+
+		return e.complexity.Field.DeprecationReason(childComplexity), true
+
+	case "__InputValue.name":
+		if e.complexity.InputValue.Name == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Name(childComplexity), true
+
+	case "__InputValue.description":
+		if e.complexity.InputValue.Description == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Description(childComplexity), true
+
+	case "__InputValue.type":
+		if e.complexity.InputValue.Type == nil {
+			break
+		}
+
+		return e.complexity.InputValue.Type(childComplexity), true
+
+	case "__InputValue.defaultValue":
+		if e.complexity.InputValue.DefaultValue == nil {
+			break
+		}
+
+		return e.complexity.InputValue.DefaultValue(childComplexity), true
+
+	case "__Schema.types":
+		if e.complexity.Schema.Types == nil {
+			break
+		}
+
+		return e.complexity.Schema.Types(childComplexity), true
+
+	case "__Schema.queryType":
+		if e.complexity.Schema.QueryType == nil {
+			break
+		}
+
+		return e.complexity.Schema.QueryType(childComplexity), true
+
+	case "__Schema.mutationType":
+		if e.complexity.Schema.MutationType == nil {
+			break
+		}
+
+		return e.complexity.Schema.MutationType(childComplexity), true
+
+	case "__Schema.subscriptionType":
+		if e.complexity.Schema.SubscriptionType == nil {
+			break
+		}
+
+		return e.complexity.Schema.SubscriptionType(childComplexity), true
+
+	case "__Schema.directives":
+		if e.complexity.Schema.Directives == nil {
+			break
+		}
+
+		return e.complexity.Schema.Directives(childComplexity), true
+
+	case "__Type.kind":
+		if e.complexity.Type.Kind == nil {
+			break
+		}
+
+		return e.complexity.Type.Kind(childComplexity), true
+
+	case "__Type.name":
+		if e.complexity.Type.Name == nil {
+			break
+		}
+
+		return e.complexity.Type.Name(childComplexity), true
+
+	case "__Type.description":
+		if e.complexity.Type.Description == nil {
+			break
+		}
+
+		return e.complexity.Type.Description(childComplexity), true
+
+	case "__Type.fields":
+		if e.complexity.Type.Fields == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 bool
+		if tmp, ok := rawArgs["includeDeprecated"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalBoolean(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["includeDeprecated"] = arg0
+
+		return e.complexity.Type.Fields(childComplexity, args["includeDeprecated"].(bool)), true
+
+	case "__Type.interfaces":
+		if e.complexity.Type.Interfaces == nil {
+			break
+		}
+
+		return e.complexity.Type.Interfaces(childComplexity), true
+
+	case "__Type.possibleTypes":
+		if e.complexity.Type.PossibleTypes == nil {
+			break
+		}
+
+		return e.complexity.Type.PossibleTypes(childComplexity), true
+
+	case "__Type.enumValues":
+		if e.complexity.Type.EnumValues == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 bool
+		if tmp, ok := rawArgs["includeDeprecated"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalBoolean(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["includeDeprecated"] = arg0
+
+		return e.complexity.Type.EnumValues(childComplexity, args["includeDeprecated"].(bool)), true
+
+	case "__Type.inputFields":
+		if e.complexity.Type.InputFields == nil {
+			break
+		}
+
+		return e.complexity.Type.InputFields(childComplexity), true
+
+	case "__Type.ofType":
+		if e.complexity.Type.OfType == nil {
+			break
+		}
+
+		return e.complexity.Type.OfType(childComplexity), true
 
 	}
 	return 0, false

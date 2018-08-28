@@ -33,16 +33,15 @@ type Object struct {
 type Field struct {
 	*Type
 
-	GQLName          string          // The name of the field in graphql
-	GoFieldType      GoFieldType     // The field type in go, if any
-	GoReceiverName   string          // The name of method & var receiver in go, if any
-	GoFieldName      string          // The name of the method or var in go, if any
-	Args             []FieldArgument // A list of arguments to be passed to this field
-	ForceResolver    bool            // Should be emit Resolver method
-	CustomComplexity bool            // Uses a custom complexity calculation
-	NoErr            bool            // If this is bound to a go method, does that method have an error as the second argument
-	Object           *Object         // A link back to the parent object
-	Default          interface{}     // The default value
+	GQLName        string          // The name of the field in graphql
+	GoFieldType    GoFieldType     // The field type in go, if any
+	GoReceiverName string          // The name of method & var receiver in go, if any
+	GoFieldName    string          // The name of the method or var in go, if any
+	Args           []FieldArgument // A list of arguments to be passed to this field
+	ForceResolver  bool            // Should be emit Resolver method
+	NoErr          bool            // If this is bound to a go method, does that method have an error as the second argument
+	Object         *Object         // A link back to the parent object
+	Default        interface{}     // The default value
 }
 
 type FieldArgument struct {
@@ -82,17 +81,12 @@ func (o *Object) IsConcurrent() bool {
 	return false
 }
 
-func (o *Object) HasComplexity() bool {
-	for _, f := range o.Fields {
-		if f.CustomComplexity {
-			return true
-		}
-	}
-	return false
-}
-
 func (f *Field) IsResolver() bool {
 	return f.GoFieldName == ""
+}
+
+func (f *Field) IsSystem() bool {
+	return strings.HasPrefix(f.GQLName, "__")
 }
 
 func (f *Field) IsMethod() bool {
@@ -226,7 +220,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 						ec.Errorf(ctx, "must not be null")
 					}
 				{{- end }}
-				return graphql.Null 
+				return graphql.Null
 			}
 			{{.next }}`, map[string]interface{}{
 			"val":     val,

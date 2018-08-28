@@ -84,7 +84,6 @@ type TypeMapEntry struct {
 
 type TypeMapField struct {
 	Resolver   bool   `yaml:"resolver"`
-	Complexity bool   `yaml:"complexity"`
 	FieldName  string `yaml:"fieldName"`
 }
 

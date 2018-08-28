@@ -135,13 +135,11 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 		}
 
 		var forceResolver bool
-		var customComplexity bool
 		var goName string
 		if entryExists {
 			if typeField, ok := typeEntry.Fields[field.Name]; ok {
 				goName = typeField.FieldName
 				forceResolver = typeField.Resolver
-				customComplexity = typeField.Complexity
 			}
 		}
 
@@ -170,13 +168,12 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 		}
 
 		obj.Fields = append(obj.Fields, Field{
-			GQLName:          field.Name,
-			Type:             types.getType(field.Type),
-			Args:             args,
-			Object:           obj,
-			GoFieldName:      goName,
-			ForceResolver:    forceResolver,
-			CustomComplexity: customComplexity,
+			GQLName:       field.Name,
+			Type:          types.getType(field.Type),
+			Args:          args,
+			Object:        obj,
+			GoFieldName:   goName,
+			ForceResolver: forceResolver,
 		})
 	}
 

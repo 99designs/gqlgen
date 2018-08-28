@@ -39,15 +39,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 {{ range $object := .Objects }}
-	{{ if $object.HasComplexity }}
-		{{ $object.GoType }} struct {
-		{{ range $field := $object.Fields }}
-			{{ if $field.CustomComplexity }}
-				{{ $field.GQLName|toCamel }} {{ $field.ComplexitySignature }}
-			{{ end }}
-		{{ end }}
-		}
-	{{ end }}
+	{{ $object.GQLType|toCamel }} struct {
+	{{ range $field := $object.Fields -}}
+	    {{ if $field.IsSystem }}{{ else -}}
+			{{ $field.GQLName|toCamel }} {{ $field.ComplexitySignature }}
+	    {{ end }}
+	{{- end }}
+	}
 {{ end }}
 }
 
@@ -75,12 +73,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	switch typeName + "." + field {
 	{{ range $object := .Objects }}
 		{{ range $field := $object.Fields }}
-			{{ if $field.CustomComplexity }}
+			{{ if $field.IsSystem }}{{ else }}
 				case "{{$object.GQLType}}.{{$field.GQLName}}":
-				    if e.complexity.{{$object.GoType}}.{{$field.GQLName|toCamel}} == nil {
+					if e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}} == nil {
 						break
 					}
-					{{ if . }}args := map[string]interface{}{} {{end}}
+					{{ if $field.Args }}args := map[string]interface{}{} {{end}}
 					{{ range $i, $arg := $field.Args }}
 						var arg{{$i}} {{$arg.Signature }}
 						if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
@@ -92,7 +90,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 						}
 						args[{{$arg.GQLName|quote}}] = arg{{$i}}
 					{{ end }}
-					return e.complexity.{{$object.GoType}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
+					return e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
 			{{ end }}
 		{{ end }}
 	{{ end }}

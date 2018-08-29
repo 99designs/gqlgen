@@ -75,6 +75,12 @@ func TestHandlerGET(t *testing.T) {
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 		assert.Equal(t, `{"data":null,"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}]}`, resp.Body.String())
 	})
+
+	t.Run("no mutations", func(t *testing.T) {
+		resp := doRequest(h, "GET", "/graphql?query=mutation{me{name}}", "")
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+		assert.Equal(t, `{"data":null,"errors":[{"message":"GET requests only allow query operations"}]}`, resp.Body.String())
+	})
 }
 
 func TestHandlerOptions(t *testing.T) {

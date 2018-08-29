@@ -206,6 +206,11 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			return
 		}
 
+		if op.Operation != ast.Query && r.Method == http.MethodGet {
+			sendErrorf(w, http.StatusUnprocessableEntity, "GET requests only allow query operations")
+			return
+		}
+
 		vars, err := validator.VariableValues(exec.Schema(), op, reqParams.Variables)
 		if err != nil {
 			sendError(w, http.StatusUnprocessableEntity, err)

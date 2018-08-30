@@ -9,13 +9,9 @@ import (
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
-
-func init() {
-	rootCmd.AddCommand(initCmd)
-}
 
 var configComment = `
 # .gqlgen.yml example
@@ -55,19 +51,24 @@ type Mutation {
 }
 `
 
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Generate gqlgen skeleton",
-	Long:  "",
-	Run: func(cmd *cobra.Command, args []string) {
-		initSchema()
-		config := initConfig()
+var initCmd = cli.Command{
+	Name:  "init",
+	Usage: "create a new gqlgen project",
+	Flags: []cli.Flag{
+		cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
+		cli.StringFlag{Name: "config, c", Usage: "the config filename"},
+		cli.StringFlag{Name: "server", Usage: "where to write the server stub to", Value: "server/server.go"},
+		cli.StringFlag{Name: "schema", Usage: "where to write the schema stub to", Value: "schema.graphql"},
+	},
+	Action: func(ctx *cli.Context) {
+		initSchema(ctx.String("schema"))
+		config := initConfig(ctx)
 
-		GenerateGraphServer(config)
+		GenerateGraphServer(config, ctx.String("server"))
 	},
 }
 
-func GenerateGraphServer(config *codegen.Config) {
+func GenerateGraphServer(config *codegen.Config, serverFilename string) {
 	schemaRaw, err := ioutil.ReadFile(config.SchemaFilename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
@@ -78,10 +79,6 @@ func GenerateGraphServer(config *codegen.Config) {
 	if err = config.Check(); err != nil {
 		fmt.Fprintln(os.Stderr, "invalid config format: "+err.Error())
 		os.Exit(1)
-	}
-
-	if serverFilename == "" {
-		serverFilename = "server/server.go"
 	}
 
 	if err := codegen.Generate(*config); err != nil {
@@ -97,9 +94,10 @@ func GenerateGraphServer(config *codegen.Config) {
 	fmt.Fprintf(os.Stdout, "Exec \"go run ./%s\" to start GraphQL server\n", serverFilename)
 }
 
-func initConfig() *codegen.Config {
+func initConfig(ctx *cli.Context) *codegen.Config {
 	var config *codegen.Config
 	var err error
+	configFilename := ctx.String("config")
 	if configFilename != "" {
 		config, err = codegen.LoadConfig(configFilename)
 	} else {
@@ -126,25 +124,6 @@ func initConfig() *codegen.Config {
 		Type:     "Resolver",
 	}
 
-	if schemaFilename != "" {
-		config.SchemaFilename = schemaFilename
-	}
-	if models != "" {
-		config.Model.Filename = models
-	}
-	if output != "" {
-		config.Exec.Filename = output
-	}
-	if packageName != "" {
-		config.Exec.Package = packageName
-	}
-	if modelPackageName != "" {
-		config.Model.Package = modelPackageName
-	}
-	if typemap != "" {
-		config.Models = loadModelMap()
-	}
-
 	var buf bytes.Buffer
 	buf.WriteString(strings.TrimSpace(configComment))
 	buf.WriteString("\n\n")
@@ -167,11 +146,7 @@ func initConfig() *codegen.Config {
 	return config
 }
 
-func initSchema() {
-	if schemaFilename == "" {
-		schemaFilename = "schema.graphql"
-	}
-
+func initSchema(schemaFilename string) {
 	_, err := os.Stat(schemaFilename)
 	if !os.IsNotExist(err) {
 		return

@@ -41,6 +41,7 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program, imports *
 		default:
 			continue
 		}
+		model.Description = typ.Description // It's this or change both obj2Model and buildObject
 
 		models = append(models, model)
 	}

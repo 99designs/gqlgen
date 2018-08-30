@@ -28,7 +28,7 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 			return nil, err
 		}
 		if def != nil {
-			for _, bindErr := range bindObject(def.Type(), obj, imports) {
+			for _, bindErr := range bindObject(def.Type(), obj, imports, cfg.StructTag) {
 				log.Println(bindErr.Error())
 				log.Println("  Adding resolver method")
 			}
@@ -115,6 +115,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectSchema",
 				Object:         obj,
+				Description:    field.Description,
 			})
 			continue
 		}

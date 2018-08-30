@@ -25,6 +25,10 @@ var schema = gqlparser.MustLoadSchema(
 			list(size: Int = 10): [Item]
 		}
 
+		type ExpensiveItem implements NameInterface {
+			name: String
+		}
+
 		type Named {
 			name: String
 		}
@@ -153,7 +157,7 @@ func TestCalculate(t *testing.T) {
 		requireComplexity(t, query, nil, 101)
 	})
 
-	t.Run("interfaces have different costs than concrete types", func(t *testing.T) {
+	t.Run("interfaces take max concrete cost", func(t *testing.T) {
 		const query = `
 		{
 			interface {
@@ -205,12 +209,12 @@ func (e *executableSchemaStub) Schema() *ast.Schema {
 
 func (e *executableSchemaStub) Complexity(typeName, field string, childComplexity int, args map[string]interface{}) (int, bool) {
 	switch typeName + "." + field {
+	case "ExpensiveItem.name":
+		return 5, true
 	case "Query.list", "Item.list":
 		return int(args["size"].(int64)) * childComplexity, true
 	case "Query.customObject":
 		return 1, true
-	case "NameInterface.name":
-		return 5, true
 	}
 	return 0, false
 }

@@ -7,15 +7,17 @@ import (
 
 func Calculate(es graphql.ExecutableSchema, op *ast.OperationDefinition, vars map[string]interface{}) int {
 	walker := complexityWalker{
-		es:   es,
-		vars: vars,
+		es:     es,
+		schema: es.Schema(),
+		vars:   vars,
 	}
 	return walker.selectionSetComplexity(op.SelectionSet)
 }
 
 type complexityWalker struct {
-	es   graphql.ExecutableSchema
-	vars map[string]interface{}
+	es     graphql.ExecutableSchema
+	schema *ast.Schema
+	vars   map[string]interface{}
 }
 
 func (cw complexityWalker) selectionSetComplexity(selectionSet ast.SelectionSet) int {
@@ -23,19 +25,21 @@ func (cw complexityWalker) selectionSetComplexity(selectionSet ast.SelectionSet)
 	for _, selection := range selectionSet {
 		switch s := selection.(type) {
 		case *ast.Field:
+			fieldDefinition := cw.schema.Types[s.Definition.Type.Name()]
 			var childComplexity int
-			switch s.ObjectDefinition.Kind {
+			switch fieldDefinition.Kind {
 			case ast.Object, ast.Interface, ast.Union:
 				childComplexity = cw.selectionSetComplexity(s.SelectionSet)
 			}
 
 			args := s.ArgumentMap(cw.vars)
-			if customComplexity, ok := cw.es.Complexity(s.ObjectDefinition.Name, s.Name, childComplexity, args); ok && customComplexity >= childComplexity {
-				complexity = safeAdd(complexity, customComplexity)
+			var fieldComplexity int
+			if s.ObjectDefinition.Kind == ast.Interface {
+				fieldComplexity = cw.interfaceFieldComplexity(s.ObjectDefinition, s.Name, childComplexity, args)
 			} else {
-				// default complexity calculation
-				complexity = safeAdd(complexity, safeAdd(1, childComplexity))
+				fieldComplexity = cw.fieldComplexity(s.ObjectDefinition.Name, s.Name, childComplexity, args)
 			}
+			complexity = safeAdd(complexity, fieldComplexity)
 
 		case *ast.FragmentSpread:
 			complexity = safeAdd(complexity, cw.selectionSetComplexity(s.Definition.SelectionSet))
@@ -45,6 +49,28 @@ func (cw complexityWalker) selectionSetComplexity(selectionSet ast.SelectionSet)
 		}
 	}
 	return complexity
+}
+
+func (cw complexityWalker) interfaceFieldComplexity(def *ast.Definition, field string, childComplexity int, args map[string]interface{}) int {
+	// Interfaces don't have their own separate field costs, so they have to assume the worst case.
+	// We iterate over all implementors and choose the most expensive one.
+	maxComplexity := 0
+	implementors := cw.schema.GetPossibleTypes(def)
+	for _, t := range implementors {
+		fieldComplexity := cw.fieldComplexity(t.Name, field, childComplexity, args)
+		if fieldComplexity > maxComplexity {
+			maxComplexity = fieldComplexity
+		}
+	}
+	return maxComplexity
+}
+
+func (cw complexityWalker) fieldComplexity(object, field string, childComplexity int, args map[string]interface{}) int {
+	if customComplexity, ok := cw.es.Complexity(object, field, childComplexity, args); ok && customComplexity >= childComplexity {
+		return customComplexity
+	}
+	// default complexity calculation
+	return safeAdd(1, childComplexity)
 }
 
 const maxInt = int(^uint(0) >> 1)

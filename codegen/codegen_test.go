@@ -19,7 +19,7 @@ func TestGenerateServer(t *testing.T) {
 	}
 `
 	serverFilename := "gen/" + name + "/server/server.go"
-	cfg := Config{
+	cfg := &Config{
 		SchemaStr: schema,
 		Exec:      PackageConfig{Filename: "gen/" + name + "/exec.go"},
 		Model:     PackageConfig{Filename: "gen/" + name + "/model.go"},

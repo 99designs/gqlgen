@@ -7,6 +7,10 @@ import (
 	"regexp"
 	"strings"
 
+	"go/build"
+	"os"
+	"path/filepath"
+
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/loader"
 )
@@ -364,4 +368,24 @@ func normalizeVendor(pkg string) string {
 	pkg = strings.TrimPrefix(pkg, modifiers)
 	parts := strings.Split(pkg, "/vendor/")
 	return modifiers + parts[len(parts)-1]
+}
+
+func importPathToPackageName(importPath string) string {
+	cwd, _ := os.Getwd()
+	pkg, _ := build.Default.Import(importPath, cwd, 0)
+	// If loading the package fails use the last part of the path segment
+	if pkg == nil || pkg.Name == "" {
+		return filepath.Base(importPath)
+	}
+
+	return pkg.Name
+}
+
+func filenameToPackageName(filename string) string {
+	dir, err := filepath.Abs(filepath.Dir(filename))
+	if err != nil {
+		panic(err)
+	}
+
+	return importPathToPackageName(dir)
 }

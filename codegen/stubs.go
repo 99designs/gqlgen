@@ -1,13 +1,14 @@
 package codegen
 
 import (
+	"fmt"
 	"go/types"
-
 	"io/ioutil"
-
 	"path/filepath"
 
-	"fmt"
+	"os"
+
+	"go/format"
 
 	"github.com/99designs/gqlgen/internal/edit"
 	"github.com/99designs/gqlgen/internal/gopath"
@@ -16,8 +17,23 @@ import (
 )
 
 func Stubs(cfg *Config) error {
+	updated, err := getUpdatedStubs(cfg)
+	if err != nil {
+		return err
+	}
+
+	for filename, file := range updated {
+		fmt.Println(filename)
+		fmt.Println("=============")
+		fmt.Println(file)
+	}
+
+	return nil
+}
+
+func getUpdatedStubs(cfg *Config) (map[string]string, error) {
 	if !cfg.Resolver.IsDefined() {
-		return errors.New("resolver is required in config for stub generation")
+		return nil, errors.New("resolver is required in config for stub generation")
 	}
 
 	conf := loader.Config{}
@@ -25,12 +41,12 @@ func Stubs(cfg *Config) error {
 	conf.Import(cfg.Exec.ImportPath())
 	prog, err := conf.Load()
 	if err != nil {
-		return errors.Wrap(err, "failed to load existing resolver package")
+		return nil, errors.Wrap(err, "failed to load existing resolver package")
 	}
 
 	srcInterface, err := findGoType(prog, cfg.Exec.ImportPath(), "ResolverRoot")
 	if err != nil {
-		return errors.Wrapf(err, "failed to find source root resolver interface")
+		return nil, errors.Wrapf(err, "failed to find source root resolver interface")
 	}
 
 	fe := fileEdits{
@@ -39,13 +55,18 @@ func Stubs(cfg *Config) error {
 	}
 	fe.updateRoot(srcInterface.Type().(*types.Named).Underlying().(*types.Interface), cfg.Resolver.Filename, cfg.Resolver.Type)
 
-	for filename, file := range fe.files {
-		fmt.Println(filename)
-		fmt.Println("=============")
-		fmt.Println(file.Result())
+	updatedStubs := map[string]string{}
+	for filename, result := range fe.files {
+		b, err := format.Source([]byte(result.Result()))
+		if err != nil {
+			updatedStubs[filename] = result.Result()
+			return updatedStubs, errors.Wrap(err, "unable to gofmt")
+		}
+
+		updatedStubs[filename] = string(b)
 	}
 
-	return nil
+	return updatedStubs, nil
 }
 
 type fileEdits struct {
@@ -63,8 +84,11 @@ func (f *fileEdits) updateRoot(src *types.Interface, filename string, typeName s
 			"ResolverType": typeName,
 		}))
 	}
+	var destNamed *types.Named
+	if dest != nil {
+		destNamed, _ = dest.Type().(*types.Named)
+	}
 
-	destNamed, _ := dest.Type().(*types.Named)
 	for i := 0; i < src.NumMethods(); i++ {
 		srcMethod := src.Method(i)
 
@@ -83,7 +107,7 @@ func (f *fileEdits) updateResolverType(src *types.Func, dest *types.Func, filena
 		func (r *{{.ResolverType}}) {{.MethodName}}() {{ .ResolverTypeName }} {
 			return &{{.ResolverTypeName}}{r}
 		}
-		type {{ .ResolverTypeName }} { *{{.ResolverType}} }
+		type {{ .ResolverTypeName }} struct { *{{.ResolverType}} }
 		`, map[string]interface{}{
 			"ResolverType":     typeName,
 			"MethodName":       src.Name(),
@@ -100,7 +124,11 @@ func (f fileEdits) getFile(filename string) *edit.Buffer {
 	}
 
 	b, err := ioutil.ReadFile(filename)
-	if err != nil {
+	if os.IsNotExist(err) {
+		b = []byte(tpl("package {{.PackageName}}\n\n", map[string]interface{}{
+			"PackageName": filenameToPackageName(filename),
+		}))
+	} else if err != nil {
 		panic(err)
 	}
 

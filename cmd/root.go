@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/internal/gopath"
 	"github.com/urfave/cli"
 )
@@ -17,6 +18,7 @@ func Execute() {
 	app.Description = "This is a library for quickly creating strictly typed graphql servers in golang. See https://gqlgen.com/ for a getting started guide."
 	app.HideVersion = true
 	app.Flags = genCmd.Flags
+	app.Version = graphql.Version
 	app.Before = func(context *cli.Context) error {
 		pwd, err := os.Getwd()
 		if err != nil {
@@ -38,6 +40,7 @@ func Execute() {
 	app.Commands = []cli.Command{
 		genCmd,
 		initCmd,
+		versionCmd,
 	}
 
 	if err := app.Run(os.Args); err != nil {

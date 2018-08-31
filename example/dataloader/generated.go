@@ -20,12 +20,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -36,6 +38,39 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 }
+
+type ComplexityRoot struct {
+	Address struct {
+		Id      func(childComplexity int) int
+		Street  func(childComplexity int) int
+		Country func(childComplexity int) int
+	}
+
+	Customer struct {
+		Id      func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Address func(childComplexity int) int
+		Orders  func(childComplexity int) int
+	}
+
+	Item struct {
+		Name func(childComplexity int) int
+	}
+
+	Order struct {
+		Id     func(childComplexity int) int
+		Date   func(childComplexity int) int
+		Amount func(childComplexity int) int
+		Items  func(childComplexity int) int
+	}
+
+	Query struct {
+		Customers func(childComplexity int) int
+		Torture1d func(childComplexity int, customerIds []int) int
+		Torture2d func(childComplexity int, customerIds [][]int) int
+	}
+}
+
 type CustomerResolver interface {
 	Address(ctx context.Context, obj *Customer) (*Address, error)
 	Orders(ctx context.Context, obj *Customer) ([]Order, error)
@@ -52,10 +87,178 @@ type QueryResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Address.id":
+		if e.complexity.Address.Id == nil {
+			break
+		}
+
+		return e.complexity.Address.Id(childComplexity), true
+
+	case "Address.street":
+		if e.complexity.Address.Street == nil {
+			break
+		}
+
+		return e.complexity.Address.Street(childComplexity), true
+
+	case "Address.country":
+		if e.complexity.Address.Country == nil {
+			break
+		}
+
+		return e.complexity.Address.Country(childComplexity), true
+
+	case "Customer.id":
+		if e.complexity.Customer.Id == nil {
+			break
+		}
+
+		return e.complexity.Customer.Id(childComplexity), true
+
+	case "Customer.name":
+		if e.complexity.Customer.Name == nil {
+			break
+		}
+
+		return e.complexity.Customer.Name(childComplexity), true
+
+	case "Customer.address":
+		if e.complexity.Customer.Address == nil {
+			break
+		}
+
+		return e.complexity.Customer.Address(childComplexity), true
+
+	case "Customer.orders":
+		if e.complexity.Customer.Orders == nil {
+			break
+		}
+
+		return e.complexity.Customer.Orders(childComplexity), true
+
+	case "Item.name":
+		if e.complexity.Item.Name == nil {
+			break
+		}
+
+		return e.complexity.Item.Name(childComplexity), true
+
+	case "Order.id":
+		if e.complexity.Order.Id == nil {
+			break
+		}
+
+		return e.complexity.Order.Id(childComplexity), true
+
+	case "Order.date":
+		if e.complexity.Order.Date == nil {
+			break
+		}
+
+		return e.complexity.Order.Date(childComplexity), true
+
+	case "Order.amount":
+		if e.complexity.Order.Amount == nil {
+			break
+		}
+
+		return e.complexity.Order.Amount(childComplexity), true
+
+	case "Order.items":
+		if e.complexity.Order.Items == nil {
+			break
+		}
+
+		return e.complexity.Order.Items(childComplexity), true
+
+	case "Query.customers":
+		if e.complexity.Query.Customers == nil {
+			break
+		}
+
+		return e.complexity.Query.Customers(childComplexity), true
+
+	case "Query.torture1d":
+		if e.complexity.Query.Torture1d == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 []int
+		if tmp, ok := rawArgs["customerIds"]; ok {
+			var err error
+			var rawIf1 []interface{}
+			if tmp != nil {
+				if tmp1, ok := tmp.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{tmp}
+				}
+			}
+			arg0 = make([]int, len(rawIf1))
+			for idx1 := range rawIf1 {
+				arg0[idx1], err = graphql.UnmarshalInt(rawIf1[idx1])
+			}
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["customerIds"] = arg0
+
+		return e.complexity.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
+
+	case "Query.torture2d":
+		if e.complexity.Query.Torture2d == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 [][]int
+		if tmp, ok := rawArgs["customerIds"]; ok {
+			var err error
+			var rawIf1 []interface{}
+			if tmp != nil {
+				if tmp1, ok := tmp.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{tmp}
+				}
+			}
+			arg0 = make([][]int, len(rawIf1))
+			for idx1 := range rawIf1 {
+				var rawIf2 []interface{}
+				if rawIf1[idx1] != nil {
+					if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
+						rawIf2 = tmp1
+					} else {
+						rawIf2 = []interface{}{rawIf1[idx1]}
+					}
+				}
+				arg0[idx1] = make([]int, len(rawIf2))
+				for idx2 := range rawIf2 {
+					arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
+				}
+			}
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["customerIds"] = arg0
+
+		return e.complexity.Query.Torture2d(childComplexity, args["customerIds"].([][]int)), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

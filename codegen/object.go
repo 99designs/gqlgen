@@ -81,8 +81,16 @@ func (o *Object) IsConcurrent() bool {
 	return false
 }
 
+func (o *Object) IsReserved() bool {
+	return strings.HasPrefix(o.GQLType, "__")
+}
+
 func (f *Field) IsResolver() bool {
 	return f.GoFieldName == ""
+}
+
+func (f *Field) IsReserved() bool {
+	return strings.HasPrefix(f.GQLName, "__")
 }
 
 func (f *Field) IsMethod() bool {
@@ -165,6 +173,24 @@ func (f *Field) ResolverDeclaration() string {
 	return res
 }
 
+func (f *Field) ComplexitySignature() string {
+	res := fmt.Sprintf("func(childComplexity int")
+	for _, arg := range f.Args {
+		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
+	}
+	res += ") int"
+	return res
+}
+
+func (f *Field) ComplexityArgs() string {
+	var args []string
+	for _, arg := range f.Args {
+		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+arg.Signature()+")")
+	}
+
+	return strings.Join(args, ", ")
+}
+
 func (f *Field) CallArgs() string {
 	var args []string
 
@@ -198,7 +224,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 						ec.Errorf(ctx, "must not be null")
 					}
 				{{- end }}
-				return graphql.Null 
+				return graphql.Null
 			}
 			{{.next }}`, map[string]interface{}{
 			"val":     val,

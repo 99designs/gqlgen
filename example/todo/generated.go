@@ -19,12 +19,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -35,6 +37,26 @@ type ResolverRoot interface {
 type DirectiveRoot struct {
 	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
 }
+
+type ComplexityRoot struct {
+	MyMutation struct {
+		CreateTodo func(childComplexity int, todo TodoInput) int
+		UpdateTodo func(childComplexity int, id int, changes map[string]interface{}) int
+	}
+
+	MyQuery struct {
+		Todo     func(childComplexity int, id int) int
+		LastTodo func(childComplexity int) int
+		Todos    func(childComplexity int) int
+	}
+
+	Todo struct {
+		Id   func(childComplexity int) int
+		Text func(childComplexity int) int
+		Done func(childComplexity int) int
+	}
+}
+
 type MyMutationResolver interface {
 	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
 	UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
@@ -48,10 +70,117 @@ type MyQueryResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "MyMutation.createTodo":
+		if e.complexity.MyMutation.CreateTodo == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 TodoInput
+		if tmp, ok := rawArgs["todo"]; ok {
+			var err error
+			arg0, err = UnmarshalTodoInput(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["todo"] = arg0
+
+		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
+
+	case "MyMutation.updateTodo":
+		if e.complexity.MyMutation.UpdateTodo == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 int
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalInt(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		var arg1 map[string]interface{}
+		if tmp, ok := rawArgs["changes"]; ok {
+			var err error
+			arg1 = tmp.(map[string]interface{})
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["changes"] = arg1
+
+		return e.complexity.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]interface{})), true
+
+	case "MyQuery.todo":
+		if e.complexity.MyQuery.Todo == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 int
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalInt(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(int)), true
+
+	case "MyQuery.lastTodo":
+		if e.complexity.MyQuery.LastTodo == nil {
+			break
+		}
+
+		return e.complexity.MyQuery.LastTodo(childComplexity), true
+
+	case "MyQuery.todos":
+		if e.complexity.MyQuery.Todos == nil {
+			break
+		}
+
+		return e.complexity.MyQuery.Todos(childComplexity), true
+
+	case "Todo.id":
+		if e.complexity.Todo.Id == nil {
+			break
+		}
+
+		return e.complexity.Todo.Id(childComplexity), true
+
+	case "Todo.text":
+		if e.complexity.Todo.Text == nil {
+			break
+		}
+
+		return e.complexity.Todo.Text(childComplexity), true
+
+	case "Todo.done":
+		if e.complexity.Todo.Done == nil {
+			break
+		}
+
+		return e.complexity.Todo.Done(childComplexity), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

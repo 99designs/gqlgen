@@ -21,12 +21,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -35,6 +37,27 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 }
+
+type ComplexityRoot struct {
+	Like struct {
+		Reaction  func(childComplexity int) int
+		Sent      func(childComplexity int) int
+		Selection func(childComplexity int) int
+		Collected func(childComplexity int) int
+	}
+
+	Post struct {
+		Message   func(childComplexity int) int
+		Sent      func(childComplexity int) int
+		Selection func(childComplexity int) int
+		Collected func(childComplexity int) int
+	}
+
+	Query struct {
+		Events func(childComplexity int) int
+	}
+}
+
 type QueryResolver interface {
 	Events(ctx context.Context) ([]Event, error)
 }
@@ -42,10 +65,81 @@ type QueryResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Like.reaction":
+		if e.complexity.Like.Reaction == nil {
+			break
+		}
+
+		return e.complexity.Like.Reaction(childComplexity), true
+
+	case "Like.sent":
+		if e.complexity.Like.Sent == nil {
+			break
+		}
+
+		return e.complexity.Like.Sent(childComplexity), true
+
+	case "Like.selection":
+		if e.complexity.Like.Selection == nil {
+			break
+		}
+
+		return e.complexity.Like.Selection(childComplexity), true
+
+	case "Like.collected":
+		if e.complexity.Like.Collected == nil {
+			break
+		}
+
+		return e.complexity.Like.Collected(childComplexity), true
+
+	case "Post.message":
+		if e.complexity.Post.Message == nil {
+			break
+		}
+
+		return e.complexity.Post.Message(childComplexity), true
+
+	case "Post.sent":
+		if e.complexity.Post.Sent == nil {
+			break
+		}
+
+		return e.complexity.Post.Sent(childComplexity), true
+
+	case "Post.selection":
+		if e.complexity.Post.Selection == nil {
+			break
+		}
+
+		return e.complexity.Post.Selection(childComplexity), true
+
+	case "Post.collected":
+		if e.complexity.Post.Collected == nil {
+			break
+		}
+
+		return e.complexity.Post.Collected(childComplexity), true
+
+	case "Query.events":
+		if e.complexity.Query.Events == nil {
+			break
+		}
+
+		return e.complexity.Query.Events(childComplexity), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

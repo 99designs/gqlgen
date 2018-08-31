@@ -21,12 +21,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -40,6 +42,74 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 }
+
+type ComplexityRoot struct {
+	Droid struct {
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Friends           func(childComplexity int) int
+		FriendsConnection func(childComplexity int, first *int, after *string) int
+		AppearsIn         func(childComplexity int) int
+		PrimaryFunction   func(childComplexity int) int
+	}
+
+	FriendsConnection struct {
+		TotalCount func(childComplexity int) int
+		Edges      func(childComplexity int) int
+		Friends    func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+	}
+
+	FriendsEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	Human struct {
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Height            func(childComplexity int, unit LengthUnit) int
+		Mass              func(childComplexity int) int
+		Friends           func(childComplexity int) int
+		FriendsConnection func(childComplexity int, first *int, after *string) int
+		AppearsIn         func(childComplexity int) int
+		Starships         func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CreateReview func(childComplexity int, episode Episode, review Review) int
+	}
+
+	PageInfo struct {
+		StartCursor func(childComplexity int) int
+		EndCursor   func(childComplexity int) int
+		HasNextPage func(childComplexity int) int
+	}
+
+	Query struct {
+		Hero      func(childComplexity int, episode Episode) int
+		Reviews   func(childComplexity int, episode Episode, since *time.Time) int
+		Search    func(childComplexity int, text string) int
+		Character func(childComplexity int, id string) int
+		Droid     func(childComplexity int, id string) int
+		Human     func(childComplexity int, id string) int
+		Starship  func(childComplexity int, id string) int
+	}
+
+	Review struct {
+		Stars      func(childComplexity int) int
+		Commentary func(childComplexity int) int
+		Time       func(childComplexity int) int
+	}
+
+	Starship struct {
+		Id      func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Length  func(childComplexity int, unit LengthUnit) int
+		History func(childComplexity int) int
+	}
+}
+
 type DroidResolver interface {
 	Friends(ctx context.Context, obj *Droid) ([]Character, error)
 	FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error)
@@ -73,10 +143,481 @@ type StarshipResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Droid.id":
+		if e.complexity.Droid.Id == nil {
+			break
+		}
+
+		return e.complexity.Droid.Id(childComplexity), true
+
+	case "Droid.name":
+		if e.complexity.Droid.Name == nil {
+			break
+		}
+
+		return e.complexity.Droid.Name(childComplexity), true
+
+	case "Droid.friends":
+		if e.complexity.Droid.Friends == nil {
+			break
+		}
+
+		return e.complexity.Droid.Friends(childComplexity), true
+
+	case "Droid.friendsConnection":
+		if e.complexity.Droid.FriendsConnection == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 *int
+		if tmp, ok := rawArgs["first"]; ok {
+			var err error
+			var ptr1 int
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalInt(tmp)
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["first"] = arg0
+
+		var arg1 *string
+		if tmp, ok := rawArgs["after"]; ok {
+			var err error
+			var ptr1 string
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalID(tmp)
+				arg1 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["after"] = arg1
+
+		return e.complexity.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Droid.appearsIn":
+		if e.complexity.Droid.AppearsIn == nil {
+			break
+		}
+
+		return e.complexity.Droid.AppearsIn(childComplexity), true
+
+	case "Droid.primaryFunction":
+		if e.complexity.Droid.PrimaryFunction == nil {
+			break
+		}
+
+		return e.complexity.Droid.PrimaryFunction(childComplexity), true
+
+	case "FriendsConnection.totalCount":
+		if e.complexity.FriendsConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.TotalCount(childComplexity), true
+
+	case "FriendsConnection.edges":
+		if e.complexity.FriendsConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.Edges(childComplexity), true
+
+	case "FriendsConnection.friends":
+		if e.complexity.FriendsConnection.Friends == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.Friends(childComplexity), true
+
+	case "FriendsConnection.pageInfo":
+		if e.complexity.FriendsConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.PageInfo(childComplexity), true
+
+	case "FriendsEdge.cursor":
+		if e.complexity.FriendsEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.FriendsEdge.Cursor(childComplexity), true
+
+	case "FriendsEdge.node":
+		if e.complexity.FriendsEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.FriendsEdge.Node(childComplexity), true
+
+	case "Human.id":
+		if e.complexity.Human.Id == nil {
+			break
+		}
+
+		return e.complexity.Human.Id(childComplexity), true
+
+	case "Human.name":
+		if e.complexity.Human.Name == nil {
+			break
+		}
+
+		return e.complexity.Human.Name(childComplexity), true
+
+	case "Human.height":
+		if e.complexity.Human.Height == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 LengthUnit
+		if tmp, ok := rawArgs["unit"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["unit"] = arg0
+
+		return e.complexity.Human.Height(childComplexity, args["unit"].(LengthUnit)), true
+
+	case "Human.mass":
+		if e.complexity.Human.Mass == nil {
+			break
+		}
+
+		return e.complexity.Human.Mass(childComplexity), true
+
+	case "Human.friends":
+		if e.complexity.Human.Friends == nil {
+			break
+		}
+
+		return e.complexity.Human.Friends(childComplexity), true
+
+	case "Human.friendsConnection":
+		if e.complexity.Human.FriendsConnection == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 *int
+		if tmp, ok := rawArgs["first"]; ok {
+			var err error
+			var ptr1 int
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalInt(tmp)
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["first"] = arg0
+
+		var arg1 *string
+		if tmp, ok := rawArgs["after"]; ok {
+			var err error
+			var ptr1 string
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalID(tmp)
+				arg1 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["after"] = arg1
+
+		return e.complexity.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Human.appearsIn":
+		if e.complexity.Human.AppearsIn == nil {
+			break
+		}
+
+		return e.complexity.Human.AppearsIn(childComplexity), true
+
+	case "Human.starships":
+		if e.complexity.Human.Starships == nil {
+			break
+		}
+
+		return e.complexity.Human.Starships(childComplexity), true
+
+	case "Mutation.createReview":
+		if e.complexity.Mutation.CreateReview == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 Episode
+		if tmp, ok := rawArgs["episode"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["episode"] = arg0
+
+		var arg1 Review
+		if tmp, ok := rawArgs["review"]; ok {
+			var err error
+			arg1, err = UnmarshalReviewInput(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["review"] = arg1
+
+		return e.complexity.Mutation.CreateReview(childComplexity, args["episode"].(Episode), args["review"].(Review)), true
+
+	case "PageInfo.startCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
+
+	case "PageInfo.endCursor":
+		if e.complexity.PageInfo.EndCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.EndCursor(childComplexity), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "Query.hero":
+		if e.complexity.Query.Hero == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 Episode
+		if tmp, ok := rawArgs["episode"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["episode"] = arg0
+
+		return e.complexity.Query.Hero(childComplexity, args["episode"].(Episode)), true
+
+	case "Query.reviews":
+		if e.complexity.Query.Reviews == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 Episode
+		if tmp, ok := rawArgs["episode"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["episode"] = arg0
+
+		var arg1 *time.Time
+		if tmp, ok := rawArgs["since"]; ok {
+			var err error
+			var ptr1 time.Time
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalTime(tmp)
+				arg1 = &ptr1
+			}
+
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["since"] = arg1
+
+		return e.complexity.Query.Reviews(childComplexity, args["episode"].(Episode), args["since"].(*time.Time)), true
+
+	case "Query.search":
+		if e.complexity.Query.Search == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["text"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["text"] = arg0
+
+		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
+
+	case "Query.character":
+		if e.complexity.Query.Character == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Character(childComplexity, args["id"].(string)), true
+
+	case "Query.droid":
+		if e.complexity.Query.Droid == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Droid(childComplexity, args["id"].(string)), true
+
+	case "Query.human":
+		if e.complexity.Query.Human == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Human(childComplexity, args["id"].(string)), true
+
+	case "Query.starship":
+		if e.complexity.Query.Starship == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.Starship(childComplexity, args["id"].(string)), true
+
+	case "Review.stars":
+		if e.complexity.Review.Stars == nil {
+			break
+		}
+
+		return e.complexity.Review.Stars(childComplexity), true
+
+	case "Review.commentary":
+		if e.complexity.Review.Commentary == nil {
+			break
+		}
+
+		return e.complexity.Review.Commentary(childComplexity), true
+
+	case "Review.time":
+		if e.complexity.Review.Time == nil {
+			break
+		}
+
+		return e.complexity.Review.Time(childComplexity), true
+
+	case "Starship.id":
+		if e.complexity.Starship.Id == nil {
+			break
+		}
+
+		return e.complexity.Starship.Id(childComplexity), true
+
+	case "Starship.name":
+		if e.complexity.Starship.Name == nil {
+			break
+		}
+
+		return e.complexity.Starship.Name(childComplexity), true
+
+	case "Starship.length":
+		if e.complexity.Starship.Length == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 LengthUnit
+		if tmp, ok := rawArgs["unit"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["unit"] = arg0
+
+		return e.complexity.Starship.Length(childComplexity, args["unit"].(LengthUnit)), true
+
+	case "Starship.history":
+		if e.complexity.Starship.History == nil {
+			break
+		}
+
+		return e.complexity.Starship.History(childComplexity), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

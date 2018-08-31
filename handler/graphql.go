@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/99designs/gqlgen/complexity"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/golang-lru"
@@ -24,12 +25,13 @@ type params struct {
 }
 
 type Config struct {
-	cacheSize      int
-	upgrader       websocket.Upgrader
-	recover        graphql.RecoverFunc
-	errorPresenter graphql.ErrorPresenterFunc
-	resolverHook   graphql.FieldMiddleware
-	requestHook    graphql.RequestMiddleware
+	cacheSize       int
+	upgrader        websocket.Upgrader
+	recover         graphql.RecoverFunc
+	errorPresenter  graphql.ErrorPresenterFunc
+	resolverHook    graphql.FieldMiddleware
+	requestHook     graphql.RequestMiddleware
+	complexityLimit int
 }
 
 func (c *Config) newRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -73,6 +75,14 @@ func RecoverFunc(recover graphql.RecoverFunc) Option {
 func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 	return func(cfg *Config) {
 		cfg.errorPresenter = f
+	}
+}
+
+// ComplexityLimit sets a maximum query complexity that is allowed to be executed.
+// If a query is submitted that exceeds the limit, a 422 status code will be returned.
+func ComplexityLimit(limit int) Option {
+	return func(cfg *Config) {
+		cfg.complexityLimit = limit
 	}
 }
 
@@ -225,6 +235,14 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 				sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
 			}
 		}()
+
+		if cfg.complexityLimit > 0 {
+			queryComplexity := complexity.Calculate(exec, op, vars)
+			if queryComplexity > cfg.complexityLimit {
+				sendErrorf(w, http.StatusUnprocessableEntity, "query has complexity %d, which exceeds the limit of %d", queryComplexity, cfg.complexityLimit)
+				return
+			}
+		}
 
 		switch op.Operation {
 		case ast.Query:

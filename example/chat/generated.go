@@ -20,12 +20,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -36,6 +38,33 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 }
+
+type ComplexityRoot struct {
+	Chatroom struct {
+		Name     func(childComplexity int) int
+		Messages func(childComplexity int) int
+	}
+
+	Message struct {
+		Id        func(childComplexity int) int
+		Text      func(childComplexity int) int
+		CreatedBy func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+	}
+
+	Mutation struct {
+		Post func(childComplexity int, text string, username string, roomName string) int
+	}
+
+	Query struct {
+		Room func(childComplexity int, name string) int
+	}
+
+	Subscription struct {
+		MessageAdded func(childComplexity int, roomName string) int
+	}
+}
+
 type MutationResolver interface {
 	Post(ctx context.Context, text string, username string, roomName string) (Message, error)
 }
@@ -49,10 +78,134 @@ type SubscriptionResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Chatroom.name":
+		if e.complexity.Chatroom.Name == nil {
+			break
+		}
+
+		return e.complexity.Chatroom.Name(childComplexity), true
+
+	case "Chatroom.messages":
+		if e.complexity.Chatroom.Messages == nil {
+			break
+		}
+
+		return e.complexity.Chatroom.Messages(childComplexity), true
+
+	case "Message.id":
+		if e.complexity.Message.Id == nil {
+			break
+		}
+
+		return e.complexity.Message.Id(childComplexity), true
+
+	case "Message.text":
+		if e.complexity.Message.Text == nil {
+			break
+		}
+
+		return e.complexity.Message.Text(childComplexity), true
+
+	case "Message.createdBy":
+		if e.complexity.Message.CreatedBy == nil {
+			break
+		}
+
+		return e.complexity.Message.CreatedBy(childComplexity), true
+
+	case "Message.createdAt":
+		if e.complexity.Message.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Message.CreatedAt(childComplexity), true
+
+	case "Mutation.post":
+		if e.complexity.Mutation.Post == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["text"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["text"] = arg0
+
+		var arg1 string
+		if tmp, ok := rawArgs["username"]; ok {
+			var err error
+			arg1, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["username"] = arg1
+
+		var arg2 string
+		if tmp, ok := rawArgs["roomName"]; ok {
+			var err error
+			arg2, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["roomName"] = arg2
+
+		return e.complexity.Mutation.Post(childComplexity, args["text"].(string), args["username"].(string), args["roomName"].(string)), true
+
+	case "Query.room":
+		if e.complexity.Query.Room == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["name"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["name"] = arg0
+
+		return e.complexity.Query.Room(childComplexity, args["name"].(string)), true
+
+	case "Subscription.messageAdded":
+		if e.complexity.Subscription.MessageAdded == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 string
+		if tmp, ok := rawArgs["roomName"]; ok {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["roomName"] = arg0
+
+		return e.complexity.Subscription.MessageAdded(childComplexity, args["roomName"].(string)), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

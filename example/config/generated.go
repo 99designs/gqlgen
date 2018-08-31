@@ -19,12 +19,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -35,6 +37,30 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 }
+
+type ComplexityRoot struct {
+	Mutation struct {
+		CreateTodo func(childComplexity int, input NewTodo) int
+	}
+
+	Query struct {
+		Todos func(childComplexity int) int
+	}
+
+	Todo struct {
+		Id         func(childComplexity int) int
+		DatabaseId func(childComplexity int) int
+		Text       func(childComplexity int) int
+		Done       func(childComplexity int) int
+		User       func(childComplexity int) int
+	}
+
+	User struct {
+		Id   func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+}
+
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input NewTodo) (Todo, error)
 }
@@ -48,10 +74,92 @@ type TodoResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Mutation.createTodo":
+		if e.complexity.Mutation.CreateTodo == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 NewTodo
+		if tmp, ok := rawArgs["input"]; ok {
+			var err error
+			arg0, err = UnmarshalNewTodo(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["input"] = arg0
+
+		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
+
+	case "Query.todos":
+		if e.complexity.Query.Todos == nil {
+			break
+		}
+
+		return e.complexity.Query.Todos(childComplexity), true
+
+	case "Todo.id":
+		if e.complexity.Todo.Id == nil {
+			break
+		}
+
+		return e.complexity.Todo.Id(childComplexity), true
+
+	case "Todo.databaseId":
+		if e.complexity.Todo.DatabaseId == nil {
+			break
+		}
+
+		return e.complexity.Todo.DatabaseId(childComplexity), true
+
+	case "Todo.text":
+		if e.complexity.Todo.Text == nil {
+			break
+		}
+
+		return e.complexity.Todo.Text(childComplexity), true
+
+	case "Todo.done":
+		if e.complexity.Todo.Done == nil {
+			break
+		}
+
+		return e.complexity.Todo.Done(childComplexity), true
+
+	case "Todo.user":
+		if e.complexity.Todo.User == nil {
+			break
+		}
+
+		return e.complexity.Todo.User(childComplexity), true
+
+	case "User.id":
+		if e.complexity.User.Id == nil {
+			break
+		}
+
+		return e.complexity.User.Id(childComplexity), true
+
+	case "User.name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

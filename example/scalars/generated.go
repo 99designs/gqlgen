@@ -22,12 +22,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -37,6 +39,30 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 }
+
+type ComplexityRoot struct {
+	Address struct {
+		Id       func(childComplexity int) int
+		Location func(childComplexity int) int
+	}
+
+	Query struct {
+		User   func(childComplexity int, id external.ObjectID) int
+		Search func(childComplexity int, input model.SearchArgs) int
+	}
+
+	User struct {
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Created           func(childComplexity int) int
+		IsBanned          func(childComplexity int) int
+		PrimitiveResolver func(childComplexity int) int
+		CustomResolver    func(childComplexity int) int
+		Address           func(childComplexity int) int
+		Tier              func(childComplexity int) int
+	}
+}
+
 type QueryResolver interface {
 	User(ctx context.Context, id external.ObjectID) (*model.User, error)
 	Search(ctx context.Context, input model.SearchArgs) ([]model.User, error)
@@ -49,10 +75,124 @@ type UserResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Address.id":
+		if e.complexity.Address.Id == nil {
+			break
+		}
+
+		return e.complexity.Address.Id(childComplexity), true
+
+	case "Address.location":
+		if e.complexity.Address.Location == nil {
+			break
+		}
+
+		return e.complexity.Address.Location(childComplexity), true
+
+	case "Query.user":
+		if e.complexity.Query.User == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 external.ObjectID
+		if tmp, ok := rawArgs["id"]; ok {
+			var err error
+			arg0, err = model.UnmarshalID(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["id"] = arg0
+
+		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
+
+	case "Query.search":
+		if e.complexity.Query.Search == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 model.SearchArgs
+		if tmp, ok := rawArgs["input"]; ok {
+			var err error
+			arg0, err = UnmarshalSearchArgs(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["input"] = arg0
+
+		return e.complexity.Query.Search(childComplexity, args["input"].(model.SearchArgs)), true
+
+	case "User.id":
+		if e.complexity.User.Id == nil {
+			break
+		}
+
+		return e.complexity.User.Id(childComplexity), true
+
+	case "User.name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
+
+	case "User.created":
+		if e.complexity.User.Created == nil {
+			break
+		}
+
+		return e.complexity.User.Created(childComplexity), true
+
+	case "User.isBanned":
+		if e.complexity.User.IsBanned == nil {
+			break
+		}
+
+		return e.complexity.User.IsBanned(childComplexity), true
+
+	case "User.primitiveResolver":
+		if e.complexity.User.PrimitiveResolver == nil {
+			break
+		}
+
+		return e.complexity.User.PrimitiveResolver(childComplexity), true
+
+	case "User.customResolver":
+		if e.complexity.User.CustomResolver == nil {
+			break
+		}
+
+		return e.complexity.User.CustomResolver(childComplexity), true
+
+	case "User.address":
+		if e.complexity.User.Address == nil {
+			break
+		}
+
+		return e.complexity.User.Address(childComplexity), true
+
+	case "User.tier":
+		if e.complexity.User.Tier == nil {
+			break
+		}
+
+		return e.complexity.User.Tier(childComplexity), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

@@ -21,12 +21,14 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
+	Complexity ComplexityRoot
 }
 
 type ResolverRoot interface {
@@ -38,6 +40,32 @@ type ResolverRoot interface {
 type DirectiveRoot struct {
 	Magic func(ctx context.Context, obj interface{}, next graphql.Resolver, kind *int) (res interface{}, err error)
 }
+
+type ComplexityRoot struct {
+	Element struct {
+		Child      func(childComplexity int) int
+		Error      func(childComplexity int) int
+		Mismatched func(childComplexity int) int
+	}
+
+	Query struct {
+		Path         func(childComplexity int) int
+		Date         func(childComplexity int, filter models.DateFilter) int
+		Viewer       func(childComplexity int) int
+		JsonEncoding func(childComplexity int) int
+		Error        func(childComplexity int, typeArg models.ErrorType) int
+	}
+
+	User struct {
+		Name  func(childComplexity int) int
+		Likes func(childComplexity int) int
+	}
+
+	Viewer struct {
+		User func(childComplexity int) int
+	}
+}
+
 type ElementResolver interface {
 	Child(ctx context.Context, obj *models.Element) (models.Element, error)
 	Error(ctx context.Context, obj *models.Element) (bool, error)
@@ -57,10 +85,117 @@ type UserResolver interface {
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
+	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Element.child":
+		if e.complexity.Element.Child == nil {
+			break
+		}
+
+		return e.complexity.Element.Child(childComplexity), true
+
+	case "Element.error":
+		if e.complexity.Element.Error == nil {
+			break
+		}
+
+		return e.complexity.Element.Error(childComplexity), true
+
+	case "Element.mismatched":
+		if e.complexity.Element.Mismatched == nil {
+			break
+		}
+
+		return e.complexity.Element.Mismatched(childComplexity), true
+
+	case "Query.path":
+		if e.complexity.Query.Path == nil {
+			break
+		}
+
+		return e.complexity.Query.Path(childComplexity), true
+
+	case "Query.date":
+		if e.complexity.Query.Date == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 models.DateFilter
+		if tmp, ok := rawArgs["filter"]; ok {
+			var err error
+			arg0, err = UnmarshalDateFilter(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["filter"] = arg0
+
+		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
+
+	case "Query.viewer":
+		if e.complexity.Query.Viewer == nil {
+			break
+		}
+
+		return e.complexity.Query.Viewer(childComplexity), true
+
+	case "Query.jsonEncoding":
+		if e.complexity.Query.JsonEncoding == nil {
+			break
+		}
+
+		return e.complexity.Query.JsonEncoding(childComplexity), true
+
+	case "Query.error":
+		if e.complexity.Query.Error == nil {
+			break
+		}
+		args := map[string]interface{}{}
+
+		var arg0 models.ErrorType
+		if tmp, ok := rawArgs["type"]; ok {
+			var err error
+			err = (&arg0).UnmarshalGQL(tmp)
+			if err != nil {
+				return 0, false
+			}
+		}
+		args["type"] = arg0
+
+		return e.complexity.Query.Error(childComplexity, args["type"].(models.ErrorType)), true
+
+	case "User.name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
+
+	case "User.likes":
+		if e.complexity.User.Likes == nil {
+			break
+		}
+
+		return e.complexity.User.Likes(childComplexity), true
+
+	case "Viewer.user":
+		if e.complexity.Viewer.User == nil {
+			break
+		}
+
+		return e.complexity.Viewer.User(childComplexity), true
+
+	}
+	return 0, false
 }
 
 func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

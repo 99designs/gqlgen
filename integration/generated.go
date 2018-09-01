@@ -2133,6 +2133,7 @@ func UnmarshalDateFilter(v interface{}) (models.DateFilter, error) {
 	return it, nil
 }
 
+// nolint: megacheck
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (nextCtx context.Context, ret interface{}) {
 	defer func() {
 		if r := recover(); r != nil {

@@ -1907,6 +1907,7 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 	}
 }
 
+// nolint: megacheck
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (nextCtx context.Context, ret interface{}) {
 	defer func() {
 		if r := recover(); r != nil {

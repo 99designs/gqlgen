@@ -2087,6 +2087,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+// nolint: megacheck
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (nextCtx context.Context, ret interface{}) {
 	defer func() {
 		if r := recover(); r != nil {

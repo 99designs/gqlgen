@@ -38,7 +38,7 @@
 			Field: field,
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
-		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(ctx context.Context) (interface{}, error) {
+		ctx, resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(ctx context.Context) (interface{}, error) {
 			{{- if $field.IsResolver }}
 				return ec.resolvers.{{ $field.ShortInvocation }}
 			{{- else if $field.IsMethod }}

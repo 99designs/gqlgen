@@ -10,7 +10,7 @@ import (
 )
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
-type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
+type FieldMiddleware func(ctx context.Context, next Resolver) (retCtx context.Context, res interface{}, err error)
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 
 type RequestContext struct {
@@ -29,12 +29,14 @@ type RequestContext struct {
 	Errors   gqlerror.List
 }
 
-func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
-	return next(ctx)
+func DefaultResolverMiddleware(ctx context.Context, next Resolver) (context.Context, interface{}, error) {
+	res, err := next(ctx)
+	return ctx, res, err
 }
 
-func DefaultDirectiveMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
-	return next(ctx)
+func DefaultDirectiveMiddleware(ctx context.Context, next Resolver) (context.Context, interface{}, error) {
+	res, err := next(ctx)
+	return ctx, res, err
 }
 
 func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context) []byte) []byte {

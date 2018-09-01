@@ -11,7 +11,7 @@ import (
 )
 
 func ResolverMiddleware() graphql.FieldMiddleware {
-	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+	return func(ctx context.Context, next graphql.Resolver) (context.Context, interface{}, error) {
 		rctx := graphql.GetResolverContext(ctx)
 		span, ctx := opentracing.StartSpanFromContext(ctx, rctx.Object+"_"+rctx.Field.Name,
 			opentracing.Tag{Key: "resolver.object", Value: rctx.Object},
@@ -32,7 +32,7 @@ func ResolverMiddleware() graphql.FieldMiddleware {
 			)
 		}
 
-		return res, err
+		return ctx, res, err
 	}
 }
 

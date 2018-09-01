@@ -96,9 +96,10 @@ func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 		}
 
 		lastResolve := cfg.resolverHook
-		cfg.resolverHook = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			return lastResolve(ctx, func(ctx context.Context) (res interface{}, err error) {
-				return middleware(ctx, next)
+		cfg.resolverHook = func(ctx context.Context, next graphql.Resolver) (context.Context, interface{}, error) {
+			return lastResolve(ctx, func(ctx context.Context) (interface{}, error) {
+				_, res, err := middleware(ctx, next)
+				return res, err
 			})
 		}
 	}

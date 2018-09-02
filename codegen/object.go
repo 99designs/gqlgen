@@ -121,6 +121,14 @@ func (f *Field) ShortInvocation() string {
 	return fmt.Sprintf("%s().%s(%s)", f.Object.GQLType, f.GoNameExported(), f.CallArgs())
 }
 
+func (f *Field) ArgsFunc() string {
+	if len(f.Args) == 0 {
+		return ""
+	}
+
+	return "field_" + f.Object.GQLType + "_" + f.GQLName + "_args"
+}
+
 func (f *Field) ResolverType() string {
 	if !f.IsResolver() {
 		return ""
@@ -247,7 +255,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 			{{.arr}} := make(graphql.Array, len({{.val}}))
 			{{ if and .top (not .isScalar) }} var wg sync.WaitGroup {{ end }}
 			{{ if not .isScalar }}
-				isLen1 := len({{.val}}) == 1 
+				isLen1 := len({{.val}}) == 1
 				if !isLen1 {
 					wg.Add(len({{.val}}))
 				}
@@ -265,7 +273,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 							defer wg.Done()
 						}
 						{{.arr}}[{{.index}}] = func() graphql.Marshaler {
-							{{ .next }} 
+							{{ .next }}
 						}()
 					}
 					if isLen1 {
@@ -275,7 +283,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 					}
 				{{ else }}
 					{{.arr}}[{{.index}}] = func() graphql.Marshaler {
-						{{ .next }} 
+						{{ .next }}
 					}()
 				{{- end}}
 			}

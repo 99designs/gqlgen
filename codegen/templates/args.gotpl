@@ -1,17 +1,13 @@
-	{{- if . }}args := map[string]interface{}{} {{end}}
+	args := map[string]interface{}{}
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.Signature }}
 		if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
 			var err error
 			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 			if err != nil {
-				ec.Error(ctx, err)
-				{{- if $arg.Stream }}
-					return nil
-				{{- else }}
-					return graphql.Null
-				{{- end }}
+				return nil, err
 			}
 		}
 		args[{{$arg.GQLName|quote}}] = arg{{$i}}
-	{{- end -}}
+	{{- end }}
+	return args, nil

@@ -11,6 +11,14 @@ type Directive struct {
 	Args []FieldArgument
 }
 
+func (d *Directive) ArgsFunc() string {
+	if len(d.Args) == 0 {
+		return ""
+	}
+
+	return "dir_" + d.Name + "_args"
+}
+
 func (d *Directive) CallArgs() string {
 	args := []string{"ctx", "obj", "n"}
 

@@ -5,7 +5,11 @@
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)
-			{{ template "args.gotpl" $field.Args }}
+			args, err := {{ $field.ArgsFunc }}(rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return nil
+			}
 		{{- end }}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Field: field,
@@ -30,7 +34,11 @@
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)
-			{{ template "args.gotpl" $field.Args }}
+			args, err := {{ $field.ArgsFunc }}(rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
 		{{- end }}
 		rctx := &graphql.ResolverContext{
 			Object: {{$object.GQLType|quote}},

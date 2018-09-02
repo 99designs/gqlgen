@@ -3,7 +3,6 @@ package codegen
 import (
 	"go/types"
 	"sort"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
@@ -38,7 +37,7 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, impo
 	}
 
 	sort.Slice(inputs, func(i, j int) bool {
-		return strings.Compare(inputs[i].GQLType, inputs[j].GQLType) == -1
+		return inputs[i].GQLType < inputs[j].GQLType
 	})
 
 	return inputs, nil

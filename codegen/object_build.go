@@ -3,7 +3,6 @@ package codegen
 import (
 	"log"
 	"sort"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
@@ -38,7 +37,7 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports 
 	}
 
 	sort.Slice(objects, func(i, j int) bool {
-		return strings.Compare(objects[i].GQLType, objects[j].GQLType) == -1
+		return objects[i].GQLType < objects[j].GQLType
 	})
 
 	return objects, nil

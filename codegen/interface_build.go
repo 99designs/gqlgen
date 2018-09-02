@@ -5,7 +5,6 @@ import (
 	"go/types"
 	"os"
 	"sort"
-	"strings"
 
 	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
@@ -20,7 +19,7 @@ func (cfg *Config) buildInterfaces(types NamedTypes, prog *loader.Program) []*In
 	}
 
 	sort.Slice(interfaces, func(i, j int) bool {
-		return strings.Compare(interfaces[i].GQLType, interfaces[j].GQLType) == -1
+		return interfaces[i].GQLType < interfaces[j].GQLType
 	})
 
 	return interfaces

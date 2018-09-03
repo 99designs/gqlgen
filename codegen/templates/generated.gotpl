@@ -39,10 +39,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 {{ range $object := .Objects }}
-	{{ if $object.IsReserved }}{{ else -}}
+	{{ if not $object.IsReserved -}}
 		{{ $object.GQLType|toCamel }} struct {
 		{{ range $field := $object.Fields -}}
-			{{ if $field.IsReserved }}{{ else -}}
+			{{ if not $field.IsReserved -}}
 				{{ $field.GQLName|toCamel }} {{ $field.ComplexitySignature }}
 			{{ end }}
 		{{- end }}
@@ -92,9 +92,9 @@ func (e *executableSchema) Schema() *ast.Schema {
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	switch typeName + "." + field {
 	{{ range $object := .Objects }}
-		{{ if $object.IsReserved }}{{ else }}
+		{{ if not $object.IsReserved }}
 			{{ range $field := $object.Fields }}
-				{{ if $field.IsReserved }}{{ else }}
+				{{ if not $field.IsReserved }}
 					case "{{$object.GQLType}}.{{$field.GQLName}}":
 						if e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}} == nil {
 							break

@@ -75,6 +75,114 @@ type SubscriptionResolver interface {
 	MessageAdded(ctx context.Context, roomName string) (<-chan Message, error)
 }
 
+func field_Mutation_post_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["text"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["text"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["username"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["username"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["roomName"]; ok {
+		var err error
+		arg2, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["roomName"] = arg2
+	return args, nil
+
+}
+
+func field_Query_room_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func field_Subscription_messageAdded_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["roomName"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["roomName"] = arg0
+	return args, nil
+
+}
+
+func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -555,37 +663,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["text"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Mutation_post_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["text"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["username"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["username"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["roomName"]; ok {
-		var err error
-		arg2, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["roomName"] = arg2
 	rctx := &graphql.ResolverContext{
 		Object: "Mutation",
 		Args:   args,
@@ -650,17 +732,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 // nolint: vetshadow
 func (ec *executionContext) _Query_room(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_room_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["name"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -686,17 +762,11 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 // nolint: vetshadow
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query___type_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["name"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -766,17 +836,11 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 
 func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["roomName"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return nil
-		}
+	args, err := field_Subscription_messageAdded_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
 	}
-	args["roomName"] = arg0
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
@@ -1782,17 +1846,11 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 // nolint: vetshadow
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_fields_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,
@@ -1950,17 +2008,11 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 // nolint: vetshadow
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_enumValues_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,

@@ -67,6 +67,120 @@ type MyQueryResolver interface {
 	Todos(ctx context.Context) ([]Todo, error)
 }
 
+func field_MyMutation_createTodo_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 TodoInput
+	if tmp, ok := rawArgs["todo"]; ok {
+		var err error
+		arg0, err = UnmarshalTodoInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["todo"] = arg0
+	return args, nil
+
+}
+
+func field_MyMutation_updateTodo_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalInt(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 map[string]interface{}
+	if tmp, ok := rawArgs["changes"]; ok {
+		var err error
+		arg1 = tmp.(map[string]interface{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["changes"] = arg1
+	return args, nil
+
+}
+
+func field_MyQuery_todo_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalInt(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+
+}
+
+func field_MyQuery___type_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func dir_hasRole_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 Role
+	if tmp, ok := rawArgs["role"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["role"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -263,17 +377,11 @@ func (ec *executionContext) _MyMutation(ctx context.Context, sel ast.SelectionSe
 // nolint: vetshadow
 func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 TodoInput
-	if tmp, ok := rawArgs["todo"]; ok {
-		var err error
-		arg0, err = UnmarshalTodoInput(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_MyMutation_createTodo_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["todo"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "MyMutation",
 		Args:   args,
@@ -298,27 +406,11 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 // nolint: vetshadow
 func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalInt(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_MyMutation_updateTodo_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["id"] = arg0
-	var arg1 map[string]interface{}
-	if tmp, ok := rawArgs["changes"]; ok {
-		var err error
-		arg1 = tmp.(map[string]interface{})
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["changes"] = arg1
 	rctx := &graphql.ResolverContext{
 		Object: "MyMutation",
 		Args:   args,
@@ -399,17 +491,11 @@ func (ec *executionContext) _MyQuery(ctx context.Context, sel ast.SelectionSet) 
 // nolint: vetshadow
 func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalInt(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_MyQuery_todo_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["id"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "MyQuery",
 		Args:   args,
@@ -514,17 +600,11 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 // nolint: vetshadow
 func (ec *executionContext) _MyQuery___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_MyQuery___type_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["name"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "MyQuery",
 		Args:   args,
@@ -1661,17 +1741,11 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 // nolint: vetshadow
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_fields_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,
@@ -1829,17 +1903,11 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 // nolint: vetshadow
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_enumValues_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,
@@ -2008,17 +2076,11 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 		case "hasRole":
 			if ec.directives.HasRole != nil {
 				rawArgs := d.ArgumentMap(ec.Variables)
-				args := map[string]interface{}{}
-				var arg0 Role
-				if tmp, ok := rawArgs["role"]; ok {
-					var err error
-					err = (&arg0).UnmarshalGQL(tmp)
-					if err != nil {
-						ec.Error(ctx, err)
-						return graphql.Null
-					}
+				args, err := dir_hasRole_args(rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
 				}
-				args["role"] = arg0
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
 					return ec.directives.HasRole(ctx, obj, n, args["role"].(Role))

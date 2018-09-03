@@ -84,6 +84,114 @@ type QueryResolver interface {
 	Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error)
 }
 
+func field_Query_torture1d_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []int
+	if tmp, ok := rawArgs["customerIds"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]int, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = graphql.UnmarshalInt(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["customerIds"] = arg0
+	return args, nil
+
+}
+
+func field_Query_torture2d_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 [][]int
+	if tmp, ok := rawArgs["customerIds"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([][]int, len(rawIf1))
+		for idx1 := range rawIf1 {
+			var rawIf2 []interface{}
+			if rawIf1[idx1] != nil {
+				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
+					rawIf2 = tmp1
+				} else {
+					rawIf2 = []interface{}{rawIf1[idx1]}
+				}
+			}
+			arg0[idx1] = make([]int, len(rawIf2))
+			for idx2 := range rawIf2 {
+				arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["customerIds"] = arg0
+	return args, nil
+
+}
+
+func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -888,28 +996,11 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 // nolint: vetshadow
 func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 []int
-	if tmp, ok := rawArgs["customerIds"]; ok {
-		var err error
-		var rawIf1 []interface{}
-		if tmp != nil {
-			if tmp1, ok := tmp.([]interface{}); ok {
-				rawIf1 = tmp1
-			} else {
-				rawIf1 = []interface{}{tmp}
-			}
-		}
-		arg0 = make([]int, len(rawIf1))
-		for idx1 := range rawIf1 {
-			arg0[idx1], err = graphql.UnmarshalInt(rawIf1[idx1])
-		}
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_torture1d_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["customerIds"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -963,39 +1054,11 @@ func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.
 // nolint: vetshadow
 func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 [][]int
-	if tmp, ok := rawArgs["customerIds"]; ok {
-		var err error
-		var rawIf1 []interface{}
-		if tmp != nil {
-			if tmp1, ok := tmp.([]interface{}); ok {
-				rawIf1 = tmp1
-			} else {
-				rawIf1 = []interface{}{tmp}
-			}
-		}
-		arg0 = make([][]int, len(rawIf1))
-		for idx1 := range rawIf1 {
-			var rawIf2 []interface{}
-			if rawIf1[idx1] != nil {
-				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
-					rawIf2 = tmp1
-				} else {
-					rawIf2 = []interface{}{rawIf1[idx1]}
-				}
-			}
-			arg0[idx1] = make([]int, len(rawIf2))
-			for idx2 := range rawIf2 {
-				arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
-			}
-		}
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_torture2d_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["customerIds"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -1080,17 +1143,11 @@ func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.
 // nolint: vetshadow
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query___type_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["name"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -2121,17 +2178,11 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 // nolint: vetshadow
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_fields_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,
@@ -2289,17 +2340,11 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 // nolint: vetshadow
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_enumValues_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,

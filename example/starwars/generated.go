@@ -140,6 +140,292 @@ type StarshipResolver interface {
 	Length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error)
 }
 
+func field_Droid_friendsConnection_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalID(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	return args, nil
+
+}
+
+func field_Human_height_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 LengthUnit
+	if tmp, ok := rawArgs["unit"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["unit"] = arg0
+	return args, nil
+
+}
+
+func field_Human_friendsConnection_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalID(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_createReview_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 Episode
+	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["episode"] = arg0
+	var arg1 Review
+	if tmp, ok := rawArgs["review"]; ok {
+		var err error
+		arg1, err = UnmarshalReviewInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["review"] = arg1
+	return args, nil
+
+}
+
+func field_Query_hero_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 Episode
+	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["episode"] = arg0
+	return args, nil
+
+}
+
+func field_Query_reviews_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 Episode
+	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["episode"] = arg0
+	var arg1 *time.Time
+	if tmp, ok := rawArgs["since"]; ok {
+		var err error
+		var ptr1 time.Time
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalTime(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["since"] = arg1
+	return args, nil
+
+}
+
+func field_Query_search_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["text"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["text"] = arg0
+	return args, nil
+
+}
+
+func field_Query_character_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+
+}
+
+func field_Query_droid_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+
+}
+
+func field_Query_human_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+
+}
+
+func field_Query_starship_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+
+}
+
+func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func field_Starship_length_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 LengthUnit
+	if tmp, ok := rawArgs["unit"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["unit"] = arg0
+	return args, nil
+
+}
+
+func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -818,37 +1104,11 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 // nolint: vetshadow
 func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field graphql.CollectedField, obj *Droid) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Droid_friendsConnection_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["first"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalID(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["after"] = arg1
 	rctx := &graphql.ResolverContext{
 		Object: "Droid",
 		Args:   args,
@@ -1307,17 +1567,11 @@ func (ec *executionContext) _Human_name(ctx context.Context, field graphql.Colle
 // nolint: vetshadow
 func (ec *executionContext) _Human_height(ctx context.Context, field graphql.CollectedField, obj *Human) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 LengthUnit
-	if tmp, ok := rawArgs["unit"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Human_height_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["unit"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Human",
 		Args:   args,
@@ -1412,37 +1666,11 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 // nolint: vetshadow
 func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field graphql.CollectedField, obj *Human) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Human_friendsConnection_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["first"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalID(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["after"] = arg1
 	rctx := &graphql.ResolverContext{
 		Object: "Human",
 		Args:   args,
@@ -1581,27 +1809,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_createReview(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 Episode
-	if tmp, ok := rawArgs["episode"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Mutation_createReview_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["episode"] = arg0
-	var arg1 Review
-	if tmp, ok := rawArgs["review"]; ok {
-		var err error
-		arg1, err = UnmarshalReviewInput(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["review"] = arg1
 	rctx := &graphql.ResolverContext{
 		Object: "Mutation",
 		Args:   args,
@@ -1815,17 +2027,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 // nolint: vetshadow
 func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 Episode
-	if tmp, ok := rawArgs["episode"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_hero_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["episode"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -1847,32 +2053,11 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 // nolint: vetshadow
 func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 Episode
-	if tmp, ok := rawArgs["episode"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_reviews_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["episode"] = arg0
-	var arg1 *time.Time
-	if tmp, ok := rawArgs["since"]; ok {
-		var err error
-		var ptr1 time.Time
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalTime(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
-	}
-	args["since"] = arg1
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -1929,17 +2114,11 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 // nolint: vetshadow
 func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["text"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_search_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["text"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -1996,17 +2175,11 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 // nolint: vetshadow
 func (ec *executionContext) _Query_character(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_character_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["id"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -2028,17 +2201,11 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 // nolint: vetshadow
 func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_droid_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["id"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -2064,17 +2231,11 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 // nolint: vetshadow
 func (ec *executionContext) _Query_human(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_human_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["id"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -2100,17 +2261,11 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 // nolint: vetshadow
 func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_starship_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["id"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -2136,17 +2291,11 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 // nolint: vetshadow
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query___type_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["name"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -2388,17 +2537,11 @@ func (ec *executionContext) _Starship_name(ctx context.Context, field graphql.Co
 // nolint: vetshadow
 func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.CollectedField, obj *Starship) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 LengthUnit
-	if tmp, ok := rawArgs["unit"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Starship_length_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["unit"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Starship",
 		Args:   args,
@@ -3443,17 +3586,11 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 // nolint: vetshadow
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_fields_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,
@@ -3611,17 +3748,11 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 // nolint: vetshadow
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_enumValues_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,

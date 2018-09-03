@@ -82,6 +82,101 @@ type UserResolver interface {
 	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
 }
 
+func field_Query_date_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 models.DateFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		var err error
+		arg0, err = UnmarshalDateFilter(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	return args, nil
+
+}
+
+func field_Query_error_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 models.ErrorType
+	if tmp, ok := rawArgs["type"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg0
+	return args, nil
+
+}
+
+func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func dir_magic_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["kind"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["kind"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -482,17 +577,11 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 // nolint: vetshadow
 func (ec *executionContext) _Query_date(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 models.DateFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		var err error
-		arg0, err = UnmarshalDateFilter(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_date_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["filter"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -562,17 +651,11 @@ func (ec *executionContext) _Query_jsonEncoding(ctx context.Context, field graph
 // nolint: vetshadow
 func (ec *executionContext) _Query_error(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 models.ErrorType
-	if tmp, ok := rawArgs["type"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query_error_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["type"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -596,17 +679,11 @@ func (ec *executionContext) _Query_error(ctx context.Context, field graphql.Coll
 // nolint: vetshadow
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field_Query___type_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["name"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   args,
@@ -1781,17 +1858,11 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 // nolint: vetshadow
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_fields_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,
@@ -1949,17 +2020,11 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 // nolint: vetshadow
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			ec.Error(ctx, err)
-			return graphql.Null
-		}
+	args, err := field___Type_enumValues_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
 	}
-	args["includeDeprecated"] = arg0
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   args,
@@ -2146,22 +2211,11 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 		case "magic":
 			if ec.directives.Magic != nil {
 				rawArgs := d.ArgumentMap(ec.Variables)
-				args := map[string]interface{}{}
-				var arg0 *int
-				if tmp, ok := rawArgs["kind"]; ok {
-					var err error
-					var ptr1 int
-					if tmp != nil {
-						ptr1, err = graphql.UnmarshalInt(tmp)
-						arg0 = &ptr1
-					}
-
-					if err != nil {
-						ec.Error(ctx, err)
-						return graphql.Null
-					}
+				args, err := dir_magic_args(rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
 				}
-				args["kind"] = arg0
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
 					return ec.directives.Magic(ctx, obj, n, args["kind"].(*int))

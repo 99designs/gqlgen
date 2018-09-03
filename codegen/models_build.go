@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
@@ -47,7 +46,7 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program, imports *
 	}
 
 	sort.Slice(models, func(i, j int) bool {
-		return strings.Compare(models[i].GQLType, models[j].GQLType) == -1
+		return models[i].GQLType < models[j].GQLType
 	})
 
 	return models, nil

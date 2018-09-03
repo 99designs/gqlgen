@@ -32,7 +32,7 @@ func (cfg *Config) buildEnums(types NamedTypes) []Enum {
 	}
 
 	sort.Slice(enums, func(i, j int) bool {
-		return strings.Compare(enums[i].GQLType, enums[j].GQLType) == -1
+		return enums[i].GQLType < enums[j].GQLType
 	})
 
 	return enums

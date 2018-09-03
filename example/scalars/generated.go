@@ -256,7 +256,7 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _Address_id(ctx context.Context, field graphql.CollectedField, obj *model.Address) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Address",
@@ -264,7 +264,7 @@ func (ec *executionContext) _Address_id(ctx context.Context, field graphql.Colle
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.ID, nil
 	})
 	if resTmp == nil {
@@ -278,7 +278,7 @@ func (ec *executionContext) _Address_id(ctx context.Context, field graphql.Colle
 	return model.MarshalID(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _Address_location(ctx context.Context, field graphql.CollectedField, obj *model.Address) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Address",
@@ -286,7 +286,7 @@ func (ec *executionContext) _Address_location(ctx context.Context, field graphql
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Location, nil
 	})
 	if resTmp == nil {
@@ -350,7 +350,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -370,7 +370,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.Query().User(ctx, args["id"].(external.ObjectID))
 	})
 	if resTmp == nil {
@@ -386,7 +386,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	return ec._User(ctx, field.Selections, res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -406,7 +406,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.Query().Search(ctx, args["input"].(model.SearchArgs))
 	})
 	if resTmp == nil {
@@ -453,7 +453,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -473,7 +473,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		return ec.introspectType(args["name"].(string)), nil
 	})
 	if resTmp == nil {
@@ -489,7 +489,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
@@ -497,7 +497,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		return ec.introspectSchema(), nil
 	})
 	if resTmp == nil {
@@ -578,7 +578,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -586,7 +586,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.ID, nil
 	})
 	if resTmp == nil {
@@ -600,7 +600,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	return model.MarshalID(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -608,7 +608,7 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
 	if resTmp == nil {
@@ -622,7 +622,7 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_created(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -630,7 +630,7 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Created, nil
 	})
 	if resTmp == nil {
@@ -641,7 +641,7 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 	return model.MarshalTimestamp(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -649,7 +649,7 @@ func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.Co
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.IsBanned, nil
 	})
 	if resTmp == nil {
@@ -663,7 +663,7 @@ func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.Co
 	return graphql.MarshalBoolean(bool(res))
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -671,7 +671,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.User().PrimitiveResolver(ctx, obj)
 	})
 	if resTmp == nil {
@@ -685,7 +685,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_customResolver(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -693,7 +693,7 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.User().CustomResolver(ctx, obj)
 	})
 	if resTmp == nil {
@@ -707,7 +707,7 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 	return res
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_address(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -715,7 +715,7 @@ func (ec *executionContext) _User_address(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Address, nil
 	})
 	if resTmp == nil {
@@ -727,7 +727,7 @@ func (ec *executionContext) _User_address(ctx context.Context, field graphql.Col
 	return ec._Address(ctx, field.Selections, &res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) _User_tier(ctx context.Context, field graphql.CollectedField, obj *model.User) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "User",
@@ -735,7 +735,7 @@ func (ec *executionContext) _User_tier(ctx context.Context, field graphql.Collec
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Tier, nil
 	})
 	if resTmp == nil {
@@ -788,7 +788,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -796,7 +796,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
 	if resTmp == nil {
@@ -810,7 +810,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Directive_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -818,7 +818,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
 	if resTmp == nil {
@@ -829,7 +829,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -837,7 +837,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Locations, nil
 	})
 	if resTmp == nil {
@@ -860,7 +860,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
@@ -868,7 +868,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Args, nil
 	})
 	if resTmp == nil {
@@ -954,7 +954,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -962,7 +962,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
 	if resTmp == nil {
@@ -976,7 +976,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___EnumValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -984,7 +984,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
 	if resTmp == nil {
@@ -995,7 +995,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -1003,7 +1003,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.IsDeprecated, nil
 	})
 	if resTmp == nil {
@@ -1017,7 +1017,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	return graphql.MarshalBoolean(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
@@ -1025,7 +1025,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.DeprecationReason, nil
 	})
 	if resTmp == nil {
@@ -1085,7 +1085,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -1093,7 +1093,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
 	if resTmp == nil {
@@ -1107,7 +1107,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Field_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -1115,7 +1115,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
 	if resTmp == nil {
@@ -1126,7 +1126,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -1134,7 +1134,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Args, nil
 	})
 	if resTmp == nil {
@@ -1181,7 +1181,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -1189,7 +1189,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Type, nil
 	})
 	if resTmp == nil {
@@ -1211,7 +1211,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -1219,7 +1219,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.IsDeprecated, nil
 	})
 	if resTmp == nil {
@@ -1233,7 +1233,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	return graphql.MarshalBoolean(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
@@ -1241,7 +1241,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.DeprecationReason, nil
 	})
 	if resTmp == nil {
@@ -1291,7 +1291,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1299,7 +1299,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
 	})
 	if resTmp == nil {
@@ -1313,7 +1313,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___InputValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1321,7 +1321,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
 	})
 	if resTmp == nil {
@@ -1332,7 +1332,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1340,7 +1340,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Type, nil
 	})
 	if resTmp == nil {
@@ -1362,7 +1362,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
@@ -1370,7 +1370,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.DefaultValue, nil
 	})
 	if resTmp == nil {
@@ -1429,7 +1429,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1437,7 +1437,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Types(), nil
 	})
 	if resTmp == nil {
@@ -1484,7 +1484,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1492,7 +1492,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.QueryType(), nil
 	})
 	if resTmp == nil {
@@ -1514,7 +1514,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1522,7 +1522,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.MutationType(), nil
 	})
 	if resTmp == nil {
@@ -1538,7 +1538,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1546,7 +1546,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.SubscriptionType(), nil
 	})
 	if resTmp == nil {
@@ -1562,7 +1562,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Schema_directives(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
@@ -1570,7 +1570,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Directives(), nil
 	})
 	if resTmp == nil {
@@ -1663,7 +1663,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1671,7 +1671,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Kind(), nil
 	})
 	if resTmp == nil {
@@ -1685,7 +1685,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1693,7 +1693,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name(), nil
 	})
 	if resTmp == nil {
@@ -1708,7 +1708,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	return graphql.MarshalString(*res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1716,7 +1716,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Description(), nil
 	})
 	if resTmp == nil {
@@ -1727,7 +1727,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	return graphql.MarshalString(res)
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -1747,7 +1747,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Fields(args["includeDeprecated"].(bool)), nil
 	})
 	if resTmp == nil {
@@ -1791,7 +1791,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1799,7 +1799,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Interfaces(), nil
 	})
 	if resTmp == nil {
@@ -1843,7 +1843,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1851,7 +1851,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.PossibleTypes(), nil
 	})
 	if resTmp == nil {
@@ -1895,7 +1895,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args := map[string]interface{}{}
@@ -1915,7 +1915,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.EnumValues(args["includeDeprecated"].(bool)), nil
 	})
 	if resTmp == nil {
@@ -1959,7 +1959,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -1967,7 +1967,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.InputFields(), nil
 	})
 	if resTmp == nil {
@@ -2011,7 +2011,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	return arr1
 }
 
-// nolint: vetshadow
+// nolint: vetshadow, ineffassign, megacheck
 func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
@@ -2019,7 +2019,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ctx, resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.OfType(), nil
 	})
 	if resTmp == nil {
@@ -2078,19 +2078,20 @@ func UnmarshalSearchArgs(v interface{}) (model.SearchArgs, error) {
 	return it, nil
 }
 
-func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
+// nolint: megacheck
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (nextCtx context.Context, ret interface{}) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = nil
 		}
 	}()
-	res, err := ec.ResolverMiddleware(ctx, next)
+	ctx, res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
-		return nil
+		return ctx, nil
 	}
-	return res
+	return ctx, res
 }
 
 func (ec *executionContext) introspectSchema() *introspection.Schema {

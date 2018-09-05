@@ -27,7 +27,7 @@ func (m *FieldSet) Concurrently(i int, f func() Marshaler) {
 	m.delayed = append(m.delayed, delayedResult{i: i, f: f})
 }
 
-func (m *FieldSet) Dispatch() {
+func (m *FieldSet) Dispatch(pool *Pool) {
 	if len(m.delayed) == 1 {
 		// only one concurrent task, no need to spawn a goroutine or deal create waitgroups
 		d := m.delayed[0]
@@ -38,10 +38,12 @@ func (m *FieldSet) Dispatch() {
 		var wg sync.WaitGroup
 		for _, d := range m.delayed[1:] {
 			wg.Add(1)
-			go func(d delayedResult) {
+			d := d
+			f := func() {
 				m.Values[d.i] = d.f()
 				wg.Done()
-			}(d)
+			}
+			pool.Go(f)
 		}
 
 		m.Values[m.delayed[0].i] = m.delayed[0].f()

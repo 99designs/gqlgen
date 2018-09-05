@@ -536,6 +536,7 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx = graphql.WithRequestContext(ctx, reqCtx)
 
 	defer func() {
+		reqCtx.Pool.Stop()
 		if err := recover(); err != nil {
 			userErr := reqCtx.Recover(ctx, err)
 			sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())

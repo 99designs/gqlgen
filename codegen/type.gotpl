@@ -80,7 +80,7 @@
 							Result: &v[i],
 						}
 						ctx := graphql.WithResolverContext(ctx, rctx)
-						f := func(i int) {
+						f := func() {
 							defer func() {
                         		if r := recover(); r != nil {
                         			ec.Error(ctx, ec.Recover(ctx, r))
@@ -93,9 +93,9 @@
 							ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
 						}
 						if isLen1 {
-							f(i)
+							f()
 						} else {
-							go f(i)
+							ec.Pool.Go(f)
 						}
 					{{ else }}
 						ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])

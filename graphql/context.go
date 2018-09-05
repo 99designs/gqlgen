@@ -31,6 +31,7 @@ type RequestContext struct {
 	DirectiveMiddleware FieldMiddleware
 	RequestMiddleware   RequestMiddleware
 	Tracer              Tracer
+	Pool                *Pool
 
 	errorsMu     sync.Mutex
 	Errors       gqlerror.List
@@ -61,6 +62,7 @@ func NewRequestContext(doc *ast.QueryDocument, query string, variables map[strin
 		Recover:             DefaultRecover,
 		ErrorPresenter:      DefaultErrorPresenter,
 		Tracer:              &NopTracer{},
+		Pool:                NewPool(0),
 	}
 }
 

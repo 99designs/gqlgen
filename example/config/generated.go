@@ -148,17 +148,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Mutation.CreateTodo == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 NewTodo
-		if tmp, ok := rawArgs["input"]; ok {
-			var err error
-			arg0, err = UnmarshalNewTodo(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Mutation_createTodo_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["input"] = arg0
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
 

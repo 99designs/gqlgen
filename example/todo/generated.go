@@ -198,17 +198,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.MyMutation.CreateTodo == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 TodoInput
-		if tmp, ok := rawArgs["todo"]; ok {
-			var err error
-			arg0, err = UnmarshalTodoInput(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_MyMutation_createTodo_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["todo"] = arg0
 
 		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
 
@@ -216,27 +210,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.MyMutation.UpdateTodo == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 int
-		if tmp, ok := rawArgs["id"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalInt(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_MyMutation_updateTodo_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["id"] = arg0
-
-		var arg1 map[string]interface{}
-		if tmp, ok := rawArgs["changes"]; ok {
-			var err error
-			arg1 = tmp.(map[string]interface{})
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["changes"] = arg1
 
 		return e.complexity.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]interface{})), true
 
@@ -244,17 +222,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.MyQuery.Todo == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 int
-		if tmp, ok := rawArgs["id"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalInt(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_MyQuery_todo_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["id"] = arg0
 
 		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(int)), true
 

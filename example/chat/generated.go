@@ -242,37 +242,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Mutation.Post == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["text"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Mutation_post_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["text"] = arg0
-
-		var arg1 string
-		if tmp, ok := rawArgs["username"]; ok {
-			var err error
-			arg1, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["username"] = arg1
-
-		var arg2 string
-		if tmp, ok := rawArgs["roomName"]; ok {
-			var err error
-			arg2, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["roomName"] = arg2
 
 		return e.complexity.Mutation.Post(childComplexity, args["text"].(string), args["username"].(string), args["roomName"].(string)), true
 
@@ -280,17 +254,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Room == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["name"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_room_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["name"] = arg0
 
 		return e.complexity.Query.Room(childComplexity, args["name"].(string)), true
 
@@ -298,17 +266,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Subscription.MessageAdded == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["roomName"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Subscription_messageAdded_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["roomName"] = arg0
 
 		return e.complexity.Subscription.MessageAdded(childComplexity, args["roomName"].(string)), true
 

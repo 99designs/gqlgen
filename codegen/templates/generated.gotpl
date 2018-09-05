@@ -99,17 +99,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 						if e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}} == nil {
 							break
 						}
-						{{ if $field.Args }}args := map[string]interface{}{} {{end}}
-						{{ range $i, $arg := $field.Args }}
-							var arg{{$i}} {{$arg.Signature }}
-							if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
-								var err error
-								{{$arg.Unmarshal (print "arg" $i) "tmp" }}
-								if err != nil {
-									return 0, false
-								}
+						{{ if $field.Args }}
+							args, err := {{ $field.ArgsFunc }}(rawArgs)
+							if err != nil {
+								return 0, false
 							}
-							args[{{$arg.GQLName|quote}}] = arg{{$i}}
 						{{ end }}
 						return e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
 				{{ end }}

@@ -464,37 +464,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Droid.FriendsConnection == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 *int
-		if tmp, ok := rawArgs["first"]; ok {
-			var err error
-			var ptr1 int
-			if tmp != nil {
-				ptr1, err = graphql.UnmarshalInt(tmp)
-				arg0 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Droid_friendsConnection_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["first"] = arg0
-
-		var arg1 *string
-		if tmp, ok := rawArgs["after"]; ok {
-			var err error
-			var ptr1 string
-			if tmp != nil {
-				ptr1, err = graphql.UnmarshalID(tmp)
-				arg1 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["after"] = arg1
 
 		return e.complexity.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
 
@@ -572,17 +546,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Human.Height == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 LengthUnit
-		if tmp, ok := rawArgs["unit"]; ok {
-			var err error
-			err = (&arg0).UnmarshalGQL(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Human_height_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["unit"] = arg0
 
 		return e.complexity.Human.Height(childComplexity, args["unit"].(LengthUnit)), true
 
@@ -604,37 +572,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Human.FriendsConnection == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 *int
-		if tmp, ok := rawArgs["first"]; ok {
-			var err error
-			var ptr1 int
-			if tmp != nil {
-				ptr1, err = graphql.UnmarshalInt(tmp)
-				arg0 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Human_friendsConnection_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["first"] = arg0
-
-		var arg1 *string
-		if tmp, ok := rawArgs["after"]; ok {
-			var err error
-			var ptr1 string
-			if tmp != nil {
-				ptr1, err = graphql.UnmarshalID(tmp)
-				arg1 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["after"] = arg1
 
 		return e.complexity.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
 
@@ -656,27 +598,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Mutation.CreateReview == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 Episode
-		if tmp, ok := rawArgs["episode"]; ok {
-			var err error
-			err = (&arg0).UnmarshalGQL(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Mutation_createReview_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["episode"] = arg0
-
-		var arg1 Review
-		if tmp, ok := rawArgs["review"]; ok {
-			var err error
-			arg1, err = UnmarshalReviewInput(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["review"] = arg1
 
 		return e.complexity.Mutation.CreateReview(childComplexity, args["episode"].(Episode), args["review"].(Review)), true
 
@@ -705,17 +631,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Hero == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 Episode
-		if tmp, ok := rawArgs["episode"]; ok {
-			var err error
-			err = (&arg0).UnmarshalGQL(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_hero_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["episode"] = arg0
 
 		return e.complexity.Query.Hero(childComplexity, args["episode"].(Episode)), true
 
@@ -723,32 +643,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Reviews == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 Episode
-		if tmp, ok := rawArgs["episode"]; ok {
-			var err error
-			err = (&arg0).UnmarshalGQL(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_reviews_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["episode"] = arg0
-
-		var arg1 *time.Time
-		if tmp, ok := rawArgs["since"]; ok {
-			var err error
-			var ptr1 time.Time
-			if tmp != nil {
-				ptr1, err = graphql.UnmarshalTime(tmp)
-				arg1 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["since"] = arg1
 
 		return e.complexity.Query.Reviews(childComplexity, args["episode"].(Episode), args["since"].(*time.Time)), true
 
@@ -756,17 +655,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Search == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["text"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_search_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["text"] = arg0
 
 		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
 
@@ -774,17 +667,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Character == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["id"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalID(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_character_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["id"] = arg0
 
 		return e.complexity.Query.Character(childComplexity, args["id"].(string)), true
 
@@ -792,17 +679,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Droid == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["id"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalID(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_droid_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["id"] = arg0
 
 		return e.complexity.Query.Droid(childComplexity, args["id"].(string)), true
 
@@ -810,17 +691,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Human == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["id"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalID(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_human_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["id"] = arg0
 
 		return e.complexity.Query.Human(childComplexity, args["id"].(string)), true
 
@@ -828,17 +703,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Starship == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["id"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalID(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_starship_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["id"] = arg0
 
 		return e.complexity.Query.Starship(childComplexity, args["id"].(string)), true
 
@@ -881,17 +750,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Starship.Length == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 LengthUnit
-		if tmp, ok := rawArgs["unit"]; ok {
-			var err error
-			err = (&arg0).UnmarshalGQL(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Starship_length_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["unit"] = arg0
 
 		return e.complexity.Starship.Length(childComplexity, args["unit"].(LengthUnit)), true
 

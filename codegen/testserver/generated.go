@@ -596,22 +596,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.MapInput == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 *map[string]interface{}
-		if tmp, ok := rawArgs["input"]; ok {
-			var err error
-			var ptr1 map[string]interface{}
-			if tmp != nil {
-				ptr1 = tmp.(map[string]interface{})
-				arg0 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_mapInput_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["input"] = arg0
 
 		return e.complexity.Query.MapInput(childComplexity, args["input"].(*map[string]interface{})), true
 
@@ -619,22 +608,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Recursive == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 *RecursiveInputSlice
-		if tmp, ok := rawArgs["input"]; ok {
-			var err error
-			var ptr1 RecursiveInputSlice
-			if tmp != nil {
-				ptr1, err = UnmarshalRecursiveInputSlice(tmp)
-				arg0 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_recursive_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["input"] = arg0
 
 		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
 
@@ -642,43 +620,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.NestedInputs == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 [][]*OuterInput
-		if tmp, ok := rawArgs["input"]; ok {
-			var err error
-			var rawIf1 []interface{}
-			if tmp != nil {
-				if tmp1, ok := tmp.([]interface{}); ok {
-					rawIf1 = tmp1
-				} else {
-					rawIf1 = []interface{}{tmp}
-				}
-			}
-			arg0 = make([][]*OuterInput, len(rawIf1))
-			for idx1 := range rawIf1 {
-				var rawIf2 []interface{}
-				if rawIf1[idx1] != nil {
-					if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
-						rawIf2 = tmp1
-					} else {
-						rawIf2 = []interface{}{rawIf1[idx1]}
-					}
-				}
-				arg0[idx1] = make([]*OuterInput, len(rawIf2))
-				for idx2 := range rawIf2 {
-					var ptr3 OuterInput
-					if rawIf2[idx2] != nil {
-						ptr3, err = UnmarshalOuterInput(rawIf2[idx2])
-						arg0[idx1][idx2] = &ptr3
-					}
-				}
-			}
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_nestedInputs_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["input"] = arg0
 
 		return e.complexity.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
 
@@ -693,22 +639,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Keywords == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 *Keywords
-		if tmp, ok := rawArgs["input"]; ok {
-			var err error
-			var ptr1 Keywords
-			if tmp != nil {
-				ptr1, err = UnmarshalKeywords(tmp)
-				arg0 = &ptr1
-			}
-
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_keywords_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["input"] = arg0
 
 		return e.complexity.Query.Keywords(childComplexity, args["input"].(*Keywords)), true
 
@@ -737,257 +672,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.KeywordArgs == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 string
-		if tmp, ok := rawArgs["break"]; ok {
-			var err error
-			arg0, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_keywordArgs_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["break"] = arg0
-
-		var arg1 string
-		if tmp, ok := rawArgs["default"]; ok {
-			var err error
-			arg1, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["default"] = arg1
-
-		var arg2 string
-		if tmp, ok := rawArgs["func"]; ok {
-			var err error
-			arg2, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["func"] = arg2
-
-		var arg3 string
-		if tmp, ok := rawArgs["interface"]; ok {
-			var err error
-			arg3, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["interface"] = arg3
-
-		var arg4 string
-		if tmp, ok := rawArgs["select"]; ok {
-			var err error
-			arg4, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["select"] = arg4
-
-		var arg5 string
-		if tmp, ok := rawArgs["case"]; ok {
-			var err error
-			arg5, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["case"] = arg5
-
-		var arg6 string
-		if tmp, ok := rawArgs["defer"]; ok {
-			var err error
-			arg6, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["defer"] = arg6
-
-		var arg7 string
-		if tmp, ok := rawArgs["go"]; ok {
-			var err error
-			arg7, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["go"] = arg7
-
-		var arg8 string
-		if tmp, ok := rawArgs["map"]; ok {
-			var err error
-			arg8, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["map"] = arg8
-
-		var arg9 string
-		if tmp, ok := rawArgs["struct"]; ok {
-			var err error
-			arg9, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["struct"] = arg9
-
-		var arg10 string
-		if tmp, ok := rawArgs["chan"]; ok {
-			var err error
-			arg10, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["chan"] = arg10
-
-		var arg11 string
-		if tmp, ok := rawArgs["else"]; ok {
-			var err error
-			arg11, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["else"] = arg11
-
-		var arg12 string
-		if tmp, ok := rawArgs["goto"]; ok {
-			var err error
-			arg12, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["goto"] = arg12
-
-		var arg13 string
-		if tmp, ok := rawArgs["package"]; ok {
-			var err error
-			arg13, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["package"] = arg13
-
-		var arg14 string
-		if tmp, ok := rawArgs["switch"]; ok {
-			var err error
-			arg14, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["switch"] = arg14
-
-		var arg15 string
-		if tmp, ok := rawArgs["const"]; ok {
-			var err error
-			arg15, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["const"] = arg15
-
-		var arg16 string
-		if tmp, ok := rawArgs["fallthrough"]; ok {
-			var err error
-			arg16, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["fallthrough"] = arg16
-
-		var arg17 string
-		if tmp, ok := rawArgs["if"]; ok {
-			var err error
-			arg17, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["if"] = arg17
-
-		var arg18 string
-		if tmp, ok := rawArgs["range"]; ok {
-			var err error
-			arg18, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["range"] = arg18
-
-		var arg19 string
-		if tmp, ok := rawArgs["type"]; ok {
-			var err error
-			arg19, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["type"] = arg19
-
-		var arg20 string
-		if tmp, ok := rawArgs["continue"]; ok {
-			var err error
-			arg20, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["continue"] = arg20
-
-		var arg21 string
-		if tmp, ok := rawArgs["for"]; ok {
-			var err error
-			arg21, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["for"] = arg21
-
-		var arg22 string
-		if tmp, ok := rawArgs["import"]; ok {
-			var err error
-			arg22, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["import"] = arg22
-
-		var arg23 string
-		if tmp, ok := rawArgs["return"]; ok {
-			var err error
-			arg23, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["return"] = arg23
-
-		var arg24 string
-		if tmp, ok := rawArgs["var"]; ok {
-			var err error
-			arg24, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return 0, false
-			}
-		}
-		args["var"] = arg24
 
 		return e.complexity.Query.KeywordArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string)), true
 

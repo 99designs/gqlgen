@@ -222,17 +222,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Date == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 models.DateFilter
-		if tmp, ok := rawArgs["filter"]; ok {
-			var err error
-			arg0, err = UnmarshalDateFilter(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_date_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["filter"] = arg0
 
 		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
 
@@ -254,17 +248,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Error == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 models.ErrorType
-		if tmp, ok := rawArgs["type"]; ok {
-			var err error
-			err = (&arg0).UnmarshalGQL(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_error_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["type"] = arg0
 
 		return e.complexity.Query.Error(childComplexity, args["type"].(models.ErrorType)), true
 

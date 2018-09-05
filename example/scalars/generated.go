@@ -178,17 +178,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.User == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 external.ObjectID
-		if tmp, ok := rawArgs["id"]; ok {
-			var err error
-			arg0, err = model.UnmarshalID(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_user_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["id"] = arg0
 
 		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
 
@@ -196,17 +190,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Search == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 model.SearchArgs
-		if tmp, ok := rawArgs["input"]; ok {
-			var err error
-			arg0, err = UnmarshalSearchArgs(tmp)
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_search_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["input"] = arg0
 
 		return e.complexity.Query.Search(childComplexity, args["input"].(model.SearchArgs)), true
 

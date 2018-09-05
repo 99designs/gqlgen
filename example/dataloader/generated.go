@@ -300,28 +300,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Torture1d == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 []int
-		if tmp, ok := rawArgs["customerIds"]; ok {
-			var err error
-			var rawIf1 []interface{}
-			if tmp != nil {
-				if tmp1, ok := tmp.([]interface{}); ok {
-					rawIf1 = tmp1
-				} else {
-					rawIf1 = []interface{}{tmp}
-				}
-			}
-			arg0 = make([]int, len(rawIf1))
-			for idx1 := range rawIf1 {
-				arg0[idx1], err = graphql.UnmarshalInt(rawIf1[idx1])
-			}
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_torture1d_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["customerIds"] = arg0
 
 		return e.complexity.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
 
@@ -329,39 +312,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		if e.complexity.Query.Torture2d == nil {
 			break
 		}
-		args := map[string]interface{}{}
 
-		var arg0 [][]int
-		if tmp, ok := rawArgs["customerIds"]; ok {
-			var err error
-			var rawIf1 []interface{}
-			if tmp != nil {
-				if tmp1, ok := tmp.([]interface{}); ok {
-					rawIf1 = tmp1
-				} else {
-					rawIf1 = []interface{}{tmp}
-				}
-			}
-			arg0 = make([][]int, len(rawIf1))
-			for idx1 := range rawIf1 {
-				var rawIf2 []interface{}
-				if rawIf1[idx1] != nil {
-					if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
-						rawIf2 = tmp1
-					} else {
-						rawIf2 = []interface{}{rawIf1[idx1]}
-					}
-				}
-				arg0[idx1] = make([]int, len(rawIf2))
-				for idx2 := range rawIf2 {
-					arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
-				}
-			}
-			if err != nil {
-				return 0, false
-			}
+		args, err := field_Query_torture2d_args(rawArgs)
+		if err != nil {
+			return 0, false
 		}
-		args["customerIds"] = arg0
 
 		return e.complexity.Query.Torture2d(childComplexity, args["customerIds"].([][]int)), true
 

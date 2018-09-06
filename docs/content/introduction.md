@@ -1,7 +1,6 @@
 ---
 linkTitle: Introduction
 title: Type-safe graphql for golang
-description: Generating GraphQL servers in golang with type safety
 type: homepage
 date: 2018-03-17T13:06:47+11:00
 ---
@@ -25,3 +24,8 @@ If you cant find what your looking for, maybe the [examples](https://github.com/
 ## Getting help
 
 If you think you've found bug, or something isnt behaving the way you think it should please raise an [issue](https://github.com/99designs/gqlgen/issues) on github.  
+
+
+## Talks
+
+ - [Christopher Biscardi @ Gophercon UK 2018](https://youtu.be/FdURVezcdcw) 

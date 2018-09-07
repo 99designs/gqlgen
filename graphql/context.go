@@ -25,8 +25,10 @@ type RequestContext struct {
 	DirectiveMiddleware FieldMiddleware
 	RequestMiddleware   RequestMiddleware
 
-	errorsMu sync.Mutex
-	Errors   gqlerror.List
+	errorsMu     sync.Mutex
+	Errors       gqlerror.List
+	extensionsMu sync.Mutex
+	Extensions   map[string]interface{}
 }
 
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
@@ -175,4 +177,21 @@ func AddError(ctx context.Context, err error) {
 // AddErrorf is a convenience method for adding an error to the current response
 func AddErrorf(ctx context.Context, format string, args ...interface{}) {
 	GetRequestContext(ctx).Errorf(ctx, format, args...)
+}
+
+// RegisterExtension registers an extension, returns error if extension has already been registered
+func (c *RequestContext) RegisterExtension(key string, value interface{}) error {
+	c.extensionsMu.Lock()
+	defer c.extensionsMu.Unlock()
+
+	if c.Extensions == nil {
+		c.Extensions = make(map[string]interface{})
+	}
+
+	if _, ok := c.Extensions[key]; ok {
+		return fmt.Errorf("extension already registered for key %s", key)
+	}
+
+	c.Extensions[key] = value
+	return nil
 }

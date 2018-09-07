@@ -9,8 +9,9 @@ import (
 )
 
 type Response struct {
-	Data   json.RawMessage `json:"data"`
-	Errors gqlerror.List   `json:"errors,omitempty"`
+	Data       json.RawMessage        `json:"data"`
+	Errors     gqlerror.List          `json:"errors,omitempty"`
+	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }
 
 func ErrorResponse(ctx context.Context, messagef string, args ...interface{}) *Response {

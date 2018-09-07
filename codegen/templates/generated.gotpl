@@ -126,9 +126,9 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 		})
 
 		return &graphql.Response{
-			Data:   buf,
-			Errors: ec.Errors,
-		}
+			Data:       buf,
+			Errors:     ec.Errors,
+			Extensions: ec.Extensions,		}
 	{{- else }}
 		return graphql.ErrorResponse(ctx, "queries are not supported")
 	{{- end }}
@@ -146,8 +146,9 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 		})
 
 		return &graphql.Response{
-			Data:   buf,
-			Errors: ec.Errors,
+			Data:       buf,
+			Errors:     ec.Errors,
+			Extensions: ec.Extensions,
 		}
 	{{- else }}
 		return graphql.ErrorResponse(ctx, "mutations are not supported")
@@ -181,8 +182,9 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 			}
 
 			return &graphql.Response{
-				Data:   buf,
-				Errors: ec.Errors,
+				Data:       buf,
+				Errors:     ec.Errors,
+				Extensions: ec.Extensions,
 			}
 		}
 	{{- else }}

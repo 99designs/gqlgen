@@ -54,8 +54,9 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program, imports *
 
 func (cfg *Config) obj2Model(obj *Object) Model {
 	model := Model{
-		NamedType: obj.NamedType,
-		Fields:    []ModelField{},
+		NamedType:  obj.NamedType,
+		Implements: obj.Implements,
+		Fields:     []ModelField{},
 	}
 
 	model.GoType = ucFirst(obj.GQLType)

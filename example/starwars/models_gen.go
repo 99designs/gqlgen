@@ -8,7 +8,9 @@ import (
 	strconv "strconv"
 )
 
-type Character interface{}
+type Character interface {
+	IsCharacter()
+}
 
 type FriendsEdge struct {
 	Cursor string    `json:"cursor"`
@@ -21,7 +23,9 @@ type PageInfo struct {
 	HasNextPage bool   `json:"hasNextPage"`
 }
 
-type SearchResult interface{}
+type SearchResult interface {
+	IsSearchResult()
+}
 
 type Starship struct {
 	ID      string  `json:"id"`
@@ -29,6 +33,8 @@ type Starship struct {
 	Length  float64 `json:"length"`
 	History [][]int `json:"history"`
 }
+
+func (Starship) IsSearchResult() {}
 
 type Episode string
 

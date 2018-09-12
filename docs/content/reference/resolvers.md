@@ -128,14 +128,14 @@ models:
 ```
 
 Here even though the graphQL type and Go struct have different field names, there is a Go struct tag field on ```longState```
-That matches and thus ```state``` will be bound to ```LongState```
+that matches and thus ```state``` will be bound to ```LongState```.
 
 
 The second way you can bind fields is by adding a line into the config file such as:
 ```go
 type Car struct {
     Make string
-    ShortState string 
+    ShortState string
     LongState string
     Model string
     Color string
@@ -166,12 +166,12 @@ models:
 
 ## Binding to Anonymous or Embedded Structs
 All of the rules from above apply to a struct that has an embedded struct.
-
+Here is an example
 ```go
 type Truck {
-    car
+    Car
 
-    is4x4 bool
+    Is4x4 bool
 }
 
 type Car struct {
@@ -197,6 +197,27 @@ type Truck {
 ```
 
 Here all the fields from the Go struct Car will still be bound to the respective fields in the graphQL schema that match
+
+Embedded structs are a good way to create thin wrappers around data access types an example would be:
+
+```go
+type Cat struct {
+    db.Cat
+    //...
+}
+
+func (c *Cat) ID() string {
+    // return a custom id based on the db shard and the cat's id
+     return fmt.Sprintf("%d:%d", c.Shard, c.Id)
+}
+```
+
+Which would correlate with a gqlgen config file of:
+```yaml
+models:
+    Cat:
+        model: github.com/my/app/models.Cat
+```
 
 ## Binding Priority
 If a ```struct_tags``` config exists, then struct tag binding has the highest priority over all other types of binding.

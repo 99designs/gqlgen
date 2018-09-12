@@ -176,6 +176,10 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 				return buf.Bytes()
 			})
 
+			if buf == nil {
+				return nil
+			}
+
 			return &graphql.Response{
 				Data:   buf,
 				Errors: ec.Errors,

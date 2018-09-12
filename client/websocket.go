@@ -14,6 +14,7 @@ const (
 	startMsg          = "start"           // Client -> Server
 	connectionAckMsg  = "connection_ack"  // Server -> Client
 	dataMsg           = "data"            // Server -> Client
+	errorMsg          = "error"           // Server -> Client
 )
 
 type operationMessage struct {
@@ -73,7 +74,11 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 			var op operationMessage
 			c.ReadJSON(&op)
 			if op.Type != dataMsg {
-				return fmt.Errorf("expected data message, got %#v", op)
+				if op.Type == errorMsg {
+					return fmt.Errorf(string(op.Payload))
+				} else {
+					return fmt.Errorf("expected data message, got %#v", op)
+				}
 			}
 
 			respDataRaw := map[string]interface{}{}

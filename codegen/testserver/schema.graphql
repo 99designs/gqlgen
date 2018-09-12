@@ -11,6 +11,10 @@ type Query {
     valid: String!
 }
 
+type Subscription {
+    updated: String!
+}
+
 type Error {
     id: ID!
     errorOnNonRequiredField: String

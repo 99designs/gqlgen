@@ -35,6 +35,7 @@ type Config struct {
 type ResolverRoot interface {
 	ForcedResolver() ForcedResolverResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -92,6 +93,10 @@ type ComplexityRoot struct {
 		Width  func(childComplexity int) int
 		Area   func(childComplexity int) int
 	}
+
+	Subscription struct {
+		Updated func(childComplexity int) int
+	}
 }
 
 type ForcedResolverResolver interface {
@@ -109,6 +114,9 @@ type QueryResolver interface {
 	ErrorBubble(ctx context.Context) (*Error, error)
 	Valid(ctx context.Context) (string, error)
 	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
+}
+type SubscriptionResolver interface {
+	Updated(ctx context.Context) (<-chan string, error)
 }
 
 func field_Query_mapInput_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -701,6 +709,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Rectangle.Area(childComplexity), true
 
+	case "Subscription.updated":
+		if e.complexity.Subscription.Updated == nil {
+			break
+		}
+
+		return e.complexity.Subscription.Updated(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -726,7 +741,35 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 }
 
 func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	next := ec._Subscription(ctx, op.SelectionSet)
+	if ec.Errors != nil {
+		return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
+	}
+
+	var buf bytes.Buffer
+	return func() *graphql.Response {
+		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+			return buf.Bytes()
+		})
+
+		if buf == nil {
+			return nil
+		}
+
+		return &graphql.Response{
+			Data:   buf,
+			Errors: ec.Errors,
+		}
+	}
 }
 
 type executionContext struct {
@@ -1829,6 +1872,47 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 	res := resTmp.(float64)
 	rctx.Result = res
 	return graphql.MarshalFloat(res)
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, subscriptionImplementors)
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "updated":
+		return ec._Subscription_updated(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
+}
+
+func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	results, err := ec.resolvers.Subscription().Updated(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler { return graphql.MarshalString(res) }())
+		return &out
+	}
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -3396,6 +3480,10 @@ var parsedSchema = gqlparser.MustLoadSchema(
     shapes: [Shape]
     errorBubble: Error
     valid: String!
+}
+
+type Subscription {
+    updated: String!
 }
 
 type Error {

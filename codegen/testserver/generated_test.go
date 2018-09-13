@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"runtime"
 	"testing"
+	"time"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/handler"
@@ -28,8 +30,9 @@ func TestForcedResolverFieldIsPointer(t *testing.T) {
 }
 
 func TestGeneratedServer(t *testing.T) {
+	tickChan := make(chan string, 1)
 	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{
-		Resolvers: &testResolver{},
+		Resolvers: &testResolver{tick: tickChan},
 	})))
 	c := client.New(srv.URL)
 
@@ -77,10 +80,39 @@ func TestGeneratedServer(t *testing.T) {
 			require.Nil(t, resp.ErrorBubble)
 			require.Equal(t, "Ok", resp.Valid)
 		})
+
+	})
+
+	t.Run("subscriptions", func(t *testing.T) {
+		t.Run("wont leak goroutines", func(t *testing.T) {
+			initialGoroutineCount := runtime.NumGoroutine()
+
+			sub := c.Websocket(`subscription { updated }`)
+
+			tickChan <- "message"
+
+			var msg struct {
+				resp struct {
+					Updated string
+				}
+			}
+
+			err := sub.Next(&msg.resp)
+			require.NoError(t, err)
+			require.Equal(t, "message", msg.resp.Updated)
+			sub.Close()
+
+			// need a little bit of time for goroutines to settle
+			time.Sleep(200 * time.Millisecond)
+
+			require.Equal(t, initialGoroutineCount, runtime.NumGoroutine())
+		})
 	})
 }
 
-type testResolver struct{}
+type testResolver struct {
+	tick chan string
+}
 
 func (r *testResolver) ForcedResolver() ForcedResolverResolver {
 	return &forcedResolverResolver{nil}
@@ -97,4 +129,27 @@ func (r *testQueryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
 
 func (r *testQueryResolver) Valid(ctx context.Context) (string, error) {
 	return "Ok", nil
+}
+
+func (r *testResolver) Subscription() SubscriptionResolver {
+	return &testSubscriptionResolver{r}
+}
+
+type testSubscriptionResolver struct{ *testResolver }
+
+func (r *testSubscriptionResolver) Updated(ctx context.Context) (<-chan string, error) {
+	res := make(chan string, 1)
+
+	go func() {
+		for {
+			select {
+			case t := <-r.tick:
+				res <- t
+			case <-ctx.Done():
+				close(res)
+				return
+			}
+		}
+	}()
+	return res, nil
 }

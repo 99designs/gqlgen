@@ -26,6 +26,7 @@ See the [docs](https://gqlgen.com/) for a getting started guide.
 | Dataloading | :+1: | :+1: | :+1: | :warning: |
 | Concurrency | :+1: | :+1: | :+1: | :+1: |
 | Custom errors & error.path | :+1: | :no_entry: [is](https://github.com/graphql-go/graphql/issues/259) | :no_entry: | :no_entry: |
+| Query complexity | :+1: | :no_entry: [is](https://github.com/graphql-go/graphql/issues/231) | :no_entry: | :no_entry: |
 
 
 ### Help

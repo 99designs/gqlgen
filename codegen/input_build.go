@@ -9,10 +9,10 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program, imports *Imports) (Objects, error) {
+func (cfg *NormalizedConfig) buildInputs(namedTypes NamedTypes, prog *loader.Program, imports *Imports) (Objects, error) {
 	var inputs Objects
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range cfg.Schema.Types {
 		switch typ.Kind {
 		case ast.InputObject:
 			input, err := cfg.buildInput(namedTypes, typ)

@@ -7,10 +7,10 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program, imports *Imports) ([]Model, error) {
+func (cfg *NormalizedConfig) buildModels(types NamedTypes, prog *loader.Program, imports *Imports) ([]Model, error) {
 	var models []Model
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range cfg.Schema.Types {
 		var model Model
 		switch typ.Kind {
 		case ast.Object:

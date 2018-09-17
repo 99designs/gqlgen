@@ -10,9 +10,9 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildInterfaces(types NamedTypes, prog *loader.Program) []*Interface {
+func (cfg *NormalizedConfig) buildInterfaces(types NamedTypes, prog *loader.Program) []*Interface {
 	var interfaces []*Interface
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range cfg.Schema.Types {
 		if typ.Kind == ast.Union || typ.Kind == ast.Interface {
 			interfaces = append(interfaces, cfg.buildInterface(types, typ, prog))
 		}
@@ -25,10 +25,10 @@ func (cfg *Config) buildInterfaces(types NamedTypes, prog *loader.Program) []*In
 	return interfaces
 }
 
-func (cfg *Config) buildInterface(types NamedTypes, typ *ast.Definition, prog *loader.Program) *Interface {
+func (cfg *NormalizedConfig) buildInterface(types NamedTypes, typ *ast.Definition, prog *loader.Program) *Interface {
 	i := &Interface{NamedType: types[typ.Name]}
 
-	for _, implementor := range cfg.schema.GetPossibleTypes(typ) {
+	for _, implementor := range cfg.Schema.GetPossibleTypes(typ) {
 		t := types[implementor.Name]
 
 		i.Implementors = append(i.Implementors, InterfaceImplementor{

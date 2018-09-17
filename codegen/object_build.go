@@ -9,10 +9,10 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program, imports *Imports) (Objects, error) {
+func (cfg *NormalizedConfig) buildObjects(types NamedTypes, prog *loader.Program, imports *Imports) (Objects, error) {
 	var objects Objects
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range cfg.Schema.Types {
 		if typ.Kind != ast.Object {
 			continue
 		}
@@ -81,23 +81,23 @@ func sanitizeArgName(name string) string {
 	return name
 }
 
-func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *Imports) (*Object, error) {
+func (cfg *NormalizedConfig) buildObject(types NamedTypes, typ *ast.Definition, imports *Imports) (*Object, error) {
 	obj := &Object{NamedType: types[typ.Name]}
 	typeEntry, entryExists := cfg.Models[typ.Name]
 
 	imp := imports.findByPath(cfg.Exec.ImportPath())
 	obj.ResolverInterface = &Ref{GoType: obj.GQLType + "Resolver", Import: imp}
 
-	if typ == cfg.schema.Query {
+	if typ == cfg.Schema.Query {
 		obj.Root = true
 	}
 
-	if typ == cfg.schema.Mutation {
+	if typ == cfg.Schema.Mutation {
 		obj.Root = true
 		obj.DisableConcurrency = true
 	}
 
-	if typ == cfg.schema.Subscription {
+	if typ == cfg.Schema.Subscription {
 		obj.Root = true
 		obj.Stream = true
 	}
@@ -105,7 +105,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 	obj.Satisfies = append(obj.Satisfies, typ.Interfaces...)
 
 	for _, field := range typ.Fields {
-		if typ == cfg.schema.Query && field.Name == "__type" {
+		if typ == cfg.Schema.Query && field.Name == "__type" {
 			obj.Fields = append(obj.Fields, Field{
 				Type:           &Type{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__schema",
@@ -118,7 +118,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 			})
 			continue
 		}
-		if typ == cfg.schema.Query && field.Name == "__schema" {
+		if typ == cfg.Schema.Query && field.Name == "__schema" {
 			obj.Fields = append(obj.Fields, Field{
 				Type:           &Type{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__type",

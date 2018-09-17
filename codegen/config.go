@@ -68,8 +68,11 @@ type Config struct {
 	StructTag      string        `yaml:"struct_tag,omitempty"`
 
 	FilePath string `yaml:"-"`
+}
 
-	schema *ast.Schema `yaml:"-"`
+type NormalizedConfig struct {
+	*Config
+	Schema *ast.Schema `yaml:"-"`
 }
 
 type PackageConfig struct {

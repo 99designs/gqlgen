@@ -14,8 +14,9 @@ import (
 	"github.com/vektah/gqlparser/gqlerror"
 )
 
-func Generate(cfg Config) error {
-	if err := cfg.normalize(); err != nil {
+func Generate(c Config) error {
+	cfg, err := c.normalize()
+	if err != nil {
 		return err
 	}
 
@@ -88,7 +89,7 @@ func GenerateServer(cfg Config, filename string) error {
 	return nil
 }
 
-func generateResolver(cfg Config) error {
+func generateResolver(cfg *NormalizedConfig) error {
 	resolverBuild, err := cfg.resolver()
 	if err != nil {
 		return errors.Wrap(err, "resolver build failed")
@@ -111,18 +112,18 @@ func generateResolver(cfg Config) error {
 	return nil
 }
 
-func (cfg *Config) normalize() error {
+func (cfg *Config) normalize() (*NormalizedConfig, error) {
 	if err := cfg.Model.normalize(); err != nil {
-		return errors.Wrap(err, "model")
+		return nil, errors.Wrap(err, "model")
 	}
 
 	if err := cfg.Exec.normalize(); err != nil {
-		return errors.Wrap(err, "exec")
+		return nil, errors.Wrap(err, "exec")
 	}
 
 	if cfg.Resolver.IsDefined() {
 		if err := cfg.Resolver.normalize(); err != nil {
-			return errors.Wrap(err, "resolver")
+			return nil, errors.Wrap(err, "resolver")
 		}
 	}
 
@@ -152,11 +153,13 @@ func (cfg *Config) normalize() error {
 	}
 
 	var err *gqlerror.Error
-	cfg.schema, err = gqlparser.LoadSchema(&ast.Source{Name: cfg.SchemaFilename, Input: cfg.SchemaStr})
+
+	schema, err := gqlparser.LoadSchema(&ast.Source{Name: cfg.SchemaFilename, Input: cfg.SchemaStr})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	return &NormalizedConfig{cfg, schema}, nil
 }
 
 var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)

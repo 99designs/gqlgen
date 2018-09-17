@@ -9,9 +9,9 @@ import (
 )
 
 // namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of Type for each thing
-func (cfg *Config) buildNamedTypes() NamedTypes {
+func (cfg *NormalizedConfig) buildNamedTypes() NamedTypes {
 	types := map[string]*NamedType{}
-	for _, schemaType := range cfg.schema.Types {
+	for _, schemaType := range cfg.Schema.Types {
 		t := namedTypeFromSchema(schemaType)
 
 		if userEntry, ok := cfg.Models[t.GQLType]; ok && userEntry.Model != "" {

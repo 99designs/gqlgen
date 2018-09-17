@@ -8,10 +8,10 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (cfg *Config) buildEnums(types NamedTypes) []Enum {
+func (cfg *NormalizedConfig) buildEnums(types NamedTypes) []Enum {
 	var enums []Enum
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range cfg.Schema.Types {
 		namedType := types[typ.Name]
 		if typ.Kind != ast.Enum || strings.HasPrefix(typ.Name, "__") || namedType.IsUserDefined {
 			continue

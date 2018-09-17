@@ -6,10 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (cfg *Config) buildDirectives(types NamedTypes) ([]*Directive, error) {
+func (cfg *NormalizedConfig) buildDirectives(types NamedTypes) ([]*Directive, error) {
 	var directives []*Directive
 
-	for name, dir := range cfg.schema.Directives {
+	for name, dir := range cfg.Schema.Directives {
 		if name == "skip" || name == "include" || name == "deprecated" {
 			continue
 		}

@@ -47,7 +47,7 @@ type ServerBuild struct {
 }
 
 // Create a list of models that need to be generated
-func (cfg *Config) models() (*ModelBuild, error) {
+func (cfg *NormalizedConfig) models() (*ModelBuild, error) {
 	namedTypes := cfg.buildNamedTypes()
 
 	progLoader := newLoader(namedTypes, true)
@@ -72,7 +72,7 @@ func (cfg *Config) models() (*ModelBuild, error) {
 }
 
 // bind a schema together with some code to generate a Build
-func (cfg *Config) resolver() (*ResolverBuild, error) {
+func (cfg *NormalizedConfig) resolver() (*ResolverBuild, error) {
 	progLoader := newLoader(cfg.buildNamedTypes(), true)
 	progLoader.Import(cfg.Resolver.ImportPath())
 
@@ -121,7 +121,7 @@ func (cfg *Config) server(destDir string) *ServerBuild {
 }
 
 // bind a schema together with some code to generate a Build
-func (cfg *Config) bind() (*Build, error) {
+func (cfg *NormalizedConfig) bind() (*Build, error) {
 	namedTypes := cfg.buildNamedTypes()
 
 	progLoader := newLoader(namedTypes, true)
@@ -158,23 +158,23 @@ func (cfg *Config) bind() (*Build, error) {
 		Directives:     directives,
 	}
 
-	if cfg.schema.Query != nil {
-		b.QueryRoot = b.Objects.ByName(cfg.schema.Query.Name)
+	if cfg.Schema.Query != nil {
+		b.QueryRoot = b.Objects.ByName(cfg.Schema.Query.Name)
 	} else {
 		return b, fmt.Errorf("query entry point missing")
 	}
 
-	if cfg.schema.Mutation != nil {
-		b.MutationRoot = b.Objects.ByName(cfg.schema.Mutation.Name)
+	if cfg.Schema.Mutation != nil {
+		b.MutationRoot = b.Objects.ByName(cfg.Schema.Mutation.Name)
 	}
 
-	if cfg.schema.Subscription != nil {
-		b.SubscriptionRoot = b.Objects.ByName(cfg.schema.Subscription.Name)
+	if cfg.Schema.Subscription != nil {
+		b.SubscriptionRoot = b.Objects.ByName(cfg.Schema.Subscription.Name)
 	}
 	return b, nil
 }
 
-func (cfg *Config) validate() error {
+func (cfg *NormalizedConfig) validate() error {
 	progLoader := newLoader(cfg.buildNamedTypes(), false)
 	_, err := progLoader.Load()
 	return err

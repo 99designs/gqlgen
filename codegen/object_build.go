@@ -139,7 +139,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 		if entryExists {
 			if typeField, ok := typeEntry.Fields[field.Name]; ok {
 				goName = typeField.FieldName
-				forceResolver = typeField.Resolver
+				forceResolver = typeField.ForceResolver
 			}
 		}
 

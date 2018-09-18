@@ -8,8 +8,8 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildDirectives(types NamedTypes, imports *Imports, prog *loader.Program) ([]*Directive, error) {
-	var directives []*Directive
+func (cfg *Config) buildDirectives(types NamedTypes, imports *Imports, prog *loader.Program) (Directives, error) {
+	var directives Directives
 
 	for name, dir := range cfg.schema.Directives {
 		if name == "skip" || name == "include" || name == "deprecated" {

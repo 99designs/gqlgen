@@ -6,6 +6,19 @@ import (
 	"strings"
 )
 
+type Directives []*Directive
+
+// NoImplementation returns the set of Directives without a preconfigured implementation
+func (ds Directives) NoImplementation() Directives {
+	noImpl := Directives{}
+	for _, d := range ds {
+		if d.Implementation == nil {
+			noImpl = append(noImpl, d)
+		}
+	}
+	return noImpl
+}
+
 type Directive struct {
 	Name           string
 	Args           []FieldArgument

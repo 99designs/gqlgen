@@ -21,7 +21,7 @@ type Build struct {
 	SubscriptionRoot *Object
 	SchemaRaw        string
 	SchemaFilename   string
-	Directives       []*Directive
+	Directives       Directives
 }
 
 type ModelBuild struct {

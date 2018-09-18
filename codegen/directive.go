@@ -65,9 +65,15 @@ func (d *Directive) validateParams(params *types.Tuple) error {
 	if params.Len() != len(d.Args)+3 {
 		return errors.Errorf("param count mismatch (%d)", params.Len())
 	}
-	if params.At(0).Type().String() != "context.Context" || params.At(1).Type().String() != "interface{}" || params.At(2).Type().String() != "github.com/99designs/gqlgen/graphql.Resolver" {
-		// TODO match args and return values and better error message
-		return errors.Errorf("first 3 params")
+	types := []string{"context.Context", "interface{}", "github.com/99designs/gqlgen/graphql.Resolver"}
+	for _, arg := range d.Args {
+		types = append(types, arg.FullSignature())
+	}
+	for i, t := range types {
+		param := params.At(i)
+		if param.Type().String() != t {
+			return errors.Errorf("%s expected %s actual %s", param.Name(), t, param.Type().String())
+		}
 	}
 	return nil
 }

@@ -31,3 +31,7 @@ models:
       field: { resolver: true }
   Error:
     model: "github.com/99designs/gqlgen/codegen/testserver.Error"
+
+directives:
+  customImpl:
+    implementation: "github.com/99designs/gqlgen/codegen/testserver.CustomDirective"

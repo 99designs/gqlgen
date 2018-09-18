@@ -3453,6 +3453,16 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "customImpl":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return CustomDirective(ctx, obj, n)
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3602,5 +3612,7 @@ union ShapeUnion = Circle | Rectangle
 type ForcedResolver {
     field: Circle
 }
+
+directive @customImpl on FIELD_DEFINITION
 `},
 )

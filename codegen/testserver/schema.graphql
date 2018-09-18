@@ -130,3 +130,5 @@ union ShapeUnion = Circle | Rectangle
 type ForcedResolver {
     field: Circle
 }
+
+directive @customImpl on FIELD_DEFINITION

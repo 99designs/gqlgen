@@ -61,19 +61,24 @@ func (d *Directive) Signature() string {
 	return res
 }
 
-func (d *Directive) validateParams(params *types.Tuple) error {
+func (d *Directive) validateSignature(sig *types.Signature) error {
+	params := sig.Params()
 	if params.Len() != len(d.Args)+3 {
 		return errors.Errorf("param count mismatch (%d)", params.Len())
 	}
-	types := []string{"context.Context", "interface{}", "github.com/99designs/gqlgen/graphql.Resolver"}
+	expected := []string{"context.Context", "interface{}", "github.com/99designs/gqlgen/graphql.Resolver"}
 	for _, arg := range d.Args {
-		types = append(types, arg.FullSignature())
+		expected = append(expected, arg.FullSignature())
 	}
-	for i, t := range types {
+	for i, t := range expected {
 		param := params.At(i)
 		if param.Type().String() != t {
 			return errors.Errorf("%s expected %s actual %s", param.Name(), t, param.Type().String())
 		}
 	}
+	if sig.Results().Len() != 2 || sig.Results().At(0).Type().String() != "interface{}" || sig.Results().At(1).Type().String() != "error" {
+		return errors.Errorf("invalid return types")
+	}
+
 	return nil
 }

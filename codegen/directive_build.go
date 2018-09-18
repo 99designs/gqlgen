@@ -79,8 +79,7 @@ func bindDirectiveImplementation(dir *Directive, impl string, imports *Imports, 
 		return errors.Errorf("implementation %s not a func", goType)
 	}
 
-	params := fn.Type().(*types.Signature).Params()
-	if err := dir.validateParams(params); err != nil {
+	if err := dir.validateSignature(fn.Type().(*types.Signature)); err != nil {
 		return errors.Errorf("implementation %s should match signature %s: %s", goType, dir.Signature(), err.Error())
 	}
 

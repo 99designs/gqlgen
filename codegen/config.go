@@ -66,6 +66,7 @@ type Config struct {
 	Resolver       PackageConfig `yaml:"resolver,omitempty"`
 	Models         TypeMap       `yaml:"models,omitempty"`
 	StructTag      string        `yaml:"struct_tag,omitempty"`
+	Directives     DirectiveMap  `yaml:"directives,omitempty"`
 
 	FilePath string `yaml:"-"`
 
@@ -84,8 +85,8 @@ type TypeMapEntry struct {
 }
 
 type TypeMapField struct {
-	Resolver   bool   `yaml:"resolver"`
-	FieldName  string `yaml:"fieldName"`
+	Resolver  bool   `yaml:"resolver"`
+	FieldName string `yaml:"fieldName"`
 }
 
 func (c *PackageConfig) normalize() error {
@@ -161,6 +162,12 @@ func (tm TypeMap) Check() error {
 	}
 	return nil
 }
+
+type DirectiveMapEntry struct {
+	Implementation string `yaml:"implementation,omitempty"`
+}
+
+type DirectiveMap map[string]DirectiveMapEntry
 
 // findCfg searches for the config file in this directory and all parents up the tree
 // looking for the closest match

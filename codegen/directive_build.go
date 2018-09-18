@@ -39,21 +39,18 @@ func (cfg *Config) buildDirectives(types NamedTypes, imports *Imports, prog *loa
 			args = append(args, newArg)
 		}
 
-		var impl *Ref
-		if cfg.Directives.Exists(name) && cfg.Directives[name].Implementation != "" {
-			impl = &Ref{}
-			impl.Package, impl.GoType = pkgAndType(cfg.Directives[name].Implementation)
-			impl.Import = imports.add(impl.Package)
-			if err := bindDirectiveImplementation(prog, args, impl); err != nil {
-				return nil, errors.Errorf("directive implementation for \"%s\": %s", name, err.Error())
+		directive := &Directive{
+			Name: name,
+			Args: args,
+		}
+
+		if impl := cfg.Directives.ImplementationFor(name); impl != "" {
+			if err := bindDirectiveImplementation(directive, impl, imports, prog); err != nil {
+				return nil, errors.Errorf("directive implementation for %s: %s", name, err.Error())
 			}
 		}
 
-		directives = append(directives, &Directive{
-			Name:           name,
-			Args:           args,
-			Implementation: impl,
-		})
+		directives = append(directives, directive)
 	}
 
 	sort.Slice(directives, func(i, j int) bool { return directives[i].Name < directives[j].Name })
@@ -61,21 +58,31 @@ func (cfg *Config) buildDirectives(types NamedTypes, imports *Imports, prog *loa
 	return directives, nil
 }
 
-func bindDirectiveImplementation(prog *loader.Program, args []FieldArgument, impl *Ref) error {
-	def, err := findGoType(prog, impl.Package, impl.GoType)
+func bindDirectiveImplementation(dir *Directive, impl string, imports *Imports, prog *loader.Program) error {
+	pkg, goType := pkgAndType(impl)
+	dir.Implementation = &Ref{
+		Package: pkg,
+		GoType:  goType,
+		Import:  imports.add(pkg),
+	}
+
+	def, err := findGoType(prog, dir.Implementation.Package, goType)
 	if err != nil {
 		return err
 	}
 	if def == nil {
-		return errors.Errorf("implementation not found")
+		return errors.Errorf("implementation %s not found", goType)
 	}
 
-	_, ok := def.(*types.Func)
+	fn, ok := def.(*types.Func)
 	if !ok {
-		return errors.Errorf("implementation not a func")
+		return errors.Errorf("implementation %s not a func", goType)
 	}
 
-	// TODO match field args to implementation signature
+	params := fn.Type().(*types.Signature).Params()
+	if err := dir.validateParams(params); err != nil {
+		return errors.Errorf("implementation %s should match signature %s: %s", goType, dir.Signature(), err.Error())
+	}
 
 	return nil
 }

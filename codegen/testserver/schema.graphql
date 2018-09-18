@@ -131,4 +131,8 @@ type ForcedResolver {
     field: Circle
 }
 
-directive @customImpl on FIELD_DEFINITION
+input ComplexInput {
+    name: String!
+}
+
+directive @customImpl(arg1: ComplexInput) on FIELD_DEFINITION

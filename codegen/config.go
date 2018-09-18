@@ -169,9 +169,12 @@ type DirectiveMapEntry struct {
 
 type DirectiveMap map[string]DirectiveMapEntry
 
-func (dm DirectiveMap) Exists(directiveName string) bool {
-	_, ok := dm[directiveName]
-	return ok
+func (dm DirectiveMap) ImplementationFor(name string) string {
+	d, ok := dm[name]
+	if !ok {
+		return ""
+	}
+	return d.Implementation
 }
 
 // findCfg searches for the config file in this directory and all parents up the tree

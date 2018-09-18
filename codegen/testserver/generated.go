@@ -496,6 +496,26 @@ func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]in
 
 }
 
+func dir_customImpl_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *ComplexInput
+	if tmp, ok := rawArgs["arg1"]; ok {
+		var err error
+		var ptr1 ComplexInput
+		if tmp != nil {
+			ptr1, err = UnmarshalComplexInput(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg1"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -3219,6 +3239,24 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 	}
 }
 
+func UnmarshalComplexInput(v interface{}) (ComplexInput, error) {
+	var it ComplexInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 	var it InnerInput
 	var asMap = v.(map[string]interface{})
@@ -3457,9 +3495,15 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 	for _, d := range rctx.Field.Definition.Directives {
 		switch d.Name {
 		case "customImpl":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := dir_customImpl_args(rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return nil
+			}
 			n := next
 			next = func(ctx context.Context) (interface{}, error) {
-				return CustomDirective(ctx, obj, n)
+				return CustomDirective(ctx, obj, n, args["arg1"].(*ComplexInput))
 			}
 		}
 	}
@@ -3613,6 +3657,10 @@ type ForcedResolver {
     field: Circle
 }
 
-directive @customImpl on FIELD_DEFINITION
+input ComplexInput {
+    name: String!
+}
+
+directive @customImpl(arg1: ComplexInput) on FIELD_DEFINITION
 `},
 )

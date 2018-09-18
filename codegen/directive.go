@@ -7,8 +7,9 @@ import (
 )
 
 type Directive struct {
-	Name string
-	Args []FieldArgument
+	Name           string
+	Args           []FieldArgument
+	Implementation *Ref
 }
 
 func (d *Directive) ArgsFunc() string {

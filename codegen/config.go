@@ -169,6 +169,11 @@ type DirectiveMapEntry struct {
 
 type DirectiveMap map[string]DirectiveMapEntry
 
+func (dm DirectiveMap) Exists(directiveName string) bool {
+	_, ok := dm[directiveName]
+	return ok
+}
+
 // findCfg searches for the config file in this directory and all parents up the tree
 // looking for the closest match
 func findCfg() (string, error) {

@@ -142,7 +142,7 @@ func (cfg *Config) bind() (*Build, error) {
 	if err != nil {
 		return nil, err
 	}
-	directives, err := cfg.buildDirectives(namedTypes)
+	directives, err := cfg.buildDirectives(namedTypes, imports, prog)
 	if err != nil {
 		return nil, err
 	}

@@ -1,12 +1,14 @@
 package codegen
 
 import (
+	"go/types"
 	"sort"
 
 	"github.com/pkg/errors"
+	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildDirectives(types NamedTypes) ([]*Directive, error) {
+func (cfg *Config) buildDirectives(types NamedTypes, imports *Imports, prog *loader.Program) ([]*Directive, error) {
 	var directives []*Directive
 
 	for name, dir := range cfg.schema.Directives {
@@ -37,13 +39,43 @@ func (cfg *Config) buildDirectives(types NamedTypes) ([]*Directive, error) {
 			args = append(args, newArg)
 		}
 
+		var impl *Ref
+		if cfg.Directives.Exists(name) && cfg.Directives[name].Implementation != "" {
+			impl = &Ref{}
+			impl.Package, impl.GoType = pkgAndType(cfg.Directives[name].Implementation)
+			impl.Import = imports.add(impl.Package)
+			if err := bindDirectiveImplementation(prog, args, impl); err != nil {
+				return nil, errors.Errorf("directive implementation for \"%s\": %s", name, err.Error())
+			}
+		}
+
 		directives = append(directives, &Directive{
-			Name: name,
-			Args: args,
+			Name:           name,
+			Args:           args,
+			Implementation: impl,
 		})
 	}
 
 	sort.Slice(directives, func(i, j int) bool { return directives[i].Name < directives[j].Name })
 
 	return directives, nil
+}
+
+func bindDirectiveImplementation(prog *loader.Program, args []FieldArgument, impl *Ref) error {
+	def, err := findGoType(prog, impl.Package, impl.GoType)
+	if err != nil {
+		return err
+	}
+	if def == nil {
+		return errors.Errorf("implementation not found")
+	}
+
+	_, ok := def.(*types.Func)
+	if !ok {
+		return errors.Errorf("implementation not a func")
+	}
+
+	// TODO match field args to implementation signature
+
+	return nil
 }

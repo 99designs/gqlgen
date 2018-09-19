@@ -9,6 +9,7 @@ type Query {
     shapes: [Shape]
     errorBubble: Error
     valid: String!
+    directiveReturn: String! @customImpl
 }
 
 type Subscription {

@@ -85,6 +85,7 @@ type ComplexityRoot struct {
 		Shapes            func(childComplexity int) int
 		ErrorBubble       func(childComplexity int) int
 		Valid             func(childComplexity int) int
+		DirectiveReturn   func(childComplexity int) int
 		KeywordArgs       func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
 	}
 
@@ -113,6 +114,7 @@ type QueryResolver interface {
 	Shapes(ctx context.Context) ([]*Shape, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
 	Valid(ctx context.Context) (string, error)
+	DirectiveReturn(ctx context.Context) (string, error)
 	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
 }
 type SubscriptionResolver interface {
@@ -695,6 +697,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Valid(childComplexity), true
+
+	case "Query.directiveReturn":
+		if e.complexity.Query.DirectiveReturn == nil {
+			break
+		}
+
+		return e.complexity.Query.DirectiveReturn(childComplexity), true
 
 	case "Query.keywordArgs":
 		if e.complexity.Query.KeywordArgs == nil {
@@ -1349,6 +1358,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "directiveReturn":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_directiveReturn(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "keywordArgs":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -1713,6 +1731,28 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.Query().Valid(ctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_directiveReturn(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().DirectiveReturn(ctx)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -3535,6 +3575,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
     shapes: [Shape]
     errorBubble: Error
     valid: String!
+    directiveReturn: String! @customImpl
 }
 
 type Subscription {

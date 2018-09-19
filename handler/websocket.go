@@ -63,33 +63,42 @@ func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Req
 		cfg:    cfg,
 	}
 
-	if !conn.init() {
+	initPayload, ok := conn.init()
+	if !ok {
 		return
 	}
 
-	conn.run()
+	conn.run(initPayload)
 }
 
-func (c *wsConnection) init() bool {
+func (c *wsConnection) init() (initPayload graphql.InitPayload, ok bool) {
 	message := c.readOp()
 	if message == nil {
 		c.close(websocket.CloseProtocolError, "decoding error")
-		return false
+		return nil, false
 	}
+
+	initPayload = make(graphql.InitPayload)
 
 	switch message.Type {
 	case connectionInitMsg:
+		err := json.Unmarshal(message.Payload, &initPayload)
+		if err != nil {
+			// Treat an invalid payload as no payload
+			initPayload = nil
+		}
+
 		c.write(&operationMessage{Type: connectionAckMsg})
 	case connectionTerminateMsg:
 		c.close(websocket.CloseNormalClosure, "terminated")
-		return false
+		return nil, false
 	default:
 		c.sendConnectionError("unexpected message %s", message.Type)
 		c.close(websocket.CloseProtocolError, "unexpected message")
-		return false
+		return nil, false
 	}
 
-	return true
+	return initPayload, true
 }
 
 func (c *wsConnection) write(msg *operationMessage) {
@@ -98,7 +107,7 @@ func (c *wsConnection) write(msg *operationMessage) {
 	c.mu.Unlock()
 }
 
-func (c *wsConnection) run() {
+func (c *wsConnection) run(initPayload graphql.InitPayload) {
 	for {
 		message := c.readOp()
 		if message == nil {
@@ -107,7 +116,7 @@ func (c *wsConnection) run() {
 
 		switch message.Type {
 		case startMsg:
-			if !c.subscribe(message) {
+			if !c.subscribe(message, initPayload) {
 				return
 			}
 		case stopMsg:
@@ -131,7 +140,7 @@ func (c *wsConnection) run() {
 	}
 }
 
-func (c *wsConnection) subscribe(message *operationMessage) bool {
+func (c *wsConnection) subscribe(message *operationMessage, initPayload graphql.InitPayload) bool {
 	var reqParams params
 	if err := jsonDecode(bytes.NewReader(message.Payload), &reqParams); err != nil {
 		c.sendConnectionError("invalid json")
@@ -157,6 +166,10 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	}
 	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, vars)
 	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
+
+	if initPayload != nil {
+		ctx = graphql.WithInitPayload(ctx, initPayload)
+	}
 
 	if op.Operation != ast.Subscription {
 		var result *graphql.Response

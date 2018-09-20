@@ -240,5 +240,10 @@ func WithInitPayload(ctx context.Context, payload InitPayload) context.Context {
 
 // GetInitPayload gets the payload from context.
 func GetInitPayload(ctx context.Context) InitPayload {
-	return ctx.Value(initpayload).(InitPayload)
+	payload, ok := ctx.Value(initpayload).(InitPayload)
+	if !ok {
+		return nil
+	}
+
+	return payload
 }

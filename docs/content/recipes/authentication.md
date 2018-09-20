@@ -114,7 +114,7 @@ func (r *queryResolver) Hero(ctx context.Context, episode Episode) (Character, e
 }
 ```
 
-Things are different with websockets, and if you do things in the vein of the above example, you have to compute this at every call to `auth.ForContext`. It's a bit inefficient if you have multiple calls to this function. What you might do to mitigate that is to have a session manager on the context and have that check the vailidity in the first `auth.ForContext` call.
+Things are different with websockets, and if you do things in the vein of the above example, you have to compute this at every call to `auth.ForContext`.
 
 ```golang
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
@@ -122,7 +122,7 @@ func ForContext(ctx context.Context) *User {
   raw, ok := ctx.Value(userCtxKey).(*User)
   
   if !ok {
-    payload := graphql.GetInitPayload(ctx)
+    payload := handler.GetInitPayload(ctx)
     if payload == nil {
       return nil
     }
@@ -138,3 +138,5 @@ func ForContext(ctx context.Context) *User {
 	return raw
 }
 ```
+
+It's a bit inefficient if you have multiple calls to this function (e.g. on a field resolver), but what you might do to mitigate that is to have a session object set on the http request and only populate it upon the first check.

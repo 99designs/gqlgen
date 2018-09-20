@@ -21,7 +21,7 @@ type Build struct {
 	SubscriptionRoot *Object
 	SchemaRaw        string
 	SchemaFilename   string
-	Directives       []*Directive
+	Directives       Directives
 }
 
 type ModelBuild struct {
@@ -142,7 +142,7 @@ func (cfg *Config) bind() (*Build, error) {
 	if err != nil {
 		return nil, err
 	}
-	directives, err := cfg.buildDirectives(namedTypes)
+	directives, err := cfg.buildDirectives(namedTypes, imports, prog)
 	if err != nil {
 		return nil, err
 	}

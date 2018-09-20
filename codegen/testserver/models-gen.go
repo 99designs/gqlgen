@@ -2,6 +2,10 @@
 
 package testserver
 
+type ComplexInput struct {
+	Name string `json:"name"`
+}
+
 type InnerInput struct {
 	ID int `json:"id"`
 }

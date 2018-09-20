@@ -85,6 +85,7 @@ type ComplexityRoot struct {
 		Shapes            func(childComplexity int) int
 		ErrorBubble       func(childComplexity int) int
 		Valid             func(childComplexity int) int
+		DirectiveReturn   func(childComplexity int) int
 		KeywordArgs       func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
 	}
 
@@ -113,6 +114,7 @@ type QueryResolver interface {
 	Shapes(ctx context.Context) ([]*Shape, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
 	Valid(ctx context.Context) (string, error)
+	DirectiveReturn(ctx context.Context) (string, error)
 	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
 }
 type SubscriptionResolver interface {
@@ -496,6 +498,26 @@ func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]in
 
 }
 
+func dir_customImpl_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *ComplexInput
+	if tmp, ok := rawArgs["arg1"]; ok {
+		var err error
+		var ptr1 ComplexInput
+		if tmp != nil {
+			ptr1, err = UnmarshalComplexInput(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg1"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -675,6 +697,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Valid(childComplexity), true
+
+	case "Query.directiveReturn":
+		if e.complexity.Query.DirectiveReturn == nil {
+			break
+		}
+
+		return e.complexity.Query.DirectiveReturn(childComplexity), true
 
 	case "Query.keywordArgs":
 		if e.complexity.Query.KeywordArgs == nil {
@@ -1329,6 +1358,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "directiveReturn":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_directiveReturn(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "keywordArgs":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -1693,6 +1731,28 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		return ec.resolvers.Query().Valid(ctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_directiveReturn(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().DirectiveReturn(ctx)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -3219,6 +3279,24 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 	}
 }
 
+func UnmarshalComplexInput(v interface{}) (ComplexInput, error) {
+	var it ComplexInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 	var it InnerInput
 	var asMap = v.(map[string]interface{})
@@ -3453,6 +3531,22 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "customImpl":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := dir_customImpl_args(rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return nil
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return CustomDirective(ctx, obj, n, args["arg1"].(*ComplexInput))
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3481,6 +3575,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
     shapes: [Shape]
     errorBubble: Error
     valid: String!
+    directiveReturn: String! @customImpl
 }
 
 type Subscription {
@@ -3602,5 +3697,11 @@ union ShapeUnion = Circle | Rectangle
 type ForcedResolver {
     field: Circle
 }
+
+input ComplexInput {
+    name: String!
+}
+
+directive @customImpl(arg1: ComplexInput) on FIELD_DEFINITION
 `},
 )

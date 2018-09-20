@@ -110,6 +110,16 @@ func TestGeneratedServer(t *testing.T) {
 			require.Equal(t, initialGoroutineCount, runtime.NumGoroutine())
 		})
 	})
+
+	t.Run("custom directive implementation", func(t *testing.T) {
+		t.Run("executes", func(t *testing.T) {
+			var resp struct {
+				DirectiveReturn string
+			}
+			c.MustPost(`query { directiveReturn }`, &resp)
+			require.Equal(t, "CustomDirective", resp.DirectiveReturn)
+		})
+	})
 }
 
 func TestResponseExtension(t *testing.T) {

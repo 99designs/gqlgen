@@ -9,6 +9,7 @@ type Query {
     shapes: [Shape]
     errorBubble: Error
     valid: String!
+    directiveReturn: String! @customImpl
 }
 
 type Subscription {
@@ -130,3 +131,9 @@ union ShapeUnion = Circle | Rectangle
 type ForcedResolver {
     field: Circle
 }
+
+input ComplexInput {
+    name: String!
+}
+
+directive @customImpl(arg1: ComplexInput) on FIELD_DEFINITION

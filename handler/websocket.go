@@ -44,7 +44,7 @@ type wsConnection struct {
 	mu     sync.Mutex
 	cfg    *Config
 
-	initPayload graphql.InitPayload
+	initPayload InitPayload
 }
 
 func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Request, cfg *Config) {
@@ -82,7 +82,7 @@ func (c *wsConnection) init() bool {
 	switch message.Type {
 	case connectionInitMsg:
 		if len(message.Payload) > 0 {
-			c.initPayload = make(graphql.InitPayload)
+			c.initPayload = make(InitPayload)
 			err := json.Unmarshal(message.Payload, &c.initPayload)
 			if err != nil {
 				return false
@@ -169,7 +169,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
 
 	if c.initPayload != nil {
-		ctx = graphql.WithInitPayload(ctx, c.initPayload)
+		ctx = withInitPayload(ctx, c.initPayload)
 	}
 
 	if op.Operation != ast.Subscription {

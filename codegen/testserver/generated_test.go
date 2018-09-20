@@ -206,7 +206,7 @@ func (r *testSubscriptionResolver) Updated(ctx context.Context) (<-chan string, 
 }
 
 func (r *testSubscriptionResolver) InitPayload(ctx context.Context) (<-chan string, error) {
-	payload := graphql.GetInitPayload(ctx)
+	payload := handler.GetInitPayload(ctx)
 	channel := make(chan string, len(payload)+1)
 
 	go func() {

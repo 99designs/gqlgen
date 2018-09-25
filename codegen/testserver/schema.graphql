@@ -137,7 +137,7 @@ type Rectangle implements Shape {
 union ShapeUnion = Circle | Rectangle
 
 type ForcedResolver {
-    field: Circle
+    field: Circle @resolver
 }
 
 type EmbeddedPointer {

@@ -132,6 +132,11 @@ func (cfg *Config) bind() (*Build, error) {
 	namedTypes := cfg.buildNamedTypes()
 
 	progLoader := newLoader(namedTypes, true)
+	for _, i := range cfg.Directives.Implementations() {
+		pkg, _ := pkgAndType(i)
+		progLoader.Import(pkg)
+	}
+
 	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")

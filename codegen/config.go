@@ -177,6 +177,16 @@ func (dm DirectiveMap) ImplementationFor(name string) string {
 	return d.Implementation
 }
 
+func (dm DirectiveMap) Implementations() []string {
+	impls := []string{}
+	for _, d := range dm {
+		if d.Implementation != "" {
+			impls = append(impls, d.Implementation)
+		}
+	}
+	return impls
+}
+
 // findCfg searches for the config file in this directory and all parents up the tree
 // looking for the closest match
 func findCfg() (string, error) {

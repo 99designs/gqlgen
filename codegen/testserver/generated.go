@@ -9,6 +9,7 @@ import (
 	strconv "strconv"
 	sync "sync"
 
+	resolver "github.com/99designs/gqlgen/codegen/plugins/resolver"
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
 	graphql "github.com/99designs/gqlgen/graphql"
@@ -4006,6 +4007,11 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			next = func(ctx context.Context) (interface{}, error) {
 				return CustomDirective(ctx, obj, n, args["arg1"].(*ComplexInput))
 			}
+		case "resolver":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return resolver.DirectiveNoop(ctx, obj, n)
+			}
 		}
 	}
 	res, err := ec.ResolverMiddleware(ctx, next)
@@ -4164,7 +4170,7 @@ type Rectangle implements Shape {
 union ShapeUnion = Circle | Rectangle
 
 type ForcedResolver {
-    field: Circle
+    field: Circle @resolver
 }
 
 type EmbeddedPointer {

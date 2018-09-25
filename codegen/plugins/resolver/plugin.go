@@ -31,6 +31,12 @@ func (p *Plugin) Execute(cfg *codegen.Config, schema *ast.Schema) error {
 				if _, ok := cfg.Models[typ.Name]; !ok {
 					cfg.Models[typ.Name] = codegen.TypeMapEntry{}
 				}
+				if cfg.Models[typ.Name].Fields == nil {
+					cfg.Models[typ.Name] = codegen.TypeMapEntry{
+						Model:  typ.Name,
+						Fields: make(map[string]codegen.TypeMapField),
+					}
+				}
 				if tmf, ok := cfg.Models[typ.Name].Fields[f.Name]; ok {
 					cfg.Models[typ.Name].Fields[f.Name] = codegen.TypeMapField{
 						ForceResolver: true,

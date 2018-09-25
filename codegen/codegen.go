@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func Generate(cfg Config) error {
@@ -160,9 +161,10 @@ func (cfg *Config) normalize() error {
 	}
 	srcs = append(srcs, pluginSrcs...)
 
-	cfg.schema, err = gqlparser.LoadSchema(srcs...)
-	if err != nil {
-		return err
+	var gqlerr *gqlerror.Error
+	cfg.schema, gqlerr = gqlparser.LoadSchema(srcs...)
+	if gqlerr != nil {
+		return gqlerr
 	}
 	return nil
 }

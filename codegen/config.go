@@ -177,8 +177,7 @@ func (dm DirectiveMap) ImplementationFor(name string) string {
 	return d.Implementation
 }
 
-func (dm DirectiveMap) Implementations() []string {
-	impls := []string{}
+func (dm DirectiveMap) Implementations() (impls []string) {
 	for _, d := range dm {
 		if d.Implementation != "" {
 			impls = append(impls, d.Implementation)
@@ -217,4 +216,8 @@ func findCfgInDir(dir string) string {
 		}
 	}
 	return ""
+}
+
+func (cfg *Config) Merge(merge *Config) error {
+	return nil
 }

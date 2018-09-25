@@ -11,13 +11,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func Generate(cfg Config) error {
 	if err := cfg.normalize(); err != nil {
 		return err
 	}
+
+	DefaultPluginRegistry.Execute(&cfg, cfg.schema)
 
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	_ = syscall.Unlink(cfg.Model.Filename)
@@ -151,8 +152,15 @@ func (cfg *Config) normalize() error {
 		}
 	}
 
-	var err *gqlerror.Error
-	cfg.schema, err = gqlparser.LoadSchema(&ast.Source{Name: cfg.SchemaFilename, Input: cfg.SchemaStr})
+	srcs := []*ast.Source{{Name: cfg.SchemaFilename, Input: cfg.SchemaStr}}
+
+	pluginSrcs, err := DefaultPluginRegistry.Schemas(cfg)
+	if err != nil {
+		return err
+	}
+	srcs = append(srcs, pluginSrcs...)
+
+	cfg.schema, err = gqlparser.LoadSchema(srcs...)
 	if err != nil {
 		return err
 	}

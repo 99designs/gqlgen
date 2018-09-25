@@ -13,6 +13,7 @@ type Query {
 
 type Subscription {
     updated: String!
+    initPayload: String!
 }
 
 type Error {

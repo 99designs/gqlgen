@@ -29,5 +29,8 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.ForcedResolver"
     fields:
       field: { resolver: true }
+  User:
+    fields:
+      friends: { resolver: true }
   Error:
     model: "github.com/99designs/gqlgen/codegen/testserver.Error"

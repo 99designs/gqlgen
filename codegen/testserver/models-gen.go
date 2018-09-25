@@ -45,3 +45,8 @@ type OuterInput struct {
 type OuterObject struct {
 	Inner InnerObject `json:"inner"`
 }
+
+type User struct {
+	ID      int    `json:"id"`
+	Friends []User `json:"friends"`
+}

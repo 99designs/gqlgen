@@ -14,6 +14,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/99designs/gqlgen/graphql"
 
 	"github.com/99designs/gqlgen/client"
@@ -34,10 +36,20 @@ func TestForcedResolverFieldIsPointer(t *testing.T) {
 }
 
 func TestGeneratedServer(t *testing.T) {
-	tickChan := make(chan string, 1)
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{
-		Resolvers: &testResolver{tick: tickChan},
-	})))
+	resolvers := &testResolver{tick: make(chan string, 1)}
+
+	srv := httptest.NewServer(
+		handler.GraphQL(
+			NewExecutableSchema(Config{Resolvers: resolvers}),
+			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+				path, _ := ctx.Value("path").([]int)
+				return next(context.WithValue(ctx, "path", append(path, 1)))
+			}),
+			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+				path, _ := ctx.Value("path").([]int)
+				return next(context.WithValue(ctx, "path", append(path, 2)))
+			}),
+		))
 	c := client.New(srv.URL)
 
 	t.Run("null bubbling", func(t *testing.T) {
@@ -87,13 +99,36 @@ func TestGeneratedServer(t *testing.T) {
 
 	})
 
+	t.Run("middleware", func(t *testing.T) {
+		var resp struct {
+			User struct {
+				ID      int
+				Friends []struct {
+					ID int
+				}
+			}
+		}
+
+		called := false
+		resolvers.userFriends = func(ctx context.Context, obj *User) ([]User, error) {
+			assert.Equal(t, []int{1, 2, 1, 2}, ctx.Value("path"))
+			called = true
+			return []User{}, nil
+		}
+
+		err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)
+
+		require.NoError(t, err)
+		require.True(t, called)
+	})
+
 	t.Run("subscriptions", func(t *testing.T) {
 		t.Run("wont leak goroutines", func(t *testing.T) {
 			initialGoroutineCount := runtime.NumGoroutine()
 
 			sub := c.Websocket(`subscription { updated }`)
 
-			tickChan <- "message"
+			resolvers.tick <- "message"
 
 			var msg struct {
 				resp struct {
@@ -162,12 +197,18 @@ func TestResponseExtension(t *testing.T) {
 }
 
 type testResolver struct {
-	tick chan string
+	tick        chan string
+	userFriends func(ctx context.Context, obj *User) ([]User, error)
 }
 
 func (r *testResolver) ForcedResolver() ForcedResolverResolver {
 	return &forcedResolverResolver{nil}
 }
+
+func (r *testResolver) User() UserResolver {
+	return &testUserResolver{r}
+}
+
 func (r *testResolver) Query() QueryResolver {
 	return &testQueryResolver{}
 }
@@ -182,8 +223,18 @@ func (r *testQueryResolver) Valid(ctx context.Context) (string, error) {
 	return "Ok", nil
 }
 
+func (r *testQueryResolver) User(ctx context.Context, id int) (User, error) {
+	return User{ID: 1}, nil
+}
+
 func (r *testResolver) Subscription() SubscriptionResolver {
 	return &testSubscriptionResolver{r}
+}
+
+type testUserResolver struct{ *testResolver }
+
+func (r *testResolver) Friends(ctx context.Context, obj *User) ([]User, error) {
+	return r.userFriends(ctx, obj)
 }
 
 type testSubscriptionResolver struct{ *testResolver }

@@ -33,7 +33,6 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	EmbeddedPointer() EmbeddedPointerResolver
 	ForcedResolver() ForcedResolverResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
@@ -106,9 +105,6 @@ type ComplexityRoot struct {
 	}
 }
 
-type EmbeddedPointerResolver interface {
-	Title(ctx context.Context, obj *EmbeddedPointerModel) (*string, error)
-}
 type ForcedResolverResolver interface {
 	Field(ctx context.Context, obj *ForcedResolver) (*Circle, error)
 }
@@ -883,7 +879,6 @@ var embeddedPointerImplementors = []string{"EmbeddedPointer"}
 func (ec *executionContext) _EmbeddedPointer(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedPointerModel) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, embeddedPointerImplementors)
 
-	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -895,16 +890,12 @@ func (ec *executionContext) _EmbeddedPointer(ctx context.Context, sel ast.Select
 		case "ID":
 			out.Values[i] = ec._EmbeddedPointer_ID(ctx, field, obj)
 		case "Title":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._EmbeddedPointer_Title(ctx, field, obj)
-				wg.Done()
-			}(i, field)
+			out.Values[i] = ec._EmbeddedPointer_Title(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	wg.Wait()
+
 	if invalid {
 		return graphql.Null
 	}
@@ -939,18 +930,14 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.EmbeddedPointer().Title(ctx, obj)
+		return obj.Title, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	rctx.Result = res
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	return graphql.MarshalString(res)
 }
 
 var errorImplementors = []string{"Error"}

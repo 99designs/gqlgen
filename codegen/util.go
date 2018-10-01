@@ -132,17 +132,16 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 		}
 
 		if field.Anonymous() {
-			if named, ok := field.Type().(*types.Struct); ok {
-				f, err := findField(named, name, structTag)
-				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
-					return nil, err
-				}
-				if f != nil && foundField == nil {
-					foundField = f
-				}
+
+			fieldType := field.Type()
+
+			if ptr, ok := fieldType.(*types.Pointer); ok {
+				fieldType = ptr.Elem()
 			}
 
-			if named, ok := field.Type().Underlying().(*types.Struct); ok {
+			// Type.Underlying() returns itself for all types except types.Named, where it returns a struct type.
+			// It should be safe to always call.
+			if named, ok := fieldType.Underlying().(*types.Struct); ok {
 				f, err := findField(named, name, structTag)
 				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
 					return nil, err

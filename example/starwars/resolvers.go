@@ -119,8 +119,8 @@ func (r *mutationResolver) CreateReview(ctx context.Context, episode Episode, re
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Hero(ctx context.Context, episode Episode) (Character, error) {
-	if episode == EpisodeEmpire {
+func (r *queryResolver) Hero(ctx context.Context, episode *Episode) (Character, error) {
+	if *episode == EpisodeEmpire {
 		return r.humans["1000"], nil
 	}
 	return r.droid["2001"], nil
@@ -193,8 +193,8 @@ func (r *queryResolver) Starship(ctx context.Context, id string) (*Starship, err
 
 type starshipResolver struct{ *Resolver }
 
-func (r *starshipResolver) Length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error) {
-	switch unit {
+func (r *starshipResolver) Length(ctx context.Context, obj *Starship, unit *LengthUnit) (float64, error) {
+	switch *unit {
 	case LengthUnitMeter, "":
 		return obj.Length, nil
 	case LengthUnitFoot:

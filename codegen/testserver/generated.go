@@ -33,6 +33,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	EmbeddedPointer() EmbeddedPointerResolver
 	ForcedResolver() ForcedResolverResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
@@ -45,6 +46,11 @@ type ComplexityRoot struct {
 	Circle struct {
 		Radius func(childComplexity int) int
 		Area   func(childComplexity int) int
+	}
+
+	EmbeddedPointer struct {
+		Id    func(childComplexity int) int
+		Title func(childComplexity int) int
 	}
 
 	Error struct {
@@ -100,6 +106,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type EmbeddedPointerResolver interface {
+	Title(ctx context.Context, obj *EmbeddedPointerModel) (*string, error)
+}
 type ForcedResolverResolver interface {
 	Field(ctx context.Context, obj *ForcedResolver) (*Circle, error)
 }
@@ -525,6 +534,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Circle.Area(childComplexity), true
 
+	case "EmbeddedPointer.ID":
+		if e.complexity.EmbeddedPointer.Id == nil {
+			break
+		}
+
+		return e.complexity.EmbeddedPointer.Id(childComplexity), true
+
+	case "EmbeddedPointer.Title":
+		if e.complexity.EmbeddedPointer.Title == nil {
+			break
+		}
+
+		return e.complexity.EmbeddedPointer.Title(childComplexity), true
+
 	case "Error.id":
 		if e.complexity.Error.Id == nil {
 			break
@@ -852,6 +875,82 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	res := resTmp.(float64)
 	rctx.Result = res
 	return graphql.MarshalFloat(res)
+}
+
+var embeddedPointerImplementors = []string{"EmbeddedPointer"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _EmbeddedPointer(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedPointerModel) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, embeddedPointerImplementors)
+
+	var wg sync.WaitGroup
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EmbeddedPointer")
+		case "ID":
+			out.Values[i] = ec._EmbeddedPointer_ID(ctx, field, obj)
+		case "Title":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._EmbeddedPointer_Title(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "EmbeddedPointer",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "EmbeddedPointer",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.EmbeddedPointer().Title(ctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var errorImplementors = []string{"Error"}
@@ -3633,6 +3732,11 @@ union ShapeUnion = Circle | Rectangle
 
 type ForcedResolver {
     field: Circle
+}
+
+type EmbeddedPointer {
+    ID: String
+    Title: String
 }
 `},
 )

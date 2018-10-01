@@ -11,6 +11,9 @@ import (
 
 type Resolver struct{}
 
+func (r *Resolver) EmbeddedPointer() EmbeddedPointerResolver {
+	return &embeddedPointerResolver{r}
+}
 func (r *Resolver) ForcedResolver() ForcedResolverResolver {
 	return &forcedResolverResolver{r}
 }
@@ -19,6 +22,12 @@ func (r *Resolver) Query() QueryResolver {
 }
 func (r *Resolver) Subscription() SubscriptionResolver {
 	return &subscriptionResolver{r}
+}
+
+type embeddedPointerResolver struct{ *Resolver }
+
+func (r *embeddedPointerResolver) Title(ctx context.Context, obj *EmbeddedPointerModel) (*string, error) {
+	panic("not implemented")
 }
 
 type forcedResolverResolver struct{ *Resolver }

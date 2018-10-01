@@ -5,10 +5,12 @@ package testserver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"runtime"
+	"sort"
 	"testing"
 	"time"
 
@@ -109,6 +111,34 @@ func TestGeneratedServer(t *testing.T) {
 
 			require.Equal(t, initialGoroutineCount, runtime.NumGoroutine())
 		})
+
+		t.Run("will parse init payload", func(t *testing.T) {
+			sub := c.WebsocketWithPayload(`subscription { initPayload }`, map[string]interface{}{
+				"Authorization": "Bearer of the curse",
+				"number":        32,
+				"strings":       []string{"hello", "world"},
+			})
+
+			var msg struct {
+				resp struct {
+					InitPayload string
+				}
+			}
+
+			err := sub.Next(&msg.resp)
+			require.NoError(t, err)
+			require.Equal(t, "AUTH:Bearer of the curse", msg.resp.InitPayload)
+			err = sub.Next(&msg.resp)
+			require.NoError(t, err)
+			require.Equal(t, "Authorization = \"Bearer of the curse\"", msg.resp.InitPayload)
+			err = sub.Next(&msg.resp)
+			require.NoError(t, err)
+			require.Equal(t, "number = 32", msg.resp.InitPayload)
+			err = sub.Next(&msg.resp)
+			require.NoError(t, err)
+			require.Equal(t, "strings = []interface {}{\"hello\", \"world\"}", msg.resp.InitPayload)
+			sub.Close()
+		})
 	})
 
 	t.Run("custom directive implementation", func(t *testing.T) {
@@ -183,4 +213,34 @@ func (r *testSubscriptionResolver) Updated(ctx context.Context) (<-chan string, 
 		}
 	}()
 	return res, nil
+}
+
+func (r *testSubscriptionResolver) InitPayload(ctx context.Context) (<-chan string, error) {
+	payload := handler.GetInitPayload(ctx)
+	channel := make(chan string, len(payload)+1)
+
+	go func() {
+		<-ctx.Done()
+		close(channel)
+	}()
+
+	// Test the helper function separately
+	auth := payload.Authorization()
+	if auth != "" {
+		channel <- "AUTH:" + auth
+	} else {
+		channel <- "AUTH:NONE"
+	}
+
+	// Send them over the channel in alphabetic order
+	keys := make([]string, 0, len(payload))
+	for key := range payload {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		channel <- fmt.Sprintf("%s = %#+v", key, payload[key])
+	}
+
+	return channel, nil
 }

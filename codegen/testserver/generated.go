@@ -96,7 +96,8 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		Updated func(childComplexity int) int
+		Updated     func(childComplexity int) int
+		InitPayload func(childComplexity int) int
 	}
 }
 
@@ -119,6 +120,7 @@ type QueryResolver interface {
 }
 type SubscriptionResolver interface {
 	Updated(ctx context.Context) (<-chan string, error)
+	InitPayload(ctx context.Context) (<-chan string, error)
 }
 
 func field_Query_mapInput_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -744,6 +746,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.Updated(childComplexity), true
+
+	case "Subscription.initPayload":
+		if e.complexity.Subscription.InitPayload == nil {
+			break
+		}
+
+		return e.complexity.Subscription.InitPayload(childComplexity), true
 
 	}
 	return 0, false
@@ -1951,6 +1960,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	switch fields[0].Name {
 	case "updated":
 		return ec._Subscription_updated(ctx, fields[0])
+	case "initPayload":
+		return ec._Subscription_initPayload(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -1961,6 +1972,26 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 		Field: field,
 	})
 	results, err := ec.resolvers.Subscription().Updated(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler { return graphql.MarshalString(res) }())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	results, err := ec.resolvers.Subscription().InitPayload(ctx)
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -3580,6 +3611,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type Subscription {
     updated: String!
+    initPayload: String!
 }
 
 type Error {

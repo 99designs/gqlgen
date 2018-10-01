@@ -71,3 +71,6 @@ type subscriptionResolver struct{ *Resolver }
 func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan string, error) {
 	panic("not implemented")
 }
+func (r *subscriptionResolver) InitPayload(ctx context.Context) (<-chan string, error) {
+	panic("not implemented")
+}

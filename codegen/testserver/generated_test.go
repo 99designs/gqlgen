@@ -175,6 +175,15 @@ func TestGeneratedServer(t *testing.T) {
 			sub.Close()
 		})
 	})
+
+	t.Run("null args", func(t *testing.T) {
+		var resp struct {
+			NullableArg *string
+		}
+		err := c.Post(`query { nullableArg(arg: null) }`, &resp)
+		require.Nil(t, err)
+		require.Nil(t, resp.NullableArg)
+	})
 }
 
 func TestResponseExtension(t *testing.T) {

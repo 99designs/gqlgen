@@ -10,6 +10,7 @@ type Query {
     errorBubble: Error
     valid: String!
     user(id: Int!): User!
+    nullableArg(arg: Int = 123): String
 }
 
 type Subscription {

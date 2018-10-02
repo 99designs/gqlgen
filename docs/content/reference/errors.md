@@ -74,10 +74,9 @@ You change this when creating the handler:
 server := handler.GraphQL(MakeExecutableSchema(resolvers),
 	handler.ErrorPresenter(
 		func(ctx context.Context, e error) *gqlerror.Error {
-			// any special logic you want to do here. This only
-			// requirement is that it can be json encoded
+			// any special logic you want to do here. Must specify path for correct null bubbling behaviour.
 			if myError, ok := e.(MyError) ; ok {
-				return &gqlerror.Errorf("Eeek!")
+				return gqlerror.ErrorPathf(graphql.GetResolverContext(ctx).Path(), "Eeek!")
 			}
 
 			return graphql.DefaultErrorPresenter(ctx, e)

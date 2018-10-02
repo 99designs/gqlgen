@@ -34,6 +34,9 @@ func (h *Human) Height(unit LengthUnit) float64 {
 	}
 }
 
+func (Human) IsCharacter()    {}
+func (Human) IsSearchResult() {}
+
 type Review struct {
 	Stars      int
 	Commentary *string
@@ -44,6 +47,9 @@ type Droid struct {
 	CharacterFields
 	PrimaryFunction string
 }
+
+func (Droid) IsCharacter()    {}
+func (Droid) IsSearchResult() {}
 
 func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, first *int, after *string) (FriendsConnection, error) {
 	from := 0

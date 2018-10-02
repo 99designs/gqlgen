@@ -18,6 +18,30 @@ func TestHandlerPOST(t *testing.T) {
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
+	t.Run("query caching", func(t *testing.T) {
+		// Run enough unique queries to evict a bunch of them
+		for i := 0; i < 2000; i++ {
+			query := `{"query":"` + strings.Repeat(" ", i) + "{ me { name } }" + `"}`
+			resp := doRequest(h, "POST", "/graphql", query)
+			assert.Equal(t, http.StatusOK, resp.Code)
+			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		}
+
+		t.Run("evicted queries run", func(t *testing.T) {
+			query := `{"query":"` + strings.Repeat(" ", 0) + "{ me { name } }" + `"}`
+			resp := doRequest(h, "POST", "/graphql", query)
+			assert.Equal(t, http.StatusOK, resp.Code)
+			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		})
+
+		t.Run("non-evicted queries run", func(t *testing.T) {
+			query := `{"query":"` + strings.Repeat(" ", 1999) + "{ me { name } }" + `"}`
+			resp := doRequest(h, "POST", "/graphql", query)
+			assert.Equal(t, http.StatusOK, resp.Code)
+			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		})
+	})
+
 	t.Run("decode failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", "notjson")
 		assert.Equal(t, http.StatusBadRequest, resp.Code)

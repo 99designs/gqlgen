@@ -1,7 +1,9 @@
 package codegen
 
 import (
+	"fmt"
 	"go/types"
+	"os"
 	"sort"
 
 	"github.com/vektah/gqlparser/ast"
@@ -49,5 +51,20 @@ func (cfg *Config) isValueReceiver(intf *NamedType, implementor *NamedType, prog
 		return true
 	}
 
-	return types.Implements(implementorType, interfaceType)
+	for i := 0; i < interfaceType.NumMethods(); i++ {
+		intfMethod := interfaceType.Method(i)
+
+		implMethod := findMethod(implementorType, intfMethod.Name())
+		if implMethod == nil {
+			fmt.Fprintf(os.Stderr, "missing method %s on %s\n", intfMethod.Name(), implementor.GoType)
+			return false
+		}
+
+		sig := implMethod.Type().(*types.Signature)
+		if _, isPtr := sig.Recv().Type().(*types.Pointer); isPtr {
+			return false
+		}
+	}
+
+	return true
 }

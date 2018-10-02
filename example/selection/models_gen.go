@@ -6,9 +6,7 @@ import (
 	time "time"
 )
 
-type Event interface {
-	IsEvent()
-}
+type Event interface{}
 
 type Like struct {
 	Reaction  string    `json:"reaction"`
@@ -17,13 +15,9 @@ type Like struct {
 	Collected []string  `json:"collected"`
 }
 
-func (Like) IsEvent() {}
-
 type Post struct {
 	Message   string    `json:"message"`
 	Sent      time.Time `json:"sent"`
 	Selection []string  `json:"selection"`
 	Collected []string  `json:"collected"`
 }
-
-func (Post) IsEvent() {}

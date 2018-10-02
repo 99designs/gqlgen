@@ -104,6 +104,10 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 
 	obj.Satisfies = append(obj.Satisfies, typ.Interfaces...)
 
+	for _, intf := range cfg.schema.GetImplements(typ) {
+		obj.Implements = append(obj.Implements, types[intf.Name])
+	}
+
 	for _, field := range typ.Fields {
 		if typ == cfg.schema.Query && field.Name == "__type" {
 			obj.Fields = append(obj.Fields, Field{

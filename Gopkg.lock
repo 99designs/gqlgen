@@ -170,8 +170,8 @@
   revision = "314ac81052eedc03ac0a79bdc89d05a49a2a5814"
 
 [[projects]]
-  branch = "add-schema-implements"
-  digest = "1:cb4a3b347499d5cca82cef6daa1fd1932f027a7cab651689c16af85300463eb2"
+  branch = "master"
+  digest = "1:7fa8a2105f0b0853395a85d3dd8ef1475c44919374c6496dba7b987586edaced"
   name = "github.com/vektah/gqlparser"
   packages = [
     ".",
@@ -183,7 +183,7 @@
     "validator/rules",
   ]
   pruneopts = "UT"
-  revision = "bd86bdb57ce80cd71b3b7f8707bb7e09b3fb2fab"
+  revision = "f119686bf1d4d1a68c7ed6afe35f183625443c41"
 
 [[projects]]
   branch = "master"

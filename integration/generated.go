@@ -3,7 +3,7 @@
 package integration
 
 import (
-	"bytes"
+	bytes "bytes"
 	context "context"
 	remote_api "remote_api"
 	strconv "strconv"

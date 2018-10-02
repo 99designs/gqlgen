@@ -3,7 +3,7 @@
 package scalars
 
 import (
-	"bytes"
+	bytes "bytes"
 	context "context"
 	external "external"
 	strconv "strconv"

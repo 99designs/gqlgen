@@ -83,7 +83,7 @@ func GenerateServer(cfg Config, filename string) error {
 			return errors.Wrap(err, "generate server failed")
 		}
 	} else {
-		log.Printf("Skipped server: %s already exists\n", serverFilename)
+		stdErrLog.Printf("Skipped server: %s already exists\n", serverFilename)
 	}
 	return nil
 }
@@ -96,7 +96,7 @@ func generateResolver(cfg Config) error {
 	filename := cfg.Resolver.Filename
 
 	if resolverBuild.ResolverFound {
-		log.Printf("Skipped resolver: %s.%s already exists\n", cfg.Resolver.ImportPath(), cfg.Resolver.Type)
+		stdErrLog.Printf("Skipped resolver: %s.%s already exists\n", cfg.Resolver.ImportPath(), cfg.Resolver.Type)
 		return nil
 	}
 
@@ -105,7 +105,7 @@ func generateResolver(cfg Config) error {
 			return err
 		}
 	} else {
-		log.Printf("Skipped resolver: %s already exists\n", filename)
+		stdErrLog.Printf("Skipped resolver: %s already exists\n", filename)
 	}
 
 	return nil
@@ -172,3 +172,7 @@ func abs(path string) string {
 	}
 	return filepath.ToSlash(absPath)
 }
+
+var (
+	stdErrLog = log.New(os.Stderr, "", log.LstdFlags)
+)

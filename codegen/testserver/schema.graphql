@@ -137,3 +137,8 @@ union ShapeUnion = Circle | Rectangle
 type ForcedResolver {
     field: Circle
 }
+
+type EmbeddedPointer {
+    ID: String
+    Title: String
+}

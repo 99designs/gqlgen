@@ -48,7 +48,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		User   func(childComplexity int, id external.ObjectID) int
-		Search func(childComplexity int, input model.SearchArgs) int
+		Search func(childComplexity int, input *model.SearchArgs) int
 	}
 
 	User struct {
@@ -65,7 +65,7 @@ type ComplexityRoot struct {
 
 type QueryResolver interface {
 	User(ctx context.Context, id external.ObjectID) (*model.User, error)
-	Search(ctx context.Context, input model.SearchArgs) ([]model.User, error)
+	Search(ctx context.Context, input *model.SearchArgs) ([]model.User, error)
 }
 type UserResolver interface {
 	PrimitiveResolver(ctx context.Context, obj *model.User) (string, error)
@@ -89,10 +89,15 @@ func field_Query_user_args(rawArgs map[string]interface{}) (map[string]interface
 
 func field_Query_search_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 model.SearchArgs
+	var arg0 *model.SearchArgs
 	if tmp, ok := rawArgs["input"]; ok {
 		var err error
-		arg0, err = UnmarshalSearchArgs(tmp)
+		var ptr1 model.SearchArgs
+		if tmp != nil {
+			ptr1, err = UnmarshalSearchArgs(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -196,7 +201,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Search(childComplexity, args["input"].(model.SearchArgs)), true
+		return e.complexity.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
 
 	case "User.id":
 		if e.complexity.User.Id == nil {
@@ -462,7 +467,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Search(rctx, args["input"].(model.SearchArgs))
+		return ec.resolvers.Query().Search(rctx, args["input"].(*model.SearchArgs))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {

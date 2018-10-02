@@ -53,7 +53,7 @@ type ComplexityRoot struct {
 		Date         func(childComplexity int, filter models.DateFilter) int
 		Viewer       func(childComplexity int) int
 		JsonEncoding func(childComplexity int) int
-		Error        func(childComplexity int, typeArg models.ErrorType) int
+		Error        func(childComplexity int, typeArg *models.ErrorType) int
 	}
 
 	User struct {
@@ -76,7 +76,7 @@ type QueryResolver interface {
 	Date(ctx context.Context, filter models.DateFilter) (bool, error)
 	Viewer(ctx context.Context) (*models.Viewer, error)
 	JSONEncoding(ctx context.Context) (string, error)
-	Error(ctx context.Context, typeArg models.ErrorType) (bool, error)
+	Error(ctx context.Context, typeArg *models.ErrorType) (bool, error)
 }
 type UserResolver interface {
 	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
@@ -99,10 +99,15 @@ func field_Query_date_args(rawArgs map[string]interface{}) (map[string]interface
 
 func field_Query_error_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 models.ErrorType
+	var arg0 *models.ErrorType
 	if tmp, ok := rawArgs["type"]; ok {
 		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
+		var ptr1 models.ErrorType
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -254,7 +259,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Error(childComplexity, args["type"].(models.ErrorType)), true
+		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
 
 	case "User.name":
 		if e.complexity.User.Name == nil {
@@ -659,7 +664,7 @@ func (ec *executionContext) _Query_error(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Error(rctx, args["type"].(models.ErrorType))
+		return ec.resolvers.Query().Error(rctx, args["type"].(*models.ErrorType))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {

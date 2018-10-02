@@ -175,6 +175,15 @@ func TestGeneratedServer(t *testing.T) {
 			sub.Close()
 		})
 	})
+
+	t.Run("null args", func(t *testing.T) {
+		var resp struct {
+			NullableArg *string
+		}
+		err := c.Post(`query { nullableArg(arg: null) }`, &resp)
+		require.Nil(t, err)
+		require.Equal(t, "Ok", *resp.NullableArg)
+	})
 }
 
 func TestResponseExtension(t *testing.T) {
@@ -225,6 +234,11 @@ func (r *testQueryResolver) Valid(ctx context.Context) (string, error) {
 
 func (r *testQueryResolver) User(ctx context.Context, id int) (User, error) {
 	return User{ID: 1}, nil
+}
+
+func (r *testQueryResolver) NullableArg(ctx context.Context, arg *int) (*string, error) {
+	s := "Ok"
+	return &s, nil
 }
 
 func (r *testResolver) Subscription() SubscriptionResolver {

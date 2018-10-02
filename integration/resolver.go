@@ -53,8 +53,8 @@ func (r *elementResolver) Child(ctx context.Context, obj *models.Element) (model
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Error(ctx context.Context, typeArg models.ErrorType) (bool, error) {
-	if typeArg == models.ErrorTypeCustom {
+func (r *queryResolver) Error(ctx context.Context, typeArg *models.ErrorType) (bool, error) {
+	if *typeArg == models.ErrorTypeCustom {
 		return false, &CustomError{"User message", "Internal Message"}
 	}
 

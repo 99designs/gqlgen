@@ -87,7 +87,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Hero      func(childComplexity int, episode Episode) int
+		Hero      func(childComplexity int, episode *Episode) int
 		Reviews   func(childComplexity int, episode Episode, since *time.Time) int
 		Search    func(childComplexity int, text string) int
 		Character func(childComplexity int, id string) int
@@ -105,7 +105,7 @@ type ComplexityRoot struct {
 	Starship struct {
 		Id      func(childComplexity int) int
 		Name    func(childComplexity int) int
-		Length  func(childComplexity int, unit LengthUnit) int
+		Length  func(childComplexity int, unit *LengthUnit) int
 		History func(childComplexity int) int
 	}
 }
@@ -128,7 +128,7 @@ type MutationResolver interface {
 	CreateReview(ctx context.Context, episode Episode, review Review) (*Review, error)
 }
 type QueryResolver interface {
-	Hero(ctx context.Context, episode Episode) (Character, error)
+	Hero(ctx context.Context, episode *Episode) (Character, error)
 	Reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error)
 	Search(ctx context.Context, text string) ([]SearchResult, error)
 	Character(ctx context.Context, id string) (Character, error)
@@ -137,7 +137,7 @@ type QueryResolver interface {
 	Starship(ctx context.Context, id string) (*Starship, error)
 }
 type StarshipResolver interface {
-	Length(ctx context.Context, obj *Starship, unit LengthUnit) (float64, error)
+	Length(ctx context.Context, obj *Starship, unit *LengthUnit) (float64, error)
 }
 
 func field_Droid_friendsConnection_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -249,10 +249,15 @@ func field_Mutation_createReview_args(rawArgs map[string]interface{}) (map[strin
 
 func field_Query_hero_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 Episode
+	var arg0 *Episode
 	if tmp, ok := rawArgs["episode"]; ok {
 		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
+		var ptr1 Episode
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -383,10 +388,15 @@ func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interfa
 
 func field_Starship_length_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 LengthUnit
+	var arg0 *LengthUnit
 	if tmp, ok := rawArgs["unit"]; ok {
 		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
+		var ptr1 LengthUnit
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -637,7 +647,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Hero(childComplexity, args["episode"].(Episode)), true
+		return e.complexity.Query.Hero(childComplexity, args["episode"].(*Episode)), true
 
 	case "Query.reviews":
 		if e.complexity.Query.Reviews == nil {
@@ -756,7 +766,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Starship.Length(childComplexity, args["unit"].(LengthUnit)), true
+		return e.complexity.Starship.Length(childComplexity, args["unit"].(*LengthUnit)), true
 
 	case "Starship.history":
 		if e.complexity.Starship.History == nil {
@@ -1928,7 +1938,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Hero(rctx, args["episode"].(Episode))
+		return ec.resolvers.Query().Hero(rctx, args["episode"].(*Episode))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -2452,7 +2462,7 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Starship().Length(rctx, obj, args["unit"].(LengthUnit))
+		return ec.resolvers.Starship().Length(rctx, obj, args["unit"].(*LengthUnit))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {

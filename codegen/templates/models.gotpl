@@ -11,9 +11,7 @@ import (
 {{ range $model := .Models }}
 	{{with .Description}} {{.|prefixLines "// "}} {{end}}
 	{{- if .IsInterface }}
-		type {{.GoType}} interface {
-			Is{{.GoType}}()
-		}
+		type {{.GoType}} interface {}
 	{{- else }}
 		type {{.GoType}} struct {
 			{{- range $field := .Fields }}
@@ -27,11 +25,6 @@ import (
 				{{- end }}
 			{{- end }}
 		}
-
-		{{- range $iface := .Implements }}
-			func ({{$model.GoType}}) Is{{$iface.GoType}}() {}
-		{{- end }}
-
 	{{- end }}
 {{- end}}
 

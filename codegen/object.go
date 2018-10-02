@@ -24,7 +24,6 @@ type Object struct {
 
 	Fields             []Field
 	Satisfies          []string
-	Implements         []*NamedType
 	ResolverInterface  *Ref
 	Root               bool
 	DisableConcurrency bool

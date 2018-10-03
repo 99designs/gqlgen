@@ -26,6 +26,7 @@ var ambientImports = []string{
 	"time",
 	"sync",
 	"errors",
+	"bytes",
 
 	"github.com/vektah/gqlparser",
 	"github.com/vektah/gqlparser/ast",

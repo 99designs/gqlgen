@@ -2,11 +2,10 @@ package main
 
 import (
 	"bytes"
+	"go/format"
 	"io/ioutil"
 	"strconv"
 	"strings"
-
-	"golang.org/x/tools/imports"
 )
 
 func main() {
@@ -39,7 +38,7 @@ func main() {
 
 	out.WriteString("}\n")
 
-	formatted, err2 := imports.Process(dir+"data.go", out.Bytes(), nil)
+	formatted, err2 := format.Source(out.Bytes())
 	if err2 != nil {
 		panic(err2)
 	}

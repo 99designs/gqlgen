@@ -21,3 +21,12 @@ func (Error) ErrorOnNonRequiredField() (string, error) {
 func (Error) NilOnRequiredField() *string {
 	return nil
 }
+
+type EmbeddedPointerModel struct {
+	*EmbeddedPointer
+	ID string
+}
+
+type EmbeddedPointer struct {
+	Title string
+}

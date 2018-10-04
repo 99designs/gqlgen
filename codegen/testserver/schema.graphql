@@ -9,12 +9,19 @@ type Query {
     shapes: [Shape]
     errorBubble: Error
     valid: String!
+    user(id: Int!): User!
+    nullableArg(arg: Int = 123): String
     directiveReturn: String! @customImpl
 }
 
 type Subscription {
     updated: String!
     initPayload: String!
+}
+
+type User {
+    id: Int!
+    friends: [User!]!
 }
 
 type Error {
@@ -131,6 +138,11 @@ union ShapeUnion = Circle | Rectangle
 
 type ForcedResolver {
     field: Circle
+}
+
+type EmbeddedPointer {
+    ID: String
+    Title: String
 }
 
 input ComplexInput {

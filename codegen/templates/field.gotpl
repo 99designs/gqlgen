@@ -14,6 +14,7 @@
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Field: field,
 		})
+		rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 		results, err := ec.resolvers.{{ $field.ShortInvocation }}
 		if err != nil {
 			ec.Error(ctx, err)
@@ -46,7 +47,8 @@
 			Field: field,
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
-		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(ctx context.Context) (interface{}, error) {
+		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
+			ctx = rctx  // use context from middleware stack in children
 			{{- if $field.IsResolver }}
 				return ec.resolvers.{{ $field.ShortInvocation }}
 			{{- else if $field.IsMethod }}

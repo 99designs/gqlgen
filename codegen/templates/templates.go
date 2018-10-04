@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -14,10 +15,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"log"
-
+	"github.com/99designs/gqlgen/internal/imports"
 	"github.com/pkg/errors"
-	"golang.org/x/tools/imports"
 )
 
 func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
@@ -164,23 +163,15 @@ func RenderToFile(tpl string, filename string, data interface{}) error {
 	return nil
 }
 
-func gofmt(filename string, b []byte) ([]byte, error) {
-	out, err := imports.Process(filename, b, nil)
-	if err != nil {
-		return b, errors.Wrap(err, "unable to gofmt")
-	}
-	return out, nil
-}
-
 func write(filename string, b []byte) error {
 	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil {
 		return errors.Wrap(err, "failed to create directory")
 	}
 
-	formatted, err := gofmt(filename, b)
+	formatted, err := imports.Prune(filename, b)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "gofmt failed: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "gofmt failed on %s: %s\n", filepath.Base(filename), err.Error())
 		formatted = b
 	}
 

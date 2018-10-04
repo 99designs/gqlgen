@@ -20,6 +20,9 @@ func (r *Resolver) Query() QueryResolver {
 func (r *Resolver) Subscription() SubscriptionResolver {
 	return &subscriptionResolver{r}
 }
+func (r *Resolver) User() UserResolver {
+	return &userResolver{r}
+}
 
 type forcedResolverResolver struct{ *Resolver }
 
@@ -59,6 +62,12 @@ func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
 func (r *queryResolver) Valid(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) User(ctx context.Context, id int) (User, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) NullableArg(ctx context.Context, arg *int) (*string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) DirectiveReturn(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
@@ -72,5 +81,11 @@ func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan string, erro
 	panic("not implemented")
 }
 func (r *subscriptionResolver) InitPayload(ctx context.Context) (<-chan string, error) {
+	panic("not implemented")
+}
+
+type userResolver struct{ *Resolver }
+
+func (r *userResolver) Friends(ctx context.Context, obj *User) ([]User, error) {
 	panic("not implemented")
 }

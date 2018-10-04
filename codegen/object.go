@@ -24,6 +24,7 @@ type Object struct {
 
 	Fields             []Field
 	Satisfies          []string
+	Implements         []*NamedType
 	ResolverInterface  *Ref
 	Root               bool
 	DisableConcurrency bool
@@ -203,7 +204,7 @@ func (f *Field) CallArgs() string {
 	var args []string
 
 	if f.IsResolver() {
-		args = append(args, "ctx")
+		args = append(args, "rctx")
 
 		if !f.Object.Root {
 			args = append(args, "obj")

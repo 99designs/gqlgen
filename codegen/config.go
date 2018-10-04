@@ -217,7 +217,3 @@ func findCfgInDir(dir string) string {
 	}
 	return ""
 }
-
-func (cfg *Config) Merge(merge *Config) error {
-	return nil
-}

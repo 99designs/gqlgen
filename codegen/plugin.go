@@ -11,7 +11,7 @@ type Plugin interface {
 
 // PluginConfigurer is an interface a plugin can satisfy in order to make changes to configuration before codegen
 type PluginConfigurer interface {
-	PostNormalize(c Config, schema *ast.Schema) (*Config, error)
+	PostNormalize(c *Config, schema *ast.Schema) error
 }
 
 // PluginSchema is an interface a plugin can satisfy if they wish to merge additional schema with the base schema
@@ -44,11 +44,7 @@ func (r *pluginRegistry) schemas(c *Config) (srcs []*ast.Source, err error) {
 func (r *pluginRegistry) postNormalize(cfg *Config, schema *ast.Schema) error {
 	for _, p := range r.plugins {
 		if p, ok := p.(PluginConfigurer); ok {
-			newCfg, err := p.PostNormalize(*cfg, schema)
-			if err != nil {
-				return err
-			}
-			err = cfg.Merge(newCfg)
+			err := p.PostNormalize(cfg, schema)
 			if err != nil {
 				return err
 			}

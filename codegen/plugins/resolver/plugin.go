@@ -27,27 +27,17 @@ func (p *Plugin) Execute(cfg *codegen.Config, schema *ast.Schema) error {
 	cfg.Directives["resolver"] = codegen.DirectiveMapEntry{Implementation: "github.com/99designs/gqlgen/codegen/plugins/resolver.DirectiveNoop"}
 	for _, typ := range schema.Types {
 		for _, f := range typ.Fields {
-			if d := f.Directives.ForName("resolver"); d != nil {
-				if _, ok := cfg.Models[typ.Name]; !ok {
-					cfg.Models[typ.Name] = codegen.TypeMapEntry{}
-				}
-				if cfg.Models[typ.Name].Fields == nil {
-					cfg.Models[typ.Name] = codegen.TypeMapEntry{
-						Model:  typ.Name,
-						Fields: make(map[string]codegen.TypeMapField),
-					}
-				}
-				if tmf, ok := cfg.Models[typ.Name].Fields[f.Name]; ok {
-					cfg.Models[typ.Name].Fields[f.Name] = codegen.TypeMapField{
-						ForceResolver: true,
-						FieldName:     tmf.FieldName,
-					}
-				} else {
-					cfg.Models[typ.Name].Fields[f.Name] = codegen.TypeMapField{
-						ForceResolver: true,
-					}
-				}
+			if d := f.Directives.ForName("resolver"); d == nil {
+				continue
 			}
+			modelCfg := cfg.Models[typ.Name]
+			if modelCfg.Fields == nil {
+				modelCfg.Fields = make(map[string]codegen.TypeMapField)
+			}
+			fieldCfg := modelCfg.Fields[f.Name]
+			fieldCfg.ForceResolver = true
+			modelCfg.Fields[f.Name] = fieldCfg
+			cfg.Models[typ.Name] = modelCfg
 		}
 	}
 	return nil

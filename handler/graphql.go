@@ -185,6 +185,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
 				return
 			}
+			defer r.Body.Close()
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return

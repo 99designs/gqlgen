@@ -43,7 +43,7 @@ type Embed struct {
 	Test string
 }
 `
-	scope, err := parseScope(input, "test")
+	scope, err := parseScope(t, input, "test")
 	require.NoError(t, err)
 
 	std := scope.Lookup("Std").Type().Underlying().(*types.Struct)
@@ -82,7 +82,8 @@ type Embed struct {
 	}
 }
 
-func parseScope(input interface{}, packageName string) (*types.Scope, error) {
+func parseScope(t *testing.T, input interface{}, packageName string) (*types.Scope, error) {
+	t.Helper()
 	// test setup to parse the types
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "test.go", input, 0)
@@ -97,4 +98,26 @@ func parseScope(input interface{}, packageName string) (*types.Scope, error) {
 	}
 
 	return pkg.Scope(), nil
+}
+
+func TestEqualFieldName(t *testing.T) {
+	tt := []struct {
+		Name string
+		Source string
+		Target string
+		Expected bool
+	}{
+		{Name: "words with same case", Source: "test", Target: "test", Expected: true},
+		{Name: "words different case", Source: "test", Target: "tEsT", Expected: true},
+		{Name: "different words", Source: "foo", Target: "bar", Expected: false},
+		{Name: "separated with underscore", Source: "the_test", Target: "TheTest", Expected: true},
+		{Name: "empty values", Source: "", Target: "", Expected: true},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			result  := equalFieldName(tc.Source, tc.Target)
+			require.Equal(t, tc.Expected, result)
+		})
+	}
 }

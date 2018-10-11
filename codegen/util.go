@@ -105,6 +105,12 @@ func findMethod(typ *types.Named, name string) *types.Func {
 	return nil
 }
 
+func equalFieldName(source, target string) bool {
+	source = strings.Replace(source, "_", "", -1)
+	target = strings.Replace(target, "_", "", -1)
+	return strings.EqualFold(source, target)
+}
+
 // findField attempts to match the name to a struct field with the following
 // priorites:
 // 1. If struct tag is passed then struct tag has highest priority
@@ -120,7 +126,7 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 		if structTag != "" {
 			tags := reflect.StructTag(typ.Tag(i))
 			if val, ok := tags.Lookup(structTag); ok {
-				if strings.EqualFold(val, name) {
+				if equalFieldName(val, name) {
 					if foundField != nil && foundFieldWasTag {
 						return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", structTag, val)
 					}
@@ -156,7 +162,7 @@ func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
 			continue
 		}
 
-		if strings.EqualFold(field.Name(), name) && foundField == nil {
+		if equalFieldName(field.Name(), name) && foundField == nil { // aqui!
 			foundField = field
 		}
 	}

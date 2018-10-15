@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/codegen"
+	"github.com/99designs/gqlgen/plugins"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
@@ -42,6 +43,8 @@ var genCmd = cli.Command{
 			os.Exit(1)
 		}
 		config.SchemaStr = string(schemaRaw)
+
+		config.Plugins.Register(plugins.DefaultPlugins()...)
 
 		if err = config.Check(); err != nil {
 			fmt.Fprintln(os.Stderr, "invalid config format: "+err.Error())

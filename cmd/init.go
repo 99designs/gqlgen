@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen"
+	"github.com/99designs/gqlgen/plugins"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
@@ -142,6 +143,8 @@ func initConfig(ctx *cli.Context) *codegen.Config {
 		fmt.Fprintln(os.Stderr, "unable to write config file: "+err.Error())
 		os.Exit(1)
 	}
+
+	config.Plugins.Register(plugins.DefaultPlugins()...)
 
 	return config
 }

@@ -19,15 +19,17 @@ type PluginSchema interface {
 	Schema(cfg *Config) (string, error)
 }
 
-type pluginRegistry struct {
+// PluginRegistry is a collection of plugins that will be accessed during codegen
+type PluginRegistry struct {
 	plugins []Plugin
 }
 
-func (r *pluginRegistry) register(p Plugin) {
-	r.plugins = append(r.plugins, p)
+// Register a set of plugins to the plugin registry
+func (r *PluginRegistry) Register(p ...Plugin) {
+	r.plugins = append(r.plugins, p...)
 }
 
-func (r *pluginRegistry) schemas(c *Config) (srcs []*ast.Source, err error) {
+func (r *PluginRegistry) schemas(c *Config) (srcs []*ast.Source, err error) {
 	for _, p := range r.plugins {
 		name := p.Name()
 		if p, ok := p.(PluginSchema); ok {
@@ -41,7 +43,7 @@ func (r *pluginRegistry) schemas(c *Config) (srcs []*ast.Source, err error) {
 	return srcs, err
 }
 
-func (r *pluginRegistry) postNormalize(cfg *Config, schema *ast.Schema) error {
+func (r *PluginRegistry) postNormalize(cfg *Config, schema *ast.Schema) error {
 	for _, p := range r.plugins {
 		if p, ok := p.(PluginConfigurer); ok {
 			err := p.PostNormalize(cfg, schema)

@@ -19,7 +19,7 @@ func Generate(cfg Config) error {
 		return err
 	}
 
-	DefaultPluginRegistry.Execute(&cfg, cfg.schema)
+	cfg.Plugins.postNormalize(&cfg, cfg.schema)
 
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	_ = syscall.Unlink(cfg.Model.Filename)
@@ -155,7 +155,7 @@ func (cfg *Config) normalize() error {
 
 	srcs := []*ast.Source{{Name: cfg.SchemaFilename, Input: cfg.SchemaStr}}
 
-	pluginSrcs, err := DefaultPluginRegistry.Schemas(cfg)
+	pluginSrcs, err := cfg.Plugins.schemas(cfg)
 	if err != nil {
 		return err
 	}

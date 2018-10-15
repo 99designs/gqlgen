@@ -22,6 +22,7 @@ func DefaultConfig() *Config {
 		SchemaFilename: "schema.graphql",
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
+		Plugins:        &PluginRegistry{},
 	}
 }
 
@@ -70,7 +71,8 @@ type Config struct {
 
 	FilePath string `yaml:"-"`
 
-	schema *ast.Schema `yaml:"-"`
+	schema  *ast.Schema     `yaml:"-"`
+	Plugins *PluginRegistry `yaml:"-"`
 }
 
 type PackageConfig struct {

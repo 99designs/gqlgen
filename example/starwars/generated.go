@@ -12,6 +12,7 @@ import (
 
 	graphql "github.com/99designs/gqlgen/graphql"
 	introspection "github.com/99designs/gqlgen/graphql/introspection"
+	resolver "github.com/99designs/gqlgen/plugins/resolver"
 	gqlparser "github.com/vektah/gqlparser"
 	ast "github.com/vektah/gqlparser/ast"
 )
@@ -41,7 +42,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Resolver func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -3910,11 +3910,9 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 	for _, d := range rctx.Field.Definition.Directives {
 		switch d.Name {
 		case "resolver":
-			if ec.directives.Resolver != nil {
-				n := next
-				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Resolver(ctx, obj, n)
-				}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return resolver.DirectiveNoop(ctx, obj, n)
 			}
 		}
 	}
@@ -4067,4 +4065,5 @@ type Starship {
 union SearchResult = Human | Droid | Starship
 scalar Time
 `},
+	&ast.Source{Name: "resolver", Input: `directive @resolver on FIELD_DEFINITION`},
 )

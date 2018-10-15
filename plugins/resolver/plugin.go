@@ -23,7 +23,7 @@ func (p *Plugin) Schema(cfg *codegen.Config) (string, error) {
 }
 
 // Execute updates the provided config to force resolvers when the @resolver directive is encountered
-func (p *Plugin) Execute(cfg *codegen.Config, schema *ast.Schema) error {
+func (p *Plugin) PostNormalize(cfg *codegen.Config, schema *ast.Schema) error {
 	if cfg.Directives.ImplementationFor("resolver") != "" {
 		return errors.Errorf("directive implementation for resolver already exists")
 	}

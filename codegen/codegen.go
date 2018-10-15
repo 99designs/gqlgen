@@ -163,6 +163,7 @@ func (cfg *Config) normalize() error {
 
 	var gqlerr *gqlerror.Error
 	cfg.schema, gqlerr = gqlparser.LoadSchema(srcs...)
+	cfg.schemaSources = srcs
 	if gqlerr != nil {
 		return gqlerr
 	}

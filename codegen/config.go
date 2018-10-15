@@ -22,6 +22,7 @@ func DefaultConfig() *Config {
 		SchemaFilename: "schema.graphql",
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
+		Directives:     make(DirectiveMap),
 	}
 }
 
@@ -68,10 +69,11 @@ type Config struct {
 	StructTag      string        `yaml:"struct_tag,omitempty"`
 	Directives     DirectiveMap  `yaml:"directives,omitempty"`
 
-	FilePath string `yaml:"-"`
+	FilePath string         `yaml:"-"`
+	Plugins  PluginRegistry `yaml:"-"`
 
-	schema  *ast.Schema    `yaml:"-"`
-	Plugins PluginRegistry `yaml:"-"`
+	schema        *ast.Schema   `yaml:"-"`
+	schemaSources []*ast.Source `yaml:"-"`
 }
 
 type PackageConfig struct {

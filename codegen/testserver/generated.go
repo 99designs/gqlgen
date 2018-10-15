@@ -13,6 +13,7 @@ import (
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
 	graphql "github.com/99designs/gqlgen/graphql"
 	introspection "github.com/99designs/gqlgen/graphql/introspection"
+	resolver "github.com/99designs/gqlgen/plugins/resolver"
 	gqlparser "github.com/vektah/gqlparser"
 	ast "github.com/vektah/gqlparser/ast"
 )
@@ -33,13 +34,13 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	ForcedResolver() ForcedResolverResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
 	User() UserResolver
 }
 
 type DirectiveRoot struct {
-	Resolver func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -114,6 +115,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type ForcedResolverResolver interface {
+	Field(ctx context.Context, obj *ForcedResolver) (*Circle, error)
+}
 type QueryResolver interface {
 	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 	Collision(ctx context.Context) (*introspection1.It, error)
@@ -1200,6 +1204,7 @@ var forcedResolverImplementors = []string{"ForcedResolver"}
 func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.SelectionSet, obj *ForcedResolver) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, forcedResolverImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -1209,12 +1214,16 @@ func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.Selecti
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ForcedResolver")
 		case "field":
-			out.Values[i] = ec._ForcedResolver_field(ctx, field, obj)
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ForcedResolver_field(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -1231,15 +1240,19 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Field, nil
+		return ec.resolvers.ForcedResolver().Field(rctx, obj)
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(Circle)
+	res := resTmp.(*Circle)
 	rctx.Result = res
 
-	return ec._Circle(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Circle(ctx, field.Selections, res)
 }
 
 var innerObjectImplementors = []string{"InnerObject"}
@@ -3995,11 +4008,9 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 				return CustomDirective(ctx, obj, n, args["arg1"].(*ComplexInput))
 			}
 		case "resolver":
-			if ec.directives.Resolver != nil {
-				n := next
-				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Resolver(ctx, obj, n)
-				}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return resolver.DirectiveNoop(ctx, obj, n)
 			}
 		}
 	}
@@ -4173,4 +4184,5 @@ input ComplexInput {
 
 directive @customImpl(arg1: ComplexInput) on FIELD_DEFINITION
 `},
+	&ast.Source{Name: "resolver", Input: `directive @resolver on FIELD_DEFINITION`},
 )

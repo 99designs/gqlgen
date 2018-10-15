@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -19,9 +20,9 @@ type Build struct {
 	QueryRoot        *Object
 	MutationRoot     *Object
 	SubscriptionRoot *Object
-	SchemaRaw        string
 	SchemaFilename   string
 	Directives       Directives
+	SchemaSources    []*ast.Source
 }
 
 type ModelBuild struct {
@@ -165,9 +166,9 @@ func (cfg *Config) bind() (*Build, error) {
 		Interfaces:     cfg.buildInterfaces(namedTypes, prog),
 		Inputs:         inputs,
 		Imports:        imports.finalize(),
-		SchemaRaw:      cfg.SchemaStr,
 		SchemaFilename: cfg.SchemaFilename,
 		Directives:     directives,
+		SchemaSources:  cfg.schemaSources,
 	}
 
 	if cfg.schema.Query != nil {

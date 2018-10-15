@@ -39,6 +39,8 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	Magic func(ctx context.Context, obj interface{}, next graphql.Resolver, kind *int) (res interface{}, err error)
+
+	Resolver func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -2257,6 +2259,13 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
 					return ec.directives.Magic(ctx, obj, n, args["kind"].(*int))
+				}
+			}
+		case "resolver":
+			if ec.directives.Resolver != nil {
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Resolver(ctx, obj, n)
 				}
 			}
 		}

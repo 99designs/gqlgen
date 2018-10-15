@@ -37,6 +37,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Resolver func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -2482,6 +2483,18 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "resolver":
+			if ec.directives.Resolver != nil {
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Resolver(ctx, obj, n)
+				}
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)

@@ -36,6 +36,8 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
+
+	Resolver func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -2099,6 +2101,13 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
 					return ec.directives.HasRole(ctx, obj, n, args["role"].(Role))
+				}
+			}
+		case "resolver":
+			if ec.directives.Resolver != nil {
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Resolver(ctx, obj, n)
 				}
 			}
 		}

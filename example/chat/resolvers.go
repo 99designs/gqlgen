@@ -9,26 +9,26 @@ import (
 	"time"
 )
 
-type resolver struct {
+type chat struct {
 	Rooms map[string]*Chatroom
 	mu    sync.Mutex // nolint: structcheck
 }
 
-func (r *resolver) Mutation() MutationResolver {
+func (r *chat) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
 
-func (r *resolver) Query() QueryResolver {
+func (r *chat) Query() QueryResolver {
 	return &queryResolver{r}
 }
 
-func (r *resolver) Subscription() SubscriptionResolver {
+func (r *chat) Subscription() SubscriptionResolver {
 	return &subscriptionResolver{r}
 }
 
 func New() Config {
 	return Config{
-		Resolvers: &resolver{
+		Resolvers: &chat{
 			Rooms: map[string]*Chatroom{},
 		},
 	}
@@ -40,7 +40,7 @@ type Chatroom struct {
 	Observers map[string]chan Message
 }
 
-type mutationResolver struct{ *resolver }
+type mutationResolver struct{ *chat }
 
 func (r *mutationResolver) Post(ctx context.Context, text string, username string, roomName string) (Message, error) {
 	r.mu.Lock()
@@ -67,7 +67,7 @@ func (r *mutationResolver) Post(ctx context.Context, text string, username strin
 	return message, nil
 }
 
-type queryResolver struct{ *resolver }
+type queryResolver struct{ *chat }
 
 func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error) {
 	r.mu.Lock()
@@ -81,7 +81,7 @@ func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error
 	return room, nil
 }
 
-type subscriptionResolver struct{ *resolver }
+type subscriptionResolver struct{ *chat }
 
 func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string) (<-chan Message, error) {
 	r.mu.Lock()

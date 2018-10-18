@@ -403,6 +403,9 @@ func (ec *executionContext) _Chatroom_name(ctx context.Context, field graphql.Co
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -435,6 +438,9 @@ func (ec *executionContext) _Chatroom_messages(ctx context.Context, field graphq
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]Message)
 
 			arr1 := make(graphql.Array, len(res))
@@ -545,6 +551,9 @@ func (ec *executionContext) _Message_id(ctx context.Context, field graphql.Colle
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalID(res)
 		}()
@@ -577,6 +586,9 @@ func (ec *executionContext) _Message_text(ctx context.Context, field graphql.Col
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -609,6 +621,9 @@ func (ec *executionContext) _Message_createdBy(ctx context.Context, field graphq
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -641,6 +656,9 @@ func (ec *executionContext) _Message_createdAt(ctx context.Context, field graphq
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(time.Time)
 			return graphql.MarshalTime(res)
 		}()
@@ -713,6 +731,9 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(Message)
 
 			return ec._Message(ctx, field.Selections, &res)
@@ -782,13 +803,16 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = ec.resolvers.Query().Room(ctx, args["name"].(string))
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*Chatroom)
 
 			if res == nil {
@@ -799,8 +823,6 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -819,13 +841,16 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = ec.introspectType(args["name"].(string)), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Type)
 
 			if res == nil {
@@ -836,8 +861,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -850,13 +873,16 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = ec.introspectSchema(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Schema)
 
 			if res == nil {
@@ -867,8 +893,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -982,6 +1006,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -1004,20 +1031,21 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Description, nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1040,6 +1068,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]string)
 
 			arr1 := make(graphql.Array, len(res))
@@ -1081,6 +1112,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.InputValue)
 
 			arr1 := make(graphql.Array, len(res))
@@ -1185,6 +1219,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -1207,20 +1244,21 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Description, nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1243,6 +1281,9 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(bool)
 			return graphql.MarshalBoolean(res)
 		}()
@@ -1265,20 +1306,21 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.DeprecationReason, nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1350,6 +1392,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -1372,20 +1417,21 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Description, nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1408,6 +1454,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.InputValue)
 
 			arr1 := make(graphql.Array, len(res))
@@ -1473,6 +1522,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Type)
 
 			if res == nil {
@@ -1513,6 +1565,9 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(bool)
 			return graphql.MarshalBoolean(res)
 		}()
@@ -1535,20 +1590,21 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.DeprecationReason, nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1610,6 +1666,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -1632,20 +1691,21 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Description, nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1668,6 +1728,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Type)
 
 			if res == nil {
@@ -1698,13 +1761,16 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.DefaultValue, nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*string)
 
 			if res == nil {
@@ -1714,8 +1780,6 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1782,6 +1846,9 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.Type)
 
 			arr1 := make(graphql.Array, len(res))
@@ -1847,6 +1914,9 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Type)
 
 			if res == nil {
@@ -1877,13 +1947,16 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.MutationType(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Type)
 
 			if res == nil {
@@ -1894,8 +1967,6 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1908,13 +1979,16 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.SubscriptionType(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Type)
 
 			if res == nil {
@@ -1925,8 +1999,6 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -1949,6 +2021,9 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.Directive)
 
 			arr1 := make(graphql.Array, len(res))
@@ -2060,6 +2135,9 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
@@ -2082,13 +2160,16 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Name(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*string)
 
 			if res == nil {
@@ -2098,8 +2179,6 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -2112,20 +2191,21 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Description(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(string)
 			return graphql.MarshalString(res)
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -2144,13 +2224,16 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Fields(args["includeDeprecated"].(bool)), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.Field)
 
 			arr1 := make(graphql.Array, len(res))
@@ -2189,8 +2272,6 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -2203,13 +2284,16 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.Interfaces(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.Type)
 
 			arr1 := make(graphql.Array, len(res))
@@ -2248,8 +2332,6 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -2262,13 +2344,16 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.PossibleTypes(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.Type)
 
 			arr1 := make(graphql.Array, len(res))
@@ -2307,8 +2392,6 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -2327,13 +2410,16 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.EnumValues(args["includeDeprecated"].(bool)), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.EnumValue)
 
 			arr1 := make(graphql.Array, len(res))
@@ -2372,8 +2458,6 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -2386,13 +2470,16 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.InputFields(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.([]introspection.InputValue)
 
 			arr1 := make(graphql.Array, len(res))
@@ -2431,8 +2518,6 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 
@@ -2445,13 +2530,16 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	var resMarshaler graphql.Marshaler = graphql.Null
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+	ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		var resTmp interface{}
 		var err error
 		resTmp, err = obj.OfType(), nil
 
 		rctx.Result = resTmp
 		resMarshaler = func() graphql.Marshaler {
+			if resTmp == nil {
+				return graphql.Null
+			}
 			res := resTmp.(*introspection.Type)
 
 			if res == nil {
@@ -2462,8 +2550,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 		}()
 		return resTmp, err
 	})
-	if resTmp == nil {
-	}
 	return resMarshaler
 }
 

@@ -47,7 +47,8 @@
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
 		var resMarshaler graphql.Marshaler = graphql.Null
-		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(ctx context.Context) (interface{}, error) {
+		{{ if $field.ASTType.NonNull -}} resTmp := {{- end -}}
+		ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(ctx context.Context) (interface{}, error) {
 			var resTmp interface{}
 			var err error
 			{{- if $field.IsResolver }}
@@ -69,18 +70,21 @@
 
 			rctx.Result = resTmp
 			resMarshaler = func () graphql.Marshaler {
+				if resTmp == nil {
+					return graphql.Null
+				}
 				res := resTmp.({{$field.Signature}})
 				{{ $field.WriteJson }}
 			}()
 			return resTmp, err
 		})
-		if resTmp == nil {
-			{{- if $field.ASTType.NonNull }}
+		{{- if $field.ASTType.NonNull }}
+			if resTmp == nil {
 				if !ec.HasError(rctx) {
 					ec.Errorf(ctx, "must not be null")
 				}
-			{{- end }}
-		}
+			}
+		{{- end }}
 		return resMarshaler
 	}
 {{ end }}

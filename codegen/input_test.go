@@ -35,7 +35,8 @@ func TestTypeInInput(t *testing.T) {
 
 func generate(name string, schema string, typemap ...TypeMap) error {
 	cfg := Config{
-		SchemaStr: schema,
+		SchemaFilename: SchemaFilenames{"schema.graphql"},
+		SchemaStr: map[string]string{"schema.graphql": schema},
 		Exec:      PackageConfig{Filename: "gen/" + name + "/exec.go"},
 		Model:     PackageConfig{Filename: "gen/" + name + "/model.go"},
 	}

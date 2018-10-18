@@ -10,8 +10,18 @@ gqlgen can be configured using a `gqlgen.yml` file, by default it will be loaded
 
 Example:
 ```yml
+# You can pass a single schema file
 schema: schema.graphql
 
+# Or multiple files
+schema:
+ - schema.graphql
+ - user.graphql
+ 
+# Or you can use globs
+schema: 
+ - "*.graphql"
+ 
 # Let gqlgen know where to put the generated server
 exec:
   filename: graph/generated/generated.go

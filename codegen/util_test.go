@@ -83,7 +83,6 @@ type Embed struct {
 }
 
 func parseScope(t *testing.T, input interface{}, packageName string) (*types.Scope, error) {
-	t.Helper()
 	// test setup to parse the types
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "test.go", input, 0)

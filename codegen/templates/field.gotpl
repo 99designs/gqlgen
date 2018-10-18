@@ -14,7 +14,6 @@
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Field: field,
 		})
-		rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 		results, err := ec.resolvers.{{ $field.ShortInvocation }}
 		if err != nil {
 			ec.Error(ctx, err)
@@ -47,19 +46,33 @@
 			Field: field,
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
-		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
-			ctx = rctx  // use context from middleware stack in children
+		var resMarshaler graphql.Marshaler = graphql.Null
+		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(ctx context.Context) (interface{}, error) {
+			var resTmp interface{}
+			var err error
 			{{- if $field.IsResolver }}
-				return ec.resolvers.{{ $field.ShortInvocation }}
+				resTmp, err = ec.resolvers.{{ $field.ShortInvocation }}
 			{{- else if $field.IsMethod }}
 				{{- if $field.NoErr }}
-					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }}), nil
+					resTmp, err = {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }}), nil
 				{{- else }}
-					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }})
+					resTmp, err = {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }})
 				{{- end }}
 			{{- else if $field.IsVariable }}
-				return {{$field.GoReceiverName}}.{{$field.GoFieldName}}, nil
+				resTmp, err = {{$field.GoReceiverName}}.{{$field.GoFieldName}}, nil
 			{{- end }}
+			{{- if $field.ASTType.NonNull }}
+				if resTmp == nil {
+						return resTmp, nil
+				}
+			{{- end }}
+
+			rctx.Result = resTmp
+			resMarshaler = func () graphql.Marshaler {
+				res := resTmp.({{$field.Signature}})
+				{{ $field.WriteJson }}
+			}()
+			return resTmp, err
 		})
 		if resTmp == nil {
 			{{- if $field.ASTType.NonNull }}
@@ -67,10 +80,7 @@
 					ec.Errorf(ctx, "must not be null")
 				}
 			{{- end }}
-			return graphql.Null
 		}
-		res := resTmp.({{$field.Signature}})
-		rctx.Result = res
-		{{ $field.WriteJson }}
+		return resMarshaler
 	}
 {{ end }}

@@ -69,14 +69,16 @@ var initCmd = cli.Command{
 }
 
 func GenerateGraphServer(config *codegen.Config, serverFilename string) {
-	schemaRaw, err := ioutil.ReadFile(config.SchemaFilename)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
-		os.Exit(1)
+	for _, filename := range config.SchemaFilename {
+		schemaRaw, err := ioutil.ReadFile(filename)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
+			os.Exit(1)
+		}
+		config.SchemaStr[filename] = string(schemaRaw)
 	}
-	config.SchemaStr = string(schemaRaw)
 
-	if err = config.Check(); err != nil {
+	if err := config.Check(); err != nil {
 		fmt.Fprintln(os.Stderr, "invalid config format: "+err.Error())
 		os.Exit(1)
 	}

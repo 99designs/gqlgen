@@ -19,7 +19,8 @@ var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 // DefaultConfig creates a copy of the default config
 func DefaultConfig() *Config {
 	return &Config{
-		SchemaFilename: "schema.graphql",
+		SchemaFilename: SchemaFilenames{"schema.graphql"},
+		SchemaStr:      map[string]string{},
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
 	}
@@ -53,19 +54,36 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, errors.Wrap(err, "unable to parse config")
 	}
 
+	preGlobbing := config.SchemaFilename
+	config.SchemaFilename = SchemaFilenames{}
+	for _, f := range preGlobbing {
+		matches, err := filepath.Glob(f)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+		}
+
+		for _, m := range matches {
+			if config.SchemaFilename.Has(m) {
+				continue
+			}
+			config.SchemaFilename = append(config.SchemaFilename, m)
+		}
+	}
+
 	config.FilePath = filename
+	config.SchemaStr = map[string]string{}
 
 	return config, nil
 }
 
 type Config struct {
-	SchemaFilename string        `yaml:"schema,omitempty"`
-	SchemaStr      string        `yaml:"-"`
-	Exec           PackageConfig `yaml:"exec"`
-	Model          PackageConfig `yaml:"model"`
-	Resolver       PackageConfig `yaml:"resolver,omitempty"`
-	Models         TypeMap       `yaml:"models,omitempty"`
-	StructTag      string        `yaml:"struct_tag,omitempty"`
+	SchemaFilename SchemaFilenames   `yaml:"schema,omitempty"`
+	SchemaStr      map[string]string `yaml:"-"`
+	Exec           PackageConfig     `yaml:"exec"`
+	Model          PackageConfig     `yaml:"model"`
+	Resolver       PackageConfig     `yaml:"resolver,omitempty"`
+	Models         TypeMap           `yaml:"models,omitempty"`
+	StructTag      string            `yaml:"struct_tag,omitempty"`
 
 	FilePath string `yaml:"-"`
 
@@ -84,8 +102,37 @@ type TypeMapEntry struct {
 }
 
 type TypeMapField struct {
-	Resolver   bool   `yaml:"resolver"`
-	FieldName  string `yaml:"fieldName"`
+	Resolver  bool   `yaml:"resolver"`
+	FieldName string `yaml:"fieldName"`
+}
+
+type SchemaFilenames []string
+
+func (a *SchemaFilenames) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var single string
+	err := unmarshal(&single)
+	if err == nil {
+		*a = []string{single}
+		return nil
+	}
+
+	var multi []string
+	err = unmarshal(&multi)
+	if err != nil {
+		return err
+	}
+
+	*a = multi
+	return nil
+}
+
+func (a SchemaFilenames) Has(file string) bool {
+	for _, existing := range a {
+		if existing == file {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *PackageConfig) normalize() error {

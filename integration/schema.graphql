@@ -25,11 +25,6 @@ input DateFilter {
     op: DATE_FILTER_OP = EQ
 }
 
-type User {
-    name: String!
-    likes: [String!]!
-}
-
 type Viewer {
     user: User
 }

@@ -19,8 +19,8 @@ type Build struct {
 	QueryRoot        *Object
 	MutationRoot     *Object
 	SubscriptionRoot *Object
-	SchemaRaw        string
-	SchemaFilename   string
+	SchemaRaw        map[string]string
+	SchemaFilename   SchemaFilenames
 	Directives       []*Directive
 }
 

@@ -36,7 +36,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
-		require.Equal(t, cfg.SchemaFilename, "inner")
+		require.Equal(t, SchemaFilenames{"inner"}, cfg.SchemaFilename)
 	})
 
 	t.Run("will find config in parent dirs", func(t *testing.T) {
@@ -45,7 +45,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
-		require.Equal(t, cfg.SchemaFilename, "outer")
+		require.Equal(t, SchemaFilenames{"outer"},cfg.SchemaFilename)
 	})
 
 	t.Run("will return error if config doesn't exist", func(t *testing.T) {

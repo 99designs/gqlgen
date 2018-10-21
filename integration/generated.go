@@ -2305,11 +2305,6 @@ input DateFilter {
     op: DATE_FILTER_OP = EQ
 }
 
-type User {
-    name: String!
-    likes: [String!]!
-}
-
 type Viewer {
     user: User
 }
@@ -2328,5 +2323,10 @@ enum ErrorType {
 }
 
 # this is a comment with a ` + "`" + `backtick` + "`" + `
+`},
+	&ast.Source{Name: "user.graphql", Input: `type User {
+    name: String!
+    likes: [String!]!
+}
 `},
 )

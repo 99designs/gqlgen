@@ -145,9 +145,9 @@ func Tracer(tracer graphql.Tracer) Option {
 		}
 
 		opt := RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-			ctx, _ = tracer.StartRequestTracing(ctx)
+			ctx = tracer.StartRequestTracing(ctx)
 			resp := next(ctx)
-			_ = tracer.EndRequestTracing(ctx)
+			tracer.EndRequestTracing(ctx)
 
 			return resp
 		})
@@ -160,38 +160,26 @@ type tracerWrapper struct {
 	tracer2 graphql.Tracer
 }
 
-func (tw *tracerWrapper) StartRequestTracing(ctx context.Context) (context.Context, error) {
-	ctx, err := tw.tracer1.StartRequestTracing(ctx)
-	if err != nil {
-		return ctx, err
-	}
-	return tw.tracer2.StartRequestTracing(ctx)
+func (tw *tracerWrapper) StartRequestTracing(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartRequestTracing(ctx)
+	ctx = tw.tracer2.StartRequestTracing(ctx)
+	return ctx
 }
 
-func (tw *tracerWrapper) EndRequestTracing(ctx context.Context) error {
-	err2 := tw.tracer2.EndRequestTracing(ctx)
-	err1 := tw.tracer1.EndRequestTracing(ctx)
-	if err2 != nil {
-		return err2
-	}
-	return err1
+func (tw *tracerWrapper) EndRequestTracing(ctx context.Context) {
+	tw.tracer2.EndRequestTracing(ctx)
+	tw.tracer1.EndRequestTracing(ctx)
 }
 
-func (tw *tracerWrapper) StartFieldTracing(ctx context.Context) (context.Context, error) {
-	ctx, err := tw.tracer1.StartFieldTracing(ctx)
-	if err != nil {
-		return ctx, err
-	}
-	return tw.tracer2.StartFieldTracing(ctx)
+func (tw *tracerWrapper) StartFieldTracing(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartFieldTracing(ctx)
+	ctx = tw.tracer2.StartFieldTracing(ctx)
+	return ctx
 }
 
-func (tw *tracerWrapper) EndFieldTracing(ctx context.Context) error {
-	err2 := tw.tracer2.EndFieldTracing(ctx)
-	err1 := tw.tracer1.EndFieldTracing(ctx)
-	if err2 != nil {
-		return err2
-	}
-	return err1
+func (tw *tracerWrapper) EndFieldTracing(ctx context.Context) {
+	tw.tracer2.EndFieldTracing(ctx)
+	tw.tracer1.EndFieldTracing(ctx)
 }
 
 // CacheSize sets the maximum size of the query cache.

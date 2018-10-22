@@ -37,31 +37,34 @@ func TestForcedResolverFieldIsPointer(t *testing.T) {
 
 type testTracer struct {
 	id     int
-	log    *[]string
 	append func(string)
 }
 
-func (tt *testTracer) StartRequestTracing(ctx context.Context) (context.Context, error) {
-	tt.append(fmt.Sprintf("request:start:%d", tt.id))
-	return ctx, nil
+func (tt *testTracer) StartRequestTracing(ctx context.Context) context.Context {
+	line := fmt.Sprintf("request:start:%d", tt.id)
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	tt.append(line)
+	return ctx
 }
 
-func (tt *testTracer) EndRequestTracing(ctx context.Context) error {
+func (tt *testTracer) EndRequestTracing(ctx context.Context) {
 	tt.append(fmt.Sprintf("request:end:%d", tt.id))
-	return nil
 }
 
-func (tt *testTracer) StartFieldTracing(ctx context.Context) (context.Context, error) {
-	tracerIDs, _ := ctx.Value("tracer").([]int)
-	ctx = context.WithValue(ctx, "tracer", append(tracerIDs, tt.id))
+func (tt *testTracer) StartFieldTracing(ctx context.Context) context.Context {
 	rc := graphql.GetResolverContext(ctx)
-	tt.append(fmt.Sprintf("resolver:start:%d:%v", tt.id, rc.Path()))
-	return ctx, nil
+	line := fmt.Sprintf("resolver:start:%d:%v", tt.id, rc.Path())
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	tt.append(line)
+	return ctx
 }
 
-func (tt *testTracer) EndFieldTracing(ctx context.Context) error {
+func (tt *testTracer) EndFieldTracing(ctx context.Context) {
 	tt.append(fmt.Sprintf("resolver:end:%d", tt.id))
-	return nil
 }
 
 func TestGeneratedServer(t *testing.T) {
@@ -178,7 +181,14 @@ func TestGeneratedServer(t *testing.T) {
 		tracerLog = nil
 		called := false
 		resolvers.userFriends = func(ctx context.Context, obj *User) ([]User, error) {
-			assert.Equal(t, []int{1, 2}, ctx.Value("tracer"))
+			assert.Equal(t, []string{
+				"request:start:1",
+				"request:start:2",
+				"resolver:start:1:[user]",
+				"resolver:start:2:[user]",
+				"resolver:start:1:[user friends]",
+				"resolver:start:2:[user friends]",
+			}, ctx.Value("tracer"))
 			called = true
 			return []User{}, nil
 		}

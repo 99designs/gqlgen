@@ -26,7 +26,7 @@
 				return nil
 			}
 			var out graphql.OrderedMap
-			out.Add(field.Alias, func() graphql.Marshaler { {{ $field.WriteJson }} }())
+			out.Add(field.Alias, func() graphql.Marshaler { return {{ $field.WriteJson }} }())
 			return &out
 		}
 	}
@@ -71,6 +71,6 @@
 		}
 		res := resTmp.({{$field.Signature}})
 		rctx.Result = res
-		{{ $field.WriteJson }}
+		return {{ $field.WriteJson }}
 	}
 {{ end }}

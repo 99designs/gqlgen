@@ -163,8 +163,8 @@ func (t Type) Marshal(val string) string {
 	}
 
 	if t.Marshaler != nil {
-		return "return " + t.Marshaler.PkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
+		return t.Marshaler.PkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
 	}
 
-	return "return " + val
+	return val
 }

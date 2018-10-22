@@ -135,20 +135,46 @@ func Tracer(tracer graphql.Tracer) Option {
 	return func(cfg *Config) {
 		if cfg.tracer == nil {
 			cfg.tracer = tracer
-			return
+
+		} else {
+			lastResolve := cfg.tracer
+			cfg.tracer = &tracerWrapper{
+				tracer1: lastResolve,
+				tracer2: tracer,
+			}
 		}
 
-		lastResolve := cfg.tracer
-		cfg.tracer = &tracerWrapper{
-			tracer1: lastResolve,
-			tracer2: tracer,
-		}
+		opt := RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+			ctx, _ = tracer.StartRequestTracing(ctx)
+			resp := next(ctx)
+			_ = tracer.EndRequestTracing(ctx)
+
+			return resp
+		})
+		opt(cfg)
 	}
 }
 
 type tracerWrapper struct {
 	tracer1 graphql.Tracer
 	tracer2 graphql.Tracer
+}
+
+func (tw *tracerWrapper) StartRequestTracing(ctx context.Context) (context.Context, error) {
+	ctx, err := tw.tracer1.StartRequestTracing(ctx)
+	if err != nil {
+		return ctx, err
+	}
+	return tw.tracer2.StartRequestTracing(ctx)
+}
+
+func (tw *tracerWrapper) EndRequestTracing(ctx context.Context) error {
+	err2 := tw.tracer2.EndRequestTracing(ctx)
+	err1 := tw.tracer1.EndRequestTracing(ctx)
+	if err2 != nil {
+		return err2
+	}
+	return err1
 }
 
 func (tw *tracerWrapper) StartFieldTracing(ctx context.Context) (context.Context, error) {

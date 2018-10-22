@@ -41,16 +41,26 @@ type testTracer struct {
 	append func(string)
 }
 
+func (tt *testTracer) StartRequestTracing(ctx context.Context) (context.Context, error) {
+	tt.append(fmt.Sprintf("request:start:%d", tt.id))
+	return ctx, nil
+}
+
+func (tt *testTracer) EndRequestTracing(ctx context.Context) error {
+	tt.append(fmt.Sprintf("request:end:%d", tt.id))
+	return nil
+}
+
 func (tt *testTracer) StartFieldTracing(ctx context.Context) (context.Context, error) {
 	tracerIDs, _ := ctx.Value("tracer").([]int)
 	ctx = context.WithValue(ctx, "tracer", append(tracerIDs, tt.id))
 	rc := graphql.GetResolverContext(ctx)
-	tt.append(fmt.Sprintf("start:%d:%v", tt.id, rc.Path()))
+	tt.append(fmt.Sprintf("resolver:start:%d:%v", tt.id, rc.Path()))
 	return ctx, nil
 }
 
 func (tt *testTracer) EndFieldTracing(ctx context.Context) error {
-	tt.append(fmt.Sprintf("end:%d", tt.id))
+	tt.append(fmt.Sprintf("resolver:end:%d", tt.id))
 	return nil
 }
 
@@ -178,18 +188,22 @@ func TestGeneratedServer(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, called)
 		assert.Equal(t, []string{
-			"start:1:[user]",
-			"start:2:[user]",
-			"start:1:[user id]",
-			"start:2:[user id]",
-			"end:2",
-			"end:1",
-			"start:1:[user friends]",
-			"start:2:[user friends]",
-			"end:2",
-			"end:1",
-			"end:2",
-			"end:1",
+			"request:start:1",
+			"request:start:2",
+			"resolver:start:1:[user]",
+			"resolver:start:2:[user]",
+			"resolver:start:1:[user id]",
+			"resolver:start:2:[user id]",
+			"resolver:end:2",
+			"resolver:end:1",
+			"resolver:start:1:[user friends]",
+			"resolver:start:2:[user friends]",
+			"resolver:end:2",
+			"resolver:end:1",
+			"resolver:end:2",
+			"resolver:end:1",
+			"request:end:2",
+			"request:end:1",
 		}, tracerLog)
 	})
 

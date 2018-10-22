@@ -35,8 +35,29 @@ func TestForcedResolverFieldIsPointer(t *testing.T) {
 	require.Equal(t, "*testserver.Circle", field.Type.Out(0).String())
 }
 
+type testTracer struct {
+	id     int
+	log    *[]string
+	append func(string)
+}
+
+func (tt *testTracer) StartFieldTracing(ctx context.Context) (context.Context, error) {
+	tracerIDs, _ := ctx.Value("tracer").([]int)
+	ctx = context.WithValue(ctx, "tracer", append(tracerIDs, tt.id))
+	rc := graphql.GetResolverContext(ctx)
+	tt.append(fmt.Sprintf("start:%d:%v", tt.id, rc.Path()))
+	return ctx, nil
+}
+
+func (tt *testTracer) EndFieldTracing(ctx context.Context) error {
+	tt.append(fmt.Sprintf("end:%d", tt.id))
+	return nil
+}
+
 func TestGeneratedServer(t *testing.T) {
 	resolvers := &testResolver{tick: make(chan string, 1)}
+
+	var tracerLog []string
 
 	srv := httptest.NewServer(
 		handler.GraphQL(
@@ -48,6 +69,18 @@ func TestGeneratedServer(t *testing.T) {
 			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 				path, _ := ctx.Value("path").([]int)
 				return next(context.WithValue(ctx, "path", append(path, 2)))
+			}),
+			handler.Tracer(&testTracer{
+				id: 1,
+				append: func(s string) {
+					tracerLog = append(tracerLog, s)
+				},
+			}),
+			handler.Tracer(&testTracer{
+				id: 2,
+				append: func(s string) {
+					tracerLog = append(tracerLog, s)
+				},
 			}),
 		))
 	c := client.New(srv.URL)
@@ -120,6 +153,44 @@ func TestGeneratedServer(t *testing.T) {
 
 		require.NoError(t, err)
 		require.True(t, called)
+	})
+
+	t.Run("tracer", func(t *testing.T) {
+		var resp struct {
+			User struct {
+				ID      int
+				Friends []struct {
+					ID int
+				}
+			}
+		}
+
+		tracerLog = nil
+		called := false
+		resolvers.userFriends = func(ctx context.Context, obj *User) ([]User, error) {
+			assert.Equal(t, []int{1, 2}, ctx.Value("tracer"))
+			called = true
+			return []User{}, nil
+		}
+
+		err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)
+
+		require.NoError(t, err)
+		require.True(t, called)
+		assert.Equal(t, []string{
+			"start:1:[user]",
+			"start:2:[user]",
+			"start:1:[user id]",
+			"start:2:[user id]",
+			"end:2",
+			"end:1",
+			"start:1:[user friends]",
+			"start:2:[user friends]",
+			"end:2",
+			"end:1",
+			"end:2",
+			"end:1",
+		}, tracerLog)
 	})
 
 	t.Run("subscriptions", func(t *testing.T) {

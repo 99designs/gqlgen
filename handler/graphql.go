@@ -31,6 +31,7 @@ type Config struct {
 	errorPresenter  graphql.ErrorPresenterFunc
 	resolverHook    graphql.FieldMiddleware
 	requestHook     graphql.RequestMiddleware
+	tracer          graphql.Tracer
 	complexityLimit int
 }
 
@@ -50,6 +51,12 @@ func (c *Config) newRequestContext(doc *ast.QueryDocument, query string, variabl
 
 	if hook := c.requestHook; hook != nil {
 		reqCtx.RequestMiddleware = hook
+	}
+
+	if hook := c.tracer; hook != nil {
+		reqCtx.Tracer = hook
+	} else {
+		reqCtx.Tracer = &graphql.NopTracer{}
 	}
 
 	return reqCtx
@@ -87,7 +94,7 @@ func ComplexityLimit(limit int) Option {
 }
 
 // ResolverMiddleware allows you to define a function that will be called around every resolver,
-// useful for tracing and logging.
+// useful for logging.
 func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.resolverHook == nil {
@@ -105,7 +112,7 @@ func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 }
 
 // RequestMiddleware allows you to define a function that will be called around the root request,
-// after the query has been parsed. This is useful for logging and tracing
+// after the query has been parsed. This is useful for logging
 func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.requestHook == nil {
@@ -120,6 +127,45 @@ func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 			})
 		}
 	}
+}
+
+// Tracer allows you to add a request/resolver tracer that will be called around the root request,
+// calling resolver. This is useful for tracing
+func Tracer(tracer graphql.Tracer) Option {
+	return func(cfg *Config) {
+		if cfg.tracer == nil {
+			cfg.tracer = tracer
+			return
+		}
+
+		lastResolve := cfg.tracer
+		cfg.tracer = &tracerWrapper{
+			tracer1: lastResolve,
+			tracer2: tracer,
+		}
+	}
+}
+
+type tracerWrapper struct {
+	tracer1 graphql.Tracer
+	tracer2 graphql.Tracer
+}
+
+func (tw *tracerWrapper) StartFieldTracing(ctx context.Context) (context.Context, error) {
+	ctx, err := tw.tracer1.StartFieldTracing(ctx)
+	if err != nil {
+		return ctx, err
+	}
+	return tw.tracer2.StartFieldTracing(ctx)
+}
+
+func (tw *tracerWrapper) EndFieldTracing(ctx context.Context) error {
+	err2 := tw.tracer2.EndFieldTracing(ctx)
+	err1 := tw.tracer1.EndFieldTracing(ctx)
+	if err2 != nil {
+		return err2
+	}
+	return err1
 }
 
 // CacheSize sets the maximum size of the query cache.

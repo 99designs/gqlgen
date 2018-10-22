@@ -14,7 +14,9 @@
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Field: field,
 		})
-		rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+		// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+		//          and Tracer stack
+		rctx := ctx
 		results, err := ec.resolvers.{{ $field.ShortInvocation }}
 		if err != nil {
 			ec.Error(ctx, err)
@@ -33,6 +35,7 @@
 {{ else }}
 	// nolint: vetshadow
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
+		var err error
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)
 			args, err := {{ $field.ArgsFunc }}(rawArgs)
@@ -47,6 +50,11 @@
 			Field: field,
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
+		ctx, err = ec.Tracer.StartFieldTracing(ctx)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
 		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			ctx = rctx  // use context from middleware stack in children
 			{{- if $field.IsResolver }}
@@ -71,6 +79,12 @@
 		}
 		res := resTmp.({{$field.Signature}})
 		rctx.Result = res
-		return {{ $field.WriteJson }}
+		resMarshaler := {{ $field.WriteJson }}
+		err = ec.Tracer.EndFieldTracing(ctx)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		return resMarshaler
 	}
 {{ end }}

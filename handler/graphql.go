@@ -166,20 +166,32 @@ func (tw *tracerWrapper) StartOperationExecution(ctx context.Context) context.Co
 	return ctx
 }
 
-func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
-	tw.tracer2.EndOperationExecution(ctx)
-	tw.tracer1.EndOperationExecution(ctx)
+func (tw *tracerWrapper) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
+	ctx = tw.tracer1.StartFieldExecution(ctx, field)
+	ctx = tw.tracer2.StartFieldExecution(ctx, field)
+	return ctx
 }
 
-func (tw *tracerWrapper) StartFieldExecution(ctx context.Context) context.Context {
-	ctx = tw.tracer1.StartFieldExecution(ctx)
-	ctx = tw.tracer2.StartFieldExecution(ctx)
+func (tw *tracerWrapper) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
+	ctx = tw.tracer1.StartFieldResolverExecution(ctx, rc)
+	ctx = tw.tracer2.StartFieldResolverExecution(ctx, rc)
+	return ctx
+}
+
+func (tw *tracerWrapper) StartFieldChildExecution(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartFieldChildExecution(ctx)
+	ctx = tw.tracer2.StartFieldChildExecution(ctx)
 	return ctx
 }
 
 func (tw *tracerWrapper) EndFieldExecution(ctx context.Context) {
 	tw.tracer2.EndFieldExecution(ctx)
 	tw.tracer1.EndFieldExecution(ctx)
+}
+
+func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
+	tw.tracer2.EndOperationExecution(ctx)
+	tw.tracer1.EndOperationExecution(ctx)
 }
 
 // CacheSize sets the maximum size of the query cache.

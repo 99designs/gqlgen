@@ -41,7 +41,7 @@ type testTracer struct {
 }
 
 func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Context {
-	line := fmt.Sprintf("request:start:%d", tt.id)
+	line := fmt.Sprintf("op:start:%d", tt.id)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
@@ -49,13 +49,26 @@ func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Conte
 	return ctx
 }
 
-func (tt *testTracer) EndOperationExecution(ctx context.Context) {
-	tt.append(fmt.Sprintf("request:end:%d", tt.id))
+func (tt *testTracer) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
+	line := fmt.Sprintf("field'a:start:%d:%s", tt.id, field.Name)
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	tt.append(line)
+	return ctx
 }
 
-func (tt *testTracer) StartFieldExecution(ctx context.Context) context.Context {
-	rc := graphql.GetResolverContext(ctx)
-	line := fmt.Sprintf("resolver:start:%d:%v", tt.id, rc.Path())
+func (tt *testTracer) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
+	line := fmt.Sprintf("field'b:start:%d:%v", tt.id, rc.Path())
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	tt.append(line)
+	return ctx
+}
+
+func (tt *testTracer) StartFieldChildExecution(ctx context.Context) context.Context {
+	line := fmt.Sprintf("field'c:start:%d", tt.id)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
@@ -64,7 +77,11 @@ func (tt *testTracer) StartFieldExecution(ctx context.Context) context.Context {
 }
 
 func (tt *testTracer) EndFieldExecution(ctx context.Context) {
-	tt.append(fmt.Sprintf("resolver:end:%d", tt.id))
+	tt.append(fmt.Sprintf("field:end:%d", tt.id))
+}
+
+func (tt *testTracer) EndOperationExecution(ctx context.Context) {
+	tt.append(fmt.Sprintf("op:end:%d", tt.id))
 }
 
 func TestGeneratedServer(t *testing.T) {
@@ -198,22 +215,25 @@ func TestGeneratedServer(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, called)
 		assert.Equal(t, []string{
-			"request:start:1",
-			"request:start:2",
-			"resolver:start:1:[user]",
-			"resolver:start:2:[user]",
-			"resolver:start:1:[user id]",
-			"resolver:start:2:[user id]",
-			"resolver:end:2",
-			"resolver:end:1",
-			"resolver:start:1:[user friends]",
-			"resolver:start:2:[user friends]",
-			"resolver:end:2",
-			"resolver:end:1",
-			"resolver:end:2",
-			"resolver:end:1",
-			"request:end:2",
-			"request:end:1",
+			"op:start:1", "op:start:2",
+
+			"field'a:start:1:user", "field'a:start:2:user",
+			"field'b:start:1:[user]", "field'b:start:2:[user]",
+			"field'c:start:1", "field'c:start:2",
+
+			"field'a:start:1:id", "field'a:start:2:id",
+			"field'b:start:1:[user id]", "field'b:start:2:[user id]",
+			"field'c:start:1", "field'c:start:2",
+			"field:end:2", "field:end:1",
+
+			"field'a:start:1:friends", "field'a:start:2:friends",
+			"field'b:start:1:[user friends]", "field'b:start:2:[user friends]",
+			"field'c:start:1", "field'c:start:2",
+			"field:end:2", "field:end:1",
+
+			"field:end:2", "field:end:1",
+
+			"op:end:2", "op:end:1",
 		}, tracerLog)
 	})
 

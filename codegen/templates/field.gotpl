@@ -35,6 +35,7 @@
 {{ else }}
 	// nolint: vetshadow
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
+		ctx = ec.Tracer.StartFieldExecution(ctx, field)
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)
 			args, err := {{ $field.ArgsFunc }}(rawArgs)
@@ -49,7 +50,7 @@
 			Field: field,
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
-		ctx = ec.Tracer.StartFieldExecution(ctx)
+		ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 		defer ec.Tracer.EndFieldExecution(ctx)
 		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			ctx = rctx  // use context from middleware stack in children
@@ -75,6 +76,7 @@
 		}
 		res := resTmp.({{$field.Signature}})
 		rctx.Result = res
+		ctx = ec.Tracer.StartFieldChildExecution(ctx)
 		{{ $field.WriteJson }}
 	}
 {{ end }}

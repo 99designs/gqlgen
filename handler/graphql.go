@@ -145,9 +145,9 @@ func Tracer(tracer graphql.Tracer) Option {
 		}
 
 		opt := RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-			ctx = tracer.StartRequestTracing(ctx)
+			ctx = tracer.StartOperationExecution(ctx)
 			resp := next(ctx)
-			tracer.EndRequestTracing(ctx)
+			tracer.EndOperationExecution(ctx)
 
 			return resp
 		})
@@ -160,26 +160,26 @@ type tracerWrapper struct {
 	tracer2 graphql.Tracer
 }
 
-func (tw *tracerWrapper) StartRequestTracing(ctx context.Context) context.Context {
-	ctx = tw.tracer1.StartRequestTracing(ctx)
-	ctx = tw.tracer2.StartRequestTracing(ctx)
+func (tw *tracerWrapper) StartOperationExecution(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartOperationExecution(ctx)
+	ctx = tw.tracer2.StartOperationExecution(ctx)
 	return ctx
 }
 
-func (tw *tracerWrapper) EndRequestTracing(ctx context.Context) {
-	tw.tracer2.EndRequestTracing(ctx)
-	tw.tracer1.EndRequestTracing(ctx)
+func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
+	tw.tracer2.EndOperationExecution(ctx)
+	tw.tracer1.EndOperationExecution(ctx)
 }
 
-func (tw *tracerWrapper) StartFieldTracing(ctx context.Context) context.Context {
-	ctx = tw.tracer1.StartFieldTracing(ctx)
-	ctx = tw.tracer2.StartFieldTracing(ctx)
+func (tw *tracerWrapper) StartFieldExecution(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartFieldExecution(ctx)
+	ctx = tw.tracer2.StartFieldExecution(ctx)
 	return ctx
 }
 
-func (tw *tracerWrapper) EndFieldTracing(ctx context.Context) {
-	tw.tracer2.EndFieldTracing(ctx)
-	tw.tracer1.EndFieldTracing(ctx)
+func (tw *tracerWrapper) EndFieldExecution(ctx context.Context) {
+	tw.tracer2.EndFieldExecution(ctx)
+	tw.tracer1.EndFieldExecution(ctx)
 }
 
 // CacheSize sets the maximum size of the query cache.

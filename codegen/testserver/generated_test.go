@@ -40,7 +40,7 @@ type testTracer struct {
 	append func(string)
 }
 
-func (tt *testTracer) StartRequestTracing(ctx context.Context) context.Context {
+func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Context {
 	line := fmt.Sprintf("request:start:%d", tt.id)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
@@ -49,11 +49,11 @@ func (tt *testTracer) StartRequestTracing(ctx context.Context) context.Context {
 	return ctx
 }
 
-func (tt *testTracer) EndRequestTracing(ctx context.Context) {
+func (tt *testTracer) EndOperationExecution(ctx context.Context) {
 	tt.append(fmt.Sprintf("request:end:%d", tt.id))
 }
 
-func (tt *testTracer) StartFieldTracing(ctx context.Context) context.Context {
+func (tt *testTracer) StartFieldExecution(ctx context.Context) context.Context {
 	rc := graphql.GetResolverContext(ctx)
 	line := fmt.Sprintf("resolver:start:%d:%v", tt.id, rc.Path())
 
@@ -63,7 +63,7 @@ func (tt *testTracer) StartFieldTracing(ctx context.Context) context.Context {
 	return ctx
 }
 
-func (tt *testTracer) EndFieldTracing(ctx context.Context) {
+func (tt *testTracer) EndFieldExecution(ctx context.Context) {
 	tt.append(fmt.Sprintf("resolver:end:%d", tt.id))
 }
 

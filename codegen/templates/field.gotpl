@@ -49,7 +49,7 @@
 			Field: field,
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
-		ctx = ec.Tracer.StartFieldTracing(ctx)
+		ctx = ec.Tracer.StartFieldExecution(ctx)
 		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			ctx = rctx  // use context from middleware stack in children
 			{{- if $field.IsResolver }}
@@ -75,7 +75,7 @@
 		res := resTmp.({{$field.Signature}})
 		rctx.Result = res
 		resMarshaler := {{ $field.WriteJson }}
-		ec.Tracer.EndFieldTracing(ctx)
+		ec.Tracer.EndFieldExecution(ctx)
 		return resMarshaler
 	}
 {{ end }}

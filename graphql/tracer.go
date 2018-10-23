@@ -5,24 +5,24 @@ import "context"
 var _ Tracer = (*NopTracer)(nil)
 
 type Tracer interface {
-	StartRequestTracing(ctx context.Context) context.Context
-	EndRequestTracing(ctx context.Context)
-	StartFieldTracing(ctx context.Context) context.Context
-	EndFieldTracing(ctx context.Context)
+	StartOperationExecution(ctx context.Context) context.Context
+	EndOperationExecution(ctx context.Context)
+	StartFieldExecution(ctx context.Context) context.Context
+	EndFieldExecution(ctx context.Context)
 }
 
 type NopTracer struct{}
 
-func (NopTracer) StartRequestTracing(ctx context.Context) context.Context {
+func (NopTracer) StartOperationExecution(ctx context.Context) context.Context {
 	return ctx
 }
 
-func (NopTracer) EndRequestTracing(ctx context.Context) {
+func (NopTracer) EndOperationExecution(ctx context.Context) {
 }
 
-func (NopTracer) StartFieldTracing(ctx context.Context) context.Context {
+func (NopTracer) StartFieldExecution(ctx context.Context) context.Context {
 	return ctx
 }
 
-func (NopTracer) EndFieldTracing(ctx context.Context) {
+func (NopTracer) EndFieldExecution(ctx context.Context) {
 }

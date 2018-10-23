@@ -220,15 +220,7 @@ func (f *Field) CallArgs() string {
 
 // should be in the template, but its recursive and has a bunch of args
 func (f *Field) WriteJson() string {
-	return strings.TrimSpace(
-		tpl(`
-			func () graphql.Marshaler {
-				{{ .next }}
-			}()
-		`, map[string]interface{}{
-			"next": f.doWriteJson("res", f.Type.Modifiers, f.ASTType, false, 1),
-		}),
-	)
+	return f.doWriteJson("res", f.Type.Modifiers, f.ASTType, false, 1)
 }
 
 func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Type, isPtr bool, depth int) string {
@@ -243,8 +235,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 				{{- end }}
 				return graphql.Null
 			}
-			{{ .next -}}
-		`, map[string]interface{}{
+			{{.next }}`, map[string]interface{}{
 			"val":     val,
 			"nonNull": astType.NonNull,
 			"next":    f.doWriteJson(val, remainingMods[1:], astType, true, depth+1),
@@ -298,8 +289,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 				{{- end}}
 			}
 			{{ if and .top (not .isScalar) }} wg.Wait() {{ end }}
-			return {{ .arr -}}
-		`, map[string]interface{}{
+			return {{.arr}}`, map[string]interface{}{
 			"val":      val,
 			"arr":      arr,
 			"index":    index,
@@ -314,7 +304,7 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 		if isPtr {
 			val = "*" + val
 		}
-		return "return " + f.Marshal(val)
+		return f.Marshal(val)
 
 	default:
 		if !isPtr {

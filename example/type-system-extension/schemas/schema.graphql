@@ -1,0 +1,28 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+schema {
+  query: MyQuery
+}
+
+interface Node {
+  id: ID!
+}
+
+type Todo implements Node {
+  id: ID!
+  text: String!
+  state: State!
+}
+
+type MyQuery {
+  todos: [Todo!]!
+}
+
+union Data = Todo
+
+enum State {
+  NOT_YET
+  DONE
+}

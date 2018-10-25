@@ -1,0 +1,15 @@
+extend schema {
+  mutation: MyMutation
+}
+
+extend type MyQuery {
+  todo(id: ID!): Todo
+}
+
+type MyMutation {
+  createTodo(todo: TodoInput!): Todo!
+}
+
+input TodoInput {
+  text: String!
+}

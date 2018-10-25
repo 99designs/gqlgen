@@ -1,0 +1,3 @@
+directive @scalarLogging on SCALAR
+
+extend scalar ID @scalarLogging

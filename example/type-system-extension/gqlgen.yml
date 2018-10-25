@@ -4,15 +4,7 @@
 # for detailed .gqlgen.yml documentation.
 
 schema:
-- ./schemas/schema.graphql
-- ./schemas/schema-extension.graphql
-- ./schemas/type-extension.graphql
-- ./schemas/scalar-extension.graphql
-- ./schemas/object-extension.graphql
-- ./schemas/interface-extension.graphql
-- ./schemas/union-extension.graphql
-- ./schemas/enum-extension.graphql
-- ./schemas/input-object-extension.graphql
+- ./schemas/*.graphql
 
 exec:
   filename: generated.go

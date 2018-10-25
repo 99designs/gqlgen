@@ -2094,27 +2094,27 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "./schemas/enum-extension.graphql", Input: `directive @enumLogging on ENUM
+	&ast.Source{Name: "schemas/enum-extension.graphql", Input: `directive @enumLogging on ENUM
 
 extend enum State @enumLogging
 `},
-	&ast.Source{Name: "./schemas/input-object-extension.graphql", Input: `directive @inputLogging on INPUT_OBJECT
+	&ast.Source{Name: "schemas/input-object-extension.graphql", Input: `directive @inputLogging on INPUT_OBJECT
 
 extend input TodoInput @inputLogging
 `},
-	&ast.Source{Name: "./schemas/interface-extension.graphql", Input: `directive @interfaceLogging on INTERFACE
+	&ast.Source{Name: "schemas/interface-extension.graphql", Input: `directive @interfaceLogging on INTERFACE
 
 extend interface Node @interfaceLogging
 `},
-	&ast.Source{Name: "./schemas/object-extension.graphql", Input: `directive @objectLogging on OBJECT
+	&ast.Source{Name: "schemas/object-extension.graphql", Input: `directive @objectLogging on OBJECT
 
 extend type Todo @objectLogging
 `},
-	&ast.Source{Name: "./schemas/scalar-extension.graphql", Input: `directive @scalarLogging on SCALAR
+	&ast.Source{Name: "schemas/scalar-extension.graphql", Input: `directive @scalarLogging on SCALAR
 
 extend scalar ID @scalarLogging
 `},
-	&ast.Source{Name: "./schemas/schema-extension.graphql", Input: `extend schema {
+	&ast.Source{Name: "schemas/schema-extension.graphql", Input: `extend schema {
   mutation: MyMutation
 }
 
@@ -2130,7 +2130,7 @@ input TodoInput {
   text: String!
 }
 `},
-	&ast.Source{Name: "./schemas/schema.graphql", Input: `# GraphQL schema example
+	&ast.Source{Name: "schemas/schema.graphql", Input: `# GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
 
@@ -2159,13 +2159,13 @@ enum State {
   DONE
 }
 `},
-	&ast.Source{Name: "./schemas/type-extension.graphql", Input: `directive @fieldLogging on FIELD_DEFINITION
+	&ast.Source{Name: "schemas/type-extension.graphql", Input: `directive @fieldLogging on FIELD_DEFINITION
 
 extend type Todo {
   verified: Boolean! @fieldLogging
 }
 `},
-	&ast.Source{Name: "./schemas/union-extension.graphql", Input: `directive @unionLogging on UNION
+	&ast.Source{Name: "schemas/union-extension.graphql", Input: `directive @unionLogging on UNION
 
 extend union Data @unionLogging
 `},

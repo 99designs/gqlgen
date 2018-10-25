@@ -44,7 +44,7 @@ func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Conte
 	line := fmt.Sprintf("op:start:%d", tt.id)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
-	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
 	return ctx
 }
@@ -53,7 +53,7 @@ func (tt *testTracer) StartFieldExecution(ctx context.Context, field graphql.Col
 	line := fmt.Sprintf("field'a:start:%d:%s", tt.id, field.Name)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
-	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
 	return ctx
 }
@@ -62,7 +62,7 @@ func (tt *testTracer) StartFieldResolverExecution(ctx context.Context, rc *graph
 	line := fmt.Sprintf("field'b:start:%d:%v", tt.id, rc.Path())
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
-	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
 	return ctx
 }
@@ -71,7 +71,7 @@ func (tt *testTracer) StartFieldChildExecution(ctx context.Context) context.Cont
 	line := fmt.Sprintf("field'c:start:%d", tt.id)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
-	ctx = context.WithValue(ctx, "tracer", append(tracerLogs, line))
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
 	return ctx
 }

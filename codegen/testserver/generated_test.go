@@ -35,8 +35,59 @@ func TestForcedResolverFieldIsPointer(t *testing.T) {
 	require.Equal(t, "*testserver.Circle", field.Type.Out(0).String())
 }
 
+type testTracer struct {
+	id     int
+	append func(string)
+}
+
+func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Context {
+	line := fmt.Sprintf("op:start:%d", tt.id)
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
+	tt.append(line)
+	return ctx
+}
+
+func (tt *testTracer) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
+	line := fmt.Sprintf("field'a:start:%d:%s", tt.id, field.Name)
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
+	tt.append(line)
+	return ctx
+}
+
+func (tt *testTracer) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
+	line := fmt.Sprintf("field'b:start:%d:%v", tt.id, rc.Path())
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
+	tt.append(line)
+	return ctx
+}
+
+func (tt *testTracer) StartFieldChildExecution(ctx context.Context) context.Context {
+	line := fmt.Sprintf("field'c:start:%d", tt.id)
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
+	tt.append(line)
+	return ctx
+}
+
+func (tt *testTracer) EndFieldExecution(ctx context.Context) {
+	tt.append(fmt.Sprintf("field:end:%d", tt.id))
+}
+
+func (tt *testTracer) EndOperationExecution(ctx context.Context) {
+	tt.append(fmt.Sprintf("op:end:%d", tt.id))
+}
+
 func TestGeneratedServer(t *testing.T) {
 	resolvers := &testResolver{tick: make(chan string, 1)}
+
+	var tracerLog []string
 
 	srv := httptest.NewServer(
 		handler.GraphQL(
@@ -48,6 +99,18 @@ func TestGeneratedServer(t *testing.T) {
 			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 				path, _ := ctx.Value("path").([]int)
 				return next(context.WithValue(ctx, "path", append(path, 2)))
+			}),
+			handler.Tracer(&testTracer{
+				id: 1,
+				append: func(s string) {
+					tracerLog = append(tracerLog, s)
+				},
+			}),
+			handler.Tracer(&testTracer{
+				id: 2,
+				append: func(s string) {
+					tracerLog = append(tracerLog, s)
+				},
 			}),
 		))
 	c := client.New(srv.URL)
@@ -120,6 +183,58 @@ func TestGeneratedServer(t *testing.T) {
 
 		require.NoError(t, err)
 		require.True(t, called)
+	})
+
+	t.Run("tracer", func(t *testing.T) {
+		var resp struct {
+			User struct {
+				ID      int
+				Friends []struct {
+					ID int
+				}
+			}
+		}
+
+		tracerLog = nil
+		called := false
+		resolvers.userFriends = func(ctx context.Context, obj *User) ([]User, error) {
+			assert.Equal(t, []string{
+				"op:start:1", "op:start:2",
+				"field'a:start:1:user", "field'a:start:2:user",
+				"field'b:start:1:[user]", "field'b:start:2:[user]",
+				"field'c:start:1", "field'c:start:2",
+				"field'a:start:1:friends", "field'a:start:2:friends",
+				"field'b:start:1:[user friends]", "field'b:start:2:[user friends]",
+			}, ctx.Value("tracer"))
+			called = true
+			return []User{}, nil
+		}
+
+		err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)
+
+		require.NoError(t, err)
+		require.True(t, called)
+		assert.Equal(t, []string{
+			"op:start:1", "op:start:2",
+
+			"field'a:start:1:user", "field'a:start:2:user",
+			"field'b:start:1:[user]", "field'b:start:2:[user]",
+			"field'c:start:1", "field'c:start:2",
+
+			"field'a:start:1:id", "field'a:start:2:id",
+			"field'b:start:1:[user id]", "field'b:start:2:[user id]",
+			"field'c:start:1", "field'c:start:2",
+			"field:end:2", "field:end:1",
+
+			"field'a:start:1:friends", "field'a:start:2:friends",
+			"field'b:start:1:[user friends]", "field'b:start:2:[user friends]",
+			"field'c:start:1", "field'c:start:2",
+			"field:end:2", "field:end:1",
+
+			"field:end:2", "field:end:1",
+
+			"op:end:2", "op:end:1",
+		}, tracerLog)
 	})
 
 	t.Run("subscriptions", func(t *testing.T) {

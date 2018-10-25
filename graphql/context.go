@@ -24,6 +24,7 @@ type RequestContext struct {
 	ResolverMiddleware  FieldMiddleware
 	DirectiveMiddleware FieldMiddleware
 	RequestMiddleware   RequestMiddleware
+	Tracer              Tracer
 
 	errorsMu     sync.Mutex
 	Errors       gqlerror.List

@@ -31,6 +31,7 @@ type Config struct {
 	errorPresenter  graphql.ErrorPresenterFunc
 	resolverHook    graphql.FieldMiddleware
 	requestHook     graphql.RequestMiddleware
+	tracer          graphql.Tracer
 	complexityLimit int
 }
 
@@ -50,6 +51,12 @@ func (c *Config) newRequestContext(doc *ast.QueryDocument, query string, variabl
 
 	if hook := c.requestHook; hook != nil {
 		reqCtx.RequestMiddleware = hook
+	}
+
+	if hook := c.tracer; hook != nil {
+		reqCtx.Tracer = hook
+	} else {
+		reqCtx.Tracer = &graphql.NopTracer{}
 	}
 
 	return reqCtx
@@ -87,7 +94,7 @@ func ComplexityLimit(limit int) Option {
 }
 
 // ResolverMiddleware allows you to define a function that will be called around every resolver,
-// useful for tracing and logging.
+// useful for logging.
 func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.resolverHook == nil {
@@ -105,7 +112,7 @@ func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 }
 
 // RequestMiddleware allows you to define a function that will be called around the root request,
-// after the query has been parsed. This is useful for logging and tracing
+// after the query has been parsed. This is useful for logging
 func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 	return func(cfg *Config) {
 		if cfg.requestHook == nil {
@@ -120,6 +127,71 @@ func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 			})
 		}
 	}
+}
+
+// Tracer allows you to add a request/resolver tracer that will be called around the root request,
+// calling resolver. This is useful for tracing
+func Tracer(tracer graphql.Tracer) Option {
+	return func(cfg *Config) {
+		if cfg.tracer == nil {
+			cfg.tracer = tracer
+
+		} else {
+			lastResolve := cfg.tracer
+			cfg.tracer = &tracerWrapper{
+				tracer1: lastResolve,
+				tracer2: tracer,
+			}
+		}
+
+		opt := RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+			ctx = tracer.StartOperationExecution(ctx)
+			resp := next(ctx)
+			tracer.EndOperationExecution(ctx)
+
+			return resp
+		})
+		opt(cfg)
+	}
+}
+
+type tracerWrapper struct {
+	tracer1 graphql.Tracer
+	tracer2 graphql.Tracer
+}
+
+func (tw *tracerWrapper) StartOperationExecution(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartOperationExecution(ctx)
+	ctx = tw.tracer2.StartOperationExecution(ctx)
+	return ctx
+}
+
+func (tw *tracerWrapper) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
+	ctx = tw.tracer1.StartFieldExecution(ctx, field)
+	ctx = tw.tracer2.StartFieldExecution(ctx, field)
+	return ctx
+}
+
+func (tw *tracerWrapper) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
+	ctx = tw.tracer1.StartFieldResolverExecution(ctx, rc)
+	ctx = tw.tracer2.StartFieldResolverExecution(ctx, rc)
+	return ctx
+}
+
+func (tw *tracerWrapper) StartFieldChildExecution(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartFieldChildExecution(ctx)
+	ctx = tw.tracer2.StartFieldChildExecution(ctx)
+	return ctx
+}
+
+func (tw *tracerWrapper) EndFieldExecution(ctx context.Context) {
+	tw.tracer2.EndFieldExecution(ctx)
+	tw.tracer1.EndFieldExecution(ctx)
+}
+
+func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
+	tw.tracer2.EndOperationExecution(ctx)
+	tw.tracer1.EndOperationExecution(ctx)
 }
 
 // CacheSize sets the maximum size of the query cache.

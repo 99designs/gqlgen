@@ -1,6 +1,6 @@
 # Type System Extension example
 
-https://facebook.github.io/graphql/draft/#sec-Type-Extensions
+https://facebook.github.io/graphql/draft/#sec-Type-System-Extensions
 
 ```
 $ go run ./server/server.go

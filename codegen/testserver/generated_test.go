@@ -199,12 +199,12 @@ func TestGeneratedServer(t *testing.T) {
 		called := false
 		resolvers.userFriends = func(ctx context.Context, obj *User) ([]User, error) {
 			assert.Equal(t, []string{
-				"request:start:1",
-				"request:start:2",
-				"resolver:start:1:[user]",
-				"resolver:start:2:[user]",
-				"resolver:start:1:[user friends]",
-				"resolver:start:2:[user friends]",
+				"op:start:1", "op:start:2",
+				"field'a:start:1:user", "field'a:start:2:user",
+				"field'b:start:1:[user]", "field'b:start:2:[user]",
+				"field'c:start:1", "field'c:start:2",
+				"field'a:start:1:friends", "field'a:start:2:friends",
+				"field'b:start:1:[user friends]", "field'b:start:2:[user friends]",
 			}, ctx.Value("tracer"))
 			called = true
 			return []User{}, nil

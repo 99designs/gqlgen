@@ -1,0 +1,23 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+- ./schemas/schema.graphql
+- ./schemas/schema-extension.graphql
+- ./schemas/type-extension.graphql
+- ./schemas/scalar-extension.graphql
+- ./schemas/object-extension.graphql
+- ./schemas/interface-extension.graphql
+- ./schemas/union-extension.graphql
+- ./schemas/enum-extension.graphql
+- ./schemas/input-object-extension.graphql
+
+exec:
+  filename: generated.go
+model:
+  filename: models_gen.go
+resolver:
+  filename: resolver.go
+  type: Resolver

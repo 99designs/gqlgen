@@ -3,7 +3,7 @@
 set -eu
 
 echo "### go generating"
-go generate $(go list ./... | grep -v codegen/tests)
+go generate ./...
 
 if [[ $(git --no-pager diff) ]] ; then
     echo "you need to run go generate"
@@ -12,7 +12,7 @@ if [[ $(git --no-pager diff) ]] ; then
 fi
 
 echo "### running testsuite"
-go test -race $(go list ./... | grep -v codegen/tests)
+go test -race ./...
 
 echo "### linting"
 gometalinter --vendor ./...

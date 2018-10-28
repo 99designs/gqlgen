@@ -11,15 +11,14 @@ import (
 	"reflect"
 	"runtime"
 	"sort"
+	"sync"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
-	"github.com/99designs/gqlgen/graphql"
-
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -88,6 +87,7 @@ func TestGeneratedServer(t *testing.T) {
 	resolvers := &testResolver{tick: make(chan string, 1)}
 
 	var tracerLog []string
+	var mu sync.Mutex
 
 	srv := httptest.NewServer(
 		handler.GraphQL(
@@ -103,13 +103,17 @@ func TestGeneratedServer(t *testing.T) {
 			handler.Tracer(&testTracer{
 				id: 1,
 				append: func(s string) {
-					tracerLog = append(append([]string{}, tracerLog...), s)
+					mu.Lock()
+					defer mu.Unlock()
+					tracerLog = append(tracerLog, s)
 				},
 			}),
 			handler.Tracer(&testTracer{
 				id: 2,
 				append: func(s string) {
-					tracerLog = append(append([]string{}, tracerLog...), s)
+					mu.Lock()
+					defer mu.Unlock()
+					tracerLog = append(tracerLog, s)
 				},
 			}),
 		))
@@ -195,7 +199,9 @@ func TestGeneratedServer(t *testing.T) {
 			}
 		}
 
+		mu.Lock()
 		tracerLog = nil
+		mu.Unlock()
 		called := false
 		resolvers.userFriends = func(ctx context.Context, obj *User) ([]User, error) {
 			assert.Equal(t, []string{
@@ -214,6 +220,8 @@ func TestGeneratedServer(t *testing.T) {
 
 		require.NoError(t, err)
 		require.True(t, called)
+		mu.Lock()
+		defer mu.Unlock()
 		assert.Equal(t, []string{
 			"op:start:1", "op:start:2",
 

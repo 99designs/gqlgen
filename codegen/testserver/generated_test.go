@@ -103,13 +103,13 @@ func TestGeneratedServer(t *testing.T) {
 			handler.Tracer(&testTracer{
 				id: 1,
 				append: func(s string) {
-					tracerLog = append(tracerLog, s)
+					tracerLog = append(append([]string{}, tracerLog...), s)
 				},
 			}),
 			handler.Tracer(&testTracer{
 				id: 2,
 				append: func(s string) {
-					tracerLog = append(tracerLog, s)
+					tracerLog = append(append([]string{}, tracerLog...), s)
 				},
 			}),
 		))

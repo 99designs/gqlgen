@@ -35,7 +35,7 @@ type Config struct {
 	complexityLimit int
 }
 
-func (c *Config) newRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *graphql.RequestContext {
+func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
 	reqCtx := graphql.NewRequestContext(doc, query, variables)
 	if hook := c.recover; hook != nil {
 		reqCtx.Recover = hook
@@ -57,6 +57,12 @@ func (c *Config) newRequestContext(doc *ast.QueryDocument, query string, variabl
 		reqCtx.Tracer = hook
 	} else {
 		reqCtx.Tracer = &graphql.NopTracer{}
+	}
+
+	if c.complexityLimit > 0 {
+		reqCtx.ComplexityLimit = c.complexityLimit
+		operationComplexity := complexity.Calculate(es, op, variables)
+		reqCtx.OperationComplexity = operationComplexity
 	}
 
 	return reqCtx
@@ -298,7 +304,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			sendError(w, http.StatusUnprocessableEntity, err)
 			return
 		}
-		reqCtx := cfg.newRequestContext(doc, reqParams.Query, vars)
+		reqCtx := cfg.newRequestContext(exec, doc, op, reqParams.Query, vars)
 		ctx := graphql.WithRequestContext(r.Context(), reqCtx)
 
 		defer func() {
@@ -308,12 +314,9 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			}
 		}()
 
-		if cfg.complexityLimit > 0 {
-			queryComplexity := complexity.Calculate(exec, op, vars)
-			if queryComplexity > cfg.complexityLimit {
-				sendErrorf(w, http.StatusUnprocessableEntity, "query has complexity %d, which exceeds the limit of %d", queryComplexity, cfg.complexityLimit)
-				return
-			}
+		if reqCtx.ComplexityLimit > 0 && reqCtx.OperationComplexity > cfg.complexityLimit {
+			sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", operationComplexity, cfg.complexityLimit)
+			return
 		}
 
 		switch op.Operation {

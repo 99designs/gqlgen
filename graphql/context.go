@@ -17,6 +17,10 @@ type RequestContext struct {
 	RawQuery  string
 	Variables map[string]interface{}
 	Doc       *ast.QueryDocument
+
+	ComplexityLimit     int
+	OperationComplexity int
+
 	// ErrorPresenter will be used to generate the error
 	// message from errors given to Error().
 	ErrorPresenter      ErrorPresenterFunc

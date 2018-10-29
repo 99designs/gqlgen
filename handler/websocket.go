@@ -165,7 +165,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		c.sendError(message.ID, err)
 		return true
 	}
-	reqCtx := c.cfg.newRequestContext(doc, reqParams.Query, vars)
+	reqCtx := c.cfg.newRequestContext(c.exec, doc, op, reqParams.Query, vars)
 	ctx := graphql.WithRequestContext(c.ctx, reqCtx)
 
 	if c.initPayload != nil {

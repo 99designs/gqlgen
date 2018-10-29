@@ -315,7 +315,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}()
 
 		if reqCtx.ComplexityLimit > 0 && reqCtx.OperationComplexity > cfg.complexityLimit {
-			sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", operationComplexity, cfg.complexityLimit)
+			sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", reqCtx.OperationComplexity, reqCtx.ComplexityLimit)
 			return
 		}
 

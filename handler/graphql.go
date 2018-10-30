@@ -12,9 +12,9 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/golang-lru"
-	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/parser"
 	"github.com/vektah/gqlparser/validator"
 )
 
@@ -160,6 +160,28 @@ type tracerWrapper struct {
 	tracer2 graphql.Tracer
 }
 
+func (tw *tracerWrapper) StartOperationParsing(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartOperationParsing(ctx)
+	ctx = tw.tracer2.StartOperationParsing(ctx)
+	return ctx
+}
+
+func (tw *tracerWrapper) EndOperationParsing(ctx context.Context) {
+	tw.tracer2.EndOperationParsing(ctx)
+	tw.tracer1.EndOperationParsing(ctx)
+}
+
+func (tw *tracerWrapper) StartOperationValidation(ctx context.Context) context.Context {
+	ctx = tw.tracer1.StartOperationValidation(ctx)
+	ctx = tw.tracer2.StartOperationValidation(ctx)
+	return ctx
+}
+
+func (tw *tracerWrapper) EndOperationValidation(ctx context.Context) {
+	tw.tracer2.EndOperationValidation(ctx)
+	tw.tracer1.EndOperationValidation(ctx)
+}
+
 func (tw *tracerWrapper) StartOperationExecution(ctx context.Context) context.Context {
 	ctx = tw.tracer1.StartOperationExecution(ctx)
 	ctx = tw.tracer2.StartOperationExecution(ctx)
@@ -227,6 +249,9 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			panic("unexpected error creating cache: " + err.Error())
 		}
 	}
+	if cfg.tracer == nil {
+		cfg.tracer = &graphql.NopTracer{}
+	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
@@ -263,6 +288,8 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		}
 		w.Header().Set("Content-Type", "application/json")
 
+		ctx := r.Context()
+
 		var doc *ast.QueryDocument
 		if cache != nil {
 			val, ok := cache.Get(reqParams.Query)
@@ -271,35 +298,58 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 			}
 		}
 		if doc == nil {
-			var qErr gqlerror.List
-			doc, qErr = gqlparser.LoadQuery(exec.Schema(), reqParams.Query)
-			if len(qErr) > 0 {
-				sendError(w, http.StatusUnprocessableEntity, qErr...)
+			var gqlErr *gqlerror.Error
+			var listErr gqlerror.List
+
+			ctx = cfg.tracer.StartOperationParsing(ctx)
+			doc, gqlErr = parser.ParseQuery(&ast.Source{Input: reqParams.Query})
+			if gqlErr != nil {
+				cfg.tracer.EndOperationParsing(ctx)
+				sendError(w, http.StatusUnprocessableEntity, gqlErr)
 				return
 			}
+			cfg.tracer.EndOperationParsing(ctx)
+
+			ctx = cfg.tracer.StartOperationValidation(ctx)
+			listErr = validator.Validate(exec.Schema(), doc)
+			if len(listErr) != 0 {
+				cfg.tracer.EndOperationValidation(ctx)
+				sendError(w, http.StatusUnprocessableEntity, listErr...)
+				return
+			}
+			// NOTE: call cfg.tracer.EndOperationValidation later
+
 			if cache != nil {
 				cache.Add(reqParams.Query, doc)
 			}
+		} else {
+			ctx = cfg.tracer.StartOperationParsing(ctx)
+			cfg.tracer.EndOperationParsing(ctx)
+			ctx = cfg.tracer.StartOperationValidation(ctx)
 		}
 
 		op := doc.Operations.ForName(reqParams.OperationName)
 		if op == nil {
+			cfg.tracer.EndOperationValidation(ctx)
 			sendErrorf(w, http.StatusUnprocessableEntity, "operation %s not found", reqParams.OperationName)
 			return
 		}
 
 		if op.Operation != ast.Query && r.Method == http.MethodGet {
+			cfg.tracer.EndOperationValidation(ctx)
 			sendErrorf(w, http.StatusUnprocessableEntity, "GET requests only allow query operations")
 			return
 		}
 
 		vars, err := validator.VariableValues(exec.Schema(), op, reqParams.Variables)
 		if err != nil {
+			cfg.tracer.EndOperationValidation(ctx)
 			sendError(w, http.StatusUnprocessableEntity, err)
 			return
 		}
+		cfg.tracer.EndOperationValidation(ctx)
 		reqCtx := cfg.newRequestContext(doc, reqParams.Query, vars)
-		ctx := graphql.WithRequestContext(r.Context(), reqCtx)
+		ctx = graphql.WithRequestContext(ctx, reqCtx)
 
 		defer func() {
 			if err := recover(); err != nil {

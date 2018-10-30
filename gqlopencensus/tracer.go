@@ -17,7 +17,7 @@ func New(opts ...Option) graphql.Tracer {
 	cfg := &config{tracer}
 
 	for _, opt := range opts {
-		opt.apply(cfg)
+		opt(cfg)
 	}
 
 	return tracer

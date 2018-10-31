@@ -12,7 +12,6 @@ func RequestMiddleware() graphql.RequestMiddleware {
 
 		reqCtx := graphql.GetRequestContext(ctx)
 		td := getTracingData(ctx)
-		td.prepare()
 
 		err := reqCtx.RegisterExtension("tracing", td)
 		if err != nil {

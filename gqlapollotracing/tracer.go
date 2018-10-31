@@ -103,4 +103,5 @@ func (t *tracerImpl) EndFieldExecution(ctx context.Context) {
 func (t *tracerImpl) EndOperationExecution(ctx context.Context) {
 	td := getTracingData(ctx)
 	td.EndTime = timeNowFunc()
+	td.prepare()
 }

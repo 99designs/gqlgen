@@ -6,7 +6,7 @@ import (
 )
 
 type tracingData struct {
-	mu sync.Mutex `json:"-"`
+	mu sync.Mutex
 
 	StartTime  time.Time     `json:"startTime"`
 	EndTime    time.Time     `json:"endTime"`
@@ -17,7 +17,7 @@ type tracingData struct {
 }
 
 func (td *tracingData) prepare() {
-	td.Duration = time.Time(td.EndTime).Sub(time.Time(td.StartTime))
+	td.Duration = td.EndTime.Sub(td.StartTime)
 	if td.Parsing != nil {
 		td.Parsing.prepare(td)
 	}
@@ -38,7 +38,7 @@ type startOffset struct {
 }
 
 func (so *startOffset) prepare(td *tracingData) {
-	so.StartOffset = time.Time(so.StartTime).Sub(time.Time(td.StartTime))
+	so.StartOffset = so.StartTime.Sub(td.StartTime)
 	so.Duration = so.EndTime.Sub(so.StartTime)
 }
 

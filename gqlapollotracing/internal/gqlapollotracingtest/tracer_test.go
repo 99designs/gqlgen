@@ -37,7 +37,7 @@ func TestNewTracer(t *testing.T) {
 
 		resp := doRequest(h, "POST", "/query", `{"query":"{ todos { id text } }"}`)
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, `{"data":{"todos":[{"id":"Todo:1","text":"Play with cat"}]},"extensions":{"tracing":{"startTime":"2018-10-30T09:00:00Z","endTime":"2018-10-30T09:00:01Z","duration":1000000000,"parsing":{"startOffset":0,"duration":100000000},"validation":{"startOffset":200000000,"duration":100000000},"execution":{"resolvers":[{"startOffset":400000000,"duration":500000000,"path":["todos"],"parentType":"Query","fieldName":"todos","returnType":"[Todo!]!"},{"startOffset":500000000,"duration":100000000,"path":["todos",0,"id"],"parentType":"Todo","fieldName":"id","returnType":"ID!"},{"startOffset":700000000,"duration":100000000,"path":["todos",0,"text"],"parentType":"Todo","fieldName":"text","returnType":"String!"}]}}}}`, resp.Body.String())
+		assert.Equal(t, `{"data":{"todos":[{"id":"Todo:1","text":"Play with cat"}]},"extensions":{"tracing":{"startTime":"2018-10-30T09:00:00.1Z","endTime":"2018-10-30T09:00:01.1Z","duration":1000000000,"parsing":{"startOffset":0,"duration":100000000},"validation":{"startOffset":200000000,"duration":100000000},"execution":{"resolvers":[{"startOffset":400000000,"duration":500000000,"path":["todos"],"parentType":"Query","fieldName":"todos","returnType":"[Todo!]!"},{"startOffset":500000000,"duration":100000000,"path":["todos",0,"id"],"parentType":"Todo","fieldName":"id","returnType":"ID!"},{"startOffset":700000000,"duration":100000000,"path":["todos",0,"text"],"parentType":"Todo","fieldName":"text","returnType":"String!"}]}}}}`, resp.Body.String())
 	})
 }
 

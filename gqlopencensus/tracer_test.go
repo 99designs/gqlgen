@@ -12,56 +12,80 @@ import (
 	"go.opencensus.io/trace"
 )
 
+var _ trace.Exporter = (*testExporter)(nil)
+
+type testExporter struct {
+	sync.Mutex
+
+	Spans []*trace.SpanData
+}
+
+func (te *testExporter) ExportSpan(s *trace.SpanData) {
+	te.Lock()
+	defer te.Unlock()
+
+	te.Spans = append(te.Spans, s)
+}
+
+func (te *testExporter) Reset() {
+	te.Lock()
+	defer te.Unlock()
+
+	te.Spans = nil
+}
+
 func TestTracer(t *testing.T) {
-	var logs []string
 	var mu sync.Mutex
 
-	tracer := gqlopencensus.New(
-		gqlopencensus.WithStartOperationExecution(func(ctx context.Context) context.Context {
-			logs = append(logs, "StartOperationExecution")
-			return ctx
-		}),
-		gqlopencensus.WithStartFieldExecution(func(ctx context.Context, field graphql.CollectedField) context.Context {
-			logs = append(logs, "StartFieldExecution")
-			return ctx
-		}),
-		gqlopencensus.WithStartFieldResolverExecution(func(ctx context.Context, rc *graphql.ResolverContext) context.Context {
-			logs = append(logs, "StartFieldResolverExecution")
-			return ctx
-		}),
-		gqlopencensus.WithStartFieldChildExecution(func(ctx context.Context) context.Context {
-			logs = append(logs, "StartFieldChildExecution")
-			return ctx
-		}),
-		gqlopencensus.WithEndFieldExecution(func(ctx context.Context) {
-			logs = append(logs, "EndFieldExecution")
-		}),
-		gqlopencensus.WithEndOperationExecutions(func(ctx context.Context) {
-			logs = append(logs, "EndOperationExecution")
-		}),
-	)
+	exporter := &testExporter{}
+
+	trace.RegisterExporter(exporter)
+	defer trace.UnregisterExporter(exporter)
 
 	specs := []struct {
-		SpecName string
-		Sampler  trace.Sampler
-		Expected []string
+		SpecName      string
+		Tracer        graphql.Tracer
+		Sampler       trace.Sampler
+		ExpectedAttrs []map[string]interface{}
 	}{
 		{
 			SpecName: "with sampling",
+			Tracer:   gqlopencensus.New(),
 			Sampler:  trace.AlwaysSample(),
-			Expected: []string{
-				"StartOperationExecution",
-				"StartFieldExecution",
-				"StartFieldResolverExecution",
-				"StartFieldChildExecution",
-				"EndFieldExecution",
-				"EndOperationExecution",
+			ExpectedAttrs: []map[string]interface{}{
+				{
+					"resolver.object": "OD",
+					"resolver.field":  "F",
+					"resolver.alias":  "F",
+					"resolver.path":   "[]",
+				},
 			},
 		},
 		{
-			SpecName: "without sampling",
-			Sampler:  trace.NeverSample(),
-			Expected: nil,
+			SpecName:      "without sampling",
+			Tracer:        gqlopencensus.New(),
+			Sampler:       trace.NeverSample(),
+			ExpectedAttrs: nil,
+		},
+		{
+			SpecName: "with sampling & DataDog",
+			Tracer:   gqlopencensus.New(gqlopencensus.WithDataDog()),
+			Sampler:  trace.AlwaysSample(),
+			ExpectedAttrs: []map[string]interface{}{
+				{
+					"resolver.object": "OD",
+					"resolver.field":  "F",
+					"resolver.alias":  "F",
+					"resolver.path":   "[]",
+					"resource.name":   "nameless-operation",
+				},
+			},
+		},
+		{
+			SpecName:      "without sampling & DataDog",
+			Tracer:        gqlopencensus.New(gqlopencensus.WithDataDog()),
+			Sampler:       trace.NeverSample(),
+			ExpectedAttrs: nil,
 		},
 	}
 
@@ -69,15 +93,17 @@ func TestTracer(t *testing.T) {
 		t.Run(spec.SpecName, func(t *testing.T) {
 			mu.Lock()
 			defer mu.Unlock()
-			logs = nil
+			exporter.Reset()
 
+			tracer := spec.Tracer
 			ctx := context.Background()
 			ctx = graphql.WithRequestContext(ctx, &graphql.RequestContext{})
 			ctx, _ = trace.StartSpan(ctx, "test", trace.WithSampler(spec.Sampler))
 			ctx = tracer.StartOperationExecution(ctx)
 			ctx = tracer.StartFieldExecution(ctx, graphql.CollectedField{
 				Field: &ast.Field{
-					Name: "F",
+					Name:  "F",
+					Alias: "F",
 					ObjectDefinition: &ast.Definition{
 						Name: "OD",
 					},
@@ -88,7 +114,16 @@ func TestTracer(t *testing.T) {
 			tracer.EndFieldExecution(ctx)
 			tracer.EndOperationExecution(ctx)
 
-			assert.Equal(t, spec.Expected, logs)
+			if len(spec.ExpectedAttrs) == 0 && len(exporter.Spans) != 0 {
+				t.Errorf("unexpected spans: %+v", exporter.Spans)
+			} else if len(spec.ExpectedAttrs) != len(exporter.Spans) {
+				assert.Equal(t, len(spec.ExpectedAttrs), len(exporter.Spans))
+			} else {
+				for idx, expectedAttrs := range spec.ExpectedAttrs {
+					span := exporter.Spans[idx]
+					assert.Equal(t, expectedAttrs, span.Attributes)
+				}
+			}
 		})
 	}
 }

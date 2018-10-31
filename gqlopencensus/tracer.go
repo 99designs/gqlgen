@@ -8,31 +8,24 @@ import (
 	"go.opencensus.io/trace"
 )
 
-var _ graphql.Tracer = (*tracerImpl)(nil)
+var _ graphql.Tracer = (tracerImpl)(0)
 
 // New returns Tracer for OpenCensus.
 // see https://go.opencensus.io/trace
 func New(opts ...Option) graphql.Tracer {
-	tracer := &tracerImpl{}
+	var tracer tracerImpl
 	cfg := &config{tracer}
 
 	for _, opt := range opts {
 		opt(cfg)
 	}
 
-	return tracer
+	return cfg.tracer
 }
 
-type tracerImpl struct {
-	startOperationExecutions     []func(ctx context.Context) context.Context
-	startFieldExecutions         []func(ctx context.Context, field graphql.CollectedField) context.Context
-	startFieldResolverExecutions []func(ctx context.Context, rc *graphql.ResolverContext) context.Context
-	startFieldChildExecutions    []func(ctx context.Context) context.Context
-	endFieldExecutions           []func(ctx context.Context)
-	endOperationExecutions       []func(ctx context.Context)
-}
+type tracerImpl int
 
-func (t *tracerImpl) StartOperationExecution(ctx context.Context) context.Context {
+func (tracerImpl) StartOperationExecution(ctx context.Context) context.Context {
 	ctx, span := trace.StartSpan(ctx, operationName(ctx))
 	if !span.IsRecordingEvents() {
 		return ctx
@@ -46,14 +39,11 @@ func (t *tracerImpl) StartOperationExecution(ctx context.Context) context.Contex
 			trace.StringAttribute(fmt.Sprintf("request.variables.%s", key), fmt.Sprintf("%+v", val)),
 		)
 	}
-	for _, f := range t.startOperationExecutions {
-		ctx = f(ctx)
-	}
 
 	return ctx
 }
 
-func (t *tracerImpl) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
+func (tracerImpl) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
 	ctx, span := trace.StartSpan(ctx, field.ObjectDefinition.Name+"/"+field.Name)
 	if !span.IsRecordingEvents() {
 		return ctx
@@ -71,14 +61,10 @@ func (t *tracerImpl) StartFieldExecution(ctx context.Context, field graphql.Coll
 		}
 	}
 
-	for _, f := range t.startFieldExecutions {
-		ctx = f(ctx, field)
-	}
-
 	return ctx
 }
 
-func (t *tracerImpl) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
+func (tracerImpl) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
 	span := trace.FromContext(ctx)
 	if !span.IsRecordingEvents() {
 		return ctx
@@ -86,43 +72,31 @@ func (t *tracerImpl) StartFieldResolverExecution(ctx context.Context, rc *graphq
 	span.AddAttributes(
 		trace.StringAttribute("resolver.path", fmt.Sprintf("%+v", rc.Path())),
 	)
-	for _, f := range t.startFieldResolverExecutions {
-		ctx = f(ctx, rc)
-	}
 
 	return ctx
 }
 
-func (t *tracerImpl) StartFieldChildExecution(ctx context.Context) context.Context {
+func (tracerImpl) StartFieldChildExecution(ctx context.Context) context.Context {
 	span := trace.FromContext(ctx)
 	if !span.IsRecordingEvents() {
 		return ctx
 	}
-	for _, f := range t.startFieldChildExecutions {
-		ctx = f(ctx)
-	}
 	return ctx
 }
 
-func (t *tracerImpl) EndFieldExecution(ctx context.Context) {
+func (tracerImpl) EndFieldExecution(ctx context.Context) {
 	span := trace.FromContext(ctx)
 	defer span.End()
 	if !span.IsRecordingEvents() {
 		return
-	}
-	for _, f := range t.endFieldExecutions {
-		f(ctx)
 	}
 }
 
-func (t *tracerImpl) EndOperationExecution(ctx context.Context) {
+func (tracerImpl) EndOperationExecution(ctx context.Context) {
 	span := trace.FromContext(ctx)
 	defer span.End()
 	if !span.IsRecordingEvents() {
 		return
-	}
-	for _, f := range t.endOperationExecutions {
-		f(ctx)
 	}
 }
 

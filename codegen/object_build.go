@@ -163,6 +163,9 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 			if arg.DefaultValue != nil {
 				var err error
 				newArg.Default, err = arg.DefaultValue.Value(nil)
+				if newArg.Type.IsPtr() {
+					newArg.Type.StripPtr()
+				}
 				if err != nil {
 					return nil, errors.Errorf("default value for %s.%s is not valid: %s", typ.Name, field.Name, err.Error())
 				}

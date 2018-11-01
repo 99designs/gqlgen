@@ -63,6 +63,9 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 		if field.DefaultValue != nil {
 			var err error
 			newField.Default, err = field.DefaultValue.Value(nil)
+			if newField.Type.IsPtr() {
+				newField.Type.StripPtr()
+			}
 			if err != nil {
 				return nil, errors.Errorf("default value for %s.%s is not valid: %s", typ.Name, field.Name, err.Error())
 			}

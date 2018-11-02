@@ -98,27 +98,17 @@ func (tracerImpl) StartFieldResolverExecution(ctx context.Context, rc *graphql.R
 }
 
 func (tracerImpl) StartFieldChildExecution(ctx context.Context) context.Context {
-	span := trace.FromContext(ctx)
-	if !span.IsRecordingEvents() {
-		return ctx
-	}
 	return ctx
 }
 
 func (tracerImpl) EndFieldExecution(ctx context.Context) {
 	span := trace.FromContext(ctx)
 	defer span.End()
-	if !span.IsRecordingEvents() {
-		return
-	}
 }
 
 func (tracerImpl) EndOperationExecution(ctx context.Context) {
 	span := trace.FromContext(ctx)
 	defer span.End()
-	if !span.IsRecordingEvents() {
-		return
-	}
 }
 
 func operationName(ctx context.Context) string {

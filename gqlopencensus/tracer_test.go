@@ -59,6 +59,12 @@ func TestTracer(t *testing.T) {
 					"resolver.alias":  "F",
 					"resolver.path":   "[]",
 				},
+				{
+					"request.query":               "query { foobar }",
+					"request.variables.fizz":      "buzz",
+					"request.complexityLimit":     int64(1000),
+					"request.operationComplexity": int64(100),
+				},
 			},
 		},
 		{
@@ -79,6 +85,12 @@ func TestTracer(t *testing.T) {
 					"resolver.path":   "[]",
 					"resource.name":   "nameless-operation",
 				},
+				{
+					"request.query":               "query { foobar }",
+					"request.variables.fizz":      "buzz",
+					"request.complexityLimit":     int64(1000),
+					"request.operationComplexity": int64(100),
+				},
 			},
 		},
 		{
@@ -97,21 +109,30 @@ func TestTracer(t *testing.T) {
 
 			tracer := spec.Tracer
 			ctx := context.Background()
-			ctx = graphql.WithRequestContext(ctx, &graphql.RequestContext{})
+			ctx = graphql.WithRequestContext(ctx, &graphql.RequestContext{
+				RawQuery: "query { foobar }",
+				Variables: map[string]interface{}{
+					"fizz": "buzz",
+				},
+				ComplexityLimit:     1000,
+				OperationComplexity: 100,
+			})
 			ctx, _ = trace.StartSpan(ctx, "test", trace.WithSampler(spec.Sampler))
 			ctx = tracer.StartOperationExecution(ctx)
-			ctx = tracer.StartFieldExecution(ctx, graphql.CollectedField{
-				Field: &ast.Field{
-					Name:  "F",
-					Alias: "F",
-					ObjectDefinition: &ast.Definition{
-						Name: "OD",
+			{
+				ctx := tracer.StartFieldExecution(ctx, graphql.CollectedField{
+					Field: &ast.Field{
+						Name:  "F",
+						Alias: "F",
+						ObjectDefinition: &ast.Definition{
+							Name: "OD",
+						},
 					},
-				},
-			})
-			ctx = tracer.StartFieldResolverExecution(ctx, &graphql.ResolverContext{})
-			ctx = tracer.StartFieldChildExecution(ctx)
-			tracer.EndFieldExecution(ctx)
+				})
+				ctx = tracer.StartFieldResolverExecution(ctx, &graphql.ResolverContext{})
+				ctx = tracer.StartFieldChildExecution(ctx)
+				tracer.EndFieldExecution(ctx)
+			}
 			tracer.EndOperationExecution(ctx)
 
 			if len(spec.ExpectedAttrs) == 0 && len(exporter.Spans) != 0 {

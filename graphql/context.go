@@ -160,6 +160,21 @@ func (c *RequestContext) HasError(rctx *ResolverContext) bool {
 	return false
 }
 
+// GetErrors returns a list of errors that occurred in the current field
+func (c *RequestContext) GetErrors(rctx *ResolverContext) gqlerror.List {
+	c.errorsMu.Lock()
+	defer c.errorsMu.Unlock()
+	path := rctx.Path()
+
+	var errs gqlerror.List
+	for _, err := range c.Errors {
+		if equalPath(err.Path, path) {
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}
+
 func equalPath(a []interface{}, b []interface{}) bool {
 	if len(a) != len(b) {
 		return false

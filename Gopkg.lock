@@ -80,14 +80,6 @@
   revision = "a4e142e9c047c904fa2f1e144d9a84e6133024bc"
 
 [[projects]]
-  branch = "master"
-  digest = "1:f0157668c753bf20253dc027a7698d170c8c65253c0ffcbdf8e310ee14184a7b"
-  name = "github.com/opentracing-contrib/go-stdlib"
-  packages = ["nethttp"]
-  pruneopts = "UT"
-  revision = "36723135187404d2f4002f4f189938565e64cc5c"
-
-[[projects]]
   digest = "1:d07bd28263c09c5d7f6502e8ddac63e027eca0eafcd07632790d958b50360317"
   name = "github.com/opentracing/basictracer-go"
   packages = [
@@ -186,21 +178,6 @@
   revision = "f119686bf1d4d1a68c7ed6afe35f183625443c41"
 
 [[projects]]
-  digest = "1:bc4aaa0db4ea6107fd151d7c56ab48cae34d65a0f409ede7484dfd3c6f793e7e"
-  name = "go.opencensus.io"
-  packages = [
-    ".",
-    "exemplar",
-    "internal",
-    "trace",
-    "trace/internal",
-    "trace/tracestate",
-  ]
-  pruneopts = "UT"
-  revision = "b7bf3cdb64150a8c8c53b769fdeb2ba581bd4d4b"
-  version = "v0.18.0"
-
-[[projects]]
   branch = "master"
   digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
   name = "golang.org/x/net"
@@ -261,10 +238,7 @@
     "github.com/gorilla/websocket",
     "github.com/hashicorp/golang-lru",
     "github.com/mitchellh/mapstructure",
-    "github.com/opentracing-contrib/go-stdlib/nethttp",
     "github.com/opentracing/opentracing-go",
-    "github.com/opentracing/opentracing-go/ext",
-    "github.com/opentracing/opentracing-go/log",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
@@ -273,8 +247,8 @@
     "github.com/vektah/gqlparser",
     "github.com/vektah/gqlparser/ast",
     "github.com/vektah/gqlparser/gqlerror",
+    "github.com/vektah/gqlparser/parser",
     "github.com/vektah/gqlparser/validator",
-    "go.opencensus.io/trace",
     "golang.org/x/tools/go/ast/astutil",
     "golang.org/x/tools/go/loader",
     "golang.org/x/tools/imports",

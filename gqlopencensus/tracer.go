@@ -25,6 +25,20 @@ func New(opts ...Option) graphql.Tracer {
 
 type tracerImpl int
 
+func (tracerImpl) StartOperationParsing(ctx context.Context) context.Context {
+	return ctx
+}
+
+func (tracerImpl) EndOperationParsing(ctx context.Context) {
+}
+
+func (tracerImpl) StartOperationValidation(ctx context.Context) context.Context {
+	return ctx
+}
+
+func (tracerImpl) EndOperationValidation(ctx context.Context) {
+}
+
 func (tracerImpl) StartOperationExecution(ctx context.Context) context.Context {
 	ctx, span := trace.StartSpan(ctx, operationName(ctx))
 	if !span.IsRecordingEvents() {

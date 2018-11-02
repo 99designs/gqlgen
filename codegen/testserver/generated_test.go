@@ -39,8 +39,34 @@ type testTracer struct {
 	append func(string)
 }
 
+func (tt *testTracer) StartOperationParsing(ctx context.Context) context.Context {
+	line := fmt.Sprintf("op:p:start:%d", tt.id)
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
+	tt.append(line)
+	return ctx
+}
+
+func (tt *testTracer) EndOperationParsing(ctx context.Context) {
+	tt.append(fmt.Sprintf("op:p:end:%d", tt.id))
+}
+
+func (tt *testTracer) StartOperationValidation(ctx context.Context) context.Context {
+	line := fmt.Sprintf("op:v:start:%d", tt.id)
+
+	tracerLogs, _ := ctx.Value("tracer").([]string)
+	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
+	tt.append(line)
+	return ctx
+}
+
+func (tt *testTracer) EndOperationValidation(ctx context.Context) {
+	tt.append(fmt.Sprintf("op:v:end:%d", tt.id))
+}
+
 func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Context {
-	line := fmt.Sprintf("op:start:%d", tt.id)
+	line := fmt.Sprintf("op:e:start:%d", tt.id)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
@@ -49,7 +75,7 @@ func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Conte
 }
 
 func (tt *testTracer) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
-	line := fmt.Sprintf("field'a:start:%d:%s", tt.id, field.Name)
+	line := fmt.Sprintf("field'a:e:start:%d:%s", tt.id, field.Name)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
@@ -58,7 +84,7 @@ func (tt *testTracer) StartFieldExecution(ctx context.Context, field graphql.Col
 }
 
 func (tt *testTracer) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
-	line := fmt.Sprintf("field'b:start:%d:%v", tt.id, rc.Path())
+	line := fmt.Sprintf("field'b:e:start:%d:%v", tt.id, rc.Path())
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
@@ -67,7 +93,7 @@ func (tt *testTracer) StartFieldResolverExecution(ctx context.Context, rc *graph
 }
 
 func (tt *testTracer) StartFieldChildExecution(ctx context.Context) context.Context {
-	line := fmt.Sprintf("field'c:start:%d", tt.id)
+	line := fmt.Sprintf("field'c:e:start:%d", tt.id)
 
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
@@ -76,11 +102,11 @@ func (tt *testTracer) StartFieldChildExecution(ctx context.Context) context.Cont
 }
 
 func (tt *testTracer) EndFieldExecution(ctx context.Context) {
-	tt.append(fmt.Sprintf("field:end:%d", tt.id))
+	tt.append(fmt.Sprintf("field:e:end:%d", tt.id))
 }
 
 func (tt *testTracer) EndOperationExecution(ctx context.Context) {
-	tt.append(fmt.Sprintf("op:end:%d", tt.id))
+	tt.append(fmt.Sprintf("op:e:end:%d", tt.id))
 }
 
 func TestGeneratedServer(t *testing.T) {
@@ -205,12 +231,14 @@ func TestGeneratedServer(t *testing.T) {
 		called := false
 		resolvers.userFriends = func(ctx context.Context, obj *User) ([]User, error) {
 			assert.Equal(t, []string{
-				"op:start:1", "op:start:2",
-				"field'a:start:1:user", "field'a:start:2:user",
-				"field'b:start:1:[user]", "field'b:start:2:[user]",
-				"field'c:start:1", "field'c:start:2",
-				"field'a:start:1:friends", "field'a:start:2:friends",
-				"field'b:start:1:[user friends]", "field'b:start:2:[user friends]",
+				"op:p:start:1", "op:p:start:2",
+				"op:v:start:1", "op:v:start:2",
+				"op:e:start:1", "op:e:start:2",
+				"field'a:e:start:1:user", "field'a:e:start:2:user",
+				"field'b:e:start:1:[user]", "field'b:e:start:2:[user]",
+				"field'c:e:start:1", "field'c:e:start:2",
+				"field'a:e:start:1:friends", "field'a:e:start:2:friends",
+				"field'b:e:start:1:[user friends]", "field'b:e:start:2:[user friends]",
 			}, ctx.Value("tracer"))
 			called = true
 			return []User{}, nil
@@ -223,25 +251,28 @@ func TestGeneratedServer(t *testing.T) {
 		mu.Lock()
 		defer mu.Unlock()
 		assert.Equal(t, []string{
-			"op:start:1", "op:start:2",
+			"op:p:start:1", "op:p:start:2",
+			"op:p:end:2", "op:p:end:1",
 
-			"field'a:start:1:user", "field'a:start:2:user",
-			"field'b:start:1:[user]", "field'b:start:2:[user]",
-			"field'c:start:1", "field'c:start:2",
+			"op:v:start:1", "op:v:start:2",
+			"op:v:end:2", "op:v:end:1",
 
-			"field'a:start:1:id", "field'a:start:2:id",
-			"field'b:start:1:[user id]", "field'b:start:2:[user id]",
-			"field'c:start:1", "field'c:start:2",
-			"field:end:2", "field:end:1",
+			"op:e:start:1", "op:e:start:2",
 
-			"field'a:start:1:friends", "field'a:start:2:friends",
-			"field'b:start:1:[user friends]", "field'b:start:2:[user friends]",
-			"field'c:start:1", "field'c:start:2",
-			"field:end:2", "field:end:1",
+			"field'a:e:start:1:user", "field'a:e:start:2:user",
+			"field'b:e:start:1:[user]", "field'b:e:start:2:[user]",
+			"field'c:e:start:1", "field'c:e:start:2",
+			"field'a:e:start:1:id", "field'a:e:start:2:id",
+			"field'b:e:start:1:[user id]", "field'b:e:start:2:[user id]",
+			"field'c:e:start:1", "field'c:e:start:2",
+			"field:e:end:2", "field:e:end:1",
+			"field'a:e:start:1:friends", "field'a:e:start:2:friends",
+			"field'b:e:start:1:[user friends]", "field'b:e:start:2:[user friends]",
+			"field'c:e:start:1", "field'c:e:start:2",
+			"field:e:end:2", "field:e:end:1",
+			"field:e:end:2", "field:e:end:1",
 
-			"field:end:2", "field:end:1",
-
-			"op:end:2", "op:end:1",
+			"op:e:end:2", "op:e:end:1",
 		}, tracerLog)
 	})
 

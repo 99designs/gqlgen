@@ -120,7 +120,7 @@ func TestTracer(t *testing.T) {
 			ctx, _ = trace.StartSpan(ctx, "test", trace.WithSampler(spec.Sampler))
 			ctx = tracer.StartOperationExecution(ctx)
 			{
-				ctx := tracer.StartFieldExecution(ctx, graphql.CollectedField{
+				ctx2 := tracer.StartFieldExecution(ctx, graphql.CollectedField{
 					Field: &ast.Field{
 						Name:  "F",
 						Alias: "F",
@@ -129,9 +129,9 @@ func TestTracer(t *testing.T) {
 						},
 					},
 				})
-				ctx = tracer.StartFieldResolverExecution(ctx, &graphql.ResolverContext{})
-				ctx = tracer.StartFieldChildExecution(ctx)
-				tracer.EndFieldExecution(ctx)
+				ctx2 = tracer.StartFieldResolverExecution(ctx2, &graphql.ResolverContext{})
+				ctx2 = tracer.StartFieldChildExecution(ctx2)
+				tracer.EndFieldExecution(ctx2)
 			}
 			tracer.EndOperationExecution(ctx)
 

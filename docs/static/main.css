@@ -392,3 +392,24 @@ strong {
     }
 
 }
+
+
+blockquote {
+    background-color: #fffaf3;
+    border-left-color: rgba(0, 0, 0, 0.1);
+    border-left-width: 9px;
+    border-left-style: solid;
+    padding: 1em 20px 1em 11px;
+    margin-bottom: 1em;
+    margin-left: -20px;
+    margin-right: -20px;
+}
+
+blockquote p {
+    margin-bottom: 0;
+}
+
+/* Blockquote headings. */
+blockquote p:first-of-type {
+    font-weight: bold;
+}

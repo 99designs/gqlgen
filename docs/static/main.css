@@ -102,7 +102,7 @@ a:hover {
 
 main {
     flex: 1;
-    padding: 20px;
+    padding: 0 20px 20px;
     color: var(--color-text);
 }
 
@@ -110,6 +110,10 @@ main {
     grid-area: content;
     max-width: 920px;
     margin: auto;
+}
+
+main .content {
+    margin-top: 40px;
 }
 
 header {
@@ -183,7 +187,7 @@ nav {
 }
 
 .menu a:hover {
-    border-bottom: none;
+    text-decoration: none;
 }
 
 .menu-item {
@@ -248,7 +252,7 @@ ul.menu a:hover {
 }
 
 .logo:hover {
-    border-bottom: none;
+    text-decoration: none;
 }
 
 code {
@@ -271,7 +275,7 @@ strong {
 }
 
 .anchor-link:hover {
-    border-bottom: none;
+    text-decoration: none;
 }
 
 .anchor-icon {

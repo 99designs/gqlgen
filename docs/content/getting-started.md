@@ -6,32 +6,54 @@ menu: main
 weight: -5
 ---
 
-## Goal
+This tutorial will take you through the process of building a GraphQL server with gqlgen that can:
 
-The aim for this tutorial is to build a "todo" graphql server that can:
-
- - get a list of all todos
- - create new todos
- - mark off todos as they are completed
+ - Return a list of todos
+ - Create new todos
+ - Mark off todos as they are completed
 
 You can find the finished code for this tutorial [here](https://github.com/vektah/gqlgen-tutorials/tree/master/gettingstarted)
 
 ## Install gqlgen
 
-Assuming you already have a working [go environment](https://golang.org/doc/install) you can simply go get:
+This article uses [`dep`](https://github.com/golang/dep) to install gqlgen.  [Follow the instructions for your environment](https://github.com/golang/dep) to install.
+
+Assuming you already have a working [Go environment](https://golang.org/doc/install), create a directory for the project in your `$GOPATH`:
 
 ```sh
-go get -u github.com/99designs/gqlgen github.com/vektah/gorunpkg
+$ mkdir -p $GOPATH/src/github.com/[username]/gqlgen-todos
 ```
+
+Add the following file to your project under `scripts/gqlgen.go`:
+
+```go
+// +build ignore
+package main
+
+import "github.com/99designs/gqlgen/cmd"
+
+func main() {
+	cmd.Execute()
+}
+```
+
+Lastly, install dependencies:
+
+```sh
+$ dep ensure
+```
+
+> Go Modules
+>
+> Currently `gqlgen` does not support Go Modules.  This is due to the [`loader`](https://godoc.org/golang.org/x/tools/go/loader) package, that also does not yet support Go Modules.  We are looking at solutions to this and the issue is tracked in Github.
 
 ## Building the server
 
 ### Define the schema
 
-gqlgen is a schema-first library, so before touching any code we write out the API we want using the graphql 
-[Schema Definition Language](http://graphql.org/learn/schema/). This usually goes into a file called schema.graphql  
+gqlgen is a schema-first library — before writing code, you describe your API using the GraphQL 
+[Schema Definition Language](http://graphql.org/learn/schema/). This usually goes into a file called `schema.graphql`:
 
-`schema.graphql`
 ```graphql
 type Todo {
   id: ID!
@@ -60,17 +82,17 @@ type Mutation {
 ```
 
 ### Create the project skeleton
+
 ```bash
-$ gqlgen init
-Exec "go run ./server/server.go" to start GraphQL server
+$ go run scripts/gqlgen.go init
 ```
 
-This has created an empty skeleton with all files we need:
+This has created an empty skeleton with all files you need:
 
- - gqlgen.yml - The gqlgen config file, knobs for controlling the generated code.
- - generated.go - The graphql execution runtime, the bulk of the generated code
- - models_gen.go - Generated models required to build the graph. Often you will override these with models you write yourself. Still very useful for input types.
- - resolver.go - This is where your application code lives. generated.go will call into this to get the data the user has requested. 
+ - `gqlgen.yml` — The gqlgen config file, knobs for controlling the generated code.
+ - `generated.go` — The GraphQL execution runtime, the bulk of the generated code.
+ - `models_gen.go` — Generated models required to build the graph. Often you will override these with your own models. Still very useful for input types.
+ - `resolver.go` — This is where your application code lives. `generated.go` will call into this to get the data the user has requested. 
  
 ### Create the database models
 
@@ -88,7 +110,7 @@ type Todo struct {
 }
 ```
 
-And then tell gqlgen to use this new struct by adding this to the gqlgen.yml:
+And then tell gqlgen to use this new struct by adding this to the `gqlgen.yml`:
 ```yaml
 models:
   Todo:
@@ -97,7 +119,7 @@ models:
 
 and regenerate by running
 ```bash
-$ gqlgen -v
+$ go run scripts/gqlgen.go -v
 Unable to bind Todo.user to github.com/vektah/gqlgen-tutorials/gettingstarted.Todo
 	no method named user
 	no field named user
@@ -242,28 +264,9 @@ query findTodos {
 
 ## Finishing touches
 
-gqlgen is still unstable, and the APIs may change at any time. To prevent changes from ruining your day make sure
-to lock your dependencies:
-
-*Note*: If you dont have dep installed yet, you can get it [here](https://github.com/golang/dep)
-
-First uninstall the global version we grabbed earlier. This is a good way to prevent version mismatch footguns.
-
-```bash
-rm ~/go/bin/gqlgen
-rm -rf ~/go/src/github.com/99designs/gqlgen
-``` 
-
-Next install gorunpkg, its kind of like npx but only searches vendor.
-
-```bash
-dep init
-dep ensure
-```
-
 At the top of our resolvers.go a go generate command was added that looks like this:
 ```go
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate go run ./scripts/gqlgen.go
 ```
 
 This magic comment tells `go generate` what command to run when we want to regenerate our code. to do so run:
@@ -271,5 +274,4 @@ This magic comment tells `go generate` what command to run when we want to regen
 go generate ./...
 ``` 
 
-*gorunpkg* will build and run the version of gqlgen we just installed into vendor with dep. This makes sure that everyone working on your project generates code the same way regardless which binaries are installed in their gopath.
-
+You can now run this command every time you want to regenerate your GraphQL server.

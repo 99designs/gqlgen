@@ -60,7 +60,6 @@
     overflow: auto;
     display: block;
     padding: 5px 10px;
-    margin-bottom: 1em;
     font-family: var(--font-code);
     color: var(--color-code-text);
     background-color: var(--color-code-background);

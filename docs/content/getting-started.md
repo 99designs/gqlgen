@@ -95,12 +95,17 @@ This has created an empty skeleton with all files you need:
  - `models_gen.go` — Generated models required to build the graph. Often you will override these with your own models. Still very useful for input types.
  - `resolver.go` — This is where your application code lives. `generated.go` will call into this to get the data the user has requested. 
  - `server/server.go` — This is a minimal entry point that sets up an `http.Handler` to the generated GraphQL server.
+
+ Now run dep ensure, so that we can ensure that the newly generated code's dependencies are all present:
+
+ ```sh
+ $ dep ensure
+ ```
  
 ### Create the database models
 
-The generated model for Todo isnt quite right, it has a user embeded in it but we only want to fetch it if the user actually requested it. So lets make our own.
+The generated model for Todo isn't right, it has a user embeded in it but we only want to fetch it if the user actually requested it. So instead lets make a new model in `todo.go`:
 
-`todo.go`
 ```go
 package gettingstarted
 
@@ -112,14 +117,16 @@ type Todo struct {
 }
 ```
 
-And then tell gqlgen to use this new struct by adding this to the `gqlgen.yml`:
+Next tell gqlgen to use this new struct by adding it to `gqlgen.yml`:
+
 ```yaml
 models:
   Todo:
     model: github.com/vektah/gqlgen-tutorials/gettingstarted.Todo
 ```
 
-and regenerate by running
+Regenerate by running:
+
 ```bash
 $ go run scripts/gqlgen.go -v
 Unable to bind Todo.user to github.com/vektah/gqlgen-tutorials/gettingstarted.Todo
@@ -179,15 +186,14 @@ better than generating.
 ### Write the resolvers
 
 This is a work in progress, we have a way to generate resolver stubs, but it cannot currently update existing code. We can force it to run again by deleting `resolvers.go` and re-running gqlgen:
+
 ```bash
-rm resolvers.go
-gqlgen
+$ rm resolvers.go
+$ go run scripts/gqlgen.go
 ```
 
-Now we just need to fill in the `not implemented` parts
+Now we just need to fill in the `not implemented` parts.  Update `graph/graph.go`
 
-
-`graph/graph.go`
 ```go
 //go:generate go run ./scripts/gqlgen.go
 
@@ -265,4 +271,18 @@ query findTodos {
       }
     }
 }
+```
+
+## Finishing touches
+
+At the top of our `resolvers.go` add the following line:
+
+```go
+//go:generate go run scripts/gqlgen.go -v
+```
+
+This magic comment tells `go generate` what command to run when we want to regenerate our code.  You can now run any generation commands for your project with:
+
+```go
+go generate ./...
 ```

@@ -270,6 +270,10 @@ strong {
     font-weight: 700;
 }
 
+em {
+    font-style: italic;
+}
+
 .anchor-link {
     display: inline-block;
 }

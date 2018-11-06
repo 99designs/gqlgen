@@ -24,10 +24,15 @@ Assuming you already have a working [Go environment](https://golang.org/doc/inst
 $ mkdir -p $GOPATH/src/github.com/[username]/gqlgen-todos
 ```
 
+> Go Modules
+>
+> Currently `gqlgen` does not support Go Modules.  This is due to the [`loader`](https://godoc.org/golang.org/x/tools/go/loader) package, that also does not yet support Go Modules.  We are looking at solutions to this and the issue is tracked in Github.
+
 Add the following file to your project under `scripts/gqlgen.go`:
 
 ```go
 // +build ignore
+
 package main
 
 import "github.com/99designs/gqlgen/cmd"
@@ -37,15 +42,11 @@ func main() {
 }
 ```
 
-Lastly, install dependencies:
+Lastly, initialise dep.  This will inspect any imports you have in your project, and pull down the latest tagged release.
 
 ```sh
-$ dep ensure
+$ dep init
 ```
-
-> Go Modules
->
-> Currently `gqlgen` does not support Go Modules.  This is due to the [`loader`](https://godoc.org/golang.org/x/tools/go/loader) package, that also does not yet support Go Modules.  We are looking at solutions to this and the issue is tracked in Github.
 
 ## Building the server
 
@@ -93,6 +94,7 @@ This has created an empty skeleton with all files you need:
  - `generated.go` — The GraphQL execution runtime, the bulk of the generated code.
  - `models_gen.go` — Generated models required to build the graph. Often you will override these with your own models. Still very useful for input types.
  - `resolver.go` — This is where your application code lives. `generated.go` will call into this to get the data the user has requested. 
+ - `server/server.go` — This is a minimal entry point that sets up an `http.Handler` to the generated GraphQL server.
  
 ### Create the database models
 
@@ -125,7 +127,10 @@ Unable to bind Todo.user to github.com/vektah/gqlgen-tutorials/gettingstarted.To
 	no field named user
 	Adding resolver method
 ```
-*note* we've used the verbose flag here to show what gqlgen is doing. Its looked at all the fields on our model and found matching methods for all of them, except user. For user it added a resolver to the interface we need to implement. This is the magic that makes gqlgen work so well. 
+
+> Note
+>
+> The verbose flag `-v` is here to show what gqlgen is doing. It has looked at all the fields on the model and found matching methods for all of them, except user. For user it has added a resolver to the interface you need to implement. *This is the magic that makes gqlgen work so well!*
 
 ### Implement the resolvers
 
@@ -184,7 +189,7 @@ Now we just need to fill in the `not implemented` parts
 
 `graph/graph.go`
 ```go
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate go run ./scripts/gqlgen.go
 
 package gettingstarted
 
@@ -261,17 +266,3 @@ query findTodos {
     }
 }
 ```
-
-## Finishing touches
-
-At the top of our resolvers.go a go generate command was added that looks like this:
-```go
-//go:generate go run ./scripts/gqlgen.go
-```
-
-This magic comment tells `go generate` what command to run when we want to regenerate our code. to do so run:
-```go
-go generate ./...
-``` 
-
-You can now run this command every time you want to regenerate your GraphQL server.

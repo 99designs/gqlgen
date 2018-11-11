@@ -255,7 +255,19 @@ func bindMethod(imports *Imports, t types.Type, field *Field) error {
 	} else if sig.Results().Len() != 2 {
 		return fmt.Errorf("method has wrong number of args")
 	}
-	newArgs, err := matchArgs(field, sig.Params())
+	params := sig.Params()
+	// If the first argument is the context, remove it from the comparison and set
+	// the MethodHasContext flag so that the context will be passed to this model's method
+	if params.Len() > 0 && params.At(0).Type().String() == "context.Context" {
+		field.MethodHasContext = true
+		vars := make([]*types.Var, params.Len()-1)
+		for i := 1; i < params.Len(); i++ {
+			vars[i-1] = params.At(i)
+		}
+		params = types.NewTuple(vars...)
+	}
+
+	newArgs, err := matchArgs(field, params)
 	if err != nil {
 		return err
 	}

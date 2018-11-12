@@ -199,8 +199,6 @@ func (tt *testTracer) StartOperationParsing(ctx context.Context) context.Context
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
 
-	ctx = context.WithValue(ctx, "StartOperationParsing", "StartOperationParsing")
-
 	return ctx
 }
 
@@ -214,8 +212,6 @@ func (tt *testTracer) StartOperationValidation(ctx context.Context) context.Cont
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
-
-	ctx = context.WithValue(ctx, "StartOperationValidation", "StartOperationValidation")
 
 	return ctx
 }
@@ -231,8 +227,6 @@ func (tt *testTracer) StartOperationExecution(ctx context.Context) context.Conte
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
 
-	ctx = context.WithValue(ctx, "StartOperationExecution", "StartOperationExecution")
-
 	return ctx
 }
 
@@ -242,8 +236,6 @@ func (tt *testTracer) StartFieldExecution(ctx context.Context, field graphql.Col
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
-
-	ctx = context.WithValue(ctx, "StartFieldExecution", "StartFieldExecution")
 
 	return ctx
 }
@@ -255,8 +247,6 @@ func (tt *testTracer) StartFieldResolverExecution(ctx context.Context, rc *graph
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
 
-	ctx = context.WithValue(ctx, "StartFieldResolverExecution", "StartFieldResolverExecution")
-
 	return ctx
 }
 
@@ -266,8 +256,6 @@ func (tt *testTracer) StartFieldChildExecution(ctx context.Context) context.Cont
 	tracerLogs, _ := ctx.Value("tracer").([]string)
 	ctx = context.WithValue(ctx, "tracer", append(append([]string{}, tracerLogs...), line))
 	tt.append(line)
-
-	ctx = context.WithValue(ctx, "StartFieldChildExecution", "StartFieldChildExecution")
 
 	return ctx
 }
@@ -283,86 +271,80 @@ func (tt *testTracer) EndOperationExecution(ctx context.Context) {
 var _ graphql.Tracer = (*configurableTracer)(nil)
 
 type configurableTracer struct {
-	StartOperationParsingFuncs       []func(ctx context.Context) context.Context
-	EndOperationParsingFuncs         []func(ctx context.Context)
-	StartOperationValidationFuncs    []func(ctx context.Context) context.Context
-	EndOperationValidationFuncs      []func(ctx context.Context)
-	StartOperationExecutionFuncs     []func(ctx context.Context) context.Context
-	StartFieldExecutionFuncs         []func(ctx context.Context, field graphql.CollectedField) context.Context
-	StartFieldResolverExecutionFuncs []func(ctx context.Context, rc *graphql.ResolverContext) context.Context
-	StartFieldChildExecutionFuncs    []func(ctx context.Context) context.Context
-	EndFieldExecutionFuncs           []func(ctx context.Context)
-	EndOperationExecutionFuncs       []func(ctx context.Context)
+	StartOperationParsingCallback       func(ctx context.Context) context.Context
+	EndOperationParsingCallback         func(ctx context.Context)
+	StartOperationValidationCallback    func(ctx context.Context) context.Context
+	EndOperationValidationCallback      func(ctx context.Context)
+	StartOperationExecutionCallback     func(ctx context.Context) context.Context
+	StartFieldExecutionCallback         func(ctx context.Context, field graphql.CollectedField) context.Context
+	StartFieldResolverExecutionCallback func(ctx context.Context, rc *graphql.ResolverContext) context.Context
+	StartFieldChildExecutionCallback    func(ctx context.Context) context.Context
+	EndFieldExecutionCallback           func(ctx context.Context)
+	EndOperationExecutionCallback       func(ctx context.Context)
 }
 
 func (ct *configurableTracer) StartOperationParsing(ctx context.Context) context.Context {
-	for _, f := range ct.StartOperationParsingFuncs {
+	if f := ct.StartOperationParsingCallback; f != nil {
 		ctx = f(ctx)
 	}
-
 	return ctx
 }
 
 func (ct *configurableTracer) EndOperationParsing(ctx context.Context) {
-	for _, f := range ct.EndOperationParsingFuncs {
+	if f := ct.EndOperationParsingCallback; f != nil {
 		f(ctx)
 	}
 }
 
 func (ct *configurableTracer) StartOperationValidation(ctx context.Context) context.Context {
-	for _, f := range ct.StartOperationValidationFuncs {
+	if f := ct.StartOperationValidationCallback; f != nil {
 		ctx = f(ctx)
 	}
-
 	return ctx
 }
 
 func (ct *configurableTracer) EndOperationValidation(ctx context.Context) {
-	for _, f := range ct.EndOperationValidationFuncs {
+	if f := ct.EndOperationValidationCallback; f != nil {
 		f(ctx)
 	}
 }
 
 func (ct *configurableTracer) StartOperationExecution(ctx context.Context) context.Context {
-	for _, f := range ct.StartOperationExecutionFuncs {
+	if f := ct.StartOperationExecutionCallback; f != nil {
 		ctx = f(ctx)
 	}
-
 	return ctx
 }
 
 func (ct *configurableTracer) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
-	for _, f := range ct.StartFieldExecutionFuncs {
+	if f := ct.StartFieldExecutionCallback; f != nil {
 		ctx = f(ctx, field)
 	}
-
 	return ctx
 }
 
 func (ct *configurableTracer) StartFieldResolverExecution(ctx context.Context, rc *graphql.ResolverContext) context.Context {
-	for _, f := range ct.StartFieldResolverExecutionFuncs {
+	if f := ct.StartFieldResolverExecutionCallback; f != nil {
 		ctx = f(ctx, rc)
 	}
-
 	return ctx
 }
 
 func (ct *configurableTracer) StartFieldChildExecution(ctx context.Context) context.Context {
-	for _, f := range ct.StartFieldChildExecutionFuncs {
+	if f := ct.StartFieldChildExecutionCallback; f != nil {
 		ctx = f(ctx)
 	}
-
 	return ctx
 }
 
 func (ct *configurableTracer) EndFieldExecution(ctx context.Context) {
-	for _, f := range ct.EndFieldExecutionFuncs {
+	if f := ct.EndFieldExecutionCallback; f != nil {
 		f(ctx)
 	}
 }
 
 func (ct *configurableTracer) EndOperationExecution(ctx context.Context) {
-	for _, f := range ct.EndOperationExecutionFuncs {
+	if f := ct.EndOperationExecutionCallback; f != nil {
 		f(ctx)
 	}
 }
@@ -465,16 +447,6 @@ func TestTracer(t *testing.T) {
 	t.Run("take ctx over from prev step", func(t *testing.T) {
 		resolvers := &testResolver{tick: make(chan string, 1)}
 
-		configurableTracer := &configurableTracer{}
-
-		srv := httptest.NewServer(
-			handler.GraphQL(
-				NewExecutableSchema(Config{Resolvers: resolvers}),
-				handler.Tracer(configurableTracer),
-			))
-		defer srv.Close()
-		c := client.New(srv.URL)
-
 		steps := []string{
 			"StartOperationParsing",
 			"StartOperationValidation",
@@ -495,56 +467,41 @@ func TestTracer(t *testing.T) {
 			}
 		}
 
-		configurableTracer.StartOperationParsingFuncs = append(
-			configurableTracer.StartOperationParsingFuncs,
-			func(ctx context.Context) context.Context {
+		configurableTracer := &configurableTracer{
+			StartOperationParsingCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartOperationParsing", true)
 			},
-		)
-		configurableTracer.EndOperationParsingFuncs = append(
-			configurableTracer.EndOperationParsingFuncs,
-			assertStep("StartOperationParsing"),
-		)
+			EndOperationParsingCallback: assertStep("StartOperationParsing"),
 
-		configurableTracer.StartOperationValidationFuncs = append(
-			configurableTracer.StartOperationValidationFuncs,
-			func(ctx context.Context) context.Context {
+			StartOperationValidationCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartOperationValidation", true)
 			},
-		)
-		configurableTracer.EndOperationValidationFuncs = append(
-			configurableTracer.EndOperationValidationFuncs,
-			assertStep("StartOperationValidation"),
-		)
+			EndOperationValidationCallback: assertStep("StartOperationValidation"),
 
-		configurableTracer.StartOperationExecutionFuncs = append(
-			configurableTracer.StartOperationExecutionFuncs,
-			func(ctx context.Context) context.Context {
+			StartOperationExecutionCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartOperationExecution", true)
 			},
-		)
-		configurableTracer.StartFieldExecutionFuncs = append(
-			configurableTracer.StartFieldExecutionFuncs,
-			func(ctx context.Context, field graphql.CollectedField) context.Context {
+			StartFieldExecutionCallback: func(ctx context.Context, field graphql.CollectedField) context.Context {
 				return context.WithValue(ctx, "StartFieldExecution", true)
 			},
-		)
-		configurableTracer.StartFieldResolverExecutionFuncs = append(
-			configurableTracer.StartFieldResolverExecutionFuncs,
-			func(ctx context.Context, rc *graphql.ResolverContext) context.Context {
+			StartFieldResolverExecutionCallback: func(ctx context.Context, rc *graphql.ResolverContext) context.Context {
 				return context.WithValue(ctx, "StartFieldResolverExecution", true)
 			},
-		)
-		configurableTracer.StartFieldChildExecutionFuncs = append(
-			configurableTracer.StartFieldChildExecutionFuncs,
-			func(ctx context.Context) context.Context {
+			StartFieldChildExecutionCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartFieldChildExecution", true)
 			},
-		)
-		configurableTracer.EndFieldExecutionFuncs = append(
-			configurableTracer.EndFieldExecutionFuncs,
-			assertStep("StartFieldChildExecution"),
-		)
+			EndFieldExecutionCallback: assertStep("StartFieldChildExecution"),
+
+			EndOperationExecutionCallback: assertStep("StartOperationExecution"),
+		}
+
+		srv := httptest.NewServer(
+			handler.GraphQL(
+				NewExecutableSchema(Config{Resolvers: resolvers}),
+				handler.Tracer(configurableTracer),
+			))
+		defer srv.Close()
+		c := client.New(srv.URL)
 
 		var resp struct {
 			User struct {

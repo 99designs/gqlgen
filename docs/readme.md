@@ -16,8 +16,5 @@ When editing docs run `hugo serve` and a live reload server will start, then nav
 
 ## Publishing docs
 
-**Requires 99designs aws-vault access**
-
-run `./publish.sh` to make the docs live.
-
+Docs are hosted using [render.com](https://render.com/) and will be automatically deployed when merging to master.
 

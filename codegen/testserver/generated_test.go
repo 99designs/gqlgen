@@ -447,36 +447,21 @@ func TestTracer(t *testing.T) {
 	t.Run("take ctx over from prev step", func(t *testing.T) {
 		resolvers := &testResolver{tick: make(chan string, 1)}
 
-		steps := []string{
-			"StartOperationParsing",
-			"StartOperationValidation",
-			"StartOperationExecution",
-			"StartFieldExecution",
-			"StartFieldResolverExecution",
-			"StartFieldChildExecution",
-		}
-
-		assertStep := func(target string) func(ctx context.Context) {
-			return func(ctx context.Context) {
-				for _, step := range steps {
-					assert.NotEmpty(t, ctx.Value(step))
-					if step == target {
-						break
-					}
-				}
-			}
-		}
-
 		configurableTracer := &configurableTracer{
 			StartOperationParsingCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartOperationParsing", true)
 			},
-			EndOperationParsingCallback: assertStep("StartOperationParsing"),
+			EndOperationParsingCallback: func(ctx context.Context) {
+				assert.NotNil(t, ctx.Value("StartOperationParsing"))
+			},
 
 			StartOperationValidationCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartOperationValidation", true)
 			},
-			EndOperationValidationCallback: assertStep("StartOperationValidation"),
+			EndOperationValidationCallback: func(ctx context.Context) {
+				assert.NotNil(t, ctx.Value("StartOperationParsing"))
+				assert.NotNil(t, ctx.Value("StartOperationValidation"))
+			},
 
 			StartOperationExecutionCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartOperationExecution", true)
@@ -490,9 +475,20 @@ func TestTracer(t *testing.T) {
 			StartFieldChildExecutionCallback: func(ctx context.Context) context.Context {
 				return context.WithValue(ctx, "StartFieldChildExecution", true)
 			},
-			EndFieldExecutionCallback: assertStep("StartFieldChildExecution"),
+			EndFieldExecutionCallback: func(ctx context.Context) {
+				assert.NotNil(t, ctx.Value("StartOperationParsing"))
+				assert.NotNil(t, ctx.Value("StartOperationValidation"))
+				assert.NotNil(t, ctx.Value("StartOperationExecution"))
+				assert.NotNil(t, ctx.Value("StartFieldExecution"))
+				assert.NotNil(t, ctx.Value("StartFieldResolverExecution"))
+				assert.NotNil(t, ctx.Value("StartFieldChildExecution"))
+			},
 
-			EndOperationExecutionCallback: assertStep("StartOperationExecution"),
+			EndOperationExecutionCallback: func(ctx context.Context) {
+				assert.NotNil(t, ctx.Value("StartOperationParsing"))
+				assert.NotNil(t, ctx.Value("StartOperationValidation"))
+				assert.NotNil(t, ctx.Value("StartOperationExecution"))
+			},
 		}
 
 		srv := httptest.NewServer(

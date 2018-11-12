@@ -281,7 +281,7 @@ At the top of our `resolvers.go` add the following line:
 //go:generate go run scripts/gqlgen.go -v
 ```
 
-This magic comment tells `go generate` what command to run when we want to regenerate our code.  You can now run any generation commands for your project with:
+This magic comment tells `go generate` what command to run when we want to regenerate our code.  To run go generate recursively over your entire project, use this command:
 
 ```go
 go generate ./...

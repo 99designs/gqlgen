@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/99designs/gqlgen/internal/gopath"
@@ -207,6 +208,36 @@ func (tm TypeMap) Check() error {
 		}
 	}
 	return nil
+}
+
+func (tm TypeMap) referencedPackages() []string {
+	var pkgs []string
+
+	for _, typ := range tm {
+		if typ.Model == "map[string]interface{}" {
+			continue
+		}
+		pkg, _ := pkgAndType(typ.Model)
+		if pkg == "" || inStrSlice(pkgs, pkg) {
+			continue
+		}
+		pkgs = append(pkgs, pkg)
+	}
+
+	sort.Slice(pkgs, func(i, j int) bool {
+		return pkgs[i] > pkgs[j]
+	})
+	return pkgs
+}
+
+func inStrSlice(haystack []string, needle string) bool {
+	for _, v := range haystack {
+		if needle == v {
+			return true
+		}
+	}
+
+	return false
 }
 
 // findCfg searches for the config file in this directory and all parents up the tree

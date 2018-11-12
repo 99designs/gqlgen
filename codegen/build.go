@@ -50,7 +50,8 @@ type ServerBuild struct {
 func (cfg *Config) models() (*ModelBuild, error) {
 	namedTypes := cfg.buildNamedTypes()
 
-	progLoader := newLoader(namedTypes, true)
+	progLoader := cfg.newLoaderWithoutErrors()
+
 	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
@@ -73,7 +74,7 @@ func (cfg *Config) models() (*ModelBuild, error) {
 
 // bind a schema together with some code to generate a Build
 func (cfg *Config) resolver() (*ResolverBuild, error) {
-	progLoader := newLoader(cfg.buildNamedTypes(), true)
+	progLoader := cfg.newLoaderWithoutErrors()
 	progLoader.Import(cfg.Resolver.ImportPath())
 
 	prog, err := progLoader.Load()
@@ -131,7 +132,7 @@ func (cfg *Config) server(destDir string) *ServerBuild {
 func (cfg *Config) bind() (*Build, error) {
 	namedTypes := cfg.buildNamedTypes()
 
-	progLoader := newLoader(namedTypes, true)
+	progLoader := cfg.newLoaderWithoutErrors()
 	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
@@ -182,29 +183,28 @@ func (cfg *Config) bind() (*Build, error) {
 }
 
 func (cfg *Config) validate() error {
-	progLoader := newLoader(cfg.buildNamedTypes(), false)
+	progLoader := cfg.newLoaderWithErrors()
 	_, err := progLoader.Load()
 	return err
 }
 
-func newLoader(namedTypes NamedTypes, allowErrors bool) loader.Config {
+func (cfg *Config) newLoaderWithErrors() loader.Config {
 	conf := loader.Config{}
-	if allowErrors {
-		conf = loader.Config{
-			AllowErrors: true,
-			TypeChecker: types.Config{
-				Error: func(e error) {},
-			},
-		}
-	}
 	for _, imp := range ambientImports {
 		conf.Import(imp)
 	}
 
-	for _, imp := range namedTypes {
-		if imp.Package != "" {
-			conf.Import(imp.Package)
-		}
+	for _, pkg := range cfg.Models.referencedPackages() {
+		conf.Import(pkg)
+	}
+	return conf
+}
+
+func (cfg *Config) newLoaderWithoutErrors() loader.Config {
+	conf := cfg.newLoaderWithErrors()
+	conf.AllowErrors = true
+	conf.TypeChecker = types.Config{
+		Error: func(e error) {},
 	}
 	return conf
 }

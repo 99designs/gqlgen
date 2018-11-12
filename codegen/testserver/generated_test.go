@@ -462,7 +462,7 @@ func TestTracer(t *testing.T) {
 		}, tracerLog)
 	})
 
-	t.Run("called in the correct order", func(t *testing.T) {
+	t.Run("take ctx over from prev step", func(t *testing.T) {
 		resolvers := &testResolver{tick: make(chan string, 1)}
 
 		configurableTracer := &configurableTracer{}

@@ -36,7 +36,7 @@
 	// nolint: vetshadow
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
 		ctx = ec.Tracer.StartFieldExecution(ctx, field)
-		defer ec.Tracer.EndFieldExecution(ctx)
+		defer func () { ec.Tracer.EndFieldExecution(ctx) }()
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)
 			args, err := {{ $field.ArgsFunc }}(rawArgs)

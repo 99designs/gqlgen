@@ -388,7 +388,7 @@ type parseOperationArgs struct {
 
 func (gh *graphqlHandler) parseOperation(ctx context.Context, args *parseOperationArgs) (context.Context, *ast.QueryDocument, *gqlerror.Error) {
 	ctx = gh.cfg.tracer.StartOperationParsing(ctx)
-	defer gh.cfg.tracer.EndOperationParsing(ctx)
+	defer func() { gh.cfg.tracer.EndOperationParsing(ctx) }()
 
 	if args.CachedDoc != nil {
 		return ctx, args.CachedDoc, nil
@@ -412,7 +412,7 @@ type validateOperationArgs struct {
 
 func (gh *graphqlHandler) validateOperation(ctx context.Context, args *validateOperationArgs) (context.Context, *ast.OperationDefinition, map[string]interface{}, gqlerror.List) {
 	ctx = gh.cfg.tracer.StartOperationValidation(ctx)
-	defer gh.cfg.tracer.EndOperationValidation(ctx)
+	defer func() { gh.cfg.tracer.EndOperationValidation(ctx) }()
 
 	if !args.CacheHit {
 		listErr := validator.Validate(gh.exec.Schema(), args.Doc)

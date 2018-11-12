@@ -104,7 +104,10 @@ func (f *Field) IsVariable() bool {
 }
 
 func (f *Field) IsConcurrent() bool {
-	return f.IsResolver() && !f.Object.DisableConcurrency
+	if f.Object.DisableConcurrency {
+		return false
+	}
+	return f.MethodHasContext || f.IsResolver()
 }
 
 func (f *Field) GoNameExported() string {

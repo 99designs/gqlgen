@@ -519,6 +519,29 @@ func TestTracer(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, called)
 	})
+
+	t.Run("model methods", func(t *testing.T) {
+		t.Run("without context", func(t *testing.T) {
+			var resp struct {
+				ModelMethods struct {
+					NoContext bool
+				}
+			}
+			err := c.Post(`query { modelMethods{ noContext } }`, &resp)
+			require.NoError(t, err)
+			require.True(t, resp.ModelMethods.NoContext)
+		})
+		t.Run("with context", func(t *testing.T) {
+			var resp struct {
+				ModelMethods struct {
+					WithContext bool
+				}
+			}
+			err := c.Post(`query { modelMethods{ withContext } }`, &resp)
+			require.NoError(t, err)
+			require.True(t, resp.ModelMethods.WithContext)
+		})
+	})
 }
 
 func TestResponseExtension(t *testing.T) {
@@ -555,6 +578,9 @@ func (r *testResolver) User() UserResolver {
 
 func (r *testResolver) Query() QueryResolver {
 	return &testQueryResolver{}
+}
+func (r *testResolver) ModelMethods() ModelMethodsResolver {
+	return &modelMethodsResolver{}
 }
 
 type testQueryResolver struct{ queryResolver }

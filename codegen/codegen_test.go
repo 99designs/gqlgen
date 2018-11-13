@@ -22,10 +22,10 @@ func TestGenerateServer(t *testing.T) {
 	serverFilename := "gen/" + name + "/server/server.go"
 	cfg := Config{
 		SchemaFilename: SchemaFilenames{"schema.graphql"},
-		SchemaStr: map[string]string{"schema.graphql": schema},
-		Exec:      PackageConfig{Filename: "gen/" + name + "/exec.go"},
-		Model:     PackageConfig{Filename: "gen/" + name + "/model.go"},
-		Resolver:  PackageConfig{Filename: "gen/" + name + "/resolver.go", Type: "Resolver"},
+		SchemaStr:      map[string]string{"schema.graphql": schema},
+		Exec:           PackageConfig{Filename: "gen/" + name + "/exec.go"},
+		Model:          PackageConfig{Filename: "gen/" + name + "/model.go"},
+		Resolver:       PackageConfig{Filename: "gen/" + name + "/resolver.go", Type: "Resolver"},
 	}
 
 	_ = syscall.Unlink(cfg.Resolver.Filename)

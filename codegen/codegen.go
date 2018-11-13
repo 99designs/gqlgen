@@ -153,7 +153,7 @@ func (cfg *Config) normalize() error {
 
 	var sources []*ast.Source
 	for _, filename := range cfg.SchemaFilename {
-		sources = append(sources, &ast.Source{Name: filename, Input:  cfg.SchemaStr[filename]})
+		sources = append(sources, &ast.Source{Name: filename, Input: cfg.SchemaStr[filename]})
 	}
 
 	var err *gqlerror.Error

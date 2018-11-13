@@ -101,9 +101,9 @@ func parseScope(t *testing.T, input interface{}, packageName string) (*types.Sco
 
 func TestEqualFieldName(t *testing.T) {
 	tt := []struct {
-		Name string
-		Source string
-		Target string
+		Name     string
+		Source   string
+		Target   string
 		Expected bool
 	}{
 		{Name: "words with same case", Source: "test", Target: "test", Expected: true},
@@ -115,7 +115,7 @@ func TestEqualFieldName(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
-			result  := equalFieldName(tc.Source, tc.Target)
+			result := equalFieldName(tc.Source, tc.Target)
 			require.Equal(t, tc.Expected, result)
 		})
 	}

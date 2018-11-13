@@ -45,7 +45,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
-		require.Equal(t, SchemaFilenames{"outer"},cfg.SchemaFilename)
+		require.Equal(t, SchemaFilenames{"outer"}, cfg.SchemaFilename)
 	})
 
 	t.Run("will return error if config doesn't exist", func(t *testing.T) {

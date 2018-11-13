@@ -33,12 +33,25 @@ func TestTypeInInput(t *testing.T) {
 	require.EqualError(t, err, "model plan failed: Item cannot be used as a field of BookmarkableInput. only input and scalar types are allowed")
 }
 
+func TestEmptyInputField(t *testing.T) {
+	err := generate("emptyinputfield", `
+		type Query {
+			addBookmark(b: BookmarkableInput!): Boolean!
+		}
+		type Item {}
+		input BookmarkableInput {
+		}
+	`)
+
+	require.EqualError(t, err, "model plan failed: Input Object Type 'BookmarkableInput' must define one or more input fields")
+}
+
 func generate(name string, schema string, typemap ...TypeMap) error {
 	cfg := Config{
 		SchemaFilename: SchemaFilenames{"schema.graphql"},
-		SchemaStr: map[string]string{"schema.graphql": schema},
-		Exec:      PackageConfig{Filename: "gen/" + name + "/exec.go"},
-		Model:     PackageConfig{Filename: "gen/" + name + "/model.go"},
+		SchemaStr:      map[string]string{"schema.graphql": schema},
+		Exec:           PackageConfig{Filename: "gen/" + name + "/exec.go"},
+		Model:          PackageConfig{Filename: "gen/" + name + "/model.go"},
 	}
 
 	if len(typemap) > 0 {

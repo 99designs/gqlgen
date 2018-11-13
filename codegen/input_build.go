@@ -47,6 +47,10 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 	obj := &Object{NamedType: types[typ.Name]}
 	typeEntry, entryExists := cfg.Models[typ.Name]
 
+	if len(typ.Fields) == 0 {
+		return nil, errors.Errorf("Input Object Type '%s' must define one or more input fields", obj.GQLType)
+	}
+
 	for _, field := range typ.Fields {
 		newField := Field{
 			GQLName: field.Name,

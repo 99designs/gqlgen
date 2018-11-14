@@ -1524,7 +1524,7 @@ func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.Selection
 // nolint: vetshadow
 func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer ec.Tracer.EndFieldExecution(ctx)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ModelMethods",
 		Args:   nil,
@@ -1551,7 +1551,7 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 // nolint: vetshadow
 func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer ec.Tracer.EndFieldExecution(ctx)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ModelMethods",
 		Args:   nil,
@@ -1578,7 +1578,7 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 // nolint: vetshadow
 func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer ec.Tracer.EndFieldExecution(ctx)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ModelMethods",
 		Args:   nil,
@@ -2168,7 +2168,7 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 // nolint: vetshadow
 func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer ec.Tracer.EndFieldExecution(ctx)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   nil,

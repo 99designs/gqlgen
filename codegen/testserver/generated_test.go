@@ -521,6 +521,12 @@ func TestTracer(t *testing.T) {
 	})
 
 	t.Run("model methods", func(t *testing.T) {
+		srv := httptest.NewServer(
+			handler.GraphQL(
+				NewExecutableSchema(Config{Resolvers: &testResolver{}}),
+			))
+		defer srv.Close()
+		c := client.New(srv.URL)
 		t.Run("without context", func(t *testing.T) {
 			var resp struct {
 				ModelMethods struct {

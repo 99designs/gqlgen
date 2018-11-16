@@ -14,6 +14,9 @@ type Resolver struct{}
 func (r *Resolver) ForcedResolver() ForcedResolverResolver {
 	return &forcedResolverResolver{r}
 }
+func (r *Resolver) ModelMethods() ModelMethodsResolver {
+	return &modelMethodsResolver{r}
+}
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
@@ -27,6 +30,12 @@ func (r *Resolver) User() UserResolver {
 type forcedResolverResolver struct{ *Resolver }
 
 func (r *forcedResolverResolver) Field(ctx context.Context, obj *ForcedResolver) (*Circle, error) {
+	panic("not implemented")
+}
+
+type modelMethodsResolver struct{ *Resolver }
+
+func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
 	panic("not implemented")
 }
 
@@ -57,6 +66,9 @@ func (r *queryResolver) Shapes(ctx context.Context) ([]*Shape, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) ModelMethods(ctx context.Context) (*ModelMethods, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Valid(ctx context.Context) (string, error) {

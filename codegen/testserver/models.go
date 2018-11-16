@@ -1,9 +1,23 @@
 package testserver
 
-import "fmt"
+import (
+	context "context"
+	"fmt"
+)
 
 type ForcedResolver struct {
 	Field Circle
+}
+
+type ModelMethods struct {
+}
+
+func (m ModelMethods) NoContext() bool {
+	return true
+}
+
+func (m ModelMethods) WithContext(_ context.Context) bool {
+	return true
 }
 
 type Error struct {

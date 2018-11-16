@@ -34,6 +34,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	ForcedResolver() ForcedResolverResolver
+	ModelMethods() ModelMethodsResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
 	User() UserResolver
@@ -76,6 +77,12 @@ type ComplexityRoot struct {
 		Id func(childComplexity int) int
 	}
 
+	ModelMethods struct {
+		ResolverField func(childComplexity int) int
+		NoContext     func(childComplexity int) int
+		WithContext   func(childComplexity int) int
+	}
+
 	OuterObject struct {
 		Inner func(childComplexity int) int
 	}
@@ -90,6 +97,7 @@ type ComplexityRoot struct {
 		Keywords          func(childComplexity int, input *Keywords) int
 		Shapes            func(childComplexity int) int
 		ErrorBubble       func(childComplexity int) int
+		ModelMethods      func(childComplexity int) int
 		Valid             func(childComplexity int) int
 		User              func(childComplexity int, id int) int
 		NullableArg       func(childComplexity int, arg *int) int
@@ -116,6 +124,9 @@ type ComplexityRoot struct {
 type ForcedResolverResolver interface {
 	Field(ctx context.Context, obj *ForcedResolver) (*Circle, error)
 }
+type ModelMethodsResolver interface {
+	ResolverField(ctx context.Context, obj *ModelMethods) (bool, error)
+}
 type QueryResolver interface {
 	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 	Collision(ctx context.Context) (*introspection1.It, error)
@@ -126,6 +137,7 @@ type QueryResolver interface {
 	Keywords(ctx context.Context, input *Keywords) (bool, error)
 	Shapes(ctx context.Context) ([]*Shape, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
+	ModelMethods(ctx context.Context) (*ModelMethods, error)
 	Valid(ctx context.Context) (string, error)
 	User(ctx context.Context, id int) (User, error)
 	NullableArg(ctx context.Context, arg *int) (*string, error)
@@ -648,6 +660,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.It.Id(childComplexity), true
 
+	case "ModelMethods.resolverField":
+		if e.complexity.ModelMethods.ResolverField == nil {
+			break
+		}
+
+		return e.complexity.ModelMethods.ResolverField(childComplexity), true
+
+	case "ModelMethods.noContext":
+		if e.complexity.ModelMethods.NoContext == nil {
+			break
+		}
+
+		return e.complexity.ModelMethods.NoContext(childComplexity), true
+
+	case "ModelMethods.withContext":
+		if e.complexity.ModelMethods.WithContext == nil {
+			break
+		}
+
+		return e.complexity.ModelMethods.WithContext(childComplexity), true
+
 	case "OuterObject.inner":
 		if e.complexity.OuterObject.Inner == nil {
 			break
@@ -737,6 +770,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ErrorBubble(childComplexity), true
+
+	case "Query.modelMethods":
+		if e.complexity.Query.ModelMethods == nil {
+			break
+		}
+
+		return e.complexity.Query.ModelMethods(childComplexity), true
 
 	case "Query.valid":
 		if e.complexity.Query.Valid == nil {
@@ -1432,6 +1472,136 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 	return graphql.MarshalID(res)
 }
 
+var modelMethodsImplementors = []string{"ModelMethods"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.SelectionSet, obj *ModelMethods) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, modelMethodsImplementors)
+
+	var wg sync.WaitGroup
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ModelMethods")
+		case "resolverField":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ModelMethods_resolverField(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "noContext":
+			out.Values[i] = ec._ModelMethods_noContext(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "withContext":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ModelMethods_withContext(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ModelMethods",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ModelMethods().ResolverField(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ModelMethods",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NoContext(), nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ModelMethods",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WithContext(ctx), nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
 var outerObjectImplementors = []string{"OuterObject"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -1564,6 +1734,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_errorBubble(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "modelMethods":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_modelMethods(ctx, field)
 				wg.Done()
 			}(i, field)
 		case "valid":
@@ -1987,6 +2163,35 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 	}
 
 	return ec._Error(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ModelMethods(rctx)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ModelMethods)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ModelMethods(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -4204,6 +4409,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
     keywords(input: Keywords): Boolean!
     shapes: [Shape]
     errorBubble: Error
+    modelMethods: ModelMethods
     valid: String!
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
@@ -4224,6 +4430,12 @@ type Error {
     errorOnNonRequiredField: String
     errorOnRequiredField: String!
     nilOnRequiredField: String!
+}
+
+type ModelMethods {
+    resolverField: Boolean!
+    noContext: Boolean!
+    withContext: Boolean!
 }
 
 type InvalidIdentifier {

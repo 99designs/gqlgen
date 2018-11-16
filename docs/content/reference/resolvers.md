@@ -87,7 +87,10 @@ models:
 ```
 
 Here, we see that there is a method on car with the name ```Owner```, thus the ```Owner``` function will be called if
-a graphQL request includes that field to be resolved
+a graphQL request includes that field to be resolved.
+
+Model methods can optionally take a context as their first argument. If a
+context is required, the model method will also be run in parallel.
 
 ## Bind when the field names do not match
 

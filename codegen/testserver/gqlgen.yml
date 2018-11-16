@@ -11,6 +11,8 @@ resolver:
 models:
   It:
     model: "github.com/99designs/gqlgen/codegen/testserver/introspection.It"
+  ModelMethods:
+    model: "github.com/99designs/gqlgen/codegen/testserver.ModelMethods"
   InvalidIdentifier:
     model: "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename.InvalidIdentifier"
   Changes:

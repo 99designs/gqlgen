@@ -8,6 +8,7 @@ type Query {
     keywords(input: Keywords): Boolean!
     shapes: [Shape]
     errorBubble: Error
+    modelMethods: ModelMethods
     valid: String!
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
@@ -28,6 +29,12 @@ type Error {
     errorOnNonRequiredField: String
     errorOnRequiredField: String!
     nilOnRequiredField: String!
+}
+
+type ModelMethods {
+    resolverField: Boolean!
+    noContext: Boolean!
+    withContext: Boolean!
 }
 
 type InvalidIdentifier {

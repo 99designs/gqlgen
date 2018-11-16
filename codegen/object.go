@@ -33,16 +33,17 @@ type Object struct {
 
 type Field struct {
 	*Type
-	Description    string          // Description of a field
-	GQLName        string          // The name of the field in graphql
-	GoFieldType    GoFieldType     // The field type in go, if any
-	GoReceiverName string          // The name of method & var receiver in go, if any
-	GoFieldName    string          // The name of the method or var in go, if any
-	Args           []FieldArgument // A list of arguments to be passed to this field
-	ForceResolver  bool            // Should be emit Resolver method
-	NoErr          bool            // If this is bound to a go method, does that method have an error as the second argument
-	Object         *Object         // A link back to the parent object
-	Default        interface{}     // The default value
+	Description      string          // Description of a field
+	GQLName          string          // The name of the field in graphql
+	GoFieldType      GoFieldType     // The field type in go, if any
+	GoReceiverName   string          // The name of method & var receiver in go, if any
+	GoFieldName      string          // The name of the method or var in go, if any
+	Args             []FieldArgument // A list of arguments to be passed to this field
+	ForceResolver    bool            // Should be emit Resolver method
+	MethodHasContext bool            // If this is bound to a go method, does the method also take a context
+	NoErr            bool            // If this is bound to a go method, does that method have an error as the second argument
+	Object           *Object         // A link back to the parent object
+	Default          interface{}     // The default value
 }
 
 type FieldArgument struct {
@@ -103,7 +104,10 @@ func (f *Field) IsVariable() bool {
 }
 
 func (f *Field) IsConcurrent() bool {
-	return f.IsResolver() && !f.Object.DisableConcurrency
+	if f.Object.DisableConcurrency {
+		return false
+	}
+	return f.MethodHasContext || f.IsResolver()
 }
 
 func (f *Field) GoNameExported() string {
@@ -208,6 +212,10 @@ func (f *Field) CallArgs() string {
 
 		if !f.Object.Root {
 			args = append(args, "obj")
+		}
+	} else {
+		if f.MethodHasContext {
+			args = append(args, "ctx")
 		}
 	}
 

@@ -519,6 +519,35 @@ func TestTracer(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, called)
 	})
+
+	t.Run("model methods", func(t *testing.T) {
+		srv := httptest.NewServer(
+			handler.GraphQL(
+				NewExecutableSchema(Config{Resolvers: &testResolver{}}),
+			))
+		defer srv.Close()
+		c := client.New(srv.URL)
+		t.Run("without context", func(t *testing.T) {
+			var resp struct {
+				ModelMethods struct {
+					NoContext bool
+				}
+			}
+			err := c.Post(`query { modelMethods{ noContext } }`, &resp)
+			require.NoError(t, err)
+			require.True(t, resp.ModelMethods.NoContext)
+		})
+		t.Run("with context", func(t *testing.T) {
+			var resp struct {
+				ModelMethods struct {
+					WithContext bool
+				}
+			}
+			err := c.Post(`query { modelMethods{ withContext } }`, &resp)
+			require.NoError(t, err)
+			require.True(t, resp.ModelMethods.WithContext)
+		})
+	})
 }
 
 func TestResponseExtension(t *testing.T) {
@@ -556,6 +585,15 @@ func (r *testResolver) User() UserResolver {
 func (r *testResolver) Query() QueryResolver {
 	return &testQueryResolver{}
 }
+func (r *testResolver) ModelMethods() ModelMethodsResolver {
+	return &testModelMethodsResolver{}
+}
+
+type testModelMethodsResolver struct{}
+
+func (r *testModelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
+	return true, nil
+}
 
 type testQueryResolver struct{ queryResolver }
 
@@ -574,6 +612,10 @@ func (r *testQueryResolver) User(ctx context.Context, id int) (User, error) {
 func (r *testQueryResolver) NullableArg(ctx context.Context, arg *int) (*string, error) {
 	s := "Ok"
 	return &s, nil
+}
+
+func (r *testQueryResolver) ModelMethods(ctx context.Context) (*ModelMethods, error) {
+	return &ModelMethods{}, nil
 }
 
 func (r *testResolver) Subscription() SubscriptionResolver {

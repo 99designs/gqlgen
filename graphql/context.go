@@ -58,6 +58,7 @@ func NewRequestContext(doc *ast.QueryDocument, query string, variables map[strin
 		RequestMiddleware:   DefaultRequestMiddleware,
 		Recover:             DefaultRecover,
 		ErrorPresenter:      DefaultErrorPresenter,
+		Tracer:              &NopTracer{},
 	}
 }
 

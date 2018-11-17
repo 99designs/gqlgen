@@ -15,10 +15,10 @@ Looking for typescript? Check out [graphqlgen](https://github.com/prisma/graphql
 | Docs | [docs](https://gqlgen.com) & [examples](https://github.com/99designs/gqlgen/tree/master/example) | [examples](https://github.com/graph-gophers/graphql-go/tree/master/example/starwars) | [examples](https://github.com/graphql-go/graphql/tree/master/examples) | [examples](https://github.com/samsarahq/thunder/tree/master/example)|
 | Query | :+1: | :+1: | :+1: | :+1: |
 | Mutation | :+1: | :construction: [pr](https://github.com/graph-gophers/graphql-go/pull/182) | :+1: | :+1: |
-| Subscription | :+1: | :construction: [pr](https://github.com/graph-gophers/graphql-go/pull/132) | :+1: | :+1: |
+| Subscription | :+1: | :construction: [pr](https://github.com/graph-gophers/graphql-go/pull/182) | :+1: | :+1: |
 | Type Safety | :+1: | :+1: | :no_entry: | :+1: | 
 | Type Binding | :+1: | :construction: [pr](https://github.com/graph-gophers/graphql-go/pull/194) | :no_entry: | :+1: |
-| Embedding | :+1: | :construction: [pr](https://github.com/graphql-go/graphql/pull/274) | :no_entry: | :no_entry: |
+| Embedding | :+1: | :no_entry: | :construction: [pr](https://github.com/graphql-go/graphql/pull/371) | :no_entry: |
 | Interfaces | :+1: | :+1: | :+1: | :no_entry: [is](https://github.com/samsarahq/thunder/issues/78) |
 | Generated Enums | :+1: | :no_entry: | :no_entry: | :no_entry: |
 | Generated Inputs | :+1: | :no_entry: | :no_entry: | :no_entry: |

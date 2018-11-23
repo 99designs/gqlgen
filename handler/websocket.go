@@ -83,7 +83,7 @@ func (c *wsConnection) init() bool {
 	case connectionInitMsg:
 		if len(message.Payload) > 0 {
 			c.initPayload = make(InitPayload)
-			err := json.Unmarshal(message.Payload, &c.initPayload)
+			err := jsonIterator.Unmarshal(message.Payload, &c.initPayload)
 			if err != nil {
 				return false
 			}
@@ -213,7 +213,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 }
 
 func (c *wsConnection) sendData(id string, response *graphql.Response) {
-	b, err := json.Marshal(response)
+	b, err := jsonIterator.Marshal(response)
 	if err != nil {
 		c.sendError(id, gqlerror.Errorf("unable to encode json response: %s", err.Error()))
 		return
@@ -227,7 +227,7 @@ func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 	for _, err := range errors {
 		errs = append(errs, err)
 	}
-	b, err := json.Marshal(errs)
+	b, err := jsonIterator.Marshal(errs)
 	if err != nil {
 		panic(err)
 	}
@@ -235,7 +235,7 @@ func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
-	b, err := json.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
+	b, err := jsonIterator.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 	if err != nil {
 		panic(err)
 	}

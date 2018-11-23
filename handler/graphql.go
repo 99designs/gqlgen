@@ -12,11 +12,14 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/golang-lru"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
 	"github.com/vektah/gqlparser/validator"
 )
+
+var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type params struct {
 	Query         string                 `json:"query"`
@@ -365,13 +368,13 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch op.Operation {
 	case ast.Query:
-		b, err := json.Marshal(gh.exec.Query(ctx, op))
+		b, err := jsonIterator.Marshal(gh.exec.Query(ctx, op))
 		if err != nil {
 			panic(err)
 		}
 		w.Write(b)
 	case ast.Mutation:
-		b, err := json.Marshal(gh.exec.Mutation(ctx, op))
+		b, err := jsonIterator.Marshal(gh.exec.Mutation(ctx, op))
 		if err != nil {
 			panic(err)
 		}
@@ -446,7 +449,7 @@ func jsonDecode(r io.Reader, val interface{}) error {
 
 func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 	w.WriteHeader(code)
-	b, err := json.Marshal(&graphql.Response{Errors: errors})
+	b, err := jsonIterator.Marshal(&graphql.Response{Errors: errors})
 	if err != nil {
 		panic(err)
 	}

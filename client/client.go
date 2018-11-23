@@ -8,8 +8,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 )
+
+var jsonIterator = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // Client for graphql requests
 type Client struct {
@@ -96,7 +99,7 @@ func (p *Client) Post(query string, response interface{}, options ...Option) (re
 
 func (p *Client) RawPost(query string, options ...Option) (*ResponseData, error) {
 	r := p.mkRequest(query, options...)
-	requestBody, err := json.Marshal(r)
+	requestBody, err := jsonIterator.Marshal(r)
 	if err != nil {
 		return nil, fmt.Errorf("encode: %s", err.Error())
 	}
@@ -122,7 +125,7 @@ func (p *Client) RawPost(query string, options ...Option) (*ResponseData, error)
 	// decode it into map string first, let mapstructure do the final decode
 	// because it can be much stricter about unknown fields.
 	respDataRaw := &ResponseData{}
-	err = json.Unmarshal(responseBody, &respDataRaw)
+	err = jsonIterator.Unmarshal(responseBody, &respDataRaw)
 	if err != nil {
 		return nil, fmt.Errorf("decode: %s", err.Error())
 	}

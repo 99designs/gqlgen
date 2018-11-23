@@ -43,7 +43,7 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 
 func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
 	r := p.mkRequest(query, options...)
-	requestBody, err := json.Marshal(r)
+	requestBody, err := jsonIterator.Marshal(r)
 	if err != nil {
 		return errorSubscription(fmt.Errorf("encode: %s", err.Error()))
 	}
@@ -58,7 +58,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 
 	initMessage := operationMessage{Type: connectionInitMsg}
 	if initPayload != nil {
-		initMessage.Payload, err = json.Marshal(initPayload)
+		initMessage.Payload, err = jsonIterator.Marshal(initPayload)
 		if err != nil {
 			return errorSubscription(fmt.Errorf("parse payload: %s", err.Error()))
 		}
@@ -94,7 +94,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 			}
 
 			respDataRaw := map[string]interface{}{}
-			err = json.Unmarshal(op.Payload, &respDataRaw)
+			err = jsonIterator.Unmarshal(op.Payload, &respDataRaw)
 			if err != nil {
 				return fmt.Errorf("decode: %s", err.Error())
 			}

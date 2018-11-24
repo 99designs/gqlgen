@@ -151,7 +151,7 @@ better than generating.
 
 ### Write the resolvers
 
-This is a work in progress, we have a way to generate resolver stubs, but it only cant currently update existing code. We can force it to run again by deleting `resolvers.go` and re-running gqlgen:
+This is a work in progress, we have a way to generate resolver stubs, but it cannot currently update existing code. We can force it to run again by deleting `resolvers.go` and re-running gqlgen:
 ```bash
 rm resolvers.go
 gqlgen

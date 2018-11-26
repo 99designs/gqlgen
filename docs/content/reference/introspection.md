@@ -13,11 +13,11 @@ The easiest way to turn it on and off at runtime by passing a handler option whe
 
 ```go
 srv := httptest.NewServer(
-			handler.GraphQL(
-				NewExecutableSchema(Config{Resolvers: resolvers}),
-				handler.IntrospectionEnabled(false),
-			),
-		)
+	handler.GraphQL(
+		NewExecutableSchema(Config{Resolvers: resolvers}),
+		handler.IntrospectionEnabled(false),
+	),
+)
 ```
 
 ## Disabling based on authentication

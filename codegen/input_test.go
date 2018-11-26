@@ -12,7 +12,7 @@ func TestTypeUnionAsInput(t *testing.T) {
 		type Query {
 			addBookmark(b: Bookmarkable!): Boolean!
 		}
-		type Item {}
+		type Item {name: String}
 		union Bookmarkable = Item
 	`)
 
@@ -24,7 +24,7 @@ func TestTypeInInput(t *testing.T) {
 		type Query {
 			addBookmark(b: BookmarkableInput!): Boolean!
 		}
-		type Item {}
+		type Item {name: String}
 		input BookmarkableInput {
 			item: Item
 		}

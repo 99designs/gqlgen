@@ -3,16 +3,16 @@
 package dataloader
 
 import (
-	bytes "bytes"
-	context "context"
-	strconv "strconv"
-	sync "sync"
-	time "time"
+	"bytes"
+	"context"
+	"strconv"
+	"sync"
+	"time"
 
-	graphql "github.com/99designs/gqlgen/graphql"
-	introspection "github.com/99designs/gqlgen/graphql/introspection"
-	gqlparser "github.com/vektah/gqlparser"
-	ast "github.com/vektah/gqlparser/ast"
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.

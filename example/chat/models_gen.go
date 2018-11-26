@@ -3,7 +3,7 @@
 package chat
 
 import (
-	time "time"
+	"time"
 )
 
 type Message struct {

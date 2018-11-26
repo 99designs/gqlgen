@@ -3,7 +3,7 @@
 package model
 
 import (
-	external "external"
+	"external"
 )
 
 type Address struct {

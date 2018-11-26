@@ -3,9 +3,9 @@
 package type_system_extension
 
 import (
-	fmt "fmt"
-	io "io"
-	strconv "strconv"
+	"fmt"
+	"io"
+	"strconv"
 )
 
 type Data interface {

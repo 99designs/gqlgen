@@ -203,7 +203,7 @@ func (b BindErrors) Error() string {
 	return strings.Join(errs, "\n\n")
 }
 
-func bindObject(t types.Type, object *Object, imports *Imports, structTag string) BindErrors {
+func bindObject(t types.Type, object *Object, structTag string) BindErrors {
 	var errs BindErrors
 	for i := range object.Fields {
 		field := &object.Fields[i]
@@ -213,13 +213,13 @@ func bindObject(t types.Type, object *Object, imports *Imports, structTag string
 		}
 
 		// first try binding to a method
-		methodErr := bindMethod(imports, t, field)
+		methodErr := bindMethod(t, field)
 		if methodErr == nil {
 			continue
 		}
 
 		// otherwise try binding to a var
-		varErr := bindVar(imports, t, field, structTag)
+		varErr := bindVar(t, field, structTag)
 
 		if varErr != nil {
 			errs = append(errs, BindError{
@@ -234,7 +234,7 @@ func bindObject(t types.Type, object *Object, imports *Imports, structTag string
 	return errs
 }
 
-func bindMethod(imports *Imports, t types.Type, field *Field) error {
+func bindMethod(t types.Type, field *Field) error {
 	namedType, ok := t.(*types.Named)
 	if !ok {
 		return fmt.Errorf("not a named type")
@@ -273,7 +273,7 @@ func bindMethod(imports *Imports, t types.Type, field *Field) error {
 	}
 
 	result := sig.Results().At(0)
-	if err := validateTypeBinding(imports, field, result.Type()); err != nil {
+	if err := validateTypeBinding(field, result.Type()); err != nil {
 		return errors.Wrap(err, "method has wrong return type")
 	}
 
@@ -285,7 +285,7 @@ func bindMethod(imports *Imports, t types.Type, field *Field) error {
 	return nil
 }
 
-func bindVar(imports *Imports, t types.Type, field *Field, structTag string) error {
+func bindVar(t types.Type, field *Field, structTag string) error {
 	underlying, ok := t.Underlying().(*types.Struct)
 	if !ok {
 		return fmt.Errorf("not a struct")
@@ -300,7 +300,7 @@ func bindVar(imports *Imports, t types.Type, field *Field, structTag string) err
 		return err
 	}
 
-	if err := validateTypeBinding(imports, field, structField.Type()); err != nil {
+	if err := validateTypeBinding(field, structField.Type()); err != nil {
 		return errors.Wrap(err, "field has wrong type")
 	}
 
@@ -333,7 +333,7 @@ nextArg:
 	return newArgs, nil
 }
 
-func validateTypeBinding(imports *Imports, field *Field, goType types.Type) error {
+func validateTypeBinding(field *Field, goType types.Type) error {
 	gqlType := normalizeVendor(field.Type.FullSignature())
 	goTypeStr := normalizeVendor(goType.String())
 
@@ -347,8 +347,7 @@ func validateTypeBinding(imports *Imports, field *Field, goType types.Type) erro
 	if equalTypes(underlyingStr, gqlType) {
 		field.Type.Modifiers = modifiersFromGoType(goType)
 		pkg, typ := pkgAndType(goType.String())
-		imp := imports.findByPath(pkg)
-		field.AliasedType = &Ref{GoType: typ, Import: imp}
+		field.AliasedType = &Ref{GoType: typ, Package: pkg}
 		return nil
 	}
 

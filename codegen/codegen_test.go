@@ -12,7 +12,7 @@ func TestGenerateServer(t *testing.T) {
 	name := "graphserver"
 	schema := `
 	type Query {
-		user(): User
+		user: User
 	}
 	type User {
 		id: Int

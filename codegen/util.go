@@ -337,14 +337,14 @@ func validateTypeBinding(imports *Imports, field *Field, goType types.Type) erro
 	gqlType := normalizeVendor(field.Type.FullSignature())
 	goTypeStr := normalizeVendor(goType.String())
 
-	if goTypeStr == gqlType || "*"+goTypeStr == gqlType || goTypeStr == "*"+gqlType {
+	if equalTypes(goTypeStr, gqlType) {
 		field.Type.Modifiers = modifiersFromGoType(goType)
 		return nil
 	}
 
 	// deal with type aliases
 	underlyingStr := normalizeVendor(goType.Underlying().String())
-	if underlyingStr == gqlType || "*"+underlyingStr == gqlType || underlyingStr == "*"+gqlType {
+	if equalTypes(underlyingStr, gqlType) {
 		field.Type.Modifiers = modifiersFromGoType(goType)
 		pkg, typ := pkgAndType(goType.String())
 		imp := imports.findByPath(pkg)
@@ -381,4 +381,8 @@ func normalizeVendor(pkg string) string {
 	pkg = strings.TrimPrefix(pkg, modifiers)
 	parts := strings.Split(pkg, "/vendor/")
 	return modifiers + parts[len(parts)-1]
+}
+
+func equalTypes(goType string, gqlType string) bool {
+	return goType == gqlType || "*"+goType == gqlType || goType == "*"+gqlType || strings.Replace(goType, "[]*", "[]", -1) == gqlType
 }

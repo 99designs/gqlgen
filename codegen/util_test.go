@@ -16,6 +16,7 @@ func TestNormalizeVendor(t *testing.T) {
 	require.Equal(t, "[]bar/baz", normalizeVendor("[]foo/vendor/bar/baz"))
 	require.Equal(t, "*bar/baz", normalizeVendor("*foo/vendor/bar/baz"))
 	require.Equal(t, "*[]*bar/baz", normalizeVendor("*[]*foo/vendor/bar/baz"))
+	require.Equal(t, "[]*bar/baz", normalizeVendor("[]*foo/vendor/bar/baz"))
 }
 
 func TestFindField(t *testing.T) {
@@ -116,6 +117,27 @@ func TestEqualFieldName(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
 			result := equalFieldName(tc.Source, tc.Target)
+			require.Equal(t, tc.Expected, result)
+		})
+	}
+}
+
+func TestEqualTypes(t *testing.T) {
+	tt := []struct {
+		Name     string
+		Source   string
+		Target   string
+		Expected bool
+	}{
+		{Name: "basic", Source: "bar/baz", Target: "bar/baz", Expected: true},
+		{Name: "basic slice", Source: "[]bar/baz", Target: "[]bar/baz", Expected: true},
+		{Name: "pointer", Source: "*bar/baz", Target: "bar/baz", Expected: true},
+		{Name: "pointer slice", Source: "[]*bar/baz", Target: "[]bar/baz", Expected: true},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			result := equalTypes(tc.Source, tc.Target)
 			require.Equal(t, tc.Expected, result)
 		})
 	}

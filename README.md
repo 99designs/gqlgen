@@ -4,8 +4,6 @@ This is a library for quickly creating strictly typed graphql servers in golang.
 
 See the [docs](https://gqlgen.com/) for a getting started guide.
 
-Looking for typescript? Check out [graphqlgen](https://github.com/prisma/graphqlgen)
-
 ### Feature comparison
 
 | | [gqlgen](https://github.com/99designs/gqlgen) | [gophers](https://github.com/graph-gophers/graphql-go) | [graphql-go](https://github.com/graphql-go/graphql) | [thunder](https://github.com/samsarahq/thunder) | 

@@ -141,7 +141,10 @@ func TestGeneratedServer(t *testing.T) {
 			sub.Close()
 
 			// need a little bit of time for goroutines to settle
-			time.Sleep(200 * time.Millisecond)
+			start := time.Now()
+			for time.Since(start).Seconds() < 2 && initialGoroutineCount != runtime.NumGoroutine() {
+				time.Sleep(5 * time.Millisecond)
+			}
 
 			require.Equal(t, initialGoroutineCount, runtime.NumGoroutine())
 		})

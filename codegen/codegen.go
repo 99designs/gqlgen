@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -77,7 +76,6 @@ func GenerateServer(cfg Config, filename string) error {
 
 	serverFilename := abs(filename)
 	serverBuild := cfg.server(filepath.Dir(serverFilename))
-	fmt.Println(serverBuild.ExecPackageName)
 
 	if _, err := os.Stat(serverFilename); os.IsNotExist(errors.Cause(err)) {
 		err = templates.RenderToFile("server.gotpl", serverFilename, serverBuild)

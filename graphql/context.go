@@ -18,8 +18,9 @@ type RequestContext struct {
 	Variables map[string]interface{}
 	Doc       *ast.QueryDocument
 
-	ComplexityLimit     int
-	OperationComplexity int
+	ComplexityLimit      int
+	OperationComplexity  int
+	DisableIntrospection bool
 
 	// ErrorPresenter will be used to generate the error
 	// message from errors given to Error().

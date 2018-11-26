@@ -5,6 +5,7 @@ package testserver
 import (
 	bytes "bytes"
 	context "context"
+	errors "errors"
 	fmt "fmt"
 	strconv "strconv"
 	sync "sync"
@@ -2341,7 +2342,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.introspectType(args["name"].(string)), nil
+		return ec.introspectType(args["name"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -2370,7 +2371,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.introspectSchema(), nil
+		return ec.introspectSchema()
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -4390,12 +4391,18 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 	return res
 }
 
-func (ec *executionContext) introspectSchema() *introspection.Schema {
-	return introspection.WrapSchema(parsedSchema)
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
 }
 
-func (ec *executionContext) introspectType(name string) *introspection.Type {
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(

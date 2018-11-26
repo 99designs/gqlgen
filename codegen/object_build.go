@@ -113,7 +113,6 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 			obj.Fields = append(obj.Fields, Field{
 				Type:           &Type{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__schema",
-				NoErr:          true,
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectSchema",
@@ -126,7 +125,6 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 			obj.Fields = append(obj.Fields, Field{
 				Type:           &Type{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__type",
-				NoErr:          true,
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectType",

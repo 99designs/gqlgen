@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"io"
-	"strconv"
 )
 
 var nullLit = []byte(`null`)
@@ -56,7 +55,7 @@ func (m *OrderedMap) MarshalGQL(writer io.Writer) {
 		if i != 0 {
 			writer.Write(comma)
 		}
-		io.WriteString(writer, strconv.Quote(key))
+		writeQuotedString(writer, key)
 		writer.Write(colon)
 		m.Values[i].MarshalGQL(writer)
 	}

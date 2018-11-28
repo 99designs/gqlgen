@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -55,4 +57,25 @@ func TestLoadDefaultConfig(t *testing.T) {
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.True(t, os.IsNotExist(err))
 	})
+}
+
+func TestReferencedPackages(t *testing.T) {
+	t.Run("valid", func(t *testing.T) {
+		tm := TypeMap{
+			"Foo": {Model: "github.com/test.Foo"},
+			"Bar": {Model: "github.com/test.Bar"},
+			"Baz": {Model: "github.com/otherpkg.Baz"},
+			"Map": {Model: "map[string]interface{}"},
+			"SkipResolver": {
+				Fields: map[string]TypeMapField{
+					"field": {Resolver: false},
+				},
+			},
+		}
+
+		pkgs := tm.referencedPackages()
+
+		assert.Equal(t, []string{"github.com/test", "github.com/otherpkg"}, pkgs)
+	})
+
 }

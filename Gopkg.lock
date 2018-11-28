@@ -163,7 +163,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7fa8a2105f0b0853395a85d3dd8ef1475c44919374c6496dba7b987586edaced"
+  digest = "1:8124fec00b7f3d03b4971bfa9d5da9f0b03f442dd323d4297abf9a1e6883357d"
   name = "github.com/vektah/gqlparser"
   packages = [
     ".",
@@ -175,7 +175,7 @@
     "validator/rules",
   ]
   pruneopts = "UT"
-  revision = "f119686bf1d4d1a68c7ed6afe35f183625443c41"
+  revision = "8d495d2fd057d1c734159ee3795905e8f162f78a"
 
 [[projects]]
   branch = "master"

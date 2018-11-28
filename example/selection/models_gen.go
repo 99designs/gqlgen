@@ -3,7 +3,7 @@
 package selection
 
 import (
-	time "time"
+	"time"
 )
 
 type Event interface {

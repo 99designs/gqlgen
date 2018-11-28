@@ -41,7 +41,7 @@ type Mutation {
 
 ## Implement the directive
 
-Finally, we need to implement the directive, and pass it in when startin gthe server:
+Finally, we need to implement the directive, and pass it in when starting the server:
 ```go
 package main
 

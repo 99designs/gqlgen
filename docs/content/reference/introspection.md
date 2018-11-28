@@ -5,11 +5,11 @@ linkTitle: Introspection
 menu: { main: { parent: 'reference' } }
 ---
 
-One of the most powerful features of running graphql is its amazing discoverability, but sometimes you might not want to allow others to discover your endpoints.
+One of the best features of GraphQL is it's powerful discoverability, but sometimes you don't want to allow others to explore your endpoint.
 
-## Disable it for the whole server
+## Disable introspection for the whole server
 
-The easiest way to turn it on and off at runtime by passing a handler option when starting the server:
+To turn introspection on and off at runtime, pass the `IntrospectionEnabled` handler option when starting the server:
 
 ```go
 srv := httptest.NewServer(
@@ -20,9 +20,10 @@ srv := httptest.NewServer(
 )
 ```
 
-## Disabling based on authentication
+## Disabling introspection based on authentication
 
-Introspection can be enabled on a per-request context basis, so you can modify it in middleware based on user authentication too:
+Introspection can also be enabled on a per-request context basis.  For example, you could modify it in a middleware based on user authentication:
+
 ```go
 srv := httptest.NewServer(
 	handler.GraphQL(

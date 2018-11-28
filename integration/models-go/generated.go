@@ -3,9 +3,9 @@
 package models
 
 import (
-	fmt "fmt"
-	io "io"
-	strconv "strconv"
+	"fmt"
+	"io"
+	"strconv"
 )
 
 type DateFilter struct {

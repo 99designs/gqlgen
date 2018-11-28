@@ -3,17 +3,17 @@
 package integration
 
 import (
-	bytes "bytes"
-	context "context"
-	remote_api "remote_api"
-	strconv "strconv"
-	sync "sync"
+	"bytes"
+	"context"
+	"remote_api"
+	"strconv"
+	"sync"
 
-	graphql "github.com/99designs/gqlgen/graphql"
-	introspection "github.com/99designs/gqlgen/graphql/introspection"
-	models "github.com/99designs/gqlgen/integration/models-go"
-	gqlparser "github.com/vektah/gqlparser"
-	ast "github.com/vektah/gqlparser/ast"
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/99designs/gqlgen/integration/models-go"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.

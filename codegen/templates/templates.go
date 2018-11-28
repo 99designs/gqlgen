@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -16,18 +15,24 @@ import (
 	"unicode"
 
 	"github.com/99designs/gqlgen/internal/imports"
+
 	"github.com/pkg/errors"
 )
 
+// this is done with a global because subtemplates currently get called in functions. Lets aim to remove this eventually.
+var CurrentImports *Imports
+
 func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 	t := template.New("").Funcs(template.FuncMap{
-		"ucFirst":     ucFirst,
-		"lcFirst":     lcFirst,
-		"quote":       strconv.Quote,
-		"rawQuote":    rawQuote,
-		"toCamel":     ToCamel,
-		"dump":        dump,
-		"prefixLines": prefixLines,
+		"ucFirst":       ucFirst,
+		"lcFirst":       lcFirst,
+		"quote":         strconv.Quote,
+		"rawQuote":      rawQuote,
+		"toCamel":       ToCamel,
+		"dump":          dump,
+		"prefixLines":   prefixLines,
+		"reserveImport": CurrentImports.Reserve,
+		"lookupImport":  CurrentImports.Lookup,
 	})
 
 	for filename, data := range data {
@@ -148,19 +153,21 @@ func prefixLines(prefix, s string) string {
 }
 
 func RenderToFile(tpl string, filename string, data interface{}) error {
+	if CurrentImports != nil {
+		panic(fmt.Errorf("recursive or concurrent call to RenderToFile detected"))
+	}
+	CurrentImports = &Imports{destDir: filepath.Dir(filename)}
+
 	var buf *bytes.Buffer
 	buf, err := Run(tpl, data)
 	if err != nil {
 		return errors.Wrap(err, filename+" generation failed")
 	}
 
-	if err := write(filename, buf.Bytes()); err != nil {
-		return err
-	}
+	b := bytes.Replace(buf.Bytes(), []byte("%%%IMPORTS%%%"), []byte(CurrentImports.String()), -1)
+	CurrentImports = nil
 
-	log.Println(filename)
-
-	return nil
+	return write(filename, b)
 }
 
 func write(filename string, b []byte) error {

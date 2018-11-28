@@ -3,10 +3,10 @@
 package testserver
 
 import (
-	context "context"
+	"context"
 
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
-	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
+	"github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
 )
 
 type Resolver struct{}

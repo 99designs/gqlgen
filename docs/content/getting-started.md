@@ -122,14 +122,14 @@ Next tell gqlgen to use this new struct by adding it to `gqlgen.yml`:
 ```yaml
 models:
   Todo:
-    model: github.com/vektah/gqlgen-tutorials/gettingstarted.Todo
+    model: github.com/[username]/gqlgen-todos/gettingstarted.Todo
 ```
 
 Regenerate by running:
 
 ```bash
 $ go run scripts/gqlgen.go -v
-Unable to bind Todo.user to github.com/vektah/gqlgen-tutorials/gettingstarted.Todo
+Unable to bind Todo.user to github.com/[username]/gqlgen-todos/gettingstarted.Todo
 	no method named user
 	no field named user
 	Adding resolver method
@@ -185,10 +185,10 @@ better than generating.
 
 ### Write the resolvers
 
-This is a work in progress, we have a way to generate resolver stubs, but it cannot currently update existing code. We can force it to run again by deleting `resolvers.go` and re-running gqlgen:
+This is a work in progress, we have a way to generate resolver stubs, but it cannot currently update existing code. We can force it to run again by deleting `resolver.go` and re-running gqlgen:
 
 ```bash
-$ rm resolvers.go
+$ rm resolver.go
 $ go run scripts/gqlgen.go
 ```
 
@@ -275,7 +275,7 @@ query findTodos {
 
 ## Finishing touches
 
-At the top of our `resolvers.go` add the following line:
+At the top of our `resolver.go` add the following line:
 
 ```go
 //go:generate go run scripts/gqlgen.go -v

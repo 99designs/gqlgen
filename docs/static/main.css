@@ -20,6 +20,11 @@
 
     --color-code-text: #445;
     --color-code-background: #f5f9fc;
+
+    --color-blockquote-background: #fffaf3;
+    --color-blockquote-highlight: rgba(0, 0, 0, 0.1);
+
+    --margin-default: 15px;
 }
 
 html, body, div, span, applet, object, iframe,
@@ -48,7 +53,7 @@ footer, header, hgroup, menu, nav, section {
     display: block;
 }
 ol, ul {
-    margin-bottom: 1em;
+    margin-bottom: var(--margin-default);
     list-style: disc;
     margin-left: 1.5em;
 }
@@ -80,7 +85,7 @@ a {
 }
 
 a:hover {
-    border-bottom: 2px solid;
+    text-decoration: underline;
 }
 
 @media (min-width: 768px) {
@@ -97,7 +102,7 @@ a:hover {
 
 main {
     flex: 1;
-    padding: 20px;
+    padding: 0 20px 20px;
     color: var(--color-text);
 }
 
@@ -105,6 +110,10 @@ main {
     grid-area: content;
     max-width: 920px;
     margin: auto;
+}
+
+main .content {
+    margin-top: 40px;
 }
 
 header {
@@ -145,20 +154,20 @@ h1 {
 
 h2 {
     margin-top: 2em;
-    margin-bottom: 1em;
+    margin-bottom: var(--margin-default);
     font-size: 19px;
     font-weight: 700;
 }
 
 h3 {
     margin-top: 1.5em;
-    margin-bottom: 1em;
+    margin-bottom: var(--margin-default);
     font-size: 16px;
     font-weight: 500;
 }
 
 p {
-    margin-bottom: 1em;
+    margin-bottom: var(--margin-default);
 }
 
 nav {
@@ -178,7 +187,7 @@ nav {
 }
 
 .menu a:hover {
-    border-bottom: none;
+    text-decoration: none;
 }
 
 .menu-item {
@@ -243,7 +252,7 @@ ul.menu a:hover {
 }
 
 .logo:hover {
-    border-bottom: none;
+    text-decoration: none;
 }
 
 code {
@@ -252,10 +261,17 @@ code {
     font-weight: 500;
     color: var(--color-code-text);
     background-color: var(--color-code-background);
+    border-radius: 3px;
+    font-size: 13px;
+    margin-bottom: var(--margin-default);
 }
 
 strong {
     font-weight: 700;
+}
+
+em {
+    font-style: italic;
 }
 
 .anchor-link {
@@ -263,7 +279,7 @@ strong {
 }
 
 .anchor-link:hover {
-    border-bottom: none;
+    text-decoration: none;
 }
 
 .anchor-icon {
@@ -391,4 +407,29 @@ strong {
         transform: none;
     }
 
+}
+
+
+blockquote {
+    background-color: var(--color-blockquote-background);
+    border-left-color: var(--color-blockquote-highlight);
+    border-left-width: 9px;
+    border-left-style: solid;
+    padding: 1em 20px 1em 11px;
+    margin-bottom: var(--margin-default);
+    margin-left: -20px;
+    margin-right: -20px;
+}
+
+blockquote p {
+    margin-bottom: 0;
+}
+
+/* Blockquote headings. */
+blockquote p:first-of-type {
+    font-weight: bold;
+}
+
+blockquote code {
+    background-color: var(--color-blockquote-highlight);
 }

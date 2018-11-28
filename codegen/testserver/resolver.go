@@ -1,5 +1,3 @@
-//go:generate gorunpkg github.com/99designs/gqlgen
-
 package testserver
 
 import (

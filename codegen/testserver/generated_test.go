@@ -222,6 +222,32 @@ func TestIntrospection(t *testing.T) {
 		var resp interface{}
 		err := c.Post(introspection.Query, &resp)
 		require.NoError(t, err)
+
+		t.Run("does not return empty deprecation strings", func(t *testing.T) {
+			q := `{
+			  __type(name:"InnerObject") {
+			    fields {
+			      name
+			      deprecationReason
+			    }
+			  }
+			}`
+
+			c := client.New(srv.URL)
+			var resp struct {
+				Type struct {
+					Fields []struct {
+						Name              string
+						DeprecationReason *string
+					}
+				} `json:"__type"`
+			}
+			err := c.Post(q, &resp)
+			require.NoError(t, err)
+
+			require.Equal(t, "id", resp.Type.Fields[0].Name)
+			require.Nil(t, resp.Type.Fields[0].DeprecationReason)
+		})
 	})
 
 	t.Run("disabled by middleware", func(t *testing.T) {
@@ -244,6 +270,7 @@ func TestIntrospection(t *testing.T) {
 		err := c.Post(introspection.Query, &resp)
 		require.EqualError(t, err, "[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]")
 	})
+
 }
 
 var _ graphql.Tracer = (*testTracer)(nil)

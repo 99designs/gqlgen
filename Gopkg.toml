@@ -14,7 +14,7 @@ required = ["github.com/vektah/dataloaden"]
 
 [[constraint]]
   name = "github.com/vektah/gqlparser"
-  revision = "^1.0.0"
+  version = "^1.0.0"
 
 [prune]
   go-tests = true
@@ -23,3 +23,7 @@ required = ["github.com/vektah/dataloaden"]
 [[constraint]]
   name = "gopkg.in/yaml.v2"
   version = "2.2.1"
+
+[[constraint]]
+  name = "github.com/rs/cors"
+  version = "1.6.0"

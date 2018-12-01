@@ -12,6 +12,10 @@ required = ["github.com/vektah/dataloaden"]
   branch = "master"
   name = "golang.org/x/tools"
 
+[[constraint]]
+  name = "github.com/vektah/gqlparser"
+  version = "^1.0.0"
+
 [prune]
   go-tests = true
   unused-packages = true
@@ -19,3 +23,7 @@ required = ["github.com/vektah/dataloaden"]
 [[constraint]]
   name = "gopkg.in/yaml.v2"
   version = "2.2.1"
+
+[[constraint]]
+  name = "github.com/rs/cors"
+  version = "1.6.0"

@@ -119,6 +119,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:b0c25f00bad20d783d259af2af8666969e2fc343fa0dc9efe52936bbd67fb758"
+  name = "github.com/rs/cors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9a47f48565a795472d43519dd49aac781f3034fb"
+  version = "v1.6.0"
+
+[[projects]]
   branch = "master"
   digest = "1:7ca2584fa7da0520cd2d1136a10194fe5a5b220bdb215074ab6f7b5ad91115f4"
   name = "github.com/shurcooL/httpfs"
@@ -162,8 +170,7 @@
   revision = "314ac81052eedc03ac0a79bdc89d05a49a2a5814"
 
 [[projects]]
-  branch = "master"
-  digest = "1:8124fec00b7f3d03b4971bfa9d5da9f0b03f442dd323d4297abf9a1e6883357d"
+  digest = "1:ed6a41de3eedd8d4868eea057837860453ebbe08c5e385fd50d4c24e5642ec18"
   name = "github.com/vektah/gqlparser"
   packages = [
     ".",
@@ -175,7 +182,8 @@
     "validator/rules",
   ]
   pruneopts = "UT"
-  revision = "8d495d2fd057d1c734159ee3795905e8f162f78a"
+  revision = "e805d08bb209b1accdea76bd2327811858d81985"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -240,6 +248,7 @@
     "github.com/mitchellh/mapstructure",
     "github.com/opentracing/opentracing-go",
     "github.com/pkg/errors",
+    "github.com/rs/cors",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/urfave/cli",

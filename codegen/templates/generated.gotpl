@@ -3,9 +3,21 @@
 package {{ .PackageName }}
 
 import (
-{{- range $import := .Imports }}
-	{{- $import.Write }}
-{{ end }}
+	%%%IMPORTS%%%
+
+	{{ reserveImport "context"  }}
+	{{ reserveImport "fmt"  }}
+	{{ reserveImport "io"  }}
+	{{ reserveImport "strconv"  }}
+	{{ reserveImport "time"  }}
+	{{ reserveImport "sync"  }}
+	{{ reserveImport "errors"  }}
+	{{ reserveImport "bytes"  }}
+
+	{{ reserveImport "github.com/vektah/gqlparser" }}
+	{{ reserveImport "github.com/vektah/gqlparser/ast" }}
+	{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
+	{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -252,12 +264,18 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 	return res
 }
 
-func (ec *executionContext) introspectSchema() *introspection.Schema {
-	return introspection.WrapSchema(parsedSchema)
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
 }
 
-func (ec *executionContext) introspectType(name string) *introspection.Type {
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(

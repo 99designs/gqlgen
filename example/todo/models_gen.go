@@ -3,9 +3,9 @@
 package todo
 
 import (
-	fmt "fmt"
-	io "io"
-	strconv "strconv"
+	"fmt"
+	"io"
+	"strconv"
 )
 
 // Passed to createTodo to create a new todo

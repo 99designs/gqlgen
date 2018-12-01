@@ -25,18 +25,21 @@ type params struct {
 }
 
 type Config struct {
-	cacheSize       int
-	upgrader        websocket.Upgrader
-	recover         graphql.RecoverFunc
-	errorPresenter  graphql.ErrorPresenterFunc
-	resolverHook    graphql.FieldMiddleware
-	requestHook     graphql.RequestMiddleware
-	tracer          graphql.Tracer
-	complexityLimit int
+	cacheSize            int
+	upgrader             websocket.Upgrader
+	recover              graphql.RecoverFunc
+	errorPresenter       graphql.ErrorPresenterFunc
+	resolverHook         graphql.FieldMiddleware
+	requestHook          graphql.RequestMiddleware
+	tracer               graphql.Tracer
+	complexityLimit      int
+	disableIntrospection bool
 }
 
 func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
 	reqCtx := graphql.NewRequestContext(doc, query, variables)
+	reqCtx.DisableIntrospection = c.disableIntrospection
+
 	if hook := c.recover; hook != nil {
 		reqCtx.Recover = hook
 	}
@@ -88,6 +91,14 @@ func RecoverFunc(recover graphql.RecoverFunc) Option {
 func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 	return func(cfg *Config) {
 		cfg.errorPresenter = f
+	}
+}
+
+// IntrospectionEnabled = false will forbid clients from calling introspection endpoints. Can be useful in prod when you dont
+// want clients introspecting the full schema.
+func IntrospectionEnabled(enabled bool) Option {
+	return func(cfg *Config) {
+		cfg.disableIntrospection = !enabled
 	}
 }
 

@@ -3,9 +3,9 @@
 package starwars
 
 import (
-	fmt "fmt"
-	io "io"
-	strconv "strconv"
+	"fmt"
+	"io"
+	"strconv"
 )
 
 type Character interface {

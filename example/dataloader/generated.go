@@ -87,9 +87,9 @@ type QueryResolver interface {
 
 func (e *executableSchema) field_Query_torture1d_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 []int
 	if tmp, ok := rawArgs["customerIds"]; ok {
+		var err error
 		var rawIf1 []interface{}
 		if tmp != nil {
 			if tmp1, ok := tmp.([]interface{}); ok {
@@ -107,15 +107,15 @@ func (e *executableSchema) field_Query_torture1d_args(ctx context.Context, rawAr
 		}
 	}
 	args["customerIds"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_torture2d_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 [][]int
 	if tmp, ok := rawArgs["customerIds"]; ok {
+		var err error
 		var rawIf1 []interface{}
 		if tmp != nil {
 			if tmp1, ok := tmp.([]interface{}); ok {
@@ -144,52 +144,52 @@ func (e *executableSchema) field_Query_torture2d_args(ctx context.Context, rawAr
 		}
 	}
 	args["customerIds"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["name"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 

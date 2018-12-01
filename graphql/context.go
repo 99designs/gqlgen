@@ -236,7 +236,7 @@ func ChainFieldMiddleware(handleFunc ...FieldMiddleware) FieldMiddleware {
 				curI++
 				res, err := handleFunc[curI](currentCtx, chainHandler)
 				curI--
-				return res,err
+				return res, err
 
 			}
 			return handleFunc[0](ctx, chainHandler)

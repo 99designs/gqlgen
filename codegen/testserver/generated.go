@@ -154,10 +154,10 @@ type UserResolver interface {
 
 func (e *executableSchema) field_Query_mapInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *map[string]interface{}
 	if tmp, ok := rawArgs["input"]; ok {
 
+		var err error
 		var ptr1 map[string]interface{}
 		if tmp != nil {
 			ptr1 = tmp.(map[string]interface{})
@@ -170,16 +170,16 @@ func (e *executableSchema) field_Query_mapInput_args(ctx context.Context, rawArg
 
 	}
 	args["input"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *RecursiveInputSlice
 	if tmp, ok := rawArgs["input"]; ok {
 
+		var err error
 		var ptr1 RecursiveInputSlice
 		if tmp != nil {
 			ptr1, err = UnmarshalRecursiveInputSlice(tmp)
@@ -197,16 +197,16 @@ func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawAr
 
 	}
 	args["input"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 [][]*OuterInput
 	if tmp, ok := rawArgs["input"]; ok {
 
+		var err error
 		var rawIf1 []interface{}
 		if tmp != nil {
 			if tmp1, ok := tmp.([]interface{}); ok {
@@ -250,16 +250,16 @@ func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, ra
 
 	}
 	args["input"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *Keywords
 	if tmp, ok := rawArgs["input"]; ok {
 
+		var err error
 		var ptr1 Keywords
 		if tmp != nil {
 			ptr1, err = UnmarshalKeywords(tmp)
@@ -277,30 +277,30 @@ func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArg
 
 	}
 	args["input"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_nullableArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *int
 	if tmp, ok := rawArgs["arg"]; ok {
+		var err error
 		var ptr1 int
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalInt(tmp)
@@ -312,15 +312,15 @@ func (e *executableSchema) field_Query_nullableArg_args(ctx context.Context, raw
 		}
 	}
 	args["arg"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["break"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -329,6 +329,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["break"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["default"]; ok {
+		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -337,6 +338,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["default"] = arg1
 	var arg2 string
 	if tmp, ok := rawArgs["func"]; ok {
+		var err error
 		arg2, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -345,6 +347,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["func"] = arg2
 	var arg3 string
 	if tmp, ok := rawArgs["interface"]; ok {
+		var err error
 		arg3, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -353,6 +356,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["interface"] = arg3
 	var arg4 string
 	if tmp, ok := rawArgs["select"]; ok {
+		var err error
 		arg4, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -361,6 +365,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["select"] = arg4
 	var arg5 string
 	if tmp, ok := rawArgs["case"]; ok {
+		var err error
 		arg5, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -369,6 +374,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["case"] = arg5
 	var arg6 string
 	if tmp, ok := rawArgs["defer"]; ok {
+		var err error
 		arg6, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -377,6 +383,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["defer"] = arg6
 	var arg7 string
 	if tmp, ok := rawArgs["go"]; ok {
+		var err error
 		arg7, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -385,6 +392,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["go"] = arg7
 	var arg8 string
 	if tmp, ok := rawArgs["map"]; ok {
+		var err error
 		arg8, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -393,6 +401,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["map"] = arg8
 	var arg9 string
 	if tmp, ok := rawArgs["struct"]; ok {
+		var err error
 		arg9, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -401,6 +410,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["struct"] = arg9
 	var arg10 string
 	if tmp, ok := rawArgs["chan"]; ok {
+		var err error
 		arg10, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -409,6 +419,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["chan"] = arg10
 	var arg11 string
 	if tmp, ok := rawArgs["else"]; ok {
+		var err error
 		arg11, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -417,6 +428,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["else"] = arg11
 	var arg12 string
 	if tmp, ok := rawArgs["goto"]; ok {
+		var err error
 		arg12, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -425,6 +437,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["goto"] = arg12
 	var arg13 string
 	if tmp, ok := rawArgs["package"]; ok {
+		var err error
 		arg13, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -433,6 +446,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["package"] = arg13
 	var arg14 string
 	if tmp, ok := rawArgs["switch"]; ok {
+		var err error
 		arg14, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -441,6 +455,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["switch"] = arg14
 	var arg15 string
 	if tmp, ok := rawArgs["const"]; ok {
+		var err error
 		arg15, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -449,6 +464,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["const"] = arg15
 	var arg16 string
 	if tmp, ok := rawArgs["fallthrough"]; ok {
+		var err error
 		arg16, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -457,6 +473,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["fallthrough"] = arg16
 	var arg17 string
 	if tmp, ok := rawArgs["if"]; ok {
+		var err error
 		arg17, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -465,6 +482,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["if"] = arg17
 	var arg18 string
 	if tmp, ok := rawArgs["range"]; ok {
+		var err error
 		arg18, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -473,6 +491,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["range"] = arg18
 	var arg19 string
 	if tmp, ok := rawArgs["type"]; ok {
+		var err error
 		arg19, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -481,6 +500,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["type"] = arg19
 	var arg20 string
 	if tmp, ok := rawArgs["continue"]; ok {
+		var err error
 		arg20, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -489,6 +509,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["continue"] = arg20
 	var arg21 string
 	if tmp, ok := rawArgs["for"]; ok {
+		var err error
 		arg21, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -497,6 +518,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["for"] = arg21
 	var arg22 string
 	if tmp, ok := rawArgs["import"]; ok {
+		var err error
 		arg22, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -505,6 +527,7 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["import"] = arg22
 	var arg23 string
 	if tmp, ok := rawArgs["return"]; ok {
+		var err error
 		arg23, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
@@ -513,58 +536,59 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args["return"] = arg23
 	var arg24 string
 	if tmp, ok := rawArgs["var"]; ok {
+		var err error
 		arg24, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["var"] = arg24
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["name"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
@@ -4103,9 +4127,8 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 }
 
 func (e *executableSchema) ChangesMiddleware(ctx context.Context, obj *map[string]interface{}) (*map[string]interface{}, error) {
-	var err error
 
-	return obj, err
+	return obj, nil
 }
 
 func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
@@ -4127,9 +4150,8 @@ func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 }
 
 func (e *executableSchema) InnerInputMiddleware(ctx context.Context, obj *InnerInput) (*InnerInput, error) {
-	var err error
 
-	return obj, err
+	return obj, nil
 }
 
 func UnmarshalKeywords(v interface{}) (Keywords, error) {
@@ -4295,9 +4317,8 @@ func UnmarshalKeywords(v interface{}) (Keywords, error) {
 }
 
 func (e *executableSchema) KeywordsMiddleware(ctx context.Context, obj *Keywords) (*Keywords, error) {
-	var err error
 
-	return obj, err
+	return obj, nil
 }
 
 func UnmarshalOuterInput(v interface{}) (OuterInput, error) {
@@ -4319,14 +4340,13 @@ func UnmarshalOuterInput(v interface{}) (OuterInput, error) {
 }
 
 func (e *executableSchema) OuterInputMiddleware(ctx context.Context, obj *OuterInput) (*OuterInput, error) {
-	var err error
 
 	mTmp1, err := e.InnerInputMiddleware(ctx, &obj.Inner)
 	if err != nil {
 		return nil, err
 	}
 	obj.Inner = *mTmp1
-	return obj, err
+	return obj, nil
 }
 
 func UnmarshalRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
@@ -4359,7 +4379,6 @@ func UnmarshalRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
 }
 
 func (e *executableSchema) RecursiveInputSliceMiddleware(ctx context.Context, obj *RecursiveInputSlice) (*RecursiveInputSlice, error) {
-	var err error
 
 	for idx1 := range obj.Self {
 
@@ -4369,7 +4388,7 @@ func (e *executableSchema) RecursiveInputSliceMiddleware(ctx context.Context, ob
 		}
 		obj.Self[idx1] = *mTmp2
 	}
-	return obj, err
+	return obj, nil
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {

@@ -75,25 +75,25 @@ type UserResolver interface {
 
 func (e *executableSchema) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 external.ObjectID
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = model.UnmarshalID(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *model.SearchArgs
 	if tmp, ok := rawArgs["input"]; ok {
 
+		var err error
 		var ptr1 model.SearchArgs
 		if tmp != nil {
 			ptr1, err = UnmarshalSearchArgs(tmp)
@@ -111,52 +111,52 @@ func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs 
 
 	}
 	args["input"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["name"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
@@ -2322,9 +2322,8 @@ func UnmarshalSearchArgs(v interface{}) (model.SearchArgs, error) {
 }
 
 func (e *executableSchema) SearchArgsMiddleware(ctx context.Context, obj *model.SearchArgs) (*model.SearchArgs, error) {
-	var err error
 
-	return obj, err
+	return obj, nil
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {

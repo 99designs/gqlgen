@@ -85,10 +85,10 @@ type UserResolver interface {
 
 func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 models.DateFilter
 	if tmp, ok := rawArgs["filter"]; ok {
 
+		var err error
 		arg0, err = UnmarshalDateFilter(tmp)
 		if err != nil {
 			return nil, err
@@ -102,15 +102,15 @@ func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs ma
 
 	}
 	args["filter"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_error_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *models.ErrorType
 	if tmp, ok := rawArgs["type"]; ok {
+		var err error
 		var ptr1 models.ErrorType
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
@@ -122,60 +122,60 @@ func (e *executableSchema) field_Query_error_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["type"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["name"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) dir_magic_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *int
 	if tmp, ok := rawArgs["kind"]; ok {
+		var err error
 		var ptr1 int
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalInt(tmp)
@@ -187,7 +187,7 @@ func (e *executableSchema) dir_magic_args(ctx context.Context, rawArgs map[strin
 		}
 	}
 	args["kind"] = arg0
-	return args, err
+	return args, nil
 
 }
 
@@ -2394,9 +2394,8 @@ func UnmarshalDateFilter(v interface{}) (models.DateFilter, error) {
 }
 
 func (e *executableSchema) DateFilterMiddleware(ctx context.Context, obj *models.DateFilter) (*models.DateFilter, error) {
-	var err error
 
-	return obj, err
+	return obj, nil
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {

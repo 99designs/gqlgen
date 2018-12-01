@@ -70,10 +70,10 @@ type MyQueryResolver interface {
 
 func (e *executableSchema) field_MyMutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 TodoInput
 	if tmp, ok := rawArgs["todo"]; ok {
 
+		var err error
 		arg0, err = UnmarshalTodoInput(tmp)
 		if err != nil {
 			return nil, err
@@ -87,15 +87,15 @@ func (e *executableSchema) field_MyMutation_createTodo_args(ctx context.Context,
 
 	}
 	args["todo"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_MyMutation_updateTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
 			return nil, err
@@ -104,88 +104,89 @@ func (e *executableSchema) field_MyMutation_updateTodo_args(ctx context.Context,
 	args["id"] = arg0
 	var arg1 map[string]interface{}
 	if tmp, ok := rawArgs["changes"]; ok {
+		var err error
 		arg1 = tmp.(map[string]interface{})
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["changes"] = arg1
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_MyQuery_todo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalInt(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_MyQuery___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["name"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) dir_hasRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 Role
 	if tmp, ok := rawArgs["role"]; ok {
+		var err error
 		err = (&arg0).UnmarshalGQL(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["role"] = arg0
-	return args, err
+	return args, nil
 
 }
 
@@ -2227,9 +2228,8 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 }
 
 func (e *executableSchema) TodoInputMiddleware(ctx context.Context, obj *TodoInput) (*TodoInput, error) {
-	var err error
 
-	return obj, err
+	return obj, nil
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {

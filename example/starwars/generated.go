@@ -143,9 +143,9 @@ type StarshipResolver interface {
 
 func (e *executableSchema) field_Droid_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
+		var err error
 		var ptr1 int
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalInt(tmp)
@@ -159,6 +159,7 @@ func (e *executableSchema) field_Droid_friendsConnection_args(ctx context.Contex
 	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := rawArgs["after"]; ok {
+		var err error
 		var ptr1 string
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalID(tmp)
@@ -170,30 +171,30 @@ func (e *executableSchema) field_Droid_friendsConnection_args(ctx context.Contex
 		}
 	}
 	args["after"] = arg1
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Human_height_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 LengthUnit
 	if tmp, ok := rawArgs["unit"]; ok {
+		var err error
 		err = (&arg0).UnmarshalGQL(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["unit"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Human_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
+		var err error
 		var ptr1 int
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalInt(tmp)
@@ -207,6 +208,7 @@ func (e *executableSchema) field_Human_friendsConnection_args(ctx context.Contex
 	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := rawArgs["after"]; ok {
+		var err error
 		var ptr1 string
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalID(tmp)
@@ -218,15 +220,15 @@ func (e *executableSchema) field_Human_friendsConnection_args(ctx context.Contex
 		}
 	}
 	args["after"] = arg1
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 Episode
 	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
 		err = (&arg0).UnmarshalGQL(tmp)
 		if err != nil {
 			return nil, err
@@ -236,6 +238,7 @@ func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context,
 	var arg1 Review
 	if tmp, ok := rawArgs["review"]; ok {
 
+		var err error
 		arg1, err = UnmarshalReviewInput(tmp)
 		if err != nil {
 			return nil, err
@@ -249,15 +252,15 @@ func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context,
 
 	}
 	args["review"] = arg1
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_hero_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *Episode
 	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
 		var ptr1 Episode
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
@@ -269,15 +272,15 @@ func (e *executableSchema) field_Query_hero_args(ctx context.Context, rawArgs ma
 		}
 	}
 	args["episode"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_reviews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 Episode
 	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
 		err = (&arg0).UnmarshalGQL(tmp)
 		if err != nil {
 			return nil, err
@@ -286,6 +289,7 @@ func (e *executableSchema) field_Query_reviews_args(ctx context.Context, rawArgs
 	args["episode"] = arg0
 	var arg1 *time.Time
 	if tmp, ok := rawArgs["since"]; ok {
+		var err error
 		var ptr1 time.Time
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalTime(tmp)
@@ -297,105 +301,105 @@ func (e *executableSchema) field_Query_reviews_args(ctx context.Context, rawArgs
 		}
 	}
 	args["since"] = arg1
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["text"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["text"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_character_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_droid_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_human_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query_starship_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalID(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["name"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field_Starship_length_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 *LengthUnit
 	if tmp, ok := rawArgs["unit"]; ok {
+		var err error
 		var ptr1 LengthUnit
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
@@ -407,37 +411,37 @@ func (e *executableSchema) field_Starship_length_args(ctx context.Context, rawAr
 		}
 	}
 	args["unit"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
 func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var err error
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
 		arg0, err = graphql.UnmarshalBoolean(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["includeDeprecated"] = arg0
-	return args, err
+	return args, nil
 
 }
 
@@ -4143,9 +4147,8 @@ func UnmarshalReviewInput(v interface{}) (Review, error) {
 }
 
 func (e *executableSchema) ReviewInputMiddleware(ctx context.Context, obj *Review) (*Review, error) {
-	var err error
 
-	return obj, err
+	return obj, nil
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {

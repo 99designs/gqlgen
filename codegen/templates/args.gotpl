@@ -1,5 +1,4 @@
 	args := map[string]interface{}{}
-	var err error
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.Signature }}
 		if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
@@ -30,6 +29,7 @@
 					return nil, errors.New("expect {{$arg.Signature }}")
 				}
 				{{ else }}
+					var err error
 					{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 					if err != nil {
 						return nil, err
@@ -41,6 +41,7 @@
 				{{- end }}
 
 			{{ else }}
+			var err error
 			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 			if err != nil {
 				return nil, err
@@ -49,4 +50,4 @@
 		}
 		args[{{$arg.GQLName|quote}}] = arg{{$i}}
 	{{- end }}
-	return args, err
+	return args, nil

@@ -62,10 +62,8 @@
 		{{- range $field := .Fields }}
 		{{ if $field.HasDirectives }}
 		{{ $resolveName := "" }}
-		{{ $declareName := "" }}
 		{{ if $field.IsPtr }}
-			{{ $resolveName = "*" }}
-			{{ $declareName = "&" }}
+			{{ $resolveName := "*" }}
 		{{ end }}
 			c{{$field.GoFieldName}}, err := graphql.ChainFieldMiddleware(
 				[]graphql.FieldMiddleware{

@@ -37,20 +37,7 @@
 				{{ end }}
 
 				{{- if $arg.IsInput }}
-					{{ if $arg.IsPtr }}
-						if arg{{$i}} != nil {
-							arg{{$i}}, err = e.{{ .GQLType }}Middleware(ctx, arg{{$i}})
-							if err != nil {
-								return nil, err
-							}
-						}
-					{{ else }}
-						args{{$i}}, err := e.{{ .GQLType }}Middleware(ctx, &arg{{$i}})
-						if err != nil {
-							return nil, err
-						}
-						arg{{$i}} = *args{{$i}}
-					{{ end }}
+					 {{ $arg.Middleware (print "arg" $i) (print "arg" $i) }}
 				{{- end }}
 
 			{{ else }}

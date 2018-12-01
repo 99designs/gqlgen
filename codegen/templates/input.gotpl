@@ -107,41 +107,9 @@
 
 			{{- end }}
 
-					{{ if $field.IsInput }}
-
-            		{{ if and $field.IsPtr (not $field.IsSlice) }}
-            			if obj.{{$field.GoFieldName}} != nil {
-            				obj.{{$field.GoFieldName}}, err = e.{{ $field.GQLType }}Middleware(ctx, obj.{{$field.GoFieldName}})
-            				if err != nil {
-            					return obj, err
-            				}
-            			}
-            		{{ else if $field.IsSlice }}
-            			for i := range obj.{{$field.GoFieldName}} {
-            			 {{ if eq ($field.Modifiers|len) 2 }}
-            				 if obj.{{$field.GoFieldName}}[i] != nil {
-            					obj.{{$field.GoFieldName}}[i], err = e.{{ $field.GQLType }}Middleware(ctx, obj.{{$field.GoFieldName}}[i])
-            					if err != nil {
-            						return nil, err
-            					}
-            				 }
-            			{{ else }}
-            				itd, err := e.{{ $field.GQLType }}Middleware(ctx, &obj.{{$field.GoFieldName}}[i])
-            				if err != nil {
-            					return nil, err
-            				}
-            				obj.{{$field.GoFieldName}}[i] = *itd
-            			{{ end }}
-            			}
-            			{{ else }}
-            			{{$field.GoFieldName}}, err := e.{{ $field.GQLType }}Middleware(ctx, &obj.{{$field.GoFieldName}})
-            			if err != nil {
-            				return obj, err
-            			}
-            			obj.{{$field.GoFieldName}} = *{{$field.GoFieldName}}
-            		{{ end }}
-            		{{ end }}
-
+			{{ if $field.IsInput }}
+				{{ $field.Middleware (print "obj." $field.GoFieldName ) (print "obj." $field.GoFieldName ) }}
+			{{- end }}
 		{{- end }}
 		return obj, err
 	}

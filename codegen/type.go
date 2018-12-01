@@ -161,6 +161,64 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	})
 }
 
+func (t Type) Middleware(result, raw string) string {
+	return t.middleware(result, raw, t.Modifiers, 1)
+}
+
+func (t Type) middleware(result, raw string, remainingMods []string, depth int) string {
+	if len(remainingMods) == 1 && remainingMods[0] == modPtr {
+		return tpl(`{{- if .t.Marshaler }}
+				{{.result}}, err = e.{{ .t.GQLType }}Middleware(ctx, {{.raw}})
+				if err != nil {	
+					return nil, err
+				}
+		{{- end }}`, map[string]interface{}{
+			"result": result,
+			"raw":    raw,
+			"t":      t,
+		})
+	}
+	switch {
+	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
+		return tpl(`if {{.raw}} != nil {
+				{{.next}}
+			}`, map[string]interface{}{
+			"t":      t,
+			"raw":    raw,
+			"result": result,
+			"mods":   strings.Join(remainingMods[1:], ""),
+			"next":   t.middleware(result, raw, remainingMods[1:], depth+1),
+		})
+
+	case len(remainingMods) > 0 && remainingMods[0] == modList:
+		var index = "idx" + strconv.Itoa(depth)
+
+		return tpl(`for {{.index}} := range {{.raw}} {
+				{{ .next -}}
+			}`, map[string]interface{}{
+			"raw":    raw,
+			"index":  index,
+			"result": result,
+			"type":   strings.Join(remainingMods, "") + t.NamedType.FullName(),
+			"next":   t.middleware(result+"["+index+"]", raw+"["+index+"]", remainingMods[1:], depth+1),
+		})
+	}
+
+	ptr := "mTmp" + strconv.Itoa(depth)
+	return tpl(`{{- if .t.Marshaler }}
+			{{.ptr}}, err := e.{{ .t.GQLType }}Middleware(ctx, &{{.raw}})
+				if err != nil {	
+					return nil, err
+			}
+			{{ .result }} = *{{.ptr}}
+		{{- end }}`, map[string]interface{}{
+		"result": result,
+		"raw":    raw,
+		"ptr":    ptr,
+		"t":      t,
+	})
+}
+
 func (t Type) Marshal(val string) string {
 	if t.AliasedType != nil {
 		val = t.GoType + "(" + val + ")"

@@ -3,17 +3,17 @@
 
 {{- if $object.Stream }}
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+			Field: field,
+		})
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)
-			args, err := {{ $field.ArgsFunc }}(rawArgs)
+			args, err := ec.{{ $field.ArgsFunc }}(ctx,rawArgs)
 			if err != nil {
 				ec.Error(ctx, err)
 				return nil
 			}
 		{{- end }}
-		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-			Field: field,
-		})
 		// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 		//          and Tracer stack
 		rctx := ctx
@@ -37,20 +37,20 @@
 	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.FullName}}{{end}}) graphql.Marshaler {
 		ctx = ec.Tracer.StartFieldExecution(ctx, field)
 		defer func () { ec.Tracer.EndFieldExecution(ctx) }()
+		rctx := &graphql.ResolverContext{
+			Object: {{$object.GQLType|quote}},
+			Field: field,
+		}
+		ctx = graphql.WithResolverContext(ctx, rctx)
 		{{- if $field.Args }}
 			rawArgs := field.ArgumentMap(ec.Variables)
-			args, err := {{ $field.ArgsFunc }}(rawArgs)
+			args, err := ec.{{ $field.ArgsFunc }}(ctx,rawArgs)
 			if err != nil {
 				ec.Error(ctx, err)
 				return graphql.Null
 			}
+			rctx.Args = args
 		{{- end }}
-		rctx := &graphql.ResolverContext{
-			Object: {{$object.GQLType|quote}},
-			Args: {{if $field.Args }}args{{else}}nil{{end}},
-			Field: field,
-		}
-		ctx = graphql.WithResolverContext(ctx, rctx)
 		ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			ctx = rctx  // use context from middleware stack in children

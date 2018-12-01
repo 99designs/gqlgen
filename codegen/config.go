@@ -85,6 +85,8 @@ type Config struct {
 	Models         TypeMap           `yaml:"models,omitempty"`
 	StructTag      string            `yaml:"struct_tag,omitempty"`
 
+	Directives map[string]*Directive `yaml:"-"`
+
 	FilePath string `yaml:"-"`
 
 	schema *ast.Schema `yaml:"-"`

@@ -64,7 +64,7 @@ type ComplexityRoot struct {
 {{ range $object := .Objects -}}
 	{{ range $field := $object.Fields -}}
 		{{ if $field.Args }}
-			func {{ $field.ArgsFunc }}(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+			func (e *executableSchema){{ $field.ArgsFunc }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 			{{ template "args.gotpl" $field.Args }}
 			}
 		{{ end }}
@@ -73,7 +73,7 @@ type ComplexityRoot struct {
 
 {{ range $directive := .Directives }}
 	{{ if $directive.Args }}
-		func {{ $directive.ArgsFunc }}(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+		func (e *executableSchema){{ $directive.ArgsFunc }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 		{{ template "args.gotpl" $directive.Args }}
 		}
 	{{ end }}
@@ -100,7 +100,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 							break
 						}
 						{{ if $field.Args }}
-							args, err := {{ $field.ArgsFunc }}(rawArgs)
+							args, err := e.{{ $field.ArgsFunc }}(context.TODO(),rawArgs)
 							if err != nil {
 								return 0, false
 							}
@@ -229,7 +229,7 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			if ec.directives.{{$directive.Name|ucFirst}} != nil {
 				{{- if $directive.Args }}
 					rawArgs := d.ArgumentMap(ec.Variables)
-					args, err := {{ $directive.ArgsFunc }}(rawArgs)
+					args, err := ec.{{ $directive.ArgsFunc }}(ctx,rawArgs)
 					if err != nil {
 						ec.Error(ctx, err)
 						return nil

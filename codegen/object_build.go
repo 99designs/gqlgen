@@ -149,11 +149,16 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition, imports *I
 
 		var args []FieldArgument
 		for _, arg := range field.Arguments {
+			dirs, err := cfg.getDirectives(arg.Directives)
+			if err != nil {
+				return nil, err
+			}
 			newArg := FieldArgument{
-				GQLName:   arg.Name,
-				Type:      types.getType(arg.Type),
-				Object:    obj,
-				GoVarName: sanitizeArgName(arg.Name),
+				GQLName:    arg.Name,
+				Type:       types.getType(arg.Type),
+				Object:     obj,
+				GoVarName:  sanitizeArgName(arg.Name),
+				Directives: dirs,
 			}
 
 			if !newArg.Type.IsInput && !newArg.Type.IsScalar {

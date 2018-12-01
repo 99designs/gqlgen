@@ -216,3 +216,37 @@ func (c *RequestContext) RegisterExtension(key string, value interface{}) error 
 	c.Extensions[key] = value
 	return nil
 }
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+func ChainFieldMiddleware(handleFunc ...FieldMiddleware) FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next Resolver) (interface{}, error) {
+			var (
+				chainHandler Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res,err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}

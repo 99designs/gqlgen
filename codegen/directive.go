@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/99designs/gqlgen/codegen/templates"
 )
 
 type Directive struct {
@@ -24,6 +26,27 @@ func (d *Directive) CallArgs() string {
 
 	for _, arg := range d.Args {
 		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+arg.Signature()+")")
+	}
+
+	return strings.Join(args, ", ")
+}
+
+func (d *Directive) ResolveArgs(obj string, next string) string {
+	args := []string{"ctx", obj, next}
+
+	for _, arg := range d.Args {
+		dArg := "&" + arg.GoVarName
+		if !arg.IsPtr() {
+			if arg.Value != nil {
+				dArg = templates.Dump(arg.Value)
+			} else {
+				dArg = templates.Dump(arg.Default)
+			}
+		} else if arg.Value == nil && arg.Default == nil {
+			dArg = "nil"
+		}
+
+		args = append(args, dArg)
 	}
 
 	return strings.Join(args, ", ")

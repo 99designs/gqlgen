@@ -48,10 +48,15 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 	typeEntry, entryExists := cfg.Models[typ.Name]
 
 	for _, field := range typ.Fields {
+		dirs, err := cfg.getDirectives(field.Directives)
+		if err != nil {
+			return nil, err
+		}
 		newField := Field{
-			GQLName: field.Name,
-			Type:    types.getType(field.Type),
-			Object:  obj,
+			GQLName:    field.Name,
+			Type:       types.getType(field.Type),
+			Object:     obj,
+			Directives: dirs,
 		}
 
 		if entryExists {
@@ -75,6 +80,12 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 		obj.Fields = append(obj.Fields, newField)
 
 	}
+	dirs, err := cfg.getDirectives(typ.Directives)
+	if err != nil {
+		return nil, err
+	}
+	obj.Directives = dirs
+
 	return obj, nil
 }
 

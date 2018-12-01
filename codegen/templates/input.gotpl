@@ -26,3 +26,122 @@
 		return it, nil
 	}
 	{{- end }}
+
+	func (e *executableSchema) {{ .GQLType }}Middleware(ctx context.Context, obj *{{.FullName}}) (*{{.FullName}}, error) {
+		var err error
+		{{ if .Directives }}
+		cObj, err := graphql.ChainFieldMiddleware(
+			[]graphql.FieldMiddleware{
+				{{- range $directive := .Directives }}
+					func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+					{{- if $directive.Args }}
+					{{- range $arg := $directive.Args }}
+						{{- if and $arg.IsPtr $arg.Value }}
+							{{$arg.GoVarName}}:={{ $arg.Value | dump}}
+						{{ else if and $arg.IsPtr $arg.Default }}
+							{{$arg.GoVarName}}:={{ $arg.Default | dump}}
+						{{- end }}
+					{{- end }}
+					{{- end -}}
+						return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "obj" "n"}})
+					},
+				{{ end }}
+			}...
+		)(ctx, func(ctx context.Context)(interface{}, error){
+			return obj, nil
+		})
+		if err != nil || cObj == nil {
+			return nil ,err
+		}
+		obj, ok := cObj.(*{{.FullName}})
+		if !ok {
+			return nil, errors.New("expect {{.FullName}}")
+		}
+		{{ end }}
+
+		{{- range $field := .Fields }}
+		{{ if $field.HasDirectives }}
+		{{ $resolveName := "" }}
+		{{ $declareName := "" }}
+		{{ if $field.IsPtr }}
+			{{ $resolveName = "*" }}
+			{{ $declareName = "&" }}
+		{{ end }}
+			c{{$field.GoFieldName}}, err := graphql.ChainFieldMiddleware(
+				[]graphql.FieldMiddleware{
+					{{- range $directive := $field.Directives }}
+						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+						{{- if $directive.Args }}
+						{{- range $arg := $directive.Args }}
+							{{- if and $arg.IsPtr $arg.Value }}
+								{{$arg.GoVarName}}:={{ $arg.Value | dump}}
+							{{ else if and $arg.IsPtr $arg.Default }}
+								{{$arg.GoVarName}}:={{ $arg.Default | dump}}
+							{{- end }}
+						{{- end }}
+						{{- end -}}
+							return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print $resolveName  "obj." $field.GoFieldName ) "n"}})
+						},
+					{{ end }}
+				}...
+			)(ctx, func(ctx context.Context)(interface{}, error){
+				return {{$resolveName}}obj.{{$field.GoFieldName}}, nil
+			})
+			if err != nil {
+				return obj ,err
+			}
+
+			{{ if $field.IsPtr }}
+				if data, ok := c{{$field.GoFieldName}}.({{ $field.FullName }}); ok {
+            		obj.{{$field.GoFieldName}} = &data
+            	} else {
+            		return obj, errors.New("expect {{ $field.Signature }}")
+            	}
+			{{else}}
+            	if data, ok := c{{$field.GoFieldName}}.({{ $field.Signature }}); ok{
+            		obj.{{$field.GoFieldName}} = data
+            	}else{
+            		return obj, errors.New("{{$field.GoFieldName}} expect {{$field.Signature }}")
+            	}
+			{{ end }}
+
+			{{- end }}
+
+					{{ if $field.IsInput }}
+
+            		{{ if and $field.IsPtr (not $field.IsSlice) }}
+            			if obj.{{$field.GoFieldName}} != nil {
+            				obj.{{$field.GoFieldName}}, err = e.{{ $field.GQLType }}Middleware(ctx, obj.{{$field.GoFieldName}})
+            				if err != nil {
+            					return obj, err
+            				}
+            			}
+            		{{ else if $field.IsSlice }}
+            			for i := range obj.{{$field.GoFieldName}} {
+            			 {{ if eq ($field.Modifiers|len) 2 }}
+            				 if obj.{{$field.GoFieldName}}[i] != nil {
+            					obj.{{$field.GoFieldName}}[i], err = e.{{ $field.GQLType }}Middleware(ctx, obj.{{$field.GoFieldName}}[i])
+            					if err != nil {
+            						return nil, err
+            					}
+            				 }
+            			{{ else }}
+            				itd, err := e.{{ $field.GQLType }}Middleware(ctx, &obj.{{$field.GoFieldName}}[i])
+            				if err != nil {
+            					return nil, err
+            				}
+            				obj.{{$field.GoFieldName}}[i] = *itd
+            			{{ end }}
+            			}
+            			{{ else }}
+            			{{$field.GoFieldName}}, err := e.{{ $field.GQLType }}Middleware(ctx, &obj.{{$field.GoFieldName}})
+            			if err != nil {
+            				return obj, err
+            			}
+            			obj.{{$field.GoFieldName}} = *{{$field.GoFieldName}}
+            		{{ end }}
+            		{{ end }}
+
+		{{- end }}
+		return obj, err
+	}

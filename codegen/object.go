@@ -29,6 +29,7 @@ type Object struct {
 	Root               bool
 	DisableConcurrency bool
 	Stream             bool
+	Directives         []*Directive
 }
 
 type Field struct {
@@ -44,15 +45,18 @@ type Field struct {
 	NoErr            bool            // If this is bound to a go method, does that method have an error as the second argument
 	Object           *Object         // A link back to the parent object
 	Default          interface{}     // The default value
+	Directives       []*Directive
 }
 
 type FieldArgument struct {
 	*Type
 
-	GQLName   string      // The name of the argument in graphql
-	GoVarName string      // The name of the var in go
-	Object    *Object     // A link back to the parent object
-	Default   interface{} // The default value
+	GQLName    string      // The name of the argument in graphql
+	GoVarName  string      // The name of the var in go
+	Object     *Object     // A link back to the parent object
+	Default    interface{} // The default value
+	Directives []*Directive
+	Value      interface{} // value set in schema
 }
 
 type Objects []*Object
@@ -73,6 +77,18 @@ func (o *Object) HasResolvers() bool {
 	}
 	return false
 }
+func (o *Object) HasDirectives() bool {
+	if len(o.Directives) > 0 {
+		return true
+	}
+	for _, f := range o.Fields {
+		if f.HasDirectives() {
+			return true
+		}
+	}
+
+	return false
+}
 
 func (o *Object) IsConcurrent() bool {
 	for _, f := range o.Fields {
@@ -85,6 +101,10 @@ func (o *Object) IsConcurrent() bool {
 
 func (o *Object) IsReserved() bool {
 	return strings.HasPrefix(o.GQLType, "__")
+}
+
+func (f *Field) HasDirectives() bool {
+	return len(f.Directives) > 0
 }
 
 func (f *Field) IsResolver() bool {

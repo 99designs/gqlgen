@@ -26,7 +26,7 @@ func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 		"quote":       strconv.Quote,
 		"rawQuote":    rawQuote,
 		"toCamel":     ToCamel,
-		"dump":        dump,
+		"dump":        Dump,
 		"prefixLines": prefixLines,
 	})
 
@@ -99,7 +99,7 @@ func rawQuote(s string) string {
 	return "`" + strings.Replace(s, "`", "`+\"`\"+`", -1) + "`"
 }
 
-func dump(val interface{}) string {
+func Dump(val interface{}) string {
 	switch val := val.(type) {
 	case int:
 		return strconv.Itoa(val)
@@ -116,7 +116,7 @@ func dump(val interface{}) string {
 	case []interface{}:
 		var parts []string
 		for _, part := range val {
-			parts = append(parts, dump(part))
+			parts = append(parts, Dump(part))
 		}
 		return "[]interface{}{" + strings.Join(parts, ",") + "}"
 	case map[string]interface{}:
@@ -133,7 +133,7 @@ func dump(val interface{}) string {
 
 			buf.WriteString(strconv.Quote(key))
 			buf.WriteString(":")
-			buf.WriteString(dump(data))
+			buf.WriteString(Dump(data))
 			buf.WriteString(",")
 		}
 		buf.WriteString("}")

@@ -21,6 +21,13 @@ func Generate(cfg Config) error {
 
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	_ = syscall.Unlink(cfg.Model.Filename)
+	namedTypes := cfg.buildNamedTypes()
+
+	directives, err := cfg.buildDirectives(namedTypes)
+	if err != nil {
+		return err
+	}
+	cfg.Directives = directives
 
 	modelsBuild, err := cfg.models()
 	if err != nil {

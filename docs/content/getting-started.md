@@ -192,7 +192,7 @@ $ rm resolver.go
 $ go run scripts/gqlgen.go
 ```
 
-Now we just need to fill in the `not implemented` parts.  Update `graph/graph.go`
+Now we just need to fill in the `not implemented` parts.  Update `resolver.go`
 
 ```go
 //go:generate go run ./scripts/gqlgen.go

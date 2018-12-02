@@ -28,7 +28,7 @@
 	{{- end }}
 
 	func (e *executableSchema) {{ .GQLType }}Middleware(ctx context.Context, obj *{{.FullName}}) (*{{.FullName}}, error) {
-		{{ if .Directives }}
+			{{ if .Directives }}
 		cObj, err := graphql.ChainFieldMiddleware(
 			[]graphql.FieldMiddleware{
 				{{- range $directive := .Directives }}

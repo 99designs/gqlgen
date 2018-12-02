@@ -42,6 +42,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -89,20 +90,23 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		InvalidIdentifier func(childComplexity int) int
-		Collision         func(childComplexity int) int
-		MapInput          func(childComplexity int, input *map[string]interface{}) int
-		Recursive         func(childComplexity int, input *RecursiveInputSlice) int
-		NestedInputs      func(childComplexity int, input [][]*OuterInput) int
-		NestedOutputs     func(childComplexity int) int
-		Keywords          func(childComplexity int, input *Keywords) int
-		Shapes            func(childComplexity int) int
-		ErrorBubble       func(childComplexity int) int
-		ModelMethods      func(childComplexity int) int
-		Valid             func(childComplexity int) int
-		User              func(childComplexity int, id int) int
-		NullableArg       func(childComplexity int, arg *int) int
-		KeywordArgs       func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
+		InvalidIdentifier      func(childComplexity int) int
+		Collision              func(childComplexity int) int
+		MapInput               func(childComplexity int, input *map[string]interface{}) int
+		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
+		NestedInputs           func(childComplexity int, input [][]*OuterInput) int
+		NestedOutputs          func(childComplexity int) int
+		Keywords               func(childComplexity int, input *Keywords) int
+		Shapes                 func(childComplexity int) int
+		ErrorBubble            func(childComplexity int) int
+		ModelMethods           func(childComplexity int) int
+		Valid                  func(childComplexity int) int
+		User                   func(childComplexity int, id int) int
+		NullableArg            func(childComplexity int, arg *int) int
+		DirectiveArg           func(childComplexity int, arg string) int
+		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
+		DirectiveInput         func(childComplexity int, arg InputDirectives) int
+		KeywordArgs            func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
 	}
 
 	Rectangle struct {
@@ -142,6 +146,9 @@ type QueryResolver interface {
 	Valid(ctx context.Context) (string, error)
 	User(ctx context.Context, id int) (User, error)
 	NullableArg(ctx context.Context, arg *int) (*string, error)
+	DirectiveArg(ctx context.Context, arg string) (*string, error)
+	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
+	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
 	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
 }
 type SubscriptionResolver interface {
@@ -190,9 +197,11 @@ func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawAr
 			return nil, err
 		}
 
-		arg0, err = e.RecursiveInputSliceMiddleware(ctx, arg0)
-		if err != nil {
-			return nil, err
+		if arg0 != nil {
+			arg0, err = e.RecursiveInputSliceMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 	}
@@ -241,9 +250,11 @@ func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, ra
 		for idx1 := range arg0 {
 			for idx2 := range arg0[idx1] {
 
-				arg0[idx1][idx2], err = e.OuterInputMiddleware(ctx, arg0[idx1][idx2])
-				if err != nil {
-					return nil, err
+				if arg0[idx1][idx2] != nil {
+					arg0[idx1][idx2], err = e.OuterInputMiddleware(ctx, arg0[idx1][idx2])
+					if err != nil {
+						return nil, err
+					}
 				}
 			}
 		}
@@ -270,9 +281,11 @@ func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArg
 			return nil, err
 		}
 
-		arg0, err = e.KeywordsMiddleware(ctx, arg0)
-		if err != nil {
-			return nil, err
+		if arg0 != nil {
+			arg0, err = e.KeywordsMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 	}
@@ -310,6 +323,90 @@ func (e *executableSchema) field_Query_nullableArg_args(ctx context.Context, raw
 		if err != nil {
 			return nil, err
 		}
+	}
+	args["arg"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["arg"]; ok {
+
+		argm0, err := graphql.ChainFieldMiddleware([]graphql.FieldMiddleware{
+			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+				max := 255
+				return e.directives.Length(ctx, tmp, n, 1, &max, "invalid length")
+			},
+		}...)(ctx, func(ctx2 context.Context) (args0 interface{}, err error) {
+			args0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return nil, err
+			}
+			return
+		})
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := argm0.(string); ok {
+			arg0 = data
+		} else {
+			return nil, errors.New("expect string")
+		}
+
+	}
+	args["arg"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) field_Query_directiveInputNullable_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *InputDirectives
+	if tmp, ok := rawArgs["arg"]; ok {
+
+		var err error
+		var ptr1 InputDirectives
+		if tmp != nil {
+			ptr1, err = UnmarshalInputDirectives(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if arg0 != nil {
+			arg0, err = e.InputDirectivesMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+	}
+	args["arg"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) field_Query_directiveInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 InputDirectives
+	if tmp, ok := rawArgs["arg"]; ok {
+
+		var err error
+		arg0, err = UnmarshalInputDirectives(tmp)
+		if err != nil {
+			return nil, err
+		}
+
+		mTmp1, err := e.InputDirectivesMiddleware(ctx, &arg0)
+		if err != nil {
+			return nil, err
+		}
+		arg0 = *mTmp1
+
 	}
 	args["arg"] = arg0
 	return args, nil
@@ -592,6 +689,44 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 
 }
 
+func (e *executableSchema) dir_length_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["min"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalInt(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["min"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["max"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["max"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["message"]; ok {
+		var err error
+		arg2, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["message"] = arg2
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -837,6 +972,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
+
+	case "Query.directiveArg":
+		if e.complexity.Query.DirectiveArg == nil {
+			break
+		}
+
+		args, err := e.field_Query_directiveArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
+
+	case "Query.directiveInputNullable":
+		if e.complexity.Query.DirectiveInputNullable == nil {
+			break
+		}
+
+		args, err := e.field_Query_directiveInputNullable_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
+
+	case "Query.directiveInput":
+		if e.complexity.Query.DirectiveInput == nil {
+			break
+		}
+
+		args, err := e.field_Query_directiveInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
 
 	case "Query.keywordArgs":
 		if e.complexity.Query.KeywordArgs == nil {
@@ -1779,6 +1950,24 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				out.Values[i] = ec._Query_nullableArg(ctx, field)
 				wg.Done()
 			}(i, field)
+		case "directiveArg":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_directiveArg(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "directiveInputNullable":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_directiveInputNullable(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "directiveInput":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_directiveInput(ctx, field)
+				wg.Done()
+			}(i, field)
 		case "keywordArgs":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -2281,6 +2470,108 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().NullableArg(rctx, args["arg"].(*int))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_directiveArg_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveArg(rctx, args["arg"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_directiveInputNullable_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveInputNullable(rctx, args["arg"].(*InputDirectives))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_directiveInput(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_directiveInput_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveInput(rctx, args["arg"].(InputDirectives))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -4131,6 +4422,48 @@ func (e *executableSchema) ChangesMiddleware(ctx context.Context, obj *map[strin
 	return obj, nil
 }
 
+func UnmarshalInnerDirectives(v interface{}) (InnerDirectives, error) {
+	var it InnerDirectives
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "message":
+			var err error
+			it.Message, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (e *executableSchema) InnerDirectivesMiddleware(ctx context.Context, obj *InnerDirectives) (*InnerDirectives, error) {
+
+	cMessage, err := graphql.ChainFieldMiddleware(
+		[]graphql.FieldMiddleware{
+			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+				return e.directives.Length(ctx, obj.Message, n, 1, nil, "not valid")
+			},
+		}...,
+	)(ctx, func(ctx context.Context) (interface{}, error) {
+		return obj.Message, nil
+	})
+	if err != nil {
+		return obj, err
+	}
+
+	if data, ok := cMessage.(string); ok {
+		obj.Message = data
+	} else {
+		return obj, errors.New("Message expect string")
+	}
+
+	return obj, nil
+}
+
 func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 	var it InnerInput
 	var asMap = v.(map[string]interface{})
@@ -4151,6 +4484,78 @@ func UnmarshalInnerInput(v interface{}) (InnerInput, error) {
 
 func (e *executableSchema) InnerInputMiddleware(ctx context.Context, obj *InnerInput) (*InnerInput, error) {
 
+	return obj, nil
+}
+
+func UnmarshalInputDirectives(v interface{}) (InputDirectives, error) {
+	var it InputDirectives
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "text":
+			var err error
+			it.Text, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "inner":
+			var err error
+			it.Inner, err = UnmarshalInnerDirectives(v)
+			if err != nil {
+				return it, err
+			}
+		case "innerNullable":
+			var err error
+			var ptr1 InnerDirectives
+			if v != nil {
+				ptr1, err = UnmarshalInnerDirectives(v)
+				it.InnerNullable = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (e *executableSchema) InputDirectivesMiddleware(ctx context.Context, obj *InputDirectives) (*InputDirectives, error) {
+
+	cText, err := graphql.ChainFieldMiddleware(
+		[]graphql.FieldMiddleware{
+			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+				max := 7
+				return e.directives.Length(ctx, obj.Text, n, 0, &max, "not valid")
+			},
+		}...,
+	)(ctx, func(ctx context.Context) (interface{}, error) {
+		return obj.Text, nil
+	})
+	if err != nil {
+		return obj, err
+	}
+
+	if data, ok := cText.(string); ok {
+		obj.Text = data
+	} else {
+		return obj, errors.New("Text expect string")
+	}
+
+	mTmp1, err := e.InnerDirectivesMiddleware(ctx, &obj.Inner)
+	if err != nil {
+		return nil, err
+	}
+	obj.Inner = *mTmp1
+
+	if obj.InnerNullable != nil {
+		obj.InnerNullable, err = e.InnerDirectivesMiddleware(ctx, obj.InnerNullable)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return obj, nil
 }
 
@@ -4398,6 +4803,24 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "length":
+			if ec.directives.Length != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_length_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int), args["message"].(string))
+				}
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4435,6 +4858,9 @@ var parsedSchema = gqlparser.MustLoadSchema(
     valid: String!
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
+    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
+    directiveInputNullable(arg: InputDirectives): String
+    directiveInput(arg: InputDirectives!): String
 }
 
 type Subscription {
@@ -4483,6 +4909,16 @@ input InnerInput {
 
 input OuterInput {
     inner: InnerInput!
+}
+
+input InputDirectives {
+    text: String! @length(min: 0, max: 7, message: "not valid")
+    inner: InnerDirectives!
+    innerNullable: InnerDirectives
+}
+
+input InnerDirectives {
+    message: String! @length(min: 1, message: "not valid")
 }
 
 type OuterObject {
@@ -4573,5 +5009,7 @@ type EmbeddedPointer {
     ID: String
     Title: String
 }
+
+directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION
 `},
 )

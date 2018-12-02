@@ -12,6 +12,9 @@ type Query {
     valid: String!
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
+    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
+    directiveInputNullable(arg: InputDirectives): String
+    directiveInput(arg: InputDirectives!): String
 }
 
 type Subscription {
@@ -60,6 +63,16 @@ input InnerInput {
 
 input OuterInput {
     inner: InnerInput!
+}
+
+input InputDirectives {
+    text: String! @length(min: 0, max: 7, message: "not valid")
+    inner: InnerDirectives!
+    innerNullable: InnerDirectives
+}
+
+input InnerDirectives {
+    message: String! @length(min: 1, message: "not valid")
 }
 
 type OuterObject {
@@ -150,3 +163,5 @@ type EmbeddedPointer {
     ID: String
     Title: String
 }
+
+directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION

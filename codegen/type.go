@@ -168,10 +168,12 @@ func (t Type) Middleware(result, raw string) string {
 func (t Type) middleware(result, raw string, remainingMods []string, depth int) string {
 	if len(remainingMods) == 1 && remainingMods[0] == modPtr {
 		return tpl(`{{- if .t.Marshaler }}
+			if {{.raw}} != nil {
 				{{.result}}, err = e.{{ .t.GQLType }}Middleware(ctx, {{.raw}})
 				if err != nil {	
 					return nil, err
 				}
+			}
 		{{- end }}`, map[string]interface{}{
 			"result": result,
 			"raw":    raw,

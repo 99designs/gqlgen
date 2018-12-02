@@ -2,12 +2,22 @@
 
 package testserver
 
+type InnerDirectives struct {
+	Message string `json:"message"`
+}
+
 type InnerInput struct {
 	ID int `json:"id"`
 }
 
 type InnerObject struct {
 	ID int `json:"id"`
+}
+
+type InputDirectives struct {
+	Text          string           `json:"text"`
+	Inner         InnerDirectives  `json:"inner"`
+	InnerNullable *InnerDirectives `json:"innerNullable"`
 }
 
 type Keywords struct {

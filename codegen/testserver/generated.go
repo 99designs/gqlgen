@@ -1273,6 +1273,7 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 	rctx := &graphql.ResolverContext{
 		Object: "Circle",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1296,6 +1297,7 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	rctx := &graphql.ResolverContext{
 		Object: "Circle",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1348,6 +1350,7 @@ func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graph
 	rctx := &graphql.ResolverContext{
 		Object: "EmbeddedPointer",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1371,6 +1374,7 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 	rctx := &graphql.ResolverContext{
 		Object: "EmbeddedPointer",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1436,6 +1440,7 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 	rctx := &graphql.ResolverContext{
 		Object: "Error",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1462,6 +1467,7 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 	rctx := &graphql.ResolverContext{
 		Object: "Error",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1485,6 +1491,7 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 	rctx := &graphql.ResolverContext{
 		Object: "Error",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1511,6 +1518,7 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 	rctx := &graphql.ResolverContext{
 		Object: "Error",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1576,6 +1584,7 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 	rctx := &graphql.ResolverContext{
 		Object: "ForcedResolver",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1634,6 +1643,7 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 	rctx := &graphql.ResolverContext{
 		Object: "InnerObject",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1690,6 +1700,7 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 	rctx := &graphql.ResolverContext{
 		Object: "InvalidIdentifier",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1746,6 +1757,7 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 	rctx := &graphql.ResolverContext{
 		Object: "It",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1821,6 +1833,7 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 	rctx := &graphql.ResolverContext{
 		Object: "ModelMethods",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1847,6 +1860,7 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 	rctx := &graphql.ResolverContext{
 		Object: "ModelMethods",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1873,6 +1887,7 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 	rctx := &graphql.ResolverContext{
 		Object: "ModelMethods",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1929,6 +1944,7 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "OuterObject",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2110,6 +2126,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2138,6 +2155,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2166,6 +2184,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2200,6 +2219,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2234,6 +2254,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2268,6 +2289,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2359,6 +2381,7 @@ func (ec *executionContext) _Query_keywords(ctx context.Context, field graphql.C
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2392,6 +2415,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2452,6 +2476,7 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2480,6 +2505,7 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2508,6 +2534,7 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2534,6 +2561,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2568,6 +2596,7 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2602,6 +2631,7 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2636,6 +2666,7 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2670,6 +2701,7 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2704,6 +2736,7 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2738,6 +2771,7 @@ func (ec *executionContext) _Query_keywordArgs(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2771,6 +2805,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2806,6 +2841,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2865,6 +2901,7 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 	rctx := &graphql.ResolverContext{
 		Object: "Rectangle",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2888,6 +2925,7 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 	rctx := &graphql.ResolverContext{
 		Object: "Rectangle",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2911,6 +2949,7 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 	rctx := &graphql.ResolverContext{
 		Object: "Rectangle",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2953,6 +2992,7 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
+		Args:  nil,
 	})
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
@@ -2976,6 +3016,7 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
+		Args:  nil,
 	})
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
@@ -3043,6 +3084,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	rctx := &graphql.ResolverContext{
 		Object: "User",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3069,6 +3111,7 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 	rctx := &graphql.ResolverContext{
 		Object: "User",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3170,6 +3213,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3196,6 +3240,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3219,6 +3264,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3254,6 +3300,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3352,6 +3399,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3378,6 +3426,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3401,6 +3450,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3427,6 +3477,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3503,6 +3554,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3529,6 +3581,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3552,6 +3605,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3611,6 +3665,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3645,6 +3700,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3671,6 +3727,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3737,6 +3794,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3763,6 +3821,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3786,6 +3845,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3820,6 +3880,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3891,6 +3952,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3950,6 +4012,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3984,6 +4047,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4012,6 +4076,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4040,6 +4105,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4145,6 +4211,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4171,6 +4238,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4198,6 +4266,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4221,6 +4290,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -4284,6 +4354,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4340,6 +4411,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4396,6 +4468,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -4459,6 +4532,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -4515,6 +4589,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Field:  field,
+		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)

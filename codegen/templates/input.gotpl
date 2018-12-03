@@ -64,10 +64,6 @@
 
 		{{- range $field := .Fields }}
 		{{ if $field.HasDirectives }}
-		{{ $resolveName := "" }}
-		{{ if $field.IsPtr }}
-			{{ $resolveName := "*" }}
-		{{ end }}
 			c{{$field.GoFieldName}}, err := chainFieldMiddleware(
 				[]graphql.FieldMiddleware{
 					{{- range $directive := $field.Directives }}
@@ -85,12 +81,16 @@
 							{{- end }}
 						{{- end }}
 						{{- end -}}
-							return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print $resolveName  "obj." $field.GoFieldName ) "n"}})
+							{{ if $field.IsPtr }}
+								return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print "*obj." $field.GoFieldName ) "n"}})
+							{{ else }}
+								return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print "obj." $field.GoFieldName ) "n"}})
+							{{ end }}
 						},
 					{{ end }}
 				}...
 			)(ctx, func(ctx context.Context)(interface{}, error){
-				return {{$resolveName}}obj.{{$field.GoFieldName}}, nil
+				return {{ if $field.IsPtr }}*{{end}}obj.{{$field.GoFieldName}}, nil
 			})
 			if err != nil {
 				return obj ,err

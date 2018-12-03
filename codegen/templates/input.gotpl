@@ -81,11 +81,11 @@
 							{{- end }}
 						{{- end }}
 						{{- end -}}
-							{{ if $field.IsPtr }}
+							{{ if $field.IsPtr -}}
 								return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print "*obj." $field.GoFieldName ) "n"}})
-							{{ else }}
+							{{- else -}}
 								return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print "obj." $field.GoFieldName ) "n"}})
-							{{ end }}
+							{{- end }}
 						},
 					{{ end }}
 				}...

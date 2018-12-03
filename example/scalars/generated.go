@@ -105,6 +105,7 @@ func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs 
 		}
 
 		if arg0 != nil {
+			var err error
 			arg0, err = e.SearchArgsMiddleware(ctx, arg0)
 			if err != nil {
 				return nil, err

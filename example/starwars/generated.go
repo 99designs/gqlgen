@@ -244,11 +244,11 @@ func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context,
 			return nil, err
 		}
 
-		mTmp1, err := e.ReviewInputMiddleware(ctx, &arg1)
+		mReviewInput1, err := e.ReviewInputMiddleware(ctx, &arg1)
 		if err != nil {
 			return nil, err
 		}
-		arg1 = *mTmp1
+		arg1 = *mReviewInput1
 
 	}
 	args["review"] = arg1

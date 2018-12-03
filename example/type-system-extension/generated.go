@@ -89,11 +89,11 @@ func (e *executableSchema) field_MyMutation_createTodo_args(ctx context.Context,
 			return nil, err
 		}
 
-		mTmp1, err := e.TodoInputMiddleware(ctx, &arg0)
+		mTodoInput1, err := e.TodoInputMiddleware(ctx, &arg0)
 		if err != nil {
 			return nil, err
 		}
-		arg0 = *mTmp1
+		arg0 = *mTodoInput1
 
 	}
 	args["todo"] = arg0

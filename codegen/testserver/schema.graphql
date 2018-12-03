@@ -13,6 +13,7 @@ type Query {
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
+    directiveNullableArg(arg: Int @range(min:0)): String
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
 }
@@ -164,4 +165,5 @@ type EmbeddedPointer {
     Title: String
 }
 
-directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION
+directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @range(min: Int, max: Int, message: String) on ARGUMENT_DEFINITION

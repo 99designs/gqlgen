@@ -169,6 +169,7 @@ func (t Type) middleware(result, raw string, remainingMods []string, depth int) 
 	if len(remainingMods) == 1 && remainingMods[0] == modPtr {
 		return tpl(`{{- if .t.Marshaler }}
 			if {{.raw}} != nil {
+				var err error
 				{{.result}}, err = e.{{ .t.GQLType }}Middleware(ctx, {{.raw}})
 				if err != nil {	
 					return nil, err
@@ -206,7 +207,7 @@ func (t Type) middleware(result, raw string, remainingMods []string, depth int) 
 		})
 	}
 
-	ptr := "mTmp" + strconv.Itoa(depth)
+	ptr := "m" + t.GQLType + strconv.Itoa(depth)
 	return tpl(`{{- if .t.Marshaler }}
 			{{.ptr}}, err := e.{{ .t.GQLType }}Middleware(ctx, &{{.raw}})
 				if err != nil {	

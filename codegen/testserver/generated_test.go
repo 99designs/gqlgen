@@ -211,6 +211,44 @@ func TestDirectives(t *testing.T) {
 						}
 						return nil, errors.New(message)
 					},
+					Range: func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int, message *string) (res interface{}, err error) {
+						if obj == nil {
+							return next(ctx)
+						}
+						if message == nil {
+							err = errors.New("range invalid")
+						}else{
+							err = errors.New(*message)
+						}
+						if d, ok := obj.(int); ok {
+							if min != nil && d < *min {
+								return nil, err
+							}
+							if max != nil && d > *max {
+								return nil, err
+							}
+							return next(ctx)
+						}
+						if d, ok := obj.(int64); ok {
+							if min != nil && int(d) < *min {
+								return nil, err
+							}
+							if max != nil && int(d) > *max {
+								return nil, err
+							}
+							return next(ctx)
+						}
+						if d, ok := obj.(*int); ok {
+							if min != nil && *d < *min {
+								return nil, err
+							}
+							if max != nil && *d > *max {
+								return nil, err
+							}
+							return next(ctx)
+						}
+						return nil, err
+					},
 				},
 			}),
 			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
@@ -234,6 +272,36 @@ func TestDirectives(t *testing.T) {
 
 			require.EqualError(t, err, `[{"message":"invalid length","path":["directiveArg"]}]`)
 			require.Nil(t, resp.DirectiveArg)
+		})
+		t.Run("when function errors on nullable arg directives", func(t *testing.T) {
+			var resp struct {
+				DirectiveNullableArg *string
+			}
+
+			err := c.Post(`query { directiveNullableArg(arg: -100) }`, &resp)
+
+			require.EqualError(t, err, `[{"message":"range invalid","path":["directiveNullableArg"]}]`)
+			require.Nil(t, resp.DirectiveNullableArg)
+		})
+		t.Run("when function success on nullable arg directives", func(t *testing.T) {
+			var resp struct {
+				DirectiveNullableArg *string
+			}
+
+			err := c.Post(`query { directiveNullableArg }`, &resp)
+
+			require.Nil(t, err)
+			require.Equal(t, "Ok", *resp.DirectiveNullableArg)
+		})
+		t.Run("when function success on valid nullable arg directives", func(t *testing.T) {
+			var resp struct {
+				DirectiveNullableArg *string
+			}
+
+			err := c.Post(`query { directiveNullableArg(arg: 1) }`, &resp)
+
+			require.Nil(t, err)
+			require.Equal(t, "Ok", *resp.DirectiveNullableArg)
 		})
 		t.Run("when function success", func(t *testing.T) {
 			var resp struct {
@@ -813,6 +881,11 @@ func (r *testQueryResolver) NullableArg(ctx context.Context, arg *int) (*string,
 }
 
 func (r *testQueryResolver) DirectiveArg(ctx context.Context, arg string) (*string, error) {
+	s := "Ok"
+	return &s, nil
+}
+
+func (r *testQueryResolver) DirectiveNullableArg(ctx context.Context, arg *int) (*string, error) {
 	s := "Ok"
 	return &s, nil
 }

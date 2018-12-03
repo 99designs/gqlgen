@@ -94,11 +94,11 @@ func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs ma
 			return nil, err
 		}
 
-		mTmp1, err := e.DateFilterMiddleware(ctx, &arg0)
+		mDateFilter1, err := e.DateFilterMiddleware(ctx, &arg0)
 		if err != nil {
 			return nil, err
 		}
-		arg0 = *mTmp1
+		arg0 = *mDateFilter1
 
 	}
 	args["filter"] = arg0

@@ -35,10 +35,14 @@
 					func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 					{{- if $directive.Args }}
 					{{- range $arg := $directive.Args }}
-						{{- if and $arg.IsPtr $arg.Value }}
-							{{$arg.GoVarName}}:={{ $arg.Value | dump}}
-						{{ else if and $arg.IsPtr $arg.Default }}
-							{{$arg.GoVarName}}:={{ $arg.Default | dump}}
+						{{- if $arg.IsPtr }}
+							{{- $argValue := $arg.Value | dump -}}
+							{{- $argDefault := $arg.Default | dump -}}
+							{{- if not (eq $argValue "nil") }}
+								{{ $arg.GoVarName }} := {{ $argValue }}
+							{{ else if not (eq $argDefault "nil") }}
+								{{$arg.GoVarName}} := {{ $argDefault }}
+							{{ end -}}
 						{{- end }}
 					{{- end }}
 					{{- end -}}
@@ -70,10 +74,14 @@
 						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 						{{- if $directive.Args }}
 						{{- range $arg := $directive.Args }}
-							{{- if and $arg.IsPtr $arg.Value }}
-								{{$arg.GoVarName}}:={{ $arg.Value | dump}}
-							{{ else if and $arg.IsPtr $arg.Default }}
-								{{$arg.GoVarName}}:={{ $arg.Default | dump}}
+							{{- if $arg.IsPtr }}
+								{{- $argValue := $arg.Value | dump -}}
+								{{- $argDefault := $arg.Default | dump -}}
+								{{- if not (eq $argValue "nil") }}
+									{{ $arg.GoVarName }} := {{ $argValue }}
+								{{ else if not (eq $argDefault "nil") }}
+									{{ $arg.GoVarName }} := {{ $argDefault }}
+								{{ end -}}
 							{{- end }}
 						{{- end }}
 						{{- end -}}

@@ -8,7 +8,15 @@
 					{{- range $directive := $arg.Directives }}
 						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 						{{- range $dArg := $directive.Args }}
-							{{- if and $dArg.IsPtr (not (eq ($dArg.Value|dump) "nil")) }}{{ $dArg.GoVarName }} := {{ $dArg.Value|dump }}{{ end -}}
+							{{- if $dArg.IsPtr }}
+								{{- $argValue := $dArg.Value | dump -}}
+								{{- $argDefault := $dArg.Default | dump -}}
+								{{- if not (eq $argValue "nil") }}
+									{{ $dArg.GoVarName }} := {{ $argValue }}
+								{{- else if not (eq $argDefault "nil") }}
+									{{ $dArg.GoVarName }} := {{ $argDefault }}
+								{{- end }}
+							{{- end }}
 						{{- end }}
 							return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "tmp" "n" }})
 						},

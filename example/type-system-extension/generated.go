@@ -2163,7 +2163,7 @@ func UnmarshalTodoInput(v interface{}) (TodoInput, error) {
 
 func (e *executableSchema) TodoInputMiddleware(ctx context.Context, obj *TodoInput) (*TodoInput, error) {
 
-	cObj, err := graphql.ChainFieldMiddleware(
+	cObj, err := chainFieldMiddleware(
 		[]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				return e.directives.InputLogging(ctx, obj, n)
@@ -2343,3 +2343,37 @@ extend type Todo {
 extend union Data @unionLogging
 `},
 )
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+			var (
+				chainHandler graphql.Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res, err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}

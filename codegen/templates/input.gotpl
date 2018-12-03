@@ -29,7 +29,7 @@
 
 	func (e *executableSchema) {{ .GQLType }}Middleware(ctx context.Context, obj *{{.FullName}}) (*{{.FullName}}, error) {
 			{{ if .Directives }}
-		cObj, err := graphql.ChainFieldMiddleware(
+		cObj, err := chainFieldMiddleware(
 			[]graphql.FieldMiddleware{
 				{{- range $directive := .Directives }}
 					func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
@@ -64,7 +64,7 @@
 		{{ if $field.IsPtr }}
 			{{ $resolveName := "*" }}
 		{{ end }}
-			c{{$field.GoFieldName}}, err := graphql.ChainFieldMiddleware(
+			c{{$field.GoFieldName}}, err := chainFieldMiddleware(
 				[]graphql.FieldMiddleware{
 					{{- range $directive := $field.Directives }}
 						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {

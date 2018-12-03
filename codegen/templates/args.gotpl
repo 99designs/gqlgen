@@ -4,7 +4,7 @@
 		if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
 			{{- if or $arg.Directives $arg.IsInput }}
 				{{ if $arg.Directives }}
-            	argm{{$i}}, err := graphql.ChainFieldMiddleware([]graphql.FieldMiddleware{
+            	argm{{$i}}, err := chainFieldMiddleware([]graphql.FieldMiddleware{
 					{{- range $directive := $arg.Directives }}
 						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 						{{- range $dArg := $directive.Args }}

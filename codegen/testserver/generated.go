@@ -341,7 +341,7 @@ func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, ra
 	var arg0 string
 	if tmp, ok := rawArgs["arg"]; ok {
 
-		argm0, err := graphql.ChainFieldMiddleware([]graphql.FieldMiddleware{
+		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				max := 255
 				return e.directives.Length(ctx, tmp, n, 1, &max, "invalid length")
@@ -373,7 +373,7 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 	var arg0 *int
 	if tmp, ok := rawArgs["arg"]; ok {
 
-		argm0, err := graphql.ChainFieldMiddleware([]graphql.FieldMiddleware{
+		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				min := 0
 				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
@@ -4587,7 +4587,7 @@ func UnmarshalInnerDirectives(v interface{}) (InnerDirectives, error) {
 
 func (e *executableSchema) InnerDirectivesMiddleware(ctx context.Context, obj *InnerDirectives) (*InnerDirectives, error) {
 
-	cMessage, err := graphql.ChainFieldMiddleware(
+	cMessage, err := chainFieldMiddleware(
 		[]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				return e.directives.Length(ctx, obj.Message, n, 1, nil, "not valid")
@@ -4669,7 +4669,7 @@ func UnmarshalInputDirectives(v interface{}) (InputDirectives, error) {
 
 func (e *executableSchema) InputDirectivesMiddleware(ctx context.Context, obj *InputDirectives) (*InputDirectives, error) {
 
-	cText, err := graphql.ChainFieldMiddleware(
+	cText, err := chainFieldMiddleware(
 		[]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				max := 7
@@ -5174,3 +5174,37 @@ directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION 
 directive @range(min: Int, max: Int, message: String) on ARGUMENT_DEFINITION
 `},
 )
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+			var (
+				chainHandler graphql.Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res, err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}

@@ -885,7 +885,7 @@ func (r *testQueryResolver) DirectiveArg(ctx context.Context, arg string) (*stri
 	return &s, nil
 }
 
-func (r *testQueryResolver) DirectiveNullableArg(ctx context.Context, arg *int) (*string, error) {
+func (r *testQueryResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error) {
 	s := "Ok"
 	return &s, nil
 }

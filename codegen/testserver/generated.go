@@ -106,7 +106,7 @@ type ComplexityRoot struct {
 		User                   func(childComplexity int, id int) int
 		NullableArg            func(childComplexity int, arg *int) int
 		DirectiveArg           func(childComplexity int, arg string) int
-		DirectiveNullableArg   func(childComplexity int, arg *int) int
+		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
 		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
 		DirectiveInput         func(childComplexity int, arg InputDirectives) int
 		KeywordArgs            func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
@@ -150,7 +150,7 @@ type QueryResolver interface {
 	User(ctx context.Context, id int) (User, error)
 	NullableArg(ctx context.Context, arg *int) (*string, error)
 	DirectiveArg(ctx context.Context, arg string) (*string, error)
-	DirectiveNullableArg(ctx context.Context, arg *int) (*string, error)
+	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error)
 	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
 	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
 	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
@@ -401,6 +401,37 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 
 	}
 	args["arg"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["arg2"]; ok {
+
+		argm1, err := chainFieldMiddleware([]graphql.FieldMiddleware{
+			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+				min := 0
+				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
+			},
+		}...)(ctx, func(ctx2 context.Context) (args1 interface{}, err error) {
+			var ptr1 int
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalInt(tmp)
+				args1 = &ptr1
+			}
+
+			if err != nil {
+				return nil, err
+			}
+			return
+		})
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := argm1.(*int); ok {
+			arg1 = data
+		} else {
+			return nil, errors.New("expect *int")
+		}
+
+	}
+	args["arg2"] = arg1
 	return args, nil
 
 }
@@ -1088,7 +1119,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int)), true
+		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int)), true
 
 	case "Query.directiveInputNullable":
 		if e.complexity.Query.DirectiveInputNullable == nil {
@@ -2679,7 +2710,7 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().DirectiveNullableArg(rctx, args["arg"].(*int))
+		return ec.resolvers.Query().DirectiveNullableArg(rctx, args["arg"].(*int), args["arg2"].(*int))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -5093,7 +5124,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
-    directiveNullableArg(arg: Int @range(min:0)): String
+    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
 }
@@ -5246,7 +5277,7 @@ type EmbeddedPointer {
 }
 
 directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @range(min: Int, max: Int, message: String) on ARGUMENT_DEFINITION
+directive @range(min: Int = 0, max: Int, message: String) on ARGUMENT_DEFINITION
 `},
 )
 

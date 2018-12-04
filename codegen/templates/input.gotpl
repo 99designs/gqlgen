@@ -37,11 +37,8 @@
 					{{- range $arg := $directive.Args }}
 						{{- if $arg.IsPtr }}
 							{{- $argValue := $arg.Value | dump -}}
-							{{- $argDefault := $arg.Default | dump -}}
 							{{- if not (eq $argValue "nil") }}
 								{{ $arg.GoVarName }} := {{ $argValue }}
-							{{ else if not (eq $argDefault "nil") }}
-								{{$arg.GoVarName}} := {{ $argDefault }}
 							{{ end -}}
 						{{- end }}
 					{{- end }}
@@ -72,11 +69,8 @@
 						{{- range $arg := $directive.Args }}
 							{{- if $arg.IsPtr }}
 								{{- $argValue := $arg.Value | dump -}}
-								{{- $argDefault := $arg.Default | dump -}}
 								{{- if not (eq $argValue "nil") }}
 									{{ $arg.GoVarName }} := {{ $argValue }}
-								{{ else if not (eq $argDefault "nil") }}
-									{{ $arg.GoVarName }} := {{ $argDefault }}
 								{{ end -}}
 							{{- end }}
 						{{- end }}

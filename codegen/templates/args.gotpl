@@ -10,11 +10,8 @@
 						{{- range $dArg := $directive.Args }}
 							{{- if $dArg.IsPtr }}
 								{{- $argValue := $dArg.Value | dump -}}
-								{{- $argDefault := $dArg.Default | dump -}}
 								{{- if not (eq $argValue "nil") }}
 									{{ $dArg.GoVarName }} := {{ $argValue }}
-								{{- else if not (eq $argDefault "nil") }}
-									{{ $dArg.GoVarName }} := {{ $argDefault }}
 								{{- end }}
 							{{- end }}
 						{{- end }}

@@ -81,7 +81,7 @@ func (r *queryResolver) NullableArg(ctx context.Context, arg *int) (*string, err
 func (r *queryResolver) DirectiveArg(ctx context.Context, arg string) (*string, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) DirectiveNullableArg(ctx context.Context, arg *int) (*string, error) {
+func (r *queryResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error) {

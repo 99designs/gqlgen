@@ -35,11 +35,8 @@
 					func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 					{{- if $directive.Args }}
 					{{- range $arg := $directive.Args }}
-						{{- if $arg.IsPtr }}
-							{{- $argValue := $arg.Value | dump -}}
-							{{- if not (eq $argValue "nil") }}
-								{{ $arg.GoVarName }} := {{ $argValue }}
-							{{ end -}}
+						{{- if and $arg.IsPtr ( notNil "Value" $arg ) }}
+							{{ $arg.GoVarName }} := {{ $arg.Value | dump }}
 						{{- end }}
 					{{- end }}
 					{{- end -}}
@@ -67,14 +64,11 @@
 						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 						{{- if $directive.Args }}
 						{{- range $arg := $directive.Args }}
-							{{- if $arg.IsPtr }}
-								{{- $argValue := $arg.Value | dump -}}
-								{{- if not (eq $argValue "nil") }}
-									{{ $arg.GoVarName }} := {{ $argValue }}
-								{{ end -}}
+							{{- if and $arg.IsPtr ( notNil "Value" $arg ) }}
+								{{ $arg.GoVarName }} := {{ $arg.Value | dump }}
 							{{- end }}
 						{{- end }}
-						{{- end -}}
+						{{- end }}
 							{{ if $field.IsPtr -}}
 								return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print "*obj." $field.GoFieldName ) "n"}})
 							{{- else -}}

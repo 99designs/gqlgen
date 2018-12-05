@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -31,6 +32,7 @@ func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 		"toCamel":       ToCamel,
 		"dump":          Dump,
 		"prefixLines":   prefixLines,
+		"notNil":         notNil,
 		"reserveImport": CurrentImports.Reserve,
 		"lookupImport":  CurrentImports.Lookup,
 	})
@@ -102,6 +104,19 @@ func ToCamel(s string) string {
 
 func rawQuote(s string) string {
 	return "`" + strings.Replace(s, "`", "`+\"`\"+`", -1) + "`"
+}
+
+func notNil(field string, data interface{}) bool {
+	v := reflect.ValueOf(data)
+
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return false
+	}
+	val := v.FieldByName(field)
+	return val.IsValid() && !val.IsNil()
 }
 
 func Dump(val interface{}) string {

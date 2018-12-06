@@ -2751,6 +2751,7 @@ scalar Time
 )
 
 // ChainFieldMiddleware add chain by FieldMiddleware
+// nolint: deadcode
 func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
 	n := len(handleFunc)
 

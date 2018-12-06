@@ -5282,6 +5282,7 @@ directive @range(min: Int = 0, max: Int, message: String) on ARGUMENT_DEFINITION
 )
 
 // ChainFieldMiddleware add chain by FieldMiddleware
+// nolint: deadcode
 func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
 	n := len(handleFunc)
 

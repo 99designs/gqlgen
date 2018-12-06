@@ -217,7 +217,7 @@ func TestDirectives(t *testing.T) {
 						}
 						if message == nil {
 							err = errors.New("range invalid")
-						}else{
+						} else {
 							err = errors.New(*message)
 						}
 						if d, ok := obj.(int); ok {

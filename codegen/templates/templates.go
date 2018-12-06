@@ -32,7 +32,7 @@ func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
 		"toCamel":       ToCamel,
 		"dump":          Dump,
 		"prefixLines":   prefixLines,
-		"notNil":         notNil,
+		"notNil":        notNil,
 		"reserveImport": CurrentImports.Reserve,
 		"lookupImport":  CurrentImports.Lookup,
 	})
@@ -116,6 +116,7 @@ func notNil(field string, data interface{}) bool {
 		return false
 	}
 	val := v.FieldByName(field)
+
 	return val.IsValid() && !val.IsNil()
 }
 

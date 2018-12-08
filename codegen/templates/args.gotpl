@@ -15,12 +15,13 @@
 							return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "tmp" "n" }})
 						},
 					{{- end }}
-					}...)(ctx, func(ctx2 context.Context)(args{{$i}} interface{},err error){
-					{{$arg.Unmarshal (print "args" $i) "tmp" }}
+					}...)(ctx, func(ctx2 context.Context)(interface{}, error){
+					var err error
+					{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 					if err != nil {
 						return nil, err
 					}
-					return
+					return arg{{ $i }}, nil
 				})
 				if err != nil {
 					return nil, err

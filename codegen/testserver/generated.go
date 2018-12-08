@@ -346,12 +346,13 @@ func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, ra
 				max := 255
 				return e.directives.Length(ctx, tmp, n, 1, &max, "invalid length")
 			},
-		}...)(ctx, func(ctx2 context.Context) (args0 interface{}, err error) {
-			args0, err = graphql.UnmarshalString(tmp)
+		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
 			if err != nil {
 				return nil, err
 			}
-			return
+			return arg0, nil
 		})
 		if err != nil {
 			return nil, err
@@ -378,17 +379,18 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 				min := 0
 				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
 			},
-		}...)(ctx, func(ctx2 context.Context) (args0 interface{}, err error) {
+		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
+			var err error
 			var ptr1 int
 			if tmp != nil {
 				ptr1, err = graphql.UnmarshalInt(tmp)
-				args0 = &ptr1
+				arg0 = &ptr1
 			}
 
 			if err != nil {
 				return nil, err
 			}
-			return
+			return arg0, nil
 		})
 		if err != nil {
 			return nil, err
@@ -409,17 +411,18 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 				min := 0
 				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
 			},
-		}...)(ctx, func(ctx2 context.Context) (args1 interface{}, err error) {
+		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
+			var err error
 			var ptr1 int
 			if tmp != nil {
 				ptr1, err = graphql.UnmarshalInt(tmp)
-				args1 = &ptr1
+				arg1 = &ptr1
 			}
 
 			if err != nil {
 				return nil, err
 			}
-			return
+			return arg1, nil
 		})
 		if err != nil {
 			return nil, err

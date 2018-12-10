@@ -27,9 +27,15 @@
 			if !ok {
 				return nil
 			}
-			var out graphql.OrderedMap
-			out.Add(field.Alias, func() graphql.Marshaler { {{ $field.WriteJson }} }())
-			return &out
+			return graphql.WriterFunc(func(w io.Writer) {
+				w.Write([]byte{'{'})
+				graphql.MarshalString(field.Alias).MarshalGQL(w)
+				w.Write([]byte{':'})
+				func() graphql.Marshaler {
+					{{ $field.WriteJson }}
+				}().MarshalGQL(w)
+				w.Write([]byte{'}'})
+			})
 		}
 	}
 {{ else }}

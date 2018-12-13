@@ -5,7 +5,7 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (cfg *Config) buildDirectives(types NamedTypes) (map[string]*Directive, error) {
+func (cfg *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, error) {
 	directives := make(map[string]*Directive, len(cfg.schema.Directives))
 
 	for name, dir := range cfg.schema.Directives {
@@ -18,6 +18,7 @@ func (cfg *Config) buildDirectives(types NamedTypes) (map[string]*Directive, err
 
 		var args []FieldArgument
 		for _, arg := range dir.Arguments {
+
 			newArg := FieldArgument{
 				GQLName:       arg.Name,
 				TypeReference: types.getType(arg.Type),
@@ -47,7 +48,7 @@ func (cfg *Config) buildDirectives(types NamedTypes) (map[string]*Directive, err
 	return directives, nil
 }
 
-func (cfg *Config) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
+func (cfg *Generator) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 
 	dirs := make([]*Directive, len(list))
 	for i, d := range list {

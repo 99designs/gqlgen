@@ -7,7 +7,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
+func (cfg *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
 	var models []Model
 
 	for _, typ := range cfg.schema.Types {
@@ -52,7 +52,7 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model,
 	return models, nil
 }
 
-func (cfg *Config) obj2Model(obj *Object) Model {
+func (cfg *Generator) obj2Model(obj *Object) Model {
 	model := Model{
 		TypeDefinition: obj.TypeDefinition,
 		Implements:     obj.Implements,

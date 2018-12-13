@@ -1,4 +1,4 @@
-package codegen
+package config
 
 import (
 	"fmt"
@@ -6,14 +6,25 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/99designs/gqlgen/internal/gopath"
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"gopkg.in/yaml.v2"
 )
+
+type Config struct {
+	SchemaFilename SchemaFilenames `yaml:"schema,omitempty"`
+	Exec           PackageConfig   `yaml:"exec"`
+	Model          PackageConfig   `yaml:"model"`
+	Resolver       PackageConfig   `yaml:"resolver,omitempty"`
+	Models         TypeMap         `yaml:"models,omitempty"`
+	StructTag      string          `yaml:"struct_tag,omitempty"`
+}
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 
@@ -21,7 +32,6 @@ var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 func DefaultConfig() *Config {
 	return &Config{
 		SchemaFilename: SchemaFilenames{"schema.graphql"},
-		SchemaStr:      map[string]string{},
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
 	}
@@ -71,26 +81,7 @@ func LoadConfig(filename string) (*Config, error) {
 		}
 	}
 
-	config.FilePath = filename
-	config.SchemaStr = map[string]string{}
-
 	return config, nil
-}
-
-type Config struct {
-	SchemaFilename SchemaFilenames   `yaml:"schema,omitempty"`
-	SchemaStr      map[string]string `yaml:"-"`
-	Exec           PackageConfig     `yaml:"exec"`
-	Model          PackageConfig     `yaml:"model"`
-	Resolver       PackageConfig     `yaml:"resolver,omitempty"`
-	Models         TypeMap           `yaml:"models,omitempty"`
-	StructTag      string            `yaml:"struct_tag,omitempty"`
-
-	Directives map[string]*Directive `yaml:"-"`
-
-	FilePath string `yaml:"-"`
-
-	schema *ast.Schema `yaml:"-"`
 }
 
 type PackageConfig struct {
@@ -173,7 +164,8 @@ func (c *PackageConfig) Check() error {
 	if c.Filename != "" && !strings.HasSuffix(c.Filename, ".go") {
 		return fmt.Errorf("filename should be path to a go source file")
 	}
-	return nil
+
+	return c.normalize()
 }
 
 func (c *PackageConfig) IsDefined() bool {
@@ -190,10 +182,13 @@ func (cfg *Config) Check() error {
 	if err := cfg.Model.Check(); err != nil {
 		return errors.Wrap(err, "config.model")
 	}
-	if err := cfg.Resolver.Check(); err != nil {
-		return errors.Wrap(err, "config.resolver")
+	if cfg.Resolver.IsDefined() {
+		if err := cfg.Resolver.Check(); err != nil {
+			return errors.Wrap(err, "config.resolver")
+		}
 	}
-	return nil
+
+	return cfg.normalize()
 }
 
 type TypeMap map[string]TypeMapEntry
@@ -212,14 +207,14 @@ func (tm TypeMap) Check() error {
 	return nil
 }
 
-func (tm TypeMap) referencedPackages() []string {
+func (tm TypeMap) ReferencedPackages() []string {
 	var pkgs []string
 
 	for _, typ := range tm {
 		if typ.Model == "map[string]interface{}" {
 			continue
 		}
-		pkg, _ := pkgAndType(typ.Model)
+		pkg, _ := gopath.PkgAndType(typ.Model)
 		if pkg == "" || inStrSlice(pkgs, pkg) {
 			continue
 		}
@@ -272,4 +267,85 @@ func findCfgInDir(dir string) string {
 		}
 	}
 	return ""
+}
+
+func (cfg *Config) normalize() error {
+	if err := cfg.Model.normalize(); err != nil {
+		return errors.Wrap(err, "model")
+	}
+
+	if err := cfg.Exec.normalize(); err != nil {
+		return errors.Wrap(err, "exec")
+	}
+
+	if cfg.Resolver.IsDefined() {
+		if err := cfg.Resolver.normalize(); err != nil {
+			return errors.Wrap(err, "resolver")
+		}
+	}
+
+	builtins := TypeMap{
+		"__Directive":  {Model: "github.com/99designs/gqlgen/graphql/introspection.Directive"},
+		"__Type":       {Model: "github.com/99designs/gqlgen/graphql/introspection.Type"},
+		"__Field":      {Model: "github.com/99designs/gqlgen/graphql/introspection.Field"},
+		"__EnumValue":  {Model: "github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
+		"__InputValue": {Model: "github.com/99designs/gqlgen/graphql/introspection.InputValue"},
+		"__Schema":     {Model: "github.com/99designs/gqlgen/graphql/introspection.Schema"},
+		"Int":          {Model: "github.com/99designs/gqlgen/graphql.Int"},
+		"Float":        {Model: "github.com/99designs/gqlgen/graphql.Float"},
+		"String":       {Model: "github.com/99designs/gqlgen/graphql.String"},
+		"Boolean":      {Model: "github.com/99designs/gqlgen/graphql.Boolean"},
+		"ID":           {Model: "github.com/99designs/gqlgen/graphql.ID"},
+		"Time":         {Model: "github.com/99designs/gqlgen/graphql.Time"},
+		"Map":          {Model: "github.com/99designs/gqlgen/graphql.Map"},
+	}
+
+	if cfg.Models == nil {
+		cfg.Models = TypeMap{}
+	}
+	for typeName, entry := range builtins {
+		if !cfg.Models.Exists(typeName) {
+			cfg.Models[typeName] = entry
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
+	schemaStrings := map[string]string{}
+
+	var sources []*ast.Source
+
+	for _, filename := range c.SchemaFilename {
+		var err error
+		var schemaRaw []byte
+		schemaRaw, err = ioutil.ReadFile(filename)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
+			os.Exit(1)
+		}
+		schemaStrings[filename] = string(schemaRaw)
+		sources = append(sources, &ast.Source{Name: filename, Input: schemaStrings[filename]})
+	}
+
+	schema, err := gqlparser.LoadSchema(sources...)
+	if err != nil {
+		return nil, nil, err
+	}
+	return schema, schemaStrings, nil
+}
+
+var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
+
+func sanitizePackageName(pkg string) string {
+	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
+}
+
+func abs(path string) string {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		panic(err)
+	}
+	return filepath.ToSlash(absPath)
 }

@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program) (Objects, error) {
+func (cfg *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Objects, error) {
 	var objects Objects
 
 	for _, typ := range cfg.schema.Types {
@@ -81,7 +81,7 @@ func sanitizeArgName(name string) string {
 	return name
 }
 
-func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
+func (cfg *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
 	obj := &Object{TypeDefinition: types[typ.Name]}
 	typeEntry, entryExists := cfg.Models[typ.Name]
 

@@ -9,7 +9,7 @@ import (
 )
 
 // namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of TypeReference for each thing
-func (cfg *Config) buildNamedTypes() NamedTypes {
+func (cfg *Generator) buildNamedTypes() NamedTypes {
 	types := map[string]*TypeDefinition{}
 	for _, schemaType := range cfg.schema.Types {
 		t := namedTypeFromSchema(schemaType)
@@ -27,7 +27,7 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 	return types
 }
 
-func (cfg *Config) bindTypes(namedTypes NamedTypes, destDir string, prog *loader.Program) {
+func (cfg *Generator) bindTypes(namedTypes NamedTypes, destDir string, prog *loader.Program) {
 	for _, t := range namedTypes {
 		if t.Package == "" {
 			continue
@@ -68,33 +68,4 @@ func pkgAndType(name string) (string, string) {
 	}
 
 	return normalizeVendor(strings.Join(parts[:len(parts)-1], ".")), parts[len(parts)-1]
-}
-
-func (n NamedTypes) getType(t *ast.Type) *TypeReference {
-	orig := t
-	var modifiers []string
-	for {
-		if t.Elem != nil {
-			modifiers = append(modifiers, modList)
-			t = t.Elem
-		} else {
-			if !t.NonNull {
-				modifiers = append(modifiers, modPtr)
-			}
-			if n[t.NamedType] == nil {
-				panic("missing type " + t.NamedType)
-			}
-			res := &TypeReference{
-				TypeDefinition: n[t.NamedType],
-				Modifiers:      modifiers,
-				ASTType:        orig,
-			}
-
-			if res.IsInterface {
-				res.StripPtr()
-			}
-
-			return res
-		}
-	}
 }

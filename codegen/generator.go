@@ -4,23 +4,42 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"syscall"
 
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/pkg/errors"
-	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/gqlerror"
 )
 
-func Generate(cfg Config) error {
-	if err := cfg.normalize(); err != nil {
-		return err
+type Generator struct {
+	*config.Config
+	schema     *ast.Schema       `yaml:"-"`
+	SchemaStr  map[string]string `yaml:"-"`
+	Directives map[string]*Directive
+}
+
+func New(cfg *config.Config) (*Generator, error) {
+	g := &Generator{Config: cfg}
+
+	var err error
+	g.schema, g.SchemaStr, err = cfg.LoadSchema()
+	if err != nil {
+		return nil, err
 	}
 
+	err = cfg.Check()
+	if err != nil {
+		return nil, err
+	}
+
+	return g, nil
+}
+
+func (cfg *Generator) Generate() error {
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	_ = syscall.Unlink(cfg.Model.Filename)
+
 	namedTypes := cfg.buildNamedTypes()
 
 	directives, err := cfg.buildDirectives(namedTypes)
@@ -61,7 +80,7 @@ func Generate(cfg Config) error {
 	}
 
 	if cfg.Resolver.IsDefined() {
-		if err := generateResolver(cfg); err != nil {
+		if err := cfg.GenerateResolver(); err != nil {
 			return errors.Wrap(err, "generating resolver failed")
 		}
 	}
@@ -73,14 +92,7 @@ func Generate(cfg Config) error {
 	return nil
 }
 
-func GenerateServer(cfg Config, filename string) error {
-	if err := cfg.Exec.normalize(); err != nil {
-		return errors.Wrap(err, "exec")
-	}
-	if err := cfg.Resolver.normalize(); err != nil {
-		return errors.Wrap(err, "resolver")
-	}
-
+func (cfg *Generator) GenerateServer(filename string) error {
 	serverFilename := abs(filename)
 	serverBuild := cfg.server(filepath.Dir(serverFilename))
 
@@ -95,7 +107,7 @@ func GenerateServer(cfg Config, filename string) error {
 	return nil
 }
 
-func generateResolver(cfg Config) error {
+func (cfg *Generator) GenerateResolver() error {
 	resolverBuild, err := cfg.resolver()
 	if err != nil {
 		return errors.Wrap(err, "resolver build failed")
@@ -116,65 +128,6 @@ func generateResolver(cfg Config) error {
 	}
 
 	return nil
-}
-
-func (cfg *Config) normalize() error {
-	if err := cfg.Model.normalize(); err != nil {
-		return errors.Wrap(err, "model")
-	}
-
-	if err := cfg.Exec.normalize(); err != nil {
-		return errors.Wrap(err, "exec")
-	}
-
-	if cfg.Resolver.IsDefined() {
-		if err := cfg.Resolver.normalize(); err != nil {
-			return errors.Wrap(err, "resolver")
-		}
-	}
-
-	builtins := TypeMap{
-		"__Directive":  {Model: "github.com/99designs/gqlgen/graphql/introspection.Directive"},
-		"__Type":       {Model: "github.com/99designs/gqlgen/graphql/introspection.Type"},
-		"__Field":      {Model: "github.com/99designs/gqlgen/graphql/introspection.Field"},
-		"__EnumValue":  {Model: "github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
-		"__InputValue": {Model: "github.com/99designs/gqlgen/graphql/introspection.InputValue"},
-		"__Schema":     {Model: "github.com/99designs/gqlgen/graphql/introspection.Schema"},
-		"Int":          {Model: "github.com/99designs/gqlgen/graphql.Int"},
-		"Float":        {Model: "github.com/99designs/gqlgen/graphql.Float"},
-		"String":       {Model: "github.com/99designs/gqlgen/graphql.String"},
-		"Boolean":      {Model: "github.com/99designs/gqlgen/graphql.Boolean"},
-		"ID":           {Model: "github.com/99designs/gqlgen/graphql.ID"},
-		"Time":         {Model: "github.com/99designs/gqlgen/graphql.Time"},
-		"Map":          {Model: "github.com/99designs/gqlgen/graphql.Map"},
-	}
-
-	if cfg.Models == nil {
-		cfg.Models = TypeMap{}
-	}
-	for typeName, entry := range builtins {
-		if !cfg.Models.Exists(typeName) {
-			cfg.Models[typeName] = entry
-		}
-	}
-
-	var sources []*ast.Source
-	for _, filename := range cfg.SchemaFilename {
-		sources = append(sources, &ast.Source{Name: filename, Input: cfg.SchemaStr[filename]})
-	}
-
-	var err *gqlerror.Error
-	cfg.schema, err = gqlparser.LoadSchema(sources...)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
-
-func sanitizePackageName(pkg string) string {
-	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
 }
 
 func abs(path string) string {

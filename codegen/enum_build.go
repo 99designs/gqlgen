@@ -8,7 +8,7 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (cfg *Config) buildEnums(types NamedTypes) []Enum {
+func (cfg *Generator) buildEnums(types NamedTypes) []Enum {
 	var enums []Enum
 
 	for _, typ := range cfg.schema.Types {

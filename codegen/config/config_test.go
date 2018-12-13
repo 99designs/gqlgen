@@ -1,4 +1,4 @@
-package codegen
+package config
 
 import (
 	"os"
@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,12 +17,12 @@ func TestLoadConfig(t *testing.T) {
 
 	t.Run("malformed config", func(t *testing.T) {
 		_, err := LoadConfig("testdata/cfg/malformedconfig.yml")
-		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `asdf` into codegen.Config")
+		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `asdf` into config.Config")
 	})
 
 	t.Run("unknown keys", func(t *testing.T) {
 		_, err := LoadConfig("testdata/cfg/unknownkeys.yml")
-		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 2: field unknown not found in type codegen.Config")
+		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 2: field unknown not found in type config.Config")
 	})
 }
 
@@ -73,7 +72,7 @@ func TestReferencedPackages(t *testing.T) {
 			},
 		}
 
-		pkgs := tm.referencedPackages()
+		pkgs := tm.ReferencedPackages()
 
 		assert.Equal(t, []string{"github.com/test", "github.com/otherpkg"}, pkgs)
 	})

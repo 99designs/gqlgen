@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Objects, error) {
+func (cfg *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Objects, error) {
 	var inputs Objects
 
 	for _, typ := range cfg.schema.Types {
@@ -43,7 +43,7 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Obj
 	return inputs, nil
 }
 
-func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
+func (cfg *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
 	obj := &Object{TypeDefinition: types[typ.Name]}
 	typeEntry, entryExists := cfg.Models[typ.Name]
 

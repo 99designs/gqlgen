@@ -21,6 +21,11 @@ const (
 	RoleOwner Role = "OWNER"
 )
 
+var AllRole = []Role{
+	RoleAdmin,
+	RoleOwner,
+}
+
 func (e Role) IsValid() bool {
 	switch e {
 	case RoleAdmin, RoleOwner:

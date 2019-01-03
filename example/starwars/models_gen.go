@@ -44,6 +44,12 @@ const (
 	EpisodeJedi    Episode = "JEDI"
 )
 
+var AllEpisode = []Episode{
+	EpisodeNewhope,
+	EpisodeEmpire,
+	EpisodeJedi,
+}
+
 func (e Episode) IsValid() bool {
 	switch e {
 	case EpisodeNewhope, EpisodeEmpire, EpisodeJedi:
@@ -79,6 +85,11 @@ const (
 	LengthUnitMeter LengthUnit = "METER"
 	LengthUnitFoot  LengthUnit = "FOOT"
 )
+
+var AllLengthUnit = []LengthUnit{
+	LengthUnitMeter,
+	LengthUnitFoot,
+}
 
 func (e LengthUnit) IsValid() bool {
 	switch e {

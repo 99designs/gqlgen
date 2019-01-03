@@ -59,6 +59,12 @@ import (
 	{{- end }}
 	)
 
+	var All{{.GoType}} = []{{.GoType}}{
+	{{- range $value := .Values}}
+		{{$enum.GoType}}{{ .Name|toCamel }},
+	{{- end }}
+	}
+
 	func (e {{.GoType}}) IsValid() bool {
 		switch e {
 		case {{ range $index, $element := .Values}}{{if $index}},{{end}}{{ $enum.GoType }}{{ $element.Name|toCamel }}{{end}}:

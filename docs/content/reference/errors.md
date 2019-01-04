@@ -7,8 +7,8 @@ menu: { main: { parent: 'reference' } }
 
 ## Returning errors
 
-All resolvers simply return an error to send it to the user. Its assumed that any error message returned
-here is safe for users, if certain messages arent safe, customize the error presenter.
+All resolvers simply return an error to be sent to the user. It's assumed that any error message returned
+here is safe for users. If certain messages aren't safe, customise the error presenter.
 
 ### Multiple errors
 
@@ -63,8 +63,8 @@ They will be returned in the same order in the response, eg:
 
 ### The error presenter
 
-All `errors` returned by resolvers, or from validation pass through a hook before being displayed to the user.
-This hook gives you the ability to customize errors however makes sense in your app.
+All `errors` returned by resolvers, or from validation, pass through a hook before being displayed to the user.
+This hook gives you the ability to customise errors however makes sense in your app.
 
 The default error presenter will capture the resolver path and use the Error() message in the response. It will
 also call an Extensions() method if one is present to return graphql extensions.
@@ -85,7 +85,7 @@ server := handler.GraphQL(MakeExecutableSchema(resolvers),
 )
 ```
 
-This function will be called with the the same resolver context that threw generated it, so you can extract the
+This function will be called with the the same resolver context that generated it, so you can extract the
 current resolver path and whatever other state you might want to notify the client about.
 
 

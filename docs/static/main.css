@@ -107,6 +107,7 @@ main {
 }
 
 .content {
+    position: relative;
     grid-area: content;
     max-width: 920px;
     margin: auto;
@@ -149,7 +150,9 @@ h1 {
 }
 
 .header-link {
-    float: right;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 h2 {

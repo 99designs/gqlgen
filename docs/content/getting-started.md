@@ -286,3 +286,7 @@ This magic comment tells `go generate` what command to run when we want to regen
 ```go
 go generate ./...
 ```
+
+> Note
+>
+> Ensure that the path to your `gqlgen` binary is relative to the file the generate command is added to.

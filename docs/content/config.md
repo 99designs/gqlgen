@@ -27,7 +27,7 @@ exec:
   filename: graph/generated/generated.go
   package: generated
 
-# Let gqlgen know where to the generated models (if any)
+# Let gqlgen know where to put the generated models (if any)
 model:
   filename: models/generated.go
   package: models
@@ -35,7 +35,7 @@ model:
 # Optional, turns on resolver stub generation
 resolver:
   filename: resolver.go # where to write them
-  type: Resolver  # whats the resolver root implementation type called?
+  type: Resolver  # what's the resolver root implementation type called?
 
 # Optional, turns on binding to field names by tag provided
 struct_tag: json

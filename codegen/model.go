@@ -1,14 +1,14 @@
 package codegen
 
 type Model struct {
-	*NamedType
+	*TypeDefinition
 	Description string
 	Fields      []ModelField
-	Implements  []*NamedType
+	Implements  []*TypeDefinition
 }
 
 type ModelField struct {
-	*Type
+	*TypeReference
 	GQLName     string
 	GoFieldName string
 	GoFKName    string

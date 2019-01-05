@@ -24,21 +24,21 @@ func (cfg *Config) buildInterfaces(types NamedTypes, prog *loader.Program) []*In
 }
 
 func (cfg *Config) buildInterface(types NamedTypes, typ *ast.Definition, prog *loader.Program) *Interface {
-	i := &Interface{NamedType: types[typ.Name]}
+	i := &Interface{TypeDefinition: types[typ.Name]}
 
 	for _, implementor := range cfg.schema.GetPossibleTypes(typ) {
 		t := types[implementor.Name]
 
 		i.Implementors = append(i.Implementors, InterfaceImplementor{
-			NamedType:     t,
-			ValueReceiver: cfg.isValueReceiver(types[typ.Name], t, prog),
+			TypeDefinition: t,
+			ValueReceiver:  cfg.isValueReceiver(types[typ.Name], t, prog),
 		})
 	}
 
 	return i
 }
 
-func (cfg *Config) isValueReceiver(intf *NamedType, implementor *NamedType, prog *loader.Program) bool {
+func (cfg *Config) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition, prog *loader.Program) bool {
 	interfaceType, err := findGoInterface(prog, intf.Package, intf.GoType)
 	if interfaceType == nil || err != nil {
 		return true

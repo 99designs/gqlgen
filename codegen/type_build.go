@@ -8,9 +8,9 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-// namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of Type for each thing
+// namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of TypeReference for each thing
 func (cfg *Config) buildNamedTypes() NamedTypes {
-	types := map[string]*NamedType{}
+	types := map[string]*TypeDefinition{}
 	for _, schemaType := range cfg.schema.Types {
 		t := namedTypeFromSchema(schemaType)
 
@@ -37,7 +37,7 @@ func (cfg *Config) bindTypes(namedTypes NamedTypes, destDir string, prog *loader
 		switch def := def.(type) {
 		case *types.Func:
 			sig := def.Type().(*types.Signature)
-			cpy := t.Ref
+			cpy := t.TypeImplementation
 			t.Marshaler = &cpy
 
 			t.Package, t.GoType = pkgAndType(sig.Params().At(0).Type().String())
@@ -47,20 +47,20 @@ func (cfg *Config) bindTypes(namedTypes NamedTypes, destDir string, prog *loader
 
 // namedTypeFromSchema objects for every graphql type, including primitives.
 // don't recurse into object fields or interfaces yet, lets make sure we have collected everything first.
-func namedTypeFromSchema(schemaType *ast.Definition) *NamedType {
+func namedTypeFromSchema(schemaType *ast.Definition) *TypeDefinition {
 	switch schemaType.Kind {
 	case ast.Scalar, ast.Enum:
-		return &NamedType{GQLType: schemaType.Name, IsScalar: true}
+		return &TypeDefinition{GQLType: schemaType.Name, IsScalar: true}
 	case ast.Interface, ast.Union:
-		return &NamedType{GQLType: schemaType.Name, IsInterface: true}
+		return &TypeDefinition{GQLType: schemaType.Name, IsInterface: true}
 	case ast.InputObject:
-		return &NamedType{GQLType: schemaType.Name, IsInput: true}
+		return &TypeDefinition{GQLType: schemaType.Name, IsInput: true}
 	default:
-		return &NamedType{GQLType: schemaType.Name}
+		return &TypeDefinition{GQLType: schemaType.Name}
 	}
 }
 
-// take a string in the form github.com/package/blah.Type and split it into package and type
+// take a string in the form github.com/package/blah.TypeReference and split it into package and type
 func pkgAndType(name string) (string, string) {
 	parts := strings.Split(name, ".")
 	if len(parts) == 1 {
@@ -70,7 +70,7 @@ func pkgAndType(name string) (string, string) {
 	return normalizeVendor(strings.Join(parts[:len(parts)-1], ".")), parts[len(parts)-1]
 }
 
-func (n NamedTypes) getType(t *ast.Type) *Type {
+func (n NamedTypes) getType(t *ast.Type) *TypeReference {
 	orig := t
 	var modifiers []string
 	for {
@@ -84,10 +84,10 @@ func (n NamedTypes) getType(t *ast.Type) *Type {
 			if n[t.NamedType] == nil {
 				panic("missing type " + t.NamedType)
 			}
-			res := &Type{
-				NamedType: n[t.NamedType],
-				Modifiers: modifiers,
-				ASTType:   orig,
+			res := &TypeReference{
+				TypeDefinition: n[t.NamedType],
+				Modifiers:      modifiers,
+				ASTType:        orig,
 			}
 
 			if res.IsInterface {

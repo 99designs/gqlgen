@@ -19,12 +19,12 @@ func (cfg *Config) buildDirectives(types NamedTypes) (map[string]*Directive, err
 		var args []FieldArgument
 		for _, arg := range dir.Arguments {
 			newArg := FieldArgument{
-				GQLName:   arg.Name,
-				Type:      types.getType(arg.Type),
-				GoVarName: sanitizeArgName(arg.Name),
+				GQLName:       arg.Name,
+				TypeReference: types.getType(arg.Type),
+				GoVarName:     sanitizeArgName(arg.Name),
 			}
 
-			if !newArg.Type.IsInput && !newArg.Type.IsScalar {
+			if !newArg.TypeReference.IsInput && !newArg.TypeReference.IsScalar {
 				return nil, errors.Errorf("%s cannot be used as argument of directive %s(%s) only input and scalar types are allowed", arg.Type, dir.Name, arg.Name)
 			}
 
@@ -69,10 +69,10 @@ func (cfg *Config) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 					value = argValue
 				}
 				args = append(args, FieldArgument{
-					GQLName:   a.GQLName,
-					Value:     value,
-					GoVarName: a.GoVarName,
-					Type:      a.Type,
+					GQLName:       a.GQLName,
+					Value:         value,
+					GoVarName:     a.GoVarName,
+					TypeReference: a.TypeReference,
 				})
 			}
 			dirs[i] = &Directive{

@@ -23,9 +23,9 @@ func (cfg *Config) buildEnums(types NamedTypes) []Enum {
 		}
 
 		enum := Enum{
-			NamedType:   namedType,
-			Values:      values,
-			Description: typ.Description,
+			TypeDefinition: namedType,
+			Values:         values,
+			Description:    typ.Description,
 		}
 		enum.GoType = templates.ToCamel(enum.GQLType)
 		enums = append(enums, enum)

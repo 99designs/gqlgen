@@ -54,17 +54,17 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model,
 
 func (cfg *Config) obj2Model(obj *Object) Model {
 	model := Model{
-		NamedType:  obj.NamedType,
-		Implements: obj.Implements,
-		Fields:     []ModelField{},
+		TypeDefinition: obj.TypeDefinition,
+		Implements:     obj.Implements,
+		Fields:         []ModelField{},
 	}
 
 	model.GoType = ucFirst(obj.GQLType)
-	model.Marshaler = &Ref{GoType: obj.GoType}
+	model.Marshaler = &TypeImplementation{GoType: obj.GoType}
 
 	for i := range obj.Fields {
 		field := &obj.Fields[i]
-		mf := ModelField{Type: field.Type, GQLName: field.GQLName}
+		mf := ModelField{TypeReference: field.TypeReference, GQLName: field.GQLName}
 
 		if field.GoFieldName != "" {
 			mf.GoFieldName = field.GoFieldName
@@ -80,12 +80,12 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 
 func int2Model(obj *Interface) Model {
 	model := Model{
-		NamedType: obj.NamedType,
-		Fields:    []ModelField{},
+		TypeDefinition: obj.TypeDefinition,
+		Fields:         []ModelField{},
 	}
 
 	model.GoType = ucFirst(obj.GQLType)
-	model.Marshaler = &Ref{GoType: obj.GoType}
+	model.Marshaler = &TypeImplementation{GoType: obj.GoType}
 
 	return model
 }

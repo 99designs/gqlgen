@@ -9,12 +9,12 @@ import (
 )
 
 // namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of TypeReference for each thing
-func (cfg *Generator) buildNamedTypes() NamedTypes {
+func (g *Generator) buildNamedTypes() NamedTypes {
 	types := map[string]*TypeDefinition{}
-	for _, schemaType := range cfg.schema.Types {
+	for _, schemaType := range g.schema.Types {
 		t := namedTypeFromSchema(schemaType)
 
-		if userEntry, ok := cfg.Models[t.GQLType]; ok && userEntry.Model != "" {
+		if userEntry, ok := g.Models[t.GQLType]; ok && userEntry.Model != "" {
 			t.IsUserDefined = true
 			t.Package, t.GoType = pkgAndType(userEntry.Model)
 		} else if t.IsScalar {
@@ -27,7 +27,7 @@ func (cfg *Generator) buildNamedTypes() NamedTypes {
 	return types
 }
 
-func (cfg *Generator) bindTypes(namedTypes NamedTypes, destDir string, prog *loader.Program) {
+func (g *Generator) bindTypes(namedTypes NamedTypes, destDir string, prog *loader.Program) {
 	for _, t := range namedTypes {
 		if t.Package == "" {
 			continue

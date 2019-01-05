@@ -9,13 +9,13 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Objects, error) {
+func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Objects, error) {
 	var inputs Objects
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range g.schema.Types {
 		switch typ.Kind {
 		case ast.InputObject:
-			input, err := cfg.buildInput(namedTypes, typ)
+			input, err := g.buildInput(namedTypes, typ)
 			if err != nil {
 				return nil, err
 			}
@@ -26,7 +26,7 @@ func (cfg *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (
 			}
 			if def != nil {
 				input.Marshaler = buildInputMarshaler(typ, def)
-				bindErrs := bindObject(def.Type(), input, cfg.StructTag)
+				bindErrs := bindObject(def.Type(), input, g.StructTag)
 				if len(bindErrs) > 0 {
 					return nil, bindErrs
 				}
@@ -43,12 +43,12 @@ func (cfg *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (
 	return inputs, nil
 }
 
-func (cfg *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
+func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
 	obj := &Object{TypeDefinition: types[typ.Name]}
-	typeEntry, entryExists := cfg.Models[typ.Name]
+	typeEntry, entryExists := g.Models[typ.Name]
 
 	for _, field := range typ.Fields {
-		dirs, err := cfg.getDirectives(field.Directives)
+		dirs, err := g.getDirectives(field.Directives)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (cfg *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object
 		obj.Fields = append(obj.Fields, newField)
 
 	}
-	dirs, err := cfg.getDirectives(typ.Directives)
+	dirs, err := g.getDirectives(typ.Directives)
 	if err != nil {
 		return nil, err
 	}

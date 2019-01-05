@@ -9,15 +9,15 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Objects, error) {
+func (g *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Objects, error) {
 	var objects Objects
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range g.schema.Types {
 		if typ.Kind != ast.Object {
 			continue
 		}
 
-		obj, err := cfg.buildObject(types, typ)
+		obj, err := g.buildObject(types, typ)
 		if err != nil {
 			return nil, err
 		}
@@ -27,7 +27,7 @@ func (cfg *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Obje
 			return nil, err
 		}
 		if def != nil {
-			for _, bindErr := range bindObject(def.Type(), obj, cfg.StructTag) {
+			for _, bindErr := range bindObject(def.Type(), obj, g.StructTag) {
 				log.Println(bindErr.Error())
 				log.Println("  Adding resolver method")
 			}
@@ -81,34 +81,34 @@ func sanitizeArgName(name string) string {
 	return name
 }
 
-func (cfg *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
+func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
 	obj := &Object{TypeDefinition: types[typ.Name]}
-	typeEntry, entryExists := cfg.Models[typ.Name]
+	typeEntry, entryExists := g.Models[typ.Name]
 
 	obj.ResolverInterface = &TypeImplementation{GoType: obj.GQLType + "Resolver"}
 
-	if typ == cfg.schema.Query {
+	if typ == g.schema.Query {
 		obj.Root = true
 	}
 
-	if typ == cfg.schema.Mutation {
+	if typ == g.schema.Mutation {
 		obj.Root = true
 		obj.DisableConcurrency = true
 	}
 
-	if typ == cfg.schema.Subscription {
+	if typ == g.schema.Subscription {
 		obj.Root = true
 		obj.Stream = true
 	}
 
 	obj.Satisfies = append(obj.Satisfies, typ.Interfaces...)
 
-	for _, intf := range cfg.schema.GetImplements(typ) {
+	for _, intf := range g.schema.GetImplements(typ) {
 		obj.Implements = append(obj.Implements, types[intf.Name])
 	}
 
 	for _, field := range typ.Fields {
-		if typ == cfg.schema.Query && field.Name == "__type" {
+		if typ == g.schema.Query && field.Name == "__type" {
 			obj.Fields = append(obj.Fields, Field{
 				TypeReference:  &TypeReference{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__schema",
@@ -120,7 +120,7 @@ func (cfg *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Objec
 			})
 			continue
 		}
-		if typ == cfg.schema.Query && field.Name == "__schema" {
+		if typ == g.schema.Query && field.Name == "__schema" {
 			obj.Fields = append(obj.Fields, Field{
 				TypeReference:  &TypeReference{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__type",
@@ -146,7 +146,7 @@ func (cfg *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Objec
 
 		var args []FieldArgument
 		for _, arg := range field.Arguments {
-			dirs, err := cfg.getDirectives(arg.Directives)
+			dirs, err := g.getDirectives(arg.Directives)
 			if err != nil {
 				return nil, err
 			}

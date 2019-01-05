@@ -44,138 +44,138 @@ type ServerBuild struct {
 }
 
 // Create a list of models that need to be generated
-func (cfg *Generator) models() (*ModelBuild, error) {
-	namedTypes := cfg.buildNamedTypes()
+func (g *Generator) models() (*ModelBuild, error) {
+	namedTypes := g.buildNamedTypes()
 
-	progLoader := cfg.newLoaderWithoutErrors()
+	progLoader := g.newLoaderWithoutErrors()
 
 	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	cfg.bindTypes(namedTypes, cfg.Model.Dir(), prog)
+	g.bindTypes(namedTypes, g.Model.Dir(), prog)
 
-	models, err := cfg.buildModels(namedTypes, prog)
+	models, err := g.buildModels(namedTypes, prog)
 	if err != nil {
 		return nil, err
 	}
 	return &ModelBuild{
-		PackageName: cfg.Model.Package,
+		PackageName: g.Model.Package,
 		Models:      models,
-		Enums:       cfg.buildEnums(namedTypes),
+		Enums:       g.buildEnums(namedTypes),
 	}, nil
 }
 
 // bind a schema together with some code to generate a Build
-func (cfg *Generator) resolver() (*ResolverBuild, error) {
-	progLoader := cfg.newLoaderWithoutErrors()
-	progLoader.Import(cfg.Resolver.ImportPath())
+func (g *Generator) resolver() (*ResolverBuild, error) {
+	progLoader := g.newLoaderWithoutErrors()
+	progLoader.Import(g.Resolver.ImportPath())
 
 	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, err
 	}
 
-	destDir := cfg.Resolver.Dir()
+	destDir := g.Resolver.Dir()
 
-	namedTypes := cfg.buildNamedTypes()
+	namedTypes := g.buildNamedTypes()
 
-	cfg.bindTypes(namedTypes, destDir, prog)
+	g.bindTypes(namedTypes, destDir, prog)
 
-	objects, err := cfg.buildObjects(namedTypes, prog)
+	objects, err := g.buildObjects(namedTypes, prog)
 	if err != nil {
 		return nil, err
 	}
 
-	def, _ := findGoType(prog, cfg.Resolver.ImportPath(), cfg.Resolver.Type)
+	def, _ := findGoType(prog, g.Resolver.ImportPath(), g.Resolver.Type)
 	resolverFound := def != nil
 
 	return &ResolverBuild{
-		PackageName:   cfg.Resolver.Package,
+		PackageName:   g.Resolver.Package,
 		Objects:       objects,
-		ResolverType:  cfg.Resolver.Type,
+		ResolverType:  g.Resolver.Type,
 		ResolverFound: resolverFound,
 	}, nil
 }
 
-func (cfg *Generator) server(destDir string) *ServerBuild {
+func (g *Generator) server(destDir string) *ServerBuild {
 	return &ServerBuild{
-		PackageName:         cfg.Resolver.Package,
-		ExecPackageName:     cfg.Exec.ImportPath(),
-		ResolverPackageName: cfg.Resolver.ImportPath(),
+		PackageName:         g.Resolver.Package,
+		ExecPackageName:     g.Exec.ImportPath(),
+		ResolverPackageName: g.Resolver.ImportPath(),
 	}
 }
 
 // bind a schema together with some code to generate a Build
-func (cfg *Generator) bind() (*Build, error) {
-	namedTypes := cfg.buildNamedTypes()
+func (g *Generator) bind() (*Build, error) {
+	namedTypes := g.buildNamedTypes()
 
-	progLoader := cfg.newLoaderWithoutErrors()
+	progLoader := g.newLoaderWithoutErrors()
 	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	cfg.bindTypes(namedTypes, cfg.Exec.Dir(), prog)
+	g.bindTypes(namedTypes, g.Exec.Dir(), prog)
 
-	objects, err := cfg.buildObjects(namedTypes, prog)
+	objects, err := g.buildObjects(namedTypes, prog)
 	if err != nil {
 		return nil, err
 	}
 
-	inputs, err := cfg.buildInputs(namedTypes, prog)
+	inputs, err := g.buildInputs(namedTypes, prog)
 	if err != nil {
 		return nil, err
 	}
-	directives, err := cfg.buildDirectives(namedTypes)
+	directives, err := g.buildDirectives(namedTypes)
 	if err != nil {
 		return nil, err
 	}
 
 	b := &Build{
-		PackageName:    cfg.Exec.Package,
+		PackageName:    g.Exec.Package,
 		Objects:        objects,
-		Interfaces:     cfg.buildInterfaces(namedTypes, prog),
+		Interfaces:     g.buildInterfaces(namedTypes, prog),
 		Inputs:         inputs,
-		SchemaRaw:      cfg.SchemaStr,
-		SchemaFilename: cfg.SchemaFilename,
+		SchemaRaw:      g.SchemaStr,
+		SchemaFilename: g.SchemaFilename,
 		Directives:     directives,
 	}
 
-	if cfg.schema.Query != nil {
-		b.QueryRoot = b.Objects.ByName(cfg.schema.Query.Name)
+	if g.schema.Query != nil {
+		b.QueryRoot = b.Objects.ByName(g.schema.Query.Name)
 	} else {
 		return b, fmt.Errorf("query entry point missing")
 	}
 
-	if cfg.schema.Mutation != nil {
-		b.MutationRoot = b.Objects.ByName(cfg.schema.Mutation.Name)
+	if g.schema.Mutation != nil {
+		b.MutationRoot = b.Objects.ByName(g.schema.Mutation.Name)
 	}
 
-	if cfg.schema.Subscription != nil {
-		b.SubscriptionRoot = b.Objects.ByName(cfg.schema.Subscription.Name)
+	if g.schema.Subscription != nil {
+		b.SubscriptionRoot = b.Objects.ByName(g.schema.Subscription.Name)
 	}
 	return b, nil
 }
 
-func (cfg *Generator) validate() error {
-	progLoader := cfg.newLoaderWithErrors()
+func (g *Generator) validate() error {
+	progLoader := g.newLoaderWithErrors()
 	_, err := progLoader.Load()
 	return err
 }
 
-func (cfg *Generator) newLoaderWithErrors() loader.Config {
+func (g *Generator) newLoaderWithErrors() loader.Config {
 	conf := loader.Config{}
 
-	for _, pkg := range cfg.Models.ReferencedPackages() {
+	for _, pkg := range g.Models.ReferencedPackages() {
 		conf.Import(pkg)
 	}
 	return conf
 }
 
-func (cfg *Generator) newLoaderWithoutErrors() loader.Config {
-	conf := cfg.newLoaderWithErrors()
+func (g *Generator) newLoaderWithoutErrors() loader.Config {
+	conf := g.newLoaderWithErrors()
 	conf.AllowErrors = true
 	conf.TypeChecker = types.Config{
 		Error: func(e error) {},

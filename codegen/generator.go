@@ -36,65 +36,65 @@ func New(cfg *config.Config) (*Generator, error) {
 	return g, nil
 }
 
-func (cfg *Generator) Generate() error {
-	_ = syscall.Unlink(cfg.Exec.Filename)
-	_ = syscall.Unlink(cfg.Model.Filename)
+func (g *Generator) Generate() error {
+	_ = syscall.Unlink(g.Exec.Filename)
+	_ = syscall.Unlink(g.Model.Filename)
 
-	namedTypes := cfg.buildNamedTypes()
+	namedTypes := g.buildNamedTypes()
 
-	directives, err := cfg.buildDirectives(namedTypes)
+	directives, err := g.buildDirectives(namedTypes)
 	if err != nil {
 		return err
 	}
-	cfg.Directives = directives
+	g.Directives = directives
 
-	modelsBuild, err := cfg.models()
+	modelsBuild, err := g.models()
 	if err != nil {
 		return errors.Wrap(err, "model plan failed")
 	}
 	if len(modelsBuild.Models) > 0 || len(modelsBuild.Enums) > 0 {
-		if err = templates.RenderToFile("models.gotpl", cfg.Model.Filename, modelsBuild); err != nil {
+		if err = templates.RenderToFile("models.gotpl", g.Model.Filename, modelsBuild); err != nil {
 			return err
 		}
 
 		for _, model := range modelsBuild.Models {
-			modelCfg := cfg.Models[model.GQLType]
-			modelCfg.Model = cfg.Model.ImportPath() + "." + model.GoType
-			cfg.Models[model.GQLType] = modelCfg
+			modelCfg := g.Models[model.GQLType]
+			modelCfg.Model = g.Model.ImportPath() + "." + model.GoType
+			g.Models[model.GQLType] = modelCfg
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			modelCfg := cfg.Models[enum.GQLType]
-			modelCfg.Model = cfg.Model.ImportPath() + "." + enum.GoType
-			cfg.Models[enum.GQLType] = modelCfg
+			modelCfg := g.Models[enum.GQLType]
+			modelCfg.Model = g.Model.ImportPath() + "." + enum.GoType
+			g.Models[enum.GQLType] = modelCfg
 		}
 	}
 
-	build, err := cfg.bind()
+	build, err := g.bind()
 	if err != nil {
 		return errors.Wrap(err, "exec plan failed")
 	}
 
-	if err := templates.RenderToFile("generated.gotpl", cfg.Exec.Filename, build); err != nil {
+	if err := templates.RenderToFile("generated.gotpl", g.Exec.Filename, build); err != nil {
 		return err
 	}
 
-	if cfg.Resolver.IsDefined() {
-		if err := cfg.GenerateResolver(); err != nil {
+	if g.Resolver.IsDefined() {
+		if err := g.GenerateResolver(); err != nil {
 			return errors.Wrap(err, "generating resolver failed")
 		}
 	}
 
-	if err := cfg.validate(); err != nil {
+	if err := g.validate(); err != nil {
 		return errors.Wrap(err, "validation failed")
 	}
 
 	return nil
 }
 
-func (cfg *Generator) GenerateServer(filename string) error {
+func (g *Generator) GenerateServer(filename string) error {
 	serverFilename := abs(filename)
-	serverBuild := cfg.server(filepath.Dir(serverFilename))
+	serverBuild := g.server(filepath.Dir(serverFilename))
 
 	if _, err := os.Stat(serverFilename); os.IsNotExist(errors.Cause(err)) {
 		err = templates.RenderToFile("server.gotpl", serverFilename, serverBuild)
@@ -107,15 +107,15 @@ func (cfg *Generator) GenerateServer(filename string) error {
 	return nil
 }
 
-func (cfg *Generator) GenerateResolver() error {
-	resolverBuild, err := cfg.resolver()
+func (g *Generator) GenerateResolver() error {
+	resolverBuild, err := g.resolver()
 	if err != nil {
 		return errors.Wrap(err, "resolver build failed")
 	}
-	filename := cfg.Resolver.Filename
+	filename := g.Resolver.Filename
 
 	if resolverBuild.ResolverFound {
-		log.Printf("Skipped resolver: %s.%s already exists\n", cfg.Resolver.ImportPath(), cfg.Resolver.Type)
+		log.Printf("Skipped resolver: %s.%s already exists\n", g.Resolver.ImportPath(), g.Resolver.Type)
 		return nil
 	}
 

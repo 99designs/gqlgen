@@ -5,10 +5,10 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (cfg *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, error) {
-	directives := make(map[string]*Directive, len(cfg.schema.Directives))
+func (g *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, error) {
+	directives := make(map[string]*Directive, len(g.schema.Directives))
 
-	for name, dir := range cfg.schema.Directives {
+	for name, dir := range g.schema.Directives {
 		if _, ok := directives[name]; ok {
 			return nil, errors.Errorf("directive with name %s already exists", name)
 		}
@@ -48,7 +48,7 @@ func (cfg *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, 
 	return directives, nil
 }
 
-func (cfg *Generator) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
+func (g *Generator) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 
 	dirs := make([]*Directive, len(list))
 	for i, d := range list {
@@ -61,7 +61,7 @@ func (cfg *Generator) getDirectives(list ast.DirectiveList) ([]*Directive, error
 			argValues[da.Name] = val
 		}
 
-		if def, ok := cfg.Directives[d.Name]; ok {
+		if def, ok := g.Directives[d.Name]; ok {
 			var args []FieldArgument
 			for _, a := range def.Args {
 

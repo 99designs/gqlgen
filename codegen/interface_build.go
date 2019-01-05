@@ -8,11 +8,11 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Generator) buildInterfaces(types NamedTypes, prog *loader.Program) []*Interface {
+func (g *Generator) buildInterfaces(types NamedTypes, prog *loader.Program) []*Interface {
 	var interfaces []*Interface
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range g.schema.Types {
 		if typ.Kind == ast.Union || typ.Kind == ast.Interface {
-			interfaces = append(interfaces, cfg.buildInterface(types, typ, prog))
+			interfaces = append(interfaces, g.buildInterface(types, typ, prog))
 		}
 	}
 
@@ -23,22 +23,22 @@ func (cfg *Generator) buildInterfaces(types NamedTypes, prog *loader.Program) []
 	return interfaces
 }
 
-func (cfg *Generator) buildInterface(types NamedTypes, typ *ast.Definition, prog *loader.Program) *Interface {
+func (g *Generator) buildInterface(types NamedTypes, typ *ast.Definition, prog *loader.Program) *Interface {
 	i := &Interface{TypeDefinition: types[typ.Name]}
 
-	for _, implementor := range cfg.schema.GetPossibleTypes(typ) {
+	for _, implementor := range g.schema.GetPossibleTypes(typ) {
 		t := types[implementor.Name]
 
 		i.Implementors = append(i.Implementors, InterfaceImplementor{
 			TypeDefinition: t,
-			ValueReceiver:  cfg.isValueReceiver(types[typ.Name], t, prog),
+			ValueReceiver:  g.isValueReceiver(types[typ.Name], t, prog),
 		})
 	}
 
 	return i
 }
 
-func (cfg *Generator) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition, prog *loader.Program) bool {
+func (g *Generator) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition, prog *loader.Program) bool {
 	interfaceType, err := findGoInterface(prog, intf.Package, intf.GoType)
 	if interfaceType == nil || err != nil {
 		return true

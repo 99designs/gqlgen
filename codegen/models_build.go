@@ -7,32 +7,32 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
+func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
 	var models []Model
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range g.schema.Types {
 		var model Model
 		switch typ.Kind {
 		case ast.Object:
-			obj, err := cfg.buildObject(types, typ)
+			obj, err := g.buildObject(types, typ)
 			if err != nil {
 				return nil, err
 			}
 			if obj.Root || obj.IsUserDefined {
 				continue
 			}
-			model = cfg.obj2Model(obj)
+			model = g.obj2Model(obj)
 		case ast.InputObject:
-			obj, err := cfg.buildInput(types, typ)
+			obj, err := g.buildInput(types, typ)
 			if err != nil {
 				return nil, err
 			}
 			if obj.IsUserDefined {
 				continue
 			}
-			model = cfg.obj2Model(obj)
+			model = g.obj2Model(obj)
 		case ast.Interface, ast.Union:
-			intf := cfg.buildInterface(types, typ, prog)
+			intf := g.buildInterface(types, typ, prog)
 			if intf.IsUserDefined {
 				continue
 			}
@@ -52,7 +52,7 @@ func (cfg *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Mod
 	return models, nil
 }
 
-func (cfg *Generator) obj2Model(obj *Object) Model {
+func (g *Generator) obj2Model(obj *Object) Model {
 	model := Model{
 		TypeDefinition: obj.TypeDefinition,
 		Implements:     obj.Implements,

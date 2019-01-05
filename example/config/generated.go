@@ -277,11 +277,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		Object: "Mutation",
 	})
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
@@ -294,7 +292,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -346,24 +344,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		Object: "Query",
 	})
 
-	var wg sync.WaitGroup
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
 		case "todos":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_todos(ctx, field)
-				if out.Values[i] == graphql.Null {
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Query_todos(ctx, field)
+				if res == graphql.Null {
 					invalid = true
 				}
-				wg.Done()
-			}(i, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -372,7 +367,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	wg.Wait()
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -510,24 +505,21 @@ var todoImplementors = []string{"Todo"}
 func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *Todo) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, todoImplementors)
 
-	var wg sync.WaitGroup
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Todo")
 		case "id":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Todo_id(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Todo_id(ctx, field, obj)
+				if res == graphql.Null {
 					invalid = true
 				}
-				wg.Done()
-			}(i, field)
+				return res
+			})
 		case "databaseId":
 			out.Values[i] = ec._Todo_databaseId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -552,7 +544,7 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	wg.Wait()
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -701,11 +693,9 @@ var userImplementors = []string{"User"}
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *User) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, userImplementors)
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
@@ -723,7 +713,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -790,11 +780,9 @@ var __DirectiveImplementors = []string{"__Directive"}
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __DirectiveImplementors)
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Directive")
@@ -819,7 +807,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -979,11 +967,9 @@ var __EnumValueImplementors = []string{"__EnumValue"}
 func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __EnumValueImplementors)
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__EnumValue")
@@ -1005,7 +991,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -1124,11 +1110,9 @@ var __FieldImplementors = []string{"__Field"}
 func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __FieldImplementors)
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Field")
@@ -1160,7 +1144,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -1374,11 +1358,9 @@ var __InputValueImplementors = []string{"__InputValue"}
 func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __InputValueImplementors)
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__InputValue")
@@ -1400,7 +1382,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -1527,11 +1509,9 @@ var __SchemaImplementors = []string{"__Schema"}
 func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __SchemaImplementors)
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Schema")
@@ -1558,7 +1538,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}
@@ -1784,11 +1764,9 @@ var __TypeImplementors = []string{"__Type"}
 func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, __TypeImplementors)
 
-	out := graphql.NewOrderedMap(len(fields))
+	out := graphql.NewFieldSet(fields)
 	invalid := false
 	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Type")
@@ -1817,7 +1795,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	out.Dispatch()
 	if invalid {
 		return graphql.Null
 	}

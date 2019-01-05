@@ -192,7 +192,7 @@ $ rm resolver.go
 $ go run scripts/gqlgen.go
 ```
 
-Now we just need to fill in the `not implemented` parts.  Update `graph/graph.go`
+Now we just need to fill in the `not implemented` parts.  Update `resolver.go`
 
 ```go
 //go:generate go run ./scripts/gqlgen.go
@@ -286,3 +286,7 @@ This magic comment tells `go generate` what command to run when we want to regen
 ```go
 go generate ./...
 ```
+
+> Note
+>
+> Ensure that the path to your `gqlgen` binary is relative to the file the generate command is added to.

@@ -7,3 +7,5 @@
 /codegen/gen
 
 .idea/
+*.test
+*.out

@@ -18,6 +18,10 @@ func TestGenerateServer(t *testing.T) {
 		id: Int
 		fist_name: String
 	}
+	enum Status {
+		OK
+		ERROR
+	}
 `
 	serverFilename := "gen/" + name + "/server/server.go"
 	cfg := Config{
@@ -42,4 +46,30 @@ func TestGenerateServer(t *testing.T) {
 
 	_, err = conf.Load()
 	require.NoError(t, err)
+
+	t.Run("list of enums", func(t *testing.T) {
+		conf = loader.Config{}
+		conf.CreateFromFilenames("gen/"+name, "gen/"+name+"/model.go")
+
+		program, err := conf.Load()
+		require.NoError(t, err)
+
+		found := false
+
+		for _, c := range program.Created {
+			for ident := range c.Defs {
+				if ident.Name == "AllStatus" {
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+
+		if !found {
+			t.Fail()
+		}
+	})
 }

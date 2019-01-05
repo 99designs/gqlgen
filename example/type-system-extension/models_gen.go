@@ -37,6 +37,11 @@ const (
 	StateDone   State = "DONE"
 )
 
+var AllState = []State{
+	StateNotYet,
+	StateDone,
+}
+
 func (e State) IsValid() bool {
 	switch e {
 	case StateNotYet, StateDone:

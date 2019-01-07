@@ -1,8 +1,9 @@
 package codegen
 
 import (
-	"go/types"
 	"sort"
+
+	"go/types"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
@@ -20,13 +21,8 @@ func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Ob
 				return nil, err
 			}
 
-			def, err := findGoType(prog, input.Package, input.GoType)
-			if err != nil {
-				return nil, errors.Wrap(err, "cannot find type")
-			}
-			if def != nil {
-				input.Marshaler = buildInputMarshaler(typ, def)
-				bindErrs := bindObject(def.Type(), input, g.StructTag)
+			if _, isMap := input.GoType.(*types.Map); !isMap {
+				bindErrs := bindObject(input, g.StructTag)
 				if len(bindErrs) > 0 {
 					return nil, bindErrs
 				}
@@ -87,21 +83,4 @@ func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, 
 	obj.Directives = dirs
 
 	return obj, nil
-}
-
-// if user has implemented an UnmarshalGQL method on the input type manually, use it
-// otherwise we will generate one.
-func buildInputMarshaler(typ *ast.Definition, def types.Object) *TypeImplementation {
-	switch def := def.(type) {
-	case *types.TypeName:
-		namedType := def.Type().(*types.Named)
-		for i := 0; i < namedType.NumMethods(); i++ {
-			method := namedType.Method(i)
-			if method.Name() == "UnmarshalGQL" {
-				return nil
-			}
-		}
-	}
-
-	return &TypeImplementation{GoType: typ.Name}
 }

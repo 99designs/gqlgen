@@ -39,12 +39,12 @@ func (g *Generator) buildInterface(types NamedTypes, typ *ast.Definition, prog *
 }
 
 func (g *Generator) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition, prog *loader.Program) bool {
-	interfaceType, err := findGoInterface(prog, intf.Package, intf.GoType)
+	interfaceType, err := findGoInterface(intf.GoType)
 	if interfaceType == nil || err != nil {
 		return true
 	}
 
-	implementorType, err := findGoNamedType(prog, implementor.Package, implementor.GoType)
+	implementorType, err := findGoNamedType(implementor.GoType)
 	if implementorType == nil || err != nil {
 		return true
 	}

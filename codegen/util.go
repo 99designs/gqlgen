@@ -41,25 +41,24 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Ob
 	return nil, errors.Errorf("unable to find type %s\n", fullName)
 }
 
-func findGoNamedType(prog *loader.Program, pkgName string, typeName string) (*types.Named, error) {
-	def, err := findGoType(prog, pkgName, typeName)
-	if err != nil {
-		return nil, err
-	}
+func findGoNamedType(def types.Type) (*types.Named, error) {
 	if def == nil {
 		return nil, nil
 	}
 
-	namedType, ok := def.Type().(*types.Named)
+	namedType, ok := def.(*types.Named)
 	if !ok {
-		return nil, errors.Errorf("expected %s to be a named type, instead found %T\n", typeName, def.Type())
+		return nil, errors.Errorf("expected %s to be a named type, instead found %T\n", def.String(), def)
 	}
 
 	return namedType, nil
 }
 
-func findGoInterface(prog *loader.Program, pkgName string, typeName string) (*types.Interface, error) {
-	namedType, err := findGoNamedType(prog, pkgName, typeName)
+func findGoInterface(def types.Type) (*types.Interface, error) {
+	if def == nil {
+		return nil, nil
+	}
+	namedType, err := findGoNamedType(def)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +68,7 @@ func findGoInterface(prog *loader.Program, pkgName string, typeName string) (*ty
 
 	underlying, ok := namedType.Underlying().(*types.Interface)
 	if !ok {
-		return nil, errors.Errorf("expected %s to be a named interface, instead found %s", typeName, namedType.String())
+		return nil, errors.Errorf("expected %s to be a named interface, instead found %s", def.String(), namedType.String())
 	}
 
 	return underlying, nil
@@ -203,7 +202,7 @@ func (b BindErrors) Error() string {
 	return strings.Join(errs, "\n\n")
 }
 
-func bindObject(t types.Type, object *Object, structTag string) BindErrors {
+func bindObject(object *Object, structTag string) BindErrors {
 	var errs BindErrors
 	for i := range object.Fields {
 		field := &object.Fields[i]
@@ -213,18 +212,18 @@ func bindObject(t types.Type, object *Object, structTag string) BindErrors {
 		}
 
 		// first try binding to a method
-		methodErr := bindMethod(t, field)
+		methodErr := bindMethod(object.GoType, field)
 		if methodErr == nil {
 			continue
 		}
 
 		// otherwise try binding to a var
-		varErr := bindVar(t, field, structTag)
+		varErr := bindVar(object.GoType, field, structTag)
 
 		if varErr != nil {
 			errs = append(errs, BindError{
 				object:    object,
-				typ:       t,
+				typ:       object.GoType,
 				field:     field,
 				varErr:    varErr,
 				methodErr: methodErr,

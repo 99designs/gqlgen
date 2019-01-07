@@ -1,9 +1,11 @@
 package codegen
 
 import (
+	"go/types"
 	"strconv"
 	"strings"
 
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -16,16 +18,11 @@ type TypeReference struct {
 }
 
 func (t TypeReference) Signature() string {
-	return strings.Join(t.Modifiers, "") + t.FullName()
+	return strings.Join(t.Modifiers, "") + templates.CurrentImports.LookupType(t.TypeDefinition.GoType)
 }
 
 func (t TypeReference) FullSignature() string {
-	pkg := ""
-	if t.Package != "" {
-		pkg = t.Package + "."
-	}
-
-	return strings.Join(t.Modifiers, "") + pkg + t.GoType
+	return strings.Join(t.Modifiers, "") + types.TypeString(t.TypeDefinition.GoType, nil)
 }
 
 func (t TypeReference) IsPtr() bool {
@@ -52,7 +49,7 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 	switch {
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
 		ptr := "ptr" + strconv.Itoa(depth)
-		return tpl(`var {{.ptr}} {{.mods}}{{.t.FullName}}
+		return tpl(`var {{.ptr}} {{.mods}}{{.t.GoType | ref }}
 			if {{.raw}} != nil {
 				{{.next}}
 				{{.result}} = &{{.ptr -}}
@@ -86,7 +83,7 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 			"rawSlice": rawIf,
 			"index":    index,
 			"result":   result,
-			"type":     strings.Join(remainingMods, "") + t.TypeDefinition.FullName(),
+			"type":     strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.GoType),
 			"next":     t.unmarshal(result+"["+index+"]", rawIf+"["+index+"]", remainingMods[1:], depth+1),
 		})
 	}
@@ -94,10 +91,10 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 	realResult := result
 
 	return tpl(`
-			{{- if eq .t.GoType "map[string]interface{}" }}
+			{{- if eq (.t.GoType | ref) "map[string]interface{}" }}
 				{{- .result }} = {{.raw}}.(map[string]interface{})
-			{{- else if .t.Marshaler }}
-				{{- .result }}, err = {{ .t.Marshaler.PkgDot }}Unmarshal{{.t.Marshaler.GoType}}({{.raw}})
+			{{- else if .t.Unmarshaler }}
+				{{- .result }}, err = {{ .t.Unmarshaler | call }}({{.raw}})
 			{{- else -}}
 				err = (&{{.result}}).UnmarshalGQL({{.raw}})
 			{{- end }}`, map[string]interface{}{
@@ -114,15 +111,14 @@ func (t TypeReference) Middleware(result, raw string) string {
 
 func (t TypeReference) middleware(result, raw string, remainingMods []string, depth int) string {
 	if len(remainingMods) == 1 && remainingMods[0] == modPtr {
-		return tpl(`{{- if .t.Marshaler }}
+		return tpl(`
 			if {{.raw}} != nil {
 				var err error
 				{{.result}}, err = e.{{ .t.GQLType }}Middleware(ctx, {{.raw}})
-				if err != nil {	
+				if err != nil {
 					return nil, err
 				}
-			}
-		{{- end }}`, map[string]interface{}{
+			}`, map[string]interface{}{
 			"result": result,
 			"raw":    raw,
 			"t":      t,
@@ -149,19 +145,18 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 			"raw":    raw,
 			"index":  index,
 			"result": result,
-			"type":   strings.Join(remainingMods, "") + t.TypeDefinition.FullName(),
+			"type":   strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.TypeDefinition.GoType),
 			"next":   t.middleware(result+"["+index+"]", raw+"["+index+"]", remainingMods[1:], depth+1),
 		})
 	}
 
 	ptr := "m" + t.GQLType + strconv.Itoa(depth)
-	return tpl(`{{- if .t.Marshaler }}
+	return tpl(`
 			{{.ptr}}, err := e.{{ .t.GQLType }}Middleware(ctx, &{{.raw}})
 				if err != nil {	
 					return nil, err
 			}
-			{{ .result }} = *{{.ptr}}
-		{{- end }}`, map[string]interface{}{
+			{{ .result }} = *{{.ptr}}`, map[string]interface{}{
 		"result": result,
 		"raw":    raw,
 		"ptr":    ptr,
@@ -170,9 +165,8 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 }
 
 func (t TypeReference) Marshal(val string) string {
-
 	if t.Marshaler != nil {
-		return "return " + t.Marshaler.PkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"
+		return "return " + templates.Call(t.TypeDefinition.Marshaler) + "(" + val + ")"
 	}
 
 	return "return " + val

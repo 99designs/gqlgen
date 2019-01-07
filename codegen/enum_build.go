@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"go/types"
 	"sort"
 	"strings"
 
@@ -8,12 +9,12 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (g *Generator) buildEnums(types NamedTypes) []Enum {
+func (g *Generator) buildEnums(ts NamedTypes) []Enum {
 	var enums []Enum
 
 	for _, typ := range g.schema.Types {
-		namedType := types[typ.Name]
-		if typ.Kind != ast.Enum || strings.HasPrefix(typ.Name, "__") || namedType.IsUserDefined {
+		namedType := ts[typ.Name]
+		if typ.Kind != ast.Enum || strings.HasPrefix(typ.Name, "__") || g.Models.UserDefined(typ.Name) {
 			continue
 		}
 
@@ -27,7 +28,9 @@ func (g *Generator) buildEnums(types NamedTypes) []Enum {
 			Values:         values,
 			Description:    typ.Description,
 		}
-		enum.GoType = templates.ToCamel(enum.GQLType)
+
+		enum.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(enum.GQLType), nil), nil, nil)
+
 		enums = append(enums, enum)
 	}
 

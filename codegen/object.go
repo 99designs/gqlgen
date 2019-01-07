@@ -8,6 +8,9 @@ import (
 	"text/template"
 	"unicode"
 
+	"go/types"
+
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -25,7 +28,7 @@ type Object struct {
 	Fields             []Field
 	Satisfies          []string
 	Implements         []*TypeDefinition
-	ResolverInterface  *TypeImplementation
+	ResolverInterface  types.Type
 	Root               bool
 	DisableConcurrency bool
 	Stream             bool
@@ -169,7 +172,7 @@ func (f *Field) ShortResolverDeclaration() string {
 	res := fmt.Sprintf("%s(ctx context.Context", f.GoNameExported())
 
 	if !f.Object.Root {
-		res += fmt.Sprintf(", obj *%s", f.Object.FullName())
+		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.GoType))
 	}
 	for _, arg := range f.Args {
 		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
@@ -191,7 +194,7 @@ func (f *Field) ResolverDeclaration() string {
 	res := fmt.Sprintf("%s_%s(ctx context.Context", f.Object.GQLType, f.GoNameUnexported())
 
 	if !f.Object.Root {
-		res += fmt.Sprintf(", obj *%s", f.Object.FullName())
+		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.GoType))
 	}
 	for _, arg := range f.Args {
 		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
@@ -361,7 +364,7 @@ func (os Objects) ByName(name string) *Object {
 
 func tpl(tpl string, vars map[string]interface{}) string {
 	b := &bytes.Buffer{}
-	err := template.Must(template.New("inline").Parse(tpl)).Execute(b, vars)
+	err := template.Must(template.New("inline").Funcs(templates.Funcs()).Parse(tpl)).Execute(b, vars)
 	if err != nil {
 		panic(err)
 	}

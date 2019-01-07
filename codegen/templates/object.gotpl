@@ -24,7 +24,7 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 	}
 }
 {{- else }}
-func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.SelectionSet{{if not $object.Root}}, obj *{{$object.FullName}} {{end}}) graphql.Marshaler {
+func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.SelectionSet{{if not $object.Root}}, obj *{{$object.GoType | ref }} {{end}}) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, {{$object.GQLType|lcFirst}}Implementors)
 	{{if $object.Root}}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{

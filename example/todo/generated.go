@@ -72,7 +72,6 @@ func (e *executableSchema) field_MyMutation_createTodo_args(ctx context.Context,
 	args := map[string]interface{}{}
 	var arg0 TodoInput
 	if tmp, ok := rawArgs["todo"]; ok {
-
 		var err error
 		arg0, err = UnmarshalTodoInput(tmp)
 		if err != nil {
@@ -84,7 +83,6 @@ func (e *executableSchema) field_MyMutation_createTodo_args(ctx context.Context,
 			return nil, err
 		}
 		arg0 = *mTodoInput1
-
 	}
 	args["todo"] = arg0
 	return args, nil

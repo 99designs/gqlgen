@@ -23,7 +23,7 @@ type {{.ResolverType}} struct {}
 
 {{ range $object := .Objects -}}
 	{{- if $object.HasResolvers -}}
-		func (r *{{$.ResolverType}}) {{$object.GQLType}}() {{ $object.ResolverInterface.FullName }} {
+		func (r *{{$.ResolverType}}) {{$object.GQLType}}() {{ $object.ResolverInterface | ref }} {
 			return &{{lcFirst $object.GQLType}}Resolver{r}
 		}
 	{{ end -}}

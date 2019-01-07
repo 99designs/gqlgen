@@ -168,7 +168,6 @@ func (e *executableSchema) field_Query_mapInput_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 *map[string]interface{}
 	if tmp, ok := rawArgs["input"]; ok {
-
 		var err error
 		var ptr1 map[string]interface{}
 		if tmp != nil {
@@ -180,6 +179,13 @@ func (e *executableSchema) field_Query_mapInput_args(ctx context.Context, rawArg
 			return nil, err
 		}
 
+		if arg0 != nil {
+			var err error
+			arg0, err = e.ChangesMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 	args["input"] = arg0
 	return args, nil
@@ -190,7 +196,6 @@ func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 *RecursiveInputSlice
 	if tmp, ok := rawArgs["input"]; ok {
-
 		var err error
 		var ptr1 RecursiveInputSlice
 		if tmp != nil {
@@ -209,7 +214,6 @@ func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawAr
 				return nil, err
 			}
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -220,7 +224,6 @@ func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 [][]*OuterInput
 	if tmp, ok := rawArgs["input"]; ok {
-
 		var err error
 		var rawIf1 []interface{}
 		if tmp != nil {
@@ -252,7 +255,6 @@ func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, ra
 		if err != nil {
 			return nil, err
 		}
-
 		for idx1 := range arg0 {
 			for idx2 := range arg0[idx1] {
 
@@ -265,7 +267,6 @@ func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, ra
 				}
 			}
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -276,7 +277,6 @@ func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 *Keywords
 	if tmp, ok := rawArgs["input"]; ok {
-
 		var err error
 		var ptr1 Keywords
 		if tmp != nil {
@@ -295,7 +295,6 @@ func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArg
 				return nil, err
 			}
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -341,7 +340,6 @@ func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["arg"]; ok {
-
 		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				max := 255
@@ -363,7 +361,6 @@ func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, ra
 		} else {
 			return nil, errors.New("expect string")
 		}
-
 	}
 	args["arg"] = arg0
 	return args, nil
@@ -374,7 +371,6 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["arg"]; ok {
-
 		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				min := 0
@@ -401,12 +397,10 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 		} else {
 			return nil, errors.New("expect *int")
 		}
-
 	}
 	args["arg"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["arg2"]; ok {
-
 		argm1, err := chainFieldMiddleware([]graphql.FieldMiddleware{
 			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 				min := 0
@@ -433,7 +427,6 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 		} else {
 			return nil, errors.New("expect *int")
 		}
-
 	}
 	args["arg2"] = arg1
 	return args, nil
@@ -444,7 +437,6 @@ func (e *executableSchema) field_Query_directiveInputNullable_args(ctx context.C
 	args := map[string]interface{}{}
 	var arg0 *InputDirectives
 	if tmp, ok := rawArgs["arg"]; ok {
-
 		var err error
 		var ptr1 InputDirectives
 		if tmp != nil {
@@ -463,7 +455,6 @@ func (e *executableSchema) field_Query_directiveInputNullable_args(ctx context.C
 				return nil, err
 			}
 		}
-
 	}
 	args["arg"] = arg0
 	return args, nil
@@ -474,7 +465,6 @@ func (e *executableSchema) field_Query_directiveInput_args(ctx context.Context, 
 	args := map[string]interface{}{}
 	var arg0 InputDirectives
 	if tmp, ok := rawArgs["arg"]; ok {
-
 		var err error
 		arg0, err = UnmarshalInputDirectives(tmp)
 		if err != nil {
@@ -486,7 +476,6 @@ func (e *executableSchema) field_Query_directiveInput_args(ctx context.Context, 
 			return nil, err
 		}
 		arg0 = *mInputDirectives1
-
 	}
 	args["arg"] = arg0
 	return args, nil

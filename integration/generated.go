@@ -87,7 +87,6 @@ func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs ma
 	args := map[string]interface{}{}
 	var arg0 models.DateFilter
 	if tmp, ok := rawArgs["filter"]; ok {
-
 		var err error
 		arg0, err = UnmarshalDateFilter(tmp)
 		if err != nil {
@@ -99,7 +98,6 @@ func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs ma
 			return nil, err
 		}
 		arg0 = *mDateFilter1
-
 	}
 	args["filter"] = arg0
 	return args, nil

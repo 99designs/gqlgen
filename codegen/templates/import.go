@@ -84,6 +84,8 @@ func (s *Imports) Lookup(path string) string {
 		return ""
 	}
 
+	path = gopath.NormalizeVendor(path)
+
 	// if we are referencing our own package we dont need an import
 	if gopath.MustDir2Import(s.destDir) == path {
 		return ""

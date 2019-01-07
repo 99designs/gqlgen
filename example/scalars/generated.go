@@ -92,7 +92,6 @@ func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 *model.SearchArgs
 	if tmp, ok := rawArgs["input"]; ok {
-
 		var err error
 		var ptr1 model.SearchArgs
 		if tmp != nil {
@@ -111,7 +110,6 @@ func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs 
 				return nil, err
 			}
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil

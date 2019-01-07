@@ -2,20 +2,19 @@
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.Signature }}
 		if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
-			{{- if or $arg.Directives $arg.IsInput }}
-				{{ if $arg.Directives }}
-            	argm{{$i}}, err := chainFieldMiddleware([]graphql.FieldMiddleware{
-					{{- range $directive := $arg.Directives }}
-						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-						{{- range $dArg := $directive.Args }}
-							{{- if and $dArg.IsPtr ( notNil "Value" $dArg ) }}
-								{{ $dArg.GoVarName }} := {{ $dArg.Value | dump }}
-							{{- end }}
+			{{- if $arg.Directives }}
+				argm{{$i}}, err := chainFieldMiddleware([]graphql.FieldMiddleware{
+				{{- range $directive := $arg.Directives }}
+					func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+					{{- range $dArg := $directive.Args }}
+						{{- if and $dArg.IsPtr ( notNil "Value" $dArg ) }}
+							{{ $dArg.GoVarName }} := {{ $dArg.Value | dump }}
 						{{- end }}
-							return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "tmp" "n" }})
-						},
 					{{- end }}
-					}...)(ctx, func(ctx2 context.Context)(interface{}, error){
+						return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "tmp" "n" }})
+					},
+				{{- end }}
+				}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
 					var err error
 					{{$arg.Unmarshal (print "arg" $i) "tmp" }}
 					if err != nil {
@@ -26,29 +25,20 @@
 				if err != nil {
 					return nil, err
 				}
-				if data, ok := argm{{$i}}.({{$arg.Signature }}); ok{
+				if data, ok := argm{{$i}}.({{$arg.Signature }}); ok {
 					arg{{$i}} = data
 				} else {
 					return nil, errors.New("expect {{$arg.Signature }}")
 				}
-				{{ else }}
-					var err error
-					{{$arg.Unmarshal (print "arg" $i) "tmp" }}
-					if err != nil {
-						return nil, err
-					}
-				{{ end }}
-
-				{{- if $arg.IsInput }}
-					 {{ $arg.Middleware (print "arg" $i) (print "arg" $i) }}
-				{{- end }}
-
-			{{ else }}
-			var err error
-			{{$arg.Unmarshal (print "arg" $i) "tmp" }}
-			if err != nil {
-				return nil, err
-			}
+			{{- else }}
+				var err error
+				{{ $arg.Unmarshal (print "arg" $i) "tmp" }}
+				if err != nil {
+					return nil, err
+				}
+			{{- end }}
+			{{- if $arg.IsInput }}
+				{{ $arg.Middleware (print "arg" $i) (print "arg" $i) }}
 			{{- end }}
 		}
 		args[{{$arg.GQLName|quote}}] = arg{{$i}}

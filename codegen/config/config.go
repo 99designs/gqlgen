@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 
+	"go/types"
+
 	"github.com/99designs/gqlgen/internal/gopath"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
@@ -168,6 +170,10 @@ func (c *PackageConfig) Check() error {
 	return c.normalize()
 }
 
+func (c *PackageConfig) Pkg() *types.Package {
+	return types.NewPackage(c.ImportPath(), c.Dir())
+}
+
 func (c *PackageConfig) IsDefined() bool {
 	return c.Filename != ""
 }
@@ -196,6 +202,11 @@ type TypeMap map[string]TypeMapEntry
 func (tm TypeMap) Exists(typeName string) bool {
 	_, ok := tm[typeName]
 	return ok
+}
+
+func (tm TypeMap) UserDefined(typeName string) bool {
+	m, ok := tm[typeName]
+	return ok && m.Model != ""
 }
 
 func (tm TypeMap) Check() error {

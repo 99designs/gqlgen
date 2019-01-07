@@ -110,7 +110,7 @@ func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object,
 	for _, field := range typ.Fields {
 		if typ == g.schema.Query && field.Name == "__type" {
 			obj.Fields = append(obj.Fields, Field{
-				TypeReference:  &TypeReference{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
+				TypeReference:  &TypeReference{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil)},
 				GQLName:        "__schema",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
@@ -122,13 +122,13 @@ func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object,
 		}
 		if typ == g.schema.Query && field.Name == "__schema" {
 			obj.Fields = append(obj.Fields, Field{
-				TypeReference:  &TypeReference{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
+				TypeReference:  &TypeReference{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil)},
 				GQLName:        "__type",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectType",
 				Args: []FieldArgument{
-					{GQLName: "name", TypeReference: &TypeReference{types["String"], []string{}, ast.NamedType("String", nil), nil}, Object: &Object{}},
+					{GQLName: "name", TypeReference: &TypeReference{types["String"], []string{}, ast.NamedType("String", nil)}, Object: &Object{}},
 				},
 				Object: obj,
 			})

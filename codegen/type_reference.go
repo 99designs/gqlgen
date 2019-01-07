@@ -11,15 +11,11 @@ import (
 type TypeReference struct {
 	*TypeDefinition
 
-	Modifiers   []string
-	ASTType     *ast.Type
-	AliasedType *TypeImplementation
+	Modifiers []string
+	ASTType   *ast.Type
 }
 
 func (t TypeReference) Signature() string {
-	if t.AliasedType != nil {
-		return strings.Join(t.Modifiers, "") + t.AliasedType.FullName()
-	}
 	return strings.Join(t.Modifiers, "") + t.FullName()
 }
 
@@ -96,23 +92,15 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 	}
 
 	realResult := result
-	if t.AliasedType != nil {
-		result = "castTmp"
-	}
 
-	return tpl(`{{- if .t.AliasedType }}
-			var castTmp {{.t.FullName}}
-		{{ end }}
+	return tpl(`
 			{{- if eq .t.GoType "map[string]interface{}" }}
 				{{- .result }} = {{.raw}}.(map[string]interface{})
 			{{- else if .t.Marshaler }}
 				{{- .result }}, err = {{ .t.Marshaler.PkgDot }}Unmarshal{{.t.Marshaler.GoType}}({{.raw}})
 			{{- else -}}
 				err = (&{{.result}}).UnmarshalGQL({{.raw}})
-			{{- end }}
-		{{- if .t.AliasedType }}
-			{{ .realResult }} = {{.t.AliasedType.FullName}}(castTmp)
-		{{- end }}`, map[string]interface{}{
+			{{- end }}`, map[string]interface{}{
 		"realResult": realResult,
 		"result":     result,
 		"raw":        raw,
@@ -182,9 +170,6 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 }
 
 func (t TypeReference) Marshal(val string) string {
-	if t.AliasedType != nil {
-		val = t.GoType + "(" + val + ")"
-	}
 
 	if t.Marshaler != nil {
 		return "return " + t.Marshaler.PkgDot() + "Marshal" + t.Marshaler.GoType + "(" + val + ")"

@@ -342,15 +342,6 @@ func validateTypeBinding(field *Field, goType types.Type) error {
 		return nil
 	}
 
-	// deal with type aliases
-	underlyingStr := normalizeVendor(goType.Underlying().String())
-	if equalTypes(underlyingStr, gqlType) {
-		field.TypeReference.Modifiers = modifiersFromGoType(goType)
-		pkg, typ := pkgAndType(goType.String())
-		field.AliasedType = &TypeImplementation{GoType: typ, Package: pkg}
-		return nil
-	}
-
 	return fmt.Errorf("%s is not compatible with %s", gqlType, goTypeStr)
 }
 

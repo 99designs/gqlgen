@@ -766,7 +766,7 @@ func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.Co
 	res := resTmp.(model.Banned)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalBoolean(bool(res))
+	return res
 }
 
 // nolint: vetshadow
@@ -2337,10 +2337,7 @@ func UnmarshalSearchArgs(v interface{}) (model.SearchArgs, error) {
 			}
 		case "isBanned":
 			var err error
-
-			var castTmp bool
-			castTmp, err = graphql.UnmarshalBoolean(v)
-			it.IsBanned = model.Banned(castTmp)
+			err = (&it.IsBanned).UnmarshalGQL(v)
 			if err != nil {
 				return it, err
 			}
@@ -2394,7 +2391,7 @@ type User {
     id: ID!
     name: String!
     created: Timestamp
-    isBanned: Boolean!
+    isBanned: Banned!
     primitiveResolver: String!
     customResolver: Point!
     address: Address
@@ -2409,7 +2406,7 @@ type Address {
 input SearchArgs {
     location: Point
     createdAfter: Timestamp
-    isBanned: Boolean
+    isBanned: Banned # TODO: This can be a Boolean again once multiple backing types are allowed
 }
 
 enum Tier {
@@ -2420,6 +2417,7 @@ enum Tier {
 
 scalar Timestamp
 scalar Point
+scalar Banned
 `},
 )
 

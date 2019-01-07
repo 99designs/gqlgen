@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"go/types"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,6 +22,15 @@ func TestImports(t *testing.T) {
 
 		require.Equal(t, "bar", a.Lookup(aBar))
 		require.Equal(t, "bar", a.Lookup(aBar))
+	})
+
+	t.Run("lookup by type", func(t *testing.T) {
+		a := Imports{destDir: wd}
+
+		pkg := types.NewPackage("github.com/99designs/gqlgen/codegen/templates/testdata/b/bar", "bar")
+		typ := types.NewNamed(types.NewTypeName(0, pkg, "Boolean", types.Typ[types.Bool]), types.Typ[types.Bool], nil)
+
+		require.Equal(t, "bar.Boolean", a.LookupType(typ))
 	})
 
 	t.Run("duplicates are decollisioned", func(t *testing.T) {
@@ -83,4 +94,5 @@ bar1 "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
 		require.Equal(t, `abar "github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
 bbar "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"`, a.String())
 	})
+
 }

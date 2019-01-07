@@ -16,7 +16,6 @@ import (
 	"unicode"
 
 	"github.com/99designs/gqlgen/internal/imports"
-
 	"github.com/pkg/errors"
 )
 

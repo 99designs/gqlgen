@@ -5,6 +5,8 @@ import (
 	"go/build"
 	"strconv"
 
+	"go/types"
+
 	"github.com/99designs/gqlgen/internal/gopath"
 )
 
@@ -114,6 +116,12 @@ func (s *Imports) Lookup(path string) string {
 	imp.Alias = alias
 
 	return imp.Alias
+}
+
+func (s *Imports) LookupType(t types.Type) string {
+	return types.TypeString(t, func(i *types.Package) string {
+		return s.Lookup(i.Path())
+	})
 }
 
 func (s Imports) findByPath(importPath string) *Import {

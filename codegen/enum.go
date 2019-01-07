@@ -1,7 +1,7 @@
 package codegen
 
 type Enum struct {
-	*NamedType
+	*TypeDefinition
 	Description string
 	Values      []EnumValue
 }

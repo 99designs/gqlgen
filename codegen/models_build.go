@@ -7,32 +7,32 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
+func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model, error) {
 	var models []Model
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range g.schema.Types {
 		var model Model
 		switch typ.Kind {
 		case ast.Object:
-			obj, err := cfg.buildObject(types, typ)
+			obj, err := g.buildObject(types, typ)
 			if err != nil {
 				return nil, err
 			}
 			if obj.Root || obj.IsUserDefined {
 				continue
 			}
-			model = cfg.obj2Model(obj)
+			model = g.obj2Model(obj)
 		case ast.InputObject:
-			obj, err := cfg.buildInput(types, typ)
+			obj, err := g.buildInput(types, typ)
 			if err != nil {
 				return nil, err
 			}
 			if obj.IsUserDefined {
 				continue
 			}
-			model = cfg.obj2Model(obj)
+			model = g.obj2Model(obj)
 		case ast.Interface, ast.Union:
-			intf := cfg.buildInterface(types, typ, prog)
+			intf := g.buildInterface(types, typ, prog)
 			if intf.IsUserDefined {
 				continue
 			}
@@ -52,19 +52,19 @@ func (cfg *Config) buildModels(types NamedTypes, prog *loader.Program) ([]Model,
 	return models, nil
 }
 
-func (cfg *Config) obj2Model(obj *Object) Model {
+func (g *Generator) obj2Model(obj *Object) Model {
 	model := Model{
-		NamedType:  obj.NamedType,
-		Implements: obj.Implements,
-		Fields:     []ModelField{},
+		TypeDefinition: obj.TypeDefinition,
+		Implements:     obj.Implements,
+		Fields:         []ModelField{},
 	}
 
 	model.GoType = ucFirst(obj.GQLType)
-	model.Marshaler = &Ref{GoType: obj.GoType}
+	model.Marshaler = &TypeImplementation{GoType: obj.GoType}
 
 	for i := range obj.Fields {
 		field := &obj.Fields[i]
-		mf := ModelField{Type: field.Type, GQLName: field.GQLName}
+		mf := ModelField{TypeReference: field.TypeReference, GQLName: field.GQLName}
 
 		if field.GoFieldName != "" {
 			mf.GoFieldName = field.GoFieldName
@@ -80,12 +80,12 @@ func (cfg *Config) obj2Model(obj *Object) Model {
 
 func int2Model(obj *Interface) Model {
 	model := Model{
-		NamedType: obj.NamedType,
-		Fields:    []ModelField{},
+		TypeDefinition: obj.TypeDefinition,
+		Fields:         []ModelField{},
 	}
 
 	model.GoType = ucFirst(obj.GQLType)
-	model.Marshaler = &Ref{GoType: obj.GoType}
+	model.Marshaler = &TypeImplementation{GoType: obj.GoType}
 
 	return model
 }

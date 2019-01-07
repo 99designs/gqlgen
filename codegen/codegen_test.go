@@ -4,7 +4,11 @@ import (
 	"syscall"
 	"testing"
 
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -24,21 +28,35 @@ func TestGenerateServer(t *testing.T) {
 	}
 `
 	serverFilename := "gen/" + name + "/server/server.go"
-	cfg := Config{
-		SchemaFilename: SchemaFilenames{"schema.graphql"},
-		SchemaStr:      map[string]string{"schema.graphql": schema},
-		Exec:           PackageConfig{Filename: "gen/" + name + "/exec.go"},
-		Model:          PackageConfig{Filename: "gen/" + name + "/model.go"},
-		Resolver:       PackageConfig{Filename: "gen/" + name + "/resolver.go", Type: "Resolver"},
+	gen := Generator{
+		Config: &config.Config{
+			SchemaFilename: config.SchemaFilenames{"schema.graphql"},
+			Exec:           config.PackageConfig{Filename: "gen/" + name + "/exec.go"},
+			Model:          config.PackageConfig{Filename: "gen/" + name + "/model.go"},
+			Resolver:       config.PackageConfig{Filename: "gen/" + name + "/resolver.go", Type: "Resolver"},
+		},
+
+		SchemaStr: map[string]string{"schema.graphql": schema},
 	}
 
-	_ = syscall.Unlink(cfg.Resolver.Filename)
+	err := gen.Config.Check()
+	if err != nil {
+		panic(err)
+	}
+
+	var gerr *gqlerror.Error
+	gen.schema, gerr = gqlparser.LoadSchema(&ast.Source{Name: "schema.graphql", Input: schema})
+	if gerr != nil {
+		panic(gerr)
+	}
+
+	_ = syscall.Unlink(gen.Resolver.Filename)
 	_ = syscall.Unlink(serverFilename)
 
-	err := Generate(cfg)
+	err = gen.Generate()
 	require.NoError(t, err)
 
-	err = GenerateServer(cfg, serverFilename)
+	err = gen.GenerateServer(serverFilename)
 	require.NoError(t, err)
 
 	conf := loader.Config{}

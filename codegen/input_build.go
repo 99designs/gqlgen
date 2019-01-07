@@ -9,13 +9,13 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Objects, error) {
+func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Objects, error) {
 	var inputs Objects
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range g.schema.Types {
 		switch typ.Kind {
 		case ast.InputObject:
-			input, err := cfg.buildInput(namedTypes, typ)
+			input, err := g.buildInput(namedTypes, typ)
 			if err != nil {
 				return nil, err
 			}
@@ -26,7 +26,7 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Obj
 			}
 			if def != nil {
 				input.Marshaler = buildInputMarshaler(typ, def)
-				bindErrs := bindObject(def.Type(), input, cfg.StructTag)
+				bindErrs := bindObject(def.Type(), input, g.StructTag)
 				if len(bindErrs) > 0 {
 					return nil, bindErrs
 				}
@@ -43,20 +43,20 @@ func (cfg *Config) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Obj
 	return inputs, nil
 }
 
-func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
-	obj := &Object{NamedType: types[typ.Name]}
-	typeEntry, entryExists := cfg.Models[typ.Name]
+func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
+	obj := &Object{TypeDefinition: types[typ.Name]}
+	typeEntry, entryExists := g.Models[typ.Name]
 
 	for _, field := range typ.Fields {
-		dirs, err := cfg.getDirectives(field.Directives)
+		dirs, err := g.getDirectives(field.Directives)
 		if err != nil {
 			return nil, err
 		}
 		newField := Field{
-			GQLName:    field.Name,
-			Type:       types.getType(field.Type),
-			Object:     obj,
-			Directives: dirs,
+			GQLName:       field.Name,
+			TypeReference: types.getType(field.Type),
+			Object:        obj,
+			Directives:    dirs,
 		}
 
 		if entryExists {
@@ -73,14 +73,14 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 			}
 		}
 
-		if !newField.Type.IsInput && !newField.Type.IsScalar {
+		if !newField.TypeReference.IsInput && !newField.TypeReference.IsScalar {
 			return nil, errors.Errorf("%s cannot be used as a field of %s. only input and scalar types are allowed", newField.GQLType, obj.GQLType)
 		}
 
 		obj.Fields = append(obj.Fields, newField)
 
 	}
-	dirs, err := cfg.getDirectives(typ.Directives)
+	dirs, err := g.getDirectives(typ.Directives)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (cfg *Config) buildInput(types NamedTypes, typ *ast.Definition) (*Object, e
 
 // if user has implemented an UnmarshalGQL method on the input type manually, use it
 // otherwise we will generate one.
-func buildInputMarshaler(typ *ast.Definition, def types.Object) *Ref {
+func buildInputMarshaler(typ *ast.Definition, def types.Object) *TypeImplementation {
 	switch def := def.(type) {
 	case *types.TypeName:
 		namedType := def.Type().(*types.Named)
@@ -103,5 +103,5 @@ func buildInputMarshaler(typ *ast.Definition, def types.Object) *Ref {
 		}
 	}
 
-	return &Ref{GoType: typ.Name}
+	return &TypeImplementation{GoType: typ.Name}
 }

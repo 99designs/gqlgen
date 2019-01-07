@@ -3,7 +3,13 @@ package codegen
 import (
 	"testing"
 
+	"github.com/vektah/gqlparser/gqlerror"
+
+	"github.com/vektah/gqlparser/ast"
+
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser"
 	"golang.org/x/tools/go/loader"
 )
 
@@ -33,26 +39,41 @@ func TestTypeInInput(t *testing.T) {
 	require.EqualError(t, err, "model plan failed: Item cannot be used as a field of BookmarkableInput. only input and scalar types are allowed")
 }
 
-func generate(name string, schema string, typemap ...TypeMap) error {
-	cfg := Config{
-		SchemaFilename: SchemaFilenames{"schema.graphql"},
-		SchemaStr:      map[string]string{"schema.graphql": schema},
-		Exec:           PackageConfig{Filename: "gen/" + name + "/exec.go"},
-		Model:          PackageConfig{Filename: "gen/" + name + "/model.go"},
+func generate(name string, schema string, typemap ...config.TypeMap) error {
+	gen := Generator{
+		Config: &config.Config{
+			SchemaFilename: config.SchemaFilenames{"schema.graphql"},
+			Exec:           config.PackageConfig{Filename: "gen/" + name + "/exec.go"},
+			Model:          config.PackageConfig{Filename: "gen/" + name + "/model.go"},
+		},
+
+		SchemaStr: map[string]string{"schema.graphql": schema},
+	}
+
+	err := gen.Config.Check()
+	if err != nil {
+		panic(err)
+	}
+
+	var gerr *gqlerror.Error
+	gen.schema, gerr = gqlparser.LoadSchema(&ast.Source{Name: "schema.graphql", Input: schema})
+	if gerr != nil {
+		panic(gerr)
 	}
 
 	if len(typemap) > 0 {
-		cfg.Models = typemap[0]
+		gen.Models = typemap[0]
 	}
-	err := Generate(cfg)
-	if err == nil {
-		conf := loader.Config{}
-		conf.Import("github.com/99designs/gqlgen/codegen/testdata/gen/" + name)
+	err = gen.Generate()
+	if err != nil {
+		return err
+	}
+	conf := loader.Config{}
+	conf.Import("github.com/99designs/gqlgen/codegen/testdata/gen/" + name)
 
-		_, err = conf.Load()
-		if err != nil {
-			panic(err)
-		}
+	_, err = conf.Load()
+	if err != nil {
+		panic(err)
 	}
-	return err
+	return nil
 }

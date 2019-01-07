@@ -1,7 +1,7 @@
 package codegen
 
 type Interface struct {
-	*NamedType
+	*TypeDefinition
 
 	Implementors []InterfaceImplementor
 }
@@ -9,5 +9,5 @@ type Interface struct {
 type InterfaceImplementor struct {
 	ValueReceiver bool
 
-	*NamedType
+	*TypeDefinition
 }

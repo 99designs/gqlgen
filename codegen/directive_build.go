@@ -5,10 +5,10 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (cfg *Config) buildDirectives(types NamedTypes) (map[string]*Directive, error) {
-	directives := make(map[string]*Directive, len(cfg.schema.Directives))
+func (g *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, error) {
+	directives := make(map[string]*Directive, len(g.schema.Directives))
 
-	for name, dir := range cfg.schema.Directives {
+	for name, dir := range g.schema.Directives {
 		if _, ok := directives[name]; ok {
 			return nil, errors.Errorf("directive with name %s already exists", name)
 		}
@@ -18,13 +18,14 @@ func (cfg *Config) buildDirectives(types NamedTypes) (map[string]*Directive, err
 
 		var args []FieldArgument
 		for _, arg := range dir.Arguments {
+
 			newArg := FieldArgument{
-				GQLName:   arg.Name,
-				Type:      types.getType(arg.Type),
-				GoVarName: sanitizeArgName(arg.Name),
+				GQLName:       arg.Name,
+				TypeReference: types.getType(arg.Type),
+				GoVarName:     sanitizeArgName(arg.Name),
 			}
 
-			if !newArg.Type.IsInput && !newArg.Type.IsScalar {
+			if !newArg.TypeReference.IsInput && !newArg.TypeReference.IsScalar {
 				return nil, errors.Errorf("%s cannot be used as argument of directive %s(%s) only input and scalar types are allowed", arg.Type, dir.Name, arg.Name)
 			}
 
@@ -47,7 +48,7 @@ func (cfg *Config) buildDirectives(types NamedTypes) (map[string]*Directive, err
 	return directives, nil
 }
 
-func (cfg *Config) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
+func (g *Generator) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 
 	dirs := make([]*Directive, len(list))
 	for i, d := range list {
@@ -60,7 +61,7 @@ func (cfg *Config) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			argValues[da.Name] = val
 		}
 
-		if def, ok := cfg.Directives[d.Name]; ok {
+		if def, ok := g.Directives[d.Name]; ok {
 			var args []FieldArgument
 			for _, a := range def.Args {
 
@@ -69,10 +70,10 @@ func (cfg *Config) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 					value = argValue
 				}
 				args = append(args, FieldArgument{
-					GQLName:   a.GQLName,
-					Value:     value,
-					GoVarName: a.GoVarName,
-					Type:      a.Type,
+					GQLName:       a.GQLName,
+					Value:         value,
+					GoVarName:     a.GoVarName,
+					TypeReference: a.TypeReference,
 				})
 			}
 			dirs[i] = &Directive{

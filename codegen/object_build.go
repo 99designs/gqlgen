@@ -9,15 +9,15 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program) (Objects, error) {
+func (g *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Objects, error) {
 	var objects Objects
 
-	for _, typ := range cfg.schema.Types {
+	for _, typ := range g.schema.Types {
 		if typ.Kind != ast.Object {
 			continue
 		}
 
-		obj, err := cfg.buildObject(types, typ)
+		obj, err := g.buildObject(types, typ)
 		if err != nil {
 			return nil, err
 		}
@@ -27,7 +27,7 @@ func (cfg *Config) buildObjects(types NamedTypes, prog *loader.Program) (Objects
 			return nil, err
 		}
 		if def != nil {
-			for _, bindErr := range bindObject(def.Type(), obj, cfg.StructTag) {
+			for _, bindErr := range bindObject(def.Type(), obj, g.StructTag) {
 				log.Println(bindErr.Error())
 				log.Println("  Adding resolver method")
 			}
@@ -81,36 +81,36 @@ func sanitizeArgName(name string) string {
 	return name
 }
 
-func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
-	obj := &Object{NamedType: types[typ.Name]}
-	typeEntry, entryExists := cfg.Models[typ.Name]
+func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
+	obj := &Object{TypeDefinition: types[typ.Name]}
+	typeEntry, entryExists := g.Models[typ.Name]
 
-	obj.ResolverInterface = &Ref{GoType: obj.GQLType + "Resolver"}
+	obj.ResolverInterface = &TypeImplementation{GoType: obj.GQLType + "Resolver"}
 
-	if typ == cfg.schema.Query {
+	if typ == g.schema.Query {
 		obj.Root = true
 	}
 
-	if typ == cfg.schema.Mutation {
+	if typ == g.schema.Mutation {
 		obj.Root = true
 		obj.DisableConcurrency = true
 	}
 
-	if typ == cfg.schema.Subscription {
+	if typ == g.schema.Subscription {
 		obj.Root = true
 		obj.Stream = true
 	}
 
 	obj.Satisfies = append(obj.Satisfies, typ.Interfaces...)
 
-	for _, intf := range cfg.schema.GetImplements(typ) {
+	for _, intf := range g.schema.GetImplements(typ) {
 		obj.Implements = append(obj.Implements, types[intf.Name])
 	}
 
 	for _, field := range typ.Fields {
-		if typ == cfg.schema.Query && field.Name == "__type" {
+		if typ == g.schema.Query && field.Name == "__type" {
 			obj.Fields = append(obj.Fields, Field{
-				Type:           &Type{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
+				TypeReference:  &TypeReference{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__schema",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
@@ -120,15 +120,15 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition) (*Object, 
 			})
 			continue
 		}
-		if typ == cfg.schema.Query && field.Name == "__schema" {
+		if typ == g.schema.Query && field.Name == "__schema" {
 			obj.Fields = append(obj.Fields, Field{
-				Type:           &Type{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
+				TypeReference:  &TypeReference{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
 				GQLName:        "__type",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectType",
 				Args: []FieldArgument{
-					{GQLName: "name", Type: &Type{types["String"], []string{}, ast.NamedType("String", nil), nil}, Object: &Object{}},
+					{GQLName: "name", TypeReference: &TypeReference{types["String"], []string{}, ast.NamedType("String", nil), nil}, Object: &Object{}},
 				},
 				Object: obj,
 			})
@@ -146,19 +146,19 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition) (*Object, 
 
 		var args []FieldArgument
 		for _, arg := range field.Arguments {
-			dirs, err := cfg.getDirectives(arg.Directives)
+			dirs, err := g.getDirectives(arg.Directives)
 			if err != nil {
 				return nil, err
 			}
 			newArg := FieldArgument{
-				GQLName:    arg.Name,
-				Type:       types.getType(arg.Type),
-				Object:     obj,
-				GoVarName:  sanitizeArgName(arg.Name),
-				Directives: dirs,
+				GQLName:       arg.Name,
+				TypeReference: types.getType(arg.Type),
+				Object:        obj,
+				GoVarName:     sanitizeArgName(arg.Name),
+				Directives:    dirs,
 			}
 
-			if !newArg.Type.IsInput && !newArg.Type.IsScalar {
+			if !newArg.TypeReference.IsInput && !newArg.TypeReference.IsScalar {
 				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.GQLType, field.Name)
 			}
 
@@ -174,7 +174,7 @@ func (cfg *Config) buildObject(types NamedTypes, typ *ast.Definition) (*Object, 
 
 		obj.Fields = append(obj.Fields, Field{
 			GQLName:       field.Name,
-			Type:          types.getType(field.Type),
+			TypeReference: types.getType(field.Type),
 			Args:          args,
 			Object:        obj,
 			GoFieldName:   goName,

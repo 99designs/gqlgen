@@ -320,7 +320,7 @@ nextArg:
 		for _, oldArg := range field.Args {
 			if strings.EqualFold(oldArg.GQLName, param.Name()) {
 				if !field.ForceResolver {
-					oldArg.Type.Modifiers = modifiersFromGoType(param.Type())
+					oldArg.TypeReference.Modifiers = modifiersFromGoType(param.Type())
 				}
 				newArgs = append(newArgs, oldArg)
 				continue nextArg
@@ -334,20 +334,20 @@ nextArg:
 }
 
 func validateTypeBinding(field *Field, goType types.Type) error {
-	gqlType := normalizeVendor(field.Type.FullSignature())
+	gqlType := normalizeVendor(field.TypeReference.FullSignature())
 	goTypeStr := normalizeVendor(goType.String())
 
 	if equalTypes(goTypeStr, gqlType) {
-		field.Type.Modifiers = modifiersFromGoType(goType)
+		field.TypeReference.Modifiers = modifiersFromGoType(goType)
 		return nil
 	}
 
 	// deal with type aliases
 	underlyingStr := normalizeVendor(goType.Underlying().String())
 	if equalTypes(underlyingStr, gqlType) {
-		field.Type.Modifiers = modifiersFromGoType(goType)
+		field.TypeReference.Modifiers = modifiersFromGoType(goType)
 		pkg, typ := pkgAndType(goType.String())
-		field.AliasedType = &Ref{GoType: typ, Package: pkg}
+		field.AliasedType = &TypeImplementation{GoType: typ, Package: pkg}
 		return nil
 	}
 

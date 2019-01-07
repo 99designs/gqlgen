@@ -20,12 +20,12 @@ const (
 )
 
 type Object struct {
-	*NamedType
+	*TypeDefinition
 
 	Fields             []Field
 	Satisfies          []string
-	Implements         []*NamedType
-	ResolverInterface  *Ref
+	Implements         []*TypeDefinition
+	ResolverInterface  *TypeImplementation
 	Root               bool
 	DisableConcurrency bool
 	Stream             bool
@@ -33,7 +33,7 @@ type Object struct {
 }
 
 type Field struct {
-	*Type
+	*TypeReference
 	Description      string          // Description of a field
 	GQLName          string          // The name of the field in graphql
 	GoFieldType      GoFieldType     // The field type in go, if any
@@ -49,7 +49,7 @@ type Field struct {
 }
 
 type FieldArgument struct {
-	*Type
+	*TypeReference
 
 	GQLName    string      // The name of the argument in graphql
 	GoVarName  string      // The name of the var in go
@@ -248,7 +248,7 @@ func (f *Field) CallArgs() string {
 
 // should be in the template, but its recursive and has a bunch of args
 func (f *Field) WriteJson() string {
-	return f.doWriteJson("res", f.Type.Modifiers, f.ASTType, false, 1)
+	return f.doWriteJson("res", f.TypeReference.Modifiers, f.ASTType, false, 1)
 }
 
 func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Type, isPtr bool, depth int) string {

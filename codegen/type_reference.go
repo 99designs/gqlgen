@@ -4,63 +4,26 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/99designs/gqlgen/codegen/templates"
-
 	"github.com/vektah/gqlparser/ast"
 )
 
-type NamedTypes map[string]*NamedType
-
-type NamedType struct {
-	Ref
-	IsScalar    bool
-	IsInterface bool
-	IsInput     bool
-	GQLType     string // Name of the graphql type
-	Marshaler   *Ref   // If this type has an external marshaler this will be set
-}
-
-type Ref struct {
-	GoType        string // Name of the go type
-	Package       string // the package the go type lives in
-	IsUserDefined bool   // does the type exist in the typemap
-}
-
-type Type struct {
-	*NamedType
+// TypeReference represents the type of a field or arg, referencing an underlying TypeDefinition (type, input, scalar)
+type TypeReference struct {
+	*TypeDefinition
 
 	Modifiers   []string
 	ASTType     *ast.Type
-	AliasedType *Ref
+	AliasedType *TypeImplementation
 }
 
-const (
-	modList = "[]"
-	modPtr  = "*"
-)
-
-func (t Ref) FullName() string {
-	return t.PkgDot() + t.GoType
-}
-
-func (t Ref) PkgDot() string {
-	name := templates.CurrentImports.Lookup(t.Package)
-	if name == "" {
-		return ""
-
-	}
-
-	return name + "."
-}
-
-func (t Type) Signature() string {
+func (t TypeReference) Signature() string {
 	if t.AliasedType != nil {
 		return strings.Join(t.Modifiers, "") + t.AliasedType.FullName()
 	}
 	return strings.Join(t.Modifiers, "") + t.FullName()
 }
 
-func (t Type) FullSignature() string {
+func (t TypeReference) FullSignature() string {
 	pkg := ""
 	if t.Package != "" {
 		pkg = t.Package + "."
@@ -69,31 +32,27 @@ func (t Type) FullSignature() string {
 	return strings.Join(t.Modifiers, "") + pkg + t.GoType
 }
 
-func (t Type) IsPtr() bool {
+func (t TypeReference) IsPtr() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
 }
 
-func (t *Type) StripPtr() {
+func (t *TypeReference) StripPtr() {
 	if !t.IsPtr() {
 		return
 	}
 	t.Modifiers = t.Modifiers[0 : len(t.Modifiers)-1]
 }
 
-func (t Type) IsSlice() bool {
+func (t TypeReference) IsSlice() bool {
 	return len(t.Modifiers) > 0 && t.Modifiers[0] == modList ||
 		len(t.Modifiers) > 1 && t.Modifiers[0] == modPtr && t.Modifiers[1] == modList
 }
 
-func (t NamedType) IsMarshaled() bool {
-	return t.Marshaler != nil
-}
-
-func (t Type) Unmarshal(result, raw string) string {
+func (t TypeReference) Unmarshal(result, raw string) string {
 	return t.unmarshal(result, raw, t.Modifiers, 1)
 }
 
-func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) string {
+func (t TypeReference) unmarshal(result, raw string, remainingMods []string, depth int) string {
 	switch {
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
 		ptr := "ptr" + strconv.Itoa(depth)
@@ -131,7 +90,7 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 			"rawSlice": rawIf,
 			"index":    index,
 			"result":   result,
-			"type":     strings.Join(remainingMods, "") + t.NamedType.FullName(),
+			"type":     strings.Join(remainingMods, "") + t.TypeDefinition.FullName(),
 			"next":     t.unmarshal(result+"["+index+"]", rawIf+"["+index+"]", remainingMods[1:], depth+1),
 		})
 	}
@@ -161,11 +120,11 @@ func (t Type) unmarshal(result, raw string, remainingMods []string, depth int) s
 	})
 }
 
-func (t Type) Middleware(result, raw string) string {
+func (t TypeReference) Middleware(result, raw string) string {
 	return t.middleware(result, raw, t.Modifiers, 1)
 }
 
-func (t Type) middleware(result, raw string, remainingMods []string, depth int) string {
+func (t TypeReference) middleware(result, raw string, remainingMods []string, depth int) string {
 	if len(remainingMods) == 1 && remainingMods[0] == modPtr {
 		return tpl(`{{- if .t.Marshaler }}
 			if {{.raw}} != nil {
@@ -202,7 +161,7 @@ func (t Type) middleware(result, raw string, remainingMods []string, depth int) 
 			"raw":    raw,
 			"index":  index,
 			"result": result,
-			"type":   strings.Join(remainingMods, "") + t.NamedType.FullName(),
+			"type":   strings.Join(remainingMods, "") + t.TypeDefinition.FullName(),
 			"next":   t.middleware(result+"["+index+"]", raw+"["+index+"]", remainingMods[1:], depth+1),
 		})
 	}
@@ -222,7 +181,7 @@ func (t Type) middleware(result, raw string, remainingMods []string, depth int) 
 	})
 }
 
-func (t Type) Marshal(val string) string {
+func (t TypeReference) Marshal(val string) string {
 	if t.AliasedType != nil {
 		val = t.GoType + "(" + val + ")"
 	}

@@ -25,7 +25,7 @@ func (g *Generator) buildObjects(ts NamedTypes, prog *loader.Program) (Objects, 
 			return nil, err
 		}
 
-		if _, isMap := obj.GoType.(*types.Map); !isMap {
+		if _, isMap := obj.Definition.GoType.(*types.Map); !isMap {
 			for _, bindErr := range bindObject(obj, g.StructTag) {
 				log.Println(bindErr.Error())
 				log.Println("  Adding resolver method")
@@ -36,7 +36,7 @@ func (g *Generator) buildObjects(ts NamedTypes, prog *loader.Program) (Objects, 
 	}
 
 	sort.Slice(objects, func(i, j int) bool {
-		return objects[i].GQLType < objects[j].GQLType
+		return objects[i].Definition.GQLType < objects[j].Definition.GQLType
 	})
 
 	return objects, nil
@@ -81,10 +81,10 @@ func sanitizeArgName(name string) string {
 }
 
 func (g *Generator) buildObject(ts NamedTypes, typ *ast.Definition) (*Object, error) {
-	obj := &Object{TypeDefinition: ts[typ.Name]}
+	obj := &Object{Definition: ts[typ.Name]}
 	typeEntry, entryExists := g.Models[typ.Name]
 
-	tt := types.NewTypeName(0, g.Config.Exec.Pkg(), obj.GQLType+"Resolver", nil)
+	tt := types.NewTypeName(0, g.Config.Exec.Pkg(), obj.Definition.GQLType+"Resolver", nil)
 	obj.ResolverInterface = types.NewNamed(tt, nil, nil)
 
 	if typ == g.schema.Query {
@@ -158,8 +158,8 @@ func (g *Generator) buildObject(ts NamedTypes, typ *ast.Definition) (*Object, er
 				Directives:    dirs,
 			}
 
-			if !newArg.TypeReference.IsInput && !newArg.TypeReference.IsScalar {
-				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.GQLType, field.Name)
+			if !newArg.TypeReference.Definition.IsInput && !newArg.TypeReference.Definition.IsScalar {
+				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.Definition.GQLType, field.Name)
 			}
 
 			if arg.DefaultValue != nil {

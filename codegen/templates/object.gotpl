@@ -1,13 +1,13 @@
 {{ $object := . }}
 
-var {{ $object.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
+var {{ $object.Definition.GQLType|lcFirst}}Implementors = {{$object.Implementors}}
 
 // nolint: gocyclo, errcheck, gas, goconst
 {{- if .Stream }}
-func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, {{$object.GQLType|lcFirst}}Implementors)
+func (ec *executionContext) _{{$object.Definition.GQLType}}(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, {{$object.Definition.GQLType|lcFirst}}Implementors)
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: {{$object.GQLType|quote}},
+		Object: {{$object.Definition.GQLType|quote}},
 	})
 	if len(fields) != 1 {
 		ec.Errorf(ctx, "must subscribe to exactly one stream")
@@ -17,18 +17,18 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 	switch fields[0].Name {
 	{{- range $field := $object.Fields }}
 	case "{{$field.GQLName}}":
-		return ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, fields[0])
+		return ec._{{$object.Definition.GQLType}}_{{$field.GQLName}}(ctx, fields[0])
 	{{- end }}
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
 }
 {{- else }}
-func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.SelectionSet{{if not $object.Root}}, obj *{{$object.GoType | ref }} {{end}}) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, {{$object.GQLType|lcFirst}}Implementors)
+func (ec *executionContext) _{{$object.Definition.GQLType}}(ctx context.Context, sel ast.SelectionSet{{if not $object.Root}}, obj *{{$object.Definition.GoType | ref }} {{end}}) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, {{$object.Definition.GQLType|lcFirst}}Implementors)
 	{{if $object.Root}}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-			Object: {{$object.GQLType|quote}},
+			Object: {{$object.Definition.GQLType|quote}},
 		})
 	{{end}}
 
@@ -37,13 +37,13 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString({{$object.GQLType|quote}})
+			out.Values[i] = graphql.MarshalString({{$object.Definition.GQLType|quote}})
 		{{- range $field := $object.Fields }}
 		case "{{$field.GQLName}}":
 			{{- if $field.IsConcurrent }}
 				field := field
 				out.Concurrently(i, func() (res graphql.Marshaler) {
-					res = ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
+					res = ec._{{$object.Definition.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
 					{{- if $field.ASTType.NonNull }}
 						if res == graphql.Null {
 							invalid = true
@@ -52,7 +52,7 @@ func (ec *executionContext) _{{$object.GQLType}}(ctx context.Context, sel ast.Se
 					return res
 				})
 			{{- else }}
-				out.Values[i] = ec._{{$object.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
+				out.Values[i] = ec._{{$object.Definition.GQLType}}_{{$field.GQLName}}(ctx, field{{if not $object.Root}}, obj{{end}})
 				{{- if $field.ASTType.NonNull }}
 					if out.Values[i] == graphql.Null {
 						invalid = true

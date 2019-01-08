@@ -11,18 +11,18 @@ import (
 
 // TypeReference represents the type of a field or arg, referencing an underlying TypeDefinition (type, input, scalar)
 type TypeReference struct {
-	*TypeDefinition
+	Definition *TypeDefinition
 
 	Modifiers []string
 	ASTType   *ast.Type
 }
 
 func (t TypeReference) Signature() string {
-	return strings.Join(t.Modifiers, "") + templates.CurrentImports.LookupType(t.TypeDefinition.GoType)
+	return strings.Join(t.Modifiers, "") + templates.CurrentImports.LookupType(t.Definition.GoType)
 }
 
 func (t TypeReference) FullSignature() string {
-	return strings.Join(t.Modifiers, "") + types.TypeString(t.TypeDefinition.GoType, nil)
+	return strings.Join(t.Modifiers, "") + types.TypeString(t.Definition.GoType, nil)
 }
 
 func (t TypeReference) IsPtr() bool {
@@ -49,7 +49,7 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 	switch {
 	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
 		ptr := "ptr" + strconv.Itoa(depth)
-		return tpl(`var {{.ptr}} {{.mods}}{{.t.GoType | ref }}
+		return tpl(`var {{.ptr}} {{.mods}}{{.t.Definition.GoType | ref }}
 			if {{.raw}} != nil {
 				{{.next}}
 				{{.result}} = &{{.ptr -}}
@@ -83,7 +83,7 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 			"rawSlice": rawIf,
 			"index":    index,
 			"result":   result,
-			"type":     strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.GoType),
+			"type":     strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.Definition.GoType),
 			"next":     t.unmarshal(result+"["+index+"]", rawIf+"["+index+"]", remainingMods[1:], depth+1),
 		})
 	}
@@ -91,10 +91,10 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 	realResult := result
 
 	return tpl(`
-			{{- if eq (.t.GoType | ref) "map[string]interface{}" }}
+			{{- if eq (.t.Definition.GoType | ref) "map[string]interface{}" }}
 				{{- .result }} = {{.raw}}.(map[string]interface{})
-			{{- else if .t.Unmarshaler }}
-				{{- .result }}, err = {{ .t.Unmarshaler | call }}({{.raw}})
+			{{- else if .t.Definition.Unmarshaler }}
+				{{- .result }}, err = {{ .t.Definition.Unmarshaler | call }}({{.raw}})
 			{{- else -}}
 				err = (&{{.result}}).UnmarshalGQL({{.raw}})
 			{{- end }}`, map[string]interface{}{
@@ -114,7 +114,7 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 		return tpl(`
 			if {{.raw}} != nil {
 				var err error
-				{{.result}}, err = e.{{ .t.GQLType }}Middleware(ctx, {{.raw}})
+				{{.result}}, err = e.{{ .t.Definition.GQLType }}Middleware(ctx, {{.raw}})
 				if err != nil {
 					return nil, err
 				}
@@ -145,14 +145,14 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 			"raw":    raw,
 			"index":  index,
 			"result": result,
-			"type":   strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.TypeDefinition.GoType),
+			"type":   strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.Definition.GoType),
 			"next":   t.middleware(result+"["+index+"]", raw+"["+index+"]", remainingMods[1:], depth+1),
 		})
 	}
 
-	ptr := "m" + t.GQLType + strconv.Itoa(depth)
+	ptr := "m" + t.Definition.GQLType + strconv.Itoa(depth)
 	return tpl(`
-			{{.ptr}}, err := e.{{ .t.GQLType }}Middleware(ctx, &{{.raw}})
+			{{.ptr}}, err := e.{{ .t.Definition.GQLType }}Middleware(ctx, &{{.raw}})
 				if err != nil {	
 					return nil, err
 			}
@@ -165,8 +165,8 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 }
 
 func (t TypeReference) Marshal(val string) string {
-	if t.Marshaler != nil {
-		return "return " + templates.Call(t.TypeDefinition.Marshaler) + "(" + val + ")"
+	if t.Definition.Marshaler != nil {
+		return "return " + templates.Call(t.Definition.Marshaler) + "(" + val + ")"
 	}
 
 	return "return " + val

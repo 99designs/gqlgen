@@ -3,13 +3,11 @@ package codegen
 import (
 	"testing"
 
-	"github.com/vektah/gqlparser/gqlerror"
-
-	"github.com/vektah/gqlparser/ast"
-
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 	"golang.org/x/tools/go/loader"
 )
 

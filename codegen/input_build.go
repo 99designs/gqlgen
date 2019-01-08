@@ -21,7 +21,7 @@ func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Ob
 				return nil, err
 			}
 
-			if _, isMap := input.GoType.(*types.Map); !isMap {
+			if _, isMap := input.Definition.GoType.(*types.Map); !isMap {
 				bindErrs := bindObject(input, g.StructTag)
 				if len(bindErrs) > 0 {
 					return nil, bindErrs
@@ -33,14 +33,14 @@ func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Ob
 	}
 
 	sort.Slice(inputs, func(i, j int) bool {
-		return inputs[i].GQLType < inputs[j].GQLType
+		return inputs[i].Definition.GQLType < inputs[j].Definition.GQLType
 	})
 
 	return inputs, nil
 }
 
 func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
-	obj := &Object{TypeDefinition: types[typ.Name]}
+	obj := &Object{Definition: types[typ.Name]}
 	typeEntry, entryExists := g.Models[typ.Name]
 
 	for _, field := range typ.Fields {
@@ -69,8 +69,8 @@ func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, 
 			}
 		}
 
-		if !newField.TypeReference.IsInput && !newField.TypeReference.IsScalar {
-			return nil, errors.Errorf("%s cannot be used as a field of %s. only input and scalar types are allowed", newField.GQLType, obj.GQLType)
+		if !newField.TypeReference.Definition.IsInput && !newField.TypeReference.Definition.IsScalar {
+			return nil, errors.Errorf("%s cannot be used as a field of %s. only input and scalar types are allowed", newField.Definition.GQLType, obj.Definition.GQLType)
 		}
 
 		obj.Fields = append(obj.Fields, newField)

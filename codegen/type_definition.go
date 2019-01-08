@@ -49,12 +49,12 @@ func (n NamedTypes) getType(t *ast.Type) *TypeReference {
 				panic("missing type " + t.NamedType)
 			}
 			res := &TypeReference{
-				TypeDefinition: n[t.NamedType],
-				Modifiers:      modifiers,
-				ASTType:        orig,
+				Definition: n[t.NamedType],
+				Modifiers:  modifiers,
+				ASTType:    orig,
 			}
 
-			if res.IsInterface {
+			if res.Definition.IsInterface {
 				res.StripPtr()
 			}
 

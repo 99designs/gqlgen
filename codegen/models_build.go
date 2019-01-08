@@ -43,7 +43,7 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 	}
 
 	sort.Slice(models, func(i, j int) bool {
-		return models[i].GQLType < models[j].GQLType
+		return models[i].Definition.GQLType < models[j].Definition.GQLType
 	})
 
 	return models, nil
@@ -51,9 +51,9 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 
 func (g *Generator) obj2Model(obj *Object) Model {
 	model := Model{
-		TypeDefinition: obj.TypeDefinition,
-		Implements:     obj.Implements,
-		Fields:         []ModelField{},
+		Definition: obj.Definition,
+		Implements: obj.Implements,
+		Fields:     []ModelField{},
 	}
 
 	for i := range obj.Fields {
@@ -74,8 +74,8 @@ func (g *Generator) obj2Model(obj *Object) Model {
 
 func int2Model(obj *Interface) Model {
 	model := Model{
-		TypeDefinition: obj.TypeDefinition,
-		Fields:         []ModelField{},
+		Definition: obj.Definition,
+		Fields:     []ModelField{},
 	}
 
 	return model

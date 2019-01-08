@@ -51,15 +51,15 @@ func (g *Generator) Generate() error {
 		}
 
 		for _, model := range modelsBuild.Models {
-			modelCfg := g.Models[model.GQLType]
-			modelCfg.Model = types.TypeString(model.GoType, nil)
-			g.Models[model.GQLType] = modelCfg
+			modelCfg := g.Models[model.Definition.GQLType]
+			modelCfg.Model = types.TypeString(model.Definition.GoType, nil)
+			g.Models[model.Definition.GQLType] = modelCfg
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			modelCfg := g.Models[enum.GQLType]
-			modelCfg.Model = types.TypeString(enum.GoType, nil)
-			g.Models[enum.GQLType] = modelCfg
+			modelCfg := g.Models[enum.Definition.GQLType]
+			modelCfg.Model = types.TypeString(enum.Definition.GoType, nil)
+			g.Models[enum.Definition.GQLType] = modelCfg
 		}
 	}
 

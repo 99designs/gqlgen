@@ -2,7 +2,7 @@
 {{ $object := $field.Object }}
 
 {{- if $object.Stream }}
-	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	func (ec *executionContext) _{{$object.Definition.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Field: field,
 			Args:  nil,
@@ -41,11 +41,11 @@
 	}
 {{ else }}
 	// nolint: vetshadow
-	func (ec *executionContext) _{{$object.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.GoType | ref}}{{end}}) graphql.Marshaler {
+	func (ec *executionContext) _{{$object.Definition.GQLType}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.Definition.GoType | ref}}{{end}}) graphql.Marshaler {
 		ctx = ec.Tracer.StartFieldExecution(ctx, field)
 		defer func () { ec.Tracer.EndFieldExecution(ctx) }()
 		rctx := &graphql.ResolverContext{
-			Object: {{$object.GQLType|quote}},
+			Object: {{$object.Definition.GQLType|quote}},
 			Field: field,
 			Args:  nil,
 		}

@@ -184,7 +184,7 @@ type BindError struct {
 func (b BindError) Error() string {
 	return fmt.Sprintf(
 		"Unable to bind %s.%s to %s\n  %s\n  %s",
-		b.object.GQLType,
+		b.object.Definition.GQLType,
 		b.field.GQLName,
 		b.typ.String(),
 		b.methodErr.Error(),
@@ -212,18 +212,18 @@ func bindObject(object *Object, structTag string) BindErrors {
 		}
 
 		// first try binding to a method
-		methodErr := bindMethod(object.GoType, field)
+		methodErr := bindMethod(object.Definition.GoType, field)
 		if methodErr == nil {
 			continue
 		}
 
 		// otherwise try binding to a var
-		varErr := bindVar(object.GoType, field, structTag)
+		varErr := bindVar(object.Definition.GoType, field, structTag)
 
 		if varErr != nil {
 			errs = append(errs, BindError{
 				object:    object,
-				typ:       object.GoType,
+				typ:       object.Definition.GoType,
 				field:     field,
 				varErr:    varErr,
 				methodErr: methodErr,

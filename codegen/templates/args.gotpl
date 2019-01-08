@@ -37,7 +37,7 @@
 					return nil, err
 				}
 			{{- end }}
-			{{- if $arg.IsInput }}
+			{{- if $arg.Definition.IsInput }}
 				{{ $arg.Middleware (print "arg" $i) (print "arg" $i) }}
 			{{- end }}
 		}

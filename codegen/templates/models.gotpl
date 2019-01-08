@@ -22,12 +22,12 @@ import (
 
 {{ range $model := .Models }}
 	{{with .Description}} {{.|prefixLines "// "}} {{end}}
-	{{- if .IsInterface }}
-		type {{.GoType | ref }} interface {
-			Is{{.GoType | ref }}()
+	{{- if .Definition.IsInterface }}
+		type {{.Definition.GoType | ref }} interface {
+			Is{{.Definition.GoType | ref }}()
 		}
 	{{- else }}
-		type {{.GoType | ref }} struct {
+		type {{.Definition.GoType | ref }} struct {
 			{{- range $field := .Fields }}
 				{{- with .Description}}
 					{{.|prefixLines "// "}}
@@ -37,7 +37,7 @@ import (
 		}
 
 		{{- range $iface := .Implements }}
-			func ({{$model.GoType | ref }}) Is{{$iface.GoType | ref }}() {}
+			func ({{$model.Definition.GoType | ref }}) Is{{$iface.GoType | ref }}() {}
 		{{- end }}
 
 	{{- end }}
@@ -45,48 +45,48 @@ import (
 
 {{ range $enum := .Enums }}
 	{{with .Description}}{{.|prefixLines "// "}} {{end}}
-	type {{.GoType | ref }} string
+	type {{.Definition.GoType | ref }} string
 	const (
 	{{- range $value := .Values}}
 		{{- with .Description}}
 			{{.|prefixLines "// "}}
 		{{- end}}
-		{{$enum.GoType | ref }}{{ .Name|toCamel }} {{$enum.GoType | ref }} = {{.Name|quote}}
+		{{$enum.Definition.GoType | ref }}{{ .Name|toCamel }} {{$enum.Definition.GoType | ref }} = {{.Name|quote}}
 	{{- end }}
 	)
 
-	var All{{.GoType | ref }} = []{{.GoType | ref }}{
+	var All{{.Definition.GoType | ref }} = []{{.Definition.GoType | ref }}{
 	{{- range $value := .Values}}
-		{{$enum.GoType | ref }}{{ .Name|toCamel }},
+		{{$enum.Definition.GoType | ref }}{{ .Name|toCamel }},
 	{{- end }}
 	}
 
-	func (e {{.GoType | ref }}) IsValid() bool {
+	func (e {{.Definition.GoType | ref }}) IsValid() bool {
 		switch e {
-		case {{ range $index, $element := .Values}}{{if $index}},{{end}}{{ $enum.GoType | ref }}{{ $element.Name|toCamel }}{{end}}:
+		case {{ range $index, $element := .Values}}{{if $index}},{{end}}{{ $enum.Definition.GoType | ref }}{{ $element.Name|toCamel }}{{end}}:
 			return true
 		}
 		return false
 	}
 
-	func (e {{.GoType | ref }}) String() string {
+	func (e {{.Definition.GoType | ref }}) String() string {
 		return string(e)
 	}
 
-	func (e *{{.GoType | ref }}) UnmarshalGQL(v interface{}) error {
+	func (e *{{.Definition.GoType | ref }}) UnmarshalGQL(v interface{}) error {
 		str, ok := v.(string)
 		if !ok {
 			return fmt.Errorf("enums must be strings")
 		}
 
-		*e = {{.GoType | ref }}(str)
+		*e = {{.Definition.GoType | ref }}(str)
 		if !e.IsValid() {
-			return fmt.Errorf("%s is not a valid {{.GQLType}}", str)
+			return fmt.Errorf("%s is not a valid {{.Definition.GQLType}}", str)
 		}
 		return nil
 	}
 
-	func (e {{.GoType | ref }}) MarshalGQL(w io.Writer) {
+	func (e {{.Definition.GoType | ref }}) MarshalGQL(w io.Writer) {
 		fmt.Fprint(w, strconv.Quote(e.String()))
 	}
 

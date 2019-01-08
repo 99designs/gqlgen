@@ -20,11 +20,6 @@ type TypeDefinition struct {
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
 }
 
-const (
-	modList = "[]"
-	modPtr  = "*"
-)
-
 func (t TypeDefinition) IsMarshaled() bool {
 	return t.Marshaler != nil || t.Unmarshaler != nil
 }
@@ -34,31 +29,28 @@ func (t TypeDefinition) IsEmptyInterface() bool {
 	return isInterface && i.NumMethods() == 0
 }
 
+func (n NamedTypes) goTypeForAst(t *ast.Type) types.Type {
+	if t.Elem != nil {
+		return types.NewSlice(n.goTypeForAst(t.Elem))
+	}
+
+	nt := n[t.NamedType]
+	gt := nt.GoType
+	if gt == nil {
+		panic("missing type " + t.NamedType)
+	}
+
+	if !t.NonNull && !nt.IsInterface {
+		return types.NewPointer(gt)
+	}
+
+	return gt
+}
+
 func (n NamedTypes) getType(t *ast.Type) *TypeReference {
-	orig := t
-	var modifiers []string
-	for {
-		if t.Elem != nil {
-			modifiers = append(modifiers, modList)
-			t = t.Elem
-		} else {
-			if !t.NonNull {
-				modifiers = append(modifiers, modPtr)
-			}
-			if n[t.NamedType] == nil {
-				panic("missing type " + t.NamedType)
-			}
-			res := &TypeReference{
-				Definition: n[t.NamedType],
-				Modifiers:  modifiers,
-				ASTType:    orig,
-			}
-
-			if res.Definition.IsInterface {
-				res.StripPtr()
-			}
-
-			return res
-		}
+	return &TypeReference{
+		Definition: n[t.Name()],
+		GoType:     n.goTypeForAst(t),
+		ASTType:    t,
 	}
 }

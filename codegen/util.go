@@ -319,7 +319,7 @@ nextArg:
 		for _, oldArg := range field.Args {
 			if strings.EqualFold(oldArg.GQLName, param.Name()) {
 				if !field.ForceResolver {
-					oldArg.TypeReference.Modifiers = modifiersFromGoType(param.Type())
+					oldArg.TypeReference.GoType = param.Type()
 				}
 				newArgs = append(newArgs, oldArg)
 				continue nextArg
@@ -333,34 +333,15 @@ nextArg:
 }
 
 func validateTypeBinding(field *Field, goType types.Type) error {
-	gqlType := normalizeVendor(field.TypeReference.FullSignature())
+	gqlType := normalizeVendor(field.TypeReference.GoType.String())
 	goTypeStr := normalizeVendor(goType.String())
 
 	if equalTypes(goTypeStr, gqlType) {
-		field.TypeReference.Modifiers = modifiersFromGoType(goType)
+		field.TypeReference.GoType = goType
 		return nil
 	}
 
 	return fmt.Errorf("%s is not compatible with %s", gqlType, goTypeStr)
-}
-
-func modifiersFromGoType(t types.Type) []string {
-	var modifiers []string
-	for {
-		switch val := t.(type) {
-		case *types.Pointer:
-			modifiers = append(modifiers, modPtr)
-			t = val.Elem()
-		case *types.Array:
-			modifiers = append(modifiers, modList)
-			t = val.Elem()
-		case *types.Slice:
-			modifiers = append(modifiers, modList)
-			t = val.Elem()
-		default:
-			return modifiers
-		}
-	}
 }
 
 var modsRegex = regexp.MustCompile(`^(\*|\[\])*`)

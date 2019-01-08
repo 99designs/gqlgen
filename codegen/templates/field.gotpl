@@ -82,7 +82,7 @@
 			{{- end }}
 			return graphql.Null
 		}
-		res := resTmp.({{$field.Signature}})
+		res := resTmp.({{$field.GoType | ref}})
 		rctx.Result = res
 		ctx = ec.Tracer.StartFieldChildExecution(ctx)
 		{{ $field.WriteJson }}

@@ -1,6 +1,6 @@
 	args := map[string]interface{}{}
 	{{- range $i, $arg := . }}
-		var arg{{$i}} {{$arg.Signature }}
+		var arg{{$i}} {{$arg.GoType | ref }}
 		if tmp, ok := rawArgs[{{$arg.GQLName|quote}}]; ok {
 			{{- if $arg.Directives }}
 				argm{{$i}}, err := chainFieldMiddleware([]graphql.FieldMiddleware{
@@ -25,10 +25,10 @@
 				if err != nil {
 					return nil, err
 				}
-				if data, ok := argm{{$i}}.({{$arg.Signature }}); ok {
+				if data, ok := argm{{$i}}.({{$arg.GoType | ref }}); ok {
 					arg{{$i}} = data
 				} else {
-					return nil, errors.New("expect {{$arg.Signature }}")
+					return nil, errors.New("expect {{$arg.GoType | ref }}")
 				}
 			{{- else }}
 				var err error

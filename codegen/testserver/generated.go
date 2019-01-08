@@ -144,7 +144,7 @@ type QueryResolver interface {
 	NestedInputs(ctx context.Context, input [][]*OuterInput) (*bool, error)
 	NestedOutputs(ctx context.Context) ([][]*OuterObject, error)
 	Keywords(ctx context.Context, input *Keywords) (bool, error)
-	Shapes(ctx context.Context) ([]*Shape, error)
+	Shapes(ctx context.Context) ([]Shape, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
 	ModelMethods(ctx context.Context) (*ModelMethods, error)
 	Valid(ctx context.Context) (string, error)
@@ -2317,7 +2317,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		idx1 := idx1
 		rctx := &graphql.ResolverContext{
 			Index:  &idx1,
-			Result: res[idx1],
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(idx1 int) {
@@ -2427,7 +2427,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*Shape)
+	res := resTmp.([]Shape)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -2443,7 +2443,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		idx1 := idx1
 		rctx := &graphql.ResolverContext{
 			Index:  &idx1,
-			Result: res[idx1],
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(idx1 int) {
@@ -2452,11 +2452,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				if res[idx1] == nil {
-					return graphql.Null
-				}
-
-				return ec._Shape(ctx, field.Selections, res[idx1])
+				return ec._Shape(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {

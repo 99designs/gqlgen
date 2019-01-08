@@ -88,13 +88,13 @@
 				if data, ok := c{{$field.GoFieldName}}.({{ $field.Definition.GoType | ref }}); ok {
             		obj.{{$field.GoFieldName}} = &data
             	} else {
-            		return obj, errors.New("expect {{ $field.Signature }}")
+            		return obj, errors.New("expect {{ $field.GoType | ref }}")
             	}
 			{{else}}
-            	if data, ok := c{{$field.GoFieldName}}.({{ $field.Signature }}); ok{
+            	if data, ok := c{{$field.GoFieldName}}.({{ $field.GoType | ref }}); ok{
             		obj.{{$field.GoFieldName}} = data
             	}else{
-            		return obj, errors.New("{{$field.GoFieldName}} expect {{$field.Signature }}")
+            		return obj, errors.New("{{$field.GoFieldName}} expect {{$field.GoType | ref }}")
             	}
 			{{ end }}
 

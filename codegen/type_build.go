@@ -28,7 +28,7 @@ func (g *Generator) buildNamedTypes(prog *loader.Program) (NamedTypes, error) {
 			}
 
 			pkgName, typeName = pkgAndType(userEntry.Model)
-		} else if t.IsScalar {
+		} else if t.IsScalar && schemaType.Kind != ast.Enum {
 			pkgName = "github.com/99designs/gqlgen/graphql"
 			typeName = "String"
 		} else {

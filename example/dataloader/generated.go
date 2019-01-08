@@ -1106,7 +1106,7 @@ func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.
 		idx1 := idx1
 		rctx := &graphql.ResolverContext{
 			Index:  &idx1,
-			Result: res[idx1],
+			Result: &res[idx1],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(idx1 int) {

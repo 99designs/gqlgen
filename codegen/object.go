@@ -174,10 +174,10 @@ func (f *Field) ShortResolverDeclaration() string {
 		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Definition.GoType))
 	}
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
+		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
 	}
 
-	result := f.Signature()
+	result := templates.CurrentImports.LookupType(f.GoType)
 	if f.Object.Stream {
 		result = "<-chan " + result
 	}
@@ -196,10 +196,10 @@ func (f *Field) ResolverDeclaration() string {
 		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Definition.GoType))
 	}
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
+		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
 	}
 
-	result := f.Signature()
+	result := templates.CurrentImports.LookupType(f.GoType)
 	if f.Object.Stream {
 		result = "<-chan " + result
 	}
@@ -211,7 +211,7 @@ func (f *Field) ResolverDeclaration() string {
 func (f *Field) ComplexitySignature() string {
 	res := fmt.Sprintf("func(childComplexity int")
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, arg.Signature())
+		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
 	}
 	res += ") int"
 	return res
@@ -220,7 +220,7 @@ func (f *Field) ComplexitySignature() string {
 func (f *Field) ComplexityArgs() string {
 	var args []string
 	for _, arg := range f.Args {
-		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+arg.Signature()+")")
+		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+templates.CurrentImports.LookupType(arg.GoType)+")")
 	}
 
 	return strings.Join(args, ", ")
@@ -242,7 +242,7 @@ func (f *Field) CallArgs() string {
 	}
 
 	for _, arg := range f.Args {
-		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+arg.Signature()+")")
+		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+templates.CurrentImports.LookupType(arg.GoType)+")")
 	}
 
 	return strings.Join(args, ", ")
@@ -250,12 +250,12 @@ func (f *Field) CallArgs() string {
 
 // should be in the template, but its recursive and has a bunch of args
 func (f *Field) WriteJson() string {
-	return f.doWriteJson("res", f.TypeReference.Modifiers, f.ASTType, false, 1)
+	return f.doWriteJson("res", f.GoType, f.ASTType, false, 1)
 }
 
-func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Type, isPtr bool, depth int) string {
-	switch {
-	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
+func (f *Field) doWriteJson(val string, destType types.Type, astType *ast.Type, isPtr bool, depth int) string {
+	switch destType := destType.(type) {
+	case *types.Pointer:
 		return tpl(`
 			if {{.val}} == nil {
 				{{- if .nonNull }}
@@ -268,18 +268,22 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 			{{.next }}`, map[string]interface{}{
 			"val":     val,
 			"nonNull": astType.NonNull,
-			"next":    f.doWriteJson(val, remainingMods[1:], astType, true, depth+1),
+			"next":    f.doWriteJson(val, destType.Elem(), astType, true, depth+1),
 		})
 
-	case len(remainingMods) > 0 && remainingMods[0] == modList:
+	case *types.Slice:
 		if isPtr {
 			val = "*" + val
 		}
 		var arr = "arr" + strconv.Itoa(depth)
 		var index = "idx" + strconv.Itoa(depth)
 		var usePtr bool
-		if len(remainingMods) == 1 && !isPtr {
-			usePtr = true
+		if !isPtr {
+			switch destType.Elem().(type) {
+			case *types.Pointer, *types.Array:
+			default:
+				usePtr = true
+			}
 		}
 
 		return tpl(`
@@ -327,16 +331,17 @@ func (f *Field) doWriteJson(val string, remainingMods []string, astType *ast.Typ
 			"arrayLen": len(val),
 			"isScalar": f.Definition.IsScalar,
 			"usePtr":   usePtr,
-			"next":     f.doWriteJson(val+"["+index+"]", remainingMods[1:], astType.Elem, false, depth+1),
+			"next":     f.doWriteJson(val+"["+index+"]", destType.Elem(), astType.Elem, false, depth+1),
 		})
 
-	case f.Definition.IsScalar:
-		if isPtr {
-			val = "*" + val
-		}
-		return f.Marshal(val)
-
 	default:
+		if f.Definition.IsScalar {
+			if isPtr {
+				val = "*" + val
+			}
+			return f.Marshal(val)
+		}
+
 		if !isPtr {
 			val = "&" + val
 		}

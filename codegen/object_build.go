@@ -20,7 +20,7 @@ func (g *Generator) buildObjects(ts NamedTypes, prog *loader.Program) (Objects, 
 			continue
 		}
 
-		obj, err := g.buildObject(ts, typ)
+		obj, err := g.buildObject(prog, ts, typ)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func sanitizeArgName(name string) string {
 	return name
 }
 
-func (g *Generator) buildObject(ts NamedTypes, typ *ast.Definition) (*Object, error) {
+func (g *Generator) buildObject(prog *loader.Program, ts NamedTypes, typ *ast.Definition) (*Object, error) {
 	obj := &Object{Definition: ts[typ.Name]}
 	typeEntry, entryExists := g.Models[typ.Name]
 
@@ -109,8 +109,13 @@ func (g *Generator) buildObject(ts NamedTypes, typ *ast.Definition) (*Object, er
 
 	for _, field := range typ.Fields {
 		if typ == g.schema.Query && field.Name == "__type" {
+			schemaType, err := findGoType(prog, "github.com/99designs/gqlgen/graphql/introspection", "Schema")
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to find root schema introspection type")
+			}
+
 			obj.Fields = append(obj.Fields, Field{
-				TypeReference:  &TypeReference{ts["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil)},
+				TypeReference:  &TypeReference{ts["__Schema"], types.NewPointer(schemaType.Type()), ast.NamedType("__Schema", nil)},
 				GQLName:        "__schema",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
@@ -121,14 +126,19 @@ func (g *Generator) buildObject(ts NamedTypes, typ *ast.Definition) (*Object, er
 			continue
 		}
 		if typ == g.schema.Query && field.Name == "__schema" {
+			typeType, err := findGoType(prog, "github.com/99designs/gqlgen/graphql/introspection", "Type")
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to find root schema introspection type")
+			}
+
 			obj.Fields = append(obj.Fields, Field{
-				TypeReference:  &TypeReference{ts["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil)},
+				TypeReference:  &TypeReference{ts["__Type"], types.NewPointer(typeType.Type()), ast.NamedType("__Schema", nil)},
 				GQLName:        "__type",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectType",
 				Args: []FieldArgument{
-					{GQLName: "name", TypeReference: &TypeReference{ts["String"], []string{}, ast.NamedType("String", nil)}, Object: &Object{}},
+					{GQLName: "name", TypeReference: &TypeReference{ts["String"], types.Typ[types.String], ast.NamedType("String", nil)}, Object: &Object{}},
 				},
 				Object: obj,
 			})

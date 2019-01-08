@@ -60,7 +60,7 @@ func (r *queryResolver) NestedOutputs(ctx context.Context) ([][]*OuterObject, er
 func (r *queryResolver) Keywords(ctx context.Context, input *Keywords) (bool, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Shapes(ctx context.Context) ([]*Shape, error) {
+func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {

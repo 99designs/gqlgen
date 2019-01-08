@@ -3,7 +3,6 @@ package codegen
 import (
 	"go/types"
 	"strconv"
-	"strings"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/ast"
@@ -13,57 +12,39 @@ import (
 type TypeReference struct {
 	Definition *TypeDefinition
 
-	Modifiers []string
-	ASTType   *ast.Type
+	GoType  types.Type
+	ASTType *ast.Type
 }
 
-func (t TypeReference) Signature() string {
-	return strings.Join(t.Modifiers, "") + templates.CurrentImports.LookupType(t.Definition.GoType)
-}
-
-func (t TypeReference) FullSignature() string {
-	return strings.Join(t.Modifiers, "") + types.TypeString(t.Definition.GoType, nil)
-}
-
+// todo @vektah: This should probably go away, its too easy to conflate gql required vs go pointer
 func (t TypeReference) IsPtr() bool {
-	return len(t.Modifiers) > 0 && t.Modifiers[0] == modPtr
-}
-
-func (t *TypeReference) StripPtr() {
-	if !t.IsPtr() {
-		return
-	}
-	t.Modifiers = t.Modifiers[0 : len(t.Modifiers)-1]
-}
-
-func (t TypeReference) IsSlice() bool {
-	return len(t.Modifiers) > 0 && t.Modifiers[0] == modList ||
-		len(t.Modifiers) > 1 && t.Modifiers[0] == modPtr && t.Modifiers[1] == modList
+	_, isPtr := t.GoType.(*types.Pointer)
+	return isPtr
 }
 
 func (t TypeReference) Unmarshal(result, raw string) string {
-	return t.unmarshal(result, raw, t.Modifiers, 1)
+	return t.unmarshal(result, raw, t.GoType, 1)
 }
 
-func (t TypeReference) unmarshal(result, raw string, remainingMods []string, depth int) string {
-	switch {
-	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
+func (t TypeReference) unmarshal(result, raw string, destType types.Type, depth int) string {
+	switch destType := destType.(type) {
+	case *types.Pointer:
 		ptr := "ptr" + strconv.Itoa(depth)
-		return tpl(`var {{.ptr}} {{.mods}}{{.t.Definition.GoType | ref }}
+		return tpl(`var {{.ptr}} {{.destType | ref }}
 			if {{.raw}} != nil {
 				{{.next}}
 				{{.result}} = &{{.ptr -}}
 			}
 		`, map[string]interface{}{
-			"ptr":    ptr,
-			"t":      t,
-			"raw":    raw,
-			"result": result,
-			"mods":   strings.Join(remainingMods[1:], ""),
-			"next":   t.unmarshal(ptr, raw, remainingMods[1:], depth+1),
+			"ptr":      ptr,
+			"t":        t,
+			"raw":      raw,
+			"result":   result,
+			"destType": destType.Elem(),
+			"next":     t.unmarshal(ptr, raw, destType.Elem(), depth+1),
 		})
 
-	case len(remainingMods) > 0 && remainingMods[0] == modList:
+	case *types.Slice:
 		var rawIf = "rawIf" + strconv.Itoa(depth)
 		var index = "idx" + strconv.Itoa(depth)
 
@@ -75,7 +56,7 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 					{{.rawSlice}} = []interface{}{ {{.raw}} }
 				}
 			}
-			{{.result}} = make({{.type}}, len({{.rawSlice}}))
+			{{.result}} = make({{.destType | ref}}, len({{.rawSlice}}))
 			for {{.index}} := range {{.rawSlice}} {
 				{{ .next -}}
 			}`, map[string]interface{}{
@@ -83,8 +64,8 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 			"rawSlice": rawIf,
 			"index":    index,
 			"result":   result,
-			"type":     strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.Definition.GoType),
-			"next":     t.unmarshal(result+"["+index+"]", rawIf+"["+index+"]", remainingMods[1:], depth+1),
+			"destType": destType,
+			"next":     t.unmarshal(result+"["+index+"]", rawIf+"["+index+"]", destType.Elem(), depth+1),
 		})
 	}
 
@@ -106,12 +87,24 @@ func (t TypeReference) unmarshal(result, raw string, remainingMods []string, dep
 }
 
 func (t TypeReference) Middleware(result, raw string) string {
-	return t.middleware(result, raw, t.Modifiers, 1)
+	return t.middleware(result, raw, t.GoType, 1)
 }
 
-func (t TypeReference) middleware(result, raw string, remainingMods []string, depth int) string {
-	if len(remainingMods) == 1 && remainingMods[0] == modPtr {
-		return tpl(`
+func (t TypeReference) middleware(result, raw string, destType types.Type, depth int) string {
+	switch destType := destType.(type) {
+	case *types.Pointer:
+		switch destType.Elem().(type) {
+		case *types.Pointer, *types.Slice:
+			return tpl(`if {{.raw}} != nil {
+				{{.next}}
+			}`, map[string]interface{}{
+				"t":      t,
+				"raw":    raw,
+				"result": result,
+				"next":   t.middleware(result, raw, destType.Elem(), depth+1),
+			})
+		default:
+			return tpl(`
 			if {{.raw}} != nil {
 				var err error
 				{{.result}}, err = e.{{ .t.Definition.GQLType }}Middleware(ctx, {{.raw}})
@@ -119,24 +112,13 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 					return nil, err
 				}
 			}`, map[string]interface{}{
-			"result": result,
-			"raw":    raw,
-			"t":      t,
-		})
-	}
-	switch {
-	case len(remainingMods) > 0 && remainingMods[0] == modPtr:
-		return tpl(`if {{.raw}} != nil {
-				{{.next}}
-			}`, map[string]interface{}{
-			"t":      t,
-			"raw":    raw,
-			"result": result,
-			"mods":   strings.Join(remainingMods[1:], ""),
-			"next":   t.middleware(result, raw, remainingMods[1:], depth+1),
-		})
+				"result": result,
+				"raw":    raw,
+				"t":      t,
+			})
+		}
 
-	case len(remainingMods) > 0 && remainingMods[0] == modList:
+	case *types.Slice:
 		var index = "idx" + strconv.Itoa(depth)
 
 		return tpl(`for {{.index}} := range {{.raw}} {
@@ -145,8 +127,7 @@ func (t TypeReference) middleware(result, raw string, remainingMods []string, de
 			"raw":    raw,
 			"index":  index,
 			"result": result,
-			"type":   strings.Join(remainingMods, "") + templates.CurrentImports.LookupType(t.Definition.GoType),
-			"next":   t.middleware(result+"["+index+"]", raw+"["+index+"]", remainingMods[1:], depth+1),
+			"next":   t.middleware(result+"["+index+"]", raw+"["+index+"]", destType.Elem(), depth+1),
 		})
 	}
 

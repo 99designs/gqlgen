@@ -17,7 +17,7 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 		}
 		switch typ.Kind {
 		case ast.Object:
-			obj, err := g.buildObject(types, typ)
+			obj, err := g.buildObject(prog, types, typ)
 			if err != nil {
 				return nil, err
 			}

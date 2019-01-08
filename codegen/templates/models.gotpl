@@ -32,7 +32,7 @@ import (
 				{{- with .Description}}
 					{{.|prefixLines "// "}}
 				{{- end}}
-				{{ $field.GoFieldName }} {{$field.Signature}} `json:"{{$field.GQLName}}"`
+				{{ $field.GoFieldName }} {{$field.GoType | ref}} `json:"{{$field.GQLName}}"`
 			{{- end }}
 		}
 

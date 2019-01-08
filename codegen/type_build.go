@@ -15,11 +15,13 @@ import (
 func (g *Generator) buildNamedTypes(prog *loader.Program) (NamedTypes, error) {
 	ts := map[string]*TypeDefinition{}
 	for _, schemaType := range g.schema.Types {
-		t := namedTypeFromSchema(schemaType)
-		ts[t.GQLType] = t
+		t := &TypeDefinition{
+			GQLDefinition: schemaType,
+		}
+		ts[t.GQLDefinition.Name] = t
 
 		var pkgName, typeName string
-		if userEntry, ok := g.Models[t.GQLType]; ok && userEntry.Model != "" {
+		if userEntry, ok := g.Models[t.GQLDefinition.Name]; ok && userEntry.Model != "" {
 			// special case for maps
 			if userEntry.Model == "map[string]interface{}" {
 				t.GoType = types.NewMap(types.Typ[types.String], types.NewInterface(nil, nil).Complete())
@@ -28,13 +30,13 @@ func (g *Generator) buildNamedTypes(prog *loader.Program) (NamedTypes, error) {
 			}
 
 			pkgName, typeName = pkgAndType(userEntry.Model)
-		} else if t.IsScalar && schemaType.Kind != ast.Enum {
+		} else if t.GQLDefinition.Kind == ast.Scalar {
 			pkgName = "github.com/99designs/gqlgen/graphql"
 			typeName = "String"
 		} else {
 			// Missing models, but we need to set up the types so any references will point to the code that will
 			// get generated
-			t.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(t.GQLType), nil), nil, nil)
+			t.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(t.GQLDefinition.Name), nil), nil, nil)
 
 			continue
 		}
@@ -81,21 +83,6 @@ func (g *Generator) buildNamedTypes(prog *loader.Program) (NamedTypes, error) {
 
 	}
 	return ts, nil
-}
-
-// namedTypeFromSchema objects for every graphql type, including primitives.
-// don't recurse into object fields or interfaces yet, lets make sure we have collected everything first.
-func namedTypeFromSchema(schemaType *ast.Definition) *TypeDefinition {
-	switch schemaType.Kind {
-	case ast.Scalar, ast.Enum:
-		return &TypeDefinition{GQLType: schemaType.Name, IsScalar: true}
-	case ast.Interface, ast.Union:
-		return &TypeDefinition{GQLType: schemaType.Name, IsInterface: true}
-	case ast.InputObject:
-		return &TypeDefinition{GQLType: schemaType.Name, IsInput: true}
-	default:
-		return &TypeDefinition{GQLType: schemaType.Name}
-	}
 }
 
 // take a string in the form github.com/package/blah.TypeReference and split it into package and type

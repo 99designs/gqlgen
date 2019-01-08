@@ -37,7 +37,7 @@
 					return nil, err
 				}
 			{{- end }}
-			{{- if $arg.Definition.IsInput }}
+			{{- if eq $arg.Definition.GQLDefinition.Kind "INPUT_OBJECT" }}
 				{{ $arg.Middleware (print "arg" $i) (print "arg" $i) }}
 			{{- end }}
 		}

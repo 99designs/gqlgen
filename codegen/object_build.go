@@ -36,7 +36,7 @@ func (g *Generator) buildObjects(ts NamedTypes, prog *loader.Program) (Objects, 
 	}
 
 	sort.Slice(objects, func(i, j int) bool {
-		return objects[i].Definition.GQLType < objects[j].Definition.GQLType
+		return objects[i].Definition.GQLDefinition.Name < objects[j].Definition.GQLDefinition.Name
 	})
 
 	return objects, nil
@@ -84,7 +84,7 @@ func (g *Generator) buildObject(prog *loader.Program, ts NamedTypes, typ *ast.De
 	obj := &Object{Definition: ts[typ.Name]}
 	typeEntry, entryExists := g.Models[typ.Name]
 
-	tt := types.NewTypeName(0, g.Config.Exec.Pkg(), obj.Definition.GQLType+"Resolver", nil)
+	tt := types.NewTypeName(0, g.Config.Exec.Pkg(), obj.Definition.GQLDefinition.Name+"Resolver", nil)
 	obj.ResolverInterface = types.NewNamed(tt, nil, nil)
 
 	if typ == g.schema.Query {
@@ -168,8 +168,8 @@ func (g *Generator) buildObject(prog *loader.Program, ts NamedTypes, typ *ast.De
 				Directives:    dirs,
 			}
 
-			if !newArg.TypeReference.Definition.IsInput && !newArg.TypeReference.Definition.IsScalar {
-				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.Definition.GQLType, field.Name)
+			if !newArg.TypeReference.Definition.GQLDefinition.IsInputType() {
+				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.Definition.GQLDefinition.Name, field.Name)
 			}
 
 			if arg.DefaultValue != nil {

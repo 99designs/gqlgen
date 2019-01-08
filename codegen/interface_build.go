@@ -17,7 +17,7 @@ func (g *Generator) buildInterfaces(types NamedTypes, prog *loader.Program) []*I
 	}
 
 	sort.Slice(interfaces, func(i, j int) bool {
-		return interfaces[i].Definition.GQLType < interfaces[j].Definition.GQLType
+		return interfaces[i].Definition.GQLDefinition.Name < interfaces[j].Definition.GQLDefinition.Name
 	})
 
 	return interfaces

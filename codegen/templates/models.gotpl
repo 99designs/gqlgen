@@ -22,7 +22,7 @@ import (
 
 {{ range $model := .Models }}
 	{{with .Description}} {{.|prefixLines "// "}} {{end}}
-	{{- if .Definition.IsInterface }}
+	{{- if .Definition.GQLDefinition.IsAbstractType }}
 		type {{.Definition.GoType | ref }} interface {
 			Is{{.Definition.GoType | ref }}()
 		}
@@ -81,7 +81,7 @@ import (
 
 		*e = {{.Definition.GoType | ref }}(str)
 		if !e.IsValid() {
-			return fmt.Errorf("%s is not a valid {{.Definition.GQLType}}", str)
+			return fmt.Errorf("%s is not a valid {{.Definition.GQLDefinition.Name}}", str)
 		}
 		return nil
 	}

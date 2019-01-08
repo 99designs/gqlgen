@@ -107,7 +107,7 @@ func (t TypeReference) middleware(result, raw string, destType types.Type, depth
 			return tpl(`
 			if {{.raw}} != nil {
 				var err error
-				{{.result}}, err = e.{{ .t.Definition.GQLType }}Middleware(ctx, {{.raw}})
+				{{.result}}, err = e.{{ .t.Definition.GQLDefinition.Name }}Middleware(ctx, {{.raw}})
 				if err != nil {
 					return nil, err
 				}
@@ -131,9 +131,9 @@ func (t TypeReference) middleware(result, raw string, destType types.Type, depth
 		})
 	}
 
-	ptr := "m" + t.Definition.GQLType + strconv.Itoa(depth)
+	ptr := "m" + t.Definition.GQLDefinition.Name + strconv.Itoa(depth)
 	return tpl(`
-			{{.ptr}}, err := e.{{ .t.Definition.GQLType }}Middleware(ctx, &{{.raw}})
+			{{.ptr}}, err := e.{{ .t.Definition.GQLDefinition.Name }}Middleware(ctx, &{{.raw}})
 				if err != nil {	
 					return nil, err
 			}

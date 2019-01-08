@@ -1,5 +1,5 @@
 	{{- if .Definition.IsMarshaled }}
-	func Unmarshal{{ .Definition.GQLType }}(v interface{}) ({{.Definition.GoType | ref}}, error) {
+	func Unmarshal{{ .Definition.GQLDefinition.Name }}(v interface{}) ({{.Definition.GoType | ref}}, error) {
 		var it {{.Definition.GoType | ref}}
 		var asMap = v.(map[string]interface{})
 		{{ range $field := .Fields}}
@@ -27,7 +27,7 @@
 	}
 	{{- end }}
 
-	func (e *executableSchema) {{ .Definition.GQLType }}Middleware(ctx context.Context, obj *{{.Definition.GoType | ref}}) (*{{.Definition.GoType | ref}}, error) {
+	func (e *executableSchema) {{ .Definition.GQLDefinition.Name }}Middleware(ctx context.Context, obj *{{.Definition.GoType | ref}}) (*{{.Definition.GoType | ref}}, error) {
 			{{ if .Directives }}
 		cObj, err := chainFieldMiddleware(
 			[]graphql.FieldMiddleware{
@@ -100,7 +100,7 @@
 
 			{{- end }}
 
-			{{ if $field.Definition.IsInput }}
+			{{ if eq $field.Definition.GQLDefinition.Kind "INPUT_OBJECT" }}
 				{{ $field.Middleware (print "obj." $field.GoFieldName ) (print "obj." $field.GoFieldName ) }}
 			{{- end }}
 		{{- end }}

@@ -33,7 +33,7 @@ func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Ob
 	}
 
 	sort.Slice(inputs, func(i, j int) bool {
-		return inputs[i].Definition.GQLType < inputs[j].Definition.GQLType
+		return inputs[i].Definition.GQLDefinition.Name < inputs[j].Definition.GQLDefinition.Name
 	})
 
 	return inputs, nil
@@ -69,8 +69,12 @@ func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, 
 			}
 		}
 
-		if !newField.TypeReference.Definition.IsInput && !newField.TypeReference.Definition.IsScalar {
-			return nil, errors.Errorf("%s cannot be used as a field of %s. only input and scalar types are allowed", newField.Definition.GQLType, obj.Definition.GQLType)
+		if !newField.TypeReference.Definition.GQLDefinition.IsInputType() {
+			return nil, errors.Errorf(
+				"%s cannot be used as a field of %s. only input and scalar types are allowed",
+				newField.Definition.GQLDefinition.Name,
+				obj.Definition.GQLDefinition.Name,
+			)
 		}
 
 		obj.Fields = append(obj.Fields, newField)

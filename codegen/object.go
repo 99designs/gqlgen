@@ -64,7 +64,7 @@ type FieldArgument struct {
 type Objects []*Object
 
 func (o *Object) Implementors() string {
-	satisfiedBy := strconv.Quote(o.Definition.GQLType)
+	satisfiedBy := strconv.Quote(o.Definition.GQLDefinition.Name)
 	for _, s := range o.Satisfies {
 		satisfiedBy += ", " + strconv.Quote(s)
 	}
@@ -102,7 +102,7 @@ func (o *Object) IsConcurrent() bool {
 }
 
 func (o *Object) IsReserved() bool {
-	return strings.HasPrefix(o.Definition.GQLType, "__")
+	return strings.HasPrefix(o.Definition.GQLDefinition.Name, "__")
 }
 
 func (f *Field) HasDirectives() bool {
@@ -145,7 +145,7 @@ func (f *Field) ShortInvocation() string {
 		return ""
 	}
 
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLType, f.GoNameExported(), f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoNameExported(), f.CallArgs())
 }
 
 func (f *Field) ArgsFunc() string {
@@ -153,7 +153,7 @@ func (f *Field) ArgsFunc() string {
 		return ""
 	}
 
-	return "field_" + f.Object.Definition.GQLType + "_" + f.GQLName + "_args"
+	return "field_" + f.Object.Definition.GQLDefinition.Name + "_" + f.GQLName + "_args"
 }
 
 func (f *Field) ResolverType() string {
@@ -161,7 +161,7 @@ func (f *Field) ResolverType() string {
 		return ""
 	}
 
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLType, f.GoNameExported(), f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoNameExported(), f.CallArgs())
 }
 
 func (f *Field) ShortResolverDeclaration() string {
@@ -190,7 +190,7 @@ func (f *Field) ResolverDeclaration() string {
 	if !f.IsResolver() {
 		return ""
 	}
-	res := fmt.Sprintf("%s_%s(ctx context.Context", f.Object.Definition.GQLType, f.GoNameUnexported())
+	res := fmt.Sprintf("%s_%s(ctx context.Context", f.Object.Definition.GQLDefinition.Name, f.GoNameUnexported())
 
 	if !f.Object.Root {
 		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Definition.GoType))
@@ -329,13 +329,13 @@ func (f *Field) doWriteJson(val string, destType types.Type, astType *ast.Type, 
 			"index":    index,
 			"top":      depth == 1,
 			"arrayLen": len(val),
-			"isScalar": f.Definition.IsScalar,
+			"isScalar": f.Definition.GQLDefinition.Kind == ast.Scalar || f.Definition.GQLDefinition.Kind == ast.Enum,
 			"usePtr":   usePtr,
 			"next":     f.doWriteJson(val+"["+index+"]", destType.Elem(), astType.Elem, false, depth+1),
 		})
 
 	default:
-		if f.Definition.IsScalar {
+		if f.Definition.GQLDefinition.Kind == ast.Scalar || f.Definition.GQLDefinition.Kind == ast.Enum {
 			if isPtr {
 				val = "*" + val
 			}
@@ -347,7 +347,7 @@ func (f *Field) doWriteJson(val string, destType types.Type, astType *ast.Type, 
 		}
 		return tpl(`
 			return ec._{{.type}}(ctx, field.Selections, {{.val}})`, map[string]interface{}{
-			"type": f.Definition.GQLType,
+			"type": f.Definition.GQLDefinition.Name,
 			"val":  val,
 		})
 	}
@@ -359,7 +359,7 @@ func (f *FieldArgument) Stream() bool {
 
 func (os Objects) ByName(name string) *Object {
 	for i, o := range os {
-		if strings.EqualFold(o.Definition.GQLType, name) {
+		if strings.EqualFold(o.Definition.GQLDefinition.Name, name) {
 			return os[i]
 		}
 	}

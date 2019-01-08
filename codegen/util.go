@@ -184,7 +184,7 @@ type BindError struct {
 func (b BindError) Error() string {
 	return fmt.Sprintf(
 		"Unable to bind %s.%s to %s\n  %s\n  %s",
-		b.object.Definition.GQLType,
+		b.object.Definition.GQLDefinition.Name,
 		b.field.GQLName,
 		b.typ.String(),
 		b.methodErr.Error(),

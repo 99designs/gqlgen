@@ -29,13 +29,13 @@ func (g *Generator) buildEnums(ts NamedTypes) []Enum {
 			Description: typ.Description,
 		}
 
-		enum.Definition.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(enum.Definition.GQLType), nil), nil, nil)
+		enum.Definition.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(enum.Definition.GQLDefinition.Name), nil), nil, nil)
 
 		enums = append(enums, enum)
 	}
 
 	sort.Slice(enums, func(i, j int) bool {
-		return enums[i].Definition.GQLType < enums[j].Definition.GQLType
+		return enums[i].Definition.GQLDefinition.Name < enums[j].Definition.GQLDefinition.Name
 	})
 
 	return enums

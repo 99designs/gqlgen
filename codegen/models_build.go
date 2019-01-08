@@ -43,7 +43,7 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 	}
 
 	sort.Slice(models, func(i, j int) bool {
-		return models[i].Definition.GQLType < models[j].Definition.GQLType
+		return models[i].Definition.GQLDefinition.Name < models[j].Definition.GQLDefinition.Name
 	})
 
 	return models, nil

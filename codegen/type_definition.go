@@ -11,13 +11,10 @@ type NamedTypes map[string]*TypeDefinition
 // TypeDefinition is the static reference to a graphql type. It can be referenced by many TypeReferences,
 // and has one or more backing implementations in go.
 type TypeDefinition struct {
-	IsScalar    bool
-	IsInterface bool
-	IsInput     bool
-	GQLType     string      // Name of the graphql type
-	GoType      types.Type  // The backing go type, may be nil until after model generation
-	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
-	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
+	GQLDefinition *ast.Definition
+	GoType        types.Type  // The backing go type, may be nil until after model generation
+	Marshaler     *types.Func // When using external marshalling functions this will point to the Marshal function
+	Unmarshaler   *types.Func // When using external marshalling functions this will point to the Unmarshal function
 }
 
 func (t TypeDefinition) IsMarshaled() bool {
@@ -40,7 +37,7 @@ func (n NamedTypes) goTypeForAst(t *ast.Type) types.Type {
 		panic("missing type " + t.NamedType)
 	}
 
-	if !t.NonNull && !nt.IsInterface {
+	if !t.NonNull && nt.GQLDefinition.Kind != ast.Interface {
 		return types.NewPointer(gt)
 	}
 

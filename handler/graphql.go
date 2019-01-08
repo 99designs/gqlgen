@@ -12,6 +12,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/golang-lru"
+	"github.com/monzo/terrors"
+	"github.com/monzo/typhon"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
@@ -277,6 +279,114 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	}
 
 	return handler.ServeHTTP
+}
+
+func TyphonHandlerFromGraphQL(exec graphql.ExecutableSchema, options ...Option) typhon.Service {
+	cfg := &Config{
+		cacheSize: DefaultCacheSize,
+		upgrader: websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		},
+	}
+
+	for _, option := range options {
+		option(cfg)
+	}
+
+	var cache *lru.Cache
+	if cfg.cacheSize > 0 {
+		var err error
+		cache, err = lru.New(DefaultCacheSize)
+		if err != nil {
+			// An error is only returned for non-positive cache size
+			// and we already checked for that.
+			panic("unexpected error creating cache: " + err.Error())
+		}
+	}
+	if cfg.tracer == nil {
+		cfg.tracer = &graphql.NopTracer{}
+	}
+
+	handler := &graphqlHandler{
+		cfg:   cfg,
+		cache: cache,
+		exec:  exec,
+	}
+
+	return handler.ServeTyphon
+}
+
+func (gh *graphqlHandler) ServeTyphon(req typhon.Request) typhon.Response {
+	var reqParams params
+	switch req.Method {
+	case http.MethodGet:
+		reqParams.Query = req.URL.Query().Get("query")
+		reqParams.OperationName = req.URL.Query().Get("operationName")
+
+		if variables := req.URL.Query().Get("variables"); variables != "" {
+			if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
+				return typhon.Response{Error: terrors.BadRequest("variables", "Variables could not be decoded", nil)}
+			}
+		}
+	case http.MethodPost:
+		if err := jsonDecode(req.Body, &reqParams); err != nil {
+			return typhon.Response{Error: terrors.WrapWithCode(err, nil, terrors.ErrBadRequest)}
+		}
+	default:
+		return typhon.Response{Error: terrors.BadRequest("invalid_method", "HTTP method not supported", map[string]string{
+			"method": req.Method,
+		})}
+	}
+
+	ctx, doc, gqlErr := gh.parseOperation(req, &parseOperationArgs{
+		Query: reqParams.Query,
+	})
+	if gqlErr != nil {
+		return typhon.Response{Error: gqlErr}
+	}
+
+	ctx, op, _, listErr := gh.validateOperation(ctx, &validateOperationArgs{
+		Doc:           doc,
+		OperationName: reqParams.OperationName,
+		// R:             req, // can't use this, hopefully not needed...
+		Variables: reqParams.Variables,
+	})
+	if len(listErr) != 0 {
+		return typhon.Response{Error: terrors.BadRequest("invalid_operation", fmt.Sprintf("Errors validating operation: %+v", listErr), nil)}
+	}
+
+	// reqCtx := gh.cfg.newRequestContext(gh.exec, doc, op, reqParams.Query, vars)
+	// ctx = graphql.WithRequestContext(ctx, reqCtx)
+	//
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		userErr := reqCtx.Recover(ctx, err)
+	// 		sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
+	// 	}
+	// }()
+	//
+	// if reqCtx.ComplexityLimit > 0 && reqCtx.OperationComplexity > reqCtx.ComplexityLimit {
+	// 	sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", reqCtx.OperationComplexity, reqCtx.ComplexityLimit)
+	// 	return
+	// }
+
+	switch op.Operation {
+	case ast.Query:
+		b, err := json.Marshal(gh.exec.Query(ctx, op))
+		if err != nil {
+			return typhon.Response{Error: terrors.BadRequest("invalid_json", "Could not marshal JSON returned from query execution", nil)}
+		}
+		return req.Response(b)
+	case ast.Mutation:
+		b, err := json.Marshal(gh.exec.Mutation(ctx, op))
+		if err != nil {
+			return typhon.Response{Error: terrors.BadRequest("invalid_json", "Could not marshal JSON returned from mutation execution", nil)}
+		}
+		return req.Response(b)
+	default:
+		return typhon.Response{Error: terrors.BadRequest("unsupported_operation_type", "Unsupported operation type", nil)}
+	}
 }
 
 var _ http.Handler = (*graphqlHandler)(nil)

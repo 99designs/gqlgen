@@ -36,16 +36,10 @@ var genCmd = cli.Command{
 			}
 		}
 
-		gen, err := codegen.New(cfg)
+		err = codegen.Generate(cfg)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(3)
-		}
-
-		err = gen.Generate()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(4)
 		}
 	},
 }

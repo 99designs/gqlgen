@@ -1,4 +1,4 @@
-package codegen
+package unified
 
 import (
 	"go/types"

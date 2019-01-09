@@ -1,8 +1,9 @@
-package codegen
+package unified
 
 type Interface struct {
 	Definition   *TypeDefinition
 	Implementors []InterfaceImplementor
+	InTypemap    bool
 }
 
 type InterfaceImplementor struct {

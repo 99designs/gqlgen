@@ -1,177 +1,13 @@
-package codegen
+package unified
 
 import (
 	"fmt"
 	"go/types"
-	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
-	"golang.org/x/tools/go/loader"
 )
-
-func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Object, error) {
-	if pkgName == "" {
-		return nil, nil
-	}
-	fullName := typeName
-	if pkgName != "" {
-		fullName = pkgName + "." + typeName
-	}
-
-	pkgName, err := resolvePkg(pkgName)
-	if err != nil {
-		return nil, errors.Errorf("unable to resolve package for %s: %s\n", fullName, err.Error())
-	}
-
-	pkg := prog.Imported[pkgName]
-	if pkg == nil {
-		return nil, errors.Errorf("required package was not loaded: %s", fullName)
-	}
-
-	for astNode, def := range pkg.Defs {
-		if astNode.Name != typeName || def.Parent() == nil || def.Parent() != pkg.Pkg.Scope() {
-			continue
-		}
-
-		return def, nil
-	}
-
-	return nil, errors.Errorf("unable to find type %s\n", fullName)
-}
-
-func findGoNamedType(def types.Type) (*types.Named, error) {
-	if def == nil {
-		return nil, nil
-	}
-
-	namedType, ok := def.(*types.Named)
-	if !ok {
-		return nil, errors.Errorf("expected %s to be a named type, instead found %T\n", def.String(), def)
-	}
-
-	return namedType, nil
-}
-
-func findGoInterface(def types.Type) (*types.Interface, error) {
-	if def == nil {
-		return nil, nil
-	}
-	namedType, err := findGoNamedType(def)
-	if err != nil {
-		return nil, err
-	}
-	if namedType == nil {
-		return nil, nil
-	}
-
-	underlying, ok := namedType.Underlying().(*types.Interface)
-	if !ok {
-		return nil, errors.Errorf("expected %s to be a named interface, instead found %s", def.String(), namedType.String())
-	}
-
-	return underlying, nil
-}
-
-func findMethod(typ *types.Named, name string) *types.Func {
-	for i := 0; i < typ.NumMethods(); i++ {
-		method := typ.Method(i)
-		if !method.Exported() {
-			continue
-		}
-
-		if strings.EqualFold(method.Name(), name) {
-			return method
-		}
-	}
-
-	if s, ok := typ.Underlying().(*types.Struct); ok {
-		for i := 0; i < s.NumFields(); i++ {
-			field := s.Field(i)
-			if !field.Anonymous() {
-				continue
-			}
-
-			if named, ok := field.Type().(*types.Named); ok {
-				if f := findMethod(named, name); f != nil {
-					return f
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
-func equalFieldName(source, target string) bool {
-	source = strings.Replace(source, "_", "", -1)
-	target = strings.Replace(target, "_", "", -1)
-	return strings.EqualFold(source, target)
-}
-
-// findField attempts to match the name to a struct field with the following
-// priorites:
-// 1. If struct tag is passed then struct tag has highest priority
-// 2. Field in an embedded struct
-// 3. Actual Field name
-func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
-	var foundField *types.Var
-	foundFieldWasTag := false
-
-	for i := 0; i < typ.NumFields(); i++ {
-		field := typ.Field(i)
-
-		if structTag != "" {
-			tags := reflect.StructTag(typ.Tag(i))
-			if val, ok := tags.Lookup(structTag); ok {
-				if equalFieldName(val, name) {
-					if foundField != nil && foundFieldWasTag {
-						return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", structTag, val)
-					}
-
-					foundField = field
-					foundFieldWasTag = true
-				}
-			}
-		}
-
-		if field.Anonymous() {
-
-			fieldType := field.Type()
-
-			if ptr, ok := fieldType.(*types.Pointer); ok {
-				fieldType = ptr.Elem()
-			}
-
-			// Type.Underlying() returns itself for all types except types.Named, where it returns a struct type.
-			// It should be safe to always call.
-			if named, ok := fieldType.Underlying().(*types.Struct); ok {
-				f, err := findField(named, name, structTag)
-				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
-					return nil, err
-				}
-				if f != nil && foundField == nil {
-					foundField = f
-				}
-			}
-		}
-
-		if !field.Exported() {
-			continue
-		}
-
-		if equalFieldName(field.Name(), name) && foundField == nil { // aqui!
-			foundField = field
-		}
-	}
-
-	if foundField == nil {
-		return nil, fmt.Errorf("no field named %s", name)
-	}
-
-	return foundField, nil
-}
 
 type BindError struct {
 	object    *Object
@@ -183,7 +19,7 @@ type BindError struct {
 
 func (b BindError) Error() string {
 	return fmt.Sprintf(
-		"Unable to bind %s.%s to %s\n  %s\n  %s",
+		"\nunable to bind %s.%s to %s\n  %s\n  %s",
 		b.object.Definition.GQLDefinition.Name,
 		b.field.GQLName,
 		b.typ.String(),
@@ -204,10 +40,8 @@ func (b BindErrors) Error() string {
 
 func bindObject(object *Object, structTag string) BindErrors {
 	var errs BindErrors
-	for i := range object.Fields {
-		field := &object.Fields[i]
-
-		if field.ForceResolver {
+	for _, field := range object.Fields {
+		if field.IsResolver {
 			continue
 		}
 
@@ -221,6 +55,8 @@ func bindObject(object *Object, structTag string) BindErrors {
 		varErr := bindVar(object.Definition.GoType, field, structTag)
 
 		if varErr != nil {
+			field.IsResolver = true
+
 			errs = append(errs, BindError{
 				object:    object,
 				typ:       object.Definition.GoType,
@@ -318,7 +154,7 @@ nextArg:
 		param := params.At(j)
 		for _, oldArg := range field.Args {
 			if strings.EqualFold(oldArg.GQLName, param.Name()) {
-				if !field.ForceResolver {
+				if !field.IsResolver {
 					oldArg.TypeReference.GoType = param.Type()
 				}
 				newArgs = append(newArgs, oldArg)

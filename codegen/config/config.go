@@ -178,23 +178,23 @@ func (c *PackageConfig) IsDefined() bool {
 	return c.Filename != ""
 }
 
-func (cfg *Config) Check() error {
-	if err := cfg.Models.Check(); err != nil {
+func (c *Config) Check() error {
+	if err := c.Models.Check(); err != nil {
 		return errors.Wrap(err, "config.models")
 	}
-	if err := cfg.Exec.Check(); err != nil {
+	if err := c.Exec.Check(); err != nil {
 		return errors.Wrap(err, "config.exec")
 	}
-	if err := cfg.Model.Check(); err != nil {
+	if err := c.Model.Check(); err != nil {
 		return errors.Wrap(err, "config.model")
 	}
-	if cfg.Resolver.IsDefined() {
-		if err := cfg.Resolver.Check(); err != nil {
+	if c.Resolver.IsDefined() {
+		if err := c.Resolver.Check(); err != nil {
 			return errors.Wrap(err, "config.resolver")
 		}
 	}
 
-	return cfg.normalize()
+	return c.normalize()
 }
 
 type TypeMap map[string]TypeMapEntry
@@ -280,17 +280,17 @@ func findCfgInDir(dir string) string {
 	return ""
 }
 
-func (cfg *Config) normalize() error {
-	if err := cfg.Model.normalize(); err != nil {
+func (c *Config) normalize() error {
+	if err := c.Model.normalize(); err != nil {
 		return errors.Wrap(err, "model")
 	}
 
-	if err := cfg.Exec.normalize(); err != nil {
+	if err := c.Exec.normalize(); err != nil {
 		return errors.Wrap(err, "exec")
 	}
 
-	if cfg.Resolver.IsDefined() {
-		if err := cfg.Resolver.normalize(); err != nil {
+	if c.Resolver.IsDefined() {
+		if err := c.Resolver.normalize(); err != nil {
 			return errors.Wrap(err, "resolver")
 		}
 	}
@@ -313,12 +313,12 @@ func (cfg *Config) normalize() error {
 		"Map":                 {Model: "github.com/99designs/gqlgen/graphql.Map"},
 	}
 
-	if cfg.Models == nil {
-		cfg.Models = TypeMap{}
+	if c.Models == nil {
+		c.Models = TypeMap{}
 	}
 	for typeName, entry := range builtins {
-		if !cfg.Models.Exists(typeName) {
-			cfg.Models[typeName] = entry
+		if !c.Models.Exists(typeName) {
+			c.Models[typeName] = entry
 		}
 	}
 

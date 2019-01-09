@@ -1,4 +1,4 @@
-package codegen
+package unified
 
 import (
 	"go/types"
@@ -24,30 +24,4 @@ func (t TypeDefinition) IsMarshaled() bool {
 func (t TypeDefinition) IsEmptyInterface() bool {
 	i, isInterface := t.GoType.(*types.Interface)
 	return isInterface && i.NumMethods() == 0
-}
-
-func (n NamedTypes) goTypeForAst(t *ast.Type) types.Type {
-	if t.Elem != nil {
-		return types.NewSlice(n.goTypeForAst(t.Elem))
-	}
-
-	nt := n[t.NamedType]
-	gt := nt.GoType
-	if gt == nil {
-		panic("missing type " + t.NamedType)
-	}
-
-	if !t.NonNull && nt.GQLDefinition.Kind != ast.Interface {
-		return types.NewPointer(gt)
-	}
-
-	return gt
-}
-
-func (n NamedTypes) getType(t *ast.Type) *TypeReference {
-	return &TypeReference{
-		Definition: n[t.Name()],
-		GoType:     n.goTypeForAst(t),
-		ASTType:    t,
-	}
 }

@@ -1,0 +1,11 @@
+type Query {
+    user: User
+}
+type User {
+    id: Int
+    fist_name: String
+}
+enum Status {
+    OK
+    ERROR
+}

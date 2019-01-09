@@ -1,14 +1,16 @@
-package codegen
+package unified
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (g *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, error) {
-	directives := make(map[string]*Directive, len(g.schema.Directives))
+func (g *Schema) buildDirectives() (map[string]*Directive, error) {
+	directives := make(map[string]*Directive, len(g.Schema.Directives))
 
-	for name, dir := range g.schema.Directives {
+	for name, dir := range g.Schema.Directives {
 		if _, ok := directives[name]; ok {
 			return nil, errors.Errorf("directive with name %s already exists", name)
 		}
@@ -21,7 +23,7 @@ func (g *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, er
 
 			newArg := FieldArgument{
 				GQLName:       arg.Name,
-				TypeReference: types.getType(arg.Type),
+				TypeReference: g.NamedTypes.getType(arg.Type),
 				GoVarName:     sanitizeArgName(arg.Name),
 			}
 
@@ -48,8 +50,7 @@ func (g *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, er
 	return directives, nil
 }
 
-func (g *Generator) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
-
+func (g *Schema) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 	dirs := make([]*Directive, len(list))
 	for i, d := range list {
 		argValues := make(map[string]interface{}, len(d.Arguments))
@@ -60,27 +61,29 @@ func (g *Generator) getDirectives(list ast.DirectiveList) ([]*Directive, error) 
 			}
 			argValues[da.Name] = val
 		}
-
-		if def, ok := g.Directives[d.Name]; ok {
-			var args []FieldArgument
-			for _, a := range def.Args {
-
-				value := a.Default
-				if argValue, ok := argValues[a.GQLName]; ok {
-					value = argValue
-				}
-				args = append(args, FieldArgument{
-					GQLName:       a.GQLName,
-					Value:         value,
-					GoVarName:     a.GoVarName,
-					TypeReference: a.TypeReference,
-				})
-			}
-			dirs[i] = &Directive{
-				Name: d.Name,
-				Args: args,
-			}
+		def, ok := g.Directives[d.Name]
+		if !ok {
+			return nil, fmt.Errorf("directive %s not found", d.Name)
 		}
+
+		var args []FieldArgument
+		for _, a := range def.Args {
+			value := a.Default
+			if argValue, ok := argValues[a.GQLName]; ok {
+				value = argValue
+			}
+			args = append(args, FieldArgument{
+				GQLName:       a.GQLName,
+				Value:         value,
+				GoVarName:     a.GoVarName,
+				TypeReference: a.TypeReference,
+			})
+		}
+		dirs[i] = &Directive{
+			Name: d.Name,
+			Args: args,
+		}
+
 	}
 
 	return dirs, nil

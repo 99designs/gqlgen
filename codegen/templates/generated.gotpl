@@ -279,7 +279,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	{{- range $filename, $schema := .SchemaRaw }}
+	{{- range $filename, $schema := .SchemaStr }}
 		&ast.Source{Name: {{$filename|quote}}, Input: {{$schema|rawQuote}}},
 	{{- end }}
 )

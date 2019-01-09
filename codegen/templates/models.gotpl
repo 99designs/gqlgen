@@ -20,31 +20,31 @@ import (
 	{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 )
 
+{{- range $model := .Interfaces }}
+	{{with .Definition.GQLDefinition.Description }} {{.|prefixLines "// "}} {{end}}
+	type {{.Definition.GoType | ref }} interface {
+		Is{{.Definition.GoType | ref }}()
+	}
+{{- end }}
+
 {{ range $model := .Models }}
-	{{with .Description}} {{.|prefixLines "// "}} {{end}}
-	{{- if .Definition.GQLDefinition.IsAbstractType }}
-		type {{.Definition.GoType | ref }} interface {
-			Is{{.Definition.GoType | ref }}()
-		}
-	{{- else }}
-		type {{.Definition.GoType | ref }} struct {
-			{{- range $field := .Fields }}
-				{{- with .Description}}
-					{{.|prefixLines "// "}}
-				{{- end}}
-				{{ $field.GoFieldName }} {{$field.GoType | ref}} `json:"{{$field.GQLName}}"`
-			{{- end }}
-		}
-
-		{{- range $iface := .Implements }}
-			func ({{$model.Definition.GoType | ref }}) Is{{$iface.GoType | ref }}() {}
+	{{with .Definition.GQLDefinition.Description }} {{.|prefixLines "// "}} {{end}}
+	type {{.Definition.GoType | ref }} struct {
+		{{- range $field := .Fields }}
+			{{- with .Definition.GQLDefinition.Description }}
+				{{.|prefixLines "// "}}
+			{{- end}}
+			{{ $field.GoFieldName }} {{$field.GoType | ref}} `json:"{{$field.GQLName}}"`
 		{{- end }}
+	}
 
+	{{- range $iface := .Implements }}
+		func ({{$model.Definition.GoType | ref }}) Is{{$iface.GoType | ref }}() {}
 	{{- end }}
 {{- end}}
 
 {{ range $enum := .Enums }}
-	{{with .Description}}{{.|prefixLines "// "}} {{end}}
+	{{with .Definition.GQLDefinition.Description }} {{.|prefixLines "// "}} {{end}}
 	type {{.Definition.GoType | ref }} string
 	const (
 	{{- range $value := .Values}}

@@ -70,17 +70,12 @@ var initCmd = cli.Command{
 }
 
 func GenerateGraphServer(cfg *config.Config, serverFilename string) {
-	gen, err := codegen.New(cfg)
+	err := codegen.Generate(cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
 
-	if err := gen.Generate(); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
-
-	if err := gen.GenerateServer(serverFilename); err != nil {
+	if err := codegen.GenerateServer(serverFilename, cfg); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}

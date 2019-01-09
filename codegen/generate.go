@@ -22,7 +22,7 @@ func Generate(cfg *config.Config) error {
 		return errors.Wrap(err, "generating models failed")
 	}
 
-	// Create a new schema now that the generated models have been injected into the typemap
+	// Merge again now that the generated models have been injected into the typemap
 	schema, err = unified.NewSchema(schema.Config)
 	if err != nil {
 		return errors.Wrap(err, "merging failed")

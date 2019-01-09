@@ -58,8 +58,8 @@ func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
 		obj.Fields = append(obj.Fields, f)
 	}
 
-	if _, isMap := obj.Definition.GoType.(*types.Map); !isMap && obj.InTypemap {
-		for _, bindErr := range bindObject(obj, g.Config.StructTag) {
+	if obj.InTypemap && !isMap(obj.Definition.GoType) {
+		for _, bindErr := range g.bindObject(obj) {
 			log.Println(bindErr.Error())
 			log.Println("  Adding resolver method")
 		}

@@ -3,6 +3,7 @@ package unified
 import (
 	"fmt"
 	"go/types"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -38,7 +39,7 @@ func (b BindErrors) Error() string {
 	return strings.Join(errs, "\n\n")
 }
 
-func bindObject(object *Object, structTag string) BindErrors {
+func (g *Schema) bindObject(object *Object) BindErrors {
 	var errs BindErrors
 	for _, field := range object.Fields {
 		if field.IsResolver {
@@ -46,14 +47,15 @@ func bindObject(object *Object, structTag string) BindErrors {
 		}
 
 		// first try binding to a method
-		methodErr := bindMethod(object.Definition.GoType, field)
+		methodErr := g.bindMethod(object.Definition.GoType, field)
 		if methodErr == nil {
 			continue
 		}
 
 		// otherwise try binding to a var
-		varErr := bindVar(object.Definition.GoType, field, structTag)
+		varErr := g.bindVar(object.Definition.GoType, field)
 
+		// if both failed, add a resolver
 		if varErr != nil {
 			field.IsResolver = true
 
@@ -69,19 +71,15 @@ func bindObject(object *Object, structTag string) BindErrors {
 	return errs
 }
 
-func bindMethod(t types.Type, field *Field) error {
-	namedType, ok := t.(*types.Named)
-	if !ok {
-		return fmt.Errorf("not a named type")
+func (g *Schema) bindMethod(t types.Type, field *Field) error {
+	namedType, err := findGoNamedType(t)
+	if err != nil {
+		return err
 	}
 
-	goName := field.GQLName
-	if field.GoFieldName != "" {
-		goName = field.GoFieldName
-	}
-	method := findMethod(namedType, goName)
+	method := g.findMethod(namedType, field.GoFieldName)
 	if method == nil {
-		return fmt.Errorf("no method named %s", field.GQLName)
+		return fmt.Errorf("no method named %s", field.GoFieldName)
 	}
 	sig := method.Type().(*types.Signature)
 
@@ -102,51 +100,47 @@ func bindMethod(t types.Type, field *Field) error {
 		params = types.NewTuple(vars...)
 	}
 
-	newArgs, err := matchArgs(field, params)
-	if err != nil {
+	if err := g.bindArgs(field, params); err != nil {
 		return err
 	}
 
 	result := sig.Results().At(0)
-	if err := validateTypeBinding(field, result.Type()); err != nil {
-		return errors.Wrap(err, "method has wrong return type")
+	if err := compatibleTypes(field.TypeReference.GoType, result.Type()); err != nil {
+		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GoType.String(), result.String())
 	}
 
 	// success, args and return type match. Bind to method
 	field.GoFieldType = GoFieldMethod
 	field.GoReceiverName = "obj"
 	field.GoFieldName = method.Name()
-	field.Args = newArgs
+	field.TypeReference.GoType = result.Type()
 	return nil
 }
 
-func bindVar(t types.Type, field *Field, structTag string) error {
+func (g *Schema) bindVar(t types.Type, field *Field) error {
 	underlying, ok := t.Underlying().(*types.Struct)
 	if !ok {
 		return fmt.Errorf("not a struct")
 	}
 
-	goName := field.GQLName
-	if field.GoFieldName != "" {
-		goName = field.GoFieldName
-	}
-	structField, err := findField(underlying, goName, structTag)
+	structField, err := g.findField(underlying, field.GoFieldName)
 	if err != nil {
 		return err
 	}
 
-	if err := validateTypeBinding(field, structField.Type()); err != nil {
-		return errors.Wrap(err, "field has wrong type")
+	if err := compatibleTypes(field.TypeReference.GoType, structField.Type()); err != nil {
+		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GoType.String(), field.TypeReference.GoType.String())
 	}
 
 	// success, bind to var
 	field.GoFieldType = GoFieldVariable
 	field.GoReceiverName = "obj"
 	field.GoFieldName = structField.Name()
+	field.TypeReference.GoType = structField.Type()
 	return nil
 }
 
-func matchArgs(field *Field, params *types.Tuple) ([]*FieldArgument, error) {
+func (g *Schema) bindArgs(field *Field, params *types.Tuple) error {
 	var newArgs []*FieldArgument
 
 nextArg:
@@ -154,30 +148,175 @@ nextArg:
 		param := params.At(j)
 		for _, oldArg := range field.Args {
 			if strings.EqualFold(oldArg.GQLName, param.Name()) {
-				if !field.IsResolver {
-					oldArg.TypeReference.GoType = param.Type()
-				}
+				oldArg.TypeReference.GoType = param.Type()
 				newArgs = append(newArgs, oldArg)
 				continue nextArg
 			}
 		}
 
 		// no matching arg found, abort
-		return nil, fmt.Errorf("arg %s not found on method", param.Name())
+		return fmt.Errorf("arg %s not found on method", param.Name())
 	}
-	return newArgs, nil
+
+	field.Args = newArgs
+	return nil
 }
 
-func validateTypeBinding(field *Field, goType types.Type) error {
-	gqlType := normalizeVendor(field.TypeReference.GoType.String())
-	goTypeStr := normalizeVendor(goType.String())
+// compatibleTypes isnt a strict comparison, it allows for pointer differences
+func compatibleTypes(expected types.Type, actual types.Type) error {
+	//fmt.Println("Comparing ", expected.String(), actual.String())
 
-	if equalTypes(goTypeStr, gqlType) {
-		field.TypeReference.GoType = goType
-		return nil
+	// Special case to deal with pointer mismatches
+	{
+		expectedPtr, expectedIsPtr := expected.(*types.Pointer)
+		actualPtr, actualIsPtr := actual.(*types.Pointer)
+
+		if expectedIsPtr && actualIsPtr {
+			return compatibleTypes(expectedPtr.Elem(), actualPtr.Elem())
+		}
+		if expectedIsPtr && !actualIsPtr {
+			return compatibleTypes(expectedPtr.Elem(), actual)
+		}
+		if !expectedIsPtr && actualIsPtr {
+			return compatibleTypes(expected, actualPtr.Elem())
+		}
 	}
 
-	return fmt.Errorf("%s is not compatible with %s", gqlType, goTypeStr)
+	switch expected := expected.(type) {
+	case *types.Slice:
+		if actual, ok := actual.(*types.Slice); ok {
+			return compatibleTypes(expected.Elem(), actual.Elem())
+		}
+
+	case *types.Array:
+		if actual, ok := actual.(*types.Array); ok {
+			if expected.Len() != actual.Len() {
+				return fmt.Errorf("array length differs")
+			}
+
+			return compatibleTypes(expected.Elem(), actual.Elem())
+		}
+
+	case *types.Basic:
+		if actual, ok := actual.(*types.Basic); ok {
+			if actual.Kind() != expected.Kind() {
+				return fmt.Errorf("basic kind differs, %s != %s", expected.Name(), actual.Name())
+			}
+
+			return nil
+		}
+
+	case *types.Struct:
+		if actual, ok := actual.(*types.Struct); ok {
+			if expected.NumFields() != actual.NumFields() {
+				return fmt.Errorf("number of struct fields differ")
+			}
+
+			for i := 0; i < expected.NumFields(); i++ {
+				if expected.Field(i).Name() != actual.Field(i).Name() {
+					return fmt.Errorf("struct field %d name differs, %s != %s", i, expected.Field(i).Name(), actual.Field(i).Name())
+				}
+				if err := compatibleTypes(expected.Field(i).Type(), actual.Field(i).Type()); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
+	case *types.Tuple:
+		if actual, ok := actual.(*types.Tuple); ok {
+			if expected.Len() != actual.Len() {
+				return fmt.Errorf("tuple length differs, %d != %d", expected.Len(), actual.Len())
+			}
+
+			for i := 0; i < expected.Len(); i++ {
+				if err := compatibleTypes(expected.At(i).Type(), actual.At(i).Type()); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		}
+
+	case *types.Signature:
+		if actual, ok := actual.(*types.Signature); ok {
+			if err := compatibleTypes(expected.Params(), actual.Params()); err != nil {
+				return err
+			}
+			if err := compatibleTypes(expected.Results(), actual.Results()); err != nil {
+				return err
+			}
+
+			return nil
+		}
+	case *types.Interface:
+		if actual, ok := actual.(*types.Interface); ok {
+			if expected.NumMethods() != actual.NumMethods() {
+				return fmt.Errorf("interface method count differs, %d != %d", expected.NumMethods(), actual.NumMethods())
+			}
+
+			for i := 0; i < expected.NumMethods(); i++ {
+				if expected.Method(i).Name() != actual.Method(i).Name() {
+					return fmt.Errorf("interface method %d name differs, %s != %s", i, expected.Method(i).Name(), actual.Method(i).Name())
+				}
+				if err := compatibleTypes(expected.Method(i).Type(), actual.Method(i).Type()); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		}
+
+	case *types.Map:
+		if actual, ok := actual.(*types.Map); ok {
+			if err := compatibleTypes(expected.Key(), actual.Key()); err != nil {
+				return err
+			}
+
+			if err := compatibleTypes(expected.Elem(), actual.Elem()); err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+	case *types.Chan:
+		if actual, ok := actual.(*types.Chan); ok {
+			return compatibleTypes(expected.Elem(), actual.Elem())
+		}
+
+	case *types.Named:
+		if actual, ok := actual.(*types.Named); ok {
+			if normalizeVendor(expected.Obj().Pkg().Path()) != normalizeVendor(actual.Obj().Pkg().Path()) {
+				return fmt.Errorf(
+					"package name of named type differs, %s != %s",
+					normalizeVendor(expected.Obj().Pkg().Path()),
+					normalizeVendor(actual.Obj().Pkg().Path()),
+				)
+			}
+
+			if expected.Obj().Name() != actual.Obj().Name() {
+				return fmt.Errorf(
+					"named type name differs, %s != %s",
+					normalizeVendor(expected.Obj().Name()),
+					normalizeVendor(actual.Obj().Name()),
+				)
+			}
+
+			return nil
+		}
+
+		// Before models are generated all missing references will be Invalid Basic references.
+		// lets assume these are valid too.
+		if actual, ok := actual.(*types.Basic); ok && actual.Kind() == types.Invalid {
+			return nil
+		}
+
+	default:
+		return fmt.Errorf("missing support for %T", expected)
+	}
+
+	return fmt.Errorf("type mismatch %T != %T", expected, actual)
 }
 
 var modsRegex = regexp.MustCompile(`^(\*|\[\])*`)
@@ -189,6 +328,99 @@ func normalizeVendor(pkg string) string {
 	return modifiers + parts[len(parts)-1]
 }
 
-func equalTypes(goType string, gqlType string) bool {
-	return goType == gqlType || "*"+goType == gqlType || goType == "*"+gqlType || strings.Replace(goType, "[]*", "[]", -1) == gqlType
+func (g *Schema) findMethod(typ *types.Named, name string) *types.Func {
+	for i := 0; i < typ.NumMethods(); i++ {
+		method := typ.Method(i)
+		if !method.Exported() {
+			continue
+		}
+
+		if strings.EqualFold(method.Name(), name) {
+			return method
+		}
+	}
+
+	if s, ok := typ.Underlying().(*types.Struct); ok {
+		for i := 0; i < s.NumFields(); i++ {
+			field := s.Field(i)
+			if !field.Anonymous() {
+				continue
+			}
+
+			if named, ok := field.Type().(*types.Named); ok {
+				if f := g.findMethod(named, name); f != nil {
+					return f
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// findField attempts to match the name to a struct field with the following
+// priorites:
+// 1. If struct tag is passed then struct tag has highest priority
+// 2. Actual Field name
+// 3. Field in an embedded struct
+func (g *Schema) findField(typ *types.Struct, name string) (*types.Var, error) {
+	if g.Config.StructTag != "" {
+		var foundField *types.Var
+		for i := 0; i < typ.NumFields(); i++ {
+			field := typ.Field(i)
+			if !field.Exported() {
+				continue
+			}
+			tags := reflect.StructTag(typ.Tag(i))
+			if val, ok := tags.Lookup(g.Config.StructTag); ok && equalFieldName(val, name) {
+				if foundField != nil {
+					return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", g.Config.StructTag, val)
+				}
+
+				foundField = field
+			}
+		}
+		if foundField != nil {
+			return foundField, nil
+		}
+	}
+
+	for i := 0; i < typ.NumFields(); i++ {
+		field := typ.Field(i)
+		if !field.Exported() {
+			continue
+		}
+		if equalFieldName(field.Name(), name) { // aqui!
+			return field, nil
+		}
+	}
+
+	for i := 0; i < typ.NumFields(); i++ {
+		field := typ.Field(i)
+		if !field.Exported() {
+			continue
+		}
+
+		if field.Anonymous() {
+			fieldType := field.Type()
+
+			if ptr, ok := fieldType.(*types.Pointer); ok {
+				fieldType = ptr.Elem()
+			}
+
+			// Type.Underlying() returns itself for all types except types.Named, where it returns a struct type.
+			// It should be safe to always call.
+			if named, ok := fieldType.Underlying().(*types.Struct); ok {
+				f, err := g.findField(named, name)
+				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
+					return nil, err
+				}
+				if f != nil {
+					return f, nil
+				}
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("no field named %s", name)
 }

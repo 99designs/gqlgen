@@ -1,11 +1,9 @@
 package unified
 
 import (
-	"fmt"
 	"go/build"
 	"go/types"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -74,103 +72,10 @@ func findGoInterface(def types.Type) (*types.Interface, error) {
 	return underlying, nil
 }
 
-func findMethod(typ *types.Named, name string) *types.Func {
-	for i := 0; i < typ.NumMethods(); i++ {
-		method := typ.Method(i)
-		if !method.Exported() {
-			continue
-		}
-
-		if strings.EqualFold(method.Name(), name) {
-			return method
-		}
-	}
-
-	if s, ok := typ.Underlying().(*types.Struct); ok {
-		for i := 0; i < s.NumFields(); i++ {
-			field := s.Field(i)
-			if !field.Anonymous() {
-				continue
-			}
-
-			if named, ok := field.Type().(*types.Named); ok {
-				if f := findMethod(named, name); f != nil {
-					return f
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
 func equalFieldName(source, target string) bool {
 	source = strings.Replace(source, "_", "", -1)
 	target = strings.Replace(target, "_", "", -1)
 	return strings.EqualFold(source, target)
-}
-
-// findField attempts to match the name to a struct field with the following
-// priorites:
-// 1. If struct tag is passed then struct tag has highest priority
-// 2. Field in an embedded struct
-// 3. Actual Field name
-func findField(typ *types.Struct, name, structTag string) (*types.Var, error) {
-	var foundField *types.Var
-	foundFieldWasTag := false
-
-	for i := 0; i < typ.NumFields(); i++ {
-		field := typ.Field(i)
-
-		if structTag != "" {
-			tags := reflect.StructTag(typ.Tag(i))
-			if val, ok := tags.Lookup(structTag); ok {
-				if equalFieldName(val, name) {
-					if foundField != nil && foundFieldWasTag {
-						return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", structTag, val)
-					}
-
-					foundField = field
-					foundFieldWasTag = true
-				}
-			}
-		}
-
-		if field.Anonymous() {
-
-			fieldType := field.Type()
-
-			if ptr, ok := fieldType.(*types.Pointer); ok {
-				fieldType = ptr.Elem()
-			}
-
-			// Type.Underlying() returns itself for all types except types.Named, where it returns a struct type.
-			// It should be safe to always call.
-			if named, ok := fieldType.Underlying().(*types.Struct); ok {
-				f, err := findField(named, name, structTag)
-				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
-					return nil, err
-				}
-				if f != nil && foundField == nil {
-					foundField = f
-				}
-			}
-		}
-
-		if !field.Exported() {
-			continue
-		}
-
-		if equalFieldName(field.Name(), name) && foundField == nil { // aqui!
-			foundField = field
-		}
-	}
-
-	if foundField == nil {
-		return nil, fmt.Errorf("no field named %s", name)
-	}
-
-	return foundField, nil
 }
 
 func resolvePkg(pkgName string) (string, error) {
@@ -220,4 +125,9 @@ func sanitizeArgName(name string) string {
 		}
 	}
 	return name
+}
+
+func isMap(t types.Type) bool {
+	_, isMap := t.(*types.Map)
+	return isMap
 }

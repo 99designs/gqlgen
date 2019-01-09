@@ -114,7 +114,7 @@ func (g *Schema) injectIntrospectionRoots() error {
 		GoFieldType:    GoFieldMethod,
 		GoReceiverName: "ec",
 		GoFieldName:    "introspectType",
-		Args: []FieldArgument{
+		Args: []*FieldArgument{
 			{
 				GQLName: "name",
 				TypeReference: &TypeReference{

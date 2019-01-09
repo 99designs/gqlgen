@@ -12,7 +12,7 @@ import (
 func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
 	dirs, err := g.getDirectives(typ.Directives)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, typ.Name)
 	}
 
 	isRoot := typ == g.Schema.Query || typ == g.Schema.Mutation || typ == g.Schema.Subscription
@@ -42,14 +42,16 @@ func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
 
 		f, err := g.buildField(obj, field)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, typ.Name+"."+field.Name)
 		}
 
 		if typ.Kind == ast.InputObject && !f.TypeReference.Definition.GQLDefinition.IsInputType() {
 			return nil, errors.Errorf(
-				"%s cannot be used as a field of %s. only input and scalar types are allowed",
+				"%s.%s: cannot use %s because %s is not a valid input type",
+				typ.Name,
+				field.Name,
 				f.Definition.GQLDefinition.Name,
-				obj.Definition.GQLDefinition.Name,
+				f.TypeReference.Definition.GQLDefinition.Kind,
 			)
 		}
 
@@ -86,7 +88,7 @@ func (g *Schema) buildField(obj *Object, field *ast.FieldDefinition) (*Field, er
 		var err error
 		f.Default, err = field.DefaultValue.Value(nil)
 		if err != nil {
-			return nil, errors.Errorf("default value for %s.%s is not valid: %s", obj.Definition.GQLDefinition.Name, field.Name, err.Error())
+			return nil, errors.Errorf("default value %s is not valid: %s", field.Name, err.Error())
 		}
 	}
 
@@ -103,30 +105,44 @@ func (g *Schema) buildField(obj *Object, field *ast.FieldDefinition) (*Field, er
 	}
 
 	for _, arg := range field.Arguments {
-		argDirs, err := g.getDirectives(arg.Directives)
+		newArg, err := g.buildArg(obj, arg)
 		if err != nil {
 			return nil, err
-		}
-		newArg := FieldArgument{
-			GQLName:       arg.Name,
-			TypeReference: g.NamedTypes.getType(arg.Type),
-			Object:        obj,
-			GoVarName:     sanitizeArgName(arg.Name),
-			Directives:    argDirs,
-		}
-
-		if !newArg.TypeReference.Definition.GQLDefinition.IsInputType() {
-			return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.Definition.GQLDefinition.Name, field.Name)
-		}
-
-		if arg.DefaultValue != nil {
-			var err error
-			newArg.Default, err = arg.DefaultValue.Value(nil)
-			if err != nil {
-				return nil, errors.Errorf("default value for %s.%s is not valid: %s", obj.Definition.GQLDefinition.Name, field.Name, err.Error())
-			}
 		}
 		f.Args = append(f.Args, newArg)
 	}
 	return &f, nil
+}
+
+func (g *Schema) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgument, error) {
+	argDirs, err := g.getDirectives(arg.Directives)
+	if err != nil {
+		return nil, err
+	}
+	newArg := FieldArgument{
+		GQLName:       arg.Name,
+		TypeReference: g.NamedTypes.getType(arg.Type),
+		Object:        obj,
+		GoVarName:     sanitizeArgName(arg.Name),
+		Directives:    argDirs,
+	}
+
+	if !newArg.TypeReference.Definition.GQLDefinition.IsInputType() {
+		return nil, errors.Errorf(
+			"cannot use %s as argument %s because %s is not a valid input type",
+			newArg.Definition.GQLDefinition.Name,
+			arg.Name,
+			newArg.TypeReference.Definition.GQLDefinition.Kind,
+		)
+	}
+
+	if arg.DefaultValue != nil {
+		var err error
+		newArg.Default, err = arg.DefaultValue.Value(nil)
+		if err != nil {
+			return nil, errors.Errorf("default value is not valid: %s", err.Error())
+		}
+	}
+
+	return &newArg, nil
 }

@@ -146,8 +146,8 @@ func bindVar(t types.Type, field *Field, structTag string) error {
 	return nil
 }
 
-func matchArgs(field *Field, params *types.Tuple) ([]FieldArgument, error) {
-	var newArgs []FieldArgument
+func matchArgs(field *Field, params *types.Tuple) ([]*FieldArgument, error) {
+	var newArgs []*FieldArgument
 
 nextArg:
 	for j := 0; j < params.Len(); j++ {

@@ -36,16 +36,16 @@ type Object struct {
 
 type Field struct {
 	*TypeReference
-	GQLName          string          // The name of the field in graphql
-	GoFieldType      GoFieldType     // The field type in go, if any
-	GoReceiverName   string          // The name of method & var receiver in go, if any
-	GoFieldName      string          // The name of the method or var in go, if any
-	IsResolver       bool            // Does this field need a resolver
-	Args             []FieldArgument // A list of arguments to be passed to this field
-	MethodHasContext bool            // If this is bound to a go method, does the method also take a context
-	NoErr            bool            // If this is bound to a go method, does that method have an error as the second argument
-	Object           *Object         // A link back to the parent object
-	Default          interface{}     // The default value
+	GQLName          string           // The name of the field in graphql
+	GoFieldType      GoFieldType      // The field type in go, if any
+	GoReceiverName   string           // The name of method & var receiver in go, if any
+	GoFieldName      string           // The name of the method or var in go, if any
+	IsResolver       bool             // Does this field need a resolver
+	Args             []*FieldArgument // A list of arguments to be passed to this field
+	MethodHasContext bool             // If this is bound to a go method, does the method also take a context
+	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
+	Object           *Object          // A link back to the parent object
+	Default          interface{}      // The default value
 	Directives       []*Directive
 }
 

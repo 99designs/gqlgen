@@ -18,7 +18,7 @@ func Generate(cfg *config.Config) error {
 		return errors.Wrap(err, "merging failed")
 	}
 
-	if err := buildModels(schema); err != nil {
+	if err = buildModels(schema); err != nil {
 		return errors.Wrap(err, "generating models failed")
 	}
 

@@ -293,25 +293,13 @@ func TyphonHandlerFromGraphQL(exec graphql.ExecutableSchema, options ...Option) 
 	for _, option := range options {
 		option(cfg)
 	}
-
-	var cache *lru.Cache
-	if cfg.cacheSize > 0 {
-		var err error
-		cache, err = lru.New(DefaultCacheSize)
-		if err != nil {
-			// An error is only returned for non-positive cache size
-			// and we already checked for that.
-			panic("unexpected error creating cache: " + err.Error())
-		}
-	}
 	if cfg.tracer == nil {
 		cfg.tracer = &graphql.NopTracer{}
 	}
 
 	handler := &graphqlHandler{
-		cfg:   cfg,
-		cache: cache,
-		exec:  exec,
+		cfg:  cfg,
+		exec: exec,
 	}
 
 	return handler.ServeTyphon
@@ -346,18 +334,18 @@ func (gh *graphqlHandler) ServeTyphon(req typhon.Request) typhon.Response {
 		return typhon.Response{Error: gqlErr}
 	}
 
-	ctx, op, _, listErr := gh.validateOperation(ctx, &validateOperationArgs{
+	ctx, op, vars, listErr := gh.validateOperation(ctx, &validateOperationArgs{
 		Doc:           doc,
 		OperationName: reqParams.OperationName,
-		// R:             req, // can't use this, hopefully not needed...
-		Variables: reqParams.Variables,
+		HTTPMethod:    req.Method,
+		Variables:     reqParams.Variables,
 	})
 	if len(listErr) != 0 {
 		return typhon.Response{Error: terrors.BadRequest("invalid_operation", fmt.Sprintf("Errors validating operation: %+v", listErr), nil)}
 	}
 
-	// reqCtx := gh.cfg.newRequestContext(gh.exec, doc, op, reqParams.Query, vars)
-	// ctx = graphql.WithRequestContext(ctx, reqCtx)
+	reqCtx := gh.cfg.newRequestContext(gh.exec, doc, op, reqParams.Query, vars)
+	ctx = graphql.WithRequestContext(ctx, reqCtx)
 	//
 	// defer func() {
 	// 	if err := recover(); err != nil {
@@ -457,7 +445,7 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Doc:           doc,
 		OperationName: reqParams.OperationName,
 		CacheHit:      cacheHit,
-		R:             r,
+		HTTPMethod:    r.Method,
 		Variables:     reqParams.Variables,
 	})
 	if len(listErr) != 0 {
@@ -527,7 +515,7 @@ type validateOperationArgs struct {
 	Doc           *ast.QueryDocument
 	OperationName string
 	CacheHit      bool
-	R             *http.Request
+	HTTPMethod    string
 	Variables     map[string]interface{}
 }
 
@@ -547,7 +535,7 @@ func (gh *graphqlHandler) validateOperation(ctx context.Context, args *validateO
 		return ctx, nil, nil, gqlerror.List{gqlerror.Errorf("operation %s not found", args.OperationName)}
 	}
 
-	if op.Operation != ast.Query && args.R.Method == http.MethodGet {
+	if op.Operation != ast.Query && args.HTTPMethod == http.MethodGet {
 		return ctx, nil, nil, gqlerror.List{gqlerror.Errorf("GET requests only allow query operations")}
 	}
 

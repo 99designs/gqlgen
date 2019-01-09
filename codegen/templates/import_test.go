@@ -11,9 +11,9 @@ func TestImports(t *testing.T) {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 
-	aBar := "github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
-	bBar := "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
-	mismatch := "github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"
+	aBar := "github.com/monzo/gqlgen/codegen/templates/testdata/a/bar"
+	bBar := "github.com/monzo/gqlgen/codegen/templates/testdata/b/bar"
+	mismatch := "github.com/monzo/gqlgen/codegen/templates/testdata/pkg_mismatch"
 
 	t.Run("multiple lookups is ok", func(t *testing.T) {
 		a := Imports{destDir: wd}
@@ -47,9 +47,9 @@ func TestImports(t *testing.T) {
 
 		require.Equal(
 			t,
-			`"github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
-bar1 "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
-"github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"`,
+			`"github.com/monzo/gqlgen/codegen/templates/testdata/a/bar"
+bar1 "github.com/monzo/gqlgen/codegen/templates/testdata/b/bar"
+"github.com/monzo/gqlgen/codegen/templates/testdata/pkg_mismatch"`,
 			a.String(),
 		)
 	})
@@ -80,7 +80,7 @@ bar1 "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
 		a.Reserve(aBar, "abar")
 		a.Reserve(bBar, "bbar")
 
-		require.Equal(t, `abar "github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
-bbar "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"`, a.String())
+		require.Equal(t, `abar "github.com/monzo/gqlgen/codegen/templates/testdata/a/bar"
+bbar "github.com/monzo/gqlgen/codegen/templates/testdata/b/bar"`, a.String())
 	})
 }

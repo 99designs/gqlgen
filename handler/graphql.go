@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/99designs/gqlgen/complexity"
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/golang-lru"
+	"github.com/monzo/gqlgen/complexity"
+	"github.com/monzo/gqlgen/graphql"
 	"github.com/monzo/terrors"
 	"github.com/monzo/typhon"
 	"github.com/vektah/gqlparser/ast"

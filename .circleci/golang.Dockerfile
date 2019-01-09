@@ -4,9 +4,9 @@ RUN curl -L -o /bin/dep https://github.com/golang/dep/releases/download/v0.4.1/d
 RUN go get -u github.com/alecthomas/gometalinter github.com/vektah/gorunpkg
 RUN gometalinter --install
 
-WORKDIR /go/src/github.com/99designs/gqlgen
+WORKDIR /go/src/github.com/monzo/gqlgen
 
-COPY Gopkg.* /go/src/github.com/99designs/gqlgen/
+COPY Gopkg.* /go/src/github.com/monzo/gqlgen/
 RUN dep ensure -v --vendor-only
 
-COPY . /go/src/github.com/99designs/gqlgen/
+COPY . /go/src/github.com/monzo/gqlgen/

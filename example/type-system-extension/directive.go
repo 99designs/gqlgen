@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/monzo/gqlgen/graphql"
 )
 
 func EnumLogging(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {

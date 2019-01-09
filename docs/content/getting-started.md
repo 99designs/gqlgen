@@ -35,7 +35,7 @@ Add the following file to your project under `scripts/gqlgen.go`:
 
 package main
 
-import "github.com/99designs/gqlgen/cmd"
+import "github.com/monzo/gqlgen/cmd"
 
 func main() {
 	cmd.Execute()

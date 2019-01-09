@@ -12,11 +12,11 @@ import (
 	{{ reserveImport "errors"  }}
 	{{ reserveImport "bytes"  }}
 
-	{{ reserveImport "github.com/99designs/gqlgen/handler" }}
+	{{ reserveImport "github.com/monzo/gqlgen/handler" }}
 	{{ reserveImport "github.com/vektah/gqlparser" }}
 	{{ reserveImport "github.com/vektah/gqlparser/ast" }}
-	{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
-	{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
+	{{ reserveImport "github.com/monzo/gqlgen/graphql" }}
+	{{ reserveImport "github.com/monzo/gqlgen/graphql/introspection" }}
 )
 
 type {{.ResolverType}} struct {}

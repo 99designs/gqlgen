@@ -34,4 +34,4 @@ git tag $VERSION
 git push origin $VERSION
 
 
-echo "Now go write some release notes! https://github.com/99designs/gqlgen/releases"
+echo "Now go write some release notes! https://github.com/monzo/gqlgen/releases"

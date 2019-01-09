@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/99designs/gqlgen/example/chat"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/monzo/gqlgen/example/chat"
+	"github.com/monzo/gqlgen/handler"
 	"github.com/gorilla/websocket"
 	"github.com/opentracing/opentracing-go"
 	"github.com/rs/cors"

@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate gorunpkg github.com/monzo/gqlgen
 
 package todo
 
@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/monzo/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
 )
 

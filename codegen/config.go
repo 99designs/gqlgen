@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/99designs/gqlgen/internal/gopath"
+	"github.com/monzo/gqlgen/internal/gopath"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 	"gopkg.in/yaml.v2"

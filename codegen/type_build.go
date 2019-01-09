@@ -18,7 +18,7 @@ func (cfg *Config) buildNamedTypes() NamedTypes {
 			t.IsUserDefined = true
 			t.Package, t.GoType = pkgAndType(userEntry.Model)
 		} else if t.IsScalar {
-			t.Package = "github.com/99designs/gqlgen/graphql"
+			t.Package = "github.com/monzo/gqlgen/graphql"
 			t.GoType = "String"
 		}
 

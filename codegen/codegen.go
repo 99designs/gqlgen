@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"syscall"
 
-	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/monzo/gqlgen/codegen/templates"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
@@ -127,19 +127,19 @@ func (cfg *Config) normalize() error {
 	}
 
 	builtins := TypeMap{
-		"__Directive":  {Model: "github.com/99designs/gqlgen/graphql/introspection.Directive"},
-		"__Type":       {Model: "github.com/99designs/gqlgen/graphql/introspection.Type"},
-		"__Field":      {Model: "github.com/99designs/gqlgen/graphql/introspection.Field"},
-		"__EnumValue":  {Model: "github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
-		"__InputValue": {Model: "github.com/99designs/gqlgen/graphql/introspection.InputValue"},
-		"__Schema":     {Model: "github.com/99designs/gqlgen/graphql/introspection.Schema"},
-		"Int":          {Model: "github.com/99designs/gqlgen/graphql.Int"},
-		"Float":        {Model: "github.com/99designs/gqlgen/graphql.Float"},
-		"String":       {Model: "github.com/99designs/gqlgen/graphql.String"},
-		"Boolean":      {Model: "github.com/99designs/gqlgen/graphql.Boolean"},
-		"ID":           {Model: "github.com/99designs/gqlgen/graphql.ID"},
-		"Time":         {Model: "github.com/99designs/gqlgen/graphql.Time"},
-		"Map":          {Model: "github.com/99designs/gqlgen/graphql.Map"},
+		"__Directive":  {Model: "github.com/monzo/gqlgen/graphql/introspection.Directive"},
+		"__Type":       {Model: "github.com/monzo/gqlgen/graphql/introspection.Type"},
+		"__Field":      {Model: "github.com/monzo/gqlgen/graphql/introspection.Field"},
+		"__EnumValue":  {Model: "github.com/monzo/gqlgen/graphql/introspection.EnumValue"},
+		"__InputValue": {Model: "github.com/monzo/gqlgen/graphql/introspection.InputValue"},
+		"__Schema":     {Model: "github.com/monzo/gqlgen/graphql/introspection.Schema"},
+		"Int":          {Model: "github.com/monzo/gqlgen/graphql.Int"},
+		"Float":        {Model: "github.com/monzo/gqlgen/graphql.Float"},
+		"String":       {Model: "github.com/monzo/gqlgen/graphql.String"},
+		"Boolean":      {Model: "github.com/monzo/gqlgen/graphql.Boolean"},
+		"ID":           {Model: "github.com/monzo/gqlgen/graphql.ID"},
+		"Time":         {Model: "github.com/monzo/gqlgen/graphql.Time"},
+		"Map":          {Model: "github.com/monzo/gqlgen/graphql.Map"},
 	}
 
 	if cfg.Models == nil {

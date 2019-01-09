@@ -365,13 +365,13 @@ func (gh *graphqlHandler) ServeTyphon(req typhon.Request) typhon.Response {
 		if err != nil {
 			return typhon.Response{Error: terrors.BadRequest("invalid_json", "Could not marshal JSON returned from query execution", nil)}
 		}
-		return req.Response(b)
+		return req.Response(string(b[:]))
 	case ast.Mutation:
 		b, err := json.Marshal(gh.exec.Mutation(ctx, op))
 		if err != nil {
 			return typhon.Response{Error: terrors.BadRequest("invalid_json", "Could not marshal JSON returned from mutation execution", nil)}
 		}
-		return req.Response(b)
+		return req.Response(string(b[:]))
 	default:
 		return typhon.Response{Error: terrors.BadRequest("unsupported_operation_type", "Unsupported operation type", nil)}
 	}

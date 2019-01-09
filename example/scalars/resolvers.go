@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate gorunpkg github.com/monzo/gqlgen
 
 package scalars
 
@@ -8,7 +8,7 @@ import (
 	"fmt"
 	time "time"
 
-	"github.com/99designs/gqlgen/example/scalars/model"
+	"github.com/monzo/gqlgen/example/scalars/model"
 )
 
 type Resolver struct {

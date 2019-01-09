@@ -77,8 +77,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/99designs/gqlgen/example/starwars"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/monzo/gqlgen/example/starwars"
+	"github.com/monzo/gqlgen/handler"
 	"github.com/go-chi/chi"
 )
 

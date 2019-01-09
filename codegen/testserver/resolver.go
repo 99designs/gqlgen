@@ -3,8 +3,8 @@ package testserver
 import (
 	"context"
 
-	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
-	"github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
+	introspection1 "github.com/monzo/gqlgen/codegen/testserver/introspection"
+	"github.com/monzo/gqlgen/codegen/testserver/invalid-packagename"
 )
 
 type Resolver struct{}

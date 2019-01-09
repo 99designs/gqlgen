@@ -14,7 +14,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/99designs/gqlgen/internal/imports"
+	"github.com/monzo/gqlgen/internal/imports"
 
 	"github.com/pkg/errors"
 )

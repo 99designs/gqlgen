@@ -1,7 +1,7 @@
 package complexity
 
 import (
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/monzo/gqlgen/graphql"
 	"github.com/vektah/gqlparser/ast"
 )
 

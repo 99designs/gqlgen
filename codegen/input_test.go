@@ -47,7 +47,7 @@ func generate(name string, schema string, typemap ...TypeMap) error {
 	err := Generate(cfg)
 	if err == nil {
 		conf := loader.Config{}
-		conf.Import("github.com/99designs/gqlgen/codegen/testdata/gen/" + name)
+		conf.Import("github.com/monzo/gqlgen/codegen/testdata/gen/" + name)
 
 		_, err = conf.Load()
 		if err != nil {

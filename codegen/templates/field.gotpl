@@ -14,7 +14,7 @@
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Field: field,
 		})
-		// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+		// FIXME: subscriptions are missing request middleware stack https://github.com/monzo/gqlgen/issues/259
 		//          and Tracer stack
 		rctx := ctx
 		results, err := ec.resolvers.{{ $field.ShortInvocation }}

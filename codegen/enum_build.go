@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/monzo/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/ast"
 )
 

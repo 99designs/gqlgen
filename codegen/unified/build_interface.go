@@ -7,25 +7,25 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (g *Schema) buildInterface(typ *ast.Definition) *Interface {
+func (b *builder) buildInterface(typ *ast.Definition) *Interface {
 	i := &Interface{
-		Definition: g.NamedTypes[typ.Name],
-		InTypemap:  g.Config.Models.UserDefined(typ.Name),
+		Definition: b.NamedTypes[typ.Name],
+		InTypemap:  b.Config.Models.UserDefined(typ.Name),
 	}
 
-	for _, implementor := range g.Schema.GetPossibleTypes(typ) {
-		t := g.NamedTypes[implementor.Name]
+	for _, implementor := range b.Schema.GetPossibleTypes(typ) {
+		t := b.NamedTypes[implementor.Name]
 
 		i.Implementors = append(i.Implementors, InterfaceImplementor{
 			Definition:    t,
-			ValueReceiver: g.isValueReceiver(g.NamedTypes[typ.Name], t),
+			ValueReceiver: b.isValueReceiver(b.NamedTypes[typ.Name], t),
 		})
 	}
 
 	return i
 }
 
-func (g *Schema) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition) bool {
+func (b *builder) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition) bool {
 	interfaceType, err := findGoInterface(intf.GoType)
 	if interfaceType == nil || err != nil {
 		return true

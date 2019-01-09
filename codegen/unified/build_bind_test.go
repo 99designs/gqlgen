@@ -72,8 +72,8 @@ type Embed struct {
 	}
 
 	for _, tt := range tests {
-		schema := Schema{Config: &config.Config{StructTag: tt.Tag}}
-		field, err := schema.findField(tt.Struct, tt.Field)
+		b := builder{Config: &config.Config{StructTag: tt.Tag}}
+		field, err := b.findField(tt.Struct, tt.Field)
 		if tt.ShouldError {
 			require.Nil(t, field, tt.Name)
 			require.Error(t, err, tt.Name)

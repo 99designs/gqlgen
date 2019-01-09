@@ -7,10 +7,10 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (g *Schema) buildDirectives() (map[string]*Directive, error) {
-	directives := make(map[string]*Directive, len(g.Schema.Directives))
+func (b *builder) buildDirectives() (map[string]*Directive, error) {
+	directives := make(map[string]*Directive, len(b.Schema.Directives))
 
-	for name, dir := range g.Schema.Directives {
+	for name, dir := range b.Schema.Directives {
 		if _, ok := directives[name]; ok {
 			return nil, errors.Errorf("directive with name %s already exists", name)
 		}
@@ -23,7 +23,7 @@ func (g *Schema) buildDirectives() (map[string]*Directive, error) {
 
 			newArg := FieldArgument{
 				GQLName:       arg.Name,
-				TypeReference: g.NamedTypes.getType(arg.Type),
+				TypeReference: b.NamedTypes.getType(arg.Type),
 				GoVarName:     sanitizeArgName(arg.Name),
 			}
 
@@ -50,7 +50,7 @@ func (g *Schema) buildDirectives() (map[string]*Directive, error) {
 	return directives, nil
 }
 
-func (g *Schema) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
+func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 	dirs := make([]*Directive, len(list))
 	for i, d := range list {
 		argValues := make(map[string]interface{}, len(d.Arguments))
@@ -61,7 +61,7 @@ func (g *Schema) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			}
 			argValues[da.Name] = val
 		}
-		def, ok := g.Directives[d.Name]
+		def, ok := b.Directives[d.Name]
 		if !ok {
 			return nil, fmt.Errorf("directive %s not found", d.Name)
 		}

@@ -9,36 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (g *Schema) FindGoType(pkgName string, typeName string) (types.Object, error) {
-	if pkgName == "" {
-		return nil, nil
-	}
-	fullName := typeName
-	if pkgName != "" {
-		fullName = pkgName + "." + typeName
-	}
-
-	pkgName, err := resolvePkg(pkgName)
-	if err != nil {
-		return nil, errors.Errorf("unable to resolve package for %s: %s\n", fullName, err.Error())
-	}
-
-	pkg := g.Program.Imported[pkgName]
-	if pkg == nil {
-		return nil, errors.Errorf("required package was not loaded: %s", fullName)
-	}
-
-	for astNode, def := range pkg.Defs {
-		if astNode.Name != typeName || def.Parent() == nil || def.Parent() != pkg.Pkg.Scope() {
-			continue
-		}
-
-		return def, nil
-	}
-
-	return nil, errors.Errorf("unable to find type %s\n", fullName)
-}
-
 func findGoNamedType(def types.Type) (*types.Named, error) {
 	if def == nil {
 		return nil, nil

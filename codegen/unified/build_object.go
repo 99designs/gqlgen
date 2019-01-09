@@ -9,30 +9,30 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
-	dirs, err := g.getDirectives(typ.Directives)
+func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
+	dirs, err := b.getDirectives(typ.Directives)
 	if err != nil {
 		return nil, errors.Wrap(err, typ.Name)
 	}
 
-	isRoot := typ == g.Schema.Query || typ == g.Schema.Mutation || typ == g.Schema.Subscription
+	isRoot := typ == b.Schema.Query || typ == b.Schema.Mutation || typ == b.Schema.Subscription
 
 	obj := &Object{
-		Definition:         g.NamedTypes[typ.Name],
-		InTypemap:          g.Config.Models.UserDefined(typ.Name) || isRoot,
+		Definition:         b.NamedTypes[typ.Name],
+		InTypemap:          b.Config.Models.UserDefined(typ.Name) || isRoot,
 		Root:               isRoot,
-		DisableConcurrency: typ == g.Schema.Mutation,
-		Stream:             typ == g.Schema.Subscription,
+		DisableConcurrency: typ == b.Schema.Mutation,
+		Stream:             typ == b.Schema.Subscription,
 		Directives:         dirs,
 		ResolverInterface: types.NewNamed(
-			types.NewTypeName(0, g.Config.Exec.Pkg(), typ.Name+"Resolver", nil),
+			types.NewTypeName(0, b.Config.Exec.Pkg(), typ.Name+"Resolver", nil),
 			nil,
 			nil,
 		),
 	}
 
-	for _, intf := range g.Schema.GetImplements(typ) {
-		obj.Implements = append(obj.Implements, g.NamedTypes[intf.Name])
+	for _, intf := range b.Schema.GetImplements(typ) {
+		obj.Implements = append(obj.Implements, b.NamedTypes[intf.Name])
 	}
 
 	for _, field := range typ.Fields {
@@ -40,7 +40,7 @@ func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
 			continue
 		}
 
-		f, err := g.buildField(obj, field)
+		f, err := b.buildField(obj, field)
 		if err != nil {
 			return nil, errors.Wrap(err, typ.Name+"."+field.Name)
 		}
@@ -59,7 +59,7 @@ func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
 	}
 
 	if obj.InTypemap && !isMap(obj.Definition.GoType) {
-		for _, bindErr := range g.bindObject(obj) {
+		for _, bindErr := range b.bindObject(obj) {
 			log.Println(bindErr.Error())
 			log.Println("  Adding resolver method")
 		}
@@ -68,15 +68,15 @@ func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
 	return obj, nil
 }
 
-func (g *Schema) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
-	dirs, err := g.getDirectives(field.Directives)
+func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
+	dirs, err := b.getDirectives(field.Directives)
 	if err != nil {
 		return nil, err
 	}
 
 	f := Field{
 		GQLName:        field.Name,
-		TypeReference:  g.NamedTypes.getType(field.Type),
+		TypeReference:  b.NamedTypes.getType(field.Type),
 		Object:         obj,
 		Directives:     dirs,
 		GoFieldName:    lintName(ucFirst(field.Name)),
@@ -92,7 +92,7 @@ func (g *Schema) buildField(obj *Object, field *ast.FieldDefinition) (*Field, er
 		}
 	}
 
-	typeEntry, entryExists := g.Config.Models[obj.Definition.GQLDefinition.Name]
+	typeEntry, entryExists := b.Config.Models[obj.Definition.GQLDefinition.Name]
 	if entryExists {
 		if typeField, ok := typeEntry.Fields[field.Name]; ok {
 			if typeField.Resolver {
@@ -105,7 +105,7 @@ func (g *Schema) buildField(obj *Object, field *ast.FieldDefinition) (*Field, er
 	}
 
 	for _, arg := range field.Arguments {
-		newArg, err := g.buildArg(obj, arg)
+		newArg, err := b.buildArg(obj, arg)
 		if err != nil {
 			return nil, err
 		}
@@ -114,14 +114,14 @@ func (g *Schema) buildField(obj *Object, field *ast.FieldDefinition) (*Field, er
 	return &f, nil
 }
 
-func (g *Schema) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgument, error) {
-	argDirs, err := g.getDirectives(arg.Directives)
+func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgument, error) {
+	argDirs, err := b.getDirectives(arg.Directives)
 	if err != nil {
 		return nil, err
 	}
 	newArg := FieldArgument{
 		GQLName:       arg.Name,
-		TypeReference: g.NamedTypes.getType(arg.Type),
+		TypeReference: b.NamedTypes.getType(arg.Type),
 		Object:        obj,
 		GoVarName:     sanitizeArgName(arg.Name),
 		Directives:    argDirs,

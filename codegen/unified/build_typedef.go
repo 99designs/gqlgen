@@ -9,13 +9,13 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (g *Schema) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, error) {
+func (b *builder) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, error) {
 	t := &TypeDefinition{
 		GQLDefinition: schemaType,
 	}
 
 	var pkgName, typeName string
-	if userEntry, ok := g.Config.Models[t.GQLDefinition.Name]; ok && userEntry.Model != "" {
+	if userEntry, ok := b.Config.Models[t.GQLDefinition.Name]; ok && userEntry.Model != "" {
 		// special case for maps
 		if userEntry.Model == "map[string]interface{}" {
 			t.GoType = types.NewMap(types.Typ[types.String], types.NewInterface(nil, nil).Complete())
@@ -30,10 +30,10 @@ func (g *Schema) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, erro
 	} else {
 		// Missing models, but we need to set up the types so any references will point to the code that will
 		// get generated
-		t.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(t.GQLDefinition.Name), nil), nil, nil)
+		t.GoType = types.NewNamed(types.NewTypeName(0, b.Config.Model.Pkg(), templates.ToCamel(t.GQLDefinition.Name), nil), nil, nil)
 
 		if t.GQLDefinition.Kind != ast.Enum {
-			t.Unmarshaler = types.NewFunc(0, g.Config.Exec.Pkg(), "Unmarshal"+schemaType.Name, nil)
+			t.Unmarshaler = types.NewFunc(0, b.Config.Exec.Pkg(), "Unmarshal"+schemaType.Name, nil)
 		}
 
 		return t, nil
@@ -44,13 +44,13 @@ func (g *Schema) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, erro
 	}
 
 	// External marshal functions
-	def, _ := g.FindGoType(pkgName, "Marshal"+typeName)
+	def, _ := b.FindGoType(pkgName, "Marshal"+typeName)
 	if f, isFunc := def.(*types.Func); isFunc {
 		sig := def.Type().(*types.Signature)
 		t.GoType = sig.Params().At(0).Type()
 		t.Marshaler = f
 
-		unmarshal, err := g.FindGoType(pkgName, "Unmarshal"+typeName)
+		unmarshal, err := b.FindGoType(pkgName, "Unmarshal"+typeName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "unable to find unmarshal func for %s.%s", pkgName, typeName)
 		}
@@ -59,7 +59,7 @@ func (g *Schema) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, erro
 	}
 
 	// Normal object binding
-	obj, err := g.FindGoType(pkgName, typeName)
+	obj, err := b.FindGoType(pkgName, typeName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to find %s.%s", pkgName, typeName)
 	}
@@ -76,7 +76,7 @@ func (g *Schema) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, erro
 
 	// Special case to reference generated unmarshal functions
 	if !hasUnmarshal {
-		t.Unmarshaler = types.NewFunc(0, g.Config.Exec.Pkg(), "Unmarshal"+schemaType.Name, nil)
+		t.Unmarshaler = types.NewFunc(0, b.Config.Exec.Pkg(), "Unmarshal"+schemaType.Name, nil)
 	}
 
 	return t, nil

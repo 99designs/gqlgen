@@ -39,7 +39,7 @@ func (b BindErrors) Error() string {
 	return strings.Join(errs, "\n\n")
 }
 
-func (g *Schema) bindObject(object *Object) BindErrors {
+func (b *builder) bindObject(object *Object) BindErrors {
 	var errs BindErrors
 	for _, field := range object.Fields {
 		if field.IsResolver {
@@ -47,13 +47,13 @@ func (g *Schema) bindObject(object *Object) BindErrors {
 		}
 
 		// first try binding to a method
-		methodErr := g.bindMethod(object.Definition.GoType, field)
+		methodErr := b.bindMethod(object.Definition.GoType, field)
 		if methodErr == nil {
 			continue
 		}
 
 		// otherwise try binding to a var
-		varErr := g.bindVar(object.Definition.GoType, field)
+		varErr := b.bindVar(object.Definition.GoType, field)
 
 		// if both failed, add a resolver
 		if varErr != nil {
@@ -71,13 +71,13 @@ func (g *Schema) bindObject(object *Object) BindErrors {
 	return errs
 }
 
-func (g *Schema) bindMethod(t types.Type, field *Field) error {
+func (b *builder) bindMethod(t types.Type, field *Field) error {
 	namedType, err := findGoNamedType(t)
 	if err != nil {
 		return err
 	}
 
-	method := g.findMethod(namedType, field.GoFieldName)
+	method := b.findMethod(namedType, field.GoFieldName)
 	if method == nil {
 		return fmt.Errorf("no method named %s", field.GoFieldName)
 	}
@@ -100,7 +100,7 @@ func (g *Schema) bindMethod(t types.Type, field *Field) error {
 		params = types.NewTuple(vars...)
 	}
 
-	if err := g.bindArgs(field, params); err != nil {
+	if err := b.bindArgs(field, params); err != nil {
 		return err
 	}
 
@@ -117,13 +117,13 @@ func (g *Schema) bindMethod(t types.Type, field *Field) error {
 	return nil
 }
 
-func (g *Schema) bindVar(t types.Type, field *Field) error {
+func (b *builder) bindVar(t types.Type, field *Field) error {
 	underlying, ok := t.Underlying().(*types.Struct)
 	if !ok {
 		return fmt.Errorf("not a struct")
 	}
 
-	structField, err := g.findField(underlying, field.GoFieldName)
+	structField, err := b.findField(underlying, field.GoFieldName)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func (g *Schema) bindVar(t types.Type, field *Field) error {
 	return nil
 }
 
-func (g *Schema) bindArgs(field *Field, params *types.Tuple) error {
+func (b *builder) bindArgs(field *Field, params *types.Tuple) error {
 	var newArgs []*FieldArgument
 
 nextArg:
@@ -328,7 +328,7 @@ func normalizeVendor(pkg string) string {
 	return modifiers + parts[len(parts)-1]
 }
 
-func (g *Schema) findMethod(typ *types.Named, name string) *types.Func {
+func (b *builder) findMethod(typ *types.Named, name string) *types.Func {
 	for i := 0; i < typ.NumMethods(); i++ {
 		method := typ.Method(i)
 		if !method.Exported() {
@@ -348,7 +348,7 @@ func (g *Schema) findMethod(typ *types.Named, name string) *types.Func {
 			}
 
 			if named, ok := field.Type().(*types.Named); ok {
-				if f := g.findMethod(named, name); f != nil {
+				if f := b.findMethod(named, name); f != nil {
 					return f
 				}
 			}
@@ -363,8 +363,8 @@ func (g *Schema) findMethod(typ *types.Named, name string) *types.Func {
 // 1. If struct tag is passed then struct tag has highest priority
 // 2. Actual Field name
 // 3. Field in an embedded struct
-func (g *Schema) findField(typ *types.Struct, name string) (*types.Var, error) {
-	if g.Config.StructTag != "" {
+func (b *builder) findField(typ *types.Struct, name string) (*types.Var, error) {
+	if b.Config.StructTag != "" {
 		var foundField *types.Var
 		for i := 0; i < typ.NumFields(); i++ {
 			field := typ.Field(i)
@@ -372,9 +372,9 @@ func (g *Schema) findField(typ *types.Struct, name string) (*types.Var, error) {
 				continue
 			}
 			tags := reflect.StructTag(typ.Tag(i))
-			if val, ok := tags.Lookup(g.Config.StructTag); ok && equalFieldName(val, name) {
+			if val, ok := tags.Lookup(b.Config.StructTag); ok && equalFieldName(val, name) {
 				if foundField != nil {
-					return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", g.Config.StructTag, val)
+					return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", b.Config.StructTag, val)
 				}
 
 				foundField = field
@@ -411,7 +411,7 @@ func (g *Schema) findField(typ *types.Struct, name string) (*types.Var, error) {
 			// Type.Underlying() returns itself for all types except types.Named, where it returns a struct type.
 			// It should be safe to always call.
 			if named, ok := fieldType.Underlying().(*types.Struct); ok {
-				f, err := g.findField(named, name)
+				f, err := b.findField(named, name)
 				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
 					return nil, err
 				}

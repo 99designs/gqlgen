@@ -12,9 +12,8 @@ import (
 type ResolverBuild struct {
 	*unified.Schema
 
-	PackageName   string
-	ResolverType  string
-	ResolverFound bool
+	PackageName  string
+	ResolverType string
 }
 
 func GenerateResolver(schema *unified.Schema) error {
@@ -23,11 +22,6 @@ func GenerateResolver(schema *unified.Schema) error {
 		return errors.Wrap(err, "resolver build failed")
 	}
 	filename := schema.Config.Resolver.Filename
-
-	if resolverBuild.ResolverFound {
-		log.Printf("Skipped resolver: %s.%s already exists\n", schema.Config.Resolver.ImportPath(), schema.Config.Resolver.Type)
-		return nil
-	}
 
 	if _, err := os.Stat(filename); os.IsNotExist(errors.Cause(err)) {
 		if err := templates.RenderToFile("resolver.gotpl", filename, resolverBuild); err != nil {
@@ -41,13 +35,9 @@ func GenerateResolver(schema *unified.Schema) error {
 }
 
 func buildResolver(s *unified.Schema) (*ResolverBuild, error) {
-	def, _ := s.FindGoType(s.Config.Resolver.ImportPath(), s.Config.Resolver.Type)
-	resolverFound := def != nil
-
 	return &ResolverBuild{
-		Schema:        s,
-		PackageName:   s.Config.Resolver.Package,
-		ResolverType:  s.Config.Resolver.Type,
-		ResolverFound: resolverFound,
+		Schema:       s,
+		PackageName:  s.Config.Resolver.Package,
+		ResolverType: s.Config.Resolver.Type,
 	}, nil
 }

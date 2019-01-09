@@ -8,9 +8,9 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func (g *Schema) buildEnum(typ *ast.Definition) *Enum {
-	namedType := g.NamedTypes[typ.Name]
-	if typ.Kind != ast.Enum || strings.HasPrefix(typ.Name, "__") || g.Config.Models.UserDefined(typ.Name) {
+func (b *builder) buildEnum(typ *ast.Definition) *Enum {
+	namedType := b.NamedTypes[typ.Name]
+	if typ.Kind != ast.Enum || strings.HasPrefix(typ.Name, "__") || b.Config.Models.UserDefined(typ.Name) {
 		return nil
 	}
 
@@ -22,10 +22,10 @@ func (g *Schema) buildEnum(typ *ast.Definition) *Enum {
 	enum := Enum{
 		Definition: namedType,
 		Values:     values,
-		InTypemap:  g.Config.Models.UserDefined(typ.Name),
+		InTypemap:  b.Config.Models.UserDefined(typ.Name),
 	}
 
-	enum.Definition.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(enum.Definition.GQLDefinition.Name), nil), nil, nil)
+	enum.Definition.GoType = types.NewNamed(types.NewTypeName(0, b.Config.Model.Pkg(), templates.ToCamel(enum.Definition.GQLDefinition.Name), nil), nil, nil)
 
 	return &enum
 }

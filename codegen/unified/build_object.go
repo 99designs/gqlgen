@@ -3,7 +3,6 @@ package unified
 import (
 	"go/types"
 	"log"
-
 	"strings"
 
 	"github.com/pkg/errors"
@@ -11,32 +10,26 @@ import (
 )
 
 func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
+	dirs, err := g.getDirectives(typ.Directives)
+	if err != nil {
+		return nil, err
+	}
+
+	isRoot := typ == g.Schema.Query || typ == g.Schema.Mutation || typ == g.Schema.Subscription
+
 	obj := &Object{
-		Definition: g.NamedTypes[typ.Name],
-		InTypemap:  g.Config.Models.UserDefined(typ.Name),
+		Definition:         g.NamedTypes[typ.Name],
+		InTypemap:          g.Config.Models.UserDefined(typ.Name) || isRoot,
+		Root:               isRoot,
+		DisableConcurrency: typ == g.Schema.Mutation,
+		Stream:             typ == g.Schema.Subscription,
+		Directives:         dirs,
+		ResolverInterface: types.NewNamed(
+			types.NewTypeName(0, g.Config.Exec.Pkg(), typ.Name+"Resolver", nil),
+			nil,
+			nil,
+		),
 	}
-
-	tt := types.NewTypeName(0, g.Config.Exec.Pkg(), obj.Definition.GQLDefinition.Name+"Resolver", nil)
-	obj.ResolverInterface = types.NewNamed(tt, nil, nil)
-
-	if typ == g.Schema.Query {
-		obj.Root = true
-		obj.InTypemap = true
-	}
-
-	if typ == g.Schema.Mutation {
-		obj.Root = true
-		obj.DisableConcurrency = true
-		obj.InTypemap = true
-	}
-
-	if typ == g.Schema.Subscription {
-		obj.Root = true
-		obj.Stream = true
-		obj.InTypemap = true
-	}
-
-	obj.Satisfies = append(obj.Satisfies, typ.Interfaces...)
 
 	for _, intf := range g.Schema.GetImplements(typ) {
 		obj.Implements = append(obj.Implements, g.NamedTypes[intf.Name])
@@ -52,14 +45,16 @@ func (g *Schema) buildObject(typ *ast.Definition) (*Object, error) {
 			return nil, err
 		}
 
+		if typ.Kind == ast.InputObject && !f.TypeReference.Definition.GQLDefinition.IsInputType() {
+			return nil, errors.Errorf(
+				"%s cannot be used as a field of %s. only input and scalar types are allowed",
+				f.Definition.GQLDefinition.Name,
+				obj.Definition.GQLDefinition.Name,
+			)
+		}
+
 		obj.Fields = append(obj.Fields, f)
 	}
-
-	dirs, err := g.getDirectives(typ.Directives)
-	if err != nil {
-		return nil, err
-	}
-	obj.Directives = dirs
 
 	if _, isMap := obj.Definition.GoType.(*types.Map); !isMap && obj.InTypemap {
 		for _, bindErr := range bindObject(obj, g.Config.StructTag) {

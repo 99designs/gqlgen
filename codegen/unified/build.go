@@ -57,7 +57,7 @@ func NewSchema(cfg *config.Config) (*Schema, error) {
 
 			g.Objects = append(g.Objects, obj)
 		case ast.InputObject:
-			input, err := g.buildInput(schemaType)
+			input, err := g.buildObject(schemaType)
 			if err != nil {
 				return nil, errors.Wrap(err, "unable to build input definition")
 			}

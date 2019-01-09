@@ -25,7 +25,6 @@ const (
 type Object struct {
 	Definition         *TypeDefinition
 	Fields             []*Field
-	Satisfies          []string
 	Implements         []*TypeDefinition
 	ResolverInterface  types.Type
 	Root               bool
@@ -65,7 +64,7 @@ type Objects []*Object
 
 func (o *Object) Implementors() string {
 	satisfiedBy := strconv.Quote(o.Definition.GQLDefinition.Name)
-	for _, s := range o.Satisfies {
+	for _, s := range o.Definition.GQLDefinition.Interfaces {
 		satisfiedBy += ", " + strconv.Quote(s)
 	}
 	return "[]string{" + satisfiedBy + "}"

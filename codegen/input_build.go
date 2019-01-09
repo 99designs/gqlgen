@@ -1,8 +1,9 @@
 package codegen
 
 import (
-	"go/types"
 	"sort"
+
+	"go/types"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
@@ -20,13 +21,8 @@ func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Ob
 				return nil, err
 			}
 
-			def, err := findGoType(prog, input.Package, input.GoType)
-			if err != nil {
-				return nil, errors.Wrap(err, "cannot find type")
-			}
-			if def != nil {
-				input.Marshaler = buildInputMarshaler(typ, def)
-				bindErrs := bindObject(def.Type(), input, g.StructTag)
+			if _, isMap := input.Definition.GoType.(*types.Map); !isMap {
+				bindErrs := bindObject(input, g.StructTag)
 				if len(bindErrs) > 0 {
 					return nil, bindErrs
 				}
@@ -37,14 +33,14 @@ func (g *Generator) buildInputs(namedTypes NamedTypes, prog *loader.Program) (Ob
 	}
 
 	sort.Slice(inputs, func(i, j int) bool {
-		return inputs[i].GQLType < inputs[j].GQLType
+		return inputs[i].Definition.GQLDefinition.Name < inputs[j].Definition.GQLDefinition.Name
 	})
 
 	return inputs, nil
 }
 
 func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, error) {
-	obj := &Object{TypeDefinition: types[typ.Name]}
+	obj := &Object{Definition: types[typ.Name]}
 	typeEntry, entryExists := g.Models[typ.Name]
 
 	for _, field := range typ.Fields {
@@ -73,8 +69,12 @@ func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, 
 			}
 		}
 
-		if !newField.TypeReference.IsInput && !newField.TypeReference.IsScalar {
-			return nil, errors.Errorf("%s cannot be used as a field of %s. only input and scalar types are allowed", newField.GQLType, obj.GQLType)
+		if !newField.TypeReference.Definition.GQLDefinition.IsInputType() {
+			return nil, errors.Errorf(
+				"%s cannot be used as a field of %s. only input and scalar types are allowed",
+				newField.Definition.GQLDefinition.Name,
+				obj.Definition.GQLDefinition.Name,
+			)
 		}
 
 		obj.Fields = append(obj.Fields, newField)
@@ -87,21 +87,4 @@ func (g *Generator) buildInput(types NamedTypes, typ *ast.Definition) (*Object, 
 	obj.Directives = dirs
 
 	return obj, nil
-}
-
-// if user has implemented an UnmarshalGQL method on the input type manually, use it
-// otherwise we will generate one.
-func buildInputMarshaler(typ *ast.Definition, def types.Object) *TypeImplementation {
-	switch def := def.(type) {
-	case *types.TypeName:
-		namedType := def.Type().(*types.Named)
-		for i := 0; i < namedType.NumMethods(); i++ {
-			method := namedType.Method(i)
-			if method.Name() == "UnmarshalGQL" {
-				return nil
-			}
-		}
-	}
-
-	return &TypeImplementation{GoType: typ.Name}
 }

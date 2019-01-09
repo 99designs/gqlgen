@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"go/types"
 	"log"
 	"os"
 	"path/filepath"
@@ -40,14 +41,6 @@ func (g *Generator) Generate() error {
 	_ = syscall.Unlink(g.Exec.Filename)
 	_ = syscall.Unlink(g.Model.Filename)
 
-	namedTypes := g.buildNamedTypes()
-
-	directives, err := g.buildDirectives(namedTypes)
-	if err != nil {
-		return err
-	}
-	g.Directives = directives
-
 	modelsBuild, err := g.models()
 	if err != nil {
 		return errors.Wrap(err, "model plan failed")
@@ -58,15 +51,15 @@ func (g *Generator) Generate() error {
 		}
 
 		for _, model := range modelsBuild.Models {
-			modelCfg := g.Models[model.GQLType]
-			modelCfg.Model = g.Model.ImportPath() + "." + model.GoType
-			g.Models[model.GQLType] = modelCfg
+			modelCfg := g.Models[model.Definition.GQLDefinition.Name]
+			modelCfg.Model = types.TypeString(model.Definition.GoType, nil)
+			g.Models[model.Definition.GQLDefinition.Name] = modelCfg
 		}
 
 		for _, enum := range modelsBuild.Enums {
-			modelCfg := g.Models[enum.GQLType]
-			modelCfg.Model = g.Model.ImportPath() + "." + enum.GoType
-			g.Models[enum.GQLType] = modelCfg
+			modelCfg := g.Models[enum.Definition.GQLDefinition.Name]
+			modelCfg.Model = types.TypeString(enum.Definition.GoType, nil)
+			g.Models[enum.Definition.GQLDefinition.Name] = modelCfg
 		}
 	}
 

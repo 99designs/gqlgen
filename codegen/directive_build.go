@@ -25,7 +25,7 @@ func (g *Generator) buildDirectives(types NamedTypes) (map[string]*Directive, er
 				GoVarName:     sanitizeArgName(arg.Name),
 			}
 
-			if !newArg.TypeReference.IsInput && !newArg.TypeReference.IsScalar {
+			if !newArg.TypeReference.Definition.GQLDefinition.IsInputType() {
 				return nil, errors.Errorf("%s cannot be used as argument of directive %s(%s) only input and scalar types are allowed", arg.Type, dir.Name, arg.Name)
 			}
 

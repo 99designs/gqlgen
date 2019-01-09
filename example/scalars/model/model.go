@@ -2,24 +2,44 @@ package model
 
 import (
 	"errors"
+	"external"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
 	"time"
 
-	"external"
-
 	"github.com/99designs/gqlgen/graphql"
 )
 
 type Banned bool
 
+func (b Banned) MarshalGQL(w io.Writer) {
+	if b {
+		w.Write([]byte("true"))
+	} else {
+		w.Write([]byte("false"))
+	}
+}
+
+func (b *Banned) UnmarshalGQL(v interface{}) error {
+	switch v := v.(type) {
+	case string:
+		*b = "true" == strings.ToLower(v)
+		return nil
+	case bool:
+		*b = Banned(v)
+		return nil
+	default:
+		return fmt.Errorf("%T is not a bool", v)
+	}
+}
+
 type User struct {
 	ID       external.ObjectID
 	Name     string
 	Created  time.Time // direct binding to builtin types with external Marshal/Unmarshal methods
-	IsBanned Banned    // aliased primitive
+	IsBanned Banned
 	Address  Address
 	Tier     Tier
 }

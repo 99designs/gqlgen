@@ -17,21 +17,21 @@ func (g *Generator) buildInterfaces(types NamedTypes, prog *loader.Program) []*I
 	}
 
 	sort.Slice(interfaces, func(i, j int) bool {
-		return interfaces[i].GQLType < interfaces[j].GQLType
+		return interfaces[i].Definition.GQLDefinition.Name < interfaces[j].Definition.GQLDefinition.Name
 	})
 
 	return interfaces
 }
 
 func (g *Generator) buildInterface(types NamedTypes, typ *ast.Definition, prog *loader.Program) *Interface {
-	i := &Interface{TypeDefinition: types[typ.Name]}
+	i := &Interface{Definition: types[typ.Name]}
 
 	for _, implementor := range g.schema.GetPossibleTypes(typ) {
 		t := types[implementor.Name]
 
 		i.Implementors = append(i.Implementors, InterfaceImplementor{
-			TypeDefinition: t,
-			ValueReceiver:  g.isValueReceiver(types[typ.Name], t, prog),
+			Definition:    t,
+			ValueReceiver: g.isValueReceiver(types[typ.Name], t, prog),
 		})
 	}
 
@@ -39,12 +39,12 @@ func (g *Generator) buildInterface(types NamedTypes, typ *ast.Definition, prog *
 }
 
 func (g *Generator) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition, prog *loader.Program) bool {
-	interfaceType, err := findGoInterface(prog, intf.Package, intf.GoType)
+	interfaceType, err := findGoInterface(intf.GoType)
 	if interfaceType == nil || err != nil {
 		return true
 	}
 
-	implementorType, err := findGoNamedType(prog, implementor.Package, implementor.GoType)
+	implementorType, err := findGoNamedType(implementor.GoType)
 	if implementorType == nil || err != nil {
 		return true
 	}

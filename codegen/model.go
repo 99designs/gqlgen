@@ -1,7 +1,7 @@
 package codegen
 
 type Model struct {
-	*TypeDefinition
+	Definition  *TypeDefinition
 	Description string
 	Fields      []ModelField
 	Implements  []*TypeDefinition

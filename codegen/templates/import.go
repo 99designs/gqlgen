@@ -5,6 +5,8 @@ import (
 	"go/build"
 	"strconv"
 
+	"go/types"
+
 	"github.com/99designs/gqlgen/internal/gopath"
 )
 
@@ -82,6 +84,8 @@ func (s *Imports) Lookup(path string) string {
 		return ""
 	}
 
+	path = gopath.NormalizeVendor(path)
+
 	// if we are referencing our own package we dont need an import
 	if gopath.MustDir2Import(s.destDir) == path {
 		return ""
@@ -114,6 +118,12 @@ func (s *Imports) Lookup(path string) string {
 	imp.Alias = alias
 
 	return imp.Alias
+}
+
+func (s *Imports) LookupType(t types.Type) string {
+	return types.TypeString(t, func(i *types.Package) string {
+		return s.Lookup(i.Path())
+	})
 }
 
 func (s Imports) findByPath(importPath string) *Import {

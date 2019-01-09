@@ -1,6 +1,6 @@
-	{{- if .IsMarshaled }}
-	func Unmarshal{{ .GQLType }}(v interface{}) ({{.FullName}}, error) {
-		var it {{.FullName}}
+	{{- if .Definition.IsMarshaled }}
+	func Unmarshal{{ .Definition.GQLDefinition.Name }}(v interface{}) ({{.Definition.GoType | ref}}, error) {
+		var it {{.Definition.GoType | ref}}
 		var asMap = v.(map[string]interface{})
 		{{ range $field := .Fields}}
 			{{- if $field.Default}}
@@ -27,7 +27,7 @@
 	}
 	{{- end }}
 
-	func (e *executableSchema) {{ .GQLType }}Middleware(ctx context.Context, obj *{{.FullName}}) (*{{.FullName}}, error) {
+	func (e *executableSchema) {{ .Definition.GQLDefinition.Name }}Middleware(ctx context.Context, obj *{{.Definition.GoType | ref}}) (*{{.Definition.GoType | ref}}, error) {
 			{{ if .Directives }}
 		cObj, err := chainFieldMiddleware(
 			[]graphql.FieldMiddleware{
@@ -50,9 +50,9 @@
 		if err != nil || cObj == nil {
 			return nil ,err
 		}
-		obj, ok := cObj.(*{{.FullName}})
+		obj, ok := cObj.(*{{.Definition.GoType | ref}})
 		if !ok {
-			return nil, errors.New("expect {{.FullName}}")
+			return nil, errors.New("expect {{.Definition.GoType | ref}}")
 		}
 		{{ end }}
 
@@ -85,22 +85,22 @@
 			}
 
 			{{ if $field.IsPtr }}
-				if data, ok := c{{$field.GoFieldName}}.({{ $field.FullName }}); ok {
+				if data, ok := c{{$field.GoFieldName}}.({{ $field.Definition.GoType | ref }}); ok {
             		obj.{{$field.GoFieldName}} = &data
             	} else {
-            		return obj, errors.New("expect {{ $field.Signature }}")
+            		return obj, errors.New("expect {{ $field.GoType | ref }}")
             	}
 			{{else}}
-            	if data, ok := c{{$field.GoFieldName}}.({{ $field.Signature }}); ok{
+            	if data, ok := c{{$field.GoFieldName}}.({{ $field.GoType | ref }}); ok{
             		obj.{{$field.GoFieldName}} = data
             	}else{
-            		return obj, errors.New("{{$field.GoFieldName}} expect {{$field.Signature }}")
+            		return obj, errors.New("{{$field.GoFieldName}} expect {{$field.GoType | ref }}")
             	}
 			{{ end }}
 
 			{{- end }}
 
-			{{ if $field.IsInput }}
+			{{ if eq $field.Definition.GQLDefinition.Kind "INPUT_OBJECT" }}
 				{{ $field.Middleware (print "obj." $field.GoFieldName ) (print "obj." $field.GoFieldName ) }}
 			{{- end }}
 		{{- end }}

@@ -237,7 +237,6 @@ func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context,
 	args["episode"] = arg0
 	var arg1 Review
 	if tmp, ok := rawArgs["review"]; ok {
-
 		var err error
 		arg1, err = UnmarshalReviewInput(tmp)
 		if err != nil {
@@ -249,7 +248,6 @@ func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context,
 			return nil, err
 		}
 		arg1 = *mReviewInput1
-
 	}
 	args["review"] = arg1
 	return args, nil

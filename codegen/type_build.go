@@ -1,63 +1,88 @@
 package codegen
 
 import (
+	"fmt"
 	"go/types"
 	"strings"
 
+	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
 )
 
 // namedTypeFromSchema objects for every graphql type, including scalars. There should only be one instance of TypeReference for each thing
-func (g *Generator) buildNamedTypes() NamedTypes {
-	types := map[string]*TypeDefinition{}
+func (g *Generator) buildNamedTypes(prog *loader.Program) (NamedTypes, error) {
+	ts := map[string]*TypeDefinition{}
 	for _, schemaType := range g.schema.Types {
-		t := namedTypeFromSchema(schemaType)
-
-		if userEntry, ok := g.Models[t.GQLType]; ok && userEntry.Model != "" {
-			t.IsUserDefined = true
-			t.Package, t.GoType = pkgAndType(userEntry.Model)
-		} else if t.IsScalar {
-			t.Package = "github.com/99designs/gqlgen/graphql"
-			t.GoType = "String"
+		t := &TypeDefinition{
+			GQLDefinition: schemaType,
 		}
+		ts[t.GQLDefinition.Name] = t
 
-		types[t.GQLType] = t
-	}
-	return types
-}
+		var pkgName, typeName string
+		if userEntry, ok := g.Models[t.GQLDefinition.Name]; ok && userEntry.Model != "" {
+			// special case for maps
+			if userEntry.Model == "map[string]interface{}" {
+				t.GoType = types.NewMap(types.Typ[types.String], types.NewInterface(nil, nil).Complete())
 
-func (g *Generator) bindTypes(namedTypes NamedTypes, destDir string, prog *loader.Program) {
-	for _, t := range namedTypes {
-		if t.Package == "" {
+				continue
+			}
+
+			pkgName, typeName = pkgAndType(userEntry.Model)
+		} else if t.GQLDefinition.Kind == ast.Scalar {
+			pkgName = "github.com/99designs/gqlgen/graphql"
+			typeName = "String"
+		} else {
+			// Missing models, but we need to set up the types so any references will point to the code that will
+			// get generated
+			t.GoType = types.NewNamed(types.NewTypeName(0, g.Config.Model.Pkg(), templates.ToCamel(t.GQLDefinition.Name), nil), nil, nil)
+
 			continue
 		}
 
-		def, _ := findGoType(prog, t.Package, "Marshal"+t.GoType)
-		switch def := def.(type) {
-		case *types.Func:
-			sig := def.Type().(*types.Signature)
-			cpy := t.TypeImplementation
-			t.Marshaler = &cpy
-
-			t.Package, t.GoType = pkgAndType(sig.Params().At(0).Type().String())
+		if pkgName == "" {
+			return nil, fmt.Errorf("missing package name for %s", schemaType.Name)
 		}
-	}
-}
 
-// namedTypeFromSchema objects for every graphql type, including primitives.
-// don't recurse into object fields or interfaces yet, lets make sure we have collected everything first.
-func namedTypeFromSchema(schemaType *ast.Definition) *TypeDefinition {
-	switch schemaType.Kind {
-	case ast.Scalar, ast.Enum:
-		return &TypeDefinition{GQLType: schemaType.Name, IsScalar: true}
-	case ast.Interface, ast.Union:
-		return &TypeDefinition{GQLType: schemaType.Name, IsInterface: true}
-	case ast.InputObject:
-		return &TypeDefinition{GQLType: schemaType.Name, IsInput: true}
-	default:
-		return &TypeDefinition{GQLType: schemaType.Name}
+		// External marshal functions
+		def, _ := findGoType(prog, pkgName, "Marshal"+typeName)
+		if f, isFunc := def.(*types.Func); isFunc {
+			sig := def.Type().(*types.Signature)
+			t.GoType = sig.Params().At(0).Type()
+			t.Marshaler = f
+
+			unmarshal, err := findGoType(prog, pkgName, "Unmarshal"+typeName)
+			if err != nil {
+				return nil, errors.Wrapf(err, "unable to find unmarshal func for %s.%s", pkgName, typeName)
+			}
+			t.Unmarshaler = unmarshal.(*types.Func)
+			continue
+		}
+
+		// Normal object binding
+		obj, err := findGoType(prog, pkgName, typeName)
+		if err != nil {
+			return nil, errors.Wrapf(err, "unable to find %s.%s", pkgName, typeName)
+		}
+		t.GoType = obj.Type()
+
+		namedType := obj.Type().(*types.Named)
+		hasUnmarshal := false
+		for i := 0; i < namedType.NumMethods(); i++ {
+			switch namedType.Method(i).Name() {
+			case "UnmarshalGQL":
+				hasUnmarshal = true
+			}
+		}
+
+		// Special case to reference generated unmarshal functions
+		if !hasUnmarshal {
+			t.Unmarshaler = types.NewFunc(0, g.Config.Exec.Pkg(), "Unmarshal"+schemaType.Name, nil)
+		}
+
 	}
+	return ts, nil
 }
 
 // take a string in the form github.com/package/blah.TypeReference and split it into package and type

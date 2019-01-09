@@ -41,25 +41,24 @@ func findGoType(prog *loader.Program, pkgName string, typeName string) (types.Ob
 	return nil, errors.Errorf("unable to find type %s\n", fullName)
 }
 
-func findGoNamedType(prog *loader.Program, pkgName string, typeName string) (*types.Named, error) {
-	def, err := findGoType(prog, pkgName, typeName)
-	if err != nil {
-		return nil, err
-	}
+func findGoNamedType(def types.Type) (*types.Named, error) {
 	if def == nil {
 		return nil, nil
 	}
 
-	namedType, ok := def.Type().(*types.Named)
+	namedType, ok := def.(*types.Named)
 	if !ok {
-		return nil, errors.Errorf("expected %s to be a named type, instead found %T\n", typeName, def.Type())
+		return nil, errors.Errorf("expected %s to be a named type, instead found %T\n", def.String(), def)
 	}
 
 	return namedType, nil
 }
 
-func findGoInterface(prog *loader.Program, pkgName string, typeName string) (*types.Interface, error) {
-	namedType, err := findGoNamedType(prog, pkgName, typeName)
+func findGoInterface(def types.Type) (*types.Interface, error) {
+	if def == nil {
+		return nil, nil
+	}
+	namedType, err := findGoNamedType(def)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +68,7 @@ func findGoInterface(prog *loader.Program, pkgName string, typeName string) (*ty
 
 	underlying, ok := namedType.Underlying().(*types.Interface)
 	if !ok {
-		return nil, errors.Errorf("expected %s to be a named interface, instead found %s", typeName, namedType.String())
+		return nil, errors.Errorf("expected %s to be a named interface, instead found %s", def.String(), namedType.String())
 	}
 
 	return underlying, nil
@@ -185,7 +184,7 @@ type BindError struct {
 func (b BindError) Error() string {
 	return fmt.Sprintf(
 		"Unable to bind %s.%s to %s\n  %s\n  %s",
-		b.object.GQLType,
+		b.object.Definition.GQLDefinition.Name,
 		b.field.GQLName,
 		b.typ.String(),
 		b.methodErr.Error(),
@@ -203,7 +202,7 @@ func (b BindErrors) Error() string {
 	return strings.Join(errs, "\n\n")
 }
 
-func bindObject(t types.Type, object *Object, structTag string) BindErrors {
+func bindObject(object *Object, structTag string) BindErrors {
 	var errs BindErrors
 	for i := range object.Fields {
 		field := &object.Fields[i]
@@ -213,18 +212,18 @@ func bindObject(t types.Type, object *Object, structTag string) BindErrors {
 		}
 
 		// first try binding to a method
-		methodErr := bindMethod(t, field)
+		methodErr := bindMethod(object.Definition.GoType, field)
 		if methodErr == nil {
 			continue
 		}
 
 		// otherwise try binding to a var
-		varErr := bindVar(t, field, structTag)
+		varErr := bindVar(object.Definition.GoType, field, structTag)
 
 		if varErr != nil {
 			errs = append(errs, BindError{
 				object:    object,
-				typ:       t,
+				typ:       object.Definition.GoType,
 				field:     field,
 				varErr:    varErr,
 				methodErr: methodErr,
@@ -320,7 +319,7 @@ nextArg:
 		for _, oldArg := range field.Args {
 			if strings.EqualFold(oldArg.GQLName, param.Name()) {
 				if !field.ForceResolver {
-					oldArg.TypeReference.Modifiers = modifiersFromGoType(param.Type())
+					oldArg.TypeReference.GoType = param.Type()
 				}
 				newArgs = append(newArgs, oldArg)
 				continue nextArg
@@ -334,43 +333,15 @@ nextArg:
 }
 
 func validateTypeBinding(field *Field, goType types.Type) error {
-	gqlType := normalizeVendor(field.TypeReference.FullSignature())
+	gqlType := normalizeVendor(field.TypeReference.GoType.String())
 	goTypeStr := normalizeVendor(goType.String())
 
 	if equalTypes(goTypeStr, gqlType) {
-		field.TypeReference.Modifiers = modifiersFromGoType(goType)
-		return nil
-	}
-
-	// deal with type aliases
-	underlyingStr := normalizeVendor(goType.Underlying().String())
-	if equalTypes(underlyingStr, gqlType) {
-		field.TypeReference.Modifiers = modifiersFromGoType(goType)
-		pkg, typ := pkgAndType(goType.String())
-		field.AliasedType = &TypeImplementation{GoType: typ, Package: pkg}
+		field.TypeReference.GoType = goType
 		return nil
 	}
 
 	return fmt.Errorf("%s is not compatible with %s", gqlType, goTypeStr)
-}
-
-func modifiersFromGoType(t types.Type) []string {
-	var modifiers []string
-	for {
-		switch val := t.(type) {
-		case *types.Pointer:
-			modifiers = append(modifiers, modPtr)
-			t = val.Elem()
-		case *types.Array:
-			modifiers = append(modifiers, modList)
-			t = val.Elem()
-		case *types.Slice:
-			modifiers = append(modifiers, modList)
-			t = val.Elem()
-		default:
-			return modifiers
-		}
-	}
 }
 
 var modsRegex = regexp.MustCompile(`^(\*|\[\])*`)

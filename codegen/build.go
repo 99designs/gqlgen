@@ -45,8 +45,6 @@ type ServerBuild struct {
 
 // Create a list of models that need to be generated
 func (g *Generator) models() (*ModelBuild, error) {
-	namedTypes := g.buildNamedTypes()
-
 	progLoader := g.newLoaderWithoutErrors()
 
 	prog, err := progLoader.Load()
@@ -54,7 +52,16 @@ func (g *Generator) models() (*ModelBuild, error) {
 		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	g.bindTypes(namedTypes, g.Model.Dir(), prog)
+	namedTypes, err := g.buildNamedTypes(prog)
+	if err != nil {
+		return nil, errors.Wrap(err, "binding types failed")
+	}
+
+	directives, err := g.buildDirectives(namedTypes)
+	if err != nil {
+		return nil, err
+	}
+	g.Directives = directives
 
 	models, err := g.buildModels(namedTypes, prog)
 	if err != nil {
@@ -77,11 +84,16 @@ func (g *Generator) resolver() (*ResolverBuild, error) {
 		return nil, err
 	}
 
-	destDir := g.Resolver.Dir()
+	namedTypes, err := g.buildNamedTypes(prog)
+	if err != nil {
+		return nil, errors.Wrap(err, "binding types failed")
+	}
 
-	namedTypes := g.buildNamedTypes()
-
-	g.bindTypes(namedTypes, destDir, prog)
+	directives, err := g.buildDirectives(namedTypes)
+	if err != nil {
+		return nil, err
+	}
+	g.Directives = directives
 
 	objects, err := g.buildObjects(namedTypes, prog)
 	if err != nil {
@@ -109,15 +121,22 @@ func (g *Generator) server(destDir string) *ServerBuild {
 
 // bind a schema together with some code to generate a Build
 func (g *Generator) bind() (*Build, error) {
-	namedTypes := g.buildNamedTypes()
-
 	progLoader := g.newLoaderWithoutErrors()
 	prog, err := progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	g.bindTypes(namedTypes, g.Exec.Dir(), prog)
+	namedTypes, err := g.buildNamedTypes(prog)
+	if err != nil {
+		return nil, errors.Wrap(err, "binding types failed")
+	}
+
+	directives, err := g.buildDirectives(namedTypes)
+	if err != nil {
+		return nil, err
+	}
+	g.Directives = directives
 
 	objects, err := g.buildObjects(namedTypes, prog)
 	if err != nil {
@@ -125,10 +144,6 @@ func (g *Generator) bind() (*Build, error) {
 	}
 
 	inputs, err := g.buildInputs(namedTypes, prog)
-	if err != nil {
-		return nil, err
-	}
-	directives, err := g.buildDirectives(namedTypes)
 	if err != nil {
 		return nil, err
 	}

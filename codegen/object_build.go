@@ -1,15 +1,18 @@
 package codegen
 
 import (
-	"log"
 	"sort"
+
+	"go/types"
+
+	"log"
 
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
 )
 
-func (g *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Objects, error) {
+func (g *Generator) buildObjects(ts NamedTypes, prog *loader.Program) (Objects, error) {
 	var objects Objects
 
 	for _, typ := range g.schema.Types {
@@ -17,17 +20,13 @@ func (g *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Object
 			continue
 		}
 
-		obj, err := g.buildObject(types, typ)
+		obj, err := g.buildObject(prog, ts, typ)
 		if err != nil {
 			return nil, err
 		}
 
-		def, err := findGoType(prog, obj.Package, obj.GoType)
-		if err != nil {
-			return nil, err
-		}
-		if def != nil {
-			for _, bindErr := range bindObject(def.Type(), obj, g.StructTag) {
+		if _, isMap := obj.Definition.GoType.(*types.Map); !isMap {
+			for _, bindErr := range bindObject(obj, g.StructTag) {
 				log.Println(bindErr.Error())
 				log.Println("  Adding resolver method")
 			}
@@ -37,7 +36,7 @@ func (g *Generator) buildObjects(types NamedTypes, prog *loader.Program) (Object
 	}
 
 	sort.Slice(objects, func(i, j int) bool {
-		return objects[i].GQLType < objects[j].GQLType
+		return objects[i].Definition.GQLDefinition.Name < objects[j].Definition.GQLDefinition.Name
 	})
 
 	return objects, nil
@@ -81,11 +80,12 @@ func sanitizeArgName(name string) string {
 	return name
 }
 
-func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object, error) {
-	obj := &Object{TypeDefinition: types[typ.Name]}
+func (g *Generator) buildObject(prog *loader.Program, ts NamedTypes, typ *ast.Definition) (*Object, error) {
+	obj := &Object{Definition: ts[typ.Name]}
 	typeEntry, entryExists := g.Models[typ.Name]
 
-	obj.ResolverInterface = &TypeImplementation{GoType: obj.GQLType + "Resolver"}
+	tt := types.NewTypeName(0, g.Config.Exec.Pkg(), obj.Definition.GQLDefinition.Name+"Resolver", nil)
+	obj.ResolverInterface = types.NewNamed(tt, nil, nil)
 
 	if typ == g.schema.Query {
 		obj.Root = true
@@ -104,13 +104,18 @@ func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object,
 	obj.Satisfies = append(obj.Satisfies, typ.Interfaces...)
 
 	for _, intf := range g.schema.GetImplements(typ) {
-		obj.Implements = append(obj.Implements, types[intf.Name])
+		obj.Implements = append(obj.Implements, ts[intf.Name])
 	}
 
 	for _, field := range typ.Fields {
 		if typ == g.schema.Query && field.Name == "__type" {
+			schemaType, err := findGoType(prog, "github.com/99designs/gqlgen/graphql/introspection", "Schema")
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to find root schema introspection type")
+			}
+
 			obj.Fields = append(obj.Fields, Field{
-				TypeReference:  &TypeReference{types["__Schema"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
+				TypeReference:  &TypeReference{ts["__Schema"], types.NewPointer(schemaType.Type()), ast.NamedType("__Schema", nil)},
 				GQLName:        "__schema",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
@@ -121,14 +126,19 @@ func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object,
 			continue
 		}
 		if typ == g.schema.Query && field.Name == "__schema" {
+			typeType, err := findGoType(prog, "github.com/99designs/gqlgen/graphql/introspection", "Type")
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to find root schema introspection type")
+			}
+
 			obj.Fields = append(obj.Fields, Field{
-				TypeReference:  &TypeReference{types["__Type"], []string{modPtr}, ast.NamedType("__Schema", nil), nil},
+				TypeReference:  &TypeReference{ts["__Type"], types.NewPointer(typeType.Type()), ast.NamedType("__Schema", nil)},
 				GQLName:        "__type",
 				GoFieldType:    GoFieldMethod,
 				GoReceiverName: "ec",
 				GoFieldName:    "introspectType",
 				Args: []FieldArgument{
-					{GQLName: "name", TypeReference: &TypeReference{types["String"], []string{}, ast.NamedType("String", nil), nil}, Object: &Object{}},
+					{GQLName: "name", TypeReference: &TypeReference{ts["String"], types.Typ[types.String], ast.NamedType("String", nil)}, Object: &Object{}},
 				},
 				Object: obj,
 			})
@@ -152,14 +162,14 @@ func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object,
 			}
 			newArg := FieldArgument{
 				GQLName:       arg.Name,
-				TypeReference: types.getType(arg.Type),
+				TypeReference: ts.getType(arg.Type),
 				Object:        obj,
 				GoVarName:     sanitizeArgName(arg.Name),
 				Directives:    dirs,
 			}
 
-			if !newArg.TypeReference.IsInput && !newArg.TypeReference.IsScalar {
-				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.GQLType, field.Name)
+			if !newArg.TypeReference.Definition.GQLDefinition.IsInputType() {
+				return nil, errors.Errorf("%s cannot be used as argument of %s.%s. only input and scalar types are allowed", arg.Type, obj.Definition.GQLDefinition.Name, field.Name)
 			}
 
 			if arg.DefaultValue != nil {
@@ -174,7 +184,7 @@ func (g *Generator) buildObject(types NamedTypes, typ *ast.Definition) (*Object,
 
 		obj.Fields = append(obj.Fields, Field{
 			GQLName:       field.Name,
-			TypeReference: types.getType(field.Type),
+			TypeReference: ts.getType(field.Type),
 			Args:          args,
 			Object:        obj,
 			GoFieldName:   goName,

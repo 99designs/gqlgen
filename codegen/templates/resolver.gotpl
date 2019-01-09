@@ -23,19 +23,19 @@ type {{.ResolverType}} struct {}
 
 {{ range $object := .Objects -}}
 	{{- if $object.HasResolvers -}}
-		func (r *{{$.ResolverType}}) {{$object.GQLType}}() {{ $object.ResolverInterface.FullName }} {
-			return &{{lcFirst $object.GQLType}}Resolver{r}
+		func (r *{{$.ResolverType}}) {{$object.Definition.GQLDefinition.Name}}() {{ $object.ResolverInterface | ref }} {
+			return &{{lcFirst $object.Definition.GQLDefinition.Name}}Resolver{r}
 		}
 	{{ end -}}
 {{ end }}
 
 {{ range $object := .Objects -}}
 	{{- if $object.HasResolvers -}}
-		type {{lcFirst $object.GQLType}}Resolver struct { *Resolver }
+		type {{lcFirst $object.Definition.GQLDefinition.Name}}Resolver struct { *Resolver }
 
 		{{ range $field := $object.Fields -}}
 			{{- if $field.IsResolver -}}
-			func (r *{{lcFirst $object.GQLType}}Resolver) {{ $field.ShortResolverDeclaration }} {
+			func (r *{{lcFirst $object.Definition.GQLDefinition.Name}}Resolver) {{ $field.ShortResolverDeclaration }} {
 				panic("not implemented")
 			}
 			{{ end -}}

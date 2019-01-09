@@ -1,7 +1,8 @@
 package codegen
 
 import (
-	"github.com/99designs/gqlgen/codegen/templates"
+	"go/types"
+
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -10,70 +11,43 @@ type NamedTypes map[string]*TypeDefinition
 // TypeDefinition is the static reference to a graphql type. It can be referenced by many TypeReferences,
 // and has one or more backing implementations in go.
 type TypeDefinition struct {
-	TypeImplementation
-	IsScalar    bool
-	IsInterface bool
-	IsInput     bool
-	GQLType     string              // Name of the graphql type
-	Marshaler   *TypeImplementation // If this type has an external marshaler this will be set
-}
-
-// TypeImplementation is a reference to exisiting golang code that either meets the graphql.Marshaler interface
-// or points to the root of a pair of external Marshal[TYPE] and Unmarshal[TYPE] functions.
-type TypeImplementation struct {
-	GoType        string // Name of the go type
-	Package       string // the package the go type lives in
-	IsUserDefined bool   // does the type exist in the typemap
-}
-
-const (
-	modList = "[]"
-	modPtr  = "*"
-)
-
-func (t TypeImplementation) FullName() string {
-	return t.PkgDot() + t.GoType
-}
-
-func (t TypeImplementation) PkgDot() string {
-	name := templates.CurrentImports.Lookup(t.Package)
-	if name == "" {
-		return ""
-
-	}
-
-	return name + "."
+	GQLDefinition *ast.Definition
+	GoType        types.Type  // The backing go type, may be nil until after model generation
+	Marshaler     *types.Func // When using external marshalling functions this will point to the Marshal function
+	Unmarshaler   *types.Func // When using external marshalling functions this will point to the Unmarshal function
 }
 
 func (t TypeDefinition) IsMarshaled() bool {
-	return t.Marshaler != nil
+	return t.Marshaler != nil || t.Unmarshaler != nil
+}
+
+func (t TypeDefinition) IsEmptyInterface() bool {
+	i, isInterface := t.GoType.(*types.Interface)
+	return isInterface && i.NumMethods() == 0
+}
+
+func (n NamedTypes) goTypeForAst(t *ast.Type) types.Type {
+	if t.Elem != nil {
+		return types.NewSlice(n.goTypeForAst(t.Elem))
+	}
+
+	nt := n[t.NamedType]
+	gt := nt.GoType
+	if gt == nil {
+		panic("missing type " + t.NamedType)
+	}
+
+	if !t.NonNull && nt.GQLDefinition.Kind != ast.Interface {
+		return types.NewPointer(gt)
+	}
+
+	return gt
 }
 
 func (n NamedTypes) getType(t *ast.Type) *TypeReference {
-	orig := t
-	var modifiers []string
-	for {
-		if t.Elem != nil {
-			modifiers = append(modifiers, modList)
-			t = t.Elem
-		} else {
-			if !t.NonNull {
-				modifiers = append(modifiers, modPtr)
-			}
-			if n[t.NamedType] == nil {
-				panic("missing type " + t.NamedType)
-			}
-			res := &TypeReference{
-				TypeDefinition: n[t.NamedType],
-				Modifiers:      modifiers,
-				ASTType:        orig,
-			}
-
-			if res.IsInterface {
-				res.StripPtr()
-			}
-
-			return res
-		}
+	return &TypeReference{
+		Definition: n[t.Name()],
+		GoType:     n.goTypeForAst(t),
+		ASTType:    t,
 	}
 }

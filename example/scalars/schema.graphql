@@ -7,7 +7,7 @@ type User {
     id: ID!
     name: String!
     created: Timestamp
-    isBanned: Boolean!
+    isBanned: Banned!
     primitiveResolver: String!
     customResolver: Point!
     address: Address
@@ -22,7 +22,7 @@ type Address {
 input SearchArgs {
     location: Point
     createdAfter: Timestamp
-    isBanned: Boolean
+    isBanned: Banned # TODO: This can be a Boolean again once multiple backing types are allowed
 }
 
 enum Tier {
@@ -33,3 +33,4 @@ enum Tier {
 
 scalar Timestamp
 scalar Point
+scalar Banned

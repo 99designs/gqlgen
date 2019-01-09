@@ -38,7 +38,7 @@ type Config struct {
 type ResolverRoot interface {
 {{- range $object := .Objects -}}
 	{{ if $object.HasResolvers -}}
-		{{$object.GQLType}}() {{$object.GQLType}}Resolver
+		{{$object.Definition.GQLDefinition.Name}}() {{$object.Definition.GQLDefinition.Name}}Resolver
 	{{ end }}
 {{- end }}
 }
@@ -52,7 +52,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 {{ range $object := .Objects }}
 	{{ if not $object.IsReserved -}}
-		{{ $object.GQLType|toCamel }} struct {
+		{{ $object.Definition.GQLDefinition.Name|toCamel }} struct {
 		{{ range $field := $object.Fields -}}
 			{{ if not $field.IsReserved -}}
 				{{ $field.GQLName|toCamel }} {{ $field.ComplexitySignature }}
@@ -65,7 +65,7 @@ type ComplexityRoot struct {
 
 {{ range $object := .Objects -}}
 	{{ if $object.HasResolvers }}
-		type {{$object.GQLType}}Resolver interface {
+		type {{$object.Definition.GQLDefinition.Name}}Resolver interface {
 		{{ range $field := $object.Fields -}}
 			{{ $field.ShortResolverDeclaration }}
 		{{ end }}
@@ -107,8 +107,8 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		{{ if not $object.IsReserved }}
 			{{ range $field := $object.Fields }}
 				{{ if not $field.IsReserved }}
-					case "{{$object.GQLType}}.{{$field.GQLName}}":
-						if e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}} == nil {
+					case "{{$object.Definition.GQLDefinition.Name}}.{{$field.GQLName}}":
+						if e.complexity.{{$object.Definition.GQLDefinition.Name|toCamel}}.{{$field.GQLName|toCamel}} == nil {
 							break
 						}
 						{{ if $field.Args }}
@@ -117,7 +117,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 								return 0, false
 							}
 						{{ end }}
-						return e.complexity.{{$object.GQLType|toCamel}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
+						return e.complexity.{{$object.Definition.GQLDefinition.Name|toCamel}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
 				{{ end }}
 			{{ end }}
 		{{ end }}
@@ -131,7 +131,7 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-			data := ec._{{.QueryRoot.GQLType}}(ctx, op.SelectionSet)
+			data := ec._{{.QueryRoot.Definition.GQLDefinition.Name}}(ctx, op.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			return buf.Bytes()
@@ -151,7 +151,7 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-			data := ec._{{.MutationRoot.GQLType}}(ctx, op.SelectionSet)
+			data := ec._{{.MutationRoot.Definition.GQLDefinition.Name}}(ctx, op.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			return buf.Bytes()
@@ -171,7 +171,7 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 	{{- if .SubscriptionRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
-		next := ec._{{.SubscriptionRoot.GQLType}}(ctx, op.SelectionSet)
+		next := ec._{{.SubscriptionRoot.Definition.GQLDefinition.Name}}(ctx, op.SelectionSet)
 		if ec.Errors != nil {
 			return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
 		}

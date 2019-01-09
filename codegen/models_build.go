@@ -12,13 +12,16 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 
 	for _, typ := range g.schema.Types {
 		var model Model
+		if g.Models.UserDefined(typ.Name) {
+			continue
+		}
 		switch typ.Kind {
 		case ast.Object:
-			obj, err := g.buildObject(types, typ)
+			obj, err := g.buildObject(prog, types, typ)
 			if err != nil {
 				return nil, err
 			}
-			if obj.Root || obj.IsUserDefined {
+			if obj.Root {
 				continue
 			}
 			model = g.obj2Model(obj)
@@ -27,15 +30,9 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 			if err != nil {
 				return nil, err
 			}
-			if obj.IsUserDefined {
-				continue
-			}
 			model = g.obj2Model(obj)
 		case ast.Interface, ast.Union:
 			intf := g.buildInterface(types, typ, prog)
-			if intf.IsUserDefined {
-				continue
-			}
 			model = int2Model(intf)
 		default:
 			continue
@@ -46,7 +43,7 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 	}
 
 	sort.Slice(models, func(i, j int) bool {
-		return models[i].GQLType < models[j].GQLType
+		return models[i].Definition.GQLDefinition.Name < models[j].Definition.GQLDefinition.Name
 	})
 
 	return models, nil
@@ -54,13 +51,10 @@ func (g *Generator) buildModels(types NamedTypes, prog *loader.Program) ([]Model
 
 func (g *Generator) obj2Model(obj *Object) Model {
 	model := Model{
-		TypeDefinition: obj.TypeDefinition,
-		Implements:     obj.Implements,
-		Fields:         []ModelField{},
+		Definition: obj.Definition,
+		Implements: obj.Implements,
+		Fields:     []ModelField{},
 	}
-
-	model.GoType = ucFirst(obj.GQLType)
-	model.Marshaler = &TypeImplementation{GoType: obj.GoType}
 
 	for i := range obj.Fields {
 		field := &obj.Fields[i]
@@ -80,12 +74,9 @@ func (g *Generator) obj2Model(obj *Object) Model {
 
 func int2Model(obj *Interface) Model {
 	model := Model{
-		TypeDefinition: obj.TypeDefinition,
-		Fields:         []ModelField{},
+		Definition: obj.Definition,
+		Fields:     []ModelField{},
 	}
-
-	model.GoType = ucFirst(obj.GQLType)
-	model.Marshaler = &TypeImplementation{GoType: obj.GoType}
 
 	return model
 }

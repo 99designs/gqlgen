@@ -15,27 +15,34 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/99designs/gqlgen/internal/imports"
+	"go/types"
 
+	"github.com/99designs/gqlgen/internal/imports"
 	"github.com/pkg/errors"
 )
 
 // this is done with a global because subtemplates currently get called in functions. Lets aim to remove this eventually.
 var CurrentImports *Imports
 
-func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
-	t := template.New("").Funcs(template.FuncMap{
+func Funcs() template.FuncMap {
+	return template.FuncMap{
 		"ucFirst":       ucFirst,
 		"lcFirst":       lcFirst,
 		"quote":         strconv.Quote,
 		"rawQuote":      rawQuote,
 		"toCamel":       ToCamel,
 		"dump":          Dump,
+		"ref":           ref,
+		"call":          Call,
 		"prefixLines":   prefixLines,
 		"notNil":        notNil,
 		"reserveImport": CurrentImports.Reserve,
 		"lookupImport":  CurrentImports.Lookup,
-	})
+	}
+}
+
+func Run(name string, tpldata interface{}) (*bytes.Buffer, error) {
+	t := template.New("").Funcs(Funcs())
 
 	for filename, data := range data {
 		_, err := t.New(filename).Parse(data)
@@ -74,6 +81,25 @@ func lcFirst(s string) string {
 
 func isDelimiter(c rune) bool {
 	return c == '-' || c == '_' || unicode.IsSpace(c)
+}
+
+func ref(p types.Type) string {
+	return CurrentImports.LookupType(p)
+}
+
+func Call(p *types.Func) string {
+	pkg := CurrentImports.Lookup(p.Pkg().Path())
+
+	if pkg != "" {
+		pkg += "."
+	}
+
+	if p.Type() != nil {
+		// make sure the returned type is listed in our imports.
+		ref(p.Type().(*types.Signature).Results().At(0).Type())
+	}
+
+	return pkg + p.Name()
 }
 
 func ToCamel(s string) string {

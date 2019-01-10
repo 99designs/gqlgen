@@ -45,7 +45,7 @@ func Playground(title string, endpoint string) http.HandlerFunc {
 		err := page.Execute(w, map[string]string{
 			"title":    title,
 			"endpoint": endpoint,
-			"version":  "1.7.8",
+			"version":  "1.8.5",
 		})
 		if err != nil {
 			panic(err)

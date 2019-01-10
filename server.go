@@ -1,17 +1,17 @@
-package codegen
+package gqlgen
 
 import (
 	"log"
 	"os"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/codegen/unified"
 	"github.com/pkg/errors"
 )
 
 type ServerBuild struct {
-	unified.Schema
+	codegen.Schema
 
 	PackageName         string
 	ExecPackageName     string

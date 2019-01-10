@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/99designs/gqlgen/codegen"
+	"github.com/99designs/gqlgen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
@@ -36,8 +36,7 @@ var genCmd = cli.Command{
 			}
 		}
 
-		err = codegen.Generate(cfg)
-		if err != nil {
+		if err = gqlgen.Generate(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(3)
 		}

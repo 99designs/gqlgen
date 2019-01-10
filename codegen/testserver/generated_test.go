@@ -1,12 +1,11 @@
 //go:generate rm -f resolver.go
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate go run ../../testdata/gqlgen.go
 
 package testserver
 
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -15,6 +14,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/99designs/gqlgen/graphql/introspection"
 

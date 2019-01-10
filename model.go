@@ -1,23 +1,23 @@
-package codegen
+package gqlgen
 
 import (
 	"sort"
 
 	"go/types"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/codegen/unified"
 )
 
 type ModelBuild struct {
-	Interfaces  []*unified.Interface
-	Models      unified.Objects
-	Enums       []unified.Enum
+	Interfaces  []*codegen.Interface
+	Models      codegen.Objects
+	Enums       []codegen.Enum
 	PackageName string
 }
 
 // Create a list of models that need to be generated
-func buildModels(s *unified.Schema) error {
+func buildModels(s *codegen.Schema) error {
 	b := &ModelBuild{
 		PackageName: s.Config.Model.Package,
 	}

@@ -1,4 +1,4 @@
-package unified
+package codegen
 
 type Interface struct {
 	Definition   *TypeDefinition

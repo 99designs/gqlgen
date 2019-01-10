@@ -1,4 +1,4 @@
-package unified
+package codegen
 
 import (
 	"fmt"

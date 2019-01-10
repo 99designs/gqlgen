@@ -1,23 +1,23 @@
-package codegen
+package gqlgen
 
 import (
 	"fmt"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/codegen/unified"
 )
 
 type ExecBuild struct {
-	*unified.Schema
+	*codegen.Schema
 
 	PackageName      string
-	QueryRoot        *unified.Object
-	MutationRoot     *unified.Object
-	SubscriptionRoot *unified.Object
+	QueryRoot        *codegen.Object
+	MutationRoot     *codegen.Object
+	SubscriptionRoot *codegen.Object
 }
 
 // bind a schema together with some code to generate a Build
-func buildExec(s *unified.Schema) error {
+func buildExec(s *codegen.Schema) error {
 	b := &ExecBuild{
 		Schema:      s,
 		PackageName: s.Config.Exec.Package,

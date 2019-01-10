@@ -1,4 +1,4 @@
-package unified
+package codegen
 
 import (
 	"github.com/99designs/gqlgen/codegen/config"

@@ -1,4 +1,4 @@
-package unified
+package codegen
 
 type Enum struct {
 	Definition *TypeDefinition

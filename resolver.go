@@ -1,22 +1,22 @@
-package codegen
+package gqlgen
 
 import (
 	"log"
 	"os"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/codegen/unified"
 	"github.com/pkg/errors"
 )
 
 type ResolverBuild struct {
-	*unified.Schema
+	*codegen.Schema
 
 	PackageName  string
 	ResolverType string
 }
 
-func GenerateResolver(schema *unified.Schema) error {
+func GenerateResolver(schema *codegen.Schema) error {
 	resolverBuild, err := buildResolver(schema)
 	if err != nil {
 		return errors.Wrap(err, "resolver build failed")
@@ -34,7 +34,7 @@ func GenerateResolver(schema *unified.Schema) error {
 	return nil
 }
 
-func buildResolver(s *unified.Schema) (*ResolverBuild, error) {
+func buildResolver(s *codegen.Schema) (*ResolverBuild, error) {
 	return &ResolverBuild{
 		Schema:       s,
 		PackageName:  s.Config.Resolver.Package,

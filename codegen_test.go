@@ -1,4 +1,4 @@
-package codegen
+package gqlgen
 
 import (
 	"testing"

@@ -7,7 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/99designs/gqlgen/codegen"
+	"github.com/99designs/gqlgen"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
@@ -70,12 +71,12 @@ var initCmd = cli.Command{
 }
 
 func GenerateGraphServer(cfg *config.Config, serverFilename string) {
-	err := codegen.Generate(cfg)
+	err := gqlgen.Generate(cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
 
-	if err := codegen.GenerateServer(serverFilename, cfg); err != nil {
+	if err := gqlgen.GenerateServer(serverFilename, cfg); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}

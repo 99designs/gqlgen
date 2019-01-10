@@ -1,11 +1,11 @@
-package codegen
+package gqlgen
 
 import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/codegen/unified"
 	"github.com/pkg/errors"
 )
 
@@ -13,7 +13,7 @@ func Generate(cfg *config.Config) error {
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	_ = syscall.Unlink(cfg.Model.Filename)
 
-	schema, err := unified.NewSchema(cfg)
+	schema, err := codegen.NewSchema(cfg)
 	if err != nil {
 		return errors.Wrap(err, "merging failed")
 	}
@@ -23,7 +23,7 @@ func Generate(cfg *config.Config) error {
 	}
 
 	// Merge again now that the generated models have been injected into the typemap
-	schema, err = unified.NewSchema(schema.Config)
+	schema, err = codegen.NewSchema(schema.Config)
 	if err != nil {
 		return errors.Wrap(err, "merging failed")
 	}

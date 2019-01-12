@@ -43,4 +43,16 @@ test_script:
   - cd c:\gopath\src\github.com\99designs\
   - mkdir init-project
   - cd init-project
-  - gqlgen init
+  - ps: |
+      Set-Content -Value @"
+      // +build ignore
+
+      package main
+
+      import "github.com/99designs/gqlgen/cmd"
+
+      func main() {
+      	cmd.Execute()
+      }
+      "@ -Path .\gqlgen.go
+  - go run gqlgen.go init

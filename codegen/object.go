@@ -24,29 +24,28 @@ const (
 
 type Object struct {
 	Definition         *TypeDefinition
-	Fields             []Field
-	Satisfies          []string
+	Fields             []*Field
 	Implements         []*TypeDefinition
 	ResolverInterface  types.Type
 	Root               bool
 	DisableConcurrency bool
 	Stream             bool
 	Directives         []*Directive
+	InTypemap          bool
 }
 
 type Field struct {
 	*TypeReference
-	Description      string          // Description of a field
-	GQLName          string          // The name of the field in graphql
-	GoFieldType      GoFieldType     // The field type in go, if any
-	GoReceiverName   string          // The name of method & var receiver in go, if any
-	GoFieldName      string          // The name of the method or var in go, if any
-	Args             []FieldArgument // A list of arguments to be passed to this field
-	ForceResolver    bool            // Should be emit Resolver method
-	MethodHasContext bool            // If this is bound to a go method, does the method also take a context
-	NoErr            bool            // If this is bound to a go method, does that method have an error as the second argument
-	Object           *Object         // A link back to the parent object
-	Default          interface{}     // The default value
+	GQLName          string           // The name of the field in graphql
+	GoFieldType      GoFieldType      // The field type in go, if any
+	GoReceiverName   string           // The name of method & var receiver in go, if any
+	GoFieldName      string           // The name of the method or var in go, if any
+	IsResolver       bool             // Does this field need a resolver
+	Args             []*FieldArgument // A list of arguments to be passed to this field
+	MethodHasContext bool             // If this is bound to a go method, does the method also take a context
+	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
+	Object           *Object          // A link back to the parent object
+	Default          interface{}      // The default value
 	Directives       []*Directive
 }
 
@@ -58,14 +57,14 @@ type FieldArgument struct {
 	Object     *Object     // A link back to the parent object
 	Default    interface{} // The default value
 	Directives []*Directive
-	Value      interface{} // value set in schema
+	Value      interface{} // value set in Schema
 }
 
 type Objects []*Object
 
 func (o *Object) Implementors() string {
 	satisfiedBy := strconv.Quote(o.Definition.GQLDefinition.Name)
-	for _, s := range o.Satisfies {
+	for _, s := range o.Definition.GQLDefinition.Interfaces {
 		satisfiedBy += ", " + strconv.Quote(s)
 	}
 	return "[]string{" + satisfiedBy + "}"
@@ -73,7 +72,7 @@ func (o *Object) Implementors() string {
 
 func (o *Object) HasResolvers() bool {
 	for _, f := range o.Fields {
-		if f.IsResolver() {
+		if f.IsResolver {
 			return true
 		}
 	}
@@ -105,12 +104,12 @@ func (o *Object) IsReserved() bool {
 	return strings.HasPrefix(o.Definition.GQLDefinition.Name, "__")
 }
 
-func (f *Field) HasDirectives() bool {
-	return len(f.Directives) > 0
+func (o *Object) Description() string {
+	return o.Definition.GQLDefinition.Description
 }
 
-func (f *Field) IsResolver() bool {
-	return f.GoFieldName == ""
+func (f *Field) HasDirectives() bool {
+	return len(f.Directives) > 0
 }
 
 func (f *Field) IsReserved() bool {
@@ -129,11 +128,7 @@ func (f *Field) IsConcurrent() bool {
 	if f.Object.DisableConcurrency {
 		return false
 	}
-	return f.MethodHasContext || f.IsResolver()
-}
-
-func (f *Field) GoNameExported() string {
-	return lintName(ucFirst(f.GQLName))
+	return f.MethodHasContext || f.IsResolver
 }
 
 func (f *Field) GoNameUnexported() string {
@@ -141,11 +136,7 @@ func (f *Field) GoNameUnexported() string {
 }
 
 func (f *Field) ShortInvocation() string {
-	if !f.IsResolver() {
-		return ""
-	}
-
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoNameExported(), f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ArgsFunc() string {
@@ -157,40 +148,18 @@ func (f *Field) ArgsFunc() string {
 }
 
 func (f *Field) ResolverType() string {
-	if !f.IsResolver() {
+	if !f.IsResolver {
 		return ""
 	}
 
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoNameExported(), f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ShortResolverDeclaration() string {
-	if !f.IsResolver() {
+	if !f.IsResolver {
 		return ""
 	}
-	res := fmt.Sprintf("%s(ctx context.Context", f.GoNameExported())
-
-	if !f.Object.Root {
-		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Definition.GoType))
-	}
-	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
-	}
-
-	result := templates.CurrentImports.LookupType(f.GoType)
-	if f.Object.Stream {
-		result = "<-chan " + result
-	}
-
-	res += fmt.Sprintf(") (%s, error)", result)
-	return res
-}
-
-func (f *Field) ResolverDeclaration() string {
-	if !f.IsResolver() {
-		return ""
-	}
-	res := fmt.Sprintf("%s_%s(ctx context.Context", f.Object.Definition.GQLDefinition.Name, f.GoNameUnexported())
+	res := fmt.Sprintf("%s(ctx context.Context", f.GoFieldName)
 
 	if !f.Object.Root {
 		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Definition.GoType))
@@ -229,7 +198,7 @@ func (f *Field) ComplexityArgs() string {
 func (f *Field) CallArgs() string {
 	var args []string
 
-	if f.IsResolver() {
+	if f.IsResolver {
 		args = append(args, "rctx")
 
 		if !f.Object.Root {

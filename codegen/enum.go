@@ -1,9 +1,9 @@
 package codegen
 
 type Enum struct {
-	Definition  *TypeDefinition
-	Description string
-	Values      []EnumValue
+	Definition *TypeDefinition
+	Values     []EnumValue
+	InTypemap  bool
 }
 
 type EnumValue struct {

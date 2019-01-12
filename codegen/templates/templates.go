@@ -203,7 +203,7 @@ func RenderToFile(tpl string, filename string, data interface{}) error {
 	var buf *bytes.Buffer
 	buf, err := Run(tpl, data)
 	if err != nil {
-		return errors.Wrap(err, filename+" generation failed")
+		return errors.Wrap(err, filename)
 	}
 
 	b := bytes.Replace(buf.Bytes(), []byte("%%%IMPORTS%%%"), []byte(CurrentImports.String()), -1)

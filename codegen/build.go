@@ -1,210 +1,193 @@
 package codegen
 
 import (
-	"fmt"
-	"go/build"
 	"go/types"
-	"os"
+	"sort"
+
+	"fmt"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/loader"
 )
 
-type Build struct {
-	PackageName      string
-	Objects          Objects
-	Inputs           Objects
-	Interfaces       []*Interface
-	QueryRoot        *Object
-	MutationRoot     *Object
-	SubscriptionRoot *Object
-	SchemaRaw        map[string]string
-	SchemaFilename   config.SchemaFilenames
-	Directives       map[string]*Directive
+type builder struct {
+	Config     *config.Config
+	Schema     *ast.Schema
+	SchemaStr  map[string]string
+	Program    *loader.Program
+	Directives map[string]*Directive
+	NamedTypes NamedTypes
 }
 
-type ModelBuild struct {
-	PackageName string
-	Models      []Model
-	Enums       []Enum
-}
+func buildSchema(cfg *config.Config) (*Schema, error) {
+	b := builder{
+		Config: cfg,
+	}
 
-type ResolverBuild struct {
-	PackageName   string
-	ResolverType  string
-	Objects       Objects
-	ResolverFound bool
-}
+	var err error
+	b.Schema, b.SchemaStr, err = cfg.LoadSchema()
+	if err != nil {
+		return nil, err
+	}
 
-type ServerBuild struct {
-	PackageName         string
-	ExecPackageName     string
-	ResolverPackageName string
-}
+	err = cfg.Check()
+	if err != nil {
+		return nil, err
+	}
 
-// Create a list of models that need to be generated
-func (g *Generator) models() (*ModelBuild, error) {
-	progLoader := g.newLoaderWithoutErrors()
-
-	prog, err := progLoader.Load()
+	progLoader := b.Config.NewLoaderWithoutErrors()
+	b.Program, err = progLoader.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "loading failed")
 	}
 
-	namedTypes, err := g.buildNamedTypes(prog)
-	if err != nil {
-		return nil, errors.Wrap(err, "binding types failed")
+	b.NamedTypes = NamedTypes{}
+
+	for _, schemaType := range b.Schema.Types {
+		b.NamedTypes[schemaType.Name], err = b.buildTypeDef(schemaType)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to build type definition")
+		}
 	}
 
-	directives, err := g.buildDirectives(namedTypes)
+	b.Directives, err = b.buildDirectives()
 	if err != nil {
 		return nil, err
 	}
-	g.Directives = directives
 
-	models, err := g.buildModels(namedTypes, prog)
-	if err != nil {
+	s := Schema{
+		Config:     cfg,
+		Directives: b.Directives,
+		Schema:     b.Schema,
+		SchemaStr:  b.SchemaStr,
+	}
+
+	for _, schemaType := range b.Schema.Types {
+		switch schemaType.Kind {
+		case ast.Object:
+			obj, err := b.buildObject(schemaType)
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to build object definition")
+			}
+
+			s.Objects = append(s.Objects, obj)
+		case ast.InputObject:
+			input, err := b.buildObject(schemaType)
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to build input definition")
+			}
+
+			s.Inputs = append(s.Inputs, input)
+
+		case ast.Union, ast.Interface:
+			s.Interfaces = append(s.Interfaces, b.buildInterface(schemaType))
+
+		case ast.Enum:
+			if enum := b.buildEnum(schemaType); enum != nil {
+				s.Enums = append(s.Enums, *enum)
+			}
+		}
+	}
+
+	if err := b.injectIntrospectionRoots(&s); err != nil {
 		return nil, err
 	}
-	return &ModelBuild{
-		PackageName: g.Model.Package,
-		Models:      models,
-		Enums:       g.buildEnums(namedTypes),
-	}, nil
+
+	sort.Slice(s.Objects, func(i, j int) bool {
+		return s.Objects[i].Definition.GQLDefinition.Name < s.Objects[j].Definition.GQLDefinition.Name
+	})
+
+	sort.Slice(s.Inputs, func(i, j int) bool {
+		return s.Inputs[i].Definition.GQLDefinition.Name < s.Inputs[j].Definition.GQLDefinition.Name
+	})
+
+	sort.Slice(s.Interfaces, func(i, j int) bool {
+		return s.Interfaces[i].Definition.GQLDefinition.Name < s.Interfaces[j].Definition.GQLDefinition.Name
+	})
+
+	sort.Slice(s.Enums, func(i, j int) bool {
+		return s.Enums[i].Definition.GQLDefinition.Name < s.Enums[j].Definition.GQLDefinition.Name
+	})
+
+	return &s, nil
 }
 
-// bind a schema together with some code to generate a Build
-func (g *Generator) resolver() (*ResolverBuild, error) {
-	progLoader := g.newLoaderWithoutErrors()
-	progLoader.Import(g.Resolver.ImportPath())
-
-	prog, err := progLoader.Load()
-	if err != nil {
-		return nil, err
+func (b *builder) injectIntrospectionRoots(s *Schema) error {
+	obj := s.Objects.ByName(b.Schema.Query.Name)
+	if obj == nil {
+		return fmt.Errorf("root query type must be defined")
 	}
 
-	namedTypes, err := g.buildNamedTypes(prog)
+	typeType, err := b.FindGoType("github.com/99designs/gqlgen/graphql/introspection", "Type")
 	if err != nil {
-		return nil, errors.Wrap(err, "binding types failed")
+		return errors.Wrap(err, "unable to find root Type introspection type")
 	}
 
-	directives, err := g.buildDirectives(namedTypes)
+	obj.Fields = append(obj.Fields, &Field{
+		TypeReference:  &TypeReference{b.NamedTypes["__Type"], types.NewPointer(typeType.Type()), ast.NamedType("__Schema", nil)},
+		GQLName:        "__type",
+		GoFieldType:    GoFieldMethod,
+		GoReceiverName: "ec",
+		GoFieldName:    "introspectType",
+		Args: []*FieldArgument{
+			{
+				GQLName: "name",
+				TypeReference: &TypeReference{
+					b.NamedTypes["String"],
+					types.Typ[types.String],
+					ast.NamedType("String", nil),
+				},
+				Object: &Object{},
+			},
+		},
+		Object: obj,
+	})
+
+	schemaType, err := b.FindGoType("github.com/99designs/gqlgen/graphql/introspection", "Schema")
 	if err != nil {
-		return nil, err
-	}
-	g.Directives = directives
-
-	objects, err := g.buildObjects(namedTypes, prog)
-	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "unable to find root Schema introspection type")
 	}
 
-	def, _ := findGoType(prog, g.Resolver.ImportPath(), g.Resolver.Type)
-	resolverFound := def != nil
+	obj.Fields = append(obj.Fields, &Field{
+		TypeReference:  &TypeReference{b.NamedTypes["__Schema"], types.NewPointer(schemaType.Type()), ast.NamedType("__Schema", nil)},
+		GQLName:        "__schema",
+		GoFieldType:    GoFieldMethod,
+		GoReceiverName: "ec",
+		GoFieldName:    "introspectSchema",
+		Object:         obj,
+	})
 
-	return &ResolverBuild{
-		PackageName:   g.Resolver.Package,
-		Objects:       objects,
-		ResolverType:  g.Resolver.Type,
-		ResolverFound: resolverFound,
-	}, nil
+	return nil
 }
 
-func (g *Generator) server(destDir string) *ServerBuild {
-	return &ServerBuild{
-		PackageName:         g.Resolver.Package,
-		ExecPackageName:     g.Exec.ImportPath(),
-		ResolverPackageName: g.Resolver.ImportPath(),
+func (b *builder) FindGoType(pkgName string, typeName string) (types.Object, error) {
+	if pkgName == "" {
+		return nil, nil
 	}
-}
+	fullName := typeName
+	if pkgName != "" {
+		fullName = pkgName + "." + typeName
+	}
 
-// bind a schema together with some code to generate a Build
-func (g *Generator) bind() (*Build, error) {
-	progLoader := g.newLoaderWithoutErrors()
-	prog, err := progLoader.Load()
+	pkgName, err := resolvePkg(pkgName)
 	if err != nil {
-		return nil, errors.Wrap(err, "loading failed")
+		return nil, errors.Errorf("unable to resolve package for %s: %s\n", fullName, err.Error())
 	}
 
-	namedTypes, err := g.buildNamedTypes(prog)
-	if err != nil {
-		return nil, errors.Wrap(err, "binding types failed")
+	pkg := b.Program.Imported[pkgName]
+	if pkg == nil {
+		return nil, errors.Errorf("required package was not loaded: %s", fullName)
 	}
 
-	directives, err := g.buildDirectives(namedTypes)
-	if err != nil {
-		return nil, err
-	}
-	g.Directives = directives
+	for astNode, def := range pkg.Defs {
+		if astNode.Name != typeName || def.Parent() == nil || def.Parent() != pkg.Pkg.Scope() {
+			continue
+		}
 
-	objects, err := g.buildObjects(namedTypes, prog)
-	if err != nil {
-		return nil, err
+		return def, nil
 	}
 
-	inputs, err := g.buildInputs(namedTypes, prog)
-	if err != nil {
-		return nil, err
-	}
-
-	b := &Build{
-		PackageName:    g.Exec.Package,
-		Objects:        objects,
-		Interfaces:     g.buildInterfaces(namedTypes, prog),
-		Inputs:         inputs,
-		SchemaRaw:      g.SchemaStr,
-		SchemaFilename: g.SchemaFilename,
-		Directives:     directives,
-	}
-
-	if g.schema.Query != nil {
-		b.QueryRoot = b.Objects.ByName(g.schema.Query.Name)
-	} else {
-		return b, fmt.Errorf("query entry point missing")
-	}
-
-	if g.schema.Mutation != nil {
-		b.MutationRoot = b.Objects.ByName(g.schema.Mutation.Name)
-	}
-
-	if g.schema.Subscription != nil {
-		b.SubscriptionRoot = b.Objects.ByName(g.schema.Subscription.Name)
-	}
-	return b, nil
-}
-
-func (g *Generator) validate() error {
-	progLoader := g.newLoaderWithErrors()
-	_, err := progLoader.Load()
-	return err
-}
-
-func (g *Generator) newLoaderWithErrors() loader.Config {
-	conf := loader.Config{}
-
-	for _, pkg := range g.Models.ReferencedPackages() {
-		conf.Import(pkg)
-	}
-	return conf
-}
-
-func (g *Generator) newLoaderWithoutErrors() loader.Config {
-	conf := g.newLoaderWithErrors()
-	conf.AllowErrors = true
-	conf.TypeChecker = types.Config{
-		Error: func(e error) {},
-	}
-	return conf
-}
-
-func resolvePkg(pkgName string) (string, error) {
-	cwd, _ := os.Getwd()
-
-	pkg, err := build.Default.Import(pkgName, cwd, build.FindOnly)
-	if err != nil {
-		return "", err
-	}
-
-	return pkg.ImportPath, nil
+	return nil, errors.Errorf("unable to find type %s\n", fullName)
 }

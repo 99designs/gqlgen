@@ -295,7 +295,7 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
-		connectWs(gh.exec, w, r, gh.cfg)
+		connectWs(gh.exec, w, r, gh.cfg, gh.cache)
 		return
 	}
 

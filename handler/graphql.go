@@ -58,8 +58,6 @@ func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDo
 
 	if hook := c.tracer; hook != nil {
 		reqCtx.Tracer = hook
-	} else {
-		reqCtx.Tracer = &graphql.NopTracer{}
 	}
 
 	if c.complexityLimit > 0 {

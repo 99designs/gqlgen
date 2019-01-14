@@ -127,6 +127,7 @@ func TestGeneratedServer(t *testing.T) {
 
 	t.Run("subscriptions", func(t *testing.T) {
 		t.Run("wont leak goroutines", func(t *testing.T) {
+			runtime.GC() // ensure no go-routines left from preceding tests
 			initialGoroutineCount := runtime.NumGoroutine()
 
 			sub := c.Websocket(`subscription { updated }`)

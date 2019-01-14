@@ -58,8 +58,6 @@ func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDo
 
 	if hook := c.tracer; hook != nil {
 		reqCtx.Tracer = hook
-	} else {
-		reqCtx.Tracer = &graphql.NopTracer{}
 	}
 
 	if c.complexityLimit > 0 {
@@ -259,7 +257,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	var cache *lru.Cache
 	if cfg.cacheSize > 0 {
 		var err error
-		cache, err = lru.New(DefaultCacheSize)
+		cache, err = lru.New(cfg.cacheSize)
 		if err != nil {
 			// An error is only returned for non-positive cache size
 			// and we already checked for that.
@@ -295,7 +293,7 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
-		connectWs(gh.exec, w, r, gh.cfg)
+		connectWs(gh.exec, w, r, gh.cfg, gh.cache)
 		return
 	}
 

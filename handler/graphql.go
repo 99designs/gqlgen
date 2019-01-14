@@ -259,7 +259,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	var cache *lru.Cache
 	if cfg.cacheSize > 0 {
 		var err error
-		cache, err = lru.New(DefaultCacheSize)
+		cache, err = lru.New(cfg.cacheSize)
 		if err != nil {
 			// An error is only returned for non-positive cache size
 			// and we already checked for that.

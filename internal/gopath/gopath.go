@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var NotFound = fmt.Errorf("not on GOPATH")
+var ErrNotFound = fmt.Errorf("not on GOPATH")
 
 // Contains returns true if the given directory is in the GOPATH
 func Contains(dir string) bool {
@@ -24,7 +24,7 @@ func Dir2Import(dir string) (string, error) {
 			return dir[len(gopath)+1:], nil
 		}
 	}
-	return "", NotFound
+	return "", ErrNotFound
 }
 
 // MustDir2Import takes an *absolute* path and returns a golang import path for the package, and panics if it isn't on the gopath

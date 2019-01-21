@@ -4670,7 +4670,7 @@ func (e *executableSchema) InnerDirectivesMiddleware(ctx context.Context, obj *I
 	if data, ok := cMessage.(string); ok {
 		obj.Message = data
 	} else {
-		return obj, errors.New("Message expect string")
+		return obj, errors.New("expected Message to be string")
 	}
 
 	return obj, nil
@@ -4753,7 +4753,7 @@ func (e *executableSchema) InputDirectivesMiddleware(ctx context.Context, obj *I
 	if data, ok := cText.(string); ok {
 		obj.Text = data
 	} else {
-		return obj, errors.New("Text expect string")
+		return obj, errors.New("expected Text to be string")
 	}
 
 	mInnerDirectives1, err := e.InnerDirectivesMiddleware(ctx, &obj.Inner)

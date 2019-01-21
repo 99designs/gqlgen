@@ -58,7 +58,7 @@ func (r *queryResolver) Error(ctx context.Context, typeArg *models.ErrorType) (b
 		return false, &CustomError{"User message", "Internal Message"}
 	}
 
-	return false, fmt.Errorf("Normal error")
+	return false, fmt.Errorf("normal error")
 }
 
 func (r *queryResolver) Path(ctx context.Context) ([]*models.Element, error) {

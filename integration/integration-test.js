@@ -68,6 +68,6 @@ describe('Errors', () => {
             query: gql`{ error(type: NORMAL) }`,
         });
 
-        expect(res.errors[0].message).toEqual('Normal error');
+        expect(res.errors[0].message).toEqual('normal error');
     });
 });

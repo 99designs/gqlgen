@@ -10,8 +10,10 @@ import (
 
 // Passed to createTodo to create a new todo
 type TodoInput struct {
+	// The body text
 	Text string `json:"text"`
-	Done *bool  `json:"done"`
+	// Is it done already?
+	Done *bool `json:"done"`
 }
 
 type Role string

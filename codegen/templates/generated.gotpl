@@ -77,7 +77,7 @@ type ComplexityRoot struct {
 	{{ range $field := $object.Fields -}}
 		{{ if $field.Args }}
 			func (e *executableSchema){{ $field.ArgsFunc }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-			{{ template "args.gotpl" $field.Args }}
+			{{ render "args.gotpl" $field.Args }}
 			}
 		{{ end }}
 	{{ end }}
@@ -86,7 +86,7 @@ type ComplexityRoot struct {
 {{ range $directive := .Directives }}
 	{{ if $directive.Args }}
 		func (e *executableSchema){{ $directive.ArgsFunc }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-		{{ template "args.gotpl" $directive.Args }}
+		{{ render "args.gotpl" $directive.Args }}
 		}
 	{{ end }}
 {{ end }}
@@ -210,19 +210,19 @@ type executionContext struct {
 }
 
 {{- range $object := .Objects }}
-	{{ template "object.gotpl" $object }}
+	{{ render "object.gotpl" $object }}
 
 	{{- range $field := $object.Fields }}
-		{{ template "field.gotpl" $field }}
+		{{ render "field.gotpl" $field }}
 	{{ end }}
 {{- end}}
 
 {{- range $interface := .Interfaces }}
-	{{ template "interface.gotpl" $interface }}
+	{{ render "interface.gotpl" $interface }}
 {{- end }}
 
 {{- range $input := .Inputs }}
-	{{ template "input.gotpl" $input }}
+	{{ render "input.gotpl" $input }}
 {{- end }}
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {

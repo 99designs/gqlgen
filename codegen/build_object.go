@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -79,7 +81,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		TypeReference:  b.NamedTypes.getType(field.Type),
 		Object:         obj,
 		Directives:     dirs,
-		GoFieldName:    lintName(ucFirst(field.Name)),
+		GoFieldName:    templates.ToGo(field.Name),
 		GoFieldType:    GoFieldVariable,
 		GoReceiverName: "obj",
 	}
@@ -99,7 +101,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 				f.IsResolver = true
 			}
 			if typeField.FieldName != "" {
-				f.GoFieldName = lintName(ucFirst(typeField.FieldName))
+				f.GoFieldName = templates.ToGo(typeField.FieldName)
 			}
 		}
 	}

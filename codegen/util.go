@@ -1,9 +1,7 @@
 package codegen
 
 import (
-	"go/build"
 	"go/types"
-	"os"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -46,17 +44,6 @@ func equalFieldName(source, target string) bool {
 	source = strings.Replace(source, "_", "", -1)
 	target = strings.Replace(target, "_", "", -1)
 	return strings.EqualFold(source, target)
-}
-
-func resolvePkg(pkgName string) (string, error) {
-	cwd, _ := os.Getwd()
-
-	pkg, err := build.Default.Import(pkgName, cwd, build.FindOnly)
-	if err != nil {
-		return "", err
-	}
-
-	return pkg.ImportPath, nil
 }
 
 var keywords = []string{

@@ -213,7 +213,12 @@ func bindObject(t types.Type, object *Object, structTag string) BindErrors {
 		}
 
 		// first try binding to a method
-		methodErr := bindMethod(t, field)
+		var methodErr error
+		if object.IsInput {
+			methodErr = fmt.Errorf("can not bind to method on input object")
+		} else {
+			methodErr = bindMethod(t, field)
+		}
 		if methodErr == nil {
 			continue
 		}

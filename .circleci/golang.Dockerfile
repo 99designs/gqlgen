@@ -7,4 +7,4 @@ WORKDIR /projects/gqlgen
 COPY go.* /projects/gqlgen/
 RUN go mod download
 
-COPY . /projects/gqlgen
+COPY . /projects/gqlgen/

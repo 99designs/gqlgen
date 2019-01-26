@@ -46,7 +46,7 @@ func TestDir2Package(t *testing.T) {
 		assert.Equal(t, "foo/bar", MustDir2Import("C:/b/src/foo/bar"))
 		assert.Equal(t, "foo/bar", MustDir2Import(`C:\b\src\foo\bar`))
 
-		assert.PanicsWithValue(t, NotFound, func() {
+		assert.PanicsWithValue(t, ErrNotFound, func() {
 			MustDir2Import("C:/tmp/foo")
 		})
 	} else {
@@ -55,7 +55,7 @@ func TestDir2Package(t *testing.T) {
 		assert.Equal(t, "foo/bar", MustDir2Import("/a/y/src/foo/bar"))
 		assert.Equal(t, "foo/bar", MustDir2Import("/b/src/foo/bar"))
 
-		assert.PanicsWithValue(t, NotFound, func() {
+		assert.PanicsWithValue(t, ErrNotFound, func() {
 			MustDir2Import("/tmp/foo")
 		})
 	}

@@ -1,22 +1,20 @@
 package codegen
 
 import (
+	"fmt"
 	"go/types"
 	"sort"
-
-	"fmt"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
-	"golang.org/x/tools/go/loader"
 )
 
 type builder struct {
 	Config     *config.Config
 	Schema     *ast.Schema
 	SchemaStr  map[string]string
-	Program    *loader.Program
+	Binder     *config.Binder
 	Directives map[string]*Directive
 	NamedTypes NamedTypes
 }
@@ -37,10 +35,9 @@ func buildSchema(cfg *config.Config) (*Schema, error) {
 		return nil, err
 	}
 
-	progLoader := b.Config.NewLoaderWithoutErrors()
-	b.Program, err = progLoader.Load()
+	b.Binder, err = b.Config.NewBinder()
 	if err != nil {
-		return nil, errors.Wrap(err, "loading failed")
+		return nil, err
 	}
 
 	b.NamedTypes = NamedTypes{}
@@ -120,7 +117,7 @@ func (b *builder) injectIntrospectionRoots(s *Schema) error {
 		return fmt.Errorf("root query type must be defined")
 	}
 
-	typeType, err := b.FindGoType("github.com/99designs/gqlgen/graphql/introspection", "Type")
+	typeType, err := b.Binder.FindObject("github.com/99designs/gqlgen/graphql/introspection", "Type")
 	if err != nil {
 		return errors.Wrap(err, "unable to find root Type introspection type")
 	}
@@ -145,7 +142,7 @@ func (b *builder) injectIntrospectionRoots(s *Schema) error {
 		Object: obj,
 	})
 
-	schemaType, err := b.FindGoType("github.com/99designs/gqlgen/graphql/introspection", "Schema")
+	schemaType, err := b.Binder.FindObject("github.com/99designs/gqlgen/graphql/introspection", "Schema")
 	if err != nil {
 		return errors.Wrap(err, "unable to find root Schema introspection type")
 	}
@@ -160,34 +157,4 @@ func (b *builder) injectIntrospectionRoots(s *Schema) error {
 	})
 
 	return nil
-}
-
-func (b *builder) FindGoType(pkgName string, typeName string) (types.Object, error) {
-	if pkgName == "" {
-		return nil, nil
-	}
-	fullName := typeName
-	if pkgName != "" {
-		fullName = pkgName + "." + typeName
-	}
-
-	pkgName, err := resolvePkg(pkgName)
-	if err != nil {
-		return nil, errors.Errorf("unable to resolve package for %s: %s\n", fullName, err.Error())
-	}
-
-	pkg := b.Program.Imported[pkgName]
-	if pkg == nil {
-		return nil, errors.Errorf("required package was not loaded: %s", fullName)
-	}
-
-	for astNode, def := range pkg.Defs {
-		if astNode.Name != typeName || def.Parent() == nil || def.Parent() != pkg.Pkg.Scope() {
-			continue
-		}
-
-		return def, nil
-	}
-
-	return nil, errors.Errorf("unable to find type %s\n", fullName)
 }

@@ -25,11 +25,11 @@ func Execute() {
 	app.Before = func(context *cli.Context) error {
 		pwd, err := os.Getwd()
 		if err != nil {
-			return fmt.Errorf("unable to determine current workding dir: %s\n", err.Error())
+			return fmt.Errorf("unable to determine current workding dir: %s", err.Error())
 		}
 
 		if !gopath.Contains(pwd) {
-			return fmt.Errorf("gqlgen must be run from inside your $GOPATH\n")
+			return fmt.Errorf("gqlgen must be run from inside your $GOPATH")
 		}
 		if context.Bool("verbose") {
 			log.SetFlags(0)
@@ -47,7 +47,7 @@ func Execute() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 }

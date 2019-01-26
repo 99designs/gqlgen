@@ -238,6 +238,12 @@ func (tm TypeMap) ReferencedPackages() []string {
 	return pkgs
 }
 
+func (tm TypeMap) Add(gqlName string, goType string) {
+	modelCfg := tm[gqlName]
+	modelCfg.Model = goType
+	tm[gqlName] = modelCfg
+}
+
 func inStrSlice(haystack []string, needle string) bool {
 	for _, v := range haystack {
 		if needle == v {
@@ -323,6 +329,15 @@ func (c *Config) normalize() error {
 	}
 
 	return nil
+}
+
+func (c *TypeMapEntry) PkgAndType() (string, string) {
+	parts := strings.Split(c.Model, ".")
+	if len(parts) == 1 {
+		return "", c.Model
+	}
+
+	return normalizeVendor(strings.Join(parts[:len(parts)-1], ".")), parts[len(parts)-1]
 }
 
 func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {

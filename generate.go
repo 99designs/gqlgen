@@ -6,24 +6,35 @@ import (
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin"
+	"github.com/99designs/gqlgen/plugin/modelgen"
 	"github.com/pkg/errors"
+	"golang.org/x/tools/go/loader"
 )
 
-func Generate(cfg *config.Config) error {
+func Generate(cfg *config.Config, option ...Option) error {
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	_ = syscall.Unlink(cfg.Model.Filename)
 
-	schema, err := codegen.NewSchema(cfg)
-	if err != nil {
-		return errors.Wrap(err, "merging failed")
+	plugins := []plugin.Plugin{
+		modelgen.New(),
 	}
 
-	if err = buildModels(schema); err != nil {
-		return errors.Wrap(err, "generating models failed")
+	for _, o := range option {
+		o(cfg, &plugins)
+	}
+
+	for _, p := range plugins {
+		if mut, ok := p.(plugin.ConfigMutator); ok {
+			err := mut.MutateConfig(cfg)
+			if err != nil {
+				return errors.Wrap(err, p.Name())
+			}
+		}
 	}
 
 	// Merge again now that the generated models have been injected into the typemap
-	schema, err = codegen.NewSchema(schema.Config)
+	schema, err := codegen.NewSchema(cfg)
 	if err != nil {
 		return errors.Wrap(err, "merging failed")
 	}
@@ -46,8 +57,18 @@ func Generate(cfg *config.Config) error {
 }
 
 func validate(cfg *config.Config) error {
-	progLoader := cfg.NewLoaderWithErrors()
-	_, err := progLoader.Load()
+	conf := loader.Config{}
+
+	conf.Import(cfg.Exec.ImportPath())
+	if cfg.Model.IsDefined() {
+		conf.Import(cfg.Model.ImportPath())
+	}
+
+	if cfg.Resolver.IsDefined() {
+		conf.Import(cfg.Resolver.ImportPath())
+	}
+
+	_, err := conf.Load()
 	return err
 }
 

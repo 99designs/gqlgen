@@ -93,8 +93,8 @@
 			{{else}}
             	if data, ok := c{{$field.GoFieldName}}.({{ $field.GoType | ref }}); ok{
             		obj.{{$field.GoFieldName}} = data
-            	}else{
-            		return obj, errors.New("{{$field.GoFieldName}} expect {{$field.GoType | ref }}")
+            	} else {
+            		return obj, errors.New("expected {{$field.GoFieldName}} to be {{$field.GoType | ref }}")
             	}
 			{{ end }}
 

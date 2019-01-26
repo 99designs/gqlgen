@@ -44,13 +44,16 @@ func (b *builder) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, err
 	}
 
 	// External marshal functions
-	def, _ := b.FindGoType(pkgName, "Marshal"+typeName)
+	def, err := b.Binder.FindObject(pkgName, typeName)
+	if err != nil {
+		return nil, err
+	}
 	if f, isFunc := def.(*types.Func); isFunc {
 		sig := def.Type().(*types.Signature)
 		t.GoType = sig.Params().At(0).Type()
 		t.Marshaler = f
 
-		unmarshal, err := b.FindGoType(pkgName, "Unmarshal"+typeName)
+		unmarshal, err := b.Binder.FindObject(pkgName, "Unmarshal"+typeName)
 		if err != nil {
 			return nil, errors.Wrapf(err, "unable to find unmarshal func for %s.%s", pkgName, typeName)
 		}
@@ -59,13 +62,9 @@ func (b *builder) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, err
 	}
 
 	// Normal object binding
-	obj, err := b.FindGoType(pkgName, typeName)
-	if err != nil {
-		return nil, errors.Wrapf(err, "unable to find %s.%s", pkgName, typeName)
-	}
-	t.GoType = obj.Type()
+	t.GoType = def.Type()
 
-	namedType := obj.Type().(*types.Named)
+	namedType := def.Type().(*types.Named)
 	hasUnmarshal := false
 	for i := 0; i < namedType.NumMethods(); i++ {
 		switch namedType.Method(i).Name() {

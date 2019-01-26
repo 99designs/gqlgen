@@ -5,10 +5,10 @@ package integration
 import (
 	"context"
 	"fmt"
-	"remote_api"
 	"time"
 
-	"github.com/99designs/gqlgen/integration/models-go"
+	models "github.com/99designs/gqlgen/integration/models-go"
+	"github.com/99designs/gqlgen/integration/remote_api"
 )
 
 type CustomError struct {
@@ -62,7 +62,7 @@ func (r *queryResolver) Error(ctx context.Context, typeArg *models.ErrorType) (b
 }
 
 func (r *queryResolver) Path(ctx context.Context) ([]*models.Element, error) {
-	return []*models.Element{{1}, {2}, {3}, {4}}, nil
+	return []*models.Element{{ID: 1}, {ID: 2}, {ID: 3}, {ID: 4}}, nil
 }
 
 func (r *queryResolver) Date(ctx context.Context, filter models.DateFilter) (bool, error) {

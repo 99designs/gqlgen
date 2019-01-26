@@ -6,11 +6,11 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"external"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/99designs/gqlgen/example/scalars/external"
 	"github.com/99designs/gqlgen/example/scalars/model"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"

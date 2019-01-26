@@ -1,12 +1,10 @@
-FROM golang:1.10
+FROM golang:1.11
 
-RUN curl -L -o /bin/dep https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 && chmod +x /bin/dep
-RUN go get -u github.com/alecthomas/gometalinter github.com/vektah/gorunpkg
-RUN gometalinter --install
+RUN curl -sL --fail https://github.com/golangci/golangci-lint/releases/download/v1.13/golangci-lint-1.13-linux-amd64.tar.gz | tar zxv --strip-components=1 --dir=/go/bin
 
-WORKDIR /go/src/github.com/99designs/gqlgen
+WORKDIR /projects/gqlgen
 
-COPY Gopkg.* /go/src/github.com/99designs/gqlgen/
-RUN dep ensure -v --vendor-only
+COPY go.* /projects/gqlgen/
+RUN go mod download
 
-COPY . /go/src/github.com/99designs/gqlgen/
+COPY . /projects/gqlgen

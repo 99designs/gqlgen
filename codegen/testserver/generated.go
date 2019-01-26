@@ -5239,6 +5239,11 @@ type EmbeddedPointer {
 
 directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int, message: String) on ARGUMENT_DEFINITION
+
+enum Status {
+    OK
+    ERROR
+}
 `},
 )
 

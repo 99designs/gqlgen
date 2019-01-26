@@ -1,6 +1,7 @@
-package gopath
+package code
 
 import (
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -22,4 +23,10 @@ func NormalizeVendor(pkg string) string {
 	pkg = strings.TrimPrefix(pkg, modifiers)
 	parts := strings.Split(pkg, "/vendor/")
 	return modifiers + parts[len(parts)-1]
+}
+
+var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
+
+func SanitizePackageName(pkg string) string {
+	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
 }

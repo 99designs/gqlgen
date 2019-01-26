@@ -7,35 +7,24 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"golang.org/x/tools/go/loader"
+	"golang.org/x/tools/go/packages"
 )
 
 // Binder connects graphql types to golang types using static analysis
 type Binder struct {
-	program *loader.Program
-	types   TypeMap
+	pkgs  []*packages.Package
+	types TypeMap
 }
 
 func (c *Config) NewBinder() (*Binder, error) {
-	conf := loader.Config{
-		AllowErrors: true,
-		TypeChecker: types.Config{
-			Error: func(e error) {},
-		},
-	}
-
-	for _, pkg := range c.Models.ReferencedPackages() {
-		conf.Import(pkg)
-	}
-
-	prog, err := conf.Load()
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, c.Models.ReferencedPackages()...)
 	if err != nil {
-		return nil, errors.Wrap(err, "loading program")
+		return nil, err
 	}
 
 	return &Binder{
-		program: prog,
-		types:   c.Models,
+		pkgs:  pkgs,
+		types: c.Models,
 	}, nil
 }
 
@@ -51,9 +40,9 @@ func (b *Binder) FindType(pkgName string, typeName string) (types.Type, error) {
 	return obj.Type(), nil
 }
 
-func (b *Binder) getPkg(find string) *loader.PackageInfo {
-	for n, p := range b.program.Imported {
-		if normalizeVendor(find) == normalizeVendor(n) {
+func (b *Binder) getPkg(find string) *packages.Package {
+	for _, p := range b.pkgs {
+		if normalizeVendor(find) == normalizeVendor(p.PkgPath) {
 			return p
 		}
 	}
@@ -74,9 +63,9 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 		return nil, errors.Errorf("required package was not loaded: %s", fullName)
 	}
 
-	for astNode, def := range pkg.Defs {
+	for astNode, def := range pkg.TypesInfo.Defs {
 		// only look at defs in the top scope
-		if def == nil || def.Parent() == nil || def.Parent() != pkg.Pkg.Scope() {
+		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {
 			continue
 		}
 

@@ -84,7 +84,10 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 		Close: c.Close,
 		Next: func(response interface{}) error {
 			var op operationMessage
-			c.ReadJSON(&op)
+			err := c.ReadJSON(&op)
+			if err != nil {
+				return err
+			}
 			if op.Type != dataMsg {
 				if op.Type == errorMsg {
 					return fmt.Errorf(string(op.Payload))

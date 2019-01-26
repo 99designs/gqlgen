@@ -2,6 +2,12 @@
 
 package testserver
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type InnerDirectives struct {
 	Message string `json:"message"`
 }
@@ -59,4 +65,45 @@ type OuterObject struct {
 type User struct {
 	ID      int    `json:"id"`
 	Friends []User `json:"friends"`
+}
+
+type Status string
+
+const (
+	StatusOk    Status = "OK"
+	StatusError Status = "ERROR"
+)
+
+var AllStatus = []Status{
+	StatusOk,
+	StatusError,
+}
+
+func (e Status) IsValid() bool {
+	switch e {
+	case StatusOk, StatusError:
+		return true
+	}
+	return false
+}
+
+func (e Status) String() string {
+	return string(e)
+}
+
+func (e *Status) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Status(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Status", str)
+	}
+	return nil
+}
+
+func (e Status) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

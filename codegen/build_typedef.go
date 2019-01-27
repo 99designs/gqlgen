@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go/types"
 
+	"github.com/99designs/gqlgen/internal/code"
+
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
@@ -18,12 +20,16 @@ func (b *builder) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, err
 	if userEntry, ok := b.Config.Models[t.GQLDefinition.Name]; ok && userEntry.Model != "" {
 		// special case for maps
 		if userEntry.Model == "map[string]interface{}" {
-			t.GoType = types.NewMap(types.Typ[types.String], types.NewInterface(nil, nil).Complete())
+			t.GoType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
 
 			return t, nil
 		}
 
-		pkgName, typeName = pkgAndType(userEntry.Model)
+		pkgName, typeName = code.PkgAndType(userEntry.Model)
+		if pkgName == "" {
+			return nil, fmt.Errorf("missing package name for %s", schemaType.Name)
+		}
+
 	} else if t.GQLDefinition.Kind == ast.Scalar {
 		pkgName = "github.com/99designs/gqlgen/graphql"
 		typeName = "String"
@@ -37,10 +43,6 @@ func (b *builder) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, err
 		}
 
 		return t, nil
-	}
-
-	if pkgName == "" {
-		return nil, fmt.Errorf("missing package name for %s", schemaType.Name)
 	}
 
 	// External marshal functions

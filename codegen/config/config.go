@@ -2,21 +2,19 @@ package config
 
 import (
 	"fmt"
-	"go/build"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 
 	"go/types"
 
-	"github.com/99designs/gqlgen/internal/gopath"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -139,20 +137,14 @@ func (c *PackageConfig) normalize() error {
 	// If Package is not set, first attempt to load the package at the output dir. If that fails
 	// fallback to just the base dir name of the output filename.
 	if c.Package == "" {
-		cwd, _ := os.Getwd()
-		pkg, _ := build.Default.Import(c.ImportPath(), cwd, 0)
-		if pkg.Name != "" {
-			c.Package = pkg.Name
-		} else {
-			c.Package = filepath.Base(c.Dir())
-		}
+		c.Package = code.NameForPackage(c.ImportPath())
 	}
-	c.Package = sanitizePackageName(c.Package)
+
 	return nil
 }
 
 func (c *PackageConfig) ImportPath() string {
-	return gopath.MustDir2Import(c.Dir())
+	return code.ImportPathForDir(c.Dir())
 }
 
 func (c *PackageConfig) Dir() string {
@@ -225,7 +217,7 @@ func (tm TypeMap) ReferencedPackages() []string {
 		if typ.Model == "map[string]interface{}" {
 			continue
 		}
-		pkg, _ := gopath.PkgAndType(typ.Model)
+		pkg, _ := code.PkgAndType(typ.Model)
 		if pkg == "" || inStrSlice(pkgs, pkg) {
 			continue
 		}
@@ -346,6 +338,7 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 	var sources []*ast.Source
 
 	for _, filename := range c.SchemaFilename {
+		filename = filepath.ToSlash(filename)
 		var err error
 		var schemaRaw []byte
 		schemaRaw, err = ioutil.ReadFile(filename)
@@ -362,12 +355,6 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 		return nil, nil, err
 	}
 	return schema, schemaStrings, nil
-}
-
-var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
-
-func sanitizePackageName(pkg string) string {
-	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")
 }
 
 func abs(path string) string {

@@ -7,6 +7,27 @@ import (
 	"time"
 )
 
+// AddressLoaderConfig captures the config to create a new AddressLoader
+type AddressLoaderConfig struct {
+	// Fetch is a method that provides the data for the loader
+	Fetch func(keys []int) ([]*Address, []error)
+
+	// Wait is how long wait before sending a batch
+	Wait time.Duration
+
+	// MaxBatch will limit the maximum number of keys to send in one batch, 0 = not limit
+	MaxBatch int
+}
+
+// NewAddressLoader creates a new AddressLoader given a fetch, wait, and maxBatch
+func NewAddressLoader(config AddressLoaderConfig) *AddressLoader {
+	return &AddressLoader{
+		fetch:    config.Fetch,
+		wait:     config.Wait,
+		maxBatch: config.MaxBatch,
+	}
+}
+
 // AddressLoader batches and caches requests
 type AddressLoader struct {
 	// this method provides the data for the loader

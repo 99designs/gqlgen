@@ -112,7 +112,7 @@ func TestHandlerOptions(t *testing.T) {
 
 	resp := doRequest(h, "OPTIONS", "/graphql?query={me{name}}", ``)
 	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, "OPTIONS, GET, POST", resp.HeaderMap.Get("Allow"))
+	assert.Equal(t, "OPTIONS, GET, POST", resp.Header().Get("Allow"))
 }
 
 func TestHandlerHead(t *testing.T) {

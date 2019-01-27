@@ -2,13 +2,13 @@ package model
 
 import (
 	"errors"
-	"external"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/99designs/gqlgen/example/scalars/external"
 	"github.com/99designs/gqlgen/graphql"
 )
 

@@ -16,7 +16,7 @@ models:
   Viewer:
     model: github.com/99designs/gqlgen/integration/models-go.Viewer
   User:
-    model: remote_api.User
+    model: github.com/99designs/gqlgen/integration/remote_api.User
     fields:
       likes:
         resolver: true

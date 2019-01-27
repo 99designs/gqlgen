@@ -2,12 +2,10 @@ package templates
 
 import (
 	"fmt"
-	"go/build"
+	"go/types"
 	"strconv"
 
-	"go/types"
-
-	"github.com/99designs/gqlgen/internal/gopath"
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 type Import struct {
@@ -46,18 +44,14 @@ func (s *Imports) Reserve(path string, aliases ...string) string {
 	}
 
 	// if we are referencing our own package we dont need an import
-	if gopath.MustDir2Import(s.destDir) == path {
+	if code.ImportPathForDir(s.destDir) == path {
 		return ""
 	}
 
-	pkg, err := build.Default.Import(path, s.destDir, 0)
-	if err != nil {
-		panic(err)
-	}
-
+	name := code.NameForPackage(path)
 	var alias string
 	if len(aliases) != 1 {
-		alias = pkg.Name
+		alias = name
 	} else {
 		alias = aliases[0]
 	}
@@ -71,7 +65,7 @@ func (s *Imports) Reserve(path string, aliases ...string) string {
 	}
 
 	s.imports = append(s.imports, &Import{
-		Name:  pkg.Name,
+		Name:  name,
 		Path:  path,
 		Alias: alias,
 	})
@@ -84,10 +78,10 @@ func (s *Imports) Lookup(path string) string {
 		return ""
 	}
 
-	path = gopath.NormalizeVendor(path)
+	path = code.NormalizeVendor(path)
 
 	// if we are referencing our own package we dont need an import
-	if gopath.MustDir2Import(s.destDir) == path {
+	if code.ImportPathForDir(s.destDir) == path {
 		return ""
 	}
 
@@ -95,13 +89,8 @@ func (s *Imports) Lookup(path string) string {
 		return existing.Alias
 	}
 
-	pkg, err := build.Default.Import(path, s.destDir, 0)
-	if err != nil {
-		panic(err)
-	}
-
 	imp := &Import{
-		Name: pkg.Name,
+		Name: code.NameForPackage(path),
 		Path: path,
 	}
 	s.imports = append(s.imports, imp)

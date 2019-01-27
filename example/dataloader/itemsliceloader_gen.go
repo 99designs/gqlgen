@@ -7,6 +7,27 @@ import (
 	"time"
 )
 
+// ItemSliceLoaderConfig captures the config to create a new ItemSliceLoader
+type ItemSliceLoaderConfig struct {
+	// Fetch is a method that provides the data for the loader
+	Fetch func(keys []int) ([][]Item, []error)
+
+	// Wait is how long wait before sending a batch
+	Wait time.Duration
+
+	// MaxBatch will limit the maximum number of keys to send in one batch, 0 = not limit
+	MaxBatch int
+}
+
+// NewItemSliceLoader creates a new ItemSliceLoader given a fetch, wait, and maxBatch
+func NewItemSliceLoader(config ItemSliceLoaderConfig) *ItemSliceLoader {
+	return &ItemSliceLoader{
+		fetch:    config.Fetch,
+		wait:     config.Wait,
+		maxBatch: config.MaxBatch,
+	}
+}
+
 // ItemSliceLoader batches and caches requests
 type ItemSliceLoader struct {
 	// this method provides the data for the loader

@@ -1,4 +1,3 @@
-//go:generate rm -f resolver.go
 //go:generate go run ../../testdata/gqlgen.go
 
 package testserver
@@ -190,6 +189,11 @@ func TestGeneratedServer(t *testing.T) {
 		err := c.Post(`query { nullableArg(arg: null) }`, &resp)
 		require.Nil(t, err)
 		require.Equal(t, "Ok", *resp.NullableArg)
+	})
+
+	t.Run("list of enums", func(t *testing.T) {
+		require.Equal(t, StatusOk, AllStatus[0])
+		require.Equal(t, StatusError, AllStatus[1])
 	})
 }
 

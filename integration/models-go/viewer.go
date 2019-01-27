@@ -1,6 +1,6 @@
 package models
 
-import "remote_api"
+import "github.com/99designs/gqlgen/integration/remote_api"
 
 type Viewer struct {
 	User *remote_api.User

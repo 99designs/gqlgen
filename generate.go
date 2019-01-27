@@ -4,12 +4,13 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"golang.org/x/tools/go/packages"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/modelgen"
 	"github.com/pkg/errors"
-	"golang.org/x/tools/go/loader"
 )
 
 func Generate(cfg *config.Config, option ...Option) error {
@@ -32,7 +33,6 @@ func Generate(cfg *config.Config, option ...Option) error {
 			}
 		}
 	}
-
 	// Merge again now that the generated models have been injected into the typemap
 	schema, err := codegen.NewSchema(cfg)
 	if err != nil {
@@ -57,19 +57,19 @@ func Generate(cfg *config.Config, option ...Option) error {
 }
 
 func validate(cfg *config.Config) error {
-	conf := loader.Config{}
-
-	conf.Import(cfg.Exec.ImportPath())
+	roots := []string{cfg.Exec.ImportPath()}
 	if cfg.Model.IsDefined() {
-		conf.Import(cfg.Model.ImportPath())
+		roots = append(roots, cfg.Model.ImportPath())
 	}
 
 	if cfg.Resolver.IsDefined() {
-		conf.Import(cfg.Resolver.ImportPath())
+		roots = append(roots, cfg.Resolver.ImportPath())
 	}
-
-	_, err := conf.Load()
-	return err
+	_, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, roots...)
+	if err != nil {
+		return errors.Wrap(err, "validation failed")
+	}
+	return nil
 }
 
 func abs(path string) string {

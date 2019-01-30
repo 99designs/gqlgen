@@ -1,3 +1,4 @@
+//go:generate rm -f resolver.go
 //go:generate go run ../../testdata/gqlgen.go
 
 package testserver

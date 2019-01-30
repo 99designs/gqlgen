@@ -1,4 +1,4 @@
-{{ $object := . }}
+{{- range $object := .Objects }}
 
 var {{ $object.Definition.GQLDefinition.Name|lcFirst}}Implementors = {{$object.Implementors}}
 
@@ -68,4 +68,6 @@ func (ec *executionContext) _{{$object.Definition.GQLDefinition.Name}}(ctx conte
 	if invalid { return graphql.Null }
 	return out
 }
+{{- end }}
+
 {{- end }}

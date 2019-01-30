@@ -1,23 +1,19 @@
-package {{ .PackageName }}
+// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
-import (
-	%%%IMPORTS%%%
+{{ reserveImport "context"  }}
+{{ reserveImport "fmt"  }}
+{{ reserveImport "io"  }}
+{{ reserveImport "strconv"  }}
+{{ reserveImport "time"  }}
+{{ reserveImport "sync"  }}
+{{ reserveImport "errors"  }}
+{{ reserveImport "bytes"  }}
 
-	{{ reserveImport "context"  }}
-	{{ reserveImport "fmt"  }}
-	{{ reserveImport "io"  }}
-	{{ reserveImport "strconv"  }}
-	{{ reserveImport "time"  }}
-	{{ reserveImport "sync"  }}
-	{{ reserveImport "errors"  }}
-	{{ reserveImport "bytes"  }}
-
-	{{ reserveImport "github.com/99designs/gqlgen/handler" }}
-	{{ reserveImport "github.com/vektah/gqlparser" }}
-	{{ reserveImport "github.com/vektah/gqlparser/ast" }}
-	{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
-	{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
-)
+{{ reserveImport "github.com/99designs/gqlgen/handler" }}
+{{ reserveImport "github.com/vektah/gqlparser" }}
+{{ reserveImport "github.com/vektah/gqlparser/ast" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
 type {{.ResolverType}} struct {}
 

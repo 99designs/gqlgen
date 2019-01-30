@@ -1,3 +1,4 @@
+{{- range $input := .Inputs }}
 	{{- if .Definition.IsMarshaled }}
 	func Unmarshal{{ .Definition.GQLDefinition.Name }}(v interface{}) ({{.Definition.GoType | ref}}, error) {
 		var it {{.Definition.GoType | ref}}
@@ -106,3 +107,4 @@
 		{{- end }}
 		return obj, nil
 	}
+{{ end }}

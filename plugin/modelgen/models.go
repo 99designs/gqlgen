@@ -133,7 +133,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				fd := schema.Types[field.Type.Name()]
 				it.Fields = append(it.Fields, &Field{
 					Name:        templates.ToGo(name),
-					Type:        copyModifiersFromAst(field.Type, fd.Kind != ast.Interface, typ),
+					Type:        binder.CopyModifiersFromAst(field.Type, fd.Kind != ast.Interface, typ),
 					Description: field.Description,
 					Tag:         `json:"` + field.Name + `"`,
 				})
@@ -177,17 +177,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		return nil
 	}
 
-	return templates.RenderToFile("./models.gotpl", cfg.Model.Filename, b)
-}
-
-func copyModifiersFromAst(t *ast.Type, usePtr bool, base types.Type) types.Type {
-	if t.Elem != nil {
-		return types.NewSlice(copyModifiersFromAst(t.Elem, usePtr, base))
-	}
-
-	if !t.NonNull && usePtr {
-		return types.NewPointer(base)
-	}
-
-	return base
+	return templates.Render(templates.Options{
+		PackageName: cfg.Model.Package,
+		Filename:    cfg.Model.Filename,
+		Data:        b,
+	})
 }

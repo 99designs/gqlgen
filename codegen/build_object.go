@@ -125,7 +125,7 @@ func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgu
 		GQLName:       arg.Name,
 		TypeReference: b.NamedTypes.getType(arg.Type),
 		Object:        obj,
-		GoVarName:     sanitizeArgName(arg.Name),
+		GoVarName:     templates.ToGoPrivate(arg.Name),
 		Directives:    argDirs,
 	}
 

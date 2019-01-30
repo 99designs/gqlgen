@@ -1,14 +1,8 @@
-package main
-
-import (
-	%%%IMPORTS%%%
-
-	{{ reserveImport "context" }}
-	{{ reserveImport "log" }}
-	{{ reserveImport "net/http" }}
-	{{ reserveImport "os" }}
-	{{ reserveImport "github.com/99designs/gqlgen/handler" }}
-)
+{{ reserveImport "context" }}
+{{ reserveImport "log" }}
+{{ reserveImport "net/http" }}
+{{ reserveImport "os" }}
+{{ reserveImport "github.com/99designs/gqlgen/handler" }}
 
 const defaultPort = "8080"
 

@@ -17,357 +17,7 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
-}
-
-type Config struct {
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
-
-type ResolverRoot interface {
-	Element() ElementResolver
-	Query() QueryResolver
-	User() UserResolver
-}
-
-type DirectiveRoot struct {
-	Magic func(ctx context.Context, obj interface{}, next graphql.Resolver, kind *int) (res interface{}, err error)
-}
-
-type ComplexityRoot struct {
-	Element struct {
-		Child      func(childComplexity int) int
-		Error      func(childComplexity int) int
-		Mismatched func(childComplexity int) int
-	}
-
-	Query struct {
-		Path         func(childComplexity int) int
-		Date         func(childComplexity int, filter models.DateFilter) int
-		Viewer       func(childComplexity int) int
-		JsonEncoding func(childComplexity int) int
-		Error        func(childComplexity int, typeArg *models.ErrorType) int
-	}
-
-	User struct {
-		Name  func(childComplexity int) int
-		Likes func(childComplexity int) int
-	}
-
-	Viewer struct {
-		User func(childComplexity int) int
-	}
-}
-
-type ElementResolver interface {
-	Child(ctx context.Context, obj *models.Element) (models.Element, error)
-	Error(ctx context.Context, obj *models.Element) (bool, error)
-	Mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
-}
-type QueryResolver interface {
-	Path(ctx context.Context) ([]*models.Element, error)
-	Date(ctx context.Context, filter models.DateFilter) (bool, error)
-	Viewer(ctx context.Context) (*models.Viewer, error)
-	JSONEncoding(ctx context.Context) (string, error)
-	Error(ctx context.Context, typeArg *models.ErrorType) (bool, error)
-}
-type UserResolver interface {
-	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
-}
-
-func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 models.DateFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		var err error
-		arg0, err = UnmarshalDateFilter(tmp)
-		if err != nil {
-			return nil, err
-		}
-
-		mDateFilter1, err := e.DateFilterMiddleware(ctx, &arg0)
-		if err != nil {
-			return nil, err
-		}
-		arg0 = *mDateFilter1
-	}
-	args["filter"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_error_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *models.ErrorType
-	if tmp, ok := rawArgs["type"]; ok {
-		var err error
-		var ptr1 models.ErrorType
-		if tmp != nil {
-			err = (&ptr1).UnmarshalGQL(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["type"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) dir_magic_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["kind"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["kind"] = arg0
-	return args, nil
-
-}
-
-type executableSchema struct {
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
-
-func (e *executableSchema) Schema() *ast.Schema {
-	return parsedSchema
-}
-
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	switch typeName + "." + field {
-
-	case "Element.child":
-		if e.complexity.Element.Child == nil {
-			break
-		}
-
-		return e.complexity.Element.Child(childComplexity), true
-
-	case "Element.error":
-		if e.complexity.Element.Error == nil {
-			break
-		}
-
-		return e.complexity.Element.Error(childComplexity), true
-
-	case "Element.mismatched":
-		if e.complexity.Element.Mismatched == nil {
-			break
-		}
-
-		return e.complexity.Element.Mismatched(childComplexity), true
-
-	case "Query.path":
-		if e.complexity.Query.Path == nil {
-			break
-		}
-
-		return e.complexity.Query.Path(childComplexity), true
-
-	case "Query.date":
-		if e.complexity.Query.Date == nil {
-			break
-		}
-
-		args, err := e.field_Query_date_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
-
-	case "Query.viewer":
-		if e.complexity.Query.Viewer == nil {
-			break
-		}
-
-		return e.complexity.Query.Viewer(childComplexity), true
-
-	case "Query.jsonEncoding":
-		if e.complexity.Query.JsonEncoding == nil {
-			break
-		}
-
-		return e.complexity.Query.JsonEncoding(childComplexity), true
-
-	case "Query.error":
-		if e.complexity.Query.Error == nil {
-			break
-		}
-
-		args, err := e.field_Query_error_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
-
-	case "User.name":
-		if e.complexity.User.Name == nil {
-			break
-		}
-
-		return e.complexity.User.Name(childComplexity), true
-
-	case "User.likes":
-		if e.complexity.User.Likes == nil {
-			break
-		}
-
-		return e.complexity.User.Likes(childComplexity), true
-
-	case "Viewer.user":
-		if e.complexity.Viewer.User == nil {
-			break
-		}
-
-		return e.complexity.Viewer.User(childComplexity), true
-
-	}
-	return 0, false
-}
-
-func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._Query(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions}
-}
-
-func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	return graphql.ErrorResponse(ctx, "mutations are not supported")
-}
-
-func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
-}
-
-type executionContext struct {
-	*graphql.RequestContext
-	*executableSchema
-}
-
-var elementImplementors = []string{"Element"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Element(ctx context.Context, sel ast.SelectionSet, obj *models.Element) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, elementImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Element")
-		case "child":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Element_child(ctx, field, obj)
-				if res == graphql.Null {
-					invalid = true
-				}
-				return res
-			})
-		case "error":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Element_error(ctx, field, obj)
-				if res == graphql.Null {
-					invalid = true
-				}
-				return res
-			})
-		case "mismatched":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Element_mismatched(ctx, field, obj)
-				return res
-			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
+// region    **************************** field.gotpl *****************************
 
 // nolint: vetshadow
 func (ec *executionContext) _Element_child(ctx context.Context, field graphql.CollectedField, obj *models.Element) graphql.Marshaler {
@@ -455,76 +105,6 @@ func (ec *executionContext) _Element_mismatched(ctx context.Context, field graph
 	}
 
 	return arr1
-}
-
-var queryImplementors = []string{"Query"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, queryImplementors)
-
-	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-		Object: "Query",
-	})
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Query")
-		case "path":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Query_path(ctx, field)
-				return res
-			})
-		case "date":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Query_date(ctx, field)
-				if res == graphql.Null {
-					invalid = true
-				}
-				return res
-			})
-		case "viewer":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Query_viewer(ctx, field)
-				return res
-			})
-		case "jsonEncoding":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Query_jsonEncoding(ctx, field)
-				if res == graphql.Null {
-					invalid = true
-				}
-				return res
-			})
-		case "error":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Query_error(ctx, field)
-				if res == graphql.Null {
-					invalid = true
-				}
-				return res
-			})
-		case "__type":
-			out.Values[i] = ec._Query___type(ctx, field)
-		case "__schema":
-			out.Values[i] = ec._Query___schema(ctx, field)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
 }
 
 // nolint: vetshadow
@@ -777,43 +357,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.___Schema(ctx, field.Selections, res)
 }
 
-var userImplementors = []string{"User"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *remote_api.User) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, userImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("User")
-		case "name":
-			out.Values[i] = ec._User_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "likes":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._User_likes(ctx, field, obj)
-				if res == graphql.Null {
-					invalid = true
-				}
-				return res
-			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
 // nolint: vetshadow
 func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *remote_api.User) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
@@ -877,31 +420,6 @@ func (ec *executionContext) _User_likes(ctx context.Context, field graphql.Colle
 	return arr1
 }
 
-var viewerImplementors = []string{"Viewer"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Viewer(ctx context.Context, sel ast.SelectionSet, obj *models.Viewer) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, viewerImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Viewer")
-		case "user":
-			out.Values[i] = ec._Viewer_user(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
 // nolint: vetshadow
 func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.CollectedField, obj *models.Viewer) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
@@ -929,46 +447,6 @@ func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.Coll
 	}
 
 	return ec._User(ctx, field.Selections, res)
-}
-
-var __DirectiveImplementors = []string{"__Directive"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, __DirectiveImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("__Directive")
-		case "name":
-			out.Values[i] = ec.___Directive_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "description":
-			out.Values[i] = ec.___Directive_description(ctx, field, obj)
-		case "locations":
-			out.Values[i] = ec.___Directive_locations(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "args":
-			out.Values[i] = ec.___Directive_args(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
 }
 
 // nolint: vetshadow
@@ -1118,43 +596,6 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	return arr1
 }
 
-var __EnumValueImplementors = []string{"__EnumValue"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, __EnumValueImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("__EnumValue")
-		case "name":
-			out.Values[i] = ec.___EnumValue_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "description":
-			out.Values[i] = ec.___EnumValue_description(ctx, field, obj)
-		case "isDeprecated":
-			out.Values[i] = ec.___EnumValue_isDeprecated(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "deprecationReason":
-			out.Values[i] = ec.___EnumValue_deprecationReason(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
 // nolint: vetshadow
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
@@ -1259,53 +700,6 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 		return graphql.Null
 	}
 	return graphql.MarshalString(*res)
-}
-
-var __FieldImplementors = []string{"__Field"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, __FieldImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("__Field")
-		case "name":
-			out.Values[i] = ec.___Field_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "description":
-			out.Values[i] = ec.___Field_description(ctx, field, obj)
-		case "args":
-			out.Values[i] = ec.___Field_args(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "type":
-			out.Values[i] = ec.___Field_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "isDeprecated":
-			out.Values[i] = ec.___Field_isDeprecated(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "deprecationReason":
-			out.Values[i] = ec.___Field_deprecationReason(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
 }
 
 // nolint: vetshadow
@@ -1509,43 +903,6 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	return graphql.MarshalString(*res)
 }
 
-var __InputValueImplementors = []string{"__InputValue"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, __InputValueImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("__InputValue")
-		case "name":
-			out.Values[i] = ec.___InputValue_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "description":
-			out.Values[i] = ec.___InputValue_description(ctx, field, obj)
-		case "type":
-			out.Values[i] = ec.___InputValue_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "defaultValue":
-			out.Values[i] = ec.___InputValue_defaultValue(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
 // nolint: vetshadow
 func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
@@ -1658,48 +1015,6 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		return graphql.Null
 	}
 	return graphql.MarshalString(*res)
-}
-
-var __SchemaImplementors = []string{"__Schema"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, __SchemaImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("__Schema")
-		case "types":
-			out.Values[i] = ec.___Schema_types(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "queryType":
-			out.Values[i] = ec.___Schema_queryType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "mutationType":
-			out.Values[i] = ec.___Schema_mutationType(ctx, field, obj)
-		case "subscriptionType":
-			out.Values[i] = ec.___Schema_subscriptionType(ctx, field, obj)
-		case "directives":
-			out.Values[i] = ec.___Schema_directives(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
 }
 
 // nolint: vetshadow
@@ -1913,50 +1228,6 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	}
 	wg.Wait()
 	return arr1
-}
-
-var __TypeImplementors = []string{"__Type"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, __TypeImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	invalid := false
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("__Type")
-		case "kind":
-			out.Values[i] = ec.___Type_kind(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "name":
-			out.Values[i] = ec.___Type_name(ctx, field, obj)
-		case "description":
-			out.Values[i] = ec.___Type_description(ctx, field, obj)
-		case "fields":
-			out.Values[i] = ec.___Type_fields(ctx, field, obj)
-		case "interfaces":
-			out.Values[i] = ec.___Type_interfaces(ctx, field, obj)
-		case "possibleTypes":
-			out.Values[i] = ec.___Type_possibleTypes(ctx, field, obj)
-		case "enumValues":
-			out.Values[i] = ec.___Type_enumValues(ctx, field, obj)
-		case "inputFields":
-			out.Values[i] = ec.___Type_inputFields(ctx, field, obj)
-		case "ofType":
-			out.Values[i] = ec.___Type_ofType(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalid {
-		return graphql.Null
-	}
-	return out
 }
 
 // nolint: vetshadow
@@ -2366,56 +1637,313 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
-func UnmarshalDateFilter(v interface{}) (models.DateFilter, error) {
-	var it models.DateFilter
-	var asMap = v.(map[string]interface{})
+// endregion **************************** field.gotpl *****************************
 
-	if _, present := asMap["timezone"]; !present {
-		asMap["timezone"] = "UTC"
+// region    ************************** generated.gotpl ***************************
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+		complexity: cfg.Complexity,
 	}
-	if _, present := asMap["op"]; !present {
-		asMap["op"] = "EQ"
-	}
-
-	for k, v := range asMap {
-		switch k {
-		case "value":
-			var err error
-			it.Value, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
-		case "timezone":
-			var err error
-			var ptr1 string
-			if v != nil {
-				ptr1, err = graphql.UnmarshalString(v)
-				it.Timezone = &ptr1
-			}
-
-			if err != nil {
-				return it, err
-			}
-		case "op":
-			var err error
-			var ptr1 models.DateFilterOp
-			if v != nil {
-				err = (&ptr1).UnmarshalGQL(v)
-				it.Op = &ptr1
-			}
-
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
 }
 
-func (e *executableSchema) DateFilterMiddleware(ctx context.Context, obj *models.DateFilter) (*models.DateFilter, error) {
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
+	Complexity ComplexityRoot
+}
 
-	return obj, nil
+type ResolverRoot interface {
+	Element() ElementResolver
+	Query() QueryResolver
+	User() UserResolver
+}
+
+type DirectiveRoot struct {
+	Magic func(ctx context.Context, obj interface{}, next graphql.Resolver, kind *int) (res interface{}, err error)
+}
+
+type ComplexityRoot struct {
+	Element struct {
+		Child      func(childComplexity int) int
+		Error      func(childComplexity int) int
+		Mismatched func(childComplexity int) int
+	}
+
+	Query struct {
+		Path         func(childComplexity int) int
+		Date         func(childComplexity int, filter models.DateFilter) int
+		Viewer       func(childComplexity int) int
+		JsonEncoding func(childComplexity int) int
+		Error        func(childComplexity int, typeArg *models.ErrorType) int
+	}
+
+	User struct {
+		Name  func(childComplexity int) int
+		Likes func(childComplexity int) int
+	}
+
+	Viewer struct {
+		User func(childComplexity int) int
+	}
+}
+
+type ElementResolver interface {
+	Child(ctx context.Context, obj *models.Element) (models.Element, error)
+	Error(ctx context.Context, obj *models.Element) (bool, error)
+	Mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
+}
+type QueryResolver interface {
+	Path(ctx context.Context) ([]*models.Element, error)
+	Date(ctx context.Context, filter models.DateFilter) (bool, error)
+	Viewer(ctx context.Context) (*models.Viewer, error)
+	JSONEncoding(ctx context.Context) (string, error)
+	Error(ctx context.Context, typeArg *models.ErrorType) (bool, error)
+}
+type UserResolver interface {
+	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
+}
+
+func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 models.DateFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		var err error
+		arg0, err = UnmarshalDateFilter(tmp)
+		if err != nil {
+			return nil, err
+		}
+
+		mDateFilter1, err := e.DateFilterMiddleware(ctx, &arg0)
+		if err != nil {
+			return nil, err
+		}
+		arg0 = *mDateFilter1
+	}
+	args["filter"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) field_Query_error_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *models.ErrorType
+	if tmp, ok := rawArgs["type"]; ok {
+		var err error
+		var ptr1 models.ErrorType
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func (e *executableSchema) dir_magic_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["kind"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["kind"] = arg0
+	return args, nil
+
+}
+
+type executableSchema struct {
+	resolvers  ResolverRoot
+	directives DirectiveRoot
+	complexity ComplexityRoot
+}
+
+func (e *executableSchema) Schema() *ast.Schema {
+	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Element.child":
+		if e.complexity.Element.Child == nil {
+			break
+		}
+
+		return e.complexity.Element.Child(childComplexity), true
+
+	case "Element.error":
+		if e.complexity.Element.Error == nil {
+			break
+		}
+
+		return e.complexity.Element.Error(childComplexity), true
+
+	case "Element.mismatched":
+		if e.complexity.Element.Mismatched == nil {
+			break
+		}
+
+		return e.complexity.Element.Mismatched(childComplexity), true
+
+	case "Query.path":
+		if e.complexity.Query.Path == nil {
+			break
+		}
+
+		return e.complexity.Query.Path(childComplexity), true
+
+	case "Query.date":
+		if e.complexity.Query.Date == nil {
+			break
+		}
+
+		args, err := e.field_Query_date_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
+
+	case "Query.viewer":
+		if e.complexity.Query.Viewer == nil {
+			break
+		}
+
+		return e.complexity.Query.Viewer(childComplexity), true
+
+	case "Query.jsonEncoding":
+		if e.complexity.Query.JsonEncoding == nil {
+			break
+		}
+
+		return e.complexity.Query.JsonEncoding(childComplexity), true
+
+	case "Query.error":
+		if e.complexity.Query.Error == nil {
+			break
+		}
+
+		args, err := e.field_Query_error_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
+
+	case "User.name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
+
+	case "User.likes":
+		if e.complexity.User.Likes == nil {
+			break
+		}
+
+		return e.complexity.User.Likes(childComplexity), true
+
+	case "Viewer.user":
+		if e.complexity.Viewer.User == nil {
+			break
+		}
+
+		return e.complexity.Viewer.User(childComplexity), true
+
+	}
+	return 0, false
+}
+
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions}
+}
+
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	return graphql.ErrorResponse(ctx, "mutations are not supported")
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
+	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
+}
+
+type executionContext struct {
+	*graphql.RequestContext
+	*executableSchema
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
@@ -2553,3 +2081,495 @@ func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMi
 		return next(ctx)
 	}
 }
+
+// endregion ************************** generated.gotpl ***************************
+
+// region    **************************** input.gotpl *****************************
+
+func UnmarshalDateFilter(v interface{}) (models.DateFilter, error) {
+	var it models.DateFilter
+	var asMap = v.(map[string]interface{})
+
+	if _, present := asMap["timezone"]; !present {
+		asMap["timezone"] = "UTC"
+	}
+	if _, present := asMap["op"]; !present {
+		asMap["op"] = "EQ"
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "value":
+			var err error
+			it.Value, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "timezone":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Timezone = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "op":
+			var err error
+			var ptr1 models.DateFilterOp
+			if v != nil {
+				err = (&ptr1).UnmarshalGQL(v)
+				it.Op = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (e *executableSchema) DateFilterMiddleware(ctx context.Context, obj *models.DateFilter) (*models.DateFilter, error) {
+
+	return obj, nil
+}
+
+// endregion **************************** input.gotpl *****************************
+
+// region    ************************** interface.gotpl ***************************
+
+// endregion ************************** interface.gotpl ***************************
+
+// region    **************************** object.gotpl ****************************
+
+var elementImplementors = []string{"Element"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Element(ctx context.Context, sel ast.SelectionSet, obj *models.Element) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, elementImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Element")
+		case "child":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Element_child(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "error":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Element_error(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "mismatched":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Element_mismatched(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var queryImplementors = []string{"Query"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, queryImplementors)
+
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Query")
+		case "path":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Query_path(ctx, field)
+				return res
+			})
+		case "date":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Query_date(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "viewer":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Query_viewer(ctx, field)
+				return res
+			})
+		case "jsonEncoding":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Query_jsonEncoding(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "error":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._Query_error(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "__type":
+			out.Values[i] = ec._Query___type(ctx, field)
+		case "__schema":
+			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var userImplementors = []string{"User"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *remote_api.User) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, userImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("User")
+		case "name":
+			out.Values[i] = ec._User_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "likes":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				res = ec._User_likes(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var viewerImplementors = []string{"Viewer"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Viewer(ctx context.Context, sel ast.SelectionSet, obj *models.Viewer) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, viewerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Viewer")
+		case "user":
+			out.Values[i] = ec._Viewer_user(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var __DirectiveImplementors = []string{"__Directive"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, __DirectiveImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("__Directive")
+		case "name":
+			out.Values[i] = ec.___Directive_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec.___Directive_description(ctx, field, obj)
+		case "locations":
+			out.Values[i] = ec.___Directive_locations(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "args":
+			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var __EnumValueImplementors = []string{"__EnumValue"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, __EnumValueImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("__EnumValue")
+		case "name":
+			out.Values[i] = ec.___EnumValue_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec.___EnumValue_description(ctx, field, obj)
+		case "isDeprecated":
+			out.Values[i] = ec.___EnumValue_isDeprecated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "deprecationReason":
+			out.Values[i] = ec.___EnumValue_deprecationReason(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var __FieldImplementors = []string{"__Field"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, __FieldImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("__Field")
+		case "name":
+			out.Values[i] = ec.___Field_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec.___Field_description(ctx, field, obj)
+		case "args":
+			out.Values[i] = ec.___Field_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "type":
+			out.Values[i] = ec.___Field_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "isDeprecated":
+			out.Values[i] = ec.___Field_isDeprecated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "deprecationReason":
+			out.Values[i] = ec.___Field_deprecationReason(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var __InputValueImplementors = []string{"__InputValue"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, __InputValueImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("__InputValue")
+		case "name":
+			out.Values[i] = ec.___InputValue_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec.___InputValue_description(ctx, field, obj)
+		case "type":
+			out.Values[i] = ec.___InputValue_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "defaultValue":
+			out.Values[i] = ec.___InputValue_defaultValue(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var __SchemaImplementors = []string{"__Schema"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, __SchemaImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("__Schema")
+		case "types":
+			out.Values[i] = ec.___Schema_types(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "queryType":
+			out.Values[i] = ec.___Schema_queryType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "mutationType":
+			out.Values[i] = ec.___Schema_mutationType(ctx, field, obj)
+		case "subscriptionType":
+			out.Values[i] = ec.___Schema_subscriptionType(ctx, field, obj)
+		case "directives":
+			out.Values[i] = ec.___Schema_directives(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var __TypeImplementors = []string{"__Type"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, __TypeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("__Type")
+		case "kind":
+			out.Values[i] = ec.___Type_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "name":
+			out.Values[i] = ec.___Type_name(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec.___Type_description(ctx, field, obj)
+		case "fields":
+			out.Values[i] = ec.___Type_fields(ctx, field, obj)
+		case "interfaces":
+			out.Values[i] = ec.___Type_interfaces(ctx, field, obj)
+		case "possibleTypes":
+			out.Values[i] = ec.___Type_possibleTypes(ctx, field, obj)
+		case "enumValues":
+			out.Values[i] = ec.___Type_enumValues(ctx, field, obj)
+		case "inputFields":
+			out.Values[i] = ec.___Type_inputFields(ctx, field, obj)
+		case "ofType":
+			out.Values[i] = ec.___Type_ofType(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// endregion **************************** object.gotpl ****************************

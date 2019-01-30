@@ -46,44 +46,6 @@ func equalFieldName(source, target string) bool {
 	return strings.EqualFold(source, target)
 }
 
-var keywords = []string{
-	"break",
-	"default",
-	"func",
-	"interface",
-	"select",
-	"case",
-	"defer",
-	"go",
-	"map",
-	"struct",
-	"chan",
-	"else",
-	"goto",
-	"package",
-	"switch",
-	"const",
-	"fallthrough",
-	"if",
-	"range",
-	"type",
-	"continue",
-	"for",
-	"import",
-	"return",
-	"var",
-}
-
-// sanitizeArgName prevents collisions with go keywords for arguments to resolver functions
-func sanitizeArgName(name string) string {
-	for _, k := range keywords {
-		if name == k {
-			return name + "Arg"
-		}
-	}
-	return name
-}
-
 func isMap(t types.Type) bool {
 	_, isMap := t.(*types.Map)
 	return isMap

@@ -1,5 +1,4 @@
-{{ $field := . }}
-{{ $object := $field.Object }}
+{{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
 {{- if $object.Stream }}
 	func (ec *executionContext) _{{$object.Definition.GQLDefinition.Name}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
@@ -88,3 +87,5 @@
 		{{ $field.WriteJson }}
 	}
 {{ end }}
+
+{{- end }}{{- end}}

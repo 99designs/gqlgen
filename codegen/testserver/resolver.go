@@ -7,6 +7,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
 )
 
+// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+
 type Resolver struct{}
 
 func (r *Resolver) ForcedResolver() ForcedResolverResolver {

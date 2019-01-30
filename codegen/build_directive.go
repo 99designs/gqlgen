@@ -3,6 +3,8 @@ package codegen
 import (
 	"fmt"
 
+	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -24,7 +26,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 			newArg := FieldArgument{
 				GQLName:       arg.Name,
 				TypeReference: b.NamedTypes.getType(arg.Type),
-				GoVarName:     sanitizeArgName(arg.Name),
+				GoVarName:     templates.ToGoPrivate(arg.Name),
 			}
 
 			if !newArg.TypeReference.Definition.GQLDefinition.IsInputType() {

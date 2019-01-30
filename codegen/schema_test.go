@@ -20,7 +20,7 @@ func TestTypeInInput(t *testing.T) {
 }
 
 func generate(name string, schemaFilename string) error {
-	_, err := NewSchema(&config.Config{
+	_, err := BuildData(&config.Config{
 		SchemaFilename: config.SchemaFilenames{schemaFilename},
 		Exec:           config.PackageConfig{Filename: "gen/" + name + "/exec.go"},
 		Model:          config.PackageConfig{Filename: "gen/" + name + "/model.go"},

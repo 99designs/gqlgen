@@ -1,4 +1,4 @@
-{{- $interface := . }}
+{{- range $interface := .Interfaces }}
 
 func (ec *executionContext) _{{$interface.Definition.GQLDefinition.Name}}(ctx context.Context, sel ast.SelectionSet, obj *{{$interface.Definition.GoType | ref}}) graphql.Marshaler {
 	switch obj := (*obj).(type) {
@@ -16,3 +16,5 @@ func (ec *executionContext) _{{$interface.Definition.GQLDefinition.Name}}(ctx co
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
 }
+
+{{- end }}

@@ -6,6 +6,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/99designs/gqlgen/internal/code"
+	"github.com/vektah/gqlparser/ast"
+
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 )
@@ -84,4 +87,43 @@ func normalizeVendor(pkg string) string {
 	pkg = strings.TrimPrefix(pkg, modifiers)
 	parts := strings.Split(pkg, "/vendor/")
 	return modifiers + parts[len(parts)-1]
+}
+
+func (b *Binder) FindBackingType(schemaType *ast.Type) (types.Type, error) {
+	var pkgName, typeName string
+
+	if userEntry, ok := b.types[schemaType.Name()]; ok && userEntry.Model != "" {
+		// special case for maps
+		if userEntry.Model == "map[string]interface{}" {
+			return types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete()), nil
+		}
+
+		pkgName, typeName = code.PkgAndType(userEntry.Model)
+		if pkgName == "" {
+			return nil, fmt.Errorf("missing package name for %s", schemaType.Name)
+		}
+
+	} else {
+		pkgName = "github.com/99designs/gqlgen/graphql"
+		typeName = "String"
+	}
+
+	t, err := b.FindType(pkgName, typeName)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.CopyModifiersFromAst(schemaType, true, t), nil
+}
+
+func (b *Binder) CopyModifiersFromAst(t *ast.Type, usePtr bool, base types.Type) types.Type {
+	if t.Elem != nil {
+		return types.NewSlice(b.CopyModifiersFromAst(t.Elem, usePtr, base))
+	}
+
+	if !t.NonNull && usePtr {
+		return types.NewPointer(base)
+	}
+
+	return base
 }

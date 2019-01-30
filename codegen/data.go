@@ -10,6 +10,23 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+// Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
+// resolvers or directives automatically (eg grpc, validation)
+type Data struct {
+	Config     *config.Config
+	Schema     *ast.Schema
+	SchemaStr  map[string]string
+	Directives map[string]*Directive
+	Objects    Objects
+	Inputs     Objects
+	Interfaces []*Interface
+	Enums      []Enum
+
+	QueryRoot        *Object
+	MutationRoot     *Object
+	SubscriptionRoot *Object
+}
+
 type builder struct {
 	Config     *config.Config
 	Schema     *ast.Schema
@@ -19,7 +36,7 @@ type builder struct {
 	NamedTypes NamedTypes
 }
 
-func buildSchema(cfg *config.Config) (*Schema, error) {
+func BuildData(cfg *config.Config) (*Data, error) {
 	b := builder{
 		Config: cfg,
 	}
@@ -54,7 +71,7 @@ func buildSchema(cfg *config.Config) (*Schema, error) {
 		return nil, err
 	}
 
-	s := Schema{
+	s := Data{
 		Config:     cfg,
 		Directives: b.Directives,
 		Schema:     b.Schema,
@@ -88,6 +105,20 @@ func buildSchema(cfg *config.Config) (*Schema, error) {
 		}
 	}
 
+	if s.Schema.Query != nil {
+		s.QueryRoot = s.Objects.ByName(s.Schema.Query.Name)
+	} else {
+		return nil, fmt.Errorf("query entry point missing")
+	}
+
+	if s.Schema.Mutation != nil {
+		s.MutationRoot = s.Objects.ByName(s.Schema.Mutation.Name)
+	}
+
+	if s.Schema.Subscription != nil {
+		s.SubscriptionRoot = s.Objects.ByName(s.Schema.Subscription.Name)
+	}
+
 	if err := b.injectIntrospectionRoots(&s); err != nil {
 		return nil, err
 	}
@@ -111,7 +142,7 @@ func buildSchema(cfg *config.Config) (*Schema, error) {
 	return &s, nil
 }
 
-func (b *builder) injectIntrospectionRoots(s *Schema) error {
+func (b *builder) injectIntrospectionRoots(s *Data) error {
 	obj := s.Objects.ByName(b.Schema.Query.Name)
 	if obj == nil {
 		return fmt.Errorf("root query type must be defined")

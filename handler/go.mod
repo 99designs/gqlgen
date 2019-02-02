@@ -14,5 +14,6 @@ replace (
 require (
 	github.com/gorilla/websocket v1.4.0
 	github.com/hashicorp/golang-lru v0.5.0
+	github.com/stretchr/testify v1.3.0
 	github.com/vektah/gqlparser v1.1.0
 )

@@ -22,7 +22,7 @@ require (
 	github.com/gogo/protobuf v1.0.0 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
 	github.com/gorilla/mux v1.6.1 // indirect
-	github.com/gorilla/websocket v1.2.0
+	github.com/gorilla/websocket v1.4.0
 	github.com/hashicorp/golang-lru v0.5.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mitchellh/mapstructure v0.0.0-20180203102830-a4e142e9c047

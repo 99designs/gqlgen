@@ -1,5 +1,11 @@
 module github.com/99designs/gqlgen
 
+// Rewrite
+require github.com/99designs/gqlgen/graphql v0.4.5-0.20190127090136-055fb4bc9a6a
+
+replace github.com/99designs/gqlgen/graphql => ./graphql
+
+// Actual dependencies
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible

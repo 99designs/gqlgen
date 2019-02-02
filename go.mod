@@ -1,9 +1,19 @@
 module github.com/99designs/gqlgen
 
 // Rewrite
-require github.com/99designs/gqlgen/graphql v0.4.5-0.20190127090136-055fb4bc9a6a
+require (
+	github.com/99designs/gqlgen/complexity v0.4.5-0.20190127090136-055fb4bc9a6a
+	github.com/99designs/gqlgen/graphql v0.4.5-0.20190127090136-055fb4bc9a6a
+	github.com/99designs/gqlgen/graphql/introspection v0.4.5-0.20190127090136-055fb4bc9a6a
+	github.com/99designs/gqlgen/handler v0.4.5-0.20190127090136-055fb4bc9a6a
+)
 
-replace github.com/99designs/gqlgen/graphql => ./graphql
+replace (
+	github.com/99designs/gqlgen/complexity => ./complexity
+	github.com/99designs/gqlgen/graphql => ./graphql
+	github.com/99designs/gqlgen/graphql/introspection => ./graphql/introspection
+	github.com/99designs/gqlgen/handler => ./handler
+)
 
 // Actual dependencies
 require (

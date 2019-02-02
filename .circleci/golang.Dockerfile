@@ -4,7 +4,5 @@ RUN curl -sL --fail https://github.com/golangci/golangci-lint/releases/download/
 
 WORKDIR /projects/gqlgen
 
-COPY go.* /projects/gqlgen/
-RUN go mod download
-
 COPY . /projects/gqlgen/
+RUN go mod download

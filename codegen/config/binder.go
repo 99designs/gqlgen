@@ -3,7 +3,9 @@ package config
 import (
 	"fmt"
 	"go/types"
+	"path"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -17,9 +19,27 @@ type Binder struct {
 }
 
 func (c *Config) NewBinder() (*Binder, error) {
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, c.Models.ReferencedPackages()...)
-	if err != nil {
-		return nil, err
+	_, runtime, _, ok := runtime.Caller(0)
+	if !ok {
+		return nil, fmt.Errorf("No gqlgen runtime information")
+	}
+	var config = packages.Config{
+		Dir:  path.Dir(runtime), // Default dir is current context with gqlgen.Types
+		Mode: packages.LoadTypes | packages.LoadSyntax,
+	}
+
+	var pkgs []*packages.Package
+	for _, p := range c.Models.ReferencedPackages() {
+		conf := config
+		if !strings.HasPrefix(p, "github.com/99designs/gqlgen") {
+			conf.Dir = path.Dir(c.Resolver.Filename)
+		}
+
+		pck, err := packages.Load(&conf, c.Models.ReferencedPackages()...)
+		if err != nil {
+			return nil, err
+		}
+		pkgs = append(pkgs, pck...)
 	}
 
 	return &Binder{
@@ -62,7 +82,6 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 	if pkg == nil {
 		return nil, errors.Errorf("required package was not loaded: %s", fullName)
 	}
-
 	for astNode, def := range pkg.TypesInfo.Defs {
 		// only look at defs in the top scope
 		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {

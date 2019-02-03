@@ -17,6 +17,7 @@ type RequestContext struct {
 	RawQuery  string
 	Variables map[string]interface{}
 	Doc       *ast.QueryDocument
+	Op        *ast.OperationDefinition
 
 	ComplexityLimit      int
 	OperationComplexity  int
@@ -49,9 +50,10 @@ func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context
 	return next(ctx)
 }
 
-func NewRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *RequestContext {
+func NewRequestContext(doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *RequestContext {
 	return &RequestContext{
 		Doc:                 doc,
+		Op:                  op,
 		RawQuery:            query,
 		Variables:           variables,
 		ResolverMiddleware:  DefaultResolverMiddleware,

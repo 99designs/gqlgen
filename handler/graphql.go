@@ -37,7 +37,7 @@ type Config struct {
 }
 
 func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
-	reqCtx := graphql.NewRequestContext(doc, query, variables)
+	reqCtx := graphql.NewRequestContext(doc, op, query, variables)
 	reqCtx.DisableIntrospection = c.disableIntrospection
 
 	if hook := c.recover; hook != nil {

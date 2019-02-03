@@ -3,10 +3,10 @@ module github.com/99designs/gqlgen/plugin/modelgen
 // Rewrite
 
 require (
-	github.com/99designs/gqlgen/codegen/config v0.4.5-0.20190127090136-055fb4bc9a6a
-	github.com/99designs/gqlgen/codegen/templates v0.4.5-0.20190127090136-055fb4bc9a6a
-	github.com/99designs/gqlgen/plugin v0.4.5-0.20190127090136-055fb4bc9a6a
-	github.com/99designs/gqlgen/graphql v0.4.5-0.20190127090136-055fb4bc9a6a
+	github.com/99designs/gqlgen/codegen/config v0.4.5-0.20190203203210-e4679b668de0
+	github.com/99designs/gqlgen/codegen/templates v0.4.5-0.20190203203210-e4679b668de0
+	github.com/99designs/gqlgen/plugin v0.4.5-0.20190203203210-e4679b668de0
+	github.com/99designs/gqlgen/graphql v0.4.5-0.20190203203210-e4679b668de0
 )
 
 replace (

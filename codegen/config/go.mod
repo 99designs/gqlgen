@@ -1,10 +1,14 @@
 module github.com/99designs/gqlgen/codegen/config
 
-require github.com/99designs/gqlgen/internal/code v0.4.5-0.20190127090136-055fb4bc9a6a
+require github.com/99designs/gqlgen/internal/code v0.4.5-0.20190203203210-e4679b668de0
 
-replace github.com/99designs/gqlgen/internal/code => ../../internal/code
+replace (
+	github.com/99designs/gqlgen/graphql => ../../graphql
+	github.com/99designs/gqlgen/internal/code => ../../internal/code
+)
 
 require (
+	github.com/99designs/gqlgen v0.7.1 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0
 	github.com/vektah/gqlparser v1.1.0

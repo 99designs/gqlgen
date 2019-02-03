@@ -1,8 +1,8 @@
 module github.com/99designs/gqlgen/handler
 
 require (
-	github.com/99designs/gqlgen/complexity v0.4.5-0.20190127090136-055fb4bc9a6a
-	github.com/99designs/gqlgen/graphql v0.4.5-0.20190127090136-055fb4bc9a6a
+	github.com/99designs/gqlgen/complexity v0.4.5-0.20190203203210-e4679b668de0
+	github.com/99designs/gqlgen/graphql v0.4.5-0.20190203203210-e4679b668de0
 )
 
 replace (

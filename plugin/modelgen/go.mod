@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen/codegen/config v0.4.5-0.20190127090136-055fb4bc9a6a
 	github.com/99designs/gqlgen/codegen/templates v0.4.5-0.20190127090136-055fb4bc9a6a
 	github.com/99designs/gqlgen/plugin v0.4.5-0.20190127090136-055fb4bc9a6a
+	github.com/99designs/gqlgen/graphql v0.4.5-0.20190127090136-055fb4bc9a6a
 )
 
 replace (
@@ -14,6 +15,7 @@ replace (
 	github.com/99designs/gqlgen/internal/code => ../../internal/code
 	github.com/99designs/gqlgen/internal/imports => ../../internal/imports
 	github.com/99designs/gqlgen/plugin => ../../plugin
+	github.com/99designs/gqlgen/graphql => ../../graphql
 )
 
 require (

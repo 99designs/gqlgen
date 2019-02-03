@@ -1,7 +1,5 @@
 module github.com/99designs/gqlgen/cmd
 
-require github.com/99designs/gqlgen v0.7.1
-
 replace (
 	github.com/99designs/gqlgen => ../
 	github.com/99designs/gqlgen/codegen => ../codegen
@@ -18,6 +16,7 @@ replace (
 )
 
 require (
+	github.com/99designs/gqlgen v0.4.5-0.20190127090136-055fb4bc9a6a
 	github.com/99designs/gqlgen/codegen/config v0.4.5-0.20190127090136-055fb4bc9a6a
 	github.com/99designs/gqlgen/graphql v0.4.5-0.20190127090136-055fb4bc9a6a
 	github.com/99designs/gqlgen/handler v0.4.5-0.20190127090136-055fb4bc9a6a

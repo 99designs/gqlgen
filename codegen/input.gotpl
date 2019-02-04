@@ -1,7 +1,7 @@
 {{- range $input := .Inputs }}
-	{{- if .Definition.IsMarshaled }}
-	func Unmarshal{{ .Definition.GQLDefinition.Name }}(v interface{}) ({{.Definition.GoType | ref}}, error) {
-		var it {{.Definition.GoType | ref}}
+	{{- if not .HasUnmarshal }}
+	func Unmarshal{{ .Name }}(v interface{}) ({{.Type | ref}}, error) {
+		var it {{.Type | ref}}
 		var asMap = v.(map[string]interface{})
 		{{ range $field := .Fields}}
 			{{- if $field.Default}}
@@ -28,7 +28,7 @@
 	}
 	{{- end }}
 
-	func (e *executableSchema) {{ .Definition.GQLDefinition.Name }}Middleware(ctx context.Context, obj *{{.Definition.GoType | ref}}) (*{{.Definition.GoType | ref}}, error) {
+	func (e *executableSchema) {{ .Name }}Middleware(ctx context.Context, obj *{{.Type | ref}}) (*{{.Type | ref}}, error) {
 			{{ if .Directives }}
 		cObj, err := chainFieldMiddleware(
 			[]graphql.FieldMiddleware{
@@ -51,9 +51,9 @@
 		if err != nil || cObj == nil {
 			return nil ,err
 		}
-		obj, ok := cObj.(*{{.Definition.GoType | ref}})
+		obj, ok := cObj.(*{{.Type | ref}})
 		if !ok {
-			return nil, errors.New("expect {{.Definition.GoType | ref}}")
+			return nil, errors.New("expect {{.Type | ref}}")
 		}
 		{{ end }}
 
@@ -86,7 +86,7 @@
 			}
 
 			{{ if $field.IsPtr }}
-				if data, ok := c{{$field.GoFieldName}}.({{ $field.Definition.GoType | ref }}); ok {
+				if data, ok := c{{$field.GoFieldName}}.({{ $field.Type | ref }}); ok {
             		obj.{{$field.GoFieldName}} = &data
             	} else {
             		return obj, errors.New("expect {{ $field.GoType | ref }}")

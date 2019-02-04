@@ -10,67 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type BindError struct {
-	object    *Object
-	field     *Field
-	typ       types.Type
-	methodErr error
-	varErr    error
-}
-
-func (b BindError) Error() string {
-	return fmt.Sprintf(
-		"\nunable to bind %s.%s to %s\n  %s\n  %s",
-		b.object.Definition.GQLDefinition.Name,
-		b.field.GQLName,
-		b.typ.String(),
-		b.methodErr.Error(),
-		b.varErr.Error(),
-	)
-}
-
-type BindErrors []BindError
-
-func (b BindErrors) Error() string {
-	var errs []string
-	for _, err := range b {
-		errs = append(errs, err.Error())
-	}
-	return strings.Join(errs, "\n\n")
-}
-
-func (b *builder) bindObject(object *Object) BindErrors {
-	var errs BindErrors
-	for _, field := range object.Fields {
-		if field.IsResolver {
-			continue
-		}
-
-		// first try binding to a method
-		methodErr := b.bindMethod(object.Definition.GoType, field)
-		if methodErr == nil {
-			continue
-		}
-
-		// otherwise try binding to a var
-		varErr := b.bindVar(object.Definition.GoType, field)
-
-		// if both failed, add a resolver
-		if varErr != nil {
-			field.IsResolver = true
-
-			errs = append(errs, BindError{
-				object:    object,
-				typ:       object.Definition.GoType,
-				field:     field,
-				varErr:    varErr,
-				methodErr: methodErr,
-			})
-		}
-	}
-	return errs
-}
-
 func (b *builder) bindMethod(t types.Type, field *Field) error {
 	namedType, err := findGoNamedType(t)
 	if err != nil {

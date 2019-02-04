@@ -293,6 +293,14 @@ func (c *Config) normalize() error {
 		}
 	}
 
+	if c.Models == nil {
+		c.Models = TypeMap{}
+	}
+
+	return nil
+}
+
+func (c *Config) InjectBuiltins(s *ast.Schema) {
 	builtins := TypeMap{
 		"__Directive":         {Model: "github.com/99designs/gqlgen/graphql/introspection.Directive"},
 		"__DirectiveLocation": {Model: "github.com/99designs/gqlgen/graphql.String"},
@@ -311,16 +319,11 @@ func (c *Config) normalize() error {
 		"Map":                 {Model: "github.com/99designs/gqlgen/graphql.Map"},
 	}
 
-	if c.Models == nil {
-		c.Models = TypeMap{}
-	}
 	for typeName, entry := range builtins {
 		if !c.Models.Exists(typeName) {
 			c.Models[typeName] = entry
 		}
 	}
-
-	return nil
 }
 
 func (c *TypeMapEntry) PkgAndType() (string, string) {

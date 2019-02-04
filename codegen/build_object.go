@@ -1,74 +1,10 @@
 package codegen
 
 import (
-	"go/types"
-	"log"
-	"strings"
-
 	"github.com/99designs/gqlgen/codegen/templates"
-
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
-
-func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
-	dirs, err := b.getDirectives(typ.Directives)
-	if err != nil {
-		return nil, errors.Wrap(err, typ.Name)
-	}
-
-	isRoot := typ == b.Schema.Query || typ == b.Schema.Mutation || typ == b.Schema.Subscription
-
-	obj := &Object{
-		Definition:         b.NamedTypes[typ.Name],
-		InTypemap:          b.Config.Models.UserDefined(typ.Name) || isRoot,
-		Root:               isRoot,
-		DisableConcurrency: typ == b.Schema.Mutation,
-		Stream:             typ == b.Schema.Subscription,
-		Directives:         dirs,
-		ResolverInterface: types.NewNamed(
-			types.NewTypeName(0, b.Config.Exec.Pkg(), typ.Name+"Resolver", nil),
-			nil,
-			nil,
-		),
-	}
-
-	for _, intf := range b.Schema.GetImplements(typ) {
-		obj.Implements = append(obj.Implements, b.NamedTypes[intf.Name])
-	}
-
-	for _, field := range typ.Fields {
-		if strings.HasPrefix(field.Name, "__") {
-			continue
-		}
-
-		f, err := b.buildField(obj, field)
-		if err != nil {
-			return nil, errors.Wrap(err, typ.Name+"."+field.Name)
-		}
-
-		if typ.Kind == ast.InputObject && !f.TypeReference.Definition.GQLDefinition.IsInputType() {
-			return nil, errors.Errorf(
-				"%s.%s: cannot use %s because %s is not a valid input type",
-				typ.Name,
-				field.Name,
-				f.Definition.GQLDefinition.Name,
-				f.TypeReference.Definition.GQLDefinition.Kind,
-			)
-		}
-
-		obj.Fields = append(obj.Fields, f)
-	}
-
-	if obj.InTypemap && !isMap(obj.Definition.GoType) {
-		for _, bindErr := range b.bindObject(obj) {
-			log.Println(bindErr.Error())
-			log.Println("  Adding resolver method")
-		}
-	}
-
-	return obj, nil
-}
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
 	dirs, err := b.getDirectives(field.Directives)
@@ -94,7 +30,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		}
 	}
 
-	typeEntry, entryExists := b.Config.Models[obj.Definition.GQLDefinition.Name]
+	typeEntry, entryExists := b.Config.Models[obj.Definition.Name]
 	if entryExists {
 		if typeField, ok := typeEntry.Fields[field.Name]; ok {
 			if typeField.Resolver {

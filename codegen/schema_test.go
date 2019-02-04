@@ -24,6 +24,10 @@ func generate(name string, schemaFilename string) error {
 		SchemaFilename: config.SchemaFilenames{schemaFilename},
 		Exec:           config.PackageConfig{Filename: "gen/" + name + "/exec.go"},
 		Model:          config.PackageConfig{Filename: "gen/" + name + "/model.go"},
+		Models: map[string]config.TypeMapEntry{
+			"Item":         {Model: "map[string]interface{}"},
+			"Bookmarkable": {Model: "interface{}"},
+		},
 	})
 
 	return err

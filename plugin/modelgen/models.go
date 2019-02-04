@@ -71,6 +71,8 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		return err
 	}
 
+	cfg.InjectBuiltins(schema)
+
 	binder, err := cfg.NewBinder()
 	if err != nil {
 		return err

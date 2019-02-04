@@ -52,6 +52,8 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		return nil, err
 	}
 
+	cfg.InjectBuiltins(b.Schema)
+
 	b.Binder, err = b.Config.NewBinder()
 	if err != nil {
 		return nil, err
@@ -124,11 +126,11 @@ func BuildData(cfg *config.Config) (*Data, error) {
 	}
 
 	sort.Slice(s.Objects, func(i, j int) bool {
-		return s.Objects[i].Definition.GQLDefinition.Name < s.Objects[j].Definition.GQLDefinition.Name
+		return s.Objects[i].Definition.Name < s.Objects[j].Definition.Name
 	})
 
 	sort.Slice(s.Inputs, func(i, j int) bool {
-		return s.Inputs[i].Definition.GQLDefinition.Name < s.Inputs[j].Definition.GQLDefinition.Name
+		return s.Inputs[i].Definition.Name < s.Inputs[j].Definition.Name
 	})
 
 	sort.Slice(s.Interfaces, func(i, j int) bool {

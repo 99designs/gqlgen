@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"go/types"
 
-	"github.com/99designs/gqlgen/internal/code"
-
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -20,7 +20,13 @@ func (b *builder) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, err
 	if userEntry, ok := b.Config.Models[t.GQLDefinition.Name]; ok && userEntry.Model != "" {
 		// special case for maps
 		if userEntry.Model == "map[string]interface{}" {
-			t.GoType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
+			t.GoType = config.MapType
+
+			return t, nil
+		}
+
+		if userEntry.Model == "interface{}" {
+			t.GoType = config.InterfaceType
 
 			return t, nil
 		}

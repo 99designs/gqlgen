@@ -53,7 +53,7 @@ func (f *Field) GoNameUnexported() string {
 }
 
 func (f *Field) ShortInvocation() string {
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoFieldName, f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.Name, f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ArgsFunc() string {
@@ -61,7 +61,7 @@ func (f *Field) ArgsFunc() string {
 		return ""
 	}
 
-	return "field_" + f.Object.Definition.GQLDefinition.Name + "_" + f.GQLName + "_args"
+	return "field_" + f.Object.Definition.Name + "_" + f.GQLName + "_args"
 }
 
 func (f *Field) ResolverType() string {
@@ -69,7 +69,7 @@ func (f *Field) ResolverType() string {
 		return ""
 	}
 
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoFieldName, f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.Name, f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ShortResolverDeclaration() string {
@@ -79,7 +79,7 @@ func (f *Field) ShortResolverDeclaration() string {
 	res := fmt.Sprintf("%s(ctx context.Context", f.GoFieldName)
 
 	if !f.Object.Root {
-		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Definition.GoType))
+		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Type))
 	}
 	for _, arg := range f.Args {
 		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))

@@ -7,9 +7,8 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/vektah/gqlparser/ast"
-
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser/ast"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -50,6 +49,36 @@ func (b *Binder) getPkg(find string) *packages.Package {
 		}
 	}
 	return nil
+}
+
+var MapType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
+var InterfaceType = types.NewInterfaceType(nil, nil)
+
+func (b *Binder) FindUserObject(name string) (types.Type, error) {
+	userEntry, ok := b.types[name]
+	if !ok {
+		return nil, fmt.Errorf(name + " not found")
+	}
+
+	if userEntry.Model == "map[string]interface{}" {
+		return MapType, nil
+	}
+
+	if userEntry.Model == "interface{}" {
+		return InterfaceType, nil
+	}
+
+	pkgName, typeName := code.PkgAndType(userEntry.Model)
+	if pkgName == "" {
+		return nil, fmt.Errorf("missing package name for %s", name)
+	}
+
+	obj, err := b.FindObject(pkgName, typeName)
+	if err != nil {
+		return nil, err
+	}
+
+	return obj.Type(), nil
 }
 
 func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, error) {
@@ -95,12 +124,16 @@ func (b *Binder) FindBackingType(schemaType *ast.Type) (types.Type, error) {
 	if userEntry, ok := b.types[schemaType.Name()]; ok && userEntry.Model != "" {
 		// special case for maps
 		if userEntry.Model == "map[string]interface{}" {
-			return types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete()), nil
+			return MapType, nil
+		}
+
+		if userEntry.Model == "interface{}" {
+			return InterfaceType, nil
 		}
 
 		pkgName, typeName = code.PkgAndType(userEntry.Model)
 		if pkgName == "" {
-			return nil, fmt.Errorf("missing package name for %s", schemaType.Name)
+			return nil, fmt.Errorf("missing package name for %s", schemaType.Name())
 		}
 
 	} else {

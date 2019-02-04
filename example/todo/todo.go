@@ -33,10 +33,6 @@ func New() Config {
 			// No admin for you!
 			return nil, nil
 		case RoleOwner:
-			// This is also available in context
-			if obj != graphql.GetResolverContext(ctx).Parent.Result {
-				return nil, fmt.Errorf("parent type mismatch")
-			}
 			ownable, isOwnable := obj.(Ownable)
 			if !isOwnable {
 				return nil, fmt.Errorf("obj cant be owned")

@@ -10,7 +10,7 @@ import (
 
 type Directive struct {
 	Name string
-	Args []FieldArgument
+	Args []*FieldArgument
 }
 
 func (d *Directive) ArgsFunc() string {

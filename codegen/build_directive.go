@@ -20,10 +20,10 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 			continue
 		}
 
-		var args []FieldArgument
+		var args []*FieldArgument
 		for _, arg := range dir.Arguments {
 
-			newArg := FieldArgument{
+			newArg := &FieldArgument{
 				GQLName:       arg.Name,
 				TypeReference: b.NamedTypes.getType(arg.Type),
 				GoVarName:     templates.ToGoPrivate(arg.Name),
@@ -68,13 +68,13 @@ func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			return nil, fmt.Errorf("directive %s not found", d.Name)
 		}
 
-		var args []FieldArgument
+		var args []*FieldArgument
 		for _, a := range def.Args {
 			value := a.Default
 			if argValue, ok := argValues[a.GQLName]; ok {
 				value = argValue
 			}
-			args = append(args, FieldArgument{
+			args = append(args, &FieldArgument{
 				GQLName:       a.GQLName,
 				Value:         value,
 				GoVarName:     a.GoVarName,

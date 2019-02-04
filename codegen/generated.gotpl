@@ -65,24 +65,6 @@ type ComplexityRoot struct {
 	{{- end }}
 {{- end }}
 
-{{ range $object := .Objects -}}
-	{{ range $field := $object.Fields -}}
-		{{ if $field.Args }}
-			func (e *executableSchema){{ $field.ArgsFunc }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-			{{ template "_args.gotpl" $field.Args }}
-			}
-		{{ end }}
-	{{ end }}
-{{- end }}
-
-{{ range $directive := .Directives }}
-	{{ if $directive.Args }}
-		func (e *executableSchema){{ $directive.ArgsFunc }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-		{{ template  "_args.gotpl" $directive.Args }}
-		}
-	{{ end }}
-{{ end }}
-
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot

@@ -1,3 +1,5 @@
+{{ range $name, $args := .Args }}
+func (e *executableSchema){{ $name }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{$arg.GoType | ref }}
@@ -44,3 +46,5 @@
 		args[{{$arg.GQLName|quote}}] = arg{{$i}}
 	{{- end }}
 	return args, nil
+}
+{{ end }}

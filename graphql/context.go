@@ -71,12 +71,10 @@ const (
 )
 
 func GetRequestContext(ctx context.Context) *RequestContext {
-	val := ctx.Value(request)
-	if val == nil {
-		return nil
+	if val, ok := ctx.Value(request).(*RequestContext); ok {
+		return val
 	}
-
-	return val.(*RequestContext)
+	return nil
 }
 
 func WithRequestContext(ctx context.Context, rc *RequestContext) context.Context {
@@ -117,8 +115,10 @@ func (r *ResolverContext) Path() []interface{} {
 }
 
 func GetResolverContext(ctx context.Context) *ResolverContext {
-	val, _ := ctx.Value(resolver).(*ResolverContext)
-	return val
+	if val, ok := ctx.Value(resolver).(*ResolverContext); ok {
+		return val
+	}
+	return nil
 }
 
 func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Context {

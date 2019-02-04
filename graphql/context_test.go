@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -62,4 +63,18 @@ func TestRequestContext_GetErrors(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetRequestContext(t *testing.T) {
+	require.Nil(t, GetRequestContext(context.Background()))
+
+	rc := &RequestContext{}
+	require.Equal(t, rc, GetRequestContext(WithRequestContext(context.Background(), rc)))
+}
+
+func TestGetResolverContext(t *testing.T) {
+	require.Nil(t, GetResolverContext(context.Background()))
+
+	rc := &ResolverContext{}
+	require.Equal(t, rc, GetResolverContext(WithResolverContext(context.Background(), rc)))
 }

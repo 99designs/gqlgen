@@ -16,6 +16,447 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+// region    ************************** generated!.gotpl **************************
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+		complexity: cfg.Complexity,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
+	Complexity ComplexityRoot
+}
+
+type ResolverRoot interface {
+	Customer() CustomerResolver
+	Order() OrderResolver
+	Query() QueryResolver
+}
+
+type DirectiveRoot struct {
+}
+
+type ComplexityRoot struct {
+	Address struct {
+		Id      func(childComplexity int) int
+		Street  func(childComplexity int) int
+		Country func(childComplexity int) int
+	}
+
+	Customer struct {
+		Id      func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Address func(childComplexity int) int
+		Orders  func(childComplexity int) int
+	}
+
+	Item struct {
+		Name func(childComplexity int) int
+	}
+
+	Order struct {
+		Id     func(childComplexity int) int
+		Date   func(childComplexity int) int
+		Amount func(childComplexity int) int
+		Items  func(childComplexity int) int
+	}
+
+	Query struct {
+		Customers func(childComplexity int) int
+		Torture1d func(childComplexity int, customerIds []int) int
+		Torture2d func(childComplexity int, customerIds [][]int) int
+	}
+}
+
+type CustomerResolver interface {
+	Address(ctx context.Context, obj *Customer) (*Address, error)
+	Orders(ctx context.Context, obj *Customer) ([]Order, error)
+}
+type OrderResolver interface {
+	Items(ctx context.Context, obj *Order) ([]Item, error)
+}
+type QueryResolver interface {
+	Customers(ctx context.Context) ([]Customer, error)
+	Torture1d(ctx context.Context, customerIds []int) ([]Customer, error)
+	Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error)
+}
+
+type executableSchema struct {
+	resolvers  ResolverRoot
+	directives DirectiveRoot
+	complexity ComplexityRoot
+}
+
+func (e *executableSchema) Schema() *ast.Schema {
+	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Address.id":
+		if e.complexity.Address.Id == nil {
+			break
+		}
+
+		return e.complexity.Address.Id(childComplexity), true
+
+	case "Address.street":
+		if e.complexity.Address.Street == nil {
+			break
+		}
+
+		return e.complexity.Address.Street(childComplexity), true
+
+	case "Address.country":
+		if e.complexity.Address.Country == nil {
+			break
+		}
+
+		return e.complexity.Address.Country(childComplexity), true
+
+	case "Customer.id":
+		if e.complexity.Customer.Id == nil {
+			break
+		}
+
+		return e.complexity.Customer.Id(childComplexity), true
+
+	case "Customer.name":
+		if e.complexity.Customer.Name == nil {
+			break
+		}
+
+		return e.complexity.Customer.Name(childComplexity), true
+
+	case "Customer.address":
+		if e.complexity.Customer.Address == nil {
+			break
+		}
+
+		return e.complexity.Customer.Address(childComplexity), true
+
+	case "Customer.orders":
+		if e.complexity.Customer.Orders == nil {
+			break
+		}
+
+		return e.complexity.Customer.Orders(childComplexity), true
+
+	case "Item.name":
+		if e.complexity.Item.Name == nil {
+			break
+		}
+
+		return e.complexity.Item.Name(childComplexity), true
+
+	case "Order.id":
+		if e.complexity.Order.Id == nil {
+			break
+		}
+
+		return e.complexity.Order.Id(childComplexity), true
+
+	case "Order.date":
+		if e.complexity.Order.Date == nil {
+			break
+		}
+
+		return e.complexity.Order.Date(childComplexity), true
+
+	case "Order.amount":
+		if e.complexity.Order.Amount == nil {
+			break
+		}
+
+		return e.complexity.Order.Amount(childComplexity), true
+
+	case "Order.items":
+		if e.complexity.Order.Items == nil {
+			break
+		}
+
+		return e.complexity.Order.Items(childComplexity), true
+
+	case "Query.customers":
+		if e.complexity.Query.Customers == nil {
+			break
+		}
+
+		return e.complexity.Query.Customers(childComplexity), true
+
+	case "Query.torture1d":
+		if e.complexity.Query.Torture1d == nil {
+			break
+		}
+
+		args, err := e.field_Query_torture1d_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
+
+	case "Query.torture2d":
+		if e.complexity.Query.Torture2d == nil {
+			break
+		}
+
+		args, err := e.field_Query_torture2d_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Torture2d(childComplexity, args["customerIds"].([][]int)), true
+
+	}
+	return 0, false
+}
+
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions}
+}
+
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	return graphql.ErrorResponse(ctx, "mutations are not supported")
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
+	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
+}
+
+type executionContext struct {
+	*graphql.RequestContext
+	*executableSchema
+}
+
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
+}
+
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
+}
+
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+}
+
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `type Query {
+    customers: [Customer!]
+
+    # these methods are here to test code generation of nested arrays
+    torture1d(customerIds: [Int!]): [Customer!]
+    torture2d(customerIds: [[Int!]]): [[Customer!]]
+}
+
+type Customer {
+    id: Int!
+    name: String!
+    address: Address
+    orders: [Order!]
+}
+
+type Address {
+    id: Int!
+    street: String!
+    country: String!
+}
+
+type Order {
+    id: Int!
+    date: Time!
+    amount: Float!
+    items: [Item!]
+}
+
+type Item {
+    name: String!
+}
+scalar Time
+`},
+)
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+// nolint: deadcode
+func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+			var (
+				chainHandler graphql.Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res, err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ***************************** args.gotpl *****************************
+
+func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_torture1d_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 []int
+	if tmp, ok := rawArgs["customerIds"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([]int, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg0[idx1], err = graphql.UnmarshalInt(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["customerIds"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_torture2d_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 [][]int
+	if tmp, ok := rawArgs["customerIds"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([][]int, len(rawIf1))
+		for idx1 := range rawIf1 {
+			var rawIf2 []interface{}
+			if rawIf1[idx1] != nil {
+				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
+					rawIf2 = tmp1
+				} else {
+					rawIf2 = []interface{}{rawIf1[idx1]}
+				}
+			}
+			arg0[idx1] = make([]int, len(rawIf2))
+			for idx2 := range rawIf2 {
+				arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["customerIds"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+// endregion ***************************** args.gotpl *****************************
+
 // region    **************************** field.gotpl *****************************
 
 // nolint: vetshadow
@@ -1874,448 +2315,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 // endregion **************************** field.gotpl *****************************
-
-// region    ************************** generated.gotpl ***************************
-
-// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
-}
-
-type Config struct {
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
-
-type ResolverRoot interface {
-	Customer() CustomerResolver
-	Order() OrderResolver
-	Query() QueryResolver
-}
-
-type DirectiveRoot struct {
-}
-
-type ComplexityRoot struct {
-	Address struct {
-		Id      func(childComplexity int) int
-		Street  func(childComplexity int) int
-		Country func(childComplexity int) int
-	}
-
-	Customer struct {
-		Id      func(childComplexity int) int
-		Name    func(childComplexity int) int
-		Address func(childComplexity int) int
-		Orders  func(childComplexity int) int
-	}
-
-	Item struct {
-		Name func(childComplexity int) int
-	}
-
-	Order struct {
-		Id     func(childComplexity int) int
-		Date   func(childComplexity int) int
-		Amount func(childComplexity int) int
-		Items  func(childComplexity int) int
-	}
-
-	Query struct {
-		Customers func(childComplexity int) int
-		Torture1d func(childComplexity int, customerIds []int) int
-		Torture2d func(childComplexity int, customerIds [][]int) int
-	}
-}
-
-type CustomerResolver interface {
-	Address(ctx context.Context, obj *Customer) (*Address, error)
-	Orders(ctx context.Context, obj *Customer) ([]Order, error)
-}
-type OrderResolver interface {
-	Items(ctx context.Context, obj *Order) ([]Item, error)
-}
-type QueryResolver interface {
-	Customers(ctx context.Context) ([]Customer, error)
-	Torture1d(ctx context.Context, customerIds []int) ([]Customer, error)
-	Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error)
-}
-
-func (e *executableSchema) field_Query_torture1d_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 []int
-	if tmp, ok := rawArgs["customerIds"]; ok {
-		var err error
-		var rawIf1 []interface{}
-		if tmp != nil {
-			if tmp1, ok := tmp.([]interface{}); ok {
-				rawIf1 = tmp1
-			} else {
-				rawIf1 = []interface{}{tmp}
-			}
-		}
-		arg0 = make([]int, len(rawIf1))
-		for idx1 := range rawIf1 {
-			arg0[idx1], err = graphql.UnmarshalInt(rawIf1[idx1])
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["customerIds"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_torture2d_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 [][]int
-	if tmp, ok := rawArgs["customerIds"]; ok {
-		var err error
-		var rawIf1 []interface{}
-		if tmp != nil {
-			if tmp1, ok := tmp.([]interface{}); ok {
-				rawIf1 = tmp1
-			} else {
-				rawIf1 = []interface{}{tmp}
-			}
-		}
-		arg0 = make([][]int, len(rawIf1))
-		for idx1 := range rawIf1 {
-			var rawIf2 []interface{}
-			if rawIf1[idx1] != nil {
-				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
-					rawIf2 = tmp1
-				} else {
-					rawIf2 = []interface{}{rawIf1[idx1]}
-				}
-			}
-			arg0[idx1] = make([]int, len(rawIf2))
-			for idx2 := range rawIf2 {
-				arg0[idx1][idx2], err = graphql.UnmarshalInt(rawIf2[idx2])
-			}
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["customerIds"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-type executableSchema struct {
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
-
-func (e *executableSchema) Schema() *ast.Schema {
-	return parsedSchema
-}
-
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	switch typeName + "." + field {
-
-	case "Address.id":
-		if e.complexity.Address.Id == nil {
-			break
-		}
-
-		return e.complexity.Address.Id(childComplexity), true
-
-	case "Address.street":
-		if e.complexity.Address.Street == nil {
-			break
-		}
-
-		return e.complexity.Address.Street(childComplexity), true
-
-	case "Address.country":
-		if e.complexity.Address.Country == nil {
-			break
-		}
-
-		return e.complexity.Address.Country(childComplexity), true
-
-	case "Customer.id":
-		if e.complexity.Customer.Id == nil {
-			break
-		}
-
-		return e.complexity.Customer.Id(childComplexity), true
-
-	case "Customer.name":
-		if e.complexity.Customer.Name == nil {
-			break
-		}
-
-		return e.complexity.Customer.Name(childComplexity), true
-
-	case "Customer.address":
-		if e.complexity.Customer.Address == nil {
-			break
-		}
-
-		return e.complexity.Customer.Address(childComplexity), true
-
-	case "Customer.orders":
-		if e.complexity.Customer.Orders == nil {
-			break
-		}
-
-		return e.complexity.Customer.Orders(childComplexity), true
-
-	case "Item.name":
-		if e.complexity.Item.Name == nil {
-			break
-		}
-
-		return e.complexity.Item.Name(childComplexity), true
-
-	case "Order.id":
-		if e.complexity.Order.Id == nil {
-			break
-		}
-
-		return e.complexity.Order.Id(childComplexity), true
-
-	case "Order.date":
-		if e.complexity.Order.Date == nil {
-			break
-		}
-
-		return e.complexity.Order.Date(childComplexity), true
-
-	case "Order.amount":
-		if e.complexity.Order.Amount == nil {
-			break
-		}
-
-		return e.complexity.Order.Amount(childComplexity), true
-
-	case "Order.items":
-		if e.complexity.Order.Items == nil {
-			break
-		}
-
-		return e.complexity.Order.Items(childComplexity), true
-
-	case "Query.customers":
-		if e.complexity.Query.Customers == nil {
-			break
-		}
-
-		return e.complexity.Query.Customers(childComplexity), true
-
-	case "Query.torture1d":
-		if e.complexity.Query.Torture1d == nil {
-			break
-		}
-
-		args, err := e.field_Query_torture1d_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
-
-	case "Query.torture2d":
-		if e.complexity.Query.Torture2d == nil {
-			break
-		}
-
-		args, err := e.field_Query_torture2d_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Torture2d(childComplexity, args["customerIds"].([][]int)), true
-
-	}
-	return 0, false
-}
-
-func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._Query(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions}
-}
-
-func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	return graphql.ErrorResponse(ctx, "mutations are not supported")
-}
-
-func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
-}
-
-type executionContext struct {
-	*graphql.RequestContext
-	*executableSchema
-}
-
-func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	res, err := ec.ResolverMiddleware(ctx, next)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	return res
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapSchema(parsedSchema), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
-}
-
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Query {
-    customers: [Customer!]
-
-    # these methods are here to test code generation of nested arrays
-    torture1d(customerIds: [Int!]): [Customer!]
-    torture2d(customerIds: [[Int!]]): [[Customer!]]
-}
-
-type Customer {
-    id: Int!
-    name: String!
-    address: Address
-    orders: [Order!]
-}
-
-type Address {
-    id: Int!
-    street: String!
-    country: String!
-}
-
-type Order {
-    id: Int!
-    date: Time!
-    amount: Float!
-    items: [Item!]
-}
-
-type Item {
-    name: String!
-}
-scalar Time
-`},
-)
-
-// ChainFieldMiddleware add chain by FieldMiddleware
-// nolint: deadcode
-func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
-	n := len(handleFunc)
-
-	if n > 1 {
-		lastI := n - 1
-		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-			var (
-				chainHandler graphql.Resolver
-				curI         int
-			)
-			chainHandler = func(currentCtx context.Context) (interface{}, error) {
-				if curI == lastI {
-					return next(currentCtx)
-				}
-				curI++
-				res, err := handleFunc[curI](currentCtx, chainHandler)
-				curI--
-				return res, err
-
-			}
-			return handleFunc[0](ctx, chainHandler)
-		}
-	}
-
-	if n == 1 {
-		return handleFunc[0]
-	}
-
-	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-		return next(ctx)
-	}
-}
-
-// endregion ************************** generated.gotpl ***************************
 
 // region    **************************** input.gotpl *****************************
 

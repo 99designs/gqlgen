@@ -178,8 +178,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	}
 
 	return templates.Render(templates.Options{
-		PackageName: cfg.Model.Package,
-		Filename:    cfg.Model.Filename,
-		Data:        b,
+		PackageName:     cfg.Model.Package,
+		Filename:        cfg.Model.Filename,
+		Data:            b,
+		GeneratedHeader: true,
 	})
 }

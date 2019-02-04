@@ -59,9 +59,8 @@ func Render(cfg Options) error {
 			return errors.Wrap(err, cfg.Filename)
 		}
 
-		if !strings.HasPrefix(info.Name(), "_") {
-			roots = append(roots, name)
-		}
+		roots = append(roots, name)
+
 		return nil
 	})
 	if err != nil {
@@ -69,7 +68,16 @@ func Render(cfg Options) error {
 	}
 
 	// then execute all the important looking ones in order, adding them to the same file
-	sort.Slice(roots, func(i, j int) bool { return roots[i] < roots[j] })
+	sort.Slice(roots, func(i, j int) bool {
+		// important files go first
+		if strings.HasSuffix(roots[i], "!.gotpl") {
+			return true
+		}
+		if strings.HasSuffix(roots[j], "!.gotpl") {
+			return false
+		}
+		return roots[i] < roots[j]
+	})
 	var buf bytes.Buffer
 	for _, root := range roots {
 		if cfg.RegionTags {

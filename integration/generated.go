@@ -17,6 +17,449 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+// region    ************************** generated!.gotpl **************************
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+		complexity: cfg.Complexity,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
+	Complexity ComplexityRoot
+}
+
+type ResolverRoot interface {
+	Element() ElementResolver
+	Query() QueryResolver
+	User() UserResolver
+}
+
+type DirectiveRoot struct {
+	Magic func(ctx context.Context, obj interface{}, next graphql.Resolver, kind *int) (res interface{}, err error)
+}
+
+type ComplexityRoot struct {
+	Element struct {
+		Child      func(childComplexity int) int
+		Error      func(childComplexity int) int
+		Mismatched func(childComplexity int) int
+	}
+
+	Query struct {
+		Path         func(childComplexity int) int
+		Date         func(childComplexity int, filter models.DateFilter) int
+		Viewer       func(childComplexity int) int
+		JsonEncoding func(childComplexity int) int
+		Error        func(childComplexity int, typeArg *models.ErrorType) int
+	}
+
+	User struct {
+		Name  func(childComplexity int) int
+		Likes func(childComplexity int) int
+	}
+
+	Viewer struct {
+		User func(childComplexity int) int
+	}
+}
+
+type ElementResolver interface {
+	Child(ctx context.Context, obj *models.Element) (models.Element, error)
+	Error(ctx context.Context, obj *models.Element) (bool, error)
+	Mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
+}
+type QueryResolver interface {
+	Path(ctx context.Context) ([]*models.Element, error)
+	Date(ctx context.Context, filter models.DateFilter) (bool, error)
+	Viewer(ctx context.Context) (*models.Viewer, error)
+	JSONEncoding(ctx context.Context) (string, error)
+	Error(ctx context.Context, typeArg *models.ErrorType) (bool, error)
+}
+type UserResolver interface {
+	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
+}
+
+type executableSchema struct {
+	resolvers  ResolverRoot
+	directives DirectiveRoot
+	complexity ComplexityRoot
+}
+
+func (e *executableSchema) Schema() *ast.Schema {
+	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Element.child":
+		if e.complexity.Element.Child == nil {
+			break
+		}
+
+		return e.complexity.Element.Child(childComplexity), true
+
+	case "Element.error":
+		if e.complexity.Element.Error == nil {
+			break
+		}
+
+		return e.complexity.Element.Error(childComplexity), true
+
+	case "Element.mismatched":
+		if e.complexity.Element.Mismatched == nil {
+			break
+		}
+
+		return e.complexity.Element.Mismatched(childComplexity), true
+
+	case "Query.path":
+		if e.complexity.Query.Path == nil {
+			break
+		}
+
+		return e.complexity.Query.Path(childComplexity), true
+
+	case "Query.date":
+		if e.complexity.Query.Date == nil {
+			break
+		}
+
+		args, err := e.field_Query_date_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
+
+	case "Query.viewer":
+		if e.complexity.Query.Viewer == nil {
+			break
+		}
+
+		return e.complexity.Query.Viewer(childComplexity), true
+
+	case "Query.jsonEncoding":
+		if e.complexity.Query.JsonEncoding == nil {
+			break
+		}
+
+		return e.complexity.Query.JsonEncoding(childComplexity), true
+
+	case "Query.error":
+		if e.complexity.Query.Error == nil {
+			break
+		}
+
+		args, err := e.field_Query_error_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
+
+	case "User.name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
+
+	case "User.likes":
+		if e.complexity.User.Likes == nil {
+			break
+		}
+
+		return e.complexity.User.Likes(childComplexity), true
+
+	case "Viewer.user":
+		if e.complexity.Viewer.User == nil {
+			break
+		}
+
+		return e.complexity.Viewer.User(childComplexity), true
+
+	}
+	return 0, false
+}
+
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions}
+}
+
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	return graphql.ErrorResponse(ctx, "mutations are not supported")
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
+	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
+}
+
+type executionContext struct {
+	*graphql.RequestContext
+	*executableSchema
+}
+
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "magic":
+			if ec.directives.Magic != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_magic_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Magic(ctx, obj, n, args["kind"].(*int))
+				}
+			}
+		}
+	}
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
+}
+
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
+}
+
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+}
+
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `"This directive does magical things"
+directive @magic(kind: Int) on FIELD_DEFINITION
+
+type Element {
+    child: Element!
+    error: Boolean!
+    mismatched: [Boolean!]
+}
+
+enum DATE_FILTER_OP {
+    # multi
+    # line
+    # comment
+    EQ
+    NEQ
+    GT
+    GTE
+    LT
+    LTE
+}
+
+input DateFilter {
+    value: String!
+    timezone: String = "UTC"
+    op: DATE_FILTER_OP = EQ
+}
+
+type Viewer {
+    user: User
+}
+
+type Query {
+    path: [Element]
+    date(filter: DateFilter!): Boolean!
+    viewer: Viewer
+    jsonEncoding: String!
+    error(type: ErrorType = NORMAL): Boolean!
+}
+
+enum ErrorType {
+    CUSTOM
+    NORMAL
+}
+
+# this is a comment with a ` + "`" + `backtick` + "`" + `
+`},
+	&ast.Source{Name: "user.graphql", Input: `type User {
+    name: String!
+    likes: [String!]!
+}
+`},
+)
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+// nolint: deadcode
+func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+			var (
+				chainHandler graphql.Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res, err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ***************************** args.gotpl *****************************
+
+func (e *executableSchema) dir_magic_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["kind"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["kind"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 models.DateFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		var err error
+		arg0, err = UnmarshalDateFilter(tmp)
+		if err != nil {
+			return nil, err
+		}
+
+		mDateFilter1, err := e.DateFilterMiddleware(ctx, &arg0)
+		if err != nil {
+			return nil, err
+		}
+		arg0 = *mDateFilter1
+	}
+	args["filter"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_error_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *models.ErrorType
+	if tmp, ok := rawArgs["type"]; ok {
+		var err error
+		var ptr1 models.ErrorType
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+// endregion ***************************** args.gotpl *****************************
+
 // region    **************************** field.gotpl *****************************
 
 // nolint: vetshadow
@@ -1638,451 +2081,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 // endregion **************************** field.gotpl *****************************
-
-// region    ************************** generated.gotpl ***************************
-
-// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
-}
-
-type Config struct {
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
-
-type ResolverRoot interface {
-	Element() ElementResolver
-	Query() QueryResolver
-	User() UserResolver
-}
-
-type DirectiveRoot struct {
-	Magic func(ctx context.Context, obj interface{}, next graphql.Resolver, kind *int) (res interface{}, err error)
-}
-
-type ComplexityRoot struct {
-	Element struct {
-		Child      func(childComplexity int) int
-		Error      func(childComplexity int) int
-		Mismatched func(childComplexity int) int
-	}
-
-	Query struct {
-		Path         func(childComplexity int) int
-		Date         func(childComplexity int, filter models.DateFilter) int
-		Viewer       func(childComplexity int) int
-		JsonEncoding func(childComplexity int) int
-		Error        func(childComplexity int, typeArg *models.ErrorType) int
-	}
-
-	User struct {
-		Name  func(childComplexity int) int
-		Likes func(childComplexity int) int
-	}
-
-	Viewer struct {
-		User func(childComplexity int) int
-	}
-}
-
-type ElementResolver interface {
-	Child(ctx context.Context, obj *models.Element) (models.Element, error)
-	Error(ctx context.Context, obj *models.Element) (bool, error)
-	Mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
-}
-type QueryResolver interface {
-	Path(ctx context.Context) ([]*models.Element, error)
-	Date(ctx context.Context, filter models.DateFilter) (bool, error)
-	Viewer(ctx context.Context) (*models.Viewer, error)
-	JSONEncoding(ctx context.Context) (string, error)
-	Error(ctx context.Context, typeArg *models.ErrorType) (bool, error)
-}
-type UserResolver interface {
-	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
-}
-
-func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 models.DateFilter
-	if tmp, ok := rawArgs["filter"]; ok {
-		var err error
-		arg0, err = UnmarshalDateFilter(tmp)
-		if err != nil {
-			return nil, err
-		}
-
-		mDateFilter1, err := e.DateFilterMiddleware(ctx, &arg0)
-		if err != nil {
-			return nil, err
-		}
-		arg0 = *mDateFilter1
-	}
-	args["filter"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_error_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *models.ErrorType
-	if tmp, ok := rawArgs["type"]; ok {
-		var err error
-		var ptr1 models.ErrorType
-		if tmp != nil {
-			err = (&ptr1).UnmarshalGQL(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["type"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) dir_magic_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["kind"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["kind"] = arg0
-	return args, nil
-
-}
-
-type executableSchema struct {
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
-
-func (e *executableSchema) Schema() *ast.Schema {
-	return parsedSchema
-}
-
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	switch typeName + "." + field {
-
-	case "Element.child":
-		if e.complexity.Element.Child == nil {
-			break
-		}
-
-		return e.complexity.Element.Child(childComplexity), true
-
-	case "Element.error":
-		if e.complexity.Element.Error == nil {
-			break
-		}
-
-		return e.complexity.Element.Error(childComplexity), true
-
-	case "Element.mismatched":
-		if e.complexity.Element.Mismatched == nil {
-			break
-		}
-
-		return e.complexity.Element.Mismatched(childComplexity), true
-
-	case "Query.path":
-		if e.complexity.Query.Path == nil {
-			break
-		}
-
-		return e.complexity.Query.Path(childComplexity), true
-
-	case "Query.date":
-		if e.complexity.Query.Date == nil {
-			break
-		}
-
-		args, err := e.field_Query_date_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
-
-	case "Query.viewer":
-		if e.complexity.Query.Viewer == nil {
-			break
-		}
-
-		return e.complexity.Query.Viewer(childComplexity), true
-
-	case "Query.jsonEncoding":
-		if e.complexity.Query.JsonEncoding == nil {
-			break
-		}
-
-		return e.complexity.Query.JsonEncoding(childComplexity), true
-
-	case "Query.error":
-		if e.complexity.Query.Error == nil {
-			break
-		}
-
-		args, err := e.field_Query_error_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
-
-	case "User.name":
-		if e.complexity.User.Name == nil {
-			break
-		}
-
-		return e.complexity.User.Name(childComplexity), true
-
-	case "User.likes":
-		if e.complexity.User.Likes == nil {
-			break
-		}
-
-		return e.complexity.User.Likes(childComplexity), true
-
-	case "Viewer.user":
-		if e.complexity.Viewer.User == nil {
-			break
-		}
-
-		return e.complexity.Viewer.User(childComplexity), true
-
-	}
-	return 0, false
-}
-
-func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._Query(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions}
-}
-
-func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	return graphql.ErrorResponse(ctx, "mutations are not supported")
-}
-
-func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
-}
-
-type executionContext struct {
-	*graphql.RequestContext
-	*executableSchema
-}
-
-func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	rctx := graphql.GetResolverContext(ctx)
-	for _, d := range rctx.Field.Definition.Directives {
-		switch d.Name {
-		case "magic":
-			if ec.directives.Magic != nil {
-				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := ec.dir_magic_args(ctx, rawArgs)
-				if err != nil {
-					ec.Error(ctx, err)
-					return nil
-				}
-				n := next
-				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Magic(ctx, obj, n, args["kind"].(*int))
-				}
-			}
-		}
-	}
-	res, err := ec.ResolverMiddleware(ctx, next)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	return res
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapSchema(parsedSchema), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
-}
-
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `"This directive does magical things"
-directive @magic(kind: Int) on FIELD_DEFINITION
-
-type Element {
-    child: Element!
-    error: Boolean!
-    mismatched: [Boolean!]
-}
-
-enum DATE_FILTER_OP {
-    # multi
-    # line
-    # comment
-    EQ
-    NEQ
-    GT
-    GTE
-    LT
-    LTE
-}
-
-input DateFilter {
-    value: String!
-    timezone: String = "UTC"
-    op: DATE_FILTER_OP = EQ
-}
-
-type Viewer {
-    user: User
-}
-
-type Query {
-    path: [Element]
-    date(filter: DateFilter!): Boolean!
-    viewer: Viewer
-    jsonEncoding: String!
-    error(type: ErrorType = NORMAL): Boolean!
-}
-
-enum ErrorType {
-    CUSTOM
-    NORMAL
-}
-
-# this is a comment with a ` + "`" + `backtick` + "`" + `
-`},
-	&ast.Source{Name: "user.graphql", Input: `type User {
-    name: String!
-    likes: [String!]!
-}
-`},
-)
-
-// ChainFieldMiddleware add chain by FieldMiddleware
-// nolint: deadcode
-func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
-	n := len(handleFunc)
-
-	if n > 1 {
-		lastI := n - 1
-		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-			var (
-				chainHandler graphql.Resolver
-				curI         int
-			)
-			chainHandler = func(currentCtx context.Context) (interface{}, error) {
-				if curI == lastI {
-					return next(currentCtx)
-				}
-				curI++
-				res, err := handleFunc[curI](currentCtx, chainHandler)
-				curI--
-				return res, err
-
-			}
-			return handleFunc[0](ctx, chainHandler)
-		}
-	}
-
-	if n == 1 {
-		return handleFunc[0]
-	}
-
-	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-		return next(ctx)
-	}
-}
-
-// endregion ************************** generated.gotpl ***************************
 
 // region    **************************** input.gotpl *****************************
 

@@ -15,6 +15,318 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+// region    ************************** generated!.gotpl **************************
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+		complexity: cfg.Complexity,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
+	Complexity ComplexityRoot
+}
+
+type ResolverRoot interface {
+	MyMutation() MyMutationResolver
+	MyQuery() MyQueryResolver
+}
+
+type DirectiveRoot struct {
+	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
+}
+
+type ComplexityRoot struct {
+	MyMutation struct {
+		CreateTodo func(childComplexity int, todo TodoInput) int
+		UpdateTodo func(childComplexity int, id int, changes map[string]interface{}) int
+	}
+
+	MyQuery struct {
+		Todo     func(childComplexity int, id int) int
+		LastTodo func(childComplexity int) int
+		Todos    func(childComplexity int) int
+	}
+
+	Todo struct {
+		Id   func(childComplexity int) int
+		Text func(childComplexity int) int
+		Done func(childComplexity int) int
+	}
+}
+
+type MyMutationResolver interface {
+	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
+	UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
+}
+type MyQueryResolver interface {
+	Todo(ctx context.Context, id int) (*Todo, error)
+	LastTodo(ctx context.Context) (*Todo, error)
+	Todos(ctx context.Context) ([]Todo, error)
+}
+
+type executableSchema struct {
+	resolvers  ResolverRoot
+	directives DirectiveRoot
+	complexity ComplexityRoot
+}
+
+func (e *executableSchema) Schema() *ast.Schema {
+	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "MyMutation.createTodo":
+		if e.complexity.MyMutation.CreateTodo == nil {
+			break
+		}
+
+		args, err := e.field_MyMutation_createTodo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
+
+	case "MyMutation.updateTodo":
+		if e.complexity.MyMutation.UpdateTodo == nil {
+			break
+		}
+
+		args, err := e.field_MyMutation_updateTodo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]interface{})), true
+
+	case "MyQuery.todo":
+		if e.complexity.MyQuery.Todo == nil {
+			break
+		}
+
+		args, err := e.field_MyQuery_todo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(int)), true
+
+	case "MyQuery.lastTodo":
+		if e.complexity.MyQuery.LastTodo == nil {
+			break
+		}
+
+		return e.complexity.MyQuery.LastTodo(childComplexity), true
+
+	case "MyQuery.todos":
+		if e.complexity.MyQuery.Todos == nil {
+			break
+		}
+
+		return e.complexity.MyQuery.Todos(childComplexity), true
+
+	case "Todo.id":
+		if e.complexity.Todo.Id == nil {
+			break
+		}
+
+		return e.complexity.Todo.Id(childComplexity), true
+
+	case "Todo.text":
+		if e.complexity.Todo.Text == nil {
+			break
+		}
+
+		return e.complexity.Todo.Text(childComplexity), true
+
+	case "Todo.done":
+		if e.complexity.Todo.Done == nil {
+			break
+		}
+
+		return e.complexity.Todo.Done(childComplexity), true
+
+	}
+	return 0, false
+}
+
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._MyQuery(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions}
+}
+
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._MyMutation(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions,
+	}
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
+	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
+}
+
+type executionContext struct {
+	*graphql.RequestContext
+	*executableSchema
+}
+
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "hasRole":
+			if ec.directives.HasRole != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_hasRole_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.HasRole(ctx, obj, n, args["role"].(Role))
+				}
+			}
+		}
+	}
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
+}
+
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
+}
+
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+}
+
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `schema {
+    query: MyQuery
+    mutation: MyMutation
+}
+
+type MyQuery {
+    todo(id: Int!): Todo
+    lastTodo: Todo
+    todos: [Todo!]!
+}
+
+type MyMutation {
+    createTodo(todo: TodoInput!): Todo!
+    updateTodo(id: Int!, changes: Map!): Todo
+}
+
+type Todo {
+    id: Int!
+    text: String!
+    done: Boolean! @hasRole(role: OWNER) # only the owner can see if a todo is done
+}
+
+"Passed to createTodo to create a new todo"
+input TodoInput {
+    "The body text"
+    text: String!
+    "Is it done already?"
+    done: Boolean
+}
+
+scalar Map
+
+"Prevents access to a field if the user doesnt have the matching role"
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+
+enum Role {
+    ADMIN
+    OWNER
+}
+`},
+)
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+// nolint: deadcode
+func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+			var (
+				chainHandler graphql.Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res, err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}
+
+// endregion ************************** generated!.gotpl **************************
+
 // region    ***************************** args.gotpl *****************************
 
 func (e *executableSchema) dir_hasRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -1665,318 +1977,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 // endregion **************************** field.gotpl *****************************
-
-// region    ************************** generated.gotpl ***************************
-
-// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
-}
-
-type Config struct {
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
-
-type ResolverRoot interface {
-	MyMutation() MyMutationResolver
-	MyQuery() MyQueryResolver
-}
-
-type DirectiveRoot struct {
-	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
-}
-
-type ComplexityRoot struct {
-	MyMutation struct {
-		CreateTodo func(childComplexity int, todo TodoInput) int
-		UpdateTodo func(childComplexity int, id int, changes map[string]interface{}) int
-	}
-
-	MyQuery struct {
-		Todo     func(childComplexity int, id int) int
-		LastTodo func(childComplexity int) int
-		Todos    func(childComplexity int) int
-	}
-
-	Todo struct {
-		Id   func(childComplexity int) int
-		Text func(childComplexity int) int
-		Done func(childComplexity int) int
-	}
-}
-
-type MyMutationResolver interface {
-	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
-	UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
-}
-type MyQueryResolver interface {
-	Todo(ctx context.Context, id int) (*Todo, error)
-	LastTodo(ctx context.Context) (*Todo, error)
-	Todos(ctx context.Context) ([]Todo, error)
-}
-
-type executableSchema struct {
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
-
-func (e *executableSchema) Schema() *ast.Schema {
-	return parsedSchema
-}
-
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	switch typeName + "." + field {
-
-	case "MyMutation.createTodo":
-		if e.complexity.MyMutation.CreateTodo == nil {
-			break
-		}
-
-		args, err := e.field_MyMutation_createTodo_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
-
-	case "MyMutation.updateTodo":
-		if e.complexity.MyMutation.UpdateTodo == nil {
-			break
-		}
-
-		args, err := e.field_MyMutation_updateTodo_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]interface{})), true
-
-	case "MyQuery.todo":
-		if e.complexity.MyQuery.Todo == nil {
-			break
-		}
-
-		args, err := e.field_MyQuery_todo_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(int)), true
-
-	case "MyQuery.lastTodo":
-		if e.complexity.MyQuery.LastTodo == nil {
-			break
-		}
-
-		return e.complexity.MyQuery.LastTodo(childComplexity), true
-
-	case "MyQuery.todos":
-		if e.complexity.MyQuery.Todos == nil {
-			break
-		}
-
-		return e.complexity.MyQuery.Todos(childComplexity), true
-
-	case "Todo.id":
-		if e.complexity.Todo.Id == nil {
-			break
-		}
-
-		return e.complexity.Todo.Id(childComplexity), true
-
-	case "Todo.text":
-		if e.complexity.Todo.Text == nil {
-			break
-		}
-
-		return e.complexity.Todo.Text(childComplexity), true
-
-	case "Todo.done":
-		if e.complexity.Todo.Done == nil {
-			break
-		}
-
-		return e.complexity.Todo.Done(childComplexity), true
-
-	}
-	return 0, false
-}
-
-func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._MyQuery(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions}
-}
-
-func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._MyMutation(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions,
-	}
-}
-
-func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
-}
-
-type executionContext struct {
-	*graphql.RequestContext
-	*executableSchema
-}
-
-func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	rctx := graphql.GetResolverContext(ctx)
-	for _, d := range rctx.Field.Definition.Directives {
-		switch d.Name {
-		case "hasRole":
-			if ec.directives.HasRole != nil {
-				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := ec.dir_hasRole_args(ctx, rawArgs)
-				if err != nil {
-					ec.Error(ctx, err)
-					return nil
-				}
-				n := next
-				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.HasRole(ctx, obj, n, args["role"].(Role))
-				}
-			}
-		}
-	}
-	res, err := ec.ResolverMiddleware(ctx, next)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	return res
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapSchema(parsedSchema), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
-}
-
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `schema {
-    query: MyQuery
-    mutation: MyMutation
-}
-
-type MyQuery {
-    todo(id: Int!): Todo
-    lastTodo: Todo
-    todos: [Todo!]!
-}
-
-type MyMutation {
-    createTodo(todo: TodoInput!): Todo!
-    updateTodo(id: Int!, changes: Map!): Todo
-}
-
-type Todo {
-    id: Int!
-    text: String!
-    done: Boolean! @hasRole(role: OWNER) # only the owner can see if a todo is done
-}
-
-"Passed to createTodo to create a new todo"
-input TodoInput {
-    "The body text"
-    text: String!
-    "Is it done already?"
-    done: Boolean
-}
-
-scalar Map
-
-"Prevents access to a field if the user doesnt have the matching role"
-directive @hasRole(role: Role!) on FIELD_DEFINITION
-
-enum Role {
-    ADMIN
-    OWNER
-}
-`},
-)
-
-// ChainFieldMiddleware add chain by FieldMiddleware
-// nolint: deadcode
-func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
-	n := len(handleFunc)
-
-	if n > 1 {
-		lastI := n - 1
-		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-			var (
-				chainHandler graphql.Resolver
-				curI         int
-			)
-			chainHandler = func(currentCtx context.Context) (interface{}, error) {
-				if curI == lastI {
-					return next(currentCtx)
-				}
-				curI++
-				res, err := handleFunc[curI](currentCtx, chainHandler)
-				curI--
-				return res, err
-
-			}
-			return handleFunc[0](ctx, chainHandler)
-		}
-	}
-
-	if n == 1 {
-		return handleFunc[0]
-	}
-
-	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-		return next(ctx)
-	}
-}
-
-// endregion ************************** generated.gotpl ***************************
 
 // region    **************************** input.gotpl *****************************
 

@@ -19,6 +19,1513 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+// region    ************************** generated!.gotpl **************************
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+		complexity: cfg.Complexity,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
+	Complexity ComplexityRoot
+}
+
+type ResolverRoot interface {
+	ForcedResolver() ForcedResolverResolver
+	ModelMethods() ModelMethodsResolver
+	Query() QueryResolver
+	Subscription() SubscriptionResolver
+	User() UserResolver
+}
+
+type DirectiveRoot struct {
+	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message string) (res interface{}, err error)
+
+	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int, message *string) (res interface{}, err error)
+}
+
+type ComplexityRoot struct {
+	Circle struct {
+		Radius func(childComplexity int) int
+		Area   func(childComplexity int) int
+	}
+
+	EmbeddedPointer struct {
+		Id    func(childComplexity int) int
+		Title func(childComplexity int) int
+	}
+
+	Error struct {
+		Id                      func(childComplexity int) int
+		ErrorOnNonRequiredField func(childComplexity int) int
+		ErrorOnRequiredField    func(childComplexity int) int
+		NilOnRequiredField      func(childComplexity int) int
+	}
+
+	ForcedResolver struct {
+		Field func(childComplexity int) int
+	}
+
+	InnerObject struct {
+		Id func(childComplexity int) int
+	}
+
+	InvalidIdentifier struct {
+		Id func(childComplexity int) int
+	}
+
+	It struct {
+		Id func(childComplexity int) int
+	}
+
+	ModelMethods struct {
+		ResolverField func(childComplexity int) int
+		NoContext     func(childComplexity int) int
+		WithContext   func(childComplexity int) int
+	}
+
+	OuterObject struct {
+		Inner func(childComplexity int) int
+	}
+
+	Query struct {
+		InvalidIdentifier      func(childComplexity int) int
+		Collision              func(childComplexity int) int
+		MapInput               func(childComplexity int, input *map[string]interface{}) int
+		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
+		NestedInputs           func(childComplexity int, input [][]*OuterInput) int
+		NestedOutputs          func(childComplexity int) int
+		Keywords               func(childComplexity int, input *Keywords) int
+		Shapes                 func(childComplexity int) int
+		ErrorBubble            func(childComplexity int) int
+		ModelMethods           func(childComplexity int) int
+		Valid                  func(childComplexity int) int
+		User                   func(childComplexity int, id int) int
+		NullableArg            func(childComplexity int, arg *int) int
+		DirectiveArg           func(childComplexity int, arg string) int
+		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
+		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
+		DirectiveInput         func(childComplexity int, arg InputDirectives) int
+		KeywordArgs            func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
+	}
+
+	Rectangle struct {
+		Length func(childComplexity int) int
+		Width  func(childComplexity int) int
+		Area   func(childComplexity int) int
+	}
+
+	Subscription struct {
+		Updated     func(childComplexity int) int
+		InitPayload func(childComplexity int) int
+	}
+
+	User struct {
+		Id      func(childComplexity int) int
+		Friends func(childComplexity int) int
+	}
+}
+
+type ForcedResolverResolver interface {
+	Field(ctx context.Context, obj *ForcedResolver) (*Circle, error)
+}
+type ModelMethodsResolver interface {
+	ResolverField(ctx context.Context, obj *ModelMethods) (bool, error)
+}
+type QueryResolver interface {
+	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
+	Collision(ctx context.Context) (*introspection.It, error)
+	MapInput(ctx context.Context, input *map[string]interface{}) (*bool, error)
+	Recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
+	NestedInputs(ctx context.Context, input [][]*OuterInput) (*bool, error)
+	NestedOutputs(ctx context.Context) ([][]*OuterObject, error)
+	Keywords(ctx context.Context, input *Keywords) (bool, error)
+	Shapes(ctx context.Context) ([]Shape, error)
+	ErrorBubble(ctx context.Context) (*Error, error)
+	ModelMethods(ctx context.Context) (*ModelMethods, error)
+	Valid(ctx context.Context) (string, error)
+	User(ctx context.Context, id int) (User, error)
+	NullableArg(ctx context.Context, arg *int) (*string, error)
+	DirectiveArg(ctx context.Context, arg string) (*string, error)
+	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error)
+	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
+	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
+	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
+}
+type SubscriptionResolver interface {
+	Updated(ctx context.Context) (<-chan string, error)
+	InitPayload(ctx context.Context) (<-chan string, error)
+}
+type UserResolver interface {
+	Friends(ctx context.Context, obj *User) ([]User, error)
+}
+
+type executableSchema struct {
+	resolvers  ResolverRoot
+	directives DirectiveRoot
+	complexity ComplexityRoot
+}
+
+func (e *executableSchema) Schema() *ast.Schema {
+	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Circle.radius":
+		if e.complexity.Circle.Radius == nil {
+			break
+		}
+
+		return e.complexity.Circle.Radius(childComplexity), true
+
+	case "Circle.area":
+		if e.complexity.Circle.Area == nil {
+			break
+		}
+
+		return e.complexity.Circle.Area(childComplexity), true
+
+	case "EmbeddedPointer.ID":
+		if e.complexity.EmbeddedPointer.Id == nil {
+			break
+		}
+
+		return e.complexity.EmbeddedPointer.Id(childComplexity), true
+
+	case "EmbeddedPointer.Title":
+		if e.complexity.EmbeddedPointer.Title == nil {
+			break
+		}
+
+		return e.complexity.EmbeddedPointer.Title(childComplexity), true
+
+	case "Error.id":
+		if e.complexity.Error.Id == nil {
+			break
+		}
+
+		return e.complexity.Error.Id(childComplexity), true
+
+	case "Error.errorOnNonRequiredField":
+		if e.complexity.Error.ErrorOnNonRequiredField == nil {
+			break
+		}
+
+		return e.complexity.Error.ErrorOnNonRequiredField(childComplexity), true
+
+	case "Error.errorOnRequiredField":
+		if e.complexity.Error.ErrorOnRequiredField == nil {
+			break
+		}
+
+		return e.complexity.Error.ErrorOnRequiredField(childComplexity), true
+
+	case "Error.nilOnRequiredField":
+		if e.complexity.Error.NilOnRequiredField == nil {
+			break
+		}
+
+		return e.complexity.Error.NilOnRequiredField(childComplexity), true
+
+	case "ForcedResolver.field":
+		if e.complexity.ForcedResolver.Field == nil {
+			break
+		}
+
+		return e.complexity.ForcedResolver.Field(childComplexity), true
+
+	case "InnerObject.id":
+		if e.complexity.InnerObject.Id == nil {
+			break
+		}
+
+		return e.complexity.InnerObject.Id(childComplexity), true
+
+	case "InvalidIdentifier.id":
+		if e.complexity.InvalidIdentifier.Id == nil {
+			break
+		}
+
+		return e.complexity.InvalidIdentifier.Id(childComplexity), true
+
+	case "It.id":
+		if e.complexity.It.Id == nil {
+			break
+		}
+
+		return e.complexity.It.Id(childComplexity), true
+
+	case "ModelMethods.resolverField":
+		if e.complexity.ModelMethods.ResolverField == nil {
+			break
+		}
+
+		return e.complexity.ModelMethods.ResolverField(childComplexity), true
+
+	case "ModelMethods.noContext":
+		if e.complexity.ModelMethods.NoContext == nil {
+			break
+		}
+
+		return e.complexity.ModelMethods.NoContext(childComplexity), true
+
+	case "ModelMethods.withContext":
+		if e.complexity.ModelMethods.WithContext == nil {
+			break
+		}
+
+		return e.complexity.ModelMethods.WithContext(childComplexity), true
+
+	case "OuterObject.inner":
+		if e.complexity.OuterObject.Inner == nil {
+			break
+		}
+
+		return e.complexity.OuterObject.Inner(childComplexity), true
+
+	case "Query.invalidIdentifier":
+		if e.complexity.Query.InvalidIdentifier == nil {
+			break
+		}
+
+		return e.complexity.Query.InvalidIdentifier(childComplexity), true
+
+	case "Query.collision":
+		if e.complexity.Query.Collision == nil {
+			break
+		}
+
+		return e.complexity.Query.Collision(childComplexity), true
+
+	case "Query.mapInput":
+		if e.complexity.Query.MapInput == nil {
+			break
+		}
+
+		args, err := e.field_Query_mapInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MapInput(childComplexity, args["input"].(*map[string]interface{})), true
+
+	case "Query.recursive":
+		if e.complexity.Query.Recursive == nil {
+			break
+		}
+
+		args, err := e.field_Query_recursive_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
+
+	case "Query.nestedInputs":
+		if e.complexity.Query.NestedInputs == nil {
+			break
+		}
+
+		args, err := e.field_Query_nestedInputs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
+
+	case "Query.nestedOutputs":
+		if e.complexity.Query.NestedOutputs == nil {
+			break
+		}
+
+		return e.complexity.Query.NestedOutputs(childComplexity), true
+
+	case "Query.keywords":
+		if e.complexity.Query.Keywords == nil {
+			break
+		}
+
+		args, err := e.field_Query_keywords_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Keywords(childComplexity, args["input"].(*Keywords)), true
+
+	case "Query.shapes":
+		if e.complexity.Query.Shapes == nil {
+			break
+		}
+
+		return e.complexity.Query.Shapes(childComplexity), true
+
+	case "Query.errorBubble":
+		if e.complexity.Query.ErrorBubble == nil {
+			break
+		}
+
+		return e.complexity.Query.ErrorBubble(childComplexity), true
+
+	case "Query.modelMethods":
+		if e.complexity.Query.ModelMethods == nil {
+			break
+		}
+
+		return e.complexity.Query.ModelMethods(childComplexity), true
+
+	case "Query.valid":
+		if e.complexity.Query.Valid == nil {
+			break
+		}
+
+		return e.complexity.Query.Valid(childComplexity), true
+
+	case "Query.user":
+		if e.complexity.Query.User == nil {
+			break
+		}
+
+		args, err := e.field_Query_user_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
+
+	case "Query.nullableArg":
+		if e.complexity.Query.NullableArg == nil {
+			break
+		}
+
+		args, err := e.field_Query_nullableArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
+
+	case "Query.directiveArg":
+		if e.complexity.Query.DirectiveArg == nil {
+			break
+		}
+
+		args, err := e.field_Query_directiveArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
+
+	case "Query.directiveNullableArg":
+		if e.complexity.Query.DirectiveNullableArg == nil {
+			break
+		}
+
+		args, err := e.field_Query_directiveNullableArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int)), true
+
+	case "Query.directiveInputNullable":
+		if e.complexity.Query.DirectiveInputNullable == nil {
+			break
+		}
+
+		args, err := e.field_Query_directiveInputNullable_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
+
+	case "Query.directiveInput":
+		if e.complexity.Query.DirectiveInput == nil {
+			break
+		}
+
+		args, err := e.field_Query_directiveInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
+
+	case "Query.keywordArgs":
+		if e.complexity.Query.KeywordArgs == nil {
+			break
+		}
+
+		args, err := e.field_Query_keywordArgs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.KeywordArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string)), true
+
+	case "Rectangle.length":
+		if e.complexity.Rectangle.Length == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Length(childComplexity), true
+
+	case "Rectangle.width":
+		if e.complexity.Rectangle.Width == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Width(childComplexity), true
+
+	case "Rectangle.area":
+		if e.complexity.Rectangle.Area == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Area(childComplexity), true
+
+	case "Subscription.updated":
+		if e.complexity.Subscription.Updated == nil {
+			break
+		}
+
+		return e.complexity.Subscription.Updated(childComplexity), true
+
+	case "Subscription.initPayload":
+		if e.complexity.Subscription.InitPayload == nil {
+			break
+		}
+
+		return e.complexity.Subscription.InitPayload(childComplexity), true
+
+	case "User.id":
+		if e.complexity.User.Id == nil {
+			break
+		}
+
+		return e.complexity.User.Id(childComplexity), true
+
+	case "User.friends":
+		if e.complexity.User.Friends == nil {
+			break
+		}
+
+		return e.complexity.User.Friends(childComplexity), true
+
+	}
+	return 0, false
+}
+
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions}
+}
+
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	return graphql.ErrorResponse(ctx, "mutations are not supported")
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	next := ec._Subscription(ctx, op.SelectionSet)
+	if ec.Errors != nil {
+		return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
+	}
+
+	var buf bytes.Buffer
+	return func() *graphql.Response {
+		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+			return buf.Bytes()
+		})
+
+		if buf == nil {
+			return nil
+		}
+
+		return &graphql.Response{
+			Data:       buf,
+			Errors:     ec.Errors,
+			Extensions: ec.Extensions,
+		}
+	}
+}
+
+type executionContext struct {
+	*graphql.RequestContext
+	*executableSchema
+}
+
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "length":
+			if ec.directives.Length != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_length_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int), args["message"].(string))
+				}
+			}
+		case "range":
+			if ec.directives.Range != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_range_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Range(ctx, obj, n, args["min"].(*int), args["max"].(*int), args["message"].(*string))
+				}
+			}
+		}
+	}
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
+}
+
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
+}
+
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+}
+
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `type Query {
+    invalidIdentifier: InvalidIdentifier
+    collision: It
+    mapInput(input: Changes): Boolean
+    recursive(input: RecursiveInputSlice): Boolean
+    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
+    nestedOutputs: [[OuterObject]]
+    keywords(input: Keywords): Boolean!
+    shapes: [Shape]
+    errorBubble: Error
+    modelMethods: ModelMethods
+    valid: String!
+    user(id: Int!): User!
+    nullableArg(arg: Int = 123): String
+    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
+    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
+    directiveInputNullable(arg: InputDirectives): String
+    directiveInput(arg: InputDirectives!): String
+}
+
+type Subscription {
+    updated: String!
+    initPayload: String!
+}
+
+type User {
+    id: Int!
+    friends: [User!]!
+}
+
+type Error {
+    id: ID!
+    errorOnNonRequiredField: String
+    errorOnRequiredField: String!
+    nilOnRequiredField: String!
+}
+
+type ModelMethods {
+    resolverField: Boolean!
+    noContext: Boolean!
+    withContext: Boolean!
+}
+
+type InvalidIdentifier {
+    id: Int!
+}
+
+type It {
+    id: ID!
+}
+
+input Changes {
+    a: Int
+    b: Int
+}
+
+input RecursiveInputSlice {
+    self: [RecursiveInputSlice!]
+}
+
+input InnerInput {
+    id:Int!
+}
+
+input OuterInput {
+    inner: InnerInput!
+}
+
+input InputDirectives {
+    text: String! @length(min: 0, max: 7, message: "not valid")
+    inner: InnerDirectives!
+    innerNullable: InnerDirectives
+}
+
+input InnerDirectives {
+    message: String! @length(min: 1, message: "not valid")
+}
+
+type OuterObject {
+    inner: InnerObject!
+}
+
+type InnerObject {
+    id: Int!
+}
+
+input Keywords {
+    break:       String!
+    default:     String!
+    func:        String!
+    interface:   String!
+    select:      String!
+    case:        String!
+    defer:       String!
+    go:          String!
+    map:         String!
+    struct:      String!
+    chan:        String!
+    else:        String!
+    goto:        String!
+    package:     String!
+    switch:      String!
+    const:       String!
+    fallthrough: String!
+    if:          String!
+    range:       String!
+    type:        String!
+    continue:    String!
+    for:         String!
+    import:      String!
+    return:      String!
+    var:         String!
+}
+
+extend type Query {
+    keywordArgs(
+        break:       String!,
+        default:     String!,
+        func:        String!,
+        interface:   String!,
+        select:      String!,
+        case:        String!,
+        defer:       String!,
+        go:          String!,
+        map:         String!,
+        struct:      String!,
+        chan:        String!,
+        else:        String!,
+        goto:        String!,
+        package:     String!,
+        switch:      String!,
+        const:       String!,
+        fallthrough: String!,
+        if:          String!,
+        range:       String!,
+        type:        String!,
+        continue:    String!,
+        for:         String!,
+        import:      String!,
+        return:      String!,
+        var:         String!,
+    ): Boolean!
+}
+
+interface Shape {
+    area: Float
+}
+type Circle implements Shape {
+    radius: Float
+    area: Float
+}
+type Rectangle implements Shape {
+    length: Float
+    width: Float
+    area: Float
+}
+union ShapeUnion = Circle | Rectangle
+
+type ForcedResolver {
+    field: Circle
+}
+
+type EmbeddedPointer {
+    ID: String
+    Title: String
+}
+
+directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @range(min: Int = 0, max: Int, message: String) on ARGUMENT_DEFINITION
+
+enum Status {
+    OK
+    ERROR
+}
+`},
+)
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+// nolint: deadcode
+func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+			var (
+				chainHandler graphql.Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res, err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ***************************** args.gotpl *****************************
+
+func (e *executableSchema) dir_length_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["min"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalInt(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["min"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["max"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["max"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["message"]; ok {
+		var err error
+		arg2, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["message"] = arg2
+	return args, nil
+}
+
+func (e *executableSchema) dir_range_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["min"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["min"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["max"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["max"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["message"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["message"] = arg2
+	return args, nil
+}
+
+func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["arg"]; ok {
+		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
+			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+				max := 255
+				return e.directives.Length(ctx, tmp, n, 1, &max, "invalid length")
+			},
+		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
+			var err error
+			arg0, err = graphql.UnmarshalString(tmp)
+			if err != nil {
+				return nil, err
+			}
+			return arg0, nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := argm0.(string); ok {
+			arg0 = data
+		} else {
+			return nil, errors.New("expect string")
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_directiveInputNullable_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *InputDirectives
+	if tmp, ok := rawArgs["arg"]; ok {
+		var err error
+		var ptr1 InputDirectives
+		if tmp != nil {
+			ptr1, err = UnmarshalInputDirectives(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if arg0 != nil {
+			var err error
+			arg0, err = e.InputDirectivesMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_directiveInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 InputDirectives
+	if tmp, ok := rawArgs["arg"]; ok {
+		var err error
+		arg0, err = UnmarshalInputDirectives(tmp)
+		if err != nil {
+			return nil, err
+		}
+
+		mInputDirectives1, err := e.InputDirectivesMiddleware(ctx, &arg0)
+		if err != nil {
+			return nil, err
+		}
+		arg0 = *mInputDirectives1
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["arg"]; ok {
+		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
+			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+				min := 0
+				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
+			},
+		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
+			var err error
+			var ptr1 int
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalInt(tmp)
+				arg0 = &ptr1
+			}
+
+			if err != nil {
+				return nil, err
+			}
+			return arg0, nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := argm0.(*int); ok {
+			arg0 = data
+		} else {
+			return nil, errors.New("expect *int")
+		}
+	}
+	args["arg"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["arg2"]; ok {
+		argm1, err := chainFieldMiddleware([]graphql.FieldMiddleware{
+			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
+				min := 0
+				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
+			},
+		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
+			var err error
+			var ptr1 int
+			if tmp != nil {
+				ptr1, err = graphql.UnmarshalInt(tmp)
+				arg1 = &ptr1
+			}
+
+			if err != nil {
+				return nil, err
+			}
+			return arg1, nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := argm1.(*int); ok {
+			arg1 = data
+		} else {
+			return nil, errors.New("expect *int")
+		}
+	}
+	args["arg2"] = arg1
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["break"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["break"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["default"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["default"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["func"]; ok {
+		var err error
+		arg2, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["func"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["interface"]; ok {
+		var err error
+		arg3, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["interface"] = arg3
+	var arg4 string
+	if tmp, ok := rawArgs["select"]; ok {
+		var err error
+		arg4, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["select"] = arg4
+	var arg5 string
+	if tmp, ok := rawArgs["case"]; ok {
+		var err error
+		arg5, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["case"] = arg5
+	var arg6 string
+	if tmp, ok := rawArgs["defer"]; ok {
+		var err error
+		arg6, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["defer"] = arg6
+	var arg7 string
+	if tmp, ok := rawArgs["go"]; ok {
+		var err error
+		arg7, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["go"] = arg7
+	var arg8 string
+	if tmp, ok := rawArgs["map"]; ok {
+		var err error
+		arg8, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["map"] = arg8
+	var arg9 string
+	if tmp, ok := rawArgs["struct"]; ok {
+		var err error
+		arg9, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["struct"] = arg9
+	var arg10 string
+	if tmp, ok := rawArgs["chan"]; ok {
+		var err error
+		arg10, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["chan"] = arg10
+	var arg11 string
+	if tmp, ok := rawArgs["else"]; ok {
+		var err error
+		arg11, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["else"] = arg11
+	var arg12 string
+	if tmp, ok := rawArgs["goto"]; ok {
+		var err error
+		arg12, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["goto"] = arg12
+	var arg13 string
+	if tmp, ok := rawArgs["package"]; ok {
+		var err error
+		arg13, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["package"] = arg13
+	var arg14 string
+	if tmp, ok := rawArgs["switch"]; ok {
+		var err error
+		arg14, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["switch"] = arg14
+	var arg15 string
+	if tmp, ok := rawArgs["const"]; ok {
+		var err error
+		arg15, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["const"] = arg15
+	var arg16 string
+	if tmp, ok := rawArgs["fallthrough"]; ok {
+		var err error
+		arg16, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["fallthrough"] = arg16
+	var arg17 string
+	if tmp, ok := rawArgs["if"]; ok {
+		var err error
+		arg17, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["if"] = arg17
+	var arg18 string
+	if tmp, ok := rawArgs["range"]; ok {
+		var err error
+		arg18, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["range"] = arg18
+	var arg19 string
+	if tmp, ok := rawArgs["type"]; ok {
+		var err error
+		arg19, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg19
+	var arg20 string
+	if tmp, ok := rawArgs["continue"]; ok {
+		var err error
+		arg20, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["continue"] = arg20
+	var arg21 string
+	if tmp, ok := rawArgs["for"]; ok {
+		var err error
+		arg21, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["for"] = arg21
+	var arg22 string
+	if tmp, ok := rawArgs["import"]; ok {
+		var err error
+		arg22, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["import"] = arg22
+	var arg23 string
+	if tmp, ok := rawArgs["return"]; ok {
+		var err error
+		arg23, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["return"] = arg23
+	var arg24 string
+	if tmp, ok := rawArgs["var"]; ok {
+		var err error
+		arg24, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["var"] = arg24
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *Keywords
+	if tmp, ok := rawArgs["input"]; ok {
+		var err error
+		var ptr1 Keywords
+		if tmp != nil {
+			ptr1, err = UnmarshalKeywords(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if arg0 != nil {
+			var err error
+			arg0, err = e.KeywordsMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_mapInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *map[string]interface{}
+	if tmp, ok := rawArgs["input"]; ok {
+		var err error
+		var ptr1 map[string]interface{}
+		if tmp != nil {
+			ptr1 = tmp.(map[string]interface{})
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if arg0 != nil {
+			var err error
+			arg0, err = e.ChangesMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 [][]*OuterInput
+	if tmp, ok := rawArgs["input"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg0 = make([][]*OuterInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			var rawIf2 []interface{}
+			if rawIf1[idx1] != nil {
+				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
+					rawIf2 = tmp1
+				} else {
+					rawIf2 = []interface{}{rawIf1[idx1]}
+				}
+			}
+			arg0[idx1] = make([]*OuterInput, len(rawIf2))
+			for idx2 := range rawIf2 {
+				var ptr3 OuterInput
+				if rawIf2[idx2] != nil {
+					ptr3, err = UnmarshalOuterInput(rawIf2[idx2])
+					arg0[idx1][idx2] = &ptr3
+				}
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+		for idx1 := range arg0 {
+			for idx2 := range arg0[idx1] {
+
+				if arg0[idx1][idx2] != nil {
+					var err error
+					arg0[idx1][idx2], err = e.OuterInputMiddleware(ctx, arg0[idx1][idx2])
+					if err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_nullableArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["arg"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *RecursiveInputSlice
+	if tmp, ok := rawArgs["input"]; ok {
+		var err error
+		var ptr1 RecursiveInputSlice
+		if tmp != nil {
+			ptr1, err = UnmarshalRecursiveInputSlice(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		if arg0 != nil {
+			var err error
+			arg0, err = e.RecursiveInputSliceMiddleware(ctx, arg0)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalInt(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+// endregion ***************************** args.gotpl *****************************
+
 // region    **************************** field.gotpl *****************************
 
 // nolint: vetshadow
@@ -2596,1525 +4103,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 // endregion **************************** field.gotpl *****************************
-
-// region    ************************** generated.gotpl ***************************
-
-// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
-}
-
-type Config struct {
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
-
-type ResolverRoot interface {
-	ForcedResolver() ForcedResolverResolver
-	ModelMethods() ModelMethodsResolver
-	Query() QueryResolver
-	Subscription() SubscriptionResolver
-	User() UserResolver
-}
-
-type DirectiveRoot struct {
-	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message string) (res interface{}, err error)
-
-	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int, message *string) (res interface{}, err error)
-}
-
-type ComplexityRoot struct {
-	Circle struct {
-		Radius func(childComplexity int) int
-		Area   func(childComplexity int) int
-	}
-
-	EmbeddedPointer struct {
-		Id    func(childComplexity int) int
-		Title func(childComplexity int) int
-	}
-
-	Error struct {
-		Id                      func(childComplexity int) int
-		ErrorOnNonRequiredField func(childComplexity int) int
-		ErrorOnRequiredField    func(childComplexity int) int
-		NilOnRequiredField      func(childComplexity int) int
-	}
-
-	ForcedResolver struct {
-		Field func(childComplexity int) int
-	}
-
-	InnerObject struct {
-		Id func(childComplexity int) int
-	}
-
-	InvalidIdentifier struct {
-		Id func(childComplexity int) int
-	}
-
-	It struct {
-		Id func(childComplexity int) int
-	}
-
-	ModelMethods struct {
-		ResolverField func(childComplexity int) int
-		NoContext     func(childComplexity int) int
-		WithContext   func(childComplexity int) int
-	}
-
-	OuterObject struct {
-		Inner func(childComplexity int) int
-	}
-
-	Query struct {
-		InvalidIdentifier      func(childComplexity int) int
-		Collision              func(childComplexity int) int
-		MapInput               func(childComplexity int, input *map[string]interface{}) int
-		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
-		NestedInputs           func(childComplexity int, input [][]*OuterInput) int
-		NestedOutputs          func(childComplexity int) int
-		Keywords               func(childComplexity int, input *Keywords) int
-		Shapes                 func(childComplexity int) int
-		ErrorBubble            func(childComplexity int) int
-		ModelMethods           func(childComplexity int) int
-		Valid                  func(childComplexity int) int
-		User                   func(childComplexity int, id int) int
-		NullableArg            func(childComplexity int, arg *int) int
-		DirectiveArg           func(childComplexity int, arg string) int
-		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
-		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
-		DirectiveInput         func(childComplexity int, arg InputDirectives) int
-		KeywordArgs            func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
-	}
-
-	Rectangle struct {
-		Length func(childComplexity int) int
-		Width  func(childComplexity int) int
-		Area   func(childComplexity int) int
-	}
-
-	Subscription struct {
-		Updated     func(childComplexity int) int
-		InitPayload func(childComplexity int) int
-	}
-
-	User struct {
-		Id      func(childComplexity int) int
-		Friends func(childComplexity int) int
-	}
-}
-
-type ForcedResolverResolver interface {
-	Field(ctx context.Context, obj *ForcedResolver) (*Circle, error)
-}
-type ModelMethodsResolver interface {
-	ResolverField(ctx context.Context, obj *ModelMethods) (bool, error)
-}
-type QueryResolver interface {
-	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
-	Collision(ctx context.Context) (*introspection.It, error)
-	MapInput(ctx context.Context, input *map[string]interface{}) (*bool, error)
-	Recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
-	NestedInputs(ctx context.Context, input [][]*OuterInput) (*bool, error)
-	NestedOutputs(ctx context.Context) ([][]*OuterObject, error)
-	Keywords(ctx context.Context, input *Keywords) (bool, error)
-	Shapes(ctx context.Context) ([]Shape, error)
-	ErrorBubble(ctx context.Context) (*Error, error)
-	ModelMethods(ctx context.Context) (*ModelMethods, error)
-	Valid(ctx context.Context) (string, error)
-	User(ctx context.Context, id int) (User, error)
-	NullableArg(ctx context.Context, arg *int) (*string, error)
-	DirectiveArg(ctx context.Context, arg string) (*string, error)
-	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error)
-	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
-	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
-	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
-}
-type SubscriptionResolver interface {
-	Updated(ctx context.Context) (<-chan string, error)
-	InitPayload(ctx context.Context) (<-chan string, error)
-}
-type UserResolver interface {
-	Friends(ctx context.Context, obj *User) ([]User, error)
-}
-
-func (e *executableSchema) field_Query_mapInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *map[string]interface{}
-	if tmp, ok := rawArgs["input"]; ok {
-		var err error
-		var ptr1 map[string]interface{}
-		if tmp != nil {
-			ptr1 = tmp.(map[string]interface{})
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if arg0 != nil {
-			var err error
-			arg0, err = e.ChangesMiddleware(ctx, arg0)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *RecursiveInputSlice
-	if tmp, ok := rawArgs["input"]; ok {
-		var err error
-		var ptr1 RecursiveInputSlice
-		if tmp != nil {
-			ptr1, err = UnmarshalRecursiveInputSlice(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if arg0 != nil {
-			var err error
-			arg0, err = e.RecursiveInputSliceMiddleware(ctx, arg0)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 [][]*OuterInput
-	if tmp, ok := rawArgs["input"]; ok {
-		var err error
-		var rawIf1 []interface{}
-		if tmp != nil {
-			if tmp1, ok := tmp.([]interface{}); ok {
-				rawIf1 = tmp1
-			} else {
-				rawIf1 = []interface{}{tmp}
-			}
-		}
-		arg0 = make([][]*OuterInput, len(rawIf1))
-		for idx1 := range rawIf1 {
-			var rawIf2 []interface{}
-			if rawIf1[idx1] != nil {
-				if tmp1, ok := rawIf1[idx1].([]interface{}); ok {
-					rawIf2 = tmp1
-				} else {
-					rawIf2 = []interface{}{rawIf1[idx1]}
-				}
-			}
-			arg0[idx1] = make([]*OuterInput, len(rawIf2))
-			for idx2 := range rawIf2 {
-				var ptr3 OuterInput
-				if rawIf2[idx2] != nil {
-					ptr3, err = UnmarshalOuterInput(rawIf2[idx2])
-					arg0[idx1][idx2] = &ptr3
-				}
-			}
-		}
-		if err != nil {
-			return nil, err
-		}
-		for idx1 := range arg0 {
-			for idx2 := range arg0[idx1] {
-
-				if arg0[idx1][idx2] != nil {
-					var err error
-					arg0[idx1][idx2], err = e.OuterInputMiddleware(ctx, arg0[idx1][idx2])
-					if err != nil {
-						return nil, err
-					}
-				}
-			}
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *Keywords
-	if tmp, ok := rawArgs["input"]; ok {
-		var err error
-		var ptr1 Keywords
-		if tmp != nil {
-			ptr1, err = UnmarshalKeywords(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if arg0 != nil {
-			var err error
-			arg0, err = e.KeywordsMiddleware(ctx, arg0)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalInt(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_nullableArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["arg"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["arg"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["arg"]; ok {
-		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
-			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-				max := 255
-				return e.directives.Length(ctx, tmp, n, 1, &max, "invalid length")
-			},
-		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
-			var err error
-			arg0, err = graphql.UnmarshalString(tmp)
-			if err != nil {
-				return nil, err
-			}
-			return arg0, nil
-		})
-		if err != nil {
-			return nil, err
-		}
-		if data, ok := argm0.(string); ok {
-			arg0 = data
-		} else {
-			return nil, errors.New("expect string")
-		}
-	}
-	args["arg"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["arg"]; ok {
-		argm0, err := chainFieldMiddleware([]graphql.FieldMiddleware{
-			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-				min := 0
-				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
-			},
-		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
-			var err error
-			var ptr1 int
-			if tmp != nil {
-				ptr1, err = graphql.UnmarshalInt(tmp)
-				arg0 = &ptr1
-			}
-
-			if err != nil {
-				return nil, err
-			}
-			return arg0, nil
-		})
-		if err != nil {
-			return nil, err
-		}
-		if data, ok := argm0.(*int); ok {
-			arg0 = data
-		} else {
-			return nil, errors.New("expect *int")
-		}
-	}
-	args["arg"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["arg2"]; ok {
-		argm1, err := chainFieldMiddleware([]graphql.FieldMiddleware{
-			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-				min := 0
-				return e.directives.Range(ctx, tmp, n, &min, nil, nil)
-			},
-		}...)(ctx, func(ctx2 context.Context) (interface{}, error) {
-			var err error
-			var ptr1 int
-			if tmp != nil {
-				ptr1, err = graphql.UnmarshalInt(tmp)
-				arg1 = &ptr1
-			}
-
-			if err != nil {
-				return nil, err
-			}
-			return arg1, nil
-		})
-		if err != nil {
-			return nil, err
-		}
-		if data, ok := argm1.(*int); ok {
-			arg1 = data
-		} else {
-			return nil, errors.New("expect *int")
-		}
-	}
-	args["arg2"] = arg1
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_directiveInputNullable_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *InputDirectives
-	if tmp, ok := rawArgs["arg"]; ok {
-		var err error
-		var ptr1 InputDirectives
-		if tmp != nil {
-			ptr1, err = UnmarshalInputDirectives(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if arg0 != nil {
-			var err error
-			arg0, err = e.InputDirectivesMiddleware(ctx, arg0)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	args["arg"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_directiveInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 InputDirectives
-	if tmp, ok := rawArgs["arg"]; ok {
-		var err error
-		arg0, err = UnmarshalInputDirectives(tmp)
-		if err != nil {
-			return nil, err
-		}
-
-		mInputDirectives1, err := e.InputDirectivesMiddleware(ctx, &arg0)
-		if err != nil {
-			return nil, err
-		}
-		arg0 = *mInputDirectives1
-	}
-	args["arg"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["break"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["break"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["default"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["default"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["func"]; ok {
-		var err error
-		arg2, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["func"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["interface"]; ok {
-		var err error
-		arg3, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["interface"] = arg3
-	var arg4 string
-	if tmp, ok := rawArgs["select"]; ok {
-		var err error
-		arg4, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["select"] = arg4
-	var arg5 string
-	if tmp, ok := rawArgs["case"]; ok {
-		var err error
-		arg5, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["case"] = arg5
-	var arg6 string
-	if tmp, ok := rawArgs["defer"]; ok {
-		var err error
-		arg6, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["defer"] = arg6
-	var arg7 string
-	if tmp, ok := rawArgs["go"]; ok {
-		var err error
-		arg7, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["go"] = arg7
-	var arg8 string
-	if tmp, ok := rawArgs["map"]; ok {
-		var err error
-		arg8, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["map"] = arg8
-	var arg9 string
-	if tmp, ok := rawArgs["struct"]; ok {
-		var err error
-		arg9, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["struct"] = arg9
-	var arg10 string
-	if tmp, ok := rawArgs["chan"]; ok {
-		var err error
-		arg10, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["chan"] = arg10
-	var arg11 string
-	if tmp, ok := rawArgs["else"]; ok {
-		var err error
-		arg11, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["else"] = arg11
-	var arg12 string
-	if tmp, ok := rawArgs["goto"]; ok {
-		var err error
-		arg12, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["goto"] = arg12
-	var arg13 string
-	if tmp, ok := rawArgs["package"]; ok {
-		var err error
-		arg13, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["package"] = arg13
-	var arg14 string
-	if tmp, ok := rawArgs["switch"]; ok {
-		var err error
-		arg14, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["switch"] = arg14
-	var arg15 string
-	if tmp, ok := rawArgs["const"]; ok {
-		var err error
-		arg15, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["const"] = arg15
-	var arg16 string
-	if tmp, ok := rawArgs["fallthrough"]; ok {
-		var err error
-		arg16, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["fallthrough"] = arg16
-	var arg17 string
-	if tmp, ok := rawArgs["if"]; ok {
-		var err error
-		arg17, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["if"] = arg17
-	var arg18 string
-	if tmp, ok := rawArgs["range"]; ok {
-		var err error
-		arg18, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["range"] = arg18
-	var arg19 string
-	if tmp, ok := rawArgs["type"]; ok {
-		var err error
-		arg19, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["type"] = arg19
-	var arg20 string
-	if tmp, ok := rawArgs["continue"]; ok {
-		var err error
-		arg20, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["continue"] = arg20
-	var arg21 string
-	if tmp, ok := rawArgs["for"]; ok {
-		var err error
-		arg21, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["for"] = arg21
-	var arg22 string
-	if tmp, ok := rawArgs["import"]; ok {
-		var err error
-		arg22, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["import"] = arg22
-	var arg23 string
-	if tmp, ok := rawArgs["return"]; ok {
-		var err error
-		arg23, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["return"] = arg23
-	var arg24 string
-	if tmp, ok := rawArgs["var"]; ok {
-		var err error
-		arg24, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["var"] = arg24
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) dir_length_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["min"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalInt(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["min"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["max"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["max"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["message"]; ok {
-		var err error
-		arg2, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["message"] = arg2
-	return args, nil
-
-}
-
-func (e *executableSchema) dir_range_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["min"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["min"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["max"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["max"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["message"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
-			arg2 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["message"] = arg2
-	return args, nil
-
-}
-
-type executableSchema struct {
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
-
-func (e *executableSchema) Schema() *ast.Schema {
-	return parsedSchema
-}
-
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	switch typeName + "." + field {
-
-	case "Circle.radius":
-		if e.complexity.Circle.Radius == nil {
-			break
-		}
-
-		return e.complexity.Circle.Radius(childComplexity), true
-
-	case "Circle.area":
-		if e.complexity.Circle.Area == nil {
-			break
-		}
-
-		return e.complexity.Circle.Area(childComplexity), true
-
-	case "EmbeddedPointer.ID":
-		if e.complexity.EmbeddedPointer.Id == nil {
-			break
-		}
-
-		return e.complexity.EmbeddedPointer.Id(childComplexity), true
-
-	case "EmbeddedPointer.Title":
-		if e.complexity.EmbeddedPointer.Title == nil {
-			break
-		}
-
-		return e.complexity.EmbeddedPointer.Title(childComplexity), true
-
-	case "Error.id":
-		if e.complexity.Error.Id == nil {
-			break
-		}
-
-		return e.complexity.Error.Id(childComplexity), true
-
-	case "Error.errorOnNonRequiredField":
-		if e.complexity.Error.ErrorOnNonRequiredField == nil {
-			break
-		}
-
-		return e.complexity.Error.ErrorOnNonRequiredField(childComplexity), true
-
-	case "Error.errorOnRequiredField":
-		if e.complexity.Error.ErrorOnRequiredField == nil {
-			break
-		}
-
-		return e.complexity.Error.ErrorOnRequiredField(childComplexity), true
-
-	case "Error.nilOnRequiredField":
-		if e.complexity.Error.NilOnRequiredField == nil {
-			break
-		}
-
-		return e.complexity.Error.NilOnRequiredField(childComplexity), true
-
-	case "ForcedResolver.field":
-		if e.complexity.ForcedResolver.Field == nil {
-			break
-		}
-
-		return e.complexity.ForcedResolver.Field(childComplexity), true
-
-	case "InnerObject.id":
-		if e.complexity.InnerObject.Id == nil {
-			break
-		}
-
-		return e.complexity.InnerObject.Id(childComplexity), true
-
-	case "InvalidIdentifier.id":
-		if e.complexity.InvalidIdentifier.Id == nil {
-			break
-		}
-
-		return e.complexity.InvalidIdentifier.Id(childComplexity), true
-
-	case "It.id":
-		if e.complexity.It.Id == nil {
-			break
-		}
-
-		return e.complexity.It.Id(childComplexity), true
-
-	case "ModelMethods.resolverField":
-		if e.complexity.ModelMethods.ResolverField == nil {
-			break
-		}
-
-		return e.complexity.ModelMethods.ResolverField(childComplexity), true
-
-	case "ModelMethods.noContext":
-		if e.complexity.ModelMethods.NoContext == nil {
-			break
-		}
-
-		return e.complexity.ModelMethods.NoContext(childComplexity), true
-
-	case "ModelMethods.withContext":
-		if e.complexity.ModelMethods.WithContext == nil {
-			break
-		}
-
-		return e.complexity.ModelMethods.WithContext(childComplexity), true
-
-	case "OuterObject.inner":
-		if e.complexity.OuterObject.Inner == nil {
-			break
-		}
-
-		return e.complexity.OuterObject.Inner(childComplexity), true
-
-	case "Query.invalidIdentifier":
-		if e.complexity.Query.InvalidIdentifier == nil {
-			break
-		}
-
-		return e.complexity.Query.InvalidIdentifier(childComplexity), true
-
-	case "Query.collision":
-		if e.complexity.Query.Collision == nil {
-			break
-		}
-
-		return e.complexity.Query.Collision(childComplexity), true
-
-	case "Query.mapInput":
-		if e.complexity.Query.MapInput == nil {
-			break
-		}
-
-		args, err := e.field_Query_mapInput_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.MapInput(childComplexity, args["input"].(*map[string]interface{})), true
-
-	case "Query.recursive":
-		if e.complexity.Query.Recursive == nil {
-			break
-		}
-
-		args, err := e.field_Query_recursive_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
-
-	case "Query.nestedInputs":
-		if e.complexity.Query.NestedInputs == nil {
-			break
-		}
-
-		args, err := e.field_Query_nestedInputs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
-
-	case "Query.nestedOutputs":
-		if e.complexity.Query.NestedOutputs == nil {
-			break
-		}
-
-		return e.complexity.Query.NestedOutputs(childComplexity), true
-
-	case "Query.keywords":
-		if e.complexity.Query.Keywords == nil {
-			break
-		}
-
-		args, err := e.field_Query_keywords_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Keywords(childComplexity, args["input"].(*Keywords)), true
-
-	case "Query.shapes":
-		if e.complexity.Query.Shapes == nil {
-			break
-		}
-
-		return e.complexity.Query.Shapes(childComplexity), true
-
-	case "Query.errorBubble":
-		if e.complexity.Query.ErrorBubble == nil {
-			break
-		}
-
-		return e.complexity.Query.ErrorBubble(childComplexity), true
-
-	case "Query.modelMethods":
-		if e.complexity.Query.ModelMethods == nil {
-			break
-		}
-
-		return e.complexity.Query.ModelMethods(childComplexity), true
-
-	case "Query.valid":
-		if e.complexity.Query.Valid == nil {
-			break
-		}
-
-		return e.complexity.Query.Valid(childComplexity), true
-
-	case "Query.user":
-		if e.complexity.Query.User == nil {
-			break
-		}
-
-		args, err := e.field_Query_user_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
-
-	case "Query.nullableArg":
-		if e.complexity.Query.NullableArg == nil {
-			break
-		}
-
-		args, err := e.field_Query_nullableArg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
-
-	case "Query.directiveArg":
-		if e.complexity.Query.DirectiveArg == nil {
-			break
-		}
-
-		args, err := e.field_Query_directiveArg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
-
-	case "Query.directiveNullableArg":
-		if e.complexity.Query.DirectiveNullableArg == nil {
-			break
-		}
-
-		args, err := e.field_Query_directiveNullableArg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int)), true
-
-	case "Query.directiveInputNullable":
-		if e.complexity.Query.DirectiveInputNullable == nil {
-			break
-		}
-
-		args, err := e.field_Query_directiveInputNullable_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
-
-	case "Query.directiveInput":
-		if e.complexity.Query.DirectiveInput == nil {
-			break
-		}
-
-		args, err := e.field_Query_directiveInput_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
-
-	case "Query.keywordArgs":
-		if e.complexity.Query.KeywordArgs == nil {
-			break
-		}
-
-		args, err := e.field_Query_keywordArgs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.KeywordArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string)), true
-
-	case "Rectangle.length":
-		if e.complexity.Rectangle.Length == nil {
-			break
-		}
-
-		return e.complexity.Rectangle.Length(childComplexity), true
-
-	case "Rectangle.width":
-		if e.complexity.Rectangle.Width == nil {
-			break
-		}
-
-		return e.complexity.Rectangle.Width(childComplexity), true
-
-	case "Rectangle.area":
-		if e.complexity.Rectangle.Area == nil {
-			break
-		}
-
-		return e.complexity.Rectangle.Area(childComplexity), true
-
-	case "Subscription.updated":
-		if e.complexity.Subscription.Updated == nil {
-			break
-		}
-
-		return e.complexity.Subscription.Updated(childComplexity), true
-
-	case "Subscription.initPayload":
-		if e.complexity.Subscription.InitPayload == nil {
-			break
-		}
-
-		return e.complexity.Subscription.InitPayload(childComplexity), true
-
-	case "User.id":
-		if e.complexity.User.Id == nil {
-			break
-		}
-
-		return e.complexity.User.Id(childComplexity), true
-
-	case "User.friends":
-		if e.complexity.User.Friends == nil {
-			break
-		}
-
-		return e.complexity.User.Friends(childComplexity), true
-
-	}
-	return 0, false
-}
-
-func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._Query(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions}
-}
-
-func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	return graphql.ErrorResponse(ctx, "mutations are not supported")
-}
-
-func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	next := ec._Subscription(ctx, op.SelectionSet)
-	if ec.Errors != nil {
-		return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
-	}
-
-	var buf bytes.Buffer
-	return func() *graphql.Response {
-		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-			buf.Reset()
-			data := next()
-
-			if data == nil {
-				return nil
-			}
-			data.MarshalGQL(&buf)
-			return buf.Bytes()
-		})
-
-		if buf == nil {
-			return nil
-		}
-
-		return &graphql.Response{
-			Data:       buf,
-			Errors:     ec.Errors,
-			Extensions: ec.Extensions,
-		}
-	}
-}
-
-type executionContext struct {
-	*graphql.RequestContext
-	*executableSchema
-}
-
-func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	rctx := graphql.GetResolverContext(ctx)
-	for _, d := range rctx.Field.Definition.Directives {
-		switch d.Name {
-		case "length":
-			if ec.directives.Length != nil {
-				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := ec.dir_length_args(ctx, rawArgs)
-				if err != nil {
-					ec.Error(ctx, err)
-					return nil
-				}
-				n := next
-				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int), args["message"].(string))
-				}
-			}
-		case "range":
-			if ec.directives.Range != nil {
-				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := ec.dir_range_args(ctx, rawArgs)
-				if err != nil {
-					ec.Error(ctx, err)
-					return nil
-				}
-				n := next
-				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Range(ctx, obj, n, args["min"].(*int), args["max"].(*int), args["message"].(*string))
-				}
-			}
-		}
-	}
-	res, err := ec.ResolverMiddleware(ctx, next)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	return res
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapSchema(parsedSchema), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
-}
-
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Query {
-    invalidIdentifier: InvalidIdentifier
-    collision: It
-    mapInput(input: Changes): Boolean
-    recursive(input: RecursiveInputSlice): Boolean
-    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
-    nestedOutputs: [[OuterObject]]
-    keywords(input: Keywords): Boolean!
-    shapes: [Shape]
-    errorBubble: Error
-    modelMethods: ModelMethods
-    valid: String!
-    user(id: Int!): User!
-    nullableArg(arg: Int = 123): String
-    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
-    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
-    directiveInputNullable(arg: InputDirectives): String
-    directiveInput(arg: InputDirectives!): String
-}
-
-type Subscription {
-    updated: String!
-    initPayload: String!
-}
-
-type User {
-    id: Int!
-    friends: [User!]!
-}
-
-type Error {
-    id: ID!
-    errorOnNonRequiredField: String
-    errorOnRequiredField: String!
-    nilOnRequiredField: String!
-}
-
-type ModelMethods {
-    resolverField: Boolean!
-    noContext: Boolean!
-    withContext: Boolean!
-}
-
-type InvalidIdentifier {
-    id: Int!
-}
-
-type It {
-    id: ID!
-}
-
-input Changes {
-    a: Int
-    b: Int
-}
-
-input RecursiveInputSlice {
-    self: [RecursiveInputSlice!]
-}
-
-input InnerInput {
-    id:Int!
-}
-
-input OuterInput {
-    inner: InnerInput!
-}
-
-input InputDirectives {
-    text: String! @length(min: 0, max: 7, message: "not valid")
-    inner: InnerDirectives!
-    innerNullable: InnerDirectives
-}
-
-input InnerDirectives {
-    message: String! @length(min: 1, message: "not valid")
-}
-
-type OuterObject {
-    inner: InnerObject!
-}
-
-type InnerObject {
-    id: Int!
-}
-
-input Keywords {
-    break:       String!
-    default:     String!
-    func:        String!
-    interface:   String!
-    select:      String!
-    case:        String!
-    defer:       String!
-    go:          String!
-    map:         String!
-    struct:      String!
-    chan:        String!
-    else:        String!
-    goto:        String!
-    package:     String!
-    switch:      String!
-    const:       String!
-    fallthrough: String!
-    if:          String!
-    range:       String!
-    type:        String!
-    continue:    String!
-    for:         String!
-    import:      String!
-    return:      String!
-    var:         String!
-}
-
-extend type Query {
-    keywordArgs(
-        break:       String!,
-        default:     String!,
-        func:        String!,
-        interface:   String!,
-        select:      String!,
-        case:        String!,
-        defer:       String!,
-        go:          String!,
-        map:         String!,
-        struct:      String!,
-        chan:        String!,
-        else:        String!,
-        goto:        String!,
-        package:     String!,
-        switch:      String!,
-        const:       String!,
-        fallthrough: String!,
-        if:          String!,
-        range:       String!,
-        type:        String!,
-        continue:    String!,
-        for:         String!,
-        import:      String!,
-        return:      String!,
-        var:         String!,
-    ): Boolean!
-}
-
-interface Shape {
-    area: Float
-}
-type Circle implements Shape {
-    radius: Float
-    area: Float
-}
-type Rectangle implements Shape {
-    length: Float
-    width: Float
-    area: Float
-}
-union ShapeUnion = Circle | Rectangle
-
-type ForcedResolver {
-    field: Circle
-}
-
-type EmbeddedPointer {
-    ID: String
-    Title: String
-}
-
-directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @range(min: Int = 0, max: Int, message: String) on ARGUMENT_DEFINITION
-
-enum Status {
-    OK
-    ERROR
-}
-`},
-)
-
-// ChainFieldMiddleware add chain by FieldMiddleware
-// nolint: deadcode
-func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
-	n := len(handleFunc)
-
-	if n > 1 {
-		lastI := n - 1
-		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-			var (
-				chainHandler graphql.Resolver
-				curI         int
-			)
-			chainHandler = func(currentCtx context.Context) (interface{}, error) {
-				if curI == lastI {
-					return next(currentCtx)
-				}
-				curI++
-				res, err := handleFunc[curI](currentCtx, chainHandler)
-				curI--
-				return res, err
-
-			}
-			return handleFunc[0](ctx, chainHandler)
-		}
-	}
-
-	if n == 1 {
-		return handleFunc[0]
-	}
-
-	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-		return next(ctx)
-	}
-}
-
-// endregion ************************** generated.gotpl ***************************
 
 // region    **************************** input.gotpl *****************************
 

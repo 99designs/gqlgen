@@ -17,6 +17,1009 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+// region    ************************** generated!.gotpl **************************
+
+// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
+	return &executableSchema{
+		resolvers:  cfg.Resolvers,
+		directives: cfg.Directives,
+		complexity: cfg.Complexity,
+	}
+}
+
+type Config struct {
+	Resolvers  ResolverRoot
+	Directives DirectiveRoot
+	Complexity ComplexityRoot
+}
+
+type ResolverRoot interface {
+	Droid() DroidResolver
+	FriendsConnection() FriendsConnectionResolver
+	Human() HumanResolver
+	Mutation() MutationResolver
+	Query() QueryResolver
+	Starship() StarshipResolver
+}
+
+type DirectiveRoot struct {
+}
+
+type ComplexityRoot struct {
+	Droid struct {
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Friends           func(childComplexity int) int
+		FriendsConnection func(childComplexity int, first *int, after *string) int
+		AppearsIn         func(childComplexity int) int
+		PrimaryFunction   func(childComplexity int) int
+	}
+
+	FriendsConnection struct {
+		TotalCount func(childComplexity int) int
+		Edges      func(childComplexity int) int
+		Friends    func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+	}
+
+	FriendsEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	Human struct {
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Height            func(childComplexity int, unit LengthUnit) int
+		Mass              func(childComplexity int) int
+		Friends           func(childComplexity int) int
+		FriendsConnection func(childComplexity int, first *int, after *string) int
+		AppearsIn         func(childComplexity int) int
+		Starships         func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CreateReview func(childComplexity int, episode Episode, review Review) int
+	}
+
+	PageInfo struct {
+		StartCursor func(childComplexity int) int
+		EndCursor   func(childComplexity int) int
+		HasNextPage func(childComplexity int) int
+	}
+
+	Query struct {
+		Hero      func(childComplexity int, episode *Episode) int
+		Reviews   func(childComplexity int, episode Episode, since *time.Time) int
+		Search    func(childComplexity int, text string) int
+		Character func(childComplexity int, id string) int
+		Droid     func(childComplexity int, id string) int
+		Human     func(childComplexity int, id string) int
+		Starship  func(childComplexity int, id string) int
+	}
+
+	Review struct {
+		Stars      func(childComplexity int) int
+		Commentary func(childComplexity int) int
+		Time       func(childComplexity int) int
+	}
+
+	Starship struct {
+		Id      func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Length  func(childComplexity int, unit *LengthUnit) int
+		History func(childComplexity int) int
+	}
+}
+
+type DroidResolver interface {
+	Friends(ctx context.Context, obj *Droid) ([]Character, error)
+	FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error)
+}
+type FriendsConnectionResolver interface {
+	Edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error)
+	Friends(ctx context.Context, obj *FriendsConnection) ([]Character, error)
+}
+type HumanResolver interface {
+	Friends(ctx context.Context, obj *Human) ([]Character, error)
+	FriendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error)
+
+	Starships(ctx context.Context, obj *Human) ([]Starship, error)
+}
+type MutationResolver interface {
+	CreateReview(ctx context.Context, episode Episode, review Review) (*Review, error)
+}
+type QueryResolver interface {
+	Hero(ctx context.Context, episode *Episode) (Character, error)
+	Reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error)
+	Search(ctx context.Context, text string) ([]SearchResult, error)
+	Character(ctx context.Context, id string) (Character, error)
+	Droid(ctx context.Context, id string) (*Droid, error)
+	Human(ctx context.Context, id string) (*Human, error)
+	Starship(ctx context.Context, id string) (*Starship, error)
+}
+type StarshipResolver interface {
+	Length(ctx context.Context, obj *Starship, unit *LengthUnit) (float64, error)
+}
+
+type executableSchema struct {
+	resolvers  ResolverRoot
+	directives DirectiveRoot
+	complexity ComplexityRoot
+}
+
+func (e *executableSchema) Schema() *ast.Schema {
+	return parsedSchema
+}
+
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	switch typeName + "." + field {
+
+	case "Droid.id":
+		if e.complexity.Droid.Id == nil {
+			break
+		}
+
+		return e.complexity.Droid.Id(childComplexity), true
+
+	case "Droid.name":
+		if e.complexity.Droid.Name == nil {
+			break
+		}
+
+		return e.complexity.Droid.Name(childComplexity), true
+
+	case "Droid.friends":
+		if e.complexity.Droid.Friends == nil {
+			break
+		}
+
+		return e.complexity.Droid.Friends(childComplexity), true
+
+	case "Droid.friendsConnection":
+		if e.complexity.Droid.FriendsConnection == nil {
+			break
+		}
+
+		args, err := e.field_Droid_friendsConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Droid.appearsIn":
+		if e.complexity.Droid.AppearsIn == nil {
+			break
+		}
+
+		return e.complexity.Droid.AppearsIn(childComplexity), true
+
+	case "Droid.primaryFunction":
+		if e.complexity.Droid.PrimaryFunction == nil {
+			break
+		}
+
+		return e.complexity.Droid.PrimaryFunction(childComplexity), true
+
+	case "FriendsConnection.totalCount":
+		if e.complexity.FriendsConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.TotalCount(childComplexity), true
+
+	case "FriendsConnection.edges":
+		if e.complexity.FriendsConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.Edges(childComplexity), true
+
+	case "FriendsConnection.friends":
+		if e.complexity.FriendsConnection.Friends == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.Friends(childComplexity), true
+
+	case "FriendsConnection.pageInfo":
+		if e.complexity.FriendsConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.PageInfo(childComplexity), true
+
+	case "FriendsEdge.cursor":
+		if e.complexity.FriendsEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.FriendsEdge.Cursor(childComplexity), true
+
+	case "FriendsEdge.node":
+		if e.complexity.FriendsEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.FriendsEdge.Node(childComplexity), true
+
+	case "Human.id":
+		if e.complexity.Human.Id == nil {
+			break
+		}
+
+		return e.complexity.Human.Id(childComplexity), true
+
+	case "Human.name":
+		if e.complexity.Human.Name == nil {
+			break
+		}
+
+		return e.complexity.Human.Name(childComplexity), true
+
+	case "Human.height":
+		if e.complexity.Human.Height == nil {
+			break
+		}
+
+		args, err := e.field_Human_height_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Human.Height(childComplexity, args["unit"].(LengthUnit)), true
+
+	case "Human.mass":
+		if e.complexity.Human.Mass == nil {
+			break
+		}
+
+		return e.complexity.Human.Mass(childComplexity), true
+
+	case "Human.friends":
+		if e.complexity.Human.Friends == nil {
+			break
+		}
+
+		return e.complexity.Human.Friends(childComplexity), true
+
+	case "Human.friendsConnection":
+		if e.complexity.Human.FriendsConnection == nil {
+			break
+		}
+
+		args, err := e.field_Human_friendsConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Human.appearsIn":
+		if e.complexity.Human.AppearsIn == nil {
+			break
+		}
+
+		return e.complexity.Human.AppearsIn(childComplexity), true
+
+	case "Human.starships":
+		if e.complexity.Human.Starships == nil {
+			break
+		}
+
+		return e.complexity.Human.Starships(childComplexity), true
+
+	case "Mutation.createReview":
+		if e.complexity.Mutation.CreateReview == nil {
+			break
+		}
+
+		args, err := e.field_Mutation_createReview_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateReview(childComplexity, args["episode"].(Episode), args["review"].(Review)), true
+
+	case "PageInfo.startCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
+
+	case "PageInfo.endCursor":
+		if e.complexity.PageInfo.EndCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.EndCursor(childComplexity), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "Query.hero":
+		if e.complexity.Query.Hero == nil {
+			break
+		}
+
+		args, err := e.field_Query_hero_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Hero(childComplexity, args["episode"].(*Episode)), true
+
+	case "Query.reviews":
+		if e.complexity.Query.Reviews == nil {
+			break
+		}
+
+		args, err := e.field_Query_reviews_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Reviews(childComplexity, args["episode"].(Episode), args["since"].(*time.Time)), true
+
+	case "Query.search":
+		if e.complexity.Query.Search == nil {
+			break
+		}
+
+		args, err := e.field_Query_search_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
+
+	case "Query.character":
+		if e.complexity.Query.Character == nil {
+			break
+		}
+
+		args, err := e.field_Query_character_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Character(childComplexity, args["id"].(string)), true
+
+	case "Query.droid":
+		if e.complexity.Query.Droid == nil {
+			break
+		}
+
+		args, err := e.field_Query_droid_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Droid(childComplexity, args["id"].(string)), true
+
+	case "Query.human":
+		if e.complexity.Query.Human == nil {
+			break
+		}
+
+		args, err := e.field_Query_human_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Human(childComplexity, args["id"].(string)), true
+
+	case "Query.starship":
+		if e.complexity.Query.Starship == nil {
+			break
+		}
+
+		args, err := e.field_Query_starship_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Starship(childComplexity, args["id"].(string)), true
+
+	case "Review.stars":
+		if e.complexity.Review.Stars == nil {
+			break
+		}
+
+		return e.complexity.Review.Stars(childComplexity), true
+
+	case "Review.commentary":
+		if e.complexity.Review.Commentary == nil {
+			break
+		}
+
+		return e.complexity.Review.Commentary(childComplexity), true
+
+	case "Review.time":
+		if e.complexity.Review.Time == nil {
+			break
+		}
+
+		return e.complexity.Review.Time(childComplexity), true
+
+	case "Starship.id":
+		if e.complexity.Starship.Id == nil {
+			break
+		}
+
+		return e.complexity.Starship.Id(childComplexity), true
+
+	case "Starship.name":
+		if e.complexity.Starship.Name == nil {
+			break
+		}
+
+		return e.complexity.Starship.Name(childComplexity), true
+
+	case "Starship.length":
+		if e.complexity.Starship.Length == nil {
+			break
+		}
+
+		args, err := e.field_Starship_length_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Starship.Length(childComplexity, args["unit"].(*LengthUnit)), true
+
+	case "Starship.history":
+		if e.complexity.Starship.History == nil {
+			break
+		}
+
+		return e.complexity.Starship.History(childComplexity), true
+
+	}
+	return 0, false
+}
+
+func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Query(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions}
+}
+
+func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	ec := executionContext{graphql.GetRequestContext(ctx), e}
+
+	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		data := ec._Mutation(ctx, op.SelectionSet)
+		var buf bytes.Buffer
+		data.MarshalGQL(&buf)
+		return buf.Bytes()
+	})
+
+	return &graphql.Response{
+		Data:       buf,
+		Errors:     ec.Errors,
+		Extensions: ec.Extensions,
+	}
+}
+
+func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
+	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
+}
+
+type executionContext struct {
+	*graphql.RequestContext
+	*executableSchema
+}
+
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
+}
+
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
+}
+
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+}
+
+var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema.graphql", Input: `# The query type, represents all of the entry points into our object graph
+type Query {
+    hero(episode: Episode = NEWHOPE): Character
+    reviews(episode: Episode!, since: Time): [Review!]!
+    search(text: String!): [SearchResult!]!
+    character(id: ID!): Character
+    droid(id: ID!): Droid
+    human(id: ID!): Human
+    starship(id: ID!): Starship
+}
+# The mutation type, represents all updates we can make to our data
+type Mutation {
+    createReview(episode: Episode!, review: ReviewInput!): Review
+}
+# The episodes in the Star Wars trilogy
+enum Episode {
+    # Star Wars Episode IV: A New Hope, released in 1977.
+    NEWHOPE
+    # Star Wars Episode V: The Empire Strikes Back, released in 1980.
+    EMPIRE
+    # Star Wars Episode VI: Return of the Jedi, released in 1983.
+    JEDI
+}
+# A character from the Star Wars universe
+interface Character {
+    # The ID of the character
+    id: ID!
+    # The name of the character
+    name: String!
+    # The friends of the character, or an empty list if they have none
+    friends: [Character!]
+    # The friends of the character exposed as a connection with edges
+    friendsConnection(first: Int, after: ID): FriendsConnection!
+    # The movies this character appears in
+    appearsIn: [Episode!]!
+}
+# Units of height
+enum LengthUnit {
+    # The standard unit around the world
+    METER
+    # Primarily used in the United States
+    FOOT
+}
+# A humanoid creature from the Star Wars universe
+type Human implements Character {
+    # The ID of the human
+    id: ID!
+    # What this human calls themselves
+    name: String!
+    # Height in the preferred unit, default is meters
+    height(unit: LengthUnit = METER): Float!
+    # Mass in kilograms, or null if unknown
+    mass: Float
+    # This human's friends, or an empty list if they have none
+    friends: [Character!]
+    # The friends of the human exposed as a connection with edges
+    friendsConnection(first: Int, after: ID): FriendsConnection!
+    # The movies this human appears in
+    appearsIn: [Episode!]!
+    # A list of starships this person has piloted, or an empty list if none
+    starships: [Starship!]
+}
+# An autonomous mechanical character in the Star Wars universe
+type Droid implements Character {
+    # The ID of the droid
+    id: ID!
+    # What others call this droid
+    name: String!
+    # This droid's friends, or an empty list if they have none
+    friends: [Character!]
+    # The friends of the droid exposed as a connection with edges
+    friendsConnection(first: Int, after: ID): FriendsConnection!
+    # The movies this droid appears in
+    appearsIn: [Episode!]!
+    # This droid's primary function
+    primaryFunction: String
+}
+# A connection object for a character's friends
+type FriendsConnection {
+    # The total number of friends
+    totalCount: Int!
+    # The edges for each of the character's friends.
+    edges: [FriendsEdge!]
+    # A list of the friends, as a convenience when edges are not needed.
+    friends: [Character!]
+    # Information for paginating this connection
+    pageInfo: PageInfo!
+}
+# An edge object for a character's friends
+type FriendsEdge {
+    # A cursor used for pagination
+    cursor: ID!
+    # The character represented by this friendship edge
+    node: Character
+}
+# Information for paginating this connection
+type PageInfo {
+    startCursor: ID!
+    endCursor: ID!
+    hasNextPage: Boolean!
+}
+# Represents a review for a movie
+type Review {
+    # The number of stars this review gave, 1-5
+    stars: Int!
+    # Comment about the movie
+    commentary: String
+    # when the review was posted
+    time: Time
+}
+# The input object sent when someone is creating a new review
+input ReviewInput {
+    # 0-5 stars
+    stars: Int!
+    # Comment about the movie, optional
+    commentary: String
+    # when the review was posted
+    time: Time
+}
+type Starship {
+    # The ID of the starship
+    id: ID!
+    # The name of the starship
+    name: String!
+    # Length of the starship, along the longest axis
+    length(unit: LengthUnit = METER): Float!
+    # coordinates tracking this ship
+    history: [[Int!]!]!
+}
+union SearchResult = Human | Droid | Starship
+scalar Time
+`},
+)
+
+// ChainFieldMiddleware add chain by FieldMiddleware
+// nolint: deadcode
+func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
+	n := len(handleFunc)
+
+	if n > 1 {
+		lastI := n - 1
+		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+			var (
+				chainHandler graphql.Resolver
+				curI         int
+			)
+			chainHandler = func(currentCtx context.Context) (interface{}, error) {
+				if curI == lastI {
+					return next(currentCtx)
+				}
+				curI++
+				res, err := handleFunc[curI](currentCtx, chainHandler)
+				curI--
+				return res, err
+
+			}
+			return handleFunc[0](ctx, chainHandler)
+		}
+	}
+
+	if n == 1 {
+		return handleFunc[0]
+	}
+
+	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+		return next(ctx)
+	}
+}
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ***************************** args.gotpl *****************************
+
+func (e *executableSchema) field_Droid_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalID(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	return args, nil
+}
+
+func (e *executableSchema) field_Human_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalID(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	return args, nil
+}
+
+func (e *executableSchema) field_Human_height_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 LengthUnit
+	if tmp, ok := rawArgs["unit"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["unit"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 Episode
+	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["episode"] = arg0
+	var arg1 Review
+	if tmp, ok := rawArgs["review"]; ok {
+		var err error
+		arg1, err = UnmarshalReviewInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+
+		mReviewInput1, err := e.ReviewInputMiddleware(ctx, &arg1)
+		if err != nil {
+			return nil, err
+		}
+		arg1 = *mReviewInput1
+	}
+	args["review"] = arg1
+	return args, nil
+}
+
+func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_character_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_droid_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_hero_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *Episode
+	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
+		var ptr1 Episode
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["episode"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_human_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_reviews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 Episode
+	if tmp, ok := rawArgs["episode"]; ok {
+		var err error
+		err = (&arg0).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["episode"] = arg0
+	var arg1 *time.Time
+	if tmp, ok := rawArgs["since"]; ok {
+		var err error
+		var ptr1 time.Time
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalTime(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["since"] = arg1
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["text"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["text"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Query_starship_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field_Starship_length_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *LengthUnit
+	if tmp, ok := rawArgs["unit"]; ok {
+		var err error
+		var ptr1 LengthUnit
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["unit"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalBoolean(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+// endregion ***************************** args.gotpl *****************************
+
 // region    **************************** field.gotpl *****************************
 
 // nolint: vetshadow
@@ -2632,1020 +3635,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 // endregion **************************** field.gotpl *****************************
-
-// region    ************************** generated.gotpl ***************************
-
-// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
-}
-
-type Config struct {
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
-
-type ResolverRoot interface {
-	Droid() DroidResolver
-	FriendsConnection() FriendsConnectionResolver
-	Human() HumanResolver
-	Mutation() MutationResolver
-	Query() QueryResolver
-	Starship() StarshipResolver
-}
-
-type DirectiveRoot struct {
-}
-
-type ComplexityRoot struct {
-	Droid struct {
-		Id                func(childComplexity int) int
-		Name              func(childComplexity int) int
-		Friends           func(childComplexity int) int
-		FriendsConnection func(childComplexity int, first *int, after *string) int
-		AppearsIn         func(childComplexity int) int
-		PrimaryFunction   func(childComplexity int) int
-	}
-
-	FriendsConnection struct {
-		TotalCount func(childComplexity int) int
-		Edges      func(childComplexity int) int
-		Friends    func(childComplexity int) int
-		PageInfo   func(childComplexity int) int
-	}
-
-	FriendsEdge struct {
-		Cursor func(childComplexity int) int
-		Node   func(childComplexity int) int
-	}
-
-	Human struct {
-		Id                func(childComplexity int) int
-		Name              func(childComplexity int) int
-		Height            func(childComplexity int, unit LengthUnit) int
-		Mass              func(childComplexity int) int
-		Friends           func(childComplexity int) int
-		FriendsConnection func(childComplexity int, first *int, after *string) int
-		AppearsIn         func(childComplexity int) int
-		Starships         func(childComplexity int) int
-	}
-
-	Mutation struct {
-		CreateReview func(childComplexity int, episode Episode, review Review) int
-	}
-
-	PageInfo struct {
-		StartCursor func(childComplexity int) int
-		EndCursor   func(childComplexity int) int
-		HasNextPage func(childComplexity int) int
-	}
-
-	Query struct {
-		Hero      func(childComplexity int, episode *Episode) int
-		Reviews   func(childComplexity int, episode Episode, since *time.Time) int
-		Search    func(childComplexity int, text string) int
-		Character func(childComplexity int, id string) int
-		Droid     func(childComplexity int, id string) int
-		Human     func(childComplexity int, id string) int
-		Starship  func(childComplexity int, id string) int
-	}
-
-	Review struct {
-		Stars      func(childComplexity int) int
-		Commentary func(childComplexity int) int
-		Time       func(childComplexity int) int
-	}
-
-	Starship struct {
-		Id      func(childComplexity int) int
-		Name    func(childComplexity int) int
-		Length  func(childComplexity int, unit *LengthUnit) int
-		History func(childComplexity int) int
-	}
-}
-
-type DroidResolver interface {
-	Friends(ctx context.Context, obj *Droid) ([]Character, error)
-	FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error)
-}
-type FriendsConnectionResolver interface {
-	Edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error)
-	Friends(ctx context.Context, obj *FriendsConnection) ([]Character, error)
-}
-type HumanResolver interface {
-	Friends(ctx context.Context, obj *Human) ([]Character, error)
-	FriendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error)
-
-	Starships(ctx context.Context, obj *Human) ([]Starship, error)
-}
-type MutationResolver interface {
-	CreateReview(ctx context.Context, episode Episode, review Review) (*Review, error)
-}
-type QueryResolver interface {
-	Hero(ctx context.Context, episode *Episode) (Character, error)
-	Reviews(ctx context.Context, episode Episode, since *time.Time) ([]Review, error)
-	Search(ctx context.Context, text string) ([]SearchResult, error)
-	Character(ctx context.Context, id string) (Character, error)
-	Droid(ctx context.Context, id string) (*Droid, error)
-	Human(ctx context.Context, id string) (*Human, error)
-	Starship(ctx context.Context, id string) (*Starship, error)
-}
-type StarshipResolver interface {
-	Length(ctx context.Context, obj *Starship, unit *LengthUnit) (float64, error)
-}
-
-func (e *executableSchema) field_Droid_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalID(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["after"] = arg1
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Human_height_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 LengthUnit
-	if tmp, ok := rawArgs["unit"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["unit"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Human_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalID(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["after"] = arg1
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 Episode
-	if tmp, ok := rawArgs["episode"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["episode"] = arg0
-	var arg1 Review
-	if tmp, ok := rawArgs["review"]; ok {
-		var err error
-		arg1, err = UnmarshalReviewInput(tmp)
-		if err != nil {
-			return nil, err
-		}
-
-		mReviewInput1, err := e.ReviewInputMiddleware(ctx, &arg1)
-		if err != nil {
-			return nil, err
-		}
-		arg1 = *mReviewInput1
-	}
-	args["review"] = arg1
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_hero_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *Episode
-	if tmp, ok := rawArgs["episode"]; ok {
-		var err error
-		var ptr1 Episode
-		if tmp != nil {
-			err = (&ptr1).UnmarshalGQL(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["episode"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_reviews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 Episode
-	if tmp, ok := rawArgs["episode"]; ok {
-		var err error
-		err = (&arg0).UnmarshalGQL(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["episode"] = arg0
-	var arg1 *time.Time
-	if tmp, ok := rawArgs["since"]; ok {
-		var err error
-		var ptr1 time.Time
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalTime(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["since"] = arg1
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["text"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["text"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_character_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_droid_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_human_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query_starship_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field_Starship_length_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *LengthUnit
-	if tmp, ok := rawArgs["unit"]; ok {
-		var err error
-		var ptr1 LengthUnit
-		if tmp != nil {
-			err = (&ptr1).UnmarshalGQL(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["unit"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalBoolean(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["includeDeprecated"] = arg0
-	return args, nil
-
-}
-
-type executableSchema struct {
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
-
-func (e *executableSchema) Schema() *ast.Schema {
-	return parsedSchema
-}
-
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	switch typeName + "." + field {
-
-	case "Droid.id":
-		if e.complexity.Droid.Id == nil {
-			break
-		}
-
-		return e.complexity.Droid.Id(childComplexity), true
-
-	case "Droid.name":
-		if e.complexity.Droid.Name == nil {
-			break
-		}
-
-		return e.complexity.Droid.Name(childComplexity), true
-
-	case "Droid.friends":
-		if e.complexity.Droid.Friends == nil {
-			break
-		}
-
-		return e.complexity.Droid.Friends(childComplexity), true
-
-	case "Droid.friendsConnection":
-		if e.complexity.Droid.FriendsConnection == nil {
-			break
-		}
-
-		args, err := e.field_Droid_friendsConnection_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
-
-	case "Droid.appearsIn":
-		if e.complexity.Droid.AppearsIn == nil {
-			break
-		}
-
-		return e.complexity.Droid.AppearsIn(childComplexity), true
-
-	case "Droid.primaryFunction":
-		if e.complexity.Droid.PrimaryFunction == nil {
-			break
-		}
-
-		return e.complexity.Droid.PrimaryFunction(childComplexity), true
-
-	case "FriendsConnection.totalCount":
-		if e.complexity.FriendsConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.FriendsConnection.TotalCount(childComplexity), true
-
-	case "FriendsConnection.edges":
-		if e.complexity.FriendsConnection.Edges == nil {
-			break
-		}
-
-		return e.complexity.FriendsConnection.Edges(childComplexity), true
-
-	case "FriendsConnection.friends":
-		if e.complexity.FriendsConnection.Friends == nil {
-			break
-		}
-
-		return e.complexity.FriendsConnection.Friends(childComplexity), true
-
-	case "FriendsConnection.pageInfo":
-		if e.complexity.FriendsConnection.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.FriendsConnection.PageInfo(childComplexity), true
-
-	case "FriendsEdge.cursor":
-		if e.complexity.FriendsEdge.Cursor == nil {
-			break
-		}
-
-		return e.complexity.FriendsEdge.Cursor(childComplexity), true
-
-	case "FriendsEdge.node":
-		if e.complexity.FriendsEdge.Node == nil {
-			break
-		}
-
-		return e.complexity.FriendsEdge.Node(childComplexity), true
-
-	case "Human.id":
-		if e.complexity.Human.Id == nil {
-			break
-		}
-
-		return e.complexity.Human.Id(childComplexity), true
-
-	case "Human.name":
-		if e.complexity.Human.Name == nil {
-			break
-		}
-
-		return e.complexity.Human.Name(childComplexity), true
-
-	case "Human.height":
-		if e.complexity.Human.Height == nil {
-			break
-		}
-
-		args, err := e.field_Human_height_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Human.Height(childComplexity, args["unit"].(LengthUnit)), true
-
-	case "Human.mass":
-		if e.complexity.Human.Mass == nil {
-			break
-		}
-
-		return e.complexity.Human.Mass(childComplexity), true
-
-	case "Human.friends":
-		if e.complexity.Human.Friends == nil {
-			break
-		}
-
-		return e.complexity.Human.Friends(childComplexity), true
-
-	case "Human.friendsConnection":
-		if e.complexity.Human.FriendsConnection == nil {
-			break
-		}
-
-		args, err := e.field_Human_friendsConnection_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
-
-	case "Human.appearsIn":
-		if e.complexity.Human.AppearsIn == nil {
-			break
-		}
-
-		return e.complexity.Human.AppearsIn(childComplexity), true
-
-	case "Human.starships":
-		if e.complexity.Human.Starships == nil {
-			break
-		}
-
-		return e.complexity.Human.Starships(childComplexity), true
-
-	case "Mutation.createReview":
-		if e.complexity.Mutation.CreateReview == nil {
-			break
-		}
-
-		args, err := e.field_Mutation_createReview_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateReview(childComplexity, args["episode"].(Episode), args["review"].(Review)), true
-
-	case "PageInfo.startCursor":
-		if e.complexity.PageInfo.StartCursor == nil {
-			break
-		}
-
-		return e.complexity.PageInfo.StartCursor(childComplexity), true
-
-	case "PageInfo.endCursor":
-		if e.complexity.PageInfo.EndCursor == nil {
-			break
-		}
-
-		return e.complexity.PageInfo.EndCursor(childComplexity), true
-
-	case "PageInfo.hasNextPage":
-		if e.complexity.PageInfo.HasNextPage == nil {
-			break
-		}
-
-		return e.complexity.PageInfo.HasNextPage(childComplexity), true
-
-	case "Query.hero":
-		if e.complexity.Query.Hero == nil {
-			break
-		}
-
-		args, err := e.field_Query_hero_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Hero(childComplexity, args["episode"].(*Episode)), true
-
-	case "Query.reviews":
-		if e.complexity.Query.Reviews == nil {
-			break
-		}
-
-		args, err := e.field_Query_reviews_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Reviews(childComplexity, args["episode"].(Episode), args["since"].(*time.Time)), true
-
-	case "Query.search":
-		if e.complexity.Query.Search == nil {
-			break
-		}
-
-		args, err := e.field_Query_search_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
-
-	case "Query.character":
-		if e.complexity.Query.Character == nil {
-			break
-		}
-
-		args, err := e.field_Query_character_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Character(childComplexity, args["id"].(string)), true
-
-	case "Query.droid":
-		if e.complexity.Query.Droid == nil {
-			break
-		}
-
-		args, err := e.field_Query_droid_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Droid(childComplexity, args["id"].(string)), true
-
-	case "Query.human":
-		if e.complexity.Query.Human == nil {
-			break
-		}
-
-		args, err := e.field_Query_human_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Human(childComplexity, args["id"].(string)), true
-
-	case "Query.starship":
-		if e.complexity.Query.Starship == nil {
-			break
-		}
-
-		args, err := e.field_Query_starship_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Starship(childComplexity, args["id"].(string)), true
-
-	case "Review.stars":
-		if e.complexity.Review.Stars == nil {
-			break
-		}
-
-		return e.complexity.Review.Stars(childComplexity), true
-
-	case "Review.commentary":
-		if e.complexity.Review.Commentary == nil {
-			break
-		}
-
-		return e.complexity.Review.Commentary(childComplexity), true
-
-	case "Review.time":
-		if e.complexity.Review.Time == nil {
-			break
-		}
-
-		return e.complexity.Review.Time(childComplexity), true
-
-	case "Starship.id":
-		if e.complexity.Starship.Id == nil {
-			break
-		}
-
-		return e.complexity.Starship.Id(childComplexity), true
-
-	case "Starship.name":
-		if e.complexity.Starship.Name == nil {
-			break
-		}
-
-		return e.complexity.Starship.Name(childComplexity), true
-
-	case "Starship.length":
-		if e.complexity.Starship.Length == nil {
-			break
-		}
-
-		args, err := e.field_Starship_length_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Starship.Length(childComplexity, args["unit"].(*LengthUnit)), true
-
-	case "Starship.history":
-		if e.complexity.Starship.History == nil {
-			break
-		}
-
-		return e.complexity.Starship.History(childComplexity), true
-
-	}
-	return 0, false
-}
-
-func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._Query(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions}
-}
-
-func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._Mutation(ctx, op.SelectionSet)
-		var buf bytes.Buffer
-		data.MarshalGQL(&buf)
-		return buf.Bytes()
-	})
-
-	return &graphql.Response{
-		Data:       buf,
-		Errors:     ec.Errors,
-		Extensions: ec.Extensions,
-	}
-}
-
-func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
-}
-
-type executionContext struct {
-	*graphql.RequestContext
-	*executableSchema
-}
-
-func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = nil
-		}
-	}()
-	res, err := ec.ResolverMiddleware(ctx, next)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	return res
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapSchema(parsedSchema), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
-}
-
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `# The query type, represents all of the entry points into our object graph
-type Query {
-    hero(episode: Episode = NEWHOPE): Character
-    reviews(episode: Episode!, since: Time): [Review!]!
-    search(text: String!): [SearchResult!]!
-    character(id: ID!): Character
-    droid(id: ID!): Droid
-    human(id: ID!): Human
-    starship(id: ID!): Starship
-}
-# The mutation type, represents all updates we can make to our data
-type Mutation {
-    createReview(episode: Episode!, review: ReviewInput!): Review
-}
-# The episodes in the Star Wars trilogy
-enum Episode {
-    # Star Wars Episode IV: A New Hope, released in 1977.
-    NEWHOPE
-    # Star Wars Episode V: The Empire Strikes Back, released in 1980.
-    EMPIRE
-    # Star Wars Episode VI: Return of the Jedi, released in 1983.
-    JEDI
-}
-# A character from the Star Wars universe
-interface Character {
-    # The ID of the character
-    id: ID!
-    # The name of the character
-    name: String!
-    # The friends of the character, or an empty list if they have none
-    friends: [Character!]
-    # The friends of the character exposed as a connection with edges
-    friendsConnection(first: Int, after: ID): FriendsConnection!
-    # The movies this character appears in
-    appearsIn: [Episode!]!
-}
-# Units of height
-enum LengthUnit {
-    # The standard unit around the world
-    METER
-    # Primarily used in the United States
-    FOOT
-}
-# A humanoid creature from the Star Wars universe
-type Human implements Character {
-    # The ID of the human
-    id: ID!
-    # What this human calls themselves
-    name: String!
-    # Height in the preferred unit, default is meters
-    height(unit: LengthUnit = METER): Float!
-    # Mass in kilograms, or null if unknown
-    mass: Float
-    # This human's friends, or an empty list if they have none
-    friends: [Character!]
-    # The friends of the human exposed as a connection with edges
-    friendsConnection(first: Int, after: ID): FriendsConnection!
-    # The movies this human appears in
-    appearsIn: [Episode!]!
-    # A list of starships this person has piloted, or an empty list if none
-    starships: [Starship!]
-}
-# An autonomous mechanical character in the Star Wars universe
-type Droid implements Character {
-    # The ID of the droid
-    id: ID!
-    # What others call this droid
-    name: String!
-    # This droid's friends, or an empty list if they have none
-    friends: [Character!]
-    # The friends of the droid exposed as a connection with edges
-    friendsConnection(first: Int, after: ID): FriendsConnection!
-    # The movies this droid appears in
-    appearsIn: [Episode!]!
-    # This droid's primary function
-    primaryFunction: String
-}
-# A connection object for a character's friends
-type FriendsConnection {
-    # The total number of friends
-    totalCount: Int!
-    # The edges for each of the character's friends.
-    edges: [FriendsEdge!]
-    # A list of the friends, as a convenience when edges are not needed.
-    friends: [Character!]
-    # Information for paginating this connection
-    pageInfo: PageInfo!
-}
-# An edge object for a character's friends
-type FriendsEdge {
-    # A cursor used for pagination
-    cursor: ID!
-    # The character represented by this friendship edge
-    node: Character
-}
-# Information for paginating this connection
-type PageInfo {
-    startCursor: ID!
-    endCursor: ID!
-    hasNextPage: Boolean!
-}
-# Represents a review for a movie
-type Review {
-    # The number of stars this review gave, 1-5
-    stars: Int!
-    # Comment about the movie
-    commentary: String
-    # when the review was posted
-    time: Time
-}
-# The input object sent when someone is creating a new review
-input ReviewInput {
-    # 0-5 stars
-    stars: Int!
-    # Comment about the movie, optional
-    commentary: String
-    # when the review was posted
-    time: Time
-}
-type Starship {
-    # The ID of the starship
-    id: ID!
-    # The name of the starship
-    name: String!
-    # Length of the starship, along the longest axis
-    length(unit: LengthUnit = METER): Float!
-    # coordinates tracking this ship
-    history: [[Int!]!]!
-}
-union SearchResult = Human | Droid | Starship
-scalar Time
-`},
-)
-
-// ChainFieldMiddleware add chain by FieldMiddleware
-// nolint: deadcode
-func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
-	n := len(handleFunc)
-
-	if n > 1 {
-		lastI := n - 1
-		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-			var (
-				chainHandler graphql.Resolver
-				curI         int
-			)
-			chainHandler = func(currentCtx context.Context) (interface{}, error) {
-				if curI == lastI {
-					return next(currentCtx)
-				}
-				curI++
-				res, err := handleFunc[curI](currentCtx, chainHandler)
-				curI--
-				return res, err
-
-			}
-			return handleFunc[0](ctx, chainHandler)
-		}
-	}
-
-	if n == 1 {
-		return handleFunc[0]
-	}
-
-	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-		return next(ctx)
-	}
-}
-
-// endregion ************************** generated.gotpl ***************************
 
 // region    **************************** input.gotpl *****************************
 

@@ -241,19 +241,23 @@ func CacheSize(size int) Option {
 	}
 }
 
-const DefaultCacheSize = 1000
-
-// WebsocketKeepAliveDuration allows you to reconfigure the keepAlive behavior.
-// By default, keep-alive is disabled.
+// WebsocketKeepAliveDuration allows you to reconfigure the keepalive behavior.
+// By default, keepalive is enabled with a DefaultConnectionKeepAlivePingInterval
+// duration. Set handler.connectionKeepAlivePingInterval = 0 to disable keepalive
+// altogether.
 func WebsocketKeepAliveDuration(duration time.Duration) Option {
 	return func(cfg *Config) {
 		cfg.connectionKeepAlivePingInterval = duration
 	}
 }
 
+const DefaultCacheSize = 1000
+const DefaultConnectionKeepAlivePingInterval = 25 * time.Second
+
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := &Config{
-		cacheSize: DefaultCacheSize,
+		cacheSize:                       DefaultCacheSize,
+		connectionKeepAlivePingInterval: DefaultConnectionKeepAlivePingInterval,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,

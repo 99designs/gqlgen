@@ -17,6 +17,7 @@ type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     inputSlice(arg: [String!]!): Boolean!
+    shapeUnion: ShapeUnion!
 }
 
 type Subscription {

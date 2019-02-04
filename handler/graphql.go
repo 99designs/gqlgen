@@ -26,16 +26,16 @@ type params struct {
 }
 
 type Config struct {
-	cacheSize                  int
-	upgrader                   websocket.Upgrader
-	recover                    graphql.RecoverFunc
-	errorPresenter             graphql.ErrorPresenterFunc
-	resolverHook               graphql.FieldMiddleware
-	requestHook                graphql.RequestMiddleware
-	tracer                     graphql.Tracer
-	complexityLimit            int
-	disableIntrospection       bool
-	connectionKeepAliveTimeout time.Duration
+	cacheSize                       int
+	upgrader                        websocket.Upgrader
+	recover                         graphql.RecoverFunc
+	errorPresenter                  graphql.ErrorPresenterFunc
+	resolverHook                    graphql.FieldMiddleware
+	requestHook                     graphql.RequestMiddleware
+	tracer                          graphql.Tracer
+	complexityLimit                 int
+	disableIntrospection            bool
+	connectionKeepAlivePingInterval time.Duration
 }
 
 func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -247,7 +247,7 @@ const DefaultCacheSize = 1000
 // By default, keep-alive is disabled.
 func WebsocketKeepAliveDuration(duration time.Duration) Option {
 	return func(cfg *Config) {
-		cfg.connectionKeepAliveTimeout = duration
+		cfg.connectionKeepAlivePingInterval = duration
 	}
 }
 

@@ -45,8 +45,3 @@ func equalFieldName(source, target string) bool {
 	target = strings.Replace(target, "_", "", -1)
 	return strings.EqualFold(source, target)
 }
-
-func isMap(t types.Type) bool {
-	_, isMap := t.(*types.Map)
-	return isMap
-}

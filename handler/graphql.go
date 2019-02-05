@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/99designs/gqlgen/complexity"
 	"github.com/99designs/gqlgen/graphql"
@@ -25,15 +26,16 @@ type params struct {
 }
 
 type Config struct {
-	cacheSize            int
-	upgrader             websocket.Upgrader
-	recover              graphql.RecoverFunc
-	errorPresenter       graphql.ErrorPresenterFunc
-	resolverHook         graphql.FieldMiddleware
-	requestHook          graphql.RequestMiddleware
-	tracer               graphql.Tracer
-	complexityLimit      int
-	disableIntrospection bool
+	cacheSize                       int
+	upgrader                        websocket.Upgrader
+	recover                         graphql.RecoverFunc
+	errorPresenter                  graphql.ErrorPresenterFunc
+	resolverHook                    graphql.FieldMiddleware
+	requestHook                     graphql.RequestMiddleware
+	tracer                          graphql.Tracer
+	complexityLimit                 int
+	disableIntrospection            bool
+	connectionKeepAlivePingInterval time.Duration
 }
 
 func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -239,11 +241,23 @@ func CacheSize(size int) Option {
 	}
 }
 
+// WebsocketKeepAliveDuration allows you to reconfigure the keepalive behavior.
+// By default, keepalive is enabled with a DefaultConnectionKeepAlivePingInterval
+// duration. Set handler.connectionKeepAlivePingInterval = 0 to disable keepalive
+// altogether.
+func WebsocketKeepAliveDuration(duration time.Duration) Option {
+	return func(cfg *Config) {
+		cfg.connectionKeepAlivePingInterval = duration
+	}
+}
+
 const DefaultCacheSize = 1000
+const DefaultConnectionKeepAlivePingInterval = 25 * time.Second
 
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := &Config{
-		cacheSize: DefaultCacheSize,
+		cacheSize:                       DefaultCacheSize,
+		connectionKeepAlivePingInterval: DefaultConnectionKeepAlivePingInterval,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,

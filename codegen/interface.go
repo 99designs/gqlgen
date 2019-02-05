@@ -7,41 +7,54 @@ import (
 )
 
 type Interface struct {
-	Definition   *TypeDefinition
+	*ast.Definition
+	Type         types.Type
 	Implementors []InterfaceImplementor
 	InTypemap    bool
 }
 
 type InterfaceImplementor struct {
-	ValueReceiver bool
-	Definition    *TypeDefinition
+	*ast.Definition
+
+	Interface *Interface
+	Type      types.Type
 }
 
 func (b *builder) buildInterface(typ *ast.Definition) *Interface {
+	obj, err := b.Binder.FindUserObject(typ.Name)
+	if err != nil {
+		panic(err)
+	}
+
 	i := &Interface{
-		Definition: b.NamedTypes[typ.Name],
+		Definition: typ,
+		Type:       obj,
 		InTypemap:  b.Config.Models.UserDefined(typ.Name),
 	}
 
 	for _, implementor := range b.Schema.GetPossibleTypes(typ) {
-		t := b.NamedTypes[implementor.Name]
+		obj, err := b.Binder.FindUserObject(implementor.Name)
+		if err != nil {
+			panic(err)
+		}
 
 		i.Implementors = append(i.Implementors, InterfaceImplementor{
-			Definition:    t,
-			ValueReceiver: b.isValueReceiver(b.NamedTypes[typ.Name], t),
+			Definition: implementor,
+			Type:       obj,
+			Interface:  i,
 		})
 	}
 
 	return i
 }
 
-func (b *builder) isValueReceiver(intf *TypeDefinition, implementor *TypeDefinition) bool {
-	interfaceType, err := findGoInterface(intf.GoType)
+func (i *InterfaceImplementor) ValueReceiver() bool {
+	interfaceType, err := findGoInterface(i.Interface.Type)
 	if interfaceType == nil || err != nil {
 		return true
 	}
 
-	implementorType, err := findGoNamedType(implementor.GoType)
+	implementorType, err := findGoNamedType(i.Type)
 	if implementorType == nil || err != nil {
 		return true
 	}

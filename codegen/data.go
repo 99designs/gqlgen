@@ -19,7 +19,7 @@ type Data struct {
 	Directives map[string]*Directive
 	Objects    Objects
 	Inputs     Objects
-	Interfaces []*Interface
+	Interfaces map[string]*Interface
 
 	QueryRoot        *Object
 	MutationRoot     *Object
@@ -77,6 +77,7 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		Directives: b.Directives,
 		Schema:     b.Schema,
 		SchemaStr:  b.SchemaStr,
+		Interfaces: map[string]*Interface{},
 	}
 
 	for _, schemaType := range b.Schema.Types {
@@ -97,8 +98,7 @@ func BuildData(cfg *config.Config) (*Data, error) {
 			s.Inputs = append(s.Inputs, input)
 
 		case ast.Union, ast.Interface:
-			s.Interfaces = append(s.Interfaces, b.buildInterface(schemaType))
-
+			s.Interfaces[schemaType.Name] = b.buildInterface(schemaType)
 		}
 	}
 
@@ -126,10 +126,6 @@ func BuildData(cfg *config.Config) (*Data, error) {
 
 	sort.Slice(s.Inputs, func(i, j int) bool {
 		return s.Inputs[i].Definition.Name < s.Inputs[j].Definition.Name
-	})
-
-	sort.Slice(s.Interfaces, func(i, j int) bool {
-		return s.Interfaces[i].Definition.GQLDefinition.Name < s.Interfaces[j].Definition.GQLDefinition.Name
 	})
 
 	return &s, nil

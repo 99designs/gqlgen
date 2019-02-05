@@ -10,5 +10,5 @@
     }
   },
   "Skip": ["internal/imports/testdata"],
-  "Disable": ["gas","golint","gocyclo","goconst", "gotype", "maligned", "gosec"]
+  "Disable": ["gas","golint","gocyclo","goconst", "gotype", "maligned", "gosec", "staticcheck"]
 }

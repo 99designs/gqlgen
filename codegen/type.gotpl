@@ -1,0 +1,38 @@
+{{- range $type := .ReferencedTypes }}
+	{{- if $type.Definition.IsInputType }}
+		func unmarshal{{ $type.Definition.Name }}2{{ $type.GO | ts }}(v interface{}) ({{ $type.GO | ref }}, error) {
+			{{- if $type.IsPtr }}
+				if v == nil { return nil, nil }
+				res, err := unmarshal{{ $type.Definition.Name }}2{{ $type.GO.Elem | ts }}(v)
+				return &res, err
+			{{- else if $type.IsSlice }}
+				var vSlice []interface{}
+				if v != nil {
+					if tmp1, ok := v.([]interface{}); ok {
+						vSlice = tmp1
+					} else {
+						vSlice = []interface{}{ v }
+					}
+				}
+				var err error
+				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
+				for i := range vSlice {
+					res[i], err = unmarshal{{ $type.Definition.Name }}2{{ $type.GO.Elem | ts }}(vSlice[i])
+					if err != nil {
+						return nil, err
+					}
+				}
+				return res, nil
+			{{- else }}
+				{{- if $type.Unmarshaler }}
+					return {{ $type.Unmarshaler | call }}(v)
+				{{- else if eq ($type.GO | ref) "map[string]interface{}" }}
+					return v.(map[string]interface{}), nil
+				{{- else -}}
+					var res {{ $type.GO | ref }}
+					return res, res.UnmarshalGQL(v)
+				{{- end }}
+			{{- end }}
+		}
+	{{- end }}
+{{- end }}

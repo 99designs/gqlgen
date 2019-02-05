@@ -1,6 +1,6 @@
 {{- range $input := .Inputs }}
 	{{- if not .HasUnmarshal }}
-	func Unmarshal{{ .Name }}(v interface{}) ({{.Type | ref}}, error) {
+	func unmarshalInput{{ .Name }}(v interface{}) ({{.Type | ref}}, error) {
 		var it {{.Type | ref}}
 		var asMap = v.(map[string]interface{})
 		{{ range $field := .Fields}}
@@ -65,8 +65,8 @@
 						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
 						{{- if $directive.Args }}
 						{{- range $arg := $directive.Args }}
-							{{- if and $arg.IsPtr ( notNil "Value" $arg ) }}
-								{{ $arg.GoVarName }} := {{ $arg.Value | dump }}
+							{{- if and $arg.TypeReference.IsPtr ( notNil "Value" $arg ) }}
+								{{ $arg.VarName }} := {{ $arg.Value | dump }}
 							{{- end }}
 						{{- end }}
 						{{- end }}

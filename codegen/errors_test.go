@@ -10,7 +10,7 @@ import (
 func TestTypeUnionAsInput(t *testing.T) {
 	err := generate("inputunion", `testdata/unioninput.graphqls`)
 
-	require.EqualError(t, err, "unable to build object definition: Query.addBookmark: cannot use Bookmarkable as argument b because UNION is not a valid input type")
+	require.EqualError(t, err, "unable to build object definition: Query.addBookmark: cannot use Bookmarkable! as argument b because UNION is not a valid input type")
 }
 
 func TestTypeInInput(t *testing.T) {
@@ -25,8 +25,9 @@ func generate(name string, schemaFilename string) error {
 		Exec:           config.PackageConfig{Filename: "gen/" + name + "/exec.go"},
 		Model:          config.PackageConfig{Filename: "gen/" + name + "/model.go"},
 		Models: map[string]config.TypeMapEntry{
-			"Item":         {Model: "map[string]interface{}"},
-			"Bookmarkable": {Model: "interface{}"},
+			"Item":              {Model: "map[string]interface{}"},
+			"Bookmarkable":      {Model: "interface{}"},
+			"BookmarkableInput": {Model: "interface{}"},
 		},
 	})
 

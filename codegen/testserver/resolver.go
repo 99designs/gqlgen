@@ -47,7 +47,7 @@ func (r *queryResolver) InvalidIdentifier(ctx context.Context) (*invalid_package
 func (r *queryResolver) Collision(ctx context.Context) (*introspection1.It, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) MapInput(ctx context.Context, input *map[string]interface{}) (*bool, error) {
+func (r *queryResolver) MapInput(ctx context.Context, input map[string]interface{}) (*bool, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error) {

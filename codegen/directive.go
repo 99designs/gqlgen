@@ -28,15 +28,20 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 
 		var args []*FieldArgument
 		for _, arg := range dir.Arguments {
-
-			newArg := &FieldArgument{
-				GQLName:       arg.Name,
-				TypeReference: b.NamedTypes.getType(arg.Type),
-				GoVarName:     templates.ToGoPrivate(arg.Name),
+			def := b.Schema.Types[arg.Type.Name()]
+			if !def.IsInputType() {
+				return nil, errors.Errorf("%s cannot be used as argument of directive %s(%s) only input and scalar types are allowed", arg.Type, dir.Name, arg.Name)
 			}
 
-			if !newArg.TypeReference.Definition.GQLDefinition.IsInputType() {
-				return nil, errors.Errorf("%s cannot be used as argument of directive %s(%s) only input and scalar types are allowed", arg.Type, dir.Name, arg.Name)
+			tr, err := b.Binder.TypeReference(arg.Type)
+			if err != nil {
+				return nil, err
+			}
+
+			newArg := &FieldArgument{
+				ArgumentDefinition: arg,
+				TypeReference:      tr,
+				VarName:            templates.ToGoPrivate(arg.Name),
 			}
 
 			if arg.DefaultValue != nil {
@@ -77,14 +82,14 @@ func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 		var args []*FieldArgument
 		for _, a := range def.Args {
 			value := a.Default
-			if argValue, ok := argValues[a.GQLName]; ok {
+			if argValue, ok := argValues[a.Name]; ok {
 				value = argValue
 			}
 			args = append(args, &FieldArgument{
-				GQLName:       a.GQLName,
-				Value:         value,
-				GoVarName:     a.GoVarName,
-				TypeReference: a.TypeReference,
+				ArgumentDefinition: a.ArgumentDefinition,
+				Value:              value,
+				VarName:            a.VarName,
+				TypeReference:      a.TypeReference,
 			})
 		}
 		dirs[i] = &Directive{
@@ -109,7 +114,7 @@ func (d *Directive) CallArgs() string {
 	args := []string{"ctx", "obj", "n"}
 
 	for _, arg := range d.Args {
-		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+templates.CurrentImports.LookupType(arg.GoType)+")")
+		args = append(args, "args["+strconv.Quote(arg.Name)+"].("+templates.CurrentImports.LookupType(arg.TypeReference.GO)+")")
 	}
 
 	return strings.Join(args, ", ")
@@ -119,8 +124,8 @@ func (d *Directive) ResolveArgs(obj string, next string) string {
 	args := []string{"ctx", obj, next}
 
 	for _, arg := range d.Args {
-		dArg := "&" + arg.GoVarName
-		if !arg.IsPtr() {
+		dArg := "&" + arg.VarName
+		if !arg.TypeReference.IsPtr() {
 			if arg.Value != nil {
 				dArg = templates.Dump(arg.Value)
 			} else {
@@ -140,7 +145,7 @@ func (d *Directive) Declaration() string {
 	res := ucFirst(d.Name) + " func(ctx context.Context, obj interface{}, next graphql.Resolver"
 
 	for _, arg := range d.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
+		res += fmt.Sprintf(", %s %s", arg.Name, templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}
 
 	res += ") (res interface{}, err error)"

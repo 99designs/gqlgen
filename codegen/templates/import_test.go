@@ -65,26 +65,6 @@ bar1 "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
 		)
 	})
 
-	t.Run("reserved collisions on path will panic", func(t *testing.T) {
-		a := Imports{destDir: wd}
-
-		a.Reserve(aBar)
-
-		require.Panics(t, func() {
-			a.Reserve(aBar)
-		})
-	})
-
-	t.Run("reserved collisions on alias will panic", func(t *testing.T) {
-		a := Imports{destDir: wd}
-
-		a.Reserve(aBar)
-
-		require.Panics(t, func() {
-			a.Reserve(bBar)
-		})
-	})
-
 	t.Run("aliased imports will not collide", func(t *testing.T) {
 		a := Imports{destDir: wd}
 

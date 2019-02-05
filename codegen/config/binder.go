@@ -14,19 +14,22 @@ import (
 
 // Binder connects graphql types to golang types using static analysis
 type Binder struct {
-	pkgs  []*packages.Package
-	types TypeMap
+	pkgs       []*packages.Package
+	schema     *ast.Schema
+	cfg        *Config
+	References []*TypeReference
 }
 
-func (c *Config) NewBinder() (*Binder, error) {
+func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, c.Models.ReferencedPackages()...)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Binder{
-		pkgs:  pkgs,
-		types: c.Models,
+		pkgs:   pkgs,
+		schema: s,
+		cfg:    c,
 	}, nil
 }
 
@@ -55,7 +58,7 @@ var MapType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, 
 var InterfaceType = types.NewInterfaceType(nil, nil)
 
 func (b *Binder) FindUserObject(name string) (types.Type, error) {
-	userEntry, ok := b.types[name]
+	userEntry, ok := b.cfg.Models[name]
 	if !ok {
 		return nil, fmt.Errorf(name + " not found")
 	}
@@ -118,17 +121,58 @@ func normalizeVendor(pkg string) string {
 	return modifiers + parts[len(parts)-1]
 }
 
-func (b *Binder) FindBackingType(schemaType *ast.Type) (types.Type, error) {
-	var pkgName, typeName string
+// TypeReference is used by args and field types. The Definition can refer to both input and output types.
+type TypeReference struct {
+	Definition  *ast.Definition
+	GQL         *ast.Type
+	GO          types.Type
+	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
+	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
+}
 
-	if userEntry, ok := b.types[schemaType.Name()]; ok && userEntry.Model != "" {
-		// special case for maps
+func (t TypeReference) IsPtr() bool {
+	_, isPtr := t.GO.(*types.Pointer)
+	return isPtr
+}
+
+func (t TypeReference) IsSlice() bool {
+	_, isSlice := t.GO.(*types.Slice)
+	return isSlice
+}
+
+func (t TypeReference) IsNamed() bool {
+	_, isSlice := t.GO.(*types.Named)
+	return isSlice
+}
+
+func (b *Binder) PushRef(ret *TypeReference) {
+	b.References = append(b.References, ret)
+}
+
+func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err error) {
+	var pkgName, typeName string
+	def := b.schema.Types[schemaType.Name()]
+	defer func() {
+		if err == nil && ret != nil {
+			b.PushRef(ret)
+		}
+	}()
+
+	if userEntry, ok := b.cfg.Models[schemaType.Name()]; ok && userEntry.Model != "" {
 		if userEntry.Model == "map[string]interface{}" {
-			return MapType, nil
+			return &TypeReference{
+				Definition: def,
+				GQL:        schemaType,
+				GO:         MapType,
+			}, nil
 		}
 
 		if userEntry.Model == "interface{}" {
-			return InterfaceType, nil
+			return &TypeReference{
+				Definition: def,
+				GQL:        schemaType,
+				GO:         InterfaceType,
+			}, nil
 		}
 
 		pkgName, typeName = code.PkgAndType(userEntry.Model)
@@ -141,12 +185,42 @@ func (b *Binder) FindBackingType(schemaType *ast.Type) (types.Type, error) {
 		typeName = "String"
 	}
 
-	t, err := b.FindType(pkgName, typeName)
+	ref := &TypeReference{
+		Definition: def,
+		GQL:        schemaType,
+	}
+
+	obj, err := b.FindObject(pkgName, typeName)
 	if err != nil {
 		return nil, err
 	}
 
-	return b.CopyModifiersFromAst(schemaType, true, t), nil
+	if fun, isFunc := obj.(*types.Func); isFunc {
+		ref.GO = fun.Type().(*types.Signature).Params().At(0).Type()
+		ref.Marshaler = fun
+		ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
+	} else {
+		ref.GO = obj.Type()
+	}
+
+	if namedType, ok := ref.GO.(*types.Named); ok && ref.Unmarshaler == nil {
+		hasUnmarshal := false
+		for i := 0; i < namedType.NumMethods(); i++ {
+			switch namedType.Method(i).Name() {
+			case "UnmarshalGQL":
+				hasUnmarshal = true
+			}
+		}
+
+		// Special case to reference generated unmarshal functions
+		if !hasUnmarshal {
+			ref.Unmarshaler = types.NewFunc(0, b.cfg.Exec.Pkg(), "unmarshalInput"+schemaType.Name(), nil)
+		}
+	}
+
+	ref.GO = b.CopyModifiersFromAst(schemaType, true, ref.GO)
+
+	return ref, nil
 }
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, usePtr bool, base types.Type) types.Type {

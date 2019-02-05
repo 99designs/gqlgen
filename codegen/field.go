@@ -297,7 +297,7 @@ func (f *Field) ShortResolverDeclaration() string {
 		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Type))
 	}
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
+		res += fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}
 
 	result := templates.CurrentImports.LookupType(f.GoType)
@@ -312,7 +312,7 @@ func (f *Field) ShortResolverDeclaration() string {
 func (f *Field) ComplexitySignature() string {
 	res := fmt.Sprintf("func(childComplexity int")
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
+		res += fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}
 	res += ") int"
 	return res
@@ -321,7 +321,7 @@ func (f *Field) ComplexitySignature() string {
 func (f *Field) ComplexityArgs() string {
 	var args []string
 	for _, arg := range f.Args {
-		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+templates.CurrentImports.LookupType(arg.GoType)+")")
+		args = append(args, "args["+strconv.Quote(arg.Name)+"].("+templates.CurrentImports.LookupType(arg.TypeReference.GO)+")")
 	}
 
 	return strings.Join(args, ", ")
@@ -343,7 +343,7 @@ func (f *Field) CallArgs() string {
 	}
 
 	for _, arg := range f.Args {
-		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+templates.CurrentImports.LookupType(arg.GoType)+")")
+		args = append(args, "args["+strconv.Quote(arg.Name)+"].("+templates.CurrentImports.LookupType(arg.TypeReference.GO)+")")
 	}
 
 	return strings.Join(args, ", ")

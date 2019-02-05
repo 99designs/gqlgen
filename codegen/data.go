@@ -13,13 +13,14 @@ import (
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
 // resolvers or directives automatically (eg grpc, validation)
 type Data struct {
-	Config     *config.Config
-	Schema     *ast.Schema
-	SchemaStr  map[string]string
-	Directives map[string]*Directive
-	Objects    Objects
-	Inputs     Objects
-	Interfaces map[string]*Interface
+	Config          *config.Config
+	Schema          *ast.Schema
+	SchemaStr       map[string]string
+	Directives      map[string]*Directive
+	Objects         Objects
+	Inputs          Objects
+	Interfaces      map[string]*Interface
+	ReferencedTypes map[string]*config.TypeReference
 
 	QueryRoot        *Object
 	MutationRoot     *Object
@@ -53,7 +54,7 @@ func BuildData(cfg *config.Config) (*Data, error) {
 
 	cfg.InjectBuiltins(b.Schema)
 
-	b.Binder, err = b.Config.NewBinder()
+	b.Binder, err = b.Config.NewBinder(b.Schema)
 	if err != nil {
 		return nil, err
 	}
@@ -120,6 +121,11 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		return nil, err
 	}
 
+	s.ReferencedTypes, err = b.buildTypes()
+	if err != nil {
+		return nil, err
+	}
+
 	sort.Slice(s.Objects, func(i, j int) bool {
 		return s.Objects[i].Definition.Name < s.Objects[j].Definition.Name
 	})
@@ -141,6 +147,10 @@ func (b *builder) injectIntrospectionRoots(s *Data) error {
 	if err != nil {
 		return errors.Wrap(err, "unable to find root Type introspection type")
 	}
+	stringRef, err := b.Binder.TypeReference(ast.NonNullNamedType("String", nil))
+	if err != nil {
+		return errors.Wrap(err, "unable to find root string type reference")
+	}
 
 	obj.Fields = append(obj.Fields, &Field{
 		TypeReference:  &TypeReference{b.NamedTypes["__Type"], types.NewPointer(typeType.Type()), ast.NamedType("__Schema", nil)},
@@ -150,13 +160,11 @@ func (b *builder) injectIntrospectionRoots(s *Data) error {
 		GoFieldName:    "introspectType",
 		Args: []*FieldArgument{
 			{
-				GQLName: "name",
-				TypeReference: &TypeReference{
-					b.NamedTypes["String"],
-					types.Typ[types.String],
-					ast.NamedType("String", nil),
+				ArgumentDefinition: &ast.ArgumentDefinition{
+					Name: "name",
 				},
-				Object: &Object{},
+				TypeReference: stringRef,
+				Object:        &Object{},
 			},
 		},
 		Object: obj,

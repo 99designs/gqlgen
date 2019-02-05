@@ -83,7 +83,7 @@ func (b *builder) buildTypeDef(schemaType *ast.Definition) (*TypeDefinition, err
 
 	// Special case to reference generated unmarshal functions
 	if !hasUnmarshal {
-		t.Unmarshaler = types.NewFunc(0, b.Config.Exec.Pkg(), "unmarshalInput"+schemaType.Name, nil)
+		t.Unmarshaler = types.NewFunc(0, b.Config.Exec.Pkg(), "e.unmarshalInput"+schemaType.Name, nil)
 	}
 
 	return t, nil

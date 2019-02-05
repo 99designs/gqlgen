@@ -327,11 +327,10 @@ func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -342,11 +341,10 @@ func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 *model.SearchArgs
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = unmarshalSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(tmp)
+		arg0, err = e.unmarshalSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -357,11 +355,10 @@ func (e *executableSchema) field_Query_user_args(ctx context.Context, rawArgs ma
 	args := map[string]interface{}{}
 	var arg0 external.ObjectID
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = unmarshalID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(tmp)
+		arg0, err = e.unmarshalID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["id"] = arg0
 	return args, nil
@@ -372,11 +369,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -387,11 +383,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -2024,7 +2019,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func unmarshalInputSearchArgs(v interface{}) (model.SearchArgs, error) {
+func (e *executableSchema) unmarshalInputSearchArgs(v interface{}) (model.SearchArgs, error) {
 	var it model.SearchArgs
 	var asMap = v.(map[string]interface{})
 
@@ -2062,11 +2057,6 @@ func unmarshalInputSearchArgs(v interface{}) (model.SearchArgs, error) {
 	}
 
 	return it, nil
-}
-
-func (e *executableSchema) SearchArgsMiddleware(ctx context.Context, obj *model.SearchArgs) (*model.SearchArgs, error) {
-
-	return obj, nil
 }
 
 // endregion **************************** input.gotpl *****************************
@@ -2466,23 +2456,23 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(v interface{}) (*model.SearchArgs, error) {
+func (e *executableSchema) unmarshalSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(v interface{}) (*model.SearchArgs, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalSearchArgs2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(v)
+	res, err := e.unmarshalSearchArgs2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(v)
 	return &res, err
 }
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(v interface{}) (external.ObjectID, error) {
+func (e *executableSchema) unmarshalID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(v interface{}) (external.ObjectID, error) {
 	return model.UnmarshalID(v)
 }
-func unmarshalSearchArgs2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(v interface{}) (model.SearchArgs, error) {
-	return unmarshalInputSearchArgs(v)
+func (e *executableSchema) unmarshalSearchArgs2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(v interface{}) (model.SearchArgs, error) {
+	return e.unmarshalInputSearchArgs(v)
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 

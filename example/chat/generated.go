@@ -346,29 +346,26 @@ func (e *executableSchema) field_Mutation_post_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["text"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["text"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["username"]; ok {
-		arg1, err = unmarshalString2string(tmp)
+		arg1, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["username"] = arg1
 	var arg2 string
 	if tmp, ok := rawArgs["roomName"]; ok {
-		arg2, err = unmarshalString2string(tmp)
+		arg2, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["roomName"] = arg2
 	return args, nil
@@ -379,11 +376,10 @@ func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -394,11 +390,10 @@ func (e *executableSchema) field_Query_room_args(ctx context.Context, rawArgs ma
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -409,11 +404,10 @@ func (e *executableSchema) field_Subscription_messageAdded_args(ctx context.Cont
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["roomName"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["roomName"] = arg0
 	return args, nil
@@ -424,11 +418,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -439,11 +432,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -2438,10 +2430,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 

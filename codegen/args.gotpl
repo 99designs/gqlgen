@@ -1,12 +1,12 @@
 {{ range $name, $args := .Args }}
-func (e *executableSchema){{ $name }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (e *executableSchema) {{ $name }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{ $arg.TypeReference.GO | ref}}
 		if tmp, ok := rawArgs[{{$arg.Name|quote}}]; ok {
 			{{- if $arg.Directives }}
-				getArg0 := func(ctx context.Context) (interface{}, error) { return unmarshal{{$arg.TypeReference.GQL.Name}}2{{ $arg.TypeReference.GO | ts }}(tmp) }
+				getArg0 := func(ctx context.Context) (interface{}, error) { return e.unmarshal{{$arg.TypeReference.GQL.Name}}2{{ $arg.TypeReference.GO | ts }}(tmp) }
 
 				{{- range $i, $directive := $arg.Directives }}
 					getArg{{add $i 1}} := func(ctx context.Context) (res interface{}, err error) {
@@ -30,15 +30,11 @@ func (e *executableSchema){{ $name }}(ctx context.Context, rawArgs map[string]in
 					return nil, fmt.Errorf(`unexpected type %T from directive, should be {{ $arg.TypeReference.GO }}`, tmp)
 				}
 			{{- else }}
-				arg{{$i}}, err = unmarshal{{$arg.TypeReference.GQL.Name}}2{{ $arg.TypeReference.GO | ts }}(tmp)
+				arg{{$i}}, err = e.unmarshal{{$arg.TypeReference.GQL.Name}}2{{ $arg.TypeReference.GO | ts }}(tmp)
 				if err != nil {
 					return nil, err
 				}
 			{{- end }}
-
-			{{/*{{- if eq $arg.TypeReference.Definition.Kind "INPUT_OBJECT" }}*/}}
-				{{/*{{ $arg.Middleware (print "arg" $i) (print "arg" $i) }}*/}}
-			{{/*{{- end }}*/}}
 		}
 		args[{{$arg.Name|quote}}] = arg{{$i}}
 	{{- end }}

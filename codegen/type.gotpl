@@ -1,9 +1,9 @@
 {{- range $type := .ReferencedTypes }}
 	{{- if $type.Definition.IsInputType }}
-		func unmarshal{{ $type.Definition.Name }}2{{ $type.GO | ts }}(v interface{}) ({{ $type.GO | ref }}, error) {
+		func (e *executableSchema) unmarshal{{ $type.Definition.Name }}2{{ $type.GO | ts }}(v interface{}) ({{ $type.GO | ref }}, error) {
 			{{- if $type.IsPtr }}
 				if v == nil { return nil, nil }
-				res, err := unmarshal{{ $type.Definition.Name }}2{{ $type.GO.Elem | ts }}(v)
+				res, err := e.unmarshal{{ $type.Definition.Name }}2{{ $type.GO.Elem | ts }}(v)
 				return &res, err
 			{{- else if $type.IsSlice }}
 				var vSlice []interface{}
@@ -17,7 +17,7 @@
 				var err error
 				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
 				for i := range vSlice {
-					res[i], err = unmarshal{{ $type.Definition.Name }}2{{ $type.GO.Elem | ts }}(vSlice[i])
+					res[i], err = e.unmarshal{{ $type.Definition.Name }}2{{ $type.GO.Elem | ts }}(vSlice[i])
 					if err != nil {
 						return nil, err
 					}

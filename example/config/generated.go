@@ -303,11 +303,10 @@ func (e *executableSchema) field_Mutation_createTodo_args(ctx context.Context, r
 	args := map[string]interface{}{}
 	var arg0 NewTodo
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = unmarshalNewTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐNewTodo(tmp)
+		arg0, err = e.unmarshalNewTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐNewTodo(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -318,11 +317,10 @@ func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -333,11 +331,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -348,11 +345,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -1904,7 +1900,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func unmarshalInputNewTodo(v interface{}) (NewTodo, error) {
+func (e *executableSchema) unmarshalInputNewTodo(v interface{}) (NewTodo, error) {
 	var it NewTodo
 	var asMap = v.(map[string]interface{})
 
@@ -1926,11 +1922,6 @@ func unmarshalInputNewTodo(v interface{}) (NewTodo, error) {
 	}
 
 	return it, nil
-}
-
-func (e *executableSchema) NewTodoMiddleware(ctx context.Context, obj *NewTodo) (*NewTodo, error) {
-
-	return obj, nil
 }
 
 // endregion **************************** input.gotpl *****************************
@@ -2349,13 +2340,13 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalNewTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐNewTodo(v interface{}) (NewTodo, error) {
-	return unmarshalInputNewTodo(v)
+func (e *executableSchema) unmarshalNewTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐNewTodo(v interface{}) (NewTodo, error) {
+	return e.unmarshalInputNewTodo(v)
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 

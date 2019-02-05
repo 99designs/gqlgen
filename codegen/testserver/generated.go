@@ -864,29 +864,26 @@ func (e *executableSchema) dir_length_args(ctx context.Context, rawArgs map[stri
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["min"]; ok {
-		arg0, err = unmarshalInt2int(tmp)
+		arg0, err = e.unmarshalInt2int(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["min"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["max"]; ok {
-		arg1, err = unmarshalInt2ᚖint(tmp)
+		arg1, err = e.unmarshalInt2ᚖint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["max"] = arg1
 	var arg2 string
 	if tmp, ok := rawArgs["message"]; ok {
-		arg2, err = unmarshalString2string(tmp)
+		arg2, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["message"] = arg2
 	return args, nil
@@ -897,29 +894,26 @@ func (e *executableSchema) dir_range_args(ctx context.Context, rawArgs map[strin
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["min"]; ok {
-		arg0, err = unmarshalInt2ᚖint(tmp)
+		arg0, err = e.unmarshalInt2ᚖint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["min"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["max"]; ok {
-		arg1, err = unmarshalInt2ᚖint(tmp)
+		arg1, err = e.unmarshalInt2ᚖint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["max"] = arg1
 	var arg2 *string
 	if tmp, ok := rawArgs["message"]; ok {
-		arg2, err = unmarshalString2ᚖstring(tmp)
+		arg2, err = e.unmarshalString2ᚖstring(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["message"] = arg2
 	return args, nil
@@ -930,11 +924,10 @@ func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -945,7 +938,7 @@ func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["arg"]; ok {
-		getArg0 := func(ctx context.Context) (interface{}, error) { return unmarshalString2string(tmp) }
+		getArg0 := func(ctx context.Context) (interface{}, error) { return e.unmarshalString2string(tmp) }
 		getArg1 := func(ctx context.Context) (res interface{}, err error) {
 			max := 255
 			n := getArg0
@@ -961,7 +954,6 @@ func (e *executableSchema) field_Query_directiveArg_args(ctx context.Context, ra
 		} else {
 			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 		}
-
 	}
 	args["arg"] = arg0
 	return args, nil
@@ -972,11 +964,10 @@ func (e *executableSchema) field_Query_directiveInputNullable_args(ctx context.C
 	args := map[string]interface{}{}
 	var arg0 *InputDirectives
 	if tmp, ok := rawArgs["arg"]; ok {
-		arg0, err = unmarshalInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(tmp)
+		arg0, err = e.unmarshalInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["arg"] = arg0
 	return args, nil
@@ -987,11 +978,10 @@ func (e *executableSchema) field_Query_directiveInput_args(ctx context.Context, 
 	args := map[string]interface{}{}
 	var arg0 InputDirectives
 	if tmp, ok := rawArgs["arg"]; ok {
-		arg0, err = unmarshalInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(tmp)
+		arg0, err = e.unmarshalInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["arg"] = arg0
 	return args, nil
@@ -1002,7 +992,7 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["arg"]; ok {
-		getArg0 := func(ctx context.Context) (interface{}, error) { return unmarshalInt2ᚖint(tmp) }
+		getArg0 := func(ctx context.Context) (interface{}, error) { return e.unmarshalInt2ᚖint(tmp) }
 		getArg1 := func(ctx context.Context) (res interface{}, err error) {
 			min := 0
 			n := getArg0
@@ -1018,12 +1008,11 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 		} else {
 			return nil, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp)
 		}
-
 	}
 	args["arg"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["arg2"]; ok {
-		getArg0 := func(ctx context.Context) (interface{}, error) { return unmarshalInt2ᚖint(tmp) }
+		getArg0 := func(ctx context.Context) (interface{}, error) { return e.unmarshalInt2ᚖint(tmp) }
 		getArg1 := func(ctx context.Context) (res interface{}, err error) {
 			min := 0
 			n := getArg0
@@ -1039,7 +1028,6 @@ func (e *executableSchema) field_Query_directiveNullableArg_args(ctx context.Con
 		} else {
 			return nil, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp)
 		}
-
 	}
 	args["arg2"] = arg1
 	return args, nil
@@ -1050,227 +1038,202 @@ func (e *executableSchema) field_Query_keywordArgs_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["break"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["break"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["default"]; ok {
-		arg1, err = unmarshalString2string(tmp)
+		arg1, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["default"] = arg1
 	var arg2 string
 	if tmp, ok := rawArgs["func"]; ok {
-		arg2, err = unmarshalString2string(tmp)
+		arg2, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["func"] = arg2
 	var arg3 string
 	if tmp, ok := rawArgs["interface"]; ok {
-		arg3, err = unmarshalString2string(tmp)
+		arg3, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["interface"] = arg3
 	var arg4 string
 	if tmp, ok := rawArgs["select"]; ok {
-		arg4, err = unmarshalString2string(tmp)
+		arg4, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["select"] = arg4
 	var arg5 string
 	if tmp, ok := rawArgs["case"]; ok {
-		arg5, err = unmarshalString2string(tmp)
+		arg5, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["case"] = arg5
 	var arg6 string
 	if tmp, ok := rawArgs["defer"]; ok {
-		arg6, err = unmarshalString2string(tmp)
+		arg6, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["defer"] = arg6
 	var arg7 string
 	if tmp, ok := rawArgs["go"]; ok {
-		arg7, err = unmarshalString2string(tmp)
+		arg7, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["go"] = arg7
 	var arg8 string
 	if tmp, ok := rawArgs["map"]; ok {
-		arg8, err = unmarshalString2string(tmp)
+		arg8, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["map"] = arg8
 	var arg9 string
 	if tmp, ok := rawArgs["struct"]; ok {
-		arg9, err = unmarshalString2string(tmp)
+		arg9, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["struct"] = arg9
 	var arg10 string
 	if tmp, ok := rawArgs["chan"]; ok {
-		arg10, err = unmarshalString2string(tmp)
+		arg10, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["chan"] = arg10
 	var arg11 string
 	if tmp, ok := rawArgs["else"]; ok {
-		arg11, err = unmarshalString2string(tmp)
+		arg11, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["else"] = arg11
 	var arg12 string
 	if tmp, ok := rawArgs["goto"]; ok {
-		arg12, err = unmarshalString2string(tmp)
+		arg12, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["goto"] = arg12
 	var arg13 string
 	if tmp, ok := rawArgs["package"]; ok {
-		arg13, err = unmarshalString2string(tmp)
+		arg13, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["package"] = arg13
 	var arg14 string
 	if tmp, ok := rawArgs["switch"]; ok {
-		arg14, err = unmarshalString2string(tmp)
+		arg14, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["switch"] = arg14
 	var arg15 string
 	if tmp, ok := rawArgs["const"]; ok {
-		arg15, err = unmarshalString2string(tmp)
+		arg15, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["const"] = arg15
 	var arg16 string
 	if tmp, ok := rawArgs["fallthrough"]; ok {
-		arg16, err = unmarshalString2string(tmp)
+		arg16, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["fallthrough"] = arg16
 	var arg17 string
 	if tmp, ok := rawArgs["if"]; ok {
-		arg17, err = unmarshalString2string(tmp)
+		arg17, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["if"] = arg17
 	var arg18 string
 	if tmp, ok := rawArgs["range"]; ok {
-		arg18, err = unmarshalString2string(tmp)
+		arg18, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["range"] = arg18
 	var arg19 string
 	if tmp, ok := rawArgs["type"]; ok {
-		arg19, err = unmarshalString2string(tmp)
+		arg19, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["type"] = arg19
 	var arg20 string
 	if tmp, ok := rawArgs["continue"]; ok {
-		arg20, err = unmarshalString2string(tmp)
+		arg20, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["continue"] = arg20
 	var arg21 string
 	if tmp, ok := rawArgs["for"]; ok {
-		arg21, err = unmarshalString2string(tmp)
+		arg21, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["for"] = arg21
 	var arg22 string
 	if tmp, ok := rawArgs["import"]; ok {
-		arg22, err = unmarshalString2string(tmp)
+		arg22, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["import"] = arg22
 	var arg23 string
 	if tmp, ok := rawArgs["return"]; ok {
-		arg23, err = unmarshalString2string(tmp)
+		arg23, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["return"] = arg23
 	var arg24 string
 	if tmp, ok := rawArgs["var"]; ok {
-		arg24, err = unmarshalString2string(tmp)
+		arg24, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["var"] = arg24
 	return args, nil
@@ -1281,11 +1244,10 @@ func (e *executableSchema) field_Query_keywords_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 *Keywords
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = unmarshalKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(tmp)
+		arg0, err = e.unmarshalKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -1296,11 +1258,10 @@ func (e *executableSchema) field_Query_mapInput_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 map[string]interface{}
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = unmarshalChanges2map(tmp)
+		arg0, err = e.unmarshalChanges2map(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -1311,11 +1272,10 @@ func (e *executableSchema) field_Query_nestedInputs_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 [][]*OuterInput
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = unmarshalOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(tmp)
+		arg0, err = e.unmarshalOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -1326,11 +1286,10 @@ func (e *executableSchema) field_Query_nullableArg_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["arg"]; ok {
-		arg0, err = unmarshalInt2ᚖint(tmp)
+		arg0, err = e.unmarshalInt2ᚖint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["arg"] = arg0
 	return args, nil
@@ -1341,11 +1300,10 @@ func (e *executableSchema) field_Query_recursive_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 *RecursiveInputSlice
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = unmarshalRecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(tmp)
+		arg0, err = e.unmarshalRecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["input"] = arg0
 	return args, nil
@@ -1356,11 +1314,10 @@ func (e *executableSchema) field_Query_user_args(ctx context.Context, rawArgs ma
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = unmarshalInt2int(tmp)
+		arg0, err = e.unmarshalInt2int(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["id"] = arg0
 	return args, nil
@@ -1371,11 +1328,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -1386,11 +1342,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -3978,12 +3933,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (e *executableSchema) ChangesMiddleware(ctx context.Context, obj *map[string]interface{}) (*map[string]interface{}, error) {
-
-	return obj, nil
-}
-
-func unmarshalInputInnerDirectives(v interface{}) (InnerDirectives, error) {
+func (e *executableSchema) unmarshalInputInnerDirectives(v interface{}) (InnerDirectives, error) {
 	var it InnerDirectives
 	var asMap = v.(map[string]interface{})
 
@@ -4001,31 +3951,7 @@ func unmarshalInputInnerDirectives(v interface{}) (InnerDirectives, error) {
 	return it, nil
 }
 
-func (e *executableSchema) InnerDirectivesMiddleware(ctx context.Context, obj *InnerDirectives) (*InnerDirectives, error) {
-
-	cMessage, err := chainFieldMiddleware(
-		[]graphql.FieldMiddleware{
-			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-				return e.directives.Length(ctx, obj.Message, n, 1, nil, "not valid")
-			},
-		}...,
-	)(ctx, func(ctx context.Context) (interface{}, error) {
-		return obj.Message, nil
-	})
-	if err != nil {
-		return obj, err
-	}
-
-	if data, ok := cMessage.(string); ok {
-		obj.Message = data
-	} else {
-		return obj, errors.New("expected Message to be string")
-	}
-
-	return obj, nil
-}
-
-func unmarshalInputInnerInput(v interface{}) (InnerInput, error) {
+func (e *executableSchema) unmarshalInputInnerInput(v interface{}) (InnerInput, error) {
 	var it InnerInput
 	var asMap = v.(map[string]interface{})
 
@@ -4043,12 +3969,7 @@ func unmarshalInputInnerInput(v interface{}) (InnerInput, error) {
 	return it, nil
 }
 
-func (e *executableSchema) InnerInputMiddleware(ctx context.Context, obj *InnerInput) (*InnerInput, error) {
-
-	return obj, nil
-}
-
-func unmarshalInputInputDirectives(v interface{}) (InputDirectives, error) {
+func (e *executableSchema) unmarshalInputInputDirectives(v interface{}) (InputDirectives, error) {
 	var it InputDirectives
 	var asMap = v.(map[string]interface{})
 
@@ -4062,7 +3983,7 @@ func unmarshalInputInputDirectives(v interface{}) (InputDirectives, error) {
 			}
 		case "inner":
 			var err error
-			it.Inner, err = unmarshalInputInnerDirectives(v)
+			it.Inner, err = e.unmarshalInputInnerDirectives(v)
 			if err != nil {
 				return it, err
 			}
@@ -4070,7 +3991,7 @@ func unmarshalInputInputDirectives(v interface{}) (InputDirectives, error) {
 			var err error
 			var ptr1 InnerDirectives
 			if v != nil {
-				ptr1, err = unmarshalInputInnerDirectives(v)
+				ptr1, err = e.unmarshalInputInnerDirectives(v)
 				it.InnerNullable = &ptr1
 			}
 
@@ -4083,45 +4004,7 @@ func unmarshalInputInputDirectives(v interface{}) (InputDirectives, error) {
 	return it, nil
 }
 
-func (e *executableSchema) InputDirectivesMiddleware(ctx context.Context, obj *InputDirectives) (*InputDirectives, error) {
-
-	cText, err := chainFieldMiddleware(
-		[]graphql.FieldMiddleware{
-			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-				max := 7
-				return e.directives.Length(ctx, obj.Text, n, 0, &max, "not valid")
-			},
-		}...,
-	)(ctx, func(ctx context.Context) (interface{}, error) {
-		return obj.Text, nil
-	})
-	if err != nil {
-		return obj, err
-	}
-
-	if data, ok := cText.(string); ok {
-		obj.Text = data
-	} else {
-		return obj, errors.New("expected Text to be string")
-	}
-
-	mInnerDirectives1, err := e.InnerDirectivesMiddleware(ctx, &obj.Inner)
-	if err != nil {
-		return nil, err
-	}
-	obj.Inner = *mInnerDirectives1
-
-	if obj.InnerNullable != nil {
-		var err error
-		obj.InnerNullable, err = e.InnerDirectivesMiddleware(ctx, obj.InnerNullable)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return obj, nil
-}
-
-func unmarshalInputKeywords(v interface{}) (Keywords, error) {
+func (e *executableSchema) unmarshalInputKeywords(v interface{}) (Keywords, error) {
 	var it Keywords
 	var asMap = v.(map[string]interface{})
 
@@ -4283,12 +4166,7 @@ func unmarshalInputKeywords(v interface{}) (Keywords, error) {
 	return it, nil
 }
 
-func (e *executableSchema) KeywordsMiddleware(ctx context.Context, obj *Keywords) (*Keywords, error) {
-
-	return obj, nil
-}
-
-func unmarshalInputOuterInput(v interface{}) (OuterInput, error) {
+func (e *executableSchema) unmarshalInputOuterInput(v interface{}) (OuterInput, error) {
 	var it OuterInput
 	var asMap = v.(map[string]interface{})
 
@@ -4296,7 +4174,7 @@ func unmarshalInputOuterInput(v interface{}) (OuterInput, error) {
 		switch k {
 		case "inner":
 			var err error
-			it.Inner, err = unmarshalInputInnerInput(v)
+			it.Inner, err = e.unmarshalInputInnerInput(v)
 			if err != nil {
 				return it, err
 			}
@@ -4306,17 +4184,7 @@ func unmarshalInputOuterInput(v interface{}) (OuterInput, error) {
 	return it, nil
 }
 
-func (e *executableSchema) OuterInputMiddleware(ctx context.Context, obj *OuterInput) (*OuterInput, error) {
-
-	mInnerInput1, err := e.InnerInputMiddleware(ctx, &obj.Inner)
-	if err != nil {
-		return nil, err
-	}
-	obj.Inner = *mInnerInput1
-	return obj, nil
-}
-
-func unmarshalInputRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
+func (e *executableSchema) unmarshalInputRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
 	var asMap = v.(map[string]interface{})
 
@@ -4334,7 +4202,7 @@ func unmarshalInputRecursiveInputSlice(v interface{}) (RecursiveInputSlice, erro
 			}
 			it.Self = make([]RecursiveInputSlice, len(rawIf1))
 			for idx1 := range rawIf1 {
-				it.Self[idx1], err = unmarshalInputRecursiveInputSlice(rawIf1[idx1])
+				it.Self[idx1], err = e.unmarshalInputRecursiveInputSlice(rawIf1[idx1])
 			}
 			if err != nil {
 				return it, err
@@ -4343,19 +4211,6 @@ func unmarshalInputRecursiveInputSlice(v interface{}) (RecursiveInputSlice, erro
 	}
 
 	return it, nil
-}
-
-func (e *executableSchema) RecursiveInputSliceMiddleware(ctx context.Context, obj *RecursiveInputSlice) (*RecursiveInputSlice, error) {
-
-	for idx1 := range obj.Self {
-
-		mRecursiveInputSlice2, err := e.RecursiveInputSliceMiddleware(ctx, &obj.Self[idx1])
-		if err != nil {
-			return nil, err
-		}
-		obj.Self[idx1] = *mRecursiveInputSlice2
-	}
-	return obj, nil
 }
 
 // endregion **************************** input.gotpl *****************************
@@ -5164,49 +5019,49 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v interface{}) (*InputDirectives, error) {
+func (e *executableSchema) unmarshalInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v interface{}) (*InputDirectives, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v)
+	res, err := e.unmarshalInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v)
 	return &res, err
 }
-func unmarshalKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v interface{}) (*Keywords, error) {
+func (e *executableSchema) unmarshalKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v interface{}) (*Keywords, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v)
+	res, err := e.unmarshalKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v)
 	return &res, err
 }
-func unmarshalOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) (*OuterInput, error) {
+func (e *executableSchema) unmarshalOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) (*OuterInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v)
+	res, err := e.unmarshalOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v)
 	return &res, err
 }
-func unmarshalRecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) (*RecursiveInputSlice, error) {
+func (e *executableSchema) unmarshalRecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) (*RecursiveInputSlice, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v)
+	res, err := e.unmarshalRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v)
 	return &res, err
 }
-func unmarshalInt2ᚖint(v interface{}) (*int, error) {
+func (e *executableSchema) unmarshalInt2ᚖint(v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalInt2int(v)
+	res, err := e.unmarshalInt2int(v)
 	return &res, err
 }
-func unmarshalString2ᚖstring(v interface{}) (*string, error) {
+func (e *executableSchema) unmarshalString2ᚖstring(v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalString2string(v)
+	res, err := e.unmarshalString2string(v)
 	return &res, err
 }
-func unmarshalOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) ([]*OuterInput, error) {
+func (e *executableSchema) unmarshalOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) ([]*OuterInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -5218,14 +5073,14 @@ func unmarshalOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtes
 	var err error
 	res := make([]*OuterInput, len(vSlice))
 	for i := range vSlice {
-		res[i], err = unmarshalOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(vSlice[i])
+		res[i], err = e.unmarshalOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
 }
-func unmarshalOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) ([][]*OuterInput, error) {
+func (e *executableSchema) unmarshalOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) ([][]*OuterInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -5237,35 +5092,35 @@ func unmarshalOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋ
 	var err error
 	res := make([][]*OuterInput, len(vSlice))
 	for i := range vSlice {
-		res[i], err = unmarshalOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(vSlice[i])
+		res[i], err = e.unmarshalOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
 }
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v interface{}) (InputDirectives, error) {
-	return unmarshalInputInputDirectives(v)
+func (e *executableSchema) unmarshalInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v interface{}) (InputDirectives, error) {
+	return e.unmarshalInputInputDirectives(v)
 }
-func unmarshalKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v interface{}) (Keywords, error) {
-	return unmarshalInputKeywords(v)
+func (e *executableSchema) unmarshalKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v interface{}) (Keywords, error) {
+	return e.unmarshalInputKeywords(v)
 }
-func unmarshalOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) (OuterInput, error) {
-	return unmarshalInputOuterInput(v)
+func (e *executableSchema) unmarshalOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) (OuterInput, error) {
+	return e.unmarshalInputOuterInput(v)
 }
-func unmarshalRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
-	return unmarshalInputRecursiveInputSlice(v)
+func (e *executableSchema) unmarshalRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
+	return e.unmarshalInputRecursiveInputSlice(v)
 }
-func unmarshalInt2int(v interface{}) (int, error) {
+func (e *executableSchema) unmarshalInt2int(v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
-func unmarshalChanges2map(v interface{}) (map[string]interface{}, error) {
+func (e *executableSchema) unmarshalChanges2map(v interface{}) (map[string]interface{}, error) {
 	return v.(map[string]interface{}), nil
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 

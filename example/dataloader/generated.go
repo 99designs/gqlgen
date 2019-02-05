@@ -356,11 +356,10 @@ func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -371,11 +370,10 @@ func (e *executableSchema) field_Query_torture1d_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 []int
 	if tmp, ok := rawArgs["customerIds"]; ok {
-		arg0, err = unmarshalInt2ᚕint(tmp)
+		arg0, err = e.unmarshalInt2ᚕint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["customerIds"] = arg0
 	return args, nil
@@ -386,11 +384,10 @@ func (e *executableSchema) field_Query_torture2d_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 [][]int
 	if tmp, ok := rawArgs["customerIds"]; ok {
-		arg0, err = unmarshalInt2ᚕᚕint(tmp)
+		arg0, err = e.unmarshalInt2ᚕᚕint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["customerIds"] = arg0
 	return args, nil
@@ -401,11 +398,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -416,11 +412,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -2752,7 +2747,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalInt2ᚕᚕint(v interface{}) ([][]int, error) {
+func (e *executableSchema) unmarshalInt2ᚕᚕint(v interface{}) ([][]int, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -2764,14 +2759,14 @@ func unmarshalInt2ᚕᚕint(v interface{}) ([][]int, error) {
 	var err error
 	res := make([][]int, len(vSlice))
 	for i := range vSlice {
-		res[i], err = unmarshalInt2ᚕint(vSlice[i])
+		res[i], err = e.unmarshalInt2ᚕint(vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
 }
-func unmarshalInt2ᚕint(v interface{}) ([]int, error) {
+func (e *executableSchema) unmarshalInt2ᚕint(v interface{}) ([]int, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -2783,20 +2778,20 @@ func unmarshalInt2ᚕint(v interface{}) ([]int, error) {
 	var err error
 	res := make([]int, len(vSlice))
 	for i := range vSlice {
-		res[i], err = unmarshalInt2int(vSlice[i])
+		res[i], err = e.unmarshalInt2int(vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
 }
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalInt2int(v interface{}) (int, error) {
+func (e *executableSchema) unmarshalInt2int(v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 

@@ -735,20 +735,18 @@ func (e *executableSchema) field_Droid_friendsConnection_args(ctx context.Contex
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
-		arg0, err = unmarshalInt2ᚖint(tmp)
+		arg0, err = e.unmarshalInt2ᚖint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := rawArgs["after"]; ok {
-		arg1, err = unmarshalID2ᚖstring(tmp)
+		arg1, err = e.unmarshalID2ᚖstring(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["after"] = arg1
 	return args, nil
@@ -759,20 +757,18 @@ func (e *executableSchema) field_Human_friendsConnection_args(ctx context.Contex
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
-		arg0, err = unmarshalInt2ᚖint(tmp)
+		arg0, err = e.unmarshalInt2ᚖint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := rawArgs["after"]; ok {
-		arg1, err = unmarshalID2ᚖstring(tmp)
+		arg1, err = e.unmarshalID2ᚖstring(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["after"] = arg1
 	return args, nil
@@ -783,11 +779,10 @@ func (e *executableSchema) field_Human_height_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 LengthUnit
 	if tmp, ok := rawArgs["unit"]; ok {
-		arg0, err = unmarshalLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(tmp)
+		arg0, err = e.unmarshalLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["unit"] = arg0
 	return args, nil
@@ -798,20 +793,18 @@ func (e *executableSchema) field_Mutation_createReview_args(ctx context.Context,
 	args := map[string]interface{}{}
 	var arg0 Episode
 	if tmp, ok := rawArgs["episode"]; ok {
-		arg0, err = unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(tmp)
+		arg0, err = e.unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["episode"] = arg0
 	var arg1 Review
 	if tmp, ok := rawArgs["review"]; ok {
-		arg1, err = unmarshalReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐReview(tmp)
+		arg1, err = e.unmarshalReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐReview(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["review"] = arg1
 	return args, nil
@@ -822,11 +815,10 @@ func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -837,11 +829,10 @@ func (e *executableSchema) field_Query_character_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = unmarshalID2string(tmp)
+		arg0, err = e.unmarshalID2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["id"] = arg0
 	return args, nil
@@ -852,11 +843,10 @@ func (e *executableSchema) field_Query_droid_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = unmarshalID2string(tmp)
+		arg0, err = e.unmarshalID2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["id"] = arg0
 	return args, nil
@@ -867,11 +857,10 @@ func (e *executableSchema) field_Query_hero_args(ctx context.Context, rawArgs ma
 	args := map[string]interface{}{}
 	var arg0 *Episode
 	if tmp, ok := rawArgs["episode"]; ok {
-		arg0, err = unmarshalEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(tmp)
+		arg0, err = e.unmarshalEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["episode"] = arg0
 	return args, nil
@@ -882,11 +871,10 @@ func (e *executableSchema) field_Query_human_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = unmarshalID2string(tmp)
+		arg0, err = e.unmarshalID2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["id"] = arg0
 	return args, nil
@@ -897,20 +885,18 @@ func (e *executableSchema) field_Query_reviews_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 Episode
 	if tmp, ok := rawArgs["episode"]; ok {
-		arg0, err = unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(tmp)
+		arg0, err = e.unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["episode"] = arg0
 	var arg1 *time.Time
 	if tmp, ok := rawArgs["since"]; ok {
-		arg1, err = unmarshalTime2ᚖtimeᚐTime(tmp)
+		arg1, err = e.unmarshalTime2ᚖtimeᚐTime(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["since"] = arg1
 	return args, nil
@@ -921,11 +907,10 @@ func (e *executableSchema) field_Query_search_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["text"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["text"] = arg0
 	return args, nil
@@ -936,11 +921,10 @@ func (e *executableSchema) field_Query_starship_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = unmarshalID2string(tmp)
+		arg0, err = e.unmarshalID2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["id"] = arg0
 	return args, nil
@@ -951,11 +935,10 @@ func (e *executableSchema) field_Starship_length_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 *LengthUnit
 	if tmp, ok := rawArgs["unit"]; ok {
-		arg0, err = unmarshalLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(tmp)
+		arg0, err = e.unmarshalLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["unit"] = arg0
 	return args, nil
@@ -966,11 +949,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -981,11 +963,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -3611,7 +3592,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func unmarshalInputReviewInput(v interface{}) (Review, error) {
+func (e *executableSchema) unmarshalInputReviewInput(v interface{}) (Review, error) {
 	var it Review
 	var asMap = v.(map[string]interface{})
 
@@ -3644,11 +3625,6 @@ func unmarshalInputReviewInput(v interface{}) (Review, error) {
 	}
 
 	return it, nil
-}
-
-func (e *executableSchema) ReviewInputMiddleware(ctx context.Context, obj *Review) (*Review, error) {
-
-	return obj, nil
 }
 
 // endregion **************************** input.gotpl *****************************
@@ -4369,65 +4345,65 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(v interface{}) (*Episode, error) {
+func (e *executableSchema) unmarshalEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(v interface{}) (*Episode, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(v)
+	res, err := e.unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(v)
 	return &res, err
 }
-func unmarshalLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(v interface{}) (*LengthUnit, error) {
+func (e *executableSchema) unmarshalLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(v interface{}) (*LengthUnit, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(v)
+	res, err := e.unmarshalLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(v)
 	return &res, err
 }
-func unmarshalInt2ᚖint(v interface{}) (*int, error) {
+func (e *executableSchema) unmarshalInt2ᚖint(v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalInt2int(v)
+	res, err := e.unmarshalInt2int(v)
 	return &res, err
 }
-func unmarshalID2ᚖstring(v interface{}) (*string, error) {
+func (e *executableSchema) unmarshalID2ᚖstring(v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalID2string(v)
+	res, err := e.unmarshalID2string(v)
 	return &res, err
 }
-func unmarshalTime2ᚖtimeᚐTime(v interface{}) (*time.Time, error) {
+func (e *executableSchema) unmarshalTime2ᚖtimeᚐTime(v interface{}) (*time.Time, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalTime2timeᚐTime(v)
+	res, err := e.unmarshalTime2timeᚐTime(v)
 	return &res, err
 }
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(v interface{}) (Episode, error) {
+func (e *executableSchema) unmarshalEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐEpisode(v interface{}) (Episode, error) {
 	var res Episode
 	return res, res.UnmarshalGQL(v)
 }
-func unmarshalLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(v interface{}) (LengthUnit, error) {
+func (e *executableSchema) unmarshalLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐLengthUnit(v interface{}) (LengthUnit, error) {
 	var res LengthUnit
 	return res, res.UnmarshalGQL(v)
 }
-func unmarshalReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐReview(v interface{}) (Review, error) {
-	return unmarshalInputReviewInput(v)
+func (e *executableSchema) unmarshalReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐReview(v interface{}) (Review, error) {
+	return e.unmarshalInputReviewInput(v)
 }
-func unmarshalInt2int(v interface{}) (int, error) {
+func (e *executableSchema) unmarshalInt2int(v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
-func unmarshalID2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalID2string(v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
-func unmarshalTime2timeᚐTime(v interface{}) (time.Time, error) {
+func (e *executableSchema) unmarshalTime2timeᚐTime(v interface{}) (time.Time, error) {
 	return graphql.UnmarshalTime(v)
 }
 

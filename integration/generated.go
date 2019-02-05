@@ -362,11 +362,10 @@ func (e *executableSchema) dir_magic_args(ctx context.Context, rawArgs map[strin
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["kind"]; ok {
-		arg0, err = unmarshalInt2ᚖint(tmp)
+		arg0, err = e.unmarshalInt2ᚖint(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["kind"] = arg0
 	return args, nil
@@ -377,11 +376,10 @@ func (e *executableSchema) field_Query___type_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -392,11 +390,10 @@ func (e *executableSchema) field_Query_date_args(ctx context.Context, rawArgs ma
 	args := map[string]interface{}{}
 	var arg0 models.DateFilter
 	if tmp, ok := rawArgs["filter"]; ok {
-		arg0, err = unmarshalDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(tmp)
+		arg0, err = e.unmarshalDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["filter"] = arg0
 	return args, nil
@@ -407,11 +404,10 @@ func (e *executableSchema) field_Query_error_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 *models.ErrorType
 	if tmp, ok := rawArgs["type"]; ok {
-		arg0, err = unmarshalErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(tmp)
+		arg0, err = e.unmarshalErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["type"] = arg0
 	return args, nil
@@ -422,11 +418,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -437,11 +432,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -2073,7 +2067,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func unmarshalInputDateFilter(v interface{}) (models.DateFilter, error) {
+func (e *executableSchema) unmarshalInputDateFilter(v interface{}) (models.DateFilter, error) {
 	var it models.DateFilter
 	var asMap = v.(map[string]interface{})
 
@@ -2118,11 +2112,6 @@ func unmarshalInputDateFilter(v interface{}) (models.DateFilter, error) {
 	}
 
 	return it, nil
-}
-
-func (e *executableSchema) DateFilterMiddleware(ctx context.Context, obj *models.DateFilter) (*models.DateFilter, error) {
-
-	return obj, nil
 }
 
 // endregion **************************** input.gotpl *****************************
@@ -2563,34 +2552,34 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v interface{}) (*models.ErrorType, error) {
+func (e *executableSchema) unmarshalErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v interface{}) (*models.ErrorType, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v)
+	res, err := e.unmarshalErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v)
 	return &res, err
 }
-func unmarshalInt2ᚖint(v interface{}) (*int, error) {
+func (e *executableSchema) unmarshalInt2ᚖint(v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := unmarshalInt2int(v)
+	res, err := e.unmarshalInt2int(v)
 	return &res, err
 }
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(v interface{}) (models.DateFilter, error) {
-	return unmarshalInputDateFilter(v)
+func (e *executableSchema) unmarshalDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(v interface{}) (models.DateFilter, error) {
+	return e.unmarshalInputDateFilter(v)
 }
-func unmarshalErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v interface{}) (models.ErrorType, error) {
+func (e *executableSchema) unmarshalErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v interface{}) (models.ErrorType, error) {
 	var res models.ErrorType
 	return res, res.UnmarshalGQL(v)
 }
-func unmarshalInt2int(v interface{}) (int, error) {
+func (e *executableSchema) unmarshalInt2int(v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 

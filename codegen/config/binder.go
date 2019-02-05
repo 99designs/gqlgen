@@ -214,7 +214,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err er
 
 		// Special case to reference generated unmarshal functions
 		if !hasUnmarshal {
-			ref.Unmarshaler = types.NewFunc(0, b.cfg.Exec.Pkg(), "unmarshalInput"+schemaType.Name(), nil)
+			ref.Unmarshaler = types.NewFunc(0, b.cfg.Exec.Pkg(), "e.unmarshalInput"+schemaType.Name(), nil)
 		}
 	}
 

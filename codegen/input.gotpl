@@ -1,6 +1,6 @@
 {{- range $input := .Inputs }}
 	{{- if not .HasUnmarshal }}
-	func unmarshalInput{{ .Name }}(v interface{}) ({{.Type | ref}}, error) {
+	func (e *executableSchema) unmarshalInput{{ .Name }}(v interface{}) ({{.Type | ref}}, error) {
 		var it {{.Type | ref}}
 		var asMap = v.(map[string]interface{})
 		{{ range $field := .Fields}}
@@ -27,84 +27,4 @@
 		return it, nil
 	}
 	{{- end }}
-
-	func (e *executableSchema) {{ .Name }}Middleware(ctx context.Context, obj *{{.Type | ref}}) (*{{.Type | ref}}, error) {
-			{{ if .Directives }}
-		cObj, err := chainFieldMiddleware(
-			[]graphql.FieldMiddleware{
-				{{- range $directive := .Directives }}
-					func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-					{{- if $directive.Args }}
-					{{- range $arg := $directive.Args }}
-						{{- if and $arg.IsPtr ( notNil "Value" $arg ) }}
-							{{ $arg.GoVarName }} := {{ $arg.Value | dump }}
-						{{- end }}
-					{{- end }}
-					{{- end -}}
-						return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "obj" "n"}})
-					},
-				{{ end }}
-			}...
-		)(ctx, func(ctx context.Context)(interface{}, error){
-			return obj, nil
-		})
-		if err != nil || cObj == nil {
-			return nil ,err
-		}
-		obj, ok := cObj.(*{{.Type | ref}})
-		if !ok {
-			return nil, errors.New("expect {{.Type | ref}}")
-		}
-		{{ end }}
-
-		{{- range $field := .Fields }}
-		{{ if $field.HasDirectives }}
-			c{{$field.GoFieldName}}, err := chainFieldMiddleware(
-				[]graphql.FieldMiddleware{
-					{{- range $directive := $field.Directives }}
-						func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-						{{- if $directive.Args }}
-						{{- range $arg := $directive.Args }}
-							{{- if and $arg.TypeReference.IsPtr ( notNil "Value" $arg ) }}
-								{{ $arg.VarName }} := {{ $arg.Value | dump }}
-							{{- end }}
-						{{- end }}
-						{{- end }}
-							{{ if $field.IsPtr -}}
-								return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print "*obj." $field.GoFieldName ) "n"}})
-							{{- else -}}
-								return e.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs ( print "obj." $field.GoFieldName ) "n"}})
-							{{- end }}
-						},
-					{{ end }}
-				}...
-			)(ctx, func(ctx context.Context)(interface{}, error){
-				return {{ if $field.IsPtr }}*{{end}}obj.{{$field.GoFieldName}}, nil
-			})
-			if err != nil {
-				return obj ,err
-			}
-
-			{{ if $field.IsPtr }}
-				if data, ok := c{{$field.GoFieldName}}.({{ $field.Type | ref }}); ok {
-            		obj.{{$field.GoFieldName}} = &data
-            	} else {
-            		return obj, errors.New("expect {{ $field.GoType | ref }}")
-            	}
-			{{else}}
-            	if data, ok := c{{$field.GoFieldName}}.({{ $field.GoType | ref }}); ok{
-            		obj.{{$field.GoFieldName}} = data
-            	} else {
-            		return obj, errors.New("expected {{$field.GoFieldName}} to be {{$field.GoType | ref }}")
-            	}
-			{{ end }}
-
-			{{- end }}
-
-			{{ if eq $field.Definition.GQLDefinition.Kind "INPUT_OBJECT" }}
-				{{ $field.Middleware (print "obj." $field.GoFieldName ) (print "obj." $field.GoFieldName ) }}
-			{{- end }}
-		{{- end }}
-		return obj, nil
-	}
 {{ end }}

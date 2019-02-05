@@ -402,11 +402,10 @@ func (e *executableSchema) field_MyMutation_createTodo_args(ctx context.Context,
 	args := map[string]interface{}{}
 	var arg0 TodoInput
 	if tmp, ok := rawArgs["todo"]; ok {
-		arg0, err = unmarshalTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtypeᚑsystemᚑextensionᚐTodoInput(tmp)
+		arg0, err = e.unmarshalTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtypeᚑsystemᚑextensionᚐTodoInput(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["todo"] = arg0
 	return args, nil
@@ -417,11 +416,10 @@ func (e *executableSchema) field_MyQuery___type_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = unmarshalString2string(tmp)
+		arg0, err = e.unmarshalString2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["name"] = arg0
 	return args, nil
@@ -432,11 +430,10 @@ func (e *executableSchema) field_MyQuery_todo_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = unmarshalID2string(tmp)
+		arg0, err = e.unmarshalID2string(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["id"] = arg0
 	return args, nil
@@ -447,11 +444,10 @@ func (e *executableSchema) field___Type_enumValues_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -462,11 +458,10 @@ func (e *executableSchema) field___Type_fields_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = unmarshalBoolean2bool(tmp)
+		arg0, err = e.unmarshalBoolean2bool(tmp)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
@@ -1972,7 +1967,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func unmarshalInputTodoInput(v interface{}) (TodoInput, error) {
+func (e *executableSchema) unmarshalInputTodoInput(v interface{}) (TodoInput, error) {
 	var it TodoInput
 	var asMap = v.(map[string]interface{})
 
@@ -1988,28 +1983,6 @@ func unmarshalInputTodoInput(v interface{}) (TodoInput, error) {
 	}
 
 	return it, nil
-}
-
-func (e *executableSchema) TodoInputMiddleware(ctx context.Context, obj *TodoInput) (*TodoInput, error) {
-
-	cObj, err := chainFieldMiddleware(
-		[]graphql.FieldMiddleware{
-			func(ctx context.Context, n graphql.Resolver) (res interface{}, err error) {
-				return e.directives.InputLogging(ctx, obj, n)
-			},
-		}...,
-	)(ctx, func(ctx context.Context) (interface{}, error) {
-		return obj, nil
-	})
-	if err != nil || cObj == nil {
-		return nil, err
-	}
-	obj, ok := cObj.(*TodoInput)
-	if !ok {
-		return nil, errors.New("expect TodoInput")
-	}
-
-	return obj, nil
 }
 
 // endregion **************************** input.gotpl *****************************
@@ -2418,16 +2391,16 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalBoolean2bool(v interface{}) (bool, error) {
+func (e *executableSchema) unmarshalBoolean2bool(v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
-func unmarshalTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtypeᚑsystemᚑextensionᚐTodoInput(v interface{}) (TodoInput, error) {
-	return unmarshalInputTodoInput(v)
+func (e *executableSchema) unmarshalTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtypeᚑsystemᚑextensionᚐTodoInput(v interface{}) (TodoInput, error) {
+	return e.unmarshalInputTodoInput(v)
 }
-func unmarshalID2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalID2string(v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
-func unmarshalString2string(v interface{}) (string, error) {
+func (e *executableSchema) unmarshalString2string(v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 

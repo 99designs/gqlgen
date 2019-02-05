@@ -20,7 +20,6 @@ type Data struct {
 	Objects    Objects
 	Inputs     Objects
 	Interfaces []*Interface
-	Enums      []Enum
 
 	QueryRoot        *Object
 	MutationRoot     *Object
@@ -100,10 +99,6 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		case ast.Union, ast.Interface:
 			s.Interfaces = append(s.Interfaces, b.buildInterface(schemaType))
 
-		case ast.Enum:
-			if enum := b.buildEnum(schemaType); enum != nil {
-				s.Enums = append(s.Enums, *enum)
-			}
 		}
 	}
 
@@ -135,10 +130,6 @@ func BuildData(cfg *config.Config) (*Data, error) {
 
 	sort.Slice(s.Interfaces, func(i, j int) bool {
 		return s.Interfaces[i].Definition.GQLDefinition.Name < s.Interfaces[j].Definition.GQLDefinition.Name
-	})
-
-	sort.Slice(s.Enums, func(i, j int) bool {
-		return s.Enums[i].Definition.GQLDefinition.Name < s.Enums[j].Definition.GQLDefinition.Name
 	})
 
 	return &s, nil

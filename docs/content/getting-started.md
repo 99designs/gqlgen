@@ -85,7 +85,7 @@ type Mutation {
 ### Create the project skeleton
 
 ```bash
-$ go run scripts/gqlgen.go init
+$ go run main.go init
 ```
 
 This has created an empty skeleton with all files you need:

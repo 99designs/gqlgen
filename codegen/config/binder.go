@@ -145,6 +145,43 @@ func (t TypeReference) IsNamed() bool {
 	return isSlice
 }
 
+func (t TypeReference) IsScalar() bool {
+	return t.Definition.Kind == ast.Scalar
+}
+
+func (t TypeReference) SelfMarshalling() bool {
+	it := t.GO
+	if ptr, isPtr := it.(*types.Pointer); isPtr {
+		it = ptr.Elem()
+	}
+	namedType, ok := it.(*types.Named)
+	if !ok {
+		return false
+	}
+
+	for i := 0; i < namedType.NumMethods(); i++ {
+		switch namedType.Method(i).Name() {
+		case "MarshalGQL":
+			return true
+		}
+	}
+	return false
+}
+
+func (t TypeReference) NeedsUnmarshaler() bool {
+	if t.Definition == nil {
+		panic(errors.New("Definition missing for " + t.GQL.Name()))
+	}
+	return t.Definition.IsInputType()
+}
+
+func (t TypeReference) NeedsMarshaler() bool {
+	if t.Definition == nil {
+		panic(errors.New("Definition missing for " + t.GQL.Name()))
+	}
+	return t.Definition.Kind != ast.InputObject
+}
+
 func (b *Binder) PushRef(ret *TypeReference) {
 	b.References = append(b.References, ret)
 }
@@ -214,11 +251,11 @@ func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err er
 
 		// Special case to reference generated unmarshal functions
 		if !hasUnmarshal {
-			ref.Unmarshaler = types.NewFunc(0, b.cfg.Exec.Pkg(), "e.unmarshalInput"+schemaType.Name(), nil)
+			ref.Unmarshaler = types.NewFunc(0, b.cfg.Exec.Pkg(), "ec.unmarshalInput"+schemaType.Name(), nil)
 		}
 	}
 
-	ref.GO = b.CopyModifiersFromAst(schemaType, true, ref.GO)
+	ref.GO = b.CopyModifiersFromAst(schemaType, def.Kind != ast.Interface, ref.GO)
 
 	return ref, nil
 }

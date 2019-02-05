@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"fmt"
-	"go/types"
 	"sort"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -33,7 +32,6 @@ type builder struct {
 	SchemaStr  map[string]string
 	Binder     *config.Binder
 	Directives map[string]*Directive
-	NamedTypes NamedTypes
 }
 
 func BuildData(cfg *config.Config) (*Data, error) {
@@ -57,15 +55,6 @@ func BuildData(cfg *config.Config) (*Data, error) {
 	b.Binder, err = b.Config.NewBinder(b.Schema)
 	if err != nil {
 		return nil, err
-	}
-
-	b.NamedTypes = NamedTypes{}
-
-	for _, schemaType := range b.Schema.Types {
-		b.NamedTypes[schemaType.Name], err = b.buildTypeDef(schemaType)
-		if err != nil {
-			return nil, errors.Wrap(err, "unable to build type definition")
-		}
 	}
 
 	b.Directives, err = b.buildDirectives()
@@ -143,7 +132,7 @@ func (b *builder) injectIntrospectionRoots(s *Data) error {
 		return fmt.Errorf("root query type must be defined")
 	}
 
-	typeType, err := b.Binder.FindObject("github.com/99designs/gqlgen/graphql/introspection", "Type")
+	typeType, err := b.Binder.TypeReference(ast.NamedType("__Type", nil))
 	if err != nil {
 		return errors.Wrap(err, "unable to find root Type introspection type")
 	}
@@ -153,8 +142,10 @@ func (b *builder) injectIntrospectionRoots(s *Data) error {
 	}
 
 	obj.Fields = append(obj.Fields, &Field{
-		TypeReference:  &TypeReference{b.NamedTypes["__Type"], types.NewPointer(typeType.Type()), ast.NamedType("__Schema", nil)},
-		GQLName:        "__type",
+		TypeReference: typeType,
+		FieldDefinition: &ast.FieldDefinition{
+			Name: "__type",
+		},
 		GoFieldType:    GoFieldMethod,
 		GoReceiverName: "ec",
 		GoFieldName:    "introspectType",
@@ -170,14 +161,16 @@ func (b *builder) injectIntrospectionRoots(s *Data) error {
 		Object: obj,
 	})
 
-	schemaType, err := b.Binder.FindObject("github.com/99designs/gqlgen/graphql/introspection", "Schema")
+	schemaType, err := b.Binder.TypeReference(ast.NamedType("__Schema", nil))
 	if err != nil {
 		return errors.Wrap(err, "unable to find root Schema introspection type")
 	}
 
 	obj.Fields = append(obj.Fields, &Field{
-		TypeReference:  &TypeReference{b.NamedTypes["__Schema"], types.NewPointer(schemaType.Type()), ast.NamedType("__Schema", nil)},
-		GQLName:        "__schema",
+		TypeReference: schemaType,
+		FieldDefinition: &ast.FieldDefinition{
+			Name: "__schema",
+		},
 		GoFieldType:    GoFieldMethod,
 		GoReceiverName: "ec",
 		GoFieldName:    "introspectSchema",

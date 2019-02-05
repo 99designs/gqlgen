@@ -1,16 +1,13 @@
 package codegen
 
 import (
-	"bytes"
 	"go/types"
 	"log"
 	"strconv"
 	"strings"
-	"text/template"
 	"unicode"
 
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -78,13 +75,13 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 			return nil, errors.Wrap(err, typ.Name+"."+field.Name)
 		}
 
-		if typ.Kind == ast.InputObject && !f.TypeReference.Definition.GQLDefinition.IsInputType() {
+		if typ.Kind == ast.InputObject && !f.TypeReference.Definition.IsInputType() {
 			return nil, errors.Errorf(
 				"%s.%s: cannot use %s because %s is not a valid input type",
 				typ.Name,
 				field.Name,
-				f.Definition.GQLDefinition.Name,
-				f.TypeReference.Definition.GQLDefinition.Kind,
+				f.TypeReference.Definition.Name,
+				f.TypeReference.Definition.Kind,
 			)
 		}
 
@@ -188,15 +185,6 @@ func (os Objects) ByName(name string) *Object {
 		}
 	}
 	return nil
-}
-
-func tpl(tpl string, vars map[string]interface{}) string {
-	b := &bytes.Buffer{}
-	err := template.Must(template.New("inline").Funcs(templates.Funcs()).Parse(tpl)).Execute(b, vars)
-	if err != nil {
-		panic(err)
-	}
-	return b.String()
 }
 
 func ucFirst(s string) string {

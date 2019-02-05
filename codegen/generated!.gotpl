@@ -48,7 +48,7 @@ type ComplexityRoot struct {
 		{{ $object.Name|toCamel }} struct {
 		{{ range $field := $object.Fields -}}
 			{{ if not $field.IsReserved -}}
-				{{ $field.GQLName|toCamel }} {{ $field.ComplexitySignature }}
+				{{ $field.Name|toCamel }} {{ $field.ComplexitySignature }}
 			{{ end }}
 		{{- end }}
 		}
@@ -77,22 +77,24 @@ func (e *executableSchema) Schema() *ast.Schema {
 }
 
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	ec := executionContext{nil, e}
+	_ = ec
 	switch typeName + "." + field {
 	{{ range $object := .Objects }}
 		{{ if not $object.IsReserved }}
 			{{ range $field := $object.Fields }}
 				{{ if not $field.IsReserved }}
-					case "{{$object.Name}}.{{$field.GQLName}}":
-						if e.complexity.{{$object.Name|toCamel}}.{{$field.GQLName|toCamel}} == nil {
+					case "{{$object.Name}}.{{$field.Name}}":
+						if e.complexity.{{$object.Name|toCamel}}.{{$field.Name|toCamel}} == nil {
 							break
 						}
 						{{ if $field.Args }}
-							args, err := e.{{ $field.ArgsFunc }}(context.TODO(),rawArgs)
+							args, err := ec.{{ $field.ArgsFunc }}(context.TODO(),rawArgs)
 							if err != nil {
 								return 0, false
 							}
 						{{ end }}
-						return e.complexity.{{$object.Name|toCamel}}.{{$field.GQLName|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
+						return e.complexity.{{$object.Name|toCamel}}.{{$field.Name|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
 				{{ end }}
 			{{ end }}
 		{{ end }}
@@ -243,40 +245,3 @@ var parsedSchema = gqlparser.MustLoadSchema(
 		&ast.Source{Name: {{$filename|quote}}, Input: {{$schema|rawQuote}}},
 	{{- end }}
 )
-
-
-
-// ChainFieldMiddleware add chain by FieldMiddleware
-// nolint: deadcode
-func chainFieldMiddleware(handleFunc ...graphql.FieldMiddleware) graphql.FieldMiddleware {
-	n := len(handleFunc)
-
-	if n > 1 {
-		lastI := n - 1
-		return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-			var (
-				chainHandler graphql.Resolver
-				curI         int
-			)
-			chainHandler = func(currentCtx context.Context) (interface{}, error) {
-				if curI == lastI {
-					return next(currentCtx)
-				}
-				curI++
-				res, err := handleFunc[curI](currentCtx, chainHandler)
-				curI--
-				return res, err
-
-			}
-			return handleFunc[0](ctx, chainHandler)
-		}
-	}
-
-	if n == 1 {
-		return handleFunc[0]
-	}
-
-	return func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
-		return next(ctx)
-	}
-}

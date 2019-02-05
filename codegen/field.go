@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
@@ -14,8 +15,9 @@ import (
 )
 
 type Field struct {
-	*TypeReference
-	GQLName          string           // The name of the field in graphql
+	*ast.FieldDefinition
+
+	TypeReference    *config.TypeReference
 	GoFieldType      GoFieldType      // The field type in go, if any
 	GoReceiverName   string           // The name of method & var receiver in go, if any
 	GoFieldName      string           // The name of the method or var in go, if any
@@ -34,14 +36,19 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		return nil, err
 	}
 
+	tr, err := b.Binder.TypeReference(field.Type)
+	if err != nil {
+		return nil, err
+	}
+
 	f := Field{
-		GQLName:        field.Name,
-		TypeReference:  b.NamedTypes.getType(field.Type),
-		Object:         obj,
-		Directives:     dirs,
-		GoFieldName:    templates.ToGo(field.Name),
-		GoFieldType:    GoFieldVariable,
-		GoReceiverName: "obj",
+		FieldDefinition: field,
+		TypeReference:   tr,
+		Object:          obj,
+		Directives:      dirs,
+		GoFieldName:     templates.ToGo(field.Name),
+		GoFieldType:     GoFieldVariable,
+		GoReceiverName:  "obj",
 	}
 
 	if field.DefaultValue != nil {
@@ -108,15 +115,15 @@ func (b *builder) bindMethod(t types.Type, field *Field) error {
 	}
 
 	result := sig.Results().At(0)
-	if err := code.CompatibleTypes(field.TypeReference.GoType, result.Type()); err != nil {
-		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GoType.String(), result.String())
+	if err = code.CompatibleTypes(field.TypeReference.GO, result.Type()); err != nil {
+		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GO.String(), result.String())
 	}
 
 	// success, args and return type match. Bind to method
 	field.GoFieldType = GoFieldMethod
 	field.GoReceiverName = "obj"
 	field.GoFieldName = method.Name()
-	field.TypeReference.GoType = result.Type()
+	field.TypeReference.GO = result.Type()
 	return nil
 }
 
@@ -131,15 +138,15 @@ func (b *builder) bindVar(t types.Type, field *Field) error {
 		return err
 	}
 
-	if err := code.CompatibleTypes(field.TypeReference.GoType, structField.Type()); err != nil {
-		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GoType.String(), field.TypeReference.GoType.String())
+	if err = code.CompatibleTypes(field.TypeReference.GO, structField.Type()); err != nil {
+		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GO.String(), field.TypeReference.GO.String())
 	}
 
 	// success, bind to var
 	field.GoFieldType = GoFieldVariable
 	field.GoReceiverName = "obj"
 	field.GoFieldName = structField.Name()
-	field.TypeReference.GoType = structField.Type()
+	field.TypeReference.GO = structField.Type()
 	return nil
 }
 
@@ -245,7 +252,7 @@ func (f *Field) HasDirectives() bool {
 }
 
 func (f *Field) IsReserved() bool {
-	return strings.HasPrefix(f.GQLName, "__")
+	return strings.HasPrefix(f.Name, "__")
 }
 
 func (f *Field) IsMethod() bool {
@@ -264,7 +271,7 @@ func (f *Field) IsConcurrent() bool {
 }
 
 func (f *Field) GoNameUnexported() string {
-	return templates.ToGoPrivate(f.GQLName)
+	return templates.ToGoPrivate(f.Name)
 }
 
 func (f *Field) ShortInvocation() string {
@@ -276,7 +283,7 @@ func (f *Field) ArgsFunc() string {
 		return ""
 	}
 
-	return "field_" + f.Object.Definition.Name + "_" + f.GQLName + "_args"
+	return "field_" + f.Object.Definition.Name + "_" + f.Name + "_args"
 }
 
 func (f *Field) ResolverType() string {
@@ -300,7 +307,7 @@ func (f *Field) ShortResolverDeclaration() string {
 		res += fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}
 
-	result := templates.CurrentImports.LookupType(f.GoType)
+	result := templates.CurrentImports.LookupType(f.TypeReference.GO)
 	if f.Object.Stream {
 		result = "<-chan " + result
 	}
@@ -347,109 +354,4 @@ func (f *Field) CallArgs() string {
 	}
 
 	return strings.Join(args, ", ")
-}
-
-// should be in the template, but its recursive and has a bunch of args
-func (f *Field) WriteJson() string {
-	return f.doWriteJson("res", f.GoType, f.ASTType, false, 1)
-}
-
-func (f *Field) doWriteJson(val string, destType types.Type, astType *ast.Type, isPtr bool, depth int) string {
-	switch destType := destType.(type) {
-	case *types.Pointer:
-		return tpl(`
-			if {{.val}} == nil {
-				{{- if .nonNull }}
-					if !ec.HasError(rctx) {
-						ec.Errorf(ctx, "must not be null")
-					}
-				{{- end }}
-				return graphql.Null
-			}
-			{{.next }}`, map[string]interface{}{
-			"val":     val,
-			"nonNull": astType.NonNull,
-			"next":    f.doWriteJson(val, destType.Elem(), astType, true, depth+1),
-		})
-
-	case *types.Slice:
-		if isPtr {
-			val = "*" + val
-		}
-		var arr = "arr" + strconv.Itoa(depth)
-		var index = "idx" + strconv.Itoa(depth)
-		var usePtr bool
-		if !isPtr {
-			switch destType.Elem().(type) {
-			case *types.Pointer, *types.Array:
-			default:
-				usePtr = true
-			}
-		}
-
-		return tpl(`
-			{{.arr}} := make(graphql.Array, len({{.val}}))
-			{{ if and .top (not .isScalar) }} var wg sync.WaitGroup {{ end }}
-			{{ if not .isScalar }}
-				isLen1 := len({{.val}}) == 1
-				if !isLen1 {
-					wg.Add(len({{.val}}))
-				}
-			{{ end }}
-			for {{.index}} := range {{.val}} {
-				{{- if not .isScalar }}
-					{{.index}} := {{.index}}
-					rctx := &graphql.ResolverContext{
-						Index: &{{.index}},
-						Result: {{ if .usePtr }}&{{end}}{{.val}}[{{.index}}],
-					}
-					ctx := graphql.WithResolverContext(ctx, rctx)
-					f := func({{.index}} int) {
-						if !isLen1 {
-							defer wg.Done()
-						}
-						{{.arr}}[{{.index}}] = func() graphql.Marshaler {
-							{{ .next }}
-						}()
-					}
-					if isLen1 {
-						f({{.index}})
-					} else {
-						go f({{.index}})
-					}
-				{{ else }}
-					{{.arr}}[{{.index}}] = func() graphql.Marshaler {
-						{{ .next }}
-					}()
-				{{- end}}
-			}
-			{{ if and .top (not .isScalar) }} wg.Wait() {{ end }}
-			return {{.arr}}`, map[string]interface{}{
-			"val":      val,
-			"arr":      arr,
-			"index":    index,
-			"top":      depth == 1,
-			"arrayLen": len(val),
-			"isScalar": f.Definition.GQLDefinition.Kind == ast.Scalar || f.Definition.GQLDefinition.Kind == ast.Enum,
-			"usePtr":   usePtr,
-			"next":     f.doWriteJson(val+"["+index+"]", destType.Elem(), astType.Elem, false, depth+1),
-		})
-
-	default:
-		if f.Definition.GQLDefinition.Kind == ast.Scalar || f.Definition.GQLDefinition.Kind == ast.Enum {
-			if isPtr {
-				val = "*" + val
-			}
-			return f.Marshal(val)
-		}
-
-		if !isPtr {
-			val = "&" + val
-		}
-		return tpl(`
-			return ec._{{.type}}(ctx, field.Selections, {{.val}})`, map[string]interface{}{
-			"type": f.Definition.GQLDefinition.Name,
-			"val":  val,
-		})
-	}
 }

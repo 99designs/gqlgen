@@ -166,7 +166,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	sort.Slice(b.Interfaces, func(i, j int) bool { return b.Interfaces[i].Name < b.Interfaces[j].Name })
 
 	for _, it := range b.Enums {
-		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+it.Name)
+		cfg.Models.Add(it.Raw, cfg.Model.ImportPath()+"."+it.Name)
 	}
 	for _, it := range b.Models {
 		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+it.Name)

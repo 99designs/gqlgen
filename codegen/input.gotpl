@@ -1,12 +1,12 @@
 {{- range $input := .Inputs }}
 	{{- if not .HasUnmarshal }}
-	func (e *executableSchema) unmarshalInput{{ .Name }}(v interface{}) ({{.Type | ref}}, error) {
+	func (ec *executionContext) unmarshalInput{{ .Name }}(v interface{}) ({{.Type | ref}}, error) {
 		var it {{.Type | ref}}
 		var asMap = v.(map[string]interface{})
 		{{ range $field := .Fields}}
 			{{- if $field.Default}}
-				if _, present := asMap[{{$field.GQLName|quote}}] ; !present {
-					asMap[{{$field.GQLName|quote}}] = {{ $field.Default | dump }}
+				if _, present := asMap[{{$field.Name|quote}}] ; !present {
+					asMap[{{$field.Name|quote}}] = {{ $field.Default | dump }}
 				}
 			{{- end}}
 		{{- end }}
@@ -14,9 +14,9 @@
 		for k, v := range asMap {
 			switch k {
 			{{- range $field := .Fields }}
-			case {{$field.GQLName|quote}}:
+			case {{$field.Name|quote}}:
 				var err error
-				{{ $field.Unmarshal (print "it." $field.GoFieldName) "v" }}
+				it.{{$field.GoFieldName}}, err = ec.unmarshal{{$field.TypeReference.GQL.Name}}2{{ $field.TypeReference.GO | ts }}(v)
 				if err != nil {
 					return it, err
 				}

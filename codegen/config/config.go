@@ -230,10 +230,10 @@ func (tm TypeMap) ReferencedPackages() []string {
 	return pkgs
 }
 
-func (tm TypeMap) Add(gqlName string, goType string) {
-	modelCfg := tm[gqlName]
+func (tm TypeMap) Add(Name string, goType string) {
+	modelCfg := tm[Name]
 	modelCfg.Model = goType
-	tm[gqlName] = modelCfg
+	tm[Name] = modelCfg
 }
 
 func inStrSlice(haystack []string, needle string) bool {

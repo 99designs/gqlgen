@@ -16,7 +16,7 @@
 			{{- range $field := .Fields }}
 			case {{$field.Name|quote}}:
 				var err error
-				it.{{$field.GoFieldName}}, err = ec.unmarshal{{$field.TypeReference.GQL.Name}}2{{ $field.TypeReference.GO | ts }}(v)
+				it.{{$field.GoFieldName}}, err = ec.{{ $field.TypeReference.UnmarshalFunc }}(v)
 				if err != nil {
 					return it, err
 				}

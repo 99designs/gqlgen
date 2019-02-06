@@ -31,7 +31,7 @@
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshal{{ $field.TypeReference.Definition.Name }}2{{ $field.TypeReference.GO | ts }}(ctx, field.Selections, res).MarshalGQL(w)
+				ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		}
@@ -81,7 +81,7 @@
 		res := resTmp.({{$field.TypeReference.GO | ref}})
 		rctx.Result = res
 		ctx = ec.Tracer.StartFieldChildExecution(ctx)
-		return ec.marshal{{ $field.TypeReference.Definition.Name }}2{{ $field.TypeReference.GO | ts }}(ctx, field.Selections, res)
+		return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
 	}
 {{ end }}
 

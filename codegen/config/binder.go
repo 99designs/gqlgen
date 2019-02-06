@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
@@ -152,6 +154,29 @@ type TypeReference struct {
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
 }
 
+func (ref TypeReference) Elem() *TypeReference {
+	if p, isPtr := ref.GO.(*types.Pointer); isPtr {
+		return &TypeReference{
+			GO:          p.Elem(),
+			GQL:         ref.GQL,
+			Definition:  ref.Definition,
+			Unmarshaler: ref.Unmarshaler,
+			Marshaler:   ref.Marshaler,
+		}
+	}
+
+	if s, isSlice := ref.GO.(*types.Slice); isSlice {
+		return &TypeReference{
+			GO:          s.Elem(),
+			GQL:         ref.GQL.Elem,
+			Definition:  ref.Definition,
+			Unmarshaler: ref.Unmarshaler,
+			Marshaler:   ref.Marshaler,
+		}
+	}
+	return nil
+}
+
 func (t TypeReference) IsPtr() bool {
 	_, isPtr := t.GO.(*types.Pointer)
 	return isPtr
@@ -190,18 +215,37 @@ func (t TypeReference) SelfMarshalling() bool {
 	return false
 }
 
-func (t TypeReference) NeedsUnmarshaler() bool {
-	if t.Definition == nil {
-		panic(errors.New("Definition missing for " + t.GQL.Name()))
+func (t TypeReference) UniquenessKey() string {
+	var nullability = "O"
+	if t.GQL.NonNull {
+		nullability = "N"
 	}
-	return t.Definition.IsInputType()
+
+	return nullability + t.Definition.Name + "2" + templates.TypeIdentifier(t.GO)
 }
 
-func (t TypeReference) NeedsMarshaler() bool {
+func (t TypeReference) MarshalFunc() string {
 	if t.Definition == nil {
 		panic(errors.New("Definition missing for " + t.GQL.Name()))
 	}
-	return t.Definition.Kind != ast.InputObject
+
+	if t.Definition.Kind == ast.InputObject {
+		return ""
+	}
+
+	return "marshal" + t.UniquenessKey()
+}
+
+func (t TypeReference) UnmarshalFunc() string {
+	if t.Definition == nil {
+		panic(errors.New("Definition missing for " + t.GQL.Name()))
+	}
+
+	if !t.Definition.IsInputType() {
+		return ""
+	}
+
+	return "unmarshal" + t.UniquenessKey()
 }
 
 func (b *Binder) PushRef(ret *TypeReference) {

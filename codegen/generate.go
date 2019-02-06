@@ -10,6 +10,6 @@ func GenerateCode(data *Data) error {
 		Filename:        data.Config.Exec.Filename,
 		Data:            data,
 		RegionTags:      true,
-		GeneratedHeader: false,
+		GeneratedHeader: true,
 	})
 }

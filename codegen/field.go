@@ -74,7 +74,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 	}
 
 	if err = b.bindField(obj, &f); err != nil {
-		log.Printf(err.Error())
+		log.Println(err.Error())
 	}
 
 	return &f, nil

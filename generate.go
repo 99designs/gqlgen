@@ -1,7 +1,6 @@
 package gqlgen
 
 import (
-	"path/filepath"
 	"syscall"
 
 	"github.com/99designs/gqlgen/codegen"
@@ -74,12 +73,4 @@ func validate(cfg *config.Config) error {
 		return errors.Wrap(err, "validation failed")
 	}
 	return nil
-}
-
-func abs(path string) string {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		panic(err)
-	}
-	return filepath.ToSlash(absPath)
 }

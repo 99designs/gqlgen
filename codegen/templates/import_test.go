@@ -1,10 +1,9 @@
 package templates
 
 import (
+	"go/types"
 	"os"
 	"testing"
-
-	"go/types"
 
 	"github.com/stretchr/testify/require"
 )
@@ -68,8 +67,8 @@ bar1 "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
 	t.Run("aliased imports will not collide", func(t *testing.T) {
 		a := Imports{destDir: wd}
 
-		a.Reserve(aBar, "abar")
-		a.Reserve(bBar, "bbar")
+		_, _ = a.Reserve(aBar, "abar")
+		_, _ = a.Reserve(bBar, "bbar")
 
 		require.Equal(t, `abar "github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
 bbar "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"`, a.String())

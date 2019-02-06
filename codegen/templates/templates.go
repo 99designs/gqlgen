@@ -45,6 +45,9 @@ func Render(cfg Options) error {
 	var roots []string
 	// load all the templates in the directory
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		name := filepath.ToSlash(strings.TrimPrefix(path, rootDir+string(os.PathSeparator)))
 		if !strings.HasSuffix(info.Name(), ".gotpl") {
 			return nil

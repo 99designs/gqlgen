@@ -33,7 +33,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 				return nil, errors.Errorf("%s cannot be used as argument of directive %s(%s) only input and scalar types are allowed", arg.Type, dir.Name, arg.Name)
 			}
 
-			tr, err := b.Binder.TypeReference(arg.Type)
+			tr, err := b.Binder.TypeReference(arg.Type, nil)
 			if err != nil {
 				return nil, err
 			}

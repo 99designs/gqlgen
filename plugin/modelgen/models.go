@@ -4,6 +4,8 @@ import (
 	"go/types"
 	"sort"
 
+	"github.com/99designs/gqlgen/internal/code"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin"
@@ -112,8 +114,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				var typ types.Type
 
 				if cfg.Models.UserDefined(field.Type.Name()) {
-					model := cfg.Models[field.Type.Name()]
-					pkg, typeName := model.PkgAndType()
+					pkg, typeName := code.PkgAndType(cfg.Models[field.Type.Name()].Model[0])
 					typ, err = binder.FindType(pkg, typeName)
 					if err != nil {
 						return err

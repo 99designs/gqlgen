@@ -2,13 +2,12 @@ package config
 
 import (
 	"fmt"
+	"go/types"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-
-	"go/types"
 
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
@@ -18,12 +17,12 @@ import (
 )
 
 type Config struct {
-	SchemaFilename SchemaFilenames `yaml:"schema,omitempty"`
-	Exec           PackageConfig   `yaml:"exec"`
-	Model          PackageConfig   `yaml:"model"`
-	Resolver       PackageConfig   `yaml:"resolver,omitempty"`
-	Models         TypeMap         `yaml:"models,omitempty"`
-	StructTag      string          `yaml:"struct_tag,omitempty"`
+	SchemaFilename StringList    `yaml:"schema,omitempty"`
+	Exec           PackageConfig `yaml:"exec"`
+	Model          PackageConfig `yaml:"model"`
+	Resolver       PackageConfig `yaml:"resolver,omitempty"`
+	Models         TypeMap       `yaml:"models,omitempty"`
+	StructTag      string        `yaml:"struct_tag,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
@@ -31,7 +30,7 @@ var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 // DefaultConfig creates a copy of the default config
 func DefaultConfig() *Config {
 	return &Config{
-		SchemaFilename: SchemaFilenames{"schema.graphql"},
+		SchemaFilename: StringList{"schema.graphql"},
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
 	}
@@ -66,7 +65,7 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	preGlobbing := config.SchemaFilename
-	config.SchemaFilename = SchemaFilenames{}
+	config.SchemaFilename = StringList{}
 	for _, f := range preGlobbing {
 		matches, err := filepath.Glob(f)
 		if err != nil {
@@ -91,7 +90,7 @@ type PackageConfig struct {
 }
 
 type TypeMapEntry struct {
-	Model  string                  `yaml:"model"`
+	Model  StringList              `yaml:"model"`
 	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
 }
 
@@ -100,9 +99,9 @@ type TypeMapField struct {
 	FieldName string `yaml:"fieldName"`
 }
 
-type SchemaFilenames []string
+type StringList []string
 
-func (a *SchemaFilenames) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *StringList) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var single string
 	err := unmarshal(&single)
 	if err == nil {
@@ -120,7 +119,7 @@ func (a *SchemaFilenames) UnmarshalYAML(unmarshal func(interface{}) error) error
 	return nil
 }
 
-func (a SchemaFilenames) Has(file string) bool {
+func (a StringList) Has(file string) bool {
 	for _, existing := range a {
 		if existing == file {
 			return true
@@ -198,13 +197,15 @@ func (tm TypeMap) Exists(typeName string) bool {
 
 func (tm TypeMap) UserDefined(typeName string) bool {
 	m, ok := tm[typeName]
-	return ok && m.Model != ""
+	return ok && len(m.Model) > 0
 }
 
 func (tm TypeMap) Check() error {
 	for typeName, entry := range tm {
-		if strings.LastIndex(entry.Model, ".") < strings.LastIndex(entry.Model, "/") {
-			return fmt.Errorf("model %s: invalid type specifier \"%s\" - you need to specify a struct to map to", typeName, entry.Model)
+		for _, model := range entry.Model {
+			if strings.LastIndex(model, ".") < strings.LastIndex(model, "/") {
+				return fmt.Errorf("model %s: invalid type specifier \"%s\" - you need to specify a struct to map to", typeName, entry.Model)
+			}
 		}
 	}
 	return nil
@@ -214,14 +215,16 @@ func (tm TypeMap) ReferencedPackages() []string {
 	var pkgs []string
 
 	for _, typ := range tm {
-		if typ.Model == "map[string]interface{}" {
-			continue
+		for _, model := range typ.Model {
+			if model == "map[string]interface{}" || model == "interface{}" {
+				continue
+			}
+			pkg, _ := code.PkgAndType(model)
+			if pkg == "" || inStrSlice(pkgs, pkg) {
+				continue
+			}
+			pkgs = append(pkgs, pkg)
 		}
-		pkg, _ := code.PkgAndType(typ.Model)
-		if pkg == "" || inStrSlice(pkgs, pkg) {
-			continue
-		}
-		pkgs = append(pkgs, pkg)
 	}
 
 	sort.Slice(pkgs, func(i, j int) bool {
@@ -232,7 +235,7 @@ func (tm TypeMap) ReferencedPackages() []string {
 
 func (tm TypeMap) Add(Name string, goType string) {
 	modelCfg := tm[Name]
-	modelCfg.Model = goType
+	modelCfg.Model = append(modelCfg.Model, goType)
 	tm[Name] = modelCfg
 }
 
@@ -302,21 +305,26 @@ func (c *Config) normalize() error {
 
 func (c *Config) InjectBuiltins(s *ast.Schema) {
 	builtins := TypeMap{
-		"__Directive":         {Model: "github.com/99designs/gqlgen/graphql/introspection.Directive"},
-		"__DirectiveLocation": {Model: "github.com/99designs/gqlgen/graphql.String"},
-		"__Type":              {Model: "github.com/99designs/gqlgen/graphql/introspection.Type"},
-		"__TypeKind":          {Model: "github.com/99designs/gqlgen/graphql.String"},
-		"__Field":             {Model: "github.com/99designs/gqlgen/graphql/introspection.Field"},
-		"__EnumValue":         {Model: "github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
-		"__InputValue":        {Model: "github.com/99designs/gqlgen/graphql/introspection.InputValue"},
-		"__Schema":            {Model: "github.com/99designs/gqlgen/graphql/introspection.Schema"},
-		"Int":                 {Model: "github.com/99designs/gqlgen/graphql.Int"},
-		"Float":               {Model: "github.com/99designs/gqlgen/graphql.Float"},
-		"String":              {Model: "github.com/99designs/gqlgen/graphql.String"},
-		"Boolean":             {Model: "github.com/99designs/gqlgen/graphql.Boolean"},
-		"ID":                  {Model: "github.com/99designs/gqlgen/graphql.ID"},
-		"Time":                {Model: "github.com/99designs/gqlgen/graphql.Time"},
-		"Map":                 {Model: "github.com/99designs/gqlgen/graphql.Map"},
+		"__Directive":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Directive"}},
+		"__DirectiveLocation": {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
+		"__Type":              {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Type"}},
+		"__TypeKind":          {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
+		"__Field":             {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Field"}},
+		"__EnumValue":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"}},
+		"__InputValue":        {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.InputValue"}},
+		"__Schema":            {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Schema"}},
+		"Int":                 {Model: StringList{"github.com/99designs/gqlgen/graphql.Int"}},
+		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.Float"}},
+		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
+		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
+		"Time":                {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
+		"Map":                 {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"ID": {
+			Model: StringList{
+				"github.com/99designs/gqlgen/graphql.ID",
+				"github.com/99designs/gqlgen/graphql.Int",
+			},
+		},
 	}
 
 	for typeName, entry := range builtins {
@@ -324,15 +332,6 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 			c.Models[typeName] = entry
 		}
 	}
-}
-
-func (c *TypeMapEntry) PkgAndType() (string, string) {
-	parts := strings.Split(c.Model, ".")
-	if len(parts) == 1 {
-		return "", c.Model
-	}
-
-	return normalizeVendor(strings.Join(parts[:len(parts)-1], ".")), parts[len(parts)-1]
 }
 
 func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {

@@ -81,21 +81,21 @@ func (b *Binder) getPkg(find string) *packages.Package {
 var MapType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
 var InterfaceType = types.NewInterfaceType(nil, nil)
 
-func (b *Binder) FindUserObject(name string) (types.Type, error) {
-	userEntry, ok := b.cfg.Models[name]
-	if !ok {
+func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
+	models := b.cfg.Models[name].Model
+	if len(models) == 0 {
 		return nil, fmt.Errorf(name + " not found")
 	}
 
-	if userEntry.Model == "map[string]interface{}" {
+	if models[0] == "map[string]interface{}" {
 		return MapType, nil
 	}
 
-	if userEntry.Model == "interface{}" {
+	if models[0] == "interface{}" {
 		return InterfaceType, nil
 	}
 
-	pkgName, typeName := code.PkgAndType(userEntry.Model)
+	pkgName, typeName := code.PkgAndType(models[0])
 	if pkgName == "" {
 		return nil, fmt.Errorf("missing package name for %s", name)
 	}
@@ -271,7 +271,23 @@ func (b *Binder) PushRef(ret *TypeReference) {
 	b.References = append(b.References, ret)
 }
 
-func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err error) {
+func isMap(t types.Type) bool {
+	if t == nil {
+		return true
+	}
+	_, ok := t.(*types.Map)
+	return ok
+}
+
+func isIntf(t types.Type) bool {
+	if t == nil {
+		return true
+	}
+	_, ok := t.(*types.Interface)
+	return ok
+}
+
+func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret *TypeReference, err error) {
 	var pkgName, typeName string
 	def := b.schema.Types[schemaType.Name()]
 	defer func() {
@@ -280,8 +296,11 @@ func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err er
 		}
 	}()
 
-	if userEntry, ok := b.cfg.Models[schemaType.Name()]; ok && userEntry.Model != "" {
-		if userEntry.Model == "map[string]interface{}" {
+	for _, model := range b.cfg.Models[schemaType.Name()].Model {
+		if model == "map[string]interface{}" {
+			if !isMap(bindTarget) {
+				continue
+			}
 			return &TypeReference{
 				Definition: def,
 				GQL:        schemaType,
@@ -289,7 +308,10 @@ func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err er
 			}, nil
 		}
 
-		if userEntry.Model == "interface{}" {
+		if model == "interface{}" {
+			if !isIntf(bindTarget) {
+				continue
+			}
 			return &TypeReference{
 				Definition: def,
 				GQL:        schemaType,
@@ -297,37 +319,42 @@ func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err er
 			}, nil
 		}
 
-		pkgName, typeName = code.PkgAndType(userEntry.Model)
+		pkgName, typeName = code.PkgAndType(model)
 		if pkgName == "" {
 			return nil, fmt.Errorf("missing package name for %s", schemaType.Name())
 		}
 
-	} else {
-		pkgName = "github.com/99designs/gqlgen/graphql"
-		typeName = "String"
+		ref := &TypeReference{
+			Definition: def,
+			GQL:        schemaType,
+		}
+
+		obj, err := b.FindObject(pkgName, typeName)
+		if err != nil {
+			return nil, err
+		}
+
+		if fun, isFunc := obj.(*types.Func); isFunc {
+			ref.GO = fun.Type().(*types.Signature).Params().At(0).Type()
+			ref.Marshaler = fun
+			ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
+		} else {
+			ref.GO = obj.Type()
+		}
+
+		ref.GO = b.CopyModifiersFromAst(schemaType, def.Kind != ast.Interface, ref.GO)
+
+		if bindTarget != nil {
+			if err = code.CompatibleTypes(ref.GO, bindTarget); err != nil {
+				continue
+			}
+			ref.GO = bindTarget
+		}
+
+		return ref, nil
 	}
 
-	ref := &TypeReference{
-		Definition: def,
-		GQL:        schemaType,
-	}
-
-	obj, err := b.FindObject(pkgName, typeName)
-	if err != nil {
-		return nil, err
-	}
-
-	if fun, isFunc := obj.(*types.Func); isFunc {
-		ref.GO = fun.Type().(*types.Signature).Params().At(0).Type()
-		ref.Marshaler = fun
-		ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
-	} else {
-		ref.GO = obj.Type()
-	}
-
-	ref.GO = b.CopyModifiersFromAst(schemaType, def.Kind != ast.Interface, ref.GO)
-
-	return ref, nil
+	return nil, fmt.Errorf("not found")
 }
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, usePtr bool, base types.Type) types.Type {

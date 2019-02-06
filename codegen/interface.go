@@ -21,7 +21,7 @@ type InterfaceImplementor struct {
 }
 
 func (b *builder) buildInterface(typ *ast.Definition) *Interface {
-	obj, err := b.Binder.FindUserObject(typ.Name)
+	obj, err := b.Binder.DefaultUserObject(typ.Name)
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +33,7 @@ func (b *builder) buildInterface(typ *ast.Definition) *Interface {
 	}
 
 	for _, implementor := range b.Schema.GetPossibleTypes(typ) {
-		obj, err := b.Binder.FindUserObject(implementor.Name)
+		obj, err := b.Binder.DefaultUserObject(implementor.Name)
 		if err != nil {
 			panic(err)
 		}

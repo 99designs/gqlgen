@@ -10,7 +10,6 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -37,29 +36,25 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		return nil, err
 	}
 
-	tr, err := b.Binder.TypeReference(field.Type)
-	if err != nil {
-		return nil, err
+	def := b.Schema.Types[field.Type.Name()]
+
+	if obj.Kind == ast.InputObject && !def.IsInputType() {
+		return nil, errors.Errorf(
+			"%s.%s: cannot use %s because %s is not a valid input type",
+			obj.Name,
+			field.Name,
+			def.Name,
+			def.Kind,
+		)
 	}
 
 	f := Field{
 		FieldDefinition: field,
-		TypeReference:   tr,
 		Object:          obj,
 		Directives:      dirs,
 		GoFieldName:     templates.ToGo(field.Name),
 		GoFieldType:     GoFieldVariable,
 		GoReceiverName:  "obj",
-	}
-
-	if obj.Kind == ast.InputObject && !f.TypeReference.Definition.IsInputType() {
-		return nil, errors.Errorf(
-			"%s.%s: cannot use %s because %s is not a valid input type",
-			obj.Name,
-			field.Name,
-			f.TypeReference.Definition.Name,
-			f.TypeReference.Definition.Kind,
-		)
 	}
 
 	if field.DefaultValue != nil {
@@ -86,6 +81,15 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 }
 
 func (b *builder) bindField(obj *Object, f *Field) error {
+	defer func() {
+		if f.TypeReference == nil {
+			tr, err := b.Binder.TypeReference(f.Type, nil)
+			if err != nil {
+				panic(err)
+			}
+			f.TypeReference = tr
+		}
+	}()
 	switch {
 	case f.Name == "__schema":
 		f.GoFieldType = GoFieldMethod
@@ -152,28 +156,30 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 		}
 
 		result := sig.Results().At(0)
-		if err = code.CompatibleTypes(f.TypeReference.GO, result.Type()); err != nil {
-			return errors.Wrapf(err, "%s:%d %s is not compatible with %s", pos.Filename, pos.Line, f.TypeReference.GO.String(), result.Type().String())
+		tr, err := b.Binder.TypeReference(f.Type, result.Type())
+		if err != nil {
+			return err
 		}
 
 		// success, args and return type match. Bind to method
 		f.GoFieldType = GoFieldMethod
 		f.GoReceiverName = "obj"
 		f.GoFieldName = target.Name()
-		f.TypeReference.GO = result.Type()
+		f.TypeReference = tr
 
 		return nil
 
 	case *types.Var:
-		if err = code.CompatibleTypes(f.TypeReference.GO, target.Type()); err != nil {
-			return errors.Wrapf(err, "%s:%d %s is not compatible with %s", pos.Filename, pos.Line, f.TypeReference.GO.String(), target.Type().String())
+		tr, err := b.Binder.TypeReference(f.Type, target.Type())
+		if err != nil {
+			return err
 		}
 
 		// success, bind to var
 		f.GoFieldType = GoFieldVariable
 		f.GoReceiverName = "obj"
 		f.GoFieldName = target.Name()
-		f.TypeReference.GO = target.Type()
+		f.TypeReference = tr
 
 		return nil
 	default:

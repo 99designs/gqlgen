@@ -41,7 +41,7 @@ func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgu
 		)
 	}
 
-	tr, err := b.Binder.TypeReference(arg.Type)
+	tr, err := b.Binder.TypeReference(arg.Type, nil)
 	if err != nil {
 		return nil, err
 	}

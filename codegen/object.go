@@ -52,7 +52,7 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	}
 
 	if !obj.Root {
-		goObject, err := b.Binder.FindUserObject(typ.Name)
+		goObject, err := b.Binder.DefaultUserObject(typ.Name)
 		if err != nil {
 			return nil, err
 		}

@@ -21,13 +21,13 @@ func TestTypeInInput(t *testing.T) {
 
 func generate(name string, schemaFilename string) error {
 	_, err := BuildData(&config.Config{
-		SchemaFilename: config.SchemaFilenames{schemaFilename},
+		SchemaFilename: config.StringList{schemaFilename},
 		Exec:           config.PackageConfig{Filename: "gen/" + name + "/exec.go"},
 		Model:          config.PackageConfig{Filename: "gen/" + name + "/model.go"},
 		Models: map[string]config.TypeMapEntry{
-			"Item":              {Model: "map[string]interface{}"},
-			"Bookmarkable":      {Model: "interface{}"},
-			"BookmarkableInput": {Model: "interface{}"},
+			"Item":              {Model: config.StringList{"map[string]interface{}"}},
+			"Bookmarkable":      {Model: config.StringList{"interface{}"}},
+			"BookmarkableInput": {Model: config.StringList{"interface{}"}},
 		},
 	})
 

@@ -37,7 +37,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
-		require.Equal(t, SchemaFilenames{"inner"}, cfg.SchemaFilename)
+		require.Equal(t, StringList{"inner"}, cfg.SchemaFilename)
 	})
 
 	t.Run("will find config in parent dirs", func(t *testing.T) {
@@ -46,7 +46,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
-		require.Equal(t, SchemaFilenames{"outer"}, cfg.SchemaFilename)
+		require.Equal(t, StringList{"outer"}, cfg.SchemaFilename)
 	})
 
 	t.Run("will return error if config doesn't exist", func(t *testing.T) {
@@ -61,10 +61,10 @@ func TestLoadDefaultConfig(t *testing.T) {
 func TestReferencedPackages(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		tm := TypeMap{
-			"Foo": {Model: "github.com/test.Foo"},
-			"Bar": {Model: "github.com/test.Bar"},
-			"Baz": {Model: "github.com/otherpkg.Baz"},
-			"Map": {Model: "map[string]interface{}"},
+			"Foo": {Model: StringList{"github.com/test.Foo"}},
+			"Bar": {Model: StringList{"github.com/test.Bar"}},
+			"Baz": {Model: StringList{"github.com/otherpkg.Baz"}},
+			"Map": {Model: StringList{"map[string]interface{}"}},
 			"SkipResolver": {
 				Fields: map[string]TypeMapField{
 					"field": {Resolver: false},

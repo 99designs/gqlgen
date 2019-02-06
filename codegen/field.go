@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 	"go/types"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -51,23 +52,21 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		GoReceiverName:  "obj",
 	}
 
+	if obj.Kind == ast.InputObject && !f.TypeReference.Definition.IsInputType() {
+		return nil, errors.Errorf(
+			"%s.%s: cannot use %s because %s is not a valid input type",
+			obj.Name,
+			field.Name,
+			f.TypeReference.Definition.Name,
+			f.TypeReference.Definition.Kind,
+		)
+	}
+
 	if field.DefaultValue != nil {
 		var err error
 		f.Default, err = field.DefaultValue.Value(nil)
 		if err != nil {
 			return nil, errors.Errorf("default value %s is not valid: %s", field.Name, err.Error())
-		}
-	}
-
-	typeEntry, entryExists := b.Config.Models[obj.Definition.Name]
-	if entryExists {
-		if typeField, ok := typeEntry.Fields[field.Name]; ok {
-			if typeField.Resolver {
-				f.IsResolver = true
-			}
-			if typeField.FieldName != "" {
-				f.GoFieldName = templates.ToGo(typeField.FieldName)
-			}
 		}
 	}
 
@@ -78,92 +77,147 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		}
 		f.Args = append(f.Args, newArg)
 	}
+
+	if err = b.bindField(obj, &f); err != nil {
+		log.Printf(err.Error())
+	}
+
 	return &f, nil
 }
 
-func (b *builder) bindMethod(t types.Type, field *Field) error {
-	namedType, err := findGoNamedType(t)
+func (b *builder) bindField(obj *Object, f *Field) error {
+	switch {
+	case f.Name == "__schema":
+		f.GoFieldType = GoFieldMethod
+		f.GoReceiverName = "ec"
+		f.GoFieldName = "introspectSchema"
+		return nil
+	case f.Name == "__type":
+		f.GoFieldType = GoFieldMethod
+		f.GoReceiverName = "ec"
+		f.GoFieldName = "introspectType"
+		return nil
+	case obj.Root:
+		f.IsResolver = true
+		return nil
+	case b.Config.Models[obj.Name].Fields[f.Name].Resolver:
+		f.IsResolver = true
+		return nil
+	case obj.Type == config.MapType:
+		return nil
+	case b.Config.Models[obj.Name].Fields[f.Name].FieldName != "":
+		f.Name = b.Config.Models[obj.Name].Fields[f.Name].FieldName
+	}
+
+	target, err := b.findBindTarget(obj.Type.(*types.Named), f.Name)
 	if err != nil {
 		return err
 	}
 
-	method := b.findMethod(namedType, field.GoFieldName)
-	if method == nil {
-		return fmt.Errorf("no method named %s", field.GoFieldName)
-	}
-	sig := method.Type().(*types.Signature)
+	pos := b.Binder.ObjectPosition(target)
 
-	if sig.Results().Len() == 1 {
-		field.NoErr = true
-	} else if sig.Results().Len() != 2 {
-		return fmt.Errorf("method has wrong number of args")
-	}
-	params := sig.Params()
-	// If the first argument is the context, remove it from the comparison and set
-	// the MethodHasContext flag so that the context will be passed to this model's method
-	if params.Len() > 0 && params.At(0).Type().String() == "context.Context" {
-		field.MethodHasContext = true
-		vars := make([]*types.Var, params.Len()-1)
-		for i := 1; i < params.Len(); i++ {
-			vars[i-1] = params.At(i)
+	switch target := target.(type) {
+	case nil:
+		f.IsResolver = true
+
+		objPos := b.Binder.TypePosition(obj.Type)
+		return fmt.Errorf(
+			"%s:%d adding resolver method for %s.%s, nothing matched",
+			objPos.Filename,
+			objPos.Line,
+			obj.Name,
+			f.Name,
+		)
+	case *types.Func:
+		sig := target.Type().(*types.Signature)
+		if sig.Results().Len() == 1 {
+			f.NoErr = true
+		} else if sig.Results().Len() != 2 {
+			return fmt.Errorf("method has wrong number of args")
 		}
-		params = types.NewTuple(vars...)
+		params := sig.Params()
+		// If the first argument is the context, remove it from the comparison and set
+		// the MethodHasContext flag so that the context will be passed to this model's method
+		if params.Len() > 0 && params.At(0).Type().String() == "context.Context" {
+			f.MethodHasContext = true
+			vars := make([]*types.Var, params.Len()-1)
+			for i := 1; i < params.Len(); i++ {
+				vars[i-1] = params.At(i)
+			}
+			params = types.NewTuple(vars...)
+		}
+
+		if err = b.bindArgs(f, params); err != nil {
+			return errors.Wrapf(err, "%s:%d", pos.Filename, pos.Line)
+		}
+
+		result := sig.Results().At(0)
+		if err = code.CompatibleTypes(f.TypeReference.GO, result.Type()); err != nil {
+			return errors.Wrapf(err, "%s:%d %s is not compatible with %s", pos.Filename, pos.Line, f.TypeReference.GO.String(), result.Type().String())
+		}
+
+		// success, args and return type match. Bind to method
+		f.GoFieldType = GoFieldMethod
+		f.GoReceiverName = "obj"
+		f.GoFieldName = target.Name()
+		f.TypeReference.GO = result.Type()
+
+		return nil
+
+	case *types.Var:
+		if err = code.CompatibleTypes(f.TypeReference.GO, target.Type()); err != nil {
+			return errors.Wrapf(err, "%s:%d %s is not compatible with %s", pos.Filename, pos.Line, f.TypeReference.GO.String(), target.Type().String())
+		}
+
+		// success, bind to var
+		f.GoFieldType = GoFieldVariable
+		f.GoReceiverName = "obj"
+		f.GoFieldName = target.Name()
+		f.TypeReference.GO = target.Type()
+
+		return nil
+	default:
+		panic(fmt.Errorf("unknown bind target %T for %s", target, f.Name))
 	}
-
-	if err := b.bindArgs(field, params); err != nil {
-		return err
-	}
-
-	result := sig.Results().At(0)
-	if err = code.CompatibleTypes(field.TypeReference.GO, result.Type()); err != nil {
-		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GO.String(), result.String())
-	}
-
-	// success, args and return type match. Bind to method
-	field.GoFieldType = GoFieldMethod
-	field.GoReceiverName = "obj"
-	field.GoFieldName = method.Name()
-	field.TypeReference.GO = result.Type()
-	return nil
-}
-
-func (b *builder) bindVar(t types.Type, field *Field) error {
-	underlying, ok := t.Underlying().(*types.Struct)
-	if !ok {
-		return fmt.Errorf("not a struct")
-	}
-
-	structField, err := b.findField(underlying, field.GoFieldName)
-	if err != nil {
-		return err
-	}
-
-	if err = code.CompatibleTypes(field.TypeReference.GO, structField.Type()); err != nil {
-		return errors.Wrapf(err, "%s is not compatible with %s", field.TypeReference.GO.String(), field.TypeReference.GO.String())
-	}
-
-	// success, bind to var
-	field.GoFieldType = GoFieldVariable
-	field.GoReceiverName = "obj"
-	field.GoFieldName = structField.Name()
-	field.TypeReference.GO = structField.Type()
-	return nil
 }
 
 // findField attempts to match the name to a struct field with the following
 // priorites:
-// 1. If struct tag is passed then struct tag has highest priority
-// 2. Actual Field name
-// 3. Field in an embedded struct
-func (b *builder) findField(typ *types.Struct, name string) (*types.Var, error) {
+// 1. Any method with a matching name
+// 2. Any Fields with a struct tag (see config.StructTag)
+// 3. Any fields with a matching name
+// 4. Same logic again for embedded fields
+func (b *builder) findBindTarget(named *types.Named, name string) (types.Object, error) {
+	for i := 0; i < named.NumMethods(); i++ {
+		method := named.Method(i)
+		if !method.Exported() {
+			continue
+		}
+
+		if !strings.EqualFold(method.Name(), name) {
+			continue
+		}
+
+		return method, nil
+	}
+
+	strukt, ok := named.Underlying().(*types.Struct)
+	if !ok {
+		return nil, fmt.Errorf("not a struct")
+	}
+	return b.findBindStructTarget(strukt, name)
+}
+
+func (b *builder) findBindStructTarget(strukt *types.Struct, name string) (types.Object, error) {
+	// struct tags have the highest priority
 	if b.Config.StructTag != "" {
 		var foundField *types.Var
-		for i := 0; i < typ.NumFields(); i++ {
-			field := typ.Field(i)
+		for i := 0; i < strukt.NumFields(); i++ {
+			field := strukt.Field(i)
 			if !field.Exported() {
 				continue
 			}
-			tags := reflect.StructTag(typ.Tag(i))
+			tags := reflect.StructTag(strukt.Tag(i))
 			if val, ok := tags.Lookup(b.Config.StructTag); ok && equalFieldName(val, name) {
 				if foundField != nil {
 					return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", b.Config.StructTag, val)
@@ -177,8 +231,9 @@ func (b *builder) findField(typ *types.Struct, name string) (*types.Var, error) 
 		}
 	}
 
-	for i := 0; i < typ.NumFields(); i++ {
-		field := typ.Field(i)
+	// Then matching field names
+	for i := 0; i < strukt.NumFields(); i++ {
+		field := strukt.Field(i)
 		if !field.Exported() {
 			continue
 		}
@@ -187,64 +242,45 @@ func (b *builder) findField(typ *types.Struct, name string) (*types.Var, error) 
 		}
 	}
 
-	for i := 0; i < typ.NumFields(); i++ {
-		field := typ.Field(i)
+	// Then look in embedded structs
+	for i := 0; i < strukt.NumFields(); i++ {
+		field := strukt.Field(i)
 		if !field.Exported() {
 			continue
 		}
 
-		if field.Anonymous() {
-			fieldType := field.Type()
-
-			if ptr, ok := fieldType.(*types.Pointer); ok {
-				fieldType = ptr.Elem()
-			}
-
-			// Type.Underlying() returns itself for all types except types.Named, where it returns a struct type.
-			// It should be safe to always call.
-			if named, ok := fieldType.Underlying().(*types.Struct); ok {
-				f, err := b.findField(named, name)
-				if err != nil && !strings.HasPrefix(err.Error(), "no field named") {
-					return nil, err
-				}
-				if f != nil {
-					return f, nil
-				}
-			}
-		}
-	}
-
-	return nil, fmt.Errorf("no field named %s", name)
-}
-
-func (b *builder) findMethod(typ *types.Named, name string) *types.Func {
-	for i := 0; i < typ.NumMethods(); i++ {
-		method := typ.Method(i)
-		if !method.Exported() {
+		if !field.Anonymous() {
 			continue
 		}
 
-		if strings.EqualFold(method.Name(), name) {
-			return method
+		fieldType := field.Type()
+		if ptr, ok := fieldType.(*types.Pointer); ok {
+			fieldType = ptr.Elem()
+		}
+
+		switch fieldType := fieldType.(type) {
+		case *types.Named:
+			f, err := b.findBindTarget(fieldType, name)
+			if err != nil {
+				return nil, err
+			}
+			if f != nil {
+				return f, nil
+			}
+		case *types.Struct:
+			f, err := b.findBindStructTarget(fieldType, name)
+			if err != nil {
+				return nil, err
+			}
+			if f != nil {
+				return f, nil
+			}
+		default:
+			panic(fmt.Errorf("unknown embedded field type %T", field.Type()))
 		}
 	}
 
-	if s, ok := typ.Underlying().(*types.Struct); ok {
-		for i := 0; i < s.NumFields(); i++ {
-			field := s.Field(i)
-			if !field.Anonymous() {
-				continue
-			}
-
-			if named, ok := field.Type().(*types.Named); ok {
-				if f := b.findMethod(named, name); f != nil {
-					return f
-				}
-			}
-		}
-	}
-
-	return nil
+	return nil, nil
 }
 
 func (f *Field) HasDirectives() bool {

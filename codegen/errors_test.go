@@ -10,7 +10,7 @@ import (
 func TestTypeUnionAsInput(t *testing.T) {
 	err := generate("inputunion", `testdata/unioninput.graphqls`)
 
-	require.EqualError(t, err, "unable to build object definition: Query.addBookmark: cannot use Bookmarkable! as argument b because UNION is not a valid input type")
+	require.EqualError(t, err, "unable to build object definition: cannot use Bookmarkable! as argument b because UNION is not a valid input type")
 }
 
 func TestTypeInInput(t *testing.T) {

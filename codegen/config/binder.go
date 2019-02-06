@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"go/token"
 	"go/types"
 	"regexp"
 	"strings"
@@ -31,6 +32,27 @@ func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
 		schema: s,
 		cfg:    c,
 	}, nil
+}
+
+func (b *Binder) TypePosition(typ types.Type) token.Position {
+	named, isNamed := typ.(*types.Named)
+	if !isNamed {
+		return token.Position{
+			Filename: "unknown",
+		}
+	}
+
+	return b.ObjectPosition(named.Obj())
+}
+
+func (b *Binder) ObjectPosition(typ types.Object) token.Position {
+	if typ == nil {
+		return token.Position{
+			Filename: "unknown",
+		}
+	}
+	pkg := b.getPkg(typ.Pkg().Path())
+	return pkg.Fset.Position(typ.Pos())
 }
 
 func (b *Binder) FindType(pkgName string, typeName string) (types.Type, error) {

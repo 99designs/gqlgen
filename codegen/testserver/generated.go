@@ -4312,29 +4312,23 @@ func (ec *executionContext) unmarshalBoolean2ᚖbool(v interface{}) (*bool, erro
 }
 
 func (ec *executionContext) marshalBoolean2ᚖbool(ctx context.Context, sel ast.SelectionSet, v *bool) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec.marshalBoolean2bool(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalCircle2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐCircle(ctx context.Context, sel ast.SelectionSet, v *Circle) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec._Circle(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v *Error) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec._Error(ctx, sel, v)
 }
 
@@ -4363,11 +4357,9 @@ func (ec *executionContext) unmarshalKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalModelMethods2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐModelMethods(ctx context.Context, sel ast.SelectionSet, v *ModelMethods) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec._ModelMethods(ctx, sel, v)
 }
 
@@ -4380,11 +4372,9 @@ func (ec *executionContext) unmarshalOuterInput2ᚖgithubᚗcomᚋ99designsᚋgq
 }
 
 func (ec *executionContext) marshalOuterObject2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx context.Context, sel ast.SelectionSet, v *OuterObject) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec._OuterObject(ctx, sel, v)
 }
 
@@ -4397,38 +4387,30 @@ func (ec *executionContext) unmarshalRecursiveInputSlice2ᚖgithubᚗcomᚋ99des
 }
 
 func (ec *executionContext) marshalIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋintrospectionᚐIt(ctx context.Context, sel ast.SelectionSet, v *introspection1.It) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec._It(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalInvalidIdentifier2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋinvalidᚑpackagenameᚐInvalidIdentifier(ctx context.Context, sel ast.SelectionSet, v *invalid_packagename.InvalidIdentifier) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec._InvalidIdentifier(ctx, sel, v)
 }
 
 func (ec *executionContext) marshal__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, sel ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec.___Schema(ctx, sel, v)
 }
 
 func (ec *executionContext) marshal__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec.___Type(ctx, sel, v)
 }
 
@@ -4441,11 +4423,9 @@ func (ec *executionContext) unmarshalInt2ᚖint(v interface{}) (*int, error) {
 }
 
 func (ec *executionContext) marshalInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec.marshalInt2int(ctx, sel, *v)
 }
 
@@ -4458,11 +4438,9 @@ func (ec *executionContext) unmarshalString2ᚖstring(v interface{}) (*string, e
 }
 
 func (ec *executionContext) marshalString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-
 	if v == nil {
 		return graphql.Null
 	}
-
 	return ec.marshalString2string(ctx, sel, *v)
 }
 
@@ -4487,7 +4465,6 @@ func (ec *executionContext) unmarshalOuterInput2ᚕᚖgithubᚗcomᚋ99designs�
 }
 
 func (ec *executionContext) marshalOuterObject2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx context.Context, sel ast.SelectionSet, v []*OuterObject) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4539,7 +4516,6 @@ func (ec *executionContext) unmarshalOuterInput2ᚕᚕᚖgithubᚗcomᚋ99design
 }
 
 func (ec *executionContext) marshalOuterObject2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx context.Context, sel ast.SelectionSet, v [][]*OuterObject) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4591,7 +4567,6 @@ func (ec *executionContext) unmarshalRecursiveInputSlice2ᚕgithubᚗcomᚋ99des
 }
 
 func (ec *executionContext) marshalShape2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx context.Context, sel ast.SelectionSet, v []Shape) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4623,7 +4598,6 @@ func (ec *executionContext) marshalShape2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 }
 
 func (ec *executionContext) marshalUser2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx context.Context, sel ast.SelectionSet, v []User) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4655,7 +4629,6 @@ func (ec *executionContext) marshalUser2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋc
 }
 
 func (ec *executionContext) marshal__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4687,7 +4660,6 @@ func (ec *executionContext) marshal__Directive2ᚕgithubᚗcomᚋ99designsᚋgql
 }
 
 func (ec *executionContext) marshal__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4719,7 +4691,6 @@ func (ec *executionContext) marshal__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgql
 }
 
 func (ec *executionContext) marshal__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx context.Context, sel ast.SelectionSet, v []introspection.Field) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4751,7 +4722,6 @@ func (ec *executionContext) marshal__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshal__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4783,7 +4753,6 @@ func (ec *executionContext) marshal__InputValue2ᚕgithubᚗcomᚋ99designsᚋgq
 }
 
 func (ec *executionContext) marshal__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4835,7 +4804,6 @@ func (ec *executionContext) unmarshal__DirectiveLocation2ᚕstring(v interface{}
 }
 
 func (ec *executionContext) marshal__DirectiveLocation2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4871,7 +4839,6 @@ func (ec *executionContext) unmarshalBoolean2bool(v interface{}) (bool, error) {
 }
 
 func (ec *executionContext) marshalBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
-
 	return graphql.MarshalBoolean(v)
 }
 
@@ -4880,17 +4847,14 @@ func (ec *executionContext) unmarshalFloat2float64(v interface{}) (float64, erro
 }
 
 func (ec *executionContext) marshalFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
-
 	return graphql.MarshalFloat(v)
 }
 
 func (ec *executionContext) marshalCircle2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐCircle(ctx context.Context, sel ast.SelectionSet, v Circle) graphql.Marshaler {
-
 	return ec._Circle(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalError2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v Error) graphql.Marshaler {
-
 	return ec._Error(ctx, sel, &v)
 }
 
@@ -4903,7 +4867,6 @@ func (ec *executionContext) unmarshalInnerInput2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalInnerObject2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerObject(ctx context.Context, sel ast.SelectionSet, v InnerObject) graphql.Marshaler {
-
 	return ec._InnerObject(ctx, sel, &v)
 }
 
@@ -4916,7 +4879,6 @@ func (ec *executionContext) unmarshalKeywords2githubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalModelMethods2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐModelMethods(ctx context.Context, sel ast.SelectionSet, v ModelMethods) graphql.Marshaler {
-
 	return ec._ModelMethods(ctx, sel, &v)
 }
 
@@ -4925,7 +4887,6 @@ func (ec *executionContext) unmarshalOuterInput2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalOuterObject2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx context.Context, sel ast.SelectionSet, v OuterObject) graphql.Marshaler {
-
 	return ec._OuterObject(ctx, sel, &v)
 }
 
@@ -4934,52 +4895,42 @@ func (ec *executionContext) unmarshalRecursiveInputSlice2githubᚗcomᚋ99design
 }
 
 func (ec *executionContext) marshalShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx context.Context, sel ast.SelectionSet, v Shape) graphql.Marshaler {
-
 	return ec._Shape(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalUser2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
-
 	return ec._User(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalIt2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋintrospectionᚐIt(ctx context.Context, sel ast.SelectionSet, v introspection1.It) graphql.Marshaler {
-
 	return ec._It(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalInvalidIdentifier2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋinvalidᚑpackagenameᚐInvalidIdentifier(ctx context.Context, sel ast.SelectionSet, v invalid_packagename.InvalidIdentifier) graphql.Marshaler {
-
 	return ec._InvalidIdentifier(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshal__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
-
 	return ec.___Directive(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshal__EnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v introspection.EnumValue) graphql.Marshaler {
-
 	return ec.___EnumValue(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshal__Field2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx context.Context, sel ast.SelectionSet, v introspection.Field) graphql.Marshaler {
-
 	return ec.___Field(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshal__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v introspection.InputValue) graphql.Marshaler {
-
 	return ec.___InputValue(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshal__Schema2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, sel ast.SelectionSet, v introspection.Schema) graphql.Marshaler {
-
 	return ec.___Schema(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshal__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v introspection.Type) graphql.Marshaler {
-
 	return ec.___Type(ctx, sel, &v)
 }
 
@@ -4988,7 +4939,6 @@ func (ec *executionContext) unmarshalInt2int(v interface{}) (int, error) {
 }
 
 func (ec *executionContext) marshalInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-
 	return graphql.MarshalInt(v)
 }
 
@@ -5001,7 +4951,6 @@ func (ec *executionContext) unmarshalID2string(v interface{}) (string, error) {
 }
 
 func (ec *executionContext) marshalID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-
 	return graphql.MarshalID(v)
 }
 
@@ -5010,7 +4959,6 @@ func (ec *executionContext) unmarshalString2string(v interface{}) (string, error
 }
 
 func (ec *executionContext) marshalString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-
 	return graphql.MarshalString(v)
 }
 
@@ -5019,7 +4967,6 @@ func (ec *executionContext) unmarshal__DirectiveLocation2string(v interface{}) (
 }
 
 func (ec *executionContext) marshal__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-
 	return graphql.MarshalString(v)
 }
 
@@ -5028,7 +4975,6 @@ func (ec *executionContext) unmarshal__TypeKind2string(v interface{}) (string, e
 }
 
 func (ec *executionContext) marshal__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-
 	return graphql.MarshalString(v)
 }
 

@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"go/types"
-	"log"
 	"strconv"
 	"strings"
 	"unicode"
@@ -72,45 +71,10 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 		var f *Field
 		f, err = b.buildField(obj, field)
 		if err != nil {
-			return nil, errors.Wrap(err, typ.Name+"."+field.Name)
-		}
-
-		if typ.Kind == ast.InputObject && !f.TypeReference.Definition.IsInputType() {
-			return nil, errors.Errorf(
-				"%s.%s: cannot use %s because %s is not a valid input type",
-				typ.Name,
-				field.Name,
-				f.TypeReference.Definition.Name,
-				f.TypeReference.Definition.Kind,
-			)
+			return nil, err
 		}
 
 		obj.Fields = append(obj.Fields, f)
-
-		if obj.Root {
-			f.IsResolver = true
-		} else if !f.IsResolver {
-			// first try binding to a method
-			methodErr := b.bindMethod(obj.Type, f)
-			if methodErr == nil {
-				continue
-			}
-
-			// otherwise try binding to a var
-			varErr := b.bindVar(obj.Type, f)
-
-			// if both failed, add a resolver
-			if varErr != nil {
-				f.IsResolver = true
-
-				log.Printf("\nadding resolver method for %s.%s to %s\n  %s\n  %s",
-					obj.Name,
-					field.Name,
-					obj.Type.String(),
-					methodErr.Error(),
-					varErr.Error())
-			}
-		}
 	}
 
 	return obj, nil

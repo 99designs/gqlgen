@@ -65,7 +65,7 @@ type Embed struct {
 
 	for _, tt := range tests {
 		b := builder{Config: &config.Config{StructTag: tt.Tag}}
-		field, err := b.findField(tt.Struct, tt.Field)
+		field, err := b.findBindStructTarget(tt.Struct, tt.Field)
 		if tt.ShouldError {
 			require.Nil(t, field, tt.Name)
 			require.Error(t, err, tt.Name)

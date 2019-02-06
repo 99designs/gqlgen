@@ -40,11 +40,6 @@
 		func (ec *executionContext) marshal{{ $type.Definition.Name }}2{{ $type.GO | ts }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
 			{{- if $type.IsPtr }}
 				if v == nil {
-					{{- if $type.GQL.NonNull }}
-						if !ec.HasError(graphql.GetResolverContext(ctx)) {
-							ec.Errorf(ctx, "must not be null")
-						}
-					{{- end }}
 					return graphql.Null
 				}
 			{{- end }}

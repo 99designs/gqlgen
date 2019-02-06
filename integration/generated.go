@@ -70,7 +70,6 @@ type ComplexityRoot struct {
 type ElementResolver interface {
 	Child(ctx context.Context, obj *models.Element) (models.Element, error)
 	Error(ctx context.Context, obj *models.Element) (bool, error)
-	Mismatched(ctx context.Context, obj *models.Element) ([]bool, error)
 }
 type QueryResolver interface {
 	Path(ctx context.Context) ([]*models.Element, error)
@@ -476,7 +475,7 @@ func (ec *executionContext) _Element_mismatched(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Element().Mismatched(rctx, obj)
+		return obj.Mismatched, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -1627,11 +1626,7 @@ func (ec *executionContext) _Element(ctx context.Context, sel ast.SelectionSet, 
 				return res
 			})
 		case "mismatched":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				res = ec._Element_mismatched(ctx, field, obj)
-				return res
-			})
+			out.Values[i] = ec._Element_mismatched(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

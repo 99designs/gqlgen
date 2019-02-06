@@ -83,7 +83,7 @@ nextArg:
 		}
 
 		// no matching arg found, abort
-		return fmt.Errorf("arg %s not found on method", param.Name())
+		return fmt.Errorf("%s is not in schema", param.Name())
 	}
 
 	field.Args = newArgs

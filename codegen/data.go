@@ -132,50 +132,29 @@ func (b *builder) injectIntrospectionRoots(s *Data) error {
 		return fmt.Errorf("root query type must be defined")
 	}
 
-	typeType, err := b.Binder.TypeReference(ast.NamedType("__Type", nil))
-	if err != nil {
-		return errors.Wrap(err, "unable to find root Type introspection type")
-	}
-	stringRef, err := b.Binder.TypeReference(ast.NonNullNamedType("String", nil))
-	if err != nil {
-		return errors.Wrap(err, "unable to find root string type reference")
-	}
-
-	obj.Fields = append(obj.Fields, &Field{
-		TypeReference: typeType,
-		FieldDefinition: &ast.FieldDefinition{
-			Name: "__type",
-		},
-		GoFieldType:    GoFieldMethod,
-		GoReceiverName: "ec",
-		GoFieldName:    "introspectType",
-		Args: []*FieldArgument{
+	__type, err := b.buildField(obj, &ast.FieldDefinition{
+		Name: "__type",
+		Type: ast.NamedType("__Type", nil),
+		Arguments: []*ast.ArgumentDefinition{
 			{
-				ArgumentDefinition: &ast.ArgumentDefinition{
-					Name: "name",
-				},
-				TypeReference: stringRef,
-				Object:        &Object{},
+				Name: "name",
+				Type: ast.NonNullNamedType("String", nil),
 			},
 		},
-		Object: obj,
 	})
-
-	schemaType, err := b.Binder.TypeReference(ast.NamedType("__Schema", nil))
 	if err != nil {
-		return errors.Wrap(err, "unable to find root Schema introspection type")
+		return err
 	}
 
-	obj.Fields = append(obj.Fields, &Field{
-		TypeReference: schemaType,
-		FieldDefinition: &ast.FieldDefinition{
-			Name: "__schema",
-		},
-		GoFieldType:    GoFieldMethod,
-		GoReceiverName: "ec",
-		GoFieldName:    "introspectSchema",
-		Object:         obj,
+	__schema, err := b.buildField(obj, &ast.FieldDefinition{
+		Name: "__schema",
+		Type: ast.NamedType("__Schema", nil),
 	})
+	if err != nil {
+		return err
+	}
+
+	obj.Fields = append(obj.Fields, __type, __schema)
 
 	return nil
 }

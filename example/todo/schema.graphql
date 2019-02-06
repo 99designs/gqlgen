@@ -4,14 +4,14 @@ schema {
 }
 
 type MyQuery {
-    todo(id: Int!): Todo
+    todo(id: ID!): Todo
     lastTodo: Todo
     todos: [Todo!]!
 }
 
 type MyMutation {
     createTodo(todo: TodoInput!): Todo!
-    updateTodo(id: Int!, changes: Map!): Todo
+    updateTodo(id: ID!, changes: Map!): Todo
 }
 
 type Todo {

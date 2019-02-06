@@ -76,7 +76,12 @@ nextArg:
 		param := params.At(j)
 		for _, oldArg := range field.Args {
 			if strings.EqualFold(oldArg.Name, param.Name()) {
-				oldArg.TypeReference.GO = param.Type()
+				tr, err := b.Binder.TypeReference(oldArg.Type, param.Type())
+				if err != nil {
+					return err
+				}
+				oldArg.TypeReference = tr
+
 				newArgs = append(newArgs, oldArg)
 				continue nextArg
 			}

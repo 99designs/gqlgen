@@ -322,7 +322,7 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 		"ID": {
 			Model: StringList{
 				"github.com/99designs/gqlgen/graphql.ID",
-				"github.com/99designs/gqlgen/graphql.Int",
+				"github.com/99designs/gqlgen/graphql.IntID",
 			},
 		},
 	}

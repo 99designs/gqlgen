@@ -15,18 +15,18 @@ func TestTodo(t *testing.T) {
 	c := client.New(srv.URL)
 
 	var resp struct {
-		CreateTodo struct{ ID int }
+		CreateTodo struct{ ID string }
 	}
 	c.MustPost(`mutation { createTodo(todo:{text:"Fery important"}) { id } }`, &resp)
 
-	require.Equal(t, 5, resp.CreateTodo.ID)
+	require.Equal(t, "5", resp.CreateTodo.ID)
 
 	t.Run("update the todo text", func(t *testing.T) {
 		var resp struct {
 			UpdateTodo struct{ Text string }
 		}
 		c.MustPost(
-			`mutation($id: Int!, $text: String!) { updateTodo(id: $id, changes:{text:$text}) { text } }`,
+			`mutation($id: ID!, $text: String!) { updateTodo(id: $id, changes:{text:$text}) { text } }`,
 			&resp,
 			client.Var("id", 5),
 			client.Var("text", "Very important"),
@@ -58,12 +58,12 @@ func TestTodo(t *testing.T) {
 	t.Run("select with alias", func(t *testing.T) {
 		var resp struct {
 			A struct{ Text string }
-			B struct{ ID int }
+			B struct{ ID string }
 		}
 		c.MustPost(`{ a: todo(id:1) { text } b: todo(id:2) { id } }`, &resp)
 
 		require.Equal(t, "A todo not to forget", resp.A.Text)
-		require.Equal(t, 2, resp.B.ID)
+		require.Equal(t, "2", resp.B.ID)
 	})
 
 	t.Run("find a missing todo", func(t *testing.T) {
@@ -101,17 +101,17 @@ func TestTodo(t *testing.T) {
 	t.Run("select all", func(t *testing.T) {
 		var resp struct {
 			Todo struct {
-				ID   int
+				ID   string
 				Text string
 				Done bool
 			}
 			LastTodo struct {
-				ID   int
+				ID   string
 				Text string
 				Done bool
 			}
 			Todos []struct {
-				ID   int
+				ID   string
 				Text string
 			}
 		}
@@ -121,11 +121,11 @@ func TestTodo(t *testing.T) {
 			todos { id text }
 		}`, &resp)
 
-		require.Equal(t, 1, resp.Todo.ID)
-		require.Equal(t, 5, resp.LastTodo.ID)
+		require.Equal(t, "1", resp.Todo.ID)
+		require.Equal(t, "5", resp.LastTodo.ID)
 		require.Len(t, resp.Todos, 5)
 		require.Equal(t, "Very important", resp.LastTodo.Text)
-		require.Equal(t, 5, resp.LastTodo.ID)
+		require.Equal(t, "5", resp.LastTodo.ID)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

@@ -36,18 +36,6 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		return nil, err
 	}
 
-	def := b.Schema.Types[field.Type.Name()]
-
-	if obj.Kind == ast.InputObject && !def.IsInputType() {
-		return nil, errors.Errorf(
-			"%s.%s: cannot use %s because %s is not a valid input type",
-			obj.Name,
-			field.Name,
-			def.Name,
-			def.Kind,
-		)
-	}
-
 	f := Field{
 		FieldDefinition: field,
 		Object:          obj,

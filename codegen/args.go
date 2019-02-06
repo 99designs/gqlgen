@@ -31,16 +31,6 @@ func (f *FieldArgument) Stream() bool {
 }
 
 func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgument, error) {
-	def := b.Schema.Types[arg.Type.Name()]
-	if !def.IsInputType() {
-		return nil, errors.Errorf(
-			"cannot use %s as argument %s because %s is not a valid input type",
-			arg.Type.String(),
-			arg.Name,
-			def.Kind,
-		)
-	}
-
 	tr, err := b.Binder.TypeReference(arg.Type, nil)
 	if err != nil {
 		return nil, err

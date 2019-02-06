@@ -43,9 +43,9 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message string) (res interface{}, err error)
+	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int) (res interface{}, err error)
 
-	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int, message *string) (res interface{}, err error)
+	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -604,7 +604,7 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 				}
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int), args["message"].(string))
+					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int))
 				}
 			}
 		case "range":
@@ -617,7 +617,7 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 				}
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Range(ctx, obj, n, args["min"].(*int), args["max"].(*int), args["message"].(*string))
+					return ec.directives.Range(ctx, obj, n, args["min"].(*int), args["max"].(*int))
 				}
 			}
 		}
@@ -812,8 +812,8 @@ type EmbeddedPointer {
     Title: String
 }
 
-directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @range(min: Int = 0, max: Int, message: String) on ARGUMENT_DEFINITION
+directive @length(min: Int!, max: Int) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 
 enum Status {
     OK
@@ -831,7 +831,7 @@ func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[str
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["min"]; ok {
-		arg0, err = ec.unmarshalNInt2int(tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -839,20 +839,12 @@ func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[str
 	args["min"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["max"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(tmp)
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["max"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["message"]; ok {
-		arg2, err = ec.unmarshalNString2string(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["message"] = arg2
 	return args, nil
 }
 
@@ -861,7 +853,7 @@ func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[stri
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["min"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(tmp)
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -869,20 +861,12 @@ func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[stri
 	args["min"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["max"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(tmp)
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["max"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["message"]; ok {
-		arg2, err = ec.unmarshalOString2ᚖstring(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["message"] = arg2
 	return args, nil
 }
 
@@ -891,7 +875,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -905,11 +889,11 @@ func (ec *executionContext) field_Query_directiveArg_args(ctx context.Context, r
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["arg"]; ok {
-		getArg0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(tmp) }
+		getArg0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
 		getArg1 := func(ctx context.Context) (res interface{}, err error) {
 			max := 255
 			n := getArg0
-			return ec.directives.Length(ctx, tmp, n, 1, &max, "invalid length")
+			return ec.directives.Length(ctx, tmp, n, 1, &max)
 		}
 
 		tmp, err = getArg1(ctx)
@@ -931,7 +915,7 @@ func (ec *executionContext) field_Query_directiveInputNullable_args(ctx context.
 	args := map[string]interface{}{}
 	var arg0 *InputDirectives
 	if tmp, ok := rawArgs["arg"]; ok {
-		arg0, err = ec.unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(tmp)
+		arg0, err = ec.unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -945,7 +929,7 @@ func (ec *executionContext) field_Query_directiveInput_args(ctx context.Context,
 	args := map[string]interface{}{}
 	var arg0 InputDirectives
 	if tmp, ok := rawArgs["arg"]; ok {
-		arg0, err = ec.unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(tmp)
+		arg0, err = ec.unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -959,11 +943,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["arg"]; ok {
-		getArg0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(tmp) }
+		getArg0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		getArg1 := func(ctx context.Context) (res interface{}, err error) {
 			min := 0
 			n := getArg0
-			return ec.directives.Range(ctx, tmp, n, &min, nil, nil)
+			return ec.directives.Range(ctx, tmp, n, &min, nil)
 		}
 
 		tmp, err = getArg1(ctx)
@@ -979,11 +963,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	args["arg"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["arg2"]; ok {
-		getArg0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(tmp) }
+		getArg0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		getArg1 := func(ctx context.Context) (res interface{}, err error) {
 			min := 0
 			n := getArg0
-			return ec.directives.Range(ctx, tmp, n, &min, nil, nil)
+			return ec.directives.Range(ctx, tmp, n, &min, nil)
 		}
 
 		tmp, err = getArg1(ctx)
@@ -1005,7 +989,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["break"]; ok {
-		arg0, err = ec.unmarshalNString2string(tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1013,7 +997,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["break"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["default"]; ok {
-		arg1, err = ec.unmarshalNString2string(tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1021,7 +1005,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["default"] = arg1
 	var arg2 string
 	if tmp, ok := rawArgs["func"]; ok {
-		arg2, err = ec.unmarshalNString2string(tmp)
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1029,7 +1013,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["func"] = arg2
 	var arg3 string
 	if tmp, ok := rawArgs["interface"]; ok {
-		arg3, err = ec.unmarshalNString2string(tmp)
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1037,7 +1021,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["interface"] = arg3
 	var arg4 string
 	if tmp, ok := rawArgs["select"]; ok {
-		arg4, err = ec.unmarshalNString2string(tmp)
+		arg4, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1045,7 +1029,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["select"] = arg4
 	var arg5 string
 	if tmp, ok := rawArgs["case"]; ok {
-		arg5, err = ec.unmarshalNString2string(tmp)
+		arg5, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1053,7 +1037,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["case"] = arg5
 	var arg6 string
 	if tmp, ok := rawArgs["defer"]; ok {
-		arg6, err = ec.unmarshalNString2string(tmp)
+		arg6, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1061,7 +1045,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["defer"] = arg6
 	var arg7 string
 	if tmp, ok := rawArgs["go"]; ok {
-		arg7, err = ec.unmarshalNString2string(tmp)
+		arg7, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1069,7 +1053,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["go"] = arg7
 	var arg8 string
 	if tmp, ok := rawArgs["map"]; ok {
-		arg8, err = ec.unmarshalNString2string(tmp)
+		arg8, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1077,7 +1061,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["map"] = arg8
 	var arg9 string
 	if tmp, ok := rawArgs["struct"]; ok {
-		arg9, err = ec.unmarshalNString2string(tmp)
+		arg9, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1085,7 +1069,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["struct"] = arg9
 	var arg10 string
 	if tmp, ok := rawArgs["chan"]; ok {
-		arg10, err = ec.unmarshalNString2string(tmp)
+		arg10, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1093,7 +1077,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["chan"] = arg10
 	var arg11 string
 	if tmp, ok := rawArgs["else"]; ok {
-		arg11, err = ec.unmarshalNString2string(tmp)
+		arg11, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1101,7 +1085,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["else"] = arg11
 	var arg12 string
 	if tmp, ok := rawArgs["goto"]; ok {
-		arg12, err = ec.unmarshalNString2string(tmp)
+		arg12, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1109,7 +1093,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["goto"] = arg12
 	var arg13 string
 	if tmp, ok := rawArgs["package"]; ok {
-		arg13, err = ec.unmarshalNString2string(tmp)
+		arg13, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1117,7 +1101,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["package"] = arg13
 	var arg14 string
 	if tmp, ok := rawArgs["switch"]; ok {
-		arg14, err = ec.unmarshalNString2string(tmp)
+		arg14, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1125,7 +1109,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["switch"] = arg14
 	var arg15 string
 	if tmp, ok := rawArgs["const"]; ok {
-		arg15, err = ec.unmarshalNString2string(tmp)
+		arg15, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1133,7 +1117,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["const"] = arg15
 	var arg16 string
 	if tmp, ok := rawArgs["fallthrough"]; ok {
-		arg16, err = ec.unmarshalNString2string(tmp)
+		arg16, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1141,7 +1125,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["fallthrough"] = arg16
 	var arg17 string
 	if tmp, ok := rawArgs["if"]; ok {
-		arg17, err = ec.unmarshalNString2string(tmp)
+		arg17, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1149,7 +1133,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["if"] = arg17
 	var arg18 string
 	if tmp, ok := rawArgs["range"]; ok {
-		arg18, err = ec.unmarshalNString2string(tmp)
+		arg18, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1157,7 +1141,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["range"] = arg18
 	var arg19 string
 	if tmp, ok := rawArgs["type"]; ok {
-		arg19, err = ec.unmarshalNString2string(tmp)
+		arg19, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1165,7 +1149,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["type"] = arg19
 	var arg20 string
 	if tmp, ok := rawArgs["continue"]; ok {
-		arg20, err = ec.unmarshalNString2string(tmp)
+		arg20, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1173,7 +1157,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["continue"] = arg20
 	var arg21 string
 	if tmp, ok := rawArgs["for"]; ok {
-		arg21, err = ec.unmarshalNString2string(tmp)
+		arg21, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1181,7 +1165,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["for"] = arg21
 	var arg22 string
 	if tmp, ok := rawArgs["import"]; ok {
-		arg22, err = ec.unmarshalNString2string(tmp)
+		arg22, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1189,7 +1173,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["import"] = arg22
 	var arg23 string
 	if tmp, ok := rawArgs["return"]; ok {
-		arg23, err = ec.unmarshalNString2string(tmp)
+		arg23, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1197,7 +1181,7 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 	args["return"] = arg23
 	var arg24 string
 	if tmp, ok := rawArgs["var"]; ok {
-		arg24, err = ec.unmarshalNString2string(tmp)
+		arg24, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1211,7 +1195,7 @@ func (ec *executionContext) field_Query_keywords_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 *Keywords
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalOKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(tmp)
+		arg0, err = ec.unmarshalOKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1225,7 +1209,7 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 map[string]interface{}
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalOChanges2map(tmp)
+		arg0, err = ec.unmarshalOChanges2map(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1239,7 +1223,7 @@ func (ec *executionContext) field_Query_nestedInputs_args(ctx context.Context, r
 	args := map[string]interface{}{}
 	var arg0 [][]*OuterInput
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(tmp)
+		arg0, err = ec.unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1253,7 +1237,7 @@ func (ec *executionContext) field_Query_nullableArg_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["arg"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(tmp)
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1267,7 +1251,7 @@ func (ec *executionContext) field_Query_recursive_args(ctx context.Context, rawA
 	args := map[string]interface{}{}
 	var arg0 *RecursiveInputSlice
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(tmp)
+		arg0, err = ec.unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1281,7 +1265,7 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNInt2int(tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1295,7 +1279,7 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(tmp)
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1309,7 +1293,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(tmp)
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3252,7 +3236,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputInnerDirectives(v interface{}) (InnerDirectives, error) {
+func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, v interface{}) (InnerDirectives, error) {
 	var it InnerDirectives
 	var asMap = v.(map[string]interface{})
 
@@ -3260,9 +3244,20 @@ func (ec *executionContext) unmarshalInputInnerDirectives(v interface{}) (InnerD
 		switch k {
 		case "message":
 			var err error
-			it.Message, err = ec.unmarshalNString2string(v)
+			getField0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+			getField1 := func(ctx context.Context) (res interface{}, err error) {
+				n := getField0
+				return ec.directives.Length(ctx, it, n, 1, nil)
+			}
+
+			tmp, err := getField1(ctx)
 			if err != nil {
 				return it, err
+			}
+			if data, ok := tmp.(string); ok {
+				it.Message = data
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 			}
 		}
 	}
@@ -3270,7 +3265,7 @@ func (ec *executionContext) unmarshalInputInnerDirectives(v interface{}) (InnerD
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputInnerInput(v interface{}) (InnerInput, error) {
+func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, v interface{}) (InnerInput, error) {
 	var it InnerInput
 	var asMap = v.(map[string]interface{})
 
@@ -3278,7 +3273,7 @@ func (ec *executionContext) unmarshalInputInnerInput(v interface{}) (InnerInput,
 		switch k {
 		case "id":
 			var err error
-			it.ID, err = ec.unmarshalNInt2int(v)
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3288,7 +3283,7 @@ func (ec *executionContext) unmarshalInputInnerInput(v interface{}) (InnerInput,
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputInputDirectives(v interface{}) (InputDirectives, error) {
+func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, v interface{}) (InputDirectives, error) {
 	var it InputDirectives
 	var asMap = v.(map[string]interface{})
 
@@ -3296,19 +3291,31 @@ func (ec *executionContext) unmarshalInputInputDirectives(v interface{}) (InputD
 		switch k {
 		case "text":
 			var err error
-			it.Text, err = ec.unmarshalNString2string(v)
+			getField0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+			getField1 := func(ctx context.Context) (res interface{}, err error) {
+				max := 7
+				n := getField0
+				return ec.directives.Length(ctx, it, n, 0, &max)
+			}
+
+			tmp, err := getField1(ctx)
 			if err != nil {
 				return it, err
 			}
+			if data, ok := tmp.(string); ok {
+				it.Text = data
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+			}
 		case "inner":
 			var err error
-			it.Inner, err = ec.unmarshalNInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(v)
+			it.Inner, err = ec.unmarshalNInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "innerNullable":
 			var err error
-			it.InnerNullable, err = ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(v)
+			it.InnerNullable, err = ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3318,7 +3325,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(v interface{}) (InputD
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputKeywords(v interface{}) (Keywords, error) {
+func (ec *executionContext) unmarshalInputKeywords(ctx context.Context, v interface{}) (Keywords, error) {
 	var it Keywords
 	var asMap = v.(map[string]interface{})
 
@@ -3326,151 +3333,151 @@ func (ec *executionContext) unmarshalInputKeywords(v interface{}) (Keywords, err
 		switch k {
 		case "break":
 			var err error
-			it.Break, err = ec.unmarshalNString2string(v)
+			it.Break, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "default":
 			var err error
-			it.Default, err = ec.unmarshalNString2string(v)
+			it.Default, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "func":
 			var err error
-			it.Func, err = ec.unmarshalNString2string(v)
+			it.Func, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "interface":
 			var err error
-			it.Interface, err = ec.unmarshalNString2string(v)
+			it.Interface, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "select":
 			var err error
-			it.Select, err = ec.unmarshalNString2string(v)
+			it.Select, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "case":
 			var err error
-			it.Case, err = ec.unmarshalNString2string(v)
+			it.Case, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "defer":
 			var err error
-			it.Defer, err = ec.unmarshalNString2string(v)
+			it.Defer, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "go":
 			var err error
-			it.Go, err = ec.unmarshalNString2string(v)
+			it.Go, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "map":
 			var err error
-			it.Map, err = ec.unmarshalNString2string(v)
+			it.Map, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "struct":
 			var err error
-			it.Struct, err = ec.unmarshalNString2string(v)
+			it.Struct, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "chan":
 			var err error
-			it.Chan, err = ec.unmarshalNString2string(v)
+			it.Chan, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "else":
 			var err error
-			it.Else, err = ec.unmarshalNString2string(v)
+			it.Else, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "goto":
 			var err error
-			it.Goto, err = ec.unmarshalNString2string(v)
+			it.Goto, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "package":
 			var err error
-			it.Package, err = ec.unmarshalNString2string(v)
+			it.Package, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "switch":
 			var err error
-			it.Switch, err = ec.unmarshalNString2string(v)
+			it.Switch, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "const":
 			var err error
-			it.Const, err = ec.unmarshalNString2string(v)
+			it.Const, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "fallthrough":
 			var err error
-			it.Fallthrough, err = ec.unmarshalNString2string(v)
+			it.Fallthrough, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "if":
 			var err error
-			it.If, err = ec.unmarshalNString2string(v)
+			it.If, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "range":
 			var err error
-			it.Range, err = ec.unmarshalNString2string(v)
+			it.Range, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "type":
 			var err error
-			it.Type, err = ec.unmarshalNString2string(v)
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "continue":
 			var err error
-			it.Continue, err = ec.unmarshalNString2string(v)
+			it.Continue, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "for":
 			var err error
-			it.For, err = ec.unmarshalNString2string(v)
+			it.For, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "import":
 			var err error
-			it.Import, err = ec.unmarshalNString2string(v)
+			it.Import, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "return":
 			var err error
-			it.Return, err = ec.unmarshalNString2string(v)
+			it.Return, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "var":
 			var err error
-			it.Var, err = ec.unmarshalNString2string(v)
+			it.Var, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3480,7 +3487,7 @@ func (ec *executionContext) unmarshalInputKeywords(v interface{}) (Keywords, err
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputOuterInput(v interface{}) (OuterInput, error) {
+func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, v interface{}) (OuterInput, error) {
 	var it OuterInput
 	var asMap = v.(map[string]interface{})
 
@@ -3488,7 +3495,7 @@ func (ec *executionContext) unmarshalInputOuterInput(v interface{}) (OuterInput,
 		switch k {
 		case "inner":
 			var err error
-			it.Inner, err = ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(v)
+			it.Inner, err = ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3498,7 +3505,7 @@ func (ec *executionContext) unmarshalInputOuterInput(v interface{}) (OuterInput,
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
+func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Context, v interface{}) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
 	var asMap = v.(map[string]interface{})
 
@@ -3506,7 +3513,7 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(v interface{}) (Re
 		switch k {
 		case "self":
 			var err error
-			it.Self, err = ec.unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v)
+			it.Self, err = ec.unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4303,7 +4310,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNBoolean2bool(v interface{}) (bool, error) {
+func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
 
@@ -4311,7 +4318,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return graphql.MarshalBoolean(v)
 }
 
-func (ec *executionContext) unmarshalNID2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
 
@@ -4319,23 +4326,23 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return graphql.MarshalID(v)
 }
 
-func (ec *executionContext) unmarshalNInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(v interface{}) (InnerDirectives, error) {
-	return ec.unmarshalInputInnerDirectives(v)
+func (ec *executionContext) unmarshalNInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx context.Context, v interface{}) (InnerDirectives, error) {
+	return ec.unmarshalInputInnerDirectives(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(v interface{}) (InnerInput, error) {
-	return ec.unmarshalInputInnerInput(v)
+func (ec *executionContext) unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx context.Context, v interface{}) (InnerInput, error) {
+	return ec.unmarshalInputInnerInput(ctx, v)
 }
 
 func (ec *executionContext) marshalNInnerObject2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerObject(ctx context.Context, sel ast.SelectionSet, v InnerObject) graphql.Marshaler {
 	return ec._InnerObject(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v interface{}) (InputDirectives, error) {
-	return ec.unmarshalInputInputDirectives(v)
+func (ec *executionContext) unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx context.Context, v interface{}) (InputDirectives, error) {
+	return ec.unmarshalInputInputDirectives(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNInt2int(v interface{}) (int, error) {
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
 
@@ -4343,11 +4350,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return graphql.MarshalInt(v)
 }
 
-func (ec *executionContext) unmarshalNRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
-	return ec.unmarshalInputRecursiveInputSlice(v)
+func (ec *executionContext) unmarshalNRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx context.Context, v interface{}) (RecursiveInputSlice, error) {
+	return ec.unmarshalInputRecursiveInputSlice(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNString2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -4355,11 +4362,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalNString2ᚖstring(v interface{}) (*string, error) {
+func (ec *executionContext) unmarshalNString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNString2string(v)
+	res, err := ec.unmarshalNString2string(ctx, v)
 	return &res, err
 }
 
@@ -4443,7 +4450,7 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 	return ret
 }
 
-func (ec *executionContext) unmarshalN__DirectiveLocation2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -4451,7 +4458,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4463,7 +4470,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(v interface{
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalN__DirectiveLocation2string(vSlice[i])
+		res[i], err = ec.unmarshalN__DirectiveLocation2string(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -4590,7 +4597,7 @@ func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec.___Type(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalN__TypeKind2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -4598,7 +4605,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalOBoolean2bool(v interface{}) (bool, error) {
+func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
 
@@ -4606,11 +4613,11 @@ func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.Se
 	return graphql.MarshalBoolean(v)
 }
 
-func (ec *executionContext) unmarshalOBoolean2ᚖbool(v interface{}) (*bool, error) {
+func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v interface{}) (*bool, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOBoolean2bool(v)
+	res, err := ec.unmarshalOBoolean2bool(ctx, v)
 	return &res, err
 }
 
@@ -4621,7 +4628,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOChanges2map(v interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
 	return v.(map[string]interface{}), nil
 }
 
@@ -4647,7 +4654,7 @@ func (ec *executionContext) marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec._Error(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOFloat2float64(v interface{}) (float64, error) {
+func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	return graphql.UnmarshalFloat(v)
 }
 
@@ -4655,31 +4662,31 @@ func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.S
 	return graphql.MarshalFloat(v)
 }
 
-func (ec *executionContext) unmarshalOInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(v interface{}) (InnerDirectives, error) {
-	return ec.unmarshalInputInnerDirectives(v)
+func (ec *executionContext) unmarshalOInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx context.Context, v interface{}) (InnerDirectives, error) {
+	return ec.unmarshalInputInnerDirectives(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(v interface{}) (*InnerDirectives, error) {
+func (ec *executionContext) unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx context.Context, v interface{}) (*InnerDirectives, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(v)
+	res, err := ec.unmarshalOInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) unmarshalOInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v interface{}) (InputDirectives, error) {
-	return ec.unmarshalInputInputDirectives(v)
+func (ec *executionContext) unmarshalOInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx context.Context, v interface{}) (InputDirectives, error) {
+	return ec.unmarshalInputInputDirectives(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v interface{}) (*InputDirectives, error) {
+func (ec *executionContext) unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx context.Context, v interface{}) (*InputDirectives, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(v)
+	res, err := ec.unmarshalOInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) unmarshalOInt2int(v interface{}) (int, error) {
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
 
@@ -4687,11 +4694,11 @@ func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.Selecti
 	return graphql.MarshalInt(v)
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint(v interface{}) (*int, error) {
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOInt2int(v)
+	res, err := ec.unmarshalOInt2int(ctx, v)
 	return &res, err
 }
 
@@ -4724,15 +4731,15 @@ func (ec *executionContext) marshalOIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋco
 	return ec._It(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v interface{}) (Keywords, error) {
-	return ec.unmarshalInputKeywords(v)
+func (ec *executionContext) unmarshalOKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(ctx context.Context, v interface{}) (Keywords, error) {
+	return ec.unmarshalInputKeywords(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v interface{}) (*Keywords, error) {
+func (ec *executionContext) unmarshalOKeywords2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(ctx context.Context, v interface{}) (*Keywords, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(v)
+	res, err := ec.unmarshalOKeywords2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐKeywords(ctx, v)
 	return &res, err
 }
 
@@ -4747,11 +4754,11 @@ func (ec *executionContext) marshalOModelMethods2ᚖgithubᚗcomᚋ99designsᚋg
 	return ec._ModelMethods(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) (OuterInput, error) {
-	return ec.unmarshalInputOuterInput(v)
+func (ec *executionContext) unmarshalOOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) (OuterInput, error) {
+	return ec.unmarshalInputOuterInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) ([][]*OuterInput, error) {
+func (ec *executionContext) unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) ([][]*OuterInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4763,7 +4770,7 @@ func (ec *executionContext) unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99desig
 	var err error
 	res := make([][]*OuterInput, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalOOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(vSlice[i])
+		res[i], err = ec.unmarshalOOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -4771,7 +4778,7 @@ func (ec *executionContext) unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99desig
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) ([]*OuterInput, error) {
+func (ec *executionContext) unmarshalOOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) ([]*OuterInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4783,7 +4790,7 @@ func (ec *executionContext) unmarshalOOuterInput2ᚕᚖgithubᚗcomᚋ99designs�
 	var err error
 	res := make([]*OuterInput, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalOOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(vSlice[i])
+		res[i], err = ec.unmarshalOOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -4791,11 +4798,11 @@ func (ec *executionContext) unmarshalOOuterInput2ᚕᚖgithubᚗcomᚋ99designs�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v interface{}) (*OuterInput, error) {
+func (ec *executionContext) unmarshalOOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) (*OuterInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(v)
+	res, err := ec.unmarshalOOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx, v)
 	return &res, err
 }
 
@@ -4872,11 +4879,11 @@ func (ec *executionContext) marshalOOuterObject2ᚖgithubᚗcomᚋ99designsᚋgq
 	return ec._OuterObject(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalORecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) (RecursiveInputSlice, error) {
-	return ec.unmarshalInputRecursiveInputSlice(v)
+func (ec *executionContext) unmarshalORecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx context.Context, v interface{}) (RecursiveInputSlice, error) {
+	return ec.unmarshalInputRecursiveInputSlice(ctx, v)
 }
 
-func (ec *executionContext) unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) ([]RecursiveInputSlice, error) {
+func (ec *executionContext) unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx context.Context, v interface{}) ([]RecursiveInputSlice, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4888,7 +4895,7 @@ func (ec *executionContext) unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99de
 	var err error
 	res := make([]RecursiveInputSlice, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(vSlice[i])
+		res[i], err = ec.unmarshalNRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -4896,11 +4903,11 @@ func (ec *executionContext) unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99de
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v interface{}) (*RecursiveInputSlice, error) {
+func (ec *executionContext) unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx context.Context, v interface{}) (*RecursiveInputSlice, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalORecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(v)
+	res, err := ec.unmarshalORecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx, v)
 	return &res, err
 }
 
@@ -4939,7 +4946,7 @@ func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	return ret
 }
 
-func (ec *executionContext) unmarshalOString2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -4947,11 +4954,11 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalOString2ᚖstring(v interface{}) (*string, error) {
+func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOString2string(v)
+	res, err := ec.unmarshalOString2string(ctx, v)
 	return &res, err
 }
 

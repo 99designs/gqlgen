@@ -19,7 +19,6 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/handler"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -204,55 +203,56 @@ func TestDirectives(t *testing.T) {
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
-					Length: func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message string) (res interface{}, err error) {
-						if d, ok := obj.(string); ok {
-							if len(d) < min {
-								return nil, errors.New(message)
-							}
-							if max != nil && len(d) > *max {
-								return nil, errors.New(message)
-							}
-							return next(ctx)
+					Length: func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int) (interface{}, error) {
+						res, err := next(ctx)
+						if err != nil {
+							return nil, err
 						}
-						return nil, errors.New(message)
+
+						s := res.(string)
+						if len(s) < min {
+							return nil, fmt.Errorf("too short")
+						}
+						if max != nil && len(s) > *max {
+							return nil, fmt.Errorf("too long")
+						}
+						return res, nil
 					},
-					Range: func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int, message *string) (res interface{}, err error) {
-						if obj == nil {
-							return next(ctx)
+					Range: func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (interface{}, error) {
+						res, err := next(ctx)
+						if err != nil {
+							return nil, err
 						}
-						if message == nil {
-							err = errors.New("range invalid")
-						} else {
-							err = errors.New(*message)
-						}
-						if d, ok := obj.(int); ok {
-							if min != nil && d < *min {
-								return nil, err
+
+						switch res := res.(type) {
+						case int:
+							if min != nil && res < *min {
+								return nil, fmt.Errorf("too small")
 							}
-							if max != nil && d > *max {
-								return nil, err
+							if max != nil && res > *max {
+								return nil, fmt.Errorf("too large")
 							}
 							return next(ctx)
-						}
-						if d, ok := obj.(int64); ok {
-							if min != nil && int(d) < *min {
-								return nil, err
+
+						case int64:
+							if min != nil && int(res) < *min {
+								return nil, fmt.Errorf("too small")
 							}
-							if max != nil && int(d) > *max {
-								return nil, err
+							if max != nil && int(res) > *max {
+								return nil, fmt.Errorf("too large")
+							}
+							return next(ctx)
+
+						case *int:
+							if min != nil && *res < *min {
+								return nil, fmt.Errorf("too small")
+							}
+							if max != nil && *res > *max {
+								return nil, fmt.Errorf("too large")
 							}
 							return next(ctx)
 						}
-						if d, ok := obj.(*int); ok {
-							if min != nil && *d < *min {
-								return nil, err
-							}
-							if max != nil && *d > *max {
-								return nil, err
-							}
-							return next(ctx)
-						}
-						return nil, err
+						return nil, fmt.Errorf("unsupported type %T", res)
 					},
 				},
 			}),
@@ -275,7 +275,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveArg(arg: "") }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"invalid length","path":["directiveArg"]}]`)
+			require.EqualError(t, err, `[{"message":"too short","path":["directiveArg"]}]`)
 			require.Nil(t, resp.DirectiveArg)
 		})
 		t.Run("when function errors on nullable arg directives", func(t *testing.T) {
@@ -285,7 +285,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveNullableArg(arg: -100) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"range invalid","path":["directiveNullableArg"]}]`)
+			require.EqualError(t, err, `[{"message":"too small","path":["directiveNullableArg"]}]`)
 			require.Nil(t, resp.DirectiveNullableArg)
 		})
 		t.Run("when function success on nullable arg directives", func(t *testing.T) {
@@ -327,7 +327,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"invalid text",inner:{message:"123"}}) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable"]}]`)
+			require.EqualError(t, err, `[{"message":"too long","path":["directiveInputNullable"]}]`)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function errors on inner directives", func(t *testing.T) {
@@ -337,7 +337,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"2",inner:{message:""}}) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable"]}]`)
+			require.EqualError(t, err, `[{"message":"too short","path":["directiveInputNullable"]}]`)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function errors on nullable inner directives", func(t *testing.T) {
@@ -347,7 +347,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"success",inner:{message:"1"},innerNullable:{message:""}}) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable"]}]`)
+			require.EqualError(t, err, `[{"message":"too short","path":["directiveInputNullable"]}]`)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function success", func(t *testing.T) {

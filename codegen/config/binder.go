@@ -154,7 +154,7 @@ type TypeReference struct {
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
 }
 
-func (ref TypeReference) Elem() *TypeReference {
+func (ref *TypeReference) Elem() *TypeReference {
 	if p, isPtr := ref.GO.(*types.Pointer); isPtr {
 		return &TypeReference{
 			GO:          p.Elem(),
@@ -177,26 +177,26 @@ func (ref TypeReference) Elem() *TypeReference {
 	return nil
 }
 
-func (t TypeReference) IsPtr() bool {
+func (t *TypeReference) IsPtr() bool {
 	_, isPtr := t.GO.(*types.Pointer)
 	return isPtr
 }
 
-func (t TypeReference) IsSlice() bool {
+func (t *TypeReference) IsSlice() bool {
 	_, isSlice := t.GO.(*types.Slice)
 	return isSlice
 }
 
-func (t TypeReference) IsNamed() bool {
+func (t *TypeReference) IsNamed() bool {
 	_, isSlice := t.GO.(*types.Named)
 	return isSlice
 }
 
-func (t TypeReference) IsScalar() bool {
+func (t *TypeReference) IsScalar() bool {
 	return t.Definition.Kind == ast.Scalar
 }
 
-func (t TypeReference) SelfMarshalling() bool {
+func (t *TypeReference) SelfMarshalling() bool {
 	it := t.GO
 	if ptr, isPtr := it.(*types.Pointer); isPtr {
 		it = ptr.Elem()
@@ -215,7 +215,26 @@ func (t TypeReference) SelfMarshalling() bool {
 	return false
 }
 
-func (t TypeReference) UniquenessKey() string {
+func (t *TypeReference) SelfUnmarshalling() bool {
+	it := t.GO
+	if ptr, isPtr := it.(*types.Pointer); isPtr {
+		it = ptr.Elem()
+	}
+	namedType, ok := it.(*types.Named)
+	if !ok {
+		return false
+	}
+
+	for i := 0; i < namedType.NumMethods(); i++ {
+		switch namedType.Method(i).Name() {
+		case "UnmarshalGQL":
+			return true
+		}
+	}
+	return false
+}
+
+func (t *TypeReference) UniquenessKey() string {
 	var nullability = "O"
 	if t.GQL.NonNull {
 		nullability = "N"
@@ -224,7 +243,7 @@ func (t TypeReference) UniquenessKey() string {
 	return nullability + t.Definition.Name + "2" + templates.TypeIdentifier(t.GO)
 }
 
-func (t TypeReference) MarshalFunc() string {
+func (t *TypeReference) MarshalFunc() string {
 	if t.Definition == nil {
 		panic(errors.New("Definition missing for " + t.GQL.Name()))
 	}
@@ -236,7 +255,7 @@ func (t TypeReference) MarshalFunc() string {
 	return "marshal" + t.UniquenessKey()
 }
 
-func (t TypeReference) UnmarshalFunc() string {
+func (t *TypeReference) UnmarshalFunc() string {
 	if t.Definition == nil {
 		panic(errors.New("Definition missing for " + t.GQL.Name()))
 	}
@@ -304,21 +323,6 @@ func (b *Binder) TypeReference(schemaType *ast.Type) (ret *TypeReference, err er
 		ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
 	} else {
 		ref.GO = obj.Type()
-	}
-
-	if namedType, ok := ref.GO.(*types.Named); ok && ref.Unmarshaler == nil {
-		hasUnmarshal := false
-		for i := 0; i < namedType.NumMethods(); i++ {
-			switch namedType.Method(i).Name() {
-			case "UnmarshalGQL":
-				hasUnmarshal = true
-			}
-		}
-
-		// Special case to reference generated unmarshal functions
-		if !hasUnmarshal {
-			ref.Unmarshaler = types.NewFunc(0, b.cfg.Exec.Pkg(), "ec.unmarshalInput"+schemaType.Name(), nil)
-		}
 	}
 
 	ref.GO = b.CopyModifiersFromAst(schemaType, def.Kind != ast.Interface, ref.GO)

@@ -328,7 +328,7 @@ func (ec *executionContext) dir_magic_args(ctx context.Context, rawArgs map[stri
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["kind"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(tmp)
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -342,7 +342,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -356,7 +356,7 @@ func (ec *executionContext) field_Query_date_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 models.DateFilter
 	if tmp, ok := rawArgs["filter"]; ok {
-		arg0, err = ec.unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(tmp)
+		arg0, err = ec.unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -370,7 +370,7 @@ func (ec *executionContext) field_Query_error_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 *models.ErrorType
 	if tmp, ok := rawArgs["type"]; ok {
-		arg0, err = ec.unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(tmp)
+		arg0, err = ec.unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -384,7 +384,7 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(tmp)
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -398,7 +398,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(tmp)
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1551,7 +1551,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputDateFilter(v interface{}) (models.DateFilter, error) {
+func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, v interface{}) (models.DateFilter, error) {
 	var it models.DateFilter
 	var asMap = v.(map[string]interface{})
 
@@ -1566,19 +1566,19 @@ func (ec *executionContext) unmarshalInputDateFilter(v interface{}) (models.Date
 		switch k {
 		case "value":
 			var err error
-			it.Value, err = ec.unmarshalNString2string(v)
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "timezone":
 			var err error
-			it.Timezone, err = ec.unmarshalOString2ᚖstring(v)
+			it.Timezone, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "op":
 			var err error
-			it.Op, err = ec.unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(v)
+			it.Op, err = ec.unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2012,7 +2012,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNBoolean2bool(v interface{}) (bool, error) {
+func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
 
@@ -2020,15 +2020,15 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return graphql.MarshalBoolean(v)
 }
 
-func (ec *executionContext) unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(v interface{}) (models.DateFilter, error) {
-	return ec.unmarshalInputDateFilter(v)
+func (ec *executionContext) unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(ctx context.Context, v interface{}) (models.DateFilter, error) {
+	return ec.unmarshalInputDateFilter(ctx, v)
 }
 
 func (ec *executionContext) marshalNElement2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐElement(ctx context.Context, sel ast.SelectionSet, v models.Element) graphql.Marshaler {
 	return ec._Element(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNString2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -2036,7 +2036,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalNString2ᚕstring(v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalNString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -2048,7 +2048,7 @@ func (ec *executionContext) unmarshalNString2ᚕstring(v interface{}) ([]string,
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNString2string(vSlice[i])
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -2100,7 +2100,7 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 	return ret
 }
 
-func (ec *executionContext) unmarshalN__DirectiveLocation2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -2108,7 +2108,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -2120,7 +2120,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(v interface{
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalN__DirectiveLocation2string(vSlice[i])
+		res[i], err = ec.unmarshalN__DirectiveLocation2string(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -2247,7 +2247,7 @@ func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec.___Type(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalN__TypeKind2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -2255,7 +2255,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalOBoolean2bool(v interface{}) (bool, error) {
+func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
 
@@ -2263,7 +2263,7 @@ func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.Se
 	return graphql.MarshalBoolean(v)
 }
 
-func (ec *executionContext) unmarshalOBoolean2ᚕbool(v interface{}) ([]bool, error) {
+func (ec *executionContext) unmarshalOBoolean2ᚕbool(ctx context.Context, v interface{}) ([]bool, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -2275,7 +2275,7 @@ func (ec *executionContext) unmarshalOBoolean2ᚕbool(v interface{}) ([]bool, er
 	var err error
 	res := make([]bool, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNBoolean2bool(vSlice[i])
+		res[i], err = ec.unmarshalNBoolean2bool(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -2292,7 +2292,7 @@ func (ec *executionContext) marshalOBoolean2ᚕbool(ctx context.Context, sel ast
 	return ret
 }
 
-func (ec *executionContext) unmarshalODATE_FILTER_OP2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(v interface{}) (models.DateFilterOp, error) {
+func (ec *executionContext) unmarshalODATE_FILTER_OP2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx context.Context, v interface{}) (models.DateFilterOp, error) {
 	var res models.DateFilterOp
 	return res, res.UnmarshalGQL(v)
 }
@@ -2301,11 +2301,11 @@ func (ec *executionContext) marshalODATE_FILTER_OP2githubᚗcomᚋ99designsᚋgq
 	return v
 }
 
-func (ec *executionContext) unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(v interface{}) (*models.DateFilterOp, error) {
+func (ec *executionContext) unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx context.Context, v interface{}) (*models.DateFilterOp, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalODATE_FILTER_OP2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(v)
+	res, err := ec.unmarshalODATE_FILTER_OP2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx, v)
 	return &res, err
 }
 
@@ -2358,7 +2358,7 @@ func (ec *executionContext) marshalOElement2ᚖgithubᚗcomᚋ99designsᚋgqlgen
 	return ec._Element(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v interface{}) (models.ErrorType, error) {
+func (ec *executionContext) unmarshalOErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx context.Context, v interface{}) (models.ErrorType, error) {
 	var res models.ErrorType
 	return res, res.UnmarshalGQL(v)
 }
@@ -2367,11 +2367,11 @@ func (ec *executionContext) marshalOErrorType2githubᚗcomᚋ99designsᚋgqlgen�
 	return v
 }
 
-func (ec *executionContext) unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v interface{}) (*models.ErrorType, error) {
+func (ec *executionContext) unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx context.Context, v interface{}) (*models.ErrorType, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(v)
+	res, err := ec.unmarshalOErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx, v)
 	return &res, err
 }
 
@@ -2382,7 +2382,7 @@ func (ec *executionContext) marshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlg
 	return v
 }
 
-func (ec *executionContext) unmarshalOInt2int(v interface{}) (int, error) {
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
 
@@ -2390,11 +2390,11 @@ func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.Selecti
 	return graphql.MarshalInt(v)
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint(v interface{}) (*int, error) {
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOInt2int(v)
+	res, err := ec.unmarshalOInt2int(ctx, v)
 	return &res, err
 }
 
@@ -2405,7 +2405,7 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return ec.marshalOInt2int(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOString2string(v interface{}) (string, error) {
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
@@ -2413,11 +2413,11 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalOString2ᚖstring(v interface{}) (*string, error) {
+func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOString2string(v)
+	res, err := ec.unmarshalOString2string(ctx, v)
 	return &res, err
 }
 

@@ -6,7 +6,7 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 		var arg{{$i}} {{ $arg.TypeReference.GO | ref}}
 		if tmp, ok := rawArgs[{{$arg.Name|quote}}]; ok {
 			{{- if $arg.Directives }}
-				getArg0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $arg.TypeReference.UnmarshalFunc }}(tmp) }
+				getArg0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, tmp) }
 
 				{{- range $i, $directive := $arg.Directives }}
 					getArg{{add $i 1}} := func(ctx context.Context) (res interface{}, err error) {
@@ -30,7 +30,7 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 					return nil, fmt.Errorf(`unexpected type %T from directive, should be {{ $arg.TypeReference.GO }}`, tmp)
 				}
 			{{- else }}
-				arg{{$i}}, err = ec.{{ $arg.TypeReference.UnmarshalFunc }}(tmp)
+				arg{{$i}}, err = ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, tmp)
 				if err != nil {
 					return nil, err
 				}

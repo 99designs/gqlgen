@@ -7,12 +7,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/99designs/gqlgen/plugin/servergen"
+
 	"github.com/99designs/gqlgen"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var configComment = `
@@ -71,14 +73,9 @@ var initCmd = cli.Command{
 }
 
 func GenerateGraphServer(cfg *config.Config, serverFilename string) {
-	err := gqlgen.Generate(cfg)
+	err := gqlgen.Generate(cfg, gqlgen.AddPlugin(servergen.New(serverFilename)))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-	}
-
-	if err := gqlgen.GenerateServer(serverFilename, cfg); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
 	}
 
 	fmt.Fprintf(os.Stdout, "Exec \"go run ./%s\" to start GraphQL server\n", serverFilename)

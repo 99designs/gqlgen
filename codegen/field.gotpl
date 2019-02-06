@@ -1,8 +1,7 @@
-{{ $field := . }}
-{{ $object := $field.Object }}
+{{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
 {{- if $object.Stream }}
-	func (ec *executionContext) _{{$object.Definition.GQLDefinition.Name}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Field: field,
 			Args:  nil,
@@ -32,20 +31,17 @@
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				func() graphql.Marshaler {
-					{{ $field.WriteJson }}
-				}().MarshalGQL(w)
+				ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		}
 	}
 {{ else }}
-	// nolint: vetshadow
-	func (ec *executionContext) _{{$object.Definition.GQLDefinition.Name}}_{{$field.GQLName}}(ctx context.Context, field graphql.CollectedField, {{if not $object.Root}}obj *{{$object.Definition.GoType | ref}}{{end}}) graphql.Marshaler {
+	func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj *{{$object.Type | ref}}{{end}}) graphql.Marshaler {
 		ctx = ec.Tracer.StartFieldExecution(ctx, field)
 		defer func () { ec.Tracer.EndFieldExecution(ctx) }()
 		rctx := &graphql.ResolverContext{
-			Object: {{$object.Definition.GQLDefinition.Name|quote}},
+			Object: {{$object.Name|quote}},
 			Field: field,
 			Args:  nil,
 		}
@@ -75,16 +71,18 @@
 			{{- end }}
 		})
 		if resTmp == nil {
-			{{- if $field.ASTType.NonNull }}
+			{{- if $field.TypeReference.GQL.NonNull }}
 				if !ec.HasError(rctx) {
 					ec.Errorf(ctx, "must not be null")
 				}
 			{{- end }}
 			return graphql.Null
 		}
-		res := resTmp.({{$field.GoType | ref}})
+		res := resTmp.({{$field.TypeReference.GO | ref}})
 		rctx.Result = res
 		ctx = ec.Tracer.StartFieldChildExecution(ctx)
-		{{ $field.WriteJson }}
+		return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
 	}
 {{ end }}
+
+{{- end }}{{- end}}

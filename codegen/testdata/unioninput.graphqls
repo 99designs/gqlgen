@@ -1,5 +1,0 @@
-type Query {
-    addBookmark(b: Bookmarkable!): Boolean!
-}
-type Item {name: String}
-union Bookmarkable = Item

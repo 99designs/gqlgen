@@ -1,16 +1,15 @@
 package gqlgen
 
 import (
-	"path/filepath"
 	"syscall"
-
-	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/modelgen"
+	"github.com/99designs/gqlgen/plugin/resolvergen"
 	"github.com/pkg/errors"
+	"golang.org/x/tools/go/packages"
 )
 
 func Generate(cfg *config.Config, option ...Option) error {
@@ -19,6 +18,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 
 	plugins := []plugin.Plugin{
 		modelgen.New(),
+		resolvergen.New(),
 	}
 
 	for _, o := range option {
@@ -34,18 +34,21 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 	// Merge again now that the generated models have been injected into the typemap
-	schema, err := codegen.NewSchema(cfg)
+	data, err := codegen.BuildData(cfg)
 	if err != nil {
 		return errors.Wrap(err, "merging failed")
 	}
 
-	if err := buildExec(schema); err != nil {
-		return errors.Wrap(err, "generating exec failed")
+	if err = codegen.GenerateCode(data); err != nil {
+		return errors.Wrap(err, "generating core failed")
 	}
 
-	if cfg.Resolver.IsDefined() {
-		if err := GenerateResolver(schema); err != nil {
-			return errors.Wrap(err, "generating resolver failed")
+	for _, p := range plugins {
+		if mut, ok := p.(plugin.CodeGenerator); ok {
+			err := mut.GenerateCode(data)
+			if err != nil {
+				return errors.Wrap(err, p.Name())
+			}
 		}
 	}
 
@@ -70,12 +73,4 @@ func validate(cfg *config.Config) error {
 		return errors.Wrap(err, "validation failed")
 	}
 	return nil
-}
-
-func abs(path string) string {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		panic(err)
-	}
-	return filepath.ToSlash(absPath)
 }

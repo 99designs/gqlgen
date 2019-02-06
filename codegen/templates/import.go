@@ -38,14 +38,14 @@ func (s *Imports) String() string {
 	return res
 }
 
-func (s *Imports) Reserve(path string, aliases ...string) string {
+func (s *Imports) Reserve(path string, aliases ...string) (string, error) {
 	if path == "" {
 		panic("empty ambient import")
 	}
 
 	// if we are referencing our own package we dont need an import
 	if code.ImportPathForDir(s.destDir) == path {
-		return ""
+		return "", nil
 	}
 
 	name := code.NameForPackage(path)
@@ -57,11 +57,14 @@ func (s *Imports) Reserve(path string, aliases ...string) string {
 	}
 
 	if existing := s.findByPath(path); existing != nil {
-		panic("ambient import already exists")
+		if existing.Alias == alias {
+			return "", nil
+		}
+		return "", fmt.Errorf("ambient import already exists")
 	}
 
 	if alias := s.findByAlias(alias); alias != nil {
-		panic("ambient import collides on an alias")
+		return "", fmt.Errorf("ambient import collides on an alias")
 	}
 
 	s.imports = append(s.imports, &Import{
@@ -70,7 +73,7 @@ func (s *Imports) Reserve(path string, aliases ...string) string {
 		Alias: alias,
 	})
 
-	return ""
+	return "", nil
 }
 
 func (s *Imports) Lookup(path string) string {

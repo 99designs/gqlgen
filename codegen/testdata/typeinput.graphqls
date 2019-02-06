@@ -1,7 +1,0 @@
-type Query {
-    addBookmark(b: BookmarkableInput!): Boolean!
-}
-type Item {name: String}
-input BookmarkableInput {
-    item: Item
-}

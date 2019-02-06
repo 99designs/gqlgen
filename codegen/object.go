@@ -1,16 +1,13 @@
 package codegen
 
 import (
-	"bytes"
-	"fmt"
+	"go/types"
 	"strconv"
 	"strings"
-	"text/template"
 	"unicode"
 
-	"go/types"
-
-	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -23,48 +20,71 @@ const (
 )
 
 type Object struct {
-	Definition         *TypeDefinition
-	Fields             []*Field
-	Implements         []*TypeDefinition
+	*ast.Definition
+
+	Type               types.Type
 	ResolverInterface  types.Type
 	Root               bool
+	Fields             []*Field
+	Implements         []*ast.Definition
 	DisableConcurrency bool
 	Stream             bool
 	Directives         []*Directive
-	InTypemap          bool
 }
 
-type Field struct {
-	*TypeReference
-	GQLName          string           // The name of the field in graphql
-	GoFieldType      GoFieldType      // The field type in go, if any
-	GoReceiverName   string           // The name of method & var receiver in go, if any
-	GoFieldName      string           // The name of the method or var in go, if any
-	IsResolver       bool             // Does this field need a resolver
-	Args             []*FieldArgument // A list of arguments to be passed to this field
-	MethodHasContext bool             // If this is bound to a go method, does the method also take a context
-	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
-	Object           *Object          // A link back to the parent object
-	Default          interface{}      // The default value
-	Directives       []*Directive
-}
+func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
+	dirs, err := b.getDirectives(typ.Directives)
+	if err != nil {
+		return nil, errors.Wrap(err, typ.Name)
+	}
 
-type FieldArgument struct {
-	*TypeReference
+	obj := &Object{
+		Definition:         typ,
+		Root:               b.Schema.Query == typ || b.Schema.Mutation == typ || b.Schema.Subscription == typ,
+		DisableConcurrency: typ == b.Schema.Mutation,
+		Stream:             typ == b.Schema.Subscription,
+		Directives:         dirs,
+		ResolverInterface: types.NewNamed(
+			types.NewTypeName(0, b.Config.Exec.Pkg(), typ.Name+"Resolver", nil),
+			nil,
+			nil,
+		),
+	}
 
-	GQLName    string      // The name of the argument in graphql
-	GoVarName  string      // The name of the var in go
-	Object     *Object     // A link back to the parent object
-	Default    interface{} // The default value
-	Directives []*Directive
-	Value      interface{} // value set in Schema
+	if !obj.Root {
+		goObject, err := b.Binder.DefaultUserObject(typ.Name)
+		if err != nil {
+			return nil, err
+		}
+		obj.Type = goObject
+	}
+
+	for _, intf := range b.Schema.GetImplements(typ) {
+		obj.Implements = append(obj.Implements, b.Schema.Types[intf.Name])
+	}
+
+	for _, field := range typ.Fields {
+		if strings.HasPrefix(field.Name, "__") {
+			continue
+		}
+
+		var f *Field
+		f, err = b.buildField(obj, field)
+		if err != nil {
+			return nil, err
+		}
+
+		obj.Fields = append(obj.Fields, f)
+	}
+
+	return obj, nil
 }
 
 type Objects []*Object
 
 func (o *Object) Implementors() string {
-	satisfiedBy := strconv.Quote(o.Definition.GQLDefinition.Name)
-	for _, s := range o.Definition.GQLDefinition.Interfaces {
+	satisfiedBy := strconv.Quote(o.Name)
+	for _, s := range o.Definition.Interfaces {
 		satisfiedBy += ", " + strconv.Quote(s)
 	}
 	return "[]string{" + satisfiedBy + "}"
@@ -78,6 +98,20 @@ func (o *Object) HasResolvers() bool {
 	}
 	return false
 }
+
+func (o *Object) HasUnmarshal() bool {
+	if o.Type == config.MapType {
+		return true
+	}
+	for i := 0; i < o.Type.(*types.Named).NumMethods(); i++ {
+		switch o.Type.(*types.Named).Method(i).Name() {
+		case "UnmarshalGQL":
+			return true
+		}
+	}
+	return false
+}
+
 func (o *Object) HasDirectives() bool {
 	if len(o.Directives) > 0 {
 		return true
@@ -101,247 +135,20 @@ func (o *Object) IsConcurrent() bool {
 }
 
 func (o *Object) IsReserved() bool {
-	return strings.HasPrefix(o.Definition.GQLDefinition.Name, "__")
+	return strings.HasPrefix(o.Definition.Name, "__")
 }
 
 func (o *Object) Description() string {
-	return o.Definition.GQLDefinition.Description
-}
-
-func (f *Field) HasDirectives() bool {
-	return len(f.Directives) > 0
-}
-
-func (f *Field) IsReserved() bool {
-	return strings.HasPrefix(f.GQLName, "__")
-}
-
-func (f *Field) IsMethod() bool {
-	return f.GoFieldType == GoFieldMethod
-}
-
-func (f *Field) IsVariable() bool {
-	return f.GoFieldType == GoFieldVariable
-}
-
-func (f *Field) IsConcurrent() bool {
-	if f.Object.DisableConcurrency {
-		return false
-	}
-	return f.MethodHasContext || f.IsResolver
-}
-
-func (f *Field) GoNameUnexported() string {
-	return templates.ToGoPrivate(f.GQLName)
-}
-
-func (f *Field) ShortInvocation() string {
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoFieldName, f.CallArgs())
-}
-
-func (f *Field) ArgsFunc() string {
-	if len(f.Args) == 0 {
-		return ""
-	}
-
-	return "field_" + f.Object.Definition.GQLDefinition.Name + "_" + f.GQLName + "_args"
-}
-
-func (f *Field) ResolverType() string {
-	if !f.IsResolver {
-		return ""
-	}
-
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.GQLDefinition.Name, f.GoFieldName, f.CallArgs())
-}
-
-func (f *Field) ShortResolverDeclaration() string {
-	if !f.IsResolver {
-		return ""
-	}
-	res := fmt.Sprintf("%s(ctx context.Context", f.GoFieldName)
-
-	if !f.Object.Root {
-		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Definition.GoType))
-	}
-	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
-	}
-
-	result := templates.CurrentImports.LookupType(f.GoType)
-	if f.Object.Stream {
-		result = "<-chan " + result
-	}
-
-	res += fmt.Sprintf(") (%s, error)", result)
-	return res
-}
-
-func (f *Field) ComplexitySignature() string {
-	res := fmt.Sprintf("func(childComplexity int")
-	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.GoVarName, templates.CurrentImports.LookupType(arg.GoType))
-	}
-	res += ") int"
-	return res
-}
-
-func (f *Field) ComplexityArgs() string {
-	var args []string
-	for _, arg := range f.Args {
-		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+templates.CurrentImports.LookupType(arg.GoType)+")")
-	}
-
-	return strings.Join(args, ", ")
-}
-
-func (f *Field) CallArgs() string {
-	var args []string
-
-	if f.IsResolver {
-		args = append(args, "rctx")
-
-		if !f.Object.Root {
-			args = append(args, "obj")
-		}
-	} else {
-		if f.MethodHasContext {
-			args = append(args, "ctx")
-		}
-	}
-
-	for _, arg := range f.Args {
-		args = append(args, "args["+strconv.Quote(arg.GQLName)+"].("+templates.CurrentImports.LookupType(arg.GoType)+")")
-	}
-
-	return strings.Join(args, ", ")
-}
-
-// should be in the template, but its recursive and has a bunch of args
-func (f *Field) WriteJson() string {
-	return f.doWriteJson("res", f.GoType, f.ASTType, false, 1)
-}
-
-func (f *Field) doWriteJson(val string, destType types.Type, astType *ast.Type, isPtr bool, depth int) string {
-	switch destType := destType.(type) {
-	case *types.Pointer:
-		return tpl(`
-			if {{.val}} == nil {
-				{{- if .nonNull }}
-					if !ec.HasError(rctx) {
-						ec.Errorf(ctx, "must not be null")
-					}
-				{{- end }}
-				return graphql.Null
-			}
-			{{.next }}`, map[string]interface{}{
-			"val":     val,
-			"nonNull": astType.NonNull,
-			"next":    f.doWriteJson(val, destType.Elem(), astType, true, depth+1),
-		})
-
-	case *types.Slice:
-		if isPtr {
-			val = "*" + val
-		}
-		var arr = "arr" + strconv.Itoa(depth)
-		var index = "idx" + strconv.Itoa(depth)
-		var usePtr bool
-		if !isPtr {
-			switch destType.Elem().(type) {
-			case *types.Pointer, *types.Array:
-			default:
-				usePtr = true
-			}
-		}
-
-		return tpl(`
-			{{.arr}} := make(graphql.Array, len({{.val}}))
-			{{ if and .top (not .isScalar) }} var wg sync.WaitGroup {{ end }}
-			{{ if not .isScalar }}
-				isLen1 := len({{.val}}) == 1
-				if !isLen1 {
-					wg.Add(len({{.val}}))
-				}
-			{{ end }}
-			for {{.index}} := range {{.val}} {
-				{{- if not .isScalar }}
-					{{.index}} := {{.index}}
-					rctx := &graphql.ResolverContext{
-						Index: &{{.index}},
-						Result: {{ if .usePtr }}&{{end}}{{.val}}[{{.index}}],
-					}
-					ctx := graphql.WithResolverContext(ctx, rctx)
-					f := func({{.index}} int) {
-						if !isLen1 {
-							defer wg.Done()
-						}
-						{{.arr}}[{{.index}}] = func() graphql.Marshaler {
-							{{ .next }}
-						}()
-					}
-					if isLen1 {
-						f({{.index}})
-					} else {
-						go f({{.index}})
-					}
-				{{ else }}
-					{{.arr}}[{{.index}}] = func() graphql.Marshaler {
-						{{ .next }}
-					}()
-				{{- end}}
-			}
-			{{ if and .top (not .isScalar) }} wg.Wait() {{ end }}
-			return {{.arr}}`, map[string]interface{}{
-			"val":      val,
-			"arr":      arr,
-			"index":    index,
-			"top":      depth == 1,
-			"arrayLen": len(val),
-			"isScalar": f.Definition.GQLDefinition.Kind == ast.Scalar || f.Definition.GQLDefinition.Kind == ast.Enum,
-			"usePtr":   usePtr,
-			"next":     f.doWriteJson(val+"["+index+"]", destType.Elem(), astType.Elem, false, depth+1),
-		})
-
-	default:
-		if f.Definition.GQLDefinition.Kind == ast.Scalar || f.Definition.GQLDefinition.Kind == ast.Enum {
-			if isPtr {
-				val = "*" + val
-			}
-			return f.Marshal(val)
-		}
-
-		if !isPtr {
-			val = "&" + val
-		}
-		return tpl(`
-			return ec._{{.type}}(ctx, field.Selections, {{.val}})`, map[string]interface{}{
-			"type": f.Definition.GQLDefinition.Name,
-			"val":  val,
-		})
-	}
-}
-
-func (f *FieldArgument) Stream() bool {
-	return f.Object != nil && f.Object.Stream
+	return o.Definition.Description
 }
 
 func (os Objects) ByName(name string) *Object {
 	for i, o := range os {
-		if strings.EqualFold(o.Definition.GQLDefinition.Name, name) {
+		if strings.EqualFold(o.Definition.Name, name) {
 			return os[i]
 		}
 	}
 	return nil
-}
-
-func tpl(tpl string, vars map[string]interface{}) string {
-	b := &bytes.Buffer{}
-	err := template.Must(template.New("inline").Funcs(templates.Funcs()).Parse(tpl)).Execute(b, vars)
-	if err != nil {
-		panic(err)
-	}
-	return b.String()
 }
 
 func ucFirst(s string) string {

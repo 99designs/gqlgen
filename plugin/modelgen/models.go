@@ -4,6 +4,8 @@ import (
 	"go/types"
 	"sort"
 
+	"github.com/99designs/gqlgen/internal/code"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin"
@@ -71,7 +73,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		return err
 	}
 
-	binder, err := cfg.NewBinder()
+	cfg.InjectBuiltins(schema)
+
+	binder, err := cfg.NewBinder(schema)
 	if err != nil {
 		return err
 	}
@@ -110,8 +114,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				var typ types.Type
 
 				if cfg.Models.UserDefined(field.Type.Name()) {
-					model := cfg.Models[field.Type.Name()]
-					pkg, typeName := model.PkgAndType()
+					pkg, typeName := code.PkgAndType(cfg.Models[field.Type.Name()].Model[0])
 					typ, err = binder.FindType(pkg, typeName)
 					if err != nil {
 						return err
@@ -133,7 +136,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				fd := schema.Types[field.Type.Name()]
 				it.Fields = append(it.Fields, &Field{
 					Name:        templates.ToGo(name),
-					Type:        copyModifiersFromAst(field.Type, fd.Kind != ast.Interface, typ),
+					Type:        binder.CopyModifiersFromAst(field.Type, fd.Kind != ast.Interface, typ),
 					Description: field.Description,
 					Tag:         `json:"` + field.Name + `"`,
 				})
@@ -164,7 +167,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	sort.Slice(b.Interfaces, func(i, j int) bool { return b.Interfaces[i].Name < b.Interfaces[j].Name })
 
 	for _, it := range b.Enums {
-		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+it.Name)
+		cfg.Models.Add(it.Raw, cfg.Model.ImportPath()+"."+it.Name)
 	}
 	for _, it := range b.Models {
 		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+it.Name)
@@ -177,17 +180,10 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		return nil
 	}
 
-	return templates.RenderToFile("./models.gotpl", cfg.Model.Filename, b)
-}
-
-func copyModifiersFromAst(t *ast.Type, usePtr bool, base types.Type) types.Type {
-	if t.Elem != nil {
-		return types.NewSlice(copyModifiersFromAst(t.Elem, usePtr, base))
-	}
-
-	if !t.NonNull && usePtr {
-		return types.NewPointer(base)
-	}
-
-	return base
+	return templates.Render(templates.Options{
+		PackageName:     cfg.Model.Package,
+		Filename:        cfg.Model.Filename,
+		Data:            b,
+		GeneratedHeader: true,
+	})
 }

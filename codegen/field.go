@@ -325,10 +325,7 @@ func (f *Field) ResolverType() string {
 }
 
 func (f *Field) ShortResolverDeclaration() string {
-	if !f.IsResolver {
-		return ""
-	}
-	res := fmt.Sprintf("%s(ctx context.Context", f.GoFieldName)
+	res := "(ctx context.Context"
 
 	if !f.Object.Root {
 		res += fmt.Sprintf(", obj *%s", templates.CurrentImports.LookupType(f.Object.Type))

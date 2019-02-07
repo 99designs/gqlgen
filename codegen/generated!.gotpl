@@ -60,7 +60,9 @@ type ComplexityRoot struct {
 	{{ if $object.HasResolvers }}
 		type {{$object.Name}}Resolver interface {
 		{{ range $field := $object.Fields -}}
-			{{ $field.ShortResolverDeclaration }}
+			{{- if $field.IsResolver }}
+				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}
+			{{- end }}
 		{{ end }}
 		}
 	{{- end }}

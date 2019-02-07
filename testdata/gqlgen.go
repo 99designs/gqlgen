@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,9 +10,13 @@ import (
 
 	"github.com/99designs/gqlgen"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin/stubgen"
 )
 
 func main() {
+	stub := flag.String("stub", "", "name of stub file to generate")
+	flag.Parse()
+
 	log.SetOutput(ioutil.Discard)
 
 	start := time.Now()
@@ -22,7 +27,12 @@ func main() {
 		os.Exit(2)
 	}
 
-	err = gqlgen.Generate(cfg)
+	var options []gqlgen.Option
+	if *stub != "" {
+		options = append(options, gqlgen.AddPlugin(stubgen.New(*stub, "Stub")))
+	}
+
+	err = gqlgen.Generate(cfg, options...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(3)

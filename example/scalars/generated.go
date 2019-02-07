@@ -2322,6 +2322,9 @@ func (ec *executionContext) unmarshalOTimestamp2timeᚐTime(ctx context.Context,
 }
 
 func (ec *executionContext) marshalOTimestamp2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	if v.IsZero() {
+		return graphql.Null
+	}
 	return model.MarshalTimestamp(v)
 }
 

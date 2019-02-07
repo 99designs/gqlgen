@@ -196,6 +196,25 @@ func (t *TypeReference) IsScalar() bool {
 	return t.Definition.Kind == ast.Scalar
 }
 
+func (t *TypeReference) HasIsZero() bool {
+	it := t.GO
+	if ptr, isPtr := it.(*types.Pointer); isPtr {
+		it = ptr.Elem()
+	}
+	namedType, ok := it.(*types.Named)
+	if !ok {
+		return false
+	}
+
+	for i := 0; i < namedType.NumMethods(); i++ {
+		switch namedType.Method(i).Name() {
+		case "IsZero":
+			return true
+		}
+	}
+	return false
+}
+
 func (t *TypeReference) SelfMarshalling() bool {
 	it := t.GO
 	if ptr, isPtr := it.(*types.Pointer); isPtr {

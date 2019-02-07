@@ -10,6 +10,7 @@ import (
 	"io"
 	"strconv"
 	"sync"
+	"time"
 
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
 	"github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
@@ -130,6 +131,8 @@ type ComplexityRoot struct {
 	User struct {
 		Id      func(childComplexity int) int
 		Friends func(childComplexity int) int
+		Created func(childComplexity int) int
+		Updated func(childComplexity int) int
 	}
 }
 
@@ -537,6 +540,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Friends(childComplexity), true
 
+	case "User.created":
+		if e.complexity.User.Created == nil {
+			break
+		}
+
+		return e.complexity.User.Created(childComplexity), true
+
+	case "User.updated":
+		if e.complexity.User.Updated == nil {
+			break
+		}
+
+		return e.complexity.User.Updated(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -690,6 +707,8 @@ type Subscription {
 type User {
     id: Int!
     friends: [User!]!
+    created: Time!
+    updated: Time
 }
 
 type Error {
@@ -836,6 +855,8 @@ enum Status {
     OK
     ERROR
 }
+
+scalar Time
 `},
 )
 
@@ -2501,6 +2522,55 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 	return ec.marshalNUser2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _User_created(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "User",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Created, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_updated(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "User",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Updated, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -4127,6 +4197,13 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
+		case "created":
+			out.Values[i] = ec._User_created(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "updated":
+			out.Values[i] = ec._User_updated(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4480,6 +4557,20 @@ func (ec *executionContext) marshalNString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalNString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	return graphql.UnmarshalTime(v)
+}
+
+func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	if v.IsZero() {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return graphql.MarshalTime(v)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
@@ -5069,6 +5160,32 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	return graphql.UnmarshalTime(v)
+}
+
+func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	if v.IsZero() {
+		return graphql.Null
+	}
+	return graphql.MarshalTime(v)
+}
+
+func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOTime2timeᚐTime(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOTime2timeᚐTime(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

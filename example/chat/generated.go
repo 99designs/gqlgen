@@ -1997,6 +1997,12 @@ func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	if v.IsZero() {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	return graphql.MarshalTime(v)
 }
 

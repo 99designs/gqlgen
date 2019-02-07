@@ -47,7 +47,7 @@ type {{$root.TypeName}} struct {
 					return r.{{$object.Name}}Resolver.{{$field.GoFieldName}}(ctx,
 						{{- if not $object.Root }}obj,{{end -}}
 						{{- range $arg := $field.Args}}
-							{{$arg.VarName}},
+							{{- $arg.VarName}},
 						{{- end }}
 					)
 				}

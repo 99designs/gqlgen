@@ -92,6 +92,9 @@ func (r *queryResolver) DirectiveInputNullable(ctx context.Context, arg *InputDi
 func (r *queryResolver) DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error) {
 	panic("not implemented")
 }

@@ -16,6 +16,7 @@ type Query {
     directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
+    inputSlice(arg: [String!]!): Boolean!
 }
 
 type Subscription {

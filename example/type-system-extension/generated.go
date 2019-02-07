@@ -1613,7 +1613,7 @@ func (ec *executionContext) _MyQuery(ctx context.Context, sel ast.SelectionSet) 
 	return out
 }
 
-var todoImplementors = []string{"Todo", "Node"}
+var todoImplementors = []string{"Todo", "Node", "Data"}
 
 func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *Todo) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, todoImplementors)

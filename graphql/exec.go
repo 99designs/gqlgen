@@ -35,7 +35,10 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 		case *ast.InlineFragment:
-			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) || !instanceOf(sel.TypeCondition, satisfies) {
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
+			if !instanceOf(sel.TypeCondition, satisfies) {
 				continue
 			}
 			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {

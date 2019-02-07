@@ -84,8 +84,8 @@ type Objects []*Object
 
 func (o *Object) Implementors() string {
 	satisfiedBy := strconv.Quote(o.Name)
-	for _, s := range o.Definition.Interfaces {
-		satisfiedBy += ", " + strconv.Quote(s)
+	for _, s := range o.Implements {
+		satisfiedBy += ", " + strconv.Quote(s.Name)
 	}
 	return "[]string{" + satisfiedBy + "}"
 }

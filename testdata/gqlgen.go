@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin/stubgen"
 )
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	err = gqlgen.Generate(cfg)
+	err = gqlgen.Generate(cfg, gqlgen.AddPlugin(stubgen.New(cfg.Exec.Dir()+"/stubs.go", "Stub")))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(3)

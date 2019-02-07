@@ -31,7 +31,7 @@ type {{.ResolverType}} struct {}
 
 		{{ range $field := $object.Fields -}}
 			{{- if $field.IsResolver -}}
-			func (r *{{lcFirst $object.Name}}Resolver) {{ $field.ShortResolverDeclaration }} {
+			func (r *{{lcFirst $object.Name}}Resolver) {{$field.GoFieldName}}{{ $field.ShortResolverDeclaration }} {
 				panic("not implemented")
 			}
 			{{ end -}}

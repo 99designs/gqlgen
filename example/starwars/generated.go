@@ -2897,7 +2897,7 @@ func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.Selection
 
 // region    **************************** object.gotpl ****************************
 
-var droidImplementors = []string{"Droid", "Character"}
+var droidImplementors = []string{"Droid", "Character", "SearchResult"}
 
 func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, obj *Droid) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, droidImplementors)
@@ -3024,7 +3024,7 @@ func (ec *executionContext) _FriendsEdge(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-var humanImplementors = []string{"Human", "Character"}
+var humanImplementors = []string{"Human", "Character", "SearchResult"}
 
 func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, obj *Human) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, humanImplementors)
@@ -3263,7 +3263,7 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
-var starshipImplementors = []string{"Starship"}
+var starshipImplementors = []string{"Starship", "SearchResult"}
 
 func (ec *executionContext) _Starship(ctx context.Context, sel ast.SelectionSet, obj *Starship) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, starshipImplementors)

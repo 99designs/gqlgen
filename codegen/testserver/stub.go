@@ -23,7 +23,6 @@ type Stub struct {
 		Recursive              func(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
 		NestedInputs           func(ctx context.Context, input [][]*OuterInput) (*bool, error)
 		NestedOutputs          func(ctx context.Context) ([][]*OuterObject, error)
-		Keywords               func(ctx context.Context, input *Keywords) (bool, error)
 		Shapes                 func(ctx context.Context) ([]Shape, error)
 		ErrorBubble            func(ctx context.Context) (*Error, error)
 		ModelMethods           func(ctx context.Context) (*ModelMethods, error)
@@ -36,7 +35,7 @@ type Stub struct {
 		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
-		KeywordArgs            func(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) (bool, error)
+		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
 	SubscriptionResolver struct {
 		Updated     func(ctx context.Context) (<-chan string, error)
@@ -95,9 +94,6 @@ func (r *stubQuery) NestedInputs(ctx context.Context, input [][]*OuterInput) (*b
 func (r *stubQuery) NestedOutputs(ctx context.Context) ([][]*OuterObject, error) {
 	return r.QueryResolver.NestedOutputs(ctx)
 }
-func (r *stubQuery) Keywords(ctx context.Context, input *Keywords) (bool, error) {
-	return r.QueryResolver.Keywords(ctx, input)
-}
 func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 	return r.QueryResolver.Shapes(ctx)
 }
@@ -134,8 +130,8 @@ func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) 
 func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	return r.QueryResolver.ShapeUnion(ctx)
 }
-func (r *stubQuery) KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) (bool, error) {
-	return r.QueryResolver.KeywordArgs(ctx, breakArg, defaultArg, funcArg, interfaceArg, selectArg, caseArg, deferArg, goArg, mapArg, structArg, chanArg, elseArg, gotoArg, packageArg, switchArg, constArg, fallthroughArg, ifArg, rangeArg, typeArg, continueArg, forArg, importArg, returnArg, varArg, _Arg)
+func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
+	return r.QueryResolver.ValidType(ctx)
 }
 
 type stubSubscription struct{ *Stub }

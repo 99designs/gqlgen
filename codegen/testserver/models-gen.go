@@ -28,7 +28,22 @@ type InputDirectives struct {
 	ThirdParty    *ThirdParty      `json:"thirdParty"`
 }
 
-type Keywords struct {
+type OuterInput struct {
+	Inner InnerInput `json:"inner"`
+}
+
+type OuterObject struct {
+	Inner InnerObject `json:"inner"`
+}
+
+type User struct {
+	ID      int        `json:"id"`
+	Friends []User     `json:"friends"`
+	Created time.Time  `json:"created"`
+	Updated *time.Time `json:"updated"`
+}
+
+type ValidInput struct {
 	Break       string `json:"break"`
 	Default     string `json:"default"`
 	Func        string `json:"func"`
@@ -57,19 +72,12 @@ type Keywords struct {
 	Underscore  string `json:"_"`
 }
 
-type OuterInput struct {
-	Inner InnerInput `json:"inner"`
-}
-
-type OuterObject struct {
-	Inner InnerObject `json:"inner"`
-}
-
-type User struct {
-	ID      int        `json:"id"`
-	Friends []User     `json:"friends"`
-	Created time.Time  `json:"created"`
-	Updated *time.Time `json:"updated"`
+//  These things are all valid, but without care generate invalid go code
+type ValidType struct {
+	DifferentCase      string `json:"differentCase"`
+	DifferentCaseOld   string `json:"different_case"`
+	ValidInputKeywords bool   `json:"validInputKeywords"`
+	ValidArgs          bool   `json:"validArgs"`
 }
 
 type Status string

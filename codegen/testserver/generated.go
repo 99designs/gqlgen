@@ -58,12 +58,12 @@ type ComplexityRoot struct {
 	}
 
 	EmbeddedPointer struct {
-		Id    func(childComplexity int) int
+		ID    func(childComplexity int) int
 		Title func(childComplexity int) int
 	}
 
 	Error struct {
-		Id                      func(childComplexity int) int
+		ID                      func(childComplexity int) int
 		ErrorOnNonRequiredField func(childComplexity int) int
 		ErrorOnRequiredField    func(childComplexity int) int
 		NilOnRequiredField      func(childComplexity int) int
@@ -74,15 +74,15 @@ type ComplexityRoot struct {
 	}
 
 	InnerObject struct {
-		Id func(childComplexity int) int
+		ID func(childComplexity int) int
 	}
 
 	InvalidIdentifier struct {
-		Id func(childComplexity int) int
+		ID func(childComplexity int) int
 	}
 
 	It struct {
-		Id func(childComplexity int) int
+		ID func(childComplexity int) int
 	}
 
 	ModelMethods struct {
@@ -115,7 +115,7 @@ type ComplexityRoot struct {
 		DirectiveInput         func(childComplexity int, arg InputDirectives) int
 		InputSlice             func(childComplexity int, arg []string) int
 		ShapeUnion             func(childComplexity int) int
-		KeywordArgs            func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) int
+		KeywordArgs            func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) int
 	}
 
 	Rectangle struct {
@@ -130,7 +130,7 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Id      func(childComplexity int) int
+		ID      func(childComplexity int) int
 		Friends func(childComplexity int) int
 		Created func(childComplexity int) int
 		Updated func(childComplexity int) int
@@ -163,7 +163,7 @@ type QueryResolver interface {
 	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
 	InputSlice(ctx context.Context, arg []string) (bool, error)
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
-	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
+	KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) (bool, error)
 }
 type SubscriptionResolver interface {
 	Updated(ctx context.Context) (<-chan string, error)
@@ -188,14 +188,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Circle.radius":
+	case "Circle.Radius":
 		if e.complexity.Circle.Radius == nil {
 			break
 		}
 
 		return e.complexity.Circle.Radius(childComplexity), true
 
-	case "Circle.area":
+	case "Circle.Area":
 		if e.complexity.Circle.Area == nil {
 			break
 		}
@@ -203,11 +203,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Circle.Area(childComplexity), true
 
 	case "EmbeddedPointer.ID":
-		if e.complexity.EmbeddedPointer.Id == nil {
+		if e.complexity.EmbeddedPointer.ID == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedPointer.Id(childComplexity), true
+		return e.complexity.EmbeddedPointer.ID(childComplexity), true
 
 	case "EmbeddedPointer.Title":
 		if e.complexity.EmbeddedPointer.Title == nil {
@@ -216,105 +216,105 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EmbeddedPointer.Title(childComplexity), true
 
-	case "Error.id":
-		if e.complexity.Error.Id == nil {
+	case "Error.ID":
+		if e.complexity.Error.ID == nil {
 			break
 		}
 
-		return e.complexity.Error.Id(childComplexity), true
+		return e.complexity.Error.ID(childComplexity), true
 
-	case "Error.errorOnNonRequiredField":
+	case "Error.ErrorOnNonRequiredField":
 		if e.complexity.Error.ErrorOnNonRequiredField == nil {
 			break
 		}
 
 		return e.complexity.Error.ErrorOnNonRequiredField(childComplexity), true
 
-	case "Error.errorOnRequiredField":
+	case "Error.ErrorOnRequiredField":
 		if e.complexity.Error.ErrorOnRequiredField == nil {
 			break
 		}
 
 		return e.complexity.Error.ErrorOnRequiredField(childComplexity), true
 
-	case "Error.nilOnRequiredField":
+	case "Error.NilOnRequiredField":
 		if e.complexity.Error.NilOnRequiredField == nil {
 			break
 		}
 
 		return e.complexity.Error.NilOnRequiredField(childComplexity), true
 
-	case "ForcedResolver.field":
+	case "ForcedResolver.Field":
 		if e.complexity.ForcedResolver.Field == nil {
 			break
 		}
 
 		return e.complexity.ForcedResolver.Field(childComplexity), true
 
-	case "InnerObject.id":
-		if e.complexity.InnerObject.Id == nil {
+	case "InnerObject.ID":
+		if e.complexity.InnerObject.ID == nil {
 			break
 		}
 
-		return e.complexity.InnerObject.Id(childComplexity), true
+		return e.complexity.InnerObject.ID(childComplexity), true
 
-	case "InvalidIdentifier.id":
-		if e.complexity.InvalidIdentifier.Id == nil {
+	case "InvalidIdentifier.ID":
+		if e.complexity.InvalidIdentifier.ID == nil {
 			break
 		}
 
-		return e.complexity.InvalidIdentifier.Id(childComplexity), true
+		return e.complexity.InvalidIdentifier.ID(childComplexity), true
 
-	case "It.id":
-		if e.complexity.It.Id == nil {
+	case "It.ID":
+		if e.complexity.It.ID == nil {
 			break
 		}
 
-		return e.complexity.It.Id(childComplexity), true
+		return e.complexity.It.ID(childComplexity), true
 
-	case "ModelMethods.resolverField":
+	case "ModelMethods.ResolverField":
 		if e.complexity.ModelMethods.ResolverField == nil {
 			break
 		}
 
 		return e.complexity.ModelMethods.ResolverField(childComplexity), true
 
-	case "ModelMethods.noContext":
+	case "ModelMethods.NoContext":
 		if e.complexity.ModelMethods.NoContext == nil {
 			break
 		}
 
 		return e.complexity.ModelMethods.NoContext(childComplexity), true
 
-	case "ModelMethods.withContext":
+	case "ModelMethods.WithContext":
 		if e.complexity.ModelMethods.WithContext == nil {
 			break
 		}
 
 		return e.complexity.ModelMethods.WithContext(childComplexity), true
 
-	case "OuterObject.inner":
+	case "OuterObject.Inner":
 		if e.complexity.OuterObject.Inner == nil {
 			break
 		}
 
 		return e.complexity.OuterObject.Inner(childComplexity), true
 
-	case "Query.invalidIdentifier":
+	case "Query.InvalidIdentifier":
 		if e.complexity.Query.InvalidIdentifier == nil {
 			break
 		}
 
 		return e.complexity.Query.InvalidIdentifier(childComplexity), true
 
-	case "Query.collision":
+	case "Query.Collision":
 		if e.complexity.Query.Collision == nil {
 			break
 		}
 
 		return e.complexity.Query.Collision(childComplexity), true
 
-	case "Query.mapInput":
+	case "Query.MapInput":
 		if e.complexity.Query.MapInput == nil {
 			break
 		}
@@ -326,7 +326,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]interface{})), true
 
-	case "Query.recursive":
+	case "Query.Recursive":
 		if e.complexity.Query.Recursive == nil {
 			break
 		}
@@ -338,7 +338,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
 
-	case "Query.nestedInputs":
+	case "Query.NestedInputs":
 		if e.complexity.Query.NestedInputs == nil {
 			break
 		}
@@ -350,14 +350,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
 
-	case "Query.nestedOutputs":
+	case "Query.NestedOutputs":
 		if e.complexity.Query.NestedOutputs == nil {
 			break
 		}
 
 		return e.complexity.Query.NestedOutputs(childComplexity), true
 
-	case "Query.keywords":
+	case "Query.Keywords":
 		if e.complexity.Query.Keywords == nil {
 			break
 		}
@@ -369,35 +369,35 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Keywords(childComplexity, args["input"].(*Keywords)), true
 
-	case "Query.shapes":
+	case "Query.Shapes":
 		if e.complexity.Query.Shapes == nil {
 			break
 		}
 
 		return e.complexity.Query.Shapes(childComplexity), true
 
-	case "Query.errorBubble":
+	case "Query.ErrorBubble":
 		if e.complexity.Query.ErrorBubble == nil {
 			break
 		}
 
 		return e.complexity.Query.ErrorBubble(childComplexity), true
 
-	case "Query.modelMethods":
+	case "Query.ModelMethods":
 		if e.complexity.Query.ModelMethods == nil {
 			break
 		}
 
 		return e.complexity.Query.ModelMethods(childComplexity), true
 
-	case "Query.valid":
+	case "Query.Valid":
 		if e.complexity.Query.Valid == nil {
 			break
 		}
 
 		return e.complexity.Query.Valid(childComplexity), true
 
-	case "Query.user":
+	case "Query.User":
 		if e.complexity.Query.User == nil {
 			break
 		}
@@ -409,7 +409,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
 
-	case "Query.nullableArg":
+	case "Query.NullableArg":
 		if e.complexity.Query.NullableArg == nil {
 			break
 		}
@@ -421,7 +421,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
 
-	case "Query.directiveArg":
+	case "Query.DirectiveArg":
 		if e.complexity.Query.DirectiveArg == nil {
 			break
 		}
@@ -433,7 +433,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
 
-	case "Query.directiveNullableArg":
+	case "Query.DirectiveNullableArg":
 		if e.complexity.Query.DirectiveNullableArg == nil {
 			break
 		}
@@ -445,7 +445,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int)), true
 
-	case "Query.directiveInputNullable":
+	case "Query.DirectiveInputNullable":
 		if e.complexity.Query.DirectiveInputNullable == nil {
 			break
 		}
@@ -457,7 +457,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
 
-	case "Query.directiveInput":
+	case "Query.DirectiveInput":
 		if e.complexity.Query.DirectiveInput == nil {
 			break
 		}
@@ -469,7 +469,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
 
-	case "Query.inputSlice":
+	case "Query.InputSlice":
 		if e.complexity.Query.InputSlice == nil {
 			break
 		}
@@ -481,14 +481,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.InputSlice(childComplexity, args["arg"].([]string)), true
 
-	case "Query.shapeUnion":
+	case "Query.ShapeUnion":
 		if e.complexity.Query.ShapeUnion == nil {
 			break
 		}
 
 		return e.complexity.Query.ShapeUnion(childComplexity), true
 
-	case "Query.keywordArgs":
+	case "Query.KeywordArgs":
 		if e.complexity.Query.KeywordArgs == nil {
 			break
 		}
@@ -498,65 +498,65 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.KeywordArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string)), true
+		return e.complexity.Query.KeywordArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string)), true
 
-	case "Rectangle.length":
+	case "Rectangle.Length":
 		if e.complexity.Rectangle.Length == nil {
 			break
 		}
 
 		return e.complexity.Rectangle.Length(childComplexity), true
 
-	case "Rectangle.width":
+	case "Rectangle.Width":
 		if e.complexity.Rectangle.Width == nil {
 			break
 		}
 
 		return e.complexity.Rectangle.Width(childComplexity), true
 
-	case "Rectangle.area":
+	case "Rectangle.Area":
 		if e.complexity.Rectangle.Area == nil {
 			break
 		}
 
 		return e.complexity.Rectangle.Area(childComplexity), true
 
-	case "Subscription.updated":
+	case "Subscription.Updated":
 		if e.complexity.Subscription.Updated == nil {
 			break
 		}
 
 		return e.complexity.Subscription.Updated(childComplexity), true
 
-	case "Subscription.initPayload":
+	case "Subscription.InitPayload":
 		if e.complexity.Subscription.InitPayload == nil {
 			break
 		}
 
 		return e.complexity.Subscription.InitPayload(childComplexity), true
 
-	case "User.id":
-		if e.complexity.User.Id == nil {
+	case "User.ID":
+		if e.complexity.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.Id(childComplexity), true
+		return e.complexity.User.ID(childComplexity), true
 
-	case "User.friends":
+	case "User.Friends":
 		if e.complexity.User.Friends == nil {
 			break
 		}
 
 		return e.complexity.User.Friends(childComplexity), true
 
-	case "User.created":
+	case "User.Created":
 		if e.complexity.User.Created == nil {
 			break
 		}
 
 		return e.complexity.User.Created(childComplexity), true
 
-	case "User.updated":
+	case "User.Updated":
 		if e.complexity.User.Updated == nil {
 			break
 		}
@@ -806,6 +806,7 @@ input Keywords {
     import:      String!
     return:      String!
     var:         String!
+    _:           String!
 }
 
 extend type Query {
@@ -835,6 +836,7 @@ extend type Query {
         import:      String!,
         return:      String!,
         var:         String!,
+        _:           String!,
     ): Boolean!
 }
 
@@ -1252,6 +1254,14 @@ func (ec *executionContext) field_Query_keywordArgs_args(ctx context.Context, ra
 		}
 	}
 	args["var"] = arg24
+	var arg25 string
+	if tmp, ok := rawArgs["_"]; ok {
+		arg25, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["_"] = arg25
 	return args, nil
 }
 
@@ -2317,7 +2327,7 @@ func (ec *executionContext) _Query_keywordArgs(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().KeywordArgs(rctx, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string))
+		return ec.resolvers.Query().KeywordArgs(rctx, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -3671,6 +3681,12 @@ func (ec *executionContext) unmarshalInputKeywords(ctx context.Context, v interf
 		case "var":
 			var err error
 			it.Var, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "_":
+			var err error
+			it.Underscore, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

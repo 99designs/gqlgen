@@ -80,63 +80,63 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Like.reaction":
+	case "Like.Reaction":
 		if e.complexity.Like.Reaction == nil {
 			break
 		}
 
 		return e.complexity.Like.Reaction(childComplexity), true
 
-	case "Like.sent":
+	case "Like.Sent":
 		if e.complexity.Like.Sent == nil {
 			break
 		}
 
 		return e.complexity.Like.Sent(childComplexity), true
 
-	case "Like.selection":
+	case "Like.Selection":
 		if e.complexity.Like.Selection == nil {
 			break
 		}
 
 		return e.complexity.Like.Selection(childComplexity), true
 
-	case "Like.collected":
+	case "Like.Collected":
 		if e.complexity.Like.Collected == nil {
 			break
 		}
 
 		return e.complexity.Like.Collected(childComplexity), true
 
-	case "Post.message":
+	case "Post.Message":
 		if e.complexity.Post.Message == nil {
 			break
 		}
 
 		return e.complexity.Post.Message(childComplexity), true
 
-	case "Post.sent":
+	case "Post.Sent":
 		if e.complexity.Post.Sent == nil {
 			break
 		}
 
 		return e.complexity.Post.Sent(childComplexity), true
 
-	case "Post.selection":
+	case "Post.Selection":
 		if e.complexity.Post.Selection == nil {
 			break
 		}
 
 		return e.complexity.Post.Selection(childComplexity), true
 
-	case "Post.collected":
+	case "Post.Collected":
 		if e.complexity.Post.Collected == nil {
 			break
 		}
 
 		return e.complexity.Post.Collected(childComplexity), true
 
-	case "Query.events":
+	case "Query.Events":
 		if e.complexity.Query.Events == nil {
 			break
 		}

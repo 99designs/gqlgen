@@ -44,13 +44,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Address struct {
-		Id      func(childComplexity int) int
+		ID      func(childComplexity int) int
 		Street  func(childComplexity int) int
 		Country func(childComplexity int) int
 	}
 
 	Customer struct {
-		Id      func(childComplexity int) int
+		ID      func(childComplexity int) int
 		Name    func(childComplexity int) int
 		Address func(childComplexity int) int
 		Orders  func(childComplexity int) int
@@ -61,7 +61,7 @@ type ComplexityRoot struct {
 	}
 
 	Order struct {
-		Id     func(childComplexity int) int
+		ID     func(childComplexity int) int
 		Date   func(childComplexity int) int
 		Amount func(childComplexity int) int
 		Items  func(childComplexity int) int
@@ -102,98 +102,98 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Address.id":
-		if e.complexity.Address.Id == nil {
+	case "Address.ID":
+		if e.complexity.Address.ID == nil {
 			break
 		}
 
-		return e.complexity.Address.Id(childComplexity), true
+		return e.complexity.Address.ID(childComplexity), true
 
-	case "Address.street":
+	case "Address.Street":
 		if e.complexity.Address.Street == nil {
 			break
 		}
 
 		return e.complexity.Address.Street(childComplexity), true
 
-	case "Address.country":
+	case "Address.Country":
 		if e.complexity.Address.Country == nil {
 			break
 		}
 
 		return e.complexity.Address.Country(childComplexity), true
 
-	case "Customer.id":
-		if e.complexity.Customer.Id == nil {
+	case "Customer.ID":
+		if e.complexity.Customer.ID == nil {
 			break
 		}
 
-		return e.complexity.Customer.Id(childComplexity), true
+		return e.complexity.Customer.ID(childComplexity), true
 
-	case "Customer.name":
+	case "Customer.Name":
 		if e.complexity.Customer.Name == nil {
 			break
 		}
 
 		return e.complexity.Customer.Name(childComplexity), true
 
-	case "Customer.address":
+	case "Customer.Address":
 		if e.complexity.Customer.Address == nil {
 			break
 		}
 
 		return e.complexity.Customer.Address(childComplexity), true
 
-	case "Customer.orders":
+	case "Customer.Orders":
 		if e.complexity.Customer.Orders == nil {
 			break
 		}
 
 		return e.complexity.Customer.Orders(childComplexity), true
 
-	case "Item.name":
+	case "Item.Name":
 		if e.complexity.Item.Name == nil {
 			break
 		}
 
 		return e.complexity.Item.Name(childComplexity), true
 
-	case "Order.id":
-		if e.complexity.Order.Id == nil {
+	case "Order.ID":
+		if e.complexity.Order.ID == nil {
 			break
 		}
 
-		return e.complexity.Order.Id(childComplexity), true
+		return e.complexity.Order.ID(childComplexity), true
 
-	case "Order.date":
+	case "Order.Date":
 		if e.complexity.Order.Date == nil {
 			break
 		}
 
 		return e.complexity.Order.Date(childComplexity), true
 
-	case "Order.amount":
+	case "Order.Amount":
 		if e.complexity.Order.Amount == nil {
 			break
 		}
 
 		return e.complexity.Order.Amount(childComplexity), true
 
-	case "Order.items":
+	case "Order.Items":
 		if e.complexity.Order.Items == nil {
 			break
 		}
 
 		return e.complexity.Order.Items(childComplexity), true
 
-	case "Query.customers":
+	case "Query.Customers":
 		if e.complexity.Query.Customers == nil {
 			break
 		}
 
 		return e.complexity.Query.Customers(childComplexity), true
 
-	case "Query.torture1d":
+	case "Query.Torture1d":
 		if e.complexity.Query.Torture1d == nil {
 			break
 		}
@@ -205,7 +205,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
 
-	case "Query.torture2d":
+	case "Query.Torture2d":
 		if e.complexity.Query.Torture2d == nil {
 			break
 		}

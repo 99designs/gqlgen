@@ -117,6 +117,7 @@ input Keywords {
     import:      String!
     return:      String!
     var:         String!
+    _:           String!
 }
 
 extend type Query {
@@ -146,6 +147,7 @@ extend type Query {
         import:      String!,
         return:      String!,
         var:         String!,
+        _:           String!,
     ): Boolean!
 }
 

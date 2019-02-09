@@ -36,7 +36,7 @@ type Stub struct {
 		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
-		KeywordArgs            func(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error)
+		KeywordArgs            func(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) (bool, error)
 	}
 	SubscriptionResolver struct {
 		Updated     func(ctx context.Context) (<-chan string, error)
@@ -134,8 +134,8 @@ func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) 
 func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	return r.QueryResolver.ShapeUnion(ctx)
 }
-func (r *stubQuery) KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error) {
-	return r.QueryResolver.KeywordArgs(ctx, breakArg, defaultArg, funcArg, interfaceArg, selectArg, caseArg, deferArg, goArg, mapArg, structArg, chanArg, elseArg, gotoArg, packageArg, switchArg, constArg, fallthroughArg, ifArg, rangeArg, typeArg, continueArg, forArg, importArg, returnArg, varArg)
+func (r *stubQuery) KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) (bool, error) {
+	return r.QueryResolver.KeywordArgs(ctx, breakArg, defaultArg, funcArg, interfaceArg, selectArg, caseArg, deferArg, goArg, mapArg, structArg, chanArg, elseArg, gotoArg, packageArg, switchArg, constArg, fallthroughArg, ifArg, rangeArg, typeArg, continueArg, forArg, importArg, returnArg, varArg, _Arg)
 }
 
 type stubSubscription struct{ *Stub }

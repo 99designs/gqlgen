@@ -98,10 +98,10 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 	case obj.Type == config.MapType:
 		return nil
 	case b.Config.Models[obj.Name].Fields[f.Name].FieldName != "":
-		f.Name = b.Config.Models[obj.Name].Fields[f.Name].FieldName
+		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
-	target, err := b.findBindTarget(obj.Type.(*types.Named), f.Name)
+	target, err := b.findBindTarget(obj.Type.(*types.Named), f.GoFieldName)
 	if err != nil {
 		return err
 	}

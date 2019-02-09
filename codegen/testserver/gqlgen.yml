@@ -40,3 +40,7 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.EmbeddedPointerModel"
   ThirdParty:
     model: "github.com/99designs/gqlgen/codegen/testserver.ThirdParty"
+  Keywords:
+    fields:
+      _: { fieldName: Underscore }
+

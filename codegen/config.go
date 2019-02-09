@@ -216,10 +216,10 @@ func (cfg *Config) Check() error {
 		if inSameDir {
 			for _, previous := range prevPkgList {
 				if current.Package != previous.Package {
-					eitherPackageEmpty := previous.Package != "" || current.Package != "";
+					eitherPackageEmpty := previous.Package != "" || current.Package != ""
 					if eitherPackageEmpty {
 						if current.Package == filepath.Base(current.Dir()) && previous.Package == "" {
-							break;
+							break
 						}
 						if previous.Package == filepath.Base(previous.Dir()) && current.Package == "" {
 							break

@@ -28,6 +28,8 @@ type Subscription {
 type User {
     id: Int!
     friends: [User!]!
+    created: Time!
+    updated: Time
 }
 
 type Error {
@@ -174,3 +176,5 @@ enum Status {
     OK
     ERROR
 }
+
+scalar Time

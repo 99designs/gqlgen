@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 type InnerDirectives struct {
@@ -63,8 +64,10 @@ type OuterObject struct {
 }
 
 type User struct {
-	ID      int    `json:"id"`
-	Friends []User `json:"friends"`
+	ID      int        `json:"id"`
+	Friends []User     `json:"friends"`
+	Created time.Time  `json:"created"`
+	Updated *time.Time `json:"updated"`
 }
 
 type Status string

@@ -4290,6 +4290,9 @@ func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	if v.IsZero() {
+		return graphql.Null
+	}
 	return graphql.MarshalTime(v)
 }
 

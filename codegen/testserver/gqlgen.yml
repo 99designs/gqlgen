@@ -38,3 +38,5 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.Error"
   EmbeddedPointer:
     model: "github.com/99designs/gqlgen/codegen/testserver.EmbeddedPointerModel"
+  ThirdParty:
+    model: "github.com/99designs/gqlgen/codegen/testserver.ThirdParty"

@@ -759,10 +759,13 @@ input OuterInput {
     inner: InnerInput!
 }
 
+scalar ThirdParty
+
 input InputDirectives {
     text: String! @length(min: 0, max: 7, message: "not valid")
     inner: InnerDirectives!
     innerNullable: InnerDirectives
+    thirdParty: ThirdParty @length(min: 0, max: 7, message: "not valid")
 }
 
 input InnerDirectives {
@@ -3489,6 +3492,26 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, v
 			if err != nil {
 				return it, err
 			}
+		case "thirdParty":
+			var err error
+			getField0 := func(ctx context.Context) (interface{}, error) {
+				return ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx, v)
+			}
+			getField1 := func(ctx context.Context) (res interface{}, err error) {
+				max := 7
+				n := getField0
+				return ec.directives.Length(ctx, it, n, 0, &max)
+			}
+
+			tmp, err := getField1(ctx)
+			if err != nil {
+				return it, err
+			}
+			if data, ok := tmp.(*ThirdParty); ok {
+				it.ThirdParty = data
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver.ThirdParty`, tmp)
+			}
 		}
 	}
 
@@ -5209,6 +5232,29 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOThirdParty2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx context.Context, v interface{}) (ThirdParty, error) {
+	return UnmarshalThirdParty(v)
+}
+
+func (ec *executionContext) marshalOThirdParty2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx context.Context, sel ast.SelectionSet, v ThirdParty) graphql.Marshaler {
+	return MarshalThirdParty(v)
+}
+
+func (ec *executionContext) unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx context.Context, v interface{}) (*ThirdParty, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOThirdParty2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx context.Context, sel ast.SelectionSet, v *ThirdParty) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOThirdParty2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx, sel, *v)
 }
 
 func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {

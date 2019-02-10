@@ -25,6 +25,7 @@ type InputDirectives struct {
 	Text          string           `json:"text"`
 	Inner         InnerDirectives  `json:"inner"`
 	InnerNullable *InnerDirectives `json:"innerNullable"`
+	ThirdParty    *ThirdParty      `json:"thirdParty"`
 }
 
 type Keywords struct {

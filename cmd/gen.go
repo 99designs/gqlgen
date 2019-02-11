@@ -46,11 +46,6 @@ var genCmd = cli.Command{
 			config.SchemaStr[filename] = string(schemaRaw)
 		}
 
-		if err = config.Check(); err != nil {
-			fmt.Fprintln(os.Stderr, "invalid config format: "+err.Error())
-			os.Exit(1)
-		}
-
 		err = codegen.Generate(*config)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())

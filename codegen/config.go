@@ -178,7 +178,7 @@ func (c *PackageConfig) IsDefined() bool {
 	return c.Filename != ""
 }
 
-func (cfg *Config) Check() error {
+func (cfg *Config) check() error {
 	if err := cfg.Models.Check(); err != nil {
 		return errors.Wrap(err, "config.models")
 	}
@@ -200,36 +200,18 @@ func (cfg *Config) Check() error {
 		cfg.Resolver,
 	}
 	filesMap := make(map[string]bool)
-	pkgConfigsByDir := make(map[string][]PackageConfig)
-	for i, current := range packageConfigList {
-		if i == 0 {
-			filesMap[current.Filename] = true
-			pkgConfigsByDir[current.Dir()] = []PackageConfig{current}
-			continue
-		}
+	pkgConfigsByDir := make(map[string]PackageConfig)
+	for _, current := range packageConfigList {
 		_, fileFound := filesMap[current.Filename]
 		if fileFound {
 			return fmt.Errorf("filename %s defined more than once", current.Filename)
 		}
 		filesMap[current.Filename] = true
-		prevPkgList, inSameDir := pkgConfigsByDir[current.Dir()]
-		if inSameDir {
-			for _, previous := range prevPkgList {
-				if current.Package != previous.Package {
-					eitherPackageEmpty := previous.Package != "" || current.Package != ""
-					if eitherPackageEmpty {
-						if current.Package == filepath.Base(current.Dir()) && previous.Package == "" {
-							break
-						}
-						if previous.Package == filepath.Base(previous.Dir()) && current.Package == "" {
-							break
-						}
-						return fmt.Errorf("filenames %s and %s are in the same directory but have different package definitions", current.Filename, previous.Filename)
-					}
-				}
-			}
+		previous, inSameDir := pkgConfigsByDir[current.Dir()]
+		if inSameDir && current.Package != previous.Package {
+			return fmt.Errorf("filenames %s and %s are in the same directory but have different package definitions", stripPath(current.Filename), stripPath(previous.Filename))
 		}
-		pkgConfigsByDir[current.Dir()] = append(pkgConfigsByDir[current.Dir()], current)
+		pkgConfigsByDir[current.Dir()] = current
 	}
 
 	return nil
@@ -311,4 +293,8 @@ func findCfgInDir(dir string) string {
 		}
 	}
 	return ""
+}
+
+func stripPath(path string) string {
+	return filepath.Base(path)
 }

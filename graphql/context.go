@@ -132,6 +132,24 @@ func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField 
 	return CollectFields(ctx, resctx.Field.Selections, satisfies)
 }
 
+// CollectAllFields returns a slice of all GraphQL field names that were selected for the current resolver context.
+// The slice will contain the unique set of all fields requested regardless of fragment type conditions.
+func CollectAllFields(ctx context.Context) []string {
+	resctx := GetResolverContext(ctx)
+	collected := CollectFields(ctx, resctx.Field.Selections, nil)
+	uniq := make([]string, 0, len(collected))
+Next:
+	for _, f := range collected {
+		for _, name := range uniq {
+			if name == f.Name {
+				continue Next
+			}
+		}
+		uniq = append(uniq, f.Name)
+	}
+	return uniq
+}
+
 // Errorf sends an error string to the client, passing it through the formatter.
 func (c *RequestContext) Errorf(ctx context.Context, format string, args ...interface{}) {
 	c.errorsMu.Lock()

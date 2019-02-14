@@ -16,17 +16,12 @@ You can find the finished code for this tutorial [here](https://github.com/vekta
 
 ## Install gqlgen
 
-This article uses [`dep`](https://github.com/golang/dep) to install gqlgen.  [Follow the instructions for your environment](https://github.com/golang/dep) to install.
-
-Assuming you already have a working [Go environment](https://golang.org/doc/install), create a directory for the project in your `$GOPATH`:
+Assuming you already have a working [Go environment](https://golang.org/doc/install) using Go 1.11 or higher, create a directory for the project:
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/[username]/gqlgen-todos
+$ mkdir -p ~/github.com/[username]/gqlgen-todos
+$ cd ~/github.com/[username]/gqlgen-todos
 ```
-
-> Go Modules
->
-> Currently `gqlgen` does not support Go Modules.  This is due to the [`loader`](https://godoc.org/golang.org/x/tools/go/loader) package, that also does not yet support Go Modules.  We are looking at solutions to this and the issue is tracked in Github.
 
 Add the following file to your project under `scripts/gqlgen.go`:
 
@@ -40,12 +35,6 @@ import "github.com/99designs/gqlgen/cmd"
 func main() {
 	cmd.Execute()
 }
-```
-
-Lastly, initialise dep.  This will inspect any imports you have in your project, and pull down the latest tagged release.
-
-```sh
-$ dep init
 ```
 
 ## Building the server
@@ -85,6 +74,7 @@ type Mutation {
 ### Create the project skeleton
 
 ```bash
+$ mkdir server
 $ go run scripts/gqlgen.go init
 ```
 
@@ -96,11 +86,6 @@ This has created an empty skeleton with all files you need:
  - `resolver.go` — This is where your application code lives. `generated.go` will call into this to get the data the user has requested. 
  - `server/server.go` — This is a minimal entry point that sets up an `http.Handler` to the generated GraphQL server.
 
- Now run dep ensure, so that we can ensure that the newly generated code's dependencies are all present:
-
- ```sh
- $ dep ensure
- ```
  
 ### Create the database models
 

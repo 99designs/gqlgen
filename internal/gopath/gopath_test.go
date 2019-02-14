@@ -2,6 +2,9 @@ package gopath
 
 import (
 	"go/build"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -11,6 +14,13 @@ import (
 func TestContains(t *testing.T) {
 	origBuildContext := build.Default
 	defer func() { build.Default = origBuildContext }()
+
+	// Make a temporary directory and add a go.mod file for the package 'foo'
+	fooDir, err := ioutil.TempDir("", "gopath")
+	assert.Nil(t, err)
+	defer os.RemoveAll(fooDir)
+	err = ioutil.WriteFile(filepath.Join(fooDir, "go.mod"), []byte("module foo\n\nrequire ()"), 0644)
+	assert.Nil(t, err)
 
 	if runtime.GOOS == "windows" {
 		build.Default.GOPATH = `C:\go;C:\Users\user\go`
@@ -22,6 +32,10 @@ func TestContains(t *testing.T) {
 		assert.False(t, Contains(`C:\tmp`))
 		assert.False(t, Contains(`C:\Users\user`))
 		assert.False(t, Contains(`C:\Users\another\go`))
+
+		// C:/Users/someone/AppData/Local/Temp/gopath123456/bar
+		assert.True(t, Contains(filepath.Join(fooDir, "bar")))
+
 	} else {
 		build.Default.GOPATH = "/go:/home/user/go"
 
@@ -31,12 +45,22 @@ func TestContains(t *testing.T) {
 		assert.False(t, Contains("/tmp"))
 		assert.False(t, Contains("/home/user"))
 		assert.False(t, Contains("/home/another/go"))
+
+		// /tmp/gopath123456/bar
+		assert.True(t, Contains(filepath.Join(fooDir, "bar")))
 	}
 }
 
 func TestDir2Package(t *testing.T) {
 	origBuildContext := build.Default
 	defer func() { build.Default = origBuildContext }()
+
+	// Make a temporary directory and add a go.mod file for the package 'foo'
+	fooDir, err := ioutil.TempDir("", "gopath")
+	assert.Nil(t, err)
+	defer os.RemoveAll(fooDir)
+	err = ioutil.WriteFile(filepath.Join(fooDir, "go.mod"), []byte("module foo\n\nrequire ()"), 0644)
+	assert.Nil(t, err)
 
 	if runtime.GOOS == "windows" {
 		build.Default.GOPATH = "C:/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;C:/a/y;C:/b/"
@@ -49,6 +73,9 @@ func TestDir2Package(t *testing.T) {
 		assert.PanicsWithValue(t, NotFound, func() {
 			MustDir2Import("C:/tmp/foo")
 		})
+
+		// C:/Users/someone/AppData/Local/Temp/gopath123456/bar
+		assert.Equal(t, "foo/bar", MustDir2Import(filepath.Join(fooDir, "bar")))
 	} else {
 		build.Default.GOPATH = "/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:/a/y:/b/"
 
@@ -58,5 +85,8 @@ func TestDir2Package(t *testing.T) {
 		assert.PanicsWithValue(t, NotFound, func() {
 			MustDir2Import("/tmp/foo")
 		})
+
+		// /tmp/gopath123456/bar
+		assert.Equal(t, "foo/bar", MustDir2Import(filepath.Join(fooDir, "bar")))
 	}
 }

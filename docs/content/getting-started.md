@@ -21,6 +21,7 @@ Assuming you already have a working [Go environment](https://golang.org/doc/inst
 ```sh
 $ mkdir -p ~/github.com/[username]/gqlgen-todos
 $ cd ~/github.com/[username]/gqlgen-todos
+$ go mod init github.com/[username]/gqlgen-todos
 ```
 
 Add the following file to your project under `scripts/gqlgen.go`:

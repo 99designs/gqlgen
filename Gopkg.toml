@@ -27,3 +27,7 @@ required = ["github.com/vektah/dataloaden"]
 [[constraint]]
   name = "github.com/rs/cors"
   version = "1.6.0"
+
+[[constraint]]
+  name = "github.com/fortytw2/leaktest"
+  version = "1.3.0"

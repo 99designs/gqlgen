@@ -18,6 +18,13 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/fortytw2/leaktest"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9a23578d06a26ec1b47bfc8965bf5e7011df8bd6"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:66ddebb274faa160a4a23394a17ad3c8e15fee9bf5408d13f77d22b61bc7f072"
   name = "github.com/go-chi/chi"
   packages = ["."]
@@ -242,6 +249,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/fortytw2/leaktest",
     "github.com/go-chi/chi",
     "github.com/gorilla/websocket",
     "github.com/hashicorp/golang-lru",

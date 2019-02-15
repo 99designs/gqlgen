@@ -18,7 +18,7 @@ func TestContains(t *testing.T) {
 	// Make a temporary directory and add a go.mod file for the package 'foo'
 	fooDir, err := ioutil.TempDir("", "gopath")
 	assert.Nil(t, err)
-	defer func() { err := os.RemoveAll(fooDir); assert.Nil(t, err) }()
+	defer func() { e := os.RemoveAll(fooDir); assert.Nil(t, e) }()
 	err = ioutil.WriteFile(filepath.Join(fooDir, "go.mod"), []byte("module foo\n\nrequire ()"), 0644)
 	assert.Nil(t, err)
 
@@ -58,7 +58,7 @@ func TestDir2Package(t *testing.T) {
 	// Make a temporary directory and add a go.mod file for the package 'foo'
 	fooDir, err := ioutil.TempDir("", "gopath")
 	assert.Nil(t, err)
-	defer func() { err := os.RemoveAll(fooDir); assert.Nil(t, err) }()
+	defer func() { e := os.RemoveAll(fooDir); assert.Nil(t, e) }()
 	err = ioutil.WriteFile(filepath.Join(fooDir, "go.mod"), []byte("module foo\n\nrequire ()"), 0644)
 	assert.Nil(t, err)
 

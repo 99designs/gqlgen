@@ -9,17 +9,15 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"runtime"
 	"sort"
 	"sync"
 	"testing"
-	"time"
-
-	"github.com/99designs/gqlgen/graphql/introspection"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/handler"
+	"github.com/fortytw2/leaktest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -125,7 +123,7 @@ func TestGeneratedServer(t *testing.T) {
 
 	t.Run("subscriptions", func(t *testing.T) {
 		t.Run("wont leak goroutines", func(t *testing.T) {
-			initialGoroutineCount := runtime.NumGoroutine()
+			defer leaktest.Check(t)()
 
 			sub := c.Websocket(`subscription { updated }`)
 
@@ -141,14 +139,6 @@ func TestGeneratedServer(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, "message", msg.resp.Updated)
 			sub.Close()
-
-			// need a little bit of time for goroutines to settle
-			start := time.Now()
-			for time.Since(start).Seconds() < 2 && initialGoroutineCount != runtime.NumGoroutine() {
-				time.Sleep(5 * time.Millisecond)
-			}
-
-			require.Equal(t, initialGoroutineCount, runtime.NumGoroutine())
 		})
 
 		t.Run("will parse init payload", func(t *testing.T) {

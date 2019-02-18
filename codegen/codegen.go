@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,6 +20,9 @@ func Generate(cfg Config) error {
 		return err
 	}
 
+	if err := cfg.check(); err != nil {
+		return fmt.Errorf("invalid config format: " + err.Error())
+	}
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	_ = syscall.Unlink(cfg.Model.Filename)
 

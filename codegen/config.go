@@ -178,7 +178,7 @@ func (c *PackageConfig) IsDefined() bool {
 	return c.Filename != ""
 }
 
-func (cfg *Config) Check() error {
+func (cfg *Config) check() error {
 	if err := cfg.Models.Check(); err != nil {
 		return errors.Wrap(err, "config.models")
 	}
@@ -191,6 +191,29 @@ func (cfg *Config) Check() error {
 	if err := cfg.Resolver.Check(); err != nil {
 		return errors.Wrap(err, "config.resolver")
 	}
+
+	// check packages names against conflict, if present in the same dir
+	// and check filenames for uniqueness
+	packageConfigList := []PackageConfig{
+		cfg.Model,
+		cfg.Exec,
+		cfg.Resolver,
+	}
+	filesMap := make(map[string]bool)
+	pkgConfigsByDir := make(map[string]PackageConfig)
+	for _, current := range packageConfigList {
+		_, fileFound := filesMap[current.Filename]
+		if fileFound {
+			return fmt.Errorf("filename %s defined more than once", current.Filename)
+		}
+		filesMap[current.Filename] = true
+		previous, inSameDir := pkgConfigsByDir[current.Dir()]
+		if inSameDir && current.Package != previous.Package {
+			return fmt.Errorf("filenames %s and %s are in the same directory but have different package definitions", stripPath(current.Filename), stripPath(previous.Filename))
+		}
+		pkgConfigsByDir[current.Dir()] = current
+	}
+
 	return nil
 }
 
@@ -270,4 +293,8 @@ func findCfgInDir(dir string) string {
 		}
 	}
 	return ""
+}
+
+func stripPath(path string) string {
+	return filepath.Base(path)
 }

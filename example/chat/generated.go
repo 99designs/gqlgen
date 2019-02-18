@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 	}
 
 	Message struct {
-		Id        func(childComplexity int) int
+		ID        func(childComplexity int) int
 		Text      func(childComplexity int) int
 		CreatedBy func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
@@ -94,49 +94,49 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Chatroom.name":
+	case "Chatroom.Name":
 		if e.complexity.Chatroom.Name == nil {
 			break
 		}
 
 		return e.complexity.Chatroom.Name(childComplexity), true
 
-	case "Chatroom.messages":
+	case "Chatroom.Messages":
 		if e.complexity.Chatroom.Messages == nil {
 			break
 		}
 
 		return e.complexity.Chatroom.Messages(childComplexity), true
 
-	case "Message.id":
-		if e.complexity.Message.Id == nil {
+	case "Message.ID":
+		if e.complexity.Message.ID == nil {
 			break
 		}
 
-		return e.complexity.Message.Id(childComplexity), true
+		return e.complexity.Message.ID(childComplexity), true
 
-	case "Message.text":
+	case "Message.Text":
 		if e.complexity.Message.Text == nil {
 			break
 		}
 
 		return e.complexity.Message.Text(childComplexity), true
 
-	case "Message.createdBy":
+	case "Message.CreatedBy":
 		if e.complexity.Message.CreatedBy == nil {
 			break
 		}
 
 		return e.complexity.Message.CreatedBy(childComplexity), true
 
-	case "Message.createdAt":
+	case "Message.CreatedAt":
 		if e.complexity.Message.CreatedAt == nil {
 			break
 		}
 
 		return e.complexity.Message.CreatedAt(childComplexity), true
 
-	case "Mutation.post":
+	case "Mutation.Post":
 		if e.complexity.Mutation.Post == nil {
 			break
 		}
@@ -148,7 +148,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Post(childComplexity, args["text"].(string), args["username"].(string), args["roomName"].(string)), true
 
-	case "Query.room":
+	case "Query.Room":
 		if e.complexity.Query.Room == nil {
 			break
 		}
@@ -160,7 +160,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Room(childComplexity, args["name"].(string)), true
 
-	case "Subscription.messageAdded":
+	case "Subscription.MessageAdded":
 		if e.complexity.Subscription.MessageAdded == nil {
 			break
 		}

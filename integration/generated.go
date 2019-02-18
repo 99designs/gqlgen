@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 		Path         func(childComplexity int) int
 		Date         func(childComplexity int, filter models.DateFilter) int
 		Viewer       func(childComplexity int) int
-		JsonEncoding func(childComplexity int) int
+		JSONEncoding func(childComplexity int) int
 		Error        func(childComplexity int, typeArg *models.ErrorType) int
 	}
 
@@ -99,35 +99,35 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Element.child":
+	case "Element.Child":
 		if e.complexity.Element.Child == nil {
 			break
 		}
 
 		return e.complexity.Element.Child(childComplexity), true
 
-	case "Element.error":
+	case "Element.Error":
 		if e.complexity.Element.Error == nil {
 			break
 		}
 
 		return e.complexity.Element.Error(childComplexity), true
 
-	case "Element.mismatched":
+	case "Element.Mismatched":
 		if e.complexity.Element.Mismatched == nil {
 			break
 		}
 
 		return e.complexity.Element.Mismatched(childComplexity), true
 
-	case "Query.path":
+	case "Query.Path":
 		if e.complexity.Query.Path == nil {
 			break
 		}
 
 		return e.complexity.Query.Path(childComplexity), true
 
-	case "Query.date":
+	case "Query.Date":
 		if e.complexity.Query.Date == nil {
 			break
 		}
@@ -139,21 +139,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
 
-	case "Query.viewer":
+	case "Query.Viewer":
 		if e.complexity.Query.Viewer == nil {
 			break
 		}
 
 		return e.complexity.Query.Viewer(childComplexity), true
 
-	case "Query.jsonEncoding":
-		if e.complexity.Query.JsonEncoding == nil {
+	case "Query.JSONEncoding":
+		if e.complexity.Query.JSONEncoding == nil {
 			break
 		}
 
-		return e.complexity.Query.JsonEncoding(childComplexity), true
+		return e.complexity.Query.JSONEncoding(childComplexity), true
 
-	case "Query.error":
+	case "Query.Error":
 		if e.complexity.Query.Error == nil {
 			break
 		}
@@ -165,21 +165,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
 
-	case "User.name":
+	case "User.Name":
 		if e.complexity.User.Name == nil {
 			break
 		}
 
 		return e.complexity.User.Name(childComplexity), true
 
-	case "User.likes":
+	case "User.Likes":
 		if e.complexity.User.Likes == nil {
 			break
 		}
 
 		return e.complexity.User.Likes(childComplexity), true
 
-	case "Viewer.user":
+	case "Viewer.User":
 		if e.complexity.Viewer.User == nil {
 			break
 		}

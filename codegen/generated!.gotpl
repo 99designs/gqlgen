@@ -48,7 +48,7 @@ type ComplexityRoot struct {
 		{{ $object.Name|toCamel }} struct {
 		{{ range $field := $object.Fields -}}
 			{{ if not $field.IsReserved -}}
-				{{ $field.Name|toCamel }} {{ $field.ComplexitySignature }}
+				{{ $field.GoFieldName }} {{ $field.ComplexitySignature }}
 			{{ end }}
 		{{- end }}
 		}
@@ -86,8 +86,8 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		{{ if not $object.IsReserved }}
 			{{ range $field := $object.Fields }}
 				{{ if not $field.IsReserved }}
-					case "{{$object.Name}}.{{$field.Name}}":
-						if e.complexity.{{$object.Name|toCamel}}.{{$field.Name|toCamel}} == nil {
+					case "{{$object.Name}}.{{$field.GoFieldName}}":
+						if e.complexity.{{$object.Name|toCamel}}.{{$field.GoFieldName}} == nil {
 							break
 						}
 						{{ if $field.Args }}
@@ -96,7 +96,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 								return 0, false
 							}
 						{{ end }}
-						return e.complexity.{{$object.Name|toCamel}}.{{$field.Name|toCamel}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
+						return e.complexity.{{$object.Name|toCamel}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
 				{{ end }}
 			{{ end }}
 		{{ end }}

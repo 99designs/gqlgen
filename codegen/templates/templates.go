@@ -229,6 +229,9 @@ func Call(p *types.Func) string {
 }
 
 func ToCamel(s string) string {
+	if s == "_" {
+		return "_"
+	}
 	buffer := make([]rune, 0, len(s))
 	upper := true
 	lastWasUpper := false
@@ -288,6 +291,7 @@ var keywords = []string{
 	"import",
 	"return",
 	"var",
+	"_",
 }
 
 // sanitizeKeywords prevents collisions with go keywords for arguments to resolver functions

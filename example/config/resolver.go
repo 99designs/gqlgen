@@ -60,6 +60,10 @@ func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
 
 type todoResolver struct{ *Resolver }
 
+func (r *todoResolver) Description(ctx context.Context, obj *Todo) (string, error) {
+	panic("implement me")
+}
+
 func (r *todoResolver) ID(ctx context.Context, obj *Todo) (string, error) {
 	if obj.ID != "" {
 		return obj.ID, nil

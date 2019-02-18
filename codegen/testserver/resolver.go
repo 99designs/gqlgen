@@ -59,9 +59,6 @@ func (r *queryResolver) NestedInputs(ctx context.Context, input [][]*OuterInput)
 func (r *queryResolver) NestedOutputs(ctx context.Context) ([][]*OuterObject, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Keywords(ctx context.Context, input *Keywords) (bool, error) {
-	panic("not implemented")
-}
 func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 	panic("not implemented")
 }
@@ -98,7 +95,7 @@ func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, err
 func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) KeywordArgs(ctx context.Context, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string) (bool, error) {
+func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
 	panic("not implemented")
 }
 

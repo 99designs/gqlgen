@@ -51,15 +51,15 @@ type ComplexityRoot struct {
 	}
 
 	Todo struct {
-		Id          func(childComplexity int) int
-		DatabaseId  func(childComplexity int) int
+		ID          func(childComplexity int) int
+		DatabaseID  func(childComplexity int) int
 		Description func(childComplexity int) int
 		Done        func(childComplexity int) int
 		User        func(childComplexity int) int
 	}
 
 	User struct {
-		Id       func(childComplexity int) int
+		ID       func(childComplexity int) int
 		FullName func(childComplexity int) int
 	}
 }
@@ -89,7 +89,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Mutation.createTodo":
+	case "Mutation.CreateTodo":
 		if e.complexity.Mutation.CreateTodo == nil {
 			break
 		}
@@ -101,26 +101,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
 
-	case "Query.todos":
+	case "Query.Todos":
 		if e.complexity.Query.Todos == nil {
 			break
 		}
 
 		return e.complexity.Query.Todos(childComplexity), true
 
-	case "Todo.id":
-		if e.complexity.Todo.Id == nil {
+	case "Todo.ID":
+		if e.complexity.Todo.ID == nil {
 			break
 		}
 
-		return e.complexity.Todo.Id(childComplexity), true
+		return e.complexity.Todo.ID(childComplexity), true
 
-	case "Todo.databaseId":
-		if e.complexity.Todo.DatabaseId == nil {
+	case "Todo.DatabaseID":
+		if e.complexity.Todo.DatabaseID == nil {
 			break
 		}
 
-		return e.complexity.Todo.DatabaseId(childComplexity), true
+		return e.complexity.Todo.DatabaseID(childComplexity), true
 
 	case "Todo.Description":
 		if e.complexity.Todo.Description == nil {
@@ -129,26 +129,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.Description(childComplexity), true
 
-	case "Todo.done":
+	case "Todo.Done":
 		if e.complexity.Todo.Done == nil {
 			break
 		}
 
 		return e.complexity.Todo.Done(childComplexity), true
 
-	case "Todo.user":
+	case "Todo.User":
 		if e.complexity.Todo.User == nil {
 			break
 		}
 
 		return e.complexity.Todo.User(childComplexity), true
 
-	case "User.id":
-		if e.complexity.User.Id == nil {
+	case "User.ID":
+		if e.complexity.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.Id(childComplexity), true
+		return e.complexity.User.ID(childComplexity), true
 
 	case "User.FullName":
 		if e.complexity.User.FullName == nil {
@@ -491,7 +491,7 @@ func (ec *executionContext) _Todo_databaseId(ctx context.Context, field graphql.
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_Description(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
+func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *Todo) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -595,7 +595,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_FullName(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
+func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1432,7 +1432,7 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, v interfa
 			if err != nil {
 				return it, err
 			}
-		case "UserID":
+		case "userId":
 			var err error
 			it.UserID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -1547,8 +1547,8 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "Description":
-			out.Values[i] = ec._Todo_Description(ctx, field, obj)
+		case "text":
+			out.Values[i] = ec._Todo_text(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -1589,8 +1589,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "FullName":
-			out.Values[i] = ec._User_FullName(ctx, field, obj)
+		case "name":
+			out.Values[i] = ec._User_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}

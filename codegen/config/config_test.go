@@ -87,7 +87,7 @@ func TestConfigCheck(t *testing.T) {
 		err = config.normalize()
 		require.NoError(t, err)
 
-		err = config.check()
+		err = config.Check()
 		require.EqualError(t, err, "filenames exec.go and models.go are in the same directory but have different package definitions")
 	})
 }

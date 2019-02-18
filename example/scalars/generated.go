@@ -45,7 +45,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Address struct {
-		Id       func(childComplexity int) int
+		ID       func(childComplexity int) int
 		Location func(childComplexity int) int
 	}
 
@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Id                func(childComplexity int) int
+		ID                func(childComplexity int) int
 		Name              func(childComplexity int) int
 		Created           func(childComplexity int) int
 		IsBanned          func(childComplexity int) int
@@ -90,21 +90,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Address.id":
-		if e.complexity.Address.Id == nil {
+	case "Address.ID":
+		if e.complexity.Address.ID == nil {
 			break
 		}
 
-		return e.complexity.Address.Id(childComplexity), true
+		return e.complexity.Address.ID(childComplexity), true
 
-	case "Address.location":
+	case "Address.Location":
 		if e.complexity.Address.Location == nil {
 			break
 		}
 
 		return e.complexity.Address.Location(childComplexity), true
 
-	case "Query.user":
+	case "Query.User":
 		if e.complexity.Query.User == nil {
 			break
 		}
@@ -116,7 +116,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
 
-	case "Query.search":
+	case "Query.Search":
 		if e.complexity.Query.Search == nil {
 			break
 		}
@@ -128,56 +128,56 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
 
-	case "User.id":
-		if e.complexity.User.Id == nil {
+	case "User.ID":
+		if e.complexity.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.Id(childComplexity), true
+		return e.complexity.User.ID(childComplexity), true
 
-	case "User.name":
+	case "User.Name":
 		if e.complexity.User.Name == nil {
 			break
 		}
 
 		return e.complexity.User.Name(childComplexity), true
 
-	case "User.created":
+	case "User.Created":
 		if e.complexity.User.Created == nil {
 			break
 		}
 
 		return e.complexity.User.Created(childComplexity), true
 
-	case "User.isBanned":
+	case "User.IsBanned":
 		if e.complexity.User.IsBanned == nil {
 			break
 		}
 
 		return e.complexity.User.IsBanned(childComplexity), true
 
-	case "User.primitiveResolver":
+	case "User.PrimitiveResolver":
 		if e.complexity.User.PrimitiveResolver == nil {
 			break
 		}
 
 		return e.complexity.User.PrimitiveResolver(childComplexity), true
 
-	case "User.customResolver":
+	case "User.CustomResolver":
 		if e.complexity.User.CustomResolver == nil {
 			break
 		}
 
 		return e.complexity.User.CustomResolver(childComplexity), true
 
-	case "User.address":
+	case "User.Address":
 		if e.complexity.User.Address == nil {
 			break
 		}
 
 		return e.complexity.User.Address(childComplexity), true
 
-	case "User.tier":
+	case "User.Tier":
 		if e.complexity.User.Tier == nil {
 			break
 		}

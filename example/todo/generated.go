@@ -54,7 +54,7 @@ type ComplexityRoot struct {
 	}
 
 	Todo struct {
-		Id   func(childComplexity int) int
+		ID   func(childComplexity int) int
 		Text func(childComplexity int) int
 		Done func(childComplexity int) int
 	}
@@ -85,7 +85,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "MyMutation.createTodo":
+	case "MyMutation.CreateTodo":
 		if e.complexity.MyMutation.CreateTodo == nil {
 			break
 		}
@@ -97,7 +97,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
 
-	case "MyMutation.updateTodo":
+	case "MyMutation.UpdateTodo":
 		if e.complexity.MyMutation.UpdateTodo == nil {
 			break
 		}
@@ -109,7 +109,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]interface{})), true
 
-	case "MyQuery.todo":
+	case "MyQuery.Todo":
 		if e.complexity.MyQuery.Todo == nil {
 			break
 		}
@@ -121,35 +121,35 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(int)), true
 
-	case "MyQuery.lastTodo":
+	case "MyQuery.LastTodo":
 		if e.complexity.MyQuery.LastTodo == nil {
 			break
 		}
 
 		return e.complexity.MyQuery.LastTodo(childComplexity), true
 
-	case "MyQuery.todos":
+	case "MyQuery.Todos":
 		if e.complexity.MyQuery.Todos == nil {
 			break
 		}
 
 		return e.complexity.MyQuery.Todos(childComplexity), true
 
-	case "Todo.id":
-		if e.complexity.Todo.Id == nil {
+	case "Todo.ID":
+		if e.complexity.Todo.ID == nil {
 			break
 		}
 
-		return e.complexity.Todo.Id(childComplexity), true
+		return e.complexity.Todo.ID(childComplexity), true
 
-	case "Todo.text":
+	case "Todo.Text":
 		if e.complexity.Todo.Text == nil {
 			break
 		}
 
 		return e.complexity.Todo.Text(childComplexity), true
 
-	case "Todo.done":
+	case "Todo.Done":
 		if e.complexity.Todo.Done == nil {
 			break
 		}

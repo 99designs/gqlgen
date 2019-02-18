@@ -23,9 +23,9 @@ You can find the finished code for this tutorial [here](https://github.com/vekta
 Create a directory for your project, and initialise it as a Go Module:
 
 ```sh
-mkdir gqlgen-todos
-cd gqlgen-todos
-go mod init gqlgen-todos
+$ mkdir gqlgen-todos
+$ cd gqlgen-todos
+$ go mod init github.com/[username]/gqlgen-todos
 ```
 
 ## Building the server
@@ -81,7 +81,7 @@ This has created an empty skeleton with all files you need:
 The generated model for Todo isn't right, it has a user embeded in it but we only want to fetch it if the user actually requested it. So instead lets make a new model in `todo.go`:
 
 ```go
-package gettingstarted
+package gqlgen_todos
 
 type Todo struct {
 	ID     string
@@ -96,17 +96,13 @@ Next tell gqlgen to use this new struct by adding it to `gqlgen.yml`:
 ```yaml
 models:
   Todo:
-    model: github.com/[username]/gqlgen-todos/gettingstarted.Todo
+    model: github.com/[username]/gqlgen-todos.Todo
 ```
 
 Regenerate by running:
 
 ```bash
-$ go run github.com/99designs/gqlgen -v
-Unable to bind Todo.user to github.com/[username]/gqlgen-todos/gettingstarted.Todo
-	no method named user
-	no field named user
-	Adding resolver method
+$ go run github.com/99designs/gqlgen
 ```
 
 > Note
@@ -115,20 +111,16 @@ Unable to bind Todo.user to github.com/[username]/gqlgen-todos/gettingstarted.To
 
 ### Implement the resolvers
 
-The generated runtime has defined an interface for all the missing resolvers that we need to provide. Lets take a look in `generated.go`
+The generated runtime has defined an interface for all the missing resolvers that we need to provide. Lets take a look in `generated.go`:
 
 ```go
-// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
-func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-	}
+func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {}
+	// ...
 }
 
 type Config struct {
 	Resolvers  ResolverRoot
-	Directives DirectiveRoot
+	// ...
 }
 
 type ResolverRoot interface {
@@ -137,23 +129,21 @@ type ResolverRoot interface {
 	Todo() TodoResolver
 }
 
-type DirectiveRoot struct {
-}
 type MutationResolver interface {
-	CreateTodo(ctx context.Context, input NewTodo) (Todo, error)
+	CreateTodo(ctx context.Context, input NewTodo) (*Todo, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]Todo, error)
 }
 type TodoResolver interface {
-	User(ctx context.Context, obj *Todo) (User, error)
+	User(ctx context.Context, obj *Todo) (*User, error)
 }
 ```
 
 Notice the `TodoResolver.User` method? Thats gqlgen saying "I dont know how to get a User from a Todo, you tell me.".
 Its worked out how to build everything else for us.
 
-For any missing models (like NewTodo) gqlgen will generate a go struct. This is usually only used for input types and 
+For any missing models (like `NewTodo`) gqlgen will generate a go struct. This is usually only used for input types and 
 one-off return values. Most of the time your types will be coming from the database, or an API client so binding is
 better than generating.
 
@@ -169,7 +159,7 @@ $ go run github.com/99designs/gqlgen
 Now we just need to fill in the `not implemented` parts.  Update `resolver.go`
 
 ```go
-package gettingstarted
+package gqlgen_todos
 
 import (
 	context "context"
@@ -177,7 +167,7 @@ import (
 	"math/rand"
 )
 
-type Resolver struct{
+type Resolver struct {
 	todos []Todo
 }
 
@@ -193,13 +183,13 @@ func (r *Resolver) Todo() TodoResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (Todo, error) {
-	todo := Todo{
+func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
+	todo := &Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
 		UserID: input.UserID,
 	}
-	r.todos = append(r.todos, todo)
+	r.todos = append(r.todos, *todo)
 	return todo, nil
 }
 
@@ -211,8 +201,8 @@ func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
 
 type todoResolver struct{ *Resolver }
 
-func (r *todoResolver) User(ctx context.Context, obj *Todo) (User, error) {
-	return User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
+func (r *todoResolver) User(ctx context.Context, obj *Todo) (*User, error) {
+	return &User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
 }
 
 ```

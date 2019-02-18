@@ -1,10 +1,14 @@
 ---
-linkTitle: Getting Started
+linkTitle: Getting Started Using dep
 title: Building GraphQL servers in golang
-description: Get started building type-safe GraphQL servers in Golang using gqlgen  
-menu: main
+description: Get started building type-safe GraphQL servers in Golang using gqlgen
 weight: -7
+hidden: true
 ---
+
+> Deprecated
+>
+> This tutorial uses the `dep` tool to manage dependencies instead of Go Modules and should be considered a deprecated way to use gqlgen.  Read out new [Getting Started]({{< ref "getting-started.md" >}}) guide for instructions for using Go Modules.
 
 This tutorial will take you through the process of building a GraphQL server with gqlgen that can:
 
@@ -14,18 +18,34 @@ This tutorial will take you through the process of building a GraphQL server wit
 
 You can find the finished code for this tutorial [here](https://github.com/vektah/gqlgen-tutorials/tree/master/gettingstarted)
 
-> Note
->
-> This tutorial uses Go Modules and requires Go 1.11+.  If you want to use this tutorial without Go Modules, take a look at our [Getting Started Using dep]({{< ref "getting-started-dep.md" >}}) guide instead.
+## Install gqlgen
 
-## Setup Project
+This article uses [`dep`](https://github.com/golang/dep) to install gqlgen.  [Follow the instructions for your environment](https://github.com/golang/dep) to install.
 
-Create a directory for your project, and initialise it as a Go Module:
+Assuming you already have a working [Go environment](https://golang.org/doc/install), create a directory for the project in your `$GOPATH`:
 
 ```sh
-mkdir gqlgen-todos
-cd gqlgen-todos
-go mod init gqlgen-todos
+$ mkdir -p $GOPATH/src/github.com/[username]/gqlgen-todos
+```
+
+Add the following file to your project under `scripts/gqlgen.go`:
+
+```go
+// +build ignore
+
+package main
+
+import "github.com/99designs/gqlgen/cmd"
+
+func main() {
+	cmd.Execute()
+}
+```
+
+Lastly, initialise dep.  This will inspect any imports you have in your project, and pull down the latest tagged release.
+
+```sh
+$ dep init
 ```
 
 ## Building the server
@@ -65,7 +85,7 @@ type Mutation {
 ### Create the project skeleton
 
 ```bash
-$ go run github.com/99designs/gqlgen init
+$ go run scripts/gqlgen.go init
 ```
 
 This has created an empty skeleton with all files you need:
@@ -75,6 +95,12 @@ This has created an empty skeleton with all files you need:
  - `models_gen.go` — Generated models required to build the graph. Often you will override these with your own models. Still very useful for input types.
  - `resolver.go` — This is where your application code lives. `generated.go` will call into this to get the data the user has requested. 
  - `server/server.go` — This is a minimal entry point that sets up an `http.Handler` to the generated GraphQL server.
+
+ Now run dep ensure, so that we can ensure that the newly generated code's dependencies are all present:
+
+ ```sh
+ $ dep ensure
+ ```
  
 ### Create the database models
 
@@ -102,7 +128,7 @@ models:
 Regenerate by running:
 
 ```bash
-$ go run github.com/99designs/gqlgen -v
+$ go run scripts/gqlgen.go -v
 Unable to bind Todo.user to github.com/[username]/gqlgen-todos/gettingstarted.Todo
 	no method named user
 	no field named user
@@ -163,12 +189,14 @@ This is a work in progress, we have a way to generate resolver stubs, but it can
 
 ```bash
 $ rm resolver.go
-$ go run github.com/99designs/gqlgen
+$ go run scripts/gqlgen.go
 ```
 
 Now we just need to fill in the `not implemented` parts.  Update `resolver.go`
 
 ```go
+//go:generate go run ./scripts/gqlgen.go
+
 package gettingstarted
 
 import (
@@ -250,7 +278,7 @@ query findTodos {
 At the top of our `resolver.go` add the following line:
 
 ```go
-//go:generate go run github.com/99designs/gqlgen
+//go:generate go run scripts/gqlgen.go -v
 ```
 
 This magic comment tells `go generate` what command to run when we want to regenerate our code.  To run go generate recursively over your entire project, use this command:
@@ -258,3 +286,7 @@ This magic comment tells `go generate` what command to run when we want to regen
 ```go
 go generate ./...
 ```
+
+> Note
+>
+> Ensure that the path to your `gqlgen` binary is relative to the file the generate command is added to.

@@ -62,7 +62,12 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 	}
 
 	if err = b.bindField(obj, &f); err != nil {
+		f.IsResolver = true
 		log.Println(err.Error())
+	}
+
+	if f.IsResolver && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {
+		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
 	}
 
 	return &f, nil
@@ -76,10 +81,6 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 				panic(err)
 			}
 			f.TypeReference = tr
-		}
-
-		if f.IsResolver && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {
-			f.TypeReference = b.Binder.PointerTo(f.TypeReference)
 		}
 	}()
 
@@ -115,8 +116,6 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 
 	switch target := target.(type) {
 	case nil:
-		f.IsResolver = true
-
 		objPos := b.Binder.TypePosition(obj.Type)
 		return fmt.Errorf(
 			"%s:%d adding resolver method for %s.%s, nothing matched",
@@ -125,6 +124,7 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 			obj.Name,
 			f.Name,
 		)
+
 	case *types.Func:
 		sig := target.Type().(*types.Signature)
 		if sig.Results().Len() == 1 {

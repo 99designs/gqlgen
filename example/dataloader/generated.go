@@ -1701,12 +1701,22 @@ func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet,
 		case "address":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Customer_address(ctx, field, obj)
 				return res
 			})
 		case "orders":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Customer_orders(ctx, field, obj)
 				return res
 			})
@@ -1777,6 +1787,11 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 		case "items":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Order_items(ctx, field, obj)
 				return res
 			})
@@ -1809,18 +1824,33 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "customers":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_customers(ctx, field)
 				return res
 			})
 		case "torture1d":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_torture1d(ctx, field)
 				return res
 			})
 		case "torture2d":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_torture2d(ctx, field)
 				return res
 			})
@@ -2161,6 +2191,12 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2220,6 +2256,12 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Co
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2263,6 +2305,12 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2298,6 +2346,12 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2381,6 +2435,12 @@ func (ec *executionContext) marshalOCustomer2ᚕgithubᚗcomᚋ99designsᚋgqlge
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2412,6 +2472,12 @@ func (ec *executionContext) marshalOCustomer2ᚕᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2501,6 +2567,12 @@ func (ec *executionContext) marshalOItem2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2532,6 +2604,12 @@ func (ec *executionContext) marshalOOrder2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2586,6 +2664,12 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2617,6 +2701,12 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2648,6 +2738,12 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2694,6 +2790,12 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}

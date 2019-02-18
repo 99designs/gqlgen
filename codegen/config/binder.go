@@ -84,7 +84,7 @@ var InterfaceType = types.NewInterfaceType(nil, nil)
 func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 	models := b.cfg.Models[name].Model
 	if len(models) == 0 {
-		return nil, fmt.Errorf(name + " not found")
+		return nil, fmt.Errorf(name + " not found in typemap")
 	}
 
 	if models[0] == "map[string]interface{}" {
@@ -346,6 +346,10 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		}
 	}()
 
+	if len(b.cfg.Models[schemaType.Name()].Model) == 0 {
+		return nil, fmt.Errorf("%s was not found", schemaType.Name())
+	}
+
 	for _, model := range b.cfg.Models[schemaType.Name()].Model {
 		if model == "map[string]interface{}" {
 			if !isMap(bindTarget) {
@@ -404,7 +408,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		return ref, nil
 	}
 
-	return nil, fmt.Errorf("not found")
+	return nil, fmt.Errorf("%s has type compatible with %s", schemaType.Name(), bindTarget.String())
 }
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, usePtr bool, base types.Type) types.Type {

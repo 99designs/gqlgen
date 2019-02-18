@@ -42,6 +42,11 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 			{{- if $field.IsConcurrent }}
 				field := field
 				out.Concurrently(i, func() (res graphql.Marshaler) {
+					defer func() {
+						if r := recover(); r != nil {
+							ec.Error(ctx, ec.Recover(ctx, r))
+						}
+					}()
 					res = ec._{{$object.Name}}_{{$field.Name}}(ctx, field{{if not $object.Root}}, obj{{end}})
 					{{- if $field.TypeReference.GQL.NonNull }}
 						if res == graphql.Null {

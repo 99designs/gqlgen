@@ -1,4 +1,4 @@
-package gqlgen
+package main
 
 import (
 	// Import and ignore the ambient imports listed below so dependency managers

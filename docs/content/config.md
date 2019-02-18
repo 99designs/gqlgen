@@ -3,7 +3,7 @@ linkTitle: Configuration
 title: How to configure gqlgen using gqlgen.yml
 description: How to configure gqlgen using gqlgen.yml
 menu: main
-weight: -7
+weight: -5
 ---
 
 gqlgen can be configured using a `gqlgen.yml` file, by default it will be loaded from the current directory, or any parent directory.

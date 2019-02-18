@@ -7,9 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/plugin/servergen"
-
-	"github.com/99designs/gqlgen"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
@@ -73,7 +72,7 @@ var initCmd = cli.Command{
 }
 
 func GenerateGraphServer(cfg *config.Config, serverFilename string) {
-	err := gqlgen.Generate(cfg, gqlgen.AddPlugin(servergen.New(serverFilename)))
+	err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename)))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}

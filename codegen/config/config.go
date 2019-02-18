@@ -185,7 +185,33 @@ func (c *Config) Check() error {
 		}
 	}
 
+	// check packages names against conflict, if present in the same dir
+	// and check filenames for uniqueness
+	packageConfigList := []PackageConfig{
+		c.Model,
+		c.Exec,
+		c.Resolver,
+	}
+	filesMap := make(map[string]bool)
+	pkgConfigsByDir := make(map[string]PackageConfig)
+	for _, current := range packageConfigList {
+		_, fileFound := filesMap[current.Filename]
+		if fileFound {
+			return fmt.Errorf("filename %s defined more than once", current.Filename)
+		}
+		filesMap[current.Filename] = true
+		previous, inSameDir := pkgConfigsByDir[current.Dir()]
+		if inSameDir && current.Package != previous.Package {
+			return fmt.Errorf("filenames %s and %s are in the same directory but have different package definitions", stripPath(current.Filename), stripPath(previous.Filename))
+		}
+		pkgConfigsByDir[current.Dir()] = current
+	}
+
 	return c.normalize()
+}
+
+func stripPath(path string) string {
+	return filepath.Base(path)
 }
 
 type TypeMap map[string]TypeMapEntry

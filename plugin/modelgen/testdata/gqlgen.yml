@@ -2,7 +2,7 @@ schema:
   - "testdata/schema.graphql"
 
 exec:
-  filename: out/generated.go
+  filename: out/ignored.go
 model:
   filename: out/generated.go
 

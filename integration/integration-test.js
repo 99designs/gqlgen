@@ -70,4 +70,13 @@ describe('Errors', () => {
 
         expect(res.errors[0].message).toEqual('Normal error');
     });
+
+    it('should return errors only for failed resolvers', async () => {
+        let res = await client.query({
+            query: gql`{ viewer { user { name } } error(type: NORMAL) }`,
+        });
+
+        expect(res.errors[0].message).toEqual('Normal error');
+        expect(res.data.viewer.user.name).toEqual('Bob');
+    });
 });

@@ -133,7 +133,7 @@ func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField 
 }
 
 // CollectAllFields returns a slice of all GraphQL field names that were selected for the current resolver context.
-// The slice will contain the unique set of all fields requested regardless of fragment type conditions.
+// The slice will contain the unique set of all field names requested regardless of fragment type conditions.
 func CollectAllFields(ctx context.Context) []string {
 	resctx := GetResolverContext(ctx)
 	collected := CollectFields(ctx, resctx.Field.Selections, nil)

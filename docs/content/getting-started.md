@@ -3,7 +3,7 @@ linkTitle: Getting Started
 title: Building GraphQL servers in golang
 description: Get started building type-safe GraphQL servers in Golang using gqlgen  
 menu: main
-weight: -5
+weight: -7
 ---
 
 This tutorial will take you through the process of building a GraphQL server with gqlgen that can:

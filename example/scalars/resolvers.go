@@ -69,6 +69,6 @@ func (r *userResolver) PrimitiveResolver(ctx context.Context, obj *model.User) (
 	return "test", nil
 }
 
-func (r *userResolver) CustomResolver(ctx context.Context, obj *model.User) (model.Point, error) {
-	return model.Point{X: 5, Y: 1}, nil
+func (r *userResolver) CustomResolver(ctx context.Context, obj *model.User) (*model.Point, error) {
+	return &model.Point{X: 5, Y: 1}, nil
 }

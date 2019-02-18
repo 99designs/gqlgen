@@ -149,6 +149,19 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 	return nil, errors.Errorf("unable to find type %s\n", fullName)
 }
 
+func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
+	newRef := &TypeReference{
+		GO:          types.NewPointer(ref.GO),
+		GQL:         ref.GQL,
+		Definition:  ref.Definition,
+		Unmarshaler: ref.Unmarshaler,
+		Marshaler:   ref.Marshaler,
+	}
+
+	b.References = append(b.References, newRef)
+	return newRef
+}
+
 var modsRegex = regexp.MustCompile(`^(\*|\[\])*`)
 
 func normalizeVendor(pkg string) string {
@@ -203,6 +216,11 @@ func (t *TypeReference) IsSlice() bool {
 func (t *TypeReference) IsNamed() bool {
 	_, isSlice := t.GO.(*types.Named)
 	return isSlice
+}
+
+func (t *TypeReference) IsStruct() bool {
+	_, isStruct := t.GO.Underlying().(*types.Struct)
+	return isStruct
 }
 
 func (t *TypeReference) IsScalar() bool {

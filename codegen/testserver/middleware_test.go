@@ -19,8 +19,8 @@ func TestMiddleware(t *testing.T) {
 		return &Error{ID: "E1234"}, nil
 	}
 
-	resolvers.QueryResolver.User = func(ctx context.Context, id int) (user User, e error) {
-		return User{ID: 1}, nil
+	resolvers.QueryResolver.User = func(ctx context.Context, id int) (user *User, e error) {
+		return &User{ID: 1}, nil
 	}
 
 	resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) (users []User, e error) {

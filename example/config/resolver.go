@@ -38,7 +38,7 @@ func (r *Resolver) Todo() TodoResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
 	newID := r.nextID
 	r.nextID++
 
@@ -49,7 +49,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (Todo,
 
 	r.todos = append(r.todos, newTodo)
 
-	return newTodo, nil
+	return &newTodo, nil
 }
 
 type queryResolver struct{ *Resolver }

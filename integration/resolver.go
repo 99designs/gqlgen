@@ -47,8 +47,8 @@ func (r *elementResolver) Mismatched(ctx context.Context, obj *models.Element) (
 	return []bool{true}, nil
 }
 
-func (r *elementResolver) Child(ctx context.Context, obj *models.Element) (models.Element, error) {
-	return models.Element{ID: obj.ID * 10}, nil
+func (r *elementResolver) Child(ctx context.Context, obj *models.Element) (*models.Element, error) {
+	return &models.Element{ID: obj.ID * 10}, nil
 }
 
 type queryResolver struct{ *Resolver }

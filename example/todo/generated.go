@@ -61,7 +61,7 @@ type ComplexityRoot struct {
 }
 
 type MyMutationResolver interface {
-	CreateTodo(ctx context.Context, todo TodoInput) (Todo, error)
+	CreateTodo(ctx context.Context, todo TodoInput) (*Todo, error)
 	UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error)
 }
 type MyQueryResolver interface {
@@ -434,10 +434,10 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Todo)
+	res := resTmp.(*Todo)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -1951,6 +1951,16 @@ func (ec *executionContext) marshalNTodo2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐTodo(ctx context.Context, sel ast.SelectionSet, v *Todo) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Todo(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐTodoInput(ctx context.Context, v interface{}) (TodoInput, error) {

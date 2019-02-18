@@ -27,7 +27,7 @@ type Stub struct {
 		ErrorBubble            func(ctx context.Context) (*Error, error)
 		ModelMethods           func(ctx context.Context) (*ModelMethods, error)
 		Valid                  func(ctx context.Context) (string, error)
-		User                   func(ctx context.Context, id int) (User, error)
+		User                   func(ctx context.Context, id int) (*User, error)
 		NullableArg            func(ctx context.Context, arg *int) (*string, error)
 		DirectiveArg           func(ctx context.Context, arg string) (*string, error)
 		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int) (*string, error)
@@ -106,7 +106,7 @@ func (r *stubQuery) ModelMethods(ctx context.Context) (*ModelMethods, error) {
 func (r *stubQuery) Valid(ctx context.Context) (string, error) {
 	return r.QueryResolver.Valid(ctx)
 }
-func (r *stubQuery) User(ctx context.Context, id int) (User, error) {
+func (r *stubQuery) User(ctx context.Context, id int) (*User, error) {
 	return r.QueryResolver.User(ctx, id)
 }
 func (r *stubQuery) NullableArg(ctx context.Context, arg *int) (*string, error) {

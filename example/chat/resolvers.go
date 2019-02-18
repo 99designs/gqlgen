@@ -37,16 +37,16 @@ func New() Config {
 type Chatroom struct {
 	Name      string
 	Messages  []Message
-	Observers map[string]chan Message
+	Observers map[string]chan *Message
 }
 
 type mutationResolver struct{ *resolver }
 
-func (r *mutationResolver) Post(ctx context.Context, text string, username string, roomName string) (Message, error) {
+func (r *mutationResolver) Post(ctx context.Context, text string, username string, roomName string) (*Message, error) {
 	r.mu.Lock()
 	room := r.Rooms[roomName]
 	if room == nil {
-		room = &Chatroom{Name: roomName, Observers: map[string]chan Message{}}
+		room = &Chatroom{Name: roomName, Observers: map[string]chan *Message{}}
 		r.Rooms[roomName] = room
 	}
 	r.mu.Unlock()
@@ -61,10 +61,10 @@ func (r *mutationResolver) Post(ctx context.Context, text string, username strin
 	room.Messages = append(room.Messages, message)
 	r.mu.Lock()
 	for _, observer := range room.Observers {
-		observer <- message
+		observer <- &message
 	}
 	r.mu.Unlock()
-	return message, nil
+	return &message, nil
 }
 
 type queryResolver struct{ *resolver }
@@ -73,7 +73,7 @@ func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error
 	r.mu.Lock()
 	room := r.Rooms[name]
 	if room == nil {
-		room = &Chatroom{Name: name, Observers: map[string]chan Message{}}
+		room = &Chatroom{Name: name, Observers: map[string]chan *Message{}}
 		r.Rooms[name] = room
 	}
 	r.mu.Unlock()
@@ -83,17 +83,17 @@ func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error
 
 type subscriptionResolver struct{ *resolver }
 
-func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string) (<-chan Message, error) {
+func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string) (<-chan *Message, error) {
 	r.mu.Lock()
 	room := r.Rooms[roomName]
 	if room == nil {
-		room = &Chatroom{Name: roomName, Observers: map[string]chan Message{}}
+		room = &Chatroom{Name: roomName, Observers: map[string]chan *Message{}}
 		r.Rooms[roomName] = room
 	}
 	r.mu.Unlock()
 
 	id := randString(8)
-	events := make(chan Message, 1)
+	events := make(chan *Message, 1)
 
 	go func() {
 		<-ctx.Done()

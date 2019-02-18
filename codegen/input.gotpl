@@ -35,7 +35,7 @@
 					if err != nil {
 						return it, err
 					}
-					if data, ok := tmp.({{ $field.TypeReference.GO }}) ; ok {
+					if data, ok := tmp.({{ $field.TypeReference.GO | ref }}) ; ok {
 						it.{{$field.GoFieldName}} = data
 					} else {
 						return it, fmt.Errorf(`unexpected type %T from directive, should be {{ $field.TypeReference.GO }}`, tmp)

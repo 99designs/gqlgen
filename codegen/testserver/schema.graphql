@@ -70,10 +70,13 @@ input OuterInput {
     inner: InnerInput!
 }
 
+scalar ThirdParty
+
 input InputDirectives {
     text: String! @length(min: 0, max: 7, message: "not valid")
     inner: InnerDirectives!
     innerNullable: InnerDirectives
+    thirdParty: ThirdParty @length(min: 0, max: 7, message: "not valid")
 }
 
 input InnerDirectives {

@@ -122,13 +122,26 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 		return nil, errors.Errorf("required package was not loaded: %s", fullName)
 	}
 
+	// function based marshalers take precedence
 	for astNode, def := range pkg.TypesInfo.Defs {
 		// only look at defs in the top scope
 		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {
 			continue
 		}
 
-		if astNode.Name == typeName || astNode.Name == "Marshal"+typeName {
+		if astNode.Name == "Marshal"+typeName {
+			return def, nil
+		}
+	}
+
+	// then look for types directly
+	for astNode, def := range pkg.TypesInfo.Defs {
+		// only look at defs in the top scope
+		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {
+			continue
+		}
+
+		if astNode.Name == typeName {
 			return def, nil
 		}
 	}

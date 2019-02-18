@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/99designs/gqlgen"
+	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin/stubgen"
 )
@@ -27,12 +27,12 @@ func main() {
 		os.Exit(2)
 	}
 
-	var options []gqlgen.Option
+	var options []api.Option
 	if *stub != "" {
-		options = append(options, gqlgen.AddPlugin(stubgen.New(*stub, "Stub")))
+		options = append(options, api.AddPlugin(stubgen.New(*stub, "Stub")))
 	}
 
-	err = gqlgen.Generate(cfg, options...)
+	err = api.Generate(cfg, options...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(3)

@@ -1,4 +1,4 @@
-package gqlgen
+package api
 
 import (
 	"github.com/99designs/gqlgen/codegen/config"

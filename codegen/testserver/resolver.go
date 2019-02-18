@@ -71,7 +71,7 @@ func (r *queryResolver) ModelMethods(ctx context.Context) (*ModelMethods, error)
 func (r *queryResolver) Valid(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) User(ctx context.Context, id int) (User, error) {
+func (r *queryResolver) User(ctx context.Context, id int) (*User, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) NullableArg(ctx context.Context, arg *int) (*string, error) {

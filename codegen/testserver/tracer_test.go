@@ -16,8 +16,8 @@ import (
 
 func TestTracer(t *testing.T) {
 	resolvers := &Stub{}
-	resolvers.QueryResolver.User = func(ctx context.Context, id int) (user User, e error) {
-		return User{ID: 1}, nil
+	resolvers.QueryResolver.User = func(ctx context.Context, id int) (user *User, e error) {
+		return &User{ID: 1}, nil
 	}
 	t.Run("called in the correct order", func(t *testing.T) {
 		var tracerLog []string

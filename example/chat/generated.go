@@ -70,13 +70,13 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	Post(ctx context.Context, text string, username string, roomName string) (Message, error)
+	Post(ctx context.Context, text string, username string, roomName string) (*Message, error)
 }
 type QueryResolver interface {
 	Room(ctx context.Context, name string) (*Chatroom, error)
 }
 type SubscriptionResolver interface {
-	MessageAdded(ctx context.Context, roomName string) (<-chan Message, error)
+	MessageAdded(ctx context.Context, roomName string) (<-chan *Message, error)
 }
 
 type executableSchema struct {
@@ -597,10 +597,10 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Message)
+	res := resTmp.(*Message)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNMessage2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋchatᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋchatᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_room(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -714,7 +714,7 @@ func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, fiel
 			w.Write([]byte{'{'})
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
-			ec.marshalNMessage2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋchatᚐMessage(ctx, field.Selections, res).MarshalGQL(w)
+			ec.marshalNMessage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋchatᚐMessage(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -1982,6 +1982,16 @@ func (ec *executionContext) marshalNMessage2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋchatᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Message(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

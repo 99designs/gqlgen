@@ -51,16 +51,16 @@ type Droid struct {
 func (Droid) IsCharacter()    {}
 func (Droid) IsSearchResult() {}
 
-func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, first *int, after *string) (FriendsConnection, error) {
+func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, first *int, after *string) (*FriendsConnection, error) {
 	from := 0
 	if after != nil {
 		b, err := base64.StdEncoding.DecodeString(*after)
 		if err != nil {
-			return FriendsConnection{}, err
+			return nil, err
 		}
 		i, err := strconv.Atoi(strings.TrimPrefix(string(b), "cursor"))
 		if err != nil {
-			return FriendsConnection{}, err
+			return nil, err
 		}
 		from = i
 	}
@@ -73,7 +73,7 @@ func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, fi
 		}
 	}
 
-	return FriendsConnection{
+	return &FriendsConnection{
 		ids:  ids,
 		from: from,
 		to:   to,

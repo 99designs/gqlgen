@@ -70,7 +70,7 @@ type ComplexityRoot struct {
 }
 
 type ElementResolver interface {
-	Child(ctx context.Context, obj *models.Element) (models.Element, error)
+	Child(ctx context.Context, obj *models.Element) (*models.Element, error)
 	Error(ctx context.Context, obj *models.Element) (bool, error)
 }
 type QueryResolver interface {
@@ -433,10 +433,10 @@ func (ec *executionContext) _Element_child(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(models.Element)
+	res := resTmp.(*models.Element)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNElement2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐElement(ctx, field.Selections, res)
+	return ec.marshalNElement2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐElement(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Element_error(ctx context.Context, field graphql.CollectedField, obj *models.Element) graphql.Marshaler {
@@ -2028,6 +2028,16 @@ func (ec *executionContext) unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlg
 
 func (ec *executionContext) marshalNElement2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐElement(ctx context.Context, sel ast.SelectionSet, v models.Element) graphql.Marshaler {
 	return ec._Element(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNElement2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐElement(ctx context.Context, sel ast.SelectionSet, v *models.Element) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Element(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

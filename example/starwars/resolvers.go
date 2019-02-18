@@ -58,7 +58,7 @@ func (r *droidResolver) Friends(ctx context.Context, obj *Droid) ([]Character, e
 	return r.resolveCharacters(ctx, obj.FriendIds)
 }
 
-func (r *droidResolver) FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error) {
+func (r *droidResolver) FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (*FriendsConnection, error) {
 	return r.resolveFriendConnection(ctx, obj.FriendIds, first, after)
 }
 
@@ -90,7 +90,7 @@ func (r *humanResolver) Friends(ctx context.Context, obj *Human) ([]Character, e
 	return r.resolveCharacters(ctx, obj.FriendIds)
 }
 
-func (r *humanResolver) FriendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error) {
+func (r *humanResolver) FriendsConnection(ctx context.Context, obj *Human, first *int, after *string) (*FriendsConnection, error) {
 	return r.resolveFriendConnection(ctx, obj.FriendIds, first, after)
 }
 

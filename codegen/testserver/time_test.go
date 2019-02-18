@@ -17,8 +17,8 @@ func TestTime(t *testing.T) {
 	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 	c := client.New(srv.URL)
 
-	resolvers.QueryResolver.User = func(ctx context.Context, id int) (user User, e error) {
-		return User{}, nil
+	resolvers.QueryResolver.User = func(ctx context.Context, id int) (user *User, e error) {
+		return &User{}, nil
 	}
 
 	t.Run("zero value in nullable field", func(t *testing.T) {
@@ -46,9 +46,9 @@ func TestTime(t *testing.T) {
 	})
 
 	t.Run("with values", func(t *testing.T) {
-		resolvers.QueryResolver.User = func(ctx context.Context, id int) (user User, e error) {
+		resolvers.QueryResolver.User = func(ctx context.Context, id int) (user *User, e error) {
 			updated := time.Date(2010, 1, 1, 0, 0, 20, 0, time.UTC)
-			return User{
+			return &User{
 				Created: time.Date(2010, 1, 1, 0, 0, 10, 0, time.UTC),
 				Updated: &updated,
 			}, nil

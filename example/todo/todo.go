@@ -91,7 +91,7 @@ func (r *QueryResolver) Todos(ctx context.Context) ([]Todo, error) {
 
 type MutationResolver resolvers
 
-func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (Todo, error) {
+func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*Todo, error) {
 	newID := r.id()
 
 	newTodo := Todo{
@@ -106,7 +106,7 @@ func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (Todo
 
 	r.todos = append(r.todos, newTodo)
 
-	return newTodo, nil
+	return &newTodo, nil
 }
 
 func (r *MutationResolver) UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {

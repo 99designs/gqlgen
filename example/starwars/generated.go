@@ -115,7 +115,7 @@ type ComplexityRoot struct {
 
 type DroidResolver interface {
 	Friends(ctx context.Context, obj *Droid) ([]Character, error)
-	FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (FriendsConnection, error)
+	FriendsConnection(ctx context.Context, obj *Droid, first *int, after *string) (*FriendsConnection, error)
 }
 type FriendsConnectionResolver interface {
 	Edges(ctx context.Context, obj *FriendsConnection) ([]FriendsEdge, error)
@@ -123,7 +123,7 @@ type FriendsConnectionResolver interface {
 }
 type HumanResolver interface {
 	Friends(ctx context.Context, obj *Human) ([]Character, error)
-	FriendsConnection(ctx context.Context, obj *Human, first *int, after *string) (FriendsConnection, error)
+	FriendsConnection(ctx context.Context, obj *Human, first *int, after *string) (*FriendsConnection, error)
 
 	Starships(ctx context.Context, obj *Human) ([]Starship, error)
 }
@@ -1047,10 +1047,10 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(FriendsConnection)
+	res := resTmp.(*FriendsConnection)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNFriendsConnection2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐFriendsConnection(ctx, field.Selections, res)
+	return ec.marshalNFriendsConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐFriendsConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Droid_appearsIn(ctx context.Context, field graphql.CollectedField, obj *Droid) graphql.Marshaler {
@@ -1407,10 +1407,10 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(FriendsConnection)
+	res := resTmp.(*FriendsConnection)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNFriendsConnection2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐFriendsConnection(ctx, field.Selections, res)
+	return ec.marshalNFriendsConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐFriendsConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Human_appearsIn(ctx context.Context, field graphql.CollectedField, obj *Human) graphql.Marshaler {
@@ -3636,6 +3636,16 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 
 func (ec *executionContext) marshalNFriendsConnection2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐFriendsConnection(ctx context.Context, sel ast.SelectionSet, v FriendsConnection) graphql.Marshaler {
 	return ec._FriendsConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFriendsConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐFriendsConnection(ctx context.Context, sel ast.SelectionSet, v *FriendsConnection) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FriendsConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNFriendsEdge2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚐFriendsEdge(ctx context.Context, sel ast.SelectionSet, v FriendsEdge) graphql.Marshaler {

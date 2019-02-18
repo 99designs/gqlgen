@@ -77,7 +77,12 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 			}
 			f.TypeReference = tr
 		}
+
+		if f.IsResolver && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {
+			f.TypeReference = b.Binder.PointerTo(f.TypeReference)
+		}
 	}()
+
 	switch {
 	case f.Name == "__schema":
 		f.GoFieldType = GoFieldMethod

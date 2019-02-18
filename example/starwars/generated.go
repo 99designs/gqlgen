@@ -2921,12 +2921,22 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 		case "friends":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Droid_friends(ctx, field, obj)
 				return res
 			})
 		case "friendsConnection":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Droid_friendsConnection(ctx, field, obj)
 				if res == graphql.Null {
 					invalid = true
@@ -2970,12 +2980,22 @@ func (ec *executionContext) _FriendsConnection(ctx context.Context, sel ast.Sele
 		case "edges":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._FriendsConnection_edges(ctx, field, obj)
 				return res
 			})
 		case "friends":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._FriendsConnection_friends(ctx, field, obj)
 				return res
 			})
@@ -3055,12 +3075,22 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 		case "friends":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Human_friends(ctx, field, obj)
 				return res
 			})
 		case "friendsConnection":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Human_friendsConnection(ctx, field, obj)
 				if res == graphql.Null {
 					invalid = true
@@ -3075,6 +3105,11 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 		case "starships":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Human_starships(ctx, field, obj)
 				return res
 			})
@@ -3172,12 +3207,22 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "hero":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_hero(ctx, field)
 				return res
 			})
 		case "reviews":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_reviews(ctx, field)
 				if res == graphql.Null {
 					invalid = true
@@ -3187,6 +3232,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "search":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_search(ctx, field)
 				if res == graphql.Null {
 					invalid = true
@@ -3196,24 +3246,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "character":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_character(ctx, field)
 				return res
 			})
 		case "droid":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_droid(ctx, field)
 				return res
 			})
 		case "human":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_human(ctx, field)
 				return res
 			})
 		case "starship":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_starship(ctx, field)
 				return res
 			})
@@ -3287,6 +3357,11 @@ func (ec *executionContext) _Starship(ctx context.Context, sel ast.SelectionSet,
 		case "length":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Starship_length(ctx, field, obj)
 				if res == graphql.Null {
 					invalid = true
@@ -3610,6 +3685,12 @@ func (ec *executionContext) marshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -3749,6 +3830,12 @@ func (ec *executionContext) marshalNReview2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -3788,6 +3875,12 @@ func (ec *executionContext) marshalNSearchResult2ᚕgithubᚗcomᚋ99designsᚋg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -3835,6 +3928,12 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -3894,6 +3993,12 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Co
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -3937,6 +4042,12 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -3972,6 +4083,12 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -4048,6 +4165,12 @@ func (ec *executionContext) marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -4122,6 +4245,12 @@ func (ec *executionContext) marshalOFriendsEdge2ᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -4249,6 +4378,12 @@ func (ec *executionContext) marshalOStarship2ᚕgithubᚗcomᚋ99designsᚋgqlge
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -4336,6 +4471,12 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -4367,6 +4508,12 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -4398,6 +4545,12 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -4444,6 +4597,12 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}

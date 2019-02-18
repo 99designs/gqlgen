@@ -16,6 +16,10 @@ type Stub struct {
 	ModelMethodsResolver struct {
 		ResolverField func(ctx context.Context, obj *ModelMethods) (bool, error)
 	}
+	PanicsResolver struct {
+		FieldScalarMarshal func(ctx context.Context, obj *Panics) ([]MarshalPanic, error)
+		ArgUnmarshal       func(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error)
+	}
 	QueryResolver struct {
 		InvalidIdentifier      func(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 		Collision              func(ctx context.Context) (*introspection1.It, error)
@@ -35,6 +39,7 @@ type Stub struct {
 		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
+		Panics                 func(ctx context.Context) (*Panics, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
 	SubscriptionResolver struct {
@@ -51,6 +56,9 @@ func (r *Stub) ForcedResolver() ForcedResolverResolver {
 }
 func (r *Stub) ModelMethods() ModelMethodsResolver {
 	return &stubModelMethods{r}
+}
+func (r *Stub) Panics() PanicsResolver {
+	return &stubPanics{r}
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
@@ -72,6 +80,15 @@ type stubModelMethods struct{ *Stub }
 
 func (r *stubModelMethods) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
 	return r.ModelMethodsResolver.ResolverField(ctx, obj)
+}
+
+type stubPanics struct{ *Stub }
+
+func (r *stubPanics) FieldScalarMarshal(ctx context.Context, obj *Panics) ([]MarshalPanic, error) {
+	return r.PanicsResolver.FieldScalarMarshal(ctx, obj)
+}
+func (r *stubPanics) ArgUnmarshal(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error) {
+	return r.PanicsResolver.ArgUnmarshal(ctx, obj, u)
 }
 
 type stubQuery struct{ *Stub }
@@ -129,6 +146,9 @@ func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) 
 }
 func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	return r.QueryResolver.ShapeUnion(ctx)
+}
+func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
+	return r.QueryResolver.Panics(ctx)
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)

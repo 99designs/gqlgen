@@ -80,6 +80,12 @@
 						}
 						ctx := graphql.WithResolverContext(ctx, rctx)
 						f := func(i int) {
+							defer func() {
+                        		if r := recover(); r != nil {
+                        			ec.Error(ctx, ec.Recover(ctx, r))
+                        			ret = nil
+                        		}
+                        	}()
 							if !isLen1 {
 								defer wg.Done()
 							}

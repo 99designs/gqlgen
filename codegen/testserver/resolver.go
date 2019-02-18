@@ -17,6 +17,9 @@ func (r *Resolver) ForcedResolver() ForcedResolverResolver {
 func (r *Resolver) ModelMethods() ModelMethodsResolver {
 	return &modelMethodsResolver{r}
 }
+func (r *Resolver) Panics() PanicsResolver {
+	return &panicsResolver{r}
+}
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
@@ -36,6 +39,15 @@ func (r *forcedResolverResolver) Field(ctx context.Context, obj *ForcedResolver)
 type modelMethodsResolver struct{ *Resolver }
 
 func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
+	panic("not implemented")
+}
+
+type panicsResolver struct{ *Resolver }
+
+func (r *panicsResolver) FieldScalarMarshal(ctx context.Context, obj *Panics) ([]MarshalPanic, error) {
+	panic("not implemented")
+}
+func (r *panicsResolver) ArgUnmarshal(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error) {
 	panic("not implemented")
 }
 
@@ -93,6 +105,9 @@ func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, err
 	panic("not implemented")
 }
 func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {

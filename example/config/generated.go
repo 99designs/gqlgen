@@ -1501,6 +1501,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "todos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Query_todos(ctx, field)
 				if res == graphql.Null {
 					invalid = true
@@ -1536,6 +1541,11 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 		case "id":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
 				res = ec._Todo_id(ctx, field, obj)
 				if res == graphql.Null {
 					invalid = true
@@ -1905,6 +1915,12 @@ func (ec *executionContext) marshalNTodo2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -1954,6 +1970,12 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2013,6 +2035,12 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Co
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2056,6 +2084,12 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2091,6 +2125,12 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2186,6 +2226,12 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2217,6 +2263,12 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2248,6 +2300,12 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}
@@ -2294,6 +2352,12 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
 		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
 			if !isLen1 {
 				defer wg.Done()
 			}

@@ -50,3 +50,7 @@ models:
   ValidType:
     fields:
       different_case: { fieldName: DifferentCaseOld }
+  Panics:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Panics"
+  MarshalPanic:
+    model: "github.com/99designs/gqlgen/codegen/testserver.MarshalPanic"

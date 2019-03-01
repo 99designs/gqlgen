@@ -83,7 +83,7 @@ func GenerateGraphServer(cfg *config.Config, serverFilename string) {
 func initConfig(ctx *cli.Context) *config.Config {
 	var cfg *config.Config
 	var err error
-	configFilename := ctx.String("cfg")
+	configFilename := ctx.String("config")
 	if configFilename != "" {
 		cfg, err = config.LoadConfig(configFilename)
 	} else {

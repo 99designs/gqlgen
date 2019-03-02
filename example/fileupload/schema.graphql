@@ -1,0 +1,27 @@
+# The query type, represents all of the entry points into our object graph
+
+# The Upload type, represents the response of uploading a file
+scalar Upload
+
+# The File type, represents the response of uploading a file
+type File {
+    id: Int!
+}
+
+# The UploadFile type, represents the request for uploading a file with certain payload
+input UploadFile {
+    id: Int!
+    file: Upload!
+}
+
+type Query {
+    file(fileName: String!): File
+}
+
+# The mutation type, represents all updates we can make to our data
+type Mutation {
+    singleUpload(file: Upload!): File!
+    singleUploadWithPayload(req: UploadFile!): File!
+    multipleUpload(files: [Upload!]!): [File!]!
+}
+

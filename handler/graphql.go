@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -325,9 +329,17 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case http.MethodPost:
-		if err := jsonDecode(r.Body, &reqParams); err != nil {
-			sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
-			return
+		contentType := strings.SplitN(r.Header.Get("Content-Type"), ";", 2)[0]
+		if contentType == "multipart/form-data" {
+			if err := processMultipart(r, &reqParams); err != nil {
+				sendErrorf(w, http.StatusBadRequest, "multipart body could not be decoded: "+err.Error())
+				return
+			}
+		} else {
+			if err := jsonDecode(r.Body, &reqParams); err != nil {
+				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
+				return
+			}
 		}
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -478,4 +490,96 @@ func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 
 func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
+}
+
+func processMultipart(r *http.Request, request *params) error {
+	// Parse multipart form
+	if err := r.ParseMultipartForm(1024); err != nil {
+		return err
+	}
+
+	// Unmarshal uploads
+	var uploads = map[graphql.Upload][]string{}
+	var uploadsMap = map[string][]string{}
+	if err := json.Unmarshal([]byte(r.Form.Get("map")), &uploadsMap); err != nil {
+		return err
+	} else {
+		for key, path := range uploadsMap {
+			if file, header, err := r.FormFile(key); err != nil {
+				panic(err)
+				//w.WriteHeader(http.StatusInternalServerError)
+				//return
+			} else {
+				uploads[graphql.Upload{
+					File:     file,
+					Size:     header.Size,
+					Filename: header.Filename,
+				}] = path
+			}
+		}
+	}
+
+	var operations interface{}
+
+	// Unmarshal operations
+	if err := jsonDecode(bytes.NewBuffer([]byte(r.Form.Get("operations"))), &operations); err != nil {
+		return err
+	}
+
+	// addUploadToOperations uploads to operations
+	for file, paths := range uploads {
+		for _, path := range paths {
+			addUploadToOperations(operations, file, path)
+		}
+	}
+
+	switch data := operations.(type) {
+	case map[string]interface{}:
+		if value, ok := data["operationName"]; ok && value != nil {
+			request.OperationName = value.(string)
+		}
+		if value, ok := data["query"]; ok && value != nil {
+			request.Query = value.(string)
+		}
+		if value, ok := data["variables"]; ok && value != nil {
+			request.Variables = value.(map[string]interface{})
+		}
+		return nil
+	default:
+		return errors.New("bad request")
+	}
+
+	return errors.New("invalid operation")
+}
+
+func addUploadToOperations(operations interface{}, upload graphql.Upload, path string) error {
+	var parts []interface{}
+	for _, p := range strings.Split(path, ".") {
+		if isNumber, err := regexp.MatchString(`\d+`, p); err != nil {
+			return err
+		} else if isNumber {
+			index, _ := strconv.Atoi(p)
+			parts = append(parts, index)
+		} else {
+			parts = append(parts, p)
+		}
+	}
+	for i, p := range parts {
+		last := i == len(parts)-1
+		switch idx := p.(type) {
+		case string:
+			if last {
+				operations.(map[string]interface{})[idx] = upload
+			} else {
+				operations = operations.(map[string]interface{})[idx]
+			}
+		case int:
+			if last {
+				operations.([]interface{})[idx] = upload
+			} else {
+				operations = operations.([]interface{})[idx]
+			}
+		}
+	}
+	return nil
 }

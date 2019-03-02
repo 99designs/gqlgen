@@ -1,0 +1,6 @@
+model:
+  filename: model/generated.go
+
+models:
+  Upload:
+    model: github.com/99designs/gqlgen/example/fileupload/model.Upload

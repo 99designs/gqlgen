@@ -9,7 +9,8 @@ import (
 )
 
 type executableSchemaStub struct {
-	NextResp chan struct{}
+	NextResp     chan struct{}
+	MutationFunc func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response
 }
 
 var _ graphql.ExecutableSchema = &executableSchemaStub{}
@@ -22,6 +23,7 @@ func (e *executableSchemaStub) Schema() *ast.Schema {
 			user(id: Int): User!
 		}
 		type User { name: String! }
+		scalar Upload
 	`})
 }
 
@@ -34,6 +36,9 @@ func (e *executableSchemaStub) Query(ctx context.Context, op *ast.OperationDefin
 }
 
 func (e *executableSchemaStub) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+	if e.MutationFunc != nil {
+		return e.MutationFunc(ctx, op)
+	}
 	return graphql.ErrorResponse(ctx, "mutations are not supported")
 }
 

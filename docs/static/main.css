@@ -431,3 +431,19 @@ blockquote p:first-of-type {
 blockquote code {
     background-color: var(--color-blockquote-highlight);
 }
+
+table {
+    width: 100%;
+}
+
+td, th {
+    padding: 0.2em 1em;
+}
+
+tr {
+    border-bottom: 1px solid var(--color-heading-background);
+}
+
+tr td:first-child, th {
+    font-weight: bold;
+}

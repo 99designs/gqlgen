@@ -47,13 +47,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		SingleUpload            func(childComplexity int, file graphql.Upload) int
-		SingleUploadWithPayload func(childComplexity int, req model.UploadFile) int
-		MultipleUpload          func(childComplexity int, files []graphql.Upload) int
+		SingleUpload              func(childComplexity int, file graphql.Upload) int
+		SingleUploadWithPayload   func(childComplexity int, req model.UploadFile) int
+		MultipleUpload            func(childComplexity int, files []graphql.Upload) int
+		MultipleUploadWithPayload func(childComplexity int, req []model.UploadFile) int
 	}
 
 	Query struct {
-		File func(childComplexity int, fileName string) int
+		Empty func(childComplexity int) int
 	}
 }
 
@@ -61,9 +62,10 @@ type MutationResolver interface {
 	SingleUpload(ctx context.Context, file graphql.Upload) (*model.File, error)
 	SingleUploadWithPayload(ctx context.Context, req model.UploadFile) (*model.File, error)
 	MultipleUpload(ctx context.Context, files []graphql.Upload) ([]model.File, error)
+	MultipleUploadWithPayload(ctx context.Context, req []model.UploadFile) ([]model.File, error)
 }
 type QueryResolver interface {
-	File(ctx context.Context, fileName string) (*model.File, error)
+	Empty(ctx context.Context) (string, error)
 }
 
 type executableSchema struct {
@@ -124,17 +126,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.MultipleUpload(childComplexity, args["files"].([]graphql.Upload)), true
 
-	case "Query.File":
-		if e.complexity.Query.File == nil {
+	case "Mutation.MultipleUploadWithPayload":
+		if e.complexity.Mutation.MultipleUploadWithPayload == nil {
 			break
 		}
 
-		args, err := ec.field_Query_file_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_multipleUploadWithPayload_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.File(childComplexity, args["fileName"].(string)), true
+		return e.complexity.Mutation.MultipleUploadWithPayload(childComplexity, args["req"].([]model.UploadFile)), true
+
+	case "Query.Empty":
+		if e.complexity.Query.Empty == nil {
+			break
+		}
+
+		return e.complexity.Query.Empty(childComplexity), true
 
 	}
 	return 0, false
@@ -227,7 +236,7 @@ input UploadFile {
 }
 
 type Query {
-    file(fileName: String!): File
+    empty: String!
 }
 
 # The mutation type, represents all updates we can make to our data
@@ -235,14 +244,31 @@ type Mutation {
     singleUpload(file: Upload!): File!
     singleUploadWithPayload(req: UploadFile!): File!
     multipleUpload(files: [Upload!]!): [File!]!
+    multipleUploadWithPayload(req: [UploadFile!]!): [File!]!
 }
 
 `},
+	&ast.Source{Name: "uploadScalar.graphql", Input: `"The ` + "`" + `Upload` + "`" + ` scalar type represents a multipart file upload."
+scalar Upload`},
 )
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_multipleUploadWithPayload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []model.UploadFile
+	if tmp, ok := rawArgs["req"]; ok {
+		arg0, err = ec.unmarshalNUploadFile2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["req"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_multipleUpload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -297,20 +323,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_file_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["fileName"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["fileName"] = arg0
 	return args, nil
 }
 
@@ -471,17 +483,17 @@ func (ec *executionContext) _Mutation_multipleUpload(ctx context.Context, field 
 	return ec.marshalNFile2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐFile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_file(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Mutation_multipleUploadWithPayload(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Query",
+		Object: "Mutation",
 		Field:  field,
 		Args:   nil,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_file_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_multipleUploadWithPayload_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -490,15 +502,44 @@ func (ec *executionContext) _Query_file(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().File(rctx, args["fileName"].(string))
+		return ec.resolvers.Mutation().MultipleUploadWithPayload(rctx, args["req"].([]model.UploadFile))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.File)
+	res := resTmp.([]model.File)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOFile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐFile(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_empty(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Empty(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -1442,6 +1483,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "multipleUploadWithPayload":
+			out.Values[i] = ec._Mutation_multipleUploadWithPayload(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1468,7 +1514,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "file":
+		case "empty":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1476,7 +1522,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_file(ctx, field)
+				res = ec._Query_empty(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
 				return res
 			})
 		case "__type":
@@ -1855,6 +1904,26 @@ func (ec *executionContext) unmarshalNUploadFile2githubᚗcomᚋ99designsᚋgqlg
 	return ec.unmarshalInputUploadFile(ctx, v)
 }
 
+func (ec *executionContext) unmarshalNUploadFile2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx context.Context, v interface{}) ([]model.UploadFile, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]model.UploadFile, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNUploadFile2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
 	return ec.___Directive(ctx, sel, &v)
 }
@@ -2090,17 +2159,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
-}
-
-func (ec *executionContext) marshalOFile2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v model.File) graphql.Marshaler {
-	return ec._File(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v *model.File) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._File(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

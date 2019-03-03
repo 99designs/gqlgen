@@ -367,11 +367,13 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 	var sources []*ast.Source
 
 	// Add upload scalar
-	sources = append(sources, &ast.Source{
-		Name: "uploadPrelude.graphql",
-		Input: "\"The `Upload` scalar type represents a multipart file upload.\"\nscalar Upload",
+	uploadSource := &ast.Source{
+		Name:    "uploadScalar.graphql",
+		Input:   "\"The `Upload` scalar type represents a multipart file upload.\"\nscalar Upload",
 		BuiltIn: true,
-	})
+	}
+	schemaStrings[uploadSource.Name] = uploadSource.Input
+	sources = append(sources, uploadSource)
 
 	for _, filename := range c.SchemaFilename {
 		filename = filepath.ToSlash(filename)

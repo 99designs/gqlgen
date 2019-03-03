@@ -11,9 +11,10 @@ import (
 )
 
 type Resolver struct {
-	SingleUploadFunc            func(ctx context.Context, file graphql.Upload) (*model.File, error)
-	SingleUploadWithPayloadFunc func(ctx context.Context, req model.UploadFile) (*model.File, error)
-	MultipleUploadFunc          func(ctx context.Context, files []graphql.Upload) ([]model.File, error)
+	SingleUploadFunc              func(ctx context.Context, file graphql.Upload) (*model.File, error)
+	SingleUploadWithPayloadFunc   func(ctx context.Context, req model.UploadFile) (*model.File, error)
+	MultipleUploadFunc            func(ctx context.Context, files []graphql.Upload) ([]model.File, error)
+	MultipleUploadWithPayloadFunc func(ctx context.Context, req []model.UploadFile) ([]model.File, error)
 }
 
 func (r *Resolver) Mutation() MutationResolver {
@@ -44,8 +45,15 @@ func (r *mutationResolver) MultipleUpload(ctx context.Context, files []graphql.U
 	return nil, fmt.Errorf("not implemented")
 }
 
+func (r *mutationResolver) MultipleUploadWithPayload(ctx context.Context, req []model.UploadFile) ([]model.File, error) {
+	if r.MultipleUploadWithPayloadFunc != nil {
+		return r.MultipleUploadWithPayloadFunc(ctx, req)
+	}
+	return nil, fmt.Errorf("not implemented")
+}
+
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) File(ctx context.Context, fileName string) (*model.File, error) {
-	return nil, fmt.Errorf("not implemented")
+func (r *queryResolver) Empty(ctx context.Context) (string, error) {
+	return "", fmt.Errorf("not implemented")
 }

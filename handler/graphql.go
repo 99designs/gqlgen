@@ -492,6 +492,7 @@ func sendErrorf(w http.ResponseWriter, code int, format string, args ...interfac
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }
 
+//TODO Add test for this
 func processMultipart(r *http.Request, request *params) error {
 	// Parse multipart form
 	if err := r.ParseMultipartForm(1024); err != nil {
@@ -552,6 +553,7 @@ func processMultipart(r *http.Request, request *params) error {
 	return errors.New("invalid operation")
 }
 
+//TODO Add test for this
 func addUploadToOperations(operations interface{}, upload graphql.Upload, path string) error {
 	var parts []interface{}
 	for _, p := range strings.Split(path, ".") {

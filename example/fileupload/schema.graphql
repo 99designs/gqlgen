@@ -12,7 +12,7 @@ input UploadFile {
 }
 
 type Query {
-    file(fileName: String!): File
+    empty: String!
 }
 
 # The mutation type, represents all updates we can make to our data
@@ -20,5 +20,6 @@ type Mutation {
     singleUpload(file: Upload!): File!
     singleUploadWithPayload(req: UploadFile!): File!
     multipleUpload(files: [Upload!]!): [File!]!
+    multipleUploadWithPayload(req: [UploadFile!]!): [File!]!
 }
 

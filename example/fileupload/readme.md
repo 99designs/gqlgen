@@ -9,6 +9,7 @@ go run ./example/fileupload/server/server.go
 
 and open http://localhost:8080 in your browser
 
+//TODO Test examples!!
 
 ## Examples
 

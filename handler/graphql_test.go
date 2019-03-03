@@ -9,10 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -120,54 +119,56 @@ func TestHandlerGET(t *testing.T) {
 }
 
 func TestFileUpload(t *testing.T) {
+
 	t.Run("valid single file upload", func(t *testing.T) {
-		stub := &executableSchemaStub{
+		mock := &executableSchemaMock{
 			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 				require.Equal(t, len(op.VariableDefinitions), 1)
 				require.Equal(t, op.VariableDefinitions[0].Variable, "file")
-				return &graphql.Response{Data: []byte(`{"name":"test"}`)}
+				return &graphql.Response{Data: []byte(`{"singleUpload":{"id":1}}`)}
+			},
+		}
+		handler := GraphQL(mock)
+
+		bodyBuf := &bytes.Buffer{}
+		bodyWriter := multipart.NewWriter(bodyBuf)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`)
+		require.NoError(t, err)
+		err = bodyWriter.WriteField("map", `{ "0": ["variables.file"] }`)
+		require.NoError(t, err)
+		w, err := bodyWriter.CreateFormFile("0", "a.txt")
+		require.NoError(t, err)
+		_, err = w.Write([]byte("test"))
+		require.NoError(t, err)
+		err = bodyWriter.Close()
+		require.NoError(t, err)
+
+		req, err := http.NewRequest("POST", "/graphql", bodyBuf)
+		require.NoError(t, err)
+
+		contentType := bodyWriter.FormDataContentType()
+		req.Header.Set("Content-Type", contentType)
+		resp := httptest.NewRecorder()
+		handler.ServeHTTP(resp, req)
+		require.Equal(t, http.StatusOK, resp.Code)
+		require.Equal(t, `{"data":{"singleUpload":{"id":1}}}`, resp.Body.String())
+	})
+
+	t.Run("valid single file upload with payload", func(t *testing.T) {
+		stub := &executableSchemaMock{
+			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+				require.Equal(t, len(op.VariableDefinitions), 1)
+				require.Equal(t, op.VariableDefinitions[0].Variable, "req")
+				return &graphql.Response{Data: []byte(`{"singleUploadWithPayload":{"id":1}}`)}
 			},
 		}
 		handler := GraphQL(stub)
 
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { fileName, size } }", "variables": { "file": null } }`)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id } }", "variables": { "req": {"file": null, "id": 1 } } }`)
 		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.file"] }`)
-		require.NoError(t, err)
-		w, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w.Write([]byte("test"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
-
-		req, err := http.NewRequest("POST", "/graphql", bodyBuf)
-		require.NoError(t, err)
-
-		contentType := bodyWriter.FormDataContentType()
-		req.Header.Set("Content-Type", contentType)
-		resp := httptest.NewRecorder()
-		handler.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code)
-		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
-	})
-
-	t.Run("valid single file upload with payload", func(t *testing.T) {
-		stub := &executableSchemaStub{}
-		stub.MutationFunc = func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			require.Equal(t, len(op.VariableDefinitions), 1)
-			require.Equal(t, op.VariableDefinitions[0].Variable, "file")
-			return &graphql.Response{Data: []byte(`{"name":"test"}`)}
-		}
-		handler := GraphQL(stub)
-
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { fileName, size } }", "variables": { "file": null } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.file"] }`)
+		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.file"] }`)
 		require.NoError(t, err)
 		w, err := bodyWriter.CreateFormFile("0", "a.txt")
 		require.NoError(t, err)
@@ -184,21 +185,22 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		handler.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code)
-		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		require.Equal(t, `{"data":{"singleUploadWithPayload":{"id":1}}}`, resp.Body.String())
 	})
 
 	t.Run("valid file list upload", func(t *testing.T) {
-		stub := &executableSchemaStub{}
-		stub.MutationFunc = func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			require.Equal(t, len(op.VariableDefinitions), 1)
-			require.Equal(t, op.VariableDefinitions[0].Variable, "files")
-			return &graphql.Response{Data: []byte(`{"name":"test"}`)}
+		mock := &executableSchemaMock{
+			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+				require.Equal(t, len(op.VariableDefinitions), 1)
+				require.Equal(t, op.VariableDefinitions[0].Variable, "files")
+				return &graphql.Response{Data: []byte(`{"multipleUpload":[{"id":1},{"id":2}]}`)}
+			},
 		}
-		handler := GraphQL(stub)
+		handler := GraphQL(mock)
 
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { fileName } }", "variables": { "files": [null, null] } }`)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id } }", "variables": { "files": [null, null] } }`)
 		require.NoError(t, err)
 		err = bodyWriter.WriteField("map", `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`)
 		require.NoError(t, err)
@@ -220,9 +222,45 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		handler.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code)
-		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		require.Equal(t, `{"data":{"multipleUpload":[{"id":1},{"id":2}]}}`, resp.Body.String())
 	})
 
+	t.Run("valid file list upload with payload", func(t *testing.T) {
+		mock := &executableSchemaMock{
+			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+				require.Equal(t, len(op.VariableDefinitions), 1)
+				require.Equal(t, op.VariableDefinitions[0].Variable, "req")
+				return &graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)}
+			},
+		}
+		handler := GraphQL(mock)
+
+		bodyBuf := &bytes.Buffer{}
+		bodyWriter := multipart.NewWriter(bodyBuf)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`)
+		require.NoError(t, err)
+		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`)
+		require.NoError(t, err)
+		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
+		require.NoError(t, err)
+		_, err = w0.Write([]byte("test"))
+		require.NoError(t, err)
+		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
+		require.NoError(t, err)
+		_, err = w1.Write([]byte("test"))
+		require.NoError(t, err)
+		err = bodyWriter.Close()
+		require.NoError(t, err)
+
+		req, err := http.NewRequest("POST", "/graphql", bodyBuf)
+		require.NoError(t, err)
+
+		req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
+		resp := httptest.NewRecorder()
+		handler.ServeHTTP(resp, req)
+		require.Equal(t, http.StatusOK, resp.Code)
+		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
+	})
 }
 
 func TestHandlerOptions(t *testing.T) {

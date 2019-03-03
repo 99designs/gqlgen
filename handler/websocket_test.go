@@ -13,7 +13,7 @@ import (
 
 func TestWebsocket(t *testing.T) {
 	next := make(chan struct{})
-	h := GraphQL(&executableSchemaStub{NextResp: next})
+	h := GraphQL(&executableSchemaStub{next})
 
 	srv := httptest.NewServer(h)
 	defer srv.Close()

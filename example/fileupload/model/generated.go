@@ -2,11 +2,15 @@
 
 package model
 
+import (
+	"github.com/99designs/gqlgen/graphql"
+)
+
 type File struct {
 	ID int `json:"id"`
 }
 
 type UploadFile struct {
-	ID   int    `json:"id"`
-	File Upload `json:"file"`
+	ID   int            `json:"id"`
+	File graphql.Upload `json:"file"`
 }

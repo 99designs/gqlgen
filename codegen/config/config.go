@@ -345,6 +345,7 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
 		"Time":                {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
 		"Map":                 {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"Upload":              {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},
 		"ID": {
 			Model: StringList{
 				"github.com/99designs/gqlgen/graphql.ID",
@@ -364,6 +365,13 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 	schemaStrings := map[string]string{}
 
 	var sources []*ast.Source
+
+	// Add upload scalar
+	sources = append(sources, &ast.Source{
+		Name: "uploadPrelude.graphql",
+		Input: "\"The `Upload` scalar type represents a multipart file upload.\"\nscalar Upload",
+		BuiltIn: true,
+	})
 
 	for _, filename := range c.SchemaFilename {
 		filename = filepath.ToSlash(filename)

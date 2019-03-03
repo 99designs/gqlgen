@@ -1,8 +1,5 @@
 # The query type, represents all of the entry points into our object graph
 
-# The Upload type, represents the response of uploading a file
-scalar Upload
-
 # The File type, represents the response of uploading a file
 type File {
     id: Int!

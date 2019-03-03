@@ -7,12 +7,13 @@ import (
 	"fmt"
 
 	"github.com/99designs/gqlgen/example/fileupload/model"
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Resolver struct {
-	SingleUploadFunc            func(ctx context.Context, file model.Upload) (*model.File, error)
+	SingleUploadFunc            func(ctx context.Context, file graphql.Upload) (*model.File, error)
 	SingleUploadWithPayloadFunc func(ctx context.Context, req model.UploadFile) (*model.File, error)
-	MultipleUploadFunc          func(ctx context.Context, files []model.Upload) ([]model.File, error)
+	MultipleUploadFunc          func(ctx context.Context, files []graphql.Upload) ([]model.File, error)
 }
 
 func (r *Resolver) Mutation() MutationResolver {
@@ -24,7 +25,7 @@ func (r *Resolver) Query() QueryResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) SingleUpload(ctx context.Context, file model.Upload) (*model.File, error) {
+func (r *mutationResolver) SingleUpload(ctx context.Context, file graphql.Upload) (*model.File, error) {
 	if r.SingleUploadFunc != nil {
 		return r.SingleUploadFunc(ctx, file)
 	}
@@ -36,7 +37,7 @@ func (r *mutationResolver) SingleUploadWithPayload(ctx context.Context, req mode
 	}
 	return nil, fmt.Errorf("not implemented")
 }
-func (r *mutationResolver) MultipleUpload(ctx context.Context, files []model.Upload) ([]model.File, error) {
+func (r *mutationResolver) MultipleUpload(ctx context.Context, files []graphql.Upload) ([]model.File, error) {
 	if r.MultipleUploadFunc != nil {
 		return r.MultipleUploadFunc(ctx, files)
 	}

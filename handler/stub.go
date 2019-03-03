@@ -9,7 +9,7 @@ import (
 )
 
 type executableSchemaStub struct {
-	NextResp     chan struct{}
+	NextResp chan struct{}
 }
 
 var _ graphql.ExecutableSchema = &executableSchemaStub{}

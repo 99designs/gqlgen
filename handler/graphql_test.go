@@ -155,14 +155,14 @@ func TestFileUpload(t *testing.T) {
 	})
 
 	t.Run("valid single file upload with payload", func(t *testing.T) {
-		stub := &executableSchemaMock{
+		mock := &executableSchemaMock{
 			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 				require.Equal(t, len(op.VariableDefinitions), 1)
 				require.Equal(t, op.VariableDefinitions[0].Variable, "req")
 				return &graphql.Response{Data: []byte(`{"singleUploadWithPayload":{"id":1}}`)}
 			},
 		}
-		handler := GraphQL(stub)
+		handler := GraphQL(mock)
 
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
@@ -206,11 +206,11 @@ func TestFileUpload(t *testing.T) {
 		require.NoError(t, err)
 		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
 		require.NoError(t, err)
-		_, err = w0.Write([]byte("test"))
+		_, err = w0.Write([]byte("test1"))
 		require.NoError(t, err)
 		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
 		require.NoError(t, err)
-		_, err = w1.Write([]byte("test"))
+		_, err = w1.Write([]byte("test2"))
 		require.NoError(t, err)
 		err = bodyWriter.Close()
 		require.NoError(t, err)
@@ -243,11 +243,11 @@ func TestFileUpload(t *testing.T) {
 		require.NoError(t, err)
 		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
 		require.NoError(t, err)
-		_, err = w0.Write([]byte("test"))
+		_, err = w0.Write([]byte("test1"))
 		require.NoError(t, err)
 		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
 		require.NoError(t, err)
-		_, err = w1.Write([]byte("test"))
+		_, err = w1.Write([]byte("test2"))
 		require.NoError(t, err)
 		err = bodyWriter.Close()
 		require.NoError(t, err)

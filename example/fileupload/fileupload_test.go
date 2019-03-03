@@ -109,12 +109,14 @@ func TestFileUpload(t *testing.T) {
 		resolver := &Resolver{
 			MultipleUploadFunc: func(ctx context.Context, files []graphql.Upload) ([]model.File, error) {
 				require.Len(t, files, 2)
+				var contents []string
 				for i := range files {
 					require.NotNil(t, files[i].File)
 					content, err := ioutil.ReadAll(files[i].File)
 					require.Nil(t, err)
-					require.Equal(t, string(content), "test")
+					contents = append(contents, string(content))
 				}
+				require.ElementsMatch(t, []string{"test1", "test2"}, contents)
 				return []model.File{
 					{ID: 1},
 					{ID: 2},
@@ -132,11 +134,11 @@ func TestFileUpload(t *testing.T) {
 		require.NoError(t, err)
 		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
 		require.NoError(t, err)
-		_, err = w0.Write([]byte("test"))
+		_, err = w0.Write([]byte("test1"))
 		require.NoError(t, err)
 		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
 		require.NoError(t, err)
-		_, err = w1.Write([]byte("test"))
+		_, err = w1.Write([]byte("test2"))
 		require.NoError(t, err)
 		err = bodyWriter.Close()
 		require.NoError(t, err)

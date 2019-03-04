@@ -1,7 +1,10 @@
 package stubgen
 
 import (
+	"path/filepath"
 	"syscall"
+
+	"github.com/99designs/gqlgen/internal/code"
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -31,8 +34,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 }
 
 func (m *Plugin) GenerateCode(data *codegen.Data) error {
+	pkgPath := code.ImportPathForDir(filepath.Dir(m.filename))
+	pkgName := code.NameForPackage(pkgPath)
+
 	return templates.Render(templates.Options{
-		PackageName: data.Config.Exec.Package,
+		PackageName: pkgName,
 		Filename:    m.filename,
 		Data: &ResolverBuild{
 			Data:     data,

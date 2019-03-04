@@ -20,7 +20,7 @@ func TestImportPathForDir(t *testing.T) {
 	assert.Equal(t, "github.com/99designs/gqlgen/docs", ImportPathForDir(filepath.Join(wd, "..", "..", "docs")))
 
 	// directory does not exist
-	assert.Equal(t, "", ImportPathForDir(filepath.Join(wd, "..", "..", "dos")))
+	assert.Equal(t, "github.com/99designs/gqlgen/dos", ImportPathForDir(filepath.Join(wd, "..", "..", "dos")))
 }
 
 func TestNameForPackage(t *testing.T) {

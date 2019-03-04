@@ -62,3 +62,12 @@ type Panics struct {
 func (p *Panics) FieldFuncMarshal(ctx context.Context, u []MarshalPanic) []MarshalPanic {
 	return []MarshalPanic{MarshalPanic("aa"), MarshalPanic("bb")}
 }
+
+type Autobind struct {
+	Int   int
+	Int32 int32
+	Int64 int64
+
+	IdStr string
+	IdInt int
+}

@@ -5,5 +5,8 @@
 /integration/schema-fetched.graphql
 /example/chat/package-lock.json
 /codegen/gen
+/gen
 
 .idea/
+*.test
+*.out

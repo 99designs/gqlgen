@@ -221,10 +221,6 @@ ul.submenu span {
     padding: 5px 10px;
 }
 
-ul.menu li {
-    font-weight: 400;
-}
-
 ul.menu li.active,
 ul.menu a:hover {
     background-color: var(--color-nav-active);
@@ -389,7 +385,6 @@ em {
         color: var(--color-heading-text);
         background-color: var(--color-heading-background);
         font-family: var(--font-heading);
-        font-weight: 500;
 
         list-style-type: none;
         -webkit-font-smoothing: antialiased;
@@ -435,4 +430,20 @@ blockquote p:first-of-type {
 
 blockquote code {
     background-color: var(--color-blockquote-highlight);
+}
+
+table {
+    width: 100%;
+}
+
+td, th {
+    padding: 0.2em 1em;
+}
+
+tr {
+    border-bottom: 1px solid var(--color-heading-background);
+}
+
+tr td:first-child, th {
+    font-weight: bold;
 }

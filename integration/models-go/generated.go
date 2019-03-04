@@ -25,6 +25,15 @@ const (
 	DateFilterOpLte DateFilterOp = "LTE"
 )
 
+var AllDateFilterOp = []DateFilterOp{
+	DateFilterOpEq,
+	DateFilterOpNeq,
+	DateFilterOpGt,
+	DateFilterOpGte,
+	DateFilterOpLt,
+	DateFilterOpLte,
+}
+
 func (e DateFilterOp) IsValid() bool {
 	switch e {
 	case DateFilterOpEq, DateFilterOpNeq, DateFilterOpGt, DateFilterOpGte, DateFilterOpLt, DateFilterOpLte:
@@ -60,6 +69,11 @@ const (
 	ErrorTypeCustom ErrorType = "CUSTOM"
 	ErrorTypeNormal ErrorType = "NORMAL"
 )
+
+var AllErrorType = []ErrorType{
+	ErrorTypeCustom,
+	ErrorTypeNormal,
+}
 
 func (e ErrorType) IsValid() bool {
 	switch e {

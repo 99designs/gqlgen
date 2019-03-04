@@ -5,13 +5,19 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/ast"
 )
 
 func TestJsonWriter(t *testing.T) {
-	obj := &OrderedMap{}
-	obj.Add("test", MarshalInt(10))
+	obj := NewFieldSet([]CollectedField{
+		{Field: &ast.Field{Alias: "test"}},
+		{Field: &ast.Field{Alias: "array"}},
+		{Field: &ast.Field{Alias: "emptyArray"}},
+		{Field: &ast.Field{Alias: "child"}},
+	})
+	obj.Values[0] = MarshalInt(10)
 
-	obj.Add("array", &Array{
+	obj.Values[1] = &Array{
 		MarshalInt(1),
 		MarshalString("2"),
 		MarshalBoolean(true),
@@ -19,17 +25,21 @@ func TestJsonWriter(t *testing.T) {
 		Null,
 		MarshalFloat(1.3),
 		True,
+	}
+
+	obj.Values[2] = &Array{}
+
+	child2 := NewFieldSet([]CollectedField{
+		{Field: &ast.Field{Alias: "child"}},
 	})
+	child2.Values[0] = Null
 
-	obj.Add("emptyArray", &Array{})
+	child1 := NewFieldSet([]CollectedField{
+		{Field: &ast.Field{Alias: "child"}},
+	})
+	child1.Values[0] = child2
 
-	child2 := &OrderedMap{}
-	child2.Add("child", Null)
-
-	child1 := &OrderedMap{}
-	child1.Add("child", child2)
-
-	obj.Add("child", child1)
+	obj.Values[3] = child1
 
 	b := &bytes.Buffer{}
 	obj.MarshalGQL(b)

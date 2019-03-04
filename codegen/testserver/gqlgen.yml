@@ -1,4 +1,5 @@
-schema: schema.graphql
+schema:
+  - "*.graphql"
 
 exec:
   filename: generated.go
@@ -38,3 +39,20 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.Error"
   EmbeddedPointer:
     model: "github.com/99designs/gqlgen/codegen/testserver.EmbeddedPointerModel"
+  ThirdParty:
+    model: "github.com/99designs/gqlgen/codegen/testserver.ThirdParty"
+  Keywords:
+    fields:
+      _: { fieldName: Underscore }
+  ValidInput:
+    fields:
+      _: { fieldName: Underscore }
+  ValidType:
+    fields:
+      different_case: { fieldName: DifferentCaseOld }
+  Panics:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Panics"
+  MarshalPanic:
+    model: "github.com/99designs/gqlgen/codegen/testserver.MarshalPanic"
+  Autobind:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Autobind"

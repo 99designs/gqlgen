@@ -1,13 +1,13 @@
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate go run ../../testdata/gqlgen.go
 
 package scalars
 
 import (
 	context "context"
-	"external"
 	"fmt"
 	time "time"
 
+	"github.com/99designs/gqlgen/example/scalars/external"
 	"github.com/99designs/gqlgen/example/scalars/model"
 )
 
@@ -69,6 +69,6 @@ func (r *userResolver) PrimitiveResolver(ctx context.Context, obj *model.User) (
 	return "test", nil
 }
 
-func (r *userResolver) CustomResolver(ctx context.Context, obj *model.User) (model.Point, error) {
-	return model.Point{X: 5, Y: 1}, nil
+func (r *userResolver) CustomResolver(ctx context.Context, obj *model.User) (*model.Point, error) {
+	return &model.Point{X: 5, Y: 1}, nil
 }

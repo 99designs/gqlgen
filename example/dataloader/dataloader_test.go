@@ -84,7 +84,7 @@ func TestTodo(t *testing.T) {
 		}
 		err := c.Post(`{ torture2d(customerIds:{}) { id name } }`, &resp)
 
-		require.EqualError(t, err, "[{\"message\":\"map[string]interface {} is not an int\"}]")
+		require.EqualError(t, err, "[{\"message\":\"map[string]interface {} is not an int\",\"path\":[\"torture2d\"]}]")
 	})
 
 }

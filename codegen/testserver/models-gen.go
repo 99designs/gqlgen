@@ -2,6 +2,17 @@
 
 package testserver
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+	"time"
+)
+
+type InnerDirectives struct {
+	Message string `json:"message"`
+}
+
 type InnerInput struct {
 	ID int `json:"id"`
 }
@@ -10,7 +21,29 @@ type InnerObject struct {
 	ID int `json:"id"`
 }
 
-type Keywords struct {
+type InputDirectives struct {
+	Text          string           `json:"text"`
+	Inner         InnerDirectives  `json:"inner"`
+	InnerNullable *InnerDirectives `json:"innerNullable"`
+	ThirdParty    *ThirdParty      `json:"thirdParty"`
+}
+
+type OuterInput struct {
+	Inner InnerInput `json:"inner"`
+}
+
+type OuterObject struct {
+	Inner InnerObject `json:"inner"`
+}
+
+type User struct {
+	ID      int        `json:"id"`
+	Friends []User     `json:"friends"`
+	Created time.Time  `json:"created"`
+	Updated *time.Time `json:"updated"`
+}
+
+type ValidInput struct {
 	Break       string `json:"break"`
 	Default     string `json:"default"`
 	Func        string `json:"func"`
@@ -36,17 +69,54 @@ type Keywords struct {
 	Import      string `json:"import"`
 	Return      string `json:"return"`
 	Var         string `json:"var"`
+	Underscore  string `json:"_"`
 }
 
-type OuterInput struct {
-	Inner InnerInput `json:"inner"`
+//  These things are all valid, but without care generate invalid go code
+type ValidType struct {
+	DifferentCase      string `json:"differentCase"`
+	DifferentCaseOld   string `json:"different_case"`
+	ValidInputKeywords bool   `json:"validInputKeywords"`
+	ValidArgs          bool   `json:"validArgs"`
 }
 
-type OuterObject struct {
-	Inner InnerObject `json:"inner"`
+type Status string
+
+const (
+	StatusOk    Status = "OK"
+	StatusError Status = "ERROR"
+)
+
+var AllStatus = []Status{
+	StatusOk,
+	StatusError,
 }
 
-type User struct {
-	ID      int    `json:"id"`
-	Friends []User `json:"friends"`
+func (e Status) IsValid() bool {
+	switch e {
+	case StatusOk, StatusError:
+		return true
+	}
+	return false
+}
+
+func (e Status) String() string {
+	return string(e)
+}
+
+func (e *Status) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Status(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Status", str)
+	}
+	return nil
+}
+
+func (e Status) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

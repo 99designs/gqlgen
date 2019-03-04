@@ -4,18 +4,18 @@ schema {
 }
 
 type MyQuery {
-    todo(id: Int!): Todo
+    todo(id: ID!): Todo
     lastTodo: Todo
     todos: [Todo!]!
 }
 
 type MyMutation {
     createTodo(todo: TodoInput!): Todo!
-    updateTodo(id: Int!, changes: Map!): Todo
+    updateTodo(id: ID!, changes: Map!): Todo
 }
 
 type Todo {
-    id: Int!
+    id: ID!
     text: String!
     done: Boolean! @hasRole(role: OWNER) # only the owner can see if a todo is done
 }

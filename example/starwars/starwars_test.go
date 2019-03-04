@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/example/starwars/generated"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStarwars(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(NewResolver())))
+	srv := httptest.NewServer(handler.GraphQL(generated.NewExecutableSchema(NewResolver())))
 	c := client.New(srv.URL)
 
 	t.Run("Lukes starships", func(t *testing.T) {
@@ -215,7 +216,7 @@ func TestStarwars(t *testing.T) {
 		  }
 		}`, &resp, client.Var("episode", "INVALID"))
 
-		require.EqualError(t, err, `[{"message":"INVALID is not a valid Episode"}]`)
+		require.EqualError(t, err, `[{"message":"INVALID is not a valid Episode","path":["createReview"]}]`)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

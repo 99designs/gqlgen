@@ -34,7 +34,7 @@ jobs:
                 gqlgen/golang go run ./integration/server/server.go \
             )
 
-            sleep 2
+            sleep 20
 
             docker run \
                 -e SERVER_URL=http://integration_server:1234/query \

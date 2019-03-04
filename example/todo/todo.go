@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate go run ../../testdata/gqlgen.go
 
 package todo
 
@@ -33,10 +33,6 @@ func New() Config {
 			// No admin for you!
 			return nil, nil
 		case RoleOwner:
-			// This is also available in context
-			if obj != graphql.GetResolverContext(ctx).Parent.Result {
-				return nil, fmt.Errorf("parent type mismatch")
-			}
 			ownable, isOwnable := obj.(Ownable)
 			if !isOwnable {
 				return nil, fmt.Errorf("obj cant be owned")
@@ -95,7 +91,7 @@ func (r *QueryResolver) Todos(ctx context.Context) ([]Todo, error) {
 
 type MutationResolver resolvers
 
-func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (Todo, error) {
+func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*Todo, error) {
 	newID := r.id()
 
 	newTodo := Todo{
@@ -110,7 +106,7 @@ func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (Todo
 
 	r.todos = append(r.todos, newTodo)
 
-	return newTodo, nil
+	return &newTodo, nil
 }
 
 func (r *MutationResolver) UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {

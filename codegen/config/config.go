@@ -249,7 +249,7 @@ func (tm TypeMap) ReferencedPackages() []string {
 			if pkg == "" || inStrSlice(pkgs, pkg) {
 				continue
 			}
-			pkgs = append(pkgs, pkg)
+			pkgs = append(pkgs, code.QualifyPackagePath(pkg))
 		}
 	}
 

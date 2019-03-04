@@ -1,4 +1,4 @@
-# Contributing
+# Contribution Guidelines
 
 Want to contribute to gqlgen? Here are some guidelines for how we accept help.
 

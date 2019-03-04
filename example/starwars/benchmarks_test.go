@@ -5,11 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/example/starwars/generated"
 	"github.com/99designs/gqlgen/handler"
 )
 
 func BenchmarkSimpleQueryNoArgs(b *testing.B) {
-	server := handler.GraphQL(NewExecutableSchema(NewResolver()))
+	server := handler.GraphQL(generated.NewExecutableSchema(NewResolver()))
 
 	q := `{"query":"{ search(text:\"Luke\") { ... on Human { starships { name } } } }"}`
 

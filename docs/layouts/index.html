@@ -11,6 +11,11 @@
 				<main>
 					<div class="content">
 						{{ .Content }}
+						{{.Scratch.Set "intro" (readFile "content/_introduction.md")}}
+						{{.Scratch.Set "intro" (split (.Scratch.Get "intro") "\n")}}
+						{{.Scratch.Set "intro" (after 2 (.Scratch.Get "intro"))}}
+						{{.Scratch.Set "intro" (delimit (.Scratch.Get "intro") "\n")}}
+						{{.Scratch.Get "intro"|markdownify}}
 					</div>
 				</main>
 	{{ end }}

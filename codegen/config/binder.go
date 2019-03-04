@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
-	"regexp"
-	"strings"
 
 	"github.com/99designs/gqlgen/codegen/templates"
-
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
@@ -27,6 +24,14 @@ func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, c.Models.ReferencedPackages()...)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, p := range pkgs {
+		for _, e := range p.Errors {
+			if e.Kind == packages.ListError {
+				return nil, p.Errors[0]
+			}
+		}
 	}
 
 	return &Binder{
@@ -71,7 +76,7 @@ func (b *Binder) FindType(pkgName string, typeName string) (types.Type, error) {
 
 func (b *Binder) getPkg(find string) *packages.Package {
 	for _, p := range b.pkgs {
-		if normalizeVendor(find) == normalizeVendor(p.PkgPath) {
+		if code.NormalizeVendor(find) == code.NormalizeVendor(p.PkgPath) {
 			return p
 		}
 	}
@@ -160,15 +165,6 @@ func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 
 	b.References = append(b.References, newRef)
 	return newRef
-}
-
-var modsRegex = regexp.MustCompile(`^(\*|\[\])*`)
-
-func normalizeVendor(pkg string) string {
-	modifiers := modsRegex.FindAllString(pkg, 1)[0]
-	pkg = strings.TrimPrefix(pkg, modifiers)
-	parts := strings.Split(pkg, "/vendor/")
-	return modifiers + parts[len(parts)-1]
 }
 
 // TypeReference is used by args and field types. The Definition can refer to both input and output types.

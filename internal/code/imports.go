@@ -33,6 +33,7 @@ func NameForPackage(importPath string) string {
 	if v, ok := nameForPackageCache.Load(importPath); ok {
 		return v.(string)
 	}
+	importPath = QualifyPackagePath(importPath)
 	p, _ := packages.Load(nil, importPath)
 
 	if len(p) != 1 || p[0].Name == "" {

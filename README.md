@@ -12,7 +12,7 @@
 
 ## Getting Started
 
-First work your way through the [Getting Started](ttps://gqlgen.com/getting-started/) tutorial.
+First work your way through the [Getting Started](https://gqlgen.com/getting-started/) tutorial.
 
 If you can't find what your looking for, look at our [examples](https://github.com/99designs/gqlgen/tree/master/example) for example usage of gqlgen.
 

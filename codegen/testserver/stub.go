@@ -39,6 +39,7 @@ type Stub struct {
 		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
+		Autobind               func(ctx context.Context) (*Autobind, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
@@ -146,6 +147,9 @@ func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) 
 }
 func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	return r.QueryResolver.ShapeUnion(ctx)
+}
+func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
+	return r.QueryResolver.Autobind(ctx)
 }
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)

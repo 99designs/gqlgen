@@ -17,6 +17,7 @@ type Query {
     directiveInput(arg: InputDirectives!): String
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
+    autobind: Autobind
 }
 
 type Subscription {
@@ -29,6 +30,15 @@ type User {
     friends: [User!]!
     created: Time!
     updated: Time
+}
+
+type Autobind {
+    int: Int!
+    int32: Int!
+    int64: Int!
+
+    idStr: ID!
+    idInt: ID!
 }
 
 type Error {

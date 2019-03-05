@@ -232,29 +232,52 @@ func ToCamel(s string) string {
 	if s == "_" {
 		return "_"
 	}
-	buffer := make([]rune, 0, len(s))
+	buf := bytes.NewBuffer(make([]byte, 0, len(s)))
 	upper := true
 	lastWasUpper := false
+	var maxCommonInitialismsLen int
+	for word := range commonInitialisms {
+		if l := len(word); maxCommonInitialismsLen < l {
+			maxCommonInitialismsLen = l
+		}
+	}
 
-	for _, c := range s {
+outer:
+	for i, rs := 0, []rune(s); i < len(rs); i++ {
+		c := rs[i]
 		if isDelimiter(c) {
 			upper = true
 			continue
 		}
 		if !lastWasUpper && unicode.IsUpper(c) {
+			tail := len(rs) - i
+			if maxCommonInitialismsLen < tail {
+				tail = maxCommonInitialismsLen
+			}
+			for j := tail; j != 0; j-- {
+				word := string(rs[i : i+j])
+				if commonInitialisms[word] {
+					buf.WriteString(word)
+					i += j - 1
+					upper = false
+					lastWasUpper = false // IDFoo will be IDFoo, not IDfoo
+					continue outer
+				}
+			}
+
 			upper = true
 		}
 
 		if upper {
-			buffer = append(buffer, unicode.ToUpper(c))
+			buf.WriteRune(unicode.ToUpper(c))
 		} else {
-			buffer = append(buffer, unicode.ToLower(c))
+			buf.WriteRune(unicode.ToLower(c))
 		}
 		upper = false
 		lastWasUpper = unicode.IsUpper(c)
 	}
 
-	return string(buffer)
+	return buf.String()
 }
 
 func ToGo(name string) string {

@@ -45,7 +45,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 {{ range $object := .Objects }}
 	{{ if not $object.IsReserved -}}
-		{{ $object.Name|toCamel }} struct {
+		{{ $object.Name|go }} struct {
 		{{ range $field := $object.Fields -}}
 			{{ if not $field.IsReserved -}}
 				{{ $field.GoFieldName }} {{ $field.ComplexitySignature }}
@@ -87,7 +87,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			{{ range $field := $object.Fields }}
 				{{ if not $field.IsReserved }}
 					case "{{$object.Name}}.{{$field.GoFieldName}}":
-						if e.complexity.{{$object.Name|toCamel}}.{{$field.GoFieldName}} == nil {
+						if e.complexity.{{$object.Name|go}}.{{$field.GoFieldName}} == nil {
 							break
 						}
 						{{ if $field.Args }}
@@ -96,7 +96,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 								return 0, false
 							}
 						{{ end }}
-						return e.complexity.{{$object.Name|toCamel}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
+						return e.complexity.{{$object.Name|go}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{end}}), true
 				{{ end }}
 			{{ end }}
 		{{ end }}

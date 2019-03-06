@@ -14,71 +14,71 @@
 
 {{- range $model := .Interfaces }}
 	{{ with .Description }} {{.|prefixLines "// "}} {{ end }}
-	type {{.Name }} interface {
-		Is{{.Name }}()
+	type {{.Name|go }} interface {
+		Is{{.Name|go }}()
 	}
 {{- end }}
 
 {{ range $model := .Models }}
 	{{with .Description }} {{.|prefixLines "// "}} {{end}}
-	type {{ .Name }} struct {
+	type {{ .Name|go }} struct {
 		{{- range $field := .Fields }}
 			{{- with .Description }}
 				{{.|prefixLines "// "}}
 			{{- end}}
-			{{ $field.Name }} {{$field.Type | ref}} `{{$field.Tag}}`
+			{{ $field.Name|go }} {{$field.Type | ref}} `{{$field.Tag}}`
 		{{- end }}
 	}
 
 	{{- range $iface := .Implements }}
-		func ({{ $model.Name }}) Is{{ $iface }}() {}
+		func ({{ $model.Name|go }}) Is{{ $iface }}() {}
 	{{- end }}
 {{- end}}
 
 {{ range $enum := .Enums }}
-	{{ with .Description }} {{.|prefixLines "// "}} {{end}}
-	type {{.Name }} string
+	{{ with .Description|go }} {{.|prefixLines "// "}} {{end}}
+	type {{.Name|go }} string
 	const (
 	{{- range $value := .Values}}
 		{{- with .Description}}
 			{{.|prefixLines "// "}}
 		{{- end}}
-		{{ $enum.Name }}{{ .Name }} {{$enum.Name }} = {{.Value|quote}}
+		{{ $enum.Name|go }}{{ .Name|go }} {{$enum.Name|go }} = {{.Name|quote}}
 	{{- end }}
 	)
 
-	var All{{.Name }} = []{{ .Name }}{
+	var All{{.Name|go }} = []{{ .Name|go }}{
 	{{- range $value := .Values}}
-		{{$enum.Name }}{{ .Name }},
+		{{$enum.Name|go }}{{ .Name|go }},
 	{{- end }}
 	}
 
-	func (e {{.Name }}) IsValid() bool {
+	func (e {{.Name|go }}) IsValid() bool {
 		switch e {
-		case {{ range $index, $element := .Values}}{{if $index}},{{end}}{{ $enum.Name }}{{ $element.Name }}{{end}}:
+		case {{ range $index, $element := .Values}}{{if $index}},{{end}}{{ $enum.Name|go }}{{ $element.Name|go }}{{end}}:
 			return true
 		}
 		return false
 	}
 
-	func (e {{.Name }}) String() string {
+	func (e {{.Name|go }}) String() string {
 		return string(e)
 	}
 
-	func (e *{{.Name }}) UnmarshalGQL(v interface{}) error {
+	func (e *{{.Name|go }}) UnmarshalGQL(v interface{}) error {
 		str, ok := v.(string)
 		if !ok {
 			return fmt.Errorf("enums must be strings")
 		}
 
-		*e = {{ .Name }}(str)
+		*e = {{ .Name|go }}(str)
 		if !e.IsValid() {
-			return fmt.Errorf("%s is not a valid {{ .Raw }}", str)
+			return fmt.Errorf("%s is not a valid {{ .Name }}", str)
 		}
 		return nil
 	}
 
-	func (e {{.Name }}) MarshalGQL(w io.Writer) {
+	func (e {{.Name|go }}) MarshalGQL(w io.Writer) {
 		fmt.Fprint(w, strconv.Quote(e.String()))
 	}
 

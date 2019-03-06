@@ -9,6 +9,14 @@ import (
 	"time"
 )
 
+type Ait struct {
+	ID string `json:"id"`
+}
+
+type AbIt struct {
+	ID string `json:"id"`
+}
+
 type InnerDirectives struct {
 	Message string `json:"message"`
 }
@@ -78,6 +86,22 @@ type ValidType struct {
 	DifferentCaseOld   string `json:"different_case"`
 	ValidInputKeywords bool   `json:"validInputKeywords"`
 	ValidArgs          bool   `json:"validArgs"`
+}
+
+type Xxit struct {
+	ID string `json:"id"`
+}
+
+type XxIt struct {
+	ID string `json:"id"`
+}
+
+type AsdfIt struct {
+	ID string `json:"id"`
+}
+
+type IIt struct {
+	ID string `json:"id"`
 }
 
 type Status string

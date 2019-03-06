@@ -25,6 +25,7 @@ func TestToGo(t *testing.T) {
 
 	require.Equal(t, "A", ToGo("A"))
 	require.Equal(t, "ID", ToGo("ID"))
+	require.Equal(t, "ID", ToGo("id"))
 	require.Equal(t, "", ToGo(""))
 
 	require.Equal(t, "RelatedUrls", ToGo("RelatedUrls"))
@@ -51,44 +52,41 @@ func TestToGoPrivate(t *testing.T) {
 
 	require.Equal(t, "a", ToGoPrivate("A"))
 	require.Equal(t, "id", ToGoPrivate("ID"))
+	require.Equal(t, "id", ToGoPrivate("id"))
 	require.Equal(t, "", ToGoPrivate(""))
 }
 
 func Test_wordWalker(t *testing.T) {
 
-	type Result struct {
-		Value            string
-		HasCommonInitial bool
-	}
-	helper := func(str string) []*Result {
-		resultList := []*Result{}
-		wordWalker(str, func(word string, hasCommonInitial bool) {
-			resultList = append(resultList, &Result{word, hasCommonInitial})
+	helper := func(str string) []*wordInfo {
+		resultList := []*wordInfo{}
+		wordWalker(str, func(info *wordInfo) {
+			resultList = append(resultList, info)
 		})
 		return resultList
 	}
 
-	require.Equal(t, []*Result{{Value: "TO"}, {Value: "CAMEL"}}, helper("TO_CAMEL"))
-	require.Equal(t, []*Result{{Value: "to"}, {Value: "camel"}}, helper("to_camel"))
-	require.Equal(t, []*Result{{Value: "to"}, {Value: "Camel"}}, helper("toCamel"))
-	require.Equal(t, []*Result{{Value: "To"}, {Value: "Camel"}}, helper("ToCamel"))
-	require.Equal(t, []*Result{{Value: "to"}, {Value: "camel"}}, helper("to-camel"))
+	require.Equal(t, []*wordInfo{{Word: "TO"}, {Word: "CAMEL"}}, helper("TO_CAMEL"))
+	require.Equal(t, []*wordInfo{{Word: "to"}, {Word: "camel"}}, helper("to_camel"))
+	require.Equal(t, []*wordInfo{{Word: "to"}, {Word: "Camel"}}, helper("toCamel"))
+	require.Equal(t, []*wordInfo{{Word: "To"}, {Word: "Camel"}}, helper("ToCamel"))
+	require.Equal(t, []*wordInfo{{Word: "to"}, {Word: "camel"}}, helper("to-camel"))
 
-	require.Equal(t, []*Result{{Value: "Related"}, {Value: "URLs", HasCommonInitial: true}}, helper("RelatedURLs"))
-	require.Equal(t, []*Result{{Value: "Image"}, {Value: "IDs", HasCommonInitial: true}}, helper("ImageIDs"))
-	require.Equal(t, []*Result{{Value: "Foo"}, {Value: "ID", HasCommonInitial: true}}, helper("FooID"))
-	require.Equal(t, []*Result{{Value: "ID", HasCommonInitial: true}, {Value: "Foo"}}, helper("IDFoo"))
-	require.Equal(t, []*Result{{Value: "Foo"}, {Value: "ASCII", HasCommonInitial: true}}, helper("FooASCII"))
-	require.Equal(t, []*Result{{Value: "ASCII", HasCommonInitial: true}, {Value: "Foo"}}, helper("ASCIIFoo"))
-	require.Equal(t, []*Result{{Value: "Foo"}, {Value: "UTF8", HasCommonInitial: true}}, helper("FooUTF8"))
-	require.Equal(t, []*Result{{Value: "UTF8", HasCommonInitial: true}, {Value: "Foo"}}, helper("UTF8Foo"))
+	require.Equal(t, []*wordInfo{{Word: "Related"}, {Word: "URLs", HasCommonInitial: true}}, helper("RelatedURLs"))
+	require.Equal(t, []*wordInfo{{Word: "Image"}, {Word: "IDs", HasCommonInitial: true}}, helper("ImageIDs"))
+	require.Equal(t, []*wordInfo{{Word: "Foo"}, {Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}}, helper("FooID"))
+	require.Equal(t, []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}, {Word: "Foo"}}, helper("IDFoo"))
+	require.Equal(t, []*wordInfo{{Word: "Foo"}, {Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}}, helper("FooASCII"))
+	require.Equal(t, []*wordInfo{{Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}, {Word: "Foo"}}, helper("ASCIIFoo"))
+	require.Equal(t, []*wordInfo{{Word: "Foo"}, {Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}}, helper("FooUTF8"))
+	require.Equal(t, []*wordInfo{{Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}, {Word: "Foo"}}, helper("UTF8Foo"))
 
-	require.Equal(t, []*Result{{Value: "A"}}, helper("A"))
-	require.Equal(t, []*Result{{Value: "ID", HasCommonInitial: true}}, helper("ID"))
-	require.Equal(t, []*Result{{Value: "ID", HasCommonInitial: true}}, helper("id"))
-	require.Equal(t, []*Result{}, helper(""))
+	require.Equal(t, []*wordInfo{{Word: "A"}}, helper("A"))
+	require.Equal(t, []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}}, helper("ID"))
+	require.Equal(t, []*wordInfo{{Word: "id", HasCommonInitial: true, MatchCommonInitial: true}}, helper("id"))
+	require.Equal(t, []*wordInfo{}, helper(""))
 
-	require.Equal(t, []*Result{{Value: "Related"}, {Value: "Urls"}}, helper("RelatedUrls"))
+	require.Equal(t, []*wordInfo{{Word: "Related"}, {Word: "Urls"}}, helper("RelatedUrls"))
 }
 
 func TestCenter(t *testing.T) {

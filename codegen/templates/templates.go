@@ -230,8 +230,11 @@ func Call(p *types.Func) string {
 func ToGo(name string) string {
 	runes := make([]rune, 0, len(name))
 
-	wordWalker(name, func(word string, hasCommonInitial bool) {
-		if !hasCommonInitial {
+	wordWalker(name, func(info *wordInfo) {
+		word := info.Word
+		if info.MatchCommonInitial {
+			word = strings.ToUpper(word)
+		} else if !info.HasCommonInitial {
 			word = ucFirst(strings.ToLower(word))
 		}
 		runes = append(runes, []rune(word)...)
@@ -244,11 +247,14 @@ func ToGoPrivate(name string) string {
 	runes := make([]rune, 0, len(name))
 
 	first := true
-	wordWalker(name, func(word string, hasCommonInitial bool) {
+	wordWalker(name, func(info *wordInfo) {
+		word := info.Word
 		if first {
-			word = strings.ToLower(word)
+			word = strings.ToLower(info.Word)
 			first = false
-		} else if !hasCommonInitial {
+		} else if info.MatchCommonInitial {
+			word = strings.ToUpper(word)
+		} else if !info.HasCommonInitial {
 			word = ucFirst(strings.ToLower(word))
 		}
 		runes = append(runes, []rune(word)...)
@@ -257,7 +263,13 @@ func ToGoPrivate(name string) string {
 	return sanitizeKeywords(string(runes))
 }
 
-func wordWalker(str string, f func(word string, hasCommonInitial bool)) {
+type wordInfo struct {
+	Word               string
+	MatchCommonInitial bool
+	HasCommonInitial   bool
+}
+
+func wordWalker(str string, f func(*wordInfo)) {
 
 	skipRune := func(r rune) bool {
 		switch r {
@@ -309,12 +321,17 @@ func wordWalker(str string, f func(word string, hasCommonInitial bool)) {
 			continue
 		}
 
-		if u := strings.ToUpper(word); commonInitialisms[u] {
+		matchCommonInitial := false
+		if commonInitialisms[strings.ToUpper(word)] {
 			hasCommonInitial = true
-			word = u
+			matchCommonInitial = true
 		}
 
-		f(word, hasCommonInitial)
+		f(&wordInfo{
+			Word:               word,
+			MatchCommonInitial: matchCommonInitial,
+			HasCommonInitial:   hasCommonInitial,
+		})
 		hasCommonInitial = false
 		w = i
 	}

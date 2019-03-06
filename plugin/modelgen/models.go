@@ -4,10 +4,9 @@ import (
 	"go/types"
 	"sort"
 
-	"github.com/99designs/gqlgen/internal/code"
-
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -17,6 +16,7 @@ type ModelBuild struct {
 	Interfaces  []*Interface
 	Models      []*Object
 	Enums       []*Enum
+	Scalars     []string
 }
 
 type Interface struct {
@@ -159,6 +159,8 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			}
 
 			b.Enums = append(b.Enums, it)
+		case ast.Scalar:
+			b.Scalars = append(b.Scalars, schemaType.Name)
 		}
 	}
 
@@ -174,6 +176,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	}
 	for _, it := range b.Interfaces {
 		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+it.Name)
+	}
+	for _, it := range b.Scalars {
+		cfg.Models.Add(it, "github.com/99designs/gqlgen/graphql.String")
 	}
 
 	if len(b.Models) == 0 && len(b.Enums) == 0 {

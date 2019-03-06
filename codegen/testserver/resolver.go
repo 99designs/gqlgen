@@ -116,6 +116,9 @@ func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
 	panic("not implemented")
 }

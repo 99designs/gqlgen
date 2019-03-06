@@ -132,6 +132,7 @@ type ComplexityRoot struct {
 		Autobind               func(childComplexity int) int
 		DeprecatedField        func(childComplexity int) int
 		Panics                 func(childComplexity int) int
+		DefaultScalar          func(childComplexity int, arg string) int
 		ValidType              func(childComplexity int) int
 	}
 
@@ -194,6 +195,7 @@ type QueryResolver interface {
 	Autobind(ctx context.Context) (*Autobind, error)
 	DeprecatedField(ctx context.Context) (string, error)
 	Panics(ctx context.Context) (*Panics, error)
+	DefaultScalar(ctx context.Context, arg string) (string, error)
 	ValidType(ctx context.Context) (*ValidType, error)
 }
 type SubscriptionResolver interface {
@@ -594,6 +596,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Panics(childComplexity), true
 
+	case "Query.DefaultScalar":
+		if e.complexity.Query.DefaultScalar == nil {
+			break
+		}
+
+		args, err := ec.field_Query_defaultScalar_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
+
 	case "Query.ValidType":
 		if e.complexity.Query.ValidType == nil {
 			break
@@ -838,6 +852,13 @@ type Panics {
 }
 
 scalar MarshalPanic
+`},
+	&ast.Source{Name: "scalar_default.graphql", Input: `extend type Query {
+    defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!
+}
+
+""" This doesnt have an implementation in the typemap, so it should act like a string """
+scalar DefaultScalarImplementation
 `},
 	&ast.Source{Name: "schema.graphql", Input: `type Query {
     invalidIdentifier: InvalidIdentifier
@@ -1133,6 +1154,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_defaultScalar_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["arg"]; ok {
+		arg0, err = ec.unmarshalNDefaultScalarImplementation2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
 	return args, nil
 }
 
@@ -2766,6 +2801,39 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOPanics2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPanics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_defaultScalar_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DefaultScalar(rctx, args["arg"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNDefaultScalarImplementation2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -4993,6 +5061,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_panics(ctx, field)
 				return res
 			})
+		case "defaultScalar":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_defaultScalar(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
 		case "validType":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5410,6 +5492,14 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
 	return graphql.MarshalBoolean(v)
+}
+
+func (ec *executionContext) unmarshalNDefaultScalarImplementation2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalString(v)
+}
+
+func (ec *executionContext) marshalNDefaultScalarImplementation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	return graphql.MarshalString(v)
 }
 
 func (ec *executionContext) unmarshalNID2int(ctx context.Context, v interface{}) (int, error) {

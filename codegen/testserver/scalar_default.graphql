@@ -1,0 +1,6 @@
+extend type Query {
+    defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!
+}
+
+""" This doesnt have an implementation in the typemap, so it should act like a string """
+scalar DefaultScalarImplementation

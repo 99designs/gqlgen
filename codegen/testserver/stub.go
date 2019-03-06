@@ -42,6 +42,7 @@ type Stub struct {
 		Autobind               func(ctx context.Context) (*Autobind, error)
 		DeprecatedField        func(ctx context.Context) (string, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
+		DefaultScalar          func(ctx context.Context, arg string) (string, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
 	SubscriptionResolver struct {
@@ -157,6 +158,9 @@ func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 }
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)
+}
+func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
+	return r.QueryResolver.DefaultScalar(ctx, arg)
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)

@@ -40,6 +40,7 @@ type Stub struct {
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
 		Autobind               func(ctx context.Context) (*Autobind, error)
+		DeprecatedField        func(ctx context.Context) (string, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
@@ -150,6 +151,9 @@ func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 }
 func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
 	return r.QueryResolver.Autobind(ctx)
+}
+func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
+	return r.QueryResolver.DeprecatedField(ctx)
 }
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)

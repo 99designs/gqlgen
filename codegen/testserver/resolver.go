@@ -110,6 +110,9 @@ func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 func (r *queryResolver) Autobind(ctx context.Context) (*Autobind, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
 	panic("not implemented")
 }

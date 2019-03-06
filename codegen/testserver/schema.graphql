@@ -18,6 +18,7 @@ type Query {
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
     autobind: Autobind
+    deprecatedField: String! @deprecated(reason: "test deprecated directive")
 }
 
 type Subscription {

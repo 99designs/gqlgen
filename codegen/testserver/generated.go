@@ -130,6 +130,7 @@ type ComplexityRoot struct {
 		InputSlice             func(childComplexity int, arg []string) int
 		ShapeUnion             func(childComplexity int) int
 		Autobind               func(childComplexity int) int
+		DeprecatedField        func(childComplexity int) int
 		Panics                 func(childComplexity int) int
 		ValidType              func(childComplexity int) int
 	}
@@ -191,6 +192,7 @@ type QueryResolver interface {
 	InputSlice(ctx context.Context, arg []string) (bool, error)
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
+	DeprecatedField(ctx context.Context) (string, error)
 	Panics(ctx context.Context) (*Panics, error)
 	ValidType(ctx context.Context) (*ValidType, error)
 }
@@ -578,6 +580,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Autobind(childComplexity), true
 
+	case "Query.DeprecatedField":
+		if e.complexity.Query.DeprecatedField == nil {
+			break
+		}
+
+		return e.complexity.Query.DeprecatedField(childComplexity), true
+
 	case "Query.Panics":
 		if e.complexity.Query.Panics == nil {
 			break
@@ -850,6 +859,7 @@ scalar MarshalPanic
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
     autobind: Autobind
+    deprecatedField: String! @deprecated(reason: "test deprecated directive")
 }
 
 type Subscription {
@@ -2707,6 +2717,32 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOAutobind2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐAutobind(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DeprecatedField(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -4930,6 +4966,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_autobind(ctx, field)
+				return res
+			})
+		case "deprecatedField":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_deprecatedField(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
 				return res
 			})
 		case "panics":

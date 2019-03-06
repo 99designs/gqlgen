@@ -129,7 +129,6 @@ func Funcs() template.FuncMap {
 		"lcFirst":       lcFirst,
 		"quote":         strconv.Quote,
 		"rawQuote":      rawQuote,
-		"toCamel":       ToCamel,
 		"dump":          Dump,
 		"ref":           ref,
 		"ts":            TypeIdentifier,
@@ -228,64 +227,97 @@ func Call(p *types.Func) string {
 	return pkg + p.Name()
 }
 
-func ToCamel(s string) string {
-	if s == "_" {
-		return "_"
-	}
-	buf := bytes.NewBuffer(make([]byte, 0, len(s)))
-	upper := true
-	lastWasUpper := false
-	var maxCommonInitialismsLen int
-	for word := range commonInitialisms {
-		if l := len(word); maxCommonInitialismsLen < l {
-			maxCommonInitialismsLen = l
-		}
-	}
-
-outer:
-	for i, rs := 0, []rune(s); i < len(rs); i++ {
-		c := rs[i]
-		if isDelimiter(c) {
-			upper = true
-			continue
-		}
-		if !lastWasUpper && unicode.IsUpper(c) {
-			tail := len(rs) - i
-			if maxCommonInitialismsLen < tail {
-				tail = maxCommonInitialismsLen
-			}
-			for j := tail; j != 0; j-- {
-				word := string(rs[i : i+j])
-				if commonInitialisms[word] {
-					buf.WriteString(word)
-					i += j - 1
-					upper = false
-					lastWasUpper = false // IDFoo will be IDFoo, not IDfoo
-					continue outer
-				}
-			}
-
-			upper = true
-		}
-
-		if upper {
-			buf.WriteRune(unicode.ToUpper(c))
-		} else {
-			buf.WriteRune(unicode.ToLower(c))
-		}
-		upper = false
-		lastWasUpper = unicode.IsUpper(c)
-	}
-
-	return buf.String()
-}
-
 func ToGo(name string) string {
-	return lintName(ToCamel(name))
+	runes := make([]rune, 0, len(name))
+
+	wordWalker(name, func(word string, hasCommonInitial bool) {
+		if !hasCommonInitial {
+			word = ucFirst(strings.ToLower(word))
+		}
+		runes = append(runes, []rune(word)...)
+	})
+
+	return string(runes)
 }
 
 func ToGoPrivate(name string) string {
-	return lintName(sanitizeKeywords(lcFirst(ToCamel(name))))
+	runes := make([]rune, 0, len(name))
+
+	first := true
+	wordWalker(name, func(word string, hasCommonInitial bool) {
+		if first {
+			word = strings.ToLower(word)
+			first = false
+		} else if !hasCommonInitial {
+			word = ucFirst(strings.ToLower(word))
+		}
+		runes = append(runes, []rune(word)...)
+	})
+
+	return sanitizeKeywords(string(runes))
+}
+
+func wordWalker(str string, f func(word string, hasCommonInitial bool)) {
+
+	skipRune := func(r rune) bool {
+		switch r {
+		case '-', '_':
+			return true
+		default:
+			return false
+		}
+	}
+
+	runes := []rune(str)
+	w, i := 0, 0 // index of start of word, scan
+	hasCommonInitial := false
+	for i+1 <= len(runes) {
+		eow := false // whether we hit the end of a word
+		if i+1 == len(runes) {
+			eow = true
+		} else if skipRune(runes[i+1]) {
+			// underscore; shift the remainder forward over any run of underscores
+			eow = true
+			n := 1
+			for i+n+1 < len(runes) && skipRune(runes[i+n+1]) {
+				n++
+			}
+
+			// Leave at most one underscore if the underscore is between two digits
+			if i+n+1 < len(runes) && unicode.IsDigit(runes[i]) && unicode.IsDigit(runes[i+n+1]) {
+				n--
+			}
+
+			copy(runes[i+1:], runes[i+n+1:])
+			runes = runes[:len(runes)-n]
+		} else if unicode.IsLower(runes[i]) && !unicode.IsLower(runes[i+1]) {
+			// lower->non-lower
+			eow = true
+		}
+		i++
+
+		// [w,i) is a word.
+		word := string(runes[w:i])
+		if !eow && commonInitialisms[word] && !unicode.IsLower(runes[i]) {
+			// through
+			// split IDFoo → ID, Foo
+			// but URLs → URLs
+		} else if !eow {
+			if commonInitialisms[word] {
+				hasCommonInitial = true
+			}
+			continue
+		}
+
+		if u := strings.ToUpper(word); commonInitialisms[u] {
+			hasCommonInitial = true
+			word = u
+		}
+
+		f(word, hasCommonInitial)
+		hasCommonInitial = false
+		w = i
+	}
 }
 
 var keywords = []string{

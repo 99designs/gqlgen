@@ -235,7 +235,11 @@ func ToGo(name string) string {
 		if info.MatchCommonInitial {
 			word = strings.ToUpper(word)
 		} else if !info.HasCommonInitial {
-			word = ucFirst(strings.ToLower(word))
+			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
+				// FOO or foo → Foo
+				// FOo → FOo
+				word = ucFirst(strings.ToLower(word))
+			}
 		}
 		runes = append(runes, []rune(word)...)
 	})
@@ -250,7 +254,13 @@ func ToGoPrivate(name string) string {
 	wordWalker(name, func(info *wordInfo) {
 		word := info.Word
 		if first {
-			word = strings.ToLower(info.Word)
+			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
+				// ID → id, CAMEL → camel
+				word = strings.ToLower(info.Word)
+			} else {
+				// ITicket → iTicket
+				word = lcFirst(info.Word)
+			}
 			first = false
 		} else if info.MatchCommonInitial {
 			word = strings.ToUpper(word)

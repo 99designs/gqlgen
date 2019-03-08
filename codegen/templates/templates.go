@@ -228,6 +228,28 @@ func Call(p *types.Func) string {
 }
 
 func ToGo(name string) string {
+
+	// skip if we already have a camel name
+	if len(name) > 0 {
+
+		k := name[0]
+		if k >= 'A' && k <= 'Z' {
+
+			isCamel := false
+
+			for _, c := range name {
+				if isDelimiter(c) {
+					isCamel = true
+					break
+				}
+			}
+
+			if !isCamel {
+				return name
+			}
+		}
+	}
+
 	runes := make([]rune, 0, len(name))
 
 	wordWalker(name, func(info *wordInfo) {

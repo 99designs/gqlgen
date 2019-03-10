@@ -7,16 +7,7 @@ to run this server
 go run ./example/fileupload/server/server.go
 ```
 
-and open http://localhost:8080 in your browser
-
-//TODO Test examples!!
-
-## Examples
-
-curl localhost:3001/graphql \
-  -F operations='{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }' \
-  -F map='{ "0": ["variables.file"] }' \
-  -F 0=@a.txt
+and open http://localhost:8087 in your browser
   
 
 ### Single file
@@ -27,7 +18,7 @@ curl localhost:3001/graphql \
 {
   query: `
     mutation($file: Upload!) {
-      uploadFile(file: $file) {
+      singleUpload(file: $file) {
         id
       }
     }
@@ -41,30 +32,46 @@ curl localhost:3001/graphql \
 #### cURL request
 
 ```shell
-curl localhost:3001/graphql \
+curl localhost:8087/query \
   -F operations='{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }' \
   -F map='{ "0": ["variables.file"] }' \
-  -F 0=@a.txt
+  -F 0=@./example/fileupload./testfiles/a.txt
+```
+
+
+```shell
+curl localhost:8087/query \
+  -F operations='{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id } }", "variables": { "req": {"file": null, "id": 1 } } }' \
+  -F map='{ "0": ["variables.req.file"] }' \
+  -F 0=@./example/fileupload/testfiles/a.txt
 ```
 
 #### Request payload
 
 ```
---------------------------cec8e8123c05ba25
+POST /query HTTP/1.1
+Host: localhost:8087
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Length: 525
+Content-Type: multipart/form-data; boundary=--------------------
+----c259ddf1cd194033
+=> Send data, 525 bytes (0x20d)
+--------------------------c259ddf1cd194033
 Content-Disposition: form-data; name="operations"
 
-{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }
---------------------------cec8e8123c05ba25
+{ "query": "mutation ($file: Upload!) { singleUpload(file: $file
+) { id } }", "variables": { "file": null } }
+--------------------------c259ddf1cd194033
 Content-Disposition: form-data; name="map"
 
 { "0": ["variables.file"] }
---------------------------cec8e8123c05ba25
+--------------------------c259ddf1cd194033
 Content-Disposition: form-data; name="0"; filename="a.txt"
 Content-Type: text/plain
 
 Alpha file content.
-
---------------------------cec8e8123c05ba25--
+--------------------------c259ddf1cd194033--
 ```
 
 ### File list
@@ -91,12 +98,20 @@ Alpha file content.
 
 #### cURL request
 
-```shell
-curl localhost:3001/graphql \
+```
+curl localhost:8087/query \
   -F operations='{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id } }", "variables": { "files": [null, null] } }' \
   -F map='{ "0": ["variables.files.0"], "1": ["variables.files.1"] }' \
-  -F 0=@b.txt \
-  -F 1=@c.txt
+  -F 0=@./example/fileupload/testfiles/b.txt \
+  -F 1=@./example/fileupload/testfiles/c.txt
+```
+
+```
+curl localhost:8087/query \
+  -F operations='{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }' \
+  -F map='{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }' \
+  -F 0=@./example/fileupload/testfiles/b.txt \
+  -F 1=@./example/fileupload/testfiles/c.txt
 ```
 
 #### Request payload

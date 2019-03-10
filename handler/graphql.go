@@ -492,24 +492,27 @@ func sendErrorf(w http.ResponseWriter, code int, format string, args ...interfac
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }
 
-//TODO Add test for this
 func processMultipart(r *http.Request, request *params) error {
 	// Parse multipart form
 	if err := r.ParseMultipartForm(1024); err != nil {
-		return err
+		return errors.New("failed to parse multipart form")
+	}
+
+	// Unmarshal operations
+	var operations interface{}
+	if err := jsonDecode(bytes.NewBuffer([]byte(r.Form.Get("operations"))), &operations); err != nil {
+		return errors.New("operations form field could not be decoded")
 	}
 
 	// Unmarshal uploads
 	var uploads = map[graphql.Upload][]string{}
 	var uploadsMap = map[string][]string{}
 	if err := json.Unmarshal([]byte(r.Form.Get("map")), &uploadsMap); err != nil {
-		return err
+		return errors.New("map form field could not be decoded")
 	} else {
 		for key, path := range uploadsMap {
 			if file, header, err := r.FormFile(key); err != nil {
-				panic(err)
-				//w.WriteHeader(http.StatusInternalServerError)
-				//return
+				return errors.New(fmt.Sprintf("failed to get key %s from form", key))
 			} else {
 				uploads[graphql.Upload{
 					File:     file,
@@ -518,13 +521,6 @@ func processMultipart(r *http.Request, request *params) error {
 				}] = path
 			}
 		}
-	}
-
-	var operations interface{}
-
-	// Unmarshal operations
-	if err := jsonDecode(bytes.NewBuffer([]byte(r.Form.Get("operations"))), &operations); err != nil {
-		return err
 	}
 
 	// addUploadToOperations uploads to operations
@@ -553,7 +549,6 @@ func processMultipart(r *http.Request, request *params) error {
 	return errors.New("invalid operation")
 }
 
-//TODO Add test for this
 func addUploadToOperations(operations interface{}, upload graphql.Upload, path string) error {
 	var parts []interface{}
 	for _, p := range strings.Split(path, ".") {
@@ -570,12 +565,18 @@ func addUploadToOperations(operations interface{}, upload graphql.Upload, path s
 		last := i == len(parts)-1
 		switch idx := p.(type) {
 		case string:
+			if operations == nil {
+				operations = map[string]interface{}{}
+			}
 			if last {
 				operations.(map[string]interface{})[idx] = upload
 			} else {
 				operations = operations.(map[string]interface{})[idx]
 			}
 		case int:
+			if operations == nil {
+				operations = map[string]interface{}{}
+			}
 			if last {
 				operations.([]interface{})[idx] = upload
 			} else {

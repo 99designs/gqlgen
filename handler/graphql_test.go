@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"context"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -130,24 +131,17 @@ func TestFileUpload(t *testing.T) {
 		}
 		handler := GraphQL(mock)
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.file"] }`)
-		require.NoError(t, err)
-		w, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w.Write([]byte("test"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`
+		mapData := `{ "0": ["variables.file"] }`
+		files := []file{
+			{
+				mapKey: "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
 
-		req, err := http.NewRequest("POST", "/graphql", bodyBuf)
-		require.NoError(t, err)
-
-		contentType := bodyWriter.FormDataContentType()
-		req.Header.Set("Content-Type", contentType)
 		resp := httptest.NewRecorder()
 		handler.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code)
@@ -164,24 +158,17 @@ func TestFileUpload(t *testing.T) {
 		}
 		handler := GraphQL(mock)
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id } }", "variables": { "req": {"file": null, "id": 1 } } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.file"] }`)
-		require.NoError(t, err)
-		w, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w.Write([]byte("test"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id } }", "variables": { "req": {"file": null, "id": 1 } } }`
+		mapData := `{ "0": ["variables.req.file"] }`
+		files := []file{
+			{
+				mapKey: "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
 
-		req, err := http.NewRequest("POST", "/graphql", bodyBuf)
-		require.NoError(t, err)
-
-		contentType := bodyWriter.FormDataContentType()
-		req.Header.Set("Content-Type", contentType)
 		resp := httptest.NewRecorder()
 		handler.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code)
@@ -198,27 +185,22 @@ func TestFileUpload(t *testing.T) {
 		}
 		handler := GraphQL(mock)
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id } }", "variables": { "files": [null, null] } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`)
-		require.NoError(t, err)
-		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w0.Write([]byte("test1"))
-		require.NoError(t, err)
-		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
-		require.NoError(t, err)
-		_, err = w1.Write([]byte("test2"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id } }", "variables": { "files": [null, null] } }`
+		mapData := `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`
+		files := []file{
+			{
+				mapKey: "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+			{
+				mapKey: "1",
+				name:    "b.txt",
+				content: "test2",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
 
-		req, err := http.NewRequest("POST", "/graphql", bodyBuf)
-		require.NoError(t, err)
-
-		req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
 		resp := httptest.NewRecorder()
 		handler.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code)
@@ -235,32 +217,91 @@ func TestFileUpload(t *testing.T) {
 		}
 		handler := GraphQL(mock)
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`)
-		require.NoError(t, err)
-		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w0.Write([]byte("test1"))
-		require.NoError(t, err)
-		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
-		require.NoError(t, err)
-		_, err = w1.Write([]byte("test2"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
+		mapData := `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`
+		files := []file{
+			{
+				mapKey: "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+			{
+				mapKey: "1",
+				name:    "b.txt",
+				content: "test2",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
 
-		req, err := http.NewRequest("POST", "/graphql", bodyBuf)
-		require.NoError(t, err)
-
-		req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
 		resp := httptest.NewRecorder()
 		handler.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code)
 		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
 	})
+}
+
+func TestProcessMultipart(t *testing.T) {
+	t.Run("parse multipart form failure", func(t *testing.T) {
+		req := &http.Request{
+			Method: "POST",
+			Header: http.Header{"Content-Type": {`multipart/form-data; boundary="foo123"`}},
+			Body:   ioutil.NopCloser(new(bytes.Buffer)),
+		}
+		var reqParams params
+		err := processMultipart(req, &reqParams)
+		require.NotNil(t, err)
+		errMsg := err.Error()
+		require.Equal(t, errMsg, "failed to parse multipart form")
+	})
+
+	t.Run("fail parse operation", func(t *testing.T) {
+		operations := `invalid operation`
+		mapData := `{ "0": ["variables.file"] }`
+		files := []file{
+			{
+				mapKey: "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
+
+		var reqParams params
+		err := processMultipart(req, &reqParams)
+		require.NotNil(t, err)
+		require.Equal(t, err.Error(), "operations form field could not be decoded")
+	})
+
+	t.Run("fail parse map", func(t *testing.T) {
+		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`
+		mapData := `invalid map`
+		files := []file{
+			{
+				mapKey: "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
+
+		var reqParams params
+		err := processMultipart(req, &reqParams)
+		require.NotNil(t, err)
+		require.Equal(t, err.Error(), "map form field could not be decoded")
+	})
+
+	t.Run("fail missing file", func(t *testing.T) {
+		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`
+		mapData := `{ "0": ["variables.file"] }`
+		var files []file
+		req := createUploadRequest(t, operations, mapData, files)
+
+		var reqParams params
+		err := processMultipart(req, &reqParams)
+		require.NotNil(t, err)
+		require.Equal(t, err.Error(), "failed to get key 0 from form")
+	})
+
 }
 
 func TestHandlerOptions(t *testing.T) {
@@ -276,6 +317,38 @@ func TestHandlerHead(t *testing.T) {
 
 	resp := doRequest(h, "HEAD", "/graphql?query={me{name}}", ``)
 	assert.Equal(t, http.StatusMethodNotAllowed, resp.Code)
+}
+
+type file struct {
+	mapKey  string
+	name    string
+	content string
+}
+
+func createUploadRequest(t *testing.T, operations, mapData string, files []file) *http.Request {
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+
+	err := bodyWriter.WriteField("operations", operations)
+	require.NoError(t, err)
+
+	err = bodyWriter.WriteField("map", mapData)
+	require.NoError(t, err)
+
+	for i := range files {
+		ff, err := bodyWriter.CreateFormFile(files[i].mapKey, files[i].name)
+		require.NoError(t, err)
+		_, err = ff.Write([]byte(files[i].content))
+		require.NoError(t, err)
+	}
+	err = bodyWriter.Close()
+	require.NoError(t, err)
+
+	req, err := http.NewRequest("POST", "/graphql", bodyBuf)
+	require.NoError(t, err)
+
+	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
+	return req
 }
 
 func doRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {

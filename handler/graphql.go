@@ -514,6 +514,7 @@ func processMultipart(r *http.Request, request *params) error {
 		return errors.New("map form field could not be decoded")
 	}
 
+	// Read form files and add them to operations variables
 	var upload graphql.Upload
 	for key, path := range uploadsMap {
 		file, header, err := r.FormFile(key)
@@ -525,11 +526,9 @@ func processMultipart(r *http.Request, request *params) error {
 			Size:     header.Size,
 			Filename: header.Filename,
 		}
-
 		if len(path) != 1 || !strings.HasPrefix(path[0], variablePrefix) {
 			return errors.New(fmt.Sprintf("invalid value for key %s", key))
 		}
-
 		addUploadToOperations(operations, upload, path[0])
 	}
 

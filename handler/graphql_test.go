@@ -135,7 +135,7 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.file"] }`
 		files := []file{
 			{
-				mapKey: "0",
+				mapKey:  "0",
 				name:    "a.txt",
 				content: "test1",
 			},
@@ -162,7 +162,7 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.req.file"] }`
 		files := []file{
 			{
-				mapKey: "0",
+				mapKey:  "0",
 				name:    "a.txt",
 				content: "test1",
 			},
@@ -189,12 +189,12 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`
 		files := []file{
 			{
-				mapKey: "0",
+				mapKey:  "0",
 				name:    "a.txt",
 				content: "test1",
 			},
 			{
-				mapKey: "1",
+				mapKey:  "1",
 				name:    "b.txt",
 				content: "test2",
 			},
@@ -221,12 +221,12 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`
 		files := []file{
 			{
-				mapKey: "0",
+				mapKey:  "0",
 				name:    "a.txt",
 				content: "test1",
 			},
 			{
-				mapKey: "1",
+				mapKey:  "1",
 				name:    "b.txt",
 				content: "test2",
 			},
@@ -241,6 +241,16 @@ func TestFileUpload(t *testing.T) {
 }
 
 func TestProcessMultipart(t *testing.T) {
+	validOperations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`
+	validMap := `{ "0": ["variables.file"] }`
+	validFiles := []file{
+		{
+			mapKey:  "0",
+			name:    "a.txt",
+			content: "test1",
+		},
+	}
+
 	t.Run("parse multipart form failure", func(t *testing.T) {
 		req := &http.Request{
 			Method: "POST",
@@ -256,15 +266,7 @@ func TestProcessMultipart(t *testing.T) {
 
 	t.Run("fail parse operation", func(t *testing.T) {
 		operations := `invalid operation`
-		mapData := `{ "0": ["variables.file"] }`
-		files := []file{
-			{
-				mapKey: "0",
-				name:    "a.txt",
-				content: "test1",
-			},
-		}
-		req := createUploadRequest(t, operations, mapData, files)
+		req := createUploadRequest(t, operations, validMap, validFiles)
 
 		var reqParams params
 		err := processMultipart(req, &reqParams)
@@ -273,16 +275,8 @@ func TestProcessMultipart(t *testing.T) {
 	})
 
 	t.Run("fail parse map", func(t *testing.T) {
-		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`
 		mapData := `invalid map`
-		files := []file{
-			{
-				mapKey: "0",
-				name:    "a.txt",
-				content: "test1",
-			},
-		}
-		req := createUploadRequest(t, operations, mapData, files)
+		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
 		err := processMultipart(req, &reqParams)
@@ -291,10 +285,8 @@ func TestProcessMultipart(t *testing.T) {
 	})
 
 	t.Run("fail missing file", func(t *testing.T) {
-		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`
-		mapData := `{ "0": ["variables.file"] }`
 		var files []file
-		req := createUploadRequest(t, operations, mapData, files)
+		req := createUploadRequest(t, validOperations, validMap, files)
 
 		var reqParams params
 		err := processMultipart(req, &reqParams)
@@ -302,6 +294,45 @@ func TestProcessMultipart(t *testing.T) {
 		require.Equal(t, err.Error(), "failed to get key 0 from form")
 	})
 
+	t.Run("fail if map entry with two values", func(t *testing.T) {
+		mapData := `{ "0": ["variables.file", "variables.file"] }`
+		req := createUploadRequest(t, validOperations, mapData, validFiles)
+
+		var reqParams params
+		err := processMultipart(req, &reqParams)
+		require.NotNil(t, err)
+		require.Equal(t, err.Error(), "invalid value for key 0")
+	})
+
+	t.Run("fail if map entry with invalid prefix", func(t *testing.T) {
+		mapData := `{ "0": ["var.file"] }`
+		req := createUploadRequest(t, validOperations, mapData, validFiles)
+
+		var reqParams params
+		err := processMultipart(req, &reqParams)
+		require.NotNil(t, err)
+		require.Equal(t, err.Error(), "invalid value for key 0")
+	})
+
+	t.Run("valid request", func(t *testing.T) {
+		req := createUploadRequest(t, validOperations, validMap, validFiles)
+
+		var reqParams params
+		err := processMultipart(req, &reqParams)
+		require.Nil(t, err)
+		require.Equal(t, "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", reqParams.Query)
+		require.Equal(t, "", reqParams.OperationName)
+		require.Equal(t, 1, len(reqParams.Variables))
+		require.NotNil(t, reqParams.Variables["file"])
+		reqParamsFile, ok := reqParams.Variables["file"].(graphql.Upload)
+		require.True(t, ok)
+		require.Equal(t, "a.txt", reqParamsFile.Filename)
+		require.Equal(t, int64(len("test1")), reqParamsFile.Size)
+		var content []byte
+		content, err = ioutil.ReadAll(reqParamsFile.File)
+		require.Nil(t, err)
+		require.Equal(t, "test1", string(content))
+	})
 }
 
 func TestHandlerOptions(t *testing.T) {
@@ -330,6 +361,35 @@ func createUploadRequest(t *testing.T, operations, mapData string, files []file)
 	bodyWriter := multipart.NewWriter(bodyBuf)
 
 	err := bodyWriter.WriteField("operations", operations)
+	require.NoError(t, err)
+
+	err = bodyWriter.WriteField("map", mapData)
+	require.NoError(t, err)
+
+	for i := range files {
+		ff, err := bodyWriter.CreateFormFile(files[i].mapKey, files[i].name)
+		require.NoError(t, err)
+		_, err = ff.Write([]byte(files[i].content))
+		require.NoError(t, err)
+	}
+	err = bodyWriter.Close()
+	require.NoError(t, err)
+
+	req, err := http.NewRequest("POST", "/graphql", bodyBuf)
+	require.NoError(t, err)
+
+	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
+	return req
+}
+
+func createInvalidUploadRequest(t *testing.T, operations, mapData string, files []file) *http.Request {
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+
+	err := bodyWriter.WriteField("invalidFormParameter", "")
+	require.NoError(t, err)
+
+	err = bodyWriter.WriteField("operations", operations)
 	require.NoError(t, err)
 
 	err = bodyWriter.WriteField("map", mapData)

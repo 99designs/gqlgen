@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -21,6 +20,11 @@ import (
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
 	"github.com/vektah/gqlparser/validator"
+)
+
+const (
+	defaultMaxMemory = 32 << 20 // 32 MB
+	variablePrefix = "variables."
 )
 
 type params struct {
@@ -494,59 +498,53 @@ func sendErrorf(w http.ResponseWriter, code int, format string, args ...interfac
 
 func processMultipart(r *http.Request, request *params) error {
 	// Parse multipart form
-	if err := r.ParseMultipartForm(1024); err != nil {
+	if err := r.ParseMultipartForm(defaultMaxMemory); err != nil {
 		return errors.New("failed to parse multipart form")
 	}
 
 	// Unmarshal operations
-	var operations interface{}
-	if err := jsonDecode(bytes.NewBuffer([]byte(r.Form.Get("operations"))), &operations); err != nil {
+	var operations map[string]interface{}
+	if err := jsonDecode(strings.NewReader(r.Form.Get("operations")), &operations); err != nil {
 		return errors.New("operations form field could not be decoded")
 	}
 
-	// Unmarshal uploads
-	var uploads = map[graphql.Upload][]string{}
+	// Unmarshal map
 	var uploadsMap = map[string][]string{}
 	if err := json.Unmarshal([]byte(r.Form.Get("map")), &uploadsMap); err != nil {
 		return errors.New("map form field could not be decoded")
-	} else {
-		for key, path := range uploadsMap {
-			if file, header, err := r.FormFile(key); err != nil {
-				return errors.New(fmt.Sprintf("failed to get key %s from form", key))
-			} else {
-				uploads[graphql.Upload{
-					File:     file,
-					Size:     header.Size,
-					Filename: header.Filename,
-				}] = path
-			}
-		}
 	}
 
-	// addUploadToOperations uploads to operations
-	for file, paths := range uploads {
-		for _, path := range paths {
-			addUploadToOperations(operations, file, path)
+	var upload graphql.Upload
+	for key, path := range uploadsMap {
+		file, header, err := r.FormFile(key)
+		if err != nil {
+			return errors.New(fmt.Sprintf("failed to get key %s from form", key))
 		}
+		upload = graphql.Upload{
+			File:     file,
+			Size:     header.Size,
+			Filename: header.Filename,
+		}
+
+		if len(path) != 1 || !strings.HasPrefix(path[0], variablePrefix) {
+			return errors.New(fmt.Sprintf("invalid value for key %s", key))
+		}
+
+		addUploadToOperations(operations, upload, path[0])
 	}
 
-	switch data := operations.(type) {
-	case map[string]interface{}:
-		if value, ok := data["operationName"]; ok && value != nil {
-			request.OperationName = value.(string)
-		}
-		if value, ok := data["query"]; ok && value != nil {
-			request.Query = value.(string)
-		}
-		if value, ok := data["variables"]; ok && value != nil {
-			request.Variables = value.(map[string]interface{})
-		}
-		return nil
-	default:
-		return errors.New("bad request")
+	// set request variables
+	if value, ok := operations["operationName"]; ok && value != nil {
+		request.OperationName = value.(string)
+	}
+	if value, ok := operations["query"]; ok && value != nil {
+		request.Query = value.(string)
+	}
+	if value, ok := operations["variables"]; ok && value != nil {
+		request.Variables = value.(map[string]interface{})
 	}
 
-	return errors.New("invalid operation")
+	return nil
 }
 
 func addUploadToOperations(operations interface{}, upload graphql.Upload, path string) error {

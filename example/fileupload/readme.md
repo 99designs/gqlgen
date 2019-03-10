@@ -41,20 +41,10 @@ curl localhost:8087/query \
 #### Request payload
 
 ```
-POST /query HTTP/1.1
-Host: localhost:8087
-User-Agent: curl/7.60.0
-Accept: */*
-Content-Length: 540
-Content-Type: multipart/form-data; boundary=--------------------
-----e6b2b29561e71173
-
-=> Send data, 540 bytes (0x21c)
 --------------------------e6b2b29561e71173
 Content-Disposition: form-data; name="operations"
 
-{ "query": "mutation ($file: Upload!) { singleUpload(file: $file
-) { id, name, content } }", "variables": { "file": null } }
+{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id, name, content } }", "variables": { "file": null } }
 --------------------------e6b2b29561e71173
 Content-Disposition: form-data; name="map"
 
@@ -98,21 +88,10 @@ curl localhost:8087/query \
 #### Request payload
 
 ```
-POST /query HTTP/1.1
-Host: localhost:8087
-User-Agent: curl/7.60.0
-Accept: */*
-Content-Length: 575
-Content-Type: multipart/form-data; boundary=--------------------
-----38752760889d14aa
-
-=> Send data, 575 bytes (0x23f)
 --------------------------38752760889d14aa
 Content-Disposition: form-data; name="operations"
 
-{ "query": "mutation ($req: UploadFile!) { singleUploadWithPaylo
-ad(req: $req) { id, name, content } }", "variables": { "req": {"
-file": null, "id": 1 } } }
+{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": {"file": null, "id": 1 } } }
 --------------------------38752760889d14aa
 Content-Disposition: form-data; name="map"
 
@@ -142,7 +121,7 @@ Alpha file content.
   variables: {
     files: [
       File, // b.txt
-      File // c.txt
+      File  // c.txt
     ]
   }
 }
@@ -161,21 +140,10 @@ curl localhost:8087/query \
 #### Request payload
 
 ```
-POST /query HTTP/1.1
-Host: localhost:8087
-User-Agent: curl/7.60.0
-Accept: */*
-Content-Length: 742
-Content-Type: multipart/form-data; boundary=--------------------
-----d7aca2a93c3655e0
-
-=> Send data, 742 bytes (0x2e6)
 --------------------------d7aca2a93c3655e0
 Content-Disposition: form-data; name="operations"
 
-{ "query": "mutation($files: [Upload!]!) { multipleUpload(files:
- $files) { id, name, content } }", "variables": { "files": [null
-, null] } }
+{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id, name, content } }", "variables": { "files": [null, null] } }
 --------------------------d7aca2a93c3655e0
 Content-Disposition: form-data; name="map"
 
@@ -211,7 +179,7 @@ Charlie file content.
   variables: {
     files: [
       File, // b.txt
-      File // c.txt
+      File  // c.txt
     ]
   }
 }
@@ -230,22 +198,10 @@ curl localhost:8087/query \
 #### Request payload
 
 ```
-=> Send header, 191 bytes (0xbf)
-POST /query HTTP/1.1
-Host: localhost:8087
-User-Agent: curl/7.60.0
-Accept: */*
-Content-Length: 799
-Content-Type: multipart/form-data; boundary=--------------------
-----65aab09fb49ee66f
-
-=> Send data, 799 bytes (0x31f)
 --------------------------65aab09fb49ee66f
 Content-Disposition: form-data; name="operations"
 
-{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithP
-ayload(req: $req) { id, name, content } }", "variables": { "req"
-: [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }
+{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }
 --------------------------65aab09fb49ee66f
 Content-Disposition: form-data; name="map"
 

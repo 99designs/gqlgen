@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -251,7 +252,7 @@ func TestProcessMultipart(t *testing.T) {
 		},
 	}
 
-	t.Run("parse multipart form failure", func(t *testing.T) {
+	t.Run("fail to parse multipart", func(t *testing.T) {
 		req := &http.Request{
 			Method: "POST",
 			Header: http.Header{"Content-Type": {`multipart/form-data; boundary="foo123"`}},
@@ -294,7 +295,7 @@ func TestProcessMultipart(t *testing.T) {
 		require.Equal(t, err.Error(), "failed to get key 0 from form")
 	})
 
-	t.Run("fail if map entry with two values", func(t *testing.T) {
+	t.Run("fail map entry with two values", func(t *testing.T) {
 		mapData := `{ "0": ["variables.file", "variables.file"] }`
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
@@ -304,7 +305,7 @@ func TestProcessMultipart(t *testing.T) {
 		require.Equal(t, err.Error(), "invalid value for key 0")
 	})
 
-	t.Run("fail if map entry with invalid prefix", func(t *testing.T) {
+	t.Run("fail map entry with invalid prefix", func(t *testing.T) {
 		mapData := `{ "0": ["var.file"] }`
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
@@ -335,6 +336,85 @@ func TestProcessMultipart(t *testing.T) {
 	})
 }
 
+func TestAddUploadToOperations(t *testing.T) {
+
+	t.Run("fail missing all variables", func(t *testing.T) {
+		file, err := os.Open("path/to/file")
+		var operations map[string]interface{}
+		upload := graphql.Upload{
+			File:     file,
+			Filename: "a.txt",
+			Size:     int64(5),
+		}
+		path := "variables.req.0.file"
+		err = addUploadToOperations(operations, upload, path)
+		require.NotNil(t, err)
+		require.Equal(t, "variables is missing, path: variables.req.0.file", err.Error())
+	})
+
+	t.Run("valid variable", func(t *testing.T) {
+		file, err := os.Open("path/to/file")
+		operations := map[string]interface{}{
+			"variables": map[string]interface{}{
+				"file": nil,
+			},
+		}
+
+		upload := graphql.Upload{
+			File:     file,
+			Filename: "a.txt",
+			Size:     int64(5),
+		}
+
+		expected := map[string]interface{}{
+			"variables": map[string]interface{}{
+				"file": upload,
+			},
+		}
+
+		path := "variables.file"
+		err = addUploadToOperations(operations, upload, path)
+		require.Nil(t, err)
+
+		require.Equal(t, operations, expected)
+	})
+
+	t.Run("valid nested variable", func(t *testing.T) {
+		file, err := os.Open("path/to/file")
+		operations := map[string]interface{}{
+			"variables": map[string]interface{}{
+				"req": []interface{}{
+					map[string]interface{}{
+						"file": nil,
+					},
+				},
+			},
+		}
+
+		upload := graphql.Upload{
+			File:     file,
+			Filename: "a.txt",
+			Size:     int64(5),
+		}
+
+		expected := map[string]interface{}{
+			"variables": map[string]interface{}{
+				"req": []interface{}{
+					map[string]interface{}{
+						"file": upload,
+					},
+				},
+			},
+		}
+
+		path := "variables.req.0.file"
+		err = addUploadToOperations(operations, upload, path)
+		require.Nil(t, err)
+
+		require.Equal(t, operations, expected)
+	})
+}
+
 func TestHandlerOptions(t *testing.T) {
 	h := GraphQL(&executableSchemaStub{})
 
@@ -361,35 +441,6 @@ func createUploadRequest(t *testing.T, operations, mapData string, files []file)
 	bodyWriter := multipart.NewWriter(bodyBuf)
 
 	err := bodyWriter.WriteField("operations", operations)
-	require.NoError(t, err)
-
-	err = bodyWriter.WriteField("map", mapData)
-	require.NoError(t, err)
-
-	for i := range files {
-		ff, err := bodyWriter.CreateFormFile(files[i].mapKey, files[i].name)
-		require.NoError(t, err)
-		_, err = ff.Write([]byte(files[i].content))
-		require.NoError(t, err)
-	}
-	err = bodyWriter.Close()
-	require.NoError(t, err)
-
-	req, err := http.NewRequest("POST", "/graphql", bodyBuf)
-	require.NoError(t, err)
-
-	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
-	return req
-}
-
-func createInvalidUploadRequest(t *testing.T, operations, mapData string, files []file) *http.Request {
-	bodyBuf := &bytes.Buffer{}
-	bodyWriter := multipart.NewWriter(bodyBuf)
-
-	err := bodyWriter.WriteField("invalidFormParameter", "")
-	require.NoError(t, err)
-
-	err = bodyWriter.WriteField("operations", operations)
 	require.NoError(t, err)
 
 	err = bodyWriter.WriteField("map", mapData)

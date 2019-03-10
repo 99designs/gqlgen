@@ -24,7 +24,7 @@ import (
 
 const (
 	defaultMaxMemory = 32 << 20 // 32 MB
-	variablePrefix = "variables."
+	variablePrefix   = "variables."
 )
 
 type params struct {
@@ -551,7 +551,7 @@ func addUploadToOperations(operations interface{}, upload graphql.Upload, path s
 	var parts []interface{}
 	for _, p := range strings.Split(path, ".") {
 		if isNumber, err := regexp.MatchString(`\d+`, p); err != nil {
-			return err
+			return errors.New(fmt.Sprintf("failed to parse path, path: %s, subpath: %s", path, p))
 		} else if isNumber {
 			index, _ := strconv.Atoi(p)
 			parts = append(parts, index)
@@ -564,7 +564,7 @@ func addUploadToOperations(operations interface{}, upload graphql.Upload, path s
 		switch idx := p.(type) {
 		case string:
 			if operations == nil {
-				operations = map[string]interface{}{}
+				return errors.New(fmt.Sprintf("variables is missing, path: %s", path))
 			}
 			if last {
 				operations.(map[string]interface{})[idx] = upload
@@ -573,7 +573,7 @@ func addUploadToOperations(operations interface{}, upload graphql.Upload, path s
 			}
 		case int:
 			if operations == nil {
-				operations = map[string]interface{}{}
+				return errors.New(fmt.Sprintf("variables is missing, path: %s", path))
 			}
 			if last {
 				operations.([]interface{})[idx] = upload

@@ -17,6 +17,7 @@ import (
 )
 
 func TestFileUpload(t *testing.T) {
+	client := http.Client{}
 
 	t.Run("valid single file upload", func(t *testing.T) {
 		resolver := &Resolver{
@@ -37,22 +38,18 @@ func TestFileUpload(t *testing.T) {
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id, name, content } }", "variables": { "file": null } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.file"] }`)
-		require.NoError(t, err)
-		w, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w.Write([]byte("test"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id, name, content } }", "variables": { "file": null } }`
+		mapData := `{ "0": ["variables.file"] }`
+		files := []file{
+			{
+				mapKey:  "0",
+				name:    "a.txt",
+				content: "test",
+			},
+		}
+		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		contentType := bodyWriter.FormDataContentType()
-
-		resp, err := http.Post(fmt.Sprintf("%s/graphql", srv.URL), contentType, bodyBuf)
+		resp, err := client.Do(req)
 		require.Nil(t, err)
 		defer func() {
 			_ = resp.Body.Close()
@@ -84,22 +81,18 @@ func TestFileUpload(t *testing.T) {
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": {"file": null, "id": 1 } } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.file"] }`)
-		require.NoError(t, err)
-		w, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w.Write([]byte("test"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": {"file": null, "id": 1 } } }`
+		mapData := `{ "0": ["variables.req.file"] }`
+		files := []file{
+			{
+				mapKey:  "0",
+				name:    "a.txt",
+				content: "test",
+			},
+		}
+		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		contentType := bodyWriter.FormDataContentType()
-
-		resp, err := http.Post(fmt.Sprintf("%s/graphql", srv.URL), contentType, bodyBuf)
+		resp, err := client.Do(req)
 		require.Nil(t, err)
 		defer func() {
 			_ = resp.Body.Close()
@@ -134,26 +127,23 @@ func TestFileUpload(t *testing.T) {
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id, name, content } }", "variables": { "files": [null, null] } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`)
-		require.NoError(t, err)
-		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w0.Write([]byte("test1"))
-		require.NoError(t, err)
-		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
-		require.NoError(t, err)
-		_, err = w1.Write([]byte("test2"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id, name, content } }", "variables": { "files": [null, null] } }`
+		mapData := `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`
+		files := []file{
+			{
+				mapKey:  "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+			{
+				mapKey:  "1",
+				name:    "b.txt",
+				content: "test2",
+			},
+		}
+		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		contentType := bodyWriter.FormDataContentType()
-
-		resp, err := http.Post(fmt.Sprintf("%s/graphql", srv.URL), contentType, bodyBuf)
+		resp, err := client.Do(req)
 		require.Nil(t, err)
 		defer func() {
 			_ = resp.Body.Close()
@@ -192,26 +182,23 @@ func TestFileUpload(t *testing.T) {
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
-		bodyBuf := &bytes.Buffer{}
-		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`)
-		require.NoError(t, err)
-		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`)
-		require.NoError(t, err)
-		w0, err := bodyWriter.CreateFormFile("0", "a.txt")
-		require.NoError(t, err)
-		_, err = w0.Write([]byte("test1"))
-		require.NoError(t, err)
-		w1, err := bodyWriter.CreateFormFile("1", "b.txt")
-		require.NoError(t, err)
-		_, err = w1.Write([]byte("test2"))
-		require.NoError(t, err)
-		err = bodyWriter.Close()
-		require.NoError(t, err)
+		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
+		mapData := `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`
+		files := []file{
+			{
+				mapKey:  "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+			{
+				mapKey:  "1",
+				name:    "b.txt",
+				content: "test2",
+			},
+		}
+		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		contentType := bodyWriter.FormDataContentType()
-
-		resp, err := http.Post(fmt.Sprintf("%s/graphql", srv.URL), contentType, bodyBuf)
+		resp, err := client.Do(req)
 		require.Nil(t, err)
 		defer func() {
 			_ = resp.Body.Close()
@@ -221,5 +208,36 @@ func TestFileUpload(t *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"b.txt","content":"test2"}]}}`, string(responseBody))
 	})
+}
 
+type file struct {
+	mapKey  string
+	name    string
+	content string
+}
+
+func createUploadRequest(t *testing.T, url, operations, mapData string, files []file) *http.Request {
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+
+	err := bodyWriter.WriteField("operations", operations)
+	require.NoError(t, err)
+
+	err = bodyWriter.WriteField("map", mapData)
+	require.NoError(t, err)
+
+	for i := range files {
+		ff, err := bodyWriter.CreateFormFile(files[i].mapKey, files[i].name)
+		require.NoError(t, err)
+		_, err = ff.Write([]byte(files[i].content))
+		require.NoError(t, err)
+	}
+	err = bodyWriter.Close()
+	require.NoError(t, err)
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/graphql", url), bodyBuf)
+	require.NoError(t, err)
+
+	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
+	return req
 }

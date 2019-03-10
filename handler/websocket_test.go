@@ -125,7 +125,7 @@ func TestWebsocket(t *testing.T) {
 
 func TestWebsocketWithKeepAlive(t *testing.T) {
 	next := make(chan struct{})
-	h := GraphQL(&executableSchemaStub{NextResp: next}, WebsocketKeepAliveDuration(10*time.Millisecond))
+	h := GraphQL(&executableSchemaStub{next}, WebsocketKeepAliveDuration(10*time.Millisecond))
 
 	srv := httptest.NewServer(h)
 	defer srv.Close()

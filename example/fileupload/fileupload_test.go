@@ -18,7 +18,7 @@ import (
 
 func TestFileUpload(t *testing.T) {
 
-	t.Run("valid singleUpload", func(t *testing.T) {
+	t.Run("valid single file upload", func(t *testing.T) {
 		resolver := &Resolver{
 			SingleUploadFunc: func(ctx context.Context, file graphql.Upload) (*model.File, error) {
 				require.NotNil(t, file)
@@ -28,7 +28,9 @@ func TestFileUpload(t *testing.T) {
 				require.Equal(t, string(content), "test")
 
 				return &model.File{
-					ID: 1,
+					ID:      1,
+					Name:    file.Filename,
+					Content: string(content),
 				}, nil
 			},
 		}
@@ -37,7 +39,7 @@ func TestFileUpload(t *testing.T) {
 
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }`)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id, name, content } }", "variables": { "file": null } }`)
 		require.NoError(t, err)
 		err = bodyWriter.WriteField("map", `{ "0": ["variables.file"] }`)
 		require.NoError(t, err)
@@ -58,7 +60,8 @@ func TestFileUpload(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
-		require.Equal(t, `{"data":{"singleUpload":{"id":1}}}`, string(responseBody))
+		responseString := string(responseBody)
+		require.Equal(t, `{"data":{"singleUpload":{"id":1,"name":"a.txt","content":"test"}}}`, responseString)
 	})
 
 	t.Run("valid single file upload with payload", func(t *testing.T) {
@@ -72,7 +75,9 @@ func TestFileUpload(t *testing.T) {
 				require.Equal(t, string(content), "test")
 
 				return &model.File{
-					ID: 1,
+					ID:      1,
+					Name:    req.File.Filename,
+					Content: string(content),
 				}, nil
 			},
 		}
@@ -81,7 +86,7 @@ func TestFileUpload(t *testing.T) {
 
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id } }", "variables": { "req": {"file": null, "id": 1 } } }`)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": {"file": null, "id": 1 } } }`)
 		require.NoError(t, err)
 		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.file"] }`)
 		require.NoError(t, err)
@@ -102,7 +107,7 @@ func TestFileUpload(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
-		require.Equal(t, `{"data":{"singleUploadWithPayload":{"id":1}}}`, string(responseBody))
+		require.Equal(t, `{"data":{"singleUploadWithPayload":{"id":1,"name":"a.txt","content":"test"}}}`, string(responseBody))
 	})
 
 	t.Run("valid file list upload", func(t *testing.T) {
@@ -110,17 +115,20 @@ func TestFileUpload(t *testing.T) {
 			MultipleUploadFunc: func(ctx context.Context, files []graphql.Upload) ([]model.File, error) {
 				require.Len(t, files, 2)
 				var contents []string
+				var resp []model.File
 				for i := range files {
 					require.NotNil(t, files[i].File)
 					content, err := ioutil.ReadAll(files[i].File)
 					require.Nil(t, err)
 					contents = append(contents, string(content))
+					resp = append(resp, model.File{
+						ID:      i + 1,
+						Name:    files[i].Filename,
+						Content: string(content),
+					})
 				}
 				require.ElementsMatch(t, []string{"test1", "test2"}, contents)
-				return []model.File{
-					{ID: 1},
-					{ID: 2},
-				}, nil
+				return resp, nil
 			},
 		}
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
@@ -128,7 +136,7 @@ func TestFileUpload(t *testing.T) {
 
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id } }", "variables": { "files": [null, null] } }`)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id, name, content } }", "variables": { "files": [null, null] } }`)
 		require.NoError(t, err)
 		err = bodyWriter.WriteField("map", `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`)
 		require.NoError(t, err)
@@ -153,7 +161,7 @@ func TestFileUpload(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
-		require.Equal(t, `{"data":{"multipleUpload":[{"id":1},{"id":2}]}}`, string(responseBody))
+		require.Equal(t, `{"data":{"multipleUpload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"b.txt","content":"test2"}]}}`, string(responseBody))
 	})
 
 	t.Run("valid file list upload with payload", func(t *testing.T) {
@@ -162,6 +170,7 @@ func TestFileUpload(t *testing.T) {
 				require.Len(t, req, 2)
 				var ids []int
 				var contents []string
+				var resp []model.File
 				for i := range req {
 					require.NotNil(t, req[i].File)
 					require.NotNil(t, req[i].File.File)
@@ -169,13 +178,15 @@ func TestFileUpload(t *testing.T) {
 					require.Nil(t, err)
 					ids = append(ids, req[i].ID)
 					contents = append(contents, string(content))
+					resp = append(resp, model.File{
+						ID:      i + 1,
+						Name:    req[i].File.Filename,
+						Content: string(content),
+					})
 				}
 				require.ElementsMatch(t, []int{1, 2}, ids)
 				require.ElementsMatch(t, []string{"test1", "test2"}, contents)
-				return []model.File{
-					{ID: 1},
-					{ID: 2},
-				}, nil
+				return resp, nil
 			},
 		}
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
@@ -183,7 +194,7 @@ func TestFileUpload(t *testing.T) {
 
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
-		err := bodyWriter.WriteField("operations", `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`)
+		err := bodyWriter.WriteField("operations", `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`)
 		require.NoError(t, err)
 		err = bodyWriter.WriteField("map", `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`)
 		require.NoError(t, err)
@@ -208,7 +219,7 @@ func TestFileUpload(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
-		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, string(responseBody))
+		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"b.txt","content":"test2"}]}}`, string(responseBody))
 	})
 
 }

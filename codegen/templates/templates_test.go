@@ -29,6 +29,8 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "", ToGo(""))
 
 	require.Equal(t, "RelatedUrls", ToGo("RelatedUrls"))
+	require.Equal(t, "ITicket", ToGo("ITicket"))
+	require.Equal(t, "FooTicket", ToGo("fooTicket"))
 }
 
 func TestToGoPrivate(t *testing.T) {
@@ -47,6 +49,9 @@ func TestToGoPrivate(t *testing.T) {
 	require.Equal(t, "fooUTF8", ToGoPrivate("FooUTF8"))
 	require.Equal(t, "utf8Foo", ToGoPrivate("UTF8Foo"))
 	require.Equal(t, "jsonEncoding", ToGoPrivate("JSONEncoding"))
+
+	require.Equal(t, "relatedUrls", ToGoPrivate("RelatedUrls"))
+	require.Equal(t, "iTicket", ToGoPrivate("ITicket"))
 
 	require.Equal(t, "rangeArg", ToGoPrivate("Range"))
 
@@ -87,6 +92,7 @@ func Test_wordWalker(t *testing.T) {
 	require.Equal(t, []*wordInfo{}, helper(""))
 
 	require.Equal(t, []*wordInfo{{Word: "Related"}, {Word: "Urls"}}, helper("RelatedUrls"))
+	require.Equal(t, []*wordInfo{{Word: "ITicket"}}, helper("ITicket"))
 }
 
 func TestCenter(t *testing.T) {

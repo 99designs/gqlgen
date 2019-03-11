@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type Ait struct {
+type AIt struct {
 	ID string `json:"id"`
 }
 
@@ -88,7 +88,7 @@ type ValidType struct {
 	ValidArgs          bool   `json:"validArgs"`
 }
 
-type Xxit struct {
+type XXIt struct {
 	ID string `json:"id"`
 }
 

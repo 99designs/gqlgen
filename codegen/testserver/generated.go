@@ -53,7 +53,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Ait struct {
+	AIt struct {
 		ID func(childComplexity int) int
 	}
 
@@ -169,7 +169,7 @@ type ComplexityRoot struct {
 		ValidArgs          func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) int
 	}
 
-	Xxit struct {
+	XXIt struct {
 		ID func(childComplexity int) int
 	}
 
@@ -246,11 +246,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	switch typeName + "." + field {
 
 	case "AIt.ID":
-		if e.complexity.Ait.ID == nil {
+		if e.complexity.AIt.ID == nil {
 			break
 		}
 
-		return e.complexity.Ait.ID(childComplexity), true
+		return e.complexity.AIt.ID(childComplexity), true
 
 	case "AbIt.ID":
 		if e.complexity.AbIt.ID == nil {
@@ -755,11 +755,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.ValidType.ValidArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string)), true
 
 	case "XXIt.ID":
-		if e.complexity.Xxit.ID == nil {
+		if e.complexity.XXIt.ID == nil {
 			break
 		}
 
-		return e.complexity.Xxit.ID(childComplexity), true
+		return e.complexity.XXIt.ID(childComplexity), true
 
 	case "XxIt.ID":
 		if e.complexity.XxIt.ID == nil {
@@ -1690,7 +1690,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.CollectedField, obj *Ait) graphql.Marshaler {
+func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.CollectedField, obj *AIt) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -3383,7 +3383,7 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.CollectedField, obj *Xxit) graphql.Marshaler {
+func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.CollectedField, obj *XXIt) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -4635,7 +4635,7 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 
 var aItImplementors = []string{"AIt"}
 
-func (ec *executionContext) _AIt(ctx context.Context, sel ast.SelectionSet, obj *Ait) graphql.Marshaler {
+func (ec *executionContext) _AIt(ctx context.Context, sel ast.SelectionSet, obj *AIt) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, aItImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -5528,7 +5528,7 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 
 var xXItImplementors = []string{"XXIt"}
 
-func (ec *executionContext) _XXIt(ctx context.Context, sel ast.SelectionSet, obj *Xxit) graphql.Marshaler {
+func (ec *executionContext) _XXIt(ctx context.Context, sel ast.SelectionSet, obj *XXIt) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, xXItImplementors)
 
 	out := graphql.NewFieldSet(fields)

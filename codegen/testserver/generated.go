@@ -76,6 +76,10 @@ type ComplexityRoot struct {
 		Area   func(childComplexity int) int
 	}
 
+	EmbeddedDefaultScalar struct {
+		Value func(childComplexity int) int
+	}
+
 	EmbeddedPointer struct {
 		ID    func(childComplexity int) int
 		Title func(childComplexity int) int
@@ -311,6 +315,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Circle.Area(childComplexity), true
+
+	case "EmbeddedDefaultScalar.Value":
+		if e.complexity.EmbeddedDefaultScalar.Value == nil {
+			break
+		}
+
+		return e.complexity.EmbeddedDefaultScalar.Value(childComplexity), true
 
 	case "EmbeddedPointer.ID":
 		if e.complexity.EmbeddedPointer.ID == nil {
@@ -948,6 +959,10 @@ scalar MarshalPanic
 
 """ This doesnt have an implementation in the typemap, so it should act like a string """
 scalar DefaultScalarImplementation
+
+type EmbeddedDefaultScalar {
+    value: DefaultScalarImplementation
+}
 `},
 	&ast.Source{Name: "schema.graphql", Input: `type Query {
     invalidIdentifier: InvalidIdentifier
@@ -1968,6 +1983,29 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, field graphql.CollectedField, obj *EmbeddedDefaultScalar) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EmbeddedDefaultScalar",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalODefaultScalarImplementation2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) graphql.Marshaler {
@@ -4842,6 +4880,30 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var embeddedDefaultScalarImplementors = []string{"EmbeddedDefaultScalar"}
+
+func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedDefaultScalar) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, embeddedDefaultScalarImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EmbeddedDefaultScalar")
+		case "value":
+			out.Values[i] = ec._EmbeddedDefaultScalar_value(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var embeddedPointerImplementors = []string{"EmbeddedPointer"}
 
 func (ec *executionContext) _EmbeddedPointer(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedPointerModel) graphql.Marshaler {
@@ -6471,6 +6533,29 @@ func (ec *executionContext) marshalOCircle2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec._Circle(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalODefaultScalarImplementation2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalString(v)
+}
+
+func (ec *executionContext) marshalODefaultScalarImplementation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalODefaultScalarImplementation2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalODefaultScalarImplementation2string(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalODefaultScalarImplementation2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalODefaultScalarImplementation2string(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalOError2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v Error) graphql.Marshaler {

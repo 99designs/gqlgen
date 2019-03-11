@@ -17,6 +17,10 @@ type AbIt struct {
 	ID string `json:"id"`
 }
 
+type EmbeddedDefaultScalar struct {
+	Value *string `json:"value"`
+}
+
 type InnerDirectives struct {
 	Message string `json:"message"`
 }

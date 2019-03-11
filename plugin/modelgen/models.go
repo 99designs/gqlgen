@@ -118,12 +118,22 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 						return err
 					}
 				} else {
-					// no user defined model, must reference another generated model
-					typ = types.NewNamed(
-						types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-						nil,
-						nil,
-					)
+					fieldDef := schema.Types[field.Type.Name()]
+					if fieldDef.Kind == ast.Scalar {
+						// no user defined model, referencing a default scalar
+						typ = types.NewNamed(
+							types.NewTypeName(0, cfg.Model.Pkg(), "string", nil),
+							nil,
+							nil,
+						)
+					} else {
+						// no user defined model, must reference another generated model
+						typ = types.NewNamed(
+							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+							nil,
+							nil,
+						)
+					}
 				}
 
 				name := field.Name

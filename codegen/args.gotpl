@@ -24,7 +24,7 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 				if err != nil {
 					return nil, err
 				}
-				if data, ok := tmp.({{ $arg.TypeReference.GO }}) ; ok {
+				if data, ok := tmp.({{ $arg.TypeReference.GO | ref }}) ; ok {
 					arg{{$i}} = data
 				} else {
 					return nil, fmt.Errorf(`unexpected type %T from directive, should be {{ $arg.TypeReference.GO }}`, tmp)

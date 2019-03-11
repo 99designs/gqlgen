@@ -47,6 +47,8 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Custom func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+
 	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int) (res interface{}, err error)
 
 	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
@@ -135,6 +137,7 @@ type ComplexityRoot struct {
 		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
 		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
 		DirectiveInput         func(childComplexity int, arg InputDirectives) int
+		DirectiveInputType     func(childComplexity int, arg InnerInput) int
 		InputSlice             func(childComplexity int, arg []string) int
 		ShapeUnion             func(childComplexity int) int
 		Autobind               func(childComplexity int) int
@@ -214,6 +217,7 @@ type QueryResolver interface {
 	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error)
 	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
 	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
+	DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error)
 	InputSlice(ctx context.Context, arg []string) (bool, error)
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
@@ -594,6 +598,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
 
+	case "Query.DirectiveInputType":
+		if e.complexity.Query.DirectiveInputType == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveInputType_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
+
 	case "Query.InputSlice":
 		if e.complexity.Query.InputSlice == nil {
 			break
@@ -855,6 +871,13 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 	rctx := graphql.GetResolverContext(ctx)
 	for _, d := range rctx.Field.Definition.Directives {
 		switch d.Name {
+		case "custom":
+			if ec.directives.Custom != nil {
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Custom(ctx, obj, n)
+				}
+			}
 		case "length":
 			if ec.directives.Length != nil {
 				rawArgs := d.ArgumentMap(ec.Variables)
@@ -943,6 +966,7 @@ scalar DefaultScalarImplementation
     directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
+    directiveInputType(arg: InnerInput! @custom): String
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
     autobind: Autobind
@@ -1054,6 +1078,7 @@ type EmbeddedPointer {
 
 directive @length(min: Int!, max: Int) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
+directive @custom on ARGUMENT_DEFINITION
 
 enum Status {
     OK
@@ -1280,6 +1305,33 @@ func (ec *executionContext) field_Query_directiveInputNullable_args(ctx context.
 		arg0, err = ec.unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx, tmp)
 		if err != nil {
 			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_directiveInputType_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 InnerInput
+	if tmp, ok := rawArgs["arg"]; ok {
+		getArg0 := func(ctx context.Context) (interface{}, error) {
+			return ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, tmp)
+		}
+		getArg1 := func(ctx context.Context) (res interface{}, err error) {
+			n := getArg0
+			return ec.directives.Custom(ctx, tmp, n)
+		}
+
+		tmp, err = getArg1(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.(InnerInput); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver.InnerInput`, tmp)
 		}
 	}
 	args["arg"] = arg0
@@ -2789,6 +2841,36 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveInput(rctx, args["arg"].(InputDirectives))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_directiveInputType_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveInputType(rctx, args["arg"].(InnerInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -5280,6 +5362,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_directiveInput(ctx, field)
+				return res
+			})
+		case "directiveInputType":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_directiveInputType(ctx, field)
 				return res
 			})
 		case "inputSlice":

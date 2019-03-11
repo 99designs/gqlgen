@@ -37,6 +37,7 @@ type Stub struct {
 		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int) (*string, error)
 		DirectiveInputNullable func(ctx context.Context, arg *InputDirectives) (*string, error)
 		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
+		DirectiveInputType     func(ctx context.Context, arg InnerInput) (*string, error)
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
 		Autobind               func(ctx context.Context) (*Autobind, error)
@@ -143,6 +144,9 @@ func (r *stubQuery) DirectiveInputNullable(ctx context.Context, arg *InputDirect
 }
 func (r *stubQuery) DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error) {
 	return r.QueryResolver.DirectiveInput(ctx, arg)
+}
+func (r *stubQuery) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
+	return r.QueryResolver.DirectiveInputType(ctx, arg)
 }
 func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) {
 	return r.QueryResolver.InputSlice(ctx, arg)

@@ -34,6 +34,11 @@ func TestDirectives(t *testing.T) {
 		return &s, nil
 	}
 
+	resolvers.QueryResolver.DirectiveInputType = func(ctx context.Context, arg InnerInput) (i *string, e error) {
+		s := "Ok"
+		return &s, nil
+	}
+
 	srv := httptest.NewServer(
 		handler.GraphQL(
 			NewExecutableSchema(Config{
@@ -89,6 +94,9 @@ func TestDirectives(t *testing.T) {
 							return next(ctx)
 						}
 						return nil, fmt.Errorf("unsupported type %T", res)
+					},
+					Custom: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
+						return next(ctx)
 					},
 				},
 			}),
@@ -205,6 +213,16 @@ func TestDirectives(t *testing.T) {
 
 			require.Nil(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputNullable)
+		})
+		t.Run("when arg has directive", func(t *testing.T) {
+			var resp struct {
+				DirectiveInputType *string
+			}
+
+			err := c.Post(`query { directiveInputType(arg: {id: 1}) }`, &resp)
+
+			require.Nil(t, err)
+			require.Equal(t, "Ok", *resp.DirectiveInputType)
 		})
 	})
 }

@@ -56,7 +56,7 @@ func main() {
 }
 ```
 
-Now any query with complexity greater than 5 is rejected by the API. By default, each field and level of depth adds one to the overall query complexity.
+Now any query with complexity greater than 5 is rejected by the API. By default, each field and level of depth adds one to the overall query complexity. You can also use `handler.ComplexityLimitFunc` to dynamically configure the complexity limit per request.
 
 This helps, but we still have a problem: the `posts` and `related` fields, which return arrays, are much more expensive to resolve than the scalar `title` and `text` fields. However, the default complexity calculation weights them equally. It would make more sense to apply a higher cost to the array fields.
 

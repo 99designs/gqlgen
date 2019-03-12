@@ -34,6 +34,7 @@ type Config struct {
 	requestHook                     graphql.RequestMiddleware
 	tracer                          graphql.Tracer
 	complexityLimit                 int
+	complexityLimitFunc             graphql.ComplexityLimitFunc
 	disableIntrospection            bool
 	connectionKeepAlivePingInterval time.Duration
 }
@@ -62,7 +63,7 @@ func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDo
 		reqCtx.Tracer = hook
 	}
 
-	if c.complexityLimit > 0 {
+	if c.complexityLimit > 0 || c.complexityLimitFunc != nil {
 		reqCtx.ComplexityLimit = c.complexityLimit
 		operationComplexity := complexity.Calculate(es, op, variables)
 		reqCtx.OperationComplexity = operationComplexity
@@ -107,6 +108,15 @@ func IntrospectionEnabled(enabled bool) Option {
 func ComplexityLimit(limit int) Option {
 	return func(cfg *Config) {
 		cfg.complexityLimit = limit
+	}
+}
+
+// ComplexityLimitFunc allows you to define a function to dynamically set the maximum query complexity that is allowed
+// to be executed.
+// If a query is submitted that exceeds the limit, a 422 status code will be returned.
+func ComplexityLimitFunc(complexityLimitFunc graphql.ComplexityLimitFunc) Option {
+	return func(cfg *Config) {
+		cfg.complexityLimitFunc = complexityLimitFunc
 	}
 }
 
@@ -380,6 +390,10 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
 		}
 	}()
+
+	if gh.cfg.complexityLimitFunc != nil {
+		reqCtx.ComplexityLimit = gh.cfg.complexityLimitFunc(ctx)
+	}
 
 	if reqCtx.ComplexityLimit > 0 && reqCtx.OperationComplexity > reqCtx.ComplexityLimit {
 		sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", reqCtx.OperationComplexity, reqCtx.ComplexityLimit)

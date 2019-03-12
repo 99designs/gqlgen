@@ -102,6 +102,7 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 		f.IsResolver = true
 		return nil
 	case obj.Type == config.MapType:
+		f.GoFieldType = GoFieldMap
 		return nil
 	case b.Config.Models[obj.Name].Fields[f.Name].FieldName != "":
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
@@ -296,6 +297,10 @@ func (f *Field) IsMethod() bool {
 
 func (f *Field) IsVariable() bool {
 	return f.GoFieldType == GoFieldVariable
+}
+
+func (f *Field) IsMap() bool {
+	return f.GoFieldType == GoFieldMap
 }
 
 func (f *Field) IsConcurrent() bool {

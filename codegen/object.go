@@ -17,6 +17,7 @@ const (
 	GoFieldUndefined GoFieldType = iota
 	GoFieldMethod
 	GoFieldVariable
+	GoFieldMap
 )
 
 type Object struct {
@@ -78,6 +79,15 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	}
 
 	return obj, nil
+}
+
+func (o *Object) Reference() types.Type {
+	switch o.Type.(type) {
+	case *types.Pointer, *types.Slice, *types.Map:
+		return o.Type
+	}
+
+	return types.NewPointer(o.Type)
 }
 
 type Objects []*Object

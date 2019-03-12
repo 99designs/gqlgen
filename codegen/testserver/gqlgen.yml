@@ -56,3 +56,7 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.MarshalPanic"
   Autobind:
     model: "github.com/99designs/gqlgen/codegen/testserver.Autobind"
+  MapStringInterfaceInput:
+    model: "map[string]interface{}"
+  MapStringInterfaceType:
+    model: "map[string]interface{}"

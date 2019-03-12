@@ -204,6 +204,13 @@ func (t *TypeReference) IsPtr() bool {
 	return isPtr
 }
 
+func (t *TypeReference) IsNilable() bool {
+	_, isPtr := t.GO.(*types.Pointer)
+	_, isMap := t.GO.(*types.Map)
+	_, isInterface := t.GO.(*types.Interface)
+	return isPtr || isMap || isInterface
+}
+
 func (t *TypeReference) IsSlice() bool {
 	_, isSlice := t.GO.(*types.Slice)
 	return isSlice

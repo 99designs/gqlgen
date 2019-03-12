@@ -116,6 +116,9 @@ func (r *queryResolver) Autobind(ctx context.Context) (*Autobind, error) {
 func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
 	panic("not implemented")
 }

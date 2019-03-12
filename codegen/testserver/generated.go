@@ -108,6 +108,11 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	MapStringInterfaceType struct {
+		A func(childComplexity int) int
+		B func(childComplexity int) int
+	}
+
 	ModelMethods struct {
 		ResolverField func(childComplexity int) int
 		NoContext     func(childComplexity int) int
@@ -146,6 +151,7 @@ type ComplexityRoot struct {
 		ShapeUnion             func(childComplexity int) int
 		Autobind               func(childComplexity int) int
 		DeprecatedField        func(childComplexity int) int
+		MapStringInterface     func(childComplexity int, in map[string]interface{}) int
 		Panics                 func(childComplexity int) int
 		DefaultScalar          func(childComplexity int, arg string) int
 		ValidType              func(childComplexity int) int
@@ -226,6 +232,7 @@ type QueryResolver interface {
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
 	DeprecatedField(ctx context.Context) (string, error)
+	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	Panics(ctx context.Context) (*Panics, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
 	ValidType(ctx context.Context) (*ValidType, error)
@@ -392,6 +399,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.It.ID(childComplexity), true
+
+	case "MapStringInterfaceType.A":
+		if e.complexity.MapStringInterfaceType.A == nil {
+			break
+		}
+
+		return e.complexity.MapStringInterfaceType.A(childComplexity), true
+
+	case "MapStringInterfaceType.B":
+		if e.complexity.MapStringInterfaceType.B == nil {
+			break
+		}
+
+		return e.complexity.MapStringInterfaceType.B(childComplexity), true
 
 	case "ModelMethods.ResolverField":
 		if e.complexity.ModelMethods.ResolverField == nil {
@@ -653,6 +674,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DeprecatedField(childComplexity), true
+
+	case "Query.MapStringInterface":
+		if e.complexity.Query.MapStringInterface == nil {
+			break
+		}
+
+		args, err := ec.field_Query_mapStringInterface_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]interface{})), true
 
 	case "Query.Panics":
 		if e.complexity.Query.Panics == nil {
@@ -940,6 +973,20 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "maps.graphql", Input: `extend type Query {
+    mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
+}
+
+type MapStringInterfaceType {
+    a: String
+    b: Int
+}
+
+input MapStringInterfaceInput {
+    a: String
+    b: Int
+}
+`},
 	&ast.Source{Name: "panics.graphql", Input: `extend type Query {
     panics: Panics
 }
@@ -1438,6 +1485,20 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_mapStringInterface_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 map[string]interface{}
+	if tmp, ok := rawArgs["in"]; ok {
+		arg0, err = ec.unmarshalOMapStringInterfaceInput2map(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["in"] = arg0
 	return args, nil
 }
 
@@ -2256,6 +2317,70 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "MapStringInterfaceType",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		switch v := obj["a"].(type) {
+		case *string:
+			return v, nil
+		case string:
+			return &v, nil
+		case nil:
+			return (*string)(nil), nil
+		default:
+			return nil, fmt.Errorf("unexpected type %T for field %s", v, "a")
+		}
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "MapStringInterfaceType",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		switch v := obj["b"].(type) {
+		case *int:
+			return v, nil
+		case int:
+			return &v, nil
+		case nil:
+			return (*int)(nil), nil
+		default:
+			return nil, fmt.Errorf("unexpected type %T for field %s", v, "b")
+		}
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -3025,6 +3150,36 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_mapStringInterface_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MapStringInterface(rctx, args["in"].(map[string]interface{}))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -5083,6 +5238,32 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 	return out
 }
 
+var mapStringInterfaceTypeImplementors = []string{"MapStringInterfaceType"}
+
+func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]interface{}) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, mapStringInterfaceTypeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MapStringInterfaceType")
+		case "a":
+			out.Values[i] = ec._MapStringInterfaceType_a(ctx, field, obj)
+		case "b":
+			out.Values[i] = ec._MapStringInterfaceType_b(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var modelMethodsImplementors = []string{"ModelMethods"}
 
 func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.SelectionSet, obj *ModelMethods) graphql.Marshaler {
@@ -5488,6 +5669,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					invalid = true
 				}
+				return res
+			})
+		case "mapStringInterface":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_mapStringInterface(ctx, field)
 				return res
 			})
 		case "panics":
@@ -6521,6 +6713,9 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 }
 
 func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
 	return v.(map[string]interface{}), nil
 }
 
@@ -6644,6 +6839,20 @@ func (ec *executionContext) marshalOIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋco
 		return graphql.Null
 	}
 	return ec._It(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	return v.(map[string]interface{}), nil
+}
+
+func (ec *executionContext) marshalOMapStringInterfaceType2map(ctx context.Context, sel ast.SelectionSet, v map[string]interface{}) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MapStringInterfaceType(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOModelMethods2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐModelMethods(ctx context.Context, sel ast.SelectionSet, v ModelMethods) graphql.Marshaler {

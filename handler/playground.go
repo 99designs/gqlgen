@@ -49,10 +49,10 @@ func Playground(title string, endpoint string) http.HandlerFunc {
 		err := page.Execute(w, map[string]string{
 			"title":      title,
 			"endpoint":   endpoint,
-			"version":    "1.7.8",
+			"version":    "1.7.20",
 			"cssSRI":     "sha256-cS9Vc2OBt9eUf4sykRWukeFYaInL29+myBmFDSa7F/U=",
 			"faviconSRI": "sha256-GhTyE+McTU79R4+pRO6ih+4TfsTOrpPwD8ReKFzb3PM=",
-			"jsSRI":      "sha256-ucQsC5k+XYnUlQia6tMKdAOGBbfbDAquMa+oqIooB5A=",
+			"jsSRI":      "sha256-4QG1Uza2GgGdlBL3RCBCGtGeZB6bDbsw8OltCMGeJsA=",
 		})
 		if err != nil {
 			panic(err)

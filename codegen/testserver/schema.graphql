@@ -16,6 +16,8 @@ type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
+    directiveInputEnum(arg: InnerInput! @permissions(roles: ADMIN)): String
+    directiveInputEnumSlice(arg: InnerInput! @permissionsSlice(roles: [ADMIN])): String
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
     autobind: Autobind
@@ -128,10 +130,17 @@ type EmbeddedPointer {
 directive @length(min: Int!, max: Int) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 directive @custom on ARGUMENT_DEFINITION
+directive @permissionsSlice(roles: [Role!]!) on ARGUMENT_DEFINITION
+directive @permissions(roles: Role!) on ARGUMENT_DEFINITION
 
 enum Status {
     OK
     ERROR
+}
+
+enum Role {
+    ADMIN
+    USER
 }
 
 scalar Time

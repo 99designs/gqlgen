@@ -51,6 +51,10 @@ type DirectiveRoot struct {
 
 	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int) (res interface{}, err error)
 
+	Permissions func(ctx context.Context, obj interface{}, next graphql.Resolver, roles Role) (res interface{}, err error)
+
+	PermissionsSlice func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []Role) (res interface{}, err error)
+
 	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
 }
 
@@ -121,30 +125,32 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		InvalidIdentifier      func(childComplexity int) int
-		Collision              func(childComplexity int) int
-		MapInput               func(childComplexity int, input map[string]interface{}) int
-		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
-		NestedInputs           func(childComplexity int, input [][]*OuterInput) int
-		NestedOutputs          func(childComplexity int) int
-		Shapes                 func(childComplexity int) int
-		ErrorBubble            func(childComplexity int) int
-		ModelMethods           func(childComplexity int) int
-		Valid                  func(childComplexity int) int
-		User                   func(childComplexity int, id int) int
-		NullableArg            func(childComplexity int, arg *int) int
-		DirectiveArg           func(childComplexity int, arg string) int
-		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
-		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
-		DirectiveInput         func(childComplexity int, arg InputDirectives) int
-		DirectiveInputType     func(childComplexity int, arg InnerInput) int
-		InputSlice             func(childComplexity int, arg []string) int
-		ShapeUnion             func(childComplexity int) int
-		Autobind               func(childComplexity int) int
-		DeprecatedField        func(childComplexity int) int
-		Panics                 func(childComplexity int) int
-		DefaultScalar          func(childComplexity int, arg string) int
-		ValidType              func(childComplexity int) int
+		InvalidIdentifier       func(childComplexity int) int
+		Collision               func(childComplexity int) int
+		MapInput                func(childComplexity int, input map[string]interface{}) int
+		Recursive               func(childComplexity int, input *RecursiveInputSlice) int
+		NestedInputs            func(childComplexity int, input [][]*OuterInput) int
+		NestedOutputs           func(childComplexity int) int
+		Shapes                  func(childComplexity int) int
+		ErrorBubble             func(childComplexity int) int
+		ModelMethods            func(childComplexity int) int
+		Valid                   func(childComplexity int) int
+		User                    func(childComplexity int, id int) int
+		NullableArg             func(childComplexity int, arg *int) int
+		DirectiveArg            func(childComplexity int, arg string) int
+		DirectiveNullableArg    func(childComplexity int, arg *int, arg2 *int) int
+		DirectiveInputNullable  func(childComplexity int, arg *InputDirectives) int
+		DirectiveInput          func(childComplexity int, arg InputDirectives) int
+		DirectiveInputType      func(childComplexity int, arg InnerInput) int
+		DirectiveInputEnum      func(childComplexity int, arg InnerInput) int
+		DirectiveInputEnumSlice func(childComplexity int, arg InnerInput) int
+		InputSlice              func(childComplexity int, arg []string) int
+		ShapeUnion              func(childComplexity int) int
+		Autobind                func(childComplexity int) int
+		DeprecatedField         func(childComplexity int) int
+		Panics                  func(childComplexity int) int
+		DefaultScalar           func(childComplexity int, arg string) int
+		ValidType               func(childComplexity int) int
 	}
 
 	Rectangle struct {
@@ -218,6 +224,8 @@ type QueryResolver interface {
 	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
 	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
 	DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error)
+	DirectiveInputEnum(ctx context.Context, arg InnerInput) (*string, error)
+	DirectiveInputEnumSlice(ctx context.Context, arg InnerInput) (*string, error)
 	InputSlice(ctx context.Context, arg []string) (bool, error)
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
@@ -610,6 +618,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
 
+	case "Query.DirectiveInputEnum":
+		if e.complexity.Query.DirectiveInputEnum == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveInputEnum_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInputEnum(childComplexity, args["arg"].(InnerInput)), true
+
+	case "Query.DirectiveInputEnumSlice":
+		if e.complexity.Query.DirectiveInputEnumSlice == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveInputEnumSlice_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInputEnumSlice(childComplexity, args["arg"].(InnerInput)), true
+
 	case "Query.InputSlice":
 		if e.complexity.Query.InputSlice == nil {
 			break
@@ -891,6 +923,32 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int))
 				}
 			}
+		case "permissions":
+			if ec.directives.Permissions != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_permissions_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Permissions(ctx, obj, n, args["roles"].(Role))
+				}
+			}
+		case "permissionsSlice":
+			if ec.directives.PermissionsSlice != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_permissionsSlice_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.PermissionsSlice(ctx, obj, n, args["roles"].([]Role))
+				}
+			}
 		case "range":
 			if ec.directives.Range != nil {
 				rawArgs := d.ArgumentMap(ec.Variables)
@@ -967,6 +1025,8 @@ scalar DefaultScalarImplementation
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
+    directiveInputEnum(arg: InnerInput! @permissions(roles: ADMIN)): String
+    directiveInputEnumSlice(arg: InnerInput! @permissionsSlice(roles: [ADMIN])): String
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
     autobind: Autobind
@@ -1079,10 +1139,17 @@ type EmbeddedPointer {
 directive @length(min: Int!, max: Int) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 directive @custom on ARGUMENT_DEFINITION
+directive @permissionsSlice(roles: [Role!]!) on ARGUMENT_DEFINITION
+directive @permissions(roles: Role!) on ARGUMENT_DEFINITION
 
 enum Status {
     OK
     ERROR
+}
+
+enum Role {
+    ADMIN
+    USER
 }
 
 scalar Time
@@ -1193,6 +1260,34 @@ func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[str
 	return args, nil
 }
 
+func (ec *executionContext) dir_permissionsSlice_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []Role
+	if tmp, ok := rawArgs["roles"]; ok {
+		arg0, err = ec.unmarshalNRole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["roles"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) dir_permissions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 Role
+	if tmp, ok := rawArgs["roles"]; ok {
+		arg0, err = ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["roles"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1291,6 +1386,60 @@ func (ec *executionContext) field_Query_directiveArg_args(ctx context.Context, r
 			arg0 = data
 		} else {
 			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_directiveInputEnumSlice_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 InnerInput
+	if tmp, ok := rawArgs["arg"]; ok {
+		getArg0 := func(ctx context.Context) (interface{}, error) {
+			return ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, tmp)
+		}
+		getArg1 := func(ctx context.Context) (res interface{}, err error) {
+			n := getArg0
+			return ec.directives.PermissionsSlice(ctx, tmp, n, []Role{"ADMIN"})
+		}
+
+		tmp, err = getArg1(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.(InnerInput); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver.InnerInput`, tmp)
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_directiveInputEnum_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 InnerInput
+	if tmp, ok := rawArgs["arg"]; ok {
+		getArg0 := func(ctx context.Context) (interface{}, error) {
+			return ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, tmp)
+		}
+		getArg1 := func(ctx context.Context) (res interface{}, err error) {
+			n := getArg0
+			return ec.directives.Permissions(ctx, tmp, n, "ADMIN")
+		}
+
+		tmp, err = getArg1(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.(InnerInput); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver.InnerInput`, tmp)
 		}
 	}
 	args["arg"] = arg0
@@ -2871,6 +3020,66 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveInputType(rctx, args["arg"].(InnerInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_directiveInputEnum(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_directiveInputEnum_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveInputEnum(rctx, args["arg"].(InnerInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_directiveInputEnumSlice(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Field:  field,
+		Args:   nil,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_directiveInputEnumSlice_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveInputEnumSlice(rctx, args["arg"].(InnerInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -5375,6 +5584,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_directiveInputType(ctx, field)
 				return res
 			})
+		case "directiveInputEnum":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_directiveInputEnum(ctx, field)
+				return res
+			})
+		case "directiveInputEnumSlice":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_directiveInputEnumSlice(ctx, field)
+				return res
+			})
 		case "inputSlice":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -6084,6 +6315,72 @@ func (ec *executionContext) marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋg
 
 func (ec *executionContext) unmarshalNRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx context.Context, v interface{}) (RecursiveInputSlice, error) {
 	return ec.unmarshalInputRecursiveInputSlice(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx context.Context, v interface{}) (Role, error) {
+	var res Role
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx context.Context, sel ast.SelectionSet, v Role) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNRole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx context.Context, v interface{}) ([]Role, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]Role, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNRole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx context.Context, sel ast.SelectionSet, v []Role) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRole(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNShapeUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShapeUnion(ctx context.Context, sel ast.SelectionSet, v ShapeUnion) graphql.Marshaler {

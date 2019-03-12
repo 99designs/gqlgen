@@ -130,6 +130,11 @@ func (d *Directive) ResolveArgs(obj string, next string) string {
 			} else {
 				dArg = templates.Dump(arg.Default)
 			}
+			// for enum slices replace interface{} with actual type to match directive function signature
+			if arg.TypeReference.IsSlice() && arg.TypeReference.Definition.Kind == ast.Enum {
+				t := templates.CurrentImports.LookupType(arg.TypeReference.GO)
+				dArg = strings.Replace(dArg, "[]interface{}", t, 1)
+			}
 		} else if arg.Value == nil && arg.Default == nil {
 			dArg = "nil"
 		}

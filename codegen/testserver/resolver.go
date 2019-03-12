@@ -104,6 +104,12 @@ func (r *queryResolver) DirectiveInput(ctx context.Context, arg InputDirectives)
 func (r *queryResolver) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DirectiveInputEnum(ctx context.Context, arg InnerInput) (*string, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) DirectiveInputEnumSlice(ctx context.Context, arg InnerInput) (*string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, error) {
 	panic("not implemented")
 }

@@ -39,6 +39,16 @@ func TestDirectives(t *testing.T) {
 		return &s, nil
 	}
 
+	resolvers.QueryResolver.DirectiveInputEnum = func(ctx context.Context, arg InnerInput) (i *string, e error) {
+		s := "Ok"
+		return &s, nil
+	}
+
+	resolvers.QueryResolver.DirectiveInputEnumSlice = func(ctx context.Context, arg InnerInput) (i *string, e error) {
+		s := "Ok"
+		return &s, nil
+	}
+
 	srv := httptest.NewServer(
 		handler.GraphQL(
 			NewExecutableSchema(Config{
@@ -96,6 +106,12 @@ func TestDirectives(t *testing.T) {
 						return nil, fmt.Errorf("unsupported type %T", res)
 					},
 					Custom: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
+						return next(ctx)
+					},
+					Permissions: func(ctx context.Context, obj interface{}, next graphql.Resolver, roles Role) (interface{}, error) {
+						return next(ctx)
+					},
+					PermissionsSlice: func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []Role) (interface{}, error) {
 						return next(ctx)
 					},
 				},
@@ -223,6 +239,26 @@ func TestDirectives(t *testing.T) {
 
 			require.Nil(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputType)
+		})
+		t.Run("when directive params has enum", func(t *testing.T) {
+			var resp struct {
+				DirectiveInputEnum *string
+			}
+
+			err := c.Post(`query { directiveInputEnum(arg: {id: 1}) }`, &resp)
+
+			require.Nil(t, err)
+			require.Equal(t, "Ok", *resp.DirectiveInputEnum)
+		})
+		t.Run("when directive params has enum slice", func(t *testing.T) {
+			var resp struct {
+				DirectiveInputEnumSlice *string
+			}
+
+			err := c.Post(`query { directiveInputEnumSlice(arg: {id: 1}) }`, &resp)
+
+			require.Nil(t, err)
+			require.Equal(t, "Ok", *resp.DirectiveInputEnumSlice)
 		})
 	})
 }

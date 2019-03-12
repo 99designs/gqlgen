@@ -21,30 +21,32 @@ type Stub struct {
 		ArgUnmarshal       func(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error)
 	}
 	QueryResolver struct {
-		InvalidIdentifier      func(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
-		Collision              func(ctx context.Context) (*introspection1.It, error)
-		MapInput               func(ctx context.Context, input map[string]interface{}) (*bool, error)
-		Recursive              func(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
-		NestedInputs           func(ctx context.Context, input [][]*OuterInput) (*bool, error)
-		NestedOutputs          func(ctx context.Context) ([][]*OuterObject, error)
-		Shapes                 func(ctx context.Context) ([]Shape, error)
-		ErrorBubble            func(ctx context.Context) (*Error, error)
-		ModelMethods           func(ctx context.Context) (*ModelMethods, error)
-		Valid                  func(ctx context.Context) (string, error)
-		User                   func(ctx context.Context, id int) (*User, error)
-		NullableArg            func(ctx context.Context, arg *int) (*string, error)
-		DirectiveArg           func(ctx context.Context, arg string) (*string, error)
-		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int) (*string, error)
-		DirectiveInputNullable func(ctx context.Context, arg *InputDirectives) (*string, error)
-		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
-		DirectiveInputType     func(ctx context.Context, arg InnerInput) (*string, error)
-		InputSlice             func(ctx context.Context, arg []string) (bool, error)
-		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
-		Autobind               func(ctx context.Context) (*Autobind, error)
-		DeprecatedField        func(ctx context.Context) (string, error)
-		Panics                 func(ctx context.Context) (*Panics, error)
-		DefaultScalar          func(ctx context.Context, arg string) (string, error)
-		ValidType              func(ctx context.Context) (*ValidType, error)
+		InvalidIdentifier       func(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
+		Collision               func(ctx context.Context) (*introspection1.It, error)
+		MapInput                func(ctx context.Context, input map[string]interface{}) (*bool, error)
+		Recursive               func(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
+		NestedInputs            func(ctx context.Context, input [][]*OuterInput) (*bool, error)
+		NestedOutputs           func(ctx context.Context) ([][]*OuterObject, error)
+		Shapes                  func(ctx context.Context) ([]Shape, error)
+		ErrorBubble             func(ctx context.Context) (*Error, error)
+		ModelMethods            func(ctx context.Context) (*ModelMethods, error)
+		Valid                   func(ctx context.Context) (string, error)
+		User                    func(ctx context.Context, id int) (*User, error)
+		NullableArg             func(ctx context.Context, arg *int) (*string, error)
+		DirectiveArg            func(ctx context.Context, arg string) (*string, error)
+		DirectiveNullableArg    func(ctx context.Context, arg *int, arg2 *int) (*string, error)
+		DirectiveInputNullable  func(ctx context.Context, arg *InputDirectives) (*string, error)
+		DirectiveInput          func(ctx context.Context, arg InputDirectives) (*string, error)
+		DirectiveInputType      func(ctx context.Context, arg InnerInput) (*string, error)
+		DirectiveInputEnum      func(ctx context.Context, arg InnerInput) (*string, error)
+		DirectiveInputEnumSlice func(ctx context.Context, arg InnerInput) (*string, error)
+		InputSlice              func(ctx context.Context, arg []string) (bool, error)
+		ShapeUnion              func(ctx context.Context) (ShapeUnion, error)
+		Autobind                func(ctx context.Context) (*Autobind, error)
+		DeprecatedField         func(ctx context.Context) (string, error)
+		Panics                  func(ctx context.Context) (*Panics, error)
+		DefaultScalar           func(ctx context.Context, arg string) (string, error)
+		ValidType               func(ctx context.Context) (*ValidType, error)
 	}
 	SubscriptionResolver struct {
 		Updated     func(ctx context.Context) (<-chan string, error)
@@ -147,6 +149,12 @@ func (r *stubQuery) DirectiveInput(ctx context.Context, arg InputDirectives) (*s
 }
 func (r *stubQuery) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
 	return r.QueryResolver.DirectiveInputType(ctx, arg)
+}
+func (r *stubQuery) DirectiveInputEnum(ctx context.Context, arg InnerInput) (*string, error) {
+	return r.QueryResolver.DirectiveInputEnum(ctx, arg)
+}
+func (r *stubQuery) DirectiveInputEnumSlice(ctx context.Context, arg InnerInput) (*string, error) {
+	return r.QueryResolver.DirectiveInputEnumSlice(ctx, arg)
 }
 func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) {
 	return r.QueryResolver.InputSlice(ctx, arg)

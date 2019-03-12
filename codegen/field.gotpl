@@ -37,7 +37,7 @@
 		}
 	}
 {{ else }}
-	func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj *{{$object.Type | ref}}{{end}}) graphql.Marshaler {
+	func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) graphql.Marshaler {
 		ctx = ec.Tracer.StartFieldExecution(ctx, field)
 		defer func () { ec.Tracer.EndFieldExecution(ctx) }()
 		rctx := &graphql.ResolverContext{
@@ -60,6 +60,17 @@
 			ctx = rctx  // use context from middleware stack in children
 			{{- if $field.IsResolver }}
 				return ec.resolvers.{{ $field.ShortInvocation }}
+			{{- else if $field.IsMap }}
+				switch v := {{$field.GoReceiverName}}[{{$field.Name|quote}}].(type) {
+				case {{$field.TypeReference.GO | ref}}:
+					return v, nil
+				case {{$field.TypeReference.Elem.GO | ref}}:
+					return &v, nil
+				case nil:
+					return ({{$field.TypeReference.GO | ref}})(nil), nil
+				default:
+					return nil, fmt.Errorf("unexpected type %T for field %s", v, {{ $field.Name | quote}})
+				}
 			{{- else if $field.IsMethod }}
 				{{- if $field.NoErr }}
 					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }}), nil

@@ -42,6 +42,7 @@ type Stub struct {
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
 		Autobind               func(ctx context.Context) (*Autobind, error)
 		DeprecatedField        func(ctx context.Context) (string, error)
+		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
@@ -159,6 +160,9 @@ func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
 }
 func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 	return r.QueryResolver.DeprecatedField(ctx)
+}
+func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+	return r.QueryResolver.MapStringInterface(ctx, in)
 }
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)

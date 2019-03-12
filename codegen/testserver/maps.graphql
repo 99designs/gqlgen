@@ -1,0 +1,13 @@
+extend type Query {
+    mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
+}
+
+type MapStringInterfaceType {
+    a: String
+    b: Int
+}
+
+input MapStringInterfaceInput {
+    a: String
+    b: Int
+}

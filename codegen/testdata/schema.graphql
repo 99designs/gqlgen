@@ -1,7 +1,6 @@
 type Query {
     invalidIdentifier: InvalidIdentifier
     collision: It
-    mapInput(input: Changes): Boolean
     recursive(input: RecursiveInputSlice): Boolean
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
@@ -47,11 +46,6 @@ type InvalidIdentifier {
 
 type It {
     id: ID!
-}
-
-input Changes {
-    a: Int
-    b: Int
 }
 
 input RecursiveInputSlice {

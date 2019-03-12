@@ -1,8 +1,10 @@
 {{- range $type := .ReferencedTypes }}
 	{{ with $type.UnmarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, v interface{}) ({{ $type.GO | ref }}, error) {
-			{{- if $type.IsPtr }}
+			{{- if $type.IsNilable }}
 				if v == nil { return nil, nil }
+			{{- end }}
+			{{- if $type.IsPtr }}
 				res, err := ec.{{ $type.Elem.UnmarshalFunc }}(ctx, v)
 				return &res, err
 			{{- else if $type.IsSlice }}
@@ -40,7 +42,7 @@
 
 	{{ with $type.MarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
-			{{- if $type.IsPtr }}
+			{{- if $type.IsNilable }}
 				if v == nil {
 					{{- if $type.GQL.NonNull }}
 						if !ec.HasError(graphql.GetResolverContext(ctx)) {
@@ -111,7 +113,7 @@
 						return {{ $type.Marshaler | call }}(v)
 					{{- end }}
 				{{- else }}
-					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsPtr}}&{{end}} v)
+					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)
 				{{- end }}
 			{{- end }}
 		}

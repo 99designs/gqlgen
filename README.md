@@ -28,3 +28,4 @@ Read our [Contribution Guidelines](https://github.com/99designs/gqlgen/blob/mast
 
  - [Christopher Biscardi @ Gophercon UK 2018](https://youtu.be/FdURVezcdcw)
  - [Introducing gqlgen: a GraphQL Server Generator for Go](https://99designs.com.au/blog/engineering/gqlgen-a-graphql-server-generator-for-go/)
+ - [GraphQL workshop for Golang developers by Iván Corrales Solera](https://graphql-go.wesovilabs.com)

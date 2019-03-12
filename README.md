@@ -24,7 +24,7 @@ If you think you've found a bug, or something isn't behaving the way you think i
 
 Read our [Contribution Guidelines](https://github.com/99designs/gqlgen/blob/master/CONTRIBUTING.md) for information on how you can help out gqlgen.
 
-## Talks & Blog Posts
+## Other Resources
 
  - [Christopher Biscardi @ Gophercon UK 2018](https://youtu.be/FdURVezcdcw)
  - [Introducing gqlgen: a GraphQL Server Generator for Go](https://99designs.com.au/blog/engineering/gqlgen-a-graphql-server-generator-for-go/)

@@ -27,6 +27,7 @@ func TestMiddleware(t *testing.T) {
 		return []User{{ID: 1}}, nil
 	}
 
+	areMethods := []bool{}
 	srv := httptest.NewServer(
 		handler.GraphQL(
 			NewExecutableSchema(Config{Resolvers: resolvers}),
@@ -37,6 +38,10 @@ func TestMiddleware(t *testing.T) {
 			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 				path, _ := ctx.Value("path").([]int)
 				return next(context.WithValue(ctx, "path", append(path, 2)))
+			}),
+			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+				areMethods = append(areMethods, graphql.GetResolverContext(ctx).IsMethod)
+				return next(ctx)
 			}),
 		))
 
@@ -59,6 +64,11 @@ func TestMiddleware(t *testing.T) {
 	}
 
 	err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)
+
+	// First resovles user which is a method
+	// Next resolves id which is not a method
+	// Finally resolves friends which is a method
+	assert.Equal(t, []bool{true, false, true}, areMethods)
 
 	require.NoError(t, err)
 	require.True(t, called)

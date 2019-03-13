@@ -288,9 +288,10 @@ func (ec *executionContext) _Like_reaction(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Like",
-		Field:  field,
-		Args:   nil,
+		Object:   "Like",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -314,9 +315,10 @@ func (ec *executionContext) _Like_sent(ctx context.Context, field graphql.Collec
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Like",
-		Field:  field,
-		Args:   nil,
+		Object:   "Like",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -340,9 +342,10 @@ func (ec *executionContext) _Like_selection(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Like",
-		Field:  field,
-		Args:   nil,
+		Object:   "Like",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -363,9 +366,10 @@ func (ec *executionContext) _Like_collected(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Like",
-		Field:  field,
-		Args:   nil,
+		Object:   "Like",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -386,9 +390,10 @@ func (ec *executionContext) _Post_message(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Post",
-		Field:  field,
-		Args:   nil,
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -412,9 +417,10 @@ func (ec *executionContext) _Post_sent(ctx context.Context, field graphql.Collec
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Post",
-		Field:  field,
-		Args:   nil,
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -438,9 +444,10 @@ func (ec *executionContext) _Post_selection(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Post",
-		Field:  field,
-		Args:   nil,
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -461,9 +468,10 @@ func (ec *executionContext) _Post_collected(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Post",
-		Field:  field,
-		Args:   nil,
+		Object:   "Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -484,9 +492,10 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Field:  field,
-		Args:   nil,
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -507,9 +516,10 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Field:  field,
-		Args:   nil,
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -537,9 +547,10 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Field:  field,
-		Args:   nil,
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -560,9 +571,10 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -586,9 +598,10 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -609,9 +622,10 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -635,9 +649,10 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Directive",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -661,9 +676,10 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -687,9 +703,10 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -710,9 +727,10 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -736,9 +754,10 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__EnumValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -759,9 +778,10 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -785,9 +805,10 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -808,9 +829,10 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -834,9 +856,10 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -860,9 +883,10 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -886,9 +910,10 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Field",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -909,9 +934,10 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -935,9 +961,10 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -958,9 +985,10 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -984,9 +1012,10 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__InputValue",
-		Field:  field,
-		Args:   nil,
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1007,9 +1036,10 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1033,9 +1063,10 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1059,9 +1090,10 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1082,9 +1114,10 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1105,9 +1138,10 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Schema",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1131,9 +1165,10 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1157,9 +1192,10 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1180,9 +1216,10 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1203,9 +1240,10 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1233,9 +1271,10 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1256,9 +1295,10 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1279,9 +1319,10 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1309,9 +1350,10 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1332,9 +1374,10 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "__Type",
-		Field:  field,
-		Args:   nil,
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)

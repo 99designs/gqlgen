@@ -94,6 +94,8 @@ type ResolverContext struct {
 	Index *int
 	// The result object of resolver
 	Result interface{}
+	// IsMethod indicates if the resolver is a method
+	IsMethod bool
 }
 
 func (r *ResolverContext) Path() []interface{} {

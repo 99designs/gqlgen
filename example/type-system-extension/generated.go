@@ -447,7 +447,7 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 		Object:   "MyMutation",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -481,7 +481,7 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 		Object:   "MyQuery",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -508,7 +508,7 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 		Object:   "MyQuery",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)

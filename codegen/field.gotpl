@@ -44,7 +44,7 @@
 			Object: {{$object.Name|quote}},
 			Field: field,
 			Args:  nil,
-			IsMethod: {{$field.IsMethod}},
+			IsMethod: {{or $field.IsMethod $field.IsResolver}},
 		}
 		ctx = graphql.WithResolverContext(ctx, rctx)
 		{{- if $field.Args }}

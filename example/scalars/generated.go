@@ -423,7 +423,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -454,7 +454,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -648,7 +648,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 		Object:   "User",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -675,7 +675,7 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 		Object:   "User",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)

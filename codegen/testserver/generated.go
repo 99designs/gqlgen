@@ -2239,7 +2239,7 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		Object:   "ForcedResolver",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2410,7 +2410,7 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 		Object:   "ModelMethods",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2518,7 +2518,7 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 		Object:   "Panics",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2579,7 +2579,7 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		Object:   "Panics",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2613,7 +2613,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2637,7 +2637,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2661,7 +2661,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2692,7 +2692,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2723,7 +2723,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2754,7 +2754,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2778,7 +2778,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2802,7 +2802,7 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2826,7 +2826,7 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2850,7 +2850,7 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -2877,7 +2877,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2911,7 +2911,7 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2942,7 +2942,7 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2973,7 +2973,7 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -3004,7 +3004,7 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -3035,7 +3035,7 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -3066,7 +3066,7 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -3097,7 +3097,7 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -3131,7 +3131,7 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3158,7 +3158,7 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3182,7 +3182,7 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3209,7 +3209,7 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -3240,7 +3240,7 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3264,7 +3264,7 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -3298,7 +3298,7 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -3532,7 +3532,7 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 		Object:   "User",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)

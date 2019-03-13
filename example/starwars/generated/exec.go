@@ -1007,7 +1007,7 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 		Object:   "Droid",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1031,7 +1031,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 		Object:   "Droid",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1143,7 +1143,7 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 		Object:   "FriendsConnection",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1167,7 +1167,7 @@ func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, fiel
 		Object:   "FriendsConnection",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1381,7 +1381,7 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 		Object:   "Human",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1405,7 +1405,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 		Object:   "Human",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1466,7 +1466,7 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 		Object:   "Human",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -1490,7 +1490,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 		Object:   "Mutation",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1602,7 +1602,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1633,7 +1633,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1667,7 +1667,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1701,7 +1701,7 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1732,7 +1732,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1763,7 +1763,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -1794,7 +1794,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -2009,7 +2009,7 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 		Object:   "Starship",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)

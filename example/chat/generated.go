@@ -583,7 +583,7 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 		Object:   "Mutation",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -617,7 +617,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)

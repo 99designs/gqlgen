@@ -536,7 +536,7 @@ func (ec *executionContext) _Customer_address(ctx context.Context, field graphql
 		Object:   "Customer",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -560,7 +560,7 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 		Object:   "Customer",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -692,7 +692,7 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 		Object:   "Order",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -716,7 +716,7 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
@@ -740,7 +740,7 @@ func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -771,7 +771,7 @@ func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.
 		Object:   "Query",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)

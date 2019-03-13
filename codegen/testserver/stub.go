@@ -45,6 +45,7 @@ type Stub struct {
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
+		Slices                 func(ctx context.Context) (*Slices, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
 	SubscriptionResolver struct {
@@ -169,6 +170,9 @@ func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 }
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)
+}
+func (r *stubQuery) Slices(ctx context.Context) (*Slices, error) {
+	return r.QueryResolver.Slices(ctx)
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)

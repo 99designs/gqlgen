@@ -83,8 +83,8 @@ func (b *Binder) getPkg(find string) *packages.Package {
 	return nil
 }
 
-var MapType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
-var InterfaceType = types.NewInterfaceType(nil, nil)
+var MapType = types.NewMap(types.Typ[types.String], types.NewInterface(nil, nil).Complete())
+var InterfaceType = types.NewInterface(nil, nil)
 
 func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 	models := b.cfg.Models[name].Model

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func TestRequestContext_GetErrors(t *testing.T) {
@@ -33,8 +34,21 @@ func TestRequestContext_GetErrors(t *testing.T) {
 		Parent: root,
 		Index:  &index,
 	}
+	userProvidedPath := &ResolverContext{
+		Parent: child,
+		Field: CollectedField{
+			Field: &ast.Field{
+				Alias: "works",
+			},
+		},
+	}
+
 	ctx = WithResolverContext(ctx, child)
 	c.Error(ctx, errors.New("bar"))
+	c.Error(ctx, &gqlerror.Error{
+		Message: "foo3",
+		Path:    append(child.Path(), "works"),
+	})
 
 	specs := []struct {
 		Name     string
@@ -50,6 +64,11 @@ func TestRequestContext_GetErrors(t *testing.T) {
 			Name:     "with child ResolverContext",
 			RCtx:     child,
 			Messages: []string{"bar"},
+		},
+		{
+			Name:     "with user provided path",
+			RCtx:     userProvidedPath,
+			Messages: []string{"foo3"},
 		},
 	}
 

@@ -65,6 +65,11 @@
 			{{- if $type.SelfMarshalling }}
 				return v
 			{{- else if $type.IsSlice }}
+				{{- if not $type.GQL.NonNull }}
+					if v == nil {
+						return graphql.Null
+					}
+				{{- end }}
 				ret := make(graphql.Array, len(v))
 				{{- if not $type.IsScalar }}
 					var wg sync.WaitGroup

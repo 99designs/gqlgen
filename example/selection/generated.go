@@ -43,17 +43,17 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Like struct {
-		Reaction  func(childComplexity int) int
-		Sent      func(childComplexity int) int
-		Selection func(childComplexity int) int
 		Collected func(childComplexity int) int
+		Reaction  func(childComplexity int) int
+		Selection func(childComplexity int) int
+		Sent      func(childComplexity int) int
 	}
 
 	Post struct {
-		Message   func(childComplexity int) int
-		Sent      func(childComplexity int) int
-		Selection func(childComplexity int) int
 		Collected func(childComplexity int) int
+		Message   func(childComplexity int) int
+		Selection func(childComplexity int) int
+		Sent      func(childComplexity int) int
 	}
 
 	Query struct {
@@ -80,19 +80,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Like.Collected":
+		if e.complexity.Like.Collected == nil {
+			break
+		}
+
+		return e.complexity.Like.Collected(childComplexity), true
+
 	case "Like.Reaction":
 		if e.complexity.Like.Reaction == nil {
 			break
 		}
 
 		return e.complexity.Like.Reaction(childComplexity), true
-
-	case "Like.Sent":
-		if e.complexity.Like.Sent == nil {
-			break
-		}
-
-		return e.complexity.Like.Sent(childComplexity), true
 
 	case "Like.Selection":
 		if e.complexity.Like.Selection == nil {
@@ -101,12 +101,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Like.Selection(childComplexity), true
 
-	case "Like.Collected":
-		if e.complexity.Like.Collected == nil {
+	case "Like.Sent":
+		if e.complexity.Like.Sent == nil {
 			break
 		}
 
-		return e.complexity.Like.Collected(childComplexity), true
+		return e.complexity.Like.Sent(childComplexity), true
+
+	case "Post.Collected":
+		if e.complexity.Post.Collected == nil {
+			break
+		}
+
+		return e.complexity.Post.Collected(childComplexity), true
 
 	case "Post.Message":
 		if e.complexity.Post.Message == nil {
@@ -115,13 +122,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Post.Message(childComplexity), true
 
-	case "Post.Sent":
-		if e.complexity.Post.Sent == nil {
-			break
-		}
-
-		return e.complexity.Post.Sent(childComplexity), true
-
 	case "Post.Selection":
 		if e.complexity.Post.Selection == nil {
 			break
@@ -129,12 +129,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Post.Selection(childComplexity), true
 
-	case "Post.Collected":
-		if e.complexity.Post.Collected == nil {
+	case "Post.Sent":
+		if e.complexity.Post.Sent == nil {
 			break
 		}
 
-		return e.complexity.Post.Collected(childComplexity), true
+		return e.complexity.Post.Sent(childComplexity), true
 
 	case "Query.Events":
 		if e.complexity.Query.Events == nil {

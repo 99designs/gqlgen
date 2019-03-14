@@ -17,6 +17,9 @@ func (r *Resolver) ForcedResolver() ForcedResolverResolver {
 func (r *Resolver) ModelMethods() ModelMethodsResolver {
 	return &modelMethodsResolver{r}
 }
+func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
+	return &overlappingFieldsResolver{r}
+}
 func (r *Resolver) Panics() PanicsResolver {
 	return &panicsResolver{r}
 }
@@ -39,6 +42,12 @@ func (r *forcedResolverResolver) Field(ctx context.Context, obj *ForcedResolver)
 type modelMethodsResolver struct{ *Resolver }
 
 func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
+	panic("not implemented")
+}
+
+type overlappingFieldsResolver struct{ *Resolver }
+
+func (r *overlappingFieldsResolver) OldFoo(ctx context.Context, obj *OverlappingFields) (int, error) {
 	panic("not implemented")
 }
 
@@ -114,6 +123,9 @@ func (r *queryResolver) Autobind(ctx context.Context) (*Autobind, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {

@@ -49,19 +49,19 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Droid struct {
-		ID                func(childComplexity int) int
-		Name              func(childComplexity int) int
+		AppearsIn         func(childComplexity int) int
 		Friends           func(childComplexity int) int
 		FriendsConnection func(childComplexity int, first *int, after *string) int
-		AppearsIn         func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Name              func(childComplexity int) int
 		PrimaryFunction   func(childComplexity int) int
 	}
 
 	FriendsConnection struct {
-		TotalCount func(childComplexity int) int
 		Edges      func(childComplexity int) int
 		Friends    func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
 	}
 
 	FriendsEdge struct {
@@ -70,13 +70,13 @@ type ComplexityRoot struct {
 	}
 
 	Human struct {
-		ID                func(childComplexity int) int
-		Name              func(childComplexity int) int
-		Height            func(childComplexity int, unit models.LengthUnit) int
-		Mass              func(childComplexity int) int
+		AppearsIn         func(childComplexity int) int
 		Friends           func(childComplexity int) int
 		FriendsConnection func(childComplexity int, first *int, after *string) int
-		AppearsIn         func(childComplexity int) int
+		Height            func(childComplexity int, unit models.LengthUnit) int
+		ID                func(childComplexity int) int
+		Mass              func(childComplexity int) int
+		Name              func(childComplexity int) int
 		Starships         func(childComplexity int) int
 	}
 
@@ -85,32 +85,32 @@ type ComplexityRoot struct {
 	}
 
 	PageInfo struct {
-		StartCursor func(childComplexity int) int
 		EndCursor   func(childComplexity int) int
 		HasNextPage func(childComplexity int) int
+		StartCursor func(childComplexity int) int
 	}
 
 	Query struct {
-		Hero      func(childComplexity int, episode *models.Episode) int
-		Reviews   func(childComplexity int, episode models.Episode, since *time.Time) int
-		Search    func(childComplexity int, text string) int
 		Character func(childComplexity int, id string) int
 		Droid     func(childComplexity int, id string) int
+		Hero      func(childComplexity int, episode *models.Episode) int
 		Human     func(childComplexity int, id string) int
+		Reviews   func(childComplexity int, episode models.Episode, since *time.Time) int
+		Search    func(childComplexity int, text string) int
 		Starship  func(childComplexity int, id string) int
 	}
 
 	Review struct {
-		Stars      func(childComplexity int) int
 		Commentary func(childComplexity int) int
+		Stars      func(childComplexity int) int
 		Time       func(childComplexity int) int
 	}
 
 	Starship struct {
-		ID      func(childComplexity int) int
-		Name    func(childComplexity int) int
-		Length  func(childComplexity int, unit *models.LengthUnit) int
 		History func(childComplexity int) int
+		ID      func(childComplexity int) int
+		Length  func(childComplexity int, unit *models.LengthUnit) int
+		Name    func(childComplexity int) int
 	}
 }
 
@@ -159,19 +159,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Droid.ID":
-		if e.complexity.Droid.ID == nil {
+	case "Droid.AppearsIn":
+		if e.complexity.Droid.AppearsIn == nil {
 			break
 		}
 
-		return e.complexity.Droid.ID(childComplexity), true
-
-	case "Droid.Name":
-		if e.complexity.Droid.Name == nil {
-			break
-		}
-
-		return e.complexity.Droid.Name(childComplexity), true
+		return e.complexity.Droid.AppearsIn(childComplexity), true
 
 	case "Droid.Friends":
 		if e.complexity.Droid.Friends == nil {
@@ -192,12 +185,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
 
-	case "Droid.AppearsIn":
-		if e.complexity.Droid.AppearsIn == nil {
+	case "Droid.ID":
+		if e.complexity.Droid.ID == nil {
 			break
 		}
 
-		return e.complexity.Droid.AppearsIn(childComplexity), true
+		return e.complexity.Droid.ID(childComplexity), true
+
+	case "Droid.Name":
+		if e.complexity.Droid.Name == nil {
+			break
+		}
+
+		return e.complexity.Droid.Name(childComplexity), true
 
 	case "Droid.PrimaryFunction":
 		if e.complexity.Droid.PrimaryFunction == nil {
@@ -205,13 +205,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Droid.PrimaryFunction(childComplexity), true
-
-	case "FriendsConnection.TotalCount":
-		if e.complexity.FriendsConnection.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.FriendsConnection.TotalCount(childComplexity), true
 
 	case "FriendsConnection.Edges":
 		if e.complexity.FriendsConnection.Edges == nil {
@@ -234,6 +227,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FriendsConnection.PageInfo(childComplexity), true
 
+	case "FriendsConnection.TotalCount":
+		if e.complexity.FriendsConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.FriendsConnection.TotalCount(childComplexity), true
+
 	case "FriendsEdge.Cursor":
 		if e.complexity.FriendsEdge.Cursor == nil {
 			break
@@ -248,38 +248,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FriendsEdge.Node(childComplexity), true
 
-	case "Human.ID":
-		if e.complexity.Human.ID == nil {
+	case "Human.AppearsIn":
+		if e.complexity.Human.AppearsIn == nil {
 			break
 		}
 
-		return e.complexity.Human.ID(childComplexity), true
-
-	case "Human.Name":
-		if e.complexity.Human.Name == nil {
-			break
-		}
-
-		return e.complexity.Human.Name(childComplexity), true
-
-	case "Human.Height":
-		if e.complexity.Human.Height == nil {
-			break
-		}
-
-		args, err := ec.field_Human_height_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Human.Height(childComplexity, args["unit"].(models.LengthUnit)), true
-
-	case "Human.Mass":
-		if e.complexity.Human.Mass == nil {
-			break
-		}
-
-		return e.complexity.Human.Mass(childComplexity), true
+		return e.complexity.Human.AppearsIn(childComplexity), true
 
 	case "Human.Friends":
 		if e.complexity.Human.Friends == nil {
@@ -300,12 +274,38 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
 
-	case "Human.AppearsIn":
-		if e.complexity.Human.AppearsIn == nil {
+	case "Human.Height":
+		if e.complexity.Human.Height == nil {
 			break
 		}
 
-		return e.complexity.Human.AppearsIn(childComplexity), true
+		args, err := ec.field_Human_height_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Human.Height(childComplexity, args["unit"].(models.LengthUnit)), true
+
+	case "Human.ID":
+		if e.complexity.Human.ID == nil {
+			break
+		}
+
+		return e.complexity.Human.ID(childComplexity), true
+
+	case "Human.Mass":
+		if e.complexity.Human.Mass == nil {
+			break
+		}
+
+		return e.complexity.Human.Mass(childComplexity), true
+
+	case "Human.Name":
+		if e.complexity.Human.Name == nil {
+			break
+		}
+
+		return e.complexity.Human.Name(childComplexity), true
 
 	case "Human.Starships":
 		if e.complexity.Human.Starships == nil {
@@ -326,13 +326,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateReview(childComplexity, args["episode"].(models.Episode), args["review"].(models.Review)), true
 
-	case "PageInfo.StartCursor":
-		if e.complexity.PageInfo.StartCursor == nil {
-			break
-		}
-
-		return e.complexity.PageInfo.StartCursor(childComplexity), true
-
 	case "PageInfo.EndCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
 			break
@@ -347,41 +340,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PageInfo.HasNextPage(childComplexity), true
 
-	case "Query.Hero":
-		if e.complexity.Query.Hero == nil {
+	case "PageInfo.StartCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
 			break
 		}
 
-		args, err := ec.field_Query_hero_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Hero(childComplexity, args["episode"].(*models.Episode)), true
-
-	case "Query.Reviews":
-		if e.complexity.Query.Reviews == nil {
-			break
-		}
-
-		args, err := ec.field_Query_reviews_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Reviews(childComplexity, args["episode"].(models.Episode), args["since"].(*time.Time)), true
-
-	case "Query.Search":
-		if e.complexity.Query.Search == nil {
-			break
-		}
-
-		args, err := ec.field_Query_search_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
 
 	case "Query.Character":
 		if e.complexity.Query.Character == nil {
@@ -407,6 +371,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Droid(childComplexity, args["id"].(string)), true
 
+	case "Query.Hero":
+		if e.complexity.Query.Hero == nil {
+			break
+		}
+
+		args, err := ec.field_Query_hero_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Hero(childComplexity, args["episode"].(*models.Episode)), true
+
 	case "Query.Human":
 		if e.complexity.Query.Human == nil {
 			break
@@ -418,6 +394,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Human(childComplexity, args["id"].(string)), true
+
+	case "Query.Reviews":
+		if e.complexity.Query.Reviews == nil {
+			break
+		}
+
+		args, err := ec.field_Query_reviews_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Reviews(childComplexity, args["episode"].(models.Episode), args["since"].(*time.Time)), true
+
+	case "Query.Search":
+		if e.complexity.Query.Search == nil {
+			break
+		}
+
+		args, err := ec.field_Query_search_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
 
 	case "Query.Starship":
 		if e.complexity.Query.Starship == nil {
@@ -431,19 +431,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Starship(childComplexity, args["id"].(string)), true
 
-	case "Review.Stars":
-		if e.complexity.Review.Stars == nil {
-			break
-		}
-
-		return e.complexity.Review.Stars(childComplexity), true
-
 	case "Review.Commentary":
 		if e.complexity.Review.Commentary == nil {
 			break
 		}
 
 		return e.complexity.Review.Commentary(childComplexity), true
+
+	case "Review.Stars":
+		if e.complexity.Review.Stars == nil {
+			break
+		}
+
+		return e.complexity.Review.Stars(childComplexity), true
 
 	case "Review.Time":
 		if e.complexity.Review.Time == nil {
@@ -452,19 +452,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Review.Time(childComplexity), true
 
+	case "Starship.History":
+		if e.complexity.Starship.History == nil {
+			break
+		}
+
+		return e.complexity.Starship.History(childComplexity), true
+
 	case "Starship.ID":
 		if e.complexity.Starship.ID == nil {
 			break
 		}
 
 		return e.complexity.Starship.ID(childComplexity), true
-
-	case "Starship.Name":
-		if e.complexity.Starship.Name == nil {
-			break
-		}
-
-		return e.complexity.Starship.Name(childComplexity), true
 
 	case "Starship.Length":
 		if e.complexity.Starship.Length == nil {
@@ -478,12 +478,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Starship.Length(childComplexity, args["unit"].(*models.LengthUnit)), true
 
-	case "Starship.History":
-		if e.complexity.Starship.History == nil {
+	case "Starship.Name":
+		if e.complexity.Starship.Name == nil {
 			break
 		}
 
-		return e.complexity.Starship.History(childComplexity), true
+		return e.complexity.Starship.Name(childComplexity), true
 
 	}
 	return 0, false

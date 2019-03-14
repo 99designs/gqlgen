@@ -46,7 +46,7 @@ type ComplexityRoot struct {
 {{ range $object := .Objects }}
 	{{ if not $object.IsReserved -}}
 		{{ $object.Name|go }} struct {
-		{{ range $field := $object.Fields -}}
+		{{ range $field := $object.UniqueFields -}}
 			{{ if not $field.IsReserved -}}
 				{{ $field.GoFieldName }} {{ $field.ComplexitySignature }}
 			{{ end }}
@@ -84,7 +84,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	switch typeName + "." + field {
 	{{ range $object := .Objects }}
 		{{ if not $object.IsReserved }}
-			{{ range $field := $object.Fields }}
+			{{ range $field := $object.UniqueFields }}
 				{{ if not $field.IsReserved }}
 					case "{{$object.Name}}.{{$field.GoFieldName}}":
 						if e.complexity.{{$object.Name|go}}.{{$field.GoFieldName}} == nil {

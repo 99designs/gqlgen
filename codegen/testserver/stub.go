@@ -16,6 +16,9 @@ type Stub struct {
 	ModelMethodsResolver struct {
 		ResolverField func(ctx context.Context, obj *ModelMethods) (bool, error)
 	}
+	OverlappingFieldsResolver struct {
+		OldFoo func(ctx context.Context, obj *OverlappingFields) (int, error)
+	}
 	PanicsResolver struct {
 		FieldScalarMarshal func(ctx context.Context, obj *Panics) ([]MarshalPanic, error)
 		ArgUnmarshal       func(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error)
@@ -42,6 +45,7 @@ type Stub struct {
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
 		Autobind               func(ctx context.Context) (*Autobind, error)
 		DeprecatedField        func(ctx context.Context) (string, error)
+		Overlapping            func(ctx context.Context) (*OverlappingFields, error)
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
@@ -62,6 +66,9 @@ func (r *Stub) ForcedResolver() ForcedResolverResolver {
 }
 func (r *Stub) ModelMethods() ModelMethodsResolver {
 	return &stubModelMethods{r}
+}
+func (r *Stub) OverlappingFields() OverlappingFieldsResolver {
+	return &stubOverlappingFields{r}
 }
 func (r *Stub) Panics() PanicsResolver {
 	return &stubPanics{r}
@@ -86,6 +93,12 @@ type stubModelMethods struct{ *Stub }
 
 func (r *stubModelMethods) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
 	return r.ModelMethodsResolver.ResolverField(ctx, obj)
+}
+
+type stubOverlappingFields struct{ *Stub }
+
+func (r *stubOverlappingFields) OldFoo(ctx context.Context, obj *OverlappingFields) (int, error) {
+	return r.OverlappingFieldsResolver.OldFoo(ctx, obj)
 }
 
 type stubPanics struct{ *Stub }
@@ -161,6 +174,9 @@ func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
 }
 func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 	return r.QueryResolver.DeprecatedField(ctx)
+}
+func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
+	return r.QueryResolver.Overlapping(ctx)
 }
 func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)

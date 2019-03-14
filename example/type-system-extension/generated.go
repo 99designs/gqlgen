@@ -60,14 +60,14 @@ type ComplexityRoot struct {
 	}
 
 	MyQuery struct {
-		Todos func(childComplexity int) int
 		Todo  func(childComplexity int, id string) int
+		Todos func(childComplexity int) int
 	}
 
 	Todo struct {
 		ID       func(childComplexity int) int
-		Text     func(childComplexity int) int
 		State    func(childComplexity int) int
+		Text     func(childComplexity int) int
 		Verified func(childComplexity int) int
 	}
 }
@@ -107,13 +107,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
 
-	case "MyQuery.Todos":
-		if e.complexity.MyQuery.Todos == nil {
-			break
-		}
-
-		return e.complexity.MyQuery.Todos(childComplexity), true
-
 	case "MyQuery.Todo":
 		if e.complexity.MyQuery.Todo == nil {
 			break
@@ -126,6 +119,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(string)), true
 
+	case "MyQuery.Todos":
+		if e.complexity.MyQuery.Todos == nil {
+			break
+		}
+
+		return e.complexity.MyQuery.Todos(childComplexity), true
+
 	case "Todo.ID":
 		if e.complexity.Todo.ID == nil {
 			break
@@ -133,19 +133,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.ID(childComplexity), true
 
-	case "Todo.Text":
-		if e.complexity.Todo.Text == nil {
-			break
-		}
-
-		return e.complexity.Todo.Text(childComplexity), true
-
 	case "Todo.State":
 		if e.complexity.Todo.State == nil {
 			break
 		}
 
 		return e.complexity.Todo.State(childComplexity), true
+
+	case "Todo.Text":
+		if e.complexity.Todo.Text == nil {
+			break
+		}
+
+		return e.complexity.Todo.Text(childComplexity), true
 
 	case "Todo.Verified":
 		if e.complexity.Todo.Verified == nil {

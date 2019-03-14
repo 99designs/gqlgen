@@ -45,15 +45,15 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Chatroom struct {
-		Name     func(childComplexity int) int
 		Messages func(childComplexity int) int
+		Name     func(childComplexity int) int
 	}
 
 	Message struct {
+		CreatedAt func(childComplexity int) int
+		CreatedBy func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Text      func(childComplexity int) int
-		CreatedBy func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -94,6 +94,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Chatroom.Messages":
+		if e.complexity.Chatroom.Messages == nil {
+			break
+		}
+
+		return e.complexity.Chatroom.Messages(childComplexity), true
+
 	case "Chatroom.Name":
 		if e.complexity.Chatroom.Name == nil {
 			break
@@ -101,12 +108,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Chatroom.Name(childComplexity), true
 
-	case "Chatroom.Messages":
-		if e.complexity.Chatroom.Messages == nil {
+	case "Message.CreatedAt":
+		if e.complexity.Message.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Chatroom.Messages(childComplexity), true
+		return e.complexity.Message.CreatedAt(childComplexity), true
+
+	case "Message.CreatedBy":
+		if e.complexity.Message.CreatedBy == nil {
+			break
+		}
+
+		return e.complexity.Message.CreatedBy(childComplexity), true
 
 	case "Message.ID":
 		if e.complexity.Message.ID == nil {
@@ -121,20 +135,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Message.Text(childComplexity), true
-
-	case "Message.CreatedBy":
-		if e.complexity.Message.CreatedBy == nil {
-			break
-		}
-
-		return e.complexity.Message.CreatedBy(childComplexity), true
-
-	case "Message.CreatedAt":
-		if e.complexity.Message.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Message.CreatedAt(childComplexity), true
 
 	case "Mutation.Post":
 		if e.complexity.Mutation.Post == nil {

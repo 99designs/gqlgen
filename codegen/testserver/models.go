@@ -71,3 +71,8 @@ type Autobind struct {
 	IdStr string
 	IdInt int
 }
+
+type OverlappingFields struct {
+	Foo    int
+	NewFoo int
+}

@@ -52,16 +52,16 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Path         func(childComplexity int) int
 		Date         func(childComplexity int, filter models.DateFilter) int
-		Viewer       func(childComplexity int) int
-		JSONEncoding func(childComplexity int) int
 		Error        func(childComplexity int, typeArg *models.ErrorType) int
+		JSONEncoding func(childComplexity int) int
+		Path         func(childComplexity int) int
+		Viewer       func(childComplexity int) int
 	}
 
 	User struct {
-		Name  func(childComplexity int) int
 		Likes func(childComplexity int) int
+		Name  func(childComplexity int) int
 	}
 
 	Viewer struct {
@@ -121,13 +121,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Element.Mismatched(childComplexity), true
 
-	case "Query.Path":
-		if e.complexity.Query.Path == nil {
-			break
-		}
-
-		return e.complexity.Query.Path(childComplexity), true
-
 	case "Query.Date":
 		if e.complexity.Query.Date == nil {
 			break
@@ -139,20 +132,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
-
-	case "Query.Viewer":
-		if e.complexity.Query.Viewer == nil {
-			break
-		}
-
-		return e.complexity.Query.Viewer(childComplexity), true
-
-	case "Query.JSONEncoding":
-		if e.complexity.Query.JSONEncoding == nil {
-			break
-		}
-
-		return e.complexity.Query.JSONEncoding(childComplexity), true
 
 	case "Query.Error":
 		if e.complexity.Query.Error == nil {
@@ -166,12 +145,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
 
-	case "User.Name":
-		if e.complexity.User.Name == nil {
+	case "Query.JSONEncoding":
+		if e.complexity.Query.JSONEncoding == nil {
 			break
 		}
 
-		return e.complexity.User.Name(childComplexity), true
+		return e.complexity.Query.JSONEncoding(childComplexity), true
+
+	case "Query.Path":
+		if e.complexity.Query.Path == nil {
+			break
+		}
+
+		return e.complexity.Query.Path(childComplexity), true
+
+	case "Query.Viewer":
+		if e.complexity.Query.Viewer == nil {
+			break
+		}
+
+		return e.complexity.Query.Viewer(childComplexity), true
 
 	case "User.Likes":
 		if e.complexity.User.Likes == nil {
@@ -179,6 +172,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Likes(childComplexity), true
+
+	case "User.Name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
 
 	case "Viewer.User":
 		if e.complexity.Viewer.User == nil {

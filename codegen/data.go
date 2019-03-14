@@ -20,6 +20,7 @@ type Data struct {
 	Inputs          Objects
 	Interfaces      map[string]*Interface
 	ReferencedTypes map[string]*config.TypeReference
+	ComplexityRoots map[string]*Object
 
 	QueryRoot        *Object
 	MutationRoot     *Object

@@ -51,16 +51,16 @@ type ComplexityRoot struct {
 	}
 
 	Todo struct {
-		ID          func(childComplexity int) int
 		DatabaseID  func(childComplexity int) int
 		Description func(childComplexity int) int
 		Done        func(childComplexity int) int
+		ID          func(childComplexity int) int
 		User        func(childComplexity int) int
 	}
 
 	User struct {
-		ID       func(childComplexity int) int
 		FullName func(childComplexity int) int
+		ID       func(childComplexity int) int
 	}
 }
 
@@ -108,13 +108,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Todos(childComplexity), true
 
-	case "Todo.ID":
-		if e.complexity.Todo.ID == nil {
-			break
-		}
-
-		return e.complexity.Todo.ID(childComplexity), true
-
 	case "Todo.DatabaseID":
 		if e.complexity.Todo.DatabaseID == nil {
 			break
@@ -136,6 +129,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.Done(childComplexity), true
 
+	case "Todo.ID":
+		if e.complexity.Todo.ID == nil {
+			break
+		}
+
+		return e.complexity.Todo.ID(childComplexity), true
+
 	case "Todo.User":
 		if e.complexity.Todo.User == nil {
 			break
@@ -143,19 +143,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.User(childComplexity), true
 
-	case "User.ID":
-		if e.complexity.User.ID == nil {
-			break
-		}
-
-		return e.complexity.User.ID(childComplexity), true
-
 	case "User.FullName":
 		if e.complexity.User.FullName == nil {
 			break
 		}
 
 		return e.complexity.User.FullName(childComplexity), true
+
+	case "User.ID":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
 
 	}
 	return 0, false

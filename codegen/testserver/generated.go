@@ -40,6 +40,7 @@ type Config struct {
 type ResolverRoot interface {
 	ForcedResolver() ForcedResolverResolver
 	ModelMethods() ModelMethodsResolver
+	OverlappingFields() OverlappingFieldsResolver
 	Panics() PanicsResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
@@ -64,16 +65,16 @@ type ComplexityRoot struct {
 	}
 
 	Autobind struct {
+		IdInt func(childComplexity int) int
+		IdStr func(childComplexity int) int
 		Int   func(childComplexity int) int
 		Int32 func(childComplexity int) int
 		Int64 func(childComplexity int) int
-		IdStr func(childComplexity int) int
-		IdInt func(childComplexity int) int
 	}
 
 	Circle struct {
-		Radius func(childComplexity int) int
 		Area   func(childComplexity int) int
+		Radius func(childComplexity int) int
 	}
 
 	EmbeddedDefaultScalar struct {
@@ -86,9 +87,9 @@ type ComplexityRoot struct {
 	}
 
 	Error struct {
-		ID                      func(childComplexity int) int
 		ErrorOnNonRequiredField func(childComplexity int) int
 		ErrorOnRequiredField    func(childComplexity int) int
+		ID                      func(childComplexity int) int
 		NilOnRequiredField      func(childComplexity int) int
 	}
 
@@ -114,8 +115,8 @@ type ComplexityRoot struct {
 	}
 
 	ModelMethods struct {
-		ResolverField func(childComplexity int) int
 		NoContext     func(childComplexity int) int
+		ResolverField func(childComplexity int) int
 		WithContext   func(childComplexity int) int
 	}
 
@@ -123,45 +124,52 @@ type ComplexityRoot struct {
 		Inner func(childComplexity int) int
 	}
 
+	OverlappingFields struct {
+		Foo    func(childComplexity int) int
+		NewFoo func(childComplexity int) int
+		OldFoo func(childComplexity int) int
+	}
+
 	Panics struct {
-		FieldScalarMarshal func(childComplexity int) int
-		FieldFuncMarshal   func(childComplexity int, u []MarshalPanic) int
 		ArgUnmarshal       func(childComplexity int, u []MarshalPanic) int
+		FieldFuncMarshal   func(childComplexity int, u []MarshalPanic) int
+		FieldScalarMarshal func(childComplexity int) int
 	}
 
 	Query struct {
-		InvalidIdentifier      func(childComplexity int) int
+		Autobind               func(childComplexity int) int
 		Collision              func(childComplexity int) int
+		DefaultScalar          func(childComplexity int, arg string) int
+		DeprecatedField        func(childComplexity int) int
+		DirectiveArg           func(childComplexity int, arg string) int
+		DirectiveInput         func(childComplexity int, arg InputDirectives) int
+		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
+		DirectiveInputType     func(childComplexity int, arg InnerInput) int
+		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
+		ErrorBubble            func(childComplexity int) int
+		InputSlice             func(childComplexity int, arg []string) int
+		InvalidIdentifier      func(childComplexity int) int
 		MapInput               func(childComplexity int, input map[string]interface{}) int
-		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
+		MapStringInterface     func(childComplexity int, in map[string]interface{}) int
+		ModelMethods           func(childComplexity int) int
 		NestedInputs           func(childComplexity int, input [][]*OuterInput) int
 		NestedOutputs          func(childComplexity int) int
-		Shapes                 func(childComplexity int) int
-		ErrorBubble            func(childComplexity int) int
-		ModelMethods           func(childComplexity int) int
-		Valid                  func(childComplexity int) int
-		User                   func(childComplexity int, id int) int
 		NullableArg            func(childComplexity int, arg *int) int
-		DirectiveArg           func(childComplexity int, arg string) int
-		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
-		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
-		DirectiveInput         func(childComplexity int, arg InputDirectives) int
-		DirectiveInputType     func(childComplexity int, arg InnerInput) int
-		InputSlice             func(childComplexity int, arg []string) int
-		ShapeUnion             func(childComplexity int) int
-		Autobind               func(childComplexity int) int
-		DeprecatedField        func(childComplexity int) int
-		MapStringInterface     func(childComplexity int, in map[string]interface{}) int
+		Overlapping            func(childComplexity int) int
 		Panics                 func(childComplexity int) int
-		DefaultScalar          func(childComplexity int, arg string) int
+		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
+		ShapeUnion             func(childComplexity int) int
+		Shapes                 func(childComplexity int) int
 		Slices                 func(childComplexity int) int
+		User                   func(childComplexity int, id int) int
+		Valid                  func(childComplexity int) int
 		ValidType              func(childComplexity int) int
 	}
 
 	Rectangle struct {
+		Area   func(childComplexity int) int
 		Length func(childComplexity int) int
 		Width  func(childComplexity int) int
-		Area   func(childComplexity int) int
 	}
 
 	Slices struct {
@@ -172,22 +180,22 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		Updated     func(childComplexity int) int
 		InitPayload func(childComplexity int) int
+		Updated     func(childComplexity int) int
 	}
 
 	User struct {
-		ID      func(childComplexity int) int
-		Friends func(childComplexity int) int
 		Created func(childComplexity int) int
+		Friends func(childComplexity int) int
+		ID      func(childComplexity int) int
 		Updated func(childComplexity int) int
 	}
 
 	ValidType struct {
 		DifferentCase      func(childComplexity int) int
 		DifferentCaseOld   func(childComplexity int) int
-		ValidInputKeywords func(childComplexity int, input *ValidInput) int
 		ValidArgs          func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) int
+		ValidInputKeywords func(childComplexity int, input *ValidInput) int
 	}
 
 	XXIt struct {
@@ -212,6 +220,9 @@ type ForcedResolverResolver interface {
 }
 type ModelMethodsResolver interface {
 	ResolverField(ctx context.Context, obj *ModelMethods) (bool, error)
+}
+type OverlappingFieldsResolver interface {
+	OldFoo(ctx context.Context, obj *OverlappingFields) (int, error)
 }
 type PanicsResolver interface {
 	FieldScalarMarshal(ctx context.Context, obj *Panics) ([]MarshalPanic, error)
@@ -240,6 +251,7 @@ type QueryResolver interface {
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
 	DeprecatedField(ctx context.Context) (string, error)
+	Overlapping(ctx context.Context) (*OverlappingFields, error)
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	Panics(ctx context.Context) (*Panics, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
@@ -283,6 +295,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AbIt.ID(childComplexity), true
 
+	case "Autobind.IdInt":
+		if e.complexity.Autobind.IdInt == nil {
+			break
+		}
+
+		return e.complexity.Autobind.IdInt(childComplexity), true
+
+	case "Autobind.IdStr":
+		if e.complexity.Autobind.IdStr == nil {
+			break
+		}
+
+		return e.complexity.Autobind.IdStr(childComplexity), true
+
 	case "Autobind.Int":
 		if e.complexity.Autobind.Int == nil {
 			break
@@ -304,19 +330,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Autobind.Int64(childComplexity), true
 
-	case "Autobind.IdStr":
-		if e.complexity.Autobind.IdStr == nil {
+	case "Circle.Area":
+		if e.complexity.Circle.Area == nil {
 			break
 		}
 
-		return e.complexity.Autobind.IdStr(childComplexity), true
-
-	case "Autobind.IdInt":
-		if e.complexity.Autobind.IdInt == nil {
-			break
-		}
-
-		return e.complexity.Autobind.IdInt(childComplexity), true
+		return e.complexity.Circle.Area(childComplexity), true
 
 	case "Circle.Radius":
 		if e.complexity.Circle.Radius == nil {
@@ -324,13 +343,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Circle.Radius(childComplexity), true
-
-	case "Circle.Area":
-		if e.complexity.Circle.Area == nil {
-			break
-		}
-
-		return e.complexity.Circle.Area(childComplexity), true
 
 	case "EmbeddedDefaultScalar.Value":
 		if e.complexity.EmbeddedDefaultScalar.Value == nil {
@@ -353,13 +365,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EmbeddedPointer.Title(childComplexity), true
 
-	case "Error.ID":
-		if e.complexity.Error.ID == nil {
-			break
-		}
-
-		return e.complexity.Error.ID(childComplexity), true
-
 	case "Error.ErrorOnNonRequiredField":
 		if e.complexity.Error.ErrorOnNonRequiredField == nil {
 			break
@@ -373,6 +378,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Error.ErrorOnRequiredField(childComplexity), true
+
+	case "Error.ID":
+		if e.complexity.Error.ID == nil {
+			break
+		}
+
+		return e.complexity.Error.ID(childComplexity), true
 
 	case "Error.NilOnRequiredField":
 		if e.complexity.Error.NilOnRequiredField == nil {
@@ -423,19 +435,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MapStringInterfaceType.B(childComplexity), true
 
-	case "ModelMethods.ResolverField":
-		if e.complexity.ModelMethods.ResolverField == nil {
-			break
-		}
-
-		return e.complexity.ModelMethods.ResolverField(childComplexity), true
-
 	case "ModelMethods.NoContext":
 		if e.complexity.ModelMethods.NoContext == nil {
 			break
 		}
 
 		return e.complexity.ModelMethods.NoContext(childComplexity), true
+
+	case "ModelMethods.ResolverField":
+		if e.complexity.ModelMethods.ResolverField == nil {
+			break
+		}
+
+		return e.complexity.ModelMethods.ResolverField(childComplexity), true
 
 	case "ModelMethods.WithContext":
 		if e.complexity.ModelMethods.WithContext == nil {
@@ -451,24 +463,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OuterObject.Inner(childComplexity), true
 
-	case "Panics.FieldScalarMarshal":
-		if e.complexity.Panics.FieldScalarMarshal == nil {
+	case "OverlappingFields.Foo":
+		if e.complexity.OverlappingFields.Foo == nil {
 			break
 		}
 
-		return e.complexity.Panics.FieldScalarMarshal(childComplexity), true
+		return e.complexity.OverlappingFields.Foo(childComplexity), true
 
-	case "Panics.FieldFuncMarshal":
-		if e.complexity.Panics.FieldFuncMarshal == nil {
+	case "OverlappingFields.NewFoo":
+		if e.complexity.OverlappingFields.NewFoo == nil {
 			break
 		}
 
-		args, err := ec.field_Panics_fieldFuncMarshal_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
+		return e.complexity.OverlappingFields.NewFoo(childComplexity), true
+
+	case "OverlappingFields.OldFoo":
+		if e.complexity.OverlappingFields.OldFoo == nil {
+			break
 		}
 
-		return e.complexity.Panics.FieldFuncMarshal(childComplexity, args["u"].([]MarshalPanic)), true
+		return e.complexity.OverlappingFields.OldFoo(childComplexity), true
 
 	case "Panics.ArgUnmarshal":
 		if e.complexity.Panics.ArgUnmarshal == nil {
@@ -482,12 +496,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Panics.ArgUnmarshal(childComplexity, args["u"].([]MarshalPanic)), true
 
-	case "Query.InvalidIdentifier":
-		if e.complexity.Query.InvalidIdentifier == nil {
+	case "Panics.FieldFuncMarshal":
+		if e.complexity.Panics.FieldFuncMarshal == nil {
 			break
 		}
 
-		return e.complexity.Query.InvalidIdentifier(childComplexity), true
+		args, err := ec.field_Panics_fieldFuncMarshal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Panics.FieldFuncMarshal(childComplexity, args["u"].([]MarshalPanic)), true
+
+	case "Panics.FieldScalarMarshal":
+		if e.complexity.Panics.FieldScalarMarshal == nil {
+			break
+		}
+
+		return e.complexity.Panics.FieldScalarMarshal(childComplexity), true
+
+	case "Query.Autobind":
+		if e.complexity.Query.Autobind == nil {
+			break
+		}
+
+		return e.complexity.Query.Autobind(childComplexity), true
 
 	case "Query.Collision":
 		if e.complexity.Query.Collision == nil {
@@ -495,6 +528,111 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Collision(childComplexity), true
+
+	case "Query.DefaultScalar":
+		if e.complexity.Query.DefaultScalar == nil {
+			break
+		}
+
+		args, err := ec.field_Query_defaultScalar_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
+
+	case "Query.DeprecatedField":
+		if e.complexity.Query.DeprecatedField == nil {
+			break
+		}
+
+		return e.complexity.Query.DeprecatedField(childComplexity), true
+
+	case "Query.DirectiveArg":
+		if e.complexity.Query.DirectiveArg == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
+
+	case "Query.DirectiveInput":
+		if e.complexity.Query.DirectiveInput == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
+
+	case "Query.DirectiveInputNullable":
+		if e.complexity.Query.DirectiveInputNullable == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveInputNullable_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
+
+	case "Query.DirectiveInputType":
+		if e.complexity.Query.DirectiveInputType == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveInputType_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
+
+	case "Query.DirectiveNullableArg":
+		if e.complexity.Query.DirectiveNullableArg == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveNullableArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int)), true
+
+	case "Query.ErrorBubble":
+		if e.complexity.Query.ErrorBubble == nil {
+			break
+		}
+
+		return e.complexity.Query.ErrorBubble(childComplexity), true
+
+	case "Query.InputSlice":
+		if e.complexity.Query.InputSlice == nil {
+			break
+		}
+
+		args, err := ec.field_Query_inputSlice_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.InputSlice(childComplexity, args["arg"].([]string)), true
+
+	case "Query.InvalidIdentifier":
+		if e.complexity.Query.InvalidIdentifier == nil {
+			break
+		}
+
+		return e.complexity.Query.InvalidIdentifier(childComplexity), true
 
 	case "Query.MapInput":
 		if e.complexity.Query.MapInput == nil {
@@ -508,17 +646,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]interface{})), true
 
-	case "Query.Recursive":
-		if e.complexity.Query.Recursive == nil {
+	case "Query.MapStringInterface":
+		if e.complexity.Query.MapStringInterface == nil {
 			break
 		}
 
-		args, err := ec.field_Query_recursive_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_mapStringInterface_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
+		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]interface{})), true
+
+	case "Query.ModelMethods":
+		if e.complexity.Query.ModelMethods == nil {
+			break
+		}
+
+		return e.complexity.Query.ModelMethods(childComplexity), true
 
 	case "Query.NestedInputs":
 		if e.complexity.Query.NestedInputs == nil {
@@ -539,6 +684,51 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.NestedOutputs(childComplexity), true
 
+	case "Query.NullableArg":
+		if e.complexity.Query.NullableArg == nil {
+			break
+		}
+
+		args, err := ec.field_Query_nullableArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
+
+	case "Query.Overlapping":
+		if e.complexity.Query.Overlapping == nil {
+			break
+		}
+
+		return e.complexity.Query.Overlapping(childComplexity), true
+
+	case "Query.Panics":
+		if e.complexity.Query.Panics == nil {
+			break
+		}
+
+		return e.complexity.Query.Panics(childComplexity), true
+
+	case "Query.Recursive":
+		if e.complexity.Query.Recursive == nil {
+			break
+		}
+
+		args, err := ec.field_Query_recursive_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
+
+	case "Query.ShapeUnion":
+		if e.complexity.Query.ShapeUnion == nil {
+			break
+		}
+
+		return e.complexity.Query.ShapeUnion(childComplexity), true
+
 	case "Query.Shapes":
 		if e.complexity.Query.Shapes == nil {
 			break
@@ -546,26 +736,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Shapes(childComplexity), true
 
-	case "Query.ErrorBubble":
-		if e.complexity.Query.ErrorBubble == nil {
+	case "Query.Slices":
+		if e.complexity.Query.Slices == nil {
 			break
 		}
 
-		return e.complexity.Query.ErrorBubble(childComplexity), true
-
-	case "Query.ModelMethods":
-		if e.complexity.Query.ModelMethods == nil {
-			break
-		}
-
-		return e.complexity.Query.ModelMethods(childComplexity), true
-
-	case "Query.Valid":
-		if e.complexity.Query.Valid == nil {
-			break
-		}
-
-		return e.complexity.Query.Valid(childComplexity), true
+		return e.complexity.Query.Slices(childComplexity), true
 
 	case "Query.User":
 		if e.complexity.Query.User == nil {
@@ -579,148 +755,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
 
-	case "Query.NullableArg":
-		if e.complexity.Query.NullableArg == nil {
+	case "Query.Valid":
+		if e.complexity.Query.Valid == nil {
 			break
 		}
 
-		args, err := ec.field_Query_nullableArg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
-
-	case "Query.DirectiveArg":
-		if e.complexity.Query.DirectiveArg == nil {
-			break
-		}
-
-		args, err := ec.field_Query_directiveArg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
-
-	case "Query.DirectiveNullableArg":
-		if e.complexity.Query.DirectiveNullableArg == nil {
-			break
-		}
-
-		args, err := ec.field_Query_directiveNullableArg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int)), true
-
-	case "Query.DirectiveInputNullable":
-		if e.complexity.Query.DirectiveInputNullable == nil {
-			break
-		}
-
-		args, err := ec.field_Query_directiveInputNullable_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
-
-	case "Query.DirectiveInput":
-		if e.complexity.Query.DirectiveInput == nil {
-			break
-		}
-
-		args, err := ec.field_Query_directiveInput_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
-
-	case "Query.DirectiveInputType":
-		if e.complexity.Query.DirectiveInputType == nil {
-			break
-		}
-
-		args, err := ec.field_Query_directiveInputType_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
-
-	case "Query.InputSlice":
-		if e.complexity.Query.InputSlice == nil {
-			break
-		}
-
-		args, err := ec.field_Query_inputSlice_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.InputSlice(childComplexity, args["arg"].([]string)), true
-
-	case "Query.ShapeUnion":
-		if e.complexity.Query.ShapeUnion == nil {
-			break
-		}
-
-		return e.complexity.Query.ShapeUnion(childComplexity), true
-
-	case "Query.Autobind":
-		if e.complexity.Query.Autobind == nil {
-			break
-		}
-
-		return e.complexity.Query.Autobind(childComplexity), true
-
-	case "Query.DeprecatedField":
-		if e.complexity.Query.DeprecatedField == nil {
-			break
-		}
-
-		return e.complexity.Query.DeprecatedField(childComplexity), true
-
-	case "Query.MapStringInterface":
-		if e.complexity.Query.MapStringInterface == nil {
-			break
-		}
-
-		args, err := ec.field_Query_mapStringInterface_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]interface{})), true
-
-	case "Query.Panics":
-		if e.complexity.Query.Panics == nil {
-			break
-		}
-
-		return e.complexity.Query.Panics(childComplexity), true
-
-	case "Query.DefaultScalar":
-		if e.complexity.Query.DefaultScalar == nil {
-			break
-		}
-
-		args, err := ec.field_Query_defaultScalar_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
-
-	case "Query.Slices":
-		if e.complexity.Query.Slices == nil {
-			break
-		}
-
-		return e.complexity.Query.Slices(childComplexity), true
+		return e.complexity.Query.Valid(childComplexity), true
 
 	case "Query.ValidType":
 		if e.complexity.Query.ValidType == nil {
@@ -728,6 +768,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ValidType(childComplexity), true
+
+	case "Rectangle.Area":
+		if e.complexity.Rectangle.Area == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Area(childComplexity), true
 
 	case "Rectangle.Length":
 		if e.complexity.Rectangle.Length == nil {
@@ -742,13 +789,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Rectangle.Width(childComplexity), true
-
-	case "Rectangle.Area":
-		if e.complexity.Rectangle.Area == nil {
-			break
-		}
-
-		return e.complexity.Rectangle.Area(childComplexity), true
 
 	case "Slices.Test1":
 		if e.complexity.Slices.Test1 == nil {
@@ -778,13 +818,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Slices.Test4(childComplexity), true
 
-	case "Subscription.Updated":
-		if e.complexity.Subscription.Updated == nil {
-			break
-		}
-
-		return e.complexity.Subscription.Updated(childComplexity), true
-
 	case "Subscription.InitPayload":
 		if e.complexity.Subscription.InitPayload == nil {
 			break
@@ -792,12 +825,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.InitPayload(childComplexity), true
 
-	case "User.ID":
-		if e.complexity.User.ID == nil {
+	case "Subscription.Updated":
+		if e.complexity.Subscription.Updated == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.complexity.Subscription.Updated(childComplexity), true
+
+	case "User.Created":
+		if e.complexity.User.Created == nil {
+			break
+		}
+
+		return e.complexity.User.Created(childComplexity), true
 
 	case "User.Friends":
 		if e.complexity.User.Friends == nil {
@@ -806,12 +846,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Friends(childComplexity), true
 
-	case "User.Created":
-		if e.complexity.User.Created == nil {
+	case "User.ID":
+		if e.complexity.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.Created(childComplexity), true
+		return e.complexity.User.ID(childComplexity), true
 
 	case "User.Updated":
 		if e.complexity.User.Updated == nil {
@@ -834,18 +874,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ValidType.DifferentCaseOld(childComplexity), true
 
-	case "ValidType.ValidInputKeywords":
-		if e.complexity.ValidType.ValidInputKeywords == nil {
-			break
-		}
-
-		args, err := ec.field_ValidType_validInputKeywords_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
-
 	case "ValidType.ValidArgs":
 		if e.complexity.ValidType.ValidArgs == nil {
 			break
@@ -857,6 +885,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ValidType.ValidArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string)), true
+
+	case "ValidType.ValidInputKeywords":
+		if e.complexity.ValidType.ValidInputKeywords == nil {
+			break
+		}
+
+		args, err := ec.field_ValidType_validInputKeywords_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
 
 	case "XXIt.ID":
 		if e.complexity.XXIt.ID == nil {
@@ -1017,6 +1057,18 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "complexity.graphql", Input: `extend type Query {
+    overlapping: OverlappingFields
+}
+
+type OverlappingFields {
+  oneFoo: Int!
+  twoFoo: Int!
+  oldFoo: Int!
+  newFoo: Int!
+  new_foo: Int!
+}
+`},
 	&ast.Source{Name: "maps.graphql", Input: `extend type Query {
     mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
 }
@@ -2566,6 +2618,141 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 	return ec.marshalNInnerObject2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerObject(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Foo, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Foo, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.OverlappingFields().OldFoo(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewFoo, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewFoo, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, field graphql.CollectedField, obj *Panics) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -3255,6 +3442,30 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Overlapping(rctx)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*OverlappingFields)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOOverlappingFields2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOverlappingFields(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -5630,6 +5841,62 @@ func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var overlappingFieldsImplementors = []string{"OverlappingFields"}
+
+func (ec *executionContext) _OverlappingFields(ctx context.Context, sel ast.SelectionSet, obj *OverlappingFields) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, overlappingFieldsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OverlappingFields")
+		case "oneFoo":
+			out.Values[i] = ec._OverlappingFields_oneFoo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "twoFoo":
+			out.Values[i] = ec._OverlappingFields_twoFoo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "oldFoo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._OverlappingFields_oldFoo(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "newFoo":
+			out.Values[i] = ec._OverlappingFields_newFoo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "new_foo":
+			out.Values[i] = ec._OverlappingFields_new_foo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var panicsImplementors = []string{"Panics"}
 
 func (ec *executionContext) _Panics(ctx context.Context, sel ast.SelectionSet, obj *Panics) graphql.Marshaler {
@@ -5953,6 +6220,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					invalid = true
 				}
+				return res
+			})
+		case "overlapping":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_overlapping(ctx, field)
 				return res
 			})
 		case "mapStringInterface":
@@ -7367,6 +7645,17 @@ func (ec *executionContext) marshalOOuterObject2ᚖgithubᚗcomᚋ99designsᚋgq
 		return graphql.Null
 	}
 	return ec._OuterObject(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOOverlappingFields2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOverlappingFields(ctx context.Context, sel ast.SelectionSet, v OverlappingFields) graphql.Marshaler {
+	return ec._OverlappingFields(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOOverlappingFields2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOverlappingFields(ctx context.Context, sel ast.SelectionSet, v *OverlappingFields) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._OverlappingFields(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOPanics2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPanics(ctx context.Context, sel ast.SelectionSet, v Panics) graphql.Marshaler {

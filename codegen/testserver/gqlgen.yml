@@ -60,3 +60,9 @@ models:
     model: "map[string]interface{}"
   MapStringInterfaceType:
     model: "map[string]interface{}"
+  OverlappingFields:
+    model: "github.com/99designs/gqlgen/codegen/testserver.OverlappingFields"
+    fields:
+      oneFoo: { fieldName: foo }
+      twoFoo: { fieldName: foo }
+      oldFoo: { fieldName: foo, resolver: true }

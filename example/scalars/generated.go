@@ -50,18 +50,18 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		User   func(childComplexity int, id external.ObjectID) int
 		Search func(childComplexity int, input *model.SearchArgs) int
+		User   func(childComplexity int, id external.ObjectID) int
 	}
 
 	User struct {
-		ID                func(childComplexity int) int
-		Name              func(childComplexity int) int
-		Created           func(childComplexity int) int
-		IsBanned          func(childComplexity int) int
-		PrimitiveResolver func(childComplexity int) int
-		CustomResolver    func(childComplexity int) int
 		Address           func(childComplexity int) int
+		Created           func(childComplexity int) int
+		CustomResolver    func(childComplexity int) int
+		ID                func(childComplexity int) int
+		IsBanned          func(childComplexity int) int
+		Name              func(childComplexity int) int
+		PrimitiveResolver func(childComplexity int) int
 		Tier              func(childComplexity int) int
 	}
 }
@@ -104,18 +104,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Address.Location(childComplexity), true
 
-	case "Query.User":
-		if e.complexity.Query.User == nil {
-			break
-		}
-
-		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
-
 	case "Query.Search":
 		if e.complexity.Query.Search == nil {
 			break
@@ -128,19 +116,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
 
-	case "User.ID":
-		if e.complexity.User.ID == nil {
+	case "Query.User":
+		if e.complexity.Query.User == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "User.Name":
-		if e.complexity.User.Name == nil {
+		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
+
+	case "User.Address":
+		if e.complexity.User.Address == nil {
 			break
 		}
 
-		return e.complexity.User.Name(childComplexity), true
+		return e.complexity.User.Address(childComplexity), true
 
 	case "User.Created":
 		if e.complexity.User.Created == nil {
@@ -149,20 +142,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Created(childComplexity), true
 
-	case "User.IsBanned":
-		if e.complexity.User.IsBanned == nil {
-			break
-		}
-
-		return e.complexity.User.IsBanned(childComplexity), true
-
-	case "User.PrimitiveResolver":
-		if e.complexity.User.PrimitiveResolver == nil {
-			break
-		}
-
-		return e.complexity.User.PrimitiveResolver(childComplexity), true
-
 	case "User.CustomResolver":
 		if e.complexity.User.CustomResolver == nil {
 			break
@@ -170,12 +149,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.CustomResolver(childComplexity), true
 
-	case "User.Address":
-		if e.complexity.User.Address == nil {
+	case "User.ID":
+		if e.complexity.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.Address(childComplexity), true
+		return e.complexity.User.ID(childComplexity), true
+
+	case "User.IsBanned":
+		if e.complexity.User.IsBanned == nil {
+			break
+		}
+
+		return e.complexity.User.IsBanned(childComplexity), true
+
+	case "User.Name":
+		if e.complexity.User.Name == nil {
+			break
+		}
+
+		return e.complexity.User.Name(childComplexity), true
+
+	case "User.PrimitiveResolver":
+		if e.complexity.User.PrimitiveResolver == nil {
+			break
+		}
+
+		return e.complexity.User.PrimitiveResolver(childComplexity), true
 
 	case "User.Tier":
 		if e.complexity.User.Tier == nil {

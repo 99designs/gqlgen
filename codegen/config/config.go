@@ -342,8 +342,6 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.Float"}},
 		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
-		"Time":                {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
-		"Map":                 {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
 		"Int": {Model: StringList{
 			"github.com/99designs/gqlgen/graphql.Int",
 			"github.com/99designs/gqlgen/graphql.Int32",
@@ -359,6 +357,18 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 
 	for typeName, entry := range builtins {
 		if !c.Models.Exists(typeName) {
+			c.Models[typeName] = entry
+		}
+	}
+
+	// These are additional types that are injected if defined in the schema as scalars.
+	extraBuiltins := TypeMap{
+		"Time": {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
+		"Map":  {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+	}
+
+	for typeName, entry := range extraBuiltins {
+		if t, ok := s.Types[typeName]; ok && t.Kind == ast.Scalar {
 			c.Models[typeName] = entry
 		}
 	}

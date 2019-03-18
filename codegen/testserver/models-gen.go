@@ -56,6 +56,12 @@ type InputDirectives struct {
 	ThirdParty    *ThirdParty      `json:"thirdParty"`
 }
 
+// Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
+// added to the TypeMap
+type Map struct {
+	ID string `json:"id"`
+}
+
 type OuterInput struct {
 	Inner InnerInput `json:"inner"`
 }

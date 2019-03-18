@@ -117,6 +117,10 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	Map struct {
+		ID func(childComplexity int) int
+	}
+
 	MapStringInterfaceType struct {
 		A func(childComplexity int) int
 		B func(childComplexity int) int
@@ -446,6 +450,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.It.ID(childComplexity), true
+
+	case "Map.ID":
+		if e.complexity.Map.ID == nil {
+			break
+		}
+
+		return e.complexity.Map.ID(childComplexity), true
 
 	case "MapStringInterfaceType.A":
 		if e.complexity.MapStringInterfaceType.A == nil {
@@ -1102,6 +1113,15 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "builtinscalar.graphql", Input: `
+"""
+Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
+added to the TypeMap
+"""
+type Map {
+    id: ID!
+}
+`},
 	&ast.Source{Name: "complexity.graphql", Input: `extend type Query {
     overlapping: OverlappingFields
 }
@@ -2559,6 +2579,33 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object:   "It",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Map_id(ctx context.Context, field graphql.CollectedField, obj *Map) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Map",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -5985,6 +6032,33 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 			out.Values[i] = graphql.MarshalString("It")
 		case "id":
 			out.Values[i] = ec._It_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var mapImplementors = []string{"Map"}
+
+func (ec *executionContext) _Map(ctx context.Context, sel ast.SelectionSet, obj *Map) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, mapImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Map")
+		case "id":
+			out.Values[i] = ec._Map_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}

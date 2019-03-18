@@ -56,6 +56,10 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	A struct {
+		ID func(childComplexity int) int
+	}
+
 	AIt struct {
 		ID func(childComplexity int) int
 	}
@@ -70,6 +74,10 @@ type ComplexityRoot struct {
 		Int   func(childComplexity int) int
 		Int32 func(childComplexity int) int
 		Int64 func(childComplexity int) int
+	}
+
+	B struct {
+		ID func(childComplexity int) int
 	}
 
 	Circle struct {
@@ -155,6 +163,7 @@ type ComplexityRoot struct {
 		NestedInputs           func(childComplexity int, input [][]*OuterInput) int
 		NestedOutputs          func(childComplexity int) int
 		NullableArg            func(childComplexity int, arg *int) int
+		OptionalUnion          func(childComplexity int) int
 		Overlapping            func(childComplexity int) int
 		Panics                 func(childComplexity int) int
 		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
@@ -256,6 +265,7 @@ type QueryResolver interface {
 	Panics(ctx context.Context) (*Panics, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
 	Slices(ctx context.Context) (*Slices, error)
+	OptionalUnion(ctx context.Context) (TestUnion, error)
 	ValidType(ctx context.Context) (*ValidType, error)
 }
 type SubscriptionResolver interface {
@@ -280,6 +290,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "A.ID":
+		if e.complexity.A.ID == nil {
+			break
+		}
+
+		return e.complexity.A.ID(childComplexity), true
 
 	case "AIt.ID":
 		if e.complexity.AIt.ID == nil {
@@ -329,6 +346,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Autobind.Int64(childComplexity), true
+
+	case "B.ID":
+		if e.complexity.B.ID == nil {
+			break
+		}
+
+		return e.complexity.B.ID(childComplexity), true
 
 	case "Circle.Area":
 		if e.complexity.Circle.Area == nil {
@@ -695,6 +719,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
+
+	case "Query.OptionalUnion":
+		if e.complexity.Query.OptionalUnion == nil {
+			break
+		}
+
+		return e.complexity.Query.OptionalUnion(childComplexity), true
 
 	case "Query.Overlapping":
 		if e.complexity.Query.Overlapping == nil {
@@ -1254,6 +1285,20 @@ type Slices {
   test2: [String!]
   test3: [String]!
   test4: [String!]!
+}
+`},
+	&ast.Source{Name: "useptr.graphql", Input: `type A {
+    id: ID!
+}
+
+type B {
+    id: ID!
+}
+
+union TestUnion = A | B
+
+extend type Query {
+    optionalUnion: TestUnion
 }
 `},
 	&ast.Source{Name: "validtypes.graphql", Input: `extend type Query {
@@ -1925,6 +1970,33 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedField, obj *A) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "A",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.CollectedField, obj *AIt) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -2112,6 +2184,33 @@ func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedField, obj *B) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "B",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.CollectedField, obj *Circle) graphql.Marshaler {
@@ -3579,6 +3678,30 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOSlices2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐSlices(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().OptionalUnion(rctx)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(TestUnion)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOTestUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐTestUnion(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -5399,9 +5522,53 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 	}
 }
 
+func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet, obj *TestUnion) graphql.Marshaler {
+	switch obj := (*obj).(type) {
+	case nil:
+		return graphql.Null
+	case A:
+		return ec._A(ctx, sel, &obj)
+	case *A:
+		return ec._A(ctx, sel, obj)
+	case B:
+		return ec._B(ctx, sel, &obj)
+	case *B:
+		return ec._B(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var aImplementors = []string{"A", "TestUnion"}
+
+func (ec *executionContext) _A(ctx context.Context, sel ast.SelectionSet, obj *A) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, aImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("A")
+		case "id":
+			out.Values[i] = ec._A_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
 
 var aItImplementors = []string{"AIt"}
 
@@ -5490,6 +5657,33 @@ func (ec *executionContext) _Autobind(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "idInt":
 			out.Values[i] = ec._Autobind_idInt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var bImplementors = []string{"B", "TestUnion"}
+
+func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, bImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("B")
+		case "id":
+			out.Values[i] = ec._B_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -6278,6 +6472,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_slices(ctx, field)
+				return res
+			})
+		case "optionalUnion":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_optionalUnion(ctx, field)
 				return res
 			})
 		case "validType":
@@ -7841,6 +8046,10 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOTestUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐTestUnion(ctx context.Context, sel ast.SelectionSet, v TestUnion) graphql.Marshaler {
+	return ec._TestUnion(ctx, sel, &v)
 }
 
 func (ec *executionContext) unmarshalOThirdParty2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx context.Context, v interface{}) (ThirdParty, error) {

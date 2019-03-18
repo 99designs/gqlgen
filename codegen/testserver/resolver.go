@@ -140,6 +140,9 @@ func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, 
 func (r *queryResolver) Slices(ctx context.Context) (*Slices, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
 	panic("not implemented")
 }

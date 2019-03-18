@@ -68,3 +68,5 @@ models:
       oldFoo: { fieldName: foo, resolver: true }
   FallbackToStringEncoding:
     model: "github.com/99designs/gqlgen/codegen/testserver.FallbackToStringEncoding"
+  Bytes:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Bytes"

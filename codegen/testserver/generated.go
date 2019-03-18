@@ -172,6 +172,7 @@ type ComplexityRoot struct {
 		Overlapping            func(childComplexity int) int
 		Panics                 func(childComplexity int) int
 		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
+		ScalarSlice            func(childComplexity int) int
 		ShapeUnion             func(childComplexity int) int
 		Shapes                 func(childComplexity int) int
 		Slices                 func(childComplexity int) int
@@ -270,6 +271,7 @@ type QueryResolver interface {
 	Panics(ctx context.Context) (*Panics, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
 	Slices(ctx context.Context) (*Slices, error)
+	ScalarSlice(ctx context.Context) ([]byte, error)
 	Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 	OptionalUnion(ctx context.Context) (TestUnion, error)
 	ValidType(ctx context.Context) (*ValidType, error)
@@ -777,6 +779,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
+
+	case "Query.ScalarSlice":
+		if e.complexity.Query.ScalarSlice == nil {
+			break
+		}
+
+		return e.complexity.Query.ScalarSlice(childComplexity), true
 
 	case "Query.ShapeUnion":
 		if e.complexity.Query.ShapeUnion == nil {
@@ -1312,6 +1321,7 @@ scalar Time
 `},
 	&ast.Source{Name: "slices.graphql", Input: `extend type Query {
     slices: Slices
+    scalarSlice: Bytes!
 }
 
 type Slices {
@@ -1320,6 +1330,8 @@ type Slices {
   test3: [String]!
   test4: [String!]!
 }
+
+scalar Bytes
 `},
 	&ast.Source{Name: "typefallback.graphql", Input: `extend type Query {
     fallback(arg: FallbackToStringEncoding!): FallbackToStringEncoding!
@@ -3763,6 +3775,33 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOSlices2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐSlices(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ScalarSlice(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]byte)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBytes2ᚕbyte(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -6620,6 +6659,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_slices(ctx, field)
 				return res
 			})
+		case "scalarSlice":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_scalarSlice(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
 		case "fallback":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -7206,6 +7259,14 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
 	return graphql.MarshalBoolean(v)
+}
+
+func (ec *executionContext) unmarshalNBytes2ᚕbyte(ctx context.Context, v interface{}) ([]byte, error) {
+	return UnmarshalBytes(v)
+}
+
+func (ec *executionContext) marshalNBytes2ᚕbyte(ctx context.Context, sel ast.SelectionSet, v []byte) graphql.Marshaler {
+	return MarshalBytes(v)
 }
 
 func (ec *executionContext) unmarshalNDefaultScalarImplementation2string(ctx context.Context, v interface{}) (string, error) {

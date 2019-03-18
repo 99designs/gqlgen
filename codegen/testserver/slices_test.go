@@ -30,4 +30,16 @@ func TestSlices(t *testing.T) {
 		require.NotNil(t, resp.Slices.Test3)
 		require.NotNil(t, resp.Slices.Test4)
 	})
+
+	t.Run("custom scalars to slices work", func(t *testing.T) {
+		resolvers.QueryResolver.ScalarSlice = func(ctx context.Context) ([]byte, error) {
+			return []byte("testing"), nil
+		}
+
+		var resp struct {
+			ScalarSlice string
+		}
+		c.MustPost(`query { scalarSlice }`, &resp)
+		require.Equal(t, "testing", resp.ScalarSlice)
+	})
 }

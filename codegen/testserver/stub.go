@@ -50,6 +50,7 @@ type Stub struct {
 		Panics                 func(ctx context.Context) (*Panics, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
 		Slices                 func(ctx context.Context) (*Slices, error)
+		OptionalUnion          func(ctx context.Context) (TestUnion, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
 	SubscriptionResolver struct {
@@ -189,6 +190,9 @@ func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, erro
 }
 func (r *stubQuery) Slices(ctx context.Context) (*Slices, error) {
 	return r.QueryResolver.Slices(ctx)
+}
+func (r *stubQuery) OptionalUnion(ctx context.Context) (TestUnion, error) {
+	return r.QueryResolver.OptionalUnion(ctx)
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)

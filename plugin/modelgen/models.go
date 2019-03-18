@@ -119,14 +119,22 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					}
 				} else {
 					fieldDef := schema.Types[field.Type.Name()]
-					if fieldDef.Kind == ast.Scalar {
+					switch fieldDef.Kind {
+					case ast.Scalar:
 						// no user defined model, referencing a default scalar
 						typ = types.NewNamed(
 							types.NewTypeName(0, cfg.Model.Pkg(), "string", nil),
 							nil,
 							nil,
 						)
-					} else {
+					case ast.Interface, ast.Union:
+						// no user defined model, referencing a generated interface type
+						typ = types.NewNamed(
+							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+							types.NewInterfaceType([]*types.Func{}, []types.Type{}),
+							nil,
+						)
+					default:
 						// no user defined model, must reference another generated model
 						typ = types.NewNamed(
 							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
@@ -141,10 +149,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					name = nameOveride
 				}
 
-				fd := schema.Types[field.Type.Name()]
 				it.Fields = append(it.Fields, &Field{
 					Name:        name,
-					Type:        binder.CopyModifiersFromAst(field.Type, fd.Kind != ast.Interface, typ),
+					Type:        binder.CopyModifiersFromAst(field.Type, typ),
 					Description: field.Description,
 					Tag:         `json:"` + field.Name + `"`,
 				})

@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+type TestUnion interface {
+	IsTestUnion()
+}
+
+type A struct {
+	ID string `json:"id"`
+}
+
+func (A) IsTestUnion() {}
+
 type AIt struct {
 	ID string `json:"id"`
 }
@@ -16,6 +26,12 @@ type AIt struct {
 type AbIt struct {
 	ID string `json:"id"`
 }
+
+type B struct {
+	ID string `json:"id"`
+}
+
+func (B) IsTestUnion() {}
 
 type EmbeddedDefaultScalar struct {
 	Value *string `json:"value"`

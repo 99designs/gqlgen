@@ -399,7 +399,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			ref.GO = obj.Type()
 		}
 
-		ref.GO = b.CopyModifiersFromAst(schemaType, def.Kind != ast.Interface, ref.GO)
+		ref.GO = b.CopyModifiersFromAst(schemaType, ref.GO)
 
 		if bindTarget != nil {
 			if err = code.CompatibleTypes(ref.GO, bindTarget); err != nil {
@@ -414,12 +414,17 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 	return nil, fmt.Errorf("%s has type compatible with %s", schemaType.Name(), bindTarget.String())
 }
 
-func (b *Binder) CopyModifiersFromAst(t *ast.Type, usePtr bool, base types.Type) types.Type {
+func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 	if t.Elem != nil {
-		return types.NewSlice(b.CopyModifiersFromAst(t.Elem, usePtr, base))
+		return types.NewSlice(b.CopyModifiersFromAst(t.Elem, base))
 	}
 
-	if !t.NonNull && usePtr {
+	var isInterface bool
+	if named, ok := base.(*types.Named); ok {
+		_, isInterface = named.Underlying().(*types.Interface)
+	}
+
+	if !isInterface && !t.NonNull {
 		return types.NewPointer(base)
 	}
 

@@ -193,9 +193,9 @@ func (ref *TypeReference) Elem() *TypeReference {
 		}
 	}
 
-	if s, isSlice := ref.GO.(*types.Slice); isSlice {
+	if ref.IsSlice() {
 		return &TypeReference{
-			GO:          s.Elem(),
+			GO:          ref.GO.(*types.Slice).Elem(),
 			GQL:         ref.GQL.Elem,
 			CastType:    ref.CastType,
 			Definition:  ref.Definition,
@@ -221,7 +221,7 @@ func (t *TypeReference) IsNilable() bool {
 
 func (t *TypeReference) IsSlice() bool {
 	_, isSlice := t.GO.(*types.Slice)
-	return isSlice
+	return t.GQL.Elem != nil && isSlice
 }
 
 func (t *TypeReference) IsNamed() bool {

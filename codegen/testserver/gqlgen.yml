@@ -66,3 +66,5 @@ models:
       oneFoo: { fieldName: foo }
       twoFoo: { fieldName: foo }
       oldFoo: { fieldName: foo, resolver: true }
+  FallbackToStringEncoding:
+    model: "github.com/99designs/gqlgen/codegen/testserver.FallbackToStringEncoding"

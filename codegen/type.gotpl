@@ -27,10 +27,15 @@
 				return res, nil
 			{{- else }}
 				{{- if $type.Unmarshaler }}
-					return {{ $type.Unmarshaler | call }}(v)
+					{{- if $type.CastType }}
+						tmp, err := {{ $type.Unmarshaler | call }}(v)
+						return {{ $type.GO | ref }}(tmp), err
+					{{- else}}
+						return {{ $type.Unmarshaler | call }}(v)
+					{{- end }}
 				{{- else if eq ($type.GO | ref) "map[string]interface{}" }}
 					return v.(map[string]interface{}), nil
-				{{- else if $type.SelfUnmarshalling -}}
+				{{- else if $type.IsMarshaler -}}
 					var res {{ $type.GO | ref }}
 					return res, res.UnmarshalGQL(v)
 				{{- else }}
@@ -62,9 +67,7 @@
 				}
 			{{- end }}
 
-			{{- if $type.SelfMarshalling }}
-				return v
-			{{- else if $type.IsSlice }}
+			{{- if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
 						return graphql.Null
@@ -111,11 +114,13 @@
 				return ret
 			{{- else }}
 
-				{{- if $type.Marshaler }}
+				{{- if $type.IsMarshaler }}
+					return v
+				{{- else if $type.Marshaler }}
 					{{- if $type.IsPtr }}
 						return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, *v)
 					{{- else }}
-						return {{ $type.Marshaler | call }}(v)
+						return {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}(v){{else}}v{{- end }})
 					{{- end }}
 				{{- else }}
 					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)

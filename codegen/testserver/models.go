@@ -76,3 +76,11 @@ type OverlappingFields struct {
 	Foo    int
 	NewFoo int
 }
+
+type FallbackToStringEncoding string
+
+const (
+	FallbackToStringEncodingA FallbackToStringEncoding = "A"
+	FallbackToStringEncodingB FallbackToStringEncoding = "B"
+	FallbackToStringEncodingC FallbackToStringEncoding = "C"
+)

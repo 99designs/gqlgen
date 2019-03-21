@@ -13,7 +13,7 @@ Here are the steps to setup Gin and gqlgen together:
 
 Install Gin:
 ```bash
-$ go get gin
+$ go get github.com/gin-gonic/gin
 ```
 
 In your router file, define the handlers for the GraphQL and Playground endpoints in two different methods and tie then together in the Gin router:

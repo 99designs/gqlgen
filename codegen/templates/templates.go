@@ -28,6 +28,7 @@ type Options struct {
 	RegionTags      bool
 	GeneratedHeader bool
 	Data            interface{}
+	Funcs           template.FuncMap
 }
 
 func Render(cfg Options) error {
@@ -40,7 +41,11 @@ func Render(cfg Options) error {
 	_, callerFile, _, _ := runtime.Caller(1)
 	rootDir := filepath.Dir(callerFile)
 
-	t := template.New("").Funcs(Funcs())
+	funcs := Funcs()
+	for n, f := range cfg.Funcs {
+		funcs[n] = f
+	}
+	t := template.New("").Funcs(funcs)
 
 	var roots []string
 	// load all the templates in the directory

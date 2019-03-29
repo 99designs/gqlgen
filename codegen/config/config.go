@@ -368,7 +368,7 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 	}
 
 	for typeName, entry := range extraBuiltins {
-		if t, ok := s.Types[typeName]; ok && t.Kind == ast.Scalar {
+		if t, ok := s.Types[typeName]; !c.Models.Exists(typeName) && ok && t.Kind == ast.Scalar {
 			c.Models[typeName] = entry
 		}
 	}

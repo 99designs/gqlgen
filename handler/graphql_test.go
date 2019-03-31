@@ -401,8 +401,7 @@ func TestProcessMultipart(t *testing.T) {
 func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("fail missing all variables", func(t *testing.T) {
-		file, err := os.Open("path/to/file")
-		require.Nil(t, err)
+		file, _ := os.Open("path/to/file")
 		var operations map[string]interface{}
 		upload := graphql.Upload{
 			File:     file,
@@ -410,19 +409,18 @@ func TestAddUploadToOperations(t *testing.T) {
 			Size:     int64(5),
 		}
 		path := "variables.req.0.file"
-		err = addUploadToOperations(operations, upload, path)
+		err := addUploadToOperations(operations, upload, path)
 		require.NotNil(t, err)
 		require.Equal(t, "variables is missing, path: variables.req.0.file", err.Error())
 	})
 
 	t.Run("valid variable", func(t *testing.T) {
-		file, err := os.Open("path/to/file")
+		file, _ := os.Open("path/to/file")
 		operations := map[string]interface{}{
 			"variables": map[string]interface{}{
 				"file": nil,
 			},
 		}
-		require.Nil(t, err)
 
 		upload := graphql.Upload{
 			File:     file,
@@ -437,15 +435,14 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		path := "variables.file"
-		err = addUploadToOperations(operations, upload, path)
+		err := addUploadToOperations(operations, upload, path)
 		require.Nil(t, err)
 
 		require.Equal(t, operations, expected)
 	})
 
 	t.Run("valid nested variable", func(t *testing.T) {
-		file, err := os.Open("path/to/file")
-		require.Nil(t, err)
+		file, _ := os.Open("path/to/file")
 		operations := map[string]interface{}{
 			"variables": map[string]interface{}{
 				"req": []interface{}{
@@ -473,7 +470,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		path := "variables.req.0.file"
-		err = addUploadToOperations(operations, upload, path)
+		err := addUploadToOperations(operations, upload, path)
 		require.Nil(t, err)
 
 		require.Equal(t, operations, expected)

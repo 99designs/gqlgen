@@ -50,6 +50,7 @@ type Stub struct {
 		Panics                 func(ctx context.Context) (*Panics, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
 		Slices                 func(ctx context.Context) (*Slices, error)
+		ScalarSlice            func(ctx context.Context) ([]byte, error)
 		Fallback               func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 		OptionalUnion          func(ctx context.Context) (TestUnion, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
@@ -191,6 +192,9 @@ func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, erro
 }
 func (r *stubQuery) Slices(ctx context.Context) (*Slices, error) {
 	return r.QueryResolver.Slices(ctx)
+}
+func (r *stubQuery) ScalarSlice(ctx context.Context) ([]byte, error) {
+	return r.QueryResolver.ScalarSlice(ctx)
 }
 func (r *stubQuery) Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error) {
 	return r.QueryResolver.Fallback(ctx, arg)

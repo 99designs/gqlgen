@@ -347,7 +347,6 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 			"github.com/99designs/gqlgen/graphql.Int32",
 			"github.com/99designs/gqlgen/graphql.Int64",
 		}},
-		"Upload":              {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},
 		"ID": {
 			Model: StringList{
 				"github.com/99designs/gqlgen/graphql.ID",
@@ -364,8 +363,9 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 
 	// These are additional types that are injected if defined in the schema as scalars.
 	extraBuiltins := TypeMap{
-		"Time": {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
-		"Map":  {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"Time":   {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
+		"Map":    {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"Upload": {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},
 	}
 
 	for typeName, entry := range extraBuiltins {
@@ -379,16 +379,6 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 	schemaStrings := map[string]string{}
 
 	var sources []*ast.Source
-
-	// Add upload scalar
-	uploadSource := &ast.Source{
-		Name:    "uploadScalar.graphql",
-		Input:   "\"The `Upload` scalar type represents a multipart file upload.\"\nscalar Upload",
-		BuiltIn: true,
-	}
-	schemaStrings[uploadSource.Name] = uploadSource.Input
-	sources = append(sources, uploadSource)
-
 	for _, filename := range c.SchemaFilename {
 		filename = filepath.ToSlash(filename)
 		var err error

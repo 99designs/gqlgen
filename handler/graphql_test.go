@@ -321,7 +321,7 @@ func TestProcessMultipart(t *testing.T) {
 			Body:   ioutil.NopCloser(new(bytes.Buffer)),
 		}
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultFileMaxMemory)
+		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		errMsg := err.Error()
 		require.Equal(t, errMsg, "failed to parse multipart form")
@@ -332,7 +332,7 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, operations, validMap, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultFileMaxMemory)
+		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "operations form field could not be decoded")
 	})
@@ -342,7 +342,7 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultFileMaxMemory)
+		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "map form field could not be decoded")
 	})
@@ -352,7 +352,7 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, files)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultFileMaxMemory)
+		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "failed to get key 0 from form")
 	})
@@ -362,7 +362,7 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultFileMaxMemory)
+		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "invalid value for key 0")
 	})
@@ -372,7 +372,7 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultFileMaxMemory)
+		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "invalid value for key 0")
 	})
@@ -381,7 +381,7 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultFileMaxMemory)
+		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
 		require.Nil(t, err)
 		require.Equal(t, "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", reqParams.Query)
 		require.Equal(t, "", reqParams.OperationName)

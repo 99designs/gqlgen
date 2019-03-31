@@ -275,7 +275,6 @@ func WebsocketKeepAliveDuration(duration time.Duration) Option {
 
 const DefaultCacheSize = 1000
 const DefaultConnectionKeepAlivePingInterval = 25 * time.Second
-
 // DefaultUploadMaxMemory sets the total of maxMemory bytes used to parse a request body
 // as multipart/form-data in memory, with the remainder stored on disk in
 // temporary files. The default value is 32 MB.

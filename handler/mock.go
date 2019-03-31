@@ -51,9 +51,7 @@ func (e *executableSchemaMock) Mutation(ctx context.Context, op *ast.OperationDe
 
 func (e *executableSchemaMock) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
 	return func() *graphql.Response {
-		select {
-		case <-ctx.Done():
-			return nil
-		}
+		<-ctx.Done()
+		return nil
 	}
 }

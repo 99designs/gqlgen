@@ -543,7 +543,7 @@ func processMultipart(r *http.Request, request *params, uploadMaxMemory int64) e
 	for key, path := range uploadsMap {
 		file, header, err := r.FormFile(key)
 		if err != nil {
-			return errors.New(fmt.Sprintf("failed to get key %s from form", key))
+			return fmt.Errorf("failed to get key %s from form", key)
 		}
 		upload = graphql.Upload{
 			File:     file,
@@ -551,9 +551,12 @@ func processMultipart(r *http.Request, request *params, uploadMaxMemory int64) e
 			Filename: header.Filename,
 		}
 		if len(path) != 1 || !strings.HasPrefix(path[0], "variables.") {
-			return errors.New(fmt.Sprintf("invalid value for key %s", key))
+			return fmt.Errorf("invalid value for key %s", key)
 		}
-		addUploadToOperations(operations, upload, path[0])
+		err = addUploadToOperations(operations, upload, path[0])
+		if err != nil {
+			return err
+		}
 	}
 
 	// set request variables
@@ -585,7 +588,7 @@ func addUploadToOperations(operations interface{}, upload graphql.Upload, path s
 		switch idx := p.(type) {
 		case string:
 			if operations == nil {
-				return errors.New(fmt.Sprintf("variables is missing, path: %s", path))
+				return fmt.Errorf("variables is missing, path: %s", path)
 			}
 			if last {
 				operations.(map[string]interface{})[idx] = upload
@@ -594,7 +597,7 @@ func addUploadToOperations(operations interface{}, upload graphql.Upload, path s
 			}
 		case int:
 			if operations == nil {
-				return errors.New(fmt.Sprintf("variables is missing, path: %s", path))
+				return fmt.Errorf("variables is missing, path: %s", path)
 			}
 			if last {
 				operations.([]interface{})[idx] = upload

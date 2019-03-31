@@ -402,6 +402,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("fail missing all variables", func(t *testing.T) {
 		file, err := os.Open("path/to/file")
+		require.Nil(t, err)
 		var operations map[string]interface{}
 		upload := graphql.Upload{
 			File:     file,
@@ -421,6 +422,7 @@ func TestAddUploadToOperations(t *testing.T) {
 				"file": nil,
 			},
 		}
+		require.Nil(t, err)
 
 		upload := graphql.Upload{
 			File:     file,
@@ -443,6 +445,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("valid nested variable", func(t *testing.T) {
 		file, err := os.Open("path/to/file")
+		require.Nil(t, err)
 		operations := map[string]interface{}{
 			"variables": map[string]interface{}{
 				"req": []interface{}{

@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -379,6 +379,7 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 	schemaStrings := map[string]string{}
 
 	var sources []*ast.Source
+
 	for _, filename := range c.SchemaFilename {
 		filename = filepath.ToSlash(filename)
 		var err error

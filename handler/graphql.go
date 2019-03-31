@@ -23,7 +23,6 @@ import (
 
 const (
 	defaultMaxMemory = 32 << 20 // 32 MB
-	variablePrefix   = "variables."
 )
 
 type params struct {
@@ -539,7 +538,7 @@ func processMultipart(r *http.Request, request *params) error {
 			Size:     header.Size,
 			Filename: header.Filename,
 		}
-		if len(path) != 1 || !strings.HasPrefix(path[0], variablePrefix) {
+		if len(path) != 1 || !strings.HasPrefix(path[0], "variables.") {
 			return errors.New(fmt.Sprintf("invalid value for key %s", key))
 		}
 		addUploadToOperations(operations, upload, path[0])

@@ -14,7 +14,7 @@ and open http://localhost:8087 in your browser
 
 #### Operations
 
-```js
+```
 {
   query: `
     mutation($file: Upload!) {
@@ -61,7 +61,7 @@ Alpha file content.
 
 #### Operations
 
-```js
+```
 {
   query: `
     mutation($file: Upload!) {
@@ -109,7 +109,7 @@ Alpha file content.
 
 #### Operations
 
-```js
+```
 {
   query: `
     mutation($files: [Upload!]!) {
@@ -167,20 +167,28 @@ Charlie file content.
 
 #### Operations
 
-```js
+```
 {
   query: `
-    mutation($files: [Upload!]!) {
-      multipleUpload(files: $files) {
-        id
+    mutation($req: [UploadFile!]!)
+      multipleUploadWithPayload(req: $req) {
+        id,
+        name,
+        content
       }
     }
   `,
   variables: {
-    files: [
-      File, // b.txt
-      File  // c.txt
-    ]
+    req: [
+        {
+            id: 1,
+            File, // b.txt
+        },
+        {
+            id: 2,
+            File, // c.txt
+        }
+    ] 
   }
 }
 ```

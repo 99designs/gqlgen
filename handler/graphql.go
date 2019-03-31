@@ -1,15 +1,12 @@
 package handler
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -565,10 +562,8 @@ func processMultipart(r *http.Request, request *params) error {
 func addUploadToOperations(operations interface{}, upload graphql.Upload, path string) error {
 	var parts []interface{}
 	for _, p := range strings.Split(path, ".") {
-		if isNumber, err := regexp.MatchString(`\d+`, p); err != nil {
-			return errors.New(fmt.Sprintf("failed to parse path, path: %s, subpath: %s", path, p))
-		} else if isNumber {
-			index, _ := strconv.Atoi(p)
+		index, parseNbrErr := strconv.Atoi(p)
+		if parseNbrErr == nil {
 			parts = append(parts, index)
 		} else {
 			parts = append(parts, p)

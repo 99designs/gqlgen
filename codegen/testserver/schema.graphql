@@ -5,13 +5,21 @@ type Query {
     recursive(input: RecursiveInputSlice): Boolean
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
-    keywords(input: Keywords): Boolean!
     shapes: [Shape]
     errorBubble: Error
     modelMethods: ModelMethods
     valid: String!
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
+    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
+    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
+    directiveInputNullable(arg: InputDirectives): String
+    directiveInput(arg: InputDirectives!): String
+    directiveInputType(arg: InnerInput! @custom): String
+    inputSlice(arg: [String!]!): Boolean!
+    shapeUnion: ShapeUnion!
+    autobind: Autobind
+    deprecatedField: String! @deprecated(reason: "test deprecated directive")
 }
 
 type Subscription {
@@ -22,6 +30,17 @@ type Subscription {
 type User {
     id: Int!
     friends: [User!]!
+    created: Time!
+    updated: Time
+}
+
+type Autobind {
+    int: Int!
+    int32: Int!
+    int64: Int!
+
+    idStr: ID!
+    idInt: ID!
 }
 
 type Error {
@@ -62,70 +81,25 @@ input OuterInput {
     inner: InnerInput!
 }
 
+scalar ThirdParty
+
+input InputDirectives {
+    text: String! @length(min: 0, max: 7, message: "not valid")
+    inner: InnerDirectives!
+    innerNullable: InnerDirectives
+    thirdParty: ThirdParty @length(min: 0, max: 7, message: "not valid")
+}
+
+input InnerDirectives {
+    message: String! @length(min: 1, message: "not valid")
+}
+
 type OuterObject {
     inner: InnerObject!
 }
 
 type InnerObject {
     id: Int!
-}
-
-input Keywords {
-    break:       String!
-    default:     String!
-    func:        String!
-    interface:   String!
-    select:      String!
-    case:        String!
-    defer:       String!
-    go:          String!
-    map:         String!
-    struct:      String!
-    chan:        String!
-    else:        String!
-    goto:        String!
-    package:     String!
-    switch:      String!
-    const:       String!
-    fallthrough: String!
-    if:          String!
-    range:       String!
-    type:        String!
-    continue:    String!
-    for:         String!
-    import:      String!
-    return:      String!
-    var:         String!
-}
-
-extend type Query {
-    keywordArgs(
-        break:       String!,
-        default:     String!,
-        func:        String!,
-        interface:   String!,
-        select:      String!,
-        case:        String!,
-        defer:       String!,
-        go:          String!,
-        map:         String!,
-        struct:      String!,
-        chan:        String!,
-        else:        String!,
-        goto:        String!,
-        package:     String!,
-        switch:      String!,
-        const:       String!,
-        fallthrough: String!,
-        if:          String!,
-        range:       String!,
-        type:        String!,
-        continue:    String!,
-        for:         String!,
-        import:      String!,
-        return:      String!,
-        var:         String!,
-    ): Boolean!
 }
 
 interface Shape {
@@ -150,3 +124,14 @@ type EmbeddedPointer {
     ID: String
     Title: String
 }
+
+directive @length(min: Int!, max: Int) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
+directive @custom on ARGUMENT_DEFINITION
+
+enum Status {
+    OK
+    ERROR
+}
+
+scalar Time

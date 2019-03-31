@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate go run ../../testdata/gqlgen.go
 
 package type_system_extension
 
@@ -65,7 +65,7 @@ func (r *queryResolver) Todo(ctx context.Context, id string) (*Todo, error) {
 
 type mutationResolver struct{ *resolver }
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, todoInput TodoInput) (Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, todoInput TodoInput) (*Todo, error) {
 	newID := fmt.Sprintf("Todo:%d", len(r.todos)+1)
 	newTodo := &Todo{
 		ID:    newID,
@@ -74,5 +74,5 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, todoInput TodoInput) 
 	}
 	r.todos = append(r.todos, newTodo)
 
-	return *newTodo, nil
+	return newTodo, nil
 }

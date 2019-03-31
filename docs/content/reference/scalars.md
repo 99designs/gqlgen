@@ -1,14 +1,32 @@
 ---
-linkTitle: Custom Scalars
-title: Using custom graphql types in golang
-description: Defining custom GraphQL scalar types using gqlgen
+linkTitle: Scalars
+title: Mapping GraphQL scalar types to Go types
+description: Mapping GraphQL scalar types to Go types
 menu: { main: { parent: 'reference' } }
 ---
 
-There are two different ways to implement scalars in gqlgen, depending on your need.
+## Built-in helpers
 
+gqlgen ships with two built-in helpers for common custom scalar use-cases, `Time` and `Map`.  Adding either of these to a schema will automatically add the marshalling behaviour to Go types.
 
-## With user defined types
+### Time
+
+```graphql
+scalar Time
+```
+
+Maps a `Time` GraphQL scalar to a Go `time.Time` struct.
+
+### Map
+
+```graphql
+scalar Map
+```
+
+Maps an arbitrary GraphQL value to a `map[string]{interface}` Go type.
+
+##  Custom scalars with user defined types
+
 For user defined types you can implement the graphql.Marshal and graphql.Unmarshal interfaces and they will be called.
 
 ```go
@@ -55,7 +73,7 @@ models:
 ```
 
 
-## Custom scalars for types you don't control
+## Custom scalars with third party types
 
 Sometimes you cant add methods to a type because its in another repo, part of the standard 
 library (eg string or time.Time). To do this we can build an external marshaler:

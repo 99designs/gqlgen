@@ -1,0 +1,168 @@
+type Query {
+    invalidIdentifier: InvalidIdentifier
+    collision: It
+    recursive(input: RecursiveInputSlice): Boolean
+    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
+    nestedOutputs: [[OuterObject]]
+    keywords(input: Keywords): Boolean!
+    shapes: [Shape]
+    errorBubble: Error
+    modelMethods: ModelMethods
+    valid: String!
+    user(id: Int!): User!
+    nullableArg(arg: Int = 123): String
+    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
+    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
+    directiveInputNullable(arg: InputDirectives): String
+    directiveInput(arg: InputDirectives!): String
+}
+
+type Subscription {
+    updated: String!
+    initPayload: String!
+}
+
+type User {
+    id: Int!
+    friends: [User!]!
+}
+
+type Error {
+    id: ID!
+    errorOnNonRequiredField: String
+    errorOnRequiredField: String!
+    nilOnRequiredField: String!
+}
+
+type ModelMethods {
+    resolverField: Boolean!
+    noContext: Boolean!
+    withContext: Boolean!
+}
+
+type InvalidIdentifier {
+    id: Int!
+}
+
+type It {
+    id: ID!
+}
+
+input RecursiveInputSlice {
+    self: [RecursiveInputSlice!]
+}
+
+input InnerInput {
+    id:Int!
+}
+
+input OuterInput {
+    inner: InnerInput!
+}
+
+input InputDirectives {
+    text: String! @length(min: 0, max: 7, message: "not valid")
+    inner: InnerDirectives!
+    innerNullable: InnerDirectives
+}
+
+input InnerDirectives {
+    message: String! @length(min: 1, message: "not valid")
+}
+
+type OuterObject {
+    inner: InnerObject!
+}
+
+type InnerObject {
+    id: Int!
+}
+
+input Keywords {
+    break:       String!
+    default:     String!
+    func:        String!
+    interface:   String!
+    select:      String!
+    case:        String!
+    defer:       String!
+    go:          String!
+    map:         String!
+    struct:      String!
+    chan:        String!
+    else:        String!
+    goto:        String!
+    package:     String!
+    switch:      String!
+    const:       String!
+    fallthrough: String!
+    if:          String!
+    range:       String!
+    type:        String!
+    continue:    String!
+    for:         String!
+    import:      String!
+    return:      String!
+    var:         String!
+}
+
+extend type Query {
+    keywordArgs(
+        break:       String!,
+        default:     String!,
+        func:        String!,
+        interface:   String!,
+        select:      String!,
+        case:        String!,
+        defer:       String!,
+        go:          String!,
+        map:         String!,
+        struct:      String!,
+        chan:        String!,
+        else:        String!,
+        goto:        String!,
+        package:     String!,
+        switch:      String!,
+        const:       String!,
+        fallthrough: String!,
+        if:          String!,
+        range:       String!,
+        type:        String!,
+        continue:    String!,
+        for:         String!,
+        import:      String!,
+        return:      String!,
+        var:         String!,
+    ): Boolean!
+}
+
+interface Shape {
+    area: Float
+}
+type Circle implements Shape {
+    radius: Float
+    area: Float
+}
+type Rectangle implements Shape {
+    length: Float
+    width: Float
+    area: Float
+}
+union ShapeUnion = Circle | Rectangle
+
+type ForcedResolver {
+    field: Circle
+}
+
+type EmbeddedPointer {
+    ID: String
+    Title: String
+}
+
+directive @length(min: Int!, max: Int, message: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @range(min: Int = 0, max: Int, message: String) on ARGUMENT_DEFINITION
+
+enum Status {
+    OK
+    ERROR
+}

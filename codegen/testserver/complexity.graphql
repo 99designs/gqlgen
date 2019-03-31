@@ -1,0 +1,11 @@
+extend type Query {
+    overlapping: OverlappingFields
+}
+
+type OverlappingFields {
+  oneFoo: Int!
+  twoFoo: Int!
+  oldFoo: Int!
+  newFoo: Int!
+  new_foo: Int!
+}

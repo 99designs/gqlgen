@@ -61,7 +61,7 @@ func TestScalars(t *testing.T) {
 		var resp struct{ Search []RawUser }
 
 		err := c.Post(`{ search(input:{createdAfter:"2014"}) { id } }`, &resp)
-		require.EqualError(t, err, `[{"message":"time should be a unix timestamp"}]`)
+		require.EqualError(t, err, `[{"message":"time should be a unix timestamp","path":["search"]}]`)
 	})
 
 	t.Run("scalar resolver methods", func(t *testing.T) {

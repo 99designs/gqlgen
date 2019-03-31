@@ -1,0 +1,58 @@
+type Query {
+    thisShoudlntGetGenerated: Boolean
+}
+
+type Mutation {
+    thisShoudlntGetGenerated: Boolean
+}
+
+type Subscription {
+    thisShoudlntGetGenerated: Boolean
+}
+
+type MissingType implements MissingInterface & ExistingInterface {
+    name: String
+    enum: MissingEnum
+    int: MissingInterface
+    existing: ExistingType
+}
+
+input MissingInput {
+    name: String
+    enum: MissingEnum
+}
+
+enum MissingEnum {
+    Hello
+    Goodbye
+}
+
+interface MissingInterface {
+    name: String
+}
+
+union MissingUnion = MissingType | ExistingType
+
+type ExistingType implements MissingInterface & ExistingInterface {
+    name: String
+    enum: ExistingEnum
+    int: ExistingInterface
+    existing: MissingType
+}
+
+input ExistingInput {
+    name: String
+    enum: ExistingEnum
+}
+
+enum ExistingEnum {
+    Hello
+    Goodbye
+}
+
+interface ExistingInterface {
+    name: String
+}
+
+union ExistingUnion = MissingType | ExistingType
+

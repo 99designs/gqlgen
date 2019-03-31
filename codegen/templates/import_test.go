@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"go/types"
 	"os"
 	"testing"
 
@@ -20,6 +21,15 @@ func TestImports(t *testing.T) {
 
 		require.Equal(t, "bar", a.Lookup(aBar))
 		require.Equal(t, "bar", a.Lookup(aBar))
+	})
+
+	t.Run("lookup by type", func(t *testing.T) {
+		a := Imports{destDir: wd}
+
+		pkg := types.NewPackage("github.com/99designs/gqlgen/codegen/templates/testdata/b/bar", "bar")
+		typ := types.NewNamed(types.NewTypeName(0, pkg, "Boolean", types.Typ[types.Bool]), types.Typ[types.Bool], nil)
+
+		require.Equal(t, "bar.Boolean", a.LookupType(typ))
 	})
 
 	t.Run("duplicates are decollisioned", func(t *testing.T) {
@@ -54,33 +64,14 @@ bar1 "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
 		)
 	})
 
-	t.Run("reserved collisions on path will panic", func(t *testing.T) {
-		a := Imports{destDir: wd}
-
-		a.Reserve(aBar)
-
-		require.Panics(t, func() {
-			a.Reserve(aBar)
-		})
-	})
-
-	t.Run("reserved collisions on alias will panic", func(t *testing.T) {
-		a := Imports{destDir: wd}
-
-		a.Reserve(aBar)
-
-		require.Panics(t, func() {
-			a.Reserve(bBar)
-		})
-	})
-
 	t.Run("aliased imports will not collide", func(t *testing.T) {
 		a := Imports{destDir: wd}
 
-		a.Reserve(aBar, "abar")
-		a.Reserve(bBar, "bbar")
+		_, _ = a.Reserve(aBar, "abar")
+		_, _ = a.Reserve(bBar, "bbar")
 
 		require.Equal(t, `abar "github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
 bbar "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"`, a.String())
 	})
+
 }

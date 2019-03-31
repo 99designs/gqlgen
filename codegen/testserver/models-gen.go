@@ -2,6 +2,45 @@
 
 package testserver
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+	"time"
+)
+
+type TestUnion interface {
+	IsTestUnion()
+}
+
+type A struct {
+	ID string `json:"id"`
+}
+
+func (A) IsTestUnion() {}
+
+type AIt struct {
+	ID string `json:"id"`
+}
+
+type AbIt struct {
+	ID string `json:"id"`
+}
+
+type B struct {
+	ID string `json:"id"`
+}
+
+func (B) IsTestUnion() {}
+
+type EmbeddedDefaultScalar struct {
+	Value *string `json:"value"`
+}
+
+type InnerDirectives struct {
+	Message string `json:"message"`
+}
+
 type InnerInput struct {
 	ID int `json:"id"`
 }
@@ -10,7 +49,42 @@ type InnerObject struct {
 	ID int `json:"id"`
 }
 
-type Keywords struct {
+type InputDirectives struct {
+	Text          string           `json:"text"`
+	Inner         InnerDirectives  `json:"inner"`
+	InnerNullable *InnerDirectives `json:"innerNullable"`
+	ThirdParty    *ThirdParty      `json:"thirdParty"`
+}
+
+// Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
+// added to the TypeMap
+type Map struct {
+	ID string `json:"id"`
+}
+
+type OuterInput struct {
+	Inner InnerInput `json:"inner"`
+}
+
+type OuterObject struct {
+	Inner InnerObject `json:"inner"`
+}
+
+type Slices struct {
+	Test1 []*string `json:"test1"`
+	Test2 []string  `json:"test2"`
+	Test3 []*string `json:"test3"`
+	Test4 []string  `json:"test4"`
+}
+
+type User struct {
+	ID      int        `json:"id"`
+	Friends []User     `json:"friends"`
+	Created time.Time  `json:"created"`
+	Updated *time.Time `json:"updated"`
+}
+
+type ValidInput struct {
 	Break       string `json:"break"`
 	Default     string `json:"default"`
 	Func        string `json:"func"`
@@ -36,17 +110,70 @@ type Keywords struct {
 	Import      string `json:"import"`
 	Return      string `json:"return"`
 	Var         string `json:"var"`
+	Underscore  string `json:"_"`
 }
 
-type OuterInput struct {
-	Inner InnerInput `json:"inner"`
+//  These things are all valid, but without care generate invalid go code
+type ValidType struct {
+	DifferentCase      string `json:"differentCase"`
+	DifferentCaseOld   string `json:"different_case"`
+	ValidInputKeywords bool   `json:"validInputKeywords"`
+	ValidArgs          bool   `json:"validArgs"`
 }
 
-type OuterObject struct {
-	Inner InnerObject `json:"inner"`
+type XXIt struct {
+	ID string `json:"id"`
 }
 
-type User struct {
-	ID      int    `json:"id"`
-	Friends []User `json:"friends"`
+type XxIt struct {
+	ID string `json:"id"`
+}
+
+type AsdfIt struct {
+	ID string `json:"id"`
+}
+
+type IIt struct {
+	ID string `json:"id"`
+}
+
+type Status string
+
+const (
+	StatusOk    Status = "OK"
+	StatusError Status = "ERROR"
+)
+
+var AllStatus = []Status{
+	StatusOk,
+	StatusError,
+}
+
+func (e Status) IsValid() bool {
+	switch e {
+	case StatusOk, StatusError:
+		return true
+	}
+	return false
+}
+
+func (e Status) String() string {
+	return string(e)
+}
+
+func (e *Status) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Status(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Status", str)
+	}
+	return nil
+}
+
+func (e Status) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

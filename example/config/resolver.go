@@ -1,4 +1,4 @@
-//go:generate gorunpkg github.com/99designs/gqlgen
+//go:generate go run ../../testdata/gqlgen.go
 
 package config
 
@@ -38,7 +38,7 @@ func (r *Resolver) Todo() TodoResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
 	newID := r.nextID
 	r.nextID++
 
@@ -49,7 +49,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (Todo,
 
 	r.todos = append(r.todos, newTodo)
 
-	return newTodo, nil
+	return &newTodo, nil
 }
 
 type queryResolver struct{ *Resolver }
@@ -59,6 +59,10 @@ func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
 }
 
 type todoResolver struct{ *Resolver }
+
+func (r *todoResolver) Description(ctx context.Context, obj *Todo) (string, error) {
+	panic("implement me")
+}
 
 func (r *todoResolver) ID(ctx context.Context, obj *Todo) (string, error) {
 	if obj.ID != "" {

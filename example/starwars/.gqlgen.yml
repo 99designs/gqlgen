@@ -1,14 +1,19 @@
+exec:
+  filename: generated/exec.go
+model:
+  filename: models/generated.go
+
 models:
   Droid:
-    model: github.com/99designs/gqlgen/example/starwars.Droid
+    model: github.com/99designs/gqlgen/example/starwars/models.Droid
   FriendsConnection:
-    model: github.com/99designs/gqlgen/example/starwars.FriendsConnection
+    model: github.com/99designs/gqlgen/example/starwars/models.FriendsConnection
   Human:
-    model: github.com/99designs/gqlgen/example/starwars.Human
+    model: github.com/99designs/gqlgen/example/starwars/models.Human
   Review:
-    model: github.com/99designs/gqlgen/example/starwars.Review
+    model: github.com/99designs/gqlgen/example/starwars/models.Review
   ReviewInput:
-    model: github.com/99designs/gqlgen/example/starwars.Review
+    model: github.com/99designs/gqlgen/example/starwars/models.Review
   Starship:
     fields:
       length:

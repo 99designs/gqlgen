@@ -9,6 +9,34 @@ import (
 	"time"
 )
 
+type TestUnion interface {
+	IsTestUnion()
+}
+
+type A struct {
+	ID string `json:"id"`
+}
+
+func (A) IsTestUnion() {}
+
+type AIt struct {
+	ID string `json:"id"`
+}
+
+type AbIt struct {
+	ID string `json:"id"`
+}
+
+type B struct {
+	ID string `json:"id"`
+}
+
+func (B) IsTestUnion() {}
+
+type EmbeddedDefaultScalar struct {
+	Value *string `json:"value"`
+}
+
 type InnerDirectives struct {
 	Message string `json:"message"`
 }
@@ -28,12 +56,25 @@ type InputDirectives struct {
 	ThirdParty    *ThirdParty      `json:"thirdParty"`
 }
 
+// Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
+// added to the TypeMap
+type Map struct {
+	ID string `json:"id"`
+}
+
 type OuterInput struct {
 	Inner InnerInput `json:"inner"`
 }
 
 type OuterObject struct {
 	Inner InnerObject `json:"inner"`
+}
+
+type Slices struct {
+	Test1 []*string `json:"test1"`
+	Test2 []string  `json:"test2"`
+	Test3 []*string `json:"test3"`
+	Test4 []string  `json:"test4"`
 }
 
 type User struct {
@@ -78,6 +119,22 @@ type ValidType struct {
 	DifferentCaseOld   string `json:"different_case"`
 	ValidInputKeywords bool   `json:"validInputKeywords"`
 	ValidArgs          bool   `json:"validArgs"`
+}
+
+type XXIt struct {
+	ID string `json:"id"`
+}
+
+type XxIt struct {
+	ID string `json:"id"`
+}
+
+type AsdfIt struct {
+	ID string `json:"id"`
+}
+
+type IIt struct {
+	ID string `json:"id"`
 }
 
 type Status string

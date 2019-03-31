@@ -15,8 +15,11 @@ type Query {
     directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
+    directiveInputType(arg: InnerInput! @custom): String
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
+    autobind: Autobind
+    deprecatedField: String! @deprecated(reason: "test deprecated directive")
 }
 
 type Subscription {
@@ -29,6 +32,15 @@ type User {
     friends: [User!]!
     created: Time!
     updated: Time
+}
+
+type Autobind {
+    int: Int!
+    int32: Int!
+    int64: Int!
+
+    idStr: ID!
+    idInt: ID!
 }
 
 type Error {
@@ -115,6 +127,7 @@ type EmbeddedPointer {
 
 directive @length(min: Int!, max: Int) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
+directive @custom on ARGUMENT_DEFINITION
 
 enum Status {
     OK

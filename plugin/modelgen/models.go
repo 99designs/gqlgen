@@ -4,10 +4,9 @@ import (
 	"go/types"
 	"sort"
 
-	"github.com/99designs/gqlgen/internal/code"
-
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -17,6 +16,7 @@ type ModelBuild struct {
 	Interfaces  []*Interface
 	Models      []*Object
 	Enums       []*Enum
+	Scalars     []string
 }
 
 type Interface struct {
@@ -41,14 +41,12 @@ type Field struct {
 type Enum struct {
 	Description string
 	Name        string
-	Raw         string
 	Values      []*EnumValue
 }
 
 type EnumValue struct {
 	Description string
 	Name        string
-	Value       string
 }
 
 func New() plugin.Plugin {
@@ -93,7 +91,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		case ast.Interface, ast.Union:
 			it := &Interface{
 				Description: schemaType.Description,
-				Name:        templates.ToGo(schemaType.Name),
+				Name:        schemaType.Name,
 			}
 
 			b.Interfaces = append(b.Interfaces, it)
@@ -103,11 +101,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			}
 			it := &Object{
 				Description: schemaType.Description,
-				Name:        templates.ToGo(schemaType.Name),
+				Name:        schemaType.Name,
 			}
 
 			for _, implementor := range schema.GetImplements(schemaType) {
-				it.Implements = append(it.Implements, templates.ToGo(implementor.Name))
+				it.Implements = append(it.Implements, implementor.Name)
 			}
 
 			for _, field := range schemaType.Fields {
@@ -120,12 +118,30 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 						return err
 					}
 				} else {
-					// no user defined model, must reference another generated model
-					typ = types.NewNamed(
-						types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-						nil,
-						nil,
-					)
+					fieldDef := schema.Types[field.Type.Name()]
+					switch fieldDef.Kind {
+					case ast.Scalar:
+						// no user defined model, referencing a default scalar
+						typ = types.NewNamed(
+							types.NewTypeName(0, cfg.Model.Pkg(), "string", nil),
+							nil,
+							nil,
+						)
+					case ast.Interface, ast.Union:
+						// no user defined model, referencing a generated interface type
+						typ = types.NewNamed(
+							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+							types.NewInterfaceType([]*types.Func{}, []types.Type{}),
+							nil,
+						)
+					default:
+						// no user defined model, must reference another generated model
+						typ = types.NewNamed(
+							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+							nil,
+							nil,
+						)
+					}
 				}
 
 				name := field.Name
@@ -133,10 +149,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					name = nameOveride
 				}
 
-				fd := schema.Types[field.Type.Name()]
 				it.Fields = append(it.Fields, &Field{
-					Name:        templates.ToGo(name),
-					Type:        binder.CopyModifiersFromAst(field.Type, fd.Kind != ast.Interface, typ),
+					Name:        name,
+					Type:        binder.CopyModifiersFromAst(field.Type, typ),
 					Description: field.Description,
 					Tag:         `json:"` + field.Name + `"`,
 				})
@@ -145,20 +160,20 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			b.Models = append(b.Models, it)
 		case ast.Enum:
 			it := &Enum{
-				Name:        templates.ToGo(schemaType.Name),
-				Raw:         schemaType.Name,
+				Name:        schemaType.Name,
 				Description: schemaType.Description,
 			}
 
 			for _, v := range schemaType.EnumValues {
 				it.Values = append(it.Values, &EnumValue{
-					Name:        templates.ToGo(v.Name),
-					Value:       v.Name,
+					Name:        v.Name,
 					Description: v.Description,
 				})
 			}
 
 			b.Enums = append(b.Enums, it)
+		case ast.Scalar:
+			b.Scalars = append(b.Scalars, schemaType.Name)
 		}
 	}
 
@@ -167,13 +182,16 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	sort.Slice(b.Interfaces, func(i, j int) bool { return b.Interfaces[i].Name < b.Interfaces[j].Name })
 
 	for _, it := range b.Enums {
-		cfg.Models.Add(it.Raw, cfg.Model.ImportPath()+"."+it.Name)
+		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+templates.ToGo(it.Name))
 	}
 	for _, it := range b.Models {
-		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+it.Name)
+		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+templates.ToGo(it.Name))
 	}
 	for _, it := range b.Interfaces {
-		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+it.Name)
+		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+templates.ToGo(it.Name))
+	}
+	for _, it := range b.Scalars {
+		cfg.Models.Add(it, "github.com/99designs/gqlgen/graphql.String")
 	}
 
 	if len(b.Models) == 0 && len(b.Enums) == 0 {

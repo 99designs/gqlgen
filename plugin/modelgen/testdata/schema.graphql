@@ -20,8 +20,6 @@ type MissingType implements MissingInterface & ExistingInterface {
 input MissingInput {
     name: String
     enum: MissingEnum
-    int: MissingInterface
-    existing: ExistingType
 }
 
 enum MissingEnum {
@@ -45,8 +43,6 @@ type ExistingType implements MissingInterface & ExistingInterface {
 input ExistingInput {
     name: String
     enum: ExistingEnum
-    int: ExistingInterface
-    existing: MissingType
 }
 
 enum ExistingEnum {

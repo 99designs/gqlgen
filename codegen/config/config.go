@@ -249,7 +249,7 @@ func (tm TypeMap) ReferencedPackages() []string {
 			if pkg == "" || inStrSlice(pkgs, pkg) {
 				continue
 			}
-			pkgs = append(pkgs, pkg)
+			pkgs = append(pkgs, code.QualifyPackagePath(pkg))
 		}
 	}
 
@@ -339,12 +339,14 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 		"__EnumValue":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"}},
 		"__InputValue":        {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.InputValue"}},
 		"__Schema":            {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Schema"}},
-		"Int":                 {Model: StringList{"github.com/99designs/gqlgen/graphql.Int"}},
 		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.Float"}},
 		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
-		"Time":                {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
-		"Map":                 {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"Int": {Model: StringList{
+			"github.com/99designs/gqlgen/graphql.Int",
+			"github.com/99designs/gqlgen/graphql.Int32",
+			"github.com/99designs/gqlgen/graphql.Int64",
+		}},
 		"Upload":              {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},
 		"ID": {
 			Model: StringList{
@@ -356,6 +358,18 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 
 	for typeName, entry := range builtins {
 		if !c.Models.Exists(typeName) {
+			c.Models[typeName] = entry
+		}
+	}
+
+	// These are additional types that are injected if defined in the schema as scalars.
+	extraBuiltins := TypeMap{
+		"Time": {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
+		"Map":  {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+	}
+
+	for typeName, entry := range extraBuiltins {
+		if t, ok := s.Types[typeName]; ok && t.Kind == ast.Scalar {
 			c.Models[typeName] = entry
 		}
 	}

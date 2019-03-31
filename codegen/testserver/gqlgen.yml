@@ -54,3 +54,17 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.Panics"
   MarshalPanic:
     model: "github.com/99designs/gqlgen/codegen/testserver.MarshalPanic"
+  Autobind:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Autobind"
+  MapStringInterfaceInput:
+    model: "map[string]interface{}"
+  MapStringInterfaceType:
+    model: "map[string]interface{}"
+  OverlappingFields:
+    model: "github.com/99designs/gqlgen/codegen/testserver.OverlappingFields"
+    fields:
+      oneFoo: { fieldName: foo }
+      twoFoo: { fieldName: foo }
+      oldFoo: { fieldName: foo, resolver: true }
+  FallbackToStringEncoding:
+    model: "github.com/99designs/gqlgen/codegen/testserver.FallbackToStringEncoding"

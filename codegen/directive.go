@@ -11,8 +11,9 @@ import (
 )
 
 type Directive struct {
-	Name string
-	Args []*FieldArgument
+	Name    string
+	Args    []*FieldArgument
+	Builtin bool
 }
 
 func (b *builder) buildDirectives() (map[string]*Directive, error) {
@@ -22,8 +23,10 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 		if _, ok := directives[name]; ok {
 			return nil, errors.Errorf("directive with name %s already exists", name)
 		}
+
+		var builtin bool
 		if name == "skip" || name == "include" || name == "deprecated" {
-			continue
+			builtin = true
 		}
 
 		var args []*FieldArgument
@@ -50,8 +53,9 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 		}
 
 		directives[name] = &Directive{
-			Name: name,
-			Args: args,
+			Name:    name,
+			Args:    args,
+			Builtin: builtin,
 		}
 	}
 

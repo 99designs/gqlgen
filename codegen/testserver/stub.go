@@ -16,6 +16,9 @@ type Stub struct {
 	ModelMethodsResolver struct {
 		ResolverField func(ctx context.Context, obj *ModelMethods) (bool, error)
 	}
+	OverlappingFieldsResolver struct {
+		OldFoo func(ctx context.Context, obj *OverlappingFields) (int, error)
+	}
 	PanicsResolver struct {
 		FieldScalarMarshal func(ctx context.Context, obj *Panics) ([]MarshalPanic, error)
 		ArgUnmarshal       func(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error)
@@ -37,9 +40,18 @@ type Stub struct {
 		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int) (*string, error)
 		DirectiveInputNullable func(ctx context.Context, arg *InputDirectives) (*string, error)
 		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
+		DirectiveInputType     func(ctx context.Context, arg InnerInput) (*string, error)
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
+		Autobind               func(ctx context.Context) (*Autobind, error)
+		DeprecatedField        func(ctx context.Context) (string, error)
+		Overlapping            func(ctx context.Context) (*OverlappingFields, error)
+		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
+		DefaultScalar          func(ctx context.Context, arg string) (string, error)
+		Slices                 func(ctx context.Context) (*Slices, error)
+		Fallback               func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
+		OptionalUnion          func(ctx context.Context) (TestUnion, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
 	}
 	SubscriptionResolver struct {
@@ -56,6 +68,9 @@ func (r *Stub) ForcedResolver() ForcedResolverResolver {
 }
 func (r *Stub) ModelMethods() ModelMethodsResolver {
 	return &stubModelMethods{r}
+}
+func (r *Stub) OverlappingFields() OverlappingFieldsResolver {
+	return &stubOverlappingFields{r}
 }
 func (r *Stub) Panics() PanicsResolver {
 	return &stubPanics{r}
@@ -80,6 +95,12 @@ type stubModelMethods struct{ *Stub }
 
 func (r *stubModelMethods) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
 	return r.ModelMethodsResolver.ResolverField(ctx, obj)
+}
+
+type stubOverlappingFields struct{ *Stub }
+
+func (r *stubOverlappingFields) OldFoo(ctx context.Context, obj *OverlappingFields) (int, error) {
+	return r.OverlappingFieldsResolver.OldFoo(ctx, obj)
 }
 
 type stubPanics struct{ *Stub }
@@ -141,14 +162,41 @@ func (r *stubQuery) DirectiveInputNullable(ctx context.Context, arg *InputDirect
 func (r *stubQuery) DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error) {
 	return r.QueryResolver.DirectiveInput(ctx, arg)
 }
+func (r *stubQuery) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
+	return r.QueryResolver.DirectiveInputType(ctx, arg)
+}
 func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) {
 	return r.QueryResolver.InputSlice(ctx, arg)
 }
 func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	return r.QueryResolver.ShapeUnion(ctx)
 }
+func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
+	return r.QueryResolver.Autobind(ctx)
+}
+func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
+	return r.QueryResolver.DeprecatedField(ctx)
+}
+func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
+	return r.QueryResolver.Overlapping(ctx)
+}
+func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+	return r.QueryResolver.MapStringInterface(ctx, in)
+}
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)
+}
+func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
+	return r.QueryResolver.DefaultScalar(ctx, arg)
+}
+func (r *stubQuery) Slices(ctx context.Context) (*Slices, error) {
+	return r.QueryResolver.Slices(ctx)
+}
+func (r *stubQuery) Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error) {
+	return r.QueryResolver.Fallback(ctx, arg)
+}
+func (r *stubQuery) OptionalUnion(ctx context.Context) (TestUnion, error) {
+	return r.QueryResolver.OptionalUnion(ctx)
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)

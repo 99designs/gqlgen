@@ -20,6 +20,7 @@ type Data struct {
 	Inputs          Objects
 	Interfaces      map[string]*Interface
 	ReferencedTypes map[string]*config.TypeReference
+	ComplexityRoots map[string]*Object
 
 	QueryRoot        *Object
 	MutationRoot     *Object
@@ -62,9 +63,16 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		return nil, err
 	}
 
+	dataDirectives := make(map[string]*Directive)
+	for name, d := range b.Directives {
+		if !d.Builtin {
+			dataDirectives[name] = d
+		}
+	}
+
 	s := Data{
 		Config:     cfg,
-		Directives: b.Directives,
+		Directives: dataDirectives,
 		Schema:     b.Schema,
 		SchemaStr:  b.SchemaStr,
 		Interfaces: map[string]*Interface{},

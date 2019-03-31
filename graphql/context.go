@@ -12,6 +12,7 @@ import (
 type Resolver func(ctx context.Context) (res interface{}, err error)
 type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
+type ComplexityLimitFunc func(ctx context.Context) int
 
 type RequestContext struct {
 	RawQuery  string
@@ -93,6 +94,8 @@ type ResolverContext struct {
 	Index *int
 	// The result object of resolver
 	Result interface{}
+	// IsMethod indicates if the resolver is a method
+	IsMethod bool
 }
 
 func (r *ResolverContext) Path() []interface{} {

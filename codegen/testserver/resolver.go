@@ -17,6 +17,9 @@ func (r *Resolver) ForcedResolver() ForcedResolverResolver {
 func (r *Resolver) ModelMethods() ModelMethodsResolver {
 	return &modelMethodsResolver{r}
 }
+func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
+	return &overlappingFieldsResolver{r}
+}
 func (r *Resolver) Panics() PanicsResolver {
 	return &panicsResolver{r}
 }
@@ -39,6 +42,12 @@ func (r *forcedResolverResolver) Field(ctx context.Context, obj *ForcedResolver)
 type modelMethodsResolver struct{ *Resolver }
 
 func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
+	panic("not implemented")
+}
+
+type overlappingFieldsResolver struct{ *Resolver }
+
+func (r *overlappingFieldsResolver) OldFoo(ctx context.Context, obj *OverlappingFields) (int, error) {
 	panic("not implemented")
 }
 
@@ -101,13 +110,40 @@ func (r *queryResolver) DirectiveInputNullable(ctx context.Context, arg *InputDi
 func (r *queryResolver) DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) Autobind(ctx context.Context) (*Autobind, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Slices(ctx context.Context) (*Slices, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {

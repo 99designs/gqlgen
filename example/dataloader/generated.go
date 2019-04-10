@@ -102,98 +102,98 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Address.Country":
+	case "Address.country":
 		if e.complexity.Address.Country == nil {
 			break
 		}
 
 		return e.complexity.Address.Country(childComplexity), true
 
-	case "Address.ID":
+	case "Address.id":
 		if e.complexity.Address.ID == nil {
 			break
 		}
 
 		return e.complexity.Address.ID(childComplexity), true
 
-	case "Address.Street":
+	case "Address.street":
 		if e.complexity.Address.Street == nil {
 			break
 		}
 
 		return e.complexity.Address.Street(childComplexity), true
 
-	case "Customer.Address":
+	case "Customer.address":
 		if e.complexity.Customer.Address == nil {
 			break
 		}
 
 		return e.complexity.Customer.Address(childComplexity), true
 
-	case "Customer.ID":
+	case "Customer.id":
 		if e.complexity.Customer.ID == nil {
 			break
 		}
 
 		return e.complexity.Customer.ID(childComplexity), true
 
-	case "Customer.Name":
+	case "Customer.name":
 		if e.complexity.Customer.Name == nil {
 			break
 		}
 
 		return e.complexity.Customer.Name(childComplexity), true
 
-	case "Customer.Orders":
+	case "Customer.orders":
 		if e.complexity.Customer.Orders == nil {
 			break
 		}
 
 		return e.complexity.Customer.Orders(childComplexity), true
 
-	case "Item.Name":
+	case "Item.name":
 		if e.complexity.Item.Name == nil {
 			break
 		}
 
 		return e.complexity.Item.Name(childComplexity), true
 
-	case "Order.Amount":
+	case "Order.amount":
 		if e.complexity.Order.Amount == nil {
 			break
 		}
 
 		return e.complexity.Order.Amount(childComplexity), true
 
-	case "Order.Date":
+	case "Order.date":
 		if e.complexity.Order.Date == nil {
 			break
 		}
 
 		return e.complexity.Order.Date(childComplexity), true
 
-	case "Order.ID":
+	case "Order.id":
 		if e.complexity.Order.ID == nil {
 			break
 		}
 
 		return e.complexity.Order.ID(childComplexity), true
 
-	case "Order.Items":
+	case "Order.items":
 		if e.complexity.Order.Items == nil {
 			break
 		}
 
 		return e.complexity.Order.Items(childComplexity), true
 
-	case "Query.Customers":
+	case "Query.customers":
 		if e.complexity.Query.Customers == nil {
 			break
 		}
 
 		return e.complexity.Query.Customers(childComplexity), true
 
-	case "Query.Torture1d":
+	case "Query.torture1d":
 		if e.complexity.Query.Torture1d == nil {
 			break
 		}
@@ -205,7 +205,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
 
-	case "Query.Torture2d":
+	case "Query.torture2d":
 		if e.complexity.Query.Torture2d == nil {
 			break
 		}

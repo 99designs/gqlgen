@@ -90,21 +90,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Address.ID":
+	case "Address.id":
 		if e.complexity.Address.ID == nil {
 			break
 		}
 
 		return e.complexity.Address.ID(childComplexity), true
 
-	case "Address.Location":
+	case "Address.location":
 		if e.complexity.Address.Location == nil {
 			break
 		}
 
 		return e.complexity.Address.Location(childComplexity), true
 
-	case "Query.Search":
+	case "Query.search":
 		if e.complexity.Query.Search == nil {
 			break
 		}
@@ -116,7 +116,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
 
-	case "Query.User":
+	case "Query.user":
 		if e.complexity.Query.User == nil {
 			break
 		}
@@ -128,56 +128,56 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
 
-	case "User.Address":
+	case "User.address":
 		if e.complexity.User.Address == nil {
 			break
 		}
 
 		return e.complexity.User.Address(childComplexity), true
 
-	case "User.Created":
+	case "User.created":
 		if e.complexity.User.Created == nil {
 			break
 		}
 
 		return e.complexity.User.Created(childComplexity), true
 
-	case "User.CustomResolver":
+	case "User.customResolver":
 		if e.complexity.User.CustomResolver == nil {
 			break
 		}
 
 		return e.complexity.User.CustomResolver(childComplexity), true
 
-	case "User.ID":
+	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
 		}
 
 		return e.complexity.User.ID(childComplexity), true
 
-	case "User.IsBanned":
+	case "User.isBanned":
 		if e.complexity.User.IsBanned == nil {
 			break
 		}
 
 		return e.complexity.User.IsBanned(childComplexity), true
 
-	case "User.Name":
+	case "User.name":
 		if e.complexity.User.Name == nil {
 			break
 		}
 
 		return e.complexity.User.Name(childComplexity), true
 
-	case "User.PrimitiveResolver":
+	case "User.primitiveResolver":
 		if e.complexity.User.PrimitiveResolver == nil {
 			break
 		}
 
 		return e.complexity.User.PrimitiveResolver(childComplexity), true
 
-	case "User.Tier":
+	case "User.tier":
 		if e.complexity.User.Tier == nil {
 			break
 		}

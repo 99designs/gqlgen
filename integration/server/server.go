@@ -21,9 +21,15 @@ func main() {
 		port = defaultPort
 	}
 
+	cfg := integration.Config{Resolvers: &integration.Resolver{}}
+	cfg.Complexity.Query.Complexity = func(childComplexity, value int) int {
+		// Allow the integration client to dictate the complexity, to verify this
+		// function is executed.
+		return value
+	}
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
 	http.Handle("/query", handler.GraphQL(
-		integration.NewExecutableSchema(integration.Config{Resolvers: &integration.Resolver{}}),
+		integration.NewExecutableSchema(cfg),
 		handler.ErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 			if e, ok := errors.Cause(e).(*integration.CustomError); ok {
 				return &gqlerror.Error{
@@ -33,6 +39,7 @@ func main() {
 			}
 			return graphql.DefaultErrorPresenter(ctx, e)
 		}),
+		handler.ComplexityLimit(1000),
 	))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)

@@ -89,7 +89,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Mutation.CreateTodo":
+	case "Mutation.createTodo":
 		if e.complexity.Mutation.CreateTodo == nil {
 			break
 		}
@@ -101,56 +101,56 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
 
-	case "Query.Todos":
+	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
 			break
 		}
 
 		return e.complexity.Query.Todos(childComplexity), true
 
-	case "Todo.DatabaseID":
+	case "Todo.databaseId":
 		if e.complexity.Todo.DatabaseID == nil {
 			break
 		}
 
 		return e.complexity.Todo.DatabaseID(childComplexity), true
 
-	case "Todo.Description":
+	case "Todo.text":
 		if e.complexity.Todo.Description == nil {
 			break
 		}
 
 		return e.complexity.Todo.Description(childComplexity), true
 
-	case "Todo.Done":
+	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
 			break
 		}
 
 		return e.complexity.Todo.Done(childComplexity), true
 
-	case "Todo.ID":
+	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
 			break
 		}
 
 		return e.complexity.Todo.ID(childComplexity), true
 
-	case "Todo.User":
+	case "Todo.user":
 		if e.complexity.Todo.User == nil {
 			break
 		}
 
 		return e.complexity.Todo.User(childComplexity), true
 
-	case "User.FullName":
+	case "User.name":
 		if e.complexity.User.FullName == nil {
 			break
 		}
 
 		return e.complexity.User.FullName(childComplexity), true
 
-	case "User.ID":
+	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
 		}

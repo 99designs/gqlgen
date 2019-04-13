@@ -24,6 +24,7 @@ var CurrentImports *Imports
 
 type Options struct {
 	PackageName     string
+	Template        string
 	Filename        string
 	RegionTags      bool
 	GeneratedHeader bool
@@ -48,31 +49,40 @@ func Render(cfg Options) error {
 	t := template.New("").Funcs(funcs)
 
 	var roots []string
-	// load all the templates in the directory
-	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+	if cfg.Template != "" {
+		var err error
+		t, err = t.New("template.gotpl").Parse(cfg.Template)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "error with provided template")
 		}
-		name := filepath.ToSlash(strings.TrimPrefix(path, rootDir+string(os.PathSeparator)))
-		if !strings.HasSuffix(info.Name(), ".gotpl") {
+		roots = append(roots, "template.gotpl")
+	} else {
+		// load all the templates in the directory
+		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			name := filepath.ToSlash(strings.TrimPrefix(path, rootDir+string(os.PathSeparator)))
+			if !strings.HasSuffix(info.Name(), ".gotpl") {
+				return nil
+			}
+			b, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			t, err = t.New(name).Parse(string(b))
+			if err != nil {
+				return errors.Wrap(err, cfg.Filename)
+			}
+
+			roots = append(roots, name)
+
 			return nil
-		}
-		b, err := ioutil.ReadFile(path)
+		})
 		if err != nil {
-			return err
+			return errors.Wrap(err, "locating templates")
 		}
-
-		t, err = t.New(name).Parse(string(b))
-		if err != nil {
-			return errors.Wrap(err, cfg.Filename)
-		}
-
-		roots = append(roots, name)
-
-		return nil
-	})
-	if err != nil {
-		return errors.Wrap(err, "locating templates")
 	}
 
 	// then execute all the important looking ones in order, adding them to the same file
@@ -91,7 +101,7 @@ func Render(cfg Options) error {
 		if cfg.RegionTags {
 			buf.WriteString("\n// region    " + center(70, "*", " "+root+" ") + "\n")
 		}
-		err = t.Lookup(root).Execute(&buf, cfg.Data)
+		err := t.Lookup(root).Execute(&buf, cfg.Data)
 		if err != nil {
 			return errors.Wrap(err, root)
 		}
@@ -110,7 +120,7 @@ func Render(cfg Options) error {
 	result.WriteString("import (\n")
 	result.WriteString(CurrentImports.String())
 	result.WriteString(")\n")
-	_, err = buf.WriteTo(&result)
+	_, err := buf.WriteTo(&result)
 	if err != nil {
 		return err
 	}

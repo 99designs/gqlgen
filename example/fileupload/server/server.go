@@ -16,7 +16,13 @@ import (
 func main() {
 	http.Handle("/", handler.Playground("File Upload Demo", "/query"))
 	resolver := getResolver()
-	http.Handle("/query", handler.GraphQL(fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver})))
+	exec := fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver})
+
+	var mb int64 = 1 << 20
+	uploadMaxMemory := handler.UploadMaxMemory(32 * mb)
+	uploadMaxSize := handler.UploadMaxSize(50 * mb)
+
+	http.Handle("/query", handler.GraphQL(exec, uploadMaxMemory, uploadMaxSize))
 	log.Print("connect to http://localhost:8087/ for GraphQL playground")
 	log.Fatal(http.ListenAndServe(":8087", nil))
 }

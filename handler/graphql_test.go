@@ -321,10 +321,10 @@ func TestProcessMultipart(t *testing.T) {
 			Body:   ioutil.NopCloser(new(bytes.Buffer)),
 		}
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
+		w := httptest.NewRecorder()
+		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
-		errMsg := err.Error()
-		require.Equal(t, errMsg, "failed to parse multipart form")
+		require.Equal(t, err.Error(), "failed to parse multipart form")
 	})
 
 	t.Run("fail parse operation", func(t *testing.T) {
@@ -332,7 +332,8 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, operations, validMap, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
+		w := httptest.NewRecorder()
+		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "operations form field could not be decoded")
 	})
@@ -342,7 +343,8 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
+		w := httptest.NewRecorder()
+		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "map form field could not be decoded")
 	})
@@ -352,36 +354,40 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, files)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
+		w := httptest.NewRecorder()
+		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "failed to get key 0 from form")
 	})
 
-	t.Run("fail map entry with two values", func(t *testing.T) {
-		mapData := `{ "0": ["variables.file", "variables.file"] }`
-		req := createUploadRequest(t, validOperations, mapData, validFiles)
-
-		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
-		require.NotNil(t, err)
-		require.Equal(t, err.Error(), "invalid value for key 0")
-	})
-
-	t.Run("fail map entry with invalid prefix", func(t *testing.T) {
+	t.Run("fail map entry with invalid operations paths prefix", func(t *testing.T) {
 		mapData := `{ "0": ["var.file"] }`
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
+		w := httptest.NewRecorder()
+		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
-		require.Equal(t, err.Error(), "invalid value for key 0")
+		require.Equal(t, err.Error(), "invalid operations paths for key 0")
+	})
+
+	t.Run("fail parse request big body", func(t *testing.T) {
+		req := createUploadRequest(t, validOperations, validMap, validFiles)
+
+		var reqParams params
+		w := httptest.NewRecorder()
+		var smallMaxSize int64 = 2
+		err := processMultipart(w, req, &reqParams, smallMaxSize, DefaultUploadMaxMemory)
+		require.NotNil(t, err)
+		require.Equal(t, err.Error(), "failed to parse multipart form, request body too large")
 	})
 
 	t.Run("valid request", func(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, validFiles)
 
 		var reqParams params
-		err := processMultipart(req, &reqParams, DefaultUploadMaxMemory)
+		w := httptest.NewRecorder()
+		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.Nil(t, err)
 		require.Equal(t, "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", reqParams.Query)
 		require.Equal(t, "", reqParams.OperationName)
@@ -391,8 +397,7 @@ func TestProcessMultipart(t *testing.T) {
 		require.True(t, ok)
 		require.Equal(t, "a.txt", reqParamsFile.Filename)
 		require.Equal(t, int64(len("test1")), reqParamsFile.Size)
-		var content []byte
-		content, err = ioutil.ReadAll(reqParamsFile.File)
+		content, err := ioutil.ReadAll(reqParamsFile.File)
 		require.Nil(t, err)
 		require.Equal(t, "test1", string(content))
 	})
@@ -402,22 +407,23 @@ func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("fail missing all variables", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
-		var operations map[string]interface{}
+		request := &params{}
+
 		upload := graphql.Upload{
 			File:     file,
 			Filename: "a.txt",
 			Size:     int64(5),
 		}
 		path := "variables.req.0.file"
-		err := addUploadToOperations(operations, upload, path)
+		err := addUploadToOperations(request, upload, path)
 		require.NotNil(t, err)
 		require.Equal(t, "variables is missing, path: variables.req.0.file", err.Error())
 	})
 
 	t.Run("valid variable", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
-		operations := map[string]interface{}{
-			"variables": map[string]interface{}{
+		request := &params{
+			Variables: map[string]interface{}{
 				"file": nil,
 			},
 		}
@@ -428,23 +434,23 @@ func TestAddUploadToOperations(t *testing.T) {
 			Size:     int64(5),
 		}
 
-		expected := map[string]interface{}{
-			"variables": map[string]interface{}{
+		expected := &params{
+			Variables: map[string]interface{}{
 				"file": upload,
 			},
 		}
 
 		path := "variables.file"
-		err := addUploadToOperations(operations, upload, path)
+		err := addUploadToOperations(request, upload, path)
 		require.Nil(t, err)
 
-		require.Equal(t, operations, expected)
+		require.Equal(t, request, expected)
 	})
 
 	t.Run("valid nested variable", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
-		operations := map[string]interface{}{
-			"variables": map[string]interface{}{
+		request := &params{
+			Variables: map[string]interface{}{
 				"req": []interface{}{
 					map[string]interface{}{
 						"file": nil,
@@ -459,8 +465,8 @@ func TestAddUploadToOperations(t *testing.T) {
 			Size:     int64(5),
 		}
 
-		expected := map[string]interface{}{
-			"variables": map[string]interface{}{
+		expected := &params{
+			Variables: map[string]interface{}{
 				"req": []interface{}{
 					map[string]interface{}{
 						"file": upload,
@@ -470,10 +476,10 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		path := "variables.req.0.file"
-		err := addUploadToOperations(operations, upload, path)
+		err := addUploadToOperations(request, upload, path)
 		require.Nil(t, err)
 
-		require.Equal(t, operations, expected)
+		require.Equal(t, request, expected)
 	})
 }
 

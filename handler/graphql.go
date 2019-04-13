@@ -40,6 +40,7 @@ type Config struct {
 	disableIntrospection            bool
 	connectionKeepAlivePingInterval time.Duration
 	uploadMaxMemory                 int64
+	uploadMaxSize                   int64
 }
 
 func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -246,20 +247,28 @@ func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
 	tw.tracer1.EndOperationExecution(ctx)
 }
 
-// UploadMaxMemory sets the total of maxMemory bytes used to parse a request body
-// as multipart/form-data in memory, with the remainder stored on disk in
-// temporary files.
-func UploadMaxMemory(maxMemory int64) Option {
-	return func(cfg *Config) {
-		cfg.uploadMaxMemory = maxMemory
-	}
-}
-
 // CacheSize sets the maximum size of the query cache.
 // If size is less than or equal to 0, the cache is disabled.
 func CacheSize(size int) Option {
 	return func(cfg *Config) {
 		cfg.cacheSize = size
+	}
+}
+
+// UploadMaxSize sets the maximum number of bytes used to parse a request body
+// as multipart/form-data.
+func UploadMaxSize(size int64) Option {
+	return func(cfg *Config) {
+		cfg.uploadMaxSize = size
+	}
+}
+
+// UploadMaxMemory sets the maximum number of bytes used to parse a request body
+// as multipart/form-data in memory, with the remainder stored on disk in
+// temporary files.
+func UploadMaxMemory(size int64) Option {
+	return func(cfg *Config) {
+		cfg.uploadMaxMemory = size
 	}
 }
 
@@ -276,15 +285,20 @@ func WebsocketKeepAliveDuration(duration time.Duration) Option {
 const DefaultCacheSize = 1000
 const DefaultConnectionKeepAlivePingInterval = 25 * time.Second
 
-// DefaultUploadMaxMemory sets the total of maxMemory bytes used to parse a request body
+// DefaultUploadMaxMemory is the maximum number of bytes used to parse a request body
 // as multipart/form-data in memory, with the remainder stored on disk in
-// temporary files. The default value is 32 MB.
+// temporary files.
 const DefaultUploadMaxMemory = 32 << 20
+
+// DefaultUploadMaxSize is maximum number of bytes used to parse a request body
+// as multipart/form-data.
+const DefaultUploadMaxSize = 32 << 20
 
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := &Config{
 		cacheSize:                       DefaultCacheSize,
 		uploadMaxMemory:                 DefaultUploadMaxMemory,
+		uploadMaxSize:                   DefaultUploadMaxSize,
 		connectionKeepAlivePingInterval: DefaultConnectionKeepAlivePingInterval,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
@@ -355,7 +369,7 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		contentType := strings.SplitN(r.Header.Get("Content-Type"), ";", 2)[0]
 		if contentType == "multipart/form-data" {
-			if err := processMultipart(r, &reqParams, gh.cfg.uploadMaxMemory); err != nil {
+			if err := processMultipart(w, r, &reqParams, gh.cfg.uploadMaxSize, gh.cfg.uploadMaxMemory); err != nil {
 				sendErrorf(w, http.StatusBadRequest, "multipart body could not be decoded: "+err.Error())
 				return
 			}
@@ -520,91 +534,86 @@ func sendErrorf(w http.ResponseWriter, code int, format string, args ...interfac
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }
 
-func processMultipart(r *http.Request, request *params, uploadMaxMemory int64) error {
-	// Parse multipart form
-	if err := r.ParseMultipartForm(uploadMaxMemory); err != nil {
+func processMultipart(w http.ResponseWriter, r *http.Request, request *params, uploadMaxSize, uploadMaxMemory int64) error {
+	var err error
+	if r.ContentLength > uploadMaxSize {
+		return errors.New("failed to parse multipart form, request body too large")
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, uploadMaxSize)
+	if err = r.ParseMultipartForm(uploadMaxMemory); err != nil {
+		if strings.Contains(err.Error(), "request body too large") {
+			return errors.New("failed to parse multipart form, request body too large")
+		}
 		return errors.New("failed to parse multipart form")
 	}
 
-	// Unmarshal operations
-	var operations map[string]interface{}
-	if err := jsonDecode(strings.NewReader(r.Form.Get("operations")), &operations); err != nil {
+	if err = jsonDecode(strings.NewReader(r.Form.Get("operations")), &request); err != nil {
 		return errors.New("operations form field could not be decoded")
 	}
 
-	// Unmarshal map
 	var uploadsMap = map[string][]string{}
-	if err := json.Unmarshal([]byte(r.Form.Get("map")), &uploadsMap); err != nil {
+	if err = json.Unmarshal([]byte(r.Form.Get("map")), &uploadsMap); err != nil {
 		return errors.New("map form field could not be decoded")
 	}
 
-	// Read form files and add them to operations variables
 	var upload graphql.Upload
-	for key, path := range uploadsMap {
-		file, header, err := r.FormFile(key)
-		if err != nil {
-			return fmt.Errorf("failed to get key %s from form", key)
-		}
-		upload = graphql.Upload{
-			File:     file,
-			Size:     header.Size,
-			Filename: header.Filename,
-		}
-		if len(path) != 1 || !strings.HasPrefix(path[0], "variables.") {
-			return fmt.Errorf("invalid value for key %s", key)
-		}
-		err = addUploadToOperations(operations, upload, path[0])
+	for key, paths := range uploadsMap {
+		err = func() error {
+			file, header, err := r.FormFile(key)
+			if err != nil {
+				return fmt.Errorf("failed to get key %s from form", key)
+			}
+			defer file.Close()
+			if len(paths) == 0 {
+				return fmt.Errorf("invalid empty operations paths list for key %s", key)
+			}
+			upload = graphql.Upload{
+				File:     file,
+				Size:     header.Size,
+				Filename: header.Filename,
+			}
+			for _, path := range paths {
+				if !strings.HasPrefix(path, "variables.") {
+					return fmt.Errorf("invalid operations paths for key %s", key)
+				}
+				err = addUploadToOperations(request, upload, path)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}()
 		if err != nil {
 			return err
 		}
 	}
-
-	// set request variables
-	if value, ok := operations["operationName"]; ok && value != nil {
-		request.OperationName = value.(string)
-	}
-	if value, ok := operations["query"]; ok && value != nil {
-		request.Query = value.(string)
-	}
-	if value, ok := operations["variables"]; ok && value != nil {
-		request.Variables = value.(map[string]interface{})
-	}
-
 	return nil
 }
 
-func addUploadToOperations(operations interface{}, upload graphql.Upload, path string) error {
-	var parts []interface{}
-	for _, p := range strings.Split(path, ".") {
-		index, parseNbrErr := strconv.Atoi(p)
-		if parseNbrErr == nil {
-			parts = append(parts, index)
+func addUploadToOperations(request *params, upload graphql.Upload, path string) error {
+	var ptr interface{} = request.Variables
+	parts := strings.Split(path, ".")
+
+	// skip the first part (variables) because we started there
+	for i, p := range parts[1:] {
+		last := i == len(parts)-2
+		if ptr == nil {
+			return fmt.Errorf("variables is missing, path: %s", path)
+		}
+		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
+			if last {
+				ptr.([]interface{})[index] = upload
+			} else {
+				ptr = ptr.([]interface{})[index]
+			}
 		} else {
-			parts = append(parts, p)
-		}
-	}
-	for i, p := range parts {
-		last := i == len(parts)-1
-		switch idx := p.(type) {
-		case string:
-			if operations == nil {
-				return fmt.Errorf("variables is missing, path: %s", path)
-			}
 			if last {
-				operations.(map[string]interface{})[idx] = upload
+				ptr.(map[string]interface{})[p] = upload
 			} else {
-				operations = operations.(map[string]interface{})[idx]
-			}
-		case int:
-			if operations == nil {
-				return fmt.Errorf("variables is missing, path: %s", path)
-			}
-			if last {
-				operations.([]interface{})[idx] = upload
-			} else {
-				operations = operations.([]interface{})[idx]
+				ptr = ptr.(map[string]interface{})[p]
 			}
 		}
 	}
+
 	return nil
 }

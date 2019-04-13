@@ -1,6 +1,8 @@
 package templates
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -99,4 +101,17 @@ func TestCenter(t *testing.T) {
 	require.Equal(t, "fffff", center(3, "#", "fffff"))
 	require.Equal(t, "##fffff###", center(10, "#", "fffff"))
 	require.Equal(t, "###fffff###", center(11, "#", "fffff"))
+}
+
+func Test(t *testing.T) {
+	f, err := ioutil.TempFile("", "gqlgen")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	defer os.RemoveAll(f.Name())
+	err = Render(Options{Template: "hello", Filename: f.Name()})
+	if err != nil {
+		t.Fatal(err)
+	}
 }

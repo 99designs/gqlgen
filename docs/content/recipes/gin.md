@@ -51,3 +51,52 @@ func main() {
     r.Run()
 }  
 ```
+
+## Accessing gin.Context
+At the Resolver level, `gqlgen` gives you access to the `context.Context` object. One way to access the `gin.Context` is to add it to the context and retrieve it again.
+
+First, create a `gin` middleware to add its context to the `context.Context`:
+```go
+func GinContextToContextMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := context.WithValue(c.Request.Context(), "GinContextKey", c)
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
+	}
+}
+```
+
+In the router definition, use the middleware:
+```go
+r.Use(GinContextToContextMiddleware())
+```
+
+Define a function to recover the `gin.Context` from the `context.Context` struct:
+```go
+func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
+	ginContext := ctx.Value(GinContextKey)
+	if ginContext == nil {
+		err := fmt.Errorf("could not retrieve gin.Context")
+		return nil, err
+	}
+
+	gc, ok := ginContext.(*gin.Context)
+	if !ok {
+		err := fmt.Errorf("gin.Context has wrong type")
+		return nil, err
+	}
+	return gc, nil
+}
+```
+
+Lastly, in the Resolver, retrieve the `gin.Context` with the previous defined function:
+```go
+func (r *resolver) Todo(ctx context.Context) (*Todo, error) {
+	gc, err := GinContextFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	
+	# ...
+}
+```

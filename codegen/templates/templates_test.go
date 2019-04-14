@@ -103,7 +103,7 @@ func TestCenter(t *testing.T) {
 	require.Equal(t, "###fffff###", center(11, "#", "fffff"))
 }
 
-func Test(t *testing.T) {
+func TestTemplateOverride(t *testing.T) {
 	f, err := ioutil.TempFile("", "gqlgen")
 	if err != nil {
 		t.Fatal(err)

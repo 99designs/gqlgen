@@ -19,19 +19,36 @@ import (
 	"github.com/pkg/errors"
 )
 
+// CurrentImports keeps track of all the import declarations that are needed during the execution of a plugin.
 // this is done with a global because subtemplates currently get called in functions. Lets aim to remove this eventually.
 var CurrentImports *Imports
 
+// Options specify various parameters to rendering a template.
 type Options struct {
-	PackageName     string
-	Template        string
+	// PackageName is a helper that specifies the package header declaration.
+	// In other words, when you write the template you don't need to specify `package X`
+	// at the top of the file. By providing PackageName in the Options, the Render
+	// function will do that for you.
+	PackageName string
+	// Template is a string of the entire template that
+	// will be parsed and rendered. If it's empty,
+	// the plugin processor will look for .gotpl files
+	// in the same directory of where you wrote the plugin.
+	Template string
+	// Filename is the name of the file that will be
+	// written to the system disk once the template is rendered.
 	Filename        string
 	RegionTags      bool
 	GeneratedHeader bool
-	Data            interface{}
-	Funcs           template.FuncMap
+	// Data will be passed to the template execution.
+	Data  interface{}
+	Funcs template.FuncMap
 }
 
+// Render renders a gql plugin template from the given Options. Render is an
+// abstraction of the text/template package that makes it easier to gqlgen plugins.
+// If Options.Template is empty, the Render function will look for `.gotpl` files
+// inside the directory where you wrote the plugin.
 func Render(cfg Options) error {
 	if CurrentImports != nil {
 		panic(fmt.Errorf("recursive or concurrent call to RenderToFile detected"))

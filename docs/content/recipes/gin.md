@@ -74,7 +74,7 @@ r.Use(GinContextToContextMiddleware())
 Define a function to recover the `gin.Context` from the `context.Context` struct:
 ```go
 func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
-	ginContext := ctx.Value(GinContextKey)
+	ginContext := ctx.Value("GinContextKey")
 	if ginContext == nil {
 		err := fmt.Errorf("could not retrieve gin.Context")
 		return nil, err
@@ -97,6 +97,6 @@ func (r *resolver) Todo(ctx context.Context) (*Todo, error) {
 		return nil, err
 	}
 	
-	# ...
+	// ...
 }
 ```

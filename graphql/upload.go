@@ -3,18 +3,17 @@ package graphql
 import (
 	"fmt"
 	"io"
-	"mime/multipart"
 )
 
 type Upload struct {
-	File     multipart.File
+	FileData []byte
 	Filename string
 	Size     int64
 }
 
 func MarshalUpload(f Upload) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		io.Copy(w, f.File)
+		w.Write(f.FileData)
 	})
 }
 

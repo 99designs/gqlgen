@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -30,25 +29,17 @@ func main() {
 func getResolver() *fileupload.Resolver {
 	resolver := &fileupload.Resolver{
 		SingleUploadFunc: func(ctx context.Context, file graphql.Upload) (*model.File, error) {
-			content, err := ioutil.ReadAll(file.File)
-			if err != nil {
-				return nil, err
-			}
 			return &model.File{
 				ID:      1,
 				Name:    file.Filename,
-				Content: string(content),
+				Content: string(file.FileData),
 			}, nil
 		},
 		SingleUploadWithPayloadFunc: func(ctx context.Context, req model.UploadFile) (*model.File, error) {
-			content, err := ioutil.ReadAll(req.File.File)
-			if err != nil {
-				return nil, err
-			}
 			return &model.File{
 				ID:      1,
 				Name:    req.File.Filename,
-				Content: string(content),
+				Content: string(req.File.FileData),
 			}, nil
 		},
 		MultipleUploadFunc: func(ctx context.Context, files []graphql.Upload) ([]model.File, error) {
@@ -57,14 +48,10 @@ func getResolver() *fileupload.Resolver {
 			}
 			var resp []model.File
 			for i := range files {
-				content, err := ioutil.ReadAll(files[i].File)
-				if err != nil {
-					return []model.File{}, err
-				}
 				resp = append(resp, model.File{
 					ID:      i + 1,
 					Name:    files[i].Filename,
-					Content: string(content),
+					Content: string(files[i].FileData),
 				})
 			}
 			return resp, nil
@@ -75,14 +62,10 @@ func getResolver() *fileupload.Resolver {
 			}
 			var resp []model.File
 			for i := range req {
-				content, err := ioutil.ReadAll(req[i].File.File)
-				if err != nil {
-					return []model.File{}, err
-				}
 				resp = append(resp, model.File{
 					ID:      i + 1,
 					Name:    req[i].File.Filename,
-					Content: string(content),
+					Content: string(req[i].File.FileData),
 				})
 			}
 			return resp, nil

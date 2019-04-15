@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -301,6 +302,33 @@ func TestFileUpload(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.Code)
 		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
 	})
+
+	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
+		mock := &executableSchemaMock{
+			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+				require.Equal(t, len(op.VariableDefinitions), 1)
+				require.Equal(t, op.VariableDefinitions[0].Variable, "req")
+				return &graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)}
+			},
+		}
+		handler := GraphQL(mock)
+
+		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
+		mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
+		files := []file{
+			{
+				mapKey:  "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
+
+		resp := httptest.NewRecorder()
+		handler.ServeHTTP(resp, req)
+		require.Equal(t, http.StatusOK, resp.Code)
+		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
+	})
 }
 
 func TestProcessMultipart(t *testing.T) {
@@ -400,6 +428,43 @@ func TestProcessMultipart(t *testing.T) {
 		content, err := ioutil.ReadAll(reqParamsFile.File)
 		require.Nil(t, err)
 		require.Equal(t, "test1", string(content))
+	})
+
+	t.Run("valid request with two values", func(t *testing.T) {
+		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
+		mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
+		files := []file{
+			{
+				mapKey:  "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+		}
+		req := createUploadRequest(t, operations, mapData, files)
+
+		var reqParams params
+		w := httptest.NewRecorder()
+		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, 2)
+		require.Nil(t, err)
+		require.Equal(t, "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", reqParams.Query)
+		require.Equal(t, "", reqParams.OperationName)
+		require.Equal(t, 1, len(reqParams.Variables))
+		require.NotNil(t, reqParams.Variables["req"])
+		reqParamsFile, ok := reqParams.Variables["req"].([]interface{})
+		require.True(t, ok)
+		require.Equal(t, 2, len(reqParamsFile))
+		for i, item := range reqParamsFile {
+			itemMap := item.(map[string]interface{})
+			require.Equal(t, fmt.Sprint(itemMap["id"]), fmt.Sprint(i+1))
+			file := itemMap["file"].(graphql.Upload)
+			require.Equal(t, "a.txt", file.Filename)
+			require.Equal(t, int64(len("test1")), file.Size)
+			_, err = file.File.Seek(0, 0)
+			require.Nil(t, err)
+			content, err := ioutil.ReadAll(file.File)
+			require.Nil(t, err)
+			require.Equal(t, "test1", string(content))
+		}
 	})
 }
 

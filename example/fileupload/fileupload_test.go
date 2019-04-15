@@ -208,6 +208,57 @@ func TestFileUpload(t *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"b.txt","content":"test2"}]}}`, string(responseBody))
 	})
+
+	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
+		resolver := &Resolver{
+			MultipleUploadWithPayloadFunc: func(ctx context.Context, req []model.UploadFile) ([]model.File, error) {
+				require.Len(t, req, 2)
+				var ids []int
+				var contents []string
+				var resp []model.File
+				for i := range req {
+					require.NotNil(t, req[i].File)
+					require.NotNil(t, req[i].File.File)
+					ids = append(ids, req[i].ID)
+					req[i].File.File.Seek(0, 0)
+					content, err := ioutil.ReadAll(req[i].File.File)
+					require.Nil(t, err)
+					contents = append(contents, string(content))
+					resp = append(resp, model.File{
+						ID:      i + 1,
+						Name:    req[i].File.Filename,
+						Content: string(content),
+					})
+				}
+				require.ElementsMatch(t, []int{1, 2}, ids)
+				require.ElementsMatch(t, []string{"test1", "test1"}, contents)
+				return resp, nil
+			},
+		}
+		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver}), handler.UploadMaxMemory(2)))
+		defer srv.Close()
+
+		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
+		mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
+		files := []file{
+			{
+				mapKey:  "0",
+				name:    "a.txt",
+				content: "test1",
+			},
+		}
+		req := createUploadRequest(t, srv.URL, operations, mapData, files)
+
+		resp, err := client.Do(req)
+		require.Nil(t, err)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		responseBody, err := ioutil.ReadAll(resp.Body)
+		require.Nil(t, err)
+		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"a.txt","content":"test1"}]}}`, string(responseBody))
+	})
 }
 
 type file struct {

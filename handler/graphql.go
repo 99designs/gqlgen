@@ -563,7 +563,6 @@ func processMultipart(w http.ResponseWriter, r *http.Request, request *params, u
 			if err != nil {
 				return fmt.Errorf("failed to get key %s from form", key)
 			}
-			defer file.Close()
 			if len(paths) == 0 {
 				return fmt.Errorf("invalid empty operations paths list for key %s", key)
 			}

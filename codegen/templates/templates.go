@@ -46,9 +46,9 @@ type Options struct {
 }
 
 // Render renders a gql plugin template from the given Options. Render is an
-// abstraction of the text/template package that makes it easier to gqlgen plugins.
-// If Options.Template is empty, the Render function will look for `.gotpl` files
-// inside the directory where you wrote the plugin.
+// abstraction of the text/template package that makes it easier to write gqlgen
+// plugins. If Options.Template is empty, the Render function will look for `.gotpl`
+// files inside the directory where you wrote the plugin.
 func Render(cfg Options) error {
 	if CurrentImports != nil {
 		panic(fmt.Errorf("recursive or concurrent call to RenderToFile detected"))

@@ -24,7 +24,7 @@ func CollectFields(ctx context.Context, selSet ast.SelectionSet, satisfies []str
 }
 
 func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
-	var groupedFields []CollectedField
+	groupedFields := make([]CollectedField, 0, len(selSet))
 
 	for _, sel := range selSet {
 		switch sel := sel.(type) {

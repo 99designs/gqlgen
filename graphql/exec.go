@@ -111,6 +111,10 @@ func getOrCreateField(c *[]CollectedField, name string, creator func() Collected
 }
 
 func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interface{}) bool {
+	if len(directives) == 0 {
+		return true
+	}
+
 	skip, include := false, true
 
 	if d := directives.ForName("skip"); d != nil {

@@ -19,8 +19,8 @@ type ExecutableSchema interface {
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types
 // passed through satisfies. Providing an empty or nil slice for satisfies will return collect all fields regardless of fragment
 // type conditions.
-func CollectFields(ctx context.Context, selSet ast.SelectionSet, satisfies []string) []CollectedField {
-	return collectFields(GetRequestContext(ctx), selSet, satisfies, map[string]bool{})
+func CollectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
+	return collectFields(reqCtx, selSet, satisfies, map[string]bool{})
 }
 
 func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
@@ -73,7 +73,6 @@ func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []
 				f := getOrCreateAndAppendField(&groupedFields, childField.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
-
 		default:
 			panic(fmt.Errorf("unsupported %T", sel))
 		}

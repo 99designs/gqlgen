@@ -23,13 +23,15 @@ func TestFileUpload(t *testing.T) {
 		resolver := &Resolver{
 			SingleUploadFunc: func(ctx context.Context, file graphql.Upload) (*model.File, error) {
 				require.NotNil(t, file)
-				require.NotNil(t, file.FileData)
-				require.Equal(t, string(file.FileData), "test")
+				require.NotNil(t, file.File)
+				content, err := ioutil.ReadAll(file.File)
+				require.Nil(t, err)
+				require.Equal(t, string(content), "test")
 
 				return &model.File{
 					ID:      1,
 					Name:    file.Filename,
-					Content: string(file.FileData),
+					Content: string(content),
 				}, nil
 			},
 		}
@@ -64,13 +66,15 @@ func TestFileUpload(t *testing.T) {
 			SingleUploadWithPayloadFunc: func(ctx context.Context, req model.UploadFile) (*model.File, error) {
 				require.Equal(t, req.ID, 1)
 				require.NotNil(t, req.File)
-				require.NotNil(t, req.File.FileData)
-				require.Equal(t, string(req.File.FileData), "test")
+				require.NotNil(t, req.File.File)
+				content, err := ioutil.ReadAll(req.File.File)
+				require.Nil(t, err)
+				require.Equal(t, string(content), "test")
 
 				return &model.File{
 					ID:      1,
 					Name:    req.File.Filename,
-					Content: string(req.File.FileData),
+					Content: string(content),
 				}, nil
 			},
 		}
@@ -106,12 +110,14 @@ func TestFileUpload(t *testing.T) {
 				var contents []string
 				var resp []model.File
 				for i := range files {
-					require.NotNil(t, files[i].FileData)
-					contents = append(contents, string(files[i].FileData))
+					require.NotNil(t, files[i].File)
+					content, err := ioutil.ReadAll(files[i].File)
+					require.Nil(t, err)
+					contents = append(contents, string(content))
 					resp = append(resp, model.File{
 						ID:      i + 1,
 						Name:    files[i].Filename,
-						Content: string(files[i].FileData),
+						Content: string(content),
 					})
 				}
 				require.ElementsMatch(t, []string{"test1", "test2"}, contents)
@@ -157,13 +163,15 @@ func TestFileUpload(t *testing.T) {
 				var resp []model.File
 				for i := range req {
 					require.NotNil(t, req[i].File)
-					require.NotNil(t, req[i].File.FileData)
+					require.NotNil(t, req[i].File.File)
+					content, err := ioutil.ReadAll(req[i].File.File)
+					require.Nil(t, err)
 					ids = append(ids, req[i].ID)
-					contents = append(contents, string(req[i].File.FileData))
+					contents = append(contents, string(content))
 					resp = append(resp, model.File{
 						ID:      i + 1,
 						Name:    req[i].File.Filename,
-						Content: string(req[i].File.FileData),
+						Content: string(content),
 					})
 				}
 				require.ElementsMatch(t, []int{1, 2}, ids)
@@ -210,13 +218,16 @@ func TestFileUpload(t *testing.T) {
 				var resp []model.File
 				for i := range req {
 					require.NotNil(t, req[i].File)
-					require.NotNil(t, req[i].File.FileData)
+					require.NotNil(t, req[i].File.File)
 					ids = append(ids, req[i].ID)
-					contents = append(contents, string(req[i].File.FileData))
+					req[i].File.File.Seek(0, 0)
+					content, err := ioutil.ReadAll(req[i].File.File)
+					require.Nil(t, err)
+					contents = append(contents, string(content))
 					resp = append(resp, model.File{
 						ID:      i + 1,
 						Name:    req[i].File.Filename,
-						Content: string(req[i].File.FileData),
+						Content: string(content),
 					})
 				}
 				require.ElementsMatch(t, []int{1, 2}, ids)

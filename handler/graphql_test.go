@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -424,8 +425,9 @@ func TestProcessMultipart(t *testing.T) {
 		require.True(t, ok)
 		require.Equal(t, "a.txt", reqParamsFile.Filename)
 		require.Equal(t, int64(len("test1")), reqParamsFile.Size)
+		content, err := ioutil.ReadAll(reqParamsFile.File)
 		require.Nil(t, err)
-		require.Equal(t, "test1", string(reqParamsFile.FileData))
+		require.Equal(t, "test1", string(content))
 	})
 
 	t.Run("valid request with two values", func(t *testing.T) {
@@ -457,8 +459,11 @@ func TestProcessMultipart(t *testing.T) {
 			file := itemMap["file"].(graphql.Upload)
 			require.Equal(t, "a.txt", file.Filename)
 			require.Equal(t, int64(len("test1")), file.Size)
+			_, err = file.File.Seek(0, 0)
 			require.Nil(t, err)
-			require.Equal(t, "test1", string(file.FileData))
+			content, err := ioutil.ReadAll(file.File)
+			require.Nil(t, err)
+			require.Equal(t, "test1", string(content))
 		}
 	})
 }
@@ -466,10 +471,11 @@ func TestProcessMultipart(t *testing.T) {
 func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("fail missing all variables", func(t *testing.T) {
+		file, _ := os.Open("path/to/file")
 		request := &params{}
 
 		upload := graphql.Upload{
-			FileData: []byte{},
+			File:     file,
 			Filename: "a.txt",
 			Size:     int64(5),
 		}
@@ -480,6 +486,7 @@ func TestAddUploadToOperations(t *testing.T) {
 	})
 
 	t.Run("valid variable", func(t *testing.T) {
+		file, _ := os.Open("path/to/file")
 		request := &params{
 			Variables: map[string]interface{}{
 				"file": nil,
@@ -487,7 +494,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		upload := graphql.Upload{
-			FileData: []byte{},
+			File:     file,
 			Filename: "a.txt",
 			Size:     int64(5),
 		}
@@ -506,6 +513,7 @@ func TestAddUploadToOperations(t *testing.T) {
 	})
 
 	t.Run("valid nested variable", func(t *testing.T) {
+		file, _ := os.Open("path/to/file")
 		request := &params{
 			Variables: map[string]interface{}{
 				"req": []interface{}{
@@ -517,7 +525,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		upload := graphql.Upload{
-			FileData: []byte{},
+			File:     file,
 			Filename: "a.txt",
 			Size:     int64(5),
 		}

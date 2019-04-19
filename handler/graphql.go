@@ -593,13 +593,13 @@ func processMultipart(w http.ResponseWriter, r *http.Request, request *params, c
 			}
 		} else {
 			if r.ContentLength < uploadMaxMemory {
-				fileContent, err := ioutil.ReadAll(file)
+				fileBytes, err := ioutil.ReadAll(file)
 				if err != nil {
 					return fmt.Errorf("failed to read file for key %s", key)
 				}
 				for _, path := range paths {
 					upload = graphql.Upload{
-						File:     bytes.NewReader(fileContent),
+						File:     bytes.NewReader(fileBytes),
 						Size:     header.Size,
 						Filename: header.Filename,
 					}

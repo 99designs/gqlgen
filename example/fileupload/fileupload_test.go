@@ -256,11 +256,11 @@ func TestFileUpload(t *testing.T) {
 			require.Nil(t, err)
 		}
 
-		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T){
+		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T) {
 			test(5000)
 		})
 
-		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T){
+		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T) {
 			test(2)
 		})
 	})

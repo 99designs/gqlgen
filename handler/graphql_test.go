@@ -305,7 +305,7 @@ func TestFileUpload(t *testing.T) {
 	})
 
 	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
-		test := func (uploadMaxMemory int64) {
+		test := func(uploadMaxMemory int64) {
 			mock := &executableSchemaMock{
 				MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 					require.Equal(t, len(op.VariableDefinitions), 1)
@@ -333,11 +333,11 @@ func TestFileUpload(t *testing.T) {
 			require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
 		}
 
-		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T){
+		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T) {
 			test(5000)
 		})
 
-		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T){
+		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T) {
 			test(2)
 		})
 	})
@@ -514,11 +514,11 @@ func TestProcessMultipart(t *testing.T) {
 			cleanUp(t, closers, tmpFiles)
 		}
 
-		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T){
+		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T) {
 			test(5000)
 		})
 
-		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T){
+		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T) {
 			test(2)
 		})
 	})

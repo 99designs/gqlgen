@@ -599,7 +599,7 @@ func processMultipart(w http.ResponseWriter, r *http.Request, request *params, c
 				}
 				for _, path := range paths {
 					upload = graphql.Upload{
-						File:     ioutil.NopCloser(bytes.NewReader(fileContent)),
+						File:     bytes.NewReader(fileContent),
 						Size:     header.Size,
 						Filename: header.Filename,
 					}

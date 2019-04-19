@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -369,7 +372,17 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		contentType := strings.SplitN(r.Header.Get("Content-Type"), ";", 2)[0]
 		if contentType == "multipart/form-data" {
-			if err := processMultipart(w, r, &reqParams, gh.cfg.uploadMaxSize, gh.cfg.uploadMaxMemory); err != nil {
+			var closers []io.Closer
+			var tmpFiles []string
+			defer func() {
+				for i := len(closers) - 1; 0 <= i; i-- {
+					_ = closers[i].Close()
+				}
+				for _, tmpFile := range tmpFiles {
+					_ = os.Remove(tmpFile)
+				}
+			}()
+			if err := processMultipart(w, r, &reqParams, &closers, &tmpFiles, gh.cfg.uploadMaxSize, gh.cfg.uploadMaxMemory); err != nil {
 				sendErrorf(w, http.StatusBadRequest, "multipart body could not be decoded: "+err.Error())
 				return
 			}
@@ -534,7 +547,7 @@ func sendErrorf(w http.ResponseWriter, code int, format string, args ...interfac
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }
 
-func processMultipart(w http.ResponseWriter, r *http.Request, request *params, uploadMaxSize, uploadMaxMemory int64) error {
+func processMultipart(w http.ResponseWriter, r *http.Request, request *params, closers *[]io.Closer, tmpFiles *[]string, uploadMaxSize, uploadMaxMemory int64) error {
 	var err error
 	if r.ContentLength > uploadMaxSize {
 		return errors.New("failed to parse multipart form, request body too large")
@@ -546,6 +559,7 @@ func processMultipart(w http.ResponseWriter, r *http.Request, request *params, u
 		}
 		return errors.New("failed to parse multipart form")
 	}
+	*closers = append(*closers, r.Body)
 
 	if err = jsonDecode(strings.NewReader(r.Form.Get("operations")), &request); err != nil {
 		return errors.New("operations form field could not be decoded")
@@ -558,38 +572,86 @@ func processMultipart(w http.ResponseWriter, r *http.Request, request *params, u
 
 	var upload graphql.Upload
 	for key, paths := range uploadsMap {
-		err = func() error {
-			file, header, err := r.FormFile(key)
-			if err != nil {
-				return fmt.Errorf("failed to get key %s from form", key)
-			}
-			if len(paths) == 0 {
-				return fmt.Errorf("invalid empty operations paths list for key %s", key)
-			}
+		if len(paths) == 0 {
+			return fmt.Errorf("invalid empty operations paths list for key %s", key)
+		}
+		file, header, err := r.FormFile(key)
+		if err != nil {
+			return fmt.Errorf("failed to get key %s from form", key)
+		}
+		*closers = append(*closers, file)
+
+		if len(paths) == 1 {
 			upload = graphql.Upload{
 				File:     file,
 				Size:     header.Size,
 				Filename: header.Filename,
 			}
-			for _, path := range paths {
-				if !strings.HasPrefix(path, "variables.") {
-					return fmt.Errorf("invalid operations paths for key %s", key)
-				}
-				err = addUploadToOperations(request, upload, path)
+			err = addUploadToOperations(request, upload, key, paths[0])
+			if err != nil {
+				return err
+			}
+		} else {
+			if r.ContentLength < uploadMaxMemory {
+				fileContent, err := ioutil.ReadAll(file)
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to read file for key %s", key)
+				}
+				for _, path := range paths {
+					upload = graphql.Upload{
+						File:     ioutil.NopCloser(bytes.NewReader(fileContent)),
+						Size:     header.Size,
+						Filename: header.Filename,
+					}
+					err = addUploadToOperations(request, upload, key, path)
+					if err != nil {
+						return err
+					}
+				}
+			} else {
+				tmpFile, err := ioutil.TempFile(os.TempDir(), "gqlgen-")
+				if err != nil {
+					return fmt.Errorf("failed to create temp file for key %s", key)
+				}
+				tmpName := tmpFile.Name()
+				*tmpFiles = append(*tmpFiles, tmpName)
+				_, err = io.Copy(tmpFile, file)
+				if err != nil {
+					if err := tmpFile.Close(); err != nil {
+						return fmt.Errorf("failed to copy to temp file and close temp file for key %s", key)
+					}
+					return fmt.Errorf("failed to copy to temp file for key %s", key)
+				}
+				if err := tmpFile.Close(); err != nil {
+					return fmt.Errorf("failed to close temp file for key %s", key)
+				}
+				for _, path := range paths {
+					pathTmpFile, err := os.Open(tmpName)
+					if err != nil {
+						return fmt.Errorf("failed to open temp file for key %s", key)
+					}
+					*closers = append(*closers, pathTmpFile)
+					upload = graphql.Upload{
+						File:     pathTmpFile,
+						Size:     header.Size,
+						Filename: header.Filename,
+					}
+					err = addUploadToOperations(request, upload, key, path)
+					if err != nil {
+						return err
+					}
 				}
 			}
-			return nil
-		}()
-		if err != nil {
-			return err
 		}
 	}
 	return nil
 }
 
-func addUploadToOperations(request *params, upload graphql.Upload, path string) error {
+func addUploadToOperations(request *params, upload graphql.Upload, key, path string) error {
+	if !strings.HasPrefix(path, "variables.") {
+		return fmt.Errorf("invalid operations paths for key %s", key)
+	}
+
 	var ptr interface{} = request.Variables
 	parts := strings.Split(path, ".")
 
@@ -597,7 +659,7 @@ func addUploadToOperations(request *params, upload graphql.Upload, path string) 
 	for i, p := range parts[1:] {
 		last := i == len(parts)-2
 		if ptr == nil {
-			return fmt.Errorf("variables is missing, path: %s", path)
+			return fmt.Errorf("path is missing \"variables.\" prefix, key: %s, path: %s", key, path)
 		}
 		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
 			if last {

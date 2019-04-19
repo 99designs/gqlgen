@@ -3,11 +3,10 @@ package graphql
 import (
 	"fmt"
 	"io"
-	"mime/multipart"
 )
 
 type Upload struct {
-	File     multipart.File
+	File     io.Reader
 	Filename string
 	Size     int64
 }

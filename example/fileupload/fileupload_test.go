@@ -51,14 +51,13 @@ func TestFileUpload(t *testing.T) {
 
 		resp, err := client.Do(req)
 		require.Nil(t, err)
-		defer func() {
-			_ = resp.Body.Close()
-		}()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
 		responseString := string(responseBody)
 		require.Equal(t, `{"data":{"singleUpload":{"id":1,"name":"a.txt","content":"test"}}}`, responseString)
+		err = resp.Body.Close()
+		require.Nil(t, err)
 	})
 
 	t.Run("valid single file upload with payload", func(t *testing.T) {
@@ -94,13 +93,12 @@ func TestFileUpload(t *testing.T) {
 
 		resp, err := client.Do(req)
 		require.Nil(t, err)
-		defer func() {
-			_ = resp.Body.Close()
-		}()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
 		require.Equal(t, `{"data":{"singleUploadWithPayload":{"id":1,"name":"a.txt","content":"test"}}}`, string(responseBody))
+		err = resp.Body.Close()
+		require.Nil(t, err)
 	})
 
 	t.Run("valid file list upload", func(t *testing.T) {
@@ -145,13 +143,12 @@ func TestFileUpload(t *testing.T) {
 
 		resp, err := client.Do(req)
 		require.Nil(t, err)
-		defer func() {
-			_ = resp.Body.Close()
-		}()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
 		require.Equal(t, `{"data":{"multipleUpload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"b.txt","content":"test2"}]}}`, string(responseBody))
+		err = resp.Body.Close()
+		require.Nil(t, err)
 	})
 
 	t.Run("valid file list upload with payload", func(t *testing.T) {
@@ -200,13 +197,12 @@ func TestFileUpload(t *testing.T) {
 
 		resp, err := client.Do(req)
 		require.Nil(t, err)
-		defer func() {
-			_ = resp.Body.Close()
-		}()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		require.Nil(t, err)
 		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"b.txt","content":"test2"}]}}`, string(responseBody))
+		err = resp.Body.Close()
+		require.Nil(t, err)
 	})
 
 	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
@@ -220,7 +216,6 @@ func TestFileUpload(t *testing.T) {
 					require.NotNil(t, req[i].File)
 					require.NotNil(t, req[i].File.File)
 					ids = append(ids, req[i].ID)
-					req[i].File.File.Seek(0, 0)
 					content, err := ioutil.ReadAll(req[i].File.File)
 					require.Nil(t, err)
 					contents = append(contents, string(content))
@@ -235,8 +230,6 @@ func TestFileUpload(t *testing.T) {
 				return resp, nil
 			},
 		}
-		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver}), handler.UploadMaxMemory(2)))
-		defer srv.Close()
 
 		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
 		mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
@@ -247,17 +240,29 @@ func TestFileUpload(t *testing.T) {
 				content: "test1",
 			},
 		}
-		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		resp, err := client.Do(req)
-		require.Nil(t, err)
-		defer func() {
-			_ = resp.Body.Close()
-		}()
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		require.Nil(t, err)
-		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"a.txt","content":"test1"}]}}`, string(responseBody))
+		test := func(uploadMaxMemory int64) {
+			memory := handler.UploadMaxMemory(uploadMaxMemory)
+			srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver}), memory))
+			defer srv.Close()
+			req := createUploadRequest(t, srv.URL, operations, mapData, files)
+			resp, err := client.Do(req)
+			require.Nil(t, err)
+			require.Equal(t, http.StatusOK, resp.StatusCode)
+			responseBody, err := ioutil.ReadAll(resp.Body)
+			require.Nil(t, err)
+			require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1"},{"id":2,"name":"a.txt","content":"test1"}]}}`, string(responseBody))
+			err = resp.Body.Close()
+			require.Nil(t, err)
+		}
+
+		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T){
+			test(5000)
+		})
+
+		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T){
+			test(2)
+		})
 	})
 }
 

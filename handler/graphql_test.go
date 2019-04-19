@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -304,30 +305,41 @@ func TestFileUpload(t *testing.T) {
 	})
 
 	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
-		mock := &executableSchemaMock{
-			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-				require.Equal(t, len(op.VariableDefinitions), 1)
-				require.Equal(t, op.VariableDefinitions[0].Variable, "req")
-				return &graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)}
-			},
-		}
-		handler := GraphQL(mock)
+		test := func (uploadMaxMemory int64) {
+			mock := &executableSchemaMock{
+				MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+					require.Equal(t, len(op.VariableDefinitions), 1)
+					require.Equal(t, op.VariableDefinitions[0].Variable, "req")
+					return &graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)}
+				},
+			}
+			maxMemory := UploadMaxMemory(5000)
+			handler := GraphQL(mock, maxMemory)
 
-		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
-		mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
-		files := []file{
-			{
-				mapKey:  "0",
-				name:    "a.txt",
-				content: "test1",
-			},
-		}
-		req := createUploadRequest(t, operations, mapData, files)
+			operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
+			mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
+			files := []file{
+				{
+					mapKey:  "0",
+					name:    "a.txt",
+					content: "test1",
+				},
+			}
+			req := createUploadRequest(t, operations, mapData, files)
 
-		resp := httptest.NewRecorder()
-		handler.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code)
-		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
+			resp := httptest.NewRecorder()
+			handler.ServeHTTP(resp, req)
+			require.Equal(t, http.StatusOK, resp.Code)
+			require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
+		}
+
+		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T){
+			test(5000)
+		})
+
+		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T){
+			test(2)
+		})
 	})
 }
 
@@ -342,6 +354,17 @@ func TestProcessMultipart(t *testing.T) {
 		},
 	}
 
+	cleanUp := func(t *testing.T, closers []io.Closer, tmpFiles []string) {
+		for i := len(closers) - 1; 0 <= i; i-- {
+			err := closers[i].Close()
+			require.Nil(t, err)
+		}
+		for _, tmpFiles := range tmpFiles {
+			err := os.Remove(tmpFiles)
+			require.Nil(t, err)
+		}
+	}
+
 	t.Run("fail to parse multipart", func(t *testing.T) {
 		req := &http.Request{
 			Method: "POST",
@@ -349,10 +372,13 @@ func TestProcessMultipart(t *testing.T) {
 			Body:   ioutil.NopCloser(new(bytes.Buffer)),
 		}
 		var reqParams params
+		var closers []io.Closer
+		var tmpFiles []string
 		w := httptest.NewRecorder()
-		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
+		err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "failed to parse multipart form")
+		cleanUp(t, closers, tmpFiles)
 	})
 
 	t.Run("fail parse operation", func(t *testing.T) {
@@ -360,10 +386,13 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, operations, validMap, validFiles)
 
 		var reqParams params
+		var closers []io.Closer
+		var tmpFiles []string
 		w := httptest.NewRecorder()
-		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
+		err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "operations form field could not be decoded")
+		cleanUp(t, closers, tmpFiles)
 	})
 
 	t.Run("fail parse map", func(t *testing.T) {
@@ -371,10 +400,13 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
+		var closers []io.Closer
+		var tmpFiles []string
 		w := httptest.NewRecorder()
-		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
+		err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "map form field could not be decoded")
+		cleanUp(t, closers, tmpFiles)
 	})
 
 	t.Run("fail missing file", func(t *testing.T) {
@@ -382,10 +414,13 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, files)
 
 		var reqParams params
+		var closers []io.Closer
+		var tmpFiles []string
 		w := httptest.NewRecorder()
-		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
+		err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "failed to get key 0 from form")
+		cleanUp(t, closers, tmpFiles)
 	})
 
 	t.Run("fail map entry with invalid operations paths prefix", func(t *testing.T) {
@@ -393,29 +428,37 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
 		var reqParams params
+		var closers []io.Closer
+		var tmpFiles []string
 		w := httptest.NewRecorder()
-		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
+		err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "invalid operations paths for key 0")
+		cleanUp(t, closers, tmpFiles)
 	})
 
 	t.Run("fail parse request big body", func(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, validFiles)
 
 		var reqParams params
+		var closers []io.Closer
+		var tmpFiles []string
 		w := httptest.NewRecorder()
 		var smallMaxSize int64 = 2
-		err := processMultipart(w, req, &reqParams, smallMaxSize, DefaultUploadMaxMemory)
+		err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, smallMaxSize, DefaultUploadMaxMemory)
 		require.NotNil(t, err)
 		require.Equal(t, err.Error(), "failed to parse multipart form, request body too large")
+		cleanUp(t, closers, tmpFiles)
 	})
 
 	t.Run("valid request", func(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, validFiles)
 
 		var reqParams params
+		var closers []io.Closer
+		var tmpFiles []string
 		w := httptest.NewRecorder()
-		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, DefaultUploadMaxMemory)
+		err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, DefaultUploadMaxSize, DefaultUploadMaxMemory)
 		require.Nil(t, err)
 		require.Equal(t, "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", reqParams.Query)
 		require.Equal(t, "", reqParams.OperationName)
@@ -428,9 +471,10 @@ func TestProcessMultipart(t *testing.T) {
 		content, err := ioutil.ReadAll(reqParamsFile.File)
 		require.Nil(t, err)
 		require.Equal(t, "test1", string(content))
+		cleanUp(t, closers, tmpFiles)
 	})
 
-	t.Run("valid request with two values", func(t *testing.T) {
+	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
 		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
 		mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
 		files := []file{
@@ -442,33 +486,46 @@ func TestProcessMultipart(t *testing.T) {
 		}
 		req := createUploadRequest(t, operations, mapData, files)
 
-		var reqParams params
-		w := httptest.NewRecorder()
-		err := processMultipart(w, req, &reqParams, DefaultUploadMaxSize, 2)
-		require.Nil(t, err)
-		require.Equal(t, "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", reqParams.Query)
-		require.Equal(t, "", reqParams.OperationName)
-		require.Equal(t, 1, len(reqParams.Variables))
-		require.NotNil(t, reqParams.Variables["req"])
-		reqParamsFile, ok := reqParams.Variables["req"].([]interface{})
-		require.True(t, ok)
-		require.Equal(t, 2, len(reqParamsFile))
-		for i, item := range reqParamsFile {
-			itemMap := item.(map[string]interface{})
-			require.Equal(t, fmt.Sprint(itemMap["id"]), fmt.Sprint(i+1))
-			file := itemMap["file"].(graphql.Upload)
-			require.Equal(t, "a.txt", file.Filename)
-			require.Equal(t, int64(len("test1")), file.Size)
-			_, err = file.File.Seek(0, 0)
+		test := func(uploadMaxMemory int64) {
+			var reqParams params
+			var closers []io.Closer
+			var tmpFiles []string
+			w := httptest.NewRecorder()
+			err := processMultipart(w, req, &reqParams, &closers, &tmpFiles, DefaultUploadMaxSize, uploadMaxMemory)
 			require.Nil(t, err)
-			content, err := ioutil.ReadAll(file.File)
-			require.Nil(t, err)
-			require.Equal(t, "test1", string(content))
+			require.Equal(t, "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", reqParams.Query)
+			require.Equal(t, "", reqParams.OperationName)
+			require.Equal(t, 1, len(reqParams.Variables))
+			require.NotNil(t, reqParams.Variables["req"])
+			reqParamsFile, ok := reqParams.Variables["req"].([]interface{})
+			require.True(t, ok)
+			require.Equal(t, 2, len(reqParamsFile))
+			for i, item := range reqParamsFile {
+				itemMap := item.(map[string]interface{})
+				require.Equal(t, fmt.Sprint(itemMap["id"]), fmt.Sprint(i+1))
+				file := itemMap["file"].(graphql.Upload)
+				require.Equal(t, "a.txt", file.Filename)
+				require.Equal(t, int64(len("test1")), file.Size)
+				require.Nil(t, err)
+				content, err := ioutil.ReadAll(file.File)
+				require.Nil(t, err)
+				require.Equal(t, "test1", string(content))
+			}
+			cleanUp(t, closers, tmpFiles)
 		}
+
+		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T){
+			test(5000)
+		})
+
+		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T){
+			test(2)
+		})
 	})
 }
 
 func TestAddUploadToOperations(t *testing.T) {
+	key := "0"
 
 	t.Run("fail missing all variables", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
@@ -480,9 +537,9 @@ func TestAddUploadToOperations(t *testing.T) {
 			Size:     int64(5),
 		}
 		path := "variables.req.0.file"
-		err := addUploadToOperations(request, upload, path)
+		err := addUploadToOperations(request, upload, key, path)
 		require.NotNil(t, err)
-		require.Equal(t, "variables is missing, path: variables.req.0.file", err.Error())
+		require.Equal(t, "path is missing \"variables.\" prefix, key: 0, path: variables.req.0.file", err.Error())
 	})
 
 	t.Run("valid variable", func(t *testing.T) {
@@ -506,7 +563,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		path := "variables.file"
-		err := addUploadToOperations(request, upload, path)
+		err := addUploadToOperations(request, upload, key, path)
 		require.Nil(t, err)
 
 		require.Equal(t, request, expected)
@@ -541,7 +598,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		path := "variables.req.0.file"
-		err := addUploadToOperations(request, upload, path)
+		err := addUploadToOperations(request, upload, key, path)
 		require.Nil(t, err)
 
 		require.Equal(t, request, expected)

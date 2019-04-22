@@ -3,13 +3,11 @@ package graphql
 import (
 	"encoding/json"
 	"io"
-
-	"github.com/qhenkart/gqlgen/graphql"
 )
 
 func MarshalInterface(v interface{}) Marshaler {
-	return graphql.WriterFunc(func(w io.Writer) {
-		err := json.NewEncoder(w).Encode(val)
+	return WriterFunc(func(w io.Writer) {
+		err := json.NewEncoder(w).Encode(v)
 		if err != nil {
 			panic(err)
 		}

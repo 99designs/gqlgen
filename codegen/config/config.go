@@ -363,8 +363,9 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 
 	// These are additional types that are injected if defined in the schema as scalars.
 	extraBuiltins := TypeMap{
-		"Time": {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
-		"Map":  {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"Time":      {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
+		"Map":       {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"Interface": {Model: StringList{"github.com/99designs/gqlgen/graphql.Interface"}},
 	}
 
 	for typeName, entry := range extraBuiltins {

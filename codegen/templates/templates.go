@@ -425,6 +425,7 @@ var commonInitialisms = map[string]bool{
 	"HTML":  true,
 	"HTTP":  true,
 	"HTTPS": true,
+	"GPU":   true,
 	"ID":    true,
 	"IP":    true,
 	"JSON":  true,

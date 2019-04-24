@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"strings"
 	"time"
@@ -335,8 +336,20 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case http.MethodPost:
-		if err := jsonDecode(r.Body, &reqParams); err != nil {
-			sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
+		mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+		if err != nil {
+			sendErrorf(w, http.StatusBadRequest, "error parsing request Content-Type")
+			return
+		}
+
+		switch mediaType {
+		case "application/json":
+			if err := jsonDecode(r.Body, &reqParams); err != nil {
+				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
+				return
+			}
+		default:
+			sendErrorf(w, http.StatusBadRequest, "unsupported Content-Type: "+mediaType)
 			return
 		}
 	default:

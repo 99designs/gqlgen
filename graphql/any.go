@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-func MarshalInterface(v interface{}) Marshaler {
+func MarshalAny(v interface{}) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		err := json.NewEncoder(w).Encode(v)
 		if err != nil {
@@ -14,6 +14,6 @@ func MarshalInterface(v interface{}) Marshaler {
 	})
 }
 
-func UnmarshalInterface(v interface{}) (interface{}, error) {
+func UnmarshalAny(v interface{}) (interface{}, error) {
 	return v, nil
 }

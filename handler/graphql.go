@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -547,6 +546,25 @@ func sendErrorf(w http.ResponseWriter, code int, format string, args ...interfac
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }
 
+type bytesReader struct {
+	s        *[]byte
+	i        int64 // current reading index
+	prevRune int   // index of previous rune; or < 0
+}
+
+func (r *bytesReader) Read(b []byte) (n int, err error) {
+	if r.s == nil {
+		return 0, errors.New("byte slice pointer is nil")
+	}
+	if r.i >= int64(len(*r.s)) {
+		return 0, io.EOF
+	}
+	r.prevRune = -1
+	n = copy(b, (*r.s)[r.i:])
+	r.i += int64(n)
+	return
+}
+
 func processMultipart(w http.ResponseWriter, r *http.Request, request *params, closers *[]io.Closer, tmpFiles *[]string, uploadMaxSize, uploadMaxMemory int64) error {
 	var err error
 	if r.ContentLength > uploadMaxSize {
@@ -599,7 +617,7 @@ func processMultipart(w http.ResponseWriter, r *http.Request, request *params, c
 				}
 				for _, path := range paths {
 					upload = graphql.Upload{
-						File:     bytes.NewReader(fileBytes),
+						File:     &bytesReader{s: &fileBytes, i: 0, prevRune: -1},
 						Size:     header.Size,
 						Filename: header.Filename,
 					}

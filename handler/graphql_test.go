@@ -694,7 +694,7 @@ func TestBytesRead(t *testing.T) {
 	})
 
 	t.Run("read updated pointer value", func(t *testing.T) {
-		data:= []byte("0123456789")
+		data := []byte("0123456789")
 		pointer := &data
 		r := bytesReader{s: pointer}
 		data[2] = []byte("9")[0]

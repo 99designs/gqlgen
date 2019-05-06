@@ -35,7 +35,7 @@ scalar Upload
 Maps a `Upload` GraphQL scalar to a `graphql.Upload` struct, defined as follows:
 ```
 type Upload struct {
-	File     io.ReadCloser
+	File     io.Reader
 	Filename string
 	Size     int64
 }

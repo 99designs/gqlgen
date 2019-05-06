@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -216,13 +217,24 @@ func TestFileUpload(t *testing.T) {
 					require.NotNil(t, req[i].File)
 					require.NotNil(t, req[i].File.File)
 					ids = append(ids, req[i].ID)
-					content, err := ioutil.ReadAll(req[i].File.File)
-					require.Nil(t, err)
-					contents = append(contents, string(content))
+
+					var got []byte
+					buf := make([]byte, 2)
+					for {
+						n, err := req[i].File.File.Read(buf)
+						got = append(got, buf[:n]...)
+						if err != nil {
+							if err == io.EOF {
+								break
+							}
+							require.Fail(t, "unexpected error while reading", err.Error())
+						}
+					}
+					contents = append(contents, string(got))
 					resp = append(resp, model.File{
 						ID:      i + 1,
 						Name:    req[i].File.Filename,
-						Content: string(content),
+						Content: string(got),
 					})
 				}
 				require.ElementsMatch(t, []int{1, 2}, ids)

@@ -682,13 +682,17 @@ func TestBytesRead(t *testing.T) {
 		got := make([]byte, 0, 11)
 		buf := make([]byte, 1)
 		for {
-			r, e := r.Read(buf)
-			if r == 0 {
-				if e != nil || e == io.EOF {
+			n, err := r.Read(buf)
+			if n < 0 {
+				require.Fail(t, "unexpected bytes read size")
+			}
+			got = append(got, buf[:n]...)
+			if err != nil {
+				if err == io.EOF {
 					break
 				}
+				require.Fail(t, "unexpected error while reading", err.Error())
 			}
-			got = append(got, buf...)
 		}
 		require.Equal(t, "0123456789", string(got))
 	})
@@ -702,13 +706,17 @@ func TestBytesRead(t *testing.T) {
 		got := make([]byte, 0, 11)
 		buf := make([]byte, 1)
 		for {
-			r, e := r.Read(buf)
-			if r == 0 {
-				if e != nil || e == io.EOF {
+			n, err := r.Read(buf)
+			if n < 0 {
+				require.Fail(t, "unexpected bytes read size")
+			}
+			got = append(got, buf[:n]...)
+			if err != nil {
+				if err == io.EOF {
 					break
 				}
+				require.Fail(t, "unexpected error while reading", err.Error())
 			}
-			got = append(got, buf...)
 		}
 		require.Equal(t, "0193456789", string(got))
 	})

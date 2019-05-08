@@ -43,6 +43,29 @@ describe('Input defaults', () => {
     });
 });
 
+describe('Complexity', () => {
+    it('should fail when complexity is too high', async () => {
+        let res;
+        try {
+            res = await client.query({
+                query: gql`{ complexity(value: 2000) }`,
+            });
+        } catch (err) {
+            expect(err.networkError.statusCode).toEqual(422);
+        }
+        expect(res).toBe(undefined);
+    });
+
+    it('should succeed when complexity is not too high', async () => {
+        let res = await client.query({
+            query: gql`{ complexity(value: 100) }`,
+        });
+
+        expect(res.data.complexity).toBe(true);
+        expect(res.errors).toBe(undefined);
+    });
+});
+
 describe('Errors', () => {
     it('should respond with correct paths', async () => {
         let res = await client.query({

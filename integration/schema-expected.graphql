@@ -36,6 +36,7 @@ type Query {
   viewer: Viewer
   jsonEncoding: String!
   error(type: ErrorType = NORMAL): Boolean!
+  complexity(value: Int!): Boolean!
 }
 
 type User {

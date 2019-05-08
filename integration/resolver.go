@@ -91,6 +91,10 @@ func (r *queryResolver) JSONEncoding(ctx context.Context) (string, error) {
 	return "\U000fe4ed", nil
 }
 
+func (r *queryResolver) Complexity(ctx context.Context, value int) (bool, error) {
+	return true, nil
+}
+
 type userResolver struct{ *Resolver }
 
 func (r *userResolver) Likes(ctx context.Context, obj *remote_api.User) ([]string, error) {

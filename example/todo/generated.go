@@ -85,7 +85,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "MyMutation.CreateTodo":
+	case "MyMutation.createTodo":
 		if e.complexity.MyMutation.CreateTodo == nil {
 			break
 		}
@@ -97,7 +97,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
 
-	case "MyMutation.UpdateTodo":
+	case "MyMutation.updateTodo":
 		if e.complexity.MyMutation.UpdateTodo == nil {
 			break
 		}
@@ -109,14 +109,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]interface{})), true
 
-	case "MyQuery.LastTodo":
+	case "MyQuery.lastTodo":
 		if e.complexity.MyQuery.LastTodo == nil {
 			break
 		}
 
 		return e.complexity.MyQuery.LastTodo(childComplexity), true
 
-	case "MyQuery.Todo":
+	case "MyQuery.todo":
 		if e.complexity.MyQuery.Todo == nil {
 			break
 		}
@@ -128,28 +128,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(int)), true
 
-	case "MyQuery.Todos":
+	case "MyQuery.todos":
 		if e.complexity.MyQuery.Todos == nil {
 			break
 		}
 
 		return e.complexity.MyQuery.Todos(childComplexity), true
 
-	case "Todo.Done":
+	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
 			break
 		}
 
 		return e.complexity.Todo.Done(childComplexity), true
 
-	case "Todo.ID":
+	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
 			break
 		}
 
 		return e.complexity.Todo.ID(childComplexity), true
 
-	case "Todo.Text":
+	case "Todo.text":
 		if e.complexity.Todo.Text == nil {
 			break
 		}

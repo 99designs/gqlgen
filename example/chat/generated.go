@@ -94,49 +94,49 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Chatroom.Messages":
+	case "Chatroom.messages":
 		if e.complexity.Chatroom.Messages == nil {
 			break
 		}
 
 		return e.complexity.Chatroom.Messages(childComplexity), true
 
-	case "Chatroom.Name":
+	case "Chatroom.name":
 		if e.complexity.Chatroom.Name == nil {
 			break
 		}
 
 		return e.complexity.Chatroom.Name(childComplexity), true
 
-	case "Message.CreatedAt":
+	case "Message.createdAt":
 		if e.complexity.Message.CreatedAt == nil {
 			break
 		}
 
 		return e.complexity.Message.CreatedAt(childComplexity), true
 
-	case "Message.CreatedBy":
+	case "Message.createdBy":
 		if e.complexity.Message.CreatedBy == nil {
 			break
 		}
 
 		return e.complexity.Message.CreatedBy(childComplexity), true
 
-	case "Message.ID":
+	case "Message.id":
 		if e.complexity.Message.ID == nil {
 			break
 		}
 
 		return e.complexity.Message.ID(childComplexity), true
 
-	case "Message.Text":
+	case "Message.text":
 		if e.complexity.Message.Text == nil {
 			break
 		}
 
 		return e.complexity.Message.Text(childComplexity), true
 
-	case "Mutation.Post":
+	case "Mutation.post":
 		if e.complexity.Mutation.Post == nil {
 			break
 		}
@@ -148,7 +148,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Post(childComplexity, args["text"].(string), args["username"].(string), args["roomName"].(string)), true
 
-	case "Query.Room":
+	case "Query.room":
 		if e.complexity.Query.Room == nil {
 			break
 		}
@@ -160,7 +160,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Room(childComplexity, args["name"].(string)), true
 
-	case "Subscription.MessageAdded":
+	case "Subscription.messageAdded":
 		if e.complexity.Subscription.MessageAdded == nil {
 			break
 		}

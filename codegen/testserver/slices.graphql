@@ -1,5 +1,6 @@
 extend type Query {
     slices: Slices
+    scalarSlice: Bytes!
 }
 
 type Slices {
@@ -8,3 +9,5 @@ type Slices {
   test3: [String]!
   test4: [String!]!
 }
+
+scalar Bytes

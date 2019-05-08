@@ -140,6 +140,9 @@ func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, 
 func (r *queryResolver) Slices(ctx context.Context) (*Slices, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) ScalarSlice(ctx context.Context) ([]byte, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error) {
 	panic("not implemented")
 }

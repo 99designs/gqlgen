@@ -17,7 +17,9 @@ func BenchmarkSimpleQueryNoArgs(b *testing.B) {
 	var body strings.Reader
 	r := httptest.NewRequest("POST", "/graphql", &body)
 
+	b.ReportAllocs()
 	b.ResetTimer()
+
 	rec := httptest.NewRecorder()
 	for i := 0; i < b.N; i++ {
 		body.Reset(q)

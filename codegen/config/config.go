@@ -366,10 +366,11 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 		"Time":   {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
 		"Map":    {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
 		"Upload": {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},
+		"Any":    {Model: StringList{"github.com/99designs/gqlgen/graphql.Any"}},
 	}
 
 	for typeName, entry := range extraBuiltins {
-		if t, ok := s.Types[typeName]; ok && t.Kind == ast.Scalar {
+		if t, ok := s.Types[typeName]; !c.Models.Exists(typeName) && ok && t.Kind == ast.Scalar {
 			c.Models[typeName] = entry
 		}
 	}

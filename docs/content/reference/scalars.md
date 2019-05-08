@@ -7,7 +7,7 @@ menu: { main: { parent: 'reference' } }
 
 ## Built-in helpers
 
-gqlgen ships with three built-in helpers for common custom scalar use-cases, `Time`, `Map` and `Upload`.  Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
+gqlgen ships with three built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`.  Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
 
 ### Time
 
@@ -26,8 +26,6 @@ scalar Map
 Maps an arbitrary GraphQL value to a `map[string]{interface}` Go type.
 
 
-### Upload
-
 ```graphql
 scalar Upload
 ```
@@ -40,6 +38,13 @@ type Upload struct {
 	Size     int64
 }
 ```
+### Any
+
+```graphql
+scalar Any
+```
+
+Maps an arbitrary GraphQL value to a `interface{}` Go type.
 
 ##  Custom scalars with user defined types
 
@@ -91,7 +96,7 @@ models:
 
 ## Custom scalars with third party types
 
-Sometimes you cant add methods to a type because its in another repo, part of the standard 
+Sometimes you cant add methods to a type because its in another repo, part of the standard
 library (eg string or time.Time). To do this we can build an external marshaler:
 
 ```go
@@ -101,7 +106,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	
+
 	"github.com/99designs/gqlgen/graphql"
 )
 

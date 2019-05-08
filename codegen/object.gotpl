@@ -4,7 +4,7 @@ var {{ $object.Name|lcFirst}}Implementors = {{$object.Implementors}}
 
 {{- if .Stream }}
 func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, {{$object.Name|lcFirst}}Implementors)
+	fields := graphql.CollectFields(ec.RequestContext, sel, {{$object.Name|lcFirst}}Implementors)
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Object: {{$object.Name|quote}},
 	})
@@ -24,7 +24,7 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 }
 {{- else }}
 func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, {{$object.Name|lcFirst}}Implementors)
+	fields := graphql.CollectFields(ec.RequestContext, sel, {{$object.Name|lcFirst}}Implementors)
 	{{if $object.Root}}
 		ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 			Object: {{$object.Name|quote}},

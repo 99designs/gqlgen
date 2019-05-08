@@ -85,28 +85,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "File.Content":
+	case "File.content":
 		if e.complexity.File.Content == nil {
 			break
 		}
 
 		return e.complexity.File.Content(childComplexity), true
 
-	case "File.ID":
+	case "File.id":
 		if e.complexity.File.ID == nil {
 			break
 		}
 
 		return e.complexity.File.ID(childComplexity), true
 
-	case "File.Name":
+	case "File.name":
 		if e.complexity.File.Name == nil {
 			break
 		}
 
 		return e.complexity.File.Name(childComplexity), true
 
-	case "Mutation.MultipleUpload":
+	case "Mutation.multipleUpload":
 		if e.complexity.Mutation.MultipleUpload == nil {
 			break
 		}
@@ -118,7 +118,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.MultipleUpload(childComplexity, args["files"].([]graphql.Upload)), true
 
-	case "Mutation.MultipleUploadWithPayload":
+	case "Mutation.multipleUploadWithPayload":
 		if e.complexity.Mutation.MultipleUploadWithPayload == nil {
 			break
 		}
@@ -130,7 +130,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.MultipleUploadWithPayload(childComplexity, args["req"].([]model.UploadFile)), true
 
-	case "Mutation.SingleUpload":
+	case "Mutation.singleUpload":
 		if e.complexity.Mutation.SingleUpload == nil {
 			break
 		}
@@ -142,7 +142,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SingleUpload(childComplexity, args["file"].(graphql.Upload)), true
 
-	case "Mutation.SingleUploadWithPayload":
+	case "Mutation.singleUploadWithPayload":
 		if e.complexity.Mutation.SingleUploadWithPayload == nil {
 			break
 		}
@@ -154,7 +154,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SingleUploadWithPayload(childComplexity, args["req"].(model.UploadFile)), true
 
-	case "Query.Empty":
+	case "Query.empty":
 		if e.complexity.Query.Empty == nil {
 			break
 		}

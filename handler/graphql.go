@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,7 +17,7 @@ import (
 	"github.com/99designs/gqlgen/complexity"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
@@ -369,8 +370,20 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case http.MethodPost:
-		contentType := strings.SplitN(r.Header.Get("Content-Type"), ";", 2)[0]
-		if contentType == "multipart/form-data" {
+		mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+		if err != nil {
+			sendErrorf(w, http.StatusBadRequest, "error parsing request Content-Type")
+			return
+		}
+
+		switch mediaType {
+		case "application/json":
+			if err := jsonDecode(r.Body, &reqParams); err != nil {
+				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
+				return
+			}
+
+		case "multipart/form-data":
 			var closers []io.Closer
 			var tmpFiles []string
 			defer func() {
@@ -385,11 +398,9 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				sendErrorf(w, http.StatusBadRequest, "multipart body could not be decoded: "+err.Error())
 				return
 			}
-		} else {
-			if err := jsonDecode(r.Body, &reqParams); err != nil {
-				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
-				return
-			}
+		default:
+			sendErrorf(w, http.StatusBadRequest, "unsupported Content-Type: "+mediaType)
+			return
 		}
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)

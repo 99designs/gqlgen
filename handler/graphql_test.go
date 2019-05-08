@@ -15,7 +15,6 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
@@ -87,6 +86,49 @@ func TestHandlerPOST(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"mutations are not supported"}],"data":null}`, resp.Body.String())
+	})
+
+	t.Run("validate content type", func(t *testing.T) {
+		doReq := func(handler http.Handler, method string, target string, body string, contentType string) *httptest.ResponseRecorder {
+			r := httptest.NewRequest(method, target, strings.NewReader(body))
+			if contentType != "" {
+				r.Header.Set("Content-Type", contentType)
+			}
+			w := httptest.NewRecorder()
+
+			handler.ServeHTTP(w, r)
+			return w
+		}
+
+		validContentTypes := []string{
+			"application/json",
+			"application/json; charset=utf-8",
+		}
+
+		for _, contentType := range validContentTypes {
+			t.Run(fmt.Sprintf("allow for content type %s", contentType), func(t *testing.T) {
+				resp := doReq(h, "POST", "/graphql", `{"query":"{ me { name } }"}`, contentType)
+				assert.Equal(t, http.StatusOK, resp.Code)
+				assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+			})
+		}
+
+		invalidContentTypes := []struct{ contentType, expectedError string }{
+			{"", "error parsing request Content-Type"},
+			{"text/plain", "unsupported Content-Type: text/plain"},
+
+			// These content types are currently not supported, but they are supported by other GraphQL servers, like express-graphql.
+			{"application/x-www-form-urlencoded", "unsupported Content-Type: application/x-www-form-urlencoded"},
+			{"application/graphql", "unsupported Content-Type: application/graphql"},
+		}
+
+		for _, tc := range invalidContentTypes {
+			t.Run(fmt.Sprintf("reject for content type %s", tc.contentType), func(t *testing.T) {
+				resp := doReq(h, "POST", "/graphql", `{"query":"{ me { name } }"}`, tc.contentType)
+				assert.Equal(t, http.StatusBadRequest, resp.Code)
+				assert.Equal(t, fmt.Sprintf(`{"errors":[{"message":"%s"}],"data":null}`, tc.expectedError), resp.Body.String())
+			})
+		}
 	})
 }
 
@@ -640,6 +682,7 @@ func createUploadRequest(t *testing.T, operations, mapData string, files []file)
 
 func doRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
+	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, r)

@@ -365,6 +365,7 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 	extraBuiltins := TypeMap{
 		"Time": {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
 		"Map":  {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
+		"Any":  {Model: StringList{"github.com/99designs/gqlgen/graphql.Any"}},
 	}
 
 	for typeName, entry := range extraBuiltins {

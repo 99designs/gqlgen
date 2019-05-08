@@ -85,6 +85,14 @@ type ComplexityRoot struct {
 		Radius func(childComplexity int) int
 	}
 
+	ContentPost struct {
+		Foo func(childComplexity int) int
+	}
+
+	ContentUser struct {
+		Foo func(childComplexity int) int
+	}
+
 	EmbeddedDefaultScalar struct {
 		Value func(childComplexity int) int
 	}
@@ -375,6 +383,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Circle.Radius(childComplexity), true
+
+	case "Content_Post.foo":
+		if e.complexity.ContentPost.Foo == nil {
+			break
+		}
+
+		return e.complexity.ContentPost.Foo(childComplexity), true
+
+	case "Content_User.foo":
+		if e.complexity.ContentUser.Foo == nil {
+			break
+		}
+
+		return e.complexity.ContentUser.Foo(childComplexity), true
 
 	case "EmbeddedDefaultScalar.value":
 		if e.complexity.EmbeddedDefaultScalar.Value == nil {
@@ -1425,6 +1447,16 @@ input ValidInput {
     _:           String!
 }
 
+# see https://github.com/99designs/gqlgen/issues/694
+type Content_User {
+  foo: String
+}
+
+type Content_Post {
+  foo: String
+}
+
+union Content_Child = Content_User | Content_Post
 `},
 	&ast.Source{Name: "weird_type_cases.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/583
 
@@ -2329,6 +2361,54 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql.CollectedField, obj *ContentPost) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Content_Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Foo, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql.CollectedField, obj *ContentUser) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Content_User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Foo, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, field graphql.CollectedField, obj *EmbeddedDefaultScalar) graphql.Marshaler {
@@ -5654,6 +5734,23 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, v inte
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.SelectionSet, obj *ContentChild) graphql.Marshaler {
+	switch obj := (*obj).(type) {
+	case nil:
+		return graphql.Null
+	case ContentUser:
+		return ec._Content_User(ctx, sel, &obj)
+	case *ContentUser:
+		return ec._Content_User(ctx, sel, obj)
+	case ContentPost:
+		return ec._Content_Post(ctx, sel, &obj)
+	case *ContentPost:
+		return ec._Content_Post(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) _Shape(ctx context.Context, sel ast.SelectionSet, obj *Shape) graphql.Marshaler {
 	switch obj := (*obj).(type) {
 	case nil:
@@ -5871,6 +5968,54 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec._Circle_radius(ctx, field, obj)
 		case "area":
 			out.Values[i] = ec._Circle_area(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var content_PostImplementors = []string{"Content_Post", "Content_Child"}
+
+func (ec *executionContext) _Content_Post(ctx context.Context, sel ast.SelectionSet, obj *ContentPost) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, content_PostImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Content_Post")
+		case "foo":
+			out.Values[i] = ec._Content_Post_foo(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var content_UserImplementors = []string{"Content_User", "Content_Child"}
+
+func (ec *executionContext) _Content_User(ctx context.Context, sel ast.SelectionSet, obj *ContentUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, content_UserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Content_User")
+		case "foo":
+			out.Values[i] = ec._Content_User_foo(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

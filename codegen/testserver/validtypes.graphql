@@ -66,3 +66,13 @@ input ValidInput {
     _:           String!
 }
 
+# see https://github.com/99designs/gqlgen/issues/694
+type Content_User {
+  foo: String
+}
+
+type Content_Post {
+  foo: String
+}
+
+union Content_Child = Content_User | Content_Post

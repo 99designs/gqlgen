@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+type ContentChild interface {
+	IsContentChild()
+}
+
 type TestUnion interface {
 	IsTestUnion()
 }
@@ -32,6 +36,18 @@ type B struct {
 }
 
 func (B) IsTestUnion() {}
+
+type ContentPost struct {
+	Foo *string `json:"foo"`
+}
+
+func (ContentPost) IsContentChild() {}
+
+type ContentUser struct {
+	Foo *string `json:"foo"`
+}
+
+func (ContentUser) IsContentChild() {}
 
 type EmbeddedDefaultScalar struct {
 	Value *string `json:"value"`

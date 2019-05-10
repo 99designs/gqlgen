@@ -38,7 +38,7 @@ models:
         model: github.com/my/app/models.Car
 ```
 
-In this case, each filed in the graphQL type will be bound to the respective field on the go struct
+In this case, each field in the graphQL type will be bound to the respective field on the go struct
 ignoring the case of the fields
 
 

@@ -34,8 +34,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 }
 
 func (m *Plugin) GenerateCode(data *codegen.Data) error {
-	pkgPath := code.ImportPathForDir(filepath.Dir(m.filename))
-	pkgName := code.NameForPackage(pkgPath)
+	abs, err := filepath.Abs(m.filename)
+	if err != nil {
+		return err
+	}
+	pkgName := code.NameForDir(filepath.Dir(abs))
 
 	return templates.Render(templates.Options{
 		PackageName: pkgName,

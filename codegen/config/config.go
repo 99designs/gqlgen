@@ -136,7 +136,7 @@ func (c *PackageConfig) normalize() error {
 	// If Package is not set, first attempt to load the package at the output dir. If that fails
 	// fallback to just the base dir name of the output filename.
 	if c.Package == "" {
-		c.Package = code.NameForPackage(c.ImportPath())
+		c.Package = code.NameForDir(c.Dir())
 	}
 
 	return nil

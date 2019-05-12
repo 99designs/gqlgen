@@ -23,6 +23,9 @@ type Stub struct {
 		FieldScalarMarshal func(ctx context.Context, obj *Panics) ([]MarshalPanic, error)
 		ArgUnmarshal       func(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error)
 	}
+	PrimitiveResolver struct {
+		Value func(ctx context.Context, obj *Primitive) (int, error)
+	}
 	QueryResolver struct {
 		InvalidIdentifier      func(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 		Collision              func(ctx context.Context) (*introspection1.It, error)
@@ -48,6 +51,7 @@ type Stub struct {
 		Overlapping            func(ctx context.Context) (*OverlappingFields, error)
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
+		PrimitiveObject        func(ctx context.Context) ([]Primitive, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
 		Slices                 func(ctx context.Context) (*Slices, error)
 		ScalarSlice            func(ctx context.Context) ([]byte, error)
@@ -75,6 +79,9 @@ func (r *Stub) OverlappingFields() OverlappingFieldsResolver {
 }
 func (r *Stub) Panics() PanicsResolver {
 	return &stubPanics{r}
+}
+func (r *Stub) Primitive() PrimitiveResolver {
+	return &stubPrimitive{r}
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
@@ -111,6 +118,12 @@ func (r *stubPanics) FieldScalarMarshal(ctx context.Context, obj *Panics) ([]Mar
 }
 func (r *stubPanics) ArgUnmarshal(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error) {
 	return r.PanicsResolver.ArgUnmarshal(ctx, obj, u)
+}
+
+type stubPrimitive struct{ *Stub }
+
+func (r *stubPrimitive) Value(ctx context.Context, obj *Primitive) (int, error) {
+	return r.PrimitiveResolver.Value(ctx, obj)
 }
 
 type stubQuery struct{ *Stub }
@@ -186,6 +199,9 @@ func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interf
 }
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)
+}
+func (r *stubQuery) PrimitiveObject(ctx context.Context) ([]Primitive, error) {
+	return r.QueryResolver.PrimitiveObject(ctx)
 }
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)

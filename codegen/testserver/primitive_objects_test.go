@@ -1,0 +1,40 @@
+package testserver
+
+import (
+	"context"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/handler"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestPrimitiveObjects(t *testing.T) {
+	resolvers := &Stub{}
+	resolvers.QueryResolver.PrimitiveObject = func(ctx context.Context) (out []Primitive, e error) {
+		return []Primitive{2, 4}, nil
+	}
+
+	resolvers.PrimitiveResolver.Value = func(ctx context.Context, obj *Primitive) (i int, e error) {
+		return int(*obj), nil
+	}
+
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := client.New(srv.URL)
+
+	t.Run("can fetch value", func(t *testing.T) {
+		var resp struct {
+			PrimitiveObject []struct {
+				Value   int
+				Squared int
+			}
+		}
+		c.MustPost(`query { primitiveObject { value, squared } }`, &resp)
+
+		assert.Equal(t, 2, resp.PrimitiveObject[0].Value)
+		assert.Equal(t, 4, resp.PrimitiveObject[0].Squared)
+		assert.Equal(t, 4, resp.PrimitiveObject[1].Value)
+		assert.Equal(t, 16, resp.PrimitiveObject[1].Squared)
+	})
+}

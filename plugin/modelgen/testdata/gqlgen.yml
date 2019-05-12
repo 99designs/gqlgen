@@ -17,5 +17,6 @@ models:
     model: github.com/99designs/gqlgen/plugin/modelgen/out.ExistingInterface
   ExistingUnion:
     model: github.com/99designs/gqlgen/plugin/modelgen/out.ExistingUnion
-
+  ExistingType:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out.ExistingType
 

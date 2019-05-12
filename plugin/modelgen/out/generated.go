@@ -16,34 +16,36 @@ type MissingUnion interface {
 	IsMissingUnion()
 }
 
-type ExistingType struct {
-	Name     *string           `json:"name"`
-	Enum     *ExistingEnum     `json:"enum"`
-	Int      ExistingInterface `json:"int"`
-	Existing *MissingType      `json:"existing"`
-}
-
-func (ExistingType) IsMissingUnion()      {}
-func (ExistingType) IsMissingInterface()  {}
-func (ExistingType) IsExistingInterface() {}
-func (ExistingType) IsExistingUnion()     {}
-
 type MissingInput struct {
 	Name *string      `json:"name"`
 	Enum *MissingEnum `json:"enum"`
 }
 
-type MissingType struct {
-	Name     *string          `json:"name"`
-	Enum     *MissingEnum     `json:"enum"`
-	Int      MissingInterface `json:"int"`
-	Existing *ExistingType    `json:"existing"`
+type MissingTypeNotNull struct {
+	Name     string               `json:"name"`
+	Enum     MissingEnum          `json:"enum"`
+	Int      MissingInterface     `json:"int"`
+	Existing *ExistingType        `json:"existing"`
+	Missing2 *MissingTypeNullable `json:"missing2"`
 }
 
-func (MissingType) IsMissingInterface()  {}
-func (MissingType) IsExistingInterface() {}
-func (MissingType) IsMissingUnion()      {}
-func (MissingType) IsExistingUnion()     {}
+func (MissingTypeNotNull) IsMissingInterface()  {}
+func (MissingTypeNotNull) IsExistingInterface() {}
+func (MissingTypeNotNull) IsMissingUnion()      {}
+func (MissingTypeNotNull) IsExistingUnion()     {}
+
+type MissingTypeNullable struct {
+	Name     *string             `json:"name"`
+	Enum     *MissingEnum        `json:"enum"`
+	Int      MissingInterface    `json:"int"`
+	Existing *ExistingType       `json:"existing"`
+	Missing2 *MissingTypeNotNull `json:"missing2"`
+}
+
+func (MissingTypeNullable) IsMissingInterface()  {}
+func (MissingTypeNullable) IsExistingInterface() {}
+func (MissingTypeNullable) IsMissingUnion()      {}
+func (MissingTypeNullable) IsExistingUnion()     {}
 
 type MissingEnum string
 

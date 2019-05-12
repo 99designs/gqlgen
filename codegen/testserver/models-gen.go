@@ -67,9 +67,17 @@ type InnerObject struct {
 
 type InputDirectives struct {
 	Text          string           `json:"text"`
-	Inner         InnerDirectives  `json:"inner"`
+	Inner         *InnerDirectives `json:"inner"`
 	InnerNullable *InnerDirectives `json:"innerNullable"`
 	ThirdParty    *ThirdParty      `json:"thirdParty"`
+}
+
+type LoopA struct {
+	B *LoopB `json:"b"`
+}
+
+type LoopB struct {
+	A *LoopA `json:"a"`
 }
 
 // Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
@@ -79,11 +87,11 @@ type Map struct {
 }
 
 type OuterInput struct {
-	Inner InnerInput `json:"inner"`
+	Inner *InnerInput `json:"inner"`
 }
 
 type OuterObject struct {
-	Inner InnerObject `json:"inner"`
+	Inner *InnerObject `json:"inner"`
 }
 
 type Slices struct {

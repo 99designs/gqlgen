@@ -117,6 +117,14 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	LoopA struct {
+		B func(childComplexity int) int
+	}
+
+	LoopB struct {
+		A func(childComplexity int) int
+	}
+
 	Map struct {
 		ID func(childComplexity int) int
 	}
@@ -452,6 +460,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.It.ID(childComplexity), true
+
+	case "LoopA.b":
+		if e.complexity.LoopA.B == nil {
+			break
+		}
+
+		return e.complexity.LoopA.B(childComplexity), true
+
+	case "LoopB.a":
+		if e.complexity.LoopB.A == nil {
+			break
+		}
+
+		return e.complexity.LoopB.A(childComplexity), true
 
 	case "Map.id":
 		if e.complexity.Map.ID == nil {
@@ -1141,6 +1163,14 @@ type OverlappingFields {
   oldFoo: Int!
   newFoo: Int!
   new_foo: Int!
+}
+`},
+	&ast.Source{Name: "loops.graphql", Input: `type LoopA {
+    b: LoopB!
+}
+
+type LoopB {
+    a: LoopA!
 }
 `},
 	&ast.Source{Name: "maps.graphql", Input: `extend type Query {
@@ -2613,6 +2643,60 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.CollectedField, obj *LoopA) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "LoopA",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.B, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*LoopB)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNLoopB2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopB(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.CollectedField, obj *LoopB) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "LoopB",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.A, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*LoopA)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNLoopA2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopA(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Map_id(ctx context.Context, field graphql.CollectedField, obj *Map) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -2808,10 +2892,10 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(InnerObject)
+	res := resTmp.(*InnerObject)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInnerObject2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerObject(ctx, field.Selections, res)
+	return ec.marshalNInnerObject2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerObject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) graphql.Marshaler {
@@ -5410,7 +5494,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, v
 			}
 		case "inner":
 			var err error
-			it.Inner, err = ec.unmarshalNInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
+			it.Inner, err = ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5454,7 +5538,7 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, v inte
 		switch k {
 		case "inner":
 			var err error
-			it.Inner, err = ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, v)
+			it.Inner, err = ec.unmarshalNInnerInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6071,6 +6155,60 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 			out.Values[i] = graphql.MarshalString("It")
 		case "id":
 			out.Values[i] = ec._It_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var loopAImplementors = []string{"LoopA"}
+
+func (ec *executionContext) _LoopA(ctx context.Context, sel ast.SelectionSet, obj *LoopA) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, loopAImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LoopA")
+		case "b":
+			out.Values[i] = ec._LoopA_b(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+var loopBImplementors = []string{"LoopB"}
+
+func (ec *executionContext) _LoopB(ctx context.Context, sel ast.SelectionSet, obj *LoopB) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, loopBImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LoopB")
+		case "a":
+			out.Values[i] = ec._LoopB_a(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -7306,12 +7444,38 @@ func (ec *executionContext) unmarshalNInnerDirectives2githubᚗcomᚋ99designs�
 	return ec.unmarshalInputInnerDirectives(ctx, v)
 }
 
+func (ec *executionContext) unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx context.Context, v interface{}) (*InnerDirectives, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
+	return &res, err
+}
+
 func (ec *executionContext) unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx context.Context, v interface{}) (InnerInput, error) {
 	return ec.unmarshalInputInnerInput(ctx, v)
 }
 
+func (ec *executionContext) unmarshalNInnerInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx context.Context, v interface{}) (*InnerInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, v)
+	return &res, err
+}
+
 func (ec *executionContext) marshalNInnerObject2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerObject(ctx context.Context, sel ast.SelectionSet, v InnerObject) graphql.Marshaler {
 	return ec._InnerObject(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNInnerObject2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerObject(ctx context.Context, sel ast.SelectionSet, v *InnerObject) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._InnerObject(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx context.Context, v interface{}) (InputDirectives, error) {
@@ -7340,6 +7504,34 @@ func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface
 
 func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
 	return graphql.MarshalInt64(v)
+}
+
+func (ec *executionContext) marshalNLoopA2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopA(ctx context.Context, sel ast.SelectionSet, v LoopA) graphql.Marshaler {
+	return ec._LoopA(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLoopA2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopA(ctx context.Context, sel ast.SelectionSet, v *LoopA) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LoopA(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLoopB2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopB(ctx context.Context, sel ast.SelectionSet, v LoopB) graphql.Marshaler {
+	return ec._LoopB(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLoopB2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopB(ctx context.Context, sel ast.SelectionSet, v *LoopB) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LoopB(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNMarshalPanic2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐMarshalPanic(ctx context.Context, v interface{}) (MarshalPanic, error) {

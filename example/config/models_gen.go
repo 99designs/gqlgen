@@ -12,5 +12,5 @@ type Todo struct {
 	DatabaseID  int    `json:"databaseId"`
 	Description string `json:"text"`
 	Done        bool   `json:"done"`
-	User        User   `json:"user"`
+	User        *User  `json:"user"`
 }

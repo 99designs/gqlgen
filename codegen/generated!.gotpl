@@ -4,6 +4,7 @@
 {{ reserveImport "strconv"  }}
 {{ reserveImport "time"  }}
 {{ reserveImport "sync"  }}
+{{ reserveImport "sync/atomic" }}
 {{ reserveImport "errors"  }}
 {{ reserveImport "bytes"  }}
 

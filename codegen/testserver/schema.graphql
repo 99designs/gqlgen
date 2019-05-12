@@ -6,9 +6,7 @@ type Query {
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
     shapes: [Shape]
-    errorBubble: Error
     modelMethods: ModelMethods
-    valid: String!
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
@@ -41,13 +39,6 @@ type Autobind {
 
     idStr: ID!
     idInt: ID!
-}
-
-type Error {
-    id: ID!
-    errorOnNonRequiredField: String
-    errorOnRequiredField: String!
-    nilOnRequiredField: String!
 }
 
 type ModelMethods {

@@ -11,6 +11,9 @@ import (
 
 type Resolver struct{}
 
+func (r *Resolver) Errors() ErrorsResolver {
+	return &errorsResolver{r}
+}
 func (r *Resolver) ForcedResolver() ForcedResolverResolver {
 	return &forcedResolverResolver{r}
 }
@@ -31,6 +34,24 @@ func (r *Resolver) Subscription() SubscriptionResolver {
 }
 func (r *Resolver) User() UserResolver {
 	return &userResolver{r}
+}
+
+type errorsResolver struct{ *Resolver }
+
+func (r *errorsResolver) A(ctx context.Context, obj *Errors) (*Error, error) {
+	panic("not implemented")
+}
+func (r *errorsResolver) B(ctx context.Context, obj *Errors) (*Error, error) {
+	panic("not implemented")
+}
+func (r *errorsResolver) C(ctx context.Context, obj *Errors) (*Error, error) {
+	panic("not implemented")
+}
+func (r *errorsResolver) D(ctx context.Context, obj *Errors) (*Error, error) {
+	panic("not implemented")
+}
+func (r *errorsResolver) E(ctx context.Context, obj *Errors) (*Error, error) {
+	panic("not implemented")
 }
 
 type forcedResolverResolver struct{ *Resolver }
@@ -83,13 +104,7 @@ func (r *queryResolver) NestedOutputs(ctx context.Context) ([][]*OuterObject, er
 func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
-	panic("not implemented")
-}
 func (r *queryResolver) ModelMethods(ctx context.Context) (*ModelMethods, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) Valid(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) User(ctx context.Context, id int) (*User, error) {
@@ -129,6 +144,15 @@ func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, er
 	panic("not implemented")
 }
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Errors(ctx context.Context) (*Errors, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Valid(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {

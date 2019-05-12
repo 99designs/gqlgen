@@ -10,6 +10,13 @@ import (
 )
 
 type Stub struct {
+	ErrorsResolver struct {
+		A func(ctx context.Context, obj *Errors) (*Error, error)
+		B func(ctx context.Context, obj *Errors) (*Error, error)
+		C func(ctx context.Context, obj *Errors) (*Error, error)
+		D func(ctx context.Context, obj *Errors) (*Error, error)
+		E func(ctx context.Context, obj *Errors) (*Error, error)
+	}
 	ForcedResolverResolver struct {
 		Field func(ctx context.Context, obj *ForcedResolver) (*Circle, error)
 	}
@@ -31,9 +38,7 @@ type Stub struct {
 		NestedInputs           func(ctx context.Context, input [][]*OuterInput) (*bool, error)
 		NestedOutputs          func(ctx context.Context) ([][]*OuterObject, error)
 		Shapes                 func(ctx context.Context) ([]Shape, error)
-		ErrorBubble            func(ctx context.Context) (*Error, error)
 		ModelMethods           func(ctx context.Context) (*ModelMethods, error)
-		Valid                  func(ctx context.Context) (string, error)
 		User                   func(ctx context.Context, id int) (*User, error)
 		NullableArg            func(ctx context.Context, arg *int) (*string, error)
 		DirectiveArg           func(ctx context.Context, arg string) (*string, error)
@@ -47,6 +52,9 @@ type Stub struct {
 		DeprecatedField        func(ctx context.Context) (string, error)
 		Overlapping            func(ctx context.Context) (*OverlappingFields, error)
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
+		ErrorBubble            func(ctx context.Context) (*Error, error)
+		Errors                 func(ctx context.Context) (*Errors, error)
+		Valid                  func(ctx context.Context) (string, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
 		Slices                 func(ctx context.Context) (*Slices, error)
@@ -64,6 +72,9 @@ type Stub struct {
 	}
 }
 
+func (r *Stub) Errors() ErrorsResolver {
+	return &stubErrors{r}
+}
 func (r *Stub) ForcedResolver() ForcedResolverResolver {
 	return &stubForcedResolver{r}
 }
@@ -84,6 +95,24 @@ func (r *Stub) Subscription() SubscriptionResolver {
 }
 func (r *Stub) User() UserResolver {
 	return &stubUser{r}
+}
+
+type stubErrors struct{ *Stub }
+
+func (r *stubErrors) A(ctx context.Context, obj *Errors) (*Error, error) {
+	return r.ErrorsResolver.A(ctx, obj)
+}
+func (r *stubErrors) B(ctx context.Context, obj *Errors) (*Error, error) {
+	return r.ErrorsResolver.B(ctx, obj)
+}
+func (r *stubErrors) C(ctx context.Context, obj *Errors) (*Error, error) {
+	return r.ErrorsResolver.C(ctx, obj)
+}
+func (r *stubErrors) D(ctx context.Context, obj *Errors) (*Error, error) {
+	return r.ErrorsResolver.D(ctx, obj)
+}
+func (r *stubErrors) E(ctx context.Context, obj *Errors) (*Error, error) {
+	return r.ErrorsResolver.E(ctx, obj)
 }
 
 type stubForcedResolver struct{ *Stub }
@@ -136,14 +165,8 @@ func (r *stubQuery) NestedOutputs(ctx context.Context) ([][]*OuterObject, error)
 func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 	return r.QueryResolver.Shapes(ctx)
 }
-func (r *stubQuery) ErrorBubble(ctx context.Context) (*Error, error) {
-	return r.QueryResolver.ErrorBubble(ctx)
-}
 func (r *stubQuery) ModelMethods(ctx context.Context) (*ModelMethods, error) {
 	return r.QueryResolver.ModelMethods(ctx)
-}
-func (r *stubQuery) Valid(ctx context.Context) (string, error) {
-	return r.QueryResolver.Valid(ctx)
 }
 func (r *stubQuery) User(ctx context.Context, id int) (*User, error) {
 	return r.QueryResolver.User(ctx, id)
@@ -183,6 +206,15 @@ func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error)
 }
 func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)
+}
+func (r *stubQuery) ErrorBubble(ctx context.Context) (*Error, error) {
+	return r.QueryResolver.ErrorBubble(ctx)
+}
+func (r *stubQuery) Errors(ctx context.Context) (*Errors, error) {
+	return r.QueryResolver.Errors(ctx)
+}
+func (r *stubQuery) Valid(ctx context.Context) (string, error) {
+	return r.QueryResolver.Valid(ctx)
 }
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)

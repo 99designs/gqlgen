@@ -37,6 +37,8 @@ models:
       friends: { resolver: true }
   Error:
     model: "github.com/99designs/gqlgen/codegen/testserver.Error"
+  Errors:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Errors"
   EmbeddedPointer:
     model: "github.com/99designs/gqlgen/codegen/testserver.EmbeddedPointerModel"
   ThirdParty:

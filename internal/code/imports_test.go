@@ -30,3 +30,13 @@ func TestNameForPackage(t *testing.T) {
 	assert.Equal(t, "docs", NameForPackage("github.com/99designs/gqlgen/docs"))
 	assert.Equal(t, "github_com", NameForPackage("github.com"))
 }
+
+func TestNameForDir(t *testing.T) {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	assert.Equal(t, "tmp", NameForDir("/tmp"))
+	assert.Equal(t, "code", NameForDir(wd))
+	assert.Equal(t, "internal", NameForDir(wd+"/.."))
+	assert.Equal(t, "main", NameForDir(wd+"/../.."))
+}

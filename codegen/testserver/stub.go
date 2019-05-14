@@ -26,6 +26,10 @@ type Stub struct {
 	PrimitiveResolver struct {
 		Value func(ctx context.Context, obj *Primitive) (int, error)
 	}
+	PrimitiveStringResolver struct {
+		Value func(ctx context.Context, obj *PrimitiveString) (string, error)
+		Len   func(ctx context.Context, obj *PrimitiveString) (int, error)
+	}
 	QueryResolver struct {
 		InvalidIdentifier      func(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 		Collision              func(ctx context.Context) (*introspection1.It, error)
@@ -52,6 +56,7 @@ type Stub struct {
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		Panics                 func(ctx context.Context) (*Panics, error)
 		PrimitiveObject        func(ctx context.Context) ([]Primitive, error)
+		PrimitiveStringObject  func(ctx context.Context) ([]PrimitiveString, error)
 		DefaultScalar          func(ctx context.Context, arg string) (string, error)
 		Slices                 func(ctx context.Context) (*Slices, error)
 		ScalarSlice            func(ctx context.Context) ([]byte, error)
@@ -82,6 +87,9 @@ func (r *Stub) Panics() PanicsResolver {
 }
 func (r *Stub) Primitive() PrimitiveResolver {
 	return &stubPrimitive{r}
+}
+func (r *Stub) PrimitiveString() PrimitiveStringResolver {
+	return &stubPrimitiveString{r}
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
@@ -124,6 +132,15 @@ type stubPrimitive struct{ *Stub }
 
 func (r *stubPrimitive) Value(ctx context.Context, obj *Primitive) (int, error) {
 	return r.PrimitiveResolver.Value(ctx, obj)
+}
+
+type stubPrimitiveString struct{ *Stub }
+
+func (r *stubPrimitiveString) Value(ctx context.Context, obj *PrimitiveString) (string, error) {
+	return r.PrimitiveStringResolver.Value(ctx, obj)
+}
+func (r *stubPrimitiveString) Len(ctx context.Context, obj *PrimitiveString) (int, error) {
+	return r.PrimitiveStringResolver.Len(ctx, obj)
 }
 
 type stubQuery struct{ *Stub }
@@ -202,6 +219,9 @@ func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 }
 func (r *stubQuery) PrimitiveObject(ctx context.Context) ([]Primitive, error) {
 	return r.QueryResolver.PrimitiveObject(ctx)
+}
+func (r *stubQuery) PrimitiveStringObject(ctx context.Context) ([]PrimitiveString, error) {
+	return r.QueryResolver.PrimitiveStringObject(ctx)
 }
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)

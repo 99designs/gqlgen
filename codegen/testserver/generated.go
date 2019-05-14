@@ -43,6 +43,7 @@ type ResolverRoot interface {
 	OverlappingFields() OverlappingFieldsResolver
 	Panics() PanicsResolver
 	Primitive() PrimitiveResolver
+	PrimitiveString() PrimitiveStringResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
 	User() UserResolver
@@ -170,6 +171,12 @@ type ComplexityRoot struct {
 		Value   func(childComplexity int) int
 	}
 
+	PrimitiveString struct {
+		Doubled func(childComplexity int) int
+		Len     func(childComplexity int) int
+		Value   func(childComplexity int) int
+	}
+
 	Query struct {
 		Autobind               func(childComplexity int) int
 		Collision              func(childComplexity int) int
@@ -194,6 +201,7 @@ type ComplexityRoot struct {
 		Overlapping            func(childComplexity int) int
 		Panics                 func(childComplexity int) int
 		PrimitiveObject        func(childComplexity int) int
+		PrimitiveStringObject  func(childComplexity int) int
 		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
 		ScalarSlice            func(childComplexity int) int
 		ShapeUnion             func(childComplexity int) int
@@ -270,6 +278,11 @@ type PanicsResolver interface {
 type PrimitiveResolver interface {
 	Value(ctx context.Context, obj *Primitive) (int, error)
 }
+type PrimitiveStringResolver interface {
+	Value(ctx context.Context, obj *PrimitiveString) (string, error)
+
+	Len(ctx context.Context, obj *PrimitiveString) (int, error)
+}
 type QueryResolver interface {
 	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 	Collision(ctx context.Context) (*introspection1.It, error)
@@ -296,6 +309,7 @@ type QueryResolver interface {
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	Panics(ctx context.Context) (*Panics, error)
 	PrimitiveObject(ctx context.Context) ([]Primitive, error)
+	PrimitiveStringObject(ctx context.Context) ([]PrimitiveString, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
 	Slices(ctx context.Context) (*Slices, error)
 	ScalarSlice(ctx context.Context) ([]byte, error)
@@ -623,6 +637,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Primitive.Value(childComplexity), true
 
+	case "PrimitiveString.doubled":
+		if e.complexity.PrimitiveString.Doubled == nil {
+			break
+		}
+
+		return e.complexity.PrimitiveString.Doubled(childComplexity), true
+
+	case "PrimitiveString.len":
+		if e.complexity.PrimitiveString.Len == nil {
+			break
+		}
+
+		return e.complexity.PrimitiveString.Len(childComplexity), true
+
+	case "PrimitiveString.value":
+		if e.complexity.PrimitiveString.Value == nil {
+			break
+		}
+
+		return e.complexity.PrimitiveString.Value(childComplexity), true
+
 	case "Query.autobind":
 		if e.complexity.Query.Autobind == nil {
 			break
@@ -843,6 +878,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PrimitiveObject(childComplexity), true
+
+	case "Query.primitiveStringObject":
+		if e.complexity.Query.PrimitiveStringObject == nil {
+			break
+		}
+
+		return e.complexity.Query.PrimitiveStringObject(childComplexity), true
 
 	case "Query.recursive":
 		if e.complexity.Query.Recursive == nil {
@@ -1256,11 +1298,18 @@ scalar MarshalPanic
 `},
 	&ast.Source{Name: "primitive_objects.graphql", Input: `extend type Query {
     primitiveObject: [Primitive!]!
+    primitiveStringObject: [PrimitiveString!]!
 }
 
 type Primitive {
     value: Int!
     squared: Int!
+}
+
+type PrimitiveString {
+    value: String!
+    doubled: String!
+    len: Int!
 }
 `},
 	&ast.Source{Name: "scalar_default.graphql", Input: `extend type Query {
@@ -3303,6 +3352,87 @@ func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphq
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "PrimitiveString",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PrimitiveString().Value(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "PrimitiveString",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Doubled(), nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "PrimitiveString",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PrimitiveString().Len(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -4003,6 +4133,33 @@ func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field gr
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitive(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PrimitiveStringObject(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]PrimitiveString)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveString(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -6786,6 +6943,61 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var primitiveStringImplementors = []string{"PrimitiveString"}
+
+func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.SelectionSet, obj *PrimitiveString) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, primitiveStringImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrimitiveString")
+		case "value":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PrimitiveString_value(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "doubled":
+			out.Values[i] = ec._PrimitiveString_doubled(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "len":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PrimitiveString_len(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -7089,6 +7301,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_primitiveObject(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "primitiveStringObject":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_primitiveStringObject(ctx, field)
 				if res == graphql.Null {
 					invalid = true
 				}
@@ -7977,6 +8203,53 @@ func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlg
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNPrimitive2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitive(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPrimitiveString2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveString(ctx context.Context, sel ast.SelectionSet, v PrimitiveString) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveString(ctx context.Context, sel ast.SelectionSet, v []PrimitiveString) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPrimitiveString2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveString(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

@@ -58,6 +58,8 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.Autobind"
   Primitive:
     model: "github.com/99designs/gqlgen/codegen/testserver.Primitive"
+  PrimitiveString:
+    model: "github.com/99designs/gqlgen/codegen/testserver.PrimitiveString"
   MapStringInterfaceInput:
     model: "map[string]interface{}"
   MapStringInterfaceType:

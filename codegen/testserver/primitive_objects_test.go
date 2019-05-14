@@ -38,3 +38,39 @@ func TestPrimitiveObjects(t *testing.T) {
 		assert.Equal(t, 16, resp.PrimitiveObject[1].Squared)
 	})
 }
+
+func TestPrimitiveStringObjects(t *testing.T) {
+	resolvers := &Stub{}
+	resolvers.QueryResolver.PrimitiveStringObject = func(ctx context.Context) (out []PrimitiveString, e error) {
+		return []PrimitiveString{"hello", "world"}, nil
+	}
+
+	resolvers.PrimitiveStringResolver.Value = func(ctx context.Context, obj *PrimitiveString) (i string, e error) {
+		return string(*obj), nil
+	}
+
+	resolvers.PrimitiveStringResolver.Len = func(ctx context.Context, obj *PrimitiveString) (i int, e error) {
+		return len(string(*obj)), nil
+	}
+
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := client.New(srv.URL)
+
+	t.Run("can fetch value", func(t *testing.T) {
+		var resp struct {
+			PrimitiveStringObject []struct {
+				Value   string
+				Doubled string
+				Len int
+			}
+		}
+		c.MustPost(`query { primitiveStringObject { value, doubled, len } }`, &resp)
+
+		assert.Equal(t, "hello", resp.PrimitiveStringObject[0].Value)
+		assert.Equal(t, "hellohello", resp.PrimitiveStringObject[0].Doubled)
+		assert.Equal(t, 5, resp.PrimitiveStringObject[0].Len)
+		assert.Equal(t, "world", resp.PrimitiveStringObject[1].Value)
+		assert.Equal(t, "worldworld", resp.PrimitiveStringObject[1].Doubled)
+		assert.Equal(t, 5, resp.PrimitiveStringObject[1].Len)
+	})
+}

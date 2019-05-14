@@ -21,6 +21,8 @@ func (m ModelMethods) WithContext(_ context.Context) bool {
 	return true
 }
 
+type Errors struct{}
+
 type Error struct {
 	ID string
 }

@@ -16,6 +16,9 @@ func TestNullBubbling(t *testing.T) {
 		return "Ok", nil
 	}
 
+	resolvers.QueryResolver.Errors = func(ctx context.Context) (errors *Errors, e error) {
+		return &Errors{}, nil
+	}
 	resolvers.QueryResolver.ErrorBubble = func(ctx context.Context) (i *Error, e error) {
 		return &Error{ID: "E1234"}, nil
 	}
@@ -79,5 +82,25 @@ func TestNullBubbling(t *testing.T) {
 		err := c.Post(`query { nullableArg(arg: null) }`, &resp)
 		require.Nil(t, err)
 		require.Equal(t, "Ok", *resp.NullableArg)
+	})
+
+	t.Run("concurrent null detection", func(t *testing.T) {
+		var resp interface{}
+		resolvers.ErrorsResolver.A = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
+		resolvers.ErrorsResolver.B = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
+		resolvers.ErrorsResolver.C = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
+		resolvers.ErrorsResolver.D = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
+		resolvers.ErrorsResolver.E = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
+
+		err := c.Post(`{ errors { 
+			a { id },
+			b { id },
+			c { id },
+			d { id },
+			e { id },
+		} }`, &resp)
+
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "must not be null")
 	})
 }

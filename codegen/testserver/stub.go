@@ -77,7 +77,7 @@ type Stub struct {
 		InitPayload func(ctx context.Context) (<-chan string, error)
 	}
 	UserResolver struct {
-		Friends func(ctx context.Context, obj *User) ([]User, error)
+		Friends func(ctx context.Context, obj *User) ([]*User, error)
 	}
 }
 
@@ -285,6 +285,6 @@ func (r *stubSubscription) InitPayload(ctx context.Context) (<-chan string, erro
 
 type stubUser struct{ *Stub }
 
-func (r *stubUser) Friends(ctx context.Context, obj *User) ([]User, error) {
+func (r *stubUser) Friends(ctx context.Context, obj *User) ([]*User, error) {
 	return r.UserResolver.Friends(ctx, obj)
 }

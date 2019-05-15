@@ -46,12 +46,8 @@ func (r *resolver) MyMutation() MyMutationResolver {
 
 type queryResolver struct{ *resolver }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
-	todos := make([]Todo, 0, len(r.todos))
-	for _, todo := range r.todos {
-		todos = append(todos, *todo)
-	}
-	return todos, nil
+func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
+	return r.todos, nil
 }
 
 func (r *queryResolver) Todo(ctx context.Context, id string) (*Todo, error) {

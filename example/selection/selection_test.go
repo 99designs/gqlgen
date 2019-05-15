@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-
 	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )

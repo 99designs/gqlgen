@@ -215,6 +215,6 @@ func (r *subscriptionResolver) InitPayload(ctx context.Context) (<-chan string, 
 
 type userResolver struct{ *Resolver }
 
-func (r *userResolver) Friends(ctx context.Context, obj *User) ([]User, error) {
+func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) {
 	panic("not implemented")
 }

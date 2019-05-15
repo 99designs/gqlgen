@@ -10,7 +10,7 @@ import (
 // ItemSliceLoaderConfig captures the config to create a new ItemSliceLoader
 type ItemSliceLoaderConfig struct {
 	// Fetch is a method that provides the data for the loader
-	Fetch func(keys []int) ([][]Item, []error)
+	Fetch func(keys []int) ([][]*Item, []error)
 
 	// Wait is how long wait before sending a batch
 	Wait time.Duration
@@ -31,7 +31,7 @@ func NewItemSliceLoader(config ItemSliceLoaderConfig) *ItemSliceLoader {
 // ItemSliceLoader batches and caches requests
 type ItemSliceLoader struct {
 	// this method provides the data for the loader
-	fetch func(keys []int) ([][]Item, []error)
+	fetch func(keys []int) ([][]*Item, []error)
 
 	// how long to done before sending a batch
 	wait time.Duration
@@ -42,51 +42,51 @@ type ItemSliceLoader struct {
 	// INTERNAL
 
 	// lazily created cache
-	cache map[int][]Item
+	cache map[int][]*Item
 
 	// the current batch. keys will continue to be collected until timeout is hit,
 	// then everything will be sent to the fetch method and out to the listeners
-	batch *itemSliceBatch
+	batch *itemSliceLoaderBatch
 
 	// mutex to prevent races
 	mu sync.Mutex
 }
 
-type itemSliceBatch struct {
+type itemSliceLoaderBatch struct {
 	keys    []int
-	data    [][]Item
+	data    [][]*Item
 	error   []error
 	closing bool
 	done    chan struct{}
 }
 
-// Load a item by key, batching and caching will be applied automatically
-func (l *ItemSliceLoader) Load(key int) ([]Item, error) {
+// Load a Item by key, batching and caching will be applied automatically
+func (l *ItemSliceLoader) Load(key int) ([]*Item, error) {
 	return l.LoadThunk(key)()
 }
 
-// LoadThunk returns a function that when called will block waiting for a item.
+// LoadThunk returns a function that when called will block waiting for a Item.
 // This method should be used if you want one goroutine to make requests to many
 // different data loaders without blocking until the thunk is called.
-func (l *ItemSliceLoader) LoadThunk(key int) func() ([]Item, error) {
+func (l *ItemSliceLoader) LoadThunk(key int) func() ([]*Item, error) {
 	l.mu.Lock()
 	if it, ok := l.cache[key]; ok {
 		l.mu.Unlock()
-		return func() ([]Item, error) {
+		return func() ([]*Item, error) {
 			return it, nil
 		}
 	}
 	if l.batch == nil {
-		l.batch = &itemSliceBatch{done: make(chan struct{})}
+		l.batch = &itemSliceLoaderBatch{done: make(chan struct{})}
 	}
 	batch := l.batch
 	pos := batch.keyIndex(l, key)
 	l.mu.Unlock()
 
-	return func() ([]Item, error) {
+	return func() ([]*Item, error) {
 		<-batch.done
 
-		var data []Item
+		var data []*Item
 		if pos < len(batch.data) {
 			data = batch.data[pos]
 		}
@@ -111,14 +111,14 @@ func (l *ItemSliceLoader) LoadThunk(key int) func() ([]Item, error) {
 
 // LoadAll fetches many keys at once. It will be broken into appropriate sized
 // sub batches depending on how the loader is configured
-func (l *ItemSliceLoader) LoadAll(keys []int) ([][]Item, []error) {
-	results := make([]func() ([]Item, error), len(keys))
+func (l *ItemSliceLoader) LoadAll(keys []int) ([][]*Item, []error) {
+	results := make([]func() ([]*Item, error), len(keys))
 
 	for i, key := range keys {
 		results[i] = l.LoadThunk(key)
 	}
 
-	items := make([][]Item, len(keys))
+	items := make([][]*Item, len(keys))
 	errors := make([]error, len(keys))
 	for i, thunk := range results {
 		items[i], errors[i] = thunk()
@@ -126,14 +126,36 @@ func (l *ItemSliceLoader) LoadAll(keys []int) ([][]Item, []error) {
 	return items, errors
 }
 
+// LoadAllThunk returns a function that when called will block waiting for a Items.
+// This method should be used if you want one goroutine to make requests to many
+// different data loaders without blocking until the thunk is called.
+func (l *ItemSliceLoader) LoadAllThunk(keys []int) func() ([][]*Item, []error) {
+	results := make([]func() ([]*Item, error), len(keys))
+	for i, key := range keys {
+		results[i] = l.LoadThunk(key)
+	}
+	return func() ([][]*Item, []error) {
+		items := make([][]*Item, len(keys))
+		errors := make([]error, len(keys))
+		for i, thunk := range results {
+			items[i], errors[i] = thunk()
+		}
+		return items, errors
+	}
+}
+
 // Prime the cache with the provided key and value. If the key already exists, no change is made
 // and false is returned.
 // (To forcefully prime the cache, clear the key first with loader.clear(key).prime(key, value).)
-func (l *ItemSliceLoader) Prime(key int, value []Item) bool {
+func (l *ItemSliceLoader) Prime(key int, value []*Item) bool {
 	l.mu.Lock()
 	var found bool
 	if _, found = l.cache[key]; !found {
-		l.unsafeSet(key, value)
+		// make a copy when writing to the cache, its easy to pass a pointer in from a loop var
+		// and end up with the whole cache pointing to the same value.
+		cpy := make([]*Item, len(value))
+		copy(cpy, value)
+		l.unsafeSet(key, cpy)
 	}
 	l.mu.Unlock()
 	return !found
@@ -146,16 +168,16 @@ func (l *ItemSliceLoader) Clear(key int) {
 	l.mu.Unlock()
 }
 
-func (l *ItemSliceLoader) unsafeSet(key int, value []Item) {
+func (l *ItemSliceLoader) unsafeSet(key int, value []*Item) {
 	if l.cache == nil {
-		l.cache = map[int][]Item{}
+		l.cache = map[int][]*Item{}
 	}
 	l.cache[key] = value
 }
 
 // keyIndex will return the location of the key in the batch, if its not found
 // it will add the key to the batch
-func (b *itemSliceBatch) keyIndex(l *ItemSliceLoader, key int) int {
+func (b *itemSliceLoaderBatch) keyIndex(l *ItemSliceLoader, key int) int {
 	for i, existingKey := range b.keys {
 		if key == existingKey {
 			return i
@@ -179,7 +201,7 @@ func (b *itemSliceBatch) keyIndex(l *ItemSliceLoader, key int) int {
 	return pos
 }
 
-func (b *itemSliceBatch) startTimer(l *ItemSliceLoader) {
+func (b *itemSliceLoaderBatch) startTimer(l *ItemSliceLoader) {
 	time.Sleep(l.wait)
 	l.mu.Lock()
 
@@ -195,7 +217,7 @@ func (b *itemSliceBatch) startTimer(l *ItemSliceLoader) {
 	b.end(l)
 }
 
-func (b *itemSliceBatch) end(l *ItemSliceLoader) {
+func (b *itemSliceLoaderBatch) end(l *ItemSliceLoader) {
 	b.data, b.error = l.fetch(b.keys)
 	close(b.done)
 }

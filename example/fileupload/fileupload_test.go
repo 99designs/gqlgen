@@ -1,3 +1,4 @@
+//go:generate go run ../../testdata/gqlgen.go -stub stubs.go
 package fileupload
 
 import (
@@ -21,20 +22,19 @@ func TestFileUpload(t *testing.T) {
 	client := http.Client{}
 
 	t.Run("valid single file upload", func(t *testing.T) {
-		resolver := &Resolver{
-			SingleUploadFunc: func(ctx context.Context, file graphql.Upload) (*model.File, error) {
-				require.NotNil(t, file)
-				require.NotNil(t, file.File)
-				content, err := ioutil.ReadAll(file.File)
-				require.Nil(t, err)
-				require.Equal(t, string(content), "test")
+		resolver := &Stub{}
+		resolver.MutationResolver.SingleUpload = func(ctx context.Context, file graphql.Upload) (*model.File, error) {
+			require.NotNil(t, file)
+			require.NotNil(t, file.File)
+			content, err := ioutil.ReadAll(file.File)
+			require.Nil(t, err)
+			require.Equal(t, string(content), "test")
 
-				return &model.File{
-					ID:      1,
-					Name:    file.Filename,
-					Content: string(content),
-				}, nil
-			},
+			return &model.File{
+				ID:      1,
+				Name:    file.Filename,
+				Content: string(content),
+			}, nil
 		}
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
@@ -62,21 +62,20 @@ func TestFileUpload(t *testing.T) {
 	})
 
 	t.Run("valid single file upload with payload", func(t *testing.T) {
-		resolver := &Resolver{
-			SingleUploadWithPayloadFunc: func(ctx context.Context, req model.UploadFile) (*model.File, error) {
-				require.Equal(t, req.ID, 1)
-				require.NotNil(t, req.File)
-				require.NotNil(t, req.File.File)
-				content, err := ioutil.ReadAll(req.File.File)
-				require.Nil(t, err)
-				require.Equal(t, string(content), "test")
+		resolver := &Stub{}
+		resolver.MutationResolver.SingleUploadWithPayload = func(ctx context.Context, req model.UploadFile) (*model.File, error) {
+			require.Equal(t, req.ID, 1)
+			require.NotNil(t, req.File)
+			require.NotNil(t, req.File.File)
+			content, err := ioutil.ReadAll(req.File.File)
+			require.Nil(t, err)
+			require.Equal(t, string(content), "test")
 
-				return &model.File{
-					ID:      1,
-					Name:    req.File.Filename,
-					Content: string(content),
-				}, nil
-			},
+			return &model.File{
+				ID:      1,
+				Name:    req.File.Filename,
+				Content: string(content),
+			}, nil
 		}
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
@@ -103,25 +102,24 @@ func TestFileUpload(t *testing.T) {
 	})
 
 	t.Run("valid file list upload", func(t *testing.T) {
-		resolver := &Resolver{
-			MultipleUploadFunc: func(ctx context.Context, files []graphql.Upload) ([]model.File, error) {
-				require.Len(t, files, 2)
-				var contents []string
-				var resp []model.File
-				for i := range files {
-					require.NotNil(t, files[i].File)
-					content, err := ioutil.ReadAll(files[i].File)
-					require.Nil(t, err)
-					contents = append(contents, string(content))
-					resp = append(resp, model.File{
-						ID:      i + 1,
-						Name:    files[i].Filename,
-						Content: string(content),
-					})
-				}
-				require.ElementsMatch(t, []string{"test1", "test2"}, contents)
-				return resp, nil
-			},
+		resolver := &Stub{}
+		resolver.MutationResolver.MultipleUpload = func(ctx context.Context, files []*graphql.Upload) ([]*model.File, error) {
+			require.Len(t, files, 2)
+			var contents []string
+			var resp []*model.File
+			for i := range files {
+				require.NotNil(t, files[i].File)
+				content, err := ioutil.ReadAll(files[i].File)
+				require.Nil(t, err)
+				contents = append(contents, string(content))
+				resp = append(resp, &model.File{
+					ID:      i + 1,
+					Name:    files[i].Filename,
+					Content: string(content),
+				})
+			}
+			require.ElementsMatch(t, []string{"test1", "test2"}, contents)
+			return resp, nil
 		}
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
@@ -153,29 +151,28 @@ func TestFileUpload(t *testing.T) {
 	})
 
 	t.Run("valid file list upload with payload", func(t *testing.T) {
-		resolver := &Resolver{
-			MultipleUploadWithPayloadFunc: func(ctx context.Context, req []model.UploadFile) ([]model.File, error) {
-				require.Len(t, req, 2)
-				var ids []int
-				var contents []string
-				var resp []model.File
-				for i := range req {
-					require.NotNil(t, req[i].File)
-					require.NotNil(t, req[i].File.File)
-					content, err := ioutil.ReadAll(req[i].File.File)
-					require.Nil(t, err)
-					ids = append(ids, req[i].ID)
-					contents = append(contents, string(content))
-					resp = append(resp, model.File{
-						ID:      i + 1,
-						Name:    req[i].File.Filename,
-						Content: string(content),
-					})
-				}
-				require.ElementsMatch(t, []int{1, 2}, ids)
-				require.ElementsMatch(t, []string{"test1", "test2"}, contents)
-				return resp, nil
-			},
+		resolver := &Stub{}
+		resolver.MutationResolver.MultipleUploadWithPayload = func(ctx context.Context, req []*model.UploadFile) ([]*model.File, error) {
+			require.Len(t, req, 2)
+			var ids []int
+			var contents []string
+			var resp []*model.File
+			for i := range req {
+				require.NotNil(t, req[i].File)
+				require.NotNil(t, req[i].File.File)
+				content, err := ioutil.ReadAll(req[i].File.File)
+				require.Nil(t, err)
+				ids = append(ids, req[i].ID)
+				contents = append(contents, string(content))
+				resp = append(resp, &model.File{
+					ID:      i + 1,
+					Name:    req[i].File.Filename,
+					Content: string(content),
+				})
+			}
+			require.ElementsMatch(t, []int{1, 2}, ids)
+			require.ElementsMatch(t, []string{"test1", "test2"}, contents)
+			return resp, nil
 		}
 		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
@@ -207,40 +204,39 @@ func TestFileUpload(t *testing.T) {
 	})
 
 	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
-		resolver := &Resolver{
-			MultipleUploadWithPayloadFunc: func(ctx context.Context, req []model.UploadFile) ([]model.File, error) {
-				require.Len(t, req, 2)
-				var ids []int
-				var contents []string
-				var resp []model.File
-				for i := range req {
-					require.NotNil(t, req[i].File)
-					require.NotNil(t, req[i].File.File)
-					ids = append(ids, req[i].ID)
+		resolver := &Stub{}
+		resolver.MutationResolver.MultipleUploadWithPayload = func(ctx context.Context, req []*model.UploadFile) ([]*model.File, error) {
+			require.Len(t, req, 2)
+			var ids []int
+			var contents []string
+			var resp []*model.File
+			for i := range req {
+				require.NotNil(t, req[i].File)
+				require.NotNil(t, req[i].File.File)
+				ids = append(ids, req[i].ID)
 
-					var got []byte
-					buf := make([]byte, 2)
-					for {
-						n, err := req[i].File.File.Read(buf)
-						got = append(got, buf[:n]...)
-						if err != nil {
-							if err == io.EOF {
-								break
-							}
-							require.Fail(t, "unexpected error while reading", err.Error())
+				var got []byte
+				buf := make([]byte, 2)
+				for {
+					n, err := req[i].File.File.Read(buf)
+					got = append(got, buf[:n]...)
+					if err != nil {
+						if err == io.EOF {
+							break
 						}
+						require.Fail(t, "unexpected error while reading", err.Error())
 					}
-					contents = append(contents, string(got))
-					resp = append(resp, model.File{
-						ID:      i + 1,
-						Name:    req[i].File.Filename,
-						Content: string(got),
-					})
 				}
-				require.ElementsMatch(t, []int{1, 2}, ids)
-				require.ElementsMatch(t, []string{"test1", "test1"}, contents)
-				return resp, nil
-			},
+				contents = append(contents, string(got))
+				resp = append(resp, &model.File{
+					ID:      i + 1,
+					Name:    req[i].File.Filename,
+					Content: string(got),
+				})
+			}
+			require.ElementsMatch(t, []int{1, 2}, ids)
+			require.ElementsMatch(t, []string{"test1", "test1"}, contents)
+			return resp, nil
 		}
 
 		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`

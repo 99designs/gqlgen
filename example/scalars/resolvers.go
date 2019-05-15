@@ -34,7 +34,7 @@ func (r *queryResolver) User(ctx context.Context, id external.ObjectID) (*model.
 	}, nil
 }
 
-func (r *queryResolver) Search(ctx context.Context, input *model.SearchArgs) ([]model.User, error) {
+func (r *queryResolver) Search(ctx context.Context, input *model.SearchArgs) ([]*model.User, error) {
 	location := model.Point{X: 1, Y: 2}
 	if input.Location != nil {
 		location = *input.Location
@@ -45,7 +45,7 @@ func (r *queryResolver) Search(ctx context.Context, input *model.SearchArgs) ([]
 		created = *input.CreatedAfter
 	}
 
-	return []model.User{
+	return []*model.User{
 		{
 			ID:      1,
 			Name:    "Test User 1",

@@ -64,7 +64,7 @@ func TestTracer(t *testing.T) {
 		}
 
 		called := false
-		resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) ([]User, error) {
+		resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) ([]*User, error) {
 			assert.Equal(t, []string{
 				"op:p:start:1", "op:p:start:2",
 				"op:v:start:1", "op:v:start:2",
@@ -76,7 +76,7 @@ func TestTracer(t *testing.T) {
 				"field'b:e:start:1:[user friends]", "field'b:e:start:2:[user friends]",
 			}, ctx.Value("tracer"))
 			called = true
-			return []User{}, nil
+			return []*User{}, nil
 		}
 
 		err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)
@@ -175,9 +175,9 @@ func TestTracer(t *testing.T) {
 		}
 
 		called := false
-		resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) ([]User, error) {
+		resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) ([]*User, error) {
 			called = true
-			return []User{}, nil
+			return []*User{}, nil
 		}
 
 		err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)

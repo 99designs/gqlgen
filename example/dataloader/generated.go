@@ -77,15 +77,15 @@ type ComplexityRoot struct {
 
 type CustomerResolver interface {
 	Address(ctx context.Context, obj *Customer) (*Address, error)
-	Orders(ctx context.Context, obj *Customer) ([]Order, error)
+	Orders(ctx context.Context, obj *Customer) ([]*Order, error)
 }
 type OrderResolver interface {
-	Items(ctx context.Context, obj *Order) ([]Item, error)
+	Items(ctx context.Context, obj *Order) ([]*Item, error)
 }
 type QueryResolver interface {
-	Customers(ctx context.Context) ([]Customer, error)
-	Torture1d(ctx context.Context, customerIds []int) ([]Customer, error)
-	Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error)
+	Customers(ctx context.Context) ([]*Customer, error)
+	Torture1d(ctx context.Context, customerIds []int) ([]*Customer, error)
+	Torture2d(ctx context.Context, customerIds [][]int) ([][]*Customer, error)
 }
 
 type executableSchema struct {
@@ -572,10 +572,10 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]Order)
+	res := resTmp.([]*Order)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOOrder2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx, field.Selections, res)
+	return ec.marshalOOrder2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Item_name(ctx context.Context, field graphql.CollectedField, obj *Item) graphql.Marshaler {
@@ -704,10 +704,10 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]Item)
+	res := resTmp.([]*Item)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOItem2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐItem(ctx, field.Selections, res)
+	return ec.marshalOItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐItem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -728,10 +728,10 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]Customer)
+	res := resTmp.([]*Customer)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOCustomer2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, field.Selections, res)
+	return ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -759,10 +759,10 @@ func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]Customer)
+	res := resTmp.([]*Customer)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOCustomer2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, field.Selections, res)
+	return ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -790,10 +790,10 @@ func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([][]Customer)
+	res := resTmp.([][]*Customer)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOCustomer2ᚕᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, field.Selections, res)
+	return ec.marshalOCustomer2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -2182,6 +2182,16 @@ func (ec *executionContext) marshalNCustomer2githubᚗcomᚋ99designsᚋgqlgen�
 	return ec._Customer(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNCustomer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx context.Context, sel ast.SelectionSet, v *Customer) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Customer(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	return graphql.UnmarshalFloat(v)
 }
@@ -2214,8 +2224,28 @@ func (ec *executionContext) marshalNItem2githubᚗcomᚋ99designsᚋgqlgenᚋexa
 	return ec._Item(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐItem(ctx context.Context, sel ast.SelectionSet, v *Item) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Item(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNOrder2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx context.Context, sel ast.SelectionSet, v Order) graphql.Marshaler {
 	return ec._Order(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx context.Context, sel ast.SelectionSet, v *Order) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Order(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2506,7 +2536,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOCustomer2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx context.Context, sel ast.SelectionSet, v []Customer) graphql.Marshaler {
+func (ec *executionContext) marshalOCustomer2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx context.Context, sel ast.SelectionSet, v [][]*Customer) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -2533,7 +2563,7 @@ func (ec *executionContext) marshalOCustomer2ᚕgithubᚗcomᚋ99designsᚋgqlge
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNCustomer2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, sel, v[i])
+			ret[i] = ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2546,7 +2576,7 @@ func (ec *executionContext) marshalOCustomer2ᚕgithubᚗcomᚋ99designsᚋgqlge
 	return ret
 }
 
-func (ec *executionContext) marshalOCustomer2ᚕᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx context.Context, sel ast.SelectionSet, v [][]Customer) graphql.Marshaler {
+func (ec *executionContext) marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx context.Context, sel ast.SelectionSet, v []*Customer) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -2573,7 +2603,7 @@ func (ec *executionContext) marshalOCustomer2ᚕᚕgithubᚗcomᚋ99designsᚋgq
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOCustomer2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, sel, v[i])
+			ret[i] = ec.marshalNCustomer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐCustomer(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2650,7 +2680,7 @@ func (ec *executionContext) marshalOInt2ᚕᚕint(ctx context.Context, sel ast.S
 	return ret
 }
 
-func (ec *executionContext) marshalOItem2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐItem(ctx context.Context, sel ast.SelectionSet, v []Item) graphql.Marshaler {
+func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐItem(ctx context.Context, sel ast.SelectionSet, v []*Item) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -2677,7 +2707,7 @@ func (ec *executionContext) marshalOItem2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNItem2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐItem(ctx, sel, v[i])
+			ret[i] = ec.marshalNItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐItem(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2690,7 +2720,7 @@ func (ec *executionContext) marshalOItem2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalOOrder2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx context.Context, sel ast.SelectionSet, v []Order) graphql.Marshaler {
+func (ec *executionContext) marshalOOrder2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx context.Context, sel ast.SelectionSet, v []*Order) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -2717,7 +2747,7 @@ func (ec *executionContext) marshalOOrder2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOrder2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx, sel, v[i])
+			ret[i] = ec.marshalNOrder2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋdataloaderᚐOrder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

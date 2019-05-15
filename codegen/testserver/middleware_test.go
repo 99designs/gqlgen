@@ -23,8 +23,8 @@ func TestMiddleware(t *testing.T) {
 		return &User{ID: 1}, nil
 	}
 
-	resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) (users []User, e error) {
-		return []User{{ID: 1}}, nil
+	resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) (users []*User, e error) {
+		return []*User{{ID: 1}}, nil
 	}
 
 	areMethods := []bool{}
@@ -57,10 +57,10 @@ func TestMiddleware(t *testing.T) {
 	}
 
 	called := false
-	resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) ([]User, error) {
+	resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) ([]*User, error) {
 		assert.Equal(t, []int{1, 2, 1, 2}, ctx.Value("path"))
 		called = true
-		return []User{}, nil
+		return []*User{}, nil
 	}
 
 	err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)

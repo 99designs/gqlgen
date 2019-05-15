@@ -120,21 +120,21 @@ type DroidResolver interface {
 	FriendsConnection(ctx context.Context, obj *models.Droid, first *int, after *string) (*models.FriendsConnection, error)
 }
 type FriendsConnectionResolver interface {
-	Edges(ctx context.Context, obj *models.FriendsConnection) ([]models.FriendsEdge, error)
+	Edges(ctx context.Context, obj *models.FriendsConnection) ([]*models.FriendsEdge, error)
 	Friends(ctx context.Context, obj *models.FriendsConnection) ([]models.Character, error)
 }
 type HumanResolver interface {
 	Friends(ctx context.Context, obj *models.Human) ([]models.Character, error)
 	FriendsConnection(ctx context.Context, obj *models.Human, first *int, after *string) (*models.FriendsConnection, error)
 
-	Starships(ctx context.Context, obj *models.Human) ([]models.Starship, error)
+	Starships(ctx context.Context, obj *models.Human) ([]*models.Starship, error)
 }
 type MutationResolver interface {
 	CreateReview(ctx context.Context, episode models.Episode, review models.Review) (*models.Review, error)
 }
 type QueryResolver interface {
 	Hero(ctx context.Context, episode *models.Episode) (models.Character, error)
-	Reviews(ctx context.Context, episode models.Episode, since *time.Time) ([]models.Review, error)
+	Reviews(ctx context.Context, episode models.Episode, since *time.Time) ([]*models.Review, error)
 	Search(ctx context.Context, text string) ([]models.SearchResult, error)
 	Character(ctx context.Context, id string) (models.Character, error)
 	Droid(ctx context.Context, id string) (*models.Droid, error)
@@ -1155,10 +1155,10 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]models.FriendsEdge)
+	res := resTmp.([]*models.FriendsEdge)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOFriendsEdge2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdge(ctx, field.Selections, res)
+	return ec.marshalOFriendsEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, field graphql.CollectedField, obj *models.FriendsConnection) graphql.Marshaler {
@@ -1478,10 +1478,10 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]models.Starship)
+	res := resTmp.([]*models.Starship)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOStarship2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx, field.Selections, res)
+	return ec.marshalOStarship2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createReview(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -1655,10 +1655,10 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]models.Review)
+	res := resTmp.([]*models.Review)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNReview2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx, field.Selections, res)
+	return ec.marshalNReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -3819,6 +3819,16 @@ func (ec *executionContext) marshalNFriendsEdge2githubᚗcomᚋ99designsᚋgqlge
 	return ec._FriendsEdge(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNFriendsEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdge(ctx context.Context, sel ast.SelectionSet, v *models.FriendsEdge) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FriendsEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
@@ -3913,7 +3923,7 @@ func (ec *executionContext) marshalNReview2githubᚗcomᚋ99designsᚋgqlgenᚋe
 	return ec._Review(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReview2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx context.Context, sel ast.SelectionSet, v []models.Review) graphql.Marshaler {
+func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx context.Context, sel ast.SelectionSet, v []*models.Review) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3937,7 +3947,7 @@ func (ec *executionContext) marshalNReview2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNReview2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx, sel, v[i])
+			ret[i] = ec.marshalNReview2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3948,6 +3958,16 @@ func (ec *executionContext) marshalNReview2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNReview2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx context.Context, sel ast.SelectionSet, v *models.Review) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Review(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx context.Context, v interface{}) (models.Review, error) {
@@ -3997,6 +4017,16 @@ func (ec *executionContext) marshalNSearchResult2ᚕgithubᚗcomᚋ99designsᚋg
 
 func (ec *executionContext) marshalNStarship2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx context.Context, sel ast.SelectionSet, v models.Starship) graphql.Marshaler {
 	return ec._Starship(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStarship2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx context.Context, sel ast.SelectionSet, v *models.Starship) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Starship(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -4349,7 +4379,7 @@ func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.S
 	return graphql.MarshalFloat(v)
 }
 
-func (ec *executionContext) marshalOFriendsEdge2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdge(ctx context.Context, sel ast.SelectionSet, v []models.FriendsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOFriendsEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdge(ctx context.Context, sel ast.SelectionSet, v []*models.FriendsEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4376,7 +4406,7 @@ func (ec *executionContext) marshalOFriendsEdge2ᚕgithubᚗcomᚋ99designsᚋgq
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFriendsEdge2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNFriendsEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4485,7 +4515,7 @@ func (ec *executionContext) marshalOStarship2githubᚗcomᚋ99designsᚋgqlgen�
 	return ec._Starship(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOStarship2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx context.Context, sel ast.SelectionSet, v []models.Starship) graphql.Marshaler {
+func (ec *executionContext) marshalOStarship2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx context.Context, sel ast.SelectionSet, v []*models.Starship) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4512,7 +4542,7 @@ func (ec *executionContext) marshalOStarship2ᚕgithubᚗcomᚋ99designsᚋgqlge
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNStarship2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx, sel, v[i])
+			ret[i] = ec.marshalNStarship2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐStarship(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

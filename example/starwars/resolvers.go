@@ -20,7 +20,7 @@ type Resolver struct {
 	humans    map[string]models.Human
 	droid     map[string]models.Droid
 	starships map[string]models.Starship
-	reviews   map[models.Episode][]models.Review
+	reviews   map[models.Episode][]*models.Review
 }
 
 func (r *Resolver) Droid() generated.DroidResolver {
@@ -100,15 +100,15 @@ func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, fi
 	}, nil
 }
 
-func (r *friendsConnectionResolver) Edges(ctx context.Context, obj *models.FriendsConnection) ([]models.FriendsEdge, error) {
+func (r *friendsConnectionResolver) Edges(ctx context.Context, obj *models.FriendsConnection) ([]*models.FriendsEdge, error) {
 	friends, err := r.resolveCharacters(ctx, obj.Ids)
 	if err != nil {
 		return nil, err
 	}
 
-	edges := make([]models.FriendsEdge, obj.To-obj.From)
+	edges := make([]*models.FriendsEdge, obj.To-obj.From)
 	for i := range edges {
-		edges[i] = models.FriendsEdge{
+		edges[i] = &models.FriendsEdge{
 			Cursor: models.EncodeCursor(obj.From + i),
 			Node:   friends[obj.From+i],
 		}
@@ -130,15 +130,15 @@ func (r *humanResolver) FriendsConnection(ctx context.Context, obj *models.Human
 	return r.resolveFriendConnection(ctx, obj.FriendIds, first, after)
 }
 
-func (r *humanResolver) Starships(ctx context.Context, obj *models.Human) ([]models.Starship, error) {
-	var result []models.Starship
+func (r *humanResolver) Starships(ctx context.Context, obj *models.Human) ([]*models.Starship, error) {
+	var result []*models.Starship
 	for _, id := range obj.StarshipIds {
 		char, err := r.Query().Starship(ctx, id)
 		if err != nil {
 			return nil, err
 		}
 		if char != nil {
-			result = append(result, *char)
+			result = append(result, char)
 		}
 	}
 	return result, nil
@@ -149,7 +149,7 @@ type mutationResolver struct{ *Resolver }
 func (r *mutationResolver) CreateReview(ctx context.Context, episode models.Episode, review models.Review) (*models.Review, error) {
 	review.Time = time.Now()
 	time.Sleep(1 * time.Second)
-	r.reviews[episode] = append(r.reviews[episode], review)
+	r.reviews[episode] = append(r.reviews[episode], &review)
 	return &review, nil
 }
 
@@ -162,12 +162,12 @@ func (r *queryResolver) Hero(ctx context.Context, episode *models.Episode) (mode
 	return r.droid["2001"], nil
 }
 
-func (r *queryResolver) Reviews(ctx context.Context, episode models.Episode, since *time.Time) ([]models.Review, error) {
+func (r *queryResolver) Reviews(ctx context.Context, episode models.Episode, since *time.Time) ([]*models.Review, error) {
 	if since == nil {
 		return r.reviews[episode], nil
 	}
 
-	var filtered []models.Review
+	var filtered []*models.Review
 	for _, rev := range r.reviews[episode] {
 		if rev.Time.After(*since) {
 			filtered = append(filtered, rev)
@@ -366,7 +366,7 @@ func NewResolver() generated.Config {
 		},
 	}
 
-	r.reviews = map[models.Episode][]models.Review{}
+	r.reviews = map[models.Episode][]*models.Review{}
 
 	return generated.Config{
 		Resolvers: &r,

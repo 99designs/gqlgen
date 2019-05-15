@@ -69,7 +69,7 @@ type MutationResolver interface {
 	CreateTodo(ctx context.Context, input NewTodo) (*Todo, error)
 }
 type QueryResolver interface {
-	Todos(ctx context.Context) ([]Todo, error)
+	Todos(ctx context.Context) ([]*Todo, error)
 }
 type TodoResolver interface {
 	ID(ctx context.Context, obj *Todo) (string, error)
@@ -383,10 +383,10 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]Todo)
+	res := resTmp.([]*Todo)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTodo2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -1968,7 +1968,7 @@ func (ec *executionContext) marshalNTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexa
 	return ec._Todo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐTodo(ctx context.Context, sel ast.SelectionSet, v []Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐTodo(ctx context.Context, sel ast.SelectionSet, v []*Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -1992,7 +1992,7 @@ func (ec *executionContext) marshalNTodo2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

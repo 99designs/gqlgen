@@ -341,7 +341,7 @@ type SubscriptionResolver interface {
 	InitPayload(ctx context.Context) (<-chan string, error)
 }
 type UserResolver interface {
-	Friends(ctx context.Context, obj *User) ([]User, error)
+	Friends(ctx context.Context, obj *User) ([]*User, error)
 }
 
 type executableSchema struct {
@@ -4894,10 +4894,10 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]User)
+	res := resTmp.([]*User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_created(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
@@ -7232,7 +7232,7 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 	fields := graphql.CollectFields(ec.RequestContext, sel, primitiveImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	invalid := false
+	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -7247,21 +7247,21 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Primitive_value(ctx, field, obj)
 				if res == graphql.Null {
-					invalid = true
+					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
 		case "squared":
 			out.Values[i] = ec._Primitive_squared(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalid = true
+				atomic.AddUint32(&invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
 	out.Dispatch()
-	if invalid {
+	if invalids > 0 {
 		return graphql.Null
 	}
 	return out
@@ -7273,7 +7273,7 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 	fields := graphql.CollectFields(ec.RequestContext, sel, primitiveStringImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	invalid := false
+	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -7288,14 +7288,14 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PrimitiveString_value(ctx, field, obj)
 				if res == graphql.Null {
-					invalid = true
+					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
 		case "doubled":
 			out.Values[i] = ec._PrimitiveString_doubled(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalid = true
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "len":
 			field := field
@@ -7307,7 +7307,7 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PrimitiveString_len(ctx, field, obj)
 				if res == graphql.Null {
-					invalid = true
+					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
@@ -7316,7 +7316,7 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 		}
 	}
 	out.Dispatch()
-	if invalid {
+	if invalids > 0 {
 		return graphql.Null
 	}
 	return out
@@ -7637,7 +7637,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}()
 				res = ec._Query_primitiveObject(ctx, field)
 				if res == graphql.Null {
-					invalid = true
+					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
@@ -7651,7 +7651,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}()
 				res = ec._Query_primitiveStringObject(ctx, field)
 				if res == graphql.Null {
-					invalid = true
+					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
@@ -8721,7 +8721,7 @@ func (ec *executionContext) marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcod
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx context.Context, sel ast.SelectionSet, v []User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8745,7 +8745,7 @@ func (ec *executionContext) marshalNUser2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

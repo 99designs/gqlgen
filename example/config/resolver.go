@@ -10,7 +10,7 @@ import (
 func New() Config {
 	c := Config{
 		Resolvers: &Resolver{
-			todos: []Todo{
+			todos: []*Todo{
 				{DatabaseID: 1, Description: "A todo not to forget", Done: false},
 				{DatabaseID: 2, Description: "This is the most important", Done: false},
 				{DatabaseID: 3, Description: "Please do this or else", Done: false},
@@ -22,7 +22,7 @@ func New() Config {
 }
 
 type Resolver struct {
-	todos  []Todo
+	todos  []*Todo
 	nextID int
 }
 
@@ -42,19 +42,19 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo
 	newID := r.nextID
 	r.nextID++
 
-	newTodo := Todo{
+	newTodo := &Todo{
 		DatabaseID:  newID,
 		Description: input.Text,
 	}
 
 	r.todos = append(r.todos, newTodo)
 
-	return &newTodo, nil
+	return newTodo, nil
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
+func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
 	return r.todos, nil
 }
 

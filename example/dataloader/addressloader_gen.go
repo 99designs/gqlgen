@@ -46,13 +46,13 @@ type AddressLoader struct {
 
 	// the current batch. keys will continue to be collected until timeout is hit,
 	// then everything will be sent to the fetch method and out to the listeners
-	batch *addressBatch
+	batch *addressLoaderBatch
 
 	// mutex to prevent races
 	mu sync.Mutex
 }
 
-type addressBatch struct {
+type addressLoaderBatch struct {
 	keys    []int
 	data    []*Address
 	error   []error
@@ -60,12 +60,12 @@ type addressBatch struct {
 	done    chan struct{}
 }
 
-// Load a address by key, batching and caching will be applied automatically
+// Load a Address by key, batching and caching will be applied automatically
 func (l *AddressLoader) Load(key int) (*Address, error) {
 	return l.LoadThunk(key)()
 }
 
-// LoadThunk returns a function that when called will block waiting for a address.
+// LoadThunk returns a function that when called will block waiting for a Address.
 // This method should be used if you want one goroutine to make requests to many
 // different data loaders without blocking until the thunk is called.
 func (l *AddressLoader) LoadThunk(key int) func() (*Address, error) {
@@ -77,7 +77,7 @@ func (l *AddressLoader) LoadThunk(key int) func() (*Address, error) {
 		}
 	}
 	if l.batch == nil {
-		l.batch = &addressBatch{done: make(chan struct{})}
+		l.batch = &addressLoaderBatch{done: make(chan struct{})}
 	}
 	batch := l.batch
 	pos := batch.keyIndex(l, key)
@@ -126,6 +126,24 @@ func (l *AddressLoader) LoadAll(keys []int) ([]*Address, []error) {
 	return addresss, errors
 }
 
+// LoadAllThunk returns a function that when called will block waiting for a Addresss.
+// This method should be used if you want one goroutine to make requests to many
+// different data loaders without blocking until the thunk is called.
+func (l *AddressLoader) LoadAllThunk(keys []int) func() ([]*Address, []error) {
+	results := make([]func() (*Address, error), len(keys))
+	for i, key := range keys {
+		results[i] = l.LoadThunk(key)
+	}
+	return func() ([]*Address, []error) {
+		addresss := make([]*Address, len(keys))
+		errors := make([]error, len(keys))
+		for i, thunk := range results {
+			addresss[i], errors[i] = thunk()
+		}
+		return addresss, errors
+	}
+}
+
 // Prime the cache with the provided key and value. If the key already exists, no change is made
 // and false is returned.
 // (To forcefully prime the cache, clear the key first with loader.clear(key).prime(key, value).)
@@ -158,7 +176,7 @@ func (l *AddressLoader) unsafeSet(key int, value *Address) {
 
 // keyIndex will return the location of the key in the batch, if its not found
 // it will add the key to the batch
-func (b *addressBatch) keyIndex(l *AddressLoader, key int) int {
+func (b *addressLoaderBatch) keyIndex(l *AddressLoader, key int) int {
 	for i, existingKey := range b.keys {
 		if key == existingKey {
 			return i
@@ -182,7 +200,7 @@ func (b *addressBatch) keyIndex(l *AddressLoader, key int) int {
 	return pos
 }
 
-func (b *addressBatch) startTimer(l *AddressLoader) {
+func (b *addressLoaderBatch) startTimer(l *AddressLoader) {
 	time.Sleep(l.wait)
 	l.mu.Lock()
 
@@ -198,7 +216,7 @@ func (b *addressBatch) startTimer(l *AddressLoader) {
 	b.end(l)
 }
 
-func (b *addressBatch) end(l *AddressLoader) {
+func (b *addressLoaderBatch) end(l *AddressLoader) {
 	b.data, b.error = l.fetch(b.keys)
 	close(b.done)
 }

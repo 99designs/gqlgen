@@ -383,7 +383,11 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 	if t.Elem != nil {
-		return types.NewSlice(b.CopyModifiersFromAst(t.Elem, base))
+		child := b.CopyModifiersFromAst(t.Elem, base)
+		if _, isStruct := child.Underlying().(*types.Struct); isStruct {
+			child = types.NewPointer(child)
+		}
+		return types.NewSlice(child)
 	}
 
 	var isInterface bool

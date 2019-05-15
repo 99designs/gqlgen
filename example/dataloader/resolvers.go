@@ -40,24 +40,24 @@ func (r *customerResolver) Address(ctx context.Context, obj *Customer) (*Address
 	return ctxLoaders(ctx).addressByID.Load(obj.AddressID)
 }
 
-func (r *customerResolver) Orders(ctx context.Context, obj *Customer) ([]Order, error) {
+func (r *customerResolver) Orders(ctx context.Context, obj *Customer) ([]*Order, error) {
 	return ctxLoaders(ctx).ordersByCustomer.Load(obj.ID)
 }
 
 type orderResolver struct{ *Resolver }
 
-func (r *orderResolver) Items(ctx context.Context, obj *Order) ([]Item, error) {
+func (r *orderResolver) Items(ctx context.Context, obj *Order) ([]*Item, error) {
 	return ctxLoaders(ctx).itemsByOrder.Load(obj.ID)
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Customers(ctx context.Context) ([]Customer, error) {
+func (r *queryResolver) Customers(ctx context.Context) ([]*Customer, error) {
 	fmt.Println("SELECT * FROM customer")
 
 	time.Sleep(5 * time.Millisecond)
 
-	return []Customer{
+	return []*Customer{
 		{ID: 1, Name: "Bob", AddressID: 1},
 		{ID: 2, Name: "Alice", AddressID: 3},
 		{ID: 3, Name: "Eve", AddressID: 4},
@@ -65,21 +65,21 @@ func (r *queryResolver) Customers(ctx context.Context) ([]Customer, error) {
 }
 
 // this method is here to test code generation of nested arrays
-func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]Customer, error) {
-	result := make([]Customer, len(customerIds))
+func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]*Customer, error) {
+	result := make([]*Customer, len(customerIds))
 	for i, id := range customerIds {
-		result[i] = Customer{ID: id, Name: fmt.Sprintf("%d", i), AddressID: rand.Int() % 10}
+		result[i] = &Customer{ID: id, Name: fmt.Sprintf("%d", i), AddressID: rand.Int() % 10}
 	}
 	return result, nil
 }
 
 // this method is here to test code generation of nested arrays
-func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][]Customer, error) {
-	result := make([][]Customer, len(customerIds))
+func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][]*Customer, error) {
+	result := make([][]*Customer, len(customerIds))
 	for i := range customerIds {
-		inner := make([]Customer, len(customerIds[i]))
+		inner := make([]*Customer, len(customerIds[i]))
 		for j := range customerIds[i] {
-			inner[j] = Customer{ID: customerIds[i][j], Name: fmt.Sprintf("%d %d", i, j), AddressID: rand.Int() % 10}
+			inner[j] = &Customer{ID: customerIds[i][j], Name: fmt.Sprintf("%d %d", i, j), AddressID: rand.Int() % 10}
 		}
 		result[i] = inner
 	}

@@ -99,7 +99,7 @@ func NameForPackage(importPath string) string {
 	if v, ok := nameForPackageCache.Load(importPath); ok {
 		return v.(string)
 	}
-	//importPath = QualifyPackagePath(importPath)
+	importPath = QualifyPackagePath(importPath)
 	p, _ := packages.Load(&packages.Config{
 		Mode: packages.NeedName,
 	}, importPath)

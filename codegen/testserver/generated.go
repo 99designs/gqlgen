@@ -8216,13 +8216,7 @@ func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalNPrimitiveString2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveString(ctx context.Context, sel ast.SelectionSet, v PrimitiveString) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return ec._PrimitiveString(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveString(ctx context.Context, sel ast.SelectionSet, v []PrimitiveString) graphql.Marshaler {

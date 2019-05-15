@@ -61,7 +61,7 @@ func TestPrimitiveStringObjects(t *testing.T) {
 			PrimitiveStringObject []struct {
 				Value   string
 				Doubled string
-				Len int
+				Len     int
 			}
 		}
 		c.MustPost(`query { primitiveStringObject { value, doubled, len } }`, &resp)

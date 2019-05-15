@@ -349,7 +349,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		} else if hasMethod(obj.Type(), "MarshalGQL") && hasMethod(obj.Type(), "UnmarshalGQL") {
 			ref.GO = obj.Type()
 			ref.IsMarshaler = true
-		} else if underlying := basicUnderlying(obj.Type()); underlying != nil && underlying.Kind() == types.String {
+		} else if underlying := basicUnderlying(obj.Type()); def.IsLeafType() && underlying != nil && underlying.Kind() == types.String {
 			// Special case for named types wrapping strings. Used by default enum implementations.
 
 			ref.GO = obj.Type()

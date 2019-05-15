@@ -86,3 +86,15 @@ const (
 	FallbackToStringEncodingB FallbackToStringEncoding = "B"
 	FallbackToStringEncodingC FallbackToStringEncoding = "C"
 )
+
+type Primitive int
+
+func (p Primitive) Squared() int {
+	return int(p) * int(p)
+}
+
+type PrimitiveString string
+
+func (s PrimitiveString) Doubled() string {
+	return string(s) + string(s)
+}

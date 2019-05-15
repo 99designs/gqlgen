@@ -26,6 +26,12 @@ func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
 func (r *Resolver) Panics() PanicsResolver {
 	return &panicsResolver{r}
 }
+func (r *Resolver) Primitive() PrimitiveResolver {
+	return &primitiveResolver{r}
+}
+func (r *Resolver) PrimitiveString() PrimitiveStringResolver {
+	return &primitiveStringResolver{r}
+}
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
@@ -78,6 +84,21 @@ func (r *panicsResolver) FieldScalarMarshal(ctx context.Context, obj *Panics) ([
 	panic("not implemented")
 }
 func (r *panicsResolver) ArgUnmarshal(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error) {
+	panic("not implemented")
+}
+
+type primitiveResolver struct{ *Resolver }
+
+func (r *primitiveResolver) Value(ctx context.Context, obj *Primitive) (int, error) {
+	panic("not implemented")
+}
+
+type primitiveStringResolver struct{ *Resolver }
+
+func (r *primitiveStringResolver) Value(ctx context.Context, obj *PrimitiveString) (string, error) {
+	panic("not implemented")
+}
+func (r *primitiveStringResolver) Len(ctx context.Context, obj *PrimitiveString) (int, error) {
 	panic("not implemented")
 }
 
@@ -156,6 +177,12 @@ func (r *queryResolver) Valid(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) PrimitiveObject(ctx context.Context) ([]Primitive, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) PrimitiveStringObject(ctx context.Context) ([]PrimitiveString, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, error) {

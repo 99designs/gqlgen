@@ -81,7 +81,10 @@ func LoadConfig(filename string) (*Config, error) {
 
 				// make sure paths match files
 				// <root>?.*<filename|.+>\.<ext>
-				fileRegex := regexp.MustCompile(pathParts[0] + "?.*" + strings.Replace(strings.Replace(pathParts[1], ".", "\\.", -1), "*", ".+", -1))
+				fileRegex := regexp.MustCompile(
+					pathParts[0] +
+						"?.*" +
+						strings.Replace(strings.Replace(pathParts[1], ".", "\\.", -1), "*", ".+", -1))
 				if fileRegex.MatchString(path) {
 					matches = append(matches, path)
 				}

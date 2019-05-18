@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -28,8 +27,8 @@ func TestLoadConfig(t *testing.T) {
 
 	t.Run("globbed filenames", func(t *testing.T) {
 		c, err := LoadConfig("testdata/cfg/glob.yml")
-		require.NoError(t, err, "")
-		fmt.Printf("%+v\n", c)
+		require.NoError(t, err)
+
 		require.Equal(t, c.SchemaFilename[0], "testdata/cfg/glob/bar/bar with spaces.graphql")
 		require.Equal(t, c.SchemaFilename[1], "testdata/cfg/glob/foo/foo.graphql")
 	})

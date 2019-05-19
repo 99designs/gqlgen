@@ -1,0 +1,9 @@
+schema: ../testdata.graphql
+
+exec:
+  filename: generated.go
+model:
+  filename: models-gen.go
+
+tweaks:
+  use_struct_value_slices: true

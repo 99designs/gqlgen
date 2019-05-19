@@ -23,6 +23,7 @@ type Config struct {
 	Resolver       PackageConfig `yaml:"resolver,omitempty"`
 	Models         TypeMap       `yaml:"models,omitempty"`
 	StructTag      string        `yaml:"struct_tag,omitempty"`
+	Tweaks         *TweakSet     `yaml:"tweaks,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
@@ -407,4 +408,10 @@ func abs(path string) string {
 		panic(err)
 	}
 	return filepath.ToSlash(absPath)
+}
+
+// A TweakSet is a config object instructing the binder to override
+// certain default behavior.
+type TweakSet struct {
+	UseStructValueSlices bool `yaml:"use_struct_value_slices"`
 }

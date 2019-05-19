@@ -58,6 +58,12 @@ models:
     model:
       - github.com/99designs/gqlgen/graphql.IntID
       - github.com/99designs/gqlgen/graphql.ID
+
+# Non-default behavior
+tweaks:
+  use_struct_value_slices: false # Set to true to not use slice-of-struct-pointers in 
+                                 # resolvers. Non-slice struct arguments and return values
+                                 # are still kept as pointers.
 ```
 
 Everything has defaults, so add things as you need.

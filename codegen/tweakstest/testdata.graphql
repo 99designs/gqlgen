@@ -1,0 +1,23 @@
+schema {
+  query: Query
+}
+
+type Query {
+  pages(tags:[TagInput!]!): [Page!]
+}
+
+type Page {
+  id: String!
+  str: String!
+  tags: [Tag!]!
+}
+
+type Tag {
+  kind: String!
+  name: String!
+}
+
+input TagInput {
+  kind: String!
+  name: String!
+}

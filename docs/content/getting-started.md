@@ -168,7 +168,7 @@ import (
 )
 
 type Resolver struct {
-	todos []Todo
+	todos []*Todo
 }
 
 func (r *Resolver) Mutation() MutationResolver {
@@ -189,7 +189,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo
 		ID:     fmt.Sprintf("T%d", rand.Int()),
 		UserID: input.UserID,
 	}
-	r.todos = append(r.todos, *todo)
+	r.todos = append(r.todos, todo)
 	return todo, nil
 }
 

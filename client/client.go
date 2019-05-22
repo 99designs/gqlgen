@@ -79,29 +79,38 @@ type ResponseData struct {
 	Extensions map[string]interface{}
 }
 
-func (p *Client) Post(query string, response interface{}, options ...Option) (resperr error) {
-	respDataRaw, resperr := p.RawPost(query, options...)
-	if resperr != nil {
-		return resperr
+func (p *Client) Post(query string, response interface{}, options ...Option) error {
+	r, err := p.NewRequest(query, options...)
+	if err != nil {
+		return err
 	}
-
-	// we want to unpack even if there is an error, so we can see partial responses
-	unpackErr := unpack(respDataRaw.Data, response)
-
-	if respDataRaw.Errors != nil {
-		return RawJsonError{respDataRaw.Errors}
-	}
-	return unpackErr
+	return p.Do(r, response)
 }
 
 func (p *Client) RawPost(query string, options ...Option) (*ResponseData, error) {
-	r := p.mkRequest(query, options...)
-	requestBody, err := json.Marshal(r)
+	r, err := p.NewRequest(query, options...)
+	if err != nil {
+		return nil, err
+	}
+	return p.DoRaw(r)
+}
+
+func (p *Client) NewRequest(query string, options ...Option) (*http.Request, error) {
+	reqData := p.mkRequest(query, options...)
+	requestBody, err := json.Marshal(reqData)
 	if err != nil {
 		return nil, fmt.Errorf("encode: %s", err.Error())
 	}
+	r, err := http.NewRequest(http.MethodPost, p.url, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, fmt.Errorf("request: %s", err.Error())
+	}
+	r.Header.Set("Content-Type", "application/json")
+	return r, nil
+}
 
-	rawResponse, err := p.client.Post(p.url, "application/json", bytes.NewBuffer(requestBody))
+func (p *Client) DoRaw(r *http.Request) (*ResponseData, error) {
+	rawResponse, err := p.client.Do(r)
 	if err != nil {
 		return nil, fmt.Errorf("post: %s", err.Error())
 	}
@@ -128,6 +137,21 @@ func (p *Client) RawPost(query string, options ...Option) (*ResponseData, error)
 	}
 
 	return respDataRaw, nil
+}
+
+func (p *Client) Do(r *http.Request, response interface{}) error {
+	respDataRaw, resperr := p.DoRaw(r)
+	if resperr != nil {
+		return resperr
+	}
+
+	// we want to unpack even if there is an error, so we can see partial responses
+	unpackErr := unpack(respDataRaw.Data, response)
+
+	if respDataRaw.Errors != nil {
+		return RawJsonError{respDataRaw.Errors}
+	}
+	return unpackErr
 }
 
 type RawJsonError struct {

@@ -14,7 +14,7 @@ fix it.
 Imagine if you had a simple query like this:
 
 ```graphql
-query { todos { users { name } }
+query { todos { users { name } } }
 ```
 
 and our todo.user resolver looks like this:

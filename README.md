@@ -6,7 +6,7 @@
 
  - **Schema first** — Define your API using the GraphQL [Schema Definition Language](http://graphql.org/learn/schema/).
  - **Type safe** — You should never see `map[string]interface{}` here.
- - **Codegen** — Let us generate the boring bits, so you can build your app quickly. 
+ - **Codegen** — Let us generate the boring bits, so you can build your app quickly.
 
 [Feature Comparison](https://gqlgen.com/feature-comparison/)
 
@@ -36,7 +36,7 @@ type User {
     friends: [User!]!
 }
 ```
-You need to tell gqlgen that we should only fetch friends if the user requested it. There are two ways to do this.
+You need to tell gqlgen that we should only fetch friends if the user requested it. There are three ways to do this.
 
 1. Write the model yourself and leave off friends.
 
@@ -65,13 +65,25 @@ models:
         resolver: true # force a resolver to be generated
 ```
 
+3. Use graphql directives @resolver on field to mark the field as requiring a resolver explicitly
+
+```graphql
+directive @resolver on FIELD_DEFINITION
+
+type User {
+    id: ID!
+    name: String!
+    friends: [User!]! @resolver # force a resolver to be generated
+}
+```
+
 After doing either of the above and running generate we will need to provide a resolver for friends:
 ```go
 func (r *userResolver) User(ctx context.Context, obj *User) ([]*User, error) {
     // select * from user where friendid = obj.ID
     return friends,  nil
 }
-``` 
+```
 
 ### IDs are strings but I like ints, why cant I have ints?
 

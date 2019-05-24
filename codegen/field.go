@@ -98,6 +98,9 @@ func (b *builder) bindField(obj *Object, f *Field) error {
 	case obj.Root:
 		f.IsResolver = true
 		return nil
+	case f.FieldDefinition.Directives.ForName("resolver") != nil:
+		f.IsResolver = true
+		return nil
 	case b.Config.Models[obj.Name].Fields[f.Name].Resolver:
 		f.IsResolver = true
 		return nil

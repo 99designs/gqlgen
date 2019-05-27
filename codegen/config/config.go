@@ -17,12 +17,13 @@ import (
 )
 
 type Config struct {
-	SchemaFilename StringList    `yaml:"schema,omitempty"`
-	Exec           PackageConfig `yaml:"exec"`
-	Model          PackageConfig `yaml:"model"`
-	Resolver       PackageConfig `yaml:"resolver,omitempty"`
-	Models         TypeMap       `yaml:"models,omitempty"`
-	StructTag      string        `yaml:"struct_tag,omitempty"`
+	SchemaFilename StringList                 `yaml:"schema,omitempty"`
+	Exec           PackageConfig              `yaml:"exec"`
+	Model          PackageConfig              `yaml:"model"`
+	Resolver       PackageConfig              `yaml:"resolver,omitempty"`
+	Models         TypeMap                    `yaml:"models,omitempty"`
+	StructTag      string                     `yaml:"struct_tag,omitempty"`
+	Directives     map[string]DirectiveConfig `yaml:"directives,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
@@ -33,6 +34,17 @@ func DefaultConfig() *Config {
 		SchemaFilename: StringList{"schema.graphql"},
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
+		Directives: map[string]DirectiveConfig{
+			"skip": {
+				SkipRuntime: true,
+			},
+			"include": {
+				SkipRuntime: true,
+			},
+			"deprecated": {
+				SkipRuntime: true,
+			},
+		},
 	}
 }
 
@@ -263,6 +275,10 @@ func (tm TypeMap) Add(Name string, goType string) {
 	modelCfg := tm[Name]
 	modelCfg.Model = append(modelCfg.Model, goType)
 	tm[Name] = modelCfg
+}
+
+type DirectiveConfig struct {
+	SkipRuntime bool `yaml:"skip_runtime"`
 }
 
 func inStrSlice(haystack []string, needle string) bool {

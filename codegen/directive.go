@@ -24,11 +24,6 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 			return nil, errors.Errorf("directive with name %s already exists", name)
 		}
 
-		var builtin bool
-		if name == "skip" || name == "include" || name == "deprecated" {
-			builtin = true
-		}
-
 		var args []*FieldArgument
 		for _, arg := range dir.Arguments {
 			tr, err := b.Binder.TypeReference(arg.Type, nil)
@@ -55,7 +50,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 		directives[name] = &Directive{
 			Name:    name,
 			Args:    args,
-			Builtin: builtin,
+			Builtin: b.Config.Directives[name].SkipRuntime,
 		}
 	}
 

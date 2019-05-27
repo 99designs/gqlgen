@@ -1,5 +1,5 @@
 type Todo {
-  id: ID!
+  id: ID! @goField(forceResolver: true)
   databaseId: Int!
   text: String!
   done: Boolean!

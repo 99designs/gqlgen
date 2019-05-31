@@ -413,6 +413,13 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+
+		if extensions := r.URL.Query().Get("extensions"); extensions != "" {
+			if err := jsonDecode(strings.NewReader(extensions), &reqParams.Extensions); err != nil {
+				sendErrorf(w, http.StatusBadRequest, "extensions could not be decoded")
+				return
+			}
+		}
 	case http.MethodPost:
 		mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 		if err != nil {

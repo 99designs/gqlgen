@@ -28,8 +28,6 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		return err
 	}
 
-	cfg.InjectBuiltins(schema)
-
 	cfg.Directives["goModel"] = config.DirectiveConfig{
 		SkipRuntime: true,
 	}

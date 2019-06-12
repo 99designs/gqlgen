@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -67,9 +68,36 @@ func LoadConfig(filename string) (*Config, error) {
 	preGlobbing := config.SchemaFilename
 	config.SchemaFilename = StringList{}
 	for _, f := range preGlobbing {
-		matches, err := filepath.Glob(f)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+		var matches []string
+
+		// for ** we want to override default globbing patterns and walk all
+		// subdirectories to match schema files.
+		if strings.Contains(f, "**") {
+			pathParts := strings.SplitN(f, "**", 2)
+			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+
+				// make sure paths match files
+				// <root>?.*<filename|.+>\.<ext>
+				fileRegex := regexp.MustCompile(
+					pathParts[0] +
+						"?.*" +
+						strings.Replace(strings.Replace(pathParts[1], ".", "\\.", -1), "*", ".+", -1))
+				if fileRegex.MatchString(path) {
+					matches = append(matches, path)
+				}
+
+				return nil
+			}); err != nil {
+				return nil, errors.Wrapf(err, "failed to walk schema at root %s", pathParts[0])
+			}
+		} else {
+			matches, err = filepath.Glob(f)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+			}
 		}
 
 		for _, m := range matches {

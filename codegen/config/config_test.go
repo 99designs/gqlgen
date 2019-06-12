@@ -24,6 +24,19 @@ func TestLoadConfig(t *testing.T) {
 		_, err := LoadConfig("testdata/cfg/unknownkeys.yml")
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 2: field unknown not found in type config.Config")
 	})
+
+	t.Run("globbed filenames", func(t *testing.T) {
+		c, err := LoadConfig("testdata/cfg/glob.yml")
+		require.NoError(t, err)
+
+		require.Equal(t, c.SchemaFilename[0], "testdata/cfg/glob/bar/bar with spaces.graphql")
+		require.Equal(t, c.SchemaFilename[1], "testdata/cfg/glob/foo/foo.graphql")
+	})
+
+	t.Run("unwalkable path", func(t *testing.T) {
+		_, err := LoadConfig("testdata/cfg/unwalkable.yml")
+		require.EqualError(t, err, "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory")
+	})
 }
 
 func TestLoadDefaultConfig(t *testing.T) {

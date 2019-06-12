@@ -17,11 +17,15 @@ schema: schema.graphql
 schema:
  - schema.graphql
  - user.graphql
- 
+
 # Or you can use globs
-schema: 
+schema:
  - "*.graphql"
- 
+
+# Or globs from a root directory
+schema:
+ - "schema/**/*.graphql"
+
 # Let gqlgen know where to put the generated server
 exec:
   filename: graph/generated/generated.go

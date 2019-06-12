@@ -358,9 +358,9 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	}
 
 	handler := &graphqlHandler{
-		cfg:      cfg,
-		cache:    cache,
-		exec:     exec,
+		cfg:   cfg,
+		cache: cache,
+		exec:  exec,
 	}
 
 	return handler.ServeHTTP
@@ -369,9 +369,9 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 var _ http.Handler = (*graphqlHandler)(nil)
 
 type graphqlHandler struct {
-	cfg      *Config
-	cache    *lru.Cache
-	exec     graphql.ExecutableSchema
+	cfg   *Config
+	cache *lru.Cache
+	exec  graphql.ExecutableSchema
 }
 
 func computeQueryHash(query string) string {

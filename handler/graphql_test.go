@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
@@ -765,8 +766,30 @@ func TestBytesRead(t *testing.T) {
 	})
 }
 
+type memoryPersistedQueryCache struct {
+	cache *lru.Cache
+}
+
+func newMemoryPersistedQueryCache(size int) (*memoryPersistedQueryCache, error) {
+	cache, err := lru.New(size)
+	return &memoryPersistedQueryCache{cache: cache}, err
+}
+
+func (c *memoryPersistedQueryCache) Add(ctx context.Context, hash string, query string) {
+	c.cache.Add(hash, query)
+}
+
+func (c *memoryPersistedQueryCache) Get(ctx context.Context, hash string) (string, bool) {
+	val, ok := c.cache.Get(hash)
+	if !ok {
+		return "", ok
+	}
+	return val.(string), ok
+}
 func TestAutomaticPersistedQuery(t *testing.T) {
-	h := GraphQL(&executableSchemaStub{}, APQCacheSize(1000))
+	cache, err := newMemoryPersistedQueryCache(1000)
+	require.NoError(t, err)
+	h := GraphQL(&executableSchemaStub{}, EnablePersistedQueryCache(cache))
 	t.Run("automatic persisted query POST", func(t *testing.T) {
 		// normal queries should be unaffected
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }"}`)

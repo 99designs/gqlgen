@@ -13,6 +13,7 @@ type Resolver func(ctx context.Context) (res interface{}, err error)
 type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 type ComplexityLimitFunc func(ctx context.Context) int
+type SendErrorMiddleware func(ctx context.Context, errors []*gqlerror.Error) []*gqlerror.Error
 
 type RequestContext struct {
 	RawQuery  string

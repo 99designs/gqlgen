@@ -106,3 +106,22 @@ server := handler.GraphQL(MakeExecutableSchema(resolvers),
 }
 ```
 
+
+### The send error middleware
+
+To get full control over all errors sent to the client, including when the client-sent GraphQL query is invalid, you can
+pass in a send error handler.
+
+Example:
+
+```go
+server := handler.GraphQL(MakeExecutableSchema(resolvers),
+	handler.SendErrorMiddleware(
+		func(ctx context.Context, errors []*gqlerror.Error) []*gqlerror.Error {
+			fmt.Printf("%v\n", errors)
+			return errors
+		}
+	),
+)
+```
+

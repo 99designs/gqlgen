@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func TestHandlerPOST(t *testing.T) {
@@ -227,8 +228,45 @@ func TestHandlerComplexity(t *testing.T) {
 	})
 }
 
-func TestFileUpload(t *testing.T) {
+func TestSendErrorMiddleware(t *testing.T) {
+	var callCount int
+	var calledErrors []*gqlerror.Error
 
+	h := GraphQL(&executableSchemaStub{}, SendErrorMiddleware(func(ctx context.Context, errors []*gqlerror.Error) []*gqlerror.Error {
+		callCount++
+		calledErrors = errors
+		return errors
+	}))
+
+	resetCalls := func() {
+		callCount = 0
+		calledErrors = nil
+	}
+
+	t.Run("no error, not called", func(t *testing.T) {
+		resetCalls()
+
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }"}`)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		assert.Equal(t, 0, callCount)
+	})
+
+	t.Run("invalid query, call send error middleware", func(t *testing.T) {
+		resetCalls()
+
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ whatIsThis }"}`)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+		assert.Equal(t, `{"errors":[{"message":"Cannot query field \"whatIsThis\" on type \"Query\".","locations":[{"line":1,"column":3}]}],"data":null}`, resp.Body.String())
+
+		assert.Equal(t, 1, callCount)
+		assert.Len(t, calledErrors, 1)
+		assert.Equal(t, `Cannot query field "whatIsThis" on type "Query".`, calledErrors[0].Message)
+	})
+}
+
+func TestFileUpload(t *testing.T) {
 	t.Run("valid single file upload", func(t *testing.T) {
 		mock := &executableSchemaMock{
 			MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {

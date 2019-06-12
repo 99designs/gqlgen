@@ -12,7 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
@@ -57,7 +57,7 @@ func connectWs(exec graphql.ExecutableSchema, w http.ResponseWriter, r *http.Req
 	})
 	if err != nil {
 		log.Printf("unable to upgrade %T to websocket %s: ", w, err.Error())
-		sendErrorf(w, http.StatusBadRequest, "unable to upgrade")
+		sendErrorf(r.Context(), cfg, w, http.StatusBadRequest, "unable to upgrade")
 		return
 	}
 

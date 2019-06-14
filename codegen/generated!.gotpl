@@ -117,7 +117,7 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		{{ if .MutationDirectives -}}
+		{{ if .QueryDirectives -}}
 			data := ec._{{.QueryRoot.Name}}Middleware(ctx, op)
 		{{- else -}}
 			data := ec._{{.QueryRoot.Name}}(ctx, op.SelectionSet)

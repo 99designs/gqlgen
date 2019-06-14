@@ -28,7 +28,7 @@ func New() Config {
 			todos: []*Todo{
 				{ID: 1, Text: "A todo not to forget", Done: false, owner: you},
 				{ID: 2, Text: "This is the most important", Done: false, owner: you},
-				{ID: 3, Text: "Somebody else's todo", Done: false, owner: them},
+				{ID: 3, Text: "Somebody else's todo", Done: true, owner: them},
 				{ID: 4, Text: "Please do this or else", Done: false, owner: you},
 			},
 			lastID: 4,

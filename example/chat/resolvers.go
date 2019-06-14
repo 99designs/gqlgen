@@ -3,10 +3,12 @@
 package chat
 
 import (
-	context "context"
+	"context"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type resolver struct {
@@ -31,13 +33,28 @@ func New() Config {
 		Resolvers: &resolver{
 			Rooms: map[string]*Chatroom{},
 		},
+		Directives: DirectiveRoot{
+			User: func(ctx context.Context, obj interface{}, next graphql.Resolver, username string) (res interface{}, err error) {
+				return next(context.WithValue(ctx, "username", username))
+			},
+		},
 	}
+}
+
+func getUsername(ctx context.Context) string {
+	if username, ok := ctx.Value("username").(string); ok {
+		return username
+	}
+	return ""
 }
 
 type Chatroom struct {
 	Name      string
 	Messages  []Message
-	Observers map[string]chan *Message
+	Observers map[string]struct {
+		Username string
+		Message  chan *Message
+	}
 }
 
 type mutationResolver struct{ *resolver }
@@ -46,7 +63,13 @@ func (r *mutationResolver) Post(ctx context.Context, text string, username strin
 	r.mu.Lock()
 	room := r.Rooms[roomName]
 	if room == nil {
-		room = &Chatroom{Name: roomName, Observers: map[string]chan *Message{}}
+		room = &Chatroom{
+			Name: roomName,
+			Observers: map[string]struct {
+				Username string
+				Message  chan *Message
+			}{},
+		}
 		r.Rooms[roomName] = room
 	}
 	r.mu.Unlock()
@@ -61,7 +84,9 @@ func (r *mutationResolver) Post(ctx context.Context, text string, username strin
 	room.Messages = append(room.Messages, message)
 	r.mu.Lock()
 	for _, observer := range room.Observers {
-		observer <- &message
+		if observer.Username == "" || observer.Username == message.CreatedBy {
+			observer.Message <- &message
+		}
 	}
 	r.mu.Unlock()
 	return &message, nil
@@ -73,7 +98,13 @@ func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error
 	r.mu.Lock()
 	room := r.Rooms[name]
 	if room == nil {
-		room = &Chatroom{Name: name, Observers: map[string]chan *Message{}}
+		room = &Chatroom{
+			Name: name,
+			Observers: map[string]struct {
+				Username string
+				Message  chan *Message
+			}{},
+		}
 		r.Rooms[name] = room
 	}
 	r.mu.Unlock()
@@ -87,7 +118,13 @@ func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string
 	r.mu.Lock()
 	room := r.Rooms[roomName]
 	if room == nil {
-		room = &Chatroom{Name: roomName, Observers: map[string]chan *Message{}}
+		room = &Chatroom{
+			Name: roomName,
+			Observers: map[string]struct {
+				Username string
+				Message  chan *Message
+			}{},
+		}
 		r.Rooms[roomName] = room
 	}
 	r.mu.Unlock()
@@ -103,7 +140,10 @@ func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string
 	}()
 
 	r.mu.Lock()
-	room.Observers[id] = events
+	room.Observers[id] = struct {
+		Username string
+		Message  chan *Message
+	}{Username: getUsername(ctx), Message: events}
 	r.mu.Unlock()
 
 	return events, nil

@@ -23,3 +23,5 @@ type Subscription {
 }
 
 scalar Time
+
+directive @user(username: String!) on SUBSCRIPTION

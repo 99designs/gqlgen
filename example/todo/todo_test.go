@@ -55,6 +55,18 @@ func TestTodo(t *testing.T) {
 		require.Equal(t, "Very important", resp.UpdateTodo.Text)
 	})
 
+	t.Run("update the todo status by user id", func(t *testing.T) {
+		var resp struct {
+			UpdateTodo struct {
+				Text string
+				Done bool
+			}
+		}
+		c.MustPost(`mutation @user(id:2){ updateTodo(id: 3, changes:{done:true}) { text, done } }`, &resp)
+
+		require.Equal(t, "Somebody else's todo", resp.UpdateTodo.Text)
+	})
+
 	t.Run("select with alias", func(t *testing.T) {
 		var resp struct {
 			A struct{ Text string }

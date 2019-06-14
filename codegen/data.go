@@ -12,15 +12,18 @@ import (
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
 // resolvers or directives automatically (eg grpc, validation)
 type Data struct {
-	Config          *config.Config
-	Schema          *ast.Schema
-	SchemaStr       map[string]string
-	Directives      map[string]*Directive
-	Objects         Objects
-	Inputs          Objects
-	Interfaces      map[string]*Interface
-	ReferencedTypes map[string]*config.TypeReference
-	ComplexityRoots map[string]*Object
+	Config                 *config.Config
+	Schema                 *ast.Schema
+	SchemaStr              map[string]string
+	Directives             DirectiveList
+	QueryDirectives        DirectiveList
+	MutationDirectives     DirectiveList
+	SubscriptionDirectives DirectiveList
+	Objects                Objects
+	Inputs                 Objects
+	Interfaces             map[string]*Interface
+	ReferencedTypes        map[string]*config.TypeReference
+	ComplexityRoots        map[string]*Object
 
 	QueryRoot        *Object
 	MutationRoot     *Object
@@ -71,11 +74,14 @@ func BuildData(cfg *config.Config) (*Data, error) {
 	}
 
 	s := Data{
-		Config:     cfg,
-		Directives: dataDirectives,
-		Schema:     b.Schema,
-		SchemaStr:  b.SchemaStr,
-		Interfaces: map[string]*Interface{},
+		Config:                 cfg,
+		Directives:             dataDirectives,
+		QueryDirectives:        locationDirectives(dataDirectives, ast.LocationQuery),
+		MutationDirectives:     locationDirectives(dataDirectives, ast.LocationMutation),
+		SubscriptionDirectives: locationDirectives(dataDirectives, ast.LocationSubscription),
+		Schema:                 b.Schema,
+		SchemaStr:              b.SchemaStr,
+		Interfaces:             map[string]*Interface{},
 	}
 
 	for _, schemaType := range b.Schema.Types {

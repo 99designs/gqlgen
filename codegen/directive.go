@@ -10,10 +10,33 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+type DirectiveList map[string]*Directive
+
 type Directive struct {
+	*ast.DirectiveDefinition
 	Name    string
 	Args    []*FieldArgument
 	Builtin bool
+}
+
+func (d *Directive) IsLocation(location ast.DirectiveLocation) bool {
+	for _, l := range d.Locations {
+		if l == location {
+			return true
+		}
+	}
+
+	return false
+}
+
+func locationDirectives(directives DirectiveList, location ast.DirectiveLocation) map[string]*Directive {
+	mDirectives := make(map[string]*Directive)
+	for name, d := range directives {
+		if d.IsLocation(location) {
+			mDirectives[name] = d
+		}
+	}
+	return mDirectives
 }
 
 func (b *builder) buildDirectives() (map[string]*Directive, error) {
@@ -53,9 +76,10 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 		}
 
 		directives[name] = &Directive{
-			Name:    name,
-			Args:    args,
-			Builtin: builtin,
+			DirectiveDefinition: dir,
+			Name:                name,
+			Args:                args,
+			Builtin:             builtin,
 		}
 	}
 

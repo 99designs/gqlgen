@@ -27,7 +27,7 @@ type {{.ResolverType}} struct {}
 
 {{ range $object := .Objects -}}
 	{{- if $object.HasResolvers -}}
-		type {{lcFirst $object.Name}}Resolver struct { *Resolver }
+		type {{lcFirst $object.Name}}Resolver struct { *{{$.ResolverType}} }
 
 		{{ range $field := $object.Fields -}}
 			{{- if $field.IsResolver -}}

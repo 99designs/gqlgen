@@ -13,7 +13,7 @@ func main() {
 	}
 
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL({{ lookupImport .ExecPackageName }}.NewExecutableSchema({{ lookupImport .ExecPackageName}}.Config{Resolvers: &{{ lookupImport .ResolverPackageName}}.Resolver{}})))
+	http.Handle("/query", handler.GraphQL({{ lookupImport .ExecPackageName }}.NewExecutableSchema({{ lookupImport .ExecPackageName}}.Config{Resolvers: &{{ lookupImport .ResolverPackageName}}.{{.ResolverType}}{}})))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":" + port, nil))

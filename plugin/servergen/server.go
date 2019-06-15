@@ -27,6 +27,7 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 	serverBuild := &ServerBuild{
 		ExecPackageName:     data.Config.Exec.ImportPath(),
 		ResolverPackageName: data.Config.Resolver.ImportPath(),
+		ResolverType:        data.Config.Resolver.Type,
 	}
 
 	if _, err := os.Stat(m.filename); os.IsNotExist(errors.Cause(err)) {
@@ -46,4 +47,5 @@ type ServerBuild struct {
 
 	ExecPackageName     string
 	ResolverPackageName string
+	ResolverType        string
 }

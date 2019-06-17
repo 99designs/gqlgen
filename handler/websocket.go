@@ -12,7 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
@@ -90,6 +90,15 @@ func (c *wsConnection) init() bool {
 			c.initPayload = make(InitPayload)
 			err := json.Unmarshal(message.Payload, &c.initPayload)
 			if err != nil {
+				return false
+			}
+		}
+
+		if c.cfg.websocketOnInitFunc != nil {
+			isValidPayload := c.cfg.websocketOnInitFunc(c.ctx, c.initPayload)
+			if !isValidPayload {
+				c.sendConnectionError("invalid init payload")
+				c.close(websocket.CloseNormalClosure, "terminated")
 				return false
 			}
 		}

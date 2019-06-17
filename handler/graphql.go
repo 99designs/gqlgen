@@ -40,6 +40,7 @@ type Config struct {
 	tracer                          graphql.Tracer
 	complexityLimit                 int
 	complexityLimitFunc             graphql.ComplexityLimitFunc
+	websocketOnInitFunc             func(ctx context.Context, initPayload InitPayload) bool
 	disableIntrospection            bool
 	connectionKeepAlivePingInterval time.Duration
 	uploadMaxMemory                 int64
@@ -248,6 +249,14 @@ func (tw *tracerWrapper) EndFieldExecution(ctx context.Context) {
 func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
 	tw.tracer2.EndOperationExecution(ctx)
 	tw.tracer1.EndOperationExecution(ctx)
+}
+
+// WebsocketOnInitFunc is called when the server receives connection init message from the client.
+// This can be used to check initial payload to see whether to accept the websocket connection.
+func WebsocketOnInitFunc(websocketOnInitFunc func(ctx context.Context, initPayload InitPayload) bool) Option {
+	return func(cfg *Config) {
+		cfg.websocketOnInitFunc = websocketOnInitFunc
+	}
 }
 
 // CacheSize sets the maximum size of the query cache.

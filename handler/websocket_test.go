@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
@@ -155,6 +156,55 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 		// keepalive
 		msg = readOp(c)
 		require.Equal(t, connectionKeepAliveMsg, msg.Type)
+	})
+}
+
+func TestWebsocketOnInitFunc(t *testing.T) {
+	next := make(chan struct{})
+
+	t.Run("accept connection if WebsocketOnInitFunc is NOT provided", func(t *testing.T) {
+		h := GraphQL(&executableSchemaStub{next})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+
+		require.Equal(t, connectionAckMsg, readOp(c).Type)
+	})
+
+	t.Run("accept connection if WebsocketOnInitFunc is provided and is accepting connection", func(t *testing.T) {
+		h := GraphQL(&executableSchemaStub{next}, WebsocketOnInitFunc(func(ctx context.Context, initPayload InitPayload) bool {
+			return true
+		}))
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+
+		require.Equal(t, connectionAckMsg, readOp(c).Type)
+	})
+
+	t.Run("reject connection if WebsocketOnInitFunc is provided and is accepting connection", func(t *testing.T) {
+		h := GraphQL(&executableSchemaStub{next}, WebsocketOnInitFunc(func(ctx context.Context, initPayload InitPayload) bool {
+			return false
+		}))
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+
+		msg := readOp(c)
+		require.Equal(t, connectionErrorMsg, msg.Type)
+		require.Equal(t, `{"message":"invalid init payload"}`, string(msg.Payload))
 	})
 }
 

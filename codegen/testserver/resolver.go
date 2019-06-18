@@ -203,6 +203,12 @@ func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
 func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
+	panic("not implemented")
+}
 
 type subscriptionResolver struct{ *Resolver }
 

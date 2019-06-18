@@ -159,10 +159,10 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 	})
 }
 
-func TestWebsocketOnInitFunc(t *testing.T) {
+func TestWebsocketInitFunc(t *testing.T) {
 	next := make(chan struct{})
 
-	t.Run("accept connection if WebsocketOnInitFunc is NOT provided", func(t *testing.T) {
+	t.Run("accept connection if WebsocketInitFunc is NOT provided", func(t *testing.T) {
 		h := GraphQL(&executableSchemaStub{next})
 		srv := httptest.NewServer(h)
 		defer srv.Close()
@@ -175,8 +175,8 @@ func TestWebsocketOnInitFunc(t *testing.T) {
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
 	})
 
-	t.Run("accept connection if WebsocketOnInitFunc is provided and is accepting connection", func(t *testing.T) {
-		h := GraphQL(&executableSchemaStub{next}, WebsocketOnInitFunc(func(ctx context.Context, initPayload InitPayload) bool {
+	t.Run("accept connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
+		h := GraphQL(&executableSchemaStub{next}, WebsocketInitFunc(func(ctx context.Context, initPayload InitPayload) bool {
 			return true
 		}))
 		srv := httptest.NewServer(h)
@@ -190,8 +190,8 @@ func TestWebsocketOnInitFunc(t *testing.T) {
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
 	})
 
-	t.Run("reject connection if WebsocketOnInitFunc is provided and is accepting connection", func(t *testing.T) {
-		h := GraphQL(&executableSchemaStub{next}, WebsocketOnInitFunc(func(ctx context.Context, initPayload InitPayload) bool {
+	t.Run("reject connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
+		h := GraphQL(&executableSchemaStub{next}, WebsocketInitFunc(func(ctx context.Context, initPayload InitPayload) bool {
 			return false
 		}))
 		srv := httptest.NewServer(h)

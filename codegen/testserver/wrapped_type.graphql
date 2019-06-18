@@ -1,0 +1,9 @@
+# regression test for https://github.com/99designs/gqlgen/issues/721
+
+extend type Query {
+    wrappedStruct: WrappedStruct!
+    wrappedScalar: WrappedScalar!
+}
+
+type WrappedStruct { name: String! }
+scalar WrappedScalar

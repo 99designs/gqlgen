@@ -71,6 +71,8 @@ type Stub struct {
 		Fallback               func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 		OptionalUnion          func(ctx context.Context) (TestUnion, error)
 		ValidType              func(ctx context.Context) (*ValidType, error)
+		WrappedStruct          func(ctx context.Context) (*WrappedStruct, error)
+		WrappedScalar          func(ctx context.Context) (WrappedScalar, error)
 	}
 	SubscriptionResolver struct {
 		Updated     func(ctx context.Context) (<-chan string, error)
@@ -272,6 +274,12 @@ func (r *stubQuery) OptionalUnion(ctx context.Context) (TestUnion, error) {
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)
+}
+func (r *stubQuery) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
+	return r.QueryResolver.WrappedStruct(ctx)
+}
+func (r *stubQuery) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
+	return r.QueryResolver.WrappedScalar(ctx)
 }
 
 type stubSubscription struct{ *Stub }

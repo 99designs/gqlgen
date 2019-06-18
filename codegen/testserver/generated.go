@@ -221,6 +221,8 @@ type ComplexityRoot struct {
 		User                   func(childComplexity int, id int) int
 		Valid                  func(childComplexity int) int
 		ValidType              func(childComplexity int) int
+		WrappedScalar          func(childComplexity int) int
+		WrappedStruct          func(childComplexity int) int
 	}
 
 	Rectangle struct {
@@ -253,6 +255,10 @@ type ComplexityRoot struct {
 		DifferentCaseOld   func(childComplexity int) int
 		ValidArgs          func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _Arg string) int
 		ValidInputKeywords func(childComplexity int, input *ValidInput) int
+	}
+
+	WrappedStruct struct {
+		Name func(childComplexity int) int
 	}
 
 	XXIt struct {
@@ -335,6 +341,8 @@ type QueryResolver interface {
 	Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 	OptionalUnion(ctx context.Context) (TestUnion, error)
 	ValidType(ctx context.Context) (*ValidType, error)
+	WrappedStruct(ctx context.Context) (*WrappedStruct, error)
+	WrappedScalar(ctx context.Context) (WrappedScalar, error)
 }
 type SubscriptionResolver interface {
 	Updated(ctx context.Context) (<-chan string, error)
@@ -1013,6 +1021,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ValidType(childComplexity), true
 
+	case "Query.wrappedScalar":
+		if e.complexity.Query.WrappedScalar == nil {
+			break
+		}
+
+		return e.complexity.Query.WrappedScalar(childComplexity), true
+
+	case "Query.wrappedStruct":
+		if e.complexity.Query.WrappedStruct == nil {
+			break
+		}
+
+		return e.complexity.Query.WrappedStruct(childComplexity), true
+
 	case "Rectangle.area":
 		if e.complexity.Rectangle.Area == nil {
 			break
@@ -1141,6 +1163,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
+
+	case "WrappedStruct.name":
+		if e.complexity.WrappedStruct.Name == nil {
+			break
+		}
+
+		return e.complexity.WrappedStruct.Name(childComplexity), true
 
 	case "XXIt.id":
 		if e.complexity.XXIt.ID == nil {
@@ -1659,6 +1688,16 @@ type AIt { id: ID! }
 type XXIt { id: ID! }
 type AbIt { id: ID! }
 type XxIt { id: ID! }
+`},
+	&ast.Source{Name: "wrapped_type.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/721
+
+extend type Query {
+    wrappedStruct: WrappedStruct!
+    wrappedScalar: WrappedScalar!
+}
+
+type WrappedStruct { name: String! }
+scalar WrappedScalar
 `},
 )
 
@@ -4561,6 +4600,60 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 	return ec.marshalOValidType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐValidType(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().WrappedStruct(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*WrappedStruct)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNWrappedStruct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedStruct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().WrappedScalar(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(WrappedScalar)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNWrappedScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedScalar(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -5071,6 +5164,33 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graphql.CollectedField, obj *WrappedStruct) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "WrappedStruct",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.CollectedField, obj *XXIt) graphql.Marshaler {
@@ -7730,6 +7850,34 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_validType(ctx, field)
 				return res
 			})
+		case "wrappedStruct":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_wrappedStruct(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "wrappedScalar":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_wrappedScalar(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -7907,6 +8055,33 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 			}
 		case "validArgs":
 			out.Values[i] = ec._ValidType_validArgs(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var wrappedStructImplementors = []string{"WrappedStruct"}
+
+func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.SelectionSet, obj *WrappedStruct) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, wrappedStructImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("WrappedStruct")
+		case "name":
+			out.Values[i] = ec._WrappedStruct_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8766,6 +8941,35 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNWrappedScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedScalar(ctx context.Context, v interface{}) (WrappedScalar, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return WrappedScalar(tmp), err
+}
+
+func (ec *executionContext) marshalNWrappedScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedScalar(ctx context.Context, sel ast.SelectionSet, v WrappedScalar) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNWrappedStruct2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedStruct(ctx context.Context, sel ast.SelectionSet, v WrappedStruct) graphql.Marshaler {
+	return ec._WrappedStruct(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNWrappedStruct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedStruct(ctx context.Context, sel ast.SelectionSet, v *WrappedStruct) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._WrappedStruct(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

@@ -12,6 +12,11 @@ import (
 
 type DirectiveList map[string]*Directive
 
+//LocationDirectives filter directives by location
+func (dl DirectiveList) LocationDirectives(location string) DirectiveList {
+	return locationDirectives(dl, ast.DirectiveLocation(location))
+}
+
 type Directive struct {
 	*ast.DirectiveDefinition
 	Name    string
@@ -19,20 +24,23 @@ type Directive struct {
 	Builtin bool
 }
 
-func (d *Directive) IsLocation(location ast.DirectiveLocation) bool {
+//IsLocation check location directive
+func (d *Directive) IsLocation(location ...ast.DirectiveLocation) bool {
 	for _, l := range d.Locations {
-		if l == location {
-			return true
+		for _, a := range location {
+			if l == a {
+				return true
+			}
 		}
 	}
 
 	return false
 }
 
-func locationDirectives(directives DirectiveList, location ast.DirectiveLocation) map[string]*Directive {
+func locationDirectives(directives DirectiveList, location ...ast.DirectiveLocation) map[string]*Directive {
 	mDirectives := make(map[string]*Directive)
 	for name, d := range directives {
-		if d.IsLocation(location) {
+		if d.IsLocation(location...) {
 			mDirectives[name] = d
 		}
 	}

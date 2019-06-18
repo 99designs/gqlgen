@@ -167,7 +167,9 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._MyQueryMiddleware(ctx, op)
+		data := ec._queryMiddleware(ctx, op, func(ctx context.Context) (interface{}, error) {
+			return ec._MyQuery(ctx, op.SelectionSet), nil
+		})
 		var buf bytes.Buffer
 		data.MarshalGQL(&buf)
 		return buf.Bytes()
@@ -184,7 +186,9 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 	buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		data := ec._MyMutationMiddleware(ctx, op)
+		data := ec._mutationMiddleware(ctx, op, func(ctx context.Context) (interface{}, error) {
+			return ec._MyMutation(ctx, op.SelectionSet), nil
+		})
 		var buf bytes.Buffer
 		data.MarshalGQL(&buf)
 		return buf.Bytes()
@@ -204,70 +208,6 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 	*executableSchema
-}
-
-func (ec *executionContext) _MyQueryMiddleware(ctx context.Context, obj *ast.OperationDefinition) graphql.Marshaler {
-
-	next := func(ctx context.Context) (interface{}, error) {
-		return ec._MyQuery(ctx, obj.SelectionSet), nil
-	}
-	for _, d := range obj.Directives {
-		switch d.Name {
-		case "user":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_user_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return graphql.Null
-			}
-			n := next
-			next = func(ctx context.Context) (interface{}, error) {
-				return ec.directives.User(ctx, obj, n, args["id"].(int))
-			}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if data, ok := tmp.(graphql.Marshaler); ok {
-		return data
-	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return graphql.Null
-}
-
-func (ec *executionContext) _MyMutationMiddleware(ctx context.Context, obj *ast.OperationDefinition) graphql.Marshaler {
-
-	next := func(ctx context.Context) (interface{}, error) {
-		return ec._MyMutation(ctx, obj.SelectionSet), nil
-	}
-	for _, d := range obj.Directives {
-		switch d.Name {
-		case "user":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_user_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return graphql.Null
-			}
-			n := next
-			next = func(ctx context.Context) (interface{}, error) {
-				return ec.directives.User(ctx, obj, n, args["id"].(int))
-			}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if data, ok := tmp.(graphql.Marshaler); ok {
-		return data
-	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return graphql.Null
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
@@ -499,6 +439,70 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 }
 
 // endregion ***************************** args.gotpl *****************************
+
+// region    ************************** directives.gotpl **************************
+
+func (ec *executionContext) _queryMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) graphql.Marshaler {
+
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "user":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_user_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return ec.directives.User(ctx, obj, n, args["id"].(int))
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if data, ok := tmp.(graphql.Marshaler); ok {
+		return data
+	}
+	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return graphql.Null
+
+}
+
+func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) graphql.Marshaler {
+
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "user":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_user_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return ec.directives.User(ctx, obj, n, args["id"].(int))
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if data, ok := tmp.(graphql.Marshaler); ok {
+		return data
+	}
+	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return graphql.Null
+
+}
+
+// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 

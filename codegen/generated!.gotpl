@@ -117,8 +117,10 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		{{ if .QueryDirectives -}}
-			data := ec._{{.QueryRoot.Name}}Middleware(ctx, op)
+		{{ if .Directives.LocationDirectives "QUERY" -}}
+			data := ec._queryMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
+				return ec._{{.QueryRoot.Name}}(ctx, op.SelectionSet), nil
+			})
 		{{- else -}}
 			data := ec._{{.QueryRoot.Name}}(ctx, op.SelectionSet)
 		{{- end }}
@@ -142,8 +144,10 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		{{ if .MutationDirectives -}}
-			data := ec._{{.MutationRoot.Name}}Middleware(ctx, op)
+		{{ if .Directives.LocationDirectives "MUTATION" -}}
+			data := ec._mutationMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
+				return ec._{{.MutationRoot.Name}}(ctx, op.SelectionSet), nil
+			})
 		{{- else -}}
 			data := ec._{{.MutationRoot.Name}}(ctx, op.SelectionSet)
 		{{- end }}
@@ -166,8 +170,10 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 	{{- if .SubscriptionRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
-		{{ if .SubscriptionDirectives -}}
-			next := ec._{{.SubscriptionRoot.Name}}Middleware(ctx, op)
+		{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
+			next := ec._subscriptionMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
+				return ec._{{.SubscriptionRoot.Name}}(ctx, op.SelectionSet),nil
+			})
 		{{- else -}}
 			next := ec._{{.SubscriptionRoot.Name}}(ctx, op.SelectionSet)
 		{{- end }}
@@ -207,126 +213,6 @@ type executionContext struct {
 	*graphql.RequestContext
 	*executableSchema
 }
-
-{{ if and .QueryDirectives .QueryRoot }}
-func (ec *executionContext) _{{.QueryRoot.Name}}Middleware(ctx context.Context, obj *ast.OperationDefinition) graphql.Marshaler {
-
-	next := func(ctx context.Context) (interface{}, error){
-		return ec._{{.QueryRoot.Name}}(ctx, obj.SelectionSet),nil
-	}
-	for _, d := range obj.Directives {
-		switch d.Name {
-		{{- range $directive := .QueryDirectives }}
-		case "{{$directive.Name}}":
-			{{- if $directive.Args }}
-				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := ec.{{ $directive.ArgsFunc }}(ctx,rawArgs)
-				if err != nil {
-					ec.Error(ctx, err)
-					return graphql.Null
-				}
-			{{- end }}
-			n := next
-			next = func(ctx context.Context) (interface{}, error) {
-				return ec.directives.{{$directive.Name|ucFirst}}({{$directive.CallArgs}})
-			}
-		{{- end }}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if data, ok := tmp.(graphql.Marshaler); ok {
-		return data
-	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return graphql.Null
-}
-{{end}}
-
-{{ if and .SubscriptionDirectives .SubscriptionRoot }}
-func (ec *executionContext) _{{.SubscriptionRoot.Name}}Middleware(ctx context.Context, obj *ast.OperationDefinition) func() graphql.Marshaler {
-
-	next := func(ctx context.Context) (interface{}, error){
-		return ec._{{.SubscriptionRoot.Name}}(ctx, obj.SelectionSet),nil
-	}
-	for _, d := range obj.Directives {
-		switch d.Name {
-		{{- range $directive := .SubscriptionDirectives }}
-		case "{{$directive.Name}}":
-			{{- if $directive.Args }}
-				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := ec.{{ $directive.ArgsFunc }}(ctx,rawArgs)
-				if err != nil {
-					ec.Error(ctx, err)
-					return func() graphql.Marshaler {
-						return graphql.Null
-					}
-				}
-			{{- end }}
-			n := next
-			next = func(ctx context.Context) (interface{}, error) {
-				return ec.directives.{{$directive.Name|ucFirst}}({{$directive.CallArgs}})
-			}
-		{{- end }}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return func() graphql.Marshaler {
-			return graphql.Null
-		}
-	}
-	if data, ok := tmp.(func() graphql.Marshaler); ok {
-		return data
-	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func() graphql.Marshaler {
-		return graphql.Null
-	}
-}
-{{end}}
-
-{{ if and .MutationDirectives .MutationRoot }}
-func (ec *executionContext) _{{.MutationRoot.Name}}Middleware(ctx context.Context, obj *ast.OperationDefinition) graphql.Marshaler {
-
-	next := func(ctx context.Context) (interface{}, error){
-		return ec._{{.MutationRoot.Name}}(ctx, obj.SelectionSet),nil
-	}
-	for _, d := range obj.Directives {
-		switch d.Name {
-		{{- range $directive := .MutationDirectives }}
-		case "{{$directive.Name}}":
-			{{- if $directive.Args }}
-				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := ec.{{ $directive.ArgsFunc }}(ctx,rawArgs)
-				if err != nil {
-					ec.Error(ctx, err)
-					return graphql.Null
-				}
-			{{- end }}
-			n := next
-			next = func(ctx context.Context) (interface{}, error) {
-				return ec.directives.{{$directive.Name|ucFirst}}({{$directive.CallArgs}})
-			}
-		{{- end }}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if data, ok := tmp.(graphql.Marshaler); ok {
-		return data
-	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return graphql.Null
-}
-{{end}}
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
 	defer func() {

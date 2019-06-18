@@ -214,7 +214,9 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
 	ec := executionContext{graphql.GetRequestContext(ctx), e}
 
-	next := ec._SubscriptionMiddleware(ctx, op)
+	next := ec._subscriptionMiddleware(ctx, op, func(ctx context.Context) (interface{}, error) {
+		return ec._Subscription(ctx, op.SelectionSet), nil
+	})
 	if ec.Errors != nil {
 		return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
 	}
@@ -247,44 +249,6 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 type executionContext struct {
 	*graphql.RequestContext
 	*executableSchema
-}
-
-func (ec *executionContext) _SubscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition) func() graphql.Marshaler {
-
-	next := func(ctx context.Context) (interface{}, error) {
-		return ec._Subscription(ctx, obj.SelectionSet), nil
-	}
-	for _, d := range obj.Directives {
-		switch d.Name {
-		case "user":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_user_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return func() graphql.Marshaler {
-					return graphql.Null
-				}
-			}
-			n := next
-			next = func(ctx context.Context) (interface{}, error) {
-				return ec.directives.User(ctx, obj, n, args["username"].(string))
-			}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return func() graphql.Marshaler {
-			return graphql.Null
-		}
-	}
-	if data, ok := tmp.(func() graphql.Marshaler); ok {
-		return data
-	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func() graphql.Marshaler {
-		return graphql.Null
-	}
 }
 
 func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) (ret interface{}) {
@@ -484,6 +448,44 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 }
 
 // endregion ***************************** args.gotpl *****************************
+
+// region    ************************** directives.gotpl **************************
+
+func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) func() graphql.Marshaler {
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "user":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_user_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return func() graphql.Marshaler {
+					return graphql.Null
+				}
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				return ec.directives.User(ctx, obj, n, args["username"].(string))
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return func() graphql.Marshaler {
+			return graphql.Null
+		}
+	}
+	if data, ok := tmp.(func() graphql.Marshaler); ok {
+		return data
+	}
+	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return func() graphql.Marshaler {
+		return graphql.Null
+	}
+}
+
+// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 

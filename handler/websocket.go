@@ -95,8 +95,8 @@ func (c *wsConnection) init() bool {
 		}
 
 		if c.cfg.websocketInitFunc != nil {
-			if ok := c.cfg.websocketInitFunc(c.ctx, c.initPayload); !ok {
-				c.sendConnectionError("invalid init payload")
+			if err := c.cfg.websocketInitFunc(c.ctx, c.initPayload); err != nil {
+				c.sendConnectionError(err.Error())
 				c.close(websocket.CloseNormalClosure, "terminated")
 				return false
 			}

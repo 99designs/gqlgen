@@ -30,6 +30,8 @@ type params struct {
 	Variables     map[string]interface{} `json:"variables"`
 }
 
+type websocketInitFunc func(ctx context.Context, initPayload InitPayload) error
+
 type Config struct {
 	cacheSize                       int
 	upgrader                        websocket.Upgrader
@@ -40,6 +42,7 @@ type Config struct {
 	tracer                          graphql.Tracer
 	complexityLimit                 int
 	complexityLimitFunc             graphql.ComplexityLimitFunc
+	websocketInitFunc               websocketInitFunc
 	disableIntrospection            bool
 	connectionKeepAlivePingInterval time.Duration
 	uploadMaxMemory                 int64
@@ -248,6 +251,14 @@ func (tw *tracerWrapper) EndFieldExecution(ctx context.Context) {
 func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
 	tw.tracer2.EndOperationExecution(ctx)
 	tw.tracer1.EndOperationExecution(ctx)
+}
+
+// WebsocketInitFunc is called when the server receives connection init message from the client.
+// This can be used to check initial payload to see whether to accept the websocket connection.
+func WebsocketInitFunc(websocketInitFunc func(ctx context.Context, initPayload InitPayload) error) Option {
+	return func(cfg *Config) {
+		cfg.websocketInitFunc = websocketInitFunc
+	}
 }
 
 // CacheSize sets the maximum size of the query cache.

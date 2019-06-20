@@ -93,6 +93,17 @@ func TestReferencedPackages(t *testing.T) {
 }
 
 func TestConfigCheck(t *testing.T) {
+	t.Run("allow disabling generation", func(t *testing.T) {
+		config := DefaultConfig()
+		config.Exec.Filename = os.DevNull
+
+		err := config.normalize()
+		require.NoError(t, err)
+
+		err = config.Check()
+		require.NoError(t, err)
+	})
+
 	t.Run("invalid config format due to conflicting package names", func(t *testing.T) {
 		config, err := LoadConfig("testdata/cfg/conflictedPackages.yml")
 		require.NoError(t, err)

@@ -182,7 +182,7 @@ func (c *PackageConfig) Check() error {
 	if strings.ContainsAny(c.Package, "./\\") {
 		return fmt.Errorf("package should be the output package name only, do not include the output filename")
 	}
-	if c.Filename != "" && !strings.HasSuffix(c.Filename, ".go") {
+	if c.Filename != "" && c.Filename != os.DevNull && !strings.HasSuffix(c.Filename, ".go") {
 		return fmt.Errorf("filename should be path to a go source file")
 	}
 

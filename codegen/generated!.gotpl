@@ -117,7 +117,13 @@ func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinitio
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		{{ if .Directives.LocationDirectives "QUERY" -}}
+			data := ec._queryMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
+				return ec._{{.QueryRoot.Name}}(ctx, op.SelectionSet), nil
+			})
+		{{- else -}}
 			data := ec._{{.QueryRoot.Name}}(ctx, op.SelectionSet)
+		{{- end }}
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			return buf.Bytes()
@@ -138,7 +144,13 @@ func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefini
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
 		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
+		{{ if .Directives.LocationDirectives "MUTATION" -}}
+			data := ec._mutationMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
+				return ec._{{.MutationRoot.Name}}(ctx, op.SelectionSet), nil
+			})
+		{{- else -}}
 			data := ec._{{.MutationRoot.Name}}(ctx, op.SelectionSet)
+		{{- end }}
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			return buf.Bytes()
@@ -158,7 +170,13 @@ func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDe
 	{{- if .SubscriptionRoot }}
 		ec := executionContext{graphql.GetRequestContext(ctx), e}
 
-		next := ec._{{.SubscriptionRoot.Name}}(ctx, op.SelectionSet)
+		{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
+			next := ec._subscriptionMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
+				return ec._{{.SubscriptionRoot.Name}}(ctx, op.SelectionSet),nil
+			})
+		{{- else -}}
+			next := ec._{{.SubscriptionRoot.Name}}(ctx, op.SelectionSet)
+		{{- end }}
 		if ec.Errors != nil {
 			return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
 		}

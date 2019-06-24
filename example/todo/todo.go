@@ -15,6 +15,13 @@ import (
 var you = &User{ID: 1, Name: "You"}
 var them = &User{ID: 2, Name: "Them"}
 
+func getUserId(ctx context.Context) int {
+	if id, ok := ctx.Value("userId").(int); ok {
+		return id
+	}
+	return you.ID
+}
+
 func New() Config {
 	c := Config{
 		Resolvers: &resolvers{
@@ -38,12 +45,15 @@ func New() Config {
 				return nil, fmt.Errorf("obj cant be owned")
 			}
 
-			if ownable.Owner().ID != you.ID {
+			if ownable.Owner().ID != getUserId(ctx) {
 				return nil, fmt.Errorf("you dont own that")
 			}
 		}
 
 		return next(ctx)
+	}
+	c.Directives.User = func(ctx context.Context, obj interface{}, next graphql.Resolver, id int) (interface{}, error) {
+		return next(context.WithValue(ctx, "userId", id))
 	}
 	return c
 }

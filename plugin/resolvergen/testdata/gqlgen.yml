@@ -2,13 +2,13 @@ schema:
   - "testdata/schema.graphql"
 
 exec:
-  filename: out/ignored.go
+  filename: testdata/out/ignored.go
 model:
-  filename: out/generated.go
+  filename: testdata/out/generated.go
 resolver:
-  filename: out/resolver.go
+  filename: testdata/out/resolver.go
   type: CustomResolverType
 
 models:
   Resolver:
-    model: github.com/99designs/gqlgen/plugin/resolvergen/out.Resolver
+    model: github.com/99designs/gqlgen/plugin/resolvergen/testdata/out.Resolver

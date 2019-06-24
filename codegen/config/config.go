@@ -52,6 +52,13 @@ func LoadConfigFromDefaultLocations() (*Config, error) {
 	return LoadConfig(cfgFile)
 }
 
+var path2regex = strings.NewReplacer(
+	`.`, `\.`,
+	`*`, `.+`,
+	`\`, `[\\/]`,
+	`/`, `[\\/]`,
+)
+
 // LoadConfig reads the gqlgen.yml config file
 func LoadConfig(filename string) (*Config, error) {
 	config := DefaultConfig()
@@ -74,18 +81,17 @@ func LoadConfig(filename string) (*Config, error) {
 		// subdirectories to match schema files.
 		if strings.Contains(f, "**") {
 			pathParts := strings.SplitN(f, "**", 2)
+			rest := strings.TrimPrefix(strings.TrimPrefix(pathParts[1], `\`), `/`)
+			// turn the rest of the glob into a regex, anchored only at the end because ** allows
+			// for any number of dirs in between and walk will let us match against the full path name
+			globRe := regexp.MustCompile(path2regex.Replace(rest) + `$`)
+
 			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
 				if err != nil {
 					return err
 				}
 
-				// make sure paths match files
-				// <root>?.*<filename|.+>\.<ext>
-				fileRegex := regexp.MustCompile(
-					pathParts[0] +
-						"?.*" +
-						strings.Replace(strings.Replace(pathParts[1], ".", "\\.", -1), "*", ".+", -1))
-				if fileRegex.MatchString(path) {
+				if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {
 					matches = append(matches, path)
 				}
 

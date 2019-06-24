@@ -12,7 +12,7 @@ import (
 )
 
 func TestPlugin(t *testing.T) {
-	_ = syscall.Unlink("out/resolver.go")
+	_ = syscall.Unlink("testdata/out/resolver.go")
 
 	cfg, err := config.LoadConfig("testdata/gqlgen.yml")
 	require.NoError(t, err)
@@ -24,7 +24,7 @@ func TestPlugin(t *testing.T) {
 	}
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/out")
+	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/out")
 }
 
 func assertNoErrors(t *testing.T, pkg string) {

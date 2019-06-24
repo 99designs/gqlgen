@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,6 +30,26 @@ type params struct {
 	Query         string                 `json:"query"`
 	OperationName string                 `json:"operationName"`
 	Variables     map[string]interface{} `json:"variables"`
+	Extensions    *extensions            `json:"extensions"`
+}
+
+type extensions struct {
+	PersistedQuery *persistedQuery `json:"persistedQuery"`
+}
+
+type persistedQuery struct {
+	Sha256  string `json:"sha256Hash"`
+	Version int64  `json:"version"`
+}
+
+const (
+	errPersistedQueryNotSupported = "PersistedQueryNotSupported"
+	errPersistedQueryNotFound     = "PersistedQueryNotFound"
+)
+
+type PersistedQueryCache interface {
+	Add(ctx context.Context, hash string, query string)
+	Get(ctx context.Context, hash string) (string, bool)
 }
 
 type websocketInitFunc func(ctx context.Context, initPayload InitPayload) error
@@ -47,6 +69,7 @@ type Config struct {
 	connectionKeepAlivePingInterval time.Duration
 	uploadMaxMemory                 int64
 	uploadMaxSize                   int64
+	apqCache                        PersistedQueryCache
 }
 
 func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -296,6 +319,13 @@ func WebsocketKeepAliveDuration(duration time.Duration) Option {
 	}
 }
 
+// Add cache that will hold queries for automatic persisted queries (APQ)
+func EnablePersistedQueryCache(cache PersistedQueryCache) Option {
+	return func(cfg *Config) {
+		cfg.apqCache = cache
+	}
+}
+
 const DefaultCacheSize = 1000
 const DefaultConnectionKeepAlivePingInterval = 25 * time.Second
 
@@ -355,6 +385,11 @@ type graphqlHandler struct {
 	exec  graphql.ExecutableSchema
 }
 
+func computeQueryHash(query string) string {
+	b := sha256.Sum256([]byte(query))
+	return hex.EncodeToString(b[:])
+}
+
 func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Allow", "OPTIONS, GET, POST")
@@ -377,6 +412,13 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if variables := r.URL.Query().Get("variables"); variables != "" {
 			if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
 				sendErrorf(w, http.StatusBadRequest, "variables could not be decoded")
+				return
+			}
+		}
+
+		if extensions := r.URL.Query().Get("extensions"); extensions != "" {
+			if err := jsonDecode(strings.NewReader(extensions), &reqParams.Extensions); err != nil {
+				sendErrorf(w, http.StatusBadRequest, "extensions could not be decoded")
 				return
 			}
 		}
@@ -419,6 +461,41 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+
+	var queryHash string
+	apqRegister := false
+	apq := reqParams.Extensions != nil && reqParams.Extensions.PersistedQuery != nil
+	if apq {
+		// client has enabled apq
+		queryHash = reqParams.Extensions.PersistedQuery.Sha256
+		if gh.cfg.apqCache == nil {
+			// server has disabled apq
+			sendErrorf(w, http.StatusOK, errPersistedQueryNotSupported)
+			return
+		}
+		if reqParams.Extensions.PersistedQuery.Version != 1 {
+			sendErrorf(w, http.StatusOK, "Unsupported persisted query version")
+			return
+		}
+		if reqParams.Query == "" {
+			// client sent optimistic query hash without query string
+			query, ok := gh.cfg.apqCache.Get(ctx, queryHash)
+			if !ok {
+				sendErrorf(w, http.StatusOK, errPersistedQueryNotFound)
+				return
+			}
+			reqParams.Query = query
+		} else {
+			if computeQueryHash(reqParams.Query) != queryHash {
+				sendErrorf(w, http.StatusOK, "provided sha does not match query")
+				return
+			}
+			apqRegister = true
+		}
+	} else if reqParams.Query == "" {
+		sendErrorf(w, http.StatusUnprocessableEntity, "Must provide query string")
+		return
+	}
 
 	var doc *ast.QueryDocument
 	var cacheHit bool
@@ -472,6 +549,11 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if reqCtx.ComplexityLimit > 0 && reqCtx.OperationComplexity > reqCtx.ComplexityLimit {
 		sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", reqCtx.OperationComplexity, reqCtx.ComplexityLimit)
 		return
+	}
+
+	if apqRegister && gh.cfg.apqCache != nil {
+		// Add to persisted query cache
+		gh.cfg.apqCache.Add(ctx, queryHash, reqParams.Query)
 	}
 
 	switch op.Operation {

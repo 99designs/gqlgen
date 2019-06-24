@@ -15,6 +15,10 @@ jobs:
             docker build -f .circleci/node.Dockerfile -t gqlgen/node .
 
       - run:
+          name: "coverage"
+          command: docker run -e REPOTOKEN --rm gqlgen/golang .circleci/coverage.sh
+
+      - run:
           name: "golang tests"
           command: docker run --rm gqlgen/golang .circleci/test.sh
 

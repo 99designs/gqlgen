@@ -6,6 +6,7 @@ import (
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin/modelgen"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
@@ -41,4 +42,19 @@ var genCmd = cli.Command{
 			os.Exit(3)
 		}
 	},
+}
+
+func main() {
+	cfg, err := config.LoadConfigFromDefaultLocations()
+	if os.IsNotExist(errors.Cause(err)) {
+		cfg = config.DefaultConfig()
+	} else if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(2)
+	}
+
+	err = modelgen.New().(*modelgen.Plugin).MutateConfig(cfg)
+	if err != nil {
+		panic(err)
+	}
 }

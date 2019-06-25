@@ -59,28 +59,7 @@
 		ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			ctx = rctx  // use context from middleware stack in children
-			{{- if $field.IsResolver }}
-				return ec.resolvers.{{ $field.ShortInvocation }}
-			{{- else if $field.IsMap }}
-				switch v := {{$field.GoReceiverName}}[{{$field.Name|quote}}].(type) {
-				case {{$field.TypeReference.GO | ref}}:
-					return v, nil
-				case {{$field.TypeReference.Elem.GO | ref}}:
-					return &v, nil
-				case nil:
-					return ({{$field.TypeReference.GO | ref}})(nil), nil
-				default:
-					return nil, fmt.Errorf("unexpected type %T for field %s", v, {{ $field.Name | quote}})
-				}
-			{{- else if $field.IsMethod }}
-				{{- if $field.NoErr }}
-					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }}), nil
-				{{- else }}
-					return {{$field.GoReceiverName}}.{{$field.GoFieldName}}({{ $field.CallArgs }})
-				{{- end }}
-			{{- else if $field.IsVariable }}
-				return {{$field.GoReceiverName}}.{{$field.GoFieldName}}, nil
-			{{- end }}
+			{{ template "fieldDefinition" $field }}
 		})
 		if resTmp == nil {
 			{{- if $field.TypeReference.GQL.NonNull }}
@@ -98,3 +77,28 @@
 {{ end }}
 
 {{- end }}{{- end}}
+
+{{ define "fieldDefinition" }}
+	{{- if .IsResolver -}}
+		return ec.resolvers.{{ .ShortInvocation }}
+	{{- else if .IsMap -}}
+		switch v := {{.GoReceiverName}}[{{.Name|quote}}].(type) {
+		case {{.TypeReference.GO | ref}}:
+			return v, nil
+		case {{.TypeReference.Elem.GO | ref}}:
+			return &v, nil
+		case nil:
+			return ({{.TypeReference.GO | ref}})(nil), nil
+		default:
+			return nil, fmt.Errorf("unexpected type %T for field %s", v, {{ .Name | quote}})
+		}
+	{{- else if .IsMethod -}}
+		{{- if .NoErr -}}
+			return {{.GoReceiverName}}.{{.GoFieldName}}({{ .CallArgs }}), nil
+		{{- else -}}
+			return {{.GoReceiverName}}.{{.GoFieldName}}({{ .CallArgs }})
+		{{- end -}}
+	{{- else if .IsVariable -}}
+		return {{.GoReceiverName}}.{{.GoFieldName}}, nil
+	{{- end }}
+{{- end }}

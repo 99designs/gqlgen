@@ -102,7 +102,7 @@ func DataloaderMiddleware(db *sql.DB, next http.Handler) http.Handler {
 				args := make([]interface{}, len(ids))
 				for i := 0; i < len(ids); i++ {
 					placeholders[i] = "?"
-					args[i] = i
+					args[i] = ids[i]
 				}
 
 				res := logAndQuery(db,
@@ -113,18 +113,21 @@ func DataloaderMiddleware(db *sql.DB, next http.Handler) http.Handler {
 				
 				defer res.Close()
 
-				users := make([]*User, len(ids))
-				i := 0
+				users := make(map[int]*User, len(ids))
 				for res.Next() {
-					users[i] = &User{}
-					err := res.Scan(&users[i].ID, &users[i].Name)
+					user := &User{}
+					err := res.Scan(&user.ID, &user.Name)
 					if err != nil {
 						panic(err)
 					}
-					i++
+					users[user.ID] = user
 				}
-
-				return users, nil
+				
+				output := make([]*User, len(ids))
+				for i, id := range ids {
+					output[i] = users[id]
+				}
+				return output, nil
 			},
 		}
 		ctx := context.WithValue(r.Context(), userLoaderKey, &userloader)

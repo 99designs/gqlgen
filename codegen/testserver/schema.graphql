@@ -14,6 +14,7 @@ type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
+    directiveField: String
     inputSlice(arg: [String!]!): Boolean!
     shapeUnion: ShapeUnion!
     autobind: Autobind
@@ -119,6 +120,8 @@ type EmbeddedPointer {
 directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 directive @custom on ARGUMENT_DEFINITION
+directive @logged(id: UUID!) on FIELD
+scalar UUID
 
 enum Status {
     OK

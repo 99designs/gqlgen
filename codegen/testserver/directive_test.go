@@ -39,6 +39,14 @@ func TestDirectives(t *testing.T) {
 		return &s, nil
 	}
 
+	resolvers.QueryResolver.DirectiveField = func(ctx context.Context) (*string, error) {
+		if s, ok := ctx.Value("request_id").(*string); ok {
+			return s, nil
+		}
+
+		return nil, nil
+	}
+
 	srv := httptest.NewServer(
 		handler.GraphQL(
 			NewExecutableSchema(Config{
@@ -46,7 +54,7 @@ func TestDirectives(t *testing.T) {
 				Directives: DirectiveRoot{
 					Length: func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (interface{}, error) {
 						e := func(msg string) error {
-							if message == nil{
+							if message == nil {
 								return fmt.Errorf(msg)
 							}
 							return fmt.Errorf(*message)
@@ -103,6 +111,9 @@ func TestDirectives(t *testing.T) {
 					},
 					Custom: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
 						return next(ctx)
+					},
+					Logged: func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (interface{}, error) {
+						return next(context.WithValue(ctx, "request_id", &id))
 					},
 				},
 			}),
@@ -167,6 +178,26 @@ func TestDirectives(t *testing.T) {
 
 			require.Nil(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveArg)
+		})
+	})
+	t.Run("field directives", func(t *testing.T) {
+		t.Run("add field directive", func(t *testing.T) {
+			var resp struct {
+				DirectiveField string
+			}
+
+			c.MustPost(`query { directiveField@logged(id:"testes_id") }`, &resp)
+
+			require.Equal(t, resp.DirectiveField, `testes_id`)
+		})
+		t.Run("without field directive", func(t *testing.T) {
+			var resp struct {
+				DirectiveField *string
+			}
+
+			c.MustPost(`query { directiveField }`, &resp)
+
+			require.Nil(t, resp.DirectiveField)
 		})
 	})
 	t.Run("input field directives", func(t *testing.T) {

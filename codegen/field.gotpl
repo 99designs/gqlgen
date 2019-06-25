@@ -37,9 +37,15 @@
 		}
 	}
 {{ else }}
-	func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) graphql.Marshaler {
+	func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret graphql.Marshaler) {
 		ctx = ec.Tracer.StartFieldExecution(ctx, field)
-		defer func () { ec.Tracer.EndFieldExecution(ctx) }()
+		defer func () {
+			if r := recover(); r != nil {
+				ec.Error(ctx, ec.Recover(ctx, r))
+				ret = graphql.Null
+			}
+			ec.Tracer.EndFieldExecution(ctx)
+		}()
 		rctx := &graphql.ResolverContext{
 			Object: {{$object.Name|quote}},
 			Field: field,
@@ -57,10 +63,19 @@
 			rctx.Args = args
 		{{- end }}
 		ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-		resTmp := ec.FieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
-			ctx = rctx  // use context from middleware stack in children
-			{{ template "fieldDefinition" $field }}
-		})
+		{{- if  $.Directives.LocationDirectives "FIELD" }}
+			resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
+				{{ template "field" $field }}
+			})
+		{{ else }}
+			resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+				{{ template "field" $field }}
+			})
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+		{{- end }}
 		if resTmp == nil {
 			{{- if $field.TypeReference.GQL.NonNull }}
 				if !ec.HasError(rctx) {
@@ -77,6 +92,27 @@
 {{ end }}
 
 {{- end }}{{- end}}
+
+{{ define "field" }}
+	{{- if .HasDirectives -}}
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx  // use context from middleware stack in children
+			{{ template "fieldDefinition" . }}
+		}
+		{{ template "implDirectives" . }}
+		tmp, err := directive{{.ImplDirectives|len}}(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.({{ .TypeReference.GO | ref }}) ; ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be {{ .TypeReference.GO }}`, tmp)
+	{{- else -}}
+		ctx = rctx  // use context from middleware stack in children
+		{{ template "fieldDefinition" . }}
+	{{- end -}}
+{{ end }}
 
 {{ define "fieldDefinition" }}
 	{{- if .IsResolver -}}

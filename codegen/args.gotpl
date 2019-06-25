@@ -1,10 +1,10 @@
 {{ range $name, $args := .Args }}
-func (ec *executionContext) {{ $name }}(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{ $arg.TypeReference.GO | ref}}
-		if tmp, ok := in[{{$arg.Name|quote}}]; ok {
+		if tmp, ok := rawArgs[{{$arg.Name|quote}}]; ok {
 			{{- if $arg.ImplDirectives }}
 				directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, tmp) }
 				{{ template "implDirectives" $arg }}

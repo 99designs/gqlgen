@@ -38,6 +38,10 @@ func (f *FieldArgument) ImplDirectives() []*Directive {
 	return d
 }
 
+func (f *FieldArgument) DirectiveObjName() string {
+	return "rawArgs"
+}
+
 func (f *FieldArgument) Stream() bool {
 	return f.Object != nil && f.Object.Stream
 }

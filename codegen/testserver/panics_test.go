@@ -37,14 +37,14 @@ func TestPanics(t *testing.T) {
 		var resp interface{}
 		err := c.Post(`query { panics { argUnmarshal(u: ["aa", "bb"]) } }`, &resp)
 
-		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"internal system error\"}],\"data\":null}")
+		require.EqualError(t, err, "[{\"message\":\"internal system error\",\"path\":[\"panics\",\"argUnmarshal\"]}]")
 	})
 
 	t.Run("panics in funcs unmarshal return errors", func(t *testing.T) {
 		var resp interface{}
 		err := c.Post(`query { panics { fieldFuncMarshal(u: ["aa", "bb"]) } }`, &resp)
 
-		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"internal system error\"}],\"data\":null}")
+		require.EqualError(t, err, "[{\"message\":\"internal system error\",\"path\":[\"panics\",\"fieldFuncMarshal\"]}]")
 	})
 
 	t.Run("panics in funcs marshal return errors", func(t *testing.T) {

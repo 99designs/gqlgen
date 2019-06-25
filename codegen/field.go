@@ -287,6 +287,10 @@ func (f *Field) HasDirectives() bool {
 	return len(f.ImplDirectives()) > 0
 }
 
+func (f *Field) DirectiveObjName() string {
+	return f.GoReceiverName
+}
+
 func (f *Field) ImplDirectives() []*Directive {
 	var d []*Directive
 	loc := ast.LocationFieldDefinition

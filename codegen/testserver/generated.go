@@ -54,7 +54,7 @@ type ResolverRoot interface {
 type DirectiveRoot struct {
 	Custom func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 
-	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int) (res interface{}, err error)
+	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (res interface{}, err error)
 
 	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
 }
@@ -1289,7 +1289,7 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 				}
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int))
+					return ec.directives.Length(ctx, obj, n, args["min"].(int), args["max"].(*int), args["message"].(*string))
 				}
 			}
 		case "range":
@@ -1514,7 +1514,7 @@ input InputDirectives {
     text: String! @length(min: 0, max: 7, message: "not valid")
     inner: InnerDirectives!
     innerNullable: InnerDirectives
-    thirdParty: ThirdParty @length(min: 0, max: 7, message: "not valid")
+    thirdParty: ThirdParty @length(min: 0, max: 7)
 }
 
 input InnerDirectives {
@@ -1552,7 +1552,7 @@ type EmbeddedPointer {
     Title: String
 }
 
-directive @length(min: Int!, max: Int) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 directive @custom on ARGUMENT_DEFINITION
 
@@ -1724,6 +1724,14 @@ func (ec *executionContext) dir_length_args(ctx context.Context, in map[string]i
 		}
 	}
 	args["max"] = arg1
+	var arg2 *string
+	if tmp, ok := in["message"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["message"] = arg2
 	return args, nil
 }
 
@@ -1812,9 +1820,19 @@ func (ec *executionContext) field_Query_directiveArg_args(ctx context.Context, i
 	if tmp, ok := in["arg"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			max := 255
-			n := directive0
-			return ec.directives.Length(ctx, in, n, 1, &max)
+			min, err := ec.unmarshalNInt2int(ctx, 1)
+			if err != nil {
+				return nil, err
+			}
+			max, err := ec.unmarshalOInt2ᚖint(ctx, 255)
+			if err != nil {
+				return nil, err
+			}
+			message, err := ec.unmarshalOString2ᚖstring(ctx, "invalid length")
+			if err != nil {
+				return nil, err
+			}
+			return ec.directives.Length(ctx, in, directive0, min, max, message)
 		}
 
 		tmp, err = directive1(ctx)
@@ -1854,8 +1872,7 @@ func (ec *executionContext) field_Query_directiveInputType_args(ctx context.Cont
 			return ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, tmp)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			n := directive0
-			return ec.directives.Custom(ctx, in, n)
+			return ec.directives.Custom(ctx, in, directive0)
 		}
 
 		tmp, err = directive1(ctx)
@@ -1893,9 +1910,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	if tmp, ok := in["arg"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min := 0
-			n := directive0
-			return ec.directives.Range(ctx, in, n, &min, nil)
+			min, err := ec.unmarshalOInt2ᚖint(ctx, 0)
+			if err != nil {
+				return nil, err
+			}
+			return ec.directives.Range(ctx, in, directive0, min, nil)
 		}
 
 		tmp, err = directive1(ctx)
@@ -1913,9 +1932,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	if tmp, ok := in["arg2"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min := 0
-			n := directive0
-			return ec.directives.Range(ctx, in, n, &min, nil)
+			min, err := ec.unmarshalOInt2ᚖint(ctx, 0)
+			if err != nil {
+				return nil, err
+			}
+			return ec.directives.Range(ctx, in, directive0, min, nil)
 		}
 
 		tmp, err = directive1(ctx)
@@ -6146,8 +6167,15 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, i
 			var err error
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				n := directive0
-				return ec.directives.Length(ctx, in, n, 1, nil)
+				min, err := ec.unmarshalNInt2int(ctx, 1)
+				if err != nil {
+					return nil, err
+				}
+				message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
+				if err != nil {
+					return nil, err
+				}
+				return ec.directives.Length(ctx, in, directive0, min, nil, message)
 			}
 
 			tmp, err := directive1(ctx)
@@ -6193,9 +6221,19 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, i
 			var err error
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				max := 7
-				n := directive0
-				return ec.directives.Length(ctx, in, n, 0, &max)
+				min, err := ec.unmarshalNInt2int(ctx, 0)
+				if err != nil {
+					return nil, err
+				}
+				max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
+				if err != nil {
+					return nil, err
+				}
+				message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
+				if err != nil {
+					return nil, err
+				}
+				return ec.directives.Length(ctx, in, directive0, min, max, message)
 			}
 
 			tmp, err := directive1(ctx)
@@ -6225,9 +6263,15 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, i
 				return ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx, v)
 			}
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				max := 7
-				n := directive0
-				return ec.directives.Length(ctx, in, n, 0, &max)
+				min, err := ec.unmarshalNInt2int(ctx, 0)
+				if err != nil {
+					return nil, err
+				}
+				max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
+				if err != nil {
+					return nil, err
+				}
+				return ec.directives.Length(ctx, in, directive0, min, max, nil)
 			}
 
 			tmp, err := directive1(ctx)

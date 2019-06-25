@@ -2,12 +2,19 @@
 	{{- range $i, $directive := .Directives -}}
 		directive{{add $i 1}} := func(ctx context.Context) (interface{}, error) {
 			{{- range $arg := $directive.Args }}
-				{{- if and $arg.TypeReference.IsPtr ( notNil "Value" $arg ) }}
-					{{ $arg.VarName }} := {{ $arg.Value | dump }}
-				{{- end }}
+				{{- if notNil "Value" $arg }}
+						{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})
+						if err != nil{
+							return nil, err
+						}
+					{{- else if notNil "Default" $arg }}
+						{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Default | dump }})
+						if err != nil{
+							return nil, err
+						}
+					{{- end }}
 			{{- end }}
-			n := directive{{$i}}
-			return ec.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "in" "n" }})
+			return ec.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "in" $i }})
 		}
 	{{- end }}
 {{ end }}

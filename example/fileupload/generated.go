@@ -275,11 +275,11 @@ type Mutation {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_multipleUploadWithPayload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_multipleUploadWithPayload_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 []*model.UploadFile
-	if tmp, ok := rawArgs["req"]; ok {
+	if tmp, ok := in["req"]; ok {
 		arg0, err = ec.unmarshalNUploadFile2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -289,11 +289,11 @@ func (ec *executionContext) field_Mutation_multipleUploadWithPayload_args(ctx co
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_multipleUpload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_multipleUpload_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 []*graphql.Upload
-	if tmp, ok := rawArgs["files"]; ok {
+	if tmp, ok := in["files"]; ok {
 		arg0, err = ec.unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -303,11 +303,11 @@ func (ec *executionContext) field_Mutation_multipleUpload_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_singleUploadWithPayload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_singleUploadWithPayload_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.UploadFile
-	if tmp, ok := rawArgs["req"]; ok {
+	if tmp, ok := in["req"]; ok {
 		arg0, err = ec.unmarshalNUploadFile2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -317,11 +317,11 @@ func (ec *executionContext) field_Mutation_singleUploadWithPayload_args(ctx cont
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_singleUpload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_singleUpload_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 graphql.Upload
-	if tmp, ok := rawArgs["file"]; ok {
+	if tmp, ok := in["file"]; ok {
 		arg0, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -331,11 +331,11 @@ func (ec *executionContext) field_Mutation_singleUpload_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query___type_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
+	if tmp, ok := in["name"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -345,11 +345,11 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -359,11 +359,11 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_fields_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -1511,9 +1511,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputUploadFile(ctx context.Context, v interface{}) (model.UploadFile, error) {
+func (ec *executionContext) unmarshalInputUploadFile(ctx context.Context, in interface{}) (model.UploadFile, error) {
 	var it model.UploadFile
-	var asMap = v.(map[string]interface{})
+	var asMap = in.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {

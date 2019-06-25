@@ -318,11 +318,11 @@ enum Role {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) dir_hasRole_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 Role
-	if tmp, ok := rawArgs["role"]; ok {
+	if tmp, ok := in["role"]; ok {
 		arg0, err = ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐRole(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -332,11 +332,11 @@ func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[st
 	return args, nil
 }
 
-func (ec *executionContext) dir_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) dir_user_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2int(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -346,11 +346,11 @@ func (ec *executionContext) dir_user_args(ctx context.Context, rawArgs map[strin
 	return args, nil
 }
 
-func (ec *executionContext) field_MyMutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_MyMutation_createTodo_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 TodoInput
-	if tmp, ok := rawArgs["todo"]; ok {
+	if tmp, ok := in["todo"]; ok {
 		arg0, err = ec.unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -360,11 +360,11 @@ func (ec *executionContext) field_MyMutation_createTodo_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_MyMutation_updateTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_MyMutation_updateTodo_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2int(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -372,7 +372,7 @@ func (ec *executionContext) field_MyMutation_updateTodo_args(ctx context.Context
 	}
 	args["id"] = arg0
 	var arg1 map[string]interface{}
-	if tmp, ok := rawArgs["changes"]; ok {
+	if tmp, ok := in["changes"]; ok {
 		arg1, err = ec.unmarshalNMap2map(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -382,11 +382,11 @@ func (ec *executionContext) field_MyMutation_updateTodo_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_MyQuery___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_MyQuery___type_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
+	if tmp, ok := in["name"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -396,11 +396,11 @@ func (ec *executionContext) field_MyQuery___type_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_MyQuery_todo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_MyQuery_todo_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2int(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -410,11 +410,11 @@ func (ec *executionContext) field_MyQuery_todo_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -424,11 +424,11 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_fields_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -1620,9 +1620,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, v interface{}) (TodoInput, error) {
+func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, in interface{}) (TodoInput, error) {
 	var it TodoInput
-	var asMap = v.(map[string]interface{})
+	var asMap = in.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {

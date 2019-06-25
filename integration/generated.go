@@ -342,11 +342,11 @@ enum ErrorType {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_magic_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) dir_magic_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
-	if tmp, ok := rawArgs["kind"]; ok {
+	if tmp, ok := in["kind"]; ok {
 		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -356,11 +356,11 @@ func (ec *executionContext) dir_magic_args(ctx context.Context, rawArgs map[stri
 	return args, nil
 }
 
-func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query___type_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
+	if tmp, ok := in["name"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -370,11 +370,11 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_complexity_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_complexity_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["value"]; ok {
+	if tmp, ok := in["value"]; ok {
 		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -384,11 +384,11 @@ func (ec *executionContext) field_Query_complexity_args(ctx context.Context, raw
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_date_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_date_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 models.DateFilter
-	if tmp, ok := rawArgs["filter"]; ok {
+	if tmp, ok := in["filter"]; ok {
 		arg0, err = ec.unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -398,11 +398,11 @@ func (ec *executionContext) field_Query_date_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_error_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_error_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *models.ErrorType
-	if tmp, ok := rawArgs["type"]; ok {
+	if tmp, ok := in["type"]; ok {
 		arg0, err = ec.unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -412,11 +412,11 @@ func (ec *executionContext) field_Query_error_args(ctx context.Context, rawArgs 
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -426,11 +426,11 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_fields_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -1667,9 +1667,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, v interface{}) (models.DateFilter, error) {
+func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, in interface{}) (models.DateFilter, error) {
 	var it models.DateFilter
-	var asMap = v.(map[string]interface{})
+	var asMap = in.(map[string]interface{})
 
 	if _, present := asMap["timezone"]; !present {
 		asMap["timezone"] = "UTC"

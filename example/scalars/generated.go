@@ -292,11 +292,11 @@ scalar Banned
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query___type_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
+	if tmp, ok := in["name"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -306,11 +306,11 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_search_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.SearchArgs
-	if tmp, ok := rawArgs["input"]; ok {
+	if tmp, ok := in["input"]; ok {
 		arg0, err = ec.unmarshalOSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -320,11 +320,11 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_user_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 external.ObjectID
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -334,11 +334,11 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -348,11 +348,11 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_fields_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -1579,9 +1579,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, v interface{}) (model.SearchArgs, error) {
+func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, in interface{}) (model.SearchArgs, error) {
 	var it model.SearchArgs
-	var asMap = v.(map[string]interface{})
+	var asMap = in.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {

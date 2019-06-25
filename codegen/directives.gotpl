@@ -1,3 +1,16 @@
+{{ define "implDirectives" }}
+	{{- range $i, $directive := .Directives -}}
+		directive{{add $i 1}} := func(ctx context.Context) (interface{}, error) {
+			{{- range $arg := $directive.Args }}
+				{{- if and $arg.TypeReference.IsPtr ( notNil "Value" $arg ) }}
+					{{ $arg.VarName }} := {{ $arg.Value | dump }}
+				{{- end }}
+			{{- end }}
+			n := directive{{$i}}
+			return ec.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs "in" "n" }})
+		}
+	{{- end }}
+{{ end }}
 
 {{define "queryDirectives"}}
 	for _, d := range obj.Directives {

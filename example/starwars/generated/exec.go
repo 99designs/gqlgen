@@ -701,11 +701,11 @@ scalar Time
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
+	if tmp, ok := in["first"]; ok {
 		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -713,7 +713,7 @@ func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Conte
 	}
 	args["first"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
+	if tmp, ok := in["after"]; ok {
 		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -723,11 +723,11 @@ func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
+	if tmp, ok := in["first"]; ok {
 		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -735,7 +735,7 @@ func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Conte
 	}
 	args["first"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["after"]; ok {
+	if tmp, ok := in["after"]; ok {
 		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -745,11 +745,11 @@ func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Human_height_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Human_height_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 models.LengthUnit
-	if tmp, ok := rawArgs["unit"]; ok {
+	if tmp, ok := in["unit"]; ok {
 		arg0, err = ec.unmarshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -759,11 +759,11 @@ func (ec *executionContext) field_Human_height_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 models.Episode
-	if tmp, ok := rawArgs["episode"]; ok {
+	if tmp, ok := in["episode"]; ok {
 		arg0, err = ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -771,7 +771,7 @@ func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context
 	}
 	args["episode"] = arg0
 	var arg1 models.Review
-	if tmp, ok := rawArgs["review"]; ok {
+	if tmp, ok := in["review"]; ok {
 		arg1, err = ec.unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -781,11 +781,11 @@ func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query___type_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
+	if tmp, ok := in["name"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -795,11 +795,11 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_character_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_character_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -809,11 +809,11 @@ func (ec *executionContext) field_Query_character_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_droid_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_droid_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -823,11 +823,11 @@ func (ec *executionContext) field_Query_droid_args(ctx context.Context, rawArgs 
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_hero_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_hero_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *models.Episode
-	if tmp, ok := rawArgs["episode"]; ok {
+	if tmp, ok := in["episode"]; ok {
 		arg0, err = ec.unmarshalOEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -837,11 +837,11 @@ func (ec *executionContext) field_Query_hero_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_human_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_human_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -851,11 +851,11 @@ func (ec *executionContext) field_Query_human_args(ctx context.Context, rawArgs 
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_reviews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_reviews_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 models.Episode
-	if tmp, ok := rawArgs["episode"]; ok {
+	if tmp, ok := in["episode"]; ok {
 		arg0, err = ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -863,7 +863,7 @@ func (ec *executionContext) field_Query_reviews_args(ctx context.Context, rawArg
 	}
 	args["episode"] = arg0
 	var arg1 *time.Time
-	if tmp, ok := rawArgs["since"]; ok {
+	if tmp, ok := in["since"]; ok {
 		arg1, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -873,11 +873,11 @@ func (ec *executionContext) field_Query_reviews_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_search_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["text"]; ok {
+	if tmp, ok := in["text"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -887,11 +887,11 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_starship_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_starship_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
+	if tmp, ok := in["id"]; ok {
 		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -901,11 +901,11 @@ func (ec *executionContext) field_Query_starship_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Starship_length_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Starship_length_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *models.LengthUnit
-	if tmp, ok := rawArgs["unit"]; ok {
+	if tmp, ok := in["unit"]; ok {
 		arg0, err = ec.unmarshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -915,11 +915,11 @@ func (ec *executionContext) field_Starship_length_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -929,11 +929,11 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field___Type_fields_args(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+	if tmp, ok := in["includeDeprecated"]; ok {
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -2899,9 +2899,9 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, v interface{}) (models.Review, error) {
+func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, in interface{}) (models.Review, error) {
 	var it models.Review
-	var asMap = v.(map[string]interface{})
+	var asMap = in.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {

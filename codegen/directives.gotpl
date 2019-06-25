@@ -1,5 +1,5 @@
 {{ define "implDirectives" }}
-	{{- range $i, $directive := .Directives -}}
+	{{- range $i, $directive := .ImplDirectives -}}
 		directive{{add $i 1}} := func(ctx context.Context) (interface{}, error) {
 			{{- range $arg := $directive.Args }}
 				{{- if notNil "Value" $arg }}

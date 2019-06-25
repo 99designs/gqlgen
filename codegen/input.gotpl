@@ -16,10 +16,10 @@
 			{{- range $field := .Fields }}
 			case {{$field.Name|quote}}:
 				var err error
-				{{- if $field.Directives }}
+				{{- if $field.ImplDirectives }}
 					directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }
 					{{ template "implDirectives" $field }}
-					tmp, err := directive{{$field.Directives|len}}(ctx)
+					tmp, err := directive{{$field.ImplDirectives|len}}(ctx)
 					if err != nil {
 						return it, err
 					}

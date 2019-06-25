@@ -5,10 +5,10 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, in map[string]inter
 	{{- range $i, $arg := . }}
 		var arg{{$i}} {{ $arg.TypeReference.GO | ref}}
 		if tmp, ok := in[{{$arg.Name|quote}}]; ok {
-			{{- if $arg.Directives }}
+			{{- if $arg.ImplDirectives }}
 				directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, tmp) }
 				{{ template "implDirectives" $arg }}
-				tmp, err = directive{{$arg.Directives|len}}(ctx)
+				tmp, err = directive{{$arg.ImplDirectives|len}}(ctx)
 				if err != nil {
 					return nil, err
 				}

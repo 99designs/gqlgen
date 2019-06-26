@@ -24,6 +24,11 @@ type Directive struct {
 	Builtin bool
 }
 
+//IsBuiltin check directive
+func (d *Directive) IsBuiltin() bool {
+	return d.Builtin || d.Name == "skip" || d.Name == "include" || d.Name == "deprecated"
+}
+
 //IsLocation check location directive
 func (d *Directive) IsLocation(location ...ast.DirectiveLocation) bool {
 	for _, l := range d.Locations {
@@ -124,8 +129,9 @@ func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			})
 		}
 		dirs[i] = &Directive{
-			Name: d.Name,
-			Args: args,
+			Name:                d.Name,
+			Args:                args,
+			DirectiveDefinition: list[i].Definition,
 		}
 
 	}
@@ -151,18 +157,12 @@ func (d *Directive) CallArgs() string {
 	return strings.Join(args, ", ")
 }
 
-func (d *Directive) ResolveArgs(obj string, next string) string {
-	args := []string{"ctx", obj, next}
+func (d *Directive) ResolveArgs(obj string, next int) string {
+	args := []string{"ctx", obj, fmt.Sprintf("directive%d", next)}
 
 	for _, arg := range d.Args {
-		dArg := "&" + arg.VarName
-		if !arg.TypeReference.IsPtr() {
-			if arg.Value != nil {
-				dArg = templates.Dump(arg.Value)
-			} else {
-				dArg = templates.Dump(arg.Default)
-			}
-		} else if arg.Value == nil && arg.Default == nil {
+		dArg := arg.VarName
+		if arg.Value == nil && arg.Default == nil {
 			dArg = "nil"
 		}
 

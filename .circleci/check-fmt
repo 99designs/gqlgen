@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -euo pipefail
+
+go fmt ./...
+if [[ $(git --no-pager diff) ]] ; then
+    echo "you need to run "go fmt" and commit the changes"
+    git --no-pager diff
+    exit 1
+fi

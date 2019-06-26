@@ -30,7 +30,7 @@ type FieldArgument struct {
 func (f *FieldArgument) ImplDirectives() []*Directive {
 	d := make([]*Directive, 0)
 	for i := range f.Directives {
-		if !f.Directives[i].IsBuiltin() && f.Directives[i].IsLocation(ast.LocationArgumentDefinition) {
+		if !f.Directives[i].Builtin && f.Directives[i].IsLocation(ast.LocationArgumentDefinition) {
 			d = append(d, f.Directives[i])
 		}
 	}

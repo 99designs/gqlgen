@@ -24,11 +24,6 @@ type Directive struct {
 	Builtin bool
 }
 
-//IsBuiltin check directive
-func (d *Directive) IsBuiltin() bool {
-	return d.Builtin || d.Name == "skip" || d.Name == "include" || d.Name == "deprecated"
-}
-
 //IsLocation check location directive
 func (d *Directive) IsLocation(location ...ast.DirectiveLocation) bool {
 	for _, l := range d.Locations {
@@ -127,6 +122,7 @@ func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			Name:                d.Name,
 			Args:                args,
 			DirectiveDefinition: list[i].Definition,
+			Builtin:             b.Config.Directives[d.Name].SkipRuntime,
 		}
 
 	}

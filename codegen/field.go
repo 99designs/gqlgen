@@ -298,7 +298,7 @@ func (f *Field) ImplDirectives() []*Directive {
 		loc = ast.LocationInputFieldDefinition
 	}
 	for i := range f.Directives {
-		if !f.Directives[i].IsBuiltin() && f.Directives[i].IsLocation(loc) {
+		if !f.Directives[i].Builtin && f.Directives[i].IsLocation(loc) {
 			d = append(d, f.Directives[i])
 		}
 	}

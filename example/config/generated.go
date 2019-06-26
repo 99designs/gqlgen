@@ -220,7 +220,10 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Query {
+	&ast.Source{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+type Query {
   todos: [Todo!]!
 }
 
@@ -229,7 +232,7 @@ type Mutation {
 }
 `},
 	&ast.Source{Name: "todo.graphql", Input: `type Todo {
-  id: ID!
+  id: ID! @goField(forceResolver: true)
   databaseId: Int!
   text: String!
   done: Boolean!
@@ -242,9 +245,10 @@ input NewTodo {
 }
 
 `},
-	&ast.Source{Name: "user.graphql", Input: `type User {
+	&ast.Source{Name: "user.graphql", Input: `type User
+@goModel(model:"github.com/99designs/gqlgen/example/config.User") {
   id: ID!
-  name: String!
+  name: String! @goField(name:"FullName")
 }
 `},
 )
@@ -2703,6 +2707,38 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

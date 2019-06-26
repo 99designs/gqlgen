@@ -24,11 +24,6 @@ type Directive struct {
 	Builtin bool
 }
 
-//IsBuiltin check directive
-func (d *Directive) IsBuiltin() bool {
-	return d.Builtin || d.Name == "skip" || d.Name == "include" || d.Name == "deprecated"
-}
-
 //IsLocation check location directive
 func (d *Directive) IsLocation(location ...ast.DirectiveLocation) bool {
 	for _, l := range d.Locations {
@@ -60,11 +55,6 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 			return nil, errors.Errorf("directive with name %s already exists", name)
 		}
 
-		var builtin bool
-		if name == "skip" || name == "include" || name == "deprecated" {
-			builtin = true
-		}
-
 		var args []*FieldArgument
 		for _, arg := range dir.Arguments {
 			tr, err := b.Binder.TypeReference(arg.Type, nil)
@@ -92,7 +82,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 			DirectiveDefinition: dir,
 			Name:                name,
 			Args:                args,
-			Builtin:             builtin,
+			Builtin:             b.Config.Directives[name].SkipRuntime,
 		}
 	}
 
@@ -132,6 +122,7 @@ func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			Name:                d.Name,
 			Args:                args,
 			DirectiveDefinition: list[i].Definition,
+			Builtin:             b.Config.Directives[d.Name].SkipRuntime,
 		}
 
 	}

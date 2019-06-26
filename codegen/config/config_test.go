@@ -6,6 +6,9 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -113,4 +116,24 @@ func TestConfigCheck(t *testing.T) {
 		err = config.Check()
 		require.EqualError(t, err, "filenames exec.go and models.go are in the same directory but have different package definitions")
 	})
+}
+
+func TestAutobinding(t *testing.T) {
+	cfg := Config{
+		Models: TypeMap{},
+		AutoBind: []string{
+			"github.com/99designs/gqlgen/example/chat",
+			"github.com/99designs/gqlgen/example/scalars/model",
+		},
+	}
+
+	s := gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
+		scalar Banned 
+		type Message { id: ID }
+	`})
+
+	require.NoError(t, cfg.Autobind(s))
+
+	require.Equal(t, "github.com/99designs/gqlgen/example/scalars/model.Banned", cfg.Models["Banned"].Model[0])
+	require.Equal(t, "github.com/99designs/gqlgen/example/chat.Message", cfg.Models["Message"].Model[0])
 }

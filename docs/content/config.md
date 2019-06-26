@@ -44,6 +44,11 @@ resolver:
 # Optional, turns on binding to field names by tag provided
 struct_tag: json
 
+# Instead of listing out every model like below, you can automatically bind to any matching types
+# within the given path. EXPERIMENTAL in v0.9.1
+autobind:
+ - github.com/my/app/models
+
 # Tell gqlgen about any existing models you want to reuse for
 # graphql. These normally come from the db or a remote api.
 models:

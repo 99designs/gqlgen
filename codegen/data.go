@@ -51,6 +51,11 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		return nil, err
 	}
 
+	err = cfg.Autobind(b.Schema)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg.InjectBuiltins(b.Schema)
 
 	b.Binder, err = b.Config.NewBinder(b.Schema)

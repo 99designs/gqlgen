@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/tools/go/packages"
+
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
@@ -22,6 +24,7 @@ type Config struct {
 	Exec           PackageConfig              `yaml:"exec"`
 	Model          PackageConfig              `yaml:"model"`
 	Resolver       PackageConfig              `yaml:"resolver,omitempty"`
+	AutoBind       []string                   `yaml:"autobind"`
 	Models         TypeMap                    `yaml:"models,omitempty"`
 	StructTag      string                     `yaml:"struct_tag,omitempty"`
 	Directives     map[string]DirectiveConfig `yaml:"directives,omitempty"`
@@ -374,6 +377,31 @@ func (c *Config) normalize() error {
 
 	if c.Models == nil {
 		c.Models = TypeMap{}
+	}
+
+	return nil
+}
+
+func (c *Config) Autobind(s *ast.Schema) error {
+	if len(c.AutoBind) == 0 {
+		return nil
+	}
+	ps, err := packages.Load(&packages.Config{Mode: packages.LoadTypes}, c.AutoBind...)
+	if err != nil {
+		return err
+	}
+
+	for _, t := range s.Types {
+		if c.Models.UserDefined(t.Name) {
+			continue
+		}
+
+		for _, p := range ps {
+			if t := p.Types.Scope().Lookup(t.Name); t != nil {
+				c.Models.Add(t.Name(), t.Pkg().Path()+"."+t.Name())
+				break
+			}
+		}
 	}
 
 	return nil

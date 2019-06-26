@@ -15,7 +15,7 @@ type Data struct {
 	Config          *config.Config
 	Schema          *ast.Schema
 	SchemaStr       map[string]string
-	Directives      map[string]*Directive
+	Directives      DirectiveList
 	Objects         Objects
 	Inputs          Objects
 	Interfaces      map[string]*Interface

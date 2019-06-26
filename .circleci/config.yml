@@ -1,48 +1,47 @@
 version: 2
 jobs:
-  build:
-    working_directory: /app
+  lint:
     docker:
-      - image: docker:18
+      - image: circleci/golang:1.12
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: "docker build"
-          command: |
-            docker build -f .circleci/golang.Dockerfile -t gqlgen/golang .
-            docker build -f .circleci/node.Dockerfile -t gqlgen/node .
+      - run: go mod download
+      - run: .circleci/check-fmt
+      - run: .circleci/check-linting
+      - run: .circleci/check-generate
 
-      - run:
-          name: "golang tests"
-          command: docker run --rm gqlgen/golang .circleci/test.sh
+  test:
+    docker:
+      - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - run: go mod download
+      - run: go test -race ./...
 
-      - run:
-          name: "integration tests"
-          command: |
-            function cleanup {
-              echo "Cleaning up containers..."
-              docker kill $SERVER_CONTAINER 1>/dev/null 2>/dev/null || true
-              docker rm --force -v $SERVER_CONTAINER 1>/dev/null 2>/dev/null || true
-            }
-            trap cleanup EXIT
+  cover:
+    docker:
+      - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - run: go mod download
+      - run: .circleci/check-coverage
 
-            SERVER_CONTAINER=$(docker run -d \
-                -e PORT=1234 \
-                --name integration_server \
-                gqlgen/golang go run ./integration/server/server.go \
-            )
+  integration:
+    docker:
+      - image: alpine:3.10
+    steps:
+      - checkout
+      - run: apk add --no-cache --no-progress nodejs npm go musl-dev git bash
+      - run: go mod download
+      - run: cd integration ; npm install
+      - run: .circleci/check-integration
 
-            sleep 20
-
-            docker run \
-                -e SERVER_URL=http://integration_server:1234/query \
-                --link=integration_server \
-                gqlgen/node ../.circleci/integration.sh
-
-            echo "### server logs"
-            docker logs $SERVER_CONTAINER
-
-            exit $(docker inspect $SERVER_CONTAINER --format='{{.State.ExitCode}}')
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - lint
+      - test
+      - cover
+      - integration
 

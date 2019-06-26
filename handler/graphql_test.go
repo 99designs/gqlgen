@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
@@ -762,5 +763,70 @@ func TestBytesRead(t *testing.T) {
 			}
 		}
 		require.Equal(t, "0193456789", string(got))
+	})
+}
+
+type memoryPersistedQueryCache struct {
+	cache *lru.Cache
+}
+
+func newMemoryPersistedQueryCache(size int) (*memoryPersistedQueryCache, error) {
+	cache, err := lru.New(size)
+	return &memoryPersistedQueryCache{cache: cache}, err
+}
+
+func (c *memoryPersistedQueryCache) Add(ctx context.Context, hash string, query string) {
+	c.cache.Add(hash, query)
+}
+
+func (c *memoryPersistedQueryCache) Get(ctx context.Context, hash string) (string, bool) {
+	val, ok := c.cache.Get(hash)
+	if !ok {
+		return "", ok
+	}
+	return val.(string), ok
+}
+func TestAutomaticPersistedQuery(t *testing.T) {
+	cache, err := newMemoryPersistedQueryCache(1000)
+	require.NoError(t, err)
+	h := GraphQL(&executableSchemaStub{}, EnablePersistedQueryCache(cache))
+	t.Run("automatic persisted query POST", func(t *testing.T) {
+		// normal queries should be unaffected
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }"}`)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		// first pass: optimistic hash without query string
+		resp = doRequest(h, "POST", "/graphql", `{"extensions":{"persistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"errors":[{"message":"PersistedQueryNotFound"}],"data":null}`, resp.Body.String())
+		// second pass: query with query string and query hash
+		resp = doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }", "extensions":{"persistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		// future requests without query string
+		resp = doRequest(h, "POST", "/graphql", `{"extensions":{"persistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
+	t.Run("automatic persisted query GET", func(t *testing.T) {
+		// normal queries should be unaffected
+		resp := doRequest(h, "GET", "/graphql?query={me{name}}", "")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		// first pass: optimistic hash without query string
+		resp = doRequest(h, "GET", `/graphql?extensions={"persistedQuery":{"version":1,"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065"}}`, "")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"errors":[{"message":"PersistedQueryNotFound"}],"data":null}`, resp.Body.String())
+		// second pass: query with query string and query hash
+		resp = doRequest(h, "GET", `/graphql?query={me{name}}&extensions={"persistedQuery":{"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065","version":1}}}`, "")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		// future requests without query string
+		resp = doRequest(h, "GET", `/graphql?extensions={"persistedQuery":{"version":1,"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065"}}`, "")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 }

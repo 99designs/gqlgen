@@ -149,6 +149,9 @@ func (r *queryResolver) DirectiveInput(ctx context.Context, arg InputDirectives)
 func (r *queryResolver) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DirectiveField(ctx context.Context) (*string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, error) {
 	panic("not implemented")
 }
@@ -201,6 +204,12 @@ func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
 	panic("not implemented")
 }
 

@@ -76,3 +76,7 @@ models:
     model: "github.com/99designs/gqlgen/codegen/testserver.FallbackToStringEncoding"
   Bytes:
     model: "github.com/99designs/gqlgen/codegen/testserver.Bytes"
+  WrappedStruct:
+    model: "github.com/99designs/gqlgen/codegen/testserver.WrappedStruct"
+  WrappedScalar:
+    model: "github.com/99designs/gqlgen/codegen/testserver.WrappedScalar"

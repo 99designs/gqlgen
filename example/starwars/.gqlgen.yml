@@ -3,15 +3,10 @@ exec:
 model:
   filename: models/generated.go
 
+autobind:
+  - github.com/99designs/gqlgen/example/starwars/models
+
 models:
-  Droid:
-    model: github.com/99designs/gqlgen/example/starwars/models.Droid
-  FriendsConnection:
-    model: github.com/99designs/gqlgen/example/starwars/models.FriendsConnection
-  Human:
-    model: github.com/99designs/gqlgen/example/starwars/models.Human
-  Review:
-    model: github.com/99designs/gqlgen/example/starwars/models.Review
   ReviewInput:
     model: github.com/99designs/gqlgen/example/starwars/models.Review
   Starship:

@@ -180,6 +180,31 @@ func TestDirectives(t *testing.T) {
 			require.Equal(t, "Ok", *resp.DirectiveArg)
 		})
 	})
+	t.Run("field definition directives", func(t *testing.T) {
+		resolvers.QueryResolver.DirectiveFieldDef = func(ctx context.Context, ret string) (i string, e error) {
+			return ret, nil
+		}
+
+		t.Run("too short", func(t *testing.T) {
+			var resp struct {
+				DirectiveFieldDef string
+			}
+
+			err := c.Post(`query { directiveFieldDef(ret: "") }`, &resp)
+
+			require.EqualError(t, err, `[{"message":"not valid","path":["directiveFieldDef"]}]`)
+		})
+
+		t.Run("ok", func(t *testing.T) {
+			var resp struct {
+				DirectiveFieldDef string
+			}
+
+			c.MustPost(`query { directiveFieldDef(ret: "aaa") }`, &resp)
+
+			require.Equal(t, "aaa", resp.DirectiveFieldDef)
+		})
+	})
 	t.Run("field directives", func(t *testing.T) {
 		t.Run("add field directive", func(t *testing.T) {
 			var resp struct {

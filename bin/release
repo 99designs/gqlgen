@@ -32,6 +32,17 @@ git add .
 git commit -m "release $VERSION"
 git tag $VERSION
 git push origin $VERSION
+git push origin HEAD:master
+
+cat > graphql/version.go <<EOF
+package graphql
+
+const Version = "$VERSION-dev"
+EOF
+
+git add .
+git commit -m "$VERSION postrelease bump"
+git push origin HEAD:master
 
 
 echo "Now go write some release notes! https://github.com/99designs/gqlgen/releases"

@@ -134,6 +134,21 @@ func (r *queryResolver) User(ctx context.Context, id int) (*User, error) {
 func (r *queryResolver) NullableArg(ctx context.Context, arg *int) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Autobind(ctx context.Context) (*Autobind, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) DirectiveArg(ctx context.Context, arg string) (*string, error) {
 	panic("not implemented")
 }
@@ -149,22 +164,10 @@ func (r *queryResolver) DirectiveInput(ctx context.Context, arg InputDirectives)
 func (r *queryResolver) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DirectiveFieldDef(ctx context.Context, ret string) (string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) DirectiveField(ctx context.Context) (*string, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) Autobind(ctx context.Context) (*Autobind, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {

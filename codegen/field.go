@@ -288,6 +288,9 @@ func (f *Field) HasDirectives() bool {
 }
 
 func (f *Field) DirectiveObjName() string {
+	if f.Object.Root {
+		return "nil"
+	}
 	return f.GoReceiverName
 }
 

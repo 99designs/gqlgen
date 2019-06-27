@@ -48,17 +48,18 @@ type Stub struct {
 		ModelMethods           func(ctx context.Context) (*ModelMethods, error)
 		User                   func(ctx context.Context, id int) (*User, error)
 		NullableArg            func(ctx context.Context, arg *int) (*string, error)
-		DirectiveArg           func(ctx context.Context, arg string) (*string, error)
-		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int) (*string, error)
-		DirectiveInputNullable func(ctx context.Context, arg *InputDirectives) (*string, error)
-		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
-		DirectiveInputType     func(ctx context.Context, arg InnerInput) (*string, error)
-		DirectiveField         func(ctx context.Context) (*string, error)
 		InputSlice             func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion             func(ctx context.Context) (ShapeUnion, error)
 		Autobind               func(ctx context.Context) (*Autobind, error)
 		DeprecatedField        func(ctx context.Context) (string, error)
 		Overlapping            func(ctx context.Context) (*OverlappingFields, error)
+		DirectiveArg           func(ctx context.Context, arg string) (*string, error)
+		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int) (*string, error)
+		DirectiveInputNullable func(ctx context.Context, arg *InputDirectives) (*string, error)
+		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
+		DirectiveInputType     func(ctx context.Context, arg InnerInput) (*string, error)
+		DirectiveFieldDef      func(ctx context.Context, ret string) (string, error)
+		DirectiveField         func(ctx context.Context) (*string, error)
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		ErrorBubble            func(ctx context.Context) (*Error, error)
 		Errors                 func(ctx context.Context) (*Errors, error)
@@ -207,6 +208,21 @@ func (r *stubQuery) User(ctx context.Context, id int) (*User, error) {
 func (r *stubQuery) NullableArg(ctx context.Context, arg *int) (*string, error) {
 	return r.QueryResolver.NullableArg(ctx, arg)
 }
+func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) {
+	return r.QueryResolver.InputSlice(ctx, arg)
+}
+func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
+	return r.QueryResolver.ShapeUnion(ctx)
+}
+func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
+	return r.QueryResolver.Autobind(ctx)
+}
+func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
+	return r.QueryResolver.DeprecatedField(ctx)
+}
+func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
+	return r.QueryResolver.Overlapping(ctx)
+}
 func (r *stubQuery) DirectiveArg(ctx context.Context, arg string) (*string, error) {
 	return r.QueryResolver.DirectiveArg(ctx, arg)
 }
@@ -222,23 +238,11 @@ func (r *stubQuery) DirectiveInput(ctx context.Context, arg InputDirectives) (*s
 func (r *stubQuery) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
 	return r.QueryResolver.DirectiveInputType(ctx, arg)
 }
+func (r *stubQuery) DirectiveFieldDef(ctx context.Context, ret string) (string, error) {
+	return r.QueryResolver.DirectiveFieldDef(ctx, ret)
+}
 func (r *stubQuery) DirectiveField(ctx context.Context) (*string, error) {
 	return r.QueryResolver.DirectiveField(ctx)
-}
-func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) {
-	return r.QueryResolver.InputSlice(ctx, arg)
-}
-func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
-	return r.QueryResolver.ShapeUnion(ctx)
-}
-func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
-	return r.QueryResolver.Autobind(ctx)
-}
-func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
-	return r.QueryResolver.DeprecatedField(ctx)
-}
-func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
-	return r.QueryResolver.Overlapping(ctx)
 }
 func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)

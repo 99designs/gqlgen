@@ -152,7 +152,7 @@ func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, er
 func (r *queryResolver) DirectiveArg(ctx context.Context, arg string) (*string, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error) {
+func (r *queryResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error) {
@@ -162,6 +162,9 @@ func (r *queryResolver) DirectiveInput(ctx context.Context, arg InputDirectives)
 	panic("not implemented")
 }
 func (r *queryResolver) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) DirectiveObject(ctx context.Context) (*ObjectDirectives, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) DirectiveFieldDef(ctx context.Context, ret string) (string, error) {

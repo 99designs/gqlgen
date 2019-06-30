@@ -67,6 +67,7 @@ type InnerObject struct {
 
 type InputDirectives struct {
 	Text          string           `json:"text"`
+	NullableText  *string          `json:"nullableText"`
 	Inner         *InnerDirectives `json:"inner"`
 	InnerNullable *InnerDirectives `json:"innerNullable"`
 	ThirdParty    *ThirdParty      `json:"thirdParty"`
@@ -84,6 +85,11 @@ type LoopB struct {
 // added to the TypeMap
 type Map struct {
 	ID string `json:"id"`
+}
+
+type ObjectDirectives struct {
+	Text         string  `json:"text"`
+	NullableText *string `json:"nullableText"`
 }
 
 type OuterInput struct {

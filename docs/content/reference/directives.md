@@ -22,12 +22,16 @@ enum Role {
 }
 ```
 
-When we next run go generate, gqlgen will add this directive to the DirectiveRoot 
+When we next run go generate, gqlgen will add this directive to the DirectiveRoot
 ```go
 type DirectiveRoot struct {
-	HasRole func(ctx context.Context, next graphql.Resolver, role Role) (res interface{}, err error)
+	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
 }
 ```
+*ctx*: passed from the resolver
+*obj*: the payload aggregated so far
+*next*: signals that the directive was successful
+*role*: the defined enumeration with helpers such as .IsValid() or .String()
 
 
 ## Use it in the schema
@@ -47,12 +51,12 @@ package main
 
 func main() {
 	c := Config{ Resolvers: &resolvers{} }
-	c.Directives.HasRole = func(ctx context.Context, next graphql.Resolver, role Role) (interface{}, error) {
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (interface{}, error) {
 		if !getCurrentUser(ctx).HasRole(role) {
 			// block calling the next resolver
 			return nil, fmt.Errorf("Access denied")
 		}
-		
+
 		// or let it pass through
 		return next(ctx)
 	}

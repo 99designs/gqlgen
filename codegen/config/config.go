@@ -38,17 +38,7 @@ func DefaultConfig() *Config {
 		SchemaFilename: StringList{"schema.graphql"},
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
-		Directives: map[string]DirectiveConfig{
-			"skip": {
-				SkipRuntime: true,
-			},
-			"include": {
-				SkipRuntime: true,
-			},
-			"deprecated": {
-				SkipRuntime: true,
-			},
-		},
+		Directives:     map[string]DirectiveConfig{},
 	}
 }
 
@@ -85,6 +75,18 @@ func LoadConfig(filename string) (*Config, error) {
 
 	if err := yaml.UnmarshalStrict(b, config); err != nil {
 		return nil, errors.Wrap(err, "unable to parse config")
+	}
+
+	defaultDirectives := map[string]DirectiveConfig{
+		"skip":       {SkipRuntime: true},
+		"include":    {SkipRuntime: true},
+		"deprecated": {SkipRuntime: true},
+	}
+
+	for key, value := range defaultDirectives {
+		if _, defined := config.Directives[key]; !defined {
+			config.Directives[key] = value
+		}
 	}
 
 	preGlobbing := config.SchemaFilename

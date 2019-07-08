@@ -54,10 +54,11 @@ type Stub struct {
 		DeprecatedField        func(ctx context.Context) (string, error)
 		Overlapping            func(ctx context.Context) (*OverlappingFields, error)
 		DirectiveArg           func(ctx context.Context, arg string) (*string, error)
-		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int) (*string, error)
+		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
 		DirectiveInputNullable func(ctx context.Context, arg *InputDirectives) (*string, error)
 		DirectiveInput         func(ctx context.Context, arg InputDirectives) (*string, error)
 		DirectiveInputType     func(ctx context.Context, arg InnerInput) (*string, error)
+		DirectiveObject        func(ctx context.Context) (*ObjectDirectives, error)
 		DirectiveFieldDef      func(ctx context.Context, ret string) (string, error)
 		DirectiveField         func(ctx context.Context) (*string, error)
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
@@ -226,8 +227,8 @@ func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error)
 func (r *stubQuery) DirectiveArg(ctx context.Context, arg string) (*string, error) {
 	return r.QueryResolver.DirectiveArg(ctx, arg)
 }
-func (r *stubQuery) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error) {
-	return r.QueryResolver.DirectiveNullableArg(ctx, arg, arg2)
+func (r *stubQuery) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
+	return r.QueryResolver.DirectiveNullableArg(ctx, arg, arg2, arg3)
 }
 func (r *stubQuery) DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error) {
 	return r.QueryResolver.DirectiveInputNullable(ctx, arg)
@@ -237,6 +238,9 @@ func (r *stubQuery) DirectiveInput(ctx context.Context, arg InputDirectives) (*s
 }
 func (r *stubQuery) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
 	return r.QueryResolver.DirectiveInputType(ctx, arg)
+}
+func (r *stubQuery) DirectiveObject(ctx context.Context) (*ObjectDirectives, error) {
+	return r.QueryResolver.DirectiveObject(ctx)
 }
 func (r *stubQuery) DirectiveFieldDef(ctx context.Context, ret string) (string, error) {
 	return r.QueryResolver.DirectiveFieldDef(ctx, ret)

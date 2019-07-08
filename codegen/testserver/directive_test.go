@@ -29,7 +29,7 @@ func TestDirectives(t *testing.T) {
 		return &s, nil
 	}
 
-	resolvers.QueryResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int) (i *string, e error) {
+	resolvers.QueryResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
 		s := "Ok"
 		return &s, nil
 	}
@@ -37,6 +37,14 @@ func TestDirectives(t *testing.T) {
 	resolvers.QueryResolver.DirectiveInputType = func(ctx context.Context, arg InnerInput) (i *string, e error) {
 		s := "Ok"
 		return &s, nil
+	}
+
+	resolvers.QueryResolver.DirectiveObject = func(ctx context.Context) (*ObjectDirectives, error) {
+		s := "Ok"
+		return &ObjectDirectives{
+			Text:         s,
+			NullableText: &s,
+		}, nil
 	}
 
 	resolvers.QueryResolver.DirectiveField = func(ctx context.Context) (*string, error) {
@@ -114,6 +122,9 @@ func TestDirectives(t *testing.T) {
 					},
 					Logged: func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (interface{}, error) {
 						return next(context.WithValue(ctx, "request_id", &id))
+					},
+					ToNull: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
+						return nil, nil
 					},
 				},
 			}),
@@ -271,7 +282,7 @@ func TestDirectives(t *testing.T) {
 				DirectiveInputNullable *string
 			}
 
-			err := c.Post(`query { directiveInputNullable(arg: {text:"23",inner:{message:"1"},innerNullable:{message:"success"}}) }`, &resp)
+			err := c.Post(`query { directiveInputNullable(arg: {text:"23",nullableText:"23",inner:{message:"1"},innerNullable:{message:"success"}}) }`, &resp)
 
 			require.Nil(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputNullable)
@@ -285,6 +296,22 @@ func TestDirectives(t *testing.T) {
 
 			require.Nil(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputType)
+		})
+	})
+	t.Run("object field directives", func(t *testing.T) {
+		t.Run("when function success", func(t *testing.T) {
+			var resp struct {
+				DirectiveObject *struct {
+					Text         string
+					NullableText *string
+				}
+			}
+
+			err := c.Post(`query { directiveObject{ text nullableText } }`, &resp)
+
+			require.Nil(t, err)
+			require.Equal(t, "Ok", resp.DirectiveObject.Text)
+			require.True(t, resp.DirectiveObject.NullableText == nil)
 		})
 	})
 }

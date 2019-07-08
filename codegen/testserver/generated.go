@@ -59,6 +59,8 @@ type DirectiveRoot struct {
 	Logged func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
 
 	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
+
+	ToNull func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -162,6 +164,11 @@ type ComplexityRoot struct {
 		WithContext   func(childComplexity int) int
 	}
 
+	ObjectDirectives struct {
+		NullableText func(childComplexity int) int
+		Text         func(childComplexity int) int
+	}
+
 	OuterObject struct {
 		Inner func(childComplexity int) int
 	}
@@ -200,7 +207,8 @@ type ComplexityRoot struct {
 		DirectiveInput         func(childComplexity int, arg InputDirectives) int
 		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
 		DirectiveInputType     func(childComplexity int, arg InnerInput) int
-		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int) int
+		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int, arg3 *string) int
+		DirectiveObject        func(childComplexity int) int
 		ErrorBubble            func(childComplexity int) int
 		Errors                 func(childComplexity int) int
 		Fallback               func(childComplexity int, arg FallbackToStringEncoding) int
@@ -328,10 +336,11 @@ type QueryResolver interface {
 	DeprecatedField(ctx context.Context) (string, error)
 	Overlapping(ctx context.Context) (*OverlappingFields, error)
 	DirectiveArg(ctx context.Context, arg string) (*string, error)
-	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int) (*string, error)
+	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
 	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
 	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
 	DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error)
+	DirectiveObject(ctx context.Context) (*ObjectDirectives, error)
 	DirectiveFieldDef(ctx context.Context, ret string) (string, error)
 	DirectiveField(ctx context.Context) (*string, error)
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
@@ -632,6 +641,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ModelMethods.WithContext(childComplexity), true
 
+	case "ObjectDirectives.nullableText":
+		if e.complexity.ObjectDirectives.NullableText == nil {
+			break
+		}
+
+		return e.complexity.ObjectDirectives.NullableText(childComplexity), true
+
+	case "ObjectDirectives.text":
+		if e.complexity.ObjectDirectives.Text == nil {
+			break
+		}
+
+		return e.complexity.ObjectDirectives.Text(childComplexity), true
+
 	case "OuterObject.inner":
 		if e.complexity.OuterObject.Inner == nil {
 			break
@@ -836,7 +859,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int)), true
+		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
+
+	case "Query.directiveObject":
+		if e.complexity.Query.DirectiveObject == nil {
+			break
+		}
+
+		return e.complexity.Query.DirectiveObject(childComplexity), true
 
 	case "Query.errorBubble":
 		if e.complexity.Query.ErrorBubble == nil {
@@ -1327,19 +1357,22 @@ type OverlappingFields {
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 directive @custom on ARGUMENT_DEFINITION
 directive @logged(id: UUID!) on FIELD
+directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
-    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range): String
+    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range, arg3: String @toNull): String
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
+    directiveObject: ObjectDirectives
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
 }
 
 input InputDirectives {
     text: String! @length(min: 0, max: 7, message: "not valid")
+    nullableText: String @toNull
     inner: InnerDirectives!
     innerNullable: InnerDirectives
     thirdParty: ThirdParty @length(min: 0, max: 7)
@@ -1347,6 +1380,11 @@ input InputDirectives {
 
 input InnerDirectives {
     message: String! @length(min: 1, message: "not valid")
+}
+
+type ObjectDirectives {
+    text: String! @length(min: 0, max: 7, message: "not valid")
+    nullableText: String @toNull
 }
 `},
 	&ast.Source{Name: "loops.graphql", Input: `type LoopA {
@@ -1928,6 +1966,8 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 		}
 		if data, ok := tmp.(*int); ok {
 			arg0 = data
+		} else if tmp == nil {
+			arg0 = nil
 		} else {
 			return nil, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp)
 		}
@@ -1949,11 +1989,32 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 		}
 		if data, ok := tmp.(*int); ok {
 			arg1 = data
+		} else if tmp == nil {
+			arg1 = nil
 		} else {
 			return nil, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp)
 		}
 	}
 	args["arg2"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["arg3"]; ok {
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			return ec.directives.ToNull(ctx, rawArgs, directive0)
+		}
+		tmp, err = directive1(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.(*string); ok {
+			arg2 = data
+		} else if tmp == nil {
+			arg2 = nil
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+		}
+	}
+	args["arg3"] = arg2
 	return args, nil
 }
 
@@ -3601,6 +3662,111 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ObjectDirectives",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.Text, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			min, err := ec.unmarshalNInt2int(ctx, 0)
+			if err != nil {
+				return nil, err
+			}
+			max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
+			if err != nil {
+				return nil, err
+			}
+			message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
+			if err != nil {
+				return nil, err
+			}
+			return ec.directives.Length(ctx, obj, directive0, min, max, message)
+		}
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+	})
+
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ObjectDirectives",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.NullableText, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			return ec.directives.ToNull(ctx, obj, directive0)
+		}
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.(*string); ok {
+			return data, nil
+		} else if tmp == nil {
+			return nil, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *OuterObject) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -4674,7 +4840,7 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().DirectiveNullableArg(rctx, args["arg"].(*int), args["arg2"].(*int))
+		return ec.resolvers.Query().DirectiveNullableArg(rctx, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string))
 	})
 
 	if resTmp == nil {
@@ -4798,6 +4964,37 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_directiveObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveObject(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ObjectDirectives)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOObjectDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectives(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -7345,6 +7542,23 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			} else {
 				return it, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 			}
+		case "nullableText":
+			var err error
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				return ec.directives.ToNull(ctx, obj, directive0)
+			}
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, err
+			}
+			if data, ok := tmp.(*string); ok {
+				it.NullableText = data
+			} else if tmp == nil {
+				it.NullableText = nil
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+			}
 		case "inner":
 			var err error
 			it.Inner, err = ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
@@ -7379,6 +7593,8 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 			if data, ok := tmp.(*ThirdParty); ok {
 				it.ThirdParty = data
+			} else if tmp == nil {
+				it.ThirdParty = nil
 			} else {
 				return it, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver.ThirdParty`, tmp)
 			}
@@ -8346,6 +8562,35 @@ func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.Selection
 	return out
 }
 
+var objectDirectivesImplementors = []string{"ObjectDirectives"}
+
+func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.SelectionSet, obj *ObjectDirectives) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, objectDirectivesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ObjectDirectives")
+		case "text":
+			out.Values[i] = ec._ObjectDirectives_text(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "nullableText":
+			out.Values[i] = ec._ObjectDirectives_nullableText(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var outerObjectImplementors = []string{"OuterObject"}
 
 func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionSet, obj *OuterObject) graphql.Marshaler {
@@ -8834,6 +9079,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_directiveInputType(ctx, field)
+				return res
+			})
+		case "directiveObject":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_directiveObject(ctx, field)
 				return res
 			})
 		case "directiveFieldDef":
@@ -10581,6 +10837,17 @@ func (ec *executionContext) marshalOModelMethods2ᚖgithubᚗcomᚋ99designsᚋg
 		return graphql.Null
 	}
 	return ec._ModelMethods(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOObjectDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectives(ctx context.Context, sel ast.SelectionSet, v ObjectDirectives) graphql.Marshaler {
+	return ec._ObjectDirectives(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOObjectDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectives(ctx context.Context, sel ast.SelectionSet, v *ObjectDirectives) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ObjectDirectives(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) (OuterInput, error) {

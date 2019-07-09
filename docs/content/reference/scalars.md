@@ -25,6 +25,7 @@ scalar Map
 
 Maps an arbitrary GraphQL value to a `map[string]{interface}` Go type.
 
+### Upload
 
 ```graphql
 scalar Upload

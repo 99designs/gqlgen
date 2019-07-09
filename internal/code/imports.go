@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -75,7 +76,8 @@ func ImportPathForDir(dir string) (res string) {
 		}
 
 		// Walked all the way to the root and didnt find anything :'(
-		if modDir == "/" {
+		if modDir == "/" ||
+			runtime.GOOS == "windows" && modDir == filepath.VolumeName(modDir)+string(filepath.Separator) {
 			break
 		}
 	}

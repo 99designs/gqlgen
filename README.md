@@ -6,7 +6,7 @@
 
  - **Schema first** — Define your API using the GraphQL [Schema Definition Language](http://graphql.org/learn/schema/).
  - **Type safe** — You should never see `map[string]interface{}` here.
- - **Codegen** — Let us generate the boring bits, so you can build your app quickly. 
+ - **Codegen** — Let us generate the boring bits, so you can build your app quickly.
 
 [Feature Comparison](https://gqlgen.com/feature-comparison/)
 
@@ -71,7 +71,7 @@ func (r *userResolver) User(ctx context.Context, obj *User) ([]*User, error) {
     // select * from user where friendid = obj.ID
     return friends,  nil
 }
-``` 
+```
 
 ### IDs are strings but I like ints, why cant I have ints?
 
@@ -95,4 +95,4 @@ There isnt any way around this, gqlgen has no way to know what you want in a giv
 
  - [Christopher Biscardi @ Gophercon UK 2018](https://youtu.be/FdURVezcdcw)
  - [Introducing gqlgen: a GraphQL Server Generator for Go](https://99designs.com.au/blog/engineering/gqlgen-a-graphql-server-generator-for-go/)
- - [GraphQL workshop for Golang developers by Iván Corrales Solera](https://graphql-go.wesovilabs.com)
+ - [Dive into GraphQL by Iván Corrales Solera](https://medium.com/@ivan.corrales.solera/dive-into-graphql-9bfedf22e1a)

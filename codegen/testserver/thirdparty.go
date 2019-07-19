@@ -2,9 +2,10 @@ package testserver
 
 import (
 	"fmt"
-	"github.com/99designs/gqlgen/graphql"
 	"io"
 	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type ThirdParty struct {

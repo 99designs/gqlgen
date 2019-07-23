@@ -237,7 +237,7 @@ query findTodos {
 
 ## Finishing touches
 
-At the top of our `resolver.go` add the following line:
+At the top of our `resolver.go`, between `package` and `import`, add the following line:
 
 ```go
 //go:generate go run github.com/99designs/gqlgen

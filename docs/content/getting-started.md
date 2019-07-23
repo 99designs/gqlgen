@@ -102,7 +102,7 @@ models:
 Regenerate by running:
 
 ```bash
-$ go run github.com/99designs/gqlgen
+$ go run github.com/99designs/gqlgen -v
 ```
 
 > Note

@@ -195,7 +195,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
+func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
 	return r.todos, nil
 }
 

@@ -384,16 +384,16 @@ func (f *Field) ComplexitySignature() string {
 }
 
 func (f *Field) ComplexityArgs() string {
-	var args []string
-	for _, arg := range f.Args {
-		args = append(args, "args["+strconv.Quote(arg.Name)+"].("+templates.CurrentImports.LookupType(arg.TypeReference.GO)+")")
+	args := make([]string, len(f.Args))
+	for i, arg := range f.Args {
+		args[i] = "args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
 	}
 
 	return strings.Join(args, ", ")
 }
 
 func (f *Field) CallArgs() string {
-	var args []string
+	args := make([]string, 0, len(f.Args)+2)
 
 	if f.IsResolver {
 		args = append(args, "rctx")

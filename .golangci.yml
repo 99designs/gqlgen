@@ -19,7 +19,6 @@ linters:
     - gochecknoinits
     - gocyclo
     - scopelint
-    - prealloc
     - goconst
     - maligned
     - golint

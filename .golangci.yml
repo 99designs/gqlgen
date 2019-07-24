@@ -1,3 +1,39 @@
+run:
+  tests: true
+  skip-dirs:
+    - bin
+    - vendor
+    - var
+    - tmp
+    - example/*
+
 linters-settings:
   errcheck:
     ignore: fmt:.*,[rR]ead|[wW]rite|[cC]lose,io:Copy
+
+linters:
+  enable-all: true
+  disable:
+    - lll
+    - gochecknoglobals
+    - gochecknoinits
+    - unparam
+    - gocritic
+    - goimports
+    - misspell
+    - gocyclo
+    - scopelint
+    - prealloc
+    - goconst
+    - maligned
+    - golint
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec

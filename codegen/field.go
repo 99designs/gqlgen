@@ -401,10 +401,8 @@ func (f *Field) CallArgs() string {
 		if !f.Object.Root {
 			args = append(args, "obj")
 		}
-	} else {
-		if f.MethodHasContext {
-			args = append(args, "ctx")
-		}
+	} else if f.MethodHasContext {
+		args = append(args, "ctx")
 	}
 
 	for _, arg := range f.Args {

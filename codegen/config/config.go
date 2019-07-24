@@ -310,10 +310,10 @@ func (tm TypeMap) ReferencedPackages() []string {
 	return pkgs
 }
 
-func (tm TypeMap) Add(Name string, goType string) {
-	modelCfg := tm[Name]
+func (tm TypeMap) Add(name string, goType string) {
+	modelCfg := tm[name]
 	modelCfg.Model = append(modelCfg.Model, goType)
-	tm[Name] = modelCfg
+	tm[name] = modelCfg
 }
 
 type DirectiveConfig struct {

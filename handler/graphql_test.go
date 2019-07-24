@@ -357,7 +357,7 @@ func TestFileUpload(t *testing.T) {
 					return &graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)}
 				},
 			}
-			maxMemory := UploadMaxMemory(5000)
+			maxMemory := UploadMaxMemory(uploadMaxMemory)
 			handler := GraphQL(mock, maxMemory)
 
 			operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`

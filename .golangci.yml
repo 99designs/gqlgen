@@ -17,7 +17,6 @@ linters:
     - lll
     - gochecknoglobals
     - gochecknoinits
-    - unparam
     - gocritic
     - misspell
     - gocyclo

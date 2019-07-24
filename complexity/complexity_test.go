@@ -47,11 +47,11 @@ var schema = gqlparser.MustLoadSchema(
 	},
 )
 
-func requireComplexity(t *testing.T, source string, vars map[string]interface{}, complexity int) {
+func requireComplexity(t *testing.T, source string, complexity int) {
 	t.Helper()
 	query := gqlparser.MustLoadQuery(schema, source)
 	es := &executableSchemaStub{}
-	actualComplexity := Calculate(es, query.Operations[0], vars)
+	actualComplexity := Calculate(es, query.Operations[0], nil)
 	require.Equal(t, complexity, actualComplexity)
 }
 
@@ -62,7 +62,7 @@ func TestCalculate(t *testing.T) {
 			scalar
 		}
 		`
-		requireComplexity(t, query, nil, 1)
+		requireComplexity(t, query, 1)
 	})
 
 	t.Run("adds together fields", func(t *testing.T) {
@@ -72,7 +72,7 @@ func TestCalculate(t *testing.T) {
 			scalar2: scalar
 		}
 		`
-		requireComplexity(t, query, nil, 2)
+		requireComplexity(t, query, 2)
 	})
 
 	t.Run("a level of nesting adds complexity", func(t *testing.T) {
@@ -83,7 +83,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, 2)
+		requireComplexity(t, query, 2)
 	})
 
 	t.Run("adds together children", func(t *testing.T) {
@@ -95,7 +95,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, 3)
+		requireComplexity(t, query, 3)
 	})
 
 	t.Run("adds inline fragments", func(t *testing.T) {
@@ -106,7 +106,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, 1)
+		requireComplexity(t, query, 1)
 	})
 
 	t.Run("adds fragments", func(t *testing.T) {
@@ -119,7 +119,7 @@ func TestCalculate(t *testing.T) {
 			scalar
 		}
 		`
-		requireComplexity(t, query, nil, 1)
+		requireComplexity(t, query, 1)
 	})
 
 	t.Run("uses custom complexity", func(t *testing.T) {
@@ -130,7 +130,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, 10)
+		requireComplexity(t, query, 10)
 	})
 
 	t.Run("ignores negative custom complexity values", func(t *testing.T) {
@@ -141,7 +141,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, 2)
+		requireComplexity(t, query, 2)
 	})
 
 	t.Run("custom complexity must be >= child complexity", func(t *testing.T) {
@@ -154,7 +154,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, 101)
+		requireComplexity(t, query, 101)
 	})
 
 	t.Run("interfaces take max concrete cost", func(t *testing.T) {
@@ -165,7 +165,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, 6)
+		requireComplexity(t, query, 6)
 	})
 
 	t.Run("guards against integer overflow", func(t *testing.T) {
@@ -194,7 +194,7 @@ func TestCalculate(t *testing.T) {
 			}
 		}
 		`
-		requireComplexity(t, query, nil, math.MaxInt64)
+		requireComplexity(t, query, math.MaxInt64)
 	})
 }
 

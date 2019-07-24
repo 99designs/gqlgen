@@ -37,7 +37,7 @@ type Embed struct {
 	Test string
 }
 `
-	scope, err := parseScope(t, input, "test")
+	scope, err := parseScope(input, "test")
 	require.NoError(t, err)
 
 	std := scope.Lookup("Std").Type().Underlying().(*types.Struct)
@@ -76,7 +76,7 @@ type Embed struct {
 	}
 }
 
-func parseScope(t *testing.T, input interface{}, packageName string) (*types.Scope, error) {
+func parseScope(input interface{}, packageName string) (*types.Scope, error) {
 	// test setup to parse the types
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "test.go", input, 0)

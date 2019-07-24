@@ -19,7 +19,6 @@ linters:
     - gochecknoinits
     - unparam
     - gocritic
-    - goimports
     - misspell
     - gocyclo
     - scopelint

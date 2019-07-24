@@ -14,7 +14,7 @@ import (
 	"time"
 
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
-	"github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
+	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser"

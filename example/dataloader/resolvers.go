@@ -4,8 +4,6 @@ package dataloader
 
 import (
 	"context"
-	"fmt"
-	"math/rand"
 	"time"
 )
 
@@ -13,11 +11,19 @@ type Customer struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
 	AddressID int
+	ResolvedAddress *Address
+	ResolvedOrders []*Order
+
+	Loader *CustomerLoader
 }
 type Order struct {
 	ID     int       `json:"id"`
 	Date   time.Time `json:"date"`
 	Amount float64   `json:"amount"`
+	CustomerID int
+	ResolvedItems []*Item `json:"-"`
+
+	Loader *OrderSliceLoader
 }
 
 type Resolver struct{}
@@ -37,49 +43,54 @@ func (r *Resolver) Query() QueryResolver {
 type customerResolver struct{ *Resolver }
 
 func (r *customerResolver) Address(ctx context.Context, obj *Customer) (*Address, error) {
-	return ctxLoaders(ctx).addressByID.Load(obj.AddressID)
+	obj.Loader.LoadAddresses()
+	return obj.ResolvedAddress, nil
 }
 
 func (r *customerResolver) Orders(ctx context.Context, obj *Customer) ([]*Order, error) {
-	return ctxLoaders(ctx).ordersByCustomer.Load(obj.ID)
+	obj.Loader.LoadOrders()
+	return obj.ResolvedOrders, nil
 }
 
 type orderResolver struct{ *Resolver }
 
 func (r *orderResolver) Items(ctx context.Context, obj *Order) ([]*Item, error) {
-	return ctxLoaders(ctx).itemsByOrder.Load(obj.ID)
+	obj.Loader.LoadItems()
+	return obj.ResolvedItems, nil
 }
 
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Customers(ctx context.Context) ([]*Customer, error) {
-	fmt.Println("SELECT * FROM customer")
-
-	time.Sleep(5 * time.Millisecond)
-
-	return []*Customer{
-		{ID: 1, Name: "Bob", AddressID: 1},
-		{ID: 2, Name: "Alice", AddressID: 3},
-		{ID: 3, Name: "Eve", AddressID: 4},
-	}, nil
+	return NewCustomerLoader([]int{1,2,3}).Customers, nil
 }
 
 // this method is here to test code generation of nested arrays
 func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]*Customer, error) {
 	result := make([]*Customer, len(customerIds))
+	loader := NewCustomerLoader(customerIds)
 	for i, id := range customerIds {
-		result[i] = &Customer{ID: id, Name: fmt.Sprintf("%d", i), AddressID: rand.Int() % 10}
+		result[i] = loader.CustomersById[id]
 	}
 	return result, nil
 }
 
 // this method is here to test code generation of nested arrays
 func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][]*Customer, error) {
+	ids := make([]int, 0, len(customerIds))
+	for i := range customerIds {
+		for j := range customerIds[i] {
+			ids = append(ids, customerIds[i][j])
+		}
+	}
+	loader := NewCustomerLoader(ids)
+
 	result := make([][]*Customer, len(customerIds))
+
 	for i := range customerIds {
 		inner := make([]*Customer, len(customerIds[i]))
 		for j := range customerIds[i] {
-			inner[j] = &Customer{ID: customerIds[i][j], Name: fmt.Sprintf("%d %d", i, j), AddressID: rand.Int() % 10}
+			inner[j] = loader.CustomersById[customerIds[i][j]]
 		}
 		result[i] = inner
 	}

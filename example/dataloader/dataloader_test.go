@@ -11,7 +11,7 @@ import (
 )
 
 func TestTodo(t *testing.T) {
-	srv := httptest.NewServer(LoaderMiddleware(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}}))))
+	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
 	c := client.New(srv.URL)
 
 	t.Run("create a new todo", func(t *testing.T) {
@@ -41,8 +41,8 @@ func TestTodo(t *testing.T) {
 		c.MustPost(`{ torture2d(customerIds:[[1,2],[3,4,5]]) { id name } }`, &resp)
 
 		require.EqualValues(t, [][]Customer{
-			{{ID: 1, Name: "0 0"}, {ID: 2, Name: "0 1"}},
-			{{ID: 3, Name: "1 0"}, {ID: 4, Name: "1 1"}, {ID: 5, Name: "1 2"}},
+			{{ID: 1, Name: "1"}, {ID: 2, Name: "2"}},
+			{{ID: 3, Name: "3"}, {ID: 4, Name: "4"}, {ID: 5, Name: "5"}},
 		}, resp.Torture2d)
 	})
 
@@ -56,7 +56,7 @@ func TestTodo(t *testing.T) {
 			c.MustPost(`{ torture1d(customerIds: 1) { id name } }`, &resp)
 
 			require.EqualValues(t, []Customer{
-				{ID: 1, Name: "0"},
+				{ID: 1, Name: "1"},
 			}, resp.Torture1d)
 		})
 
@@ -67,7 +67,7 @@ func TestTodo(t *testing.T) {
 			c.MustPost(`{ torture2d(customerIds: 1) { id name } }`, &resp)
 
 			require.EqualValues(t, [][]Customer{
-				{{ID: 1, Name: "0 0"}},
+				{{ID: 1, Name: "1"}},
 			}, resp.Torture2d)
 		})
 	})

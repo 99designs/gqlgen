@@ -11,7 +11,6 @@ import (
 
 func main() {
 	router := chi.NewRouter()
-	router.Use(dataloader.LoaderMiddleware)
 
 	router.Handle("/", handler.Playground("Dataloader", "/query"))
 	router.Handle("/query", handler.GraphQL(

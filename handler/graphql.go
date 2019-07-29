@@ -55,21 +55,22 @@ type PersistedQueryCache interface {
 type websocketInitFunc func(ctx context.Context, initPayload InitPayload) error
 
 type Config struct {
-	cacheSize                       int
-	upgrader                        websocket.Upgrader
-	recover                         graphql.RecoverFunc
-	errorPresenter                  graphql.ErrorPresenterFunc
-	resolverHook                    graphql.FieldMiddleware
-	requestHook                     graphql.RequestMiddleware
-	tracer                          graphql.Tracer
-	complexityLimit                 int
-	complexityLimitFunc             graphql.ComplexityLimitFunc
-	websocketInitFunc               websocketInitFunc
-	disableIntrospection            bool
-	connectionKeepAlivePingInterval time.Duration
-	uploadMaxMemory                 int64
-	uploadMaxSize                   int64
-	apqCache                        PersistedQueryCache
+	cacheSize                         int
+	upgrader                          websocket.Upgrader
+	recover                           graphql.RecoverFunc
+	errorPresenter                    graphql.ErrorPresenterFunc
+	resolverHook                      graphql.FieldMiddleware
+	requestHook                       graphql.RequestMiddleware
+	tracer                            graphql.Tracer
+	complexityLimit                   int
+	complexityLimitFunc               graphql.ComplexityLimitFunc
+	websocketInitFunc                 websocketInitFunc
+	disableIntrospection              bool
+	connectionKeepAlivePingInterval   time.Duration
+	connectionKeepAliveFirstInstantly bool
+	uploadMaxMemory                   int64
+	uploadMaxSize                     int64
+	apqCache                          PersistedQueryCache
 }
 
 func (c *Config) newRequestContext(es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) *graphql.RequestContext {
@@ -316,6 +317,16 @@ func UploadMaxMemory(size int64) Option {
 func WebsocketKeepAliveDuration(duration time.Duration) Option {
 	return func(cfg *Config) {
 		cfg.connectionKeepAlivePingInterval = duration
+	}
+}
+
+// WebsocketKeepAliveFirstInstantly allows you to reconfigure the keepalive behavior.
+// By default, keepalive is sent when first keep alive ping interval is over.
+// Set handler.connectionKeepAliveFirstInstantly = true to send first keepalive
+// instantly. This behaviour is required by a few frontend libraries.
+func WebsocketKeepAliveFirstInstantly(enabled bool) Option {
+	return func(cfg *Config) {
+		cfg.connectionKeepAliveFirstInstantly = enabled
 	}
 }
 

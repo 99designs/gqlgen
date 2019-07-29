@@ -169,6 +169,10 @@ func (c *wsConnection) run() {
 }
 
 func (c *wsConnection) keepAlive(ctx context.Context) {
+	if c.cfg.connectionKeepAliveFirstInstantly {
+		c.write(&operationMessage{Type: connectionKeepAliveMsg})
+	}
+
 	for {
 		select {
 		case <-ctx.Done():

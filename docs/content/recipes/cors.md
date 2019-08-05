@@ -34,9 +34,18 @@ func main() {
 		Debug:            true,
 	}).Handler)
 
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			// Check against your desired domains here
+			return true
+		},
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
 	router.Handle("/", handler.Playground("Starwars", "/query"))
 	router.Handle("/query",
-		handler.GraphQL(starwars.NewExecutableSchema(starwars.NewResolver())),
+		handler.GraphQL(starwars.NewExecutableSchema(starwars.NewResolver()), handler.WebsocketUpgrader(upgrader)),
 	)
 
 	err := http.ListenAndServe(":8080", router)

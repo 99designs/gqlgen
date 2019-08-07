@@ -55,7 +55,7 @@ type PersistedQueryCache interface {
 type websocketInitFunc func(ctx context.Context, initPayload InitPayload) error
 
 type Config struct {
-	cacheSize                       int
+	cache                           Cache
 	upgrader                        websocket.Upgrader
 	recover                         graphql.RecoverFunc
 	errorPresenter                  graphql.ErrorPresenterFunc
@@ -284,11 +284,33 @@ func WebsocketInitFunc(websocketInitFunc func(ctx context.Context, initPayload I
 	}
 }
 
-// CacheSize sets the maximum size of the query cache.
+// CacheSize sets the maximum size of the query cache. Use with lru cache
 // If size is less than or equal to 0, the cache is disabled.
 func CacheSize(size int) Option {
 	return func(cfg *Config) {
-		cfg.cacheSize = size
+		if size <= 0 {
+			cfg.cache = nil
+			return
+		}
+		cfg.cache = lruCache(size)
+	}
+}
+
+func lruCache(size int) *lru.Cache {
+	cache, err := lru.New(size)
+	if err != nil {
+		// An error is only returned for non-positive cache size
+		// and we already checked for that.
+		panic("unexpected error creating cache: " + err.Error())
+	}
+	return cache
+}
+
+// QueryCache set custom query cache
+// If nil, the cache is disabled.
+func QueryCache(c Cache) Option {
+	return func(cfg *Config) {
+		cfg.cache = c
 	}
 }
 
@@ -340,7 +362,7 @@ const DefaultUploadMaxSize = 32 << 20
 
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	cfg := &Config{
-		cacheSize:                       DefaultCacheSize,
+		cache:                           lruCache(DefaultCacheSize),
 		uploadMaxMemory:                 DefaultUploadMaxMemory,
 		uploadMaxSize:                   DefaultUploadMaxSize,
 		connectionKeepAlivePingInterval: DefaultConnectionKeepAlivePingInterval,
@@ -354,24 +376,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		option(cfg)
 	}
 
-	var cache *lru.Cache
-	if cfg.cacheSize > 0 {
-		var err error
-		cache, err = lru.New(cfg.cacheSize)
-		if err != nil {
-			// An error is only returned for non-positive cache size
-			// and we already checked for that.
-			panic("unexpected error creating cache: " + err.Error())
-		}
-	}
 	if cfg.tracer == nil {
 		cfg.tracer = &graphql.NopTracer{}
 	}
 
 	handler := &graphqlHandler{
-		cfg:   cfg,
-		cache: cache,
-		exec:  exec,
+		cfg:  cfg,
+		exec: exec,
 	}
 
 	return handler.ServeHTTP
@@ -380,9 +391,8 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 var _ http.Handler = (*graphqlHandler)(nil)
 
 type graphqlHandler struct {
-	cfg   *Config
-	cache *lru.Cache
-	exec  graphql.ExecutableSchema
+	cfg  *Config
+	exec graphql.ExecutableSchema
 }
 
 func computeQueryHash(query string) string {
@@ -398,7 +408,7 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
-		connectWs(gh.exec, w, r, gh.cfg, gh.cache)
+		connectWs(gh.exec, w, r, gh.cfg)
 		return
 	}
 
@@ -499,8 +509,8 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var doc *ast.QueryDocument
 	var cacheHit bool
-	if gh.cache != nil {
-		val, ok := gh.cache.Get(reqParams.Query)
+	if gh.cfg.cache != nil {
+		val, ok := gh.cfg.cache.Get(reqParams.Query)
 		if ok {
 			doc = val.(*ast.QueryDocument)
 			cacheHit = true
@@ -528,8 +538,8 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if gh.cache != nil && !cacheHit {
-		gh.cache.Add(reqParams.Query, doc)
+	if gh.cfg.cache != nil && !cacheHit {
+		gh.cfg.cache.Add(reqParams.Query, doc)
 	}
 
 	reqCtx := gh.cfg.newRequestContext(gh.exec, doc, op, reqParams.Query, vars)

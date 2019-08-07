@@ -5,7 +5,6 @@ type Query {
     recursive(input: RecursiveInputSlice): Boolean
     nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
     nestedOutputs: [[OuterObject]]
-    shapes: [Shape]
     modelMethods: ModelMethods
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
@@ -76,20 +75,6 @@ type OuterObject {
 type InnerObject {
     id: Int!
 }
-
-interface Shape {
-    area: Float
-}
-type Circle implements Shape {
-    radius: Float
-    area: Float
-}
-type Rectangle implements Shape {
-    length: Float
-    width: Float
-    area: Float
-}
-union ShapeUnion = Circle | Rectangle
 
 type ForcedResolver {
     field: Circle

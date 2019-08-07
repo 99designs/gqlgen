@@ -1914,8 +1914,8 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj int
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _Data(ctx context.Context, sel ast.SelectionSet, obj *Data) graphql.Marshaler {
-	switch obj := (*obj).(type) {
+func (ec *executionContext) _Data(ctx context.Context, sel ast.SelectionSet, obj Data) graphql.Marshaler {
+	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
 	case Todo:
@@ -1927,8 +1927,8 @@ func (ec *executionContext) _Data(ctx context.Context, sel ast.SelectionSet, obj
 	}
 }
 
-func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj *Node) graphql.Marshaler {
-	switch obj := (*obj).(type) {
+func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj Node) graphql.Marshaler {
+	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
 	case Todo:

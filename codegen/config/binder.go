@@ -427,6 +427,9 @@ func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 }
 
 func isNilable(t types.Type) bool {
+	if namedType, isNamed := t.(*types.Named); isNamed {
+		t = namedType.Underlying()
+	}
 	_, isPtr := t.(*types.Pointer)
 	_, isMap := t.(*types.Map)
 	_, isInterface := t.(*types.Interface)

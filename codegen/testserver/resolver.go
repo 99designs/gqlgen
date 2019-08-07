@@ -122,9 +122,6 @@ func (r *queryResolver) NestedInputs(ctx context.Context, input [][]*OuterInput)
 func (r *queryResolver) NestedOutputs(ctx context.Context) ([][]*OuterObject, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
-	panic("not implemented")
-}
 func (r *queryResolver) ModelMethods(ctx context.Context) (*ModelMethods, error) {
 	panic("not implemented")
 }
@@ -180,6 +177,12 @@ func (r *queryResolver) DirectiveDouble(ctx context.Context) (*string, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) NoShape(ctx context.Context) (Shape, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {

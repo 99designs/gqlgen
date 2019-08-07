@@ -67,7 +67,7 @@ models:
 
 After doing either of the above and running generate we will need to provide a resolver for friends:
 ```go
-func (r *userResolver) User(ctx context.Context, obj *User) ([]*User, error) {
+func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) {
     // select * from user where friendid = obj.ID
     return friends,  nil
 }

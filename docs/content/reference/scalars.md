@@ -23,7 +23,7 @@ Maps a `Time` GraphQL scalar to a Go `time.Time` struct.
 scalar Map
 ```
 
-Maps an arbitrary GraphQL value to a `map[string]{interface}` Go type.
+Maps an arbitrary GraphQL value to a `map[string]interface{}` Go type.
 
 
 ```graphql

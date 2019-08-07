@@ -8,23 +8,36 @@ linters-settings:
     ignore: fmt:.*,[rR]ead|[wW]rite|[cC]lose,io:Copy
 
 linters:
-  enable-all: true
-  disable:
-    - lll
-    - gochecknoglobals
-    - gochecknoinits
-    - gocyclo
-    - scopelint
-    - goconst
-    - maligned
-    - golint
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dupl
+    - errcheck
+    - gocritic
+    - gofmt
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - misspell
+    - nakedret
+    - prealloc
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
 
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:
-        - gocyclo
-        - errcheck
         - dupl
-        - gosec

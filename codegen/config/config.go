@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -310,10 +310,10 @@ func (tm TypeMap) ReferencedPackages() []string {
 	return pkgs
 }
 
-func (tm TypeMap) Add(Name string, goType string) {
-	modelCfg := tm[Name]
+func (tm TypeMap) Add(name string, goType string) {
+	modelCfg := tm[name]
 	modelCfg.Model = append(modelCfg.Model, goType)
-	tm[Name] = modelCfg
+	tm[name] = modelCfg
 }
 
 type DirectiveConfig struct {
@@ -459,9 +459,9 @@ func (c *Config) InjectBuiltins(s *ast.Schema) {
 func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 	schemaStrings := map[string]string{}
 
-	var sources []*ast.Source
+	sources := make([]*ast.Source, len(c.SchemaFilename))
 
-	for _, filename := range c.SchemaFilename {
+	for i, filename := range c.SchemaFilename {
 		filename = filepath.ToSlash(filename)
 		var err error
 		var schemaRaw []byte
@@ -471,7 +471,7 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 			os.Exit(1)
 		}
 		schemaStrings[filename] = string(schemaRaw)
-		sources = append(sources, &ast.Source{Name: filename, Input: schemaStrings[filename]})
+		sources[i] = &ast.Source{Name: filename, Input: schemaStrings[filename]}
 	}
 
 	schema, err := gqlparser.LoadSchema(sources...)

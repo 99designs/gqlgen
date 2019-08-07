@@ -59,7 +59,7 @@ func TestImports(t *testing.T) {
 			t,
 			`"github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
 bar1 "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
-"github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"`,
+turtles "github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"`,
 			a.String(),
 		)
 	})

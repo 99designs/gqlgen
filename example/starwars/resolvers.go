@@ -48,13 +48,13 @@ func (r *Resolver) Starship() generated.StarshipResolver {
 }
 
 func (r *Resolver) resolveCharacters(ctx context.Context, ids []string) ([]models.Character, error) {
-	var result []models.Character
-	for _, id := range ids {
+	result := make([]models.Character, len(ids))
+	for i, id := range ids {
 		char, err := r.Query().Character(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, char)
+		result[i] = char
 	}
 	return result, nil
 }
@@ -71,7 +71,7 @@ func (r *droidResolver) FriendsConnection(ctx context.Context, obj *models.Droid
 
 type friendsConnectionResolver struct{ *Resolver }
 
-func (r *Resolver) resolveFriendConnection(ctx context.Context, ids []string, first *int, after *string) (*models.FriendsConnection, error) {
+func (r *Resolver) resolveFriendConnection(_ context.Context, ids []string, first *int, after *string) (*models.FriendsConnection, error) {
 	from := 0
 	if after != nil {
 		b, err := base64.StdEncoding.DecodeString(*after)

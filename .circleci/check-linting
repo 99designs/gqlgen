@@ -2,6 +2,6 @@
 
 set -euo pipefail
 
-curl -sL --fail https://github.com/golangci/golangci-lint/releases/download/v1.13/golangci-lint-1.13-linux-amd64.tar.gz | tar zxv --strip-components=1 --dir=/go/bin
+curl -sL --fail https://github.com/golangci/golangci-lint/releases/download/v1.17.1/golangci-lint-1.17.1-linux-amd64.tar.gz | tar zxv --strip-components=1 --dir=/go/bin
 
 golangci-lint run

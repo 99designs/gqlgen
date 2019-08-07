@@ -2,7 +2,7 @@
 title: "Setting CORS headers using rs/cors for gqlgen"
 description: Use the best of breed rs/cors library to set CORS headers when working with gqlgen
 linkTitle: CORS
-menu: { main: { parent: 'recipes' } }
+menu: { main: { parent: "recipes" } }
 ---
 
 Cross-Origin Resource Sharing (CORS) headers are required when your graphql server lives on a different domain to the one your client code is served. You can read more about CORS in the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
@@ -37,7 +37,7 @@ func main() {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			// Check against your desired domains here
-			return true
+			 return r.Host == "example.org"
 		},
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,

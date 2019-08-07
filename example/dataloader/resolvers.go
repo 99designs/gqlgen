@@ -65,6 +65,7 @@ func (r *queryResolver) Customers(ctx context.Context) ([]*Customer, error) {
 }
 
 // this method is here to test code generation of nested arrays
+// nolint: gosec
 func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]*Customer, error) {
 	result := make([]*Customer, len(customerIds))
 	for i, id := range customerIds {
@@ -74,6 +75,7 @@ func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]*Cu
 }
 
 // this method is here to test code generation of nested arrays
+// nolint: gosec
 func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][]*Customer, error) {
 	result := make([][]*Customer, len(customerIds))
 	for i := range customerIds {

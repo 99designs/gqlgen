@@ -24,6 +24,7 @@ type loaders struct {
 	itemsByOrder     *ItemSliceLoader
 }
 
+// nolint: gosec
 func LoaderMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ldrs := loaders{}

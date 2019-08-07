@@ -3,7 +3,7 @@
 package selection
 
 import (
-	context "context"
+	"context"
 	"fmt"
 	"time"
 
@@ -59,10 +59,10 @@ func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 }
 
 func formatCollected(cf []graphql.CollectedField) []string {
-	var res []string
+	res := make([]string, len(cf))
 
-	for _, f := range cf {
-		res = append(res, fmt.Sprintf("%s as %s", f.Name, f.Alias))
+	for i, f := range cf {
+		res[i] = f.Name + " as " + f.Alias
 	}
 	return res
 }

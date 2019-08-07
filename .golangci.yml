@@ -2,10 +2,6 @@ run:
   tests: true
   skip-dirs:
     - bin
-    - vendor
-    - var
-    - tmp
-    - example/*
 
 linters-settings:
   errcheck:

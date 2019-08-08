@@ -217,10 +217,12 @@ func TestWebsocketInitFunc(t *testing.T) {
 }
 
 func wsConnect(url string) *websocket.Conn {
-	c, _, err := websocket.DefaultDialer.Dial(strings.Replace(url, "http://", "ws://", -1), nil)
+	c, resp, err := websocket.DefaultDialer.Dial(strings.Replace(url, "http://", "ws://", -1), nil)
 	if err != nil {
 		panic(err)
 	}
+	_ = resp.Body.Close()
+
 	return c
 }
 

@@ -25,10 +25,19 @@ enum Role {
 When we next run go generate, gqlgen will add this directive to the DirectiveRoot 
 ```go
 type DirectiveRoot struct {
-	HasRole func(ctx context.Context, next graphql.Resolver, role Role) (res interface{}, err error)
+	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
 }
 ```
 
+The arguments are:
+ - *ctx*: the parent context
+ - *obj*: the object containing the value this was applied to, eg:
+    - for field definition directives, the object/input object that contains the field
+    - for argument directives, a map containing all arguments
+ - *next*: the next directive in the directive chain, or the field resolver. This should be called to get the
+           value of the field/argument/whatever. You can block access to the field by not calling next for permission
+           checks etc.
+ - *...args*: Any args to the directive will be passed in too.
 
 ## Use it in the schema
 
@@ -47,7 +56,7 @@ package main
 
 func main() {
 	c := Config{ Resolvers: &resolvers{} }
-	c.Directives.HasRole = func(ctx context.Context, next graphql.Resolver, role Role) (interface{}, error) {
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (interface{}, error) {
 		if !getCurrentUser(ctx).HasRole(role) {
 			// block calling the next resolver
 			return nil, fmt.Errorf("Access denied")

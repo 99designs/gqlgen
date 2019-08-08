@@ -65,14 +65,18 @@ var initCmd = cli.Command{
 	},
 	Action: func(ctx *cli.Context) {
 		initSchema(ctx.String("schema"))
-		config := initConfig(ctx)
+		initConfig(ctx)
 
-		GenerateGraphServer(config, ctx.String("server"))
+		GenerateGraphServer(ctx.String("server"))
 	},
 }
 
-func GenerateGraphServer(cfg *config.Config, serverFilename string) {
-	err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename)))
+func GenerateGraphServer(serverFilename string) {
+	cfg, err := config.LoadConfigFromDefaultLocations()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+	err = api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename)))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
@@ -80,7 +84,7 @@ func GenerateGraphServer(cfg *config.Config, serverFilename string) {
 	fmt.Fprintf(os.Stdout, "Exec \"go run ./%s\" to start GraphQL server\n", serverFilename)
 }
 
-func initConfig(ctx *cli.Context) *config.Config {
+func initConfig(ctx *cli.Context) {
 	var cfg *config.Config
 	var err error
 	configFilename := ctx.String("config")
@@ -126,8 +130,6 @@ func initConfig(ctx *cli.Context) *config.Config {
 		fmt.Fprintln(os.Stderr, "unable to write cfg file: "+err.Error())
 		os.Exit(1)
 	}
-
-	return cfg
 }
 
 func initSchema(schemaFilename string) {

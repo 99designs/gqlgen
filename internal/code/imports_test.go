@@ -3,6 +3,7 @@ package code
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,12 @@ func TestImportPathForDir(t *testing.T) {
 
 	// directory does not exist
 	assert.Equal(t, "github.com/99designs/gqlgen/dos", ImportPathForDir(filepath.Join(wd, "..", "..", "dos")))
+
+	if runtime.GOOS == "windows" {
+		assert.Equal(t, "", ImportPathForDir("C:/doesnotexist"))
+	} else {
+		assert.Equal(t, "", ImportPathForDir("/doesnotexist"))
+	}
 }
 
 func TestNameForPackage(t *testing.T) {

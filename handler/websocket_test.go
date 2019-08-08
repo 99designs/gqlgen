@@ -59,6 +59,7 @@ func TestWebsocket(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
+		require.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
 
 	t.Run("client can terminate before run", func(t *testing.T) {
@@ -67,6 +68,7 @@ func TestWebsocket(t *testing.T) {
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
+		require.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionTerminateMsg}))
 
@@ -80,6 +82,7 @@ func TestWebsocket(t *testing.T) {
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
+		require.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 
 		require.NoError(t, c.WriteJSON(&operationMessage{
 			Type:    startMsg,
@@ -98,6 +101,7 @@ func TestWebsocket(t *testing.T) {
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
+		require.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 
 		require.NoError(t, c.WriteJSON(&operationMessage{
 			Type:    startMsg,
@@ -138,6 +142,7 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
+		require.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 
 		require.NoError(t, c.WriteJSON(&operationMessage{
 			Type:    startMsg,
@@ -174,6 +179,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
+		require.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
 
 	t.Run("accept connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
@@ -189,6 +195,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 
 		require.Equal(t, connectionAckMsg, readOp(c).Type)
+		require.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
 
 	t.Run("reject connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {

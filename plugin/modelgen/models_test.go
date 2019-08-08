@@ -42,4 +42,12 @@ func TestModelGeneration(t *testing.T) {
 			require.True(t, len(words) > 1, "expected description %q to have more than one word", text)
 		}
 	})
+
+	t.Run("generated file matches reference", func(t *testing.T) {
+		generated, err := ioutil.ReadFile("./out/generated.go")
+		require.NoError(t, err)
+		reference, err := ioutil.ReadFile("./ref/reference.go")
+		require.NoError(t, err)
+		require.Equal(t, string(reference), string(generated))
+	})
 }

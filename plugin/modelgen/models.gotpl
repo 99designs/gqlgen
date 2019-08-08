@@ -16,6 +16,12 @@
 	{{ with .Description }} {{.|prefixLines "// "}} {{ end }}
 	type {{.Name|go }} interface {
 		Is{{.Name|go }}()
+        {{- range $field := .Fields }}
+            {{- with .Description }}
+                {{.|prefixLines "// "}}
+            {{- end}}
+            Get{{ $field.Name|go }}() {{$field.Type | ref}}
+        {{- end }}
 	}
 {{- end }}
 
@@ -31,8 +37,16 @@
 	}
 
 	{{- range $iface := .Implements }}
-		func ({{ $model.Name|go }}) Is{{ $iface|go }}() {}
+		func (p* {{ $model.Name|go }}) Is{{ $iface|go }}() {}
 	{{- end }}
+	{{- range $field := .Fields }}
+        {{- with .Description }}
+            {{.|prefixLines "// "}}
+        {{- end}}
+        func (p* {{ $model.Name|go }}) Get{{ $field.Name|go }}() {{$field.Type | ref}} {
+            return p.{{ $field.Name|go }}
+        }
+    {{- end }}
 {{- end}}
 
 {{ range $enum := .Enums }}

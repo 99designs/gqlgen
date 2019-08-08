@@ -23,6 +23,7 @@ type ModelBuild struct {
 type Interface struct {
 	Description string
 	Name        string
+	Fields      []*Field
 }
 
 type Object struct {
@@ -100,6 +101,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				Name:        schemaType.Name,
 			}
 
+			var err error
+			it.Fields, err = m.extractFields(schema, schemaType, cfg, binder)
+			if err != nil {
+				return err
+			}
 			b.Interfaces = append(b.Interfaces, it)
 		case ast.Object, ast.InputObject:
 			if schemaType == schema.Query || schemaType == schema.Mutation || schemaType == schema.Subscription {
@@ -114,72 +120,10 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				it.Implements = append(it.Implements, implementor.Name)
 			}
 
-			for _, field := range schemaType.Fields {
-				var typ types.Type
-				fieldDef := schema.Types[field.Type.Name()]
-
-				if cfg.Models.UserDefined(field.Type.Name()) {
-					pkg, typeName := code.PkgAndType(cfg.Models[field.Type.Name()].Model[0])
-					typ, err = binder.FindType(pkg, typeName)
-					if err != nil {
-						return err
-					}
-				} else {
-					switch fieldDef.Kind {
-					case ast.Scalar:
-						// no user defined model, referencing a default scalar
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), "string", nil),
-							nil,
-							nil,
-						)
-
-					case ast.Interface, ast.Union:
-						// no user defined model, referencing a generated interface type
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-							types.NewInterfaceType([]*types.Func{}, []types.Type{}),
-							nil,
-						)
-
-					case ast.Enum:
-						// no user defined model, must reference a generated enum
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-							nil,
-							nil,
-						)
-
-					case ast.Object, ast.InputObject:
-						// no user defined model, must reference a generated struct
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-							types.NewStruct(nil, nil),
-							nil,
-						)
-
-					default:
-						panic(fmt.Errorf("unknown ast type %s", fieldDef.Kind))
-					}
-				}
-
-				name := field.Name
-				if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
-					name = nameOveride
-				}
-
-				typ = binder.CopyModifiersFromAst(field.Type, typ)
-
-				if isStruct(typ) && (fieldDef.Kind == ast.Object || fieldDef.Kind == ast.InputObject) {
-					typ = types.NewPointer(typ)
-				}
-
-				it.Fields = append(it.Fields, &Field{
-					Name:        name,
-					Type:        typ,
-					Description: field.Description,
-					Tag:         `json:"` + field.Name + `"`,
-				})
+			var err error
+			it.Fields, err = m.extractFields(schema, schemaType, cfg, binder)
+			if err != nil {
+				return err
 			}
 
 			b.Models = append(b.Models, it)
@@ -229,6 +173,77 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		Data:            b,
 		GeneratedHeader: true,
 	})
+}
+
+func (m *Plugin) extractFields(schema *ast.Schema, schemaType *ast.Definition, cfg *config.Config, binder *config.Binder) (fields []*Field, err error) {
+	for _, field := range schemaType.Fields {
+		var typ types.Type
+		fieldDef := schema.Types[field.Type.Name()]
+
+		if cfg.Models.UserDefined(field.Type.Name()) {
+			pkg, typeName := code.PkgAndType(cfg.Models[field.Type.Name()].Model[0])
+			typ, err = binder.FindType(pkg, typeName)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			switch fieldDef.Kind {
+			case ast.Scalar:
+				// no user defined model, referencing a default scalar
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), "string", nil),
+					nil,
+					nil,
+				)
+
+			case ast.Interface, ast.Union:
+				// no user defined model, referencing a generated interface type
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					types.NewInterfaceType([]*types.Func{}, []types.Type{}),
+					nil,
+				)
+
+			case ast.Enum:
+				// no user defined model, must reference a generated enum
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					nil,
+					nil,
+				)
+
+			case ast.Object, ast.InputObject:
+				// no user defined model, must reference a generated struct
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					types.NewStruct(nil, nil),
+					nil,
+				)
+
+			default:
+				panic(fmt.Errorf("unknown ast type %s", fieldDef.Kind))
+			}
+		}
+
+		name := field.Name
+		if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
+			name = nameOveride
+		}
+
+		typ = binder.CopyModifiersFromAst(field.Type, typ)
+
+		if isStruct(typ) && (fieldDef.Kind == ast.Object || fieldDef.Kind == ast.InputObject) {
+			typ = types.NewPointer(typ)
+		}
+
+		fields = append(fields, &Field{
+			Name:        name,
+			Type:        typ,
+			Description: field.Description,
+			Tag:         `json:"` + field.Name + `"`,
+		})
+	}
+	return
 }
 
 func isStruct(t types.Type) bool {

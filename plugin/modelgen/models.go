@@ -243,7 +243,7 @@ func (m *Plugin) extractFields(schema *ast.Schema, schemaType *ast.Definition, c
 			Tag:         `json:"` + field.Name + `"`,
 		})
 	}
-	return
+	return fields, nil
 }
 
 func isStruct(t types.Type) bool {

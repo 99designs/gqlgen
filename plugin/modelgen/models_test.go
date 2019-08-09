@@ -46,7 +46,7 @@ func TestModelGeneration(t *testing.T) {
 	t.Run("generated file matches reference", func(t *testing.T) {
 		generated, err := ioutil.ReadFile("./out/generated.go")
 		require.NoError(t, err)
-		reference, err := ioutil.ReadFile("./ref/reference.go")
+		reference, err := ioutil.ReadFile("./out/generated.reference")
 		require.NoError(t, err)
 		require.Equal(t, string(reference), string(generated))
 	})

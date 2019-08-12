@@ -182,7 +182,7 @@ func (c *wsConnection) keepAlive(ctx context.Context) {
 }
 
 func (c *wsConnection) subscribe(message *operationMessage) bool {
-	var reqParams params
+	var reqParams graphql.ParsedParams
 	if err := jsonDecode(bytes.NewReader(message.Payload), &reqParams); err != nil {
 		c.sendConnectionError("invalid json")
 		return false

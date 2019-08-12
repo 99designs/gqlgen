@@ -26,22 +26,6 @@ import (
 	"github.com/vektah/gqlparser/validator"
 )
 
-type params struct {
-	Query         string                 `json:"query"`
-	OperationName string                 `json:"operationName"`
-	Variables     map[string]interface{} `json:"variables"`
-	Extensions    *extensions            `json:"extensions"`
-}
-
-type extensions struct {
-	PersistedQuery *persistedQuery `json:"persistedQuery"`
-}
-
-type persistedQuery struct {
-	Sha256  string `json:"sha256Hash"`
-	Version int64  `json:"version"`
-}
-
 const (
 	errPersistedQueryNotSupported = "PersistedQueryNotSupported"
 	errPersistedQueryNotFound     = "PersistedQueryNotFound"
@@ -62,6 +46,7 @@ type Config struct {
 	resolverHook                    graphql.FieldMiddleware
 	requestHook                     graphql.RequestMiddleware
 	tracer                          graphql.Tracer
+	parserHandler                   graphql.ParserHandlerFunc
 	complexityLimit                 int
 	complexityLimitFunc             graphql.ComplexityLimitFunc
 	websocketInitFunc               websocketInitFunc
@@ -185,6 +170,17 @@ func RequestMiddleware(middleware graphql.RequestMiddleware) Option {
 			return lastResolve(ctx, func(ctx context.Context) []byte {
 				return middleware(ctx, next)
 			})
+		}
+	}
+}
+
+// ParserMiddleware allows you to define a function that will replace the initial parsing of the request, allowing
+// you to define additional methods and custom ways of marshaling the query.
+// E.g. you could parse PUT requests or handle other custom media types
+func ParserMiddleware(f graphql.ParserHandlerFunc) Option {
+	return func(cfg *Config) {
+		if f != nil {
+			cfg.parserHandler = f
 		}
 	}
 }
@@ -350,6 +346,8 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		},
 	}
 
+	cfg.parserHandler = newDefaultParser(cfg)
+
 	for _, option := range options {
 		option(cfg)
 	}
@@ -374,10 +372,10 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		exec:  exec,
 	}
 
-	return handler.ServeHTTP
+	return cfg.parserHandler(func(writer http.ResponseWriter, request *http.Request, params graphql.ParsedParams) {
+		handler.serve(params).ServeHTTP(writer, request)
+	})
 }
-
-var _ http.Handler = (*graphqlHandler)(nil)
 
 type graphqlHandler struct {
 	cfg   *Config
@@ -390,187 +388,199 @@ func computeQueryHash(query string) string {
 	return hex.EncodeToString(b[:])
 }
 
-func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodOptions {
-		w.Header().Set("Allow", "OPTIONS, GET, POST")
-		w.WriteHeader(http.StatusOK)
-		return
-	}
+func (gh *graphqlHandler) serve(reqParams graphql.ParsedParams) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
-		connectWs(gh.exec, w, r, gh.cfg, gh.cache)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	var reqParams params
-	switch r.Method {
-	case http.MethodGet:
-		reqParams.Query = r.URL.Query().Get("query")
-		reqParams.OperationName = r.URL.Query().Get("operationName")
-
-		if variables := r.URL.Query().Get("variables"); variables != "" {
-			if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
-				sendErrorf(w, http.StatusBadRequest, "variables could not be decoded")
-				return
-			}
-		}
-
-		if extensions := r.URL.Query().Get("extensions"); extensions != "" {
-			if err := jsonDecode(strings.NewReader(extensions), &reqParams.Extensions); err != nil {
-				sendErrorf(w, http.StatusBadRequest, "extensions could not be decoded")
-				return
-			}
-		}
-	case http.MethodPost:
-		mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
-		if err != nil {
-			sendErrorf(w, http.StatusBadRequest, "error parsing request Content-Type")
+		if strings.Contains(r.Header.Get("Upgrade"), "websocket") {
+			connectWs(gh.exec, w, r, gh.cfg, gh.cache)
 			return
 		}
 
-		switch mediaType {
-		case "application/json":
-			if err := jsonDecode(r.Body, &reqParams); err != nil {
-				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
-				return
-			}
+		ctx := r.Context()
 
-		case "multipart/form-data":
-			var closers []io.Closer
-			var tmpFiles []string
-			defer func() {
-				for i := len(closers) - 1; 0 <= i; i-- {
-					_ = closers[i].Close()
-				}
-				for _, tmpFile := range tmpFiles {
-					_ = os.Remove(tmpFile)
-				}
-			}()
-			if err := processMultipart(w, r, &reqParams, &closers, &tmpFiles, gh.cfg.uploadMaxSize, gh.cfg.uploadMaxMemory); err != nil {
-				sendErrorf(w, http.StatusBadRequest, "multipart body could not be decoded: "+err.Error())
+		var queryHash string
+		apqRegister := false
+		apq := reqParams.Extensions != nil && reqParams.Extensions.PersistedQuery != nil
+		if apq {
+			// client has enabled apq
+			queryHash = reqParams.Extensions.PersistedQuery.Sha256
+			if gh.cfg.apqCache == nil {
+				// server has disabled apq
+				sendErrorf(w, http.StatusOK, errPersistedQueryNotSupported)
 				return
 			}
+			if reqParams.Extensions.PersistedQuery.Version != 1 {
+				sendErrorf(w, http.StatusOK, "Unsupported persisted query version")
+				return
+			}
+			if reqParams.Query == "" {
+				// client sent optimistic query hash without query string
+				query, ok := gh.cfg.apqCache.Get(ctx, queryHash)
+				if !ok {
+					sendErrorf(w, http.StatusOK, errPersistedQueryNotFound)
+					return
+				}
+				reqParams.Query = query
+			} else {
+				if computeQueryHash(reqParams.Query) != queryHash {
+					sendErrorf(w, http.StatusOK, "provided sha does not match query")
+					return
+				}
+				apqRegister = true
+			}
+		} else if reqParams.Query == "" {
+			sendErrorf(w, http.StatusUnprocessableEntity, "Must provide query string")
+			return
+		}
+
+		var doc *ast.QueryDocument
+		var cacheHit bool
+		if gh.cache != nil {
+			val, ok := gh.cache.Get(reqParams.Query)
+			if ok {
+				doc = val.(*ast.QueryDocument)
+				cacheHit = true
+			}
+		}
+
+		ctx, doc, gqlErr := gh.parseOperation(ctx, &parseOperationArgs{
+			Query:     reqParams.Query,
+			CachedDoc: doc,
+		})
+		if gqlErr != nil {
+			sendError(w, http.StatusUnprocessableEntity, gqlErr)
+			return
+		}
+
+		ctx, op, vars, listErr := gh.validateOperation(ctx, &validateOperationArgs{
+			Doc:           doc,
+			OperationName: reqParams.OperationName,
+			CacheHit:      cacheHit,
+			R:             r,
+			Variables:     reqParams.Variables,
+		})
+		if len(listErr) != 0 {
+			sendError(w, http.StatusUnprocessableEntity, listErr...)
+			return
+		}
+
+		if gh.cache != nil && !cacheHit {
+			gh.cache.Add(reqParams.Query, doc)
+		}
+
+		reqCtx := gh.cfg.newRequestContext(gh.exec, doc, op, reqParams.Query, vars)
+		ctx = graphql.WithRequestContext(ctx, reqCtx)
+
+		defer func() {
+			if err := recover(); err != nil {
+				userErr := reqCtx.Recover(ctx, err)
+				sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
+			}
+		}()
+
+		if gh.cfg.complexityLimitFunc != nil {
+			reqCtx.ComplexityLimit = gh.cfg.complexityLimitFunc(ctx)
+		}
+
+		if reqCtx.ComplexityLimit > 0 && reqCtx.OperationComplexity > reqCtx.ComplexityLimit {
+			sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", reqCtx.OperationComplexity, reqCtx.ComplexityLimit)
+			return
+		}
+
+		if apqRegister && gh.cfg.apqCache != nil {
+			// Add to persisted query cache
+			gh.cfg.apqCache.Add(ctx, queryHash, reqParams.Query)
+		}
+
+		switch op.Operation {
+		case ast.Query:
+			b, err := json.Marshal(gh.exec.Query(ctx, op))
+			if err != nil {
+				panic(err)
+			}
+			w.Write(b)
+		case ast.Mutation:
+			b, err := json.Marshal(gh.exec.Mutation(ctx, op))
+			if err != nil {
+				panic(err)
+			}
+			w.Write(b)
 		default:
-			sendErrorf(w, http.StatusBadRequest, "unsupported Content-Type: "+mediaType)
-			return
+			sendErrorf(w, http.StatusBadRequest, "unsupported operation type")
 		}
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
+	})
+}
 
-	ctx := r.Context()
-
-	var queryHash string
-	apqRegister := false
-	apq := reqParams.Extensions != nil && reqParams.Extensions.PersistedQuery != nil
-	if apq {
-		// client has enabled apq
-		queryHash = reqParams.Extensions.PersistedQuery.Sha256
-		if gh.cfg.apqCache == nil {
-			// server has disabled apq
-			sendErrorf(w, http.StatusOK, errPersistedQueryNotSupported)
-			return
-		}
-		if reqParams.Extensions.PersistedQuery.Version != 1 {
-			sendErrorf(w, http.StatusOK, "Unsupported persisted query version")
-			return
-		}
-		if reqParams.Query == "" {
-			// client sent optimistic query hash without query string
-			query, ok := gh.cfg.apqCache.Get(ctx, queryHash)
-			if !ok {
-				sendErrorf(w, http.StatusOK, errPersistedQueryNotFound)
+func newDefaultParser(cfg *Config) graphql.ParserHandlerFunc {
+	return func(serveWithParamsFunc graphql.ParserFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodOptions {
+				w.Header().Set("Allow", "OPTIONS, GET, POST")
+				w.WriteHeader(http.StatusOK)
 				return
 			}
-			reqParams.Query = query
-		} else {
-			if computeQueryHash(reqParams.Query) != queryHash {
-				sendErrorf(w, http.StatusOK, "provided sha does not match query")
+
+			w.Header().Set("Content-Type", "application/json")
+
+			var reqParams graphql.ParsedParams
+			switch r.Method {
+			case http.MethodGet:
+				reqParams.Query = r.URL.Query().Get("query")
+				reqParams.OperationName = r.URL.Query().Get("operationName")
+
+				if variables := r.URL.Query().Get("variables"); variables != "" {
+					if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
+						sendErrorf(w, http.StatusBadRequest, "variables could not be decoded")
+						return
+					}
+				}
+
+				if extensions := r.URL.Query().Get("extensions"); extensions != "" {
+					if err := jsonDecode(strings.NewReader(extensions), &reqParams.Extensions); err != nil {
+						sendErrorf(w, http.StatusBadRequest, "extensions could not be decoded")
+						return
+					}
+				}
+			case http.MethodPost:
+				mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+				if err != nil {
+					sendErrorf(w, http.StatusBadRequest, "error parsing request Content-Type")
+					return
+				}
+
+				switch mediaType {
+				case "application/json":
+					if err := jsonDecode(r.Body, &reqParams); err != nil {
+						sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
+						return
+					}
+
+				case "multipart/form-data":
+					var closers []io.Closer
+					var tmpFiles []string
+					defer func() {
+						for i := len(closers) - 1; 0 <= i; i-- {
+							_ = closers[i].Close()
+						}
+						for _, tmpFile := range tmpFiles {
+							_ = os.Remove(tmpFile)
+						}
+					}()
+					if err := processMultipart(w, r, &reqParams, &closers, &tmpFiles, cfg.uploadMaxSize, cfg.uploadMaxMemory); err != nil {
+						sendErrorf(w, http.StatusBadRequest, "multipart body could not be decoded: "+err.Error())
+						return
+					}
+				default:
+					sendErrorf(w, http.StatusBadRequest, "unsupported Content-Type: "+mediaType)
+					return
+				}
+			default:
+				w.WriteHeader(http.StatusMethodNotAllowed)
 				return
 			}
-			apqRegister = true
+
+			serveWithParamsFunc(w, r, reqParams)
 		}
-	} else if reqParams.Query == "" {
-		sendErrorf(w, http.StatusUnprocessableEntity, "Must provide query string")
-		return
-	}
-
-	var doc *ast.QueryDocument
-	var cacheHit bool
-	if gh.cache != nil {
-		val, ok := gh.cache.Get(reqParams.Query)
-		if ok {
-			doc = val.(*ast.QueryDocument)
-			cacheHit = true
-		}
-	}
-
-	ctx, doc, gqlErr := gh.parseOperation(ctx, &parseOperationArgs{
-		Query:     reqParams.Query,
-		CachedDoc: doc,
-	})
-	if gqlErr != nil {
-		sendError(w, http.StatusUnprocessableEntity, gqlErr)
-		return
-	}
-
-	ctx, op, vars, listErr := gh.validateOperation(ctx, &validateOperationArgs{
-		Doc:           doc,
-		OperationName: reqParams.OperationName,
-		CacheHit:      cacheHit,
-		R:             r,
-		Variables:     reqParams.Variables,
-	})
-	if len(listErr) != 0 {
-		sendError(w, http.StatusUnprocessableEntity, listErr...)
-		return
-	}
-
-	if gh.cache != nil && !cacheHit {
-		gh.cache.Add(reqParams.Query, doc)
-	}
-
-	reqCtx := gh.cfg.newRequestContext(gh.exec, doc, op, reqParams.Query, vars)
-	ctx = graphql.WithRequestContext(ctx, reqCtx)
-
-	defer func() {
-		if err := recover(); err != nil {
-			userErr := reqCtx.Recover(ctx, err)
-			sendErrorf(w, http.StatusUnprocessableEntity, userErr.Error())
-		}
-	}()
-
-	if gh.cfg.complexityLimitFunc != nil {
-		reqCtx.ComplexityLimit = gh.cfg.complexityLimitFunc(ctx)
-	}
-
-	if reqCtx.ComplexityLimit > 0 && reqCtx.OperationComplexity > reqCtx.ComplexityLimit {
-		sendErrorf(w, http.StatusUnprocessableEntity, "operation has complexity %d, which exceeds the limit of %d", reqCtx.OperationComplexity, reqCtx.ComplexityLimit)
-		return
-	}
-
-	if apqRegister && gh.cfg.apqCache != nil {
-		// Add to persisted query cache
-		gh.cfg.apqCache.Add(ctx, queryHash, reqParams.Query)
-	}
-
-	switch op.Operation {
-	case ast.Query:
-		b, err := json.Marshal(gh.exec.Query(ctx, op))
-		if err != nil {
-			panic(err)
-		}
-		w.Write(b)
-	case ast.Mutation:
-		b, err := json.Marshal(gh.exec.Mutation(ctx, op))
-		if err != nil {
-			panic(err)
-		}
-		w.Write(b)
-	default:
-		sendErrorf(w, http.StatusBadRequest, "unsupported operation type")
 	}
 }
 
@@ -669,7 +679,7 @@ func (r *bytesReader) Read(b []byte) (n int, err error) {
 	return
 }
 
-func processMultipart(w http.ResponseWriter, r *http.Request, request *params, closers *[]io.Closer, tmpFiles *[]string, uploadMaxSize, uploadMaxMemory int64) error {
+func processMultipart(w http.ResponseWriter, r *http.Request, request *graphql.ParsedParams, closers *[]io.Closer, tmpFiles *[]string, uploadMaxSize, uploadMaxMemory int64) error {
 	var err error
 	if r.ContentLength > uploadMaxSize {
 		return errors.New("failed to parse multipart form, request body too large")
@@ -769,7 +779,7 @@ func processMultipart(w http.ResponseWriter, r *http.Request, request *params, c
 	return nil
 }
 
-func addUploadToOperations(request *params, upload graphql.Upload, key, path string) error {
+func addUploadToOperations(request *graphql.ParsedParams, upload graphql.Upload, key, path string) error {
 	if !strings.HasPrefix(path, "variables.") {
 		return fmt.Errorf("invalid operations paths for key %s", key)
 	}

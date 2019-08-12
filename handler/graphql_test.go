@@ -182,6 +182,53 @@ func TestHandlerHead(t *testing.T) {
 	assert.Equal(t, http.StatusMethodNotAllowed, resp.Code)
 }
 
+func TestCustomParser(t *testing.T) {
+	h := GraphQL(&executableSchemaStub{}, ParserMiddleware(func(parserFunc graphql.ParserFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodOptions {
+				w.Header().Set("Allow", "OPTIONS, PUT")
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			if r.Method != http.MethodPut {
+				sendErrorf(w, http.StatusMethodNotAllowed, "ignoring everything but PUT")
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+
+			var reqParams graphql.ParsedParams
+			if err := jsonDecode(r.Body, &reqParams); err != nil {
+				sendErrorf(w, http.StatusBadRequest, "json body could not be decoded: "+err.Error())
+				return
+			}
+
+			parserFunc(w, r, reqParams)
+		}
+	}))
+
+	t.Run("custom options", func(t *testing.T) {
+		resp := doRequest(h, "OPTIONS", "/graphql?query={me{name}}", ``)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, "OPTIONS, PUT", resp.Header().Get("Allow"))
+	})
+
+	t.Run("success", func(t *testing.T) {
+		resp := doRequest(h, "PUT", "/graphql", `{"query":"{ me { name } }"}`)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
+	t.Run("failure", func(t *testing.T) {
+		resp := doRequest(h, "GET", "/graphql?query={me{name}}", ``)
+		assert.Equal(t, http.StatusMethodNotAllowed, resp.Code)
+		fmt.Println(resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"ignoring everything but PUT"}],"data":null}`, resp.Body.String())
+	})
+
+}
+
 func TestHandlerComplexity(t *testing.T) {
 	t.Run("static complexity", func(t *testing.T) {
 		h := GraphQL(&executableSchemaStub{}, ComplexityLimit(2))
@@ -415,7 +462,7 @@ func TestProcessMultipart(t *testing.T) {
 			Header: http.Header{"Content-Type": {`multipart/form-data; boundary="foo123"`}},
 			Body:   ioutil.NopCloser(new(bytes.Buffer)),
 		}
-		var reqParams params
+		var reqParams graphql.ParsedParams
 		var closers []io.Closer
 		var tmpFiles []string
 		w := httptest.NewRecorder()
@@ -429,7 +476,7 @@ func TestProcessMultipart(t *testing.T) {
 		operations := `invalid operation`
 		req := createUploadRequest(t, operations, validMap, validFiles)
 
-		var reqParams params
+		var reqParams graphql.ParsedParams
 		var closers []io.Closer
 		var tmpFiles []string
 		w := httptest.NewRecorder()
@@ -443,7 +490,7 @@ func TestProcessMultipart(t *testing.T) {
 		mapData := `invalid map`
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
-		var reqParams params
+		var reqParams graphql.ParsedParams
 		var closers []io.Closer
 		var tmpFiles []string
 		w := httptest.NewRecorder()
@@ -457,7 +504,7 @@ func TestProcessMultipart(t *testing.T) {
 		var files []file
 		req := createUploadRequest(t, validOperations, validMap, files)
 
-		var reqParams params
+		var reqParams graphql.ParsedParams
 		var closers []io.Closer
 		var tmpFiles []string
 		w := httptest.NewRecorder()
@@ -471,7 +518,7 @@ func TestProcessMultipart(t *testing.T) {
 		mapData := `{ "0": ["var.file"] }`
 		req := createUploadRequest(t, validOperations, mapData, validFiles)
 
-		var reqParams params
+		var reqParams graphql.ParsedParams
 		var closers []io.Closer
 		var tmpFiles []string
 		w := httptest.NewRecorder()
@@ -484,7 +531,7 @@ func TestProcessMultipart(t *testing.T) {
 	t.Run("fail parse request big body", func(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, validFiles)
 
-		var reqParams params
+		var reqParams graphql.ParsedParams
 		var closers []io.Closer
 		var tmpFiles []string
 		w := httptest.NewRecorder()
@@ -498,7 +545,7 @@ func TestProcessMultipart(t *testing.T) {
 	t.Run("valid request", func(t *testing.T) {
 		req := createUploadRequest(t, validOperations, validMap, validFiles)
 
-		var reqParams params
+		var reqParams graphql.ParsedParams
 		var closers []io.Closer
 		var tmpFiles []string
 		w := httptest.NewRecorder()
@@ -531,7 +578,7 @@ func TestProcessMultipart(t *testing.T) {
 		req := createUploadRequest(t, operations, mapData, files)
 
 		test := func(uploadMaxMemory int64) {
-			var reqParams params
+			var reqParams graphql.ParsedParams
 			var closers []io.Closer
 			var tmpFiles []string
 			w := httptest.NewRecorder()
@@ -573,7 +620,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("fail missing all variables", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
-		request := &params{}
+		request := &graphql.ParsedParams{}
 
 		upload := graphql.Upload{
 			File:     file,
@@ -588,7 +635,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("valid variable", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
-		request := &params{
+		request := &graphql.ParsedParams{
 			Variables: map[string]interface{}{
 				"file": nil,
 			},
@@ -600,7 +647,7 @@ func TestAddUploadToOperations(t *testing.T) {
 			Size:     int64(5),
 		}
 
-		expected := &params{
+		expected := &graphql.ParsedParams{
 			Variables: map[string]interface{}{
 				"file": upload,
 			},
@@ -615,7 +662,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 	t.Run("valid nested variable", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
-		request := &params{
+		request := &graphql.ParsedParams{
 			Variables: map[string]interface{}{
 				"req": []interface{}{
 					map[string]interface{}{
@@ -631,7 +678,7 @@ func TestAddUploadToOperations(t *testing.T) {
 			Size:     int64(5),
 		}
 
-		expected := &params{
+		expected := &graphql.ParsedParams{
 			Variables: map[string]interface{}{
 				"req": []interface{}{
 					map[string]interface{}{
@@ -797,15 +844,15 @@ func TestAutomaticPersistedQuery(t *testing.T) {
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 		// first pass: optimistic hash without query string
-		resp = doRequest(h, "POST", "/graphql", `{"extensions":{"persistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
+		resp = doRequest(h, "POST", "/graphql", `{"extensions":{"PersistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"errors":[{"message":"PersistedQueryNotFound"}],"data":null}`, resp.Body.String())
 		// second pass: query with query string and query hash
-		resp = doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }", "extensions":{"persistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
+		resp = doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }", "extensions":{"PersistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 		// future requests without query string
-		resp = doRequest(h, "POST", "/graphql", `{"extensions":{"persistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
+		resp = doRequest(h, "POST", "/graphql", `{"extensions":{"PersistedQuery":{"sha256Hash":"b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88","version":1}}}`)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
@@ -817,15 +864,15 @@ func TestAutomaticPersistedQuery(t *testing.T) {
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 		// first pass: optimistic hash without query string
-		resp = doRequest(h, "GET", `/graphql?extensions={"persistedQuery":{"version":1,"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065"}}`, "")
+		resp = doRequest(h, "GET", `/graphql?extensions={"PersistedQuery":{"version":1,"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065"}}`, "")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"errors":[{"message":"PersistedQueryNotFound"}],"data":null}`, resp.Body.String())
 		// second pass: query with query string and query hash
-		resp = doRequest(h, "GET", `/graphql?query={me{name}}&extensions={"persistedQuery":{"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065","version":1}}}`, "")
+		resp = doRequest(h, "GET", `/graphql?query={me{name}}&extensions={"PersistedQuery":{"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065","version":1}}}`, "")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 		// future requests without query string
-		resp = doRequest(h, "GET", `/graphql?extensions={"persistedQuery":{"version":1,"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065"}}`, "")
+		resp = doRequest(h, "GET", `/graphql?extensions={"PersistedQuery":{"version":1,"sha256Hash":"b58723c4fd7ce18043ae53635b304ba6cee765a67009645b04ca01e80ce1c065"}}`, "")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})

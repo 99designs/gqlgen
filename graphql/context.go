@@ -16,9 +16,10 @@ type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) 
 type ComplexityLimitFunc func(ctx context.Context) int
 
 type RequestContext struct {
-	RawQuery  string
-	Variables map[string]interface{}
-	Doc       *ast.QueryDocument
+	RawQuery      string
+	Variables     map[string]interface{}
+	OperationName string
+	Doc           *ast.QueryDocument
 
 	ComplexityLimit      int
 	OperationComplexity  int

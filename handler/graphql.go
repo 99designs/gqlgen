@@ -72,11 +72,12 @@ type Config struct {
 	apqCache                        PersistedQueryCache
 }
 
-func (c *Config) newRequestContext(ctx context.Context, es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, query string, variables map[string]interface{}) (*graphql.RequestContext, error) {
+func (c *Config) newRequestContext(ctx context.Context, es graphql.ExecutableSchema, doc *ast.QueryDocument, op *ast.OperationDefinition, operationName, query string, variables map[string]interface{}) (*graphql.RequestContext, error) {
 	reqCtx := &graphql.RequestContext{
 		Doc:                  doc,
 		RawQuery:             query,
 		Variables:            variables,
+		OperationName:        operationName,
 		DisableIntrospection: c.disableIntrospection,
 		Recover:              c.recover,
 		ErrorPresenter:       c.errorPresenter,
@@ -523,7 +524,7 @@ func (gh *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		gh.cache.Add(reqParams.Query, doc)
 	}
 
-	reqCtx, err := gh.cfg.newRequestContext(ctx, gh.exec, doc, op, reqParams.Query, vars)
+	reqCtx, err := gh.cfg.newRequestContext(ctx, gh.exec, doc, op, reqParams.OperationName, reqParams.Query, vars)
 	if err != nil {
 		sendErrorf(w, http.StatusBadRequest, "invalid RequestContext was generated: %s", err.Error())
 		return

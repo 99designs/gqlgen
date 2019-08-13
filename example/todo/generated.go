@@ -834,6 +834,7 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 			}
 			return ec.directives.HasRole(ctx, obj, directive0, role)
 		}
+
 		tmp, err := directive1(rctx)
 		if err != nil {
 			return nil, err

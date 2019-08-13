@@ -61,6 +61,7 @@ type Stub struct {
 		DirectiveObject        func(ctx context.Context) (*ObjectDirectives, error)
 		DirectiveFieldDef      func(ctx context.Context, ret string) (string, error)
 		DirectiveField         func(ctx context.Context) (*string, error)
+		DirectiveDouble        func(ctx context.Context) (*string, error)
 		MapStringInterface     func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		ErrorBubble            func(ctx context.Context) (*Error, error)
 		Errors                 func(ctx context.Context) (*Errors, error)
@@ -247,6 +248,9 @@ func (r *stubQuery) DirectiveFieldDef(ctx context.Context, ret string) (string, 
 }
 func (r *stubQuery) DirectiveField(ctx context.Context) (*string, error) {
 	return r.QueryResolver.DirectiveField(ctx)
+}
+func (r *stubQuery) DirectiveDouble(ctx context.Context) (*string, error) {
+	return r.QueryResolver.DirectiveDouble(ctx)
 }
 func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)

@@ -709,6 +709,7 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			return ec.directives.FieldLogging(ctx, obj, directive0)
 		}
+
 		tmp, err := directive1(rctx)
 		if err != nil {
 			return nil, err

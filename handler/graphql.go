@@ -86,7 +86,7 @@ func (c *Config) newRequestContext(ctx context.Context, es graphql.ExecutableSch
 		Tracer:               c.tracer,
 		ComplexityLimit:      c.complexityLimit,
 	}
-	if reqCtx.ComplexityLimit > 0 {
+	if reqCtx.ComplexityLimit > 0 || c.complexityLimitFunc != nil {
 		reqCtx.OperationComplexity = complexity.Calculate(es, op, variables)
 	}
 	err := reqCtx.Validate(ctx)

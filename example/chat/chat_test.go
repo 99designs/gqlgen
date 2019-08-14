@@ -15,16 +15,16 @@ func TestChatSubscriptions(t *testing.T) {
 	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
 	c := client.New(srv.URL)
 
-	sub := c.Websocket(`subscription @user(username:"vektah") { messageAdded(roomName:"#gophers") { text createdBy } }`)
+	sub := c.Websocket(`subscription @user(username:"vektah") { messageAdded(roomName:"#gophers") { text createdBy } }`, nil)
 	defer sub.Close()
 
 	go func() {
 		var resp interface{}
 		time.Sleep(10 * time.Millisecond)
-		err := c.Post(`mutation { 
-				a:post(text:"Hello!", roomName:"#gophers", username:"vektah") { id } 
-				b:post(text:"Hello Vektah!", roomName:"#gophers", username:"andrey") { id } 
-				c:post(text:"Whats up?", roomName:"#gophers", username:"vektah") { id } 
+		err := c.Post(`mutation {
+				a:post(text:"Hello!", roomName:"#gophers", username:"vektah") { id }
+				b:post(text:"Hello Vektah!", roomName:"#gophers", username:"andrey") { id }
+				c:post(text:"Whats up?", roomName:"#gophers", username:"vektah") { id }
 			}`, &resp)
 		assert.NoError(t, err)
 	}()

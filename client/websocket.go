@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -38,11 +39,11 @@ func errorSubscription(err error) *Subscription {
 	}
 }
 
-func (p *Client) Websocket(query string, options ...Option) *Subscription {
-	return p.WebsocketWithPayload(query, nil, options...)
+func (p *Client) Websocket(query string, reqHeaders http.Header, options ...Option) *Subscription {
+	return p.WebsocketWithPayload(query, nil, reqHeaders, options...)
 }
 
-func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
+func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, reqHeaders http.Header, options ...Option) *Subscription {
 	r := p.mkRequest(query, options...)
 	requestBody, err := json.Marshal(r)
 	if err != nil {
@@ -52,7 +53,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 	url := strings.Replace(p.url, "http://", "ws://", -1)
 	url = strings.Replace(url, "https://", "wss://", -1)
 
-	c, resp, err := websocket.DefaultDialer.Dial(url, nil)
+	c, resp, err := websocket.DefaultDialer.Dial(url, reqHeaders)
 	if err != nil {
 		return errorSubscription(fmt.Errorf("dial: %s", err.Error()))
 	}

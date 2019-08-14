@@ -85,7 +85,7 @@ func TestSubscriptions(t *testing.T) {
 		runtime.GC() // ensure no go-routines left from preceding tests
 		initialGoroutineCount := runtime.NumGoroutine()
 
-		sub := c.Websocket(`subscription { updated }`)
+		sub := c.Websocket(`subscription { updated }`, nil)
 
 		tick <- "message"
 
@@ -114,7 +114,7 @@ func TestSubscriptions(t *testing.T) {
 			"Authorization": "Bearer of the curse",
 			"number":        32,
 			"strings":       []string{"hello", "world"},
-		})
+		}, nil)
 
 		var msg struct {
 			resp struct {

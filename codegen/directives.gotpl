@@ -1,5 +1,5 @@
 {{ define "implDirectives" }}{{ $in := .DirectiveObjName }}
-	{{- range $i, $directive := .ImplDirectives -}}
+	{{ range $i, $directive := .ImplDirectives }}
 		directive{{add $i 1}} := func(ctx context.Context) (interface{}, error) {
 			{{- range $arg := $directive.Args }}
 				{{- if notNil "Value" $arg }}
@@ -16,7 +16,7 @@
 			{{- end }}
 			return ec.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs $in $i }})
 		}
-	{{- end -}}
+	{{ end }}
 {{ end }}
 
 {{define "queryDirectives"}}

@@ -16,7 +16,7 @@
 			{{- end }}
 			return ec.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs $in $i }})
 		}
-	{{- end -}}
+	{{ end -}}
 {{ end }}
 
 {{define "queryDirectives"}}

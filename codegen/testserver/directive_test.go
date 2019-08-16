@@ -55,6 +55,11 @@ func TestDirectives(t *testing.T) {
 		return nil, nil
 	}
 
+	resolvers.QueryResolver.DirectiveDouble = func(ctx context.Context) (*string, error) {
+		s := "Ok"
+		return &s, nil
+	}
+
 	srv := httptest.NewServer(
 		handler.GraphQL(
 			NewExecutableSchema(Config{
@@ -125,6 +130,12 @@ func TestDirectives(t *testing.T) {
 					},
 					ToNull: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
 						return nil, nil
+					},
+					Directive1: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+						return next(ctx)
+					},
+					Directive2: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+						return next(ctx)
 					},
 				},
 			}),
@@ -204,6 +215,16 @@ func TestDirectives(t *testing.T) {
 			err := c.Post(`query { directiveFieldDef(ret: "") }`, &resp)
 
 			require.EqualError(t, err, `[{"message":"not valid","path":["directiveFieldDef"]}]`)
+		})
+
+		t.Run("has 2 directives", func(t *testing.T) {
+			var resp struct {
+				DirectiveDouble string
+			}
+
+			c.MustPost(`query { directiveDouble }`, &resp)
+
+			require.Equal(t, "Ok", resp.DirectiveDouble)
 		})
 
 		t.Run("ok", func(t *testing.T) {

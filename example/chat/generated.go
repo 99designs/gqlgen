@@ -432,6 +432,9 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			}
 			n := next
 			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.User == nil {
+					return nil, errors.New("directive user is not implemented")
+				}
 				return ec.directives.User(ctx, obj, n, args["username"].(string))
 			}
 		}

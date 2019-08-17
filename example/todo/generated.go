@@ -410,6 +410,9 @@ func (ec *executionContext) _queryMiddleware(ctx context.Context, obj *ast.Opera
 			}
 			n := next
 			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.User == nil {
+					return nil, errors.New("directive user is not implemented")
+				}
 				return ec.directives.User(ctx, obj, n, args["id"].(int))
 			}
 		}
@@ -440,6 +443,9 @@ func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.Op
 			}
 			n := next
 			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.User == nil {
+					return nil, errors.New("directive user is not implemented")
+				}
 				return ec.directives.User(ctx, obj, n, args["id"].(int))
 			}
 		}
@@ -470,6 +476,9 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{
 			}
 			n := next
 			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.User == nil {
+					return nil, errors.New("directive user is not implemented")
+				}
 				return ec.directives.User(ctx, obj, n, args["id"].(int))
 			}
 		}
@@ -831,6 +840,9 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 			role, err := ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐRole(ctx, "OWNER")
 			if err != nil {
 				return nil, err
+			}
+			if ec.directives.HasRole == nil {
+				return nil, errors.New("directive hasRole is not implemented")
 			}
 			return ec.directives.HasRole(ctx, obj, directive0, role)
 		}

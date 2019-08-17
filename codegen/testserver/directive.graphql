@@ -5,6 +5,7 @@ directive @logged(id: UUID!) on FIELD
 directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
+directive @unimplemented on FIELD_DEFINITION
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
@@ -16,6 +17,7 @@ extend type Query {
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
     directiveDouble: String @directive1 @directive2
+    directiveUnimplemented: String @unimplemented
 }
 
 input InputDirectives {

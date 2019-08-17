@@ -167,6 +167,9 @@ func (r *queryResolver) DirectiveInputType(ctx context.Context, arg InnerInput) 
 func (r *queryResolver) DirectiveObject(ctx context.Context) (*ObjectDirectives, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DirectiveObjectWithCustomGoModel(ctx context.Context) (*ObjectDirectivesWithCustomGoModel, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) DirectiveFieldDef(ctx context.Context, ret string) (string, error) {
 	panic("not implemented")
 }

@@ -714,6 +714,9 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 		if err != nil {
 			return nil, err
 		}
+		if tmp == nil {
+			return nil, nil
+		}
 		if data, ok := tmp.(bool); ok {
 			return data, nil
 		}

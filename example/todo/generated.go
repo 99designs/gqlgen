@@ -839,6 +839,9 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 		if err != nil {
 			return nil, err
 		}
+		if tmp == nil {
+			return nil, nil
+		}
 		if data, ok := tmp.(bool); ok {
 			return data, nil
 		}

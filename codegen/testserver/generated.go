@@ -173,6 +173,10 @@ type ComplexityRoot struct {
 		Text         func(childComplexity int) int
 	}
 
+	ObjectDirectivesWithCustomGoModel struct {
+		NullableText func(childComplexity int) int
+	}
+
 	OuterObject struct {
 		Inner func(childComplexity int) int
 	}
@@ -201,45 +205,46 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Autobind               func(childComplexity int) int
-		Collision              func(childComplexity int) int
-		DefaultScalar          func(childComplexity int, arg string) int
-		DeprecatedField        func(childComplexity int) int
-		DirectiveArg           func(childComplexity int, arg string) int
-		DirectiveDouble        func(childComplexity int) int
-		DirectiveField         func(childComplexity int) int
-		DirectiveFieldDef      func(childComplexity int, ret string) int
-		DirectiveInput         func(childComplexity int, arg InputDirectives) int
-		DirectiveInputNullable func(childComplexity int, arg *InputDirectives) int
-		DirectiveInputType     func(childComplexity int, arg InnerInput) int
-		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int, arg3 *string) int
-		DirectiveObject        func(childComplexity int) int
-		ErrorBubble            func(childComplexity int) int
-		Errors                 func(childComplexity int) int
-		Fallback               func(childComplexity int, arg FallbackToStringEncoding) int
-		InputSlice             func(childComplexity int, arg []string) int
-		InvalidIdentifier      func(childComplexity int) int
-		MapInput               func(childComplexity int, input map[string]interface{}) int
-		MapStringInterface     func(childComplexity int, in map[string]interface{}) int
-		ModelMethods           func(childComplexity int) int
-		NestedInputs           func(childComplexity int, input [][]*OuterInput) int
-		NestedOutputs          func(childComplexity int) int
-		NullableArg            func(childComplexity int, arg *int) int
-		OptionalUnion          func(childComplexity int) int
-		Overlapping            func(childComplexity int) int
-		Panics                 func(childComplexity int) int
-		PrimitiveObject        func(childComplexity int) int
-		PrimitiveStringObject  func(childComplexity int) int
-		Recursive              func(childComplexity int, input *RecursiveInputSlice) int
-		ScalarSlice            func(childComplexity int) int
-		ShapeUnion             func(childComplexity int) int
-		Shapes                 func(childComplexity int) int
-		Slices                 func(childComplexity int) int
-		User                   func(childComplexity int, id int) int
-		Valid                  func(childComplexity int) int
-		ValidType              func(childComplexity int) int
-		WrappedScalar          func(childComplexity int) int
-		WrappedStruct          func(childComplexity int) int
+		Autobind                         func(childComplexity int) int
+		Collision                        func(childComplexity int) int
+		DefaultScalar                    func(childComplexity int, arg string) int
+		DeprecatedField                  func(childComplexity int) int
+		DirectiveArg                     func(childComplexity int, arg string) int
+		DirectiveDouble                  func(childComplexity int) int
+		DirectiveField                   func(childComplexity int) int
+		DirectiveFieldDef                func(childComplexity int, ret string) int
+		DirectiveInput                   func(childComplexity int, arg InputDirectives) int
+		DirectiveInputNullable           func(childComplexity int, arg *InputDirectives) int
+		DirectiveInputType               func(childComplexity int, arg InnerInput) int
+		DirectiveNullableArg             func(childComplexity int, arg *int, arg2 *int, arg3 *string) int
+		DirectiveObject                  func(childComplexity int) int
+		DirectiveObjectWithCustomGoModel func(childComplexity int) int
+		ErrorBubble                      func(childComplexity int) int
+		Errors                           func(childComplexity int) int
+		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
+		InputSlice                       func(childComplexity int, arg []string) int
+		InvalidIdentifier                func(childComplexity int) int
+		MapInput                         func(childComplexity int, input map[string]interface{}) int
+		MapStringInterface               func(childComplexity int, in map[string]interface{}) int
+		ModelMethods                     func(childComplexity int) int
+		NestedInputs                     func(childComplexity int, input [][]*OuterInput) int
+		NestedOutputs                    func(childComplexity int) int
+		NullableArg                      func(childComplexity int, arg *int) int
+		OptionalUnion                    func(childComplexity int) int
+		Overlapping                      func(childComplexity int) int
+		Panics                           func(childComplexity int) int
+		PrimitiveObject                  func(childComplexity int) int
+		PrimitiveStringObject            func(childComplexity int) int
+		Recursive                        func(childComplexity int, input *RecursiveInputSlice) int
+		ScalarSlice                      func(childComplexity int) int
+		ShapeUnion                       func(childComplexity int) int
+		Shapes                           func(childComplexity int) int
+		Slices                           func(childComplexity int) int
+		User                             func(childComplexity int, id int) int
+		Valid                            func(childComplexity int) int
+		ValidType                        func(childComplexity int) int
+		WrappedScalar                    func(childComplexity int) int
+		WrappedStruct                    func(childComplexity int) int
 	}
 
 	Rectangle struct {
@@ -346,6 +351,7 @@ type QueryResolver interface {
 	DirectiveInput(ctx context.Context, arg InputDirectives) (*string, error)
 	DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error)
 	DirectiveObject(ctx context.Context) (*ObjectDirectives, error)
+	DirectiveObjectWithCustomGoModel(ctx context.Context) (*ObjectDirectivesWithCustomGoModel, error)
 	DirectiveFieldDef(ctx context.Context, ret string) (string, error)
 	DirectiveField(ctx context.Context) (*string, error)
 	DirectiveDouble(ctx context.Context) (*string, error)
@@ -661,6 +667,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ObjectDirectives.Text(childComplexity), true
 
+	case "ObjectDirectivesWithCustomGoModel.nullableText":
+		if e.complexity.ObjectDirectivesWithCustomGoModel.NullableText == nil {
+			break
+		}
+
+		return e.complexity.ObjectDirectivesWithCustomGoModel.NullableText(childComplexity), true
+
 	case "OuterObject.inner":
 		if e.complexity.OuterObject.Inner == nil {
 			break
@@ -880,6 +893,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DirectiveObject(childComplexity), true
+
+	case "Query.directiveObjectWithCustomGoModel":
+		if e.complexity.Query.DirectiveObjectWithCustomGoModel == nil {
+			break
+		}
+
+		return e.complexity.Query.DirectiveObjectWithCustomGoModel(childComplexity), true
 
 	case "Query.errorBubble":
 		if e.complexity.Query.ErrorBubble == nil {
@@ -1381,6 +1401,7 @@ extend type Query {
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
     directiveObject: ObjectDirectives
+    directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
     directiveDouble: String @directive1 @directive2
@@ -1400,6 +1421,10 @@ input InnerDirectives {
 
 type ObjectDirectives {
     text: String! @length(min: 0, max: 7, message: "not valid")
+    nullableText: String @toNull
+}
+
+type ObjectDirectivesWithCustomGoModel {
     nullableText: String @toNull
 }
 `},
@@ -3725,6 +3750,9 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 		if err != nil {
 			return nil, err
 		}
+		if tmp == nil {
+			return nil, nil
+		}
 		if data, ok := tmp.(string); ok {
 			return data, nil
 		}
@@ -3773,10 +3801,11 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 		if err != nil {
 			return nil, err
 		}
+		if tmp == nil {
+			return nil, nil
+		}
 		if data, ok := tmp.(*string); ok {
 			return data, nil
-		} else if tmp == nil {
-			return nil, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
 	})
@@ -3788,6 +3817,54 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectivesWithCustomGoModel) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ObjectDirectivesWithCustomGoModel",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.NullableText, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			return ec.directives.ToNull(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *OuterObject) (ret graphql.Marshaler) {
@@ -5020,6 +5097,37 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 	return ec.marshalOObjectDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectives(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ObjectDirectivesWithCustomGoModel)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOObjectDirectivesWithCustomGoModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectivesWithCustomGoModel(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -5064,6 +5172,9 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		tmp, err := directive1(rctx)
 		if err != nil {
 			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
 		}
 		if data, ok := tmp.(string); ok {
 			return data, nil
@@ -5147,10 +5258,11 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 		if err != nil {
 			return nil, err
 		}
+		if tmp == nil {
+			return nil, nil
+		}
 		if data, ok := tmp.(*string); ok {
 			return data, nil
-		} else if tmp == nil {
-			return nil, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
 	})
@@ -8669,6 +8781,30 @@ func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var objectDirectivesWithCustomGoModelImplementors = []string{"ObjectDirectivesWithCustomGoModel"}
+
+func (ec *executionContext) _ObjectDirectivesWithCustomGoModel(ctx context.Context, sel ast.SelectionSet, obj *ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, objectDirectivesWithCustomGoModelImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ObjectDirectivesWithCustomGoModel")
+		case "nullableText":
+			out.Values[i] = ec._ObjectDirectivesWithCustomGoModel_nullableText(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var outerObjectImplementors = []string{"OuterObject"}
 
 func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionSet, obj *OuterObject) graphql.Marshaler {
@@ -9168,6 +9304,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_directiveObject(ctx, field)
+				return res
+			})
+		case "directiveObjectWithCustomGoModel":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_directiveObjectWithCustomGoModel(ctx, field)
 				return res
 			})
 		case "directiveFieldDef":
@@ -10937,6 +11084,17 @@ func (ec *executionContext) marshalOObjectDirectives2ᚖgithubᚗcomᚋ99designs
 		return graphql.Null
 	}
 	return ec._ObjectDirectives(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOObjectDirectivesWithCustomGoModel2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectivesWithCustomGoModel(ctx context.Context, sel ast.SelectionSet, v ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
+	return ec._ObjectDirectivesWithCustomGoModel(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOObjectDirectivesWithCustomGoModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectivesWithCustomGoModel(ctx context.Context, sel ast.SelectionSet, v *ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ObjectDirectivesWithCustomGoModel(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOOuterInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) (OuterInput, error) {

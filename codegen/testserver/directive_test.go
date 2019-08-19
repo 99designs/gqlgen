@@ -67,6 +67,11 @@ func TestDirectives(t *testing.T) {
 		return &s, nil
 	}
 
+	resolvers.QueryResolver.DirectiveUnimplemented = func(ctx context.Context) (*string, error) {
+		s := "Ok"
+		return &s, nil
+	}
+
 	srv := httptest.NewServer(
 		handler.GraphQL(
 			NewExecutableSchema(Config{
@@ -144,6 +149,7 @@ func TestDirectives(t *testing.T) {
 					Directive2: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
 						return next(ctx)
 					},
+					Unimplemented: nil,
 				},
 			}),
 			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
@@ -232,6 +238,16 @@ func TestDirectives(t *testing.T) {
 			c.MustPost(`query { directiveDouble }`, &resp)
 
 			require.Equal(t, "Ok", resp.DirectiveDouble)
+		})
+
+		t.Run("directive is not implemented", func(t *testing.T) {
+			var resp struct {
+				DirectiveUnimplemented string
+			}
+
+			err := c.Post(`query { directiveUnimplemented }`, &resp)
+
+			require.EqualError(t, err, `[{"message":"directive unimplemented is not implemented","path":["directiveUnimplemented"]}]`)
 		})
 
 		t.Run("ok", func(t *testing.T) {

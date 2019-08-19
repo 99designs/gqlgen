@@ -179,6 +179,9 @@ func (r *queryResolver) DirectiveField(ctx context.Context) (*string, error) {
 func (r *queryResolver) DirectiveDouble(ctx context.Context) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	panic("not implemented")
 }

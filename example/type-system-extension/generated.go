@@ -707,6 +707,9 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 			return obj.Verified, nil
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.FieldLogging == nil {
+				return nil, errors.New("directive fieldLogging is not implemented")
+			}
 			return ec.directives.FieldLogging(ctx, obj, directive0)
 		}
 

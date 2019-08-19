@@ -8198,7 +8198,7 @@ func (ec *executionContext) _A(ctx context.Context, sel ast.SelectionSet, obj *A
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8225,7 +8225,7 @@ func (ec *executionContext) _AIt(ctx context.Context, sel ast.SelectionSet, obj 
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8252,7 +8252,7 @@ func (ec *executionContext) _AbIt(ctx context.Context, sel ast.SelectionSet, obj
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8299,7 +8299,7 @@ func (ec *executionContext) _Autobind(ctx context.Context, sel ast.SelectionSet,
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8326,7 +8326,7 @@ func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8352,7 +8352,7 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8376,7 +8376,7 @@ func (ec *executionContext) _Content_Post(ctx context.Context, sel ast.Selection
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8400,7 +8400,7 @@ func (ec *executionContext) _Content_User(ctx context.Context, sel ast.Selection
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8424,7 +8424,7 @@ func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8450,7 +8450,7 @@ func (ec *executionContext) _EmbeddedPointer(ctx context.Context, sel ast.Select
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8489,7 +8489,7 @@ func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, ob
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8581,7 +8581,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8614,7 +8614,7 @@ func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.Selecti
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8641,7 +8641,7 @@ func (ec *executionContext) _InnerObject(ctx context.Context, sel ast.SelectionS
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8668,7 +8668,7 @@ func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel ast.Sele
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8695,7 +8695,7 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8722,7 +8722,7 @@ func (ec *executionContext) _LoopA(ctx context.Context, sel ast.SelectionSet, ob
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8749,7 +8749,7 @@ func (ec *executionContext) _LoopB(ctx context.Context, sel ast.SelectionSet, ob
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8776,7 +8776,7 @@ func (ec *executionContext) _Map(ctx context.Context, sel ast.SelectionSet, obj 
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8802,7 +8802,7 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8857,7 +8857,7 @@ func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.Selection
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8886,7 +8886,7 @@ func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.Selec
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8910,7 +8910,7 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel(ctx context.Conte
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8937,7 +8937,7 @@ func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionS
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -8993,7 +8993,7 @@ func (ec *executionContext) _OverlappingFields(ctx context.Context, sel ast.Sele
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9057,7 +9057,7 @@ func (ec *executionContext) _Panics(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9098,7 +9098,7 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9153,7 +9153,7 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9673,7 +9673,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9701,7 +9701,7 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9737,7 +9737,7 @@ func (ec *executionContext) _Slices(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9807,7 +9807,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9849,7 +9849,7 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9876,7 +9876,7 @@ func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.Selectio
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9903,7 +9903,7 @@ func (ec *executionContext) _XXIt(ctx context.Context, sel ast.SelectionSet, obj
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9930,7 +9930,7 @@ func (ec *executionContext) _XxIt(ctx context.Context, sel ast.SelectionSet, obj
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -9969,7 +9969,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10005,7 +10005,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10051,7 +10051,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10087,7 +10087,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10128,7 +10128,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10171,7 +10171,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10198,7 +10198,7 @@ func (ec *executionContext) _asdfIt(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10225,7 +10225,7 @@ func (ec *executionContext) _iIt(ctx context.Context, sel ast.SelectionSet, obj 
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
+	out.Dispatch(ec.Pool)
 	if invalids > 0 {
 		return graphql.Null
 	}
@@ -10503,7 +10503,7 @@ func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlg
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -10516,9 +10516,9 @@ func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlg
 			ret[i] = ec.marshalNPrimitive2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitive(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -10544,7 +10544,7 @@ func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designs�
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -10557,9 +10557,9 @@ func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designs�
 			ret[i] = ec.marshalNPrimitiveString2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveString(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -10711,7 +10711,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -10724,9 +10724,9 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen
 			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -10791,7 +10791,7 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -10804,9 +10804,9 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 			ret[i] = ec.marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -10862,7 +10862,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Co
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -10875,9 +10875,9 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Co
 			ret[i] = ec.marshalN__DirectiveLocation2string(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -10911,7 +10911,7 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -10924,9 +10924,9 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 			ret[i] = ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -10952,7 +10952,7 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -10965,9 +10965,9 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			ret[i] = ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -11293,7 +11293,7 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99design
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -11306,9 +11306,9 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99design
 			ret[i] = ec.marshalOOuterObject2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -11333,7 +11333,7 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚖgithubᚗcomᚋ99designs�
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -11346,9 +11346,9 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚖgithubᚗcomᚋ99designs�
 			ret[i] = ec.marshalOOuterObject2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -11438,7 +11438,7 @@ func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -11451,9 +11451,9 @@ func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			ret[i] = ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -11649,7 +11649,7 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -11662,9 +11662,9 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 			ret[i] = ec.marshalN__EnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -11689,7 +11689,7 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -11702,9 +11702,9 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 			ret[i] = ec.marshalN__Field2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -11729,7 +11729,7 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -11742,9 +11742,9 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 			ret[i] = ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}
@@ -11784,7 +11784,7 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			Result: &v[i],
 		}
 		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
+		f := func() {
 			defer func() {
 				if r := recover(); r != nil {
 					ec.Error(ctx, ec.Recover(ctx, r))
@@ -11797,9 +11797,9 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			ret[i] = ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
 		}
 		if isLen1 {
-			f(i)
+			f()
 		} else {
-			go f(i)
+			ec.Pool.Go(f)
 		}
 
 	}

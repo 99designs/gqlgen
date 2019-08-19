@@ -53,7 +53,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 	url := strings.Replace(p.url, "http://", "ws://", -1)
 	url = strings.Replace(url, "https://", "wss://", -1)
 
-	c, resp, err := websocket.DefaultDialer.Dial(url, reqHeaders)
+	c, resp, err := websocket.DefaultDialer.Dial(url, reqHeaders) //nolint:bodyclose
 	if err != nil {
 		return errorSubscription(fmt.Errorf("dial: %s", err.Error()))
 	}

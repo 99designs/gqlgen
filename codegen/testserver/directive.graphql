@@ -14,6 +14,7 @@ extend type Query {
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
     directiveObject: ObjectDirectives
+    directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
     directiveDouble: String @directive1 @directive2
@@ -34,5 +35,9 @@ input InnerDirectives {
 
 type ObjectDirectives {
     text: String! @length(min: 0, max: 7, message: "not valid")
+    nullableText: String @toNull
+}
+
+type ObjectDirectivesWithCustomGoModel {
     nullableText: String @toNull
 }

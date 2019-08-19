@@ -72,6 +72,8 @@ models:
       oneFoo: { fieldName: foo }
       twoFoo: { fieldName: foo }
       oldFoo: { fieldName: foo, resolver: true }
+  ObjectDirectivesWithCustomGoModel:
+    model: "github.com/99designs/gqlgen/codegen/testserver.ObjectDirectivesWithCustomGoModel"
   FallbackToStringEncoding:
     model: "github.com/99designs/gqlgen/codegen/testserver.FallbackToStringEncoding"
   Bytes:

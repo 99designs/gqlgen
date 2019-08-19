@@ -47,6 +47,13 @@ func TestDirectives(t *testing.T) {
 		}, nil
 	}
 
+	resolvers.QueryResolver.DirectiveObjectWithCustomGoModel = func(ctx context.Context) (*ObjectDirectivesWithCustomGoModel, error) {
+		s := "Ok"
+		return &ObjectDirectivesWithCustomGoModel{
+			NullableText: s,
+		}, nil
+	}
+
 	resolvers.QueryResolver.DirectiveField = func(ctx context.Context) (*string, error) {
 		if s, ok := ctx.Value("request_id").(*string); ok {
 			return s, nil
@@ -349,6 +356,18 @@ func TestDirectives(t *testing.T) {
 			require.Nil(t, err)
 			require.Equal(t, "Ok", resp.DirectiveObject.Text)
 			require.True(t, resp.DirectiveObject.NullableText == nil)
+		})
+		t.Run("when directive returns nil & custom go field is not nilable", func(t *testing.T) {
+			var resp struct {
+				DirectiveObjectWithCustomGoModel *struct {
+					NullableText *string
+				}
+			}
+
+			err := c.Post(`query { directiveObjectWithCustomGoModel{ nullableText } }`, &resp)
+
+			require.Nil(t, err)
+			require.True(t, resp.DirectiveObjectWithCustomGoModel.NullableText == nil)
 		})
 	})
 }

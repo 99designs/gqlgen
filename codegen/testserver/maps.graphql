@@ -1,5 +1,6 @@
 extend type Query {
     mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
+    mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
 }
 
 type MapStringInterfaceType {
@@ -10,4 +11,8 @@ type MapStringInterfaceType {
 input MapStringInterfaceInput {
     a: String
     b: Int
+}
+
+input NestedMapInput {
+    map: MapStringInterfaceInput
 }

@@ -87,6 +87,10 @@ type Map struct {
 	ID string `json:"id"`
 }
 
+type NestedMapInput struct {
+	Map map[string]interface{} `json:"map"`
+}
+
 type ObjectDirectives struct {
 	Text         string  `json:"text"`
 	NullableText *string `json:"nullableText"`

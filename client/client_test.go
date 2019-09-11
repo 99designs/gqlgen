@@ -39,3 +39,33 @@ func TestClient(t *testing.T) {
 
 	require.Equal(t, "bob", resp.Name)
 }
+
+func TestClientWithHeader(t *testing.T) {
+	h := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		require.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
+
+		err = json.NewEncoder(w).Encode(map[string]interface{}{
+			"data": map[string]interface{}{
+				"name": "bob",
+			},
+		})
+		if err != nil {
+			panic(err)
+		}
+	}))
+
+	c := client.New(h.URL)
+	c.Header.Add("Authorization", "mytoken")
+
+	var resp struct {
+		Name string
+	}
+
+	c.MustPost("user(id:$id){name}", &resp, client.Var("id", 1))
+
+	require.Equal(t, "bob", resp.Name)
+}

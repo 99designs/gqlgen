@@ -15,6 +15,7 @@ import (
 type Client struct {
 	url    string
 	client *http.Client
+	Header http.Header
 }
 
 // New creates a graphql client
@@ -22,6 +23,9 @@ func New(url string, client ...*http.Client) *Client {
 	p := &Client{
 		url: url,
 	}
+
+	p.Header = http.Header{}
+	p.Header.Add("Content-Type", "application/json")
 
 	if len(client) > 0 {
 		p.client = client[0]
@@ -101,7 +105,9 @@ func (p *Client) RawPost(query string, options ...Option) (*ResponseData, error)
 		return nil, fmt.Errorf("encode: %s", err.Error())
 	}
 
-	rawResponse, err := p.client.Post(p.url, "application/json", bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", p.url, bytes.NewBuffer(requestBody))
+	req.Header = p.Header
+	rawResponse, err := p.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("post: %s", err.Error())
 	}

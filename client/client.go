@@ -106,6 +106,9 @@ func (p *Client) RawPost(query string, options ...Option) (*ResponseData, error)
 	}
 
 	req, err := http.NewRequest("POST", p.url, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %s", err.Error())
+	}
 	req.Header = p.Header
 	rawResponse, err := p.client.Do(req)
 	if err != nil {

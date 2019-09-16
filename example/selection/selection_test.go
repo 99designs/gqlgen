@@ -1,7 +1,6 @@
 package selection
 
 import (
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -10,8 +9,7 @@ import (
 )
 
 func TestSelection(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
 
 	query := `{
 			events {

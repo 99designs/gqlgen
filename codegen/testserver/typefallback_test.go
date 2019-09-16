@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -13,8 +12,7 @@ import (
 func TestTypeFallback(t *testing.T) {
 	resolvers := &Stub{}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	resolvers.QueryResolver.Fallback = func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error) {
 		return arg, nil

@@ -3,7 +3,6 @@ package testserver
 import (
 	"context"
 	"fmt"
-	"net/http/httptest"
 	"sync"
 	"testing"
 
@@ -23,36 +22,34 @@ func TestTracer(t *testing.T) {
 		var tracerLog []string
 		var mu sync.Mutex
 
-		srv := httptest.NewServer(
-			handler.GraphQL(
-				NewExecutableSchema(Config{Resolvers: resolvers}),
-				handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-					path, _ := ctx.Value("path").([]int)
-					return next(context.WithValue(ctx, "path", append(path, 1)))
-				}),
-				handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-					path, _ := ctx.Value("path").([]int)
-					return next(context.WithValue(ctx, "path", append(path, 2)))
-				}),
-				handler.Tracer(&testTracer{
-					id: 1,
-					append: func(s string) {
-						mu.Lock()
-						defer mu.Unlock()
-						tracerLog = append(tracerLog, s)
-					},
-				}),
-				handler.Tracer(&testTracer{
-					id: 2,
-					append: func(s string) {
-						mu.Lock()
-						defer mu.Unlock()
-						tracerLog = append(tracerLog, s)
-					},
-				}),
-			))
-		defer srv.Close()
-		c := client.New(srv.URL)
+		srv := handler.GraphQL(
+			NewExecutableSchema(Config{Resolvers: resolvers}),
+			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+				path, _ := ctx.Value("path").([]int)
+				return next(context.WithValue(ctx, "path", append(path, 1)))
+			}),
+			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+				path, _ := ctx.Value("path").([]int)
+				return next(context.WithValue(ctx, "path", append(path, 2)))
+			}),
+			handler.Tracer(&testTracer{
+				id: 1,
+				append: func(s string) {
+					mu.Lock()
+					defer mu.Unlock()
+					tracerLog = append(tracerLog, s)
+				},
+			}),
+			handler.Tracer(&testTracer{
+				id: 2,
+				append: func(s string) {
+					mu.Lock()
+					defer mu.Unlock()
+					tracerLog = append(tracerLog, s)
+				},
+			}),
+		)
+		c := client.New(srv)
 
 		var resp struct {
 			User struct {
@@ -157,13 +154,10 @@ func TestTracer(t *testing.T) {
 			},
 		}
 
-		srv := httptest.NewServer(
-			handler.GraphQL(
-				NewExecutableSchema(Config{Resolvers: resolvers}),
-				handler.Tracer(configurableTracer),
-			))
-		defer srv.Close()
-		c := client.New(srv.URL)
+		c := client.New(handler.GraphQL(
+			NewExecutableSchema(Config{Resolvers: resolvers}),
+			handler.Tracer(configurableTracer),
+		))
 
 		var resp struct {
 			User struct {

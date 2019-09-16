@@ -1,7 +1,6 @@
 package dataloader
 
 import (
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -11,8 +10,7 @@ import (
 )
 
 func TestTodo(t *testing.T) {
-	srv := httptest.NewServer(LoaderMiddleware(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}}))))
-	c := client.New(srv.URL)
+	c := client.New(LoaderMiddleware(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}}))))
 
 	t.Run("create a new todo", func(t *testing.T) {
 		var resp interface{}

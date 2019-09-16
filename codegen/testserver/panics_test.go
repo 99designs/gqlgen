@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,8 +22,7 @@ func TestPanics(t *testing.T) {
 		return []MarshalPanic{MarshalPanic("aa"), MarshalPanic("bb")}, nil
 	}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	t.Run("panics in marshallers will not kill server", func(t *testing.T) {
 		var resp interface{}

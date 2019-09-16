@@ -3,7 +3,6 @@ package testserver
 import (
 	"context"
 	"fmt"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -72,7 +71,7 @@ func TestDirectives(t *testing.T) {
 		return &s, nil
 	}
 
-	srv := httptest.NewServer(
+	srv :=
 		handler.GraphQL(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
@@ -160,8 +159,8 @@ func TestDirectives(t *testing.T) {
 				path, _ := ctx.Value("path").([]int)
 				return next(context.WithValue(ctx, "path", append(path, 2)))
 			}),
-		))
-	c := client.New(srv.URL)
+		)
+	c := client.New(srv)
 
 	t.Run("arg directives", func(t *testing.T) {
 		t.Run("when function errors on directives", func(t *testing.T) {

@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -14,8 +13,7 @@ import (
 func TestTime(t *testing.T) {
 	resolvers := &Stub{}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	resolvers.QueryResolver.User = func(ctx context.Context, id int) (user *User, e error) {
 		return &User{}, nil

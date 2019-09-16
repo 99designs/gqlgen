@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -16,14 +15,10 @@ func TestIntrospection(t *testing.T) {
 	t.Run("disabled", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		srv := httptest.NewServer(
-			handler.GraphQL(
-				NewExecutableSchema(Config{Resolvers: resolvers}),
-				handler.IntrospectionEnabled(false),
-			),
-		)
-
-		c := client.New(srv.URL)
+		c := client.New(handler.GraphQL(
+			NewExecutableSchema(Config{Resolvers: resolvers}),
+			handler.IntrospectionEnabled(false),
+		))
 
 		var resp interface{}
 		err := c.Post(introspection.Query, &resp)
@@ -33,13 +28,9 @@ func TestIntrospection(t *testing.T) {
 	t.Run("enabled by default", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		srv := httptest.NewServer(
-			handler.GraphQL(
-				NewExecutableSchema(Config{Resolvers: resolvers}),
-			),
-		)
-
-		c := client.New(srv.URL)
+		c := client.New(handler.GraphQL(
+			NewExecutableSchema(Config{Resolvers: resolvers}),
+		))
 
 		var resp interface{}
 		err := c.Post(introspection.Query, &resp)
@@ -55,7 +46,6 @@ func TestIntrospection(t *testing.T) {
 			  }
 			}`
 
-			c := client.New(srv.URL)
 			var resp struct {
 				Type struct {
 					Fields []struct {
@@ -75,18 +65,14 @@ func TestIntrospection(t *testing.T) {
 	t.Run("disabled by middleware", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		srv := httptest.NewServer(
-			handler.GraphQL(
-				NewExecutableSchema(Config{Resolvers: resolvers}),
-				handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-					graphql.GetRequestContext(ctx).DisableIntrospection = true
+		c := client.New(handler.GraphQL(
+			NewExecutableSchema(Config{Resolvers: resolvers}),
+			handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+				graphql.GetRequestContext(ctx).DisableIntrospection = true
 
-					return next(ctx)
-				}),
-			),
-		)
-
-		c := client.New(srv.URL)
+				return next(ctx)
+			}),
+		))
 
 		var resp interface{}
 		err := c.Post(introspection.Query, &resp)

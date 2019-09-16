@@ -1,7 +1,6 @@
 package scalars
 
 import (
-	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -22,8 +21,7 @@ type RawUser struct {
 }
 
 func TestScalars(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
 
 	t.Run("marshaling", func(t *testing.T) {
 		var resp struct {

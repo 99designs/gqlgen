@@ -1,5 +1,7 @@
 module github.com/99designs/gqlgen
 
+go 1.12
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi v3.3.2+incompatible

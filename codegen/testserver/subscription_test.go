@@ -3,7 +3,6 @@ package testserver
 import (
 	"context"
 	"fmt"
-	"net/http/httptest"
 	"runtime"
 	"sort"
 	"testing"
@@ -67,19 +66,18 @@ func TestSubscriptions(t *testing.T) {
 		return res, nil
 	}
 
-	srv := httptest.NewServer(
-		handler.GraphQL(
-			NewExecutableSchema(Config{Resolvers: resolvers}),
-			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				path, _ := ctx.Value("path").([]int)
-				return next(context.WithValue(ctx, "path", append(path, 1)))
-			}),
-			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				path, _ := ctx.Value("path").([]int)
-				return next(context.WithValue(ctx, "path", append(path, 2)))
-			}),
-		))
-	c := client.New(srv.URL)
+	srv := handler.GraphQL(
+		NewExecutableSchema(Config{Resolvers: resolvers}),
+		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			path, _ := ctx.Value("path").([]int)
+			return next(context.WithValue(ctx, "path", append(path, 1)))
+		}),
+		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			path, _ := ctx.Value("path").([]int)
+			return next(context.WithValue(ctx, "path", append(path, 2)))
+		}),
+	)
+	c := client.New(srv)
 
 	t.Run("wont leak goroutines", func(t *testing.T) {
 		runtime.GC() // ensure no go-routines left from preceding tests

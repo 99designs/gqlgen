@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -23,8 +22,7 @@ func TestNullBubbling(t *testing.T) {
 		return &Error{ID: "E1234"}, nil
 	}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	t.Run("when function errors on non required field", func(t *testing.T) {
 		var resp struct {

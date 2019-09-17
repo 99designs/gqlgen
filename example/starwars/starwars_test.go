@@ -1,7 +1,6 @@
 package starwars
 
 import (
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -12,8 +11,7 @@ import (
 )
 
 func TestStarwars(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(generated.NewExecutableSchema(NewResolver())))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(generated.NewExecutableSchema(NewResolver())))
 
 	t.Run("Lukes starships", func(t *testing.T) {
 		var resp struct {

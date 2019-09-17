@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -20,8 +19,7 @@ func TestPrimitiveObjects(t *testing.T) {
 		return int(*obj), nil
 	}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	t.Run("can fetch value", func(t *testing.T) {
 		var resp struct {
@@ -53,8 +51,7 @@ func TestPrimitiveStringObjects(t *testing.T) {
 		return len(string(*obj)), nil
 	}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	t.Run("can fetch value", func(t *testing.T) {
 		var resp struct {

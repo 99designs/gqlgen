@@ -3,6 +3,8 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http/httptest"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -13,7 +15,7 @@ const (
 	connectionInitMsg = "connection_init" // Client -> Server
 	startMsg          = "start"           // Client -> Server
 	connectionAckMsg  = "connection_ack"  // Server -> Client
-	connectionKa      = "ka"              // Server -> Client
+	connectionKaMsg   = "ka"              // Server -> Client
 	dataMsg           = "data"            // Server -> Client
 	errorMsg          = "error"           // Server -> Client
 )
@@ -43,16 +45,23 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 }
 
 func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
-	r := p.mkRequest(query, options...)
-	requestBody, err := json.Marshal(r)
+	r, err := p.newRequest(query, options...)
 	if err != nil {
-		return errorSubscription(fmt.Errorf("encode: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("request: %s", err.Error()))
+	}
+	r.Header.Set("Host", "99designs.com")
+
+	requestBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return errorSubscription(fmt.Errorf("parse body: %s", err.Error()))
 	}
 
-	url := strings.Replace(p.url, "http://", "ws://", -1)
+	srv := httptest.NewServer(p.h)
+	url := strings.Replace(srv.URL, "http://", "ws://", -1)
 	url = strings.Replace(url, "https://", "wss://", -1)
 
-	c, resp, err := websocket.DefaultDialer.Dial(url, nil)
+	c, _, err := websocket.DefaultDialer.Dial(url, r.Header)
+
 	if err != nil {
 		return errorSubscription(fmt.Errorf("dial: %s", err.Error()))
 	}
@@ -80,11 +89,11 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 
 	var ka operationMessage
 	if err = c.ReadJSON(&ka); err != nil {
-		return errorSubscription(fmt.Errorf("ka: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("ack: %s", err.Error()))
 	}
 
-	if ka.Type != connectionKa {
-		return errorSubscription(fmt.Errorf("expected ka message, got %#v", ack))
+	if ka.Type != connectionKaMsg {
+		return errorSubscription(fmt.Errorf("expected ack message, got %#v", ack))
 	}
 
 	if err = c.WriteJSON(operationMessage{Type: startMsg, ID: "1", Payload: requestBody}); err != nil {
@@ -93,9 +102,8 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 
 	return &Subscription{
 		Close: func() error {
-			c.Close()
-			resp.Body.Close()
-			return nil
+			srv.Close()
+			return c.Close()
 		},
 		Next: func(response interface{}) error {
 			var op operationMessage

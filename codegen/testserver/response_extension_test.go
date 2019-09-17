@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -17,7 +16,7 @@ func TestResponseExtension(t *testing.T) {
 		return "Ok", nil
 	}
 
-	srv := httptest.NewServer(handler.GraphQL(
+	srv := handler.GraphQL(
 		NewExecutableSchema(Config{Resolvers: resolvers}),
 		handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
 			rctx := graphql.GetRequestContext(ctx)
@@ -26,8 +25,8 @@ func TestResponseExtension(t *testing.T) {
 			}
 			return next(ctx)
 		}),
-	))
-	c := client.New(srv.URL)
+	)
+	c := client.New(srv)
 
 	raw, _ := c.RawPost(`query { valid }`)
 	require.Equal(t, raw.Extensions["example"], "value")

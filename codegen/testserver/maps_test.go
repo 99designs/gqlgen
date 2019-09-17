@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -16,12 +15,9 @@ func TestMaps(t *testing.T) {
 		return in, nil
 	}
 
-	srv := httptest.NewServer(
-		handler.GraphQL(
-			NewExecutableSchema(Config{Resolvers: resolver}),
-		))
-	defer srv.Close()
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(
+		NewExecutableSchema(Config{Resolvers: resolver}),
+	))
 	t.Run("unset", func(t *testing.T) {
 		var resp struct {
 			MapStringInterface map[string]interface{}

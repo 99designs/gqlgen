@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -28,24 +27,23 @@ func TestMiddleware(t *testing.T) {
 	}
 
 	areMethods := []bool{}
-	srv := httptest.NewServer(
-		handler.GraphQL(
-			NewExecutableSchema(Config{Resolvers: resolvers}),
-			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				path, _ := ctx.Value("path").([]int)
-				return next(context.WithValue(ctx, "path", append(path, 1)))
-			}),
-			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				path, _ := ctx.Value("path").([]int)
-				return next(context.WithValue(ctx, "path", append(path, 2)))
-			}),
-			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				areMethods = append(areMethods, graphql.GetResolverContext(ctx).IsMethod)
-				return next(ctx)
-			}),
-		))
+	srv := handler.GraphQL(
+		NewExecutableSchema(Config{Resolvers: resolvers}),
+		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			path, _ := ctx.Value("path").([]int)
+			return next(context.WithValue(ctx, "path", append(path, 1)))
+		}),
+		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			path, _ := ctx.Value("path").([]int)
+			return next(context.WithValue(ctx, "path", append(path, 2)))
+		}),
+		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			areMethods = append(areMethods, graphql.GetResolverContext(ctx).IsMethod)
+			return next(ctx)
+		}),
+	)
 
-	c := client.New(srv.URL)
+	c := client.New(srv)
 
 	var resp struct {
 		User struct {

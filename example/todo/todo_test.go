@@ -1,7 +1,6 @@
 package todo
 
 import (
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -11,8 +10,7 @@ import (
 )
 
 func TestTodo(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(New())))
 
 	var resp struct {
 		CreateTodo struct{ ID string }
@@ -182,8 +180,7 @@ func TestTodo(t *testing.T) {
 }
 
 func TestSkipAndIncludeDirectives(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(New())))
 
 	t.Run("skip on field", func(t *testing.T) {
 		var resp map[string]interface{}

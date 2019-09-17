@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -13,8 +12,7 @@ import (
 func TestComplexityCollisions(t *testing.T) {
 	resolvers := &Stub{}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	resolvers.QueryResolver.Overlapping = func(ctx context.Context) (fields *OverlappingFields, e error) {
 		return &OverlappingFields{
@@ -50,8 +48,7 @@ func TestComplexityFuncs(t *testing.T) {
 	cfg.Complexity.OverlappingFields.Foo = func(childComplexity int) int { return 1000 }
 	cfg.Complexity.OverlappingFields.NewFoo = func(childComplexity int) int { return 5 }
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(cfg), handler.ComplexityLimit(10)))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(cfg), handler.ComplexityLimit(10)))
 
 	resolvers.QueryResolver.Overlapping = func(ctx context.Context) (fields *OverlappingFields, e error) {
 		return &OverlappingFields{

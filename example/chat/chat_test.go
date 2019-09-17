@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -12,8 +11,7 @@ import (
 )
 
 func TestChatSubscriptions(t *testing.T) {
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(New())))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(New())))
 
 	sub := c.Websocket(`subscription @user(username:"vektah") { messageAdded(roomName:"#gophers") { text createdBy } }`)
 	defer sub.Close()

@@ -6,7 +6,6 @@ package testserver
 import (
 	"context"
 	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"testing"
 
@@ -40,8 +39,7 @@ func TestUnionFragments(t *testing.T) {
 		return &Circle{Radius: 32}, nil
 	}
 
-	srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
-	c := client.New(srv.URL)
+	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	t.Run("inline fragment on union", func(t *testing.T) {
 		var resp struct {

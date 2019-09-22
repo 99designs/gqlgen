@@ -52,7 +52,7 @@ type PersistedQueryCache interface {
 	Get(ctx context.Context, hash string) (string, bool)
 }
 
-type websocketInitFunc func(ctx context.Context, initPayload InitPayload) error
+type websocketInitFunc func(ctx context.Context, initPayload InitPayload) (context.Context, error)
 
 type Config struct {
 	cacheSize                       int
@@ -278,7 +278,7 @@ func (tw *tracerWrapper) EndOperationExecution(ctx context.Context) {
 
 // WebsocketInitFunc is called when the server receives connection init message from the client.
 // This can be used to check initial payload to see whether to accept the websocket connection.
-func WebsocketInitFunc(websocketInitFunc func(ctx context.Context, initPayload InitPayload) error) Option {
+func WebsocketInitFunc(websocketInitFunc websocketInitFunc) Option {
 	return func(cfg *Config) {
 		cfg.websocketInitFunc = websocketInitFunc
 	}

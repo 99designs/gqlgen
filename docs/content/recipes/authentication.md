@@ -114,29 +114,44 @@ func (r *queryResolver) Hero(ctx context.Context, episode Episode) (Character, e
 }
 ```
 
-Things are different with websockets, and if you do things in the vein of the above example, you have to compute this at every call to `auth.ForContext`.
+### Websockets
 
-```golang
-// ForContext finds the user from the context. REQUIRES Middleware to have run.
-func ForContext(ctx context.Context) *User {
-  raw, ok := ctx.Value(userCtxKey).(*User)
-  
-  if !ok {
-    payload := handler.GetInitPayload(ctx)
-    if payload == nil {
-      return nil
-    }
+If you need access to the websocket init payload we can do the same thing with the WebsocketInitFunc:
 
-    userId, err := validateAndGetUserID(payload["token"])
-    if err != nil {
-      return nil
-    }
+```go
+func main() {
+	router := chi.NewRouter()
 
-    return getUserByID(db, userId)
-  }
+	router.Use(auth.Middleware(db))
 
-	return raw
+	router.Handle("/", handler.Playground("Starwars", "/query"))
+	router.Handle("/query",
+		handler.GraphQL(starwars.NewExecutableSchema(starwars.NewResolver())),
+		WebsocketInitFunc(func(ctx context.Context, initPayload InitPayload) (context.Context, error) {
+			userId, err := validateAndGetUserID(payload["token"])
+			if err != nil {
+				return nil, err
+			}
+
+			// get the user from the database
+			user := getUserByID(db, userId)
+
+			// put it in context
+			userCtx := context.WithValue(r.Context(), userCtxKey, user)
+
+			// and return it so the resolvers can see it
+			return userCtx, nil
+		}))
+	)
+
+	err := http.ListenAndServe(":8080", router)
+	if err != nil {
+		panic(err)
+	}
 }
 ```
 
-It's a bit inefficient if you have multiple calls to this function (e.g. on a field resolver), but what you might do to mitigate that is to have a session object set on the http request and only populate it upon the first check.
+> Note
+>
+> Subscriptions are long lived, if your tokens can timeout or need to be refreshed you should keep the token in
+context too and verify it is still valid in `auth.ForContext`.

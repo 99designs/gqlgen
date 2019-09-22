@@ -95,11 +95,13 @@ func (c *wsConnection) init() bool {
 		}
 
 		if c.cfg.websocketInitFunc != nil {
-			if err := c.cfg.websocketInitFunc(c.ctx, c.initPayload); err != nil {
+			ctx, err := c.cfg.websocketInitFunc(c.ctx, c.initPayload)
+			if err != nil {
 				c.sendConnectionError(err.Error())
 				c.close(websocket.CloseNormalClosure, "terminated")
 				return false
 			}
+			c.ctx = ctx
 		}
 
 		c.write(&operationMessage{Type: connectionAckMsg})

@@ -45,7 +45,7 @@ resolver:
 struct_tag: json
 
 # Instead of listing out every model like below, you can automatically bind to any matching types
-# within the given path. EXPERIMENTAL in v0.9.1
+# within the given path by using `model: User` or `model: models.User`. EXPERIMENTAL in v0.9.1
 autobind:
  - github.com/my/app/models
 
@@ -53,9 +53,9 @@ autobind:
 # graphql. These normally come from the db or a remote api.
 models:
   User:
-    model: github.com/my/app/models.User
+    model: models.User # can use short paths when the package is listed in autobind
   Todo:
-    model: github.com/my/app/models.Todo
+    model: github.com/my/app/models.Todo # or full paths if you need to go elsewhere
     fields:
       id:
         resolver: true # force a resolver to be generated

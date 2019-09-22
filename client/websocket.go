@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"github.com/vektah/gqlparser/gqlerror"
 )
 
 const (
@@ -42,6 +41,13 @@ func errorSubscription(err error) *Subscription {
 
 func (p *Client) Websocket(query string, options ...Option) *Subscription {
 	return p.WebsocketWithPayload(query, nil, options...)
+}
+
+// Grab a single response from a websocket based query
+func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option) error {
+	sock := p.Websocket(query)
+	defer sock.Close()
+	return sock.Next(&resp)
 }
 
 func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
@@ -119,23 +125,19 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 				}
 			}
 
-			respDataRaw := map[string]interface{}{}
+			var respDataRaw Response
 			err = json.Unmarshal(op.Payload, &respDataRaw)
 			if err != nil {
 				return fmt.Errorf("decode: %s", err.Error())
 			}
 
-			if respDataRaw["errors"] != nil {
-				var errs []*gqlerror.Error
-				if err = unpack(respDataRaw["errors"], &errs); err != nil {
-					return err
-				}
-				if len(errs) > 0 {
-					return fmt.Errorf("errors: %s", errs)
-				}
-			}
+			// we want to unpack even if there is an error, so we can see partial responses
+			unpackErr := unpack(respDataRaw.Data, response)
 
-			return unpack(respDataRaw["data"], response)
+			if respDataRaw.Errors != nil {
+				return RawJsonError{respDataRaw.Errors}
+			}
+			return unpackErr
 		},
 	}
 }

@@ -13,43 +13,37 @@ import (
 
 func TestDirectives(t *testing.T) {
 	resolvers := &Stub{}
+	ok := "Ok"
 	resolvers.QueryResolver.DirectiveArg = func(ctx context.Context, arg string) (i *string, e error) {
-		s := "Ok"
-		return &s, nil
+		return &ok, nil
 	}
 
 	resolvers.QueryResolver.DirectiveInput = func(ctx context.Context, arg InputDirectives) (i *string, e error) {
-		s := "Ok"
-		return &s, nil
+		return &ok, nil
 	}
 
 	resolvers.QueryResolver.DirectiveInputNullable = func(ctx context.Context, arg *InputDirectives) (i *string, e error) {
-		s := "Ok"
-		return &s, nil
+		return &ok, nil
 	}
 
 	resolvers.QueryResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
-		s := "Ok"
-		return &s, nil
+		return &ok, nil
 	}
 
 	resolvers.QueryResolver.DirectiveInputType = func(ctx context.Context, arg InnerInput) (i *string, e error) {
-		s := "Ok"
-		return &s, nil
+		return &ok, nil
 	}
 
 	resolvers.QueryResolver.DirectiveObject = func(ctx context.Context) (*ObjectDirectives, error) {
-		s := "Ok"
 		return &ObjectDirectives{
-			Text:         s,
-			NullableText: &s,
+			Text:         ok,
+			NullableText: &ok,
 		}, nil
 	}
 
 	resolvers.QueryResolver.DirectiveObjectWithCustomGoModel = func(ctx context.Context) (*ObjectDirectivesWithCustomGoModel, error) {
-		s := "Ok"
 		return &ObjectDirectivesWithCustomGoModel{
-			NullableText: s,
+			NullableText: ok,
 		}, nil
 	}
 
@@ -62,13 +56,34 @@ func TestDirectives(t *testing.T) {
 	}
 
 	resolvers.QueryResolver.DirectiveDouble = func(ctx context.Context) (*string, error) {
-		s := "Ok"
-		return &s, nil
+		return &ok, nil
 	}
 
 	resolvers.QueryResolver.DirectiveUnimplemented = func(ctx context.Context) (*string, error) {
-		s := "Ok"
-		return &s, nil
+		return &ok, nil
+	}
+
+	okchan := func() (<-chan *string, error) {
+		res := make(chan *string, 1)
+		res <- &ok
+		close(res)
+		return res, nil
+	}
+
+	resolvers.SubscriptionResolver.DirectiveArg = func(ctx context.Context, arg string) (strings <-chan *string, e error) {
+		return okchan()
+	}
+
+	resolvers.SubscriptionResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (strings <-chan *string, e error) {
+		return okchan()
+	}
+
+	resolvers.SubscriptionResolver.DirectiveDouble = func(ctx context.Context) (strings <-chan *string, e error) {
+		return okchan()
+	}
+
+	resolvers.SubscriptionResolver.DirectiveUnimplemented = func(ctx context.Context) (<-chan *string, error) {
+		return okchan()
 	}
 
 	srv :=
@@ -367,6 +382,61 @@ func TestDirectives(t *testing.T) {
 
 			require.Nil(t, err)
 			require.True(t, resp.DirectiveObjectWithCustomGoModel.NullableText == nil)
+		})
+	})
+
+	t.Run("Subscription directives", func(t *testing.T) {
+		t.Run("arg directives", func(t *testing.T) {
+			t.Run("when function errors on directives", func(t *testing.T) {
+				var resp struct {
+					DirectiveArg *string
+				}
+
+				err := c.WebsocketOnce(`subscription { directiveArg(arg: "") }`, &resp)
+
+				require.EqualError(t, err, `[{"message":"invalid length","path":["directiveArg"]}]`)
+				require.Nil(t, resp.DirectiveArg)
+			})
+			t.Run("when function errors on nullable arg directives", func(t *testing.T) {
+				var resp struct {
+					DirectiveNullableArg *string
+				}
+
+				err := c.WebsocketOnce(`subscription { directiveNullableArg(arg: -100) }`, &resp)
+
+				require.EqualError(t, err, `[{"message":"too small","path":["directiveNullableArg"]}]`)
+				require.Nil(t, resp.DirectiveNullableArg)
+			})
+			t.Run("when function success on nullable arg directives", func(t *testing.T) {
+				var resp struct {
+					DirectiveNullableArg *string
+				}
+
+				err := c.WebsocketOnce(`subscription { directiveNullableArg }`, &resp)
+
+				require.Nil(t, err)
+				require.Equal(t, "Ok", *resp.DirectiveNullableArg)
+			})
+			t.Run("when function success on valid nullable arg directives", func(t *testing.T) {
+				var resp struct {
+					DirectiveNullableArg *string
+				}
+
+				err := c.WebsocketOnce(`subscription { directiveNullableArg(arg: 1) }`, &resp)
+
+				require.Nil(t, err)
+				require.Equal(t, "Ok", *resp.DirectiveNullableArg)
+			})
+			t.Run("when function success", func(t *testing.T) {
+				var resp struct {
+					DirectiveArg *string
+				}
+
+				err := c.WebsocketOnce(`subscription { directiveArg(arg: "test") }`, &resp)
+
+				require.Nil(t, err)
+				require.Equal(t, "Ok", *resp.DirectiveArg)
+			})
 		})
 	})
 }

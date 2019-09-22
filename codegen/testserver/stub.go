@@ -81,8 +81,12 @@ type Stub struct {
 		WrappedScalar                    func(ctx context.Context) (WrappedScalar, error)
 	}
 	SubscriptionResolver struct {
-		Updated     func(ctx context.Context) (<-chan string, error)
-		InitPayload func(ctx context.Context) (<-chan string, error)
+		Updated                func(ctx context.Context) (<-chan string, error)
+		InitPayload            func(ctx context.Context) (<-chan string, error)
+		DirectiveArg           func(ctx context.Context, arg string) (<-chan *string, error)
+		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error)
+		DirectiveDouble        func(ctx context.Context) (<-chan *string, error)
+		DirectiveUnimplemented func(ctx context.Context) (<-chan *string, error)
 	}
 	UserResolver struct {
 		Friends func(ctx context.Context, obj *User) ([]*User, error)
@@ -313,6 +317,18 @@ func (r *stubSubscription) Updated(ctx context.Context) (<-chan string, error) {
 }
 func (r *stubSubscription) InitPayload(ctx context.Context) (<-chan string, error) {
 	return r.SubscriptionResolver.InitPayload(ctx)
+}
+func (r *stubSubscription) DirectiveArg(ctx context.Context, arg string) (<-chan *string, error) {
+	return r.SubscriptionResolver.DirectiveArg(ctx, arg)
+}
+func (r *stubSubscription) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error) {
+	return r.SubscriptionResolver.DirectiveNullableArg(ctx, arg, arg2, arg3)
+}
+func (r *stubSubscription) DirectiveDouble(ctx context.Context) (<-chan *string, error) {
+	return r.SubscriptionResolver.DirectiveDouble(ctx)
+}
+func (r *stubSubscription) DirectiveUnimplemented(ctx context.Context) (<-chan *string, error) {
+	return r.SubscriptionResolver.DirectiveUnimplemented(ctx)
 }
 
 type stubUser struct{ *Stub }

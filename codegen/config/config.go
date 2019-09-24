@@ -20,14 +20,15 @@ import (
 )
 
 type Config struct {
-	SchemaFilename StringList                 `yaml:"schema,omitempty"`
-	Exec           PackageConfig              `yaml:"exec"`
-	Model          PackageConfig              `yaml:"model"`
-	Resolver       PackageConfig              `yaml:"resolver,omitempty"`
-	AutoBind       []string                   `yaml:"autobind"`
-	Models         TypeMap                    `yaml:"models,omitempty"`
-	StructTag      string                     `yaml:"struct_tag,omitempty"`
-	Directives     map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	SchemaFilename           StringList                 `yaml:"schema,omitempty"`
+	Exec                     PackageConfig              `yaml:"exec"`
+	Model                    PackageConfig              `yaml:"model"`
+	Resolver                 PackageConfig              `yaml:"resolver,omitempty"`
+	AutoBind                 []string                   `yaml:"autobind"`
+	Models                   TypeMap                    `yaml:"models,omitempty"`
+	StructTag                string                     `yaml:"struct_tag,omitempty"`
+	Directives               map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	OmitSliceElementPointers bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}

@@ -239,6 +239,18 @@ func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan string, erro
 func (r *subscriptionResolver) InitPayload(ctx context.Context) (<-chan string, error) {
 	panic("not implemented")
 }
+func (r *subscriptionResolver) DirectiveArg(ctx context.Context, arg string) (<-chan *string, error) {
+	panic("not implemented")
+}
+func (r *subscriptionResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error) {
+	panic("not implemented")
+}
+func (r *subscriptionResolver) DirectiveDouble(ctx context.Context) (<-chan *string, error) {
+	panic("not implemented")
+}
+func (r *subscriptionResolver) DirectiveUnimplemented(ctx context.Context) (<-chan *string, error) {
+	panic("not implemented")
+}
 
 type userResolver struct{ *Resolver }
 

@@ -21,6 +21,13 @@ extend type Query {
     directiveUnimplemented: String @unimplemented
 }
 
+extend type Subscription {
+    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
+    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range, arg3: String @toNull): String
+    directiveDouble: String @directive1 @directive2
+    directiveUnimplemented: String @unimplemented
+}
+
 input InputDirectives {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull

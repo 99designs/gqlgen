@@ -406,6 +406,27 @@ func (c *Config) Autobind(s *ast.Schema) error {
 		}
 	}
 
+	for i, t := range c.Models {
+		for j, m := range t.Model {
+			pkg, typename := code.PkgAndType(m)
+
+			// skip anything that looks like an import path
+			if strings.Contains(pkg, "/") {
+				continue
+			}
+
+			for _, p := range ps {
+				if p.Name != pkg {
+					continue
+				}
+				if t := p.Types.Scope().Lookup(typename); t != nil {
+					c.Models[i].Model[j] = t.Pkg().Path() + "." + t.Name()
+					break
+				}
+			}
+		}
+	}
+
 	return nil
 }
 

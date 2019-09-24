@@ -111,7 +111,7 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 	bd.HTTP.Header.Set("Content-Type", "application/json")
 
 	// per client options from client.New apply first
-	for _, option := range options {
+	for _, option := range p.opts {
 		option(bd)
 	}
 	// per request options

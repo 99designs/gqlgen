@@ -3638,8 +3638,8 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj i
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet, obj *models.Character) graphql.Marshaler {
-	switch obj := (*obj).(type) {
+func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet, obj models.Character) graphql.Marshaler {
+	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
 	case models.Human:
@@ -3655,8 +3655,8 @@ func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet
 	}
 }
 
-func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.SelectionSet, obj *models.SearchResult) graphql.Marshaler {
-	switch obj := (*obj).(type) {
+func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.SelectionSet, obj models.SearchResult) graphql.Marshaler {
+	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
 	case models.Human:
@@ -4427,7 +4427,13 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 }
 
 func (ec *executionContext) marshalNCharacter2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐCharacter(ctx context.Context, sel ast.SelectionSet, v models.Character) graphql.Marshaler {
-	return ec._Character(ctx, sel, &v)
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Character(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx context.Context, v interface{}) (models.Episode, error) {
@@ -4684,7 +4690,13 @@ func (ec *executionContext) unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgql
 }
 
 func (ec *executionContext) marshalNSearchResult2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v models.SearchResult) graphql.Marshaler {
-	return ec._SearchResult(ctx, sel, &v)
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SearchResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNSearchResult2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v []models.SearchResult) graphql.Marshaler {
@@ -5002,7 +5014,10 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 }
 
 func (ec *executionContext) marshalOCharacter2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐCharacter(ctx context.Context, sel ast.SelectionSet, v models.Character) graphql.Marshaler {
-	return ec._Character(ctx, sel, &v)
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Character(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐCharacter(ctx context.Context, sel ast.SelectionSet, v []models.Character) graphql.Marshaler {

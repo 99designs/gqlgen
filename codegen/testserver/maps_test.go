@@ -14,6 +14,12 @@ func TestMaps(t *testing.T) {
 	resolver.QueryResolver.MapStringInterface = func(ctx context.Context, in map[string]interface{}) (i map[string]interface{}, e error) {
 		return in, nil
 	}
+	resolver.QueryResolver.MapNestedStringInterface = func(ctx context.Context, in *NestedMapInput) (i map[string]interface{}, e error) {
+		if in == nil {
+			return nil, nil
+		}
+		return in.Map, nil
+	}
 
 	c := client.New(handler.GraphQL(
 		NewExecutableSchema(Config{Resolvers: resolver}),
@@ -44,5 +50,24 @@ func TestMaps(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "a", resp.MapStringInterface["a"])
 		require.Nil(t, resp.MapStringInterface["b"])
+	})
+
+	t.Run("nested", func(t *testing.T) {
+		var resp struct {
+			MapNestedStringInterface map[string]interface{}
+		}
+		err := c.Post(`query { mapNestedStringInterface(in: { map: { a: "a", b: null } }) { a, b } }`, &resp)
+		require.NoError(t, err)
+		require.Equal(t, "a", resp.MapNestedStringInterface["a"])
+		require.Nil(t, resp.MapNestedStringInterface["b"])
+	})
+
+	t.Run("nested nil", func(t *testing.T) {
+		var resp struct {
+			MapNestedStringInterface map[string]interface{}
+		}
+		err := c.Post(`query { mapNestedStringInterface(in: { map: null }) { a, b } }`, &resp)
+		require.NoError(t, err)
+		require.Nil(t, resp.MapNestedStringInterface)
 	})
 }

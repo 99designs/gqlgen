@@ -228,6 +228,7 @@ type ComplexityRoot struct {
 		InputSlice                       func(childComplexity int, arg []string) int
 		InvalidIdentifier                func(childComplexity int) int
 		MapInput                         func(childComplexity int, input map[string]interface{}) int
+		MapNestedStringInterface         func(childComplexity int, in *NestedMapInput) int
 		MapStringInterface               func(childComplexity int, in map[string]interface{}) int
 		ModelMethods                     func(childComplexity int) int
 		NestedInputs                     func(childComplexity int, input [][]*OuterInput) int
@@ -360,6 +361,7 @@ type QueryResolver interface {
 	DirectiveDouble(ctx context.Context) (*string, error)
 	DirectiveUnimplemented(ctx context.Context) (*string, error)
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
+	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
 	Errors(ctx context.Context) (*Errors, error)
 	Valid(ctx context.Context) (string, error)
@@ -969,6 +971,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]interface{})), true
 
+	case "Query.mapNestedStringInterface":
+		if e.complexity.Query.MapNestedStringInterface == nil {
+			break
+		}
+
+		args, err := ec.field_Query_mapNestedStringInterface_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MapNestedStringInterface(childComplexity, args["in"].(*NestedMapInput)), true
+
 	case "Query.mapStringInterface":
 		if e.complexity.Query.MapStringInterface == nil {
 			break
@@ -1451,6 +1465,7 @@ type LoopB {
 `},
 	&ast.Source{Name: "maps.graphql", Input: `extend type Query {
     mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
+    mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
 }
 
 type MapStringInterfaceType {
@@ -1461,6 +1476,10 @@ type MapStringInterfaceType {
 input MapStringInterfaceInput {
     a: String
     b: Int
+}
+
+input NestedMapInput {
+    map: MapStringInterfaceInput
 }
 `},
 	&ast.Source{Name: "nulls.graphql", Input: `extend type Query {
@@ -2131,6 +2150,20 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_mapNestedStringInterface_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *NestedMapInput
+	if tmp, ok := rawArgs["in"]; ok {
+		arg0, err = ec.unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNestedMapInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["in"] = arg0
 	return args, nil
 }
 
@@ -5414,6 +5447,44 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_mapNestedStringInterface_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MapNestedStringInterface(rctx, args["in"].(*NestedMapInput))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -7906,6 +7977,24 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj interface{}) (NestedMapInput, error) {
+	var it NestedMapInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "map":
+			var err error
+			it.Map, err = ec.unmarshalOMapStringInterfaceInput2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj interface{}) (OuterInput, error) {
 	var it OuterInput
 	var asMap = obj.(map[string]interface{})
@@ -9485,6 +9574,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_mapStringInterface(ctx, field)
+				return res
+			})
+		case "mapNestedStringInterface":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_mapNestedStringInterface(ctx, field)
 				return res
 			})
 		case "errorBubble":
@@ -11196,6 +11296,18 @@ func (ec *executionContext) marshalOModelMethods2ᚖgithubᚗcomᚋ99designsᚋg
 		return graphql.Null
 	}
 	return ec._ModelMethods(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalONestedMapInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNestedMapInput(ctx context.Context, v interface{}) (NestedMapInput, error) {
+	return ec.unmarshalInputNestedMapInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNestedMapInput(ctx context.Context, v interface{}) (*NestedMapInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalONestedMapInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNestedMapInput(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalOObjectDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐObjectDirectives(ctx context.Context, sel ast.SelectionSet, v ObjectDirectives) graphql.Marshaler {

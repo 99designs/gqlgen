@@ -185,6 +185,9 @@ func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, er
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
 	panic("not implemented")
 }

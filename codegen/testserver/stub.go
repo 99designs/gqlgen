@@ -65,6 +65,7 @@ type Stub struct {
 		DirectiveDouble                  func(ctx context.Context) (*string, error)
 		DirectiveUnimplemented           func(ctx context.Context) (*string, error)
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
+		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 		ErrorBubble                      func(ctx context.Context) (*Error, error)
 		Errors                           func(ctx context.Context) (*Errors, error)
 		Valid                            func(ctx context.Context) (string, error)
@@ -262,6 +263,9 @@ func (r *stubQuery) DirectiveUnimplemented(ctx context.Context) (*string, error)
 }
 func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)
+}
+func (r *stubQuery) MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error) {
+	return r.QueryResolver.MapNestedStringInterface(ctx, in)
 }
 func (r *stubQuery) ErrorBubble(ctx context.Context) (*Error, error) {
 	return r.QueryResolver.ErrorBubble(ctx)

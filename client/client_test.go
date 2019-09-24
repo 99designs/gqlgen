@@ -54,6 +54,19 @@ func TestAddHeader(t *testing.T) {
 	)
 }
 
+func TestAddClientHeader(t *testing.T) {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "ASDF", r.Header.Get("Test-Key"))
+
+		w.Write([]byte(`{}`))
+	})
+
+	c := client.New(h, client.AddHeader("Test-Key", "ASDF"))
+
+	var resp struct{}
+	c.MustPost("{ id }", &resp)
+}
+
 func TestBasicAuth(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, pass, ok := r.BasicAuth()

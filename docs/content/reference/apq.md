@@ -19,7 +19,7 @@ In order to enable Automatic Persisted Queries you need to change your client. F
 For the server you need to implement `PersistedQueryCache` interface and pass instance to 
 `handler.EnablePersistedQueryCache` option.
 
-See example using [go-redis](github.com/go-redis/redis) package below:
+See example using [go-redis](https://github.com/go-redis/redis) package below:
 ```go
 import (
 	"context"

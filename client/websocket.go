@@ -55,7 +55,6 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 	if err != nil {
 		return errorSubscription(fmt.Errorf("request: %s", err.Error()))
 	}
-	r.Header.Set("Host", "99designs.com")
 
 	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -63,10 +62,8 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 	}
 
 	srv := httptest.NewServer(p.h)
-	url := strings.Replace(srv.URL, "http://", "ws://", -1)
-	url = strings.Replace(url, "https://", "wss://", -1)
-
-	c, _, err := websocket.DefaultDialer.Dial(url, r.Header)
+	host := strings.Replace(srv.URL, "http://", "ws://", -1)
+	c, _, err := websocket.DefaultDialer.Dial(host+r.URL.Path, r.Header)
 
 	if err != nil {
 		return errorSubscription(fmt.Errorf("dial: %s", err.Error()))

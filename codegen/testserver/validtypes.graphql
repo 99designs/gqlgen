@@ -5,7 +5,7 @@ extend type Query {
 """ These things are all valid, but without care generate invalid go code """
 type ValidType {
     differentCase: String!
-    different_case: String!
+    different_case: String! @goField(name:"DifferentCaseOld")
     validInputKeywords(input: ValidInput): Boolean!
     validArgs(
         break:       String!,
@@ -63,7 +63,7 @@ input ValidInput {
     import:      String!
     return:      String!
     var:         String!
-    _:           String!
+    _:           String! @goField(name: "Underscore")
 }
 
 # see https://github.com/99designs/gqlgen/issues/694

@@ -1,3 +1,6 @@
+directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Query {
     invalidIdentifier: InvalidIdentifier
     collision: It
@@ -21,7 +24,7 @@ type Subscription {
 
 type User {
     id: Int!
-    friends: [User!]!
+    friends: [User!]! @goField(forceResolver: true)
     created: Time!
     updated: Time
 }
@@ -49,7 +52,7 @@ type It {
     id: ID!
 }
 
-input Changes {
+input Changes @goModel(model:"map[string]interface{}") {
     a: Int
     b: Int
 }
@@ -66,7 +69,7 @@ input OuterInput {
     inner: InnerInput!
 }
 
-scalar ThirdParty
+scalar ThirdParty @goModel(model:"testserver.ThirdParty")
 
 type OuterObject {
     inner: InnerObject!
@@ -77,10 +80,10 @@ type InnerObject {
 }
 
 type ForcedResolver {
-    field: Circle
+    field: Circle @goField(forceResolver: true)
 }
 
-type EmbeddedPointer {
+type EmbeddedPointer @goModel(model:"testserver.EmbeddedPointerModel") {
     ID: String
     Title: String
 }

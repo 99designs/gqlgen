@@ -102,3 +102,5 @@ type PrimitiveString string
 func (s PrimitiveString) Doubled() string {
 	return string(s) + string(s)
 }
+
+type Bytes []byte

@@ -3,12 +3,12 @@ extend type Query {
     mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
 }
 
-type MapStringInterfaceType {
+type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
     a: String
     b: Int
 }
 
-input MapStringInterfaceInput {
+input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
     a: String
     b: Int
 }

@@ -9,76 +9,8 @@ resolver:
   filename: resolver.go
   type: Resolver
 
-models:
-  It:
-    model: "github.com/99designs/gqlgen/codegen/testserver/introspection.It"
-  ModelMethods:
-    model: "github.com/99designs/gqlgen/codegen/testserver.ModelMethods"
-  InvalidIdentifier:
-    model: "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename.InvalidIdentifier"
-  Changes:
-    model: "map[string]interface{}"
-  RecursiveInputSlice:
-    model: "github.com/99designs/gqlgen/codegen/testserver.RecursiveInputSlice"
-  Shape:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Shape"
-  ShapeUnion:
-    model: "github.com/99designs/gqlgen/codegen/testserver.ShapeUnion"
-  Circle:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Circle"
-  Rectangle:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Rectangle"
-  ForcedResolver:
-    model: "github.com/99designs/gqlgen/codegen/testserver.ForcedResolver"
-    fields:
-      field: { resolver: true }
-  User:
-    fields:
-      friends: { resolver: true }
-  Error:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Error"
-  Errors:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Errors"
-  EmbeddedPointer:
-    model: "github.com/99designs/gqlgen/codegen/testserver.EmbeddedPointerModel"
-  ThirdParty:
-    model: "github.com/99designs/gqlgen/codegen/testserver.ThirdParty"
-  Keywords:
-    fields:
-      _: { fieldName: Underscore }
-  ValidInput:
-    fields:
-      _: { fieldName: Underscore }
-  ValidType:
-    fields:
-      different_case: { fieldName: DifferentCaseOld }
-  Panics:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Panics"
-  MarshalPanic:
-    model: "github.com/99designs/gqlgen/codegen/testserver.MarshalPanic"
-  Autobind:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Autobind"
-  Primitive:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Primitive"
-  PrimitiveString:
-    model: "github.com/99designs/gqlgen/codegen/testserver.PrimitiveString"
-  MapStringInterfaceInput:
-    model: "map[string]interface{}"
-  MapStringInterfaceType:
-    model: "map[string]interface{}"
-  OverlappingFields:
-    model: "github.com/99designs/gqlgen/codegen/testserver.OverlappingFields"
-    fields:
-      oneFoo: { fieldName: foo }
-      twoFoo: { fieldName: foo }
-      oldFoo: { fieldName: foo, resolver: true }
-  ObjectDirectivesWithCustomGoModel:
-    model: "github.com/99designs/gqlgen/codegen/testserver.ObjectDirectivesWithCustomGoModel"
-  FallbackToStringEncoding:
-    model: "github.com/99designs/gqlgen/codegen/testserver.FallbackToStringEncoding"
-  Bytes:
-    model: "github.com/99designs/gqlgen/codegen/testserver.Bytes"
-  WrappedStruct:
-    model: "github.com/99designs/gqlgen/codegen/testserver.WrappedStruct"
-  WrappedScalar:
-    model: "github.com/99designs/gqlgen/codegen/testserver.WrappedScalar"
+autobind:
+  - "github.com/99designs/gqlgen/codegen/testserver"
+  - "github.com/99designs/gqlgen/codegen/testserver/introspection"
+  - "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
+

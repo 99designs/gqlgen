@@ -3,9 +3,9 @@ extend type Query {
 }
 
 type OverlappingFields {
-  oneFoo: Int!
-  twoFoo: Int!
-  oldFoo: Int!
+  oneFoo: Int! @goField(name: "foo")
+  twoFoo: Int! @goField(name: "foo")
+  oldFoo: Int! @goField(name: "foo", forceResolver: true)
   newFoo: Int!
   new_foo: Int!
 }

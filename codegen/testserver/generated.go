@@ -1461,9 +1461,9 @@ type Map {
 }
 
 type OverlappingFields {
-  oneFoo: Int!
-  twoFoo: Int!
-  oldFoo: Int!
+  oneFoo: Int! @goField(name: "foo")
+  twoFoo: Int! @goField(name: "foo")
+  oldFoo: Int! @goField(name: "foo", forceResolver: true)
   newFoo: Int!
   new_foo: Int!
 }
@@ -1536,7 +1536,7 @@ type Rectangle implements Shape {
     width: Float
     area: Float
 }
-union ShapeUnion = Circle | Rectangle
+union ShapeUnion @goModel(model:"testserver.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION
 `},
@@ -1553,12 +1553,12 @@ type LoopB {
     mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
 }
 
-type MapStringInterfaceType {
+type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
     a: String
     b: Int
 }
 
-input MapStringInterfaceInput {
+input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
     a: String
     b: Int
 }
@@ -1628,7 +1628,10 @@ type EmbeddedDefaultScalar {
     value: DefaultScalarImplementation
 }
 `},
-	&ast.Source{Name: "schema.graphql", Input: `type Query {
+	&ast.Source{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+type Query {
     invalidIdentifier: InvalidIdentifier
     collision: It
     mapInput(input: Changes): Boolean
@@ -1651,7 +1654,7 @@ type Subscription {
 
 type User {
     id: Int!
-    friends: [User!]!
+    friends: [User!]! @goField(forceResolver: true)
     created: Time!
     updated: Time
 }
@@ -1679,7 +1682,7 @@ type It {
     id: ID!
 }
 
-input Changes {
+input Changes @goModel(model:"map[string]interface{}") {
     a: Int
     b: Int
 }
@@ -1696,7 +1699,7 @@ input OuterInput {
     inner: InnerInput!
 }
 
-scalar ThirdParty
+scalar ThirdParty @goModel(model:"testserver.ThirdParty")
 
 type OuterObject {
     inner: InnerObject!
@@ -1707,10 +1710,10 @@ type InnerObject {
 }
 
 type ForcedResolver {
-    field: Circle
+    field: Circle @goField(forceResolver: true)
 }
 
-type EmbeddedPointer {
+type EmbeddedPointer @goModel(model:"testserver.EmbeddedPointerModel") {
     ID: String
     Title: String
 }
@@ -1769,7 +1772,7 @@ extend type Query {
 """ These things are all valid, but without care generate invalid go code """
 type ValidType {
     differentCase: String!
-    different_case: String!
+    different_case: String! @goField(name:"DifferentCaseOld")
     validInputKeywords(input: ValidInput): Boolean!
     validArgs(
         break:       String!,
@@ -1827,7 +1830,7 @@ input ValidInput {
     import:      String!
     return:      String!
     var:         String!
-    _:           String!
+    _:           String! @goField(name: "Underscore")
 }
 
 # see https://github.com/99designs/gqlgen/issues/694

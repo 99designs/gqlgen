@@ -1,6 +1,6 @@
 type Todo {
   id: ID! @goField(forceResolver: true)
-  databaseId: Int!
+  databaseId: Int! @goField(tag: "json:\"databaseId\" db:\"id,pk\"")
   text: String!
   done: Boolean!
   user: User!

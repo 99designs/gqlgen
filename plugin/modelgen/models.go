@@ -161,9 +161,14 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					}
 				}
 
+				fieldConfig := cfg.Models[schemaType.Name].Fields[field.Name]
 				name := field.Name
-				if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
-					name = nameOveride
+				if nameOverride := fieldConfig.FieldName; nameOverride != "" {
+					name = nameOverride
+				}
+				tag := `json:"` + field.Name + `"`
+				if tagOverride := fieldConfig.Tag; tagOverride != "" {
+					tag = tagOverride
 				}
 
 				typ = binder.CopyModifiersFromAst(field.Type, typ)
@@ -176,7 +181,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					Name:        name,
 					Type:        typ,
 					Description: field.Description,
-					Tag:         `json:"` + field.Name + `"`,
+					Tag:         tag,
 				})
 			}
 

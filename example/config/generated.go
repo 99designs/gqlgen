@@ -221,7 +221,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @goField(forceResolver: Boolean, name: String, tag: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Query {
   todos: [Todo!]!
@@ -233,7 +233,7 @@ type Mutation {
 `},
 	&ast.Source{Name: "todo.graphql", Input: `type Todo {
   id: ID! @goField(forceResolver: true)
-  databaseId: Int!
+  databaseId: Int! @goField(tag: "json:\"databaseId\" db:\"id,pk\"")
   text: String!
   done: Boolean!
   user: User!

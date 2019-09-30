@@ -59,18 +59,23 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		if schemaType.Kind == ast.Object || schemaType.Kind == ast.InputObject {
 			for _, field := range schemaType.Fields {
 				if fd := field.Directives.ForName("goField"); fd != nil {
-					forceResolver := cfg.Models[schemaType.Name].Fields[field.Name].Resolver
-					fieldName := cfg.Models[schemaType.Name].Fields[field.Name].FieldName
+					f := cfg.Models[schemaType.Name].Fields[field.Name]
 
 					if ra := fd.Arguments.ForName("forceResolver"); ra != nil {
 						if fr, err := ra.Value.Value(nil); err == nil {
-							forceResolver = fr.(bool)
+							f.Resolver = fr.(bool)
 						}
 					}
 
 					if na := fd.Arguments.ForName("name"); na != nil {
 						if fr, err := na.Value.Value(nil); err == nil {
-							fieldName = fr.(string)
+							f.FieldName = fr.(string)
+						}
+					}
+
+					if ta := fd.Arguments.ForName("tag"); ta != nil {
+						if fr, err := ta.Value.Value(nil); err == nil {
+							f.Tag = fr.(string)
 						}
 					}
 
@@ -81,10 +86,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 						}
 					}
 
-					cfg.Models[schemaType.Name].Fields[field.Name] = config.TypeMapField{
-						FieldName: fieldName,
-						Resolver:  forceResolver,
-					}
+					cfg.Models[schemaType.Name].Fields[field.Name] = f
 				}
 			}
 		}

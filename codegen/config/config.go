@@ -149,6 +149,7 @@ type TypeMapEntry struct {
 type TypeMapField struct {
 	Resolver  bool   `yaml:"resolver"`
 	FieldName string `yaml:"fieldName"`
+	Tag       string `yaml:"tag"`
 }
 
 type StringList []string

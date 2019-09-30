@@ -15,6 +15,6 @@ type Rectangle implements Shape {
     width: Float
     area: Float
 }
-union ShapeUnion = Circle | Rectangle
+union ShapeUnion @goModel(model:"testserver.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION

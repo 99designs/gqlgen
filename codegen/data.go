@@ -133,6 +133,16 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		return s.Inputs[i].Definition.Name < s.Inputs[j].Definition.Name
 	})
 
+	if b.Binder.SawInvalid {
+		// if we have a syntax error, show it
+		if len(b.Binder.PkgErrors) > 0 {
+			return nil, b.Binder.PkgErrors
+		}
+
+		// otherwise show a generic error message
+		return nil, fmt.Errorf("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
+	}
+
 	return &s, nil
 }
 

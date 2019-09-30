@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"go/token"
 	"go/types"
@@ -18,6 +19,8 @@ type Binder struct {
 	schema     *ast.Schema
 	cfg        *Config
 	References []*TypeReference
+	PkgErrors  PkgErrors
+	SawInvalid bool
 }
 
 func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
@@ -27,20 +30,34 @@ func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
 	}
 
 	mp := map[string]*packages.Package{}
+	var pkgErrs PkgErrors
 	for _, p := range pkgs {
 		populatePkg(mp, p)
 		for _, e := range p.Errors {
 			if e.Kind == packages.ListError {
-				return nil, p.Errors[0]
+				return nil, e
 			}
 		}
+		pkgErrs = append(pkgErrs, p.Errors...)
 	}
 
 	return &Binder{
-		pkgs:   mp,
-		schema: s,
-		cfg:    c,
+		pkgs:      mp,
+		schema:    s,
+		cfg:       c,
+		PkgErrors: pkgErrs,
 	}, nil
+}
+
+type PkgErrors []packages.Error
+
+func (p PkgErrors) Error() string {
+	var b bytes.Buffer
+	b.WriteString("packages.Load: ")
+	for _, e := range p {
+		b.WriteString(e.Error() + "\n")
+	}
+	return b.String()
 }
 
 func populatePkg(mp map[string]*packages.Package, p *packages.Package) {
@@ -316,6 +333,11 @@ func isIntf(t types.Type) bool {
 }
 
 func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret *TypeReference, err error) {
+	if !isValid(bindTarget) {
+		b.SawInvalid = true
+		return nil, fmt.Errorf("%s has an invalid type", schemaType.Name())
+	}
+
 	var pkgName, typeName string
 	def := b.schema.Types[schemaType.Name()]
 	defer func() {
@@ -402,7 +424,15 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		return ref, nil
 	}
 
-	return nil, fmt.Errorf("%s has type compatible with %s", schemaType.Name(), bindTarget.String())
+	return nil, fmt.Errorf("%s is incompatible with %s", schemaType.Name(), bindTarget.String())
+}
+
+func isValid(t types.Type) bool {
+	basic, isBasic := t.(*types.Basic)
+	if !isBasic {
+		return true
+	}
+	return basic.Kind() != types.Invalid
 }
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {

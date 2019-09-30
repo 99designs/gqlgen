@@ -74,12 +74,12 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 	return &f, nil
 }
 
-func (b *builder) bindField(obj *Object, f *Field) error {
+func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 	defer func() {
 		if f.TypeReference == nil {
 			tr, err := b.Binder.TypeReference(f.Type, nil)
 			if err != nil {
-				panic(err)
+				errret = err
 			}
 			f.TypeReference = tr
 		}

@@ -1,13 +1,19 @@
 package config
 
 import (
+	"go/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 )
+
+func TestBindingToInvalid(t *testing.T) {
+	binder, schema := createBinder(Config{})
+	_, err := binder.TypeReference(schema.Query.Fields.ForName("messages").Type, &types.Basic{})
+	require.EqualError(t, err, "Message has an invalid type")
+}
 
 func TestSlicePointerBinding(t *testing.T) {
 	t.Run("without OmitSliceElementPointers", func(t *testing.T) {

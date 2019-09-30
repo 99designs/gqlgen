@@ -53,7 +53,9 @@ func New() plugin.Plugin {
 	return &Plugin{}
 }
 
-type Plugin struct{}
+type Plugin struct {
+	TagTemplate string `yaml:"tag"`
+}
 
 var _ plugin.ConfigMutator = &Plugin{}
 

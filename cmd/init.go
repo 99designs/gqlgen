@@ -13,7 +13,7 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 var configComment = `

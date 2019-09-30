@@ -137,3 +137,31 @@ func TestAutobinding(t *testing.T) {
 	require.Equal(t, "github.com/99designs/gqlgen/example/scalars/model.Banned", cfg.Models["Banned"].Model[0])
 	require.Equal(t, "github.com/99designs/gqlgen/example/chat.Message", cfg.Models["Message"].Model[0])
 }
+
+func TestConfigPlugins(t *testing.T) {
+	config, err := LoadConfig("testdata/cfg/plugins.yml")
+	require.NoError(t, err)
+
+	t.Run("loads config via yaml", func(t *testing.T) {
+		plugin1 := struct {
+			Key string `yaml:"key"`
+			Baz string `yaml:"baz"`
+		}{}
+
+		err = config.ConfigurePlugin("legit_plugin", &plugin1)
+		require.NoError(t, err)
+		require.Equal(t, "value", plugin1.Key)
+		require.Equal(t, "", plugin1.Baz)
+	})
+
+	t.Run("ignores unknown plugins", func(t *testing.T) {
+		plugin3 := struct {
+			Key string `yaml:"key"`
+			Baz string `yaml:"baz"`
+		}{}
+		err = config.ConfigurePlugin("not_legit_plugin", &plugin3)
+		require.NoError(t, err)
+		require.Equal(t, "", plugin3.Key)
+		require.Equal(t, "", plugin3.Baz)
+	})
+}

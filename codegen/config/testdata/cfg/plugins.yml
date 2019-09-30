@@ -1,0 +1,7 @@
+schema: outer
+plugins:
+  legit_plugin:
+    key: value
+  plugin2:
+    otherkey: othervalue
+

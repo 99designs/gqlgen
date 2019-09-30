@@ -27,6 +27,10 @@ func Generate(cfg *config.Config, option ...Option) error {
 		o(cfg, &plugins)
 	}
 
+	if err := plugin.ConfigurePlugins(cfg, plugins); err != nil {
+		return errors.Wrap(err, "loading plugin config failed")
+	}
+
 	for _, p := range plugins {
 		if mut, ok := p.(plugin.ConfigMutator); ok {
 			err := mut.MutateConfig(cfg)

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"go/types"
 	"io/ioutil"
@@ -10,19 +11,19 @@ import (
 	"sort"
 	"strings"
 
-	"golang.org/x/tools/go/packages"
-
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	"gopkg.in/yaml.v2"
+	"golang.org/x/tools/go/packages"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
 	SchemaFilename           StringList                 `yaml:"schema,omitempty"`
 	Exec                     PackageConfig              `yaml:"exec"`
 	Model                    PackageConfig              `yaml:"model"`
+	Plugins                  map[string]yaml.Node       `yaml:"plugins,omitempty"`
 	Resolver                 PackageConfig              `yaml:"resolver,omitempty"`
 	AutoBind                 []string                   `yaml:"autobind"`
 	Models                   TypeMap                    `yaml:"models,omitempty"`
@@ -74,7 +75,9 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, errors.Wrap(err, "unable to read config")
 	}
 
-	if err := yaml.UnmarshalStrict(b, config); err != nil {
+	dec := yaml.NewDecoder(bytes.NewReader(b))
+	dec.KnownFields(true)
+	if err := dec.Decode(config); err != nil {
 		return nil, errors.Wrap(err, "unable to parse config")
 	}
 
@@ -501,6 +504,13 @@ func (c *Config) LoadSchema() (*ast.Schema, map[string]string, error) {
 		return nil, nil, err
 	}
 	return schema, schemaStrings, nil
+}
+
+func (c *Config) ConfigurePlugin(name string, target interface{}) error {
+	if pc, found := c.Plugins[name]; found {
+		return pc.Decode(target)
+	}
+	return nil
 }
 
 func abs(path string) string {

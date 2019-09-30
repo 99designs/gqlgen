@@ -24,7 +24,7 @@ require (
 	github.com/vektah/gqlparser v1.1.2
 	golang.org/x/tools v0.0.0-20190515012406-7d7faa4812bd
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v3 v3.0.0-20190924164351-c8b7dadae555
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20180110180208-2cc67fd64755
 	sourcegraph.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67 // indirect
 )

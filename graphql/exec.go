@@ -1,3 +1,5 @@
+//go:generate go run github.com/matryer/moq -out esmock.go . ExecutableSchema
+
 package graphql
 
 import (

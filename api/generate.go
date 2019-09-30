@@ -38,11 +38,11 @@ func Generate(cfg *config.Config, option ...Option) error {
 	// Merge again now that the generated models have been injected into the typemap
 	data, err := codegen.BuildData(cfg)
 	if err != nil {
-		return errors.Wrap(err, "merging failed")
+		return errors.Wrap(err, "merging type systems failed")
 	}
 
 	if err = codegen.GenerateCode(data); err != nil {
-		return errors.Wrap(err, "generating core failed")
+		return errors.Wrap(err, "generating code failed")
 	}
 
 	for _, p := range plugins {

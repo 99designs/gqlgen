@@ -7,24 +7,24 @@ import (
 )
 
 type middlewareContext struct {
-	*graphql.RequestContext
-	InvokedNext bool
+	InvokedNext   bool
+	ResultContext graphql.RequestContext
+	Response      graphql.Response
 }
 
 func testMiddleware(m Middleware, initialContexts ...graphql.RequestContext) middlewareContext {
-	rc := &graphql.RequestContext{}
+	var c middlewareContext
+	initial := &graphql.RequestContext{}
 	if len(initialContexts) > 0 {
-		rc = &initialContexts[0]
+		initial = &initialContexts[0]
 	}
 
 	m(func(ctx context.Context, writer Writer) {
-		rc = graphql.GetRequestContext(ctx)
-	})(graphql.WithRequestContext(context.Background(), rc), noopWriter)
+		c.ResultContext = *graphql.GetRequestContext(ctx)
+		c.InvokedNext = true
+	})(graphql.WithRequestContext(context.Background(), initial), func(response *graphql.Response) {
+		c.Response = *response
+	})
 
-	return middlewareContext{
-		InvokedNext:    rc != nil,
-		RequestContext: rc,
-	}
+	return c
 }
-
-func noopWriter(response *graphql.Response) {}

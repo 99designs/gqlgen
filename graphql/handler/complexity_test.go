@@ -13,7 +13,7 @@ func TestComplexityLimit(t *testing.T) {
 	}))
 
 	require.True(t, rc.InvokedNext)
-	require.Equal(t, 10, rc.ComplexityLimit)
+	require.Equal(t, 10, rc.ResultContext.ComplexityLimit)
 }
 
 func TestComplexityLimitFunc(t *testing.T) {
@@ -22,5 +22,5 @@ func TestComplexityLimitFunc(t *testing.T) {
 	}))
 
 	require.True(t, rc.InvokedNext)
-	require.Equal(t, 22, rc.ComplexityLimit)
+	require.Equal(t, 22, rc.ResultContext.ComplexityLimit)
 }

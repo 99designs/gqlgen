@@ -15,5 +15,5 @@ func TestIntrospection(t *testing.T) {
 
 	require.True(t, rc.InvokedNext)
 	// cant test for function equality in go, so testing the return type instead
-	assert.False(t, rc.DisableIntrospection)
+	assert.False(t, rc.ResultContext.DisableIntrospection)
 }

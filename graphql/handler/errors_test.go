@@ -18,7 +18,7 @@ func TestErrorPresenter(t *testing.T) {
 
 	require.True(t, rc.InvokedNext)
 	// cant test for function equality in go, so testing the return type instead
-	require.Equal(t, "boom", rc.ErrorPresenter(nil, nil).Message)
+	require.Equal(t, "boom", rc.ResultContext.ErrorPresenter(nil, nil).Message)
 }
 
 func TestRecoverFunc(t *testing.T) {
@@ -28,5 +28,5 @@ func TestRecoverFunc(t *testing.T) {
 
 	require.True(t, rc.InvokedNext)
 	// cant test for function equality in go, so testing the return type instead
-	assert.Equal(t, "boom", rc.Recover(nil, nil).Error())
+	assert.Equal(t, "boom", rc.ResultContext.Recover(nil, nil).Error())
 }

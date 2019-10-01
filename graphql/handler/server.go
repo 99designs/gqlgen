@@ -35,6 +35,18 @@ type (
 	ResponseStream func() *graphql.Response
 )
 
+func (w Writer) Errorf(format string, args ...interface{}) {
+	w(&graphql.Response{
+		Errors: gqlerror.List{{Message: fmt.Sprintf(format, args...)}},
+	})
+}
+
+func (w Writer) Error(msg string) {
+	w(&graphql.Response{
+		Errors: gqlerror.List{{Message: msg}},
+	})
+}
+
 func (s *Server) AddTransport(transport Transport) {
 	s.transports = append(s.transports, transport)
 }

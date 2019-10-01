@@ -105,46 +105,6 @@ func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 	}
 }
 
-func RecoverFunc(recover graphql.RecoverFunc) Option {
-	return func(cfg *Config) {
-		cfg.recover = recover
-	}
-}
-
-// ErrorPresenter transforms errors found while resolving into errors that will be returned to the user. It provides
-// a good place to add any extra fields, like error.type, that might be desired by your frontend. Check the default
-// implementation in graphql.DefaultErrorPresenter for an example.
-func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
-	return func(cfg *Config) {
-		cfg.errorPresenter = f
-	}
-}
-
-// IntrospectionEnabled = false will forbid clients from calling introspection endpoints. Can be useful in prod when you dont
-// want clients introspecting the full schema.
-func IntrospectionEnabled(enabled bool) Option {
-	return func(cfg *Config) {
-		cfg.disableIntrospection = !enabled
-	}
-}
-
-// ComplexityLimit sets a maximum query complexity that is allowed to be executed.
-// If a query is submitted that exceeds the limit, a 422 status code will be returned.
-func ComplexityLimit(limit int) Option {
-	return func(cfg *Config) {
-		cfg.complexityLimit = limit
-	}
-}
-
-// ComplexityLimitFunc allows you to define a function to dynamically set the maximum query complexity that is allowed
-// to be executed.
-// If a query is submitted that exceeds the limit, a 422 status code will be returned.
-func ComplexityLimitFunc(complexityLimitFunc graphql.ComplexityLimitFunc) Option {
-	return func(cfg *Config) {
-		cfg.complexityLimitFunc = complexityLimitFunc
-	}
-}
-
 // ResolverMiddleware allows you to define a function that will be called around every resolver,
 // useful for logging.
 func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {

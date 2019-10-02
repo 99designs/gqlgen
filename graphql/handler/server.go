@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/vektah/gqlparser/validator"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
@@ -78,6 +80,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rc, writer := transport.Do(w, r)
+	if rc == nil {
+		return
+	}
 
 	handler := s.executableSchemaHandler
 
@@ -92,20 +97,36 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // executableSchemaHandler is the inner most handler, it invokes the graph directly after all middleware
 // and sends responses to the transport so it can be returned to the client
 func (s *Server) executableSchemaHandler(ctx context.Context, write Writer) {
-	r := graphql.GetRequestContext(ctx)
+	rc := graphql.GetRequestContext(ctx)
 
 	var gerr *gqlerror.Error
 
 	// todo: hmm... how should this work?
-	if r.Doc == nil {
-		r.Doc, gerr = s.parseOperation(ctx, r.RawQuery)
+	if rc.Doc == nil {
+		rc.Doc, gerr = s.parseOperation(ctx, rc)
 		if gerr != nil {
 			write(&graphql.Response{Errors: []*gqlerror.Error{gerr}})
 			return
 		}
 	}
 
-	op := r.Doc.Operations.ForName(r.OperationName)
+	ctx, op, listErr := s.validateOperation(ctx, rc)
+	if len(listErr) != 0 {
+		write(&graphql.Response{
+			Errors: listErr,
+		})
+		return
+	}
+
+	vars, err := validator.VariableValues(s.es.Schema(), op, rc.Variables)
+	if err != nil {
+		write(&graphql.Response{
+			Errors: gqlerror.List{err},
+		})
+		return
+	}
+
+	rc.Variables = vars
 
 	switch op.Operation {
 	case ast.Query:
@@ -125,9 +146,28 @@ func (s *Server) executableSchemaHandler(ctx context.Context, write Writer) {
 	}
 }
 
-func (s *Server) parseOperation(ctx context.Context, query string) (*ast.QueryDocument, *gqlerror.Error) {
-	// todo: tracing
-	return parser.ParseQuery(&ast.Source{Input: query})
+func (s *Server) parseOperation(ctx context.Context, rc *graphql.RequestContext) (*ast.QueryDocument, *gqlerror.Error) {
+	ctx = rc.Tracer.StartOperationValidation(ctx)
+	defer func() { rc.Tracer.EndOperationValidation(ctx) }()
+
+	return parser.ParseQuery(&ast.Source{Input: rc.RawQuery})
+}
+
+func (gh *Server) validateOperation(ctx context.Context, rc *graphql.RequestContext) (context.Context, *ast.OperationDefinition, gqlerror.List) {
+	ctx = rc.Tracer.StartOperationValidation(ctx)
+	defer func() { rc.Tracer.EndOperationValidation(ctx) }()
+
+	listErr := validator.Validate(gh.es.Schema(), rc.Doc)
+	if len(listErr) != 0 {
+		return ctx, nil, listErr
+	}
+
+	op := rc.Doc.Operations.ForName(rc.OperationName)
+	if op == nil {
+		return ctx, nil, gqlerror.List{gqlerror.Errorf("operation %s not found", rc.OperationName)}
+	}
+
+	return ctx, op, nil
 }
 
 func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {

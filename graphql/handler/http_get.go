@@ -20,8 +20,7 @@ func (H HTTPGet) Supports(r *http.Request) bool {
 }
 
 func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestContext, Writer) {
-	var reqParams graphql.RequestContext
-
+	reqParams := newRequestContext()
 	reqParams.RawQuery = r.URL.Query().Get("query")
 	reqParams.OperationName = r.URL.Query().Get("operationName")
 
@@ -39,7 +38,12 @@ func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestCon
 		}
 	}
 
-	return &reqParams, func(response *graphql.Response) {
+	// TODO: FIXME
+	//if op.Operation != ast.Query && args.R.Method == http.MethodGet {
+	//	return ctx, nil, nil, gqlerror.List{gqlerror.Errorf("GET requests only allow query operations")}
+	//}
+
+	return reqParams, func(response *graphql.Response) {
 		b, err := json.Marshal(response)
 		if err != nil {
 			panic(err)

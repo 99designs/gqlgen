@@ -75,6 +75,34 @@ func (rc *RequestContext) Validate(ctx context.Context) error {
 	return nil
 }
 
+// AddRequestMiddleware allows you to define a function that will be called around the root request,
+// after the query has been parsed. This is useful for logging
+func (cfg *RequestContext) AddRequestMiddleware(middleware RequestMiddleware) {
+	if cfg.RequestMiddleware == nil {
+		cfg.RequestMiddleware = middleware
+		return
+	}
+
+	lastResolve := cfg.RequestMiddleware
+	cfg.RequestMiddleware = func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+		return lastResolve(ctx, func(ctx context.Context) []byte {
+			return middleware(ctx, next)
+		})
+	}
+}
+
+func (cfg *RequestContext) AddTracer(tracer Tracer) {
+	if cfg.Tracer == nil {
+		cfg.Tracer = tracer
+		return
+	}
+	lastTracer := cfg.Tracer
+	cfg.Tracer = &tracerWrapper{
+		tracer1: lastTracer,
+		tracer2: tracer,
+	}
+}
+
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
 	return next(ctx)
 }

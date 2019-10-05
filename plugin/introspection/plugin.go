@@ -80,7 +80,7 @@ func (p *Plugin) injectIntrospectionAuth(schema *ast.Schema) {
 		Location:         ast.LocationFieldDefinition,
 	})
 	inputFields := __type.Fields.ForName("inputFields")
-	inputFields.Directives = append(fields.Directives, &ast.Directive{
+	inputFields.Directives = append(inputFields.Directives, &ast.Directive{
 		Name:             introspection.Name,
 		Arguments:        nil,
 		Position:         nil,

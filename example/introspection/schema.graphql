@@ -1,0 +1,28 @@
+directive @hide on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @requireAuth(roles: [Role!]) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+enum Role {
+    Admin,
+    User,
+    Anonymous
+}
+
+type User {
+    id: ID!
+    email: String! @requireAuth(roles: [Admin, User])
+    passwordHash: String! @hide
+}
+
+input UserCreateInput {
+    email: String!
+    password: String!
+}
+
+type Mutation {
+    createUser(input: UserCreateInput): User!
+}
+
+type Query {
+    currentUser: User
+}

@@ -35,17 +35,14 @@ type builder struct {
 	Directives map[string]*Directive
 }
 
-func BuildData(cfg *config.Config) (*Data, error) {
+func BuildData(cfg *config.Config, schema *ast.Schema, schemaStr map[string]string) (*Data, error) {
 	b := builder{
-		Config: cfg,
+		Config:    cfg,
+		Schema:    schema,
+		SchemaStr: schemaStr,
 	}
 
 	var err error
-	b.Schema, b.SchemaStr, err = cfg.LoadSchema()
-	if err != nil {
-		return nil, err
-	}
-
 	err = cfg.Check()
 	if err != nil {
 		return nil, err

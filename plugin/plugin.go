@@ -5,6 +5,7 @@ package plugin
 import (
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/vektah/gqlparser/ast"
 )
 
 type Plugin interface {
@@ -17,4 +18,8 @@ type ConfigMutator interface {
 
 type CodeGenerator interface {
 	GenerateCode(cfg *codegen.Data) error
+}
+
+type SchemaMutator interface {
+	MutateSchema(schema *ast.Schema) error
 }

@@ -35,8 +35,22 @@ func Generate(cfg *config.Config, option ...Option) error {
 			}
 		}
 	}
+
+	schema, schemaStr, err := cfg.LoadSchema()
+	if err != nil {
+		return err
+	}
+
+	for _, p := range plugins {
+		if sm, ok := p.(plugin.SchemaMutator); ok {
+			if err := sm.MutateSchema(schema); nil != err {
+				return err
+			}
+		}
+	}
+
 	// Merge again now that the generated models have been injected into the typemap
-	data, err := codegen.BuildData(cfg)
+	data, err := codegen.BuildData(cfg, schema, schemaStr)
 	if err != nil {
 		return errors.Wrap(err, "merging type systems failed")
 	}

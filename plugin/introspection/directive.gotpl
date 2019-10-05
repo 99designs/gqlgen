@@ -1,0 +1,58 @@
+{{ reserveImport "context"  }}
+{{ reserveImport "strconv"  }}
+{{ reserveImport "time"  }}
+{{ reserveImport "errors"  }}
+{{ reserveImport "fmt"  }}
+{{ reserveImport "bytes"  }}
+
+{{ reserveImport "github.com/vektah/gqlparser" }}
+{{ reserveImport "github.com/vektah/gqlparser/ast" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
+
+type IntrospectionConfig struct {
+	{{- range $d := .Directives }}
+		{{ $d.Name | go }}Func func(ctx context.Context, directive *ast.Directive) (allow bool, err error)
+	{{- end }}
+}
+
+func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+	return func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+		res, err = next(ctx)
+		if nil != err {
+			return
+		}
+		introspectedType := obj.(*introspection.Type)
+		schemaType := parsedSchema.Types[*introspectedType.Name()]
+		switch fields := res.(type) {
+
+		case []introspection.Field:
+			newFields := make([]introspection.Field, 0, len(fields))
+			{{ template "introspection_body" . }}
+
+		case []introspection.InputValue:
+			newFields := make([]introspection.InputValue, 0, len(fields))
+			{{ template "introspection_body" . }}
+		}
+		return
+	}
+}
+
+{{ define "introspection_body" }}
+for _, f := range fields {
+	schemaField := schemaType.Fields.ForName(f.Name)
+    {{- range $d := .Directives }}
+		if {{ $d.Name | goPrivate }}Directive := schemaField.Directives.ForName({{ $d.Name | quote }}); nil != {{ $d.Name | goPrivate }}Directive {
+			allow, err := cfg.{{ $d.Name | go }}Func(ctx, {{ $d.Name | goPrivate }}Directive)
+			if nil != err {
+				return nil, err
+			}
+			if !allow {
+				continue
+			}
+		}
+    {{- end }}
+	newFields = append(newFields, f)
+}
+res = newFields
+{{ end }}

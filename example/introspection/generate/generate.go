@@ -5,7 +5,7 @@ import (
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin/introspection"
+	"github.com/99designs/gqlgen/plugin/introauth"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	if nil != err {
 		log.Fatal(err)
 	}
-	err = api.Generate(cfg, api.AddPlugin(introspection.New(introspection.Config{
+	err = api.Generate(cfg, api.AddPlugin(introauth.New(introauth.Config{
 		Directives: config.StringList{
 			"hide",
 			"requireAuth",

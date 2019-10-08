@@ -39,7 +39,11 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Hide func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+
 	Introspection func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+
+	RequireAuth func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []Role) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -216,6 +220,20 @@ type Query {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_requireAuth_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []Role
+	if tmp, ok := rawArgs["roles"]; ok {
+		arg0, err = ec.unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐRole(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["roles"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -489,8 +507,32 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Email, nil
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.Email, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			roles, err := ec.unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐRole(ctx, []interface{}{"Admin", "User"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.RequireAuth == nil {
+				return nil, errors.New("directive requireAuth is not implemented")
+			}
+			return ec.directives.RequireAuth(ctx, obj, directive0, roles)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -526,8 +568,28 @@ func (ec *executionContext) _User_passwordHash(ctx context.Context, field graphq
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PasswordHash, nil
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.PasswordHash, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Hide == nil {
+				return nil, errors.New("directive hide is not implemented")
+			}
+			return ec.directives.Hide(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1672,14 +1734,8 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 			}
 			return ec.directives.Introspection(ctx, obj, directive0)
 		}
-		directive2 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.Introspection == nil {
-				return nil, errors.New("directive introspection is not implemented")
-			}
-			return ec.directives.Introspection(ctx, obj, directive1)
-		}
 
-		tmp, err := directive2(rctx)
+		tmp, err := directive1(rctx)
 		if err != nil {
 			return nil, err
 		}

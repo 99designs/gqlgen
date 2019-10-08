@@ -1,4 +1,4 @@
-package introspection
+package introauth
 
 import (
 	"github.com/99designs/gqlgen/codegen"

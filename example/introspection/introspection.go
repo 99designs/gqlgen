@@ -32,7 +32,7 @@ func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, o
 
 			for _, f := range fields {
 				schemaField := schemaType.Fields.ForName(f.Name)
-				if hideDirective := schemaField.Directives.ForName("hide"); nil != hideDirective {
+				if hideDirective := schemaField.Directives.ForName("hide"); hideDirective != nil {
 					allow, err := cfg.HideFunc(ctx, hideDirective)
 					if nil != err {
 						return nil, err
@@ -41,7 +41,7 @@ func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, o
 						continue
 					}
 				}
-				if requireAuthDirective := schemaField.Directives.ForName("requireAuth"); nil != requireAuthDirective {
+				if requireAuthDirective := schemaField.Directives.ForName("requireAuth"); requireAuthDirective != nil {
 					allow, err := cfg.RequireAuthFunc(ctx, requireAuthDirective)
 					if nil != err {
 						return nil, err
@@ -59,7 +59,7 @@ func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, o
 
 			for _, f := range fields {
 				schemaField := schemaType.Fields.ForName(f.Name)
-				if hideDirective := schemaField.Directives.ForName("hide"); nil != hideDirective {
+				if hideDirective := schemaField.Directives.ForName("hide"); hideDirective != nil {
 					allow, err := cfg.HideFunc(ctx, hideDirective)
 					if nil != err {
 						return nil, err
@@ -68,7 +68,7 @@ func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, o
 						continue
 					}
 				}
-				if requireAuthDirective := schemaField.Directives.ForName("requireAuth"); nil != requireAuthDirective {
+				if requireAuthDirective := schemaField.Directives.ForName("requireAuth"); requireAuthDirective != nil {
 					allow, err := cfg.RequireAuthFunc(ctx, requireAuthDirective)
 					if nil != err {
 						return nil, err

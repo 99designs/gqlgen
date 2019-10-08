@@ -23,13 +23,6 @@ func (p *Plugin) Name() string {
 	return "introspection"
 }
 
-func (p *Plugin) MutateConfig(cfg *config.Config) error {
-	for _, d := range p.cfg.Directives {
-		cfg.Directives[d] = config.DirectiveConfig{SkipRuntime: true}
-	}
-	return nil
-}
-
 func (p *Plugin) MutateSchema(schema *ast.Schema) error {
 	p.injectIntrospectionAuth(schema)
 	return nil

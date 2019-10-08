@@ -13,8 +13,9 @@ import (
 // region    ************************** directive.gotpl ***************************
 
 type IntrospectionConfig struct {
-	HideFunc        func(ctx context.Context, directive *ast.Directive) (allow bool, err error)
-	RequireAuthFunc func(ctx context.Context, directive *ast.Directive) (allow bool, err error)
+	HideFunc         func(ctx context.Context, directive *ast.Directive) (allow bool, err error)
+	RequireAuthFunc  func(ctx context.Context, directive *ast.Directive) (allow bool, err error)
+	RequireOwnerFunc func(ctx context.Context, directive *ast.Directive) (allow bool, err error)
 }
 
 func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
@@ -50,6 +51,15 @@ func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, o
 						continue
 					}
 				}
+				if requireOwnerDirective := schemaField.Directives.ForName("requireOwner"); requireOwnerDirective != nil {
+					allow, err := cfg.RequireOwnerFunc(ctx, requireOwnerDirective)
+					if nil != err {
+						return nil, err
+					}
+					if !allow {
+						continue
+					}
+				}
 				newFields = append(newFields, f)
 			}
 			res = newFields
@@ -70,6 +80,15 @@ func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, o
 				}
 				if requireAuthDirective := schemaField.Directives.ForName("requireAuth"); requireAuthDirective != nil {
 					allow, err := cfg.RequireAuthFunc(ctx, requireAuthDirective)
+					if nil != err {
+						return nil, err
+					}
+					if !allow {
+						continue
+					}
+				}
+				if requireOwnerDirective := schemaField.Directives.ForName("requireOwner"); requireOwnerDirective != nil {
+					allow, err := cfg.RequireOwnerFunc(ctx, requireOwnerDirective)
 					if nil != err {
 						return nil, err
 					}

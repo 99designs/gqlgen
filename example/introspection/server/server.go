@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql"
+
 	"github.com/99designs/gqlgen/example/introspection"
 	"github.com/vektah/gqlparser/ast"
 
@@ -16,6 +18,9 @@ func main() {
 	exec := introspection.NewExecutableSchema(introspection.Config{
 		Resolvers: nil,
 		Directives: introspection.DirectiveRoot{
+			Hide: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+				return next(ctx)
+			},
 			Introspection: introspection.IntrospectionDirective(introspection.IntrospectionConfig{
 				HideFunc: func(ctx context.Context, directive *ast.Directive) (bool, error) {
 					return false, nil
@@ -25,6 +30,9 @@ func main() {
 					return false, nil
 				},
 			}),
+			RequireAuth: func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []introspection.Role) (res interface{}, err error) {
+				return next(ctx)
+			},
 		},
 		Complexity: introspection.ComplexityRoot{},
 	})

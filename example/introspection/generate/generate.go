@@ -17,6 +17,7 @@ func main() {
 		Directives: config.StringList{
 			"hide",
 			"requireAuth",
+			"requireOwner",
 		},
 	})))
 	if nil != err {

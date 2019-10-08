@@ -44,11 +44,14 @@ type DirectiveRoot struct {
 	Introspection func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 
 	RequireAuth func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []Role) (res interface{}, err error)
+
+	RequireOwner func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
 	Mutation struct {
 		CreateUser func(childComplexity int, input *UserCreateInput) int
+		UpdateUser func(childComplexity int, input *UserUpdateInput) int
 	}
 
 	Query struct {
@@ -64,6 +67,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input *UserCreateInput) (*User, error)
+	UpdateUser(ctx context.Context, input *UserUpdateInput) (*User, error)
 }
 type QueryResolver interface {
 	CurrentUser(ctx context.Context) (*User, error)
@@ -95,6 +99,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(*UserCreateInput)), true
+
+	case "Mutation.updateUser":
+		if e.complexity.Mutation.UpdateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(*UserUpdateInput)), true
 
 	case "Query.currentUser":
 		if e.complexity.Query.CurrentUser == nil {
@@ -190,6 +206,8 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 directive @requireAuth(roles: [Role!]) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
+directive @requireOwner on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
 enum Role {
     Admin,
     User,
@@ -207,8 +225,16 @@ input UserCreateInput {
     password: String!
 }
 
+input UserUpdateInput {
+    id: String!
+    email: String @requireOwner
+    password: String @requireOwner
+}
+
 type Mutation {
     createUser(input: UserCreateInput): User!
+
+    updateUser(input: UserUpdateInput): User!
 }
 
 type Query {
@@ -241,6 +267,20 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	var arg0 *UserCreateInput
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalOUserCreateInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐUserCreateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *UserUpdateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOUserUpdateInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐUserUpdateInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -326,6 +366,50 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(*UserCreateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUser(rctx, args["input"].(*UserUpdateInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1822,6 +1906,66 @@ func (ec *executionContext) unmarshalInputUserCreateInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUserUpdateInput(ctx context.Context, obj interface{}) (UserUpdateInput, error) {
+	var it UserUpdateInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				if ec.directives.RequireOwner == nil {
+					return nil, errors.New("directive requireOwner is not implemented")
+				}
+				return ec.directives.RequireOwner(ctx, obj, directive0)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, err
+			}
+			if data, ok := tmp.(*string); ok {
+				it.Email = data
+			} else if tmp == nil {
+				it.Email = nil
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+			}
+		case "password":
+			var err error
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				if ec.directives.RequireOwner == nil {
+					return nil, errors.New("directive requireOwner is not implemented")
+				}
+				return ec.directives.RequireOwner(ctx, obj, directive0)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, err
+			}
+			if data, ok := tmp.(*string); ok {
+				it.Password = data
+			} else if tmp == nil {
+				it.Password = nil
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1847,6 +1991,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createUser":
 			out.Values[i] = ec._Mutation_createUser(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateUser":
+			out.Values[i] = ec._Mutation_updateUser(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2601,6 +2750,18 @@ func (ec *executionContext) unmarshalOUserCreateInput2ᚖgithubᚗcomᚋ99design
 		return nil, nil
 	}
 	res, err := ec.unmarshalOUserCreateInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐUserCreateInput(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOUserUpdateInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐUserUpdateInput(ctx context.Context, v interface{}) (UserUpdateInput, error) {
+	return ec.unmarshalInputUserUpdateInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOUserUpdateInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐUserUpdateInput(ctx context.Context, v interface{}) (*UserUpdateInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOUserUpdateInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋintrospectionᚐUserUpdateInput(ctx, v)
 	return &res, err
 }
 

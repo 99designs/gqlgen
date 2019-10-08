@@ -2,6 +2,8 @@ directive @hide on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @requireAuth(roles: [Role!]) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
+directive @requireOwner on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
 enum Role {
     Admin,
     User,
@@ -19,8 +21,16 @@ input UserCreateInput {
     password: String!
 }
 
+input UserUpdateInput {
+    id: String!
+    email: String @requireOwner
+    password: String @requireOwner
+}
+
 type Mutation {
     createUser(input: UserCreateInput): User!
+
+    updateUser(input: UserUpdateInput): User!
 }
 
 type Query {

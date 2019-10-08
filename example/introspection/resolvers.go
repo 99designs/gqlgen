@@ -17,6 +17,18 @@ func (r *Root) Query() QueryResolver {
 type mutationResolver struct {
 }
 
+func (m *mutationResolver) UpdateUser(ctx context.Context, input *UserUpdateInput) (*User, error) {
+	u := &User{
+		ID:           "1",
+		Email:        "example@example.com",
+		PasswordHash: "212f6d7f6885bc4acea7",
+	}
+	if input.Email != nil {
+		u.Email = *input.Email
+	}
+	return u, nil
+}
+
 func (m *mutationResolver) CreateUser(ctx context.Context, input *UserCreateInput) (*User, error) {
 	return &User{
 		ID:           "1",

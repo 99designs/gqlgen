@@ -19,6 +19,12 @@ type UserCreateInput struct {
 	Password string `json:"password"`
 }
 
+type UserUpdateInput struct {
+	ID       string  `json:"id"`
+	Email    *string `json:"email"`
+	Password *string `json:"password"`
+}
+
 type Role string
 
 const (

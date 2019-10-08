@@ -1,10 +1,11 @@
 package main
 
 import (
+	"log"
+
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin/introspection"
-	"log"
 )
 
 func main() {

@@ -28,21 +28,21 @@ func IntrospectionDirective(cfg IntrospectionConfig) func(ctx context.Context, o
 
 		case []introspection.Field:
 			newFields := make([]introspection.Field, 0, len(fields))
-			{{ template "introspection_body" . }}
+{{ template "introspectionBody" . }}
 
 		case []introspection.InputValue:
 			newFields := make([]introspection.InputValue, 0, len(fields))
-			{{ template "introspection_body" . }}
+{{ template "introspectionBody" . }}
 		}
 		return
 	}
 }
 
-{{ define "introspection_body" }}
+{{ define "introspectionBody" }}
 for _, f := range fields {
 	schemaField := schemaType.Fields.ForName(f.Name)
-    {{- range $d := .Directives }}
-		if {{ $d.Name | goPrivate }}Directive := schemaField.Directives.ForName({{ $d.Name | quote }}); nil != {{ $d.Name | goPrivate }}Directive {
+{{- range $d := .Directives }}
+	if {{ $d.Name | goPrivate }}Directive := schemaField.Directives.ForName({{ $d.Name | quote }}); {{ $d.Name | goPrivate }}Directive != nil {
 			allow, err := cfg.{{ $d.Name | go }}Func(ctx, {{ $d.Name | goPrivate }}Directive)
 			if nil != err {
 				return nil, err
@@ -51,7 +51,7 @@ for _, f := range fields {
 				continue
 			}
 		}
-    {{- end }}
+{{- end }}
 	newFields = append(newFields, f)
 }
 res = newFields

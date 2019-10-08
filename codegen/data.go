@@ -42,8 +42,7 @@ func BuildData(cfg *config.Config, schema *ast.Schema, schemaStr map[string]stri
 		SchemaStr: schemaStr,
 	}
 
-	var err error
-	err = cfg.Check()
+	err := cfg.Check()
 	if err != nil {
 		return nil, err
 	}

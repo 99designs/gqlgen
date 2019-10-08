@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/99designs/gqlgen/example/introspection"
-	"github.com/vektah/gqlparser/ast"
 	"log"
 	"net/http"
+
+	"github.com/99designs/gqlgen/example/introspection"
+	"github.com/vektah/gqlparser/ast"
 
 	"github.com/99designs/gqlgen/handler"
 )

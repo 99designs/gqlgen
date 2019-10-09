@@ -63,6 +63,7 @@ type Stub struct {
 		DirectiveField                   func(ctx context.Context) (*string, error)
 		DirectiveDouble                  func(ctx context.Context) (*string, error)
 		DirectiveUnimplemented           func(ctx context.Context) (*string, error)
+		EnumInInput                      func(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
@@ -262,6 +263,9 @@ func (r *stubQuery) DirectiveDouble(ctx context.Context) (*string, error) {
 }
 func (r *stubQuery) DirectiveUnimplemented(ctx context.Context) (*string, error) {
 	return r.QueryResolver.DirectiveUnimplemented(ctx)
+}
+func (r *stubQuery) EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error) {
+	return r.QueryResolver.EnumInInput(ctx, input)
 }
 func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 	return r.QueryResolver.Shapes(ctx)

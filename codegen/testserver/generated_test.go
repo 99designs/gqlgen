@@ -31,6 +31,11 @@ func TestEnums(t *testing.T) {
 		require.Equal(t, StatusOk, AllStatus[0])
 		require.Equal(t, StatusError, AllStatus[1])
 	})
+
+	t.Run("invalid enum values", func(t *testing.T) {
+		require.Equal(t, StatusOk, AllStatus[0])
+		require.Equal(t, StatusError, AllStatus[1])
+	})
 }
 
 func TestUnionFragments(t *testing.T) {

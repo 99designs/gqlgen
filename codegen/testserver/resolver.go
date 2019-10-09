@@ -179,6 +179,9 @@ func (r *queryResolver) DirectiveDouble(ctx context.Context) (*string, error) {
 func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 	panic("not implemented")
 }

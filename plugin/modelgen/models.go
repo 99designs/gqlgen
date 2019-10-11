@@ -11,6 +11,12 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+type BuildMutateHook = func(b *ModelBuild) *ModelBuild
+
+func defaultBuildMutateHook(b *ModelBuild) *ModelBuild {
+	return b
+}
+
 type ModelBuild struct {
 	PackageName string
 	Interfaces  []*Interface
@@ -50,10 +56,14 @@ type EnumValue struct {
 }
 
 func New() plugin.Plugin {
-	return &Plugin{}
+	return &Plugin{
+		MutateHook: defaultBuildMutateHook,
+	}
 }
 
-type Plugin struct{}
+type Plugin struct {
+	MutateHook BuildMutateHook
+}
 
 var _ plugin.ConfigMutator = &Plugin{}
 
@@ -219,6 +229,10 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 
 	if len(b.Models) == 0 && len(b.Enums) == 0 {
 		return nil
+	}
+
+	if m.MutateHook != nil {
+		b = m.MutateHook(b)
 	}
 
 	return templates.Render(templates.Options{

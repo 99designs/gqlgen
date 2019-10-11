@@ -1,6 +1,7 @@
 package modelgen
 
 import (
+	"go/ast"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
@@ -14,7 +15,9 @@ import (
 func TestModelGeneration(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen.yml")
 	require.NoError(t, err)
-	p := Plugin{}
+	p := Plugin{
+		MutateHook: mutateHook,
+	}
 	require.NoError(t, p.MutateConfig(cfg))
 
 	require.True(t, cfg.Models.UserDefined("MissingTypeNotNull"))
@@ -42,4 +45,30 @@ func TestModelGeneration(t *testing.T) {
 			require.True(t, len(words) > 1, "expected description %q to have more than one word", text)
 		}
 	})
+
+	t.Run("tags are applied", func(t *testing.T) {
+		node, err := parser.ParseFile(token.NewFileSet(), "./out/generated.go", nil, 0)
+		require.NoError(t, err)
+		for _, obj := range node.Scope.Objects {
+			if spec, ok := (obj.Decl).(*ast.TypeSpec); ok {
+				if st, ok := (spec.Type).(*ast.StructType); ok {
+					for _, field := range st.Fields.List {
+						fieldName := strings.ToLower(field.Names[0].String())
+						expectedTag := "`json:\"" + fieldName + "\" database:\"" + spec.Name.String() + fieldName + "\"`"
+						require.True(t, field.Tag.Value == expectedTag)
+					}
+				}
+			}
+		}
+	})
+}
+
+func mutateHook(b *ModelBuild) *ModelBuild {
+	for _, model := range b.Models {
+		for _, field := range model.Fields {
+			field.Tag += ` database:"` + model.Name + field.Name + `"`
+		}
+	}
+
+	return b
 }

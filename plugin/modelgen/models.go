@@ -161,7 +161,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					}
 				}
 
-				name := field.Name
+				name := templates.ToGo(field.Name)
 				if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
 					name = nameOveride
 				}

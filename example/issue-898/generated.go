@@ -52,10 +52,10 @@ type ComplexityRoot struct {
 
 	Todo struct {
 		Done                func(childComplexity int) int
+		DownloadDNA         func(childComplexity int) int
 		DownloadDNALocation func(childComplexity int) int
-		DownloadDna         func(childComplexity int) int
+		DownloadSPA         func(childComplexity int) int
 		DownloadSPALocation func(childComplexity int) int
-		DownloadSpa         func(childComplexity int) int
 		ID                  func(childComplexity int) int
 		Text                func(childComplexity int) int
 		User                func(childComplexity int) int
@@ -115,6 +115,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.Done(childComplexity), true
 
+	case "Todo.download_dna":
+		if e.complexity.Todo.DownloadDNA == nil {
+			break
+		}
+
+		return e.complexity.Todo.DownloadDNA(childComplexity), true
+
 	case "Todo.download_dna_location":
 		if e.complexity.Todo.DownloadDNALocation == nil {
 			break
@@ -122,12 +129,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Todo.DownloadDNALocation(childComplexity), true
 
-	case "Todo.download_dna":
-		if e.complexity.Todo.DownloadDna == nil {
+	case "Todo.download_spa":
+		if e.complexity.Todo.DownloadSPA == nil {
 			break
 		}
 
-		return e.complexity.Todo.DownloadDna(childComplexity), true
+		return e.complexity.Todo.DownloadSPA(childComplexity), true
 
 	case "Todo.download_spa_location":
 		if e.complexity.Todo.DownloadSPALocation == nil {
@@ -135,13 +142,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.DownloadSPALocation(childComplexity), true
-
-	case "Todo.download_spa":
-		if e.complexity.Todo.DownloadSpa == nil {
-			break
-		}
-
-		return e.complexity.Todo.DownloadSpa(childComplexity), true
 
 	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
@@ -667,7 +667,7 @@ func (ec *executionContext) _Todo_download_dna(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DownloadDna, nil
+		return obj.DownloadDNA, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -741,7 +741,7 @@ func (ec *executionContext) _Todo_download_spa(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DownloadSpa, nil
+		return obj.DownloadSPA, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)

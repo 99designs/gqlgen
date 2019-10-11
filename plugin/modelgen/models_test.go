@@ -26,6 +26,11 @@ func TestModelGeneration(t *testing.T) {
 	require.True(t, cfg.Models.UserDefined("EnumWithDescription"))
 	require.True(t, cfg.Models.UserDefined("InterfaceWithDescription"))
 	require.True(t, cfg.Models.UserDefined("UnionWithDescription"))
+	require.True(t, cfg.Models.UserDefined("FieldOverrides"))
+
+	// TODO: not sure if this is a sufficient test, should examine ./out/generated.go
+	//
+	require.Equal(t, "NotName", cfg.Models["FieldOverrides"].Fields["name"].FieldName)
 
 	t.Run("no pointer pointers", func(t *testing.T) {
 		generated, err := ioutil.ReadFile("./out/generated.go")

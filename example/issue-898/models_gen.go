@@ -12,9 +12,9 @@ type Todo struct {
 	Text                string `json:"text"`
 	Done                bool   `json:"done"`
 	User                *User  `json:"user"`
-	DownloadDna         bool   `json:"download_dna"`
+	DownloadDNA         bool   `json:"download_dna"`
 	DownloadDNALocation string `json:"download_dna_location"`
-	DownloadSpa         bool   `json:"download_spa"`
+	DownloadSPA         bool   `json:"download_spa"`
 	DownloadSPALocation string `json:"download_spa_location"`
 }
 

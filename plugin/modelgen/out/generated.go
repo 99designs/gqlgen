@@ -26,6 +26,10 @@ type UnionWithDescription interface {
 	IsUnionWithDescription()
 }
 
+type FieldOverrides struct {
+	NotName *string `json:"name"`
+}
+
 type MissingInput struct {
 	Name *string      `json:"name"`
 	Enum *MissingEnum `json:"enum"`

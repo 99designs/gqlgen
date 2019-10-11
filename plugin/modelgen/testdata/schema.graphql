@@ -83,3 +83,7 @@ interface InterfaceWithDescription {
 
 "UnionWithDescription is an union with a description"
 union UnionWithDescription = TypeWithDescription | ExistingType
+
+type FieldOverrides {
+    name: String
+}

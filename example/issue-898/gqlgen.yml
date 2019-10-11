@@ -1,0 +1,22 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+- schema.graphql
+exec:
+  filename: generated.go
+model:
+  filename: models_gen.go
+resolver:
+  filename: resolver.go
+  type: Resolver
+autobind: []
+models:
+  Todo:
+    fields:
+      download_spa:
+        fieldName: DownloadSPA
+      download_spa_location:
+        fieldName: DownloadSPALocation

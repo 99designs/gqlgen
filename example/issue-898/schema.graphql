@@ -1,0 +1,34 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+type Todo {
+  id: ID!
+  text: String!
+  done: Boolean!
+  user: User!
+  download_dna: Boolean! @goField(name:"DownloadDNA")
+  download_dna_location: String! @goField(name:"DownloadDNALocation")
+  download_spa: Boolean!
+  download_spa_location: String!
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  todos: [Todo!]!
+}
+
+input NewTodo {
+  text: String!
+  userId: String!
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+}

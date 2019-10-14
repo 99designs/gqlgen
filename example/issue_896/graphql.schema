@@ -1,0 +1,14 @@
+schema {
+  query: Query
+  subscription: Subscription
+}
+
+type Thing {id: Int}
+
+type Query {
+  things1: [Thing!] # Note the "!" or lack thereof.
+}
+
+type Subscription {
+  things2: [Thing] # Note the "!" or lack thereof.
+}

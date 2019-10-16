@@ -1,21 +1,22 @@
 package graphql
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMarshalID(t *testing.T) {
 	tests := []struct {
-		Name string
-		Input interface{}
-		Expected string
+		Name        string
+		Input       interface{}
+		Expected    string
 		ShouldError bool
 	}{
 		{
-			Name: "int64",
-			Input: int64(12),
-			Expected: "12",
+			Name:        "int64",
+			Input:       int64(12),
+			Expected:    "12",
 			ShouldError: false,
 		},
 	}

@@ -55,7 +55,7 @@ curl localhost:4000/graphql \
 
 That invokes the following operation:
 
-```graphql
+```javascript
 {
   query: `
     mutation($file: Upload!) {
@@ -115,7 +115,7 @@ curl localhost:4000/query \
 
 That invokes the following operation:
 
-```graphql
+```javascript
 {
   query: `
     mutation($req: [UploadFile!]!)
@@ -141,4 +141,4 @@ That invokes the following operation:
 }
 ```
 
-see the [example/fileupload](https://github.com/99designs/gqlgen/tree/master/example/fileupload) package for more examples.
+See the [example/fileupload](https://github.com/99designs/gqlgen/tree/master/example/fileupload) package for more examples.

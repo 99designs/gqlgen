@@ -40,14 +40,18 @@ type User {
 
 You need to tell gqlgen that we should only fetch friends if the user requested it. There are two ways to do this.
 
-1. Write the model yourself and leave off friends.
+#### Custom Models
+
+Write a custom model that omits the Friends model:
 
 ```go
 type User struct {
-  ID int
-  Name string
+    ID int
+    Name string
 }
 ```
+
+And reference the model in `gqlgen.yml`:
 
 ```yaml
 # gqlgen.yml
@@ -56,7 +60,9 @@ models:
     model: github.com/you/pkg/model.User # go import path to the User struct above
 ```
 
-2. Keep using the generated model, and mark the field as requiring a resolver explicitly
+#### Explicit Resolvers
+
+If you want to Keep using the generated model: mark the field as requiring a resolver explicitly in `gqlgen.yml`:
 
 ```yaml
 # gqlgen.yml

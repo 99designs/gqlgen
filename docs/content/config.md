@@ -82,15 +82,15 @@ gqlgen ships with some builtin directives that make it a little easier to manage
 To start using them you first need to define them:
 
 ```graphql
-directive @goModel(
-	model: String
-	models: [String!]
-) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goModel(model: String, models: [String!]) on OBJECT 
+    | INPUT_OBJECT 
+    | SCALAR 
+    | ENUM 
+    | INTERFACE 
+    | UNION
 
-directive @goField(
-	forceResolver: Boolean
-	name: String
-) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION 
+    | FIELD_DEFINITION
 ```
 
 > Here be dragons
@@ -102,7 +102,7 @@ Now you can use these directives when defining types in your schema:
 
 ```graphql
 type User @goModel(model: "github.com/my/app/models.User") {
-	id: ID! @goField(name: "todoId")
-	name: String! @goField(forceResolver: true)
+    id: ID!         @goField(name: "todoId")
+    name: String!   @goField(forceResolver: true)
 }
 ```

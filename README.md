@@ -91,8 +91,8 @@ models:
 This means gqlgen will be able to automatically bind to strings or ints for models you have written yourself, but the
 first model in this list is used as the default type and it will always be used when:
 
-- generating models based on schema
-- as arguments in resolvers
+- Generating models based on schema
+- As arguments in resolvers
 
 There isnt any way around this, gqlgen has no way to know what you want in a given context.
 

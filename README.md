@@ -44,8 +44,8 @@ You need to tell gqlgen that we should only fetch friends if the user requested 
 
 ```go
 type User struct {
-    ID int
-    Name string
+  ID int
+  Name string
 }
 ```
 

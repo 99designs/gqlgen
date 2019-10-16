@@ -9,6 +9,7 @@ weight: -5
 gqlgen can be configured using a `gqlgen.yml` file, by default it will be loaded from the current directory, or any parent directory.
 
 Example:
+
 ```yml
 # You can pass a single schema file
 schema: schema.graphql
@@ -44,7 +45,7 @@ resolver:
 # Optional, turns on binding to field names by tag provided
 struct_tag: json
 
-# Optional, set to true if you prefer []*Thing over []Thing
+# Optional, set to true if you prefer []Thing over []*Thing
 omit_slice_element_pointers: false
 
 # Instead of listing out every model like below, you can automatically bind to any matching types
@@ -79,18 +80,19 @@ Everything has defaults, so add things as you need.
 gqlgen ships with some builtin directives that make it a little easier to manage wiring.
 
 To start using them you first need to define them:
-```graphql
-directive @goModel(model: String, models: [String!]) on OBJECT 
-    | INPUT_OBJECT 
-    | SCALAR 
-    | ENUM 
-    | INTERFACE 
-    | UNION
 
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION 
-    | FIELD_DEFINITION
+```graphql
+directive @goModel(
+	model: String
+	models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+directive @goField(
+	forceResolver: Boolean
+	name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 ```
-  
+
 > Here be dragons
 >
 > gqlgen doesnt currently support user-configurable directives for SCALAR, ENUM, INTERFACE or UNION. This only works
@@ -99,8 +101,8 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 Now you can use these directives when defining types in your schema:
 
 ```graphql
-type User @goModel(model:"github.com/my/app/models.User") {
-  id:   ID!	    @goField(name:"todoId")
-  name: String! @goField(forceResolver: true)
+type User @goModel(model: "github.com/my/app/models.User") {
+	id: ID! @goField(name: "todoId")
+	name: String! @goField(forceResolver: true)
 }
 ```

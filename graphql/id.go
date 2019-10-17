@@ -21,7 +21,7 @@ func UnmarshalID(v interface{}) (string, error) {
 	case int:
 		return strconv.Itoa(v), nil
 	case int64:
-		return strconv.Itoa(int(v)), nil
+		return strconv.FormatInt(v, 10), nil
 	case float64:
 		return fmt.Sprintf("%f", v), nil
 	case bool:

@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,6 +19,16 @@ func TestMarshalID(t *testing.T) {
 			Input:       int64(12),
 			Expected:    "12",
 			ShouldError: false,
+		},
+		{
+			Name:     "int64 max",
+			Input:    math.MaxInt64,
+			Expected: "9223372036854775807",
+		},
+		{
+			Name:     "int64 min",
+			Input:    math.MinInt64,
+			Expected: "-9223372036854775808",
 		},
 	}
 

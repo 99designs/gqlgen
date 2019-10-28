@@ -167,7 +167,7 @@ func (d *Directive) Declaration() string {
 	res := ucFirst(d.Name) + " func(ctx context.Context, obj interface{}, next graphql.Resolver"
 
 	for _, arg := range d.Args {
-		res += fmt.Sprintf(", %s %s", arg.Name, templates.CurrentImports.LookupType(arg.TypeReference.GO))
+		res += fmt.Sprintf(", %s %s", templates.ToGoPrivate(arg.Name), templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}
 
 	res += ") (res interface{}, err error)"

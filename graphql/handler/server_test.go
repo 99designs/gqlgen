@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -31,11 +32,14 @@ func TestServer(t *testing.T) {
 				return &graphql.Response{Data: []byte(`"subscription resp"`)}
 			}
 		},
+		SchemaFunc: func() *ast.Schema {
+			return &ast.Schema{}
+		},
 	}
 	srv := New(es)
-	srv.AddTransport(&HTTPGet{})
+	srv.AddTransport(&transport.HTTPGet{})
 	srv.Use(func(next Handler) Handler {
-		return func(ctx context.Context, writer Writer) {
+		return func(ctx context.Context, writer transport.Writer) {
 			next(ctx, writer)
 		}
 	})
@@ -67,13 +71,13 @@ func TestServer(t *testing.T) {
 	t.Run("invokes middleware in order", func(t *testing.T) {
 		var calls []string
 		srv.Use(func(next Handler) Handler {
-			return func(ctx context.Context, writer Writer) {
+			return func(ctx context.Context, writer transport.Writer) {
 				calls = append(calls, "first")
 				next(ctx, writer)
 			}
 		})
 		srv.Use(func(next Handler) Handler {
-			return func(ctx context.Context, writer Writer) {
+			return func(ctx context.Context, writer transport.Writer) {
 				calls = append(calls, "second")
 				next(ctx, writer)
 			}

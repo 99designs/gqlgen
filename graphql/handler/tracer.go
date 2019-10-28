@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+
 	"github.com/99designs/gqlgen/graphql"
 )
 
@@ -10,7 +12,7 @@ import (
 // calling resolver. This is useful for tracing
 func Tracer(tracer graphql.Tracer) Middleware {
 	return func(next Handler) Handler {
-		return func(ctx context.Context, writer Writer) {
+		return func(ctx context.Context, writer transport.Writer) {
 			rc := graphql.GetRequestContext(ctx)
 			rc.AddTracer(tracer)
 			rc.AddRequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {

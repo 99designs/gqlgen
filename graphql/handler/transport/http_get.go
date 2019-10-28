@@ -1,4 +1,4 @@
-package handler
+package transport
 
 import (
 	"encoding/json"
@@ -24,16 +24,24 @@ func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestCon
 	reqParams.RawQuery = r.URL.Query().Get("query")
 	reqParams.OperationName = r.URL.Query().Get("operationName")
 
+	writer := Writer(func(response *graphql.Response) {
+		b, err := json.Marshal(response)
+		if err != nil {
+			panic(err)
+		}
+		w.Write(b)
+	})
+
 	if variables := r.URL.Query().Get("variables"); variables != "" {
 		if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
-			sendErrorf(w, http.StatusBadRequest, "variables could not be decoded")
+			writer.Errorf("variables could not be decoded")
 			return nil, nil
 		}
 	}
 
 	if extensions := r.URL.Query().Get("extensions"); extensions != "" {
 		if err := jsonDecode(strings.NewReader(extensions), &reqParams.Extensions); err != nil {
-			sendErrorf(w, http.StatusBadRequest, "extensions could not be decoded")
+			writer.Errorf("extensions could not be decoded")
 			return nil, nil
 		}
 	}
@@ -43,13 +51,7 @@ func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestCon
 	//	return ctx, nil, nil, gqlerror.List{gqlerror.Errorf("GET requests only allow query operations")}
 	//}
 
-	return reqParams, func(response *graphql.Response) {
-		b, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.Write(b)
-	}
+	return reqParams, writer
 }
 
 func jsonDecode(r io.Reader, val interface{}) error {

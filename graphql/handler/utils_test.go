@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 type middlewareContext struct {
@@ -19,7 +20,7 @@ func testMiddleware(m Middleware, initialContexts ...graphql.RequestContext) mid
 		initial = &initialContexts[0]
 	}
 
-	m(func(ctx context.Context, writer Writer) {
+	m(func(ctx context.Context, writer transport.Writer) {
 		c.ResultContext = *graphql.GetRequestContext(ctx)
 		c.InvokedNext = true
 	})(graphql.WithRequestContext(context.Background(), initial), func(response *graphql.Response) {

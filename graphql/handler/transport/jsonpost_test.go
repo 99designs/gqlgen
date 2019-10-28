@@ -1,4 +1,4 @@
-package handler
+package transport_test
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
@@ -33,8 +35,8 @@ func TestJsonPost(t *testing.T) {
 			`})
 		},
 	}
-	h := New(es)
-	h.AddTransport(JsonPostTransport{})
+	h := handler.New(es)
+	h.AddTransport(transport.JsonPostTransport{})
 
 	t.Run("success", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }"}`)

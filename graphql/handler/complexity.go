@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+
 	"github.com/99designs/gqlgen/graphql"
 )
 
@@ -11,7 +13,7 @@ import (
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
 func ComplexityLimit(limit int) Middleware {
 	return func(next Handler) Handler {
-		return func(ctx context.Context, writer Writer) {
+		return func(ctx context.Context, writer transport.Writer) {
 			graphql.GetRequestContext(ctx).ComplexityLimit = limit
 			next(ctx, writer)
 		}
@@ -25,7 +27,7 @@ func ComplexityLimit(limit int) Middleware {
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
 func ComplexityLimitFunc(f graphql.ComplexityLimitFunc) Middleware {
 	return func(next Handler) Handler {
-		return func(ctx context.Context, writer Writer) {
+		return func(ctx context.Context, writer transport.Writer) {
 			graphql.GetRequestContext(ctx).ComplexityLimit = f(ctx)
 			next(ctx, writer)
 		}

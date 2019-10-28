@@ -32,9 +32,9 @@ When you have nested or recursive schema like this:
 
 ```graphql
 type User {
-	id: ID!
-	name: String!
-	friends: [User!]!
+  id: ID!
+  name: String!
+  friends: [User!]!
 }
 ```
 
@@ -46,8 +46,8 @@ Write a custom model that omits the Friends model:
 
 ```go
 type User struct {
-    ID int
-    Name string
+  ID int
+  Name string
 }
 ```
 
@@ -77,8 +77,8 @@ After doing either of the above and running generate we will need to provide a r
 
 ```go
 func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) {
-    // select * from user where friendid = obj.ID
-    return friends,  nil
+  // select * from user where friendid = obj.ID
+  return friends,  nil
 }
 ```
 

@@ -6,37 +6,28 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-
-	"github.com/vektah/gqlparser/validator"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
+	"github.com/vektah/gqlparser/validator"
 )
 
 type (
 	Server struct {
 		es          graphql.ExecutableSchema
-		transports  []transport.Transport
-		middlewares []Middleware
+		transports  []graphql.Transport
+		middlewares []graphql.Middleware
 	}
 
-	Handler func(ctx context.Context, writer transport.Writer)
-
-	Middleware func(next Handler) Handler
-
 	Option func(Server)
-
-	ResponseStream func() *graphql.Response
 )
 
-func (s *Server) AddTransport(transport transport.Transport) {
+func (s *Server) AddTransport(transport graphql.Transport) {
 	s.transports = append(s.transports, transport)
 }
 
-func (s *Server) Use(middleware Middleware) {
+func (s *Server) Use(middleware graphql.Middleware) {
 	s.middlewares = append(s.middlewares, middleware)
 }
 
@@ -46,7 +37,7 @@ func New(es graphql.ExecutableSchema) *Server {
 	}
 }
 
-func (s *Server) getTransport(r *http.Request) transport.Transport {
+func (s *Server) getTransport(r *http.Request) graphql.Transport {
 	for _, t := range s.transports {
 		if t.Supports(r) {
 			return t
@@ -79,7 +70,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // executableSchemaHandler is the inner most handler, it invokes the graph directly after all middleware
 // and sends responses to the transport so it can be returned to the client
-func (s *Server) executableSchemaHandler(ctx context.Context, write transport.Writer) {
+func (s *Server) executableSchemaHandler(ctx context.Context, write graphql.Writer) {
 	rc := graphql.GetRequestContext(ctx)
 
 	var gerr *gqlerror.Error

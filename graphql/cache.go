@@ -1,4 +1,4 @@
-package handler
+package graphql
 
 // Cache is a shared store for APQ and query AST caching
 type Cache interface {

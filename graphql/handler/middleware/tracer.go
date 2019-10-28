@@ -1,18 +1,16 @@
-package handler
+package middleware
 
 import (
 	"context"
-
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/99designs/gqlgen/graphql"
 )
 
 // Tracer allows you to add a request/resolver tracer that will be called around the root request,
 // calling resolver. This is useful for tracing
-func Tracer(tracer graphql.Tracer) Middleware {
-	return func(next Handler) Handler {
-		return func(ctx context.Context, writer transport.Writer) {
+func Tracer(tracer graphql.Tracer) graphql.Middleware {
+	return func(next graphql.Handler) graphql.Handler {
+		return func(ctx context.Context, writer graphql.Writer) {
 			rc := graphql.GetRequestContext(ctx)
 			rc.AddTracer(tracer)
 			rc.AddRequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {

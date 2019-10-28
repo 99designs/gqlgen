@@ -1,9 +1,7 @@
-package handler
+package middleware
 
 import (
 	"context"
-
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/99designs/gqlgen/graphql"
 )
@@ -11,9 +9,9 @@ import (
 // ComplexityLimit sets a maximum query complexity that is allowed to be executed.
 //
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
-func ComplexityLimit(limit int) Middleware {
-	return func(next Handler) Handler {
-		return func(ctx context.Context, writer transport.Writer) {
+func ComplexityLimit(limit int) graphql.Middleware {
+	return func(next graphql.Handler) graphql.Handler {
+		return func(ctx context.Context, writer graphql.Writer) {
 			graphql.GetRequestContext(ctx).ComplexityLimit = limit
 			next(ctx, writer)
 		}
@@ -25,9 +23,9 @@ func ComplexityLimit(limit int) Middleware {
 // instead.
 //
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
-func ComplexityLimitFunc(f graphql.ComplexityLimitFunc) Middleware {
-	return func(next Handler) Handler {
-		return func(ctx context.Context, writer transport.Writer) {
+func ComplexityLimitFunc(f graphql.ComplexityLimitFunc) graphql.Middleware {
+	return func(next graphql.Handler) graphql.Handler {
+		return func(ctx context.Context, writer graphql.Writer) {
 			graphql.GetRequestContext(ctx).ComplexityLimit = f(ctx)
 			next(ctx, writer)
 		}

@@ -1,11 +1,9 @@
-package handler
+package middleware
 
 import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
@@ -20,9 +18,9 @@ const (
 // does not yet know what the query is for the hash it will respond telling the client to send the query along with the
 // hash in the next request.
 // see https://github.com/apollographql/apollo-link-persisted-queries
-func AutomaticPersistedQuery(cache Cache) Middleware {
-	return func(next Handler) Handler {
-		return func(ctx context.Context, writer transport.Writer) {
+func AutomaticPersistedQuery(cache graphql.Cache) graphql.Middleware {
+	return func(next graphql.Handler) graphql.Handler {
+		return func(ctx context.Context, writer graphql.Writer) {
 			rc := graphql.GetRequestContext(ctx)
 
 			if rc.Extensions["persistedQuery"] == nil {

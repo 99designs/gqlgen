@@ -38,8 +38,8 @@ func TestServer(t *testing.T) {
 	}
 	srv := New(es)
 	srv.AddTransport(&transport.HTTPGet{})
-	srv.Use(func(next Handler) Handler {
-		return func(ctx context.Context, writer transport.Writer) {
+	srv.Use(func(next graphql.Handler) graphql.Handler {
+		return func(ctx context.Context, writer graphql.Writer) {
 			next(ctx, writer)
 		}
 	})
@@ -70,14 +70,14 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(func(next Handler) Handler {
-			return func(ctx context.Context, writer transport.Writer) {
+		srv.Use(func(next graphql.Handler) graphql.Handler {
+			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "first")
 				next(ctx, writer)
 			}
 		})
-		srv.Use(func(next Handler) Handler {
-			return func(ctx context.Context, writer transport.Writer) {
+		srv.Use(func(next graphql.Handler) graphql.Handler {
+			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "second")
 				next(ctx, writer)
 			}

@@ -19,12 +19,12 @@ func (H HTTPGet) Supports(r *http.Request) bool {
 	return r.Method == "GET"
 }
 
-func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestContext, Writer) {
+func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestContext, graphql.Writer) {
 	reqParams := newRequestContext()
 	reqParams.RawQuery = r.URL.Query().Get("query")
 	reqParams.OperationName = r.URL.Query().Get("operationName")
 
-	writer := Writer(func(response *graphql.Response) {
+	writer := graphql.Writer(func(response *graphql.Response) {
 		b, err := json.Marshal(response)
 		if err != nil {
 			panic(err)

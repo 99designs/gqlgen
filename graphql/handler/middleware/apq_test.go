@@ -1,4 +1,4 @@
-package handler
+package middleware
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ func TestAPQ(t *testing.T) {
 	const hash = "b8d9506e34c83b0e53c2aa463624fcea354713bc38f95276e6f0bd893ffb5b88"
 
 	t.Run("with query and no hash", func(t *testing.T) {
-		rc := testMiddleware(AutomaticPersistedQuery(MapCache{}), graphql.RequestContext{
+		rc := testMiddleware(AutomaticPersistedQuery(graphql.MapCache{}), graphql.RequestContext{
 			RawQuery: "original query",
 		})
 
@@ -21,7 +21,7 @@ func TestAPQ(t *testing.T) {
 	})
 
 	t.Run("with hash miss and no query", func(t *testing.T) {
-		rc := testMiddleware(AutomaticPersistedQuery(MapCache{}), graphql.RequestContext{
+		rc := testMiddleware(AutomaticPersistedQuery(graphql.MapCache{}), graphql.RequestContext{
 			RawQuery: "",
 			Extensions: map[string]interface{}{
 				"persistedQuery": map[string]interface{}{
@@ -36,7 +36,7 @@ func TestAPQ(t *testing.T) {
 	})
 
 	t.Run("with hash miss and query", func(t *testing.T) {
-		cache := MapCache{}
+		cache := graphql.MapCache{}
 		rc := testMiddleware(AutomaticPersistedQuery(cache), graphql.RequestContext{
 			RawQuery: query,
 			Extensions: map[string]interface{}{
@@ -53,7 +53,7 @@ func TestAPQ(t *testing.T) {
 	})
 
 	t.Run("with hash miss and query", func(t *testing.T) {
-		cache := MapCache{}
+		cache := graphql.MapCache{}
 		rc := testMiddleware(AutomaticPersistedQuery(cache), graphql.RequestContext{
 			RawQuery: query,
 			Extensions: map[string]interface{}{
@@ -70,7 +70,7 @@ func TestAPQ(t *testing.T) {
 	})
 
 	t.Run("with hash hit and no query", func(t *testing.T) {
-		cache := MapCache{
+		cache := graphql.MapCache{
 			hash: query,
 		}
 		rc := testMiddleware(AutomaticPersistedQuery(cache), graphql.RequestContext{
@@ -88,7 +88,7 @@ func TestAPQ(t *testing.T) {
 	})
 
 	t.Run("with malformed extension payload", func(t *testing.T) {
-		rc := testMiddleware(AutomaticPersistedQuery(MapCache{}), graphql.RequestContext{
+		rc := testMiddleware(AutomaticPersistedQuery(graphql.MapCache{}), graphql.RequestContext{
 			Extensions: map[string]interface{}{
 				"persistedQuery": "asdf",
 			},
@@ -99,7 +99,7 @@ func TestAPQ(t *testing.T) {
 	})
 
 	t.Run("with invalid extension version", func(t *testing.T) {
-		rc := testMiddleware(AutomaticPersistedQuery(MapCache{}), graphql.RequestContext{
+		rc := testMiddleware(AutomaticPersistedQuery(graphql.MapCache{}), graphql.RequestContext{
 			Extensions: map[string]interface{}{
 				"persistedQuery": map[string]interface{}{
 					"version": 2,
@@ -112,7 +112,7 @@ func TestAPQ(t *testing.T) {
 	})
 
 	t.Run("with hash mismatch", func(t *testing.T) {
-		rc := testMiddleware(AutomaticPersistedQuery(MapCache{}), graphql.RequestContext{
+		rc := testMiddleware(AutomaticPersistedQuery(graphql.MapCache{}), graphql.RequestContext{
 			RawQuery: query,
 			Extensions: map[string]interface{}{
 				"persistedQuery": map[string]interface{}{

@@ -73,14 +73,14 @@ func (s *Server) executableSchemaHandler(ctx context.Context, write graphql.Writ
 	if rc.Doc == nil {
 		rc.Doc, gerr = s.parseOperation(ctx, rc)
 		if gerr != nil {
-			write(&graphql.Response{Errors: []*gqlerror.Error{gerr}})
+			write(graphql.StatusParseError, &graphql.Response{Errors: []*gqlerror.Error{gerr}})
 			return
 		}
 	}
 
 	ctx, op, listErr := s.validateOperation(ctx, rc)
 	if len(listErr) != 0 {
-		write(&graphql.Response{
+		write(graphql.StatusValidationError, &graphql.Response{
 			Errors: listErr,
 		})
 		return
@@ -88,7 +88,7 @@ func (s *Server) executableSchemaHandler(ctx context.Context, write graphql.Writ
 
 	vars, err := validator.VariableValues(s.es.Schema(), op, rc.Variables)
 	if err != nil {
-		write(&graphql.Response{
+		write(graphql.StatusValidationError, &graphql.Response{
 			Errors: gqlerror.List{err},
 		})
 		return
@@ -99,19 +99,27 @@ func (s *Server) executableSchemaHandler(ctx context.Context, write graphql.Writ
 	switch op.Operation {
 	case ast.Query:
 		resp := s.es.Query(ctx, op)
-		write(resp)
+
+		write(getStatus(resp), resp)
 	case ast.Mutation:
 		resp := s.es.Mutation(ctx, op)
-		write(resp)
+		write(getStatus(resp), resp)
 	case ast.Subscription:
 		resp := s.es.Subscription(ctx, op)
 
 		for w := resp(); w != nil; w = resp() {
-			write(w)
+			write(getStatus(w), w)
 		}
 	default:
-		write(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
+		write(graphql.StatusValidationError, graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
 	}
+}
+
+func getStatus(resp *graphql.Response) graphql.Status {
+	if len(resp.Errors) > 0 {
+		return graphql.StatusResolverError
+	}
+	return graphql.StatusOk
 }
 
 func (s *Server) parseOperation(ctx context.Context, rc *graphql.RequestContext) (*ast.QueryDocument, *gqlerror.Error) {

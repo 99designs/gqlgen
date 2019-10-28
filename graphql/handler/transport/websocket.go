@@ -10,10 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vektah/gqlparser/gqlerror"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gorilla/websocket"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 const (
@@ -221,7 +220,15 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				c.sendError(message.ID, &gqlerror.Error{Message: userErr.Error()})
 			}
 		}()
-		c.handler(ctx, func(response *graphql.Response) {
+		c.handler(ctx, func(status graphql.Status, response *graphql.Response) {
+			msgType := dataMsg
+			switch status {
+			case graphql.StatusOk, graphql.StatusResolverError:
+				msgType = dataMsg
+			case graphql.StatusParseError, graphql.StatusValidationError:
+				msgType = errorMsg
+			}
+
 			b, err := json.Marshal(response)
 			if err != nil {
 				panic(err)
@@ -229,7 +236,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 			c.write(&operationMessage{
 				Payload: b,
 				ID:      message.ID,
-				Type:    dataMsg,
+				Type:    msgType,
 			})
 		})
 		c.write(&operationMessage{ID: message.ID, Type: completeMsg})

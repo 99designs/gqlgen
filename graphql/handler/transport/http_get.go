@@ -26,7 +26,13 @@ func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request, handler graphql.Hand
 	rc.RawQuery = r.URL.Query().Get("query")
 	rc.OperationName = r.URL.Query().Get("operationName")
 
-	writer := graphql.Writer(func(response *graphql.Response) {
+	writer := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
+		switch status {
+		case graphql.StatusOk, graphql.StatusResolverError:
+			w.WriteHeader(http.StatusOK)
+		case graphql.StatusParseError, graphql.StatusValidationError:
+			w.WriteHeader(http.StatusUnprocessableEntity)
+		}
 		b, err := json.Marshal(response)
 		if err != nil {
 			panic(err)

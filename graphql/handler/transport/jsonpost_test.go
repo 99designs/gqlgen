@@ -78,21 +78,21 @@ func TestJsonPost(t *testing.T) {
 
 	t.Run("parse failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "!"}`)
-		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("validation failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "{ me { title }}"}`)
-		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"Cannot query field \"title\" on type \"User\".","locations":[{"line":1,"column":8}]}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("invalid variable", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "query($id:Int!){user(id:$id){name}}","variables":{"id":false}}`)
-		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"]}],"data":null}`, resp.Body.String())
 	})

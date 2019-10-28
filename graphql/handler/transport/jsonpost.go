@@ -28,7 +28,14 @@ func (H JsonPostTransport) Supports(r *http.Request) bool {
 func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request, handler graphql.Handler) {
 	w.Header().Set("Content-Type", "application/json")
 
-	write := graphql.Writer(func(response *graphql.Response) {
+	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
+		switch status {
+		case graphql.StatusOk, graphql.StatusResolverError:
+			w.WriteHeader(http.StatusOK)
+		case graphql.StatusParseError, graphql.StatusValidationError:
+			w.WriteHeader(http.StatusUnprocessableEntity)
+		}
+
 		b, err := json.Marshal(response)
 		if err != nil {
 			panic(err)

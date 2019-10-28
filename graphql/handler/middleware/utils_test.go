@@ -22,7 +22,7 @@ func testMiddleware(m graphql.Middleware, initialContexts ...graphql.RequestCont
 	m(func(ctx context.Context, writer graphql.Writer) {
 		c.ResultContext = *graphql.GetRequestContext(ctx)
 		c.InvokedNext = true
-	})(graphql.WithRequestContext(context.Background(), initial), func(response *graphql.Response) {
+	})(graphql.WithRequestContext(context.Background(), initial), func(status graphql.Status, response *graphql.Response) {
 		c.Response = *response
 	})
 

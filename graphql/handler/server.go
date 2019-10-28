@@ -18,6 +18,8 @@ type (
 		es          graphql.ExecutableSchema
 		transports  []graphql.Transport
 		middlewares []graphql.Middleware
+
+		handler graphql.Handler
 	}
 
 	Option func(Server)
@@ -29,12 +31,26 @@ func (s *Server) AddTransport(transport graphql.Transport) {
 
 func (s *Server) Use(middleware graphql.Middleware) {
 	s.middlewares = append(s.middlewares, middleware)
+	s.buildHandler()
+}
+
+// This is fairly expensive, so we dont want to do it in every request. May be called multiple times while creating
+// the server.
+func (s *Server) buildHandler() {
+	handler := s.executableSchemaHandler
+	for i := len(s.middlewares) - 1; i >= 0; i-- {
+		handler = s.middlewares[i](handler)
+	}
+
+	s.handler = handler
 }
 
 func New(es graphql.ExecutableSchema) *Server {
-	return &Server{
+	s := &Server{
 		es: es,
 	}
+	s.handler = s.executableSchemaHandler
+	return s
 }
 
 func (s *Server) getTransport(r *http.Request) graphql.Transport {
@@ -53,13 +69,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// todo: Should be done statically at server init rather than per request.
-	handler := s.executableSchemaHandler
-	for i := len(s.middlewares) - 1; i >= 0; i-- {
-		handler = s.middlewares[i](handler)
-	}
-
-	transport.Do(w, r, handler)
+	transport.Do(w, r, s.handler)
 }
 
 // executableSchemaHandler is the inner most handler, it invokes the graph directly after all middleware

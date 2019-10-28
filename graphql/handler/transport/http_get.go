@@ -11,6 +11,8 @@ import (
 
 type HTTPGet struct{}
 
+var _ graphql.Transport = HTTPGet{}
+
 func (H HTTPGet) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false
@@ -19,10 +21,10 @@ func (H HTTPGet) Supports(r *http.Request) bool {
 	return r.Method == "GET"
 }
 
-func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestContext, graphql.Writer) {
-	reqParams := newRequestContext()
-	reqParams.RawQuery = r.URL.Query().Get("query")
-	reqParams.OperationName = r.URL.Query().Get("operationName")
+func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request, handler graphql.Handler) {
+	rc := newRequestContext()
+	rc.RawQuery = r.URL.Query().Get("query")
+	rc.OperationName = r.URL.Query().Get("operationName")
 
 	writer := graphql.Writer(func(response *graphql.Response) {
 		b, err := json.Marshal(response)
@@ -33,16 +35,16 @@ func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestCon
 	})
 
 	if variables := r.URL.Query().Get("variables"); variables != "" {
-		if err := jsonDecode(strings.NewReader(variables), &reqParams.Variables); err != nil {
+		if err := jsonDecode(strings.NewReader(variables), &rc.Variables); err != nil {
 			writer.Errorf("variables could not be decoded")
-			return nil, nil
+			return
 		}
 	}
 
 	if extensions := r.URL.Query().Get("extensions"); extensions != "" {
-		if err := jsonDecode(strings.NewReader(extensions), &reqParams.Extensions); err != nil {
+		if err := jsonDecode(strings.NewReader(extensions), &rc.Extensions); err != nil {
 			writer.Errorf("extensions could not be decoded")
-			return nil, nil
+			return
 		}
 	}
 
@@ -51,7 +53,8 @@ func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestCon
 	//	return ctx, nil, nil, gqlerror.List{gqlerror.Errorf("GET requests only allow query operations")}
 	//}
 
-	return reqParams, writer
+	ctx := graphql.WithRequestContext(r.Context(), rc)
+	handler(ctx, writer)
 }
 
 func jsonDecode(r io.Reader, val interface{}) error {

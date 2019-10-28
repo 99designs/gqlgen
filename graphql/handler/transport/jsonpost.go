@@ -25,7 +25,7 @@ func (H JsonPostTransport) Supports(r *http.Request) bool {
 	return r.Method == "POST" && mediaType == "application/json"
 }
 
-func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request) (*graphql.RequestContext, graphql.Writer) {
+func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request, handler graphql.Handler) {
 	w.Header().Set("Content-Type", "application/json")
 
 	write := graphql.Writer(func(response *graphql.Response) {
@@ -36,23 +36,19 @@ func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request) (*graphql.
 		w.Write(b)
 	})
 
-	var params struct {
-		Query         string                 `json:"query"`
-		OperationName string                 `json:"operationName"`
-		Variables     map[string]interface{} `json:"variables"`
-		Extensions    map[string]interface{} `json:"extensions"`
-	}
+	var params rawParams
 	if err := jsonDecode(r.Body, &params); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		write.Errorf("json body could not be decoded: " + err.Error())
-		return nil, nil
+		return
 	}
 
-	reqParams := newRequestContext()
-	reqParams.RawQuery = params.Query
-	reqParams.OperationName = params.OperationName
-	reqParams.Variables = params.Variables
-	reqParams.Extensions = params.Extensions
+	rc := newRequestContext()
+	rc.RawQuery = params.Query
+	rc.OperationName = params.OperationName
+	rc.Variables = params.Variables
+	rc.Extensions = params.Extensions
 
-	return reqParams, write
+	ctx := graphql.WithRequestContext(r.Context(), rc)
+	handler(ctx, write)
 }

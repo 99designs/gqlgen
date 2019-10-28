@@ -16,7 +16,7 @@ type (
 
 	Transport interface {
 		Supports(r *http.Request) bool
-		Do(w http.ResponseWriter, r *http.Request) (*RequestContext, Writer)
+		Do(w http.ResponseWriter, r *http.Request, handler Handler)
 	}
 )
 

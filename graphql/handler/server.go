@@ -53,19 +53,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rc, writer := transport.Do(w, r)
-	if rc == nil {
-		return
-	}
-
+	// todo: Should be done statically at server init rather than per request.
 	handler := s.executableSchemaHandler
-
 	for i := len(s.middlewares) - 1; i >= 0; i-- {
 		handler = s.middlewares[i](handler)
 	}
 
-	ctx := graphql.WithRequestContext(r.Context(), rc)
-	handler(ctx, writer)
+	transport.Do(w, r, handler)
 }
 
 // executableSchemaHandler is the inner most handler, it invokes the graph directly after all middleware

@@ -1,4 +1,4 @@
-package handler
+package transport
 
 import "context"
 
@@ -14,12 +14,12 @@ type InitPayload map[string]interface{}
 
 // GetString safely gets a string value from the payload. It returns an empty string if the
 // payload is nil or the value isn't set.
-func (payload InitPayload) GetString(key string) string {
-	if payload == nil {
+func (p InitPayload) GetString(key string) string {
+	if p == nil {
 		return ""
 	}
 
-	if value, ok := payload[key]; ok {
+	if value, ok := p[key]; ok {
 		res, _ := value.(string)
 		return res
 	}
@@ -29,12 +29,12 @@ func (payload InitPayload) GetString(key string) string {
 
 // Authorization is a short hand for getting the Authorization header from the
 // payload.
-func (payload InitPayload) Authorization() string {
-	if value := payload.GetString("Authorization"); value != "" {
+func (p InitPayload) Authorization() string {
+	if value := p.GetString("Authorization"); value != "" {
 		return value
 	}
 
-	if value := payload.GetString("authorization"); value != "" {
+	if value := p.GetString("authorization"); value != "" {
 		return value
 	}
 

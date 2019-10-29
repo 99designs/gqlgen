@@ -1,7 +1,6 @@
 package modelgen
 
 import (
-	"go/ast"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
@@ -47,18 +46,20 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("tags are applied", func(t *testing.T) {
-		node, err := parser.ParseFile(token.NewFileSet(), "./out/generated.go", nil, 0)
+		file, err := ioutil.ReadFile("./out/generated.go")
 		require.NoError(t, err)
-		for _, obj := range node.Scope.Objects {
-			if spec, ok := (obj.Decl).(*ast.TypeSpec); ok {
-				if st, ok := (spec.Type).(*ast.StructType); ok {
-					for _, field := range st.Fields.List {
-						fieldName := strings.ToLower(field.Names[0].String())
-						expectedTag := "`json:\"" + fieldName + "\" database:\"" + spec.Name.String() + fieldName + "\"`"
-						require.True(t, field.Tag.Value == expectedTag)
-					}
-				}
-			}
+
+		fileText := string(file)
+
+		expectedTags := []string{
+			`json:"missing2" database:"MissingTypeNotNullmissing2"`,
+			`json:"name" database:"MissingInputname"`,
+			`json:"missing2" database:"MissingTypeNullablemissing2"`,
+			`json:"name" database:"TypeWithDescriptionname"`,
+		}
+
+		for _, tag := range expectedTags {
+			require.True(t, strings.Contains(fileText, tag))
 		}
 	})
 }

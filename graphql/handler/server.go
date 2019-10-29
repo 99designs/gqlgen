@@ -1,56 +1,44 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
-	"github.com/vektah/gqlparser/parser"
-	"github.com/vektah/gqlparser/validator"
 )
 
 type (
 	Server struct {
-		es          graphql.ExecutableSchema
-		transports  []graphql.Transport
-		middlewares []graphql.Middleware
-
-		handler graphql.Handler
+		es         graphql.ExecutableSchema
+		transports []graphql.Transport
+		plugins    []graphql.HandlerPlugin
+		exec       executor
 	}
-
-	Option func(Server)
 )
-
-func (s *Server) AddTransport(transport graphql.Transport) {
-	s.transports = append(s.transports, transport)
-}
-
-func (s *Server) Use(middleware graphql.Middleware) {
-	s.middlewares = append(s.middlewares, middleware)
-	s.buildHandler()
-}
-
-// This is fairly expensive, so we dont want to do it in every request. May be called multiple times while creating
-// the server.
-func (s *Server) buildHandler() {
-	handler := s.executableSchemaHandler
-	for i := len(s.middlewares) - 1; i >= 0; i-- {
-		handler = s.middlewares[i](handler)
-	}
-
-	s.handler = handler
-}
 
 func New(es graphql.ExecutableSchema) *Server {
 	s := &Server{
 		es: es,
 	}
-	s.handler = s.executableSchemaHandler
+	s.exec = newExecutor(s.es, s.plugins)
 	return s
+}
+
+func (s *Server) AddTransport(transport graphql.Transport) {
+	s.transports = append(s.transports, transport)
+}
+
+func (s *Server) Use(plugin graphql.HandlerPlugin) {
+	switch plugin.(type) {
+	case graphql.RequestMutator, graphql.RequestContextMutator, graphql.RequestMiddleware:
+		s.plugins = append(s.plugins, plugin)
+		s.exec = newExecutor(s.es, s.plugins)
+
+	default:
+		panic(fmt.Errorf("cannot Use %T as a gqlgen handler plugin because it does not implement any plugin hooks", plugin))
+	}
 }
 
 func (s *Server) getTransport(r *http.Request) graphql.Transport {
@@ -69,60 +57,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transport.Do(w, r, s.handler)
-}
-
-// executableSchemaHandler is the inner most handler, it invokes the graph directly after all middleware
-// and sends responses to the transport so it can be returned to the client
-func (s *Server) executableSchemaHandler(ctx context.Context, write graphql.Writer) {
-	rc := graphql.GetRequestContext(ctx)
-
-	var gerr *gqlerror.Error
-
-	// todo: hmm... how should this work?
-	if rc.Doc == nil {
-		rc.Doc, gerr = s.parseOperation(ctx, rc)
-		if gerr != nil {
-			write(graphql.StatusParseError, &graphql.Response{Errors: []*gqlerror.Error{gerr}})
-			return
-		}
-	}
-
-	ctx, op, listErr := s.validateOperation(ctx, rc)
-	if len(listErr) != 0 {
-		write(graphql.StatusValidationError, &graphql.Response{
-			Errors: listErr,
-		})
-		return
-	}
-
-	vars, err := validator.VariableValues(s.es.Schema(), op, rc.Variables)
-	if err != nil {
-		write(graphql.StatusValidationError, &graphql.Response{
-			Errors: gqlerror.List{err},
-		})
-		return
-	}
-
-	rc.Variables = vars
-
-	switch op.Operation {
-	case ast.Query:
-		resp := s.es.Query(ctx, op)
-
-		write(getStatus(resp), resp)
-	case ast.Mutation:
-		resp := s.es.Mutation(ctx, op)
-		write(getStatus(resp), resp)
-	case ast.Subscription:
-		resp := s.es.Subscription(ctx, op)
-
-		for w := resp(); w != nil; w = resp() {
-			write(getStatus(w), w)
-		}
-	default:
-		write(graphql.StatusValidationError, graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
-	}
+	transport.Do(w, r, s.exec)
 }
 
 func getStatus(resp *graphql.Response) graphql.Status {
@@ -130,30 +65,6 @@ func getStatus(resp *graphql.Response) graphql.Status {
 		return graphql.StatusResolverError
 	}
 	return graphql.StatusOk
-}
-
-func (s *Server) parseOperation(ctx context.Context, rc *graphql.RequestContext) (*ast.QueryDocument, *gqlerror.Error) {
-	ctx = rc.Tracer.StartOperationValidation(ctx)
-	defer func() { rc.Tracer.EndOperationValidation(ctx) }()
-
-	return parser.ParseQuery(&ast.Source{Input: rc.RawQuery})
-}
-
-func (gh *Server) validateOperation(ctx context.Context, rc *graphql.RequestContext) (context.Context, *ast.OperationDefinition, gqlerror.List) {
-	ctx = rc.Tracer.StartOperationValidation(ctx)
-	defer func() { rc.Tracer.EndOperationValidation(ctx) }()
-
-	listErr := validator.Validate(gh.es.Schema(), rc.Doc)
-	if len(listErr) != 0 {
-		return ctx, nil, listErr
-	}
-
-	op := rc.Doc.Operations.ForName(rc.OperationName)
-	if op == nil {
-		return ctx, nil, gqlerror.List{gqlerror.Errorf("operation %s not found", rc.OperationName)}
-	}
-
-	return ctx, op, nil
 }
 
 func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {

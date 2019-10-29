@@ -12,7 +12,6 @@ import (
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
 type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
-type RequestMiddleware func(ctx context.Context, next func(ctx context.Context) []byte) []byte
 type ComplexityLimitFunc func(ctx context.Context) int
 
 type RequestContext struct {
@@ -56,9 +55,6 @@ func (rc *RequestContext) Validate(ctx context.Context) error {
 	if rc.DirectiveMiddleware == nil {
 		rc.DirectiveMiddleware = DefaultDirectiveMiddleware
 	}
-	if rc.RequestMiddleware == nil {
-		rc.RequestMiddleware = DefaultRequestMiddleware
-	}
 	if rc.Recover == nil {
 		rc.Recover = DefaultRecover
 	}
@@ -73,22 +69,6 @@ func (rc *RequestContext) Validate(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-// AddRequestMiddleware allows you to define a function that will be called around the root request,
-// after the query has been parsed. This is useful for logging
-func (cfg *RequestContext) AddRequestMiddleware(middleware RequestMiddleware) {
-	if cfg.RequestMiddleware == nil {
-		cfg.RequestMiddleware = middleware
-		return
-	}
-
-	lastResolve := cfg.RequestMiddleware
-	cfg.RequestMiddleware = func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-		return lastResolve(ctx, func(ctx context.Context) []byte {
-			return middleware(ctx, next)
-		})
-	}
 }
 
 func (cfg *RequestContext) AddTracer(tracer Tracer) {
@@ -337,4 +317,11 @@ func ChainFieldMiddleware(handleFunc ...FieldMiddleware) FieldMiddleware {
 	return func(ctx context.Context, next Resolver) (interface{}, error) {
 		return next(ctx)
 	}
+}
+
+var _ RequestContextMutator = ComplexityLimitFunc(nil)
+
+func (c ComplexityLimitFunc) MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error {
+	rc.ComplexityLimit = c(ctx)
+	return nil
 }

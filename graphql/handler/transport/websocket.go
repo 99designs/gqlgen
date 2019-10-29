@@ -41,7 +41,7 @@ type (
 		active          map[string]context.CancelFunc
 		mu              sync.Mutex
 		keepAliveTicker *time.Ticker
-		handler         graphql.Handler
+		exec            graphql.GraphExecutor
 
 		initPayload InitPayload
 	}
@@ -59,7 +59,7 @@ func (t WebsocketTransport) Supports(r *http.Request) bool {
 	return r.Header.Get("Upgrade") != ""
 }
 
-func (t WebsocketTransport) Do(w http.ResponseWriter, r *http.Request, handler graphql.Handler) {
+func (t WebsocketTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ws, err := t.Upgrader.Upgrade(w, r, http.Header{
 		"Sec-Websocket-Protocol": []string{"graphql-ws"},
 	})
@@ -73,7 +73,7 @@ func (t WebsocketTransport) Do(w http.ResponseWriter, r *http.Request, handler g
 		active:             map[string]context.CancelFunc{},
 		conn:               ws,
 		ctx:                r.Context(),
-		handler:            handler,
+		exec:               exec,
 		WebsocketTransport: t,
 	}
 
@@ -191,17 +191,17 @@ func (c *wsConnection) keepAlive(ctx context.Context) {
 }
 
 func (c *wsConnection) subscribe(message *operationMessage) bool {
-	var params rawParams
+	var params *graphql.RawParams
 	if err := jsonDecode(bytes.NewReader(message.Payload), &params); err != nil {
 		c.sendConnectionError("invalid json")
 		return false
 	}
 
-	rc := newRequestContext()
-	rc.RawQuery = params.Query
-	rc.OperationName = params.OperationName
-	rc.Variables = params.Variables
-	rc.Extensions = params.Extensions
+	rc, err := c.exec.CreateRequestContext(c.ctx, params)
+	if err != nil {
+		c.sendError(message.ID, err...)
+		return false
+	}
 
 	ctx := graphql.WithRequestContext(c.ctx, rc)
 
@@ -220,7 +220,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				c.sendError(message.ID, &gqlerror.Error{Message: userErr.Error()})
 			}
 		}()
-		c.handler(ctx, func(status graphql.Status, response *graphql.Response) {
+		c.exec.DispatchRequest(ctx, func(status graphql.Status, response *graphql.Response) {
 			msgType := dataMsg
 			switch status {
 			case graphql.StatusOk, graphql.StatusResolverError:

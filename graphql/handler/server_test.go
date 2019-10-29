@@ -38,11 +38,11 @@ func TestServer(t *testing.T) {
 	}
 	srv := New(es)
 	srv.AddTransport(&transport.HTTPGet{})
-	srv.Use(func(next graphql.Handler) graphql.Handler {
+	srv.Use(middlewareFunc(func(next graphql.Handler) graphql.Handler {
 		return func(ctx context.Context, writer graphql.Writer) {
 			next(ctx, writer)
 		}
-	})
+	}))
 
 	t.Run("returns an error if no transport matches", func(t *testing.T) {
 		resp := post(srv, "/foo", "application/json")
@@ -56,37 +56,43 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, `{"data":"query resp"}`, resp.Body.String())
 	})
 
-	t.Run("calls mutation on executable schema", func(t *testing.T) {
+	t.Run("mutations are forbidden", func(t *testing.T) {
 		resp := get(srv, "/foo?query=mutation{a}")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, `{"data":"mutation resp"}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
 
-	t.Run("calls subscription repeatedly on executable schema", func(t *testing.T) {
+	t.Run("subscriptions are forbidden", func(t *testing.T) {
 		resp := get(srv, "/foo?query=subscription{a}")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, `{"data":"subscription resp"}{"data":"subscription resp"}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("invokes middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(func(next graphql.Handler) graphql.Handler {
+		srv.Use(middlewareFunc(func(next graphql.Handler) graphql.Handler {
 			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "first")
 				next(ctx, writer)
 			}
-		})
-		srv.Use(func(next graphql.Handler) graphql.Handler {
+		}))
+		srv.Use(middlewareFunc(func(next graphql.Handler) graphql.Handler {
 			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "second")
 				next(ctx, writer)
 			}
-		})
+		}))
 
 		resp := get(srv, "/foo?query={a}")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
+}
+
+type middlewareFunc func(next graphql.Handler) graphql.Handler
+
+func (r middlewareFunc) InterceptRequest(next graphql.Handler) graphql.Handler {
+	return r(next)
 }
 
 func get(handler http.Handler, target string) *httptest.ResponseRecorder {

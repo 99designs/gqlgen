@@ -48,7 +48,6 @@ type Config struct {
 	recover                         graphql.RecoverFunc
 	errorPresenter                  graphql.ErrorPresenterFunc
 	resolverHook                    graphql.FieldMiddleware
-	requestHook                     graphql.RequestMiddleware
 	tracer                          graphql.Tracer
 	complexityLimit                 int
 	complexityLimitFunc             graphql.ComplexityLimitFunc

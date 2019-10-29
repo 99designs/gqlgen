@@ -25,7 +25,7 @@ func (H JsonPostTransport) Supports(r *http.Request) bool {
 	return r.Method == "POST" && mediaType == "application/json"
 }
 
-func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request, handler graphql.Handler) {
+func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	w.Header().Set("Content-Type", "application/json")
 
 	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
@@ -43,19 +43,19 @@ func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request, handler gr
 		w.Write(b)
 	})
 
-	var params rawParams
+	var params *graphql.RawParams
 	if err := jsonDecode(r.Body, &params); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		write.Errorf("json body could not be decoded: " + err.Error())
 		return
 	}
 
-	rc := newRequestContext()
-	rc.RawQuery = params.Query
-	rc.OperationName = params.OperationName
-	rc.Variables = params.Variables
-	rc.Extensions = params.Extensions
-
+	rc, err := exec.CreateRequestContext(r.Context(), params)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		write.GraphqlErr(err...)
+		return
+	}
 	ctx := graphql.WithRequestContext(r.Context(), rc)
-	handler(ctx, write)
+	exec.DispatchRequest(ctx, write)
 }

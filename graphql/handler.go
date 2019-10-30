@@ -9,10 +9,11 @@ import (
 )
 
 type (
-	Handler        func(ctx context.Context, writer Writer)
-	ResponseStream func() *Response
-	Writer         func(Status, *Response)
-	Status         int
+	OperationHandler func(ctx context.Context, writer Writer)
+	ResultHandler    func(ctx context.Context) *Response
+	ResponseStream   func() *Response
+	Writer           func(Status, *Response)
+	Status           int
 
 	RawParams struct {
 		Query         string                 `json:"query"`
@@ -56,10 +57,14 @@ type (
 		MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error
 	}
 
-	// ResponseInterceptor is called around each graphql operation. This can be called many times in the case of
-	// batching and subscriptions.
-	ResponseInterceptor interface {
-		InterceptResponse(next Handler) Handler
+	OperationInterceptor interface {
+		InterceptOperation(next OperationHandler) OperationHandler
+	}
+
+	// ResultInterceptor is called around each graphql operation result. This can be called many times for a single
+	// operation the case of subscriptions.
+	ResultInterceptor interface {
+		InterceptResult(ctx context.Context, next ResultHandler) *Response
 	}
 
 	// FieldInterceptor called around each field
@@ -67,6 +72,7 @@ type (
 		InterceptField(ctx context.Context, next Resolver) (res interface{}, err error)
 	}
 
+	// Transport provides support for different wire level encodings of graphql requests, eg Form, Get, Post, Websocket
 	Transport interface {
 		Supports(r *http.Request) bool
 		Do(w http.ResponseWriter, r *http.Request, exec GraphExecutor)

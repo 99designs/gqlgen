@@ -71,13 +71,13 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(opFunc(func(next graphql.Handler) graphql.Handler {
+		srv.Use(opFunc(func(next graphql.OperationHandler) graphql.OperationHandler {
 			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "first")
 				next(ctx, writer)
 			}
 		}))
-		srv.Use(opFunc(func(next graphql.Handler) graphql.Handler {
+		srv.Use(opFunc(func(next graphql.OperationHandler) graphql.OperationHandler {
 			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "second")
 				next(ctx, writer)
@@ -108,9 +108,9 @@ func TestServer(t *testing.T) {
 	})
 }
 
-type opFunc func(next graphql.Handler) graphql.Handler
+type opFunc func(next graphql.OperationHandler) graphql.OperationHandler
 
-func (r opFunc) InterceptResponse(next graphql.Handler) graphql.Handler {
+func (r opFunc) InterceptOperation(next graphql.OperationHandler) graphql.OperationHandler {
 	return r(next)
 }
 

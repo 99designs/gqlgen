@@ -2,7 +2,6 @@ package apollotracing
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -40,7 +39,7 @@ type (
 	}
 )
 
-var _ graphql.ResponseInterceptor = ApolloTracing{}
+var _ graphql.ResultInterceptor = ApolloTracing{}
 var _ graphql.FieldInterceptor = ApolloTracing{}
 
 func New() graphql.HandlerPlugin {
@@ -49,7 +48,7 @@ func New() graphql.HandlerPlugin {
 
 func (a ApolloTracing) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 	rc := graphql.GetRequestContext(ctx)
-	td, ok := rc.Extensions["tracing"].(*TracingExtension)
+	td, ok := graphql.GetExtension(ctx, "tracing").(*TracingExtension)
 	if !ok {
 		panic("missing tracing extension")
 	}
@@ -76,39 +75,36 @@ func (a ApolloTracing) InterceptField(ctx context.Context, next graphql.Resolver
 	return next(ctx)
 }
 
-func (a ApolloTracing) InterceptResponse(next graphql.Handler) graphql.Handler {
-	return func(ctx context.Context, writer graphql.Writer) {
-		rc := graphql.GetRequestContext(ctx)
+func (a ApolloTracing) InterceptResult(ctx context.Context, next graphql.ResultHandler) *graphql.Response {
+	rc := graphql.GetRequestContext(ctx)
 
-		start := rc.Stats.OperationStart
+	start := rc.Stats.OperationStart
 
-		td := &TracingExtension{
-			Version:   1,
-			StartTime: start,
-			Parsing: Span{
-				StartOffset: rc.Stats.Parsing.Start.Sub(start),
-				Duration:    rc.Stats.Parsing.End.Sub(rc.Stats.Parsing.Start),
-			},
+	td := &TracingExtension{
+		Version:   1,
+		StartTime: start,
+		Parsing: Span{
+			StartOffset: rc.Stats.Parsing.Start.Sub(start),
+			Duration:    rc.Stats.Parsing.End.Sub(rc.Stats.Parsing.Start),
+		},
 
-			Validation: Span{
-				StartOffset: rc.Stats.Validation.Start.Sub(start),
-				Duration:    rc.Stats.Validation.End.Sub(rc.Stats.Validation.Start),
-			},
+		Validation: Span{
+			StartOffset: rc.Stats.Validation.Start.Sub(start),
+			Duration:    rc.Stats.Validation.End.Sub(rc.Stats.Validation.Start),
+		},
 
-			Execution: struct {
-				Resolvers []ResolverExecution `json:"resolvers"`
-			}{},
-		}
-
-		if err := rc.RegisterExtension("tracing", td); err != nil {
-			panic(fmt.Errorf("unable to register extension: %s", err.Error()))
-		}
-
-		next(ctx, func(status graphql.Status, response *graphql.Response) {
-			end := graphql.Now()
-			td.EndTime = end
-			td.Duration = end.Sub(start)
-			writer(status, response)
-		})
+		Execution: struct {
+			Resolvers []ResolverExecution `json:"resolvers"`
+		}{},
 	}
+
+	graphql.RegisterExtension(ctx, "tracing", td)
+
+	resp := next(ctx)
+
+	end := graphql.Now()
+	td.EndTime = end
+	td.Duration = end.Sub(start)
+
+	return resp
 }

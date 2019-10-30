@@ -34,8 +34,9 @@ func (s *Server) Use(plugin graphql.HandlerPlugin) {
 	switch plugin.(type) {
 	case graphql.RequestParameterMutator,
 		graphql.RequestContextMutator,
-		graphql.ResponseInterceptor,
-		graphql.FieldInterceptor:
+		graphql.OperationInterceptor,
+		graphql.FieldInterceptor,
+		graphql.ResultInterceptor:
 		s.plugins = append(s.plugins, plugin)
 		s.exec = newExecutor(s.es, s.plugins)
 

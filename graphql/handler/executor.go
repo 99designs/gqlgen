@@ -11,7 +11,8 @@ import (
 )
 
 type executor struct {
-	handler                graphql.Handler
+	operationHandler       graphql.OperationHandler
+	resultHandler          graphql.ResultMiddleware
 	responseMiddleware     graphql.FieldMiddleware
 	es                     graphql.ExecutableSchema
 	requestParamMutators   []graphql.RequestParameterMutator
@@ -24,7 +25,10 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 	e := executor{
 		es: es,
 	}
-	e.handler = e.executableSchemaHandler
+	e.operationHandler = e.executableSchemaHandler
+	e.resultHandler = func(ctx context.Context, next graphql.ResultHandler) *graphql.Response {
+		return next(ctx)
+	}
 	e.responseMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 		return next(ctx)
 	}
@@ -32,9 +36,18 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 	// this loop goes backwards so the first plugin is the outer most middleware and runs first.
 	for i := len(plugins) - 1; i >= 0; i-- {
 		p := plugins[i]
-		if p, ok := p.(graphql.ResponseInterceptor); ok {
-			previous := e.handler
-			e.handler = p.InterceptResponse(previous)
+		if p, ok := p.(graphql.OperationInterceptor); ok {
+			previous := e.operationHandler
+			e.operationHandler = p.InterceptOperation(previous)
+		}
+
+		if p, ok := p.(graphql.ResultInterceptor); ok {
+			previous := e.resultHandler
+			e.resultHandler = func(ctx context.Context, next graphql.ResultHandler) *graphql.Response {
+				return p.InterceptResult(ctx, func(ctx context.Context) *graphql.Response {
+					return previous(ctx, next)
+				})
+			}
 		}
 
 		if p, ok := p.(graphql.FieldInterceptor); ok {
@@ -62,7 +75,7 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 }
 
 func (e executor) DispatchRequest(ctx context.Context, writer graphql.Writer) {
-	e.handler(ctx, writer)
+	e.operationHandler(ctx, writer)
 }
 
 func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawParams) (*graphql.RequestContext, gqlerror.List) {
@@ -84,7 +97,6 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 		RawQuery:             params.Query,
 		OperationName:        params.OperationName,
 		Variables:            params.Variables,
-		Extensions:           params.Extensions,
 	}
 	rc.Stats.OperationStart = graphql.GetStartTime(ctx)
 
@@ -114,7 +126,16 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 	return rc, nil
 }
 
-// executableSchemaHandler is the inner most handler, it invokes the graph directly after all middleware
+func (e *executor) write(ctx context.Context, resp *graphql.Response, writer graphql.Writer) {
+	resp.Extensions = graphql.GetExtensions(ctx)
+
+	for _, err := range graphql.GetErrors(ctx) {
+		resp.Errors = append(resp.Errors, err)
+	}
+	writer(getStatus(resp), resp)
+}
+
+// executableSchemaHandler is the inner most operation handler, it invokes the graph directly after all middleware
 // and sends responses to the transport so it can be returned to the client
 func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Writer) {
 	rc := graphql.GetRequestContext(ctx)
@@ -123,21 +144,37 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 
 	switch op.Operation {
 	case ast.Query:
-		resp := e.es.Query(ctx, op)
-		resp.Extensions = graphql.GetExtensions(ctx)
-		write(getStatus(resp), resp)
+		resCtx := graphql.WithResultContext(ctx)
+		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
+			return e.es.Query(ctx, op)
+		})
+		e.write(resCtx, resp, write)
+
 	case ast.Mutation:
-		resp := e.es.Mutation(ctx, op)
-		resp.Extensions = graphql.GetExtensions(ctx)
-		write(getStatus(resp), resp)
+		resCtx := graphql.WithResultContext(ctx)
+		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
+			return e.es.Mutation(ctx, op)
+		})
+		e.write(resCtx, resp, write)
+
 	case ast.Subscription:
-		resp := e.es.Subscription(ctx, op)
-
-		for w := resp(); w != nil; w = resp() {
-			w.Extensions = graphql.GetExtensions(ctx)
-
-			write(getStatus(w), w)
+		responses := e.es.Subscription(ctx, op)
+		for {
+			resCtx := graphql.WithResultContext(ctx)
+			resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
+				resp := responses()
+				if resp == nil {
+					return nil
+				}
+				resp.Extensions = graphql.GetExtensions(ctx)
+				return resp
+			})
+			if resp == nil {
+				break
+			}
+			e.write(resCtx, resp, write)
 		}
+
 	default:
 		write(graphql.StatusValidationError, graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
 	}

@@ -3,14 +3,13 @@ package graphql
 import (
 	"context"
 	"errors"
-	"fmt"
-	"sync"
 
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
 )
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
+type ResultMiddleware func(ctx context.Context, next ResultHandler) *Response
 type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 type ComplexityLimitFunc func(ctx context.Context) int
 
@@ -30,15 +29,7 @@ type RequestContext struct {
 	Recover             RecoverFunc
 	ResolverMiddleware  FieldMiddleware
 	DirectiveMiddleware FieldMiddleware
-	RequestMiddleware   ResponseInterceptor
-
-	errorsMu     sync.Mutex
-	Errors       gqlerror.List
-	extensionsMu sync.Mutex
-
-	// @deprecated use ResponseContext instead, in the case of subscriptions there are many responses returned
-	// and each can have its own set of extensions
-	Extensions map[string]interface{}
+	RequestMiddleware   OperationInterceptor
 
 	Stats Stats
 }
@@ -80,41 +71,22 @@ func DefaultDirectiveMiddleware(ctx context.Context, next Resolver) (res interfa
 	return next(ctx)
 }
 
-func DefaultRequestMiddleware(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-	return next(ctx)
-}
-
-// Deprecated: construct RequestContext directly & call Validate method.
-func NewRequestContext(doc *ast.QueryDocument, query string, variables map[string]interface{}) *RequestContext {
-	rc := &RequestContext{
-		Doc:       doc,
-		RawQuery:  query,
-		Variables: variables,
-	}
-	err := rc.Validate(context.Background())
-	if err != nil {
-		panic(err)
-	}
-
-	return rc
-}
-
 type key string
 
 const (
-	request  key = "request_context"
-	resolver key = "resolver_context"
+	requestCtx  key = "request_context"
+	resolverCtx key = "resolver_context"
 )
 
 func GetRequestContext(ctx context.Context) *RequestContext {
-	if val, ok := ctx.Value(request).(*RequestContext); ok {
+	if val, ok := ctx.Value(requestCtx).(*RequestContext); ok {
 		return val
 	}
 	return nil
 }
 
 func WithRequestContext(ctx context.Context, rc *RequestContext) context.Context {
-	return context.WithValue(ctx, request, rc)
+	return context.WithValue(ctx, requestCtx, rc)
 }
 
 type ResolverContext struct {
@@ -153,7 +125,7 @@ func (r *ResolverContext) Path() []interface{} {
 }
 
 func GetResolverContext(ctx context.Context) *ResolverContext {
-	if val, ok := ctx.Value(resolver).(*ResolverContext); ok {
+	if val, ok := ctx.Value(resolverCtx).(*ResolverContext); ok {
 		return val
 	}
 	return nil
@@ -161,7 +133,7 @@ func GetResolverContext(ctx context.Context) *ResolverContext {
 
 func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Context {
 	rc.Parent = GetResolverContext(ctx)
-	return context.WithValue(ctx, resolver, rc)
+	return context.WithValue(ctx, resolverCtx, rc)
 }
 
 // This is just a convenient wrapper method for CollectFields
@@ -189,48 +161,15 @@ Next:
 }
 
 // Errorf sends an error string to the client, passing it through the formatter.
+// Deprecated: use graphql.AddErrorf(ctx, err) instead
 func (c *RequestContext) Errorf(ctx context.Context, format string, args ...interface{}) {
-	c.errorsMu.Lock()
-	defer c.errorsMu.Unlock()
-
-	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, fmt.Errorf(format, args...)))
+	AddErrorf(ctx, format, args...)
 }
 
 // Error sends an error to the client, passing it through the formatter.
+// Deprecated: use graphql.AddError(ctx, err) instead
 func (c *RequestContext) Error(ctx context.Context, err error) {
-	c.errorsMu.Lock()
-	defer c.errorsMu.Unlock()
-
-	c.Errors = append(c.Errors, c.ErrorPresenter(ctx, err))
-}
-
-// HasError returns true if the current field has already errored
-func (c *RequestContext) HasError(rctx *ResolverContext) bool {
-	c.errorsMu.Lock()
-	defer c.errorsMu.Unlock()
-	path := rctx.Path()
-
-	for _, err := range c.Errors {
-		if equalPath(err.Path, path) {
-			return true
-		}
-	}
-	return false
-}
-
-// GetErrors returns a list of errors that occurred in the current field
-func (c *RequestContext) GetErrors(rctx *ResolverContext) gqlerror.List {
-	c.errorsMu.Lock()
-	defer c.errorsMu.Unlock()
-	path := rctx.Path()
-
-	var errs gqlerror.List
-	for _, err := range c.Errors {
-		if equalPath(err.Path, path) {
-			errs = append(errs, err)
-		}
-	}
-	return errs
+	AddError(ctx, err)
 }
 
 func equalPath(a []interface{}, b []interface{}) bool {
@@ -245,67 +184,6 @@ func equalPath(a []interface{}, b []interface{}) bool {
 	}
 
 	return true
-}
-
-// AddError is a convenience method for adding an error to the current response
-func AddError(ctx context.Context, err error) {
-	GetRequestContext(ctx).Error(ctx, err)
-}
-
-// AddErrorf is a convenience method for adding an error to the current response
-func AddErrorf(ctx context.Context, format string, args ...interface{}) {
-	GetRequestContext(ctx).Errorf(ctx, format, args...)
-}
-
-// RegisterExtension registers an extension, returns error if extension has already been registered
-func (c *RequestContext) RegisterExtension(key string, value interface{}) error {
-	c.extensionsMu.Lock()
-	defer c.extensionsMu.Unlock()
-
-	if c.Extensions == nil {
-		c.Extensions = make(map[string]interface{})
-	}
-
-	if _, ok := c.Extensions[key]; ok {
-		return fmt.Errorf("extension already registered for key %s", key)
-	}
-
-	c.Extensions[key] = value
-	return nil
-}
-
-// ChainFieldMiddleware add chain by FieldMiddleware
-func ChainFieldMiddleware(handleFunc ...FieldMiddleware) FieldMiddleware {
-	n := len(handleFunc)
-
-	if n > 1 {
-		lastI := n - 1
-		return func(ctx context.Context, next Resolver) (interface{}, error) {
-			var (
-				chainHandler Resolver
-				curI         int
-			)
-			chainHandler = func(currentCtx context.Context) (interface{}, error) {
-				if curI == lastI {
-					return next(currentCtx)
-				}
-				curI++
-				res, err := handleFunc[curI](currentCtx, chainHandler)
-				curI--
-				return res, err
-
-			}
-			return handleFunc[0](ctx, chainHandler)
-		}
-	}
-
-	if n == 1 {
-		return handleFunc[0]
-	}
-
-	return func(ctx context.Context, next Resolver) (interface{}, error) {
-		return next(ctx)
-	}
 }
 
 var _ RequestContextMutator = ComplexityLimitFunc(nil)

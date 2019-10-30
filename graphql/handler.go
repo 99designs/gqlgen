@@ -27,18 +27,44 @@ type (
 	}
 
 	// HandlerPlugin interface is entirely optional, see the list of possible hook points below
+	// Its important to understand the lifecycle of a graphql request and the terminology we use in gqlgen before working with these
+	// +---REQUEST POST /graphql------------------------------------------------+
+	// |                                                                        |
+	// | ++OPERATION query OpName { viewer { name } }+------------------------+ |
+	// | |                                                                    | |
+	// | | RESULT    { "data": { "viewer": { "name": "bob" } } }              | |
+	// | |                                                                    | |
+	// | ++OPERATION subscription OpName2 { chat { message } }+---------------+ |
+	// | |                                                                    | |
+	// | | RESULT    { "data": { "chat": { "message": "hello" } } }           | |
+	// | |                                                                    | |
+	// | | RESULT    { "data": { "chat": { "message": "byee" } } }            | |
+	// | |                                                                    | |
+	// | +--------------------------------------------------------------------+ |
+	// +------------------------------------------------------------------------+
+
 	HandlerPlugin interface{}
 
-	RequestMutator interface {
-		MutateRequest(ctx context.Context, request *RawParams) *gqlerror.Error
+	// RequestParameterMutator is called before creating a request context. allows manipulating the raw query
+	// on the way in.
+	RequestParameterMutator interface {
+		MutateRequestParameters(ctx context.Context, request *RawParams) *gqlerror.Error
 	}
 
+	// RequestContextMutator is called after creating the request context, but before executing the root resolver.
 	RequestContextMutator interface {
 		MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error
 	}
 
-	RequestMiddleware interface {
-		InterceptRequest(next Handler) Handler
+	// ResponseInterceptor is called around each graphql operation. This can be called many times in the case of
+	// batching and subscriptions.
+	ResponseInterceptor interface {
+		InterceptResponse(next Handler) Handler
+	}
+
+	// FieldInterceptor called around each field
+	FieldInterceptor interface {
+		InterceptField(ctx context.Context, next Resolver) (res interface{}, err error)
 	}
 
 	Transport interface {

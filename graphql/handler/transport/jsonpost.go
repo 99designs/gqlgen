@@ -52,7 +52,7 @@ func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request, exec graph
 
 	rc, err := exec.CreateRequestContext(r.Context(), params)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		write.GraphqlErr(err...)
 		return
 	}

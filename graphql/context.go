@@ -30,13 +30,17 @@ type RequestContext struct {
 	Recover             RecoverFunc
 	ResolverMiddleware  FieldMiddleware
 	DirectiveMiddleware FieldMiddleware
-	RequestMiddleware   RequestMiddleware
-	Tracer              Tracer
+	RequestMiddleware   ResponseInterceptor
 
 	errorsMu     sync.Mutex
 	Errors       gqlerror.List
 	extensionsMu sync.Mutex
-	Extensions   map[string]interface{}
+
+	// @deprecated use ResponseContext instead, in the case of subscriptions there are many responses returned
+	// and each can have its own set of extensions
+	Extensions map[string]interface{}
+
+	Stats Stats
 }
 
 func (rc *RequestContext) Validate(ctx context.Context) error {
@@ -61,26 +65,11 @@ func (rc *RequestContext) Validate(ctx context.Context) error {
 	if rc.ErrorPresenter == nil {
 		rc.ErrorPresenter = DefaultErrorPresenter
 	}
-	if rc.Tracer == nil {
-		rc.Tracer = &NopTracer{}
-	}
 	if rc.ComplexityLimit < 0 {
 		return errors.New("field 'ComplexityLimit' value must be 0 or more")
 	}
 
 	return nil
-}
-
-func (cfg *RequestContext) AddTracer(tracer Tracer) {
-	if cfg.Tracer == nil {
-		cfg.Tracer = tracer
-		return
-	}
-	lastTracer := cfg.Tracer
-	cfg.Tracer = &tracerWrapper{
-		tracer1: lastTracer,
-		tracer2: tracer,
-	}
 }
 
 func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {

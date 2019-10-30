@@ -32,7 +32,10 @@ func (s *Server) AddTransport(transport graphql.Transport) {
 
 func (s *Server) Use(plugin graphql.HandlerPlugin) {
 	switch plugin.(type) {
-	case graphql.RequestMutator, graphql.RequestContextMutator, graphql.RequestMiddleware:
+	case graphql.RequestParameterMutator,
+		graphql.RequestContextMutator,
+		graphql.ResponseInterceptor,
+		graphql.FieldInterceptor:
 		s.plugins = append(s.plugins, plugin)
 		s.exec = newExecutor(s.es, s.plugins)
 
@@ -51,6 +54,8 @@ func (s *Server) getTransport(r *http.Request) graphql.Transport {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	r = r.WithContext(graphql.StartOperationTrace(r.Context()))
+
 	transport := s.getTransport(r)
 	if transport == nil {
 		sendErrorf(w, http.StatusBadRequest, "transport not supported")

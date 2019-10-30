@@ -10,13 +10,20 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
 )
 
 func TestServer(t *testing.T) {
 	es := &graphql.ExecutableSchemaMock{
 		QueryFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			return &graphql.Response{Data: []byte(`"query resp"`)}
+			// Field execution happens inside the generated code, we want just enough to test against right now.
+			res, err := graphql.GetRequestContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+				return &graphql.Response{Data: []byte(`"query resp"`)}, nil
+			})
+			require.NoError(t, err)
+
+			return res.(*graphql.Response)
 		},
 		MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 			return &graphql.Response{Data: []byte(`"mutation resp"`)}
@@ -24,7 +31,6 @@ func TestServer(t *testing.T) {
 		SubscriptionFunc: func(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
 			called := 0
 			return func() *graphql.Response {
-				fmt.Println("asdf")
 				called++
 				if called > 2 {
 					return nil
@@ -38,11 +44,6 @@ func TestServer(t *testing.T) {
 	}
 	srv := New(es)
 	srv.AddTransport(&transport.HTTPGet{})
-	srv.Use(middlewareFunc(func(next graphql.Handler) graphql.Handler {
-		return func(ctx context.Context, writer graphql.Writer) {
-			next(ctx, writer)
-		}
-	}))
 
 	t.Run("returns an error if no transport matches", func(t *testing.T) {
 		resp := post(srv, "/foo", "application/json")
@@ -68,15 +69,15 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
 
-	t.Run("invokes middleware in order", func(t *testing.T) {
+	t.Run("invokes operation middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(middlewareFunc(func(next graphql.Handler) graphql.Handler {
+		srv.Use(opFunc(func(next graphql.Handler) graphql.Handler {
 			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "first")
 				next(ctx, writer)
 			}
 		}))
-		srv.Use(middlewareFunc(func(next graphql.Handler) graphql.Handler {
+		srv.Use(opFunc(func(next graphql.Handler) graphql.Handler {
 			return func(ctx context.Context, writer graphql.Writer) {
 				calls = append(calls, "second")
 				next(ctx, writer)
@@ -87,12 +88,36 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
+
+	t.Run("invokes field middleware in order", func(t *testing.T) {
+		var calls []string
+		srv.Use(fieldFunc(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			fmt.Println("first")
+			calls = append(calls, "first")
+			return next(ctx)
+		}))
+		srv.Use(fieldFunc(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			fmt.Println("second")
+			calls = append(calls, "second")
+			return next(ctx)
+		}))
+
+		resp := get(srv, "/foo?query={a}")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, []string{"first", "second"}, calls)
+	})
 }
 
-type middlewareFunc func(next graphql.Handler) graphql.Handler
+type opFunc func(next graphql.Handler) graphql.Handler
 
-func (r middlewareFunc) InterceptRequest(next graphql.Handler) graphql.Handler {
+func (r opFunc) InterceptResponse(next graphql.Handler) graphql.Handler {
 	return r(next)
+}
+
+type fieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
+
+func (f fieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	return f(ctx, next)
 }
 
 func get(handler http.Handler, target string) *httptest.ResponseRecorder {

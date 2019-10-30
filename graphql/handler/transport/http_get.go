@@ -59,6 +59,7 @@ func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphEx
 
 	rc, err := exec.CreateRequestContext(r.Context(), raw)
 	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		writer.GraphqlErr(err...)
 	}
 	op := rc.Doc.Operations.ForName(rc.OperationName)

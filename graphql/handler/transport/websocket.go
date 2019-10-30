@@ -191,19 +191,20 @@ func (c *wsConnection) keepAlive(ctx context.Context) {
 }
 
 func (c *wsConnection) subscribe(message *operationMessage) bool {
+	ctx := graphql.StartOperationTrace(c.ctx)
 	var params *graphql.RawParams
 	if err := jsonDecode(bytes.NewReader(message.Payload), &params); err != nil {
 		c.sendConnectionError("invalid json")
 		return false
 	}
 
-	rc, err := c.exec.CreateRequestContext(c.ctx, params)
+	rc, err := c.exec.CreateRequestContext(ctx, params)
 	if err != nil {
 		c.sendError(message.ID, err...)
 		return false
 	}
 
-	ctx := graphql.WithRequestContext(c.ctx, rc)
+	ctx = graphql.WithRequestContext(ctx, rc)
 
 	if c.initPayload != nil {
 		ctx = withInitPayload(ctx, c.initPayload)

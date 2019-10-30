@@ -12,8 +12,9 @@ import (
 
 type executor struct {
 	handler                graphql.Handler
+	responseMiddleware     graphql.FieldMiddleware
 	es                     graphql.ExecutableSchema
-	requestMutators        []graphql.RequestMutator
+	requestParamMutators   []graphql.RequestParameterMutator
 	requestContextMutators []graphql.RequestContextMutator
 }
 
@@ -23,27 +24,39 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 	e := executor{
 		es: es,
 	}
-	handler := e.executableSchemaHandler
+	e.handler = e.executableSchemaHandler
+	e.responseMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		return next(ctx)
+	}
+
 	// this loop goes backwards so the first plugin is the outer most middleware and runs first.
 	for i := len(plugins) - 1; i >= 0; i-- {
 		p := plugins[i]
-		if p, ok := p.(graphql.RequestMiddleware); ok {
-			handler = p.InterceptRequest(handler)
+		if p, ok := p.(graphql.ResponseInterceptor); ok {
+			previous := e.handler
+			e.handler = p.InterceptResponse(previous)
+		}
+
+		if p, ok := p.(graphql.FieldInterceptor); ok {
+			previous := e.responseMiddleware
+			e.responseMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+				return p.InterceptField(ctx, func(ctx context.Context) (res interface{}, err error) {
+					return previous(ctx, next)
+				})
+			}
 		}
 	}
 
 	for _, p := range plugins {
-
-		if p, ok := p.(graphql.RequestMutator); ok {
-			e.requestMutators = append(e.requestMutators, p)
+		if p, ok := p.(graphql.RequestParameterMutator); ok {
+			e.requestParamMutators = append(e.requestParamMutators, p)
 		}
 
 		if p, ok := p.(graphql.RequestContextMutator); ok {
 			e.requestContextMutators = append(e.requestContextMutators, p)
 		}
-	}
 
-	e.handler = handler
+	}
 
 	return e
 }
@@ -53,8 +66,8 @@ func (e executor) DispatchRequest(ctx context.Context, writer graphql.Writer) {
 }
 
 func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawParams) (*graphql.RequestContext, gqlerror.List) {
-	for _, p := range e.requestMutators {
-		if err := p.MutateRequest(ctx, params); err != nil {
+	for _, p := range e.requestParamMutators {
+		if err := p.MutateRequestParameters(ctx, params); err != nil {
 			return nil, gqlerror.List{err}
 		}
 	}
@@ -65,15 +78,15 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 		DisableIntrospection: true,
 		Recover:              graphql.DefaultRecover,
 		ErrorPresenter:       graphql.DefaultErrorPresenter,
-		ResolverMiddleware:   nil,
+		ResolverMiddleware:   e.responseMiddleware,
 		RequestMiddleware:    nil,
-		Tracer:               graphql.NopTracer{},
 		ComplexityLimit:      0,
 		RawQuery:             params.Query,
 		OperationName:        params.OperationName,
 		Variables:            params.Variables,
 		Extensions:           params.Extensions,
 	}
+	rc.Stats.OperationStart = graphql.GetStartTime(ctx)
 
 	rc.Doc, gerr = e.parseOperation(ctx, rc)
 	if gerr != nil {
@@ -111,15 +124,18 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 	switch op.Operation {
 	case ast.Query:
 		resp := e.es.Query(ctx, op)
-
+		resp.Extensions = graphql.GetExtensions(ctx)
 		write(getStatus(resp), resp)
 	case ast.Mutation:
 		resp := e.es.Mutation(ctx, op)
+		resp.Extensions = graphql.GetExtensions(ctx)
 		write(getStatus(resp), resp)
 	case ast.Subscription:
 		resp := e.es.Subscription(ctx, op)
 
 		for w := resp(); w != nil; w = resp() {
+			w.Extensions = graphql.GetExtensions(ctx)
+
 			write(getStatus(w), w)
 		}
 	default:
@@ -128,15 +144,18 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 }
 
 func (e executor) parseOperation(ctx context.Context, rc *graphql.RequestContext) (*ast.QueryDocument, *gqlerror.Error) {
-	ctx = rc.Tracer.StartOperationValidation(ctx)
-	defer func() { rc.Tracer.EndOperationValidation(ctx) }()
-
+	rc.Stats.Parsing.Start = graphql.Now()
+	defer func() {
+		rc.Stats.Parsing.End = graphql.Now()
+	}()
 	return parser.ParseQuery(&ast.Source{Input: rc.RawQuery})
 }
 
 func (e executor) validateOperation(ctx context.Context, rc *graphql.RequestContext) (context.Context, *ast.OperationDefinition, gqlerror.List) {
-	ctx = rc.Tracer.StartOperationValidation(ctx)
-	defer func() { rc.Tracer.EndOperationValidation(ctx) }()
+	rc.Stats.Validation.Start = graphql.Now()
+	defer func() {
+		rc.Stats.Validation.End = graphql.Now()
+	}()
 
 	listErr := validator.Validate(e.es.Schema(), rc.Doc)
 	if len(listErr) != 0 {

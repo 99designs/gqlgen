@@ -39,7 +39,7 @@ type (
 	}
 )
 
-var _ graphql.ResultInterceptor = ApolloTracing{}
+var _ graphql.ResponseInterceptor = ApolloTracing{}
 var _ graphql.FieldInterceptor = ApolloTracing{}
 
 func New() graphql.HandlerPlugin {
@@ -75,7 +75,7 @@ func (a ApolloTracing) InterceptField(ctx context.Context, next graphql.Resolver
 	return next(ctx)
 }
 
-func (a ApolloTracing) InterceptResult(ctx context.Context, next graphql.ResultHandler) *graphql.Response {
+func (a ApolloTracing) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	rc := graphql.GetRequestContext(ctx)
 
 	start := rc.Stats.OperationStart

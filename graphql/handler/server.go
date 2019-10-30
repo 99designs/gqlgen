@@ -36,7 +36,7 @@ func (s *Server) Use(plugin graphql.HandlerPlugin) {
 		graphql.RequestContextMutator,
 		graphql.OperationInterceptor,
 		graphql.FieldInterceptor,
-		graphql.ResultInterceptor:
+		graphql.ResponseInterceptor:
 		s.plugins = append(s.plugins, plugin)
 		s.exec = newExecutor(s.es, s.plugins)
 

@@ -10,7 +10,7 @@ import (
 
 type (
 	OperationHandler func(ctx context.Context, writer Writer)
-	ResultHandler    func(ctx context.Context) *Response
+	ResponseHandler  func(ctx context.Context) *Response
 	ResponseStream   func() *Response
 	Writer           func(Status, *Response)
 	Status           int
@@ -33,10 +33,10 @@ type (
 	//
 	// +--- REQUEST   POST /graphql --------------------------------------------+
 	// | +- OPERATION query OpName { viewer { name } } -----------------------+ |
-	// | |  RESULT    { "data": { "viewer": { "name": "bob" } } }             | |
+	// | |  RESPONSE  { "data": { "viewer": { "name": "bob" } } }             | |
 	// | +- OPERATION subscription OpName2 { chat { message } } --------------+ |
-	// | |  RESULT    { "data": { "chat": { "message": "hello" } } }          | |
-	// | |  RESULT    { "data": { "chat": { "message": "byee" } } }           | |
+	// | |  RESPONSE  { "data": { "chat": { "message": "hello" } } }          | |
+	// | |  RESPONSE  { "data": { "chat": { "message": "byee" } } }           | |
 	// | +--------------------------------------------------------------------+ |
 	// +------------------------------------------------------------------------+
 	HandlerPlugin interface{}
@@ -58,10 +58,10 @@ type (
 		InterceptOperation(ctx context.Context, next OperationHandler, writer Writer)
 	}
 
-	// ResultInterceptor is called around each graphql operation result. This can be called many times for a single
+	// ResponseInterceptor is called around each graphql operation response. This can be called many times for a single
 	// operation the case of subscriptions.
-	ResultInterceptor interface {
-		InterceptResult(ctx context.Context, next ResultHandler) *Response
+	ResponseInterceptor interface {
+		InterceptResponse(ctx context.Context, next ResponseHandler) *Response
 	}
 
 	// FieldInterceptor called around each field

@@ -26,7 +26,7 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 		es: es,
 	}
 	e.operationMiddleware = e.executableSchemaHandler
-	e.resultHandler = func(ctx context.Context, next graphql.ResultHandler) *graphql.Response {
+	e.resultHandler = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 		return next(ctx)
 	}
 	e.responseMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
@@ -43,10 +43,10 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 			}
 		}
 
-		if p, ok := p.(graphql.ResultInterceptor); ok {
+		if p, ok := p.(graphql.ResponseInterceptor); ok {
 			previous := e.resultHandler
-			e.resultHandler = func(ctx context.Context, next graphql.ResultHandler) *graphql.Response {
-				return p.InterceptResult(ctx, func(ctx context.Context) *graphql.Response {
+			e.resultHandler = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+				return p.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
 					return previous(ctx, next)
 				})
 			}
@@ -146,14 +146,14 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 
 	switch op.Operation {
 	case ast.Query:
-		resCtx := graphql.WithResultContext(ctx)
+		resCtx := graphql.WithResponseContext(ctx)
 		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
 			return e.es.Query(ctx, op)
 		})
 		e.write(resCtx, resp, write)
 
 	case ast.Mutation:
-		resCtx := graphql.WithResultContext(ctx)
+		resCtx := graphql.WithResponseContext(ctx)
 		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
 			return e.es.Mutation(ctx, op)
 		})
@@ -162,7 +162,7 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 	case ast.Subscription:
 		responses := e.es.Subscription(ctx, op)
 		for {
-			resCtx := graphql.WithResultContext(ctx)
+			resCtx := graphql.WithResponseContext(ctx)
 			resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
 				resp := responses()
 				if resp == nil {

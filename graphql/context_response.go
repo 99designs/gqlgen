@@ -8,7 +8,7 @@ import (
 	"github.com/vektah/gqlparser/gqlerror"
 )
 
-type resultContext struct {
+type responseContext struct {
 	errors   gqlerror.List
 	errorsMu sync.Mutex
 
@@ -18,18 +18,18 @@ type resultContext struct {
 
 var resultCtx key = "result_context"
 
-func getResultContext(ctx context.Context) *resultContext {
-	val, _ := ctx.Value(resultCtx).(*resultContext)
+func getResponseContext(ctx context.Context) *responseContext {
+	val, _ := ctx.Value(resultCtx).(*responseContext)
 	return val
 }
 
-func WithResultContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, resultCtx, &resultContext{})
+func WithResponseContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, resultCtx, &responseContext{})
 }
 
 // AddErrorf writes a formatted error to the client, first passing it through the error presenter.
 func AddErrorf(ctx context.Context, format string, args ...interface{}) {
-	c := getResultContext(ctx)
+	c := getResponseContext(ctx)
 
 	c.errorsMu.Lock()
 	defer c.errorsMu.Unlock()
@@ -39,7 +39,7 @@ func AddErrorf(ctx context.Context, format string, args ...interface{}) {
 
 // AddError sends an error to the client, first passing it through the error presenter.
 func AddError(ctx context.Context, err error) {
-	c := getResultContext(ctx)
+	c := getResponseContext(ctx)
 
 	c.errorsMu.Lock()
 	defer c.errorsMu.Unlock()
@@ -49,7 +49,7 @@ func AddError(ctx context.Context, err error) {
 
 // HasFieldError returns true if the given field has already errored
 func HasFieldError(ctx context.Context, rctx *ResolverContext) bool {
-	c := getResultContext(ctx)
+	c := getResponseContext(ctx)
 
 	c.errorsMu.Lock()
 	defer c.errorsMu.Unlock()
@@ -65,7 +65,7 @@ func HasFieldError(ctx context.Context, rctx *ResolverContext) bool {
 
 // GetFieldErrors returns a list of errors that occurred in the given field
 func GetFieldErrors(ctx context.Context, rctx *ResolverContext) gqlerror.List {
-	c := getResultContext(ctx)
+	c := getResponseContext(ctx)
 
 	c.errorsMu.Lock()
 	defer c.errorsMu.Unlock()
@@ -81,7 +81,7 @@ func GetFieldErrors(ctx context.Context, rctx *ResolverContext) gqlerror.List {
 }
 
 func GetErrors(ctx context.Context) gqlerror.List {
-	resCtx := getResultContext(ctx)
+	resCtx := getResponseContext(ctx)
 	resCtx.errorsMu.Lock()
 	defer resCtx.errorsMu.Unlock()
 
@@ -100,7 +100,7 @@ func GetErrors(ctx context.Context) gqlerror.List {
 
 // RegisterExtension allows you to add a new extension into the graphql response
 func RegisterExtension(ctx context.Context, key string, value interface{}) {
-	c := getResultContext(ctx)
+	c := getResponseContext(ctx)
 	c.extensionsMu.Lock()
 	defer c.extensionsMu.Unlock()
 
@@ -117,7 +117,7 @@ func RegisterExtension(ctx context.Context, key string, value interface{}) {
 
 // GetExtensions returns any extensions registered in the current result context
 func GetExtensions(ctx context.Context) map[string]interface{} {
-	ext := getResultContext(ctx).extensions
+	ext := getResponseContext(ctx).extensions
 	if ext == nil {
 		return map[string]interface{}{}
 	}
@@ -126,7 +126,7 @@ func GetExtensions(ctx context.Context) map[string]interface{} {
 }
 
 func GetExtension(ctx context.Context, name string) interface{} {
-	ext := getResultContext(ctx).extensions
+	ext := getResponseContext(ctx).extensions
 	if ext == nil {
 		return nil
 	}

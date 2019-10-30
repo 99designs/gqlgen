@@ -10,6 +10,7 @@ import (
 
 type Resolver func(ctx context.Context) (res interface{}, err error)
 type ResultMiddleware func(ctx context.Context, next ResultHandler) *Response
+type OperationMiddleware func(ctx context.Context, next OperationHandler, writer Writer)
 type FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 type ComplexityLimitFunc func(ctx context.Context) int
 

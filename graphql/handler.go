@@ -28,22 +28,17 @@ type (
 	}
 
 	// HandlerPlugin interface is entirely optional, see the list of possible hook points below
-	// Its important to understand the lifecycle of a graphql request and the terminology we use in gqlgen before working with these
-	// +---REQUEST POST /graphql------------------------------------------------+
-	// |                                                                        |
-	// | ++OPERATION query OpName { viewer { name } }+------------------------+ |
-	// | |                                                                    | |
-	// | | RESULT    { "data": { "viewer": { "name": "bob" } } }              | |
-	// | |                                                                    | |
-	// | ++OPERATION subscription OpName2 { chat { message } }+---------------+ |
-	// | |                                                                    | |
-	// | | RESULT    { "data": { "chat": { "message": "hello" } } }           | |
-	// | |                                                                    | |
-	// | | RESULT    { "data": { "chat": { "message": "byee" } } }            | |
-	// | |                                                                    | |
+	// Its important to understand the lifecycle of a graphql request and the terminology we use in gqlgen
+	// before working with these
+	//
+	// +--- REQUEST   POST /graphql --------------------------------------------+
+	// | +- OPERATION query OpName { viewer { name } } -----------------------+ |
+	// | |  RESULT    { "data": { "viewer": { "name": "bob" } } }             | |
+	// | +- OPERATION subscription OpName2 { chat { message } } --------------+ |
+	// | |  RESULT    { "data": { "chat": { "message": "hello" } } }          | |
+	// | |  RESULT    { "data": { "chat": { "message": "byee" } } }           | |
 	// | +--------------------------------------------------------------------+ |
 	// +------------------------------------------------------------------------+
-
 	HandlerPlugin interface{}
 
 	// RequestParameterMutator is called before creating a request context. allows manipulating the raw query
@@ -57,8 +52,10 @@ type (
 		MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error
 	}
 
+	// OperationInterceptor is called for each incoming query, for basic requests the writer will be invoked once,
+	// for subscriptions it will be invoked multiple times.
 	OperationInterceptor interface {
-		InterceptOperation(next OperationHandler) OperationHandler
+		InterceptOperation(ctx context.Context, next OperationHandler, writer Writer)
 	}
 
 	// ResultInterceptor is called around each graphql operation result. This can be called many times for a single

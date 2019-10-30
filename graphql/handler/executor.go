@@ -11,7 +11,7 @@ import (
 )
 
 type executor struct {
-	operationHandler       graphql.OperationHandler
+	operationMiddleware    graphql.OperationHandler
 	resultHandler          graphql.ResultMiddleware
 	responseMiddleware     graphql.FieldMiddleware
 	es                     graphql.ExecutableSchema
@@ -25,7 +25,7 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 	e := executor{
 		es: es,
 	}
-	e.operationHandler = e.executableSchemaHandler
+	e.operationMiddleware = e.executableSchemaHandler
 	e.resultHandler = func(ctx context.Context, next graphql.ResultHandler) *graphql.Response {
 		return next(ctx)
 	}
@@ -37,8 +37,10 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 	for i := len(plugins) - 1; i >= 0; i-- {
 		p := plugins[i]
 		if p, ok := p.(graphql.OperationInterceptor); ok {
-			previous := e.operationHandler
-			e.operationHandler = p.InterceptOperation(previous)
+			previous := e.operationMiddleware
+			e.operationMiddleware = func(ctx context.Context, writer graphql.Writer) {
+				p.InterceptOperation(ctx, previous, writer)
+			}
 		}
 
 		if p, ok := p.(graphql.ResultInterceptor); ok {
@@ -75,7 +77,7 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 }
 
 func (e executor) DispatchRequest(ctx context.Context, writer graphql.Writer) {
-	e.operationHandler(ctx, writer)
+	e.operationMiddleware(ctx, writer)
 }
 
 func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawParams) (*graphql.RequestContext, gqlerror.List) {

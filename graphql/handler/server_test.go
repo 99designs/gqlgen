@@ -71,17 +71,13 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(opFunc(func(next graphql.OperationHandler) graphql.OperationHandler {
-			return func(ctx context.Context, writer graphql.Writer) {
-				calls = append(calls, "first")
-				next(ctx, writer)
-			}
+		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer) {
+			calls = append(calls, "first")
+			next(ctx, writer)
 		}))
-		srv.Use(opFunc(func(next graphql.OperationHandler) graphql.OperationHandler {
-			return func(ctx context.Context, writer graphql.Writer) {
-				calls = append(calls, "second")
-				next(ctx, writer)
-			}
+		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer) {
+			calls = append(calls, "second")
+			next(ctx, writer)
 		}))
 
 		resp := get(srv, "/foo?query={a}")
@@ -108,10 +104,10 @@ func TestServer(t *testing.T) {
 	})
 }
 
-type opFunc func(next graphql.OperationHandler) graphql.OperationHandler
+type opFunc func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer)
 
-func (r opFunc) InterceptOperation(next graphql.OperationHandler) graphql.OperationHandler {
-	return r(next)
+func (r opFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer) {
+	r(ctx, next, writer)
 }
 
 type fieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)

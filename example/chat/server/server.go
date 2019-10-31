@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/99designs/gqlgen/example/chat"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/websocket"
@@ -24,7 +26,7 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	http.Handle("/", handler.Playground("Todo", "/query"))
+	http.Handle("/", playground.Handler("Todo", "/query"))
 	http.Handle("/query", c.Handler(handler.GraphQL(chat.NewExecutableSchema(chat.New()),
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {

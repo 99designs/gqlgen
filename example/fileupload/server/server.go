@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/99designs/gqlgen/example/fileupload"
 	"github.com/99designs/gqlgen/example/fileupload/model"
 	"github.com/99designs/gqlgen/graphql"
@@ -14,7 +16,7 @@ import (
 )
 
 func main() {
-	http.Handle("/", handler.Playground("File Upload Demo", "/query"))
+	http.Handle("/", playground.Handler("File Upload Demo", "/query"))
 	resolver := getResolver()
 	exec := fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver})
 

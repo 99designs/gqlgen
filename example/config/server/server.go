@@ -4,12 +4,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	todo "github.com/99designs/gqlgen/example/config"
 	"github.com/99designs/gqlgen/handler"
 )
 
 func main() {
-	http.Handle("/", handler.Playground("Todo", "/query"))
+	http.Handle("/", playground.Handler("Todo", "/query"))
 	http.Handle("/query", handler.GraphQL(
 		todo.NewExecutableSchema(todo.New()),
 	))

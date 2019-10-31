@@ -1,4 +1,4 @@
-package handler
+package playground
 
 import (
 	"html/template"
@@ -44,7 +44,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 </html>
 `))
 
-func Playground(title string, endpoint string) http.HandlerFunc {
+func Handler(title string, endpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html")
 		err := page.Execute(w, map[string]string{

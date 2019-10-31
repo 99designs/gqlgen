@@ -32,7 +32,7 @@ type (
 		DispatchRequest(ctx context.Context, writer Writer)
 	}
 
-	// HandlerPlugin interface is entirely optional, see the list of possible hook points below
+	// HandlerExtension interface is entirely optional, see the list of possible hook points below
 	// Its important to understand the lifecycle of a graphql request and the terminology we use in gqlgen
 	// before working with these
 	//
@@ -44,7 +44,7 @@ type (
 	// | |  RESPONSE  { "data": { "chat": { "message": "byee" } } }           | |
 	// | +--------------------------------------------------------------------+ |
 	// +------------------------------------------------------------------------+
-	HandlerPlugin interface{}
+	HandlerExtension interface{}
 
 	// RequestParameterMutator is called before creating a request context. allows manipulating the raw query
 	// on the way in.

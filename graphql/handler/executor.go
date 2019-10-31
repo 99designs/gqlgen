@@ -33,9 +33,9 @@ func newExecutor(s *Server) executor {
 		return next(ctx)
 	}
 
-	// this loop goes backwards so the first plugin is the outer most middleware and runs first.
-	for i := len(s.plugins) - 1; i >= 0; i-- {
-		p := s.plugins[i]
+	// this loop goes backwards so the first extension is the outer most middleware and runs first.
+	for i := len(s.extensions) - 1; i >= 0; i-- {
+		p := s.extensions[i]
 		if p, ok := p.(graphql.OperationInterceptor); ok {
 			previous := e.operationMiddleware
 			e.operationMiddleware = func(ctx context.Context, writer graphql.Writer) {
@@ -62,7 +62,7 @@ func newExecutor(s *Server) executor {
 		}
 	}
 
-	for _, p := range s.plugins {
+	for _, p := range s.extensions {
 		if p, ok := p.(graphql.RequestParameterMutator); ok {
 			e.requestParamMutators = append(e.requestParamMutators, p)
 		}

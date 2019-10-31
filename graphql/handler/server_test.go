@@ -7,15 +7,13 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/vektah/gqlparser/parser"
-
-	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/ast"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/parser"
 )
 
 func TestServer(t *testing.T) {
@@ -107,6 +105,7 @@ func TestServer(t *testing.T) {
 			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
 		})
 	})
+
 }
 
 type opFunc func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer)

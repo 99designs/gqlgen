@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/99designs/gqlgen/integration"
@@ -27,7 +29,7 @@ func main() {
 		// function is executed.
 		return value
 	}
-	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", handler.GraphQL(
 		integration.NewExecutableSchema(cfg),
 		handler.ErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {

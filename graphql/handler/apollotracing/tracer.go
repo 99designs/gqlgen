@@ -42,7 +42,7 @@ type (
 var _ graphql.ResponseInterceptor = ApolloTracing{}
 var _ graphql.FieldInterceptor = ApolloTracing{}
 
-func New() graphql.HandlerPlugin {
+func New() graphql.HandlerExtension {
 	return &ApolloTracing{}
 }
 

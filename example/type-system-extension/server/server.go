@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	extension "github.com/99designs/gqlgen/example/type-system-extension"
 	"github.com/99designs/gqlgen/handler"
 )
@@ -17,7 +19,7 @@ func main() {
 		port = defaultPort
 	}
 
-	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", handler.GraphQL(
 		extension.NewExecutableSchema(
 			extension.Config{

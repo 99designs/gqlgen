@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/99designs/gqlgen/example/starwars"
 	"github.com/99designs/gqlgen/example/starwars/generated"
 	"github.com/99designs/gqlgen/graphql"
@@ -13,7 +15,7 @@ import (
 )
 
 func main() {
-	http.Handle("/", handler.Playground("Starwars", "/query"))
+	http.Handle("/", playground.Handler("Starwars", "/query"))
 	http.Handle("/query", handler.GraphQL(generated.NewExecutableSchema(starwars.NewResolver()),
 		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			rc := graphql.GetResolverContext(ctx)

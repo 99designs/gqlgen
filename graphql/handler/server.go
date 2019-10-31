@@ -13,7 +13,7 @@ type (
 	Server struct {
 		es         graphql.ExecutableSchema
 		transports []graphql.Transport
-		plugins    []graphql.HandlerPlugin
+		extensions []graphql.HandlerExtension
 		exec       executor
 
 		errorPresenter graphql.ErrorPresenterFunc
@@ -49,18 +49,18 @@ func (s *Server) SetQueryCache(cache graphql.Cache) {
 	s.queryCache = cache
 }
 
-func (s *Server) Use(plugin graphql.HandlerPlugin) {
-	switch plugin.(type) {
+func (s *Server) Use(extension graphql.HandlerExtension) {
+	switch extension.(type) {
 	case graphql.RequestParameterMutator,
 		graphql.RequestContextMutator,
 		graphql.OperationInterceptor,
 		graphql.FieldInterceptor,
 		graphql.ResponseInterceptor:
-		s.plugins = append(s.plugins, plugin)
+		s.extensions = append(s.extensions, extension)
 		s.exec = newExecutor(s)
 
 	default:
-		panic(fmt.Errorf("cannot Use %T as a gqlgen handler plugin because it does not implement any plugin hooks", plugin))
+		panic(fmt.Errorf("cannot Use %T as a gqlgen handler extension because it does not implement any extension hooks", extension))
 	}
 }
 

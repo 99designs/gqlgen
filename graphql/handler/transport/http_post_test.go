@@ -16,7 +16,7 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func TestJsonPost(t *testing.T) {
+func TestPOST(t *testing.T) {
 	es := &graphql.ExecutableSchemaMock{
 		QueryFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 			return &graphql.Response{Data: []byte(`{"name":"test"}`)}
@@ -36,7 +36,7 @@ func TestJsonPost(t *testing.T) {
 		},
 	}
 	h := handler.New(es)
-	h.AddTransport(transport.JsonPostTransport{})
+	h.AddTransport(transport.POST{})
 
 	t.Run("success", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }"}`)

@@ -8,11 +8,13 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-type JsonPostTransport struct{}
+// POST implements the POST side of the default HTTP transport
+// defined in https://github.com/APIs-guru/graphql-over-http#post
+type POST struct{}
 
-var _ graphql.Transport = JsonPostTransport{}
+var _ graphql.Transport = POST{}
 
-func (H JsonPostTransport) Supports(r *http.Request) bool {
+func (H POST) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false
 	}
@@ -25,7 +27,7 @@ func (H JsonPostTransport) Supports(r *http.Request) bool {
 	return r.Method == "POST" && mediaType == "application/json"
 }
 
-func (H JsonPostTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (H POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	w.Header().Set("Content-Type", "application/json")
 
 	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {

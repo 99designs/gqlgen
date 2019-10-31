@@ -66,7 +66,7 @@ func TestApolloTracing(t *testing.T) {
 		},
 	}
 	h := handler.New(es)
-	h.AddTransport(transport.JsonPostTransport{})
+	h.AddTransport(transport.POST{})
 	h.Use(apollotracing.New())
 
 	resp := doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }"}`)

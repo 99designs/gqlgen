@@ -11,11 +11,13 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-type HTTPGet struct{}
+// GET implements the GET side of the default HTTP transport
+// defined in https://github.com/APIs-guru/graphql-over-http#get
+type GET struct{}
 
-var _ graphql.Transport = HTTPGet{}
+var _ graphql.Transport = GET{}
 
-func (H HTTPGet) Supports(r *http.Request) bool {
+func (H GET) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false
 	}
@@ -23,7 +25,7 @@ func (H HTTPGet) Supports(r *http.Request) bool {
 	return r.Method == "GET"
 }
 
-func (H HTTPGet) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (H GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	raw := &graphql.RawParams{
 		Query:         r.URL.Query().Get("query"),
 		OperationName: r.URL.Query().Get("operationName"),

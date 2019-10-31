@@ -43,7 +43,7 @@ func TestServer(t *testing.T) {
 		},
 	}
 	srv := New(es)
-	srv.AddTransport(&transport.HTTPGet{})
+	srv.AddTransport(&transport.GET{})
 
 	t.Run("returns an error if no transport matches", func(t *testing.T) {
 		resp := post(srv, "/foo", "application/json")

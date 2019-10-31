@@ -81,6 +81,8 @@ func (e executor) DispatchRequest(ctx context.Context, writer graphql.Writer) {
 }
 
 func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawParams) (*graphql.RequestContext, gqlerror.List) {
+	ctx = graphql.WithServerContext(ctx, e.server.es)
+
 	for _, p := range e.requestParamMutators {
 		if err := p.MutateRequestParameters(ctx, params); err != nil {
 			return nil, gqlerror.List{err}
@@ -91,7 +93,6 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 		DisableIntrospection: true,
 		Recover:              graphql.DefaultRecover,
 		ResolverMiddleware:   e.responseMiddleware,
-		ComplexityLimit:      0,
 		RawQuery:             params.Query,
 		OperationName:        params.OperationName,
 		Variables:            params.Variables,

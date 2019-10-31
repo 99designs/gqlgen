@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/gqlerror"
 )
 
 type RequestContext struct {
@@ -14,13 +13,10 @@ type RequestContext struct {
 	OperationName string
 	Doc           *ast.QueryDocument
 
-	ComplexityLimit      int
-	OperationComplexity  int
 	DisableIntrospection bool
-
-	Recover             RecoverFunc
-	ResolverMiddleware  FieldMiddleware
-	DirectiveMiddleware FieldMiddleware
+	Recover              RecoverFunc
+	ResolverMiddleware   FieldMiddleware
+	DirectiveMiddleware  FieldMiddleware
 
 	Stats Stats
 }
@@ -45,9 +41,6 @@ func (rc *RequestContext) Validate(ctx context.Context) error {
 	}
 	if rc.Recover == nil {
 		rc.Recover = DefaultRecover
-	}
-	if rc.ComplexityLimit < 0 {
-		return errors.New("field 'ComplexityLimit' value must be 0 or more")
 	}
 
 	return nil
@@ -98,11 +91,4 @@ func (c *RequestContext) Errorf(ctx context.Context, format string, args ...inte
 // Deprecated: use graphql.AddError(ctx, err) instead
 func (c *RequestContext) Error(ctx context.Context, err error) {
 	AddError(ctx, err)
-}
-
-var _ RequestContextMutator = ComplexityLimitFunc(nil)
-
-func (c ComplexityLimitFunc) MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error {
-	rc.ComplexityLimit = c(ctx)
-	return nil
 }

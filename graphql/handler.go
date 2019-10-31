@@ -19,7 +19,6 @@ type (
 	ResponseStream      func() *Response
 	ResponseMiddleware  func(ctx context.Context, next ResponseHandler) *Response
 	FieldMiddleware     func(ctx context.Context, next Resolver) (res interface{}, err error)
-	ComplexityLimitFunc func(ctx context.Context) int
 
 	RawParams struct {
 		Query         string                 `json:"query"`

@@ -37,7 +37,11 @@ func New() *TestServer {
 		}
 	`})
 
-	es := &graphql.ExecutableSchemaMock{
+	srv := &TestServer{
+		next: next,
+	}
+
+	srv.Server = handler.New(&graphql.ExecutableSchemaMock{
 		QueryFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
 			// Field execution happens inside the generated code, lets simulate some of it.
 			ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
@@ -76,16 +80,17 @@ func New() *TestServer {
 		SchemaFunc: func() *ast.Schema {
 			return schema
 		},
-	}
-	return &TestServer{
-		Server: handler.New(es),
-		next:   next,
-	}
+		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (i int, b bool) {
+			return srv.complexity, true
+		},
+	})
+	return srv
 }
 
 type TestServer struct {
 	*handler.Server
-	next chan struct{}
+	next       chan struct{}
+	complexity int
 }
 
 func (s *TestServer) SendNextSubscriptionMessage() {
@@ -95,4 +100,8 @@ func (s *TestServer) SendNextSubscriptionMessage() {
 		fmt.Println("WARNING: no active subscription")
 	}
 
+}
+
+func (s *TestServer) SetCalculatedComplexity(complexity int) {
+	s.complexity = complexity
 }

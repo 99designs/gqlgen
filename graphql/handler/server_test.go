@@ -107,7 +107,6 @@ func TestServer(t *testing.T) {
 			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
 		})
 	})
-
 }
 
 type opFunc func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer)

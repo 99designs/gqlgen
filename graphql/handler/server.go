@@ -15,19 +15,32 @@ type (
 		transports []graphql.Transport
 		plugins    []graphql.HandlerPlugin
 		exec       executor
+
+		errorPresenter graphql.ErrorPresenterFunc
+		recoverFunc    graphql.RecoverFunc
 	}
 )
 
 func New(es graphql.ExecutableSchema) *Server {
 	s := &Server{
-		es: es,
+		es:             es,
+		errorPresenter: graphql.DefaultErrorPresenter,
+		recoverFunc:    graphql.DefaultRecover,
 	}
-	s.exec = newExecutor(s.es, s.plugins)
+	s.exec = newExecutor(s)
 	return s
 }
 
 func (s *Server) AddTransport(transport graphql.Transport) {
 	s.transports = append(s.transports, transport)
+}
+
+func (s *Server) SetErrorPresenter(f graphql.ErrorPresenterFunc) {
+	s.errorPresenter = f
+}
+
+func (s *Server) SetRecoverFunc(f graphql.RecoverFunc) {
+	s.recoverFunc = f
 }
 
 func (s *Server) Use(plugin graphql.HandlerPlugin) {
@@ -38,7 +51,7 @@ func (s *Server) Use(plugin graphql.HandlerPlugin) {
 		graphql.FieldInterceptor,
 		graphql.ResponseInterceptor:
 		s.plugins = append(s.plugins, plugin)
-		s.exec = newExecutor(s.es, s.plugins)
+		s.exec = newExecutor(s)
 
 	default:
 		panic(fmt.Errorf("cannot Use %T as a gqlgen handler plugin because it does not implement any plugin hooks", plugin))

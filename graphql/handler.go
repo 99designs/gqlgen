@@ -9,11 +9,15 @@ import (
 )
 
 type (
-	OperationHandler func(ctx context.Context, writer Writer)
-	ResponseHandler  func(ctx context.Context) *Response
-	ResponseStream   func() *Response
-	Writer           func(Status, *Response)
-	Status           int
+	Resolver            func(ctx context.Context) (res interface{}, err error)
+	Writer              func(Status, *Response)
+	OperationMiddleware func(ctx context.Context, next OperationHandler, writer Writer)
+	OperationHandler    func(ctx context.Context, writer Writer)
+	ResponseHandler     func(ctx context.Context) *Response
+	ResponseStream      func() *Response
+	ResponseMiddleware  func(ctx context.Context, next ResponseHandler) *Response
+	FieldMiddleware     func(ctx context.Context, next Resolver) (res interface{}, err error)
+	ComplexityLimitFunc func(ctx context.Context) int
 
 	RawParams struct {
 		Query         string                 `json:"query"`
@@ -75,6 +79,8 @@ type (
 		Do(w http.ResponseWriter, r *http.Request, exec GraphExecutor)
 	}
 )
+
+type Status int
 
 const (
 	StatusOk Status = iota

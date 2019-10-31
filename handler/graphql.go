@@ -66,10 +66,7 @@ func (c *Config) newRequestContext(ctx context.Context, es graphql.ExecutableSch
 		OperationName:        operationName,
 		DisableIntrospection: c.disableIntrospection,
 		Recover:              c.recover,
-		ErrorPresenter:       c.errorPresenter,
 		ResolverMiddleware:   c.resolverHook,
-		RequestMiddleware:    c.requestHook,
-		Tracer:               c.tracer,
 		ComplexityLimit:      c.complexityLimit,
 	}
 	if reqCtx.ComplexityLimit > 0 || c.complexityLimitFunc != nil {

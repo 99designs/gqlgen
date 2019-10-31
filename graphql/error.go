@@ -31,10 +31,3 @@ func DefaultErrorPresenter(ctx context.Context, err error) *gqlerror.Error {
 		Extensions: extensions,
 	}
 }
-
-var _ RequestContextMutator = ErrorPresenterFunc(nil)
-
-func (f ErrorPresenterFunc) MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error {
-	rc.ErrorPresenter = f
-	return nil
-}

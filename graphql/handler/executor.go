@@ -12,18 +12,18 @@ import (
 
 type executor struct {
 	operationMiddleware    graphql.OperationHandler
-	resultHandler          graphql.ResultMiddleware
+	resultHandler          graphql.ResponseMiddleware
 	responseMiddleware     graphql.FieldMiddleware
-	es                     graphql.ExecutableSchema
 	requestParamMutators   []graphql.RequestParameterMutator
 	requestContextMutators []graphql.RequestContextMutator
+	server                 *Server
 }
 
 var _ graphql.GraphExecutor = executor{}
 
-func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) executor {
+func newExecutor(s *Server) executor {
 	e := executor{
-		es: es,
+		server: s,
 	}
 	e.operationMiddleware = e.executableSchemaHandler
 	e.resultHandler = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
@@ -34,8 +34,8 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 	}
 
 	// this loop goes backwards so the first plugin is the outer most middleware and runs first.
-	for i := len(plugins) - 1; i >= 0; i-- {
-		p := plugins[i]
+	for i := len(s.plugins) - 1; i >= 0; i-- {
+		p := s.plugins[i]
 		if p, ok := p.(graphql.OperationInterceptor); ok {
 			previous := e.operationMiddleware
 			e.operationMiddleware = func(ctx context.Context, writer graphql.Writer) {
@@ -62,7 +62,7 @@ func newExecutor(es graphql.ExecutableSchema, plugins []graphql.HandlerPlugin) e
 		}
 	}
 
-	for _, p := range plugins {
+	for _, p := range s.plugins {
 		if p, ok := p.(graphql.RequestParameterMutator); ok {
 			e.requestParamMutators = append(e.requestParamMutators, p)
 		}
@@ -92,9 +92,7 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 	rc := &graphql.RequestContext{
 		DisableIntrospection: true,
 		Recover:              graphql.DefaultRecover,
-		ErrorPresenter:       graphql.DefaultErrorPresenter,
 		ResolverMiddleware:   e.responseMiddleware,
-		RequestMiddleware:    nil,
 		ComplexityLimit:      0,
 		RawQuery:             params.Query,
 		OperationName:        params.OperationName,
@@ -112,7 +110,7 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 		return nil, listErr
 	}
 
-	vars, err := validator.VariableValues(e.es.Schema(), op, rc.Variables)
+	vars, err := validator.VariableValues(e.server.es.Schema(), op, rc.Variables)
 	if err != nil {
 		return nil, gqlerror.List{err}
 	}
@@ -146,23 +144,23 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 
 	switch op.Operation {
 	case ast.Query:
-		resCtx := graphql.WithResponseContext(ctx)
+		resCtx := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
 		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
-			return e.es.Query(ctx, op)
+			return e.server.es.Query(ctx, op)
 		})
 		e.write(resCtx, resp, write)
 
 	case ast.Mutation:
-		resCtx := graphql.WithResponseContext(ctx)
+		resCtx := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
 		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
-			return e.es.Mutation(ctx, op)
+			return e.server.es.Mutation(ctx, op)
 		})
 		e.write(resCtx, resp, write)
 
 	case ast.Subscription:
-		responses := e.es.Subscription(ctx, op)
+		responses := e.server.es.Subscription(ctx, op)
 		for {
-			resCtx := graphql.WithResponseContext(ctx)
+			resCtx := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
 			resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
 				resp := responses()
 				if resp == nil {
@@ -196,7 +194,7 @@ func (e executor) validateOperation(ctx context.Context, rc *graphql.RequestCont
 		rc.Stats.Validation.End = graphql.Now()
 	}()
 
-	listErr := validator.Validate(e.es.Schema(), rc.Doc)
+	listErr := validator.Validate(e.server.es.Schema(), rc.Doc)
 	if len(listErr) != 0 {
 		return ctx, nil, listErr
 	}

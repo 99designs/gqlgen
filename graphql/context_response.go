@@ -9,6 +9,9 @@ import (
 )
 
 type responseContext struct {
+	errorPresenter ErrorPresenterFunc
+	recover        RecoverFunc
+
 	errors   gqlerror.List
 	errorsMu sync.Mutex
 
@@ -16,15 +19,18 @@ type responseContext struct {
 	extensionsMu sync.Mutex
 }
 
-var resultCtx key = "result_context"
+const resultCtx key = "result_context"
 
 func getResponseContext(ctx context.Context) *responseContext {
 	val, _ := ctx.Value(resultCtx).(*responseContext)
 	return val
 }
 
-func WithResponseContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, resultCtx, &responseContext{})
+func WithResponseContext(ctx context.Context, presenterFunc ErrorPresenterFunc, recoverFunc RecoverFunc) context.Context {
+	return context.WithValue(ctx, resultCtx, &responseContext{
+		errorPresenter: presenterFunc,
+		recover:        recoverFunc,
+	})
 }
 
 // AddErrorf writes a formatted error to the client, first passing it through the error presenter.
@@ -34,7 +40,7 @@ func AddErrorf(ctx context.Context, format string, args ...interface{}) {
 	c.errorsMu.Lock()
 	defer c.errorsMu.Unlock()
 
-	c.errors = append(c.errors, GetRequestContext(ctx).ErrorPresenter(ctx, fmt.Errorf(format, args...)))
+	c.errors = append(c.errors, c.errorPresenter(ctx, fmt.Errorf(format, args...)))
 }
 
 // AddError sends an error to the client, first passing it through the error presenter.
@@ -44,7 +50,12 @@ func AddError(ctx context.Context, err error) {
 	c.errorsMu.Lock()
 	defer c.errorsMu.Unlock()
 
-	c.errors = append(c.errors, GetRequestContext(ctx).ErrorPresenter(ctx, err))
+	c.errors = append(c.errors, c.errorPresenter(ctx, err))
+}
+
+func Recover(ctx context.Context, err interface{}) (userMessage error) {
+	c := getResponseContext(ctx)
+	return c.recover(ctx, err)
 }
 
 // HasFieldError returns true if the given field has already errored

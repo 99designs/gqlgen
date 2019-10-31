@@ -12,6 +12,7 @@ import (
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -21,9 +22,8 @@ import (
 )
 
 func TestWebsocket(t *testing.T) {
-	next := make(chan struct{})
-	handler := newServer(next)
-	handler.AddTransport(transport.WebsocketTransport{})
+	handler := testserver.New()
+	handler.AddTransport(transport.Websocket{})
 
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
@@ -114,33 +114,33 @@ func TestWebsocket(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{
 			Type:    startMsg,
 			ID:      "test_1",
-			Payload: json.RawMessage(`{"query": "subscription { user { title } }"}`),
+			Payload: json.RawMessage(`{"query": "subscription { name }"}`),
 		}))
 
-		next <- struct{}{}
+		handler.SendNextSubscriptionMessage()
 		msg := readOp(c)
-		assert.Equal(t, dataMsg, msg.Type)
-		assert.Equal(t, "test_1", msg.ID)
-		assert.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.Equal(t, dataMsg, msg.Type, string(msg.Payload))
+		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
-		next <- struct{}{}
+		handler.SendNextSubscriptionMessage()
 		msg = readOp(c)
-		assert.Equal(t, dataMsg, msg.Type)
-		assert.Equal(t, "test_1", msg.ID)
-		assert.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.Equal(t, dataMsg, msg.Type, string(msg.Payload))
+		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: stopMsg, ID: "test_1"}))
 
 		msg = readOp(c)
-		assert.Equal(t, completeMsg, msg.Type)
-		assert.Equal(t, "test_1", msg.ID)
+		require.Equal(t, completeMsg, msg.Type)
+		require.Equal(t, "test_1", msg.ID)
 	})
 }
 
 func TestWebsocketWithKeepAlive(t *testing.T) {
-	next := make(chan struct{})
-	h := newServer(next)
-	h.AddTransport(transport.WebsocketTransport{
+
+	h := testserver.New()
+	h.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Millisecond,
 	})
 
@@ -157,7 +157,7 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 	require.NoError(t, c.WriteJSON(&operationMessage{
 		Type:    startMsg,
 		ID:      "test_1",
-		Payload: json.RawMessage(`{"query": "subscription { user { title } }"}`),
+		Payload: json.RawMessage(`{"query": "subscription { name }"}`),
 	}))
 
 	// keepalive
@@ -165,7 +165,7 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 	assert.Equal(t, connectionKeepAliveMsg, msg.Type)
 
 	// server message
-	next <- struct{}{}
+	h.SendNextSubscriptionMessage()
 	msg = readOp(c)
 	assert.Equal(t, dataMsg, msg.Type)
 
@@ -175,11 +175,9 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 }
 
 func TestWebsocketInitFunc(t *testing.T) {
-	next := make(chan struct{})
-
 	t.Run("accept connection if WebsocketInitFunc is NOT provided", func(t *testing.T) {
-		h := newServer(next)
-		h.AddTransport(transport.WebsocketTransport{})
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{})
 		srv := httptest.NewServer(h)
 		defer srv.Close()
 
@@ -193,8 +191,8 @@ func TestWebsocketInitFunc(t *testing.T) {
 	})
 
 	t.Run("accept connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
-		h := newServer(next)
-		h.AddTransport(transport.WebsocketTransport{
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
 			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
 				return context.WithValue(ctx, "newkey", "newvalue"), nil
 			},
@@ -212,8 +210,8 @@ func TestWebsocketInitFunc(t *testing.T) {
 	})
 
 	t.Run("reject connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
-		h := newServer(next)
-		h.AddTransport(transport.WebsocketTransport{
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
 			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
 				return ctx, errors.New("invalid init payload")
 			},
@@ -248,7 +246,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		}
 		h := handler.New(es)
 
-		h.AddTransport(transport.WebsocketTransport{
+		h.AddTransport(transport.Websocket{
 			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
 				return context.WithValue(ctx, "newkey", "newvalue"), nil
 			},
@@ -265,40 +263,6 @@ func TestWebsocketInitFunc(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "ok", resp.Empty)
 	})
-}
-
-func newServer(next chan struct{}) *handler.Server {
-	es := &graphql.ExecutableSchemaMock{
-		QueryFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			return graphql.ErrorResponse(ctx, "queries are not supported")
-		},
-		MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			return graphql.ErrorResponse(ctx, "mutations are not supported")
-		},
-		SubscriptionFunc: func(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-			return func() *graphql.Response {
-				select {
-				case <-ctx.Done():
-					return nil
-				case <-next:
-					return &graphql.Response{
-						Data: []byte(`{"name":"test"}`),
-					}
-				}
-			}
-		},
-		SchemaFunc: func() *ast.Schema {
-			return gqlparser.MustLoadSchema(&ast.Source{Input: `
-				schema { query: Query }
-				type Query {
-					me: User!
-					user(id: Int): User!
-				}
-				type User { name: String! }
-			`})
-		},
-	}
-	return handler.New(es)
 }
 
 func wsConnect(url string) *websocket.Conn {

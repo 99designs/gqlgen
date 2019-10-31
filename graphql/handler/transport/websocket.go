@@ -29,13 +29,13 @@ const (
 )
 
 type (
-	WebsocketTransport struct {
+	Websocket struct {
 		Upgrader              websocket.Upgrader
 		InitFunc              websocketInitFunc
 		KeepAlivePingInterval time.Duration
 	}
 	wsConnection struct {
-		WebsocketTransport
+		Websocket
 		ctx             context.Context
 		conn            *websocket.Conn
 		active          map[string]context.CancelFunc
@@ -53,13 +53,13 @@ type (
 	websocketInitFunc func(ctx context.Context, initPayload InitPayload) (context.Context, error)
 )
 
-var _ graphql.Transport = WebsocketTransport{}
+var _ graphql.Transport = Websocket{}
 
-func (t WebsocketTransport) Supports(r *http.Request) bool {
+func (t Websocket) Supports(r *http.Request) bool {
 	return r.Header.Get("Upgrade") != ""
 }
 
-func (t WebsocketTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ws, err := t.Upgrader.Upgrade(w, r, http.Header{
 		"Sec-Websocket-Protocol": []string{"graphql-ws"},
 	})
@@ -70,11 +70,11 @@ func (t WebsocketTransport) Do(w http.ResponseWriter, r *http.Request, exec grap
 	}
 
 	conn := wsConnection{
-		active:             map[string]context.CancelFunc{},
-		conn:               ws,
-		ctx:                r.Context(),
-		exec:               exec,
-		WebsocketTransport: t,
+		active:    map[string]context.CancelFunc{},
+		conn:      ws,
+		ctx:       r.Context(),
+		exec:      exec,
+		Websocket: t,
 	}
 
 	if !conn.init() {

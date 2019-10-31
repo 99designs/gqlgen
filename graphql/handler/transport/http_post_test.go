@@ -1,45 +1,23 @@
 package transport_test
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
-	"github.com/vektah/gqlparser"
-	"github.com/vektah/gqlparser/ast"
 )
 
 func TestPOST(t *testing.T) {
-	es := &graphql.ExecutableSchemaMock{
-		QueryFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			return &graphql.Response{Data: []byte(`{"name":"test"}`)}
-		},
-		MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			return graphql.ErrorResponse(ctx, "mutations are not supported")
-		},
-		SchemaFunc: func() *ast.Schema {
-			return gqlparser.MustLoadSchema(&ast.Source{Input: `
-				schema { query: Query }
-				type Query {
-					me: User!
-					user(id: Int): User!
-				}
-				type User { name: String! }
-			`})
-		},
-	}
-	h := handler.New(es)
+	h := testserver.New()
 	h.AddTransport(transport.POST{})
 
 	t.Run("success", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ me { name } }"}`)
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
@@ -84,21 +62,21 @@ func TestPOST(t *testing.T) {
 	})
 
 	t.Run("validation failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "{ me { title }}"}`)
+		resp := doRequest(h, "POST", "/graphql", `{"query": "{ title }"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"Cannot query field \"title\" on type \"User\".","locations":[{"line":1,"column":8}]}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"Cannot query field \"title\" on type \"Query\".","locations":[{"line":1,"column":3}]}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("invalid variable", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "query($id:Int!){user(id:$id){name}}","variables":{"id":false}}`)
+		resp := doRequest(h, "POST", "/graphql", `{"query": "query($id:Int!){find(id:$id)}","variables":{"id":false}}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"]}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("execution failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "mutation { me { name } }"}`)
+		resp := doRequest(h, "POST", "/graphql", `{"query": "mutation { name }"}`)
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"mutations are not supported"}],"data":null}`, resp.Body.String())
@@ -123,7 +101,7 @@ func TestPOST(t *testing.T) {
 
 		for _, contentType := range validContentTypes {
 			t.Run(fmt.Sprintf("allow for content type %s", contentType), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ me { name } }"}`, contentType)
+				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, contentType)
 				assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 				assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 			})
@@ -140,7 +118,7 @@ func TestPOST(t *testing.T) {
 
 		for _, tc := range invalidContentTypes {
 			t.Run(fmt.Sprintf("reject for content type %s", tc), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ me { name } }"}`, tc)
+				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, tc)
 				assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 				assert.Equal(t, fmt.Sprintf(`{"errors":[{"message":"%s"}],"data":null}`, "transport not supported"), resp.Body.String())
 			})

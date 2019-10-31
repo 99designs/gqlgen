@@ -18,6 +18,7 @@ type (
 
 		errorPresenter graphql.ErrorPresenterFunc
 		recoverFunc    graphql.RecoverFunc
+		queryCache     graphql.Cache
 	}
 )
 
@@ -26,6 +27,7 @@ func New(es graphql.ExecutableSchema) *Server {
 		es:             es,
 		errorPresenter: graphql.DefaultErrorPresenter,
 		recoverFunc:    graphql.DefaultRecover,
+		queryCache:     graphql.NoCache{},
 	}
 	s.exec = newExecutor(s)
 	return s
@@ -41,6 +43,10 @@ func (s *Server) SetErrorPresenter(f graphql.ErrorPresenterFunc) {
 
 func (s *Server) SetRecoverFunc(f graphql.RecoverFunc) {
 	s.recoverFunc = f
+}
+
+func (s *Server) SetQueryCache(cache graphql.Cache) {
+	s.queryCache = cache
 }
 
 func (s *Server) Use(plugin graphql.HandlerPlugin) {

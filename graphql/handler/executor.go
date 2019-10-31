@@ -87,8 +87,6 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 		}
 	}
 
-	var gerr *gqlerror.Error
-
 	rc := &graphql.RequestContext{
 		DisableIntrospection: true,
 		Recover:              graphql.DefaultRecover,
@@ -100,21 +98,22 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 	}
 	rc.Stats.OperationStart = graphql.GetStartTime(ctx)
 
-	rc.Doc, gerr = e.parseOperation(ctx, rc)
-	if gerr != nil {
-		return nil, []*gqlerror.Error{gerr}
-	}
-
-	ctx, op, listErr := e.validateOperation(ctx, rc)
+	var listErr gqlerror.List
+	rc.Doc, listErr = e.parseQuery(ctx, rc)
 	if len(listErr) != 0 {
 		return nil, listErr
+	}
+
+	op := rc.Doc.Operations.ForName(rc.OperationName)
+	if op == nil {
+		return nil, gqlerror.List{gqlerror.Errorf("operation %s not found", rc.OperationName)}
 	}
 
 	vars, err := validator.VariableValues(e.server.es.Schema(), op, rc.Variables)
 	if err != nil {
 		return nil, gqlerror.List{err}
 	}
-
+	rc.Stats.Validation.End = graphql.Now()
 	rc.Variables = vars
 
 	for _, p := range e.requestContextMutators {
@@ -180,29 +179,34 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 	}
 }
 
-func (e executor) parseOperation(ctx context.Context, rc *graphql.RequestContext) (*ast.QueryDocument, *gqlerror.Error) {
+// parseQuery decodes the incoming query and validates it, pulling from cache if present.
+//
+// NOTE: This should NOT look at variables, they will change per request. It should only parse and validate
+// the raw query string.
+func (e executor) parseQuery(ctx context.Context, rc *graphql.RequestContext) (*ast.QueryDocument, gqlerror.List) {
 	rc.Stats.Parsing.Start = graphql.Now()
-	defer func() {
-		rc.Stats.Parsing.End = graphql.Now()
-	}()
-	return parser.ParseQuery(&ast.Source{Input: rc.RawQuery})
-}
 
-func (e executor) validateOperation(ctx context.Context, rc *graphql.RequestContext) (context.Context, *ast.OperationDefinition, gqlerror.List) {
+	if doc, ok := e.server.queryCache.Get(rc.RawQuery); ok {
+		now := graphql.Now()
+
+		rc.Stats.Parsing.End = now
+		rc.Stats.Validation.Start = now
+		return doc.(*ast.QueryDocument), nil
+	}
+
+	doc, err := parser.ParseQuery(&ast.Source{Input: rc.RawQuery})
+	if err != nil {
+		return nil, gqlerror.List{err}
+	}
+	rc.Stats.Parsing.End = graphql.Now()
+
 	rc.Stats.Validation.Start = graphql.Now()
-	defer func() {
-		rc.Stats.Validation.End = graphql.Now()
-	}()
-
-	listErr := validator.Validate(e.server.es.Schema(), rc.Doc)
+	listErr := validator.Validate(e.server.es.Schema(), doc)
 	if len(listErr) != 0 {
-		return ctx, nil, listErr
+		return nil, listErr
 	}
 
-	op := rc.Doc.Operations.ForName(rc.OperationName)
-	if op == nil {
-		return ctx, nil, gqlerror.List{gqlerror.Errorf("operation %s not found", rc.OperationName)}
-	}
+	e.server.queryCache.Add(rc.RawQuery, doc)
 
-	return ctx, op, nil
+	return doc, nil
 }

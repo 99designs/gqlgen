@@ -2,10 +2,15 @@ package handler_test
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
+
+	"github.com/vektah/gqlparser/parser"
+
+	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/ast"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
@@ -60,12 +65,10 @@ func TestServer(t *testing.T) {
 	t.Run("invokes field middleware in order", func(t *testing.T) {
 		var calls []string
 		srv.Use(fieldFunc(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			fmt.Println("first")
 			calls = append(calls, "first")
 			return next(ctx)
 		}))
 		srv.Use(fieldFunc(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			fmt.Println("second")
 			calls = append(calls, "second")
 			return next(ctx)
 		}))
@@ -74,6 +77,37 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
+
+	t.Run("query caching", func(t *testing.T) {
+		cache := &graphql.MapCache{}
+		srv.SetQueryCache(cache)
+		qry := `query Foo {name}`
+
+		t.Run("cache miss populates cache", func(t *testing.T) {
+			resp := get(srv, "/foo?query="+url.QueryEscape(qry))
+			assert.Equal(t, http.StatusOK, resp.Code)
+			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+			cacheDoc, ok := cache.Get(qry)
+			require.True(t, ok)
+			require.Equal(t, "Foo", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
+		})
+
+		t.Run("cache hits use document from cache", func(t *testing.T) {
+			doc, err := parser.ParseQuery(&ast.Source{Input: `query Bar {name}`})
+			require.Nil(t, err)
+			cache.Add(qry, doc)
+
+			resp := get(srv, "/foo?query="+url.QueryEscape(qry))
+			assert.Equal(t, http.StatusOK, resp.Code)
+			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+			cacheDoc, ok := cache.Get(qry)
+			require.True(t, ok)
+			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
+		})
+	})
+
 }
 
 type opFunc func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer)

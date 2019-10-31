@@ -25,7 +25,6 @@ func New() *TestServer {
 	}
 
 	schema := gqlparser.MustLoadSchema(&ast.Source{Input: `
-		schema { query: Query }
 		type Query {
 			name: String!
 			find(id: Int!): String!

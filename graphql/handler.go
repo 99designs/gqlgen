@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/vektah/gqlparser/gqlerror"
 )
@@ -105,4 +107,36 @@ func (w Writer) GraphqlErr(err ...*gqlerror.Error) {
 	w(StatusResolverError, &Response{
 		Errors: err,
 	})
+}
+
+func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
+	if !strings.HasPrefix(path, "variables.") {
+		return gqlerror.Errorf("invalid operations paths for key %s", key)
+	}
+
+	var ptr interface{} = p.Variables
+	parts := strings.Split(path, ".")
+
+	// skip the first part (variables) because we started there
+	for i, p := range parts[1:] {
+		last := i == len(parts)-2
+		if ptr == nil {
+			return gqlerror.Errorf("path is missing \"variables.\" prefix, key: %s, path: %s", key, path)
+		}
+		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
+			if last {
+				ptr.([]interface{})[index] = upload
+			} else {
+				ptr = ptr.([]interface{})[index]
+			}
+		} else {
+			if last {
+				ptr.(map[string]interface{})[p] = upload
+			} else {
+				ptr = ptr.(map[string]interface{})[p]
+			}
+		}
+	}
+
+	return nil
 }

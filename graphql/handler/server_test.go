@@ -46,13 +46,13 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer) {
+		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 			calls = append(calls, "first")
-			next(ctx, writer)
+			return next(ctx)
 		}))
-		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer) {
+		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 			calls = append(calls, "second")
-			next(ctx, writer)
+			return next(ctx)
 		}))
 
 		resp := get(srv, "/foo?query={name}")
@@ -108,10 +108,10 @@ func TestServer(t *testing.T) {
 
 }
 
-type opFunc func(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer)
+type opFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
 
-func (r opFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler, writer graphql.Writer) {
-	r(ctx, next, writer)
+func (r opFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+	return r(ctx, next)
 }
 
 type fieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)

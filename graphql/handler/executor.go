@@ -11,7 +11,7 @@ import (
 )
 
 type executor struct {
-	operationMiddleware    graphql.OperationHandler
+	operationMiddleware    graphql.OperationMiddleware
 	responseMiddleware     graphql.ResponseMiddleware
 	fieldMiddleware        graphql.FieldMiddleware
 	requestParamMutators   []graphql.RequestParameterMutator
@@ -25,7 +25,9 @@ func newExecutor(s *Server) executor {
 	e := executor{
 		server: s,
 	}
-	e.operationMiddleware = e.executableSchemaHandler
+	e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		return next(ctx)
+	}
 	e.responseMiddleware = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 		return next(ctx)
 	}
@@ -38,8 +40,10 @@ func newExecutor(s *Server) executor {
 		p := s.extensions[i]
 		if p, ok := p.(graphql.OperationInterceptor); ok {
 			previous := e.operationMiddleware
-			e.operationMiddleware = func(ctx context.Context, writer graphql.Writer) {
-				p.InterceptOperation(ctx, previous, writer)
+			e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+				return p.InterceptOperation(ctx, func(ctx context.Context) graphql.ResponseHandler {
+					return previous(ctx, next)
+				})
 			}
 		}
 
@@ -76,8 +80,35 @@ func newExecutor(s *Server) executor {
 	return e
 }
 
-func (e executor) DispatchRequest(ctx context.Context, writer graphql.Writer) {
-	e.operationMiddleware(ctx, writer)
+func (e executor) DispatchRequest(ctx context.Context, rc *graphql.RequestContext) (graphql.ResponseHandler, context.Context) {
+	var innerCtx context.Context
+	res := e.operationMiddleware(graphql.WithRequestContext(ctx, rc), func(ctx context.Context) graphql.ResponseHandler {
+		innerCtx = ctx
+
+		responses := e.server.es.Exec(ctx)
+
+		return func(ctx context.Context) *graphql.Response {
+			ctx = graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
+			resp := e.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
+				resp := responses(ctx)
+				if resp == nil {
+					return nil
+				}
+				resp.Extensions = graphql.GetExtensions(ctx)
+				return resp
+			})
+			if resp == nil {
+				return nil
+			}
+
+			for _, err := range graphql.GetErrors(ctx) {
+				resp.Errors = append(resp.Errors, err)
+			}
+			return resp
+		}
+	})
+
+	return res, innerCtx
 }
 
 func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawParams) (*graphql.RequestContext, gqlerror.List) {
@@ -128,36 +159,6 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 	}
 
 	return rc, nil
-}
-
-func (e *executor) write(ctx context.Context, resp *graphql.Response, writer graphql.Writer) {
-	resp.Extensions = graphql.GetExtensions(ctx)
-
-	for _, err := range graphql.GetErrors(ctx) {
-		resp.Errors = append(resp.Errors, err)
-	}
-	writer(getStatus(resp), resp)
-}
-
-// executableSchemaHandler is the inner most operation handler, it invokes the graph directly after all middleware
-// and sends responses to the transport so it can be returned to the client
-func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Writer) {
-	responses := e.server.es.Exec(ctx)
-	for {
-		resCtx := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
-		resp := e.responseMiddleware(resCtx, func(ctx context.Context) *graphql.Response {
-			resp := responses(resCtx)
-			if resp == nil {
-				return nil
-			}
-			resp.Extensions = graphql.GetExtensions(ctx)
-			return resp
-		})
-		if resp == nil {
-			break
-		}
-		e.write(resCtx, resp, write)
-	}
 }
 
 // parseQuery decodes the incoming query and validates it, pulling from cache if present.

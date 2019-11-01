@@ -194,6 +194,6 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 		write.GraphqlErr(gerr...)
 		return
 	}
-	ctx := graphql.WithRequestContext(r.Context(), rc)
-	exec.DispatchRequest(ctx, write)
+	responses, ctx := exec.DispatchRequest(r.Context(), rc)
+	write(graphql.StatusResolverError, responses(ctx))
 }

@@ -58,6 +58,6 @@ func (H POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		write.GraphqlErr(err...)
 		return
 	}
-	ctx := graphql.WithRequestContext(r.Context(), rc)
-	exec.DispatchRequest(ctx, write)
+	responses, ctx := exec.DispatchRequest(r.Context(), rc)
+	write(graphql.StatusResolverError, responses(ctx))
 }

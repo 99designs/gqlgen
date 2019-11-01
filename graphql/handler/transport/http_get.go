@@ -30,7 +30,7 @@ func (H GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		OperationName: r.URL.Query().Get("operationName"),
 	}
 
-	writer := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
+	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
 		switch status {
 		case graphql.StatusOk, graphql.StatusResolverError:
 			w.WriteHeader(http.StatusOK)
@@ -47,7 +47,7 @@ func (H GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	if variables := r.URL.Query().Get("variables"); variables != "" {
 		if err := jsonDecode(strings.NewReader(variables), &raw.Variables); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			writer.Errorf("variables could not be decoded")
+			write.Errorf("variables could not be decoded")
 			return
 		}
 	}
@@ -55,7 +55,7 @@ func (H GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	if extensions := r.URL.Query().Get("extensions"); extensions != "" {
 		if err := jsonDecode(strings.NewReader(extensions), &raw.Extensions); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			writer.Errorf("extensions could not be decoded")
+			write.Errorf("extensions could not be decoded")
 			return
 		}
 	}
@@ -63,17 +63,18 @@ func (H GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	rc, err := exec.CreateRequestContext(r.Context(), raw)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		writer.GraphqlErr(err...)
+		write.GraphqlErr(err...)
 		return
 	}
 	op := rc.Doc.Operations.ForName(rc.OperationName)
 	if op.Operation != ast.Query {
 		w.WriteHeader(http.StatusNotAcceptable)
-		writer.Errorf("GET requests only allow query operations")
+		write.Errorf("GET requests only allow query operations")
 		return
 	}
-	ctx := graphql.WithRequestContext(r.Context(), rc)
-	exec.DispatchRequest(ctx, writer)
+
+	responses, ctx := exec.DispatchRequest(r.Context(), rc)
+	write(graphql.StatusResolverError, responses(ctx))
 }
 
 func jsonDecode(r io.Reader, val interface{}) error {

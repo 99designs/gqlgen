@@ -214,6 +214,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 	c.mu.Lock()
 	c.active[message.ID] = cancel
 	c.mu.Unlock()
+
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
@@ -221,12 +222,15 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				c.sendError(message.ID, &gqlerror.Error{Message: userErr.Error()})
 			}
 		}()
-		c.exec.DispatchRequest(ctx, func(status graphql.Status, response *graphql.Response) {
+		responses, ctx := c.exec.DispatchRequest(ctx, rc)
+		for {
+			response := responses(ctx)
+			if response == nil {
+				break
+			}
+
 			msgType := dataMsg
-			switch status {
-			case graphql.StatusOk, graphql.StatusResolverError:
-				msgType = dataMsg
-			case graphql.StatusParseError, graphql.StatusValidationError:
+			if len(response.Errors) > 0 {
 				msgType = errorMsg
 			}
 
@@ -239,7 +243,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				ID:      message.ID,
 				Type:    msgType,
 			})
-		})
+		}
 		c.write(&operationMessage{ID: message.ID, Type: completeMsg})
 
 		c.mu.Lock()

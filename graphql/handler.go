@@ -11,14 +11,16 @@ import (
 )
 
 type (
-	Resolver            func(ctx context.Context) (res interface{}, err error)
-	Writer              func(Status, *Response)
-	OperationMiddleware func(ctx context.Context, next OperationHandler, writer Writer)
-	OperationHandler    func(ctx context.Context, writer Writer)
-	ResponseHandler     func(ctx context.Context) *Response
-	ResponseStream      func() *Response
-	ResponseMiddleware  func(ctx context.Context, next ResponseHandler) *Response
-	FieldMiddleware     func(ctx context.Context, next Resolver) (res interface{}, err error)
+	Writer func(Status, *Response)
+
+	OperationMiddleware func(ctx context.Context, next OperationHandler) ResponseHandler
+	OperationHandler    func(ctx context.Context) ResponseHandler
+
+	ResponseHandler    func(ctx context.Context) *Response
+	ResponseMiddleware func(ctx context.Context, next ResponseHandler) *Response
+
+	Resolver        func(ctx context.Context) (res interface{}, err error)
+	FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
 
 	RawParams struct {
 		Query         string                 `json:"query"`
@@ -29,7 +31,7 @@ type (
 
 	GraphExecutor interface {
 		CreateRequestContext(ctx context.Context, params *RawParams) (*RequestContext, gqlerror.List)
-		DispatchRequest(ctx context.Context, writer Writer)
+		DispatchRequest(ctx context.Context, rc *RequestContext) (ResponseHandler, context.Context)
 	}
 
 	// HandlerExtension interface is entirely optional, see the list of possible hook points below
@@ -60,7 +62,7 @@ type (
 	// OperationInterceptor is called for each incoming query, for basic requests the writer will be invoked once,
 	// for subscriptions it will be invoked multiple times.
 	OperationInterceptor interface {
-		InterceptOperation(ctx context.Context, next OperationHandler, writer Writer)
+		InterceptOperation(ctx context.Context, next OperationHandler) ResponseHandler
 	}
 
 	// ResponseInterceptor is called around each graphql operation response. This can be called many times for a single

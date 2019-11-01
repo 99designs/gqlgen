@@ -31,7 +31,7 @@ const (
 type (
 	Websocket struct {
 		Upgrader              websocket.Upgrader
-		InitFunc              websocketInitFunc
+		InitFunc              WebsocketInitFunc
 		KeepAlivePingInterval time.Duration
 	}
 	wsConnection struct {
@@ -50,7 +50,7 @@ type (
 		ID      string          `json:"id,omitempty"`
 		Type    string          `json:"type"`
 	}
-	websocketInitFunc func(ctx context.Context, initPayload InitPayload) (context.Context, error)
+	WebsocketInitFunc func(ctx context.Context, initPayload InitPayload) (context.Context, error)
 )
 
 var _ graphql.Transport = Websocket{}

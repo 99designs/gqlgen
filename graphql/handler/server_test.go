@@ -46,14 +46,30 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 			calls = append(calls, "first")
 			return next(ctx)
-		}))
-		srv.Use(opFunc(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		})
+		srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 			calls = append(calls, "second")
 			return next(ctx)
-		}))
+		})
+
+		resp := get(srv, "/foo?query={name}")
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.Equal(t, []string{"first", "second"}, calls)
+	})
+
+	t.Run("invokes response middleware in order", func(t *testing.T) {
+		var calls []string
+		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			calls = append(calls, "first")
+			return next(ctx)
+		})
+		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			calls = append(calls, "second")
+			return next(ctx)
+		})
 
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -62,14 +78,14 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes field middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.Use(fieldFunc(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			calls = append(calls, "first")
 			return next(ctx)
-		}))
-		srv.Use(fieldFunc(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		})
+		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			calls = append(calls, "second")
 			return next(ctx)
-		}))
+		})
 
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -106,18 +122,6 @@ func TestServer(t *testing.T) {
 		})
 	})
 
-}
-
-type opFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
-
-func (r opFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-	return r(ctx, next)
-}
-
-type fieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
-
-func (f fieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-	return f(ctx, next)
 }
 
 func get(handler http.Handler, target string) *httptest.ResponseRecorder {

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -64,6 +65,21 @@ func (s *Server) Use(extension graphql.HandlerExtension) {
 	}
 }
 
+// AroundFields is a convenience method for creating an extension that only implements field middleware
+func (s *Server) AroundFields(f graphql.FieldMiddleware) {
+	s.Use(FieldFunc(f))
+}
+
+// AroundOperations is a convenience method for creating an extension that only implements operation middleware
+func (s *Server) AroundOperations(f graphql.OperationMiddleware) {
+	s.Use(OperationFunc(f))
+}
+
+// AroundResponses is a convenience method for creating an extension that only implements response middleware
+func (s *Server) AroundResponses(f graphql.ResponseMiddleware) {
+	s.Use(ResponseFunc(f))
+}
+
 func (s *Server) getTransport(r *http.Request) graphql.Transport {
 	for _, t := range s.transports {
 		if t.Supports(r) {
@@ -85,13 +101,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	transport.Do(w, r, s.exec)
 }
 
-func getStatus(resp *graphql.Response) graphql.Status {
-	if len(resp.Errors) > 0 {
-		return graphql.StatusResolverError
-	}
-	return graphql.StatusOk
-}
-
 func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 	w.WriteHeader(code)
 	b, err := json.Marshal(&graphql.Response{Errors: errors})
@@ -103,4 +112,22 @@ func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 
 func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
+}
+
+type OperationFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
+
+func (r OperationFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+	return r(ctx, next)
+}
+
+type ResponseFunc func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response
+
+func (r ResponseFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+	return r(ctx, next)
+}
+
+type FieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
+
+func (f FieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	return f(ctx, next)
 }

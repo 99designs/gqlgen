@@ -155,4 +155,4 @@ The generated UserLoader has a few other useful methods on it:
  - `LoadAll(keys)`: If you know up front you want a bunch users
  - `Prime(key, user)`: Used to sync state between similar loaders (usersById, usersByNote)
 
-You can see the full working example [here](https://github.com/vektah/gqlgen-tutorials/tree/master/dataloader)
+You can see the full working example [here](https://github.com/vektah/gqlgen-tutorials/tree/master/dataloader).

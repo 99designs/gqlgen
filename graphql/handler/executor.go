@@ -12,8 +12,8 @@ import (
 
 type executor struct {
 	operationMiddleware    graphql.OperationHandler
-	resultHandler          graphql.ResponseMiddleware
-	responseMiddleware     graphql.FieldMiddleware
+	responseMiddleware     graphql.ResponseMiddleware
+	fieldMiddleware        graphql.FieldMiddleware
 	requestParamMutators   []graphql.RequestParameterMutator
 	requestContextMutators []graphql.RequestContextMutator
 	server                 *Server
@@ -26,10 +26,10 @@ func newExecutor(s *Server) executor {
 		server: s,
 	}
 	e.operationMiddleware = e.executableSchemaHandler
-	e.resultHandler = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+	e.responseMiddleware = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 		return next(ctx)
 	}
-	e.responseMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	e.fieldMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 		return next(ctx)
 	}
 
@@ -44,8 +44,8 @@ func newExecutor(s *Server) executor {
 		}
 
 		if p, ok := p.(graphql.ResponseInterceptor); ok {
-			previous := e.resultHandler
-			e.resultHandler = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			previous := e.responseMiddleware
+			e.responseMiddleware = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 				return p.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
 					return previous(ctx, next)
 				})
@@ -53,8 +53,8 @@ func newExecutor(s *Server) executor {
 		}
 
 		if p, ok := p.(graphql.FieldInterceptor); ok {
-			previous := e.responseMiddleware
-			e.responseMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			previous := e.fieldMiddleware
+			e.fieldMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 				return p.InterceptField(ctx, func(ctx context.Context) (res interface{}, err error) {
 					return previous(ctx, next)
 				})
@@ -83,39 +83,43 @@ func (e executor) DispatchRequest(ctx context.Context, writer graphql.Writer) {
 func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawParams) (*graphql.RequestContext, gqlerror.List) {
 	ctx = graphql.WithServerContext(ctx, e.server.es)
 
+	stats := graphql.Stats{
+		OperationStart: graphql.GetStartTime(ctx),
+	}
 	for _, p := range e.requestParamMutators {
 		if err := p.MutateRequestParameters(ctx, params); err != nil {
 			return nil, gqlerror.List{err}
 		}
 	}
 
-	rc := &graphql.RequestContext{
-		DisableIntrospection: true,
-		Recover:              graphql.DefaultRecover,
-		ResolverMiddleware:   e.responseMiddleware,
-		RawQuery:             params.Query,
-		OperationName:        params.OperationName,
-		Variables:            params.Variables,
-	}
-	rc.Stats.OperationStart = graphql.GetStartTime(ctx)
-
-	var listErr gqlerror.List
-	rc.Doc, listErr = e.parseQuery(ctx, rc)
+	doc, listErr := e.parseQuery(ctx, &stats, params.Query)
 	if len(listErr) != 0 {
 		return nil, listErr
 	}
 
-	op := rc.Doc.Operations.ForName(rc.OperationName)
+	op := doc.Operations.ForName(params.OperationName)
 	if op == nil {
-		return nil, gqlerror.List{gqlerror.Errorf("operation %s not found", rc.OperationName)}
+		return nil, gqlerror.List{gqlerror.Errorf("operation %s not found", params.OperationName)}
 	}
 
-	vars, err := validator.VariableValues(e.server.es.Schema(), op, rc.Variables)
+	vars, err := validator.VariableValues(e.server.es.Schema(), op, params.Variables)
 	if err != nil {
 		return nil, gqlerror.List{err}
 	}
-	rc.Stats.Validation.End = graphql.Now()
-	rc.Variables = vars
+	stats.Validation.End = graphql.Now()
+
+	rc := &graphql.RequestContext{
+		RawQuery:             params.Query,
+		Variables:            vars,
+		OperationName:        params.OperationName,
+		Doc:                  doc,
+		Operation:            op,
+		DisableIntrospection: true,
+		Recover:              graphql.DefaultRecover,
+		ResolverMiddleware:   e.fieldMiddleware,
+		DirectiveMiddleware:  nil, //todo fixme
+		Stats:                stats,
+	}
 
 	for _, p := range e.requestContextMutators {
 		if err := p.MutateRequestContext(ctx, rc); err != nil {
@@ -138,45 +142,21 @@ func (e *executor) write(ctx context.Context, resp *graphql.Response, writer gra
 // executableSchemaHandler is the inner most operation handler, it invokes the graph directly after all middleware
 // and sends responses to the transport so it can be returned to the client
 func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Writer) {
-	rc := graphql.GetRequestContext(ctx)
-
-	op := rc.Doc.Operations.ForName(rc.OperationName)
-
-	switch op.Operation {
-	case ast.Query:
+	responses := e.server.es.Exec(ctx)
+	for {
 		resCtx := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
-		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
-			return e.server.es.Query(ctx, op)
-		})
-		e.write(resCtx, resp, write)
-
-	case ast.Mutation:
-		resCtx := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
-		resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
-			return e.server.es.Mutation(ctx, op)
-		})
-		e.write(resCtx, resp, write)
-
-	case ast.Subscription:
-		responses := e.server.es.Subscription(ctx, op)
-		for {
-			resCtx := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
-			resp := e.resultHandler(resCtx, func(ctx context.Context) *graphql.Response {
-				resp := responses()
-				if resp == nil {
-					return nil
-				}
-				resp.Extensions = graphql.GetExtensions(ctx)
-				return resp
-			})
+		resp := e.responseMiddleware(resCtx, func(ctx context.Context) *graphql.Response {
+			resp := responses(resCtx)
 			if resp == nil {
-				break
+				return nil
 			}
-			e.write(resCtx, resp, write)
+			resp.Extensions = graphql.GetExtensions(ctx)
+			return resp
+		})
+		if resp == nil {
+			break
 		}
-
-	default:
-		write(graphql.StatusValidationError, graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
+		e.write(resCtx, resp, write)
 	}
 }
 
@@ -184,30 +164,30 @@ func (e *executor) executableSchemaHandler(ctx context.Context, write graphql.Wr
 //
 // NOTE: This should NOT look at variables, they will change per request. It should only parse and validate
 // the raw query string.
-func (e executor) parseQuery(ctx context.Context, rc *graphql.RequestContext) (*ast.QueryDocument, gqlerror.List) {
-	rc.Stats.Parsing.Start = graphql.Now()
+func (e executor) parseQuery(ctx context.Context, stats *graphql.Stats, query string) (*ast.QueryDocument, gqlerror.List) {
+	stats.Parsing.Start = graphql.Now()
 
-	if doc, ok := e.server.queryCache.Get(rc.RawQuery); ok {
+	if doc, ok := e.server.queryCache.Get(query); ok {
 		now := graphql.Now()
 
-		rc.Stats.Parsing.End = now
-		rc.Stats.Validation.Start = now
+		stats.Parsing.End = now
+		stats.Validation.Start = now
 		return doc.(*ast.QueryDocument), nil
 	}
 
-	doc, err := parser.ParseQuery(&ast.Source{Input: rc.RawQuery})
+	doc, err := parser.ParseQuery(&ast.Source{Input: query})
 	if err != nil {
 		return nil, gqlerror.List{err}
 	}
-	rc.Stats.Parsing.End = graphql.Now()
+	stats.Parsing.End = graphql.Now()
 
-	rc.Stats.Validation.Start = graphql.Now()
+	stats.Validation.Start = graphql.Now()
 	listErr := validator.Validate(e.server.es.Schema(), doc)
 	if len(listErr) != 0 {
 		return nil, listErr
 	}
 
-	e.server.queryCache.Add(rc.RawQuery, doc)
+	e.server.queryCache.Add(query, doc)
 
 	return doc, nil
 }

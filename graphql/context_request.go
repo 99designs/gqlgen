@@ -13,6 +13,7 @@ type RequestContext struct {
 	OperationName string
 	Doc           *ast.QueryDocument
 
+	Operation            *ast.OperationDefinition
 	DisableIntrospection bool
 	Recover              RecoverFunc
 	ResolverMiddleware   FieldMiddleware

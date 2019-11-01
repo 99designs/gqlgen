@@ -2,6 +2,8 @@ package apollotracing
 
 import (
 	"context"
+	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -100,6 +102,8 @@ func (a ApolloTracing) InterceptResponse(ctx context.Context, next graphql.Respo
 
 	graphql.RegisterExtension(ctx, "tracing", td)
 
+	fmt.Println("AAAAAAAAAAa")
+	debug.PrintStack()
 	resp := next(ctx)
 
 	end := graphql.Now()

@@ -42,39 +42,50 @@ func New() *TestServer {
 	}
 
 	srv.Server = handler.New(&graphql.ExecutableSchemaMock{
-		QueryFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			// Field execution happens inside the generated code, lets simulate some of it.
-			ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
-				Object: "Query",
-				Field: graphql.CollectedField{
-					Field: &ast.Field{
-						Name:       "name",
-						Alias:      "name",
-						Definition: schema.Types["Query"].Fields.ForName("name"),
-					},
-				},
-			})
-			res, err := graphql.GetRequestContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-				return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
-			})
-			if err != nil {
-				panic(err)
-			}
-			return res.(*graphql.Response)
-		},
-		MutationFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-			return graphql.ErrorResponse(ctx, "mutations are not supported")
-		},
-		SubscriptionFunc: func(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-			return func() *graphql.Response {
-				select {
-				case <-ctx.Done():
-					return nil
-				case <-next:
-					return &graphql.Response{
-						Data: []byte(`{"name":"test"}`),
+		ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
+			rc := graphql.GetRequestContext(ctx)
+			switch rc.Operation.Operation {
+			case ast.Query:
+				ran := false
+				return func(ctx context.Context) *graphql.Response {
+					if ran {
+						return nil
+					}
+					ran = true
+					// Field execution happens inside the generated code, lets simulate some of it.
+					ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+						Object: "Query",
+						Field: graphql.CollectedField{
+							Field: &ast.Field{
+								Name:       "name",
+								Alias:      "name",
+								Definition: schema.Types["Query"].Fields.ForName("name"),
+							},
+						},
+					})
+					res, err := graphql.GetRequestContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+						return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
+					})
+					if err != nil {
+						panic(err)
+					}
+					return res.(*graphql.Response)
+				}
+			case ast.Mutation:
+				return graphql.OneShot(graphql.ErrorResponse(ctx, "mutations are not supported"))
+			case ast.Subscription:
+				return func(context context.Context) *graphql.Response {
+					select {
+					case <-ctx.Done():
+						return nil
+					case <-next:
+						return &graphql.Response{
+							Data: []byte(`{"name":"test"}`),
+						}
 					}
 				}
+			default:
+				return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
 			}
 		},
 		SchemaFunc: func() *ast.Schema {

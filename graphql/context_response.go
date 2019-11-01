@@ -22,7 +22,10 @@ type responseContext struct {
 const resultCtx key = "result_context"
 
 func getResponseContext(ctx context.Context) *responseContext {
-	val, _ := ctx.Value(resultCtx).(*responseContext)
+	val, ok := ctx.Value(resultCtx).(*responseContext)
+	if !ok {
+		panic("missing response context")
+	}
 	return val
 }
 

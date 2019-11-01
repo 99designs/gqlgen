@@ -1,4 +1,4 @@
-//go:generate go run github.com/matryer/moq -out esmock.go . ExecutableSchema
+//go:generate go run github.com/matryer/moq -out executable_schema_mock.go . ExecutableSchema
 
 package graphql
 
@@ -13,9 +13,7 @@ type ExecutableSchema interface {
 	Schema() *ast.Schema
 
 	Complexity(typeName, fieldName string, childComplexity int, args map[string]interface{}) (int, bool)
-	Query(ctx context.Context, op *ast.OperationDefinition) *Response
-	Mutation(ctx context.Context, op *ast.OperationDefinition) *Response
-	Subscription(ctx context.Context, op *ast.OperationDefinition) func() *Response
+	Exec(ctx context.Context) ResponseHandler
 }
 
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types

@@ -231,9 +231,9 @@ func TestWebsocketInitFunc(t *testing.T) {
 
 	t.Run("can return context for request from WebsocketInitFunc", func(t *testing.T) {
 		es := &graphql.ExecutableSchemaMock{
-			QueryFunc: func(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
+			ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
 				assert.Equal(t, "newvalue", ctx.Value("newkey"))
-				return &graphql.Response{Data: []byte(`{"empty":"ok"}`)}
+				return graphql.OneShot(&graphql.Response{Data: []byte(`{"empty":"ok"}`)})
 			},
 			SchemaFunc: func() *ast.Schema {
 				return gqlparser.MustLoadSchema(&ast.Source{Input: `

@@ -7,7 +7,7 @@ menu: { main: { parent: "reference" } }
 
 ## Built-in helpers
 
-gqlgen ships with three built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`. Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
+gqlgen ships with some built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`. Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
 
 ### Time
 

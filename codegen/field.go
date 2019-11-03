@@ -184,75 +184,111 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 	}
 }
 
-// findField attempts to match the name to a struct field with the following
-// priorites:
-// 1. Any method with a matching name
-// 2. Any Fields with a struct tag (see config.StructTag)
-// 3. Any fields with a matching name
-// 4. Same logic again for embedded fields
+// findBindTarget attempts to match the name to a struct field or method
+// with the following priorites:
+// 1. Any Fields with a struct tag (see config.StructTag). Errors if more than one match is found
+// 2. Any method or field with a matching name. Errors if more than one match is found
+// 3. Same logic again for embedded fields
 func (b *builder) findBindTarget(named *types.Named, name string) (types.Object, error) {
+	strukt, isStruct := named.Underlying().(*types.Struct)
+	if isStruct {
+		// NOTE: a struct tag will override both methods and fields
+		// Bind to struct tag
+		found, err := b.findBindStructTagTarget(strukt, name)
+		if found != nil || err != nil {
+			return found, err
+		}
+	}
+
+	// Search for a method to bind to
+	var foundMethod types.Object
 	for i := 0; i < named.NumMethods(); i++ {
 		method := named.Method(i)
-		if !method.Exported() {
+		if !method.Exported() || !strings.EqualFold(method.Name(), name) {
 			continue
 		}
 
-		if !strings.EqualFold(method.Name(), name) {
-			continue
+		if foundMethod != nil {
+			return nil, errors.Errorf("found more than one matching method to bind for %s", name)
 		}
 
-		return method, nil
+		foundMethod = method
 	}
 
-	strukt, ok := named.Underlying().(*types.Struct)
-	if !ok {
-		return nil, fmt.Errorf("not a struct")
+	// Search for a field to bind to
+	if isStruct {
+		foundField, err := b.findBindFieldTarget(strukt, name)
+		if err != nil {
+			return nil, err
+		}
+
+		switch {
+		case foundField == nil && foundMethod == nil:
+			// Search embeds
+			return b.findBindEmbedsTarget(strukt, name)
+		case foundField == nil && foundMethod != nil:
+			// Bind to method
+			return foundMethod, nil
+		case foundField != nil && foundMethod == nil:
+			// Bind to field
+			return foundField, nil
+		case foundField != nil && foundMethod != nil:
+			// Error
+			return nil, errors.Errorf("found more than one way to bind for %s", name)
+		}
 	}
-	return b.findBindStructTarget(strukt, name)
+
+	// Bind to method or don't bind at all
+	return foundMethod, nil
 }
 
-func (b *builder) findBindStructTarget(strukt *types.Struct, name string) (types.Object, error) {
-	// struct tags have the highest priority
-	if b.Config.StructTag != "" {
-		var foundField *types.Var
-		for i := 0; i < strukt.NumFields(); i++ {
-			field := strukt.Field(i)
-			if !field.Exported() {
-				continue
-			}
-			tags := reflect.StructTag(strukt.Tag(i))
-			if val, ok := tags.Lookup(b.Config.StructTag); ok && equalFieldName(val, name) {
-				if foundField != nil {
-					return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", b.Config.StructTag, val)
-				}
+func (b *builder) findBindStructTagTarget(strukt *types.Struct, name string) (types.Object, error) {
+	if b.Config.StructTag == "" {
+		return nil, nil
+	}
 
-				foundField = field
-			}
+	var found types.Object
+	for i := 0; i < strukt.NumFields(); i++ {
+		field := strukt.Field(i)
+		if !field.Exported() || field.Embedded() {
+			continue
 		}
-		if foundField != nil {
-			return foundField, nil
+		tags := reflect.StructTag(strukt.Tag(i))
+		if val, ok := tags.Lookup(b.Config.StructTag); ok && equalFieldName(val, name) {
+			if found != nil {
+				return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", b.Config.StructTag, val)
+			}
+
+			found = field
 		}
 	}
 
-	// Then matching field names
+	return found, nil
+}
+
+func (b *builder) findBindFieldTarget(strukt *types.Struct, name string) (types.Object, error) {
+	var found types.Object
 	for i := 0; i < strukt.NumFields(); i++ {
 		field := strukt.Field(i)
-		if !field.Exported() {
+		if !field.Exported() || !equalFieldName(field.Name(), name) {
 			continue
 		}
-		if equalFieldName(field.Name(), name) { // aqui!
-			return field, nil
+
+		if found != nil {
+			return nil, errors.Errorf("found more than one matching field to bind for %s", name)
 		}
+
+		found = field
 	}
 
-	// Then look in embedded structs
+	return found, nil
+}
+
+func (b *builder) findBindEmbedsTarget(strukt *types.Struct, name string) (types.Object, error) {
+	var found types.Object
 	for i := 0; i < strukt.NumFields(); i++ {
 		field := strukt.Field(i)
-		if !field.Exported() {
-			continue
-		}
-
-		if !field.Anonymous() {
+		if !field.Embedded() {
 			continue
 		}
 
@@ -267,23 +303,39 @@ func (b *builder) findBindStructTarget(strukt *types.Struct, name string) (types
 			if err != nil {
 				return nil, err
 			}
+			if f != nil && found != nil {
+				return nil, errors.Errorf("found more than one way to bind for %s", name)
+			}
 			if f != nil {
-				return f, nil
+				found = f
 			}
 		case *types.Struct:
-			f, err := b.findBindStructTarget(fieldType, name)
+			f, err := b.findBindStructTagTarget(fieldType, name)
 			if err != nil {
 				return nil, err
 			}
-			if f != nil {
-				return f, nil
+			if f != nil && found != nil {
+				return nil, errors.Errorf("found more than one way to bind for %s", name)
 			}
-		default:
-			panic(fmt.Errorf("unknown embedded field type %T", field.Type()))
+			if f != nil {
+				found = f
+				continue
+			}
+
+			f, err = b.findBindFieldTarget(fieldType, name)
+			if err != nil {
+				return nil, err
+			}
+			if f != nil && found != nil {
+				return nil, errors.Errorf("found more than one way to bind for %s", name)
+			}
+			if f != nil {
+				found = f
+			}
 		}
 	}
 
-	return nil, nil
+	return found, nil
 }
 
 func (f *Field) HasDirectives() bool {

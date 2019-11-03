@@ -40,15 +40,15 @@ type Embed struct {
 	scope, err := parseScope(input, "test")
 	require.NoError(t, err)
 
-	std := scope.Lookup("Std").Type().Underlying().(*types.Struct)
-	anon := scope.Lookup("Anon").Type().Underlying().(*types.Struct)
-	tags := scope.Lookup("Tags").Type().Underlying().(*types.Struct)
-	amb := scope.Lookup("Amb").Type().Underlying().(*types.Struct)
-	embed := scope.Lookup("Embed").Type().Underlying().(*types.Struct)
+	std := scope.Lookup("Std").Type().(*types.Named)
+	anon := scope.Lookup("Anon").Type().(*types.Named)
+	tags := scope.Lookup("Tags").Type().(*types.Named)
+	amb := scope.Lookup("Amb").Type().(*types.Named)
+	embed := scope.Lookup("Embed").Type().(*types.Named)
 
 	tests := []struct {
 		Name        string
-		Struct      *types.Struct
+		Named       *types.Named
 		Field       string
 		Tag         string
 		Expected    string
@@ -65,13 +65,13 @@ type Embed struct {
 
 	for _, tt := range tests {
 		b := builder{Config: &config.Config{StructTag: tt.Tag}}
-		field, err := b.findBindStructTarget(tt.Struct, tt.Field)
+		target, err := b.findBindTarget(tt.Named, tt.Field)
 		if tt.ShouldError {
-			require.Nil(t, field, tt.Name)
+			require.Nil(t, target, tt.Name)
 			require.Error(t, err, tt.Name)
 		} else {
 			require.NoError(t, err, tt.Name)
-			require.Equal(t, tt.Expected, field.Name(), tt.Name)
+			require.Equal(t, tt.Expected, target.Name(), tt.Name)
 		}
 	}
 }

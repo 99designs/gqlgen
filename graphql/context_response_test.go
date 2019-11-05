@@ -14,23 +14,23 @@ import (
 func TestAddError(t *testing.T) {
 	ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
 
-	root := &ResolverContext{
+	root := &FieldContext{
 		Field: CollectedField{
 			Field: &ast.Field{
 				Alias: "foo",
 			},
 		},
 	}
-	ctx = WithResolverContext(ctx, root)
+	ctx = WithFieldContext(ctx, root)
 	AddError(ctx, errors.New("foo1"))
 	AddError(ctx, errors.New("foo2"))
 
 	index := 1
-	child := &ResolverContext{
+	child := &FieldContext{
 		Parent: root,
 		Index:  &index,
 	}
-	userProvidedPath := &ResolverContext{
+	userProvidedPath := &FieldContext{
 		Parent: child,
 		Field: CollectedField{
 			Field: &ast.Field{
@@ -39,7 +39,7 @@ func TestAddError(t *testing.T) {
 		},
 	}
 
-	ctx = WithResolverContext(ctx, child)
+	ctx = WithFieldContext(ctx, child)
 	AddError(ctx, errors.New("bar"))
 	AddError(ctx, &gqlerror.Error{
 		Message: "foo3",
@@ -48,16 +48,16 @@ func TestAddError(t *testing.T) {
 
 	specs := []struct {
 		Name     string
-		RCtx     *ResolverContext
+		RCtx     *FieldContext
 		Messages []string
 	}{
 		{
-			Name:     "with root ResolverContext",
+			Name:     "with root FieldContext",
 			RCtx:     root,
 			Messages: []string{"foo1", "foo2"},
 		},
 		{
-			Name:     "with child ResolverContext",
+			Name:     "with child FieldContext",
 			RCtx:     child,
 			Messages: []string{"bar"},
 		},

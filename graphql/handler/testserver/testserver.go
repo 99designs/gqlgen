@@ -53,7 +53,7 @@ func New() *TestServer {
 					}
 					ran = true
 					// Field execution happens inside the generated code, lets simulate some of it.
-					ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+					ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 						Object: "Query",
 						Field: graphql.CollectedField{
 							Field: &ast.Field{

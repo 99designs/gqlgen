@@ -38,7 +38,7 @@ func TestMiddleware(t *testing.T) {
 			return next(context.WithValue(ctx, "path", append(path, 2)))
 		}),
 		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			areMethods = append(areMethods, graphql.GetResolverContext(ctx).IsMethod)
+			areMethods = append(areMethods, graphql.GetFieldContext(ctx).IsMethod)
 			return next(ctx)
 		}),
 	)

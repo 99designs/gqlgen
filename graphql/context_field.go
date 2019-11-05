@@ -9,8 +9,11 @@ type key string
 
 const resolverCtx key = "resolver_context"
 
-type ResolverContext struct {
-	Parent *ResolverContext
+// Deprecated: Use FieldContext instead
+type ResolverContext = FieldContext
+
+type FieldContext struct {
+	Parent *FieldContext
 	// The name of the type this field belongs to
 	Object string
 	// These are the args after processing, they can be mutated in middleware to change what the resolver will get.
@@ -39,7 +42,7 @@ type FieldStats struct {
 	Completed time.Time
 }
 
-func (r *ResolverContext) Path() []interface{} {
+func (r *FieldContext) Path() []interface{} {
 	var path []interface{}
 	for it := r; it != nil; it = it.Parent {
 		if it.Index != nil {
@@ -58,15 +61,20 @@ func (r *ResolverContext) Path() []interface{} {
 	return path
 }
 
+// Deprecated: Use GetFieldContext instead
 func GetResolverContext(ctx context.Context) *ResolverContext {
-	if val, ok := ctx.Value(resolverCtx).(*ResolverContext); ok {
+	return GetFieldContext(ctx)
+}
+
+func GetFieldContext(ctx context.Context) *FieldContext {
+	if val, ok := ctx.Value(resolverCtx).(*FieldContext); ok {
 		return val
 	}
 	return nil
 }
 
-func WithResolverContext(ctx context.Context, rc *ResolverContext) context.Context {
-	rc.Parent = GetResolverContext(ctx)
+func WithFieldContext(ctx context.Context, rc *FieldContext) context.Context {
+	rc.Parent = GetFieldContext(ctx)
 	return context.WithValue(ctx, resolverCtx, rc)
 }
 

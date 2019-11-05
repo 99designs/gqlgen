@@ -115,8 +115,8 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 {{ if .Directives.LocationDirectives "FIELD" }}
 	func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) interface{} {
 		{{- if .Directives.LocationDirectives "FIELD" }}
-		rctx := graphql.GetResolverContext(ctx)
-		for _, d := range rctx.Field.Directives {
+		fc := graphql.GetFieldContext(ctx)
+		for _, d := range fc.Field.Directives {
 			switch d.Name {
 			{{- range $directive := .Directives.LocationDirectives "FIELD" }}
 			case "{{$directive.Name}}":

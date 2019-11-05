@@ -9,10 +9,10 @@ import (
 )
 
 func TestGetResolverContext(t *testing.T) {
-	require.Nil(t, GetResolverContext(context.Background()))
+	require.Nil(t, GetFieldContext(context.Background()))
 
-	rc := &ResolverContext{}
-	require.Equal(t, rc, GetResolverContext(WithResolverContext(context.Background(), rc)))
+	rc := &FieldContext{}
+	require.Equal(t, rc, GetFieldContext(WithFieldContext(context.Background(), rc)))
 }
 
 func testContext(sel ast.SelectionSet) context.Context {
@@ -22,12 +22,12 @@ func testContext(sel ast.SelectionSet) context.Context {
 	rqCtx := &OperationContext{}
 	ctx = WithOperationContext(ctx, rqCtx)
 
-	root := &ResolverContext{
+	root := &FieldContext{
 		Field: CollectedField{
 			Selections: sel,
 		},
 	}
-	ctx = WithResolverContext(ctx, root)
+	ctx = WithFieldContext(ctx, root)
 
 	return ctx
 }

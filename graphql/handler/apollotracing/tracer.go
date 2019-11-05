@@ -52,7 +52,7 @@ func (a Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (res 
 	defer func() {
 		td.mu.Lock()
 		defer td.mu.Unlock()
-		fc := graphql.GetResolverContext(ctx)
+		fc := graphql.GetFieldContext(ctx)
 
 		end := graphql.Now()
 

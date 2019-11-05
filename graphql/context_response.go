@@ -62,7 +62,7 @@ func Recover(ctx context.Context, err interface{}) (userMessage error) {
 }
 
 // HasFieldError returns true if the given field has already errored
-func HasFieldError(ctx context.Context, rctx *ResolverContext) bool {
+func HasFieldError(ctx context.Context, rctx *FieldContext) bool {
 	c := getResponseContext(ctx)
 
 	c.errorsMu.Lock()
@@ -78,7 +78,7 @@ func HasFieldError(ctx context.Context, rctx *ResolverContext) bool {
 }
 
 // GetFieldErrors returns a list of errors that occurred in the given field
-func GetFieldErrors(ctx context.Context, rctx *ResolverContext) gqlerror.List {
+func GetFieldErrors(ctx context.Context, rctx *FieldContext) gqlerror.List {
 	c := getResponseContext(ctx)
 
 	c.errorsMu.Lock()

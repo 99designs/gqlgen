@@ -23,7 +23,7 @@ func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 	var sels []string
 
 	reqCtx := graphql.GetOperationContext(ctx)
-	fieldSelections := graphql.GetResolverContext(ctx).Field.Selections
+	fieldSelections := graphql.GetFieldContext(ctx).Field.Selections
 	for _, sel := range fieldSelections {
 		switch sel := sel.(type) {
 		case *ast.Field:

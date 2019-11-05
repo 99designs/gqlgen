@@ -20,9 +20,9 @@ func DefaultRecover(ctx context.Context, err interface{}) error {
 	return errors.New("internal system error")
 }
 
-var _ RequestContextMutator = RecoverFunc(nil)
+var _ OperationContextMutator = RecoverFunc(nil)
 
-func (f RecoverFunc) MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error {
+func (f RecoverFunc) MutateOperationContext(ctx context.Context, rc *OperationContext) *gqlerror.Error {
 	rc.Recover = f
 	return nil
 }

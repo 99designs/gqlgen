@@ -9,9 +9,9 @@ import (
 )
 
 func TestIntrospection(t *testing.T) {
-	rc := &graphql.RequestContext{
+	rc := &graphql.OperationContext{
 		DisableIntrospection: true,
 	}
-	require.Nil(t, Introspection{}.MutateRequestContext(context.Background(), rc))
+	require.Nil(t, Introspection{}.MutateOperationContext(context.Background(), rc))
 	require.Equal(t, false, rc.DisableIntrospection)
 }

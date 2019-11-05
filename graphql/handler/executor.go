@@ -11,12 +11,12 @@ import (
 )
 
 type executor struct {
-	operationMiddleware    graphql.OperationMiddleware
-	responseMiddleware     graphql.ResponseMiddleware
-	fieldMiddleware        graphql.FieldMiddleware
-	requestParamMutators   []graphql.RequestParameterMutator
-	requestContextMutators []graphql.RequestContextMutator
-	server                 *Server
+	operationMiddleware        graphql.OperationMiddleware
+	responseMiddleware         graphql.ResponseMiddleware
+	fieldMiddleware            graphql.FieldMiddleware
+	operationParameterMutators []graphql.OperationParameterMutator
+	operationContextMutators   []graphql.OperationContextMutator
+	server                     *Server
 }
 
 var _ graphql.GraphExecutor = executor{}
@@ -67,12 +67,12 @@ func newExecutor(s *Server) executor {
 	}
 
 	for _, p := range s.extensions {
-		if p, ok := p.(graphql.RequestParameterMutator); ok {
-			e.requestParamMutators = append(e.requestParamMutators, p)
+		if p, ok := p.(graphql.OperationParameterMutator); ok {
+			e.operationParameterMutators = append(e.operationParameterMutators, p)
 		}
 
-		if p, ok := p.(graphql.RequestContextMutator); ok {
-			e.requestContextMutators = append(e.requestContextMutators, p)
+		if p, ok := p.(graphql.OperationContextMutator); ok {
+			e.operationContextMutators = append(e.operationContextMutators, p)
 		}
 
 	}
@@ -80,8 +80,8 @@ func newExecutor(s *Server) executor {
 	return e
 }
 
-func (e executor) DispatchRequest(ctx context.Context, rc *graphql.RequestContext) (h graphql.ResponseHandler, resctx context.Context) {
-	ctx = graphql.WithRequestContext(ctx, rc)
+func (e executor) DispatchOperation(ctx context.Context, rc *graphql.OperationContext) (h graphql.ResponseHandler, resctx context.Context) {
+	ctx = graphql.WithOperationContext(ctx, rc)
 
 	var innerCtx context.Context
 	res := e.operationMiddleware(ctx, func(ctx context.Context) graphql.ResponseHandler {
@@ -115,14 +115,14 @@ func (e executor) DispatchRequest(ctx context.Context, rc *graphql.RequestContex
 	return res, innerCtx
 }
 
-func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawParams) (*graphql.RequestContext, gqlerror.List) {
+func (e executor) CreateOperationContext(ctx context.Context, params *graphql.RawParams) (*graphql.OperationContext, gqlerror.List) {
 	ctx = graphql.WithServerContext(ctx, e.server.es)
 
 	stats := graphql.Stats{
 		OperationStart: graphql.GetStartTime(ctx),
 	}
-	for _, p := range e.requestParamMutators {
-		if err := p.MutateRequestParameters(ctx, params); err != nil {
+	for _, p := range e.operationParameterMutators {
+		if err := p.MutateOperationParameters(ctx, params); err != nil {
 			return nil, gqlerror.List{err}
 		}
 	}
@@ -143,7 +143,7 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 	}
 	stats.Validation.End = graphql.Now()
 
-	rc := &graphql.RequestContext{
+	rc := &graphql.OperationContext{
 		RawQuery:             params.Query,
 		Variables:            vars,
 		OperationName:        params.OperationName,
@@ -156,8 +156,8 @@ func (e executor) CreateRequestContext(ctx context.Context, params *graphql.RawP
 		Stats:                stats,
 	}
 
-	for _, p := range e.requestContextMutators {
-		if err := p.MutateRequestContext(ctx, rc); err != nil {
+	for _, p := range e.operationContextMutators {
+		if err := p.MutateOperationContext(ctx, rc); err != nil {
 			return nil, gqlerror.List{err}
 		}
 	}

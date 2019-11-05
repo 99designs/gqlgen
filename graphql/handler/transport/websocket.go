@@ -198,13 +198,13 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 		return false
 	}
 
-	rc, err := c.exec.CreateRequestContext(ctx, params)
+	rc, err := c.exec.CreateOperationContext(ctx, params)
 	if err != nil {
 		c.sendError(message.ID, err...)
 		return false
 	}
 
-	ctx = graphql.WithRequestContext(ctx, rc)
+	ctx = graphql.WithOperationContext(ctx, rc)
 
 	if c.initPayload != nil {
 		ctx = withInitPayload(ctx, c.initPayload)
@@ -222,7 +222,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				c.sendError(message.ID, &gqlerror.Error{Message: userErr.Error()})
 			}
 		}()
-		responses, ctx := c.exec.DispatchRequest(ctx, rc)
+		responses, ctx := c.exec.DispatchOperation(ctx, rc)
 		for {
 			response := responses(ctx)
 			if response == nil {

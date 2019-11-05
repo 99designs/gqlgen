@@ -30,7 +30,7 @@ srv := httptest.NewServer(
 		NewExecutableSchema(Config{Resolvers: resolvers}),
 		handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
 			if !userForContext(ctx).IsAdmin {
-				graphql.GetRequestContext(ctx).DisableIntrospection = true
+				graphql.GetOperationContext(ctx).DisableIntrospection = true
 			}
 
 			return next(ctx)

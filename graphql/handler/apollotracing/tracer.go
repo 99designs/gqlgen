@@ -47,7 +47,7 @@ func New() graphql.HandlerExtension {
 }
 
 func (a ApolloTracing) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-	rc := graphql.GetRequestContext(ctx)
+	rc := graphql.GetOperationContext(ctx)
 	td, ok := graphql.GetExtension(ctx, "tracing").(*TracingExtension)
 	if !ok {
 		panic("missing tracing extension")
@@ -76,7 +76,7 @@ func (a ApolloTracing) InterceptField(ctx context.Context, next graphql.Resolver
 }
 
 func (a ApolloTracing) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-	rc := graphql.GetRequestContext(ctx)
+	rc := graphql.GetOperationContext(ctx)
 
 	start := rc.Stats.OperationStart
 

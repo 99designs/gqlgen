@@ -52,12 +52,12 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		return
 	}
 
-	rc, err := exec.CreateRequestContext(r.Context(), params)
+	rc, err := exec.CreateOperationContext(r.Context(), params)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		write.GraphqlErr(err...)
 		return
 	}
-	responses, ctx := exec.DispatchRequest(r.Context(), rc)
+	responses, ctx := exec.DispatchOperation(r.Context(), rc)
 	write(graphql.StatusResolverError, responses(ctx))
 }

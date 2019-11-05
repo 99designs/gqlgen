@@ -52,8 +52,8 @@ func (s *Server) SetQueryCache(cache graphql.Cache) {
 
 func (s *Server) Use(extension graphql.HandlerExtension) {
 	switch extension.(type) {
-	case graphql.RequestParameterMutator,
-		graphql.RequestContextMutator,
+	case graphql.OperationParameterMutator,
+		graphql.OperationContextMutator,
 		graphql.OperationInterceptor,
 		graphql.FieldInterceptor,
 		graphql.ResponseInterceptor:

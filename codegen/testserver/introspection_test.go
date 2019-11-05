@@ -68,7 +68,7 @@ func TestIntrospection(t *testing.T) {
 		c := client.New(handler.GraphQL(
 			NewExecutableSchema(Config{Resolvers: resolvers}),
 			handler.RequestMiddleware(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-				graphql.GetRequestContext(ctx).DisableIntrospection = true
+				graphql.GetOperationContext(ctx).DisableIntrospection = true
 
 				return next(ctx)
 			}),

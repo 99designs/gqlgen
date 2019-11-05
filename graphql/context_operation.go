@@ -7,7 +7,10 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-type RequestContext struct {
+// Deprecated: Please update all references to OperationContext instead
+type RequestContext = OperationContext
+
+type OperationContext struct {
 	RawQuery      string
 	Variables     map[string]interface{}
 	OperationName string
@@ -22,9 +25,9 @@ type RequestContext struct {
 	Stats Stats
 }
 
-const requestCtx key = "request_context"
+const operationCtx key = "operation_context"
 
-func (rc *RequestContext) Validate(ctx context.Context) error {
+func (rc *OperationContext) Validate(ctx context.Context) error {
 	if rc.Doc == nil {
 		return errors.New("field 'Doc' must be required")
 	}
@@ -47,28 +50,33 @@ func (rc *RequestContext) Validate(ctx context.Context) error {
 	return nil
 }
 
+// Deprecated: Please update all references to GetOperationContext instead
 func GetRequestContext(ctx context.Context) *RequestContext {
-	if val, ok := ctx.Value(requestCtx).(*RequestContext); ok {
+	return GetOperationContext(ctx)
+}
+
+func GetOperationContext(ctx context.Context) *OperationContext {
+	if val, ok := ctx.Value(operationCtx).(*OperationContext); ok {
 		return val
 	}
 	return nil
 }
 
-func WithRequestContext(ctx context.Context, rc *RequestContext) context.Context {
-	return context.WithValue(ctx, requestCtx, rc)
+func WithOperationContext(ctx context.Context, rc *OperationContext) context.Context {
+	return context.WithValue(ctx, operationCtx, rc)
 }
 
 // This is just a convenient wrapper method for CollectFields
 func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
 	resctx := GetResolverContext(ctx)
-	return CollectFields(GetRequestContext(ctx), resctx.Field.Selections, satisfies)
+	return CollectFields(GetOperationContext(ctx), resctx.Field.Selections, satisfies)
 }
 
 // CollectAllFields returns a slice of all GraphQL field names that were selected for the current resolver context.
 // The slice will contain the unique set of all field names requested regardless of fragment type conditions.
 func CollectAllFields(ctx context.Context) []string {
 	resctx := GetResolverContext(ctx)
-	collected := CollectFields(GetRequestContext(ctx), resctx.Field.Selections, nil)
+	collected := CollectFields(GetOperationContext(ctx), resctx.Field.Selections, nil)
 	uniq := make([]string, 0, len(collected))
 Next:
 	for _, f := range collected {
@@ -84,12 +92,12 @@ Next:
 
 // Errorf sends an error string to the client, passing it through the formatter.
 // Deprecated: use graphql.AddErrorf(ctx, err) instead
-func (c *RequestContext) Errorf(ctx context.Context, format string, args ...interface{}) {
+func (c *OperationContext) Errorf(ctx context.Context, format string, args ...interface{}) {
 	AddErrorf(ctx, format, args...)
 }
 
 // Error sends an error to the client, passing it through the formatter.
 // Deprecated: use graphql.AddError(ctx, err) instead
-func (c *RequestContext) Error(ctx context.Context, err error) {
+func (c *OperationContext) Error(ctx context.Context, err error) {
 	AddError(ctx, err)
 }

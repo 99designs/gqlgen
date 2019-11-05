@@ -8,11 +8,11 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
-func TestGetRequestContext(t *testing.T) {
-	require.Nil(t, GetRequestContext(context.Background()))
+func TestGetOperationContext(t *testing.T) {
+	require.Nil(t, GetOperationContext(context.Background()))
 
-	rc := &RequestContext{}
-	require.Equal(t, rc, GetRequestContext(WithRequestContext(context.Background(), rc)))
+	rc := &OperationContext{}
+	require.Equal(t, rc, GetOperationContext(WithOperationContext(context.Background(), rc)))
 }
 
 func TestCollectAllFields(t *testing.T) {

@@ -30,8 +30,8 @@ type (
 	}
 
 	GraphExecutor interface {
-		CreateRequestContext(ctx context.Context, params *RawParams) (*RequestContext, gqlerror.List)
-		DispatchRequest(ctx context.Context, rc *RequestContext) (ResponseHandler, context.Context)
+		CreateOperationContext(ctx context.Context, params *RawParams) (*OperationContext, gqlerror.List)
+		DispatchOperation(ctx context.Context, rc *OperationContext) (ResponseHandler, context.Context)
 	}
 
 	// HandlerExtension interface is entirely optional, see the list of possible hook points below
@@ -48,15 +48,15 @@ type (
 	// +------------------------------------------------------------------------+
 	HandlerExtension interface{}
 
-	// RequestParameterMutator is called before creating a request context. allows manipulating the raw query
+	// OperationParameterMutator is called before creating a request context. allows manipulating the raw query
 	// on the way in.
-	RequestParameterMutator interface {
-		MutateRequestParameters(ctx context.Context, request *RawParams) *gqlerror.Error
+	OperationParameterMutator interface {
+		MutateOperationParameters(ctx context.Context, request *RawParams) *gqlerror.Error
 	}
 
-	// RequestContextMutator is called after creating the request context, but before executing the root resolver.
-	RequestContextMutator interface {
-		MutateRequestContext(ctx context.Context, rc *RequestContext) *gqlerror.Error
+	// OperationContextMutator is called after creating the request context, but before executing the root resolver.
+	OperationContextMutator interface {
+		MutateOperationContext(ctx context.Context, rc *OperationContext) *gqlerror.Error
 	}
 
 	// OperationInterceptor is called for each incoming query, for basic requests the writer will be invoked once,

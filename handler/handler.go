@@ -51,12 +51,12 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		srv.AroundResponses(hook)
 	}
 	if cfg.complexityLimit != 0 {
-		srv.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.RequestContext) int {
+		srv.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
 			return cfg.complexityLimit
 		}))
 	} else if cfg.complexityLimitFunc != nil {
-		srv.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.RequestContext) int {
-			return cfg.complexityLimitFunc(graphql.WithRequestContext(ctx, rc))
+		srv.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
+			return cfg.complexityLimitFunc(graphql.WithOperationContext(ctx, rc))
 		}))
 	}
 	if !cfg.disableIntrospection {

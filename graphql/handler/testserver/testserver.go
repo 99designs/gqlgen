@@ -43,7 +43,7 @@ func New() *TestServer {
 
 	srv.Server = handler.New(&graphql.ExecutableSchemaMock{
 		ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
-			rc := graphql.GetRequestContext(ctx)
+			rc := graphql.GetOperationContext(ctx)
 			switch rc.Operation.Operation {
 			case ast.Query:
 				ran := false
@@ -63,7 +63,7 @@ func New() *TestServer {
 							},
 						},
 					})
-					res, err := graphql.GetRequestContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+					res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 						return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
 					})
 					if err != nil {

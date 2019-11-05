@@ -11,11 +11,11 @@ import (
 // ComplexityLimit allows you to define a limit on query complexity
 //
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
-type ComplexityLimit func(ctx context.Context, rc *graphql.RequestContext) int
+type ComplexityLimit func(ctx context.Context, rc *graphql.OperationContext) int
 
-var _ graphql.RequestContextMutator = ComplexityLimit(func(ctx context.Context, rc *graphql.RequestContext) int { return 0 })
+var _ graphql.OperationContextMutator = ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int { return 0 })
 
-func (c ComplexityLimit) MutateRequestContext(ctx context.Context, rc *graphql.RequestContext) *gqlerror.Error {
+func (c ComplexityLimit) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
 	es := graphql.GetServerContext(ctx)
 	op := rc.Doc.Operations.ForName(rc.OperationName)
 	complexity := complexity.Calculate(es, op, rc.Variables)

@@ -19,11 +19,11 @@ type ExecutableSchema interface {
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types
 // passed through satisfies. Providing an empty or nil slice for satisfies will return collect all fields regardless of fragment
 // type conditions.
-func CollectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
+func CollectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
 	return collectFields(reqCtx, selSet, satisfies, map[string]bool{})
 }
 
-func collectFields(reqCtx *RequestContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
+func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
 	groupedFields := make([]CollectedField, 0, len(selSet))
 
 	for _, sel := range selSet {

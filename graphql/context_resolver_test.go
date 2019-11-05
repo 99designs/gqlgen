@@ -19,8 +19,8 @@ func testContext(sel ast.SelectionSet) context.Context {
 
 	ctx := context.Background()
 
-	rqCtx := &RequestContext{}
-	ctx = WithRequestContext(ctx, rqCtx)
+	rqCtx := &OperationContext{}
+	ctx = WithOperationContext(ctx, rqCtx)
 
 	root := &ResolverContext{
 		Field: CollectedField{

@@ -12,7 +12,7 @@ type (
 	ApolloTracing struct{}
 
 	TracingExtension struct {
-		mu         sync.Mutex    `json:"-"`
+		mu         sync.Mutex
 		Version    int           `json:"version"`
 		StartTime  time.Time     `json:"startTime"`
 		EndTime    time.Time     `json:"endTime"`

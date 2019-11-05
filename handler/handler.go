@@ -208,10 +208,10 @@ type apqAdapter struct {
 }
 
 func (a apqAdapter) Get(key string) (value interface{}, ok bool) {
-	return a.Get(key)
+	return a.PersistedQueryCache.Get(context.Background(), key)
 }
 func (a apqAdapter) Add(key string, value interface{}) {
-	a.Add(key, value)
+	a.PersistedQueryCache.Add(context.Background(), key, value.(string))
 }
 
 type PersistedQueryCache interface {

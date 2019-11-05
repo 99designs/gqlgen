@@ -107,9 +107,7 @@ func (e executor) DispatchRequest(ctx context.Context, rc *graphql.RequestContex
 				return nil
 			}
 
-			for _, err := range graphql.GetErrors(ctx) {
-				resp.Errors = append(resp.Errors, err)
-			}
+			resp.Errors = append(resp.Errors, graphql.GetErrors(ctx)...)
 			return resp
 		}
 	})

@@ -16,7 +16,7 @@ type GET struct{}
 
 var _ graphql.Transport = GET{}
 
-func (H GET) Supports(r *http.Request) bool {
+func (h GET) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false
 	}
@@ -24,7 +24,7 @@ func (H GET) Supports(r *http.Request) bool {
 	return r.Method == "GET"
 }
 
-func (H GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	raw := &graphql.RawParams{
 		Query:         r.URL.Query().Get("query"),
 		OperationName: r.URL.Query().Get("operationName"),

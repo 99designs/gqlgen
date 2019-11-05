@@ -28,7 +28,7 @@ func TestApolloTracing(t *testing.T) {
 	}
 	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &respData))
 
-	tracing := respData.Extensions.Tracing
+	tracing := &respData.Extensions.Tracing
 
 	require.EqualValues(t, 1, tracing.Version)
 

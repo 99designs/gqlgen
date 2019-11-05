@@ -14,7 +14,7 @@ type POST struct{}
 
 var _ graphql.Transport = POST{}
 
-func (H POST) Supports(r *http.Request) bool {
+func (h POST) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false
 	}
@@ -27,7 +27,7 @@ func (H POST) Supports(r *http.Request) bool {
 	return r.Method == "POST" && mediaType == "application/json"
 }
 
-func (H POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	w.Header().Set("Content-Type", "application/json")
 
 	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {

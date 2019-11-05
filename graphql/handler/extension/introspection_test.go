@@ -12,6 +12,6 @@ func TestIntrospection(t *testing.T) {
 	rc := &graphql.RequestContext{
 		DisableIntrospection: true,
 	}
-	Introspection{}.MutateRequestContext(context.Background(), rc)
+	require.Nil(t, Introspection{}.MutateRequestContext(context.Background(), rc))
 	require.Equal(t, false, rc.DisableIntrospection)
 }

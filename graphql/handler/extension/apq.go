@@ -10,10 +10,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-const (
-	errPersistedQueryNotSupported = "PersistedQueryNotSupported"
-	errPersistedQueryNotFound     = "PersistedQueryNotFound"
-)
+const errPersistedQueryNotFound = "PersistedQueryNotFound"
 
 // AutomaticPersistedQuery saves client upload by optimistically sending only the hashes of queries, if the server
 // does not yet know what the query is for the hash it will respond telling the client to send the query along with the
@@ -34,11 +31,11 @@ func (a AutomaticPersistedQuery) MutateRequest(ctx context.Context, rawParams *g
 	}
 
 	if err := mapstructure.Decode(rawParams.Extensions["persistedQuery"], &extension); err != nil {
-		return errors.New("Invalid APQ extension data")
+		return errors.New("invalid APQ extension data")
 	}
 
 	if extension.Version != 1 {
-		return errors.New("Unsupported APQ version")
+		return errors.New("unsupported APQ version")
 	}
 
 	if rawParams.Query == "" {
@@ -51,7 +48,7 @@ func (a AutomaticPersistedQuery) MutateRequest(ctx context.Context, rawParams *g
 	} else {
 		// client sent optimistic query hash with query string, verify and store it
 		if computeQueryHash(rawParams.Query) != extension.Sha256 {
-			return errors.New("Provided APQ hash does not match query")
+			return errors.New("provided APQ hash does not match query")
 		}
 		a.Cache.Add(extension.Sha256, rawParams.Query)
 	}

@@ -98,7 +98,7 @@ func TestAPQ(t *testing.T) {
 		}
 
 		err := AutomaticPersistedQuery{graphql.MapCache{}}.MutateRequest(context.Background(), params)
-		require.EqualError(t, err, "Invalid APQ extension data")
+		require.EqualError(t, err, "invalid APQ extension data")
 	})
 
 	t.Run("with invalid extension version", func(t *testing.T) {
@@ -110,7 +110,7 @@ func TestAPQ(t *testing.T) {
 			},
 		}
 		err := AutomaticPersistedQuery{graphql.MapCache{}}.MutateRequest(context.Background(), params)
-		require.EqualError(t, err, "Unsupported APQ version")
+		require.EqualError(t, err, "unsupported APQ version")
 	})
 
 	t.Run("with hash mismatch", func(t *testing.T) {
@@ -125,6 +125,6 @@ func TestAPQ(t *testing.T) {
 		}
 
 		err := AutomaticPersistedQuery{graphql.MapCache{}}.MutateRequest(context.Background(), params)
-		require.EqualError(t, err, "Provided APQ hash does not match query")
+		require.EqualError(t, err, "provided APQ hash does not match query")
 	})
 }

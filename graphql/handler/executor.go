@@ -152,7 +152,6 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 		DisableIntrospection: true,
 		Recover:              graphql.DefaultRecover,
 		ResolverMiddleware:   e.fieldMiddleware,
-		DirectiveMiddleware:  nil, //todo fixme
 		Stats:                stats,
 	}
 

@@ -4,14 +4,6 @@ import (
 	"context"
 )
 
-func DefaultResolverMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
-	return next(ctx)
-}
-
-func DefaultDirectiveMiddleware(ctx context.Context, next Resolver) (res interface{}, err error) {
-	return next(ctx)
-}
-
 type key string
 
 const resolverCtx key = "resolver_context"

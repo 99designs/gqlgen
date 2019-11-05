@@ -20,35 +20,31 @@ type OperationContext struct {
 	DisableIntrospection bool
 	Recover              RecoverFunc
 	ResolverMiddleware   FieldMiddleware
-	DirectiveMiddleware  FieldMiddleware
 
 	Stats Stats
 }
 
-const operationCtx key = "operation_context"
-
-func (rc *OperationContext) Validate(ctx context.Context) error {
-	if rc.Doc == nil {
-		return errors.New("field 'Doc' must be required")
+func (c *OperationContext) Validate(ctx context.Context) error {
+	if c.Doc == nil {
+		return errors.New("field 'Doc'is required")
 	}
-	if rc.RawQuery == "" {
-		return errors.New("field 'RawQuery' must be required")
+	if c.RawQuery == "" {
+		return errors.New("field 'RawQuery' is required")
 	}
-	if rc.Variables == nil {
-		rc.Variables = make(map[string]interface{})
+	if c.Variables == nil {
+		c.Variables = make(map[string]interface{})
 	}
-	if rc.ResolverMiddleware == nil {
-		rc.ResolverMiddleware = DefaultResolverMiddleware
+	if c.ResolverMiddleware == nil {
+		return errors.New("field 'ResolverMiddleware' is required")
 	}
-	if rc.DirectiveMiddleware == nil {
-		rc.DirectiveMiddleware = DefaultDirectiveMiddleware
-	}
-	if rc.Recover == nil {
-		rc.Recover = DefaultRecover
+	if c.Recover == nil {
+		c.Recover = DefaultRecover
 	}
 
 	return nil
 }
+
+const operationCtx key = "operation_context"
 
 // Deprecated: Please update all references to GetOperationContext instead
 func GetRequestContext(ctx context.Context) *RequestContext {

@@ -90,6 +90,16 @@ func (s *Server) getTransport(r *http.Request) graphql.Transport {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			err := s.errorPresenter(r.Context(), s.recoverFunc(r.Context(), err))
+			resp := &graphql.Response{Errors: []*gqlerror.Error{err}}
+			b, _ := json.Marshal(resp)
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write(b)
+		}
+	}()
+
 	r = r.WithContext(graphql.StartOperationTrace(r.Context()))
 
 	transport := s.getTransport(r)

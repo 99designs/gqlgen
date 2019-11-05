@@ -4,10 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/handler"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPanics(t *testing.T) {

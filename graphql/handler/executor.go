@@ -80,12 +80,18 @@ func newExecutor(s *Server) executor {
 	return e
 }
 
-func (e executor) DispatchRequest(ctx context.Context, rc *graphql.RequestContext) (graphql.ResponseHandler, context.Context) {
+func (e executor) DispatchRequest(ctx context.Context, rc *graphql.RequestContext) (h graphql.ResponseHandler, resctx context.Context) {
+	ctx = graphql.WithRequestContext(ctx, rc)
+
 	var innerCtx context.Context
-	res := e.operationMiddleware(graphql.WithRequestContext(ctx, rc), func(ctx context.Context) graphql.ResponseHandler {
+	res := e.operationMiddleware(ctx, func(ctx context.Context) graphql.ResponseHandler {
 		innerCtx = ctx
 
-		responses := e.server.es.Exec(ctx)
+		tmpResponseContext := graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
+		responses := e.server.es.Exec(tmpResponseContext)
+		if errs := graphql.GetErrors(tmpResponseContext); errs != nil {
+			return graphql.OneShot(&graphql.Response{Errors: errs})
+		}
 
 		return func(ctx context.Context) *graphql.Response {
 			ctx = graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)

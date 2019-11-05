@@ -229,11 +229,6 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 				break
 			}
 
-			msgType := dataMsg
-			if len(response.Errors) > 0 {
-				msgType = errorMsg
-			}
-
 			b, err := json.Marshal(response)
 			if err != nil {
 				panic(err)
@@ -241,7 +236,7 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 			c.write(&operationMessage{
 				Payload: b,
 				ID:      message.ID,
-				Type:    msgType,
+				Type:    dataMsg,
 			})
 		}
 		c.write(&operationMessage{ID: message.ID, Type: completeMsg})

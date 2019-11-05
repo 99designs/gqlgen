@@ -112,101 +112,79 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	return 0, false
 }
 
-func (e *executableSchema) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	{{- if .QueryRoot }}
-		ec := executionContext{graphql.GetRequestContext(ctx), e}
+func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
+	rc := graphql.GetRequestContext(ctx)
+	ec := executionContext{rc, e}
+	first := true
 
-		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		{{ if .Directives.LocationDirectives "QUERY" -}}
-			data := ec._queryMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
-				return ec._{{.QueryRoot.Name}}(ctx, op.SelectionSet), nil
-			})
-		{{- else -}}
-			data := ec._{{.QueryRoot.Name}}(ctx, op.SelectionSet)
-		{{- end }}
+	switch rc.Operation.Operation {
+	{{- if .QueryRoot }} case ast.Query:
+		return func(ctx context.Context) *graphql.Response {
+			if !first { return nil }
+			first = false
+			{{ if .Directives.LocationDirectives "QUERY" -}}
+				data := ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
+					return ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet), nil
+				})
+			{{- else -}}
+				data := ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet)
+			{{- end }}
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
-			return buf.Bytes()
-		})
-
-		return &graphql.Response{
-			Data:       buf,
-			Errors:     ec.Errors,
-			Extensions: ec.Extensions,
-		}
-	{{- else }}
-		return graphql.ErrorResponse(ctx, "queries are not supported")
-	{{- end }}
-}
-
-func (e *executableSchema) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	{{- if .MutationRoot }}
-		ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-		buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-		{{ if .Directives.LocationDirectives "MUTATION" -}}
-			data := ec._mutationMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
-				return ec._{{.MutationRoot.Name}}(ctx, op.SelectionSet), nil
-			})
-		{{- else -}}
-			data := ec._{{.MutationRoot.Name}}(ctx, op.SelectionSet)
-		{{- end }}
-			var buf bytes.Buffer
-			data.MarshalGQL(&buf)
-			return buf.Bytes()
-		})
-
-		return &graphql.Response{
-			Data:       buf,
-			Errors:     ec.Errors,
-			Extensions: ec.Extensions,
-		}
-	{{- else }}
-		return graphql.ErrorResponse(ctx, "mutations are not supported")
-	{{- end }}
-}
-
-func (e *executableSchema) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	{{- if .SubscriptionRoot }}
-		ec := executionContext{graphql.GetRequestContext(ctx), e}
-
-		{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
-			next := ec._subscriptionMiddleware(ctx, op, func(ctx context.Context) (interface{}, error){
-				return ec._{{.SubscriptionRoot.Name}}(ctx, op.SelectionSet),nil
-			})
-		{{- else -}}
-			next := ec._{{.SubscriptionRoot.Name}}(ctx, op.SelectionSet)
-		{{- end }}
-		if ec.Errors != nil {
-			return graphql.OneShot(&graphql.Response{Data: []byte("null"), Errors: ec.Errors})
-		}
-
-		var buf bytes.Buffer
-		return func() *graphql.Response {
-			buf := ec.RequestMiddleware(ctx, func(ctx context.Context) []byte {
-				buf.Reset()
-				data := next()
-
-				if data == nil {
-					return nil
-				}
-				data.MarshalGQL(&buf)
-				return buf.Bytes()
-			})
-
-			if buf == nil {
-				return nil
-			}
 
 			return &graphql.Response{
-				Data:       buf,
-				Errors:     ec.Errors,
-				Extensions: ec.Extensions,
+				Data:       buf.Bytes(),
 			}
 		}
-	{{- else }}
-		return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
-	{{- end }}
+	{{ end }}
+
+	{{- if .MutationRoot }} case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first { return nil }
+			first = false
+			{{ if .Directives.LocationDirectives "MUTATION" -}}
+				data := ec._mutationMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
+					return ec._{{.MutationRoot.Name}}(ctx, rc.Operation.SelectionSet), nil
+				})
+			{{- else -}}
+				data := ec._{{.MutationRoot.Name}}(ctx, rc.Operation.SelectionSet)
+			{{- end }}
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data:       buf.Bytes(),
+			}
+		}
+	{{ end }}
+
+	{{- if .SubscriptionRoot }} case ast.Subscription:
+		{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
+			next := ec._subscriptionMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
+				return ec._{{.SubscriptionRoot.Name}}(ctx, rc.Operation.SelectionSet),nil
+			})
+		{{- else -}}
+			next := ec._{{.SubscriptionRoot.Name}}(ctx, rc.Operation.SelectionSet)
+		{{- end }}
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data:       buf.Bytes(),
+			}
+		}
+	{{ end }}
+	default:
+		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
+	}
 }
 
 type executionContext struct {

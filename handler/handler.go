@@ -45,12 +45,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		srv.SetErrorPresenter(cfg.errorPresenter)
 	}
 	for _, hook := range cfg.fieldHooks {
-		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			if !graphql.GetResolverContext(ctx).IsMethod {
-				return next(ctx)
-			}
-			return hook(ctx, next)
-		})
+		srv.AroundFields(hook)
 	}
 	for _, hook := range cfg.requestHooks {
 		srv.AroundResponses(hook)

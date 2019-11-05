@@ -1,7 +1,6 @@
 package complexity
 
 import (
-	"context"
 	"math"
 	"testing"
 
@@ -50,7 +49,24 @@ var schema = gqlparser.MustLoadSchema(
 func requireComplexity(t *testing.T, source string, complexity int) {
 	t.Helper()
 	query := gqlparser.MustLoadQuery(schema, source)
-	es := &executableSchemaStub{}
+
+	es := &graphql.ExecutableSchemaMock{
+		ComplexityFunc: func(typeName, field string, childComplexity int, args map[string]interface{}) (int, bool) {
+			switch typeName + "." + field {
+			case "ExpensiveItem.name":
+				return 5, true
+			case "Query.list", "Item.list":
+				return int(args["size"].(int64)) * childComplexity, true
+			case "Query.customObject":
+				return 1, true
+			}
+			return 0, false
+		},
+		SchemaFunc: func() *ast.Schema {
+			return schema
+		},
+	}
+
 	actualComplexity := Calculate(es, query.Operations[0], nil)
 	require.Equal(t, complexity, actualComplexity)
 }
@@ -196,37 +212,4 @@ func TestCalculate(t *testing.T) {
 		`
 		requireComplexity(t, query, math.MaxInt64)
 	})
-}
-
-type executableSchemaStub struct {
-}
-
-var _ graphql.ExecutableSchema = &executableSchemaStub{}
-
-func (e *executableSchemaStub) Schema() *ast.Schema {
-	return schema
-}
-
-func (e *executableSchemaStub) Complexity(typeName, field string, childComplexity int, args map[string]interface{}) (int, bool) {
-	switch typeName + "." + field {
-	case "ExpensiveItem.name":
-		return 5, true
-	case "Query.list", "Item.list":
-		return int(args["size"].(int64)) * childComplexity, true
-	case "Query.customObject":
-		return 1, true
-	}
-	return 0, false
-}
-
-func (e *executableSchemaStub) Query(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	panic("Query should never be called by complexity calculations")
-}
-
-func (e *executableSchemaStub) Mutation(ctx context.Context, op *ast.OperationDefinition) *graphql.Response {
-	panic("Mutation should never be called by complexity calculations")
-}
-
-func (e *executableSchemaStub) Subscription(ctx context.Context, op *ast.OperationDefinition) func() *graphql.Response {
-	panic("Subscription should never be called by complexity calculations")
 }

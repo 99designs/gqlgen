@@ -18,11 +18,9 @@ func TestResponseExtension(t *testing.T) {
 
 	srv := handler.GraphQL(
 		NewExecutableSchema(Config{Resolvers: resolvers}),
-		handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-			rctx := graphql.GetRequestContext(ctx)
-			if err := rctx.RegisterExtension("example", "value"); err != nil {
-				panic(err)
-			}
+		handler.RequestMiddleware(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			graphql.RegisterExtension(ctx, "example", "value")
+
 			return next(ctx)
 		}),
 	)

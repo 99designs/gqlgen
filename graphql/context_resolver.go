@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+	"time"
 )
 
 type key string
@@ -22,6 +23,20 @@ type ResolverContext struct {
 	Result interface{}
 	// IsMethod indicates if the resolver is a method
 	IsMethod bool
+
+	// Stats collected while executing this field
+	Stats FieldStats
+}
+
+type FieldStats struct {
+	// When field execution started
+	Started time.Time
+
+	// When argument marshaling finished
+	ArgumentsCompleted time.Time
+
+	// When the field completed running all middleware. Not available inside field middleware!
+	Completed time.Time
 }
 
 func (r *ResolverContext) Path() []interface{} {

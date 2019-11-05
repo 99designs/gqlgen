@@ -49,8 +49,6 @@ func (a Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (res 
 		panic("missing tracing extension")
 	}
 
-	start := graphql.Now()
-
 	defer func() {
 		td.mu.Lock()
 		defer td.mu.Unlock()
@@ -63,8 +61,8 @@ func (a Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (res 
 			ParentType:  fc.Object,
 			FieldName:   fc.Field.Name,
 			ReturnType:  fc.Field.Definition.Type.String(),
-			StartOffset: start.Sub(rc.Stats.OperationStart),
-			Duration:    end.Sub(start),
+			StartOffset: fc.Stats.Started.Sub(rc.Stats.OperationStart),
+			Duration:    end.Sub(fc.Stats.Started),
 		})
 	}()
 

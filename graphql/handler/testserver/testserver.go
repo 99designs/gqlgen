@@ -62,6 +62,9 @@ func New() *TestServer {
 								Definition: schema.Types["Query"].Fields.ForName("name"),
 							},
 						},
+						Stats: graphql.FieldStats{
+							Started: graphql.Now(),
+						},
 					})
 					res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
 						return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil

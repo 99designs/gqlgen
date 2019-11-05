@@ -5,19 +5,20 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
 	{{- end }}
-
-	defer func () {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = {{ $null }}
-		}
-	}()
 	rctx := &graphql.ResolverContext{
 		Object: {{$object.Name|quote}},
 		Field: field,
 		Args:  nil,
 		IsMethod: {{or $field.IsMethod $field.IsResolver}},
+		Stats: graphql.FieldStats{Started: graphql.Now()},
 	}
+	defer func () {
+		rctx.Stats.Completed = graphql.Now()
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = {{ $null }}
+		}
+	}()
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	{{- if $field.Args }}
 		rawArgs := field.ArgumentMap(ec.Variables)
@@ -28,6 +29,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		}
 		rctx.Args = args
 	{{- end }}
+	rctx.Stats.ArgumentsCompleted = graphql.Now()
 	{{- if  $.Directives.LocationDirectives "FIELD" }}
 		resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			{{ template "field" $field }}

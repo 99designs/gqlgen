@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	ApolloTracing struct{}
+	Tracer struct{}
 
 	TracingExtension struct {
 		mu         sync.Mutex
@@ -39,14 +39,10 @@ type (
 	}
 )
 
-var _ graphql.ResponseInterceptor = ApolloTracing{}
-var _ graphql.FieldInterceptor = ApolloTracing{}
+var _ graphql.ResponseInterceptor = Tracer{}
+var _ graphql.FieldInterceptor = Tracer{}
 
-func New() graphql.HandlerExtension {
-	return &ApolloTracing{}
-}
-
-func (a ApolloTracing) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+func (a Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 	rc := graphql.GetOperationContext(ctx)
 	td, ok := graphql.GetExtension(ctx, "tracing").(*TracingExtension)
 	if !ok {
@@ -75,7 +71,7 @@ func (a ApolloTracing) InterceptField(ctx context.Context, next graphql.Resolver
 	return next(ctx)
 }
 
-func (a ApolloTracing) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	rc := graphql.GetOperationContext(ctx)
 
 	start := rc.Stats.OperationStart

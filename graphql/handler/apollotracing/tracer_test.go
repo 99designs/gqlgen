@@ -17,7 +17,7 @@ import (
 func TestApolloTracing(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
-	h.Use(apollotracing.New())
+	h.Use(apollotracing.Tracer{})
 
 	resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 	assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())

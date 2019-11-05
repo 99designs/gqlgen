@@ -1,4 +1,4 @@
-package extension
+package extension_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
@@ -15,7 +16,7 @@ import (
 
 func TestHandlerComplexity(t *testing.T) {
 	h := testserver.New()
-	h.Use(ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
+	h.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
 		if rc.RawQuery == "{ ok: name }" {
 			return 4
 		}

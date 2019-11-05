@@ -5,8 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/vektah/gqlparser/gqlerror"
 )
 
@@ -32,6 +37,28 @@ func New(es graphql.ExecutableSchema) *Server {
 	}
 	s.exec = newExecutor(s)
 	return s
+}
+
+func NewDefaultServer(es graphql.ExecutableSchema) *Server {
+	srv := New(es)
+
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+	})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{})
+
+	srv.SetQueryCache(lru.New(100))
+
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New(100),
+	})
+	srv.Use(apollotracing.Tracer{})
+
+	return srv
 }
 
 func (s *Server) AddTransport(transport graphql.Transport) {

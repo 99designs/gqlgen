@@ -10,9 +10,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
 )
 
+// Deprecated: switch to graphql/handler.New
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	var cfg Config
 
@@ -68,6 +70,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	return srv.ServeHTTP
 }
 
+// Deprecated: switch to graphql/handler.New
 type Config struct {
 	cacheSize                       int
 	upgrader                        websocket.Upgrader
@@ -85,14 +88,17 @@ type Config struct {
 	apqCache                        PersistedQueryCache
 }
 
+// Deprecated: switch to graphql/handler.New
 type Option func(cfg *Config)
 
+// Deprecated: switch to graphql/handler.New
 func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 	return func(cfg *Config) {
 		cfg.upgrader = upgrader
 	}
 }
 
+// Deprecated: switch to graphql/handler.New
 func RecoverFunc(recover graphql.RecoverFunc) Option {
 	return func(cfg *Config) {
 		cfg.recover = recover
@@ -102,6 +108,7 @@ func RecoverFunc(recover graphql.RecoverFunc) Option {
 // ErrorPresenter transforms errors found while resolving into errors that will be returned to the user. It provides
 // a good place to add any extra fields, like error.type, that might be desired by your frontend. Check the default
 // implementation in graphql.DefaultErrorPresenter for an example.
+// Deprecated: switch to graphql/handler.New
 func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 	return func(cfg *Config) {
 		cfg.errorPresenter = f
@@ -110,6 +117,7 @@ func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 
 // IntrospectionEnabled = false will forbid clients from calling introspection endpoints. Can be useful in prod when you dont
 // want clients introspecting the full schema.
+// Deprecated: switch to graphql/handler.New
 func IntrospectionEnabled(enabled bool) Option {
 	return func(cfg *Config) {
 		cfg.disableIntrospection = !enabled
@@ -118,6 +126,7 @@ func IntrospectionEnabled(enabled bool) Option {
 
 // ComplexityLimit sets a maximum query complexity that is allowed to be executed.
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
+// Deprecated: switch to graphql/handler.New
 func ComplexityLimit(limit int) Option {
 	return func(cfg *Config) {
 		cfg.complexityLimit = limit
@@ -127,6 +136,7 @@ func ComplexityLimit(limit int) Option {
 // ComplexityLimitFunc allows you to define a function to dynamically set the maximum query complexity that is allowed
 // to be executed.
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
+// Deprecated: switch to graphql/handler.New
 func ComplexityLimitFunc(complexityLimitFunc func(ctx context.Context) int) Option {
 	return func(cfg *Config) {
 		cfg.complexityLimitFunc = complexityLimitFunc
@@ -135,6 +145,7 @@ func ComplexityLimitFunc(complexityLimitFunc func(ctx context.Context) int) Opti
 
 // ResolverMiddleware allows you to define a function that will be called around every resolver,
 // useful for logging.
+// Deprecated: switch to graphql/handler.New
 func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 	return func(cfg *Config) {
 		cfg.fieldHooks = append(cfg.fieldHooks, middleware)
@@ -143,6 +154,7 @@ func ResolverMiddleware(middleware graphql.FieldMiddleware) Option {
 
 // RequestMiddleware allows you to define a function that will be called around the root request,
 // after the query has been parsed. This is useful for logging
+// Deprecated: switch to graphql/handler.New
 func RequestMiddleware(middleware graphql.ResponseMiddleware) Option {
 	return func(cfg *Config) {
 		cfg.requestHooks = append(cfg.requestHooks, middleware)
@@ -151,6 +163,7 @@ func RequestMiddleware(middleware graphql.ResponseMiddleware) Option {
 
 // WebsocketInitFunc is called when the server receives connection init message from the client.
 // This can be used to check initial payload to see whether to accept the websocket connection.
+// Deprecated: switch to graphql/handler.New
 func WebsocketInitFunc(websocketInitFunc transport.WebsocketInitFunc) Option {
 	return func(cfg *Config) {
 		cfg.websocketInitFunc = websocketInitFunc
@@ -159,6 +172,7 @@ func WebsocketInitFunc(websocketInitFunc transport.WebsocketInitFunc) Option {
 
 // CacheSize sets the maximum size of the query cache.
 // If size is less than or equal to 0, the cache is disabled.
+// Deprecated: switch to graphql/handler.New
 func CacheSize(size int) Option {
 	return func(cfg *Config) {
 		cfg.cacheSize = size
@@ -167,6 +181,7 @@ func CacheSize(size int) Option {
 
 // UploadMaxSize sets the maximum number of bytes used to parse a request body
 // as multipart/form-data.
+// Deprecated: switch to graphql/handler.New
 func UploadMaxSize(size int64) Option {
 	return func(cfg *Config) {
 		cfg.uploadMaxSize = size
@@ -176,6 +191,7 @@ func UploadMaxSize(size int64) Option {
 // UploadMaxMemory sets the maximum number of bytes used to parse a request body
 // as multipart/form-data in memory, with the remainder stored on disk in
 // temporary files.
+// Deprecated: switch to graphql/handler.New
 func UploadMaxMemory(size int64) Option {
 	return func(cfg *Config) {
 		cfg.uploadMaxMemory = size
@@ -186,6 +202,7 @@ func UploadMaxMemory(size int64) Option {
 // By default, keepalive is enabled with a DefaultConnectionKeepAlivePingInterval
 // duration. Set handler.connectionKeepAlivePingInterval = 0 to disable keepalive
 // altogether.
+// Deprecated: switch to graphql/handler.New
 func WebsocketKeepAliveDuration(duration time.Duration) Option {
 	return func(cfg *Config) {
 		cfg.connectionKeepAlivePingInterval = duration
@@ -193,6 +210,7 @@ func WebsocketKeepAliveDuration(duration time.Duration) Option {
 }
 
 // Add cache that will hold queries for automatic persisted queries (APQ)
+// Deprecated: switch to graphql/handler.New
 func EnablePersistedQueryCache(cache PersistedQueryCache) Option {
 	return func(cfg *Config) {
 		cfg.apqCache = cache
@@ -218,3 +236,11 @@ type PersistedQueryCache interface {
 	Add(ctx context.Context, hash string, query string)
 	Get(ctx context.Context, hash string) (string, bool)
 }
+
+// Deprecated: use playground.Handler instead
+func Playground(title string, endpoint string) http.HandlerFunc {
+	return playground.Handler(title, endpoint)
+}
+
+// Deprecated: use transport.InitPayload instead
+type InitPayload = transport.InitPayload

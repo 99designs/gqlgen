@@ -65,6 +65,7 @@ type Stub struct {
 		DirectiveUnimplemented           func(ctx context.Context) (*string, error)
 		EmbeddedCase1                    func(ctx context.Context) (*EmbeddedCase1, error)
 		EmbeddedCase2                    func(ctx context.Context) (*EmbeddedCase2, error)
+		EmbeddedCase3                    func(ctx context.Context) (*EmbeddedCase3, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
@@ -270,6 +271,9 @@ func (r *stubQuery) EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error) {
 }
 func (r *stubQuery) EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error) {
 	return r.QueryResolver.EmbeddedCase2(ctx)
+}
+func (r *stubQuery) EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error) {
+	return r.QueryResolver.EmbeddedCase3(ctx)
 }
 func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 	return r.QueryResolver.Shapes(ctx)

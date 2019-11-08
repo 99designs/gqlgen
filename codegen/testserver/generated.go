@@ -117,6 +117,10 @@ type ComplexityRoot struct {
 		UnexportedEmbeddedPointerExportedMethod func(childComplexity int) int
 	}
 
+	EmbeddedCase3 struct {
+		UnexportedEmbeddedInterfaceExportedMethod func(childComplexity int) int
+	}
+
 	EmbeddedDefaultScalar struct {
 		Value func(childComplexity int) int
 	}
@@ -234,6 +238,7 @@ type ComplexityRoot struct {
 		DirectiveUnimplemented           func(childComplexity int) int
 		EmbeddedCase1                    func(childComplexity int) int
 		EmbeddedCase2                    func(childComplexity int) int
+		EmbeddedCase3                    func(childComplexity int) int
 		ErrorBubble                      func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
@@ -378,6 +383,7 @@ type QueryResolver interface {
 	DirectiveUnimplemented(ctx context.Context) (*string, error)
 	EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error)
 	EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error)
+	EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error)
 	Shapes(ctx context.Context) ([]Shape, error)
 	NoShape(ctx context.Context) (Shape, error)
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
@@ -528,6 +534,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod(childComplexity), true
+
+	case "EmbeddedCase3.unexportedEmbeddedInterfaceExportedMethod":
+		if e.complexity.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod == nil {
+			break
+		}
+
+		return e.complexity.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod(childComplexity), true
 
 	case "EmbeddedDefaultScalar.value":
 		if e.complexity.EmbeddedDefaultScalar.Value == nil {
@@ -965,6 +978,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.EmbeddedCase2(childComplexity), true
+
+	case "Query.embeddedCase3":
+		if e.complexity.Query.EmbeddedCase3 == nil {
+			break
+		}
+
+		return e.complexity.Query.EmbeddedCase3(childComplexity), true
 
 	case "Query.errorBubble":
 		if e.complexity.Query.ErrorBubble == nil {
@@ -1562,6 +1582,7 @@ type ObjectDirectivesWithCustomGoModel {
 	&ast.Source{Name: "embedded.graphql", Input: `extend type Query {
     embeddedCase1: EmbeddedCase1
     embeddedCase2: EmbeddedCase2
+    embeddedCase3: EmbeddedCase3
 }
 
 type EmbeddedCase1 @goModel(model:"testserver.EmbeddedCase1") {
@@ -1570,6 +1591,10 @@ type EmbeddedCase1 @goModel(model:"testserver.EmbeddedCase1") {
 
 type EmbeddedCase2 @goModel(model:"testserver.EmbeddedCase2") {
     unexportedEmbeddedPointerExportedMethod: String!
+}
+
+type EmbeddedCase3 @goModel(model:"testserver.EmbeddedCase3") {
+    unexportedEmbeddedInterfaceExportedMethod: String!
 }
 `},
 	&ast.Source{Name: "interfaces.graphql", Input: `extend type Query {
@@ -3261,6 +3286,40 @@ func (ec *executionContext) _EmbeddedCase2_unexportedEmbeddedPointerExportedMeth
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.UnexportedEmbeddedPointerExportedMethod(), nil
+	})
+
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(ctx context.Context, field graphql.CollectedField, obj *EmbeddedCase3) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "EmbeddedCase3",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UnexportedEmbeddedInterfaceExportedMethod(), nil
 	})
 
 	if resTmp == nil {
@@ -5754,6 +5813,37 @@ func (ec *executionContext) _Query_embeddedCase2(ctx context.Context, field grap
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOEmbeddedCase22ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEmbeddedCase2(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().EmbeddedCase3(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*EmbeddedCase3)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOEmbeddedCase32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEmbeddedCase3(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9229,6 +9319,33 @@ func (ec *executionContext) _EmbeddedCase2(ctx context.Context, sel ast.Selectio
 	return out
 }
 
+var embeddedCase3Implementors = []string{"EmbeddedCase3"}
+
+func (ec *executionContext) _EmbeddedCase3(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedCase3) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, embeddedCase3Implementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EmbeddedCase3")
+		case "unexportedEmbeddedInterfaceExportedMethod":
+			out.Values[i] = ec._EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var embeddedDefaultScalarImplementors = []string{"EmbeddedDefaultScalar"}
 
 func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedDefaultScalar) graphql.Marshaler {
@@ -10307,6 +10424,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_embeddedCase2(ctx, field)
+				return res
+			})
+		case "embeddedCase3":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_embeddedCase3(ctx, field)
 				return res
 			})
 		case "shapes":
@@ -11974,6 +12102,17 @@ func (ec *executionContext) marshalOEmbeddedCase22ᚖgithubᚗcomᚋ99designsᚋ
 		return graphql.Null
 	}
 	return ec._EmbeddedCase2(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOEmbeddedCase32githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEmbeddedCase3(ctx context.Context, sel ast.SelectionSet, v EmbeddedCase3) graphql.Marshaler {
+	return ec._EmbeddedCase3(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOEmbeddedCase32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEmbeddedCase3(ctx context.Context, sel ast.SelectionSet, v *EmbeddedCase3) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._EmbeddedCase3(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOError2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v Error) graphql.Marshaler {

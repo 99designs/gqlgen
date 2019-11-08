@@ -28,3 +28,16 @@ type unexportedEmbeddedPointer struct{}
 func (*unexportedEmbeddedPointer) UnexportedEmbeddedPointerExportedMethod() string {
 	return "UnexportedEmbeddedPointerExportedMethodResponse"
 }
+
+// EmbeddedCase3 model
+type EmbeddedCase3 struct {
+	unexportedEmbeddedInterface
+}
+
+type unexportedEmbeddedInterface interface {
+	nestedInterface
+}
+
+type nestedInterface interface {
+	UnexportedEmbeddedInterfaceExportedMethod() string
+}

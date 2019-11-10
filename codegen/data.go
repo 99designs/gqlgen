@@ -7,6 +7,7 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
+	"golang.org/x/tools/go/packages"
 )
 
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
@@ -35,30 +36,21 @@ type builder struct {
 	Directives map[string]*Directive
 }
 
-func BuildData(cfg *config.Config) (*Data, error) {
+func BuildData(cfg *config.Config, pkgs []*packages.Package, schema *ast.Schema, schemaStr map[string]string) (*Data, error) {
 	b := builder{
 		Config: cfg,
 	}
 
+	b.Schema = schema
+	b.SchemaStr = schemaStr
 	var err error
-	b.Schema, b.SchemaStr, err = cfg.LoadSchema()
+
+	err = cfg.Autobind(b.Schema, pkgs)
 	if err != nil {
 		return nil, err
 	}
 
-	err = cfg.Check()
-	if err != nil {
-		return nil, err
-	}
-
-	err = cfg.Autobind(b.Schema)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg.InjectBuiltins(b.Schema)
-
-	b.Binder, err = b.Config.NewBinder(b.Schema)
+	b.Binder, err = b.Config.NewBinder(b.Schema, pkgs)
 	if err != nil {
 		return nil, err
 	}

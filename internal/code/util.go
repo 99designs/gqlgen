@@ -39,6 +39,11 @@ func NormalizeVendor(pkg string) string {
 // x/tools/packages only supports 'qualified package paths' so this will need to be done prior to calling it
 // See https://github.com/golang/go/issues/30289
 func QualifyPackagePath(importPath string) string {
+	// TODO: check if we are in go module mode or not
+	goModuleMode := true
+	if goModuleMode {
+		return importPath
+	}
 	wd, _ := os.Getwd()
 
 	pkg, err := build.Import(importPath, wd, 0)

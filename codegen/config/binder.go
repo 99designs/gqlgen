@@ -20,12 +20,7 @@ type Binder struct {
 	References []*TypeReference
 }
 
-func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, c.Models.ReferencedPackages()...)
-	if err != nil {
-		return nil, err
-	}
-
+func (c *Config) NewBinder(s *ast.Schema, pkgs []*packages.Package) (*Binder, error) {
 	mp := map[string]*packages.Package{}
 	for _, p := range pkgs {
 		populatePkg(mp, p)

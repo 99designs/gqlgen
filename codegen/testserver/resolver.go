@@ -179,6 +179,15 @@ func (r *queryResolver) DirectiveDouble(ctx context.Context) (*string, error) {
 func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 	panic("not implemented")
 }

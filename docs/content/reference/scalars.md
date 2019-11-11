@@ -2,12 +2,12 @@
 linkTitle: Scalars
 title: Mapping GraphQL scalar types to Go types
 description: Mapping GraphQL scalar types to Go types
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: "reference" } }
 ---
 
 ## Built-in helpers
 
-gqlgen ships with three built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`.  Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
+gqlgen ships with some built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`. Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
 
 ### Time
 
@@ -32,13 +32,15 @@ scalar Upload
 ```
 
 Maps a `Upload` GraphQL scalar to a `graphql.Upload` struct, defined as follows:
-```
+
+```go
 type Upload struct {
 	File     io.Reader
 	Filename string
 	Size     int64
 }
 ```
+
 ### Any
 
 ```graphql
@@ -47,7 +49,7 @@ scalar Any
 
 Maps an arbitrary GraphQL value to a `interface{}` Go type.
 
-##  Custom scalars with user defined types
+## Custom scalars with user defined types
 
 For user defined types you can implement the graphql.Marshaler and graphql.Unmarshaler interfaces and they will be called.
 
@@ -88,12 +90,12 @@ func (y YesNo) MarshalGQL(w io.Writer) {
 ```
 
 and then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+
 ```yaml
 models:
   YesNo:
     model: github.com/me/mypkg.YesNo
 ```
-
 
 ## Custom scalars with third party types
 
@@ -136,11 +138,12 @@ func UnmarshalMyCustomBooleanScalar(v interface{}) (bool, error) {
 }
 ```
 
-and then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+Then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+
 ```yaml
 models:
   MyCustomBooleanScalar:
     model: github.com/me/mypkg.MyCustomBooleanScalar
 ```
 
-see the [example/scalars](https://github.com/99designs/gqlgen/tree/master/example/scalars) package for more examples.
+See the [example/scalars](https://github.com/99designs/gqlgen/tree/master/example/scalars) package for more examples.

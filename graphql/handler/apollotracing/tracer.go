@@ -42,6 +42,10 @@ type (
 var _ graphql.ResponseInterceptor = Tracer{}
 var _ graphql.FieldInterceptor = Tracer{}
 
+func (a Tracer) ExtensionName() string {
+	return "ApolloTracing"
+}
+
 func (a Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 	rc := graphql.GetOperationContext(ctx)
 	td, ok := graphql.GetExtension(ctx, "tracing").(*TracingExtension)

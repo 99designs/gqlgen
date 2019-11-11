@@ -22,6 +22,10 @@ func FixedComplexityLimit(limit int) graphql.HandlerExtension {
 	})
 }
 
+func (c ComplexityLimit) ExtensionName() string {
+	return "ComplexityLimit"
+}
+
 func (c ComplexityLimit) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
 	es := graphql.GetServerContext(ctx)
 	op := rc.Doc.Operations.ForName(rc.OperationName)

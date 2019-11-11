@@ -20,6 +20,10 @@ type AutomaticPersistedQuery struct {
 	Cache graphql.Cache
 }
 
+func (a AutomaticPersistedQuery) ExtensionName() string {
+	return "AutomaticPersistedQuery"
+}
+
 func (a AutomaticPersistedQuery) MutateRequest(ctx context.Context, rawParams *graphql.RawParams) error {
 	if rawParams.Extensions["persistedQuery"] == nil {
 		return nil

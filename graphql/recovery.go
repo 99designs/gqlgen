@@ -22,6 +22,10 @@ func DefaultRecover(ctx context.Context, err interface{}) error {
 
 var _ OperationContextMutator = RecoverFunc(nil)
 
+func (f RecoverFunc) ExtensionName() string {
+	return "RecoverFunc"
+}
+
 func (f RecoverFunc) MutateOperationContext(ctx context.Context, rc *OperationContext) *gqlerror.Error {
 	rc.Recover = f
 	return nil

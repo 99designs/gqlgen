@@ -12,6 +12,10 @@ type Introspection struct{}
 
 var _ graphql.OperationContextMutator = Introspection{}
 
+func (c Introspection) ExtensionName() string {
+	return "Introspection"
+}
+
 func (c Introspection) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
 	rc.DisableIntrospection = false
 	return nil

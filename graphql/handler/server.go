@@ -153,17 +153,29 @@ func sendErrorf(w http.ResponseWriter, code int, format string, args ...interfac
 
 type OperationFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
 
+func (r OperationFunc) ExtensionName() string {
+	return "InlineOperationFunc"
+}
+
 func (r OperationFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 	return r(ctx, next)
 }
 
 type ResponseFunc func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response
 
+func (r ResponseFunc) ExtensionName() string {
+	return "InlineResponseFunc"
+}
+
 func (r ResponseFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	return r(ctx, next)
 }
 
 type FieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
+
+func (f FieldFunc) ExtensionName() string {
+	return "InlineFieldFunc"
+}
 
 func (f FieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 	return f(ctx, next)

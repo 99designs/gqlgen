@@ -34,7 +34,7 @@ type (
 		DispatchOperation(ctx context.Context, rc *OperationContext) (ResponseHandler, context.Context)
 	}
 
-	// HandlerExtension interface is entirely optional, see the list of possible hook points below
+	// HandlerExtension adds functionality to the http handler. See the list of possible hook points below
 	// Its important to understand the lifecycle of a graphql request and the terminology we use in gqlgen
 	// before working with these
 	//
@@ -46,7 +46,9 @@ type (
 	// | |  RESPONSE  { "data": { "chat": { "message": "byee" } } }           | |
 	// | +--------------------------------------------------------------------+ |
 	// +------------------------------------------------------------------------+
-	HandlerExtension interface{}
+	HandlerExtension interface {
+		ExtensionName() string
+	}
 
 	// OperationParameterMutator is called before creating a request context. allows manipulating the raw query
 	// on the way in.

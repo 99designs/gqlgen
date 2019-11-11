@@ -8,9 +8,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +22,7 @@ func TestSubscriptions(t *testing.T) {
 	resolvers := &Stub{}
 
 	resolvers.SubscriptionResolver.InitPayload = func(ctx context.Context) (strings <-chan string, e error) {
-		payload := handler.GetInitPayload(ctx)
+		payload := transport.GetInitPayload(ctx)
 		channel := make(chan string, len(payload)+1)
 
 		go func() {
@@ -66,17 +68,19 @@ func TestSubscriptions(t *testing.T) {
 		return res, nil
 	}
 
-	srv := handler.GraphQL(
+	srv := handler.NewDefaultServer(
 		NewExecutableSchema(Config{Resolvers: resolvers}),
-		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			path, _ := ctx.Value("path").([]int)
-			return next(context.WithValue(ctx, "path", append(path, 1)))
-		}),
-		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			path, _ := ctx.Value("path").([]int)
-			return next(context.WithValue(ctx, "path", append(path, 2)))
-		}),
 	)
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		path, _ := ctx.Value("path").([]int)
+		return next(context.WithValue(ctx, "path", append(path, 1)))
+	})
+
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		path, _ := ctx.Value("path").([]int)
+		return next(context.WithValue(ctx, "path", append(path, 2)))
+	})
+
 	c := client.New(srv)
 
 	t.Run("wont leak goroutines", func(t *testing.T) {

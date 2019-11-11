@@ -7,7 +7,6 @@
 {{ reserveImport "errors"  }}
 {{ reserveImport "bytes"  }}
 
-{{ reserveImport "github.com/99designs/gqlgen/handler" }}
 {{ reserveImport "github.com/vektah/gqlparser" }}
 {{ reserveImport "github.com/vektah/gqlparser/ast" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}

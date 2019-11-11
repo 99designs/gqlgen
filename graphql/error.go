@@ -6,7 +6,7 @@ import (
 	"github.com/vektah/gqlparser/gqlerror"
 )
 
-type ErrorPresenterFunc func(context.Context, error) *gqlerror.Error
+type ErrorPresenterFunc func(ctx context.Context, err error) *gqlerror.Error
 
 type ExtendedError interface {
 	Extensions() map[string]interface{}

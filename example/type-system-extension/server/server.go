@@ -8,7 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 
 	extension "github.com/99designs/gqlgen/example/type-system-extension"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 const defaultPort = "8080"
@@ -20,7 +20,7 @@ func main() {
 	}
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL(
+	http.Handle("/query", handler.NewDefaultServer(
 		extension.NewExecutableSchema(
 			extension.Config{
 				Resolvers: extension.NewRootResolver(),

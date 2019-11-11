@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTodo(t *testing.T) {
-	c := client.New(LoaderMiddleware(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}}))))
+	c := client.New(LoaderMiddleware(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: &Resolver{}}))))
 
 	t.Run("create a new todo", func(t *testing.T) {
 		var resp interface{}

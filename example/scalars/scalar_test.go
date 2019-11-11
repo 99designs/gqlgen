@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,7 +21,7 @@ type RawUser struct {
 }
 
 func TestScalars(t *testing.T) {
-	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
+	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
 
 	t.Run("marshaling", func(t *testing.T) {
 		var resp struct {

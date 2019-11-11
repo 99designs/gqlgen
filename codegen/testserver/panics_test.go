@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,7 +21,7 @@ func TestPanics(t *testing.T) {
 		return []MarshalPanic{MarshalPanic("aa"), MarshalPanic("bb")}, nil
 	}
 
-	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
 
 	t.Run("panics in marshallers will not kill server", func(t *testing.T) {
 		var resp interface{}

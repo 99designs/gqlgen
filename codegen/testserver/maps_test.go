@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,7 +21,7 @@ func TestMaps(t *testing.T) {
 		return in.Map, nil
 	}
 
-	c := client.New(handler.GraphQL(
+	c := client.New(handler.NewDefaultServer(
 		NewExecutableSchema(Config{Resolvers: resolver}),
 	))
 	t.Run("unset", func(t *testing.T) {

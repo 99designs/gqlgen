@@ -70,7 +70,7 @@ func (c ComplexityLimit) MutateOperationContext(ctx context.Context, rc *graphql
 }
 
 func GetComplexityStats(ctx context.Context) *ComplexityStats {
-	rc := graphql.GetRequestContext(ctx)
+	rc := graphql.GetOperationContext(ctx)
 	if rc == nil {
 		return nil
 	}

@@ -14,7 +14,8 @@ import (
 
 	"github.com/99designs/gqlgen/example/fileupload/model"
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +37,7 @@ func TestFileUpload(t *testing.T) {
 				Content: string(content),
 			}, nil
 		}
-		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
+		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
 		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id, name, content } }", "variables": { "file": null } }`
@@ -77,7 +78,7 @@ func TestFileUpload(t *testing.T) {
 				Content: string(content),
 			}, nil
 		}
-		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
+		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
 		operations := `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": {"file": null, "id": 1 } } }`
@@ -121,7 +122,7 @@ func TestFileUpload(t *testing.T) {
 			require.ElementsMatch(t, []string{"test1", "test2"}, contents)
 			return resp, nil
 		}
-		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
+		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
 		operations := `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id, name, content } }", "variables": { "files": [null, null] } }`
@@ -174,7 +175,7 @@ func TestFileUpload(t *testing.T) {
 			require.ElementsMatch(t, []string{"test1", "test2"}, contents)
 			return resp, nil
 		}
-		srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver})))
+		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
 		defer srv.Close()
 
 		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
@@ -250,8 +251,10 @@ func TestFileUpload(t *testing.T) {
 		}
 
 		test := func(uploadMaxMemory int64) {
-			memory := handler.UploadMaxMemory(uploadMaxMemory)
-			srv := httptest.NewServer(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolver}), memory))
+			hndlr := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
+			hndlr.AddTransport(transport.MultipartForm{MaxMemory: uploadMaxMemory})
+
+			srv := httptest.NewServer(hndlr)
 			defer srv.Close()
 			req := createUploadRequest(t, srv.URL, operations, mapData, files)
 			resp, err := client.Do(req)

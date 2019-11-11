@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -56,7 +55,6 @@ func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New(100),
 	})
-	srv.Use(apollotracing.Tracer{})
 
 	return srv
 }

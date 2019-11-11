@@ -5,13 +5,13 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/example/starwars/generated"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStarwars(t *testing.T) {
-	c := client.New(handler.GraphQL(generated.NewExecutableSchema(NewResolver())))
+	c := client.New(handler.NewDefaultServer(generated.NewExecutableSchema(NewResolver())))
 
 	t.Run("Lukes starships", func(t *testing.T) {
 		var resp struct {

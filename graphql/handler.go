@@ -48,6 +48,7 @@ type (
 	// +------------------------------------------------------------------------+
 	HandlerExtension interface {
 		ExtensionName() string
+		Validate() error
 	}
 
 	// OperationParameterMutator is called before creating a request context. allows manipulating the raw query

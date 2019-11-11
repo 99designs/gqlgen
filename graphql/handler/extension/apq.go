@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
@@ -22,6 +23,13 @@ type AutomaticPersistedQuery struct {
 
 func (a AutomaticPersistedQuery) ExtensionName() string {
 	return "AutomaticPersistedQuery"
+}
+
+func (a AutomaticPersistedQuery) Validate() error {
+	if a.Cache == nil {
+		return fmt.Errorf("AutomaticPersistedQuery.Cache can not be nil")
+	}
+	return nil
 }
 
 func (a AutomaticPersistedQuery) MutateRequest(ctx context.Context, rawParams *graphql.RawParams) error {

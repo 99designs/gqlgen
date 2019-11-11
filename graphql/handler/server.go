@@ -78,6 +78,10 @@ func (s *Server) SetQueryCache(cache graphql.Cache) {
 }
 
 func (s *Server) Use(extension graphql.HandlerExtension) {
+	if err := extension.Validate(); err != nil {
+		panic(err)
+	}
+
 	switch extension.(type) {
 	case graphql.OperationParameterMutator,
 		graphql.OperationContextMutator,
@@ -157,6 +161,13 @@ func (r OperationFunc) ExtensionName() string {
 	return "InlineOperationFunc"
 }
 
+func (r OperationFunc) Validate() error {
+	if r == nil {
+		return fmt.Errorf("OperationFunc can not be nil")
+	}
+	return nil
+}
+
 func (r OperationFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 	return r(ctx, next)
 }
@@ -167,6 +178,13 @@ func (r ResponseFunc) ExtensionName() string {
 	return "InlineResponseFunc"
 }
 
+func (r ResponseFunc) Validate() error {
+	if r == nil {
+		return fmt.Errorf("ResponseFunc can not be nil")
+	}
+	return nil
+}
+
 func (r ResponseFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	return r(ctx, next)
 }
@@ -175,6 +193,13 @@ type FieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}
 
 func (f FieldFunc) ExtensionName() string {
 	return "InlineFieldFunc"
+}
+
+func (f FieldFunc) Validate() error {
+	if f == nil {
+		return fmt.Errorf("FieldFunc can not be nil")
+	}
+	return nil
 }
 
 func (f FieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {

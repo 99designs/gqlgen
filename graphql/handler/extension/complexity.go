@@ -2,6 +2,7 @@ package extension
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/99designs/gqlgen/complexity"
 	"github.com/99designs/gqlgen/graphql"
@@ -24,6 +25,13 @@ func FixedComplexityLimit(limit int) graphql.HandlerExtension {
 
 func (c ComplexityLimit) ExtensionName() string {
 	return "ComplexityLimit"
+}
+
+func (c ComplexityLimit) Validate() error {
+	if c == nil {
+		return fmt.Errorf("ComplexityLimit func can not be nil")
+	}
+	return nil
 }
 
 func (c ComplexityLimit) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {

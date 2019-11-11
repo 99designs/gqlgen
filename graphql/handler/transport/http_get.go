@@ -30,24 +30,10 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		OperationName: r.URL.Query().Get("operationName"),
 	}
 
-	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
-		switch status {
-		case graphql.StatusOk, graphql.StatusResolverError:
-			w.WriteHeader(http.StatusOK)
-		case graphql.StatusParseError, graphql.StatusValidationError:
-			w.WriteHeader(http.StatusUnprocessableEntity)
-		}
-		b, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.Write(b)
-	})
-
 	if variables := r.URL.Query().Get("variables"); variables != "" {
 		if err := jsonDecode(strings.NewReader(variables), &raw.Variables); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			write.Errorf("variables could not be decoded")
+			writeJsonError(w, "variables could not be decoded")
 			return
 		}
 	}
@@ -55,7 +41,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	if extensions := r.URL.Query().Get("extensions"); extensions != "" {
 		if err := jsonDecode(strings.NewReader(extensions), &raw.Extensions); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			write.Errorf("extensions could not be decoded")
+			writeJsonError(w, "extensions could not be decoded")
 			return
 		}
 	}
@@ -64,18 +50,18 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), err)
-		write(graphql.StatusValidationError, resp)
+		writeJson(w, resp)
 		return
 	}
 	op := rc.Doc.Operations.ForName(rc.OperationName)
 	if op.Operation != ast.Query {
 		w.WriteHeader(http.StatusNotAcceptable)
-		write.Errorf("GET requests only allow query operations")
+		writeJsonError(w, "GET requests only allow query operations")
 		return
 	}
 
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
-	write(graphql.StatusResolverError, responses(ctx))
+	writeJson(w, responses(ctx))
 }
 
 func jsonDecode(r io.Reader, val interface{}) error {

@@ -204,7 +204,7 @@ func TestFileUpload(t *testing.T) {
 		}
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		require.Equal(t, `{"errors":[{"message":"failed to parse multipart form"}],"data":null}`, resp.Body.String())
 	})
 
@@ -214,7 +214,7 @@ func TestFileUpload(t *testing.T) {
 
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		require.Equal(t, `{"errors":[{"message":"operations form field could not be decoded"}],"data":null}`, resp.Body.String())
 	})
 
@@ -224,7 +224,7 @@ func TestFileUpload(t *testing.T) {
 
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		require.Equal(t, `{"errors":[{"message":"map form field could not be decoded"}],"data":null}`, resp.Body.String())
 	})
 
@@ -234,7 +234,7 @@ func TestFileUpload(t *testing.T) {
 
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		require.Equal(t, `{"errors":[{"message":"failed to get key 0 from form"}],"data":null}`, resp.Body.String())
 	})
 
@@ -244,7 +244,7 @@ func TestFileUpload(t *testing.T) {
 
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		require.Equal(t, `{"errors":[{"message":"invalid operations paths for key 0"}],"data":null}`, resp.Body.String())
 	})
 

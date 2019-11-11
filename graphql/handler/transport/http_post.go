@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"encoding/json"
 	"mime"
 	"net/http"
 
@@ -30,25 +29,10 @@ func (h POST) Supports(r *http.Request) bool {
 func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	w.Header().Set("Content-Type", "application/json")
 
-	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
-		switch status {
-		case graphql.StatusOk, graphql.StatusResolverError:
-			w.WriteHeader(http.StatusOK)
-		case graphql.StatusParseError, graphql.StatusValidationError:
-			w.WriteHeader(http.StatusUnprocessableEntity)
-		}
-
-		b, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.Write(b)
-	})
-
 	var params *graphql.RawParams
 	if err := jsonDecode(r.Body, &params); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		write.Errorf("json body could not be decoded: " + err.Error())
+		writeJsonErrorf(w, "json body could not be decoded: "+err.Error())
 		return
 	}
 
@@ -56,9 +40,9 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), err)
-		write(graphql.StatusValidationError, resp)
+		writeJson(w, resp)
 		return
 	}
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
-	write(graphql.StatusResolverError, responses(ctx))
+	writeJson(w, responses(ctx))
 }

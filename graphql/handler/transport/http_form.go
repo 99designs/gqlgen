@@ -56,33 +56,19 @@ func (f MultipartForm) maxMemory() int64 {
 func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	w.Header().Set("Content-Type", "application/json")
 
-	write := graphql.Writer(func(status graphql.Status, response *graphql.Response) {
-		switch status {
-		case graphql.StatusOk, graphql.StatusResolverError:
-			w.WriteHeader(http.StatusOK)
-		case graphql.StatusParseError, graphql.StatusValidationError:
-			w.WriteHeader(http.StatusUnprocessableEntity)
-		}
-
-		b, err := json.Marshal(response)
-		if err != nil {
-			panic(err)
-		}
-		w.Write(b)
-	})
-
 	var err error
 	if r.ContentLength > f.maxUploadSize() {
-		write.Errorf("failed to parse multipart form, request body too large")
+		writeJsonError(w, "failed to parse multipart form, request body too large")
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, f.maxUploadSize())
 	if err = r.ParseMultipartForm(f.maxUploadSize()); err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		if strings.Contains(err.Error(), "request body too large") {
-			write.Errorf("failed to parse multipart form, request body too large")
+			writeJsonError(w, "failed to parse multipart form, request body too large")
 			return
 		}
-		write.Errorf("failed to parse multipart form")
+		writeJsonError(w, "failed to parse multipart form")
 		return
 	}
 	defer r.Body.Close()
@@ -90,25 +76,29 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 	var params graphql.RawParams
 
 	if err = jsonDecode(strings.NewReader(r.Form.Get("operations")), &params); err != nil {
-		write.Errorf("operations form field could not be decoded")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		writeJsonError(w, "operations form field could not be decoded")
 		return
 	}
 
 	var uploadsMap = map[string][]string{}
 	if err = json.Unmarshal([]byte(r.Form.Get("map")), &uploadsMap); err != nil {
-		write.Errorf("map form field could not be decoded")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		writeJsonError(w, "map form field could not be decoded")
 		return
 	}
 
 	var upload graphql.Upload
 	for key, paths := range uploadsMap {
 		if len(paths) == 0 {
-			write.Errorf("invalid empty operations paths list for key %s", key)
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			writeJsonErrorf(w, "invalid empty operations paths list for key %s", key)
 			return
 		}
 		file, header, err := r.FormFile(key)
 		if err != nil {
-			write.Errorf("failed to get key %s from form", key)
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			writeJsonErrorf(w, "failed to get key %s from form", key)
 			return
 		}
 		defer file.Close()
@@ -121,14 +111,16 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 			}
 
 			if err := params.AddUpload(upload, key, paths[0]); err != nil {
-				write.GraphqlErr(err)
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				writeJsonGraphqlError(w, err)
 				return
 			}
 		} else {
 			if r.ContentLength < f.maxMemory() {
 				fileBytes, err := ioutil.ReadAll(file)
 				if err != nil {
-					write.Errorf("failed to read file for key %s", key)
+					w.WriteHeader(http.StatusUnprocessableEntity)
+					writeJsonErrorf(w, "failed to read file for key %s", key)
 					return
 				}
 				for _, path := range paths {
@@ -139,14 +131,16 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 					}
 
 					if err := params.AddUpload(upload, key, path); err != nil {
-						write.GraphqlErr(err)
+						w.WriteHeader(http.StatusUnprocessableEntity)
+						writeJsonGraphqlError(w, err)
 						return
 					}
 				}
 			} else {
 				tmpFile, err := ioutil.TempFile(os.TempDir(), "gqlgen-")
 				if err != nil {
-					write.Errorf("failed to create temp file for key %s", key)
+					w.WriteHeader(http.StatusUnprocessableEntity)
+					writeJsonErrorf(w, "failed to create temp file for key %s", key)
 					return
 				}
 				tmpName := tmpFile.Name()
@@ -155,21 +149,24 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 				}()
 				_, err = io.Copy(tmpFile, file)
 				if err != nil {
+					w.WriteHeader(http.StatusUnprocessableEntity)
 					if err := tmpFile.Close(); err != nil {
-						write.Errorf("failed to copy to temp file and close temp file for key %s", key)
+						writeJsonErrorf(w, "failed to copy to temp file and close temp file for key %s", key)
 						return
 					}
-					write.Errorf("failed to copy to temp file for key %s", key)
+					writeJsonErrorf(w, "failed to copy to temp file for key %s", key)
 					return
 				}
 				if err := tmpFile.Close(); err != nil {
-					write.Errorf("failed to close temp file for key %s", key)
+					w.WriteHeader(http.StatusUnprocessableEntity)
+					writeJsonErrorf(w, "failed to close temp file for key %s", key)
 					return
 				}
 				for _, path := range paths {
 					pathTmpFile, err := os.Open(tmpName)
 					if err != nil {
-						write.Errorf("failed to open temp file for key %s", key)
+						w.WriteHeader(http.StatusUnprocessableEntity)
+						writeJsonErrorf(w, "failed to open temp file for key %s", key)
 						return
 					}
 					defer pathTmpFile.Close()
@@ -180,7 +177,8 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 					}
 
 					if err := params.AddUpload(upload, key, path); err != nil {
-						write.GraphqlErr(err)
+						w.WriteHeader(http.StatusUnprocessableEntity)
+						writeJsonGraphqlError(w, err)
 						return
 					}
 				}
@@ -190,11 +188,11 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 
 	rc, gerr := exec.CreateOperationContext(r.Context(), &params)
 	if gerr != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
 		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), gerr)
-		write(graphql.StatusValidationError, resp)
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		writeJson(w, resp)
 		return
 	}
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
-	write(graphql.StatusResolverError, responses(ctx))
+	writeJson(w, responses(ctx))
 }

@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,8 +10,6 @@ import (
 )
 
 type (
-	Writer func(Status, *Response)
-
 	OperationMiddleware func(ctx context.Context, next OperationHandler) ResponseHandler
 	OperationHandler    func(ctx context.Context) ResponseHandler
 
@@ -88,31 +85,6 @@ type (
 )
 
 type Status int
-
-const (
-	StatusOk Status = iota
-	StatusParseError
-	StatusValidationError
-	StatusResolverError
-)
-
-func (w Writer) Errorf(format string, args ...interface{}) {
-	w(StatusResolverError, &Response{
-		Errors: gqlerror.List{{Message: fmt.Sprintf(format, args...)}},
-	})
-}
-
-func (w Writer) Error(msg string) {
-	w(StatusResolverError, &Response{
-		Errors: gqlerror.List{{Message: msg}},
-	})
-}
-
-func (w Writer) GraphqlErr(err ...*gqlerror.Error) {
-	w(StatusResolverError, &Response{
-		Errors: err,
-	})
-}
 
 func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 	if !strings.HasPrefix(path, "variables.") {

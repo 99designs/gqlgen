@@ -10,6 +10,10 @@ type Stats struct {
 	OperationStart time.Time
 	Parsing        TraceTiming
 	Validation     TraceTiming
+
+	// Stats collected by handler extensions. Dont use directly, the extension should provide a type safe way to
+	// access this.
+	Extension map[string]interface{}
 }
 
 type TraceTiming struct {

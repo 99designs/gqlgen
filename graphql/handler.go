@@ -32,6 +32,7 @@ type (
 	GraphExecutor interface {
 		CreateOperationContext(ctx context.Context, params *RawParams) (*OperationContext, gqlerror.List)
 		DispatchOperation(ctx context.Context, rc *OperationContext) (ResponseHandler, context.Context)
+		DispatchError(ctx context.Context, list gqlerror.List) *Response
 	}
 
 	// HandlerExtension adds functionality to the http handler. See the list of possible hook points below

@@ -2,6 +2,7 @@ package extension_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func TestHandlerComplexity(t *testing.T) {
@@ -23,26 +25,43 @@ func TestHandlerComplexity(t *testing.T) {
 		return 2
 	}))
 	h.AddTransport(&transport.POST{})
+	var stats *extension.ComplexityStats
+	h.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		stats = extension.GetComplexityStats(ctx)
+		return next(ctx)
+	})
 
 	t.Run("below complexity limit", func(t *testing.T) {
+		stats = nil
 		h.SetCalculatedComplexity(2)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		require.Equal(t, 2, stats.ComplexityLimit)
+		require.Equal(t, 2, stats.Complexity)
 	})
 
 	t.Run("above complexity limit", func(t *testing.T) {
+		stats = nil
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2"}],"data":null}`, resp.Body.String())
+
+		require.Equal(t, 2, stats.ComplexityLimit)
+		require.Equal(t, 4, stats.Complexity)
 	})
 
 	t.Run("within dynamic complexity limit", func(t *testing.T) {
+		stats = nil
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ ok: name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		require.Equal(t, 4, stats.ComplexityLimit)
+		require.Equal(t, 4, stats.Complexity)
 	})
 }
 
@@ -51,11 +70,20 @@ func TestFixedComplexity(t *testing.T) {
 	h.Use(extension.FixedComplexityLimit(2))
 	h.AddTransport(&transport.POST{})
 
+	var stats *extension.ComplexityStats
+	h.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		stats = extension.GetComplexityStats(ctx)
+		return next(ctx)
+	})
+
 	t.Run("below complexity limit", func(t *testing.T) {
 		h.SetCalculatedComplexity(2)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		require.Equal(t, 2, stats.ComplexityLimit)
+		require.Equal(t, 2, stats.Complexity)
 	})
 
 	t.Run("above complexity limit", func(t *testing.T) {
@@ -63,6 +91,9 @@ func TestFixedComplexity(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2"}],"data":null}`, resp.Body.String())
+
+		require.Equal(t, 2, stats.ComplexityLimit)
+		require.Equal(t, 4, stats.Complexity)
 	})
 }
 
@@ -73,4 +104,21 @@ func doRequest(handler http.Handler, method string, target string, body string) 
 
 	handler.ServeHTTP(w, r)
 	return w
+}
+
+type operationMutatorFunc func(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error
+
+func (r operationMutatorFunc) ExtensionName() string {
+	return "operationMutatorFunc"
+}
+
+func (r operationMutatorFunc) Validate() error {
+	if r == nil {
+		return fmt.Errorf("operationMutatorFunc can not be nil")
+	}
+	return nil
+}
+
+func (r operationMutatorFunc) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
+	return r(ctx, rc)
 }

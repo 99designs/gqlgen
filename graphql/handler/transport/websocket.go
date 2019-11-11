@@ -200,7 +200,8 @@ func (c *wsConnection) subscribe(message *operationMessage) bool {
 
 	rc, err := c.exec.CreateOperationContext(ctx, params)
 	if err != nil {
-		c.sendError(message.ID, err...)
+		resp := c.exec.DispatchError(graphql.WithOperationContext(ctx, rc), err)
+		c.sendError(message.ID, resp.Errors...)
 		return false
 	}
 

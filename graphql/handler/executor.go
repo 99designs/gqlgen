@@ -120,6 +120,7 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 
 	stats := graphql.Stats{
 		OperationStart: graphql.GetStartTime(ctx),
+		Extension:      map[string]interface{}{},
 	}
 	for _, p := range e.operationParameterMutators {
 		if err := p.MutateOperationParameters(ctx, params); err != nil {
@@ -157,11 +158,24 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 
 	for _, p := range e.operationContextMutators {
 		if err := p.MutateOperationContext(ctx, rc); err != nil {
-			return nil, gqlerror.List{err}
+			return rc, gqlerror.List{err}
 		}
 	}
 
 	return rc, nil
+}
+
+func (e executor) DispatchError(ctx context.Context, list gqlerror.List) *graphql.Response {
+	ctx = graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
+	resp := e.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
+		resp := &graphql.Response{
+			Errors: list,
+		}
+		resp.Extensions = graphql.GetExtensions(ctx)
+		return resp
+	})
+
+	return resp
 }
 
 // parseQuery decodes the incoming query and validates it, pulling from cache if present.

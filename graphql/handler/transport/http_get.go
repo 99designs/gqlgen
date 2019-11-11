@@ -63,7 +63,8 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	rc, err := exec.CreateOperationContext(r.Context(), raw)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		write.GraphqlErr(err...)
+		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), err)
+		write(graphql.StatusValidationError, resp)
 		return
 	}
 	op := rc.Doc.Operations.ForName(rc.OperationName)

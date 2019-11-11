@@ -16,6 +16,7 @@ func BenchmarkSimpleQueryNoArgs(b *testing.B) {
 
 	var body strings.Reader
 	r := httptest.NewRequest("POST", "/graphql", &body)
+	r.Header.Set("Content-Type", "application/json")
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -26,7 +27,7 @@ func BenchmarkSimpleQueryNoArgs(b *testing.B) {
 		rec.Body.Reset()
 		server.ServeHTTP(rec, r)
 		if rec.Body.String() != `{"data":{"search":[{"starships":[{"name":"X-Wing"},{"name":"Imperial shuttle"}]}]}}` {
-			b.Fatalf("Unexpected response")
+			b.Fatalf("Unexpected response: %s", rec.Body.String())
 		}
 
 	}

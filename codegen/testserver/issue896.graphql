@@ -7,12 +7,12 @@ extend schema {
   subscription: Subscription
 }
 
-type Thing {id: Int}
+type CheckIssue896 {id: Int}
 
 extend type Query {
-  things1: [Thing!] # Note the "!" or lack thereof.
+  issue896a: [CheckIssue896!] # Note the "!" or lack thereof.
 }
 
 extend type Subscription {
-  things2: [Thing] # Note the "!" or lack thereof.
+  issue896b: [CheckIssue896] # Note the "!" or lack thereof.
 }

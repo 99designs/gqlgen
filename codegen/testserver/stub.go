@@ -68,6 +68,7 @@ type Stub struct {
 		EmbeddedCase3                    func(ctx context.Context) (*EmbeddedCase3, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
+		Issue896a                        func(ctx context.Context) ([]*CheckIssue896, error)
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 		ErrorBubble                      func(ctx context.Context) (*Error, error)
@@ -92,6 +93,7 @@ type Stub struct {
 		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error)
 		DirectiveDouble        func(ctx context.Context) (<-chan *string, error)
 		DirectiveUnimplemented func(ctx context.Context) (<-chan *string, error)
+		Issue896b              func(ctx context.Context) (<-chan []*CheckIssue896, error)
 	}
 	UserResolver struct {
 		Friends func(ctx context.Context, obj *User) ([]*User, error)
@@ -281,6 +283,9 @@ func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 func (r *stubQuery) NoShape(ctx context.Context) (Shape, error) {
 	return r.QueryResolver.NoShape(ctx)
 }
+func (r *stubQuery) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
+	return r.QueryResolver.Issue896a(ctx)
+}
 func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)
 }
@@ -349,6 +354,9 @@ func (r *stubSubscription) DirectiveDouble(ctx context.Context) (<-chan *string,
 }
 func (r *stubSubscription) DirectiveUnimplemented(ctx context.Context) (<-chan *string, error) {
 	return r.SubscriptionResolver.DirectiveUnimplemented(ctx)
+}
+func (r *stubSubscription) Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error) {
+	return r.SubscriptionResolver.Issue896b(ctx)
 }
 
 type stubUser struct{ *Stub }

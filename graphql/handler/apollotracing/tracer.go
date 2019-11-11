@@ -46,7 +46,7 @@ func (a Tracer) ExtensionName() string {
 	return "ApolloTracing"
 }
 
-func (a Tracer) Validate() error {
+func (a Tracer) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 

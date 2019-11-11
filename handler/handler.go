@@ -17,6 +17,7 @@ import (
 // Deprecated: switch to graphql/handler.New
 func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc {
 	var cfg Config
+	cfg.cacheSize = 1000
 
 	for _, option := range options {
 		option(&cfg)
@@ -53,13 +54,13 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		srv.AroundResponses(hook)
 	}
 	if cfg.complexityLimit != 0 {
-		srv.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
-			return cfg.complexityLimit
-		}))
+		srv.Use(extension.FixedComplexityLimit(cfg.complexityLimit))
 	} else if cfg.complexityLimitFunc != nil {
-		srv.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
-			return cfg.complexityLimitFunc(graphql.WithOperationContext(ctx, rc))
-		}))
+		srv.Use(&extension.ComplexityLimit{
+			Func: func(ctx context.Context, rc *graphql.OperationContext) int {
+				return cfg.complexityLimitFunc(graphql.WithOperationContext(ctx, rc))
+			},
+		})
 	}
 	if !cfg.disableIntrospection {
 		srv.Use(extension.Introspection{})

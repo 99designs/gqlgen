@@ -16,7 +16,7 @@ func (c Introspection) ExtensionName() string {
 	return "Introspection"
 }
 
-func (c Introspection) Validate() error {
+func (c Introspection) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 

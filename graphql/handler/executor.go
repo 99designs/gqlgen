@@ -116,45 +116,38 @@ func (e executor) DispatchOperation(ctx context.Context, rc *graphql.OperationCo
 }
 
 func (e executor) CreateOperationContext(ctx context.Context, params *graphql.RawParams) (*graphql.OperationContext, gqlerror.List) {
-	ctx = graphql.WithServerContext(ctx, e.server.es)
-
-	stats := graphql.Stats{
-		OperationStart: graphql.GetStartTime(ctx),
-		Extension:      map[string]interface{}{},
-	}
 	for _, p := range e.operationParameterMutators {
 		if err := p.MutateOperationParameters(ctx, params); err != nil {
 			return nil, gqlerror.List{err}
 		}
 	}
 
-	doc, listErr := e.parseQuery(ctx, &stats, params.Query)
+	rc := &graphql.OperationContext{
+		RawQuery:             params.Query,
+		OperationName:        params.OperationName,
+		DisableIntrospection: true,
+		Recover:              graphql.DefaultRecover,
+		ResolverMiddleware:   e.fieldMiddleware,
+		Stats:                graphql.Stats{OperationStart: graphql.GetStartTime(ctx)},
+	}
+
+	var listErr gqlerror.List
+	rc.Doc, listErr = e.parseQuery(ctx, &rc.Stats, params.Query)
 	if len(listErr) != 0 {
 		return nil, listErr
 	}
 
-	op := doc.Operations.ForName(params.OperationName)
-	if op == nil {
+	rc.Operation = rc.Doc.Operations.ForName(params.OperationName)
+	if rc.Operation == nil {
 		return nil, gqlerror.List{gqlerror.Errorf("operation %s not found", params.OperationName)}
 	}
 
-	vars, err := validator.VariableValues(e.server.es.Schema(), op, params.Variables)
+	var err *gqlerror.Error
+	rc.Variables, err = validator.VariableValues(e.server.es.Schema(), rc.Operation, params.Variables)
 	if err != nil {
 		return nil, gqlerror.List{err}
 	}
-	stats.Validation.End = graphql.Now()
-
-	rc := &graphql.OperationContext{
-		RawQuery:             params.Query,
-		Variables:            vars,
-		OperationName:        params.OperationName,
-		Doc:                  doc,
-		Operation:            op,
-		DisableIntrospection: true,
-		Recover:              graphql.DefaultRecover,
-		ResolverMiddleware:   e.fieldMiddleware,
-		Stats:                stats,
-	}
+	rc.Stats.Validation.End = graphql.Now()
 
 	for _, p := range e.operationContextMutators {
 		if err := p.MutateOperationContext(ctx, rc); err != nil {

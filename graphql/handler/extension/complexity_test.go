@@ -2,7 +2,6 @@ package extension_test
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,17 +12,18 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func TestHandlerComplexity(t *testing.T) {
 	h := testserver.New()
-	h.Use(extension.ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
-		if rc.RawQuery == "{ ok: name }" {
-			return 4
-		}
-		return 2
-	}))
+	h.Use(&extension.ComplexityLimit{
+		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
+			if rc.RawQuery == "{ ok: name }" {
+				return 4
+			}
+			return 2
+		},
+	})
 	h.AddTransport(&transport.POST{})
 	var stats *extension.ComplexityStats
 	h.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
@@ -104,21 +104,4 @@ func doRequest(handler http.Handler, method string, target string, body string) 
 
 	handler.ServeHTTP(w, r)
 	return w
-}
-
-type operationMutatorFunc func(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error
-
-func (r operationMutatorFunc) ExtensionName() string {
-	return "operationMutatorFunc"
-}
-
-func (r operationMutatorFunc) Validate() error {
-	if r == nil {
-		return fmt.Errorf("operationMutatorFunc can not be nil")
-	}
-	return nil
-}
-
-func (r operationMutatorFunc) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
-	return r(ctx, rc)
 }

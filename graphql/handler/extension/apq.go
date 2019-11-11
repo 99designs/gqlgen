@@ -28,7 +28,7 @@ func (a AutomaticPersistedQuery) ExtensionName() string {
 	return "AutomaticPersistedQuery"
 }
 
-func (a AutomaticPersistedQuery) Validate() error {
+func (a AutomaticPersistedQuery) Validate(schema graphql.ExecutableSchema) error {
 	if a.Cache == nil {
 		return fmt.Errorf("AutomaticPersistedQuery.Cache can not be nil")
 	}

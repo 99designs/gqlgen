@@ -12,9 +12,13 @@ import (
 // ComplexityLimit allows you to define a limit on query complexity
 //
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
-type ComplexityLimit func(ctx context.Context, rc *graphql.OperationContext) int
+type ComplexityLimit struct {
+	Func func(ctx context.Context, rc *graphql.OperationContext) int
 
-var _ graphql.OperationContextMutator = ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int { return 0 })
+	es graphql.ExecutableSchema
+}
+
+var _ graphql.OperationContextMutator = &ComplexityLimit{}
 
 const complexityExtension = "ComplexityLimit"
 
@@ -28,33 +32,35 @@ type ComplexityStats struct {
 
 // FixedComplexityLimit sets a complexity limit that does not change
 func FixedComplexityLimit(limit int) graphql.HandlerExtension {
-	return ComplexityLimit(func(ctx context.Context, rc *graphql.OperationContext) int {
-		return limit
-	})
+	return &ComplexityLimit{
+		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
+			return limit
+		},
+	}
 }
 
 func (c ComplexityLimit) ExtensionName() string {
 	return complexityExtension
 }
 
-func (c ComplexityLimit) Validate() error {
-	if c == nil {
+func (c *ComplexityLimit) Validate(schema graphql.ExecutableSchema) error {
+	if c.Func == nil {
 		return fmt.Errorf("ComplexityLimit func can not be nil")
 	}
+	c.es = schema
 	return nil
 }
 
 func (c ComplexityLimit) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
-	es := graphql.GetServerContext(ctx)
 	op := rc.Doc.Operations.ForName(rc.OperationName)
-	complexity := complexity.Calculate(es, op, rc.Variables)
+	complexity := complexity.Calculate(c.es, op, rc.Variables)
 
-	limit := c(ctx, rc)
+	limit := c.Func(ctx, rc)
 
-	rc.Stats.Extension[complexityExtension] = &ComplexityStats{
+	rc.Stats.SetExtension(complexityExtension, &ComplexityStats{
 		Complexity:      complexity,
 		ComplexityLimit: limit,
-	}
+	})
 
 	if complexity > limit {
 		return gqlerror.Errorf("operation has complexity %d, which exceeds the limit of %d", complexity, limit)
@@ -69,6 +75,6 @@ func GetComplexityStats(ctx context.Context) *ComplexityStats {
 		return nil
 	}
 
-	s, _ := rc.Stats.Extension[complexityExtension].(*ComplexityStats)
+	s, _ := rc.Stats.GetExtension(complexityExtension).(*ComplexityStats)
 	return s
 }

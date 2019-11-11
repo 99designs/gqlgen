@@ -50,7 +50,7 @@ func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{})
 
-	srv.SetQueryCache(lru.New(100))
+	srv.SetQueryCache(lru.New(1000))
 
 	srv.Use(extension.Introspection{})
 	srv.Use(extension.AutomaticPersistedQuery{
@@ -78,7 +78,7 @@ func (s *Server) SetQueryCache(cache graphql.Cache) {
 }
 
 func (s *Server) Use(extension graphql.HandlerExtension) {
-	if err := extension.Validate(); err != nil {
+	if err := extension.Validate(s.es); err != nil {
 		panic(err)
 	}
 
@@ -161,7 +161,7 @@ func (r OperationFunc) ExtensionName() string {
 	return "InlineOperationFunc"
 }
 
-func (r OperationFunc) Validate() error {
+func (r OperationFunc) Validate(schema graphql.ExecutableSchema) error {
 	if r == nil {
 		return fmt.Errorf("OperationFunc can not be nil")
 	}
@@ -178,7 +178,7 @@ func (r ResponseFunc) ExtensionName() string {
 	return "InlineResponseFunc"
 }
 
-func (r ResponseFunc) Validate() error {
+func (r ResponseFunc) Validate(schema graphql.ExecutableSchema) error {
 	if r == nil {
 		return fmt.Errorf("ResponseFunc can not be nil")
 	}
@@ -195,7 +195,7 @@ func (f FieldFunc) ExtensionName() string {
 	return "InlineFieldFunc"
 }
 
-func (f FieldFunc) Validate() error {
+func (f FieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	if f == nil {
 		return fmt.Errorf("FieldFunc can not be nil")
 	}

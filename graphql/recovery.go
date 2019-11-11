@@ -26,7 +26,7 @@ func (f RecoverFunc) ExtensionName() string {
 	return "RecoverFunc"
 }
 
-func (f RecoverFunc) Validate() error {
+func (f RecoverFunc) Validate(schema ExecutableSchema) error {
 	if f == nil {
 		return fmt.Errorf("RecoverFunc can not be nil")
 	}

@@ -4,8 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"fmt"
+
+	"github.com/vektah/gqlparser/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/mitchellh/mapstructure"
@@ -21,6 +22,8 @@ type AutomaticPersistedQuery struct {
 	Cache graphql.Cache
 }
 
+var _ graphql.OperationParameterMutator = AutomaticPersistedQuery{}
+
 func (a AutomaticPersistedQuery) ExtensionName() string {
 	return "AutomaticPersistedQuery"
 }
@@ -32,7 +35,7 @@ func (a AutomaticPersistedQuery) Validate() error {
 	return nil
 }
 
-func (a AutomaticPersistedQuery) MutateRequest(ctx context.Context, rawParams *graphql.RawParams) error {
+func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, rawParams *graphql.RawParams) *gqlerror.Error {
 	if rawParams.Extensions["persistedQuery"] == nil {
 		return nil
 	}
@@ -43,24 +46,24 @@ func (a AutomaticPersistedQuery) MutateRequest(ctx context.Context, rawParams *g
 	}
 
 	if err := mapstructure.Decode(rawParams.Extensions["persistedQuery"], &extension); err != nil {
-		return errors.New("invalid APQ extension data")
+		return gqlerror.Errorf("invalid APQ extension data")
 	}
 
 	if extension.Version != 1 {
-		return errors.New("unsupported APQ version")
+		return gqlerror.Errorf("unsupported APQ version")
 	}
 
 	if rawParams.Query == "" {
 		// client sent optimistic query hash without query string, get it from the cache
 		query, ok := a.Cache.Get(extension.Sha256)
 		if !ok {
-			return errors.New(errPersistedQueryNotFound)
+			return gqlerror.Errorf(errPersistedQueryNotFound)
 		}
 		rawParams.Query = query.(string)
 	} else {
 		// client sent optimistic query hash with query string, verify and store it
 		if computeQueryHash(rawParams.Query) != extension.Sha256 {
-			return errors.New("provided APQ hash does not match query")
+			return gqlerror.Errorf("provided APQ hash does not match query")
 		}
 		a.Cache.Add(extension.Sha256, rawParams.Query)
 	}

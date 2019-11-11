@@ -5,20 +5,19 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
 	{{- end }}
-	fc := &graphql.FieldContext{
-		Object: {{$object.Name|quote}},
-		Field: field,
-		Args:  nil,
-		IsMethod: {{or $field.IsMethod $field.IsResolver}},
-		Stats: graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func () {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = {{ $null }}
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object: {{$object.Name|quote}},
+		Field: field,
+		Args:  nil,
+		IsMethod: {{or $field.IsMethod $field.IsResolver}},
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	{{- if $field.Args }}
 		rawArgs := field.ArgumentMap(ec.Variables)
@@ -29,7 +28,6 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		}
 		fc.Args = args
 	{{- end }}
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	{{- if  $.Directives.LocationDirectives "FIELD" }}
 		resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			{{ template "field" $field }}

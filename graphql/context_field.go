@@ -26,9 +26,6 @@ type FieldContext struct {
 	Result interface{}
 	// IsMethod indicates if the resolver is a method
 	IsMethod bool
-
-	// Stats collected while executing this field
-	Stats FieldStats
 }
 
 type FieldStats struct {

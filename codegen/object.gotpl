@@ -7,7 +7,6 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 	fields := graphql.CollectFields(ec.OperationContext, sel, {{$object.Name|lcFirst}}Implementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: {{$object.Name|quote}},
-		Stats: graphql.FieldStats{Started: graphql.Now()},
 	})
 	if len(fields) != 1 {
 		ec.Errorf(ctx, "must subscribe to exactly one stream")
@@ -29,7 +28,6 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 	{{if $object.Root}}
 		ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 			Object: {{$object.Name|quote}},
-			Stats: graphql.FieldStats{Started: graphql.Now()},
 		})
 	{{end}}
 

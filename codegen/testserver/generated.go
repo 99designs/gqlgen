@@ -2714,22 +2714,20 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedField, obj *A) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "A",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "A",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -2747,22 +2745,20 @@ func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedFi
 }
 
 func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.CollectedField, obj *AIt) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "AIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "AIt",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -2780,22 +2776,20 @@ func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.Collected
 }
 
 func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.CollectedField, obj *AbIt) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "AbIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "AbIt",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -2813,22 +2807,20 @@ func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.Collecte
 }
 
 func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Autobind",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Autobind",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Int, nil
@@ -2846,22 +2838,20 @@ func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Autobind",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Autobind",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Int32, nil
@@ -2879,22 +2869,20 @@ func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Autobind",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Autobind",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Int64, nil
@@ -2912,22 +2900,20 @@ func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Autobind",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Autobind",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IdStr, nil
@@ -2945,22 +2931,20 @@ func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Autobind",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Autobind",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IdInt, nil
@@ -2978,22 +2962,20 @@ func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedField, obj *B) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "B",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "B",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -3011,22 +2993,20 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 }
 
 func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Circle",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Circle",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Radius, nil
@@ -3041,22 +3021,20 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Circle",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Circle",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Area(), nil
@@ -3071,22 +3049,20 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql.CollectedField, obj *ContentPost) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Content_Post",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Content_Post",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
@@ -3101,22 +3077,20 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql.CollectedField, obj *ContentUser) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Content_User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Content_User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
@@ -3131,22 +3105,20 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, field graphql.CollectedField, obj *EmbeddedDefaultScalar) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "EmbeddedDefaultScalar",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "EmbeddedDefaultScalar",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Value, nil
@@ -3161,22 +3133,20 @@ func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, fi
 }
 
 func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "EmbeddedPointer",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "EmbeddedPointer",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -3191,22 +3161,20 @@ func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graph
 }
 
 func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "EmbeddedPointer",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "EmbeddedPointer",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Title, nil
@@ -3221,22 +3189,20 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _Error_id(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Error",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Error",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -3254,22 +3220,20 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Error",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Error",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ErrorOnNonRequiredField()
@@ -3284,22 +3248,20 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 }
 
 func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Error",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Error",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ErrorOnRequiredField()
@@ -3317,22 +3279,20 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 }
 
 func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Error",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Error",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.NilOnRequiredField(), nil
@@ -3350,22 +3310,20 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 }
 
 func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Errors",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Errors",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Errors().A(rctx, obj)
@@ -3383,22 +3341,20 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Errors",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Errors",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Errors().B(rctx, obj)
@@ -3416,22 +3372,20 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Errors",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Errors",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Errors().C(rctx, obj)
@@ -3449,22 +3403,20 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Errors",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Errors",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Errors().D(rctx, obj)
@@ -3482,22 +3434,20 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Errors",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Errors",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Errors().E(rctx, obj)
@@ -3515,22 +3465,20 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field graphql.CollectedField, obj *ForcedResolver) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ForcedResolver",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ForcedResolver",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ForcedResolver().Field(rctx, obj)
@@ -3545,22 +3493,20 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 }
 
 func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.CollectedField, obj *InnerObject) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "InnerObject",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "InnerObject",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -3578,22 +3524,20 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field graphql.CollectedField, obj *invalid_packagename.InvalidIdentifier) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "InvalidIdentifier",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "InvalidIdentifier",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -3611,22 +3555,20 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 }
 
 func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedField, obj *introspection1.It) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "It",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "It",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -3644,22 +3586,20 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 }
 
 func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.CollectedField, obj *LoopA) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "LoopA",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "LoopA",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.B, nil
@@ -3677,22 +3617,20 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 }
 
 func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.CollectedField, obj *LoopB) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "LoopB",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "LoopB",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.A, nil
@@ -3710,22 +3648,20 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 }
 
 func (ec *executionContext) _Map_id(ctx context.Context, field graphql.CollectedField, obj *Map) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Map",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Map",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -3743,22 +3679,20 @@ func (ec *executionContext) _Map_id(ctx context.Context, field graphql.Collected
 }
 
 func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "MapStringInterfaceType",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "MapStringInterfaceType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		switch v := obj["a"].(type) {
@@ -3782,22 +3716,20 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 }
 
 func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "MapStringInterfaceType",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "MapStringInterfaceType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		switch v := obj["b"].(type) {
@@ -3821,22 +3753,20 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 }
 
 func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ModelMethods",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ModelMethods",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ModelMethods().ResolverField(rctx, obj)
@@ -3854,22 +3784,20 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 }
 
 func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ModelMethods",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ModelMethods",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.NoContext(), nil
@@ -3887,22 +3815,20 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 }
 
 func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ModelMethods",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ModelMethods",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.WithContext(ctx), nil
@@ -3920,22 +3846,20 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 }
 
 func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ObjectDirectives",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ObjectDirectives",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -3985,22 +3909,20 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ObjectDirectives",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ObjectDirectives",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -4035,22 +3957,20 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 }
 
 func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectivesWithCustomGoModel) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ObjectDirectivesWithCustomGoModel",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ObjectDirectivesWithCustomGoModel",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -4085,22 +4005,20 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 }
 
 func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *OuterObject) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "OuterObject",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "OuterObject",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Inner, nil
@@ -4118,22 +4036,20 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "OverlappingFields",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
@@ -4151,22 +4067,20 @@ func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field
 }
 
 func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "OverlappingFields",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
@@ -4184,22 +4098,20 @@ func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field
 }
 
 func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "OverlappingFields",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.OverlappingFields().OldFoo(rctx, obj)
@@ -4217,22 +4129,20 @@ func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field
 }
 
 func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "OverlappingFields",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.NewFoo, nil
@@ -4250,22 +4160,20 @@ func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field
 }
 
 func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "OverlappingFields",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "OverlappingFields",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.NewFoo, nil
@@ -4283,22 +4191,20 @@ func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, fiel
 }
 
 func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, field graphql.CollectedField, obj *Panics) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Panics",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Panics",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Panics().FieldScalarMarshal(rctx, obj)
@@ -4316,20 +4222,19 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 }
 
 func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field graphql.CollectedField, obj *Panics) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Panics",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Panics",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Panics_fieldFuncMarshal_args(ctx, rawArgs)
@@ -4338,7 +4243,6 @@ func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field 
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.FieldFuncMarshal(ctx, args["u"].([]MarshalPanic)), nil
@@ -4356,20 +4260,19 @@ func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field 
 }
 
 func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field graphql.CollectedField, obj *Panics) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Panics",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Panics",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Panics_argUnmarshal_args(ctx, rawArgs)
@@ -4378,7 +4281,6 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Panics().ArgUnmarshal(rctx, obj, args["u"].([]MarshalPanic))
@@ -4396,22 +4298,20 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _Primitive_value(ctx context.Context, field graphql.CollectedField, obj *Primitive) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Primitive",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Primitive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Primitive().Value(rctx, obj)
@@ -4429,22 +4329,20 @@ func (ec *executionContext) _Primitive_value(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphql.CollectedField, obj *Primitive) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Primitive",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Primitive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Squared(), nil
@@ -4462,22 +4360,20 @@ func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "PrimitiveString",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "PrimitiveString",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.PrimitiveString().Value(rctx, obj)
@@ -4495,22 +4391,20 @@ func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "PrimitiveString",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "PrimitiveString",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Doubled(), nil
@@ -4528,22 +4422,20 @@ func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field 
 }
 
 func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "PrimitiveString",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "PrimitiveString",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.PrimitiveString().Len(rctx, obj)
@@ -4561,22 +4453,20 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().InvalidIdentifier(rctx)
@@ -4591,22 +4481,20 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 }
 
 func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Collision(rctx)
@@ -4621,20 +4509,19 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_mapInput_args(ctx, rawArgs)
@@ -4643,7 +4530,6 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().MapInput(rctx, args["input"].(map[string]interface{}))
@@ -4658,20 +4544,19 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_recursive_args(ctx, rawArgs)
@@ -4680,7 +4565,6 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Recursive(rctx, args["input"].(*RecursiveInputSlice))
@@ -4695,20 +4579,19 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_nestedInputs_args(ctx, rawArgs)
@@ -4717,7 +4600,6 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().NestedInputs(rctx, args["input"].([][]*OuterInput))
@@ -4732,22 +4614,20 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 }
 
 func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().NestedOutputs(rctx)
@@ -4762,22 +4642,20 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ModelMethods(rctx)
@@ -4792,20 +4670,19 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_user_args(ctx, rawArgs)
@@ -4814,7 +4691,6 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().User(rctx, args["id"].(int))
@@ -4832,20 +4708,19 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_nullableArg_args(ctx, rawArgs)
@@ -4854,7 +4729,6 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().NullableArg(rctx, args["arg"].(*int))
@@ -4869,20 +4743,19 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_inputSlice_args(ctx, rawArgs)
@@ -4891,7 +4764,6 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().InputSlice(rctx, args["arg"].([]string))
@@ -4909,22 +4781,20 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ShapeUnion(rctx)
@@ -4942,22 +4812,20 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Autobind(rctx)
@@ -4972,22 +4840,20 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DeprecatedField(rctx)
@@ -5005,22 +4871,20 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Overlapping(rctx)
@@ -5035,20 +4899,19 @@ func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_directiveArg_args(ctx, rawArgs)
@@ -5057,7 +4920,6 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveArg(rctx, args["arg"].(string))
@@ -5072,20 +4934,19 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 }
 
 func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_directiveNullableArg_args(ctx, rawArgs)
@@ -5094,7 +4955,6 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveNullableArg(rctx, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string))
@@ -5109,20 +4969,19 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 }
 
 func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_directiveInputNullable_args(ctx, rawArgs)
@@ -5131,7 +4990,6 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveInputNullable(rctx, args["arg"].(*InputDirectives))
@@ -5146,20 +5004,19 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 }
 
 func (ec *executionContext) _Query_directiveInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_directiveInput_args(ctx, rawArgs)
@@ -5168,7 +5025,6 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveInput(rctx, args["arg"].(InputDirectives))
@@ -5183,20 +5039,19 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 }
 
 func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_directiveInputType_args(ctx, rawArgs)
@@ -5205,7 +5060,6 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveInputType(rctx, args["arg"].(InnerInput))
@@ -5220,22 +5074,20 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 }
 
 func (ec *executionContext) _Query_directiveObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveObject(rctx)
@@ -5250,22 +5102,20 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
@@ -5280,20 +5130,19 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 }
 
 func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_directiveFieldDef_args(ctx, rawArgs)
@@ -5302,7 +5151,6 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -5348,22 +5196,20 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 }
 
 func (ec *executionContext) _Query_directiveField(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveField(rctx)
@@ -5378,22 +5224,20 @@ func (ec *executionContext) _Query_directiveField(ctx context.Context, field gra
 }
 
 func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -5434,22 +5278,20 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -5484,22 +5326,20 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 }
 
 func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Shapes(rctx)
@@ -5514,22 +5354,20 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -5564,20 +5402,19 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_mapStringInterface_args(ctx, rawArgs)
@@ -5586,7 +5423,6 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().MapStringInterface(rctx, args["in"].(map[string]interface{}))
@@ -5601,20 +5437,19 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 }
 
 func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_mapNestedStringInterface_args(ctx, rawArgs)
@@ -5623,7 +5458,6 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().MapNestedStringInterface(rctx, args["in"].(*NestedMapInput))
@@ -5638,22 +5472,20 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 }
 
 func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ErrorBubble(rctx)
@@ -5668,22 +5500,20 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Errors(rctx)
@@ -5698,22 +5528,20 @@ func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Valid(rctx)
@@ -5731,22 +5559,20 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Panics(rctx)
@@ -5761,22 +5587,20 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().PrimitiveObject(rctx)
@@ -5794,22 +5618,20 @@ func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().PrimitiveStringObject(rctx)
@@ -5827,20 +5649,19 @@ func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, fi
 }
 
 func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_defaultScalar_args(ctx, rawArgs)
@@ -5849,7 +5670,6 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DefaultScalar(rctx, args["arg"].(string))
@@ -5867,22 +5687,20 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Slices(rctx)
@@ -5897,22 +5715,20 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ScalarSlice(rctx)
@@ -5930,20 +5746,19 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query_fallback_args(ctx, rawArgs)
@@ -5952,7 +5767,6 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Fallback(rctx, args["arg"].(FallbackToStringEncoding))
@@ -5970,22 +5784,20 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().OptionalUnion(rctx)
@@ -6000,22 +5812,20 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ValidType(rctx)
@@ -6030,22 +5840,20 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().WrappedStruct(rctx)
@@ -6063,22 +5871,20 @@ func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().WrappedScalar(rctx)
@@ -6096,20 +5902,19 @@ func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Query___type_args(ctx, rawArgs)
@@ -6118,7 +5923,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectType(args["name"].(string))
@@ -6133,22 +5937,20 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectSchema()
@@ -6163,22 +5965,20 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Rectangle",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Rectangle",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Length, nil
@@ -6193,22 +5993,20 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Rectangle",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Rectangle",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Width, nil
@@ -6223,22 +6021,20 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Rectangle",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Rectangle",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Area(), nil
@@ -6253,22 +6049,20 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Slices",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Slices",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Test1, nil
@@ -6283,22 +6077,20 @@ func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Slices",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Slices",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Test2, nil
@@ -6313,22 +6105,20 @@ func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Slices",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Slices",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Test3, nil
@@ -6346,22 +6136,20 @@ func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Slices",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Slices",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Test4, nil
@@ -6379,22 +6167,20 @@ func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = nil
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Subscription().Updated(rctx)
@@ -6422,22 +6208,20 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 }
 
 func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = nil
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Subscription().InitPayload(rctx)
@@ -6465,20 +6249,19 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 }
 
 func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = nil
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Subscription_directiveArg_args(ctx, rawArgs)
@@ -6487,7 +6270,6 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 		return nil
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Subscription().DirectiveArg(rctx, args["arg"].(string))
@@ -6512,20 +6294,19 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 }
 
 func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = nil
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_Subscription_directiveNullableArg_args(ctx, rawArgs)
@@ -6534,7 +6315,6 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 		return nil
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Subscription().DirectiveNullableArg(rctx, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string))
@@ -6559,22 +6339,20 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 }
 
 func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = nil
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -6625,22 +6403,20 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 }
 
 func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "Subscription",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = nil
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
@@ -6685,22 +6461,20 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -6718,22 +6492,20 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 }
 
 func (ec *executionContext) _User_friends(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.User().Friends(rctx, obj)
@@ -6751,22 +6523,20 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _User_created(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Created, nil
@@ -6784,22 +6554,20 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _User_updated(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Updated, nil
@@ -6814,22 +6582,20 @@ func (ec *executionContext) _User_updated(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ValidType",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ValidType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DifferentCase, nil
@@ -6847,22 +6613,20 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 }
 
 func (ec *executionContext) _ValidType_different_case(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ValidType",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ValidType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DifferentCaseOld, nil
@@ -6880,20 +6644,19 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 }
 
 func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ValidType",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ValidType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_ValidType_validInputKeywords_args(ctx, rawArgs)
@@ -6902,7 +6665,6 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ValidInputKeywords, nil
@@ -6920,20 +6682,19 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 }
 
 func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "ValidType",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "ValidType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field_ValidType_validArgs_args(ctx, rawArgs)
@@ -6942,7 +6703,6 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ValidArgs, nil
@@ -6960,22 +6720,20 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 }
 
 func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graphql.CollectedField, obj *WrappedStruct) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "WrappedStruct",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "WrappedStruct",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -6993,22 +6751,20 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 }
 
 func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.CollectedField, obj *XXIt) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "XXIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "XXIt",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -7026,22 +6782,20 @@ func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.Collecte
 }
 
 func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.CollectedField, obj *XxIt) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "XxIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "XxIt",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -7059,22 +6813,20 @@ func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.Collecte
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Directive",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7092,22 +6844,20 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) ___Directive_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Directive",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -7122,22 +6872,20 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 }
 
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Directive",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Locations, nil
@@ -7155,22 +6903,20 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 }
 
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Directive",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Directive",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
@@ -7188,22 +6934,20 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__EnumValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7221,22 +6965,20 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) ___EnumValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__EnumValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -7251,22 +6993,20 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 }
 
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__EnumValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsDeprecated(), nil
@@ -7284,22 +7024,20 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 }
 
 func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__EnumValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__EnumValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DeprecationReason(), nil
@@ -7314,22 +7052,20 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 }
 
 func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Field",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7347,22 +7083,20 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) ___Field_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Field",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -7377,22 +7111,20 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 }
 
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Field",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
@@ -7410,22 +7142,20 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Field",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -7443,22 +7173,20 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Field",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsDeprecated(), nil
@@ -7476,22 +7204,20 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Field",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Field",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DeprecationReason(), nil
@@ -7506,22 +7232,20 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 }
 
 func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__InputValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7539,22 +7263,20 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) ___InputValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__InputValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -7569,22 +7291,20 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 }
 
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__InputValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -7602,22 +7322,20 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__InputValue",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__InputValue",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DefaultValue, nil
@@ -7632,22 +7350,20 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 }
 
 func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Schema",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Types(), nil
@@ -7665,22 +7381,20 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Schema",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.QueryType(), nil
@@ -7698,22 +7412,20 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Schema",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.MutationType(), nil
@@ -7728,22 +7440,20 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 }
 
 func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Schema",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SubscriptionType(), nil
@@ -7758,22 +7468,20 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 }
 
 func (ec *executionContext) ___Schema_directives(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Schema",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Schema",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Directives(), nil
@@ -7791,22 +7499,20 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 }
 
 func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Kind(), nil
@@ -7824,22 +7530,20 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name(), nil
@@ -7854,22 +7558,20 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) ___Type_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
@@ -7884,20 +7586,19 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field___Type_fields_args(ctx, rawArgs)
@@ -7906,7 +7607,6 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Fields(args["includeDeprecated"].(bool)), nil
@@ -7921,22 +7621,20 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Interfaces(), nil
@@ -7951,22 +7649,20 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PossibleTypes(), nil
@@ -7981,20 +7677,19 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := ec.field___Type_enumValues_args(ctx, rawArgs)
@@ -8003,7 +7698,6 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	fc.Args = args
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.EnumValues(args["includeDeprecated"].(bool)), nil
@@ -8018,22 +7712,20 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.InputFields(), nil
@@ -8048,22 +7740,20 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 }
 
 func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "__Type",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "__Type",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.OfType(), nil
@@ -8078,22 +7768,20 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.CollectedField, obj *AsdfIt) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "asdfIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "asdfIt",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -8111,22 +7799,20 @@ func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.Collec
 }
 
 func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.CollectedField, obj *IIt) (ret graphql.Marshaler) {
-	fc := &graphql.FieldContext{
-		Object:   "iIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-		Stats:    graphql.FieldStats{Started: graphql.Now()},
-	}
 	defer func() {
-		fc.Stats.Completed = graphql.Now()
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
 			ret = graphql.Null
 		}
 	}()
+	fc := &graphql.FieldContext{
+		Object:   "iIt",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
 	ctx = graphql.WithFieldContext(ctx, fc)
-	fc.Stats.ArgumentsCompleted = graphql.Now()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -9590,7 +9276,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Query",
-		Stats:  graphql.FieldStats{Started: graphql.Now()},
 	})
 
 	out := graphql.NewFieldSet(fields)
@@ -10196,7 +9881,6 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Subscription",
-		Stats:  graphql.FieldStats{Started: graphql.Now()},
 	})
 	if len(fields) != 1 {
 		ec.Errorf(ctx, "must subscribe to exactly one stream")
@@ -10956,7 +10640,6 @@ func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlg
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -10998,7 +10681,6 @@ func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designs�
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11172,7 +10854,6 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11253,7 +10934,6 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11325,7 +11005,6 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Co
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11375,7 +11054,6 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11417,7 +11095,6 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11771,7 +11448,6 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99design
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11812,7 +11488,6 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚖgithubᚗcomᚋ99designs�
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -11921,7 +11596,6 @@ func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -12136,7 +11810,6 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -12177,7 +11850,6 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -12218,7 +11890,6 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {
@@ -12274,7 +11945,6 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		fc := &graphql.FieldContext{
 			Index:  &i,
 			Result: &v[i],
-			Stats:  graphql.FieldStats{Started: graphql.Now()},
 		}
 		ctx := graphql.WithFieldContext(ctx, fc)
 		f := func(i int) {

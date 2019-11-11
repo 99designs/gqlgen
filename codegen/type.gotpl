@@ -78,7 +78,6 @@
 						fc := &graphql.FieldContext{
 							Index: &i,
 							Result: &v[i],
-							Stats: graphql.FieldStats{Started: graphql.Now()},
 						}
 						ctx := graphql.WithFieldContext(ctx, fc)
 						f := func(i int) {

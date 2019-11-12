@@ -37,6 +37,10 @@ type B struct {
 
 func (B) IsTestUnion() {}
 
+type CheckIssue896 struct {
+	ID *int `json:"id"`
+}
+
 type ContentPost struct {
 	Foo *string `json:"foo"`
 }

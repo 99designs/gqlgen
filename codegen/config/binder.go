@@ -285,7 +285,12 @@ func (t *TypeReference) UniquenessKey() string {
 		nullability = "N"
 	}
 
-	return nullability + t.Definition.Name + "2" + templates.TypeIdentifier(t.GO)
+	var elemNullability = ""
+	if t.GQL.Elem != nil && t.GQL.Elem.NonNull {
+		// Fix for #896
+		elemNullability = "ᚄ"
+	}
+	return nullability + t.Definition.Name + "2" + templates.TypeIdentifier(t.GO) + elemNullability
 }
 
 func (t *TypeReference) MarshalFunc() string {

@@ -66,6 +66,7 @@ type Stub struct {
 		EmbeddedCase1                    func(ctx context.Context) (*EmbeddedCase1, error)
 		EmbeddedCase2                    func(ctx context.Context) (*EmbeddedCase2, error)
 		EmbeddedCase3                    func(ctx context.Context) (*EmbeddedCase3, error)
+		EnumInInput                      func(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
 		Issue896a                        func(ctx context.Context) ([]*CheckIssue896, error)
@@ -276,6 +277,9 @@ func (r *stubQuery) EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error) {
 }
 func (r *stubQuery) EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error) {
 	return r.QueryResolver.EmbeddedCase3(ctx)
+}
+func (r *stubQuery) EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error) {
+	return r.QueryResolver.EnumInInput(ctx, input)
 }
 func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 	return r.QueryResolver.Shapes(ctx)

@@ -188,6 +188,9 @@ func (r *queryResolver) EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, erro
 func (r *queryResolver) EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 	panic("not implemented")
 }

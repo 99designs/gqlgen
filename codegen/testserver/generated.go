@@ -243,6 +243,7 @@ type ComplexityRoot struct {
 		EmbeddedCase1                    func(childComplexity int) int
 		EmbeddedCase2                    func(childComplexity int) int
 		EmbeddedCase3                    func(childComplexity int) int
+		EnumInInput                      func(childComplexity int, input *InputWithEnumValue) int
 		ErrorBubble                      func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
@@ -390,6 +391,7 @@ type QueryResolver interface {
 	EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error)
 	EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error)
 	EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error)
+	EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 	Shapes(ctx context.Context) ([]Shape, error)
 	NoShape(ctx context.Context) (Shape, error)
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
@@ -1000,6 +1002,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.EmbeddedCase3(childComplexity), true
+
+	case "Query.enumInInput":
+		if e.complexity.Query.EnumInInput == nil {
+			break
+		}
+
+		args, err := ec.field_Query_enumInInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.EnumInInput(childComplexity, args["input"].(*InputWithEnumValue)), true
 
 	case "Query.errorBubble":
 		if e.complexity.Query.ErrorBubble == nil {
@@ -1624,6 +1638,19 @@ type EmbeddedCase2 @goModel(model:"testserver.EmbeddedCase2") {
 
 type EmbeddedCase3 @goModel(model:"testserver.EmbeddedCase3") {
     unexportedEmbeddedInterfaceExportedMethod: String!
+}
+`},
+	&ast.Source{Name: "enum.graphql", Input: `enum EnumTest {
+    OK
+    NG
+}
+
+input InputWithEnumValue {
+    enum: EnumTest!
+}
+
+extend type Query {
+    enumInInput(input: InputWithEnumValue): EnumTest!
 }
 `},
 	&ast.Source{Name: "interfaces.graphql", Input: `extend type Query {
@@ -2307,6 +2334,20 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 		}
 	}
 	args["arg3"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_enumInInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *InputWithEnumValue
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOInputWithEnumValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputWithEnumValue(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -5925,6 +5966,47 @@ func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field grap
 	return ec.marshalOEmbeddedCase32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEmbeddedCase3(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_enumInInput_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().EnumInInput(rctx, args["input"].(*InputWithEnumValue))
+	})
+
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(EnumTest)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEnumTest(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -8896,6 +8978,24 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context, obj interface{}) (InputWithEnumValue, error) {
+	var it InputWithEnumValue
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "enum":
+			var err error
+			it.Enum, err = ec.unmarshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEnumTest(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj interface{}) (NestedMapInput, error) {
 	var it NestedMapInput
 	var asMap = obj.(map[string]interface{})
@@ -10611,6 +10711,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_embeddedCase3(ctx, field)
 				return res
 			})
+		case "enumInInput":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_enumInInput(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "shapes":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -11479,6 +11593,15 @@ func (ec *executionContext) marshalNDefaultScalarImplementation2string(ctx conte
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEnumTest(ctx context.Context, v interface{}) (EnumTest, error) {
+	var res EnumTest
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEnumTest(ctx context.Context, sel ast.SelectionSet, v EnumTest) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNError2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v Error) graphql.Marshaler {
@@ -12458,6 +12581,18 @@ func (ec *executionContext) unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99design
 		return nil, nil
 	}
 	res, err := ec.unmarshalOInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputDirectives(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOInputWithEnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputWithEnumValue(ctx context.Context, v interface{}) (InputWithEnumValue, error) {
+	return ec.unmarshalInputInputWithEnumValue(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOInputWithEnumValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputWithEnumValue(ctx context.Context, v interface{}) (*InputWithEnumValue, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOInputWithEnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInputWithEnumValue(ctx, v)
 	return &res, err
 }
 

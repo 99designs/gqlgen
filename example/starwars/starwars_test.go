@@ -214,7 +214,7 @@ func TestStarwars(t *testing.T) {
 		  }
 		}`, &resp, client.Var("episode", "INVALID"))
 
-		require.EqualError(t, err, `[{"message":"INVALID is not a valid Episode","path":["createReview"]}]`)
+		require.EqualError(t, err, `http 422: {"errors":[{"message":"INVALID is not a valid Episode","path":["variable","episode"]}],"data":null}`)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

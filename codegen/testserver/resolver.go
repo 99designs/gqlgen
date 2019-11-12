@@ -179,6 +179,15 @@ func (r *queryResolver) DirectiveDouble(ctx context.Context) (*string, error) {
 func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error) {
 	panic("not implemented")
 }
@@ -186,6 +195,9 @@ func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) NoShape(ctx context.Context) (Shape, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
@@ -255,6 +267,9 @@ func (r *subscriptionResolver) DirectiveDouble(ctx context.Context) (<-chan *str
 	panic("not implemented")
 }
 func (r *subscriptionResolver) DirectiveUnimplemented(ctx context.Context) (<-chan *string, error) {
+	panic("not implemented")
+}
+func (r *subscriptionResolver) Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error) {
 	panic("not implemented")
 }
 

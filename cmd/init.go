@@ -113,6 +113,7 @@ func initConfig(ctx *cli.Context) {
 		Filename: "resolver.go",
 		Type:     "Resolver",
 	}
+	cfg.SchemaFilename = config.StringList{ctx.String("schema")}
 
 	var buf bytes.Buffer
 	buf.WriteString(strings.TrimSpace(configComment))

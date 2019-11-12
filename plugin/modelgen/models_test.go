@@ -14,7 +14,9 @@ import (
 func TestModelGeneration(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen.yml")
 	require.NoError(t, err)
-	p := Plugin{}
+	p := Plugin{
+		MutateHook: mutateHook,
+	}
 	require.NoError(t, p.MutateConfig(cfg))
 
 	require.True(t, cfg.Models.UserDefined("MissingTypeNotNull"))
@@ -42,4 +44,32 @@ func TestModelGeneration(t *testing.T) {
 			require.True(t, len(words) > 1, "expected description %q to have more than one word", text)
 		}
 	})
+
+	t.Run("tags are applied", func(t *testing.T) {
+		file, err := ioutil.ReadFile("./out/generated.go")
+		require.NoError(t, err)
+
+		fileText := string(file)
+
+		expectedTags := []string{
+			`json:"missing2" database:"MissingTypeNotNullmissing2"`,
+			`json:"name" database:"MissingInputname"`,
+			`json:"missing2" database:"MissingTypeNullablemissing2"`,
+			`json:"name" database:"TypeWithDescriptionname"`,
+		}
+
+		for _, tag := range expectedTags {
+			require.True(t, strings.Contains(fileText, tag))
+		}
+	})
+}
+
+func mutateHook(b *ModelBuild) *ModelBuild {
+	for _, model := range b.Models {
+		for _, field := range model.Fields {
+			field.Tag += ` database:"` + model.Name + field.Name + `"`
+		}
+	}
+
+	return b
 }

@@ -1,6 +1,6 @@
 ---
 linkTitle: Resolvers
-title: Resolving grapqhQL requests
+title: Resolving graphQL requests
 description: Different ways of binding graphQL requests to resolvers
 menu: { main: { parent: 'reference' } }
 ---

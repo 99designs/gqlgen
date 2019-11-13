@@ -1828,10 +1828,16 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 	case Post:
 		return ec._Post(ctx, sel, &obj)
 	case *Post:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Post(ctx, sel, obj)
 	case Like:
 		return ec._Like(ctx, sel, &obj)
 	case *Like:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Like(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))

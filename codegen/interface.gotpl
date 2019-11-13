@@ -10,6 +10,9 @@ func (ec *executionContext) _{{$interface.Name}}(ctx context.Context, sel ast.Se
 				return ec._{{$implementor.Name}}(ctx, sel, &obj)
 		{{- end}}
 		case *{{$implementor.Type | ref}}:
+			if obj == nil {
+				return graphql.Null
+			}
 			return ec._{{$implementor.Name}}(ctx, sel, obj)
 	{{- end }}
 	default:

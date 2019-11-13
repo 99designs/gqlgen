@@ -40,4 +40,28 @@ func TestInterfaces(t *testing.T) {
 		var resp interface{}
 		c.MustPost(`{ noShape { area } }`, &resp)
 	})
+
+	t.Run("interfaces can be typed nil", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.NoShapeTypedNil = func(ctx context.Context) (shapes Shape, e error) {
+			panic("should not be called")
+		}
+
+		srv := handler.GraphQL(
+			NewExecutableSchema(Config{
+				Resolvers: resolvers,
+				Directives: DirectiveRoot{
+					MakeTypedNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+						var circle *Circle
+						return circle, nil
+					},
+				},
+			}),
+		)
+
+		c := client.New(srv)
+
+		var resp interface{}
+		c.MustPost(`{ noShapeTypedNil { area } }`, &resp)
+	})
 }

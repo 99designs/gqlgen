@@ -76,7 +76,7 @@ func TestInterfaces(t *testing.T) {
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
 					MakeTypedNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-						var dog *Dog
+						var dog *Dog // return a typed nil, not just nil
 						return dog, nil
 					},
 				},

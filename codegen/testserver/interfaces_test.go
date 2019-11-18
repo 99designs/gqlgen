@@ -64,4 +64,28 @@ func TestInterfaces(t *testing.T) {
 		var resp interface{}
 		c.MustPost(`{ noShapeTypedNil { area } }`, &resp)
 	})
+
+	t.Run("interfaces can be nil (test with code-generated resolver)", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.Animal = func(ctx context.Context) (animal Animal, e error) {
+			panic("should not be called")
+		}
+
+		srv := handler.GraphQL(
+			NewExecutableSchema(Config{
+				Resolvers: resolvers,
+				Directives: DirectiveRoot{
+					MakeTypedNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+						var dog *Dog
+						return dog, nil
+					},
+				},
+			}),
+		)
+
+		c := client.New(srv)
+
+		var resp interface{}
+		c.MustPost(`{ animal { species } }`, &resp)
+	})
 }

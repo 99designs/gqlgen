@@ -2,6 +2,21 @@ extend type Query {
     shapes: [Shape]
     noShape: Shape @makeNil
     noShapeTypedNil: Shape @makeTypedNil
+    animal: Animal @makeTypedNil
+}
+
+interface Animal {
+    species: String!
+}
+
+type Dog implements Animal {
+    species: String!
+    dogBreed: String!
+}
+
+type Cat implements Animal {
+    species: String!
+    catBreed: String!
 }
 
 interface Shape {

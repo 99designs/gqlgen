@@ -25,7 +25,7 @@ import (
 )
 
 // Defining mutation function
-func mutateHook(b *ModelBuild) *ModelBuild {
+func mutateHook(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 	for _, model := range b.Models {
 		for _, field := range model.Fields {
 			field.Tag += ` orm_binding:"` + model.Name + `.` +  field.Name + `"`
@@ -49,7 +49,7 @@ func main() {
 
 	err = api.Generate(cfg,
 		api.NoPlugins(),
-		api.AddPlugin(p),
+		api.AddPlugin(&p),
 	)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())

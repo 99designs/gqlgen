@@ -54,8 +54,10 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 
-	if err := validate(cfg); err != nil {
-		return errors.Wrap(err, "validation failed")
+	if !cfg.SkipValidation {
+		if err := validate(cfg); err != nil {
+			return errors.Wrap(err, "validation failed")
+		}
 	}
 
 	return nil

@@ -29,6 +29,7 @@ type Config struct {
 	StructTag                string                     `yaml:"struct_tag,omitempty"`
 	Directives               map[string]DirectiveConfig `yaml:"directives,omitempty"`
 	OmitSliceElementPointers bool                       `yaml:"omit_slice_element_pointers,omitempty"`
+	SkipValidation           bool                       `yaml:"skip_validation,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}

@@ -10,14 +10,16 @@ import (
 )
 
 type Import struct {
-	Name  string
-	Path  string
-	Alias string
+	NameForPackage code.NameForPackage
+	Name           string
+	Path           string
+	Alias          string
 }
 
 type Imports struct {
-	imports []*Import
-	destDir string
+	nameForPackage code.NameForPackage
+	imports        []*Import
+	destDir        string
 }
 
 func (i *Import) String() string {
@@ -49,7 +51,7 @@ func (s *Imports) Reserve(path string, aliases ...string) (string, error) {
 		return "", nil
 	}
 
-	name := code.NameForPackage(path)
+	name := s.nameForPackage.Get(path)
 	var alias string
 	if len(aliases) != 1 {
 		alias = name
@@ -69,9 +71,10 @@ func (s *Imports) Reserve(path string, aliases ...string) (string, error) {
 	}
 
 	s.imports = append(s.imports, &Import{
-		Name:  name,
-		Path:  path,
-		Alias: alias,
+		NameForPackage: s.nameForPackage,
+		Name:           name,
+		Path:           path,
+		Alias:          alias,
 	})
 
 	return "", nil
@@ -94,8 +97,9 @@ func (s *Imports) Lookup(path string) string {
 	}
 
 	imp := &Import{
-		Name: code.NameForPackage(path),
-		Path: path,
+		NameForPackage: s.nameForPackage,
+		Name:           s.nameForPackage.Get(path),
+		Path:           path,
 	}
 	s.imports = append(s.imports, imp)
 

@@ -14,8 +14,6 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var nameForPackageCache = sync.Map{}
-
 var gopaths []string
 
 func init() {
@@ -93,23 +91,41 @@ func ImportPathForDir(dir string) (res string) {
 var modregex = regexp.MustCompile("module (.*)\n")
 
 // NameForPackage returns the package name for a given import path. This can be really slow.
-func NameForPackage(importPath string) string {
+type NameForPackage struct {
+	cache    *sync.Map
+	packages []*packages.Package
+}
+
+// NewNameForPackage creates a NameForPackage
+func NewNameForPackage(packages []*packages.Package) NameForPackage {
+	return NameForPackage{
+		cache:    &sync.Map{},
+		packages: packages,
+	}
+}
+
+// Get returns the package name for a given import path. This can be really slow.
+func (n NameForPackage) Get(importPath string) string {
 	if importPath == "" {
 		panic(errors.New("import path can not be empty"))
 	}
-	if v, ok := nameForPackageCache.Load(importPath); ok {
+
+	if v, ok := n.cache.Load(importPath); ok {
 		return v.(string)
 	}
 	importPath = QualifyPackagePath(importPath)
-	p, _ := packages.Load(&packages.Config{
-		Mode: packages.NeedName,
-	}, importPath)
+	var p *packages.Package
+	for _, pkg := range n.packages {
+		if pkg.PkgPath == importPath {
+			p = pkg
+		}
+	}
 
-	if len(p) != 1 || p[0].Name == "" {
+	if p == nil || p.Name == "" {
 		return SanitizePackageName(filepath.Base(importPath))
 	}
 
-	nameForPackageCache.Store(importPath, p[0].Name)
+	n.cache.Store(importPath, p.Name)
 
-	return p[0].Name
+	return p.Name
 }

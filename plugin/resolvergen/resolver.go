@@ -36,9 +36,10 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 
 	if _, err := os.Stat(filename); os.IsNotExist(errors.Cause(err)) {
 		return templates.Render(templates.Options{
-			PackageName: data.Config.Resolver.Package,
-			Filename:    data.Config.Resolver.Filename,
-			Data:        resolverBuild,
+			PackageName:    data.Config.Resolver.Package,
+			Filename:       data.Config.Resolver.Filename,
+			Data:           resolverBuild,
+			NameForPackage: data.NameForPackage,
 		})
 	}
 

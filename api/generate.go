@@ -70,7 +70,7 @@ func validate(cfg *config.Config) error {
 	if cfg.Resolver.IsDefined() {
 		roots = append(roots, cfg.Resolver.ImportPath())
 	}
-	_, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, roots...)
+	_, err := packages.Load(&packages.Config{Mode: packages.LoadSyntax}, roots...)
 	if err != nil {
 		return errors.Wrap(err, "validation failed")
 	}

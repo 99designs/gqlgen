@@ -8,6 +8,7 @@ import (
 
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
+	"golang.org/x/tools/go/packages"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -132,7 +133,10 @@ func TestAutobinding(t *testing.T) {
 		type Message { id: ID }
 	`})
 
-	require.NoError(t, cfg.Autobind(s))
+	ps, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedTypes}, cfg.AutoBind...)
+	require.NoError(t, err)
+
+	require.NoError(t, cfg.Autobind(s, ps))
 
 	require.Equal(t, "github.com/99designs/gqlgen/example/scalars/model.Banned", cfg.Models["Banned"].Model[0])
 	require.Equal(t, "github.com/99designs/gqlgen/example/chat.Message", cfg.Models["Message"].Model[0])

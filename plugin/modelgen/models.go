@@ -7,8 +7,11 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
+	"golang.org/x/tools/go/packages"
 )
 
 type BuildMutateHook = func(b *ModelBuild) *ModelBuild
@@ -81,14 +84,21 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		return err
 	}
 
-	err = cfg.Autobind(schema)
+	// This must be before loading packages so the built in packages are loaded
+	cfg.InjectBuiltins(schema)
+
+	packageNames := append(cfg.AutoBind, cfg.Models.ReferencedPackages()...)
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedDeps | packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo}, packageNames...)
+	if err != nil {
+		return errors.Wrap(err, "loading failed")
+	}
+
+	err = cfg.Autobind(schema, pkgs)
 	if err != nil {
 		return err
 	}
 
-	cfg.InjectBuiltins(schema)
-
-	binder, err := cfg.NewBinder(schema)
+	binder, err := cfg.NewBinder(schema, pkgs)
 	if err != nil {
 		return err
 	}
@@ -240,6 +250,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		Filename:        cfg.Model.Filename,
 		Data:            b,
 		GeneratedHeader: true,
+		NameForPackage:  code.NewNameForPackage(pkgs),
 	})
 }
 

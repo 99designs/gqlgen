@@ -23,12 +23,7 @@ type Binder struct {
 	SawInvalid bool
 }
 
-func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, c.Models.ReferencedPackages()...)
-	if err != nil {
-		return nil, err
-	}
-
+func (c *Config) NewBinder(s *ast.Schema, pkgs []*packages.Package) (*Binder, error) {
 	mp := map[string]*packages.Package{}
 	var pkgErrs PkgErrors
 	for _, p := range pkgs {

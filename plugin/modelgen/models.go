@@ -80,14 +80,28 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		return err
 	}
 
-	err = cfg.Autobind(schema)
+	cfg.InjectBuiltins(schema)
+
+	ps, err := packages.Load(&packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedTypes |
+			packages.NeedTypesSizes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo,
+	}, append(cfg.Models.ReferencedPackages(), cfg.AutoBind...)...)
 	if err != nil {
 		return err
 	}
 
-	cfg.InjectBuiltins(schema)
+	err = cfg.Autobind(schema, ps)
+	if err != nil {
+		return err
+	}
 
-	binder, err := cfg.NewBinder(schema)
+	binder, err := cfg.NewBinder(schema, ps)
 	if err != nil {
 		return err
 	}

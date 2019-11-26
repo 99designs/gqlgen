@@ -59,11 +59,6 @@ func BuildData(cfg *config.Config, plugins []SchemaMutator) (*Data, error) {
 		return nil, err
 	}
 
-	err = cfg.Autobind(b.Schema)
-	if err != nil {
-		return nil, err
-	}
-
 	cfg.InjectBuiltins(b.Schema)
 
 	for _, p := range plugins {
@@ -73,7 +68,26 @@ func BuildData(cfg *config.Config, plugins []SchemaMutator) (*Data, error) {
 		}
 	}
 
-	b.Binder, err = b.Config.NewBinder(b.Schema)
+	ps, err := packages.Load(&packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedTypes |
+			packages.NeedTypesSizes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo,
+	}, append(cfg.Models.ReferencedPackages(), cfg.AutoBind...)...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cfg.Autobind(b.Schema, ps)
+	if err != nil {
+		return nil, err
+	}
+
+	b.Binder, err = b.Config.NewBinder(b.Schema, ps)
 	if err != nil {
 		return nil, err
 	}

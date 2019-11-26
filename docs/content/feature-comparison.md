@@ -15,7 +15,7 @@ weight: -1
 | Mutation | 👍 | 🚧 [pr](https://github.com/graph-gophers/graphql-go/pull/182) | 👍 | 👍 |
 | Subscription | 👍 | 🚧 [pr](https://github.com/graph-gophers/graphql-go/pull/182) | 👍 | 👍 |
 | Type Safety | 👍 | 👍 | ⛔️ | 👍 | 
-| Type Binding | 👍 | 🚧 [pr](https://github.com/graph-gophers/graphql-go/pull/194) | ⛔️ | 👍 |
+| Type Binding | 👍 | 👍 | ⛔️ | 👍 |
 | Embedding | 👍 | ⛔️ | 🚧 [pr](https://github.com/graphql-go/graphql/pull/371) | ⛔️ |
 | Interfaces | 👍 | 👍 | 👍 | ⛔️ [is](https://github.com/samsarahq/thunder/issues/78) |
 | Generated Enums | 👍 | ⛔️ | ⛔️ | ⛔️ |

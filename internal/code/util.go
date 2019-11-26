@@ -42,7 +42,7 @@ func QualifyPackagePath(importPath string) string {
 	wd, _ := os.Getwd()
 
 	// in go module mode, the import path doesn't need fixing
-	if _, ok := GoModuleRoot(wd); ok {
+	if _, ok := goModuleRoot(wd); ok {
 		return importPath
 	}
 

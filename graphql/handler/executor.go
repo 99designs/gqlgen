@@ -126,7 +126,7 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 
 	for _, p := range e.operationParameterMutators {
 		if err := p.MutateOperationParameters(ctx, params); err != nil {
-			return nil, gqlerror.List{err}
+			return rc, gqlerror.List{err}
 		}
 	}
 
@@ -136,18 +136,18 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 	var listErr gqlerror.List
 	rc.Doc, listErr = e.parseQuery(ctx, &rc.Stats, params.Query)
 	if len(listErr) != 0 {
-		return nil, listErr
+		return rc, listErr
 	}
 
 	rc.Operation = rc.Doc.Operations.ForName(params.OperationName)
 	if rc.Operation == nil {
-		return nil, gqlerror.List{gqlerror.Errorf("operation %s not found", params.OperationName)}
+		return rc, gqlerror.List{gqlerror.Errorf("operation %s not found", params.OperationName)}
 	}
 
 	var err *gqlerror.Error
 	rc.Variables, err = validator.VariableValues(e.server.es.Schema(), rc.Operation, params.Variables)
 	if err != nil {
-		return nil, gqlerror.List{err}
+		return rc, gqlerror.List{err}
 	}
 	rc.Stats.Validation.End = graphql.Now()
 

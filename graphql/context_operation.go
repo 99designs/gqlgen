@@ -52,7 +52,7 @@ func GetRequestContext(ctx context.Context) *RequestContext {
 }
 
 func GetOperationContext(ctx context.Context) *OperationContext {
-	if val, ok := ctx.Value(operationCtx).(*OperationContext); ok {
+	if val, ok := ctx.Value(operationCtx).(*OperationContext); ok && val != nil {
 		return val
 	}
 	panic("missing operation context")

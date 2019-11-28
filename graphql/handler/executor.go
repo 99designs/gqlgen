@@ -116,20 +116,22 @@ func (e executor) DispatchOperation(ctx context.Context, rc *graphql.OperationCo
 }
 
 func (e executor) CreateOperationContext(ctx context.Context, params *graphql.RawParams) (*graphql.OperationContext, gqlerror.List) {
+	rc := &graphql.OperationContext{
+		DisableIntrospection: true,
+		Recover:              graphql.DefaultRecover,
+		ResolverMiddleware:   e.fieldMiddleware,
+		Stats:                graphql.Stats{OperationStart: graphql.GetStartTime(ctx)},
+	}
+	ctx = graphql.WithOperationContext(ctx, rc)
+
 	for _, p := range e.operationParameterMutators {
 		if err := p.MutateOperationParameters(ctx, params); err != nil {
 			return nil, gqlerror.List{err}
 		}
 	}
 
-	rc := &graphql.OperationContext{
-		RawQuery:             params.Query,
-		OperationName:        params.OperationName,
-		DisableIntrospection: true,
-		Recover:              graphql.DefaultRecover,
-		ResolverMiddleware:   e.fieldMiddleware,
-		Stats:                graphql.Stats{OperationStart: graphql.GetStartTime(ctx)},
-	}
+	rc.RawQuery = params.Query
+	rc.OperationName = params.OperationName
 
 	var listErr gqlerror.List
 	rc.Doc, listErr = e.parseQuery(ctx, &rc.Stats, params.Query)

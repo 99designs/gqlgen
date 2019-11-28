@@ -22,6 +22,16 @@ type AutomaticPersistedQuery struct {
 	Cache graphql.Cache
 }
 
+type ApqStats struct {
+	// The hash of the incoming query
+	Hash string
+
+	// SentQuery is true if the incoming request sent the full query
+	SentQuery bool
+}
+
+const apqExtension = "APQ"
+
 var _ graphql.OperationParameterMutator = AutomaticPersistedQuery{}
 
 func (a AutomaticPersistedQuery) ExtensionName() string {
@@ -41,8 +51,8 @@ func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, 
 	}
 
 	var extension struct {
-		Sha256  string `json:"sha256Hash"`
-		Version int64  `json:"version"`
+		Sha256  string `mapstructure:"sha256Hash"`
+		Version int64  `mapstructure:"version"`
 	}
 
 	if err := mapstructure.Decode(rawParams.Extensions["persistedQuery"], &extension); err != nil {
@@ -53,6 +63,7 @@ func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, 
 		return gqlerror.Errorf("unsupported APQ version")
 	}
 
+	fullQuery := false
 	if rawParams.Query == "" {
 		// client sent optimistic query hash without query string, get it from the cache
 		query, ok := a.Cache.Get(extension.Sha256)
@@ -66,9 +77,25 @@ func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, 
 			return gqlerror.Errorf("provided APQ hash does not match query")
 		}
 		a.Cache.Add(extension.Sha256, rawParams.Query)
+		fullQuery = true
 	}
 
+	graphql.GetOperationContext(ctx).Stats.SetExtension(apqExtension, &ApqStats{
+		Hash:      extension.Sha256,
+		SentQuery: fullQuery,
+	})
+
 	return nil
+}
+
+func GetApqStats(ctx context.Context) *ApqStats {
+	rc := graphql.GetOperationContext(ctx)
+	if rc == nil {
+		return nil
+	}
+
+	s, _ := rc.Stats.GetExtension(apqExtension).(*ApqStats)
+	return s
 }
 
 func computeQueryHash(query string) string {

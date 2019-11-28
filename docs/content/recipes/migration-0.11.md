@@ -13,6 +13,7 @@ more modular and easier to maintain once we get to 1.0.
 
 Transports are the first thing that run, they handle decoding the incoming http request, and encoding the graphql 
 response. Supported transports are:
+
  - GET
  - JSON POST
  - Multipart form
@@ -29,23 +30,24 @@ srv.AddTransport(transport.Options{})
 srv.AddTransport(transport.GET{})
 srv.AddTransport(transport.POST{})
 srv.AddTransport(transport.MultipartForm{})
-````
+```
 
- 
 ### New handler extension API
 
 The core of this changes the handler package to be a set of composable extensions. The extensions implement a set of optional interfaces:
-- **OperationParameterMutator** runs before creating a OperationContext (formerly RequestContext). allows manipulating the raw query before parsing.
-- **OperationContextMutator** runs after creating the OperationContext, but before executing the root resolver.
-- **OperationInterceptor** runs for each incoming query after parsing and validation, for basic requests the writer will be invoked once, for subscriptions it will be invoked multiple times.
-- **ResponseInterceptor** runs around each graphql operation response. This can be called many times for a single operation the case of subscriptions.
-- **FieldInterceptor** runs around each field
+
+ - **OperationParameterMutator** runs before creating a OperationContext (formerly RequestContext). allows manipulating the raw query before parsing.
+ - **OperationContextMutator** runs after creating the OperationContext, but before executing the root resolver.
+ - **OperationInterceptor** runs for each incoming query after parsing and validation, for basic requests the writer will be invoked once, for subscriptions it will be invoked multiple times.
+ - **ResponseInterceptor** runs around each graphql operation response. This can be called many times for a single operation the case of subscriptions.
+ - **FieldInterceptor** runs around each field
 
 ![Anatomy of a request@2x](https://user-images.githubusercontent.com/2247982/68181515-c8a27c00-ffeb-11e9-86f6-1673e7179ecb.png)
 
 Users of an extension should not need to know which extension points are being used by a given extension, they are added to the server simply by calling `Use(extension)`.
 
 There are a few convenience methods for defining middleware inline, instead of creating an extension
+
 ```go
 srv := handler.New(es)
 srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
@@ -68,6 +70,7 @@ srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *gra
 
 
 Some of the features supported out of the box by handler extensions:
+
  - APQ
  - Query Complexity
  - Error Presenters and Recover Func
@@ -76,6 +79,7 @@ Some of the features supported out of the box by handler extensions:
  - Tracing API
 
 They can be `Use`'d like this:
+
 ```go
 srv := handler.New(es)
 srv.Use(extension.Introspection{})
@@ -99,6 +103,7 @@ As part of cleaning up the names the RequestContext has been renamed to Operatio
 ### Removal of tracing
 
 Many of the old interfaces collapse down into just a few extension points:
+
 ![Anatomy of a request@2x (1)](https://user-images.githubusercontent.com/2247982/68181517-cb04d600-ffeb-11e9-9271-0295e6c4ff34.png)
 
 The tracing interface has also been removed, tracing stats are now measured in core (eg time to parse query) and made available on the operation/response contexts. Much of the old interface was designed so that users of a tracer dont need to know which extension points it was listening to, the new handler extensions have the same goal. 
@@ -106,5 +111,6 @@ The tracing interface has also been removed, tracing stats are now measured in c
 ### Backward compatibility
 
 There is a backwards compatibility layer that keeps most of the original interface in place. There are a few places where BC is known to be broken:
+ 
  - ResponseMiddleware: The signature used to be `func(ctx context.Context, next func(ctx context.Context) []byte) []byte` and is now `func(ctx context.Context) *Response`. We could maintain BC by marshalling to json before and after, but the change is pretty easy to make and is likely to cause less issues.
  - The Tracer interface has been removed, any tracers will need to be reimplemented against the new extension interface.

@@ -48,6 +48,9 @@ struct_tag: json
 # Optional, set to true if you prefer []Thing over []*Thing
 omit_slice_element_pointers: false
 
+# Optional, set to speed up generation time by not performing a final validation pass
+skip_validation: true
+
 # Instead of listing out every model like below, you can automatically bind to any matching types
 # within the given path by using `model: User` or `model: models.User`. EXPERIMENTAL in v0.9.1
 autobind:

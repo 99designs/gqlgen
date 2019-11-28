@@ -47,7 +47,7 @@ func TestInterfaces(t *testing.T) {
 			panic("should not be called")
 		}
 
-		srv := handler.GraphQL(
+		srv := handler.NewDefaultServer(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
@@ -71,7 +71,7 @@ func TestInterfaces(t *testing.T) {
 			panic("should not be called")
 		}
 
-		srv := handler.GraphQL(
+		srv := handler.NewDefaultServer(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{

@@ -78,7 +78,8 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/example/starwars"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 )
 
@@ -87,10 +88,9 @@ func main() {
 
 	router.Use(auth.Middleware(db))
 
-	router.Handle("/", handler.Playground("Starwars", "/query"))
-	router.Handle("/query",
-		handler.GraphQL(starwars.NewExecutableSchema(starwars.NewResolver())),
-	)
+    srv := handler.NewDefaultServer(starwars.NewExecutableSchema(starwars.NewResolver()))
+	router.Handle("/", playground.Handler("Starwars", "/query"))
+	router.Handle("/query", srv)
 
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {

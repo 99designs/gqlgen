@@ -6,19 +6,19 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )
 
 func TestIntrospection(t *testing.T) {
-	t.Run("disabled", func(t *testing.T) {
+	t.Run("disabled when creating your own server", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		c := client.New(handler.GraphQL(
-			NewExecutableSchema(Config{Resolvers: resolvers}),
-			handler.IntrospectionEnabled(false),
-		))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 
 		var resp interface{}
 		err := c.Post(introspection.Query, &resp)
@@ -28,7 +28,7 @@ func TestIntrospection(t *testing.T) {
 	t.Run("enabled by default", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		c := client.New(handler.GraphQL(
+		c := client.New(handler.NewDefaultServer(
 			NewExecutableSchema(Config{Resolvers: resolvers}),
 		))
 
@@ -65,14 +65,12 @@ func TestIntrospection(t *testing.T) {
 	t.Run("disabled by middleware", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		c := client.New(handler.GraphQL(
-			NewExecutableSchema(Config{Resolvers: resolvers}),
-			handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-				graphql.GetRequestContext(ctx).DisableIntrospection = true
-
-				return next(ctx)
-			}),
-		))
+		srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+			graphql.GetOperationContext(ctx).DisableIntrospection = true
+			return next(ctx)
+		})
+		c := client.New(srv)
 
 		var resp interface{}
 		err := c.Post(introspection.Query, &resp)

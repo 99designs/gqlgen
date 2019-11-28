@@ -19,7 +19,7 @@ $ go get github.com/gin-gonic/gin
 In your router file, define the handlers for the GraphQL and Playground endpoints in two different methods and tie then together in the Gin router:
 ```go
 import (
-    "github.com/99designs/gqlgen/handler"
+    "github.com/99designs/gqlgen/graphql/handler"
     "github.com/gin-gonic/gin"
 )
 
@@ -27,7 +27,7 @@ import (
 func graphqlHandler() gin.HandlerFunc {
     // NewExecutableSchema and Config are in the generated.go file
     // Resolver is in the resolver.go file
-	h := handler.GraphQL(NewExecutableSchema(Config{Resolvers: &Resolver{}}))
+	h := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: &Resolver{}}))
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
@@ -36,7 +36,7 @@ func graphqlHandler() gin.HandlerFunc {
 
 // Defining the Playground handler
 func playgroundHandler() gin.HandlerFunc {
-	h := handler.Playground("GraphQL", "/query")
+	h := playground.Handler("GraphQL", "/query")
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)

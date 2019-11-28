@@ -7,7 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +24,7 @@ func TestInterfaces(t *testing.T) {
 			return nil, nil
 		}
 
-		srv := handler.GraphQL(
+		srv := handler.NewDefaultServer(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{

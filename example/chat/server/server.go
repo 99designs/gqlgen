@@ -6,8 +6,13 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/99designs/gqlgen/example/chat"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/gorilla/websocket"
 	"github.com/opentracing/opentracing-go"
 	"github.com/rs/cors"
@@ -24,14 +29,21 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	http.Handle("/", handler.Playground("Todo", "/query"))
-	http.Handle("/query", c.Handler(handler.GraphQL(chat.NewExecutableSchema(chat.New()),
-		handler.WebsocketUpgrader(websocket.Upgrader{
+	srv := handler.New(chat.NewExecutableSchema(chat.New()))
+
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
-		}))),
-	)
+		},
+	})
+	srv.Use(extension.Introspection{})
+
+	http.Handle("/", playground.Handler("Todo", "/query"))
+	http.Handle("/query", c.Handler(srv))
+
 	log.Fatal(http.ListenAndServe(":8085", nil))
 }
 

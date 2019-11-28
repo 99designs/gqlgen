@@ -22,8 +22,8 @@ type queryResolver struct{ *Resolver }
 func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 	var sels []string
 
-	reqCtx := graphql.GetRequestContext(ctx)
-	fieldSelections := graphql.GetResolverContext(ctx).Field.Selections
+	reqCtx := graphql.GetOperationContext(ctx)
+	fieldSelections := graphql.GetFieldContext(ctx).Field.Selections
 	for _, sel := range fieldSelections {
 		switch sel := sel.(type) {
 		case *ast.Field:

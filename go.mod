@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/websocket v1.2.0
 	github.com/hashicorp/golang-lru v0.5.0
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/matryer/moq v0.0.0-20190312154309-6cfb0558e1bd // indirect
 	github.com/mitchellh/mapstructure v0.0.0-20180203102830-a4e142e9c047
 	github.com/opentracing/basictracer-go v1.0.0 // indirect
 	github.com/opentracing/opentracing-go v1.0.2

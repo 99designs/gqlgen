@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/example/selection"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 func main() {
-	http.Handle("/", handler.Playground("Selection Demo", "/query"))
-	http.Handle("/query", handler.GraphQL(selection.NewExecutableSchema(selection.Config{Resolvers: &selection.Resolver{}})))
+	http.Handle("/", playground.Handler("Selection Demo", "/query"))
+	http.Handle("/query", handler.NewDefaultServer(selection.NewExecutableSchema(selection.Config{Resolvers: &selection.Resolver{}})))
 	log.Fatal(http.ListenAndServe(":8086", nil))
 }

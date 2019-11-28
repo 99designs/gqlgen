@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/example/dataloader"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 )
 
@@ -13,8 +14,8 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(dataloader.LoaderMiddleware)
 
-	router.Handle("/", handler.Playground("Dataloader", "/query"))
-	router.Handle("/query", handler.GraphQL(
+	router.Handle("/", playground.Handler("Dataloader", "/query"))
+	router.Handle("/query", handler.NewDefaultServer(
 		dataloader.NewExecutableSchema(dataloader.Config{Resolvers: &dataloader.Resolver{}}),
 	))
 

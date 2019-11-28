@@ -6,7 +6,7 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,21 +27,23 @@ func TestMiddleware(t *testing.T) {
 	}
 
 	areMethods := []bool{}
-	srv := handler.GraphQL(
+	srv := handler.NewDefaultServer(
 		NewExecutableSchema(Config{Resolvers: resolvers}),
-		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			path, _ := ctx.Value("path").([]int)
-			return next(context.WithValue(ctx, "path", append(path, 1)))
-		}),
-		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			path, _ := ctx.Value("path").([]int)
-			return next(context.WithValue(ctx, "path", append(path, 2)))
-		}),
-		handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-			areMethods = append(areMethods, graphql.GetResolverContext(ctx).IsMethod)
-			return next(ctx)
-		}),
 	)
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		path, _ := ctx.Value("path").([]int)
+		return next(context.WithValue(ctx, "path", append(path, 1)))
+	})
+
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		path, _ := ctx.Value("path").([]int)
+		return next(context.WithValue(ctx, "path", append(path, 2)))
+	})
+
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		areMethods = append(areMethods, graphql.GetFieldContext(ctx).IsMethod)
+		return next(ctx)
+	})
 
 	c := client.New(srv)
 

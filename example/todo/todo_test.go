@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/99designs/gqlgen/handler"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTodo(t *testing.T) {
-	c := client.New(handler.GraphQL(NewExecutableSchema(New())))
+	c := client.New(handler.NewDefaultServer(NewExecutableSchema(New())))
 
 	var resp struct {
 		CreateTodo struct{ ID string }
@@ -180,7 +180,7 @@ func TestTodo(t *testing.T) {
 }
 
 func TestSkipAndIncludeDirectives(t *testing.T) {
-	c := client.New(handler.GraphQL(NewExecutableSchema(New())))
+	c := client.New(handler.NewDefaultServer(NewExecutableSchema(New())))
 
 	t.Run("skip on field", func(t *testing.T) {
 		var resp map[string]interface{}

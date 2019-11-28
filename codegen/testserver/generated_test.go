@@ -5,20 +5,13 @@ package testserver
 
 import (
 	"context"
-	"net/http"
 	"reflect"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
-
-func TestGeneratedResolversAreValid(t *testing.T) {
-	http.Handle("/query", handler.GraphQL(NewExecutableSchema(Config{
-		Resolvers: &Resolver{},
-	})))
-}
 
 func TestForcedResolverFieldIsPointer(t *testing.T) {
 	field, ok := reflect.TypeOf((*ForcedResolverResolver)(nil)).Elem().MethodByName("Field")
@@ -44,7 +37,8 @@ func TestUnionFragments(t *testing.T) {
 		return &Circle{Radius: 32}, nil
 	}
 
-	c := client.New(handler.GraphQL(NewExecutableSchema(Config{Resolvers: resolvers})))
+	srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+	c := client.New(srv)
 
 	t.Run("inline fragment on union", func(t *testing.T) {
 		var resp struct {

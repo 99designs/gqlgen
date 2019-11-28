@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli"
 
 	// Required since otherwise dep will prune away these unused packages before codegen has a chance to run
+	_ "github.com/99designs/gqlgen/graphql/handler"
 	_ "github.com/99designs/gqlgen/handler"
 )
 

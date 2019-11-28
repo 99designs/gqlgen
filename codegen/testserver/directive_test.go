@@ -7,7 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
 
@@ -85,96 +85,95 @@ func TestDirectives(t *testing.T) {
 	resolvers.SubscriptionResolver.DirectiveUnimplemented = func(ctx context.Context) (<-chan *string, error) {
 		return okchan()
 	}
+	srv := handler.NewDefaultServer(NewExecutableSchema(Config{
+		Resolvers: resolvers,
+		Directives: DirectiveRoot{
+			Length: func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (interface{}, error) {
+				e := func(msg string) error {
+					if message == nil {
+						return fmt.Errorf(msg)
+					}
+					return fmt.Errorf(*message)
+				}
+				res, err := next(ctx)
+				if err != nil {
+					return nil, err
+				}
 
-	srv :=
-		handler.GraphQL(
-			NewExecutableSchema(Config{
-				Resolvers: resolvers,
-				Directives: DirectiveRoot{
-					Length: func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (interface{}, error) {
-						e := func(msg string) error {
-							if message == nil {
-								return fmt.Errorf(msg)
-							}
-							return fmt.Errorf(*message)
-						}
-						res, err := next(ctx)
-						if err != nil {
-							return nil, err
-						}
+				s := res.(string)
+				if len(s) < min {
+					return nil, e("too short")
+				}
+				if max != nil && len(s) > *max {
+					return nil, e("too long")
+				}
+				return res, nil
+			},
+			Range: func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (interface{}, error) {
+				res, err := next(ctx)
+				if err != nil {
+					return nil, err
+				}
 
-						s := res.(string)
-						if len(s) < min {
-							return nil, e("too short")
-						}
-						if max != nil && len(s) > *max {
-							return nil, e("too long")
-						}
-						return res, nil
-					},
-					Range: func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (interface{}, error) {
-						res, err := next(ctx)
-						if err != nil {
-							return nil, err
-						}
+				switch res := res.(type) {
+				case int:
+					if min != nil && res < *min {
+						return nil, fmt.Errorf("too small")
+					}
+					if max != nil && res > *max {
+						return nil, fmt.Errorf("too large")
+					}
+					return next(ctx)
 
-						switch res := res.(type) {
-						case int:
-							if min != nil && res < *min {
-								return nil, fmt.Errorf("too small")
-							}
-							if max != nil && res > *max {
-								return nil, fmt.Errorf("too large")
-							}
-							return next(ctx)
+				case int64:
+					if min != nil && int(res) < *min {
+						return nil, fmt.Errorf("too small")
+					}
+					if max != nil && int(res) > *max {
+						return nil, fmt.Errorf("too large")
+					}
+					return next(ctx)
 
-						case int64:
-							if min != nil && int(res) < *min {
-								return nil, fmt.Errorf("too small")
-							}
-							if max != nil && int(res) > *max {
-								return nil, fmt.Errorf("too large")
-							}
-							return next(ctx)
+				case *int:
+					if min != nil && *res < *min {
+						return nil, fmt.Errorf("too small")
+					}
+					if max != nil && *res > *max {
+						return nil, fmt.Errorf("too large")
+					}
+					return next(ctx)
+				}
+				return nil, fmt.Errorf("unsupported type %T", res)
+			},
+			Custom: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
+				return next(ctx)
+			},
+			Logged: func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (interface{}, error) {
+				return next(context.WithValue(ctx, "request_id", &id))
+			},
+			ToNull: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
+				return nil, nil
+			},
+			Directive1: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+				return next(ctx)
+			},
+			Directive2: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+				return next(ctx)
+			},
+			Unimplemented: nil,
+		},
+	}))
 
-						case *int:
-							if min != nil && *res < *min {
-								return nil, fmt.Errorf("too small")
-							}
-							if max != nil && *res > *max {
-								return nil, fmt.Errorf("too large")
-							}
-							return next(ctx)
-						}
-						return nil, fmt.Errorf("unsupported type %T", res)
-					},
-					Custom: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
-						return next(ctx)
-					},
-					Logged: func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (interface{}, error) {
-						return next(context.WithValue(ctx, "request_id", &id))
-					},
-					ToNull: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
-						return nil, nil
-					},
-					Directive1: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-						return next(ctx)
-					},
-					Directive2: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-						return next(ctx)
-					},
-					Unimplemented: nil,
-				},
-			}),
-			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				path, _ := ctx.Value("path").([]int)
-				return next(context.WithValue(ctx, "path", append(path, 1)))
-			}),
-			handler.ResolverMiddleware(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				path, _ := ctx.Value("path").([]int)
-				return next(context.WithValue(ctx, "path", append(path, 2)))
-			}),
-		)
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		path, _ := ctx.Value("path").([]int)
+		return next(context.WithValue(ctx, "path", append(path, 1)))
+	})
+
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		path, _ := ctx.Value("path").([]int)
+		return next(context.WithValue(ctx, "path", append(path, 2)))
+	})
+
 	c := client.New(srv)
 
 	t.Run("arg directives", func(t *testing.T) {

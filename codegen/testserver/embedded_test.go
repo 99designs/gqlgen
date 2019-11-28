@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +27,7 @@ func TestEmbedded(t *testing.T) {
 		return &EmbeddedCase3{&fakeUnexportedEmbeddedInterface{}}, nil
 	}
 
-	c := client.New(handler.GraphQL(
+	c := client.New(handler.NewDefaultServer(
 		NewExecutableSchema(Config{Resolvers: resolver}),
 	))
 

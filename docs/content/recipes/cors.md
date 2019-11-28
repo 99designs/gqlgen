@@ -15,10 +15,11 @@ gqlgen doesn't include a CORS implementation, but it is built to work with all s
 package main
 
 import (
-	"net/http"
+    "net/http"
 
-	"github.com/99designs/gqlgen/example/starwars"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+    "github.com/99designs/gqlgen/example/starwars"
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
 )
@@ -34,19 +35,21 @@ func main() {
 		Debug:            true,
 	}).Handler)
 
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			// Check against your desired domains here
-			 return r.Host == "example.org"
-		},
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-	}
+
+    srv := handler.New(starwars.NewExecutableSchema(starwars.NewResolver()))
+    srv.AddTransport(&transport.Websocket{
+        Upgrader: websocket.Upgrader{
+            CheckOrigin: func(r *http.Request) bool {
+                // Check against your desired domains here
+                 return r.Host == "example.org"
+            },
+            ReadBufferSize:  1024,
+            WriteBufferSize: 1024,
+        },
+    })
 
 	router.Handle("/", handler.Playground("Starwars", "/query"))
-	router.Handle("/query",
-		handler.GraphQL(starwars.NewExecutableSchema(starwars.NewResolver()), handler.WebsocketUpgrader(upgrader)),
-	)
+	router.Handle("/query", srv)
 
 	err := http.ListenAndServe(":8080", router)
 	if err != nil {

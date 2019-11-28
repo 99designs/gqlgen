@@ -7,22 +7,30 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+
+	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/99designs/gqlgen/example/fileupload"
 	"github.com/99designs/gqlgen/example/fileupload/model"
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func main() {
-	http.Handle("/", handler.Playground("File Upload Demo", "/query"))
+	http.Handle("/", playground.Handler("File Upload Demo", "/query"))
 	resolver := getResolver()
-	exec := fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver})
 
 	var mb int64 = 1 << 20
-	uploadMaxMemory := handler.UploadMaxMemory(32 * mb)
-	uploadMaxSize := handler.UploadMaxSize(50 * mb)
 
-	http.Handle("/query", handler.GraphQL(exec, uploadMaxMemory, uploadMaxSize))
+	srv := handler.New(fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver}))
+
+	srv.AddTransport(transport.MultipartForm{
+		MaxMemory:     32 * mb,
+		MaxUploadSize: 50 * mb,
+	})
+
+	http.Handle("/query", srv)
 	log.Print("connect to http://localhost:8087/ for GraphQL playground")
 	log.Fatal(http.ListenAndServe(":8087", nil))
 }

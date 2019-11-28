@@ -6,16 +6,17 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/example/starwars/generated"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func BenchmarkSimpleQueryNoArgs(b *testing.B) {
-	server := handler.GraphQL(generated.NewExecutableSchema(NewResolver()))
+	server := handler.NewDefaultServer(generated.NewExecutableSchema(NewResolver()))
 
 	q := `{"query":"{ search(text:\"Luke\") { ... on Human { starships { name } } } }"}`
 
 	var body strings.Reader
 	r := httptest.NewRequest("POST", "/graphql", &body)
+	r.Header.Set("Content-Type", "application/json")
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -26,7 +27,7 @@ func BenchmarkSimpleQueryNoArgs(b *testing.B) {
 		rec.Body.Reset()
 		server.ServeHTTP(rec, r)
 		if rec.Body.String() != `{"data":{"search":[{"starships":[{"name":"X-Wing"},{"name":"Imperial shuttle"}]}]}}` {
-			b.Fatalf("Unexpected response")
+			b.Fatalf("Unexpected response: %s", rec.Body.String())
 		}
 
 	}

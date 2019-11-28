@@ -55,7 +55,7 @@ func GetOperationContext(ctx context.Context) *OperationContext {
 	if val, ok := ctx.Value(operationCtx).(*OperationContext); ok {
 		return val
 	}
-	return nil
+	panic("missing operation context")
 }
 
 func WithOperationContext(ctx context.Context, rc *OperationContext) context.Context {

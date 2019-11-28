@@ -9,8 +9,6 @@ import (
 )
 
 func TestGetOperationContext(t *testing.T) {
-	require.Nil(t, GetOperationContext(context.Background()))
-
 	rc := &OperationContext{}
 	require.Equal(t, rc, GetOperationContext(WithOperationContext(context.Background(), rc)))
 }

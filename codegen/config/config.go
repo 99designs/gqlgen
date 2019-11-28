@@ -22,7 +22,7 @@ import (
 type Config struct {
 	SchemaFilename           StringList                 `yaml:"schema,omitempty"`
 	Exec                     PackageConfig              `yaml:"exec"`
-	Model                    PackageConfig              `yaml:"model"`
+	Model                    PackageConfig              `yaml:"model,omitempty"`
 	Resolver                 PackageConfig              `yaml:"resolver,omitempty"`
 	AutoBind                 []string                   `yaml:"autobind"`
 	Models                   TypeMap                    `yaml:"models,omitempty"`
@@ -229,8 +229,10 @@ func (c *Config) Check() error {
 	if err := c.Exec.Check(); err != nil {
 		return errors.Wrap(err, "config.exec")
 	}
-	if err := c.Model.Check(); err != nil {
-		return errors.Wrap(err, "config.model")
+	if c.Model.IsDefined() {
+		if err := c.Model.Check(); err != nil {
+			return errors.Wrap(err, "config.model")
+		}
 	}
 	if c.Resolver.IsDefined() {
 		if err := c.Resolver.Check(); err != nil {
@@ -240,11 +242,14 @@ func (c *Config) Check() error {
 
 	// check packages names against conflict, if present in the same dir
 	// and check filenames for uniqueness
-	packageConfigList := []PackageConfig{
-		c.Model,
+	packageConfigList := []PackageConfig{}
+	if c.Model.IsDefined() {
+		packageConfigList = append(packageConfigList, c.Model)
+	}
+	packageConfigList = append(packageConfigList, []PackageConfig{
 		c.Exec,
 		c.Resolver,
-	}
+	}...)
 	filesMap := make(map[string]bool)
 	pkgConfigsByDir := make(map[string]PackageConfig)
 	for _, current := range packageConfigList {
@@ -365,8 +370,10 @@ func findCfgInDir(dir string) string {
 }
 
 func (c *Config) normalize() error {
-	if err := c.Model.normalize(); err != nil {
-		return errors.Wrap(err, "model")
+	if c.Model.IsDefined() {
+		if err := c.Model.normalize(); err != nil {
+			return errors.Wrap(err, "model")
+		}
 	}
 
 	if err := c.Exec.normalize(); err != nil {

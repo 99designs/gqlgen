@@ -15,13 +15,15 @@ import (
 
 func Generate(cfg *config.Config, option ...Option) error {
 	_ = syscall.Unlink(cfg.Exec.Filename)
-	_ = syscall.Unlink(cfg.Model.Filename)
-
-	plugins := []plugin.Plugin{
-		schemaconfig.New(),
-		modelgen.New(),
-		resolvergen.New(),
+	if cfg.Model.IsDefined() {
+		_ = syscall.Unlink(cfg.Model.Filename)
 	}
+
+	plugins := []plugin.Plugin{schemaconfig.New()}
+	if cfg.Model.IsDefined() {
+		plugins = append(plugins, modelgen.New())
+	}
+	plugins = append(plugins, resolvergen.New())
 
 	for _, o := range option {
 		o(cfg, &plugins)

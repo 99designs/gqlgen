@@ -33,6 +33,7 @@ exec:
   package: generated
 
 # Let gqlgen know where to put the generated models (if any)
+# Set to null to disable
 model:
   filename: models/generated.go
   package: models

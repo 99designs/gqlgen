@@ -51,21 +51,21 @@ func NameForDir(dir string) string {
 	return SanitizePackageName(filepath.Base(dir))
 }
 
-// ImportPathForDir takes a path and returns a golang import path for the package
-func ImportPathForDir(dir string) (res string) {
+// goModuleRoot returns the root of the current go module if there is a go.mod file in the directory tree
+// If not, it returns false
+func goModuleRoot(dir string) (string, bool) {
 	dir, err := filepath.Abs(dir)
 	if err != nil {
 		panic(err)
 	}
 	dir = filepath.ToSlash(dir)
-
 	modDir := dir
 	assumedPart := ""
 	for {
 		f, err := ioutil.ReadFile(filepath.Join(modDir, "go.mod"))
 		if err == nil {
 			// found it, stop searching
-			return string(modregex.FindSubmatch(f)[1]) + assumedPart
+			return string(modregex.FindSubmatch(f)[1]) + assumedPart, true
 		}
 
 		assumedPart = "/" + filepath.Base(modDir) + assumedPart
@@ -79,6 +79,21 @@ func ImportPathForDir(dir string) (res string) {
 			break
 		}
 		modDir = parentDir
+	}
+	return "", false
+}
+
+// ImportPathForDir takes a path and returns a golang import path for the package
+func ImportPathForDir(dir string) (res string) {
+	dir, err := filepath.Abs(dir)
+	if err != nil {
+		panic(err)
+	}
+	dir = filepath.ToSlash(dir)
+
+	modDir, ok := goModuleRoot(dir)
+	if ok {
+		return modDir
 	}
 
 	for _, gopath := range gopaths {

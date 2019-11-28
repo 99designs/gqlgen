@@ -18,7 +18,10 @@ type ComplexityLimit struct {
 	es graphql.ExecutableSchema
 }
 
-var _ graphql.OperationContextMutator = &ComplexityLimit{}
+var _ interface {
+	graphql.OperationContextMutator
+	graphql.HandlerExtension
+} = &ComplexityLimit{}
 
 const complexityExtension = "ComplexityLimit"
 
@@ -31,7 +34,7 @@ type ComplexityStats struct {
 }
 
 // FixedComplexityLimit sets a complexity limit that does not change
-func FixedComplexityLimit(limit int) graphql.HandlerExtension {
+func FixedComplexityLimit(limit int) *ComplexityLimit {
 	return &ComplexityLimit{
 		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
 			return limit

@@ -32,7 +32,10 @@ type ApqStats struct {
 
 const apqExtension = "APQ"
 
-var _ graphql.OperationParameterMutator = AutomaticPersistedQuery{}
+var _ interface {
+	graphql.OperationParameterMutator
+	graphql.HandlerExtension
+} = AutomaticPersistedQuery{}
 
 func (a AutomaticPersistedQuery) ExtensionName() string {
 	return "AutomaticPersistedQuery"

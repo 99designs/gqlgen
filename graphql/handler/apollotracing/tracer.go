@@ -39,8 +39,11 @@ type (
 	}
 )
 
-var _ graphql.ResponseInterceptor = Tracer{}
-var _ graphql.FieldInterceptor = Tracer{}
+var _ interface {
+	graphql.HandlerExtension
+	graphql.ResponseInterceptor
+	graphql.FieldInterceptor
+} = Tracer{}
 
 func (a Tracer) ExtensionName() string {
 	return "ApolloTracing"

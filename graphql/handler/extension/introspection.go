@@ -10,7 +10,10 @@ import (
 // EnableIntrospection enables clients to reflect all of the types available on the graph.
 type Introspection struct{}
 
-var _ graphql.OperationContextMutator = Introspection{}
+var _ interface {
+	graphql.OperationContextMutator
+	graphql.HandlerExtension
+} = Introspection{}
 
 func (c Introspection) ExtensionName() string {
 	return "Introspection"

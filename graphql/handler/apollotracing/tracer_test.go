@@ -8,10 +8,13 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 func TestApolloTracing(t *testing.T) {
@@ -48,7 +51,24 @@ func TestApolloTracing(t *testing.T) {
 	require.EqualValues(t, "Query", tracing.Execution.Resolvers[0].ParentType)
 	require.EqualValues(t, "name", tracing.Execution.Resolvers[0].FieldName)
 	require.EqualValues(t, "String!", tracing.Execution.Resolvers[0].ReturnType)
+}
 
+func TestApolloTracing_withFail(t *testing.T) {
+	h := testserver.New()
+	h.AddTransport(transport.POST{})
+	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})
+	h.Use(apollotracing.Tracer{})
+
+	resp := doRequest(h, "POST", "/graphql", `{"operationName":"A","extensions":{"persistedQuery":{"version":1,"sha256Hash":"338bbc16ac780daf81845339fbf0342061c1e9d2b702c96d3958a13a557083a6"}}}`)
+	assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+	b := resp.Body.Bytes()
+	t.Log(string(b))
+	var respData struct {
+		Errors gqlerror.List
+	}
+	require.NoError(t, json.Unmarshal(b, &respData))
+	require.Equal(t, 1, len(respData.Errors))
+	require.Equal(t, "PersistedQueryNotFound", respData.Errors[0].Message)
 }
 
 func doRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {

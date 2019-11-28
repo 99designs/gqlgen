@@ -45,7 +45,9 @@ type (
 	// | +--------------------------------------------------------------------+ |
 	// +------------------------------------------------------------------------+
 	HandlerExtension interface {
+		// ExtensionName should be a CamelCase string version of the extension which may be shown in stats and logging.
 		ExtensionName() string
+		// Validate is called when adding an extension to the server, it allows validation against the servers schema.
 		Validate(schema ExecutableSchema) error
 	}
 

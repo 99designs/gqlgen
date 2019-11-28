@@ -28,5 +28,6 @@ build: false
 deploy: false
 
 test_script:
+  - git clean -ffdx
   - go generate ./...
   - go test -timeout 20m ./...

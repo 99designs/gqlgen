@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+type Animal interface {
+	IsAnimal()
+}
+
 type ContentChild interface {
 	IsContentChild()
 }
@@ -37,6 +41,13 @@ type B struct {
 
 func (B) IsTestUnion() {}
 
+type Cat struct {
+	Species  string `json:"species"`
+	CatBreed string `json:"catBreed"`
+}
+
+func (Cat) IsAnimal() {}
+
 type CheckIssue896 struct {
 	ID *int `json:"id"`
 }
@@ -52,6 +63,13 @@ type ContentUser struct {
 }
 
 func (ContentUser) IsContentChild() {}
+
+type Dog struct {
+	Species  string `json:"species"`
+	DogBreed string `json:"dogBreed"`
+}
+
+func (Dog) IsAnimal() {}
 
 type EmbeddedDefaultScalar struct {
 	Value *string `json:"value"`

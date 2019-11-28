@@ -197,6 +197,12 @@ func (r *queryResolver) Shapes(ctx context.Context) ([]Shape, error) {
 func (r *queryResolver) NoShape(ctx context.Context) (Shape, error) {
 	panic("not implemented")
 }
+func (r *queryResolver) NoShapeTypedNil(ctx context.Context) (Shape, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Animal(ctx context.Context) (Animal, error) {
+	panic("not implemented")
+}
 func (r *queryResolver) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
 	panic("not implemented")
 }

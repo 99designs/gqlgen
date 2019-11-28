@@ -64,6 +64,8 @@ type DirectiveRoot struct {
 
 	MakeNil func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 
+	MakeTypedNil func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+
 	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
 
 	ToNull func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
@@ -96,6 +98,11 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	Cat struct {
+		CatBreed func(childComplexity int) int
+		Species  func(childComplexity int) int
+	}
+
 	CheckIssue896 struct {
 		ID func(childComplexity int) int
 	}
@@ -111,6 +118,11 @@ type ComplexityRoot struct {
 
 	ContentUser struct {
 		Foo func(childComplexity int) int
+	}
+
+	Dog struct {
+		DogBreed func(childComplexity int) int
+		Species  func(childComplexity int) int
 	}
 
 	EmbeddedCase1 struct {
@@ -225,6 +237,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Animal                           func(childComplexity int) int
 		Autobind                         func(childComplexity int) int
 		Collision                        func(childComplexity int) int
 		DefaultScalar                    func(childComplexity int, arg string) int
@@ -257,6 +270,7 @@ type ComplexityRoot struct {
 		NestedInputs                     func(childComplexity int, input [][]*OuterInput) int
 		NestedOutputs                    func(childComplexity int) int
 		NoShape                          func(childComplexity int) int
+		NoShapeTypedNil                  func(childComplexity int) int
 		NullableArg                      func(childComplexity int, arg *int) int
 		OptionalUnion                    func(childComplexity int) int
 		Overlapping                      func(childComplexity int) int
@@ -394,6 +408,8 @@ type QueryResolver interface {
 	EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 	Shapes(ctx context.Context) ([]Shape, error)
 	NoShape(ctx context.Context) (Shape, error)
+	NoShapeTypedNil(ctx context.Context) (Shape, error)
+	Animal(ctx context.Context) (Animal, error)
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
@@ -503,6 +519,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.B.ID(childComplexity), true
 
+	case "Cat.catBreed":
+		if e.complexity.Cat.CatBreed == nil {
+			break
+		}
+
+		return e.complexity.Cat.CatBreed(childComplexity), true
+
+	case "Cat.species":
+		if e.complexity.Cat.Species == nil {
+			break
+		}
+
+		return e.complexity.Cat.Species(childComplexity), true
+
 	case "CheckIssue896.id":
 		if e.complexity.CheckIssue896.ID == nil {
 			break
@@ -537,6 +567,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ContentUser.Foo(childComplexity), true
+
+	case "Dog.dogBreed":
+		if e.complexity.Dog.DogBreed == nil {
+			break
+		}
+
+		return e.complexity.Dog.DogBreed(childComplexity), true
+
+	case "Dog.species":
+		if e.complexity.Dog.Species == nil {
+			break
+		}
+
+		return e.complexity.Dog.Species(childComplexity), true
 
 	case "EmbeddedCase1.exportedEmbeddedPointerExportedMethod":
 		if e.complexity.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod == nil {
@@ -842,6 +886,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PrimitiveString.Value(childComplexity), true
 
+	case "Query.animal":
+		if e.complexity.Query.Animal == nil {
+			break
+		}
+
+		return e.complexity.Query.Animal(childComplexity), true
+
 	case "Query.autobind":
 		if e.complexity.Query.Autobind == nil {
 			break
@@ -1135,6 +1186,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.NoShape(childComplexity), true
+
+	case "Query.noShapeTypedNil":
+		if e.complexity.Query.NoShapeTypedNil == nil {
+			break
+		}
+
+		return e.complexity.Query.NoShapeTypedNil(childComplexity), true
 
 	case "Query.nullableArg":
 		if e.complexity.Query.NullableArg == nil {
@@ -1656,6 +1714,22 @@ extend type Query {
 	&ast.Source{Name: "interfaces.graphql", Input: `extend type Query {
     shapes: [Shape]
     noShape: Shape @makeNil
+    noShapeTypedNil: Shape @makeTypedNil
+    animal: Animal @makeTypedNil
+}
+
+interface Animal {
+    species: String!
+}
+
+type Dog implements Animal {
+    species: String!
+    dogBreed: String!
+}
+
+type Cat implements Animal {
+    species: String!
+    catBreed: String!
 }
 
 interface Shape {
@@ -1673,6 +1747,7 @@ type Rectangle implements Shape {
 union ShapeUnion @goModel(model:"testserver.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION
+directive @makeTypedNil on FIELD_DEFINITION
 `},
 	&ast.Source{Name: "issue896.graphql", Input: `# This example should build stable output. If the file content starts
 # alternating nondeterministically between two outputs, then see
@@ -3197,6 +3272,74 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Cat",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Species, nil
+	})
+
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Cat",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CatBreed, nil
+	})
+
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql.CollectedField, obj *CheckIssue896) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -3350,6 +3493,74 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Dog",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Species, nil
+	})
+
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Dog",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DogBreed, nil
+	})
+
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EmbeddedCase1_exportedEmbeddedPointerExportedMethod(ctx context.Context, field graphql.CollectedField, obj *EmbeddedCase1) (ret graphql.Marshaler) {
@@ -6087,6 +6298,108 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().NoShapeTypedNil(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.MakeTypedNil == nil {
+				return nil, errors.New("directive makeTypedNil is not implemented")
+			}
+			return ec.directives.MakeTypedNil(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(Shape); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver.Shape`, tmp)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Shape)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Animal(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.MakeTypedNil == nil {
+				return nil, errors.New("directive makeTypedNil is not implemented")
+			}
+			return ec.directives.MakeTypedNil(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(Animal); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver.Animal`, tmp)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Animal)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐAnimal(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9222,6 +9535,29 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, obj Animal) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case Dog:
+		return ec._Dog(ctx, sel, &obj)
+	case *Dog:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Dog(ctx, sel, obj)
+	case Cat:
+		return ec._Cat(ctx, sel, &obj)
+	case *Cat:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Cat(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.SelectionSet, obj ContentChild) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -9229,10 +9565,16 @@ func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.Selectio
 	case ContentUser:
 		return ec._Content_User(ctx, sel, &obj)
 	case *ContentUser:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Content_User(ctx, sel, obj)
 	case ContentPost:
 		return ec._Content_Post(ctx, sel, &obj)
 	case *ContentPost:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Content_Post(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
@@ -9244,8 +9586,14 @@ func (ec *executionContext) _Shape(ctx context.Context, sel ast.SelectionSet, ob
 	case nil:
 		return graphql.Null
 	case *Circle:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Rectangle(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
@@ -9257,8 +9605,14 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 	case nil:
 		return graphql.Null
 	case *Circle:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Rectangle(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
@@ -9272,10 +9626,16 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 	case A:
 		return ec._A(ctx, sel, &obj)
 	case *A:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._A(ctx, sel, obj)
 	case B:
 		return ec._B(ctx, sel, &obj)
 	case *B:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._B(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
@@ -9441,6 +9801,38 @@ func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B
 	return out
 }
 
+var catImplementors = []string{"Cat", "Animal"}
+
+func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj *Cat) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, catImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Cat")
+		case "species":
+			out.Values[i] = ec._Cat_species(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "catBreed":
+			out.Values[i] = ec._Cat_catBreed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var checkIssue896Implementors = []string{"CheckIssue896"}
 
 func (ec *executionContext) _CheckIssue896(ctx context.Context, sel ast.SelectionSet, obj *CheckIssue896) graphql.Marshaler {
@@ -9528,6 +9920,38 @@ func (ec *executionContext) _Content_User(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("Content_User")
 		case "foo":
 			out.Values[i] = ec._Content_User_foo(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var dogImplementors = []string{"Dog", "Animal"}
+
+func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *Dog) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, dogImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Dog")
+		case "species":
+			out.Values[i] = ec._Dog_species(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "dogBreed":
+			out.Values[i] = ec._Dog_dogBreed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10745,6 +11169,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_noShape(ctx, field)
+				return res
+			})
+		case "noShapeTypedNil":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_noShapeTypedNil(ctx, field)
+				return res
+			})
+		case "animal":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_animal(ctx, field)
 				return res
 			})
 		case "issue896a":
@@ -12329,6 +12775,13 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐAnimal(ctx context.Context, sel ast.SelectionSet, v Animal) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Animal(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOAutobind2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐAutobind(ctx context.Context, sel ast.SelectionSet, v Autobind) graphql.Marshaler {

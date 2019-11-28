@@ -3645,10 +3645,16 @@ func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet
 	case models.Human:
 		return ec._Human(ctx, sel, &obj)
 	case *models.Human:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Human(ctx, sel, obj)
 	case models.Droid:
 		return ec._Droid(ctx, sel, &obj)
 	case *models.Droid:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Droid(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
@@ -3662,14 +3668,23 @@ func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.Selection
 	case models.Human:
 		return ec._Human(ctx, sel, &obj)
 	case *models.Human:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Human(ctx, sel, obj)
 	case models.Droid:
 		return ec._Droid(ctx, sel, &obj)
 	case *models.Droid:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Droid(ctx, sel, obj)
 	case models.Starship:
 		return ec._Starship(ctx, sel, &obj)
 	case *models.Starship:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Starship(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))

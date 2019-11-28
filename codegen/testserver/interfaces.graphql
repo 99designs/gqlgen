@@ -1,6 +1,22 @@
 extend type Query {
     shapes: [Shape]
     noShape: Shape @makeNil
+    noShapeTypedNil: Shape @makeTypedNil
+    animal: Animal @makeTypedNil
+}
+
+interface Animal {
+    species: String!
+}
+
+type Dog implements Animal {
+    species: String!
+    dogBreed: String!
+}
+
+type Cat implements Animal {
+    species: String!
+    catBreed: String!
 }
 
 interface Shape {
@@ -18,3 +34,4 @@ type Rectangle implements Shape {
 union ShapeUnion @goModel(model:"testserver.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION
+directive @makeTypedNil on FIELD_DEFINITION

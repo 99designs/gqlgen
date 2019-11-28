@@ -69,6 +69,8 @@ type Stub struct {
 		EnumInInput                      func(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
+		NoShapeTypedNil                  func(ctx context.Context) (Shape, error)
+		Animal                           func(ctx context.Context) (Animal, error)
 		Issue896a                        func(ctx context.Context) ([]*CheckIssue896, error)
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
@@ -286,6 +288,12 @@ func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 }
 func (r *stubQuery) NoShape(ctx context.Context) (Shape, error) {
 	return r.QueryResolver.NoShape(ctx)
+}
+func (r *stubQuery) NoShapeTypedNil(ctx context.Context) (Shape, error) {
+	return r.QueryResolver.NoShapeTypedNil(ctx)
+}
+func (r *stubQuery) Animal(ctx context.Context) (Animal, error) {
+	return r.QueryResolver.Animal(ctx)
 }
 func (r *stubQuery) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
 	return r.QueryResolver.Issue896a(ctx)

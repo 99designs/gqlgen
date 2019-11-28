@@ -1921,6 +1921,9 @@ func (ec *executionContext) _Data(ctx context.Context, sel ast.SelectionSet, obj
 	case Todo:
 		return ec._Todo(ctx, sel, &obj)
 	case *Todo:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Todo(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
@@ -1934,6 +1937,9 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	case Todo:
 		return ec._Todo(ctx, sel, &obj)
 	case *Todo:
+		if obj == nil {
+			return graphql.Null
+		}
 		return ec._Todo(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))

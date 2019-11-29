@@ -38,7 +38,7 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 
 	rc, err := exec.CreateOperationContext(r.Context(), params)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusOK)
 		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), err)
 		writeJson(w, resp)
 		return

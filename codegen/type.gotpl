@@ -35,7 +35,7 @@
 					{{- end }}
 				{{- else if eq ($type.GO | ref) "map[string]interface{}" }}
 					return v.(map[string]interface{}), nil
-				{{- else if $type.IsMarshaler -}}
+				{{- else if $type.IsMarshaler }}
 					var res {{ $type.GO | ref }}
 					return res, res.UnmarshalGQL(v)
 				{{- else }}

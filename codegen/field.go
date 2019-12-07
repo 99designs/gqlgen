@@ -98,6 +98,18 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoReceiverName = "ec"
 		f.GoFieldName = "introspectType"
 		return nil
+	case f.Name == "_entities":
+		f.GoFieldType = GoFieldMethod
+		f.GoReceiverName = "ec"
+		f.GoFieldName = "__resolve_entities"
+		f.MethodHasContext = true
+		return nil
+	case f.Name == "_service":
+		f.GoFieldType = GoFieldMethod
+		f.GoReceiverName = "ec"
+		f.GoFieldName = "__resolve__service"
+		f.MethodHasContext = true
+		return nil
 	case obj.Root:
 		f.IsResolver = true
 		return nil

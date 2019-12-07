@@ -18,7 +18,7 @@ func TestPlugin(t *testing.T) {
 	require.NoError(t, err)
 	p := Plugin{}
 
-	data, err := codegen.BuildData(cfg)
+	data, err := codegen.BuildData(cfg, nil)
 	if err != nil {
 		panic(err)
 	}

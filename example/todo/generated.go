@@ -808,9 +808,6 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 			return obj.Done, nil
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.HasRole == nil {
-			//	return directive0(ctx)
-			// }
 			role, err := ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐRole(ctx, "OWNER")
 			if err != nil {
 				return nil, err

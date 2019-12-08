@@ -2074,9 +2074,6 @@ func (ec *executionContext) field_Query_directiveArg_args(ctx context.Context, r
 	if tmp, ok := rawArgs["arg"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Length == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalNInt2int(ctx, 1)
 			if err != nil {
 				return nil, err
@@ -2146,9 +2143,6 @@ func (ec *executionContext) field_Query_directiveInputType_args(ctx context.Cont
 			return ec.unmarshalNInnerInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerInput(ctx, tmp)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Custom == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.Custom == nil {
 				return nil, errors.New("directive custom is not implemented")
 			}
@@ -2190,9 +2184,6 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	if tmp, ok := rawArgs["arg"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Range == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalOInt2ᚖint(ctx, 0)
 			if err != nil {
 				return nil, err
@@ -2220,9 +2211,6 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	if tmp, ok := rawArgs["arg2"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Range == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalOInt2ᚖint(ctx, 0)
 			if err != nil {
 				return nil, err
@@ -2250,9 +2238,6 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	if tmp, ok := rawArgs["arg3"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.ToNull == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.ToNull == nil {
 				return nil, errors.New("directive toNull is not implemented")
 			}
@@ -2422,9 +2407,6 @@ func (ec *executionContext) field_Subscription_directiveArg_args(ctx context.Con
 	if tmp, ok := rawArgs["arg"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Length == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalNInt2int(ctx, 1)
 			if err != nil {
 				return nil, err
@@ -2464,9 +2446,6 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_args(ctx con
 	if tmp, ok := rawArgs["arg"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Range == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalOInt2ᚖint(ctx, 0)
 			if err != nil {
 				return nil, err
@@ -2494,9 +2473,6 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_args(ctx con
 	if tmp, ok := rawArgs["arg2"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Range == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalOInt2ᚖint(ctx, 0)
 			if err != nil {
 				return nil, err
@@ -2524,9 +2500,6 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_args(ctx con
 	if tmp, ok := rawArgs["arg3"]; ok {
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.ToNull == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.ToNull == nil {
 				return nil, errors.New("directive toNull is not implemented")
 			}
@@ -4239,9 +4212,6 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 			return obj.Text, nil
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Length == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalNInt2int(ctx, 0)
 			if err != nil {
 				return nil, err
@@ -4305,9 +4275,6 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 			return obj.NullableText, nil
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.ToNull == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.ToNull == nil {
 				return nil, errors.New("directive toNull is not implemented")
 			}
@@ -4356,9 +4323,6 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 			return obj.NullableText, nil
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.ToNull == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.ToNull == nil {
 				return nil, errors.New("directive toNull is not implemented")
 			}
@@ -5539,9 +5503,6 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 			return ec.resolvers.Query().DirectiveFieldDef(rctx, args["ret"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Length == nil {
-			//	return directive0(ctx)
-			// }
 			min, err := ec.unmarshalNInt2int(ctx, 1)
 			if err != nil {
 				return nil, err
@@ -5629,18 +5590,12 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 			return ec.resolvers.Query().DirectiveDouble(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Directive1 == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.Directive1 == nil {
 				return nil, errors.New("directive directive1 is not implemented")
 			}
 			return ec.directives.Directive1(ctx, nil, directive0)
 		}
 		directive2 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Directive2 == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.Directive2 == nil {
 				return nil, errors.New("directive directive2 is not implemented")
 			}
@@ -5689,9 +5644,6 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 			return ec.resolvers.Query().DirectiveUnimplemented(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Unimplemented == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.Unimplemented == nil {
 				return nil, errors.New("directive unimplemented is not implemented")
 			}
@@ -5890,9 +5842,6 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 			return ec.resolvers.Query().NoShape(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.MakeNil == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.MakeNil == nil {
 				return nil, errors.New("directive makeNil is not implemented")
 			}
@@ -5941,9 +5890,6 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 			return ec.resolvers.Query().NoShapeTypedNil(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.MakeTypedNil == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.MakeTypedNil == nil {
 				return nil, errors.New("directive makeTypedNil is not implemented")
 			}
@@ -5992,9 +5938,6 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 			return ec.resolvers.Query().Animal(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.MakeTypedNil == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.MakeTypedNil == nil {
 				return nil, errors.New("directive makeTypedNil is not implemented")
 			}
@@ -7008,18 +6951,12 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 			return ec.resolvers.Subscription().DirectiveDouble(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Directive1 == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.Directive1 == nil {
 				return nil, errors.New("directive directive1 is not implemented")
 			}
 			return ec.directives.Directive1(ctx, nil, directive0)
 		}
 		directive2 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Directive2 == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.Directive2 == nil {
 				return nil, errors.New("directive directive2 is not implemented")
 			}
@@ -7078,9 +7015,6 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 			return ec.resolvers.Subscription().DirectiveUnimplemented(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			// if ec.directives.Unimplemented == nil {
-			//	return directive0(ctx)
-			// }
 			if ec.directives.Unimplemented == nil {
 				return nil, errors.New("directive unimplemented is not implemented")
 			}
@@ -8539,9 +8473,6 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 			var err error
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				// if ec.directives.Length == nil {
-				//	return directive0(ctx)
-				// }
 				min, err := ec.unmarshalNInt2int(ctx, 1)
 				if err != nil {
 					return nil, err
@@ -8599,9 +8530,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			var err error
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				// if ec.directives.Length == nil {
-				//	return directive0(ctx)
-				// }
 				min, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					return nil, err
@@ -8633,9 +8561,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			var err error
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				// if ec.directives.ToNull == nil {
-				//	return directive0(ctx)
-				// }
 				if ec.directives.ToNull == nil {
 					return nil, errors.New("directive toNull is not implemented")
 				}
@@ -8671,9 +8596,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx, v)
 			}
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				// if ec.directives.Length == nil {
-				//	return directive0(ctx)
-				// }
 				min, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					return nil, err

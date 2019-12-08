@@ -43,3 +43,13 @@ func TestGetSDL(t *testing.T) {
 	_, err = f.getSDL(cfg)
 	require.NoError(t, err)
 }
+
+func TestMutateConfig(t *testing.T) {
+	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Check())
+
+	f := &federation{}
+	err = f.MutateConfig(cfg)
+	require.NoError(t, err)
+}

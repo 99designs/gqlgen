@@ -72,10 +72,6 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	cfg.Directives["key"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["extends"] = config.DirectiveConfig{SkipRuntime: true}
 
-	// ff := cfg.Models["Query"].Fields["_entities"]
-	// ff.GeneratedMethod = ""
-	// q := cfg.Models["Query"]
-
 	return nil
 }
 

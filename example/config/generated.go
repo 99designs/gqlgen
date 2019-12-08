@@ -222,35 +222,28 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
-
-type Query {
-  todos: [Todo!]!
-}
-
+	&ast.Source{Name: "schema.graphql", Input: `directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+	createTodo(input: NewTodo!): Todo!
 }
-`},
-	&ast.Source{Name: "todo.graphql", Input: `type Todo {
-  id: ID! @goField(forceResolver: true)
-  databaseId: Int!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
 input NewTodo {
-  text: String!
-  userId: String!
+	text: String!
+	userId: String!
 }
-
-`},
-	&ast.Source{Name: "user.graphql", Input: `type User
-@goModel(model:"github.com/99designs/gqlgen/example/config.User") {
-  id: ID!
-  name: String! @goField(name:"FullName")
+type Query {
+	todos: [Todo!]!
+}
+type Todo {
+	id: ID! @goField(forceResolver: true)
+	databaseId: Int!
+	text: String!
+	done: Boolean!
+	user: User!
+}
+type User @goModel(model: "github.com/99designs/gqlgen/example/config.User") {
+	id: ID!
+	name: String! @goField(name: "FullName")
 }
 `},
 )

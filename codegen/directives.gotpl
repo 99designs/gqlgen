@@ -1,9 +1,6 @@
 {{ define "implDirectives" }}{{ $in := .DirectiveObjName }}
 	{{- range $i, $directive := .ImplDirectives -}}
 		directive{{add $i 1}} := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.{{ $directive.Name|ucFirst }} == nil {
-				return directive0(ctx)
-			}
 			{{- range $arg := $directive.Args }}
 				{{- if notNil "Value" $arg }}
 						{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})

@@ -226,35 +226,40 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `"The ` + "`" + `Upload` + "`" + ` scalar type represents a multipart file upload."
-scalar Upload
-
-"The ` + "`" + `File` + "`" + ` type, represents the response of uploading a file."
+	&ast.Source{Name: "schema.graphql", Input: `"""
+The ` + "`" + `File` + "`" + ` type, represents the response of uploading a file.
+"""
 type File {
-    id: Int!
-    name: String!
-    content: String!
+	id: Int!
+	name: String!
+	content: String!
 }
-
-"The ` + "`" + `UploadFile` + "`" + ` type, represents the request for uploading a file with certain payload."
-input UploadFile {
-    id: Int!
-    file: Upload!
-}
-
-"The ` + "`" + `Query` + "`" + ` type, represents all of the entry points into our object graph."
-type Query {
-    empty: String!
-}
-
-"The ` + "`" + `Mutation` + "`" + ` type, represents all updates we can make to our data."
+"""
+The ` + "`" + `Mutation` + "`" + ` type, represents all updates we can make to our data.
+"""
 type Mutation {
-    singleUpload(file: Upload!): File!
-    singleUploadWithPayload(req: UploadFile!): File!
-    multipleUpload(files: [Upload!]!): [File!]!
-    multipleUploadWithPayload(req: [UploadFile!]!): [File!]!
+	singleUpload(file: Upload!): File!
+	singleUploadWithPayload(req: UploadFile!): File!
+	multipleUpload(files: [Upload!]!): [File!]!
+	multipleUploadWithPayload(req: [UploadFile!]!): [File!]!
 }
-
+"""
+The ` + "`" + `Query` + "`" + ` type, represents all of the entry points into our object graph.
+"""
+type Query {
+	empty: String!
+}
+"""
+The ` + "`" + `Upload` + "`" + ` scalar type represents a multipart file upload.
+"""
+scalar Upload
+"""
+The ` + "`" + `UploadFile` + "`" + ` type, represents the request for uploading a file with certain payload.
+"""
+input UploadFile {
+	id: Int!
+	file: Upload!
+}
 `},
 )
 

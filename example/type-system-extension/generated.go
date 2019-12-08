@@ -219,80 +219,41 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schemas/enum-extension.graphql", Input: `directive @enumLogging on ENUM
-
-extend enum State @enumLogging
-`},
-	&ast.Source{Name: "schemas/input-object-extension.graphql", Input: `directive @inputLogging on INPUT_OBJECT
-
-extend input TodoInput @inputLogging
-`},
-	&ast.Source{Name: "schemas/interface-extension.graphql", Input: `directive @interfaceLogging on INTERFACE
-
-extend interface Node @interfaceLogging
-`},
-	&ast.Source{Name: "schemas/object-extension.graphql", Input: `directive @objectLogging on OBJECT
-
-extend type Todo @objectLogging
-`},
-	&ast.Source{Name: "schemas/scalar-extension.graphql", Input: `directive @scalarLogging on SCALAR
-
-extend scalar ID @scalarLogging
-`},
-	&ast.Source{Name: "schemas/schema-extension.graphql", Input: `extend schema {
-  mutation: MyMutation
+	&ast.Source{Name: "schema.graphql", Input: `schema {
+	query: MyQuery
+	mutation: MyMutation
 }
-
-extend type MyQuery {
-  todo(id: ID!): Todo
-}
-
+directive @enumLogging on ENUM
+directive @fieldLogging on FIELD_DEFINITION
+directive @inputLogging on INPUT_OBJECT
+directive @interfaceLogging on INTERFACE
+directive @objectLogging on OBJECT
+directive @scalarLogging on SCALAR
+directive @unionLogging on UNION
+union Data @unionLogging = Todo
 type MyMutation {
-  createTodo(todo: TodoInput!): Todo!
+	createTodo(todo: TodoInput!): Todo!
 }
-
-input TodoInput {
-  text: String!
-}
-`},
-	&ast.Source{Name: "schemas/schema.graphql", Input: `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-schema {
-  query: MyQuery
-}
-
-interface Node {
-  id: ID!
-}
-
-type Todo implements Node {
-  id: ID!
-  text: String!
-  state: State!
-}
-
 type MyQuery {
-  todos: [Todo!]!
+	todos: [Todo!]!
+	todo(id: ID!): Todo
 }
-
-union Data = Todo
-
-enum State {
-  NOT_YET
-  DONE
+interface Node @interfaceLogging {
+	id: ID!
 }
-`},
-	&ast.Source{Name: "schemas/type-extension.graphql", Input: `directive @fieldLogging on FIELD_DEFINITION
-
-extend type Todo {
-  verified: Boolean! @fieldLogging
+enum State @enumLogging {
+	NOT_YET
+	DONE
 }
-`},
-	&ast.Source{Name: "schemas/union-extension.graphql", Input: `directive @unionLogging on UNION
-
-extend union Data @unionLogging
+type Todo implements Node @objectLogging {
+	id: ID!
+	text: String!
+	state: State!
+	verified: Boolean! @fieldLogging
+}
+input TodoInput @inputLogging {
+	text: String!
+}
 `},
 )
 
@@ -683,6 +644,9 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 			return obj.Verified, nil
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
+			// if ec.directives.FieldLogging == nil {
+			//	return directive0(ctx)
+			// }
 			if ec.directives.FieldLogging == nil {
 				return nil, errors.New("directive fieldLogging is not implemented")
 			}

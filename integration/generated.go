@@ -252,7 +252,10 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `directive @magic(kind: Int) on FIELD_DEFINITION
+	&ast.Source{Name: "schema.graphql", Input: `"""
+This directive does magical things
+"""
+directive @magic(kind: Int) on FIELD_DEFINITION
 enum DATE_FILTER_OP {
 	EQ
 	NEQ

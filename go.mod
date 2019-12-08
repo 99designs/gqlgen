@@ -29,3 +29,6 @@ require (
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20180110180208-2cc67fd64755
 	sourcegraph.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67 // indirect
 )
+
+// temporary until pr is merged
+replace github.com/vektah/gqlparser => github.com/marwan-at-work/gqlparser v1.1.3-0.20191208165912-fbc9893d5ef5

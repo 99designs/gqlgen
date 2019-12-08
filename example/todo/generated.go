@@ -232,6 +232,9 @@ var parsedSchema = gqlparser.MustLoadSchema(
 	query: MyQuery
 	mutation: MyMutation
 }
+"""
+Prevents access to a field if the user doesnt have the matching role
+"""
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 directive @user(id: ID!) on MUTATION | QUERY | FIELD
 scalar Map

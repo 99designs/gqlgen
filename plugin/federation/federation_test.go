@@ -1,19 +1,17 @@
-package federation_test
+package federation
 
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin"
-	"github.com/99designs/gqlgen/plugin/federation"
+	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 )
 
 func TestInjectSources(t *testing.T) {
 	var cfg config.Config
-	f := federation.New().(plugin.SourcesInjector)
+	f := &federation{}
 	f.InjectSources(&cfg)
 	if len(cfg.AdditionalSources) != 2 {
 		t.Fatalf("expected an additional source but got %v", len(cfg.AdditionalSources))
@@ -21,7 +19,7 @@ func TestInjectSources(t *testing.T) {
 }
 
 func TestMutateSchema(t *testing.T) {
-	f := federation.New()
+	f := &federation{}
 
 	schema, gqlErr := gqlparser.LoadSchema(&ast.Source{
 		Name: "schema.graphql",
@@ -32,8 +30,16 @@ func TestMutateSchema(t *testing.T) {
 	if gqlErr != nil {
 		t.Fatal(gqlErr)
 	}
-	err := f.(codegen.SchemaMutator).MutateSchema(schema)
+	err := f.MutateSchema(schema)
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestGetSDL(t *testing.T) {
+	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
+	require.NoError(t, err)
+	f := &federation{}
+	_, err = f.getSDL(cfg)
+	require.NoError(t, err)
 }

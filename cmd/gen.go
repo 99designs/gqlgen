@@ -10,14 +10,14 @@ import (
 	"github.com/urfave/cli"
 )
 
-var genCmd = cli.Command{
+var genCmd = &cli.Command{
 	Name:  "generate",
 	Usage: "generate a graphql server based on schema",
 	Flags: []cli.Flag{
-		cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
-		cli.StringFlag{Name: "config, c", Usage: "the config filename"},
+		&cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
+		&cli.StringFlag{Name: "config, c", Usage: "the config filename"},
 	},
-	Action: func(ctx *cli.Context) {
+	Action: func(ctx *cli.Context) error {
 		var cfg *config.Config
 		var err error
 		if configFilename := ctx.String("config"); configFilename != "" {
@@ -25,6 +25,7 @@ var genCmd = cli.Command{
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error())
 				os.Exit(1)
+				return err
 			}
 		} else {
 			cfg, err = config.LoadConfigFromDefaultLocations()
@@ -33,12 +34,15 @@ var genCmd = cli.Command{
 			} else if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error())
 				os.Exit(2)
+				return err
 			}
 		}
 
 		if err = api.Generate(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(3)
+			return err
 		}
+		return nil
 	},
 }

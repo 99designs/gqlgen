@@ -32,7 +32,7 @@ func Execute() {
 	}
 
 	app.Action = genCmd.Action
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		genCmd,
 		initCmd,
 		versionCmd,

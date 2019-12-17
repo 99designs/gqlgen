@@ -54,20 +54,21 @@ type Mutation {
 }
 `
 
-var initCmd = cli.Command{
+var initCmd = &cli.Command{
 	Name:  "init",
 	Usage: "create a new gqlgen project",
 	Flags: []cli.Flag{
-		cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
-		cli.StringFlag{Name: "config, c", Usage: "the config filename"},
-		cli.StringFlag{Name: "server", Usage: "where to write the server stub to", Value: "server/server.go"},
-		cli.StringFlag{Name: "schema", Usage: "where to write the schema stub to", Value: "schema.graphql"},
+		&cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
+		&cli.StringFlag{Name: "config, c", Usage: "the config filename"},
+		&cli.StringFlag{Name: "server", Usage: "where to write the server stub to", Value: "server/server.go"},
+		&cli.StringFlag{Name: "schema", Usage: "where to write the schema stub to", Value: "schema.graphql"},
 	},
-	Action: func(ctx *cli.Context) {
+	Action: func(ctx *cli.Context) error {
 		initSchema(ctx.String("schema"))
 		initConfig(ctx)
 
 		GenerateGraphServer(ctx.String("server"))
+		return nil
 	},
 }
 

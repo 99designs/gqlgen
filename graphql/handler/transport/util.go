@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/gqlerror"
@@ -27,4 +28,19 @@ func writeJsonErrorf(w io.Writer, format string, args ...interface{}) {
 
 func writeJsonGraphqlError(w io.Writer, err ...*gqlerror.Error) {
 	writeJson(w, &graphql.Response{Errors: err})
+}
+
+func httpStatusCode(resp *graphql.Response) int {
+	if len(resp.Errors) == 0 {
+		return http.StatusOK
+	}
+
+	if len(resp.Data) != 0 {
+		return http.StatusOK
+	} else if len(resp.Errors) == 1 && resp.Errors[0].Message == "PersistedQueryNotFound" {
+		// for APQ
+		return http.StatusOK
+	}
+
+	return http.StatusUnprocessableEntity
 }

@@ -17,19 +17,31 @@ func TestAPQIntegration(t *testing.T) {
 	h.Use(&extension.AutomaticPersistedQuery{Cache: graphql.MapCache{}})
 	h.AddTransport(&transport.POST{})
 
-	var stats *extension.ApqStats
-	h.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-		stats = extension.GetApqStats(ctx)
-		return next(ctx)
+	t.Run("hash only", func(t *testing.T) {
+		h.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			return next(ctx)
+		})
+
+		resp := doRequest(h, "POST", "/graphql", `{"operationName":"A","extensions":{"persistedQuery":{"version":1,"sha256Hash":"338bbc16ac780daf81845339fbf0342061c1e9d2b702c96d3958a13a557083a6"}}}`)
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, `{"errors":[{"message":"PersistedQueryNotFound"}],"data":null}`, resp.Body.String())
 	})
 
-	resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }","extensions":{"persistedQuery":{"version":1,"sha256Hash":"30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07"}}}`)
-	require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-	require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	t.Run("hash & query", func(t *testing.T) {
+		var stats *extension.ApqStats
+		h.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			stats = extension.GetApqStats(ctx)
+			return next(ctx)
+		})
 
-	require.NotNil(t, stats)
-	require.True(t, stats.SentQuery)
-	require.Equal(t, "30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07", stats.Hash)
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }","extensions":{"persistedQuery":{"version":1,"sha256Hash":"30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07"}}}`)
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		require.NotNil(t, stats)
+		require.True(t, stats.SentQuery)
+		require.Equal(t, "30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07", stats.Hash)
+	})
 }
 
 func TestAPQ(t *testing.T) {

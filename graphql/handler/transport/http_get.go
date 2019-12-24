@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,7 +13,9 @@ import (
 
 // GET implements the GET side of the default HTTP transport
 // defined in https://github.com/APIs-guru/graphql-over-http#get
-type GET struct{}
+type GET struct {
+	StatusCodeFunc func(ctx context.Context, resp *graphql.Response) int
+}
 
 var _ graphql.Transport = GET{}
 
@@ -48,8 +51,9 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 
 	rc, err := exec.CreateOperationContext(r.Context(), raw)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), err)
+		ctx := graphql.WithOperationContext(r.Context(), rc)
+		resp := exec.DispatchError(ctx, err)
+		h.writeStatusCode(ctx, w, resp)
 		writeJson(w, resp)
 		return
 	}
@@ -61,7 +65,17 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	}
 
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
-	writeJson(w, responses(ctx))
+	resp := responses(ctx)
+	h.writeStatusCode(ctx, w, resp)
+	writeJson(w, resp)
+}
+
+func (h GET) writeStatusCode(ctx context.Context, w http.ResponseWriter, resp *graphql.Response) {
+	if h.StatusCodeFunc == nil {
+		w.WriteHeader(httpStatusCode(resp))
+	} else {
+		w.WriteHeader(h.StatusCodeFunc(ctx, resp))
+	}
 }
 
 func jsonDecode(r io.Reader, val interface{}) error {

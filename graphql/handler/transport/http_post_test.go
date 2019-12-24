@@ -52,7 +52,7 @@ func TestPOST(t *testing.T) {
 
 	t.Run("execution failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "mutation { name }"}`)
-		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"mutations are not supported"}],"data":null}`, resp.Body.String())
 	})

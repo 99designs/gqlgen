@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"context"
 	"mime"
 	"net/http"
 
@@ -9,7 +10,9 @@ import (
 
 // POST implements the POST side of the default HTTP transport
 // defined in https://github.com/APIs-guru/graphql-over-http#post
-type POST struct{}
+type POST struct {
+	StatusCodeFunc func(ctx context.Context, resp *graphql.Response) int
+}
 
 var _ graphql.Transport = POST{}
 
@@ -38,11 +41,22 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 
 	rc, err := exec.CreateOperationContext(r.Context(), params)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), err)
+		ctx := graphql.WithOperationContext(r.Context(), rc)
+		resp := exec.DispatchError(ctx, err)
+		h.writeStatusCode(ctx, w, resp)
 		writeJson(w, resp)
 		return
 	}
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
-	writeJson(w, responses(ctx))
+	resp := responses(ctx)
+	h.writeStatusCode(ctx, w, resp)
+	writeJson(w, resp)
+}
+
+func (h POST) writeStatusCode(ctx context.Context, w http.ResponseWriter, resp *graphql.Response) {
+	if h.StatusCodeFunc == nil {
+		w.WriteHeader(httpStatusCode(resp))
+	} else {
+		w.WriteHeader(h.StatusCodeFunc(ctx, resp))
+	}
 }

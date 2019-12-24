@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -22,6 +23,8 @@ type MultipartForm struct {
 	// as multipart/form-data in memory, with the remainder stored on disk in
 	// temporary files.
 	MaxMemory int64
+
+	StatusCodeFunc func(ctx context.Context, resp *graphql.Response) int
 }
 
 var _ graphql.Transport = MultipartForm{}
@@ -188,11 +191,22 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 
 	rc, gerr := exec.CreateOperationContext(r.Context(), &params)
 	if gerr != nil {
-		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), gerr)
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		ctx := graphql.WithOperationContext(r.Context(), rc)
+		resp := exec.DispatchError(ctx, gerr)
+		f.writeStatusCode(ctx, w, resp)
 		writeJson(w, resp)
 		return
 	}
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
-	writeJson(w, responses(ctx))
+	resp := responses(ctx)
+	f.writeStatusCode(ctx, w, resp)
+	writeJson(w, resp)
+}
+
+func (f MultipartForm) writeStatusCode(ctx context.Context, w http.ResponseWriter, resp *graphql.Response) {
+	if f.StatusCodeFunc == nil {
+		w.WriteHeader(httpStatusCode(resp))
+	} else {
+		w.WriteHeader(f.StatusCodeFunc(ctx, resp))
+	}
 }

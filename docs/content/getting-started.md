@@ -81,7 +81,7 @@ This has created an empty skeleton with all files you need:
 The generated model for Todo isn't right, it has a user embeded in it but we only want to fetch it if the user actually requested it. So instead lets make a new model in `todo.go`:
 
 ```go
-package gqlgen_todos
+package gqlgen-todos
 
 type Todo struct {
 	ID     string
@@ -159,7 +159,7 @@ $ go run github.com/99designs/gqlgen
 Now we just need to fill in the `not implemented` parts.  Update `resolver.go`
 
 ```go
-package gqlgen_todos
+package gqlgen-todos
 
 import (
 	context "context"

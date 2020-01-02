@@ -54,4 +54,4 @@ The type `Circle` would satisfy `Circle`, `Shape`, and `Shapes` — these values
 
 > Note
 >
-> `CollectFieldsCtx` is just a convenience wrapper around `CollectFields` that calls the later with the selection set automatically passed through from the resolver context.
+> `CollectFieldsCtx` is just a convenience wrapper around `CollectFields` that calls the latter with the selection set automatically passed through from the resolver context.

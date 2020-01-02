@@ -80,7 +80,6 @@ func CollectAllFields(ctx context.Context) []string {
 			uniq[f.Name] = struct{}{}
 			res = append(res, f.Name)
 		}
-
 	}
 	return res
 }

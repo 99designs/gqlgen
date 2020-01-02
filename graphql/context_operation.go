@@ -73,17 +73,16 @@ func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField 
 func CollectAllFields(ctx context.Context) []string {
 	resctx := GetFieldContext(ctx)
 	collected := CollectFields(GetOperationContext(ctx), resctx.Field.Selections, nil)
-	uniq := make([]string, 0, len(collected))
-Next:
+	uniq := make(map[string]struct{})
+	res := make([]string, 0, len(collected))
 	for _, f := range collected {
-		for _, name := range uniq {
-			if name == f.Name {
-				continue Next
-			}
+		if _, ok := uniq[f.Name]; !ok {
+			uniq[f.Name] = struct{}{}
+			res = append(res, f.Name)
 		}
-		uniq = append(uniq, f.Name)
+
 	}
-	return uniq
+	return res
 }
 
 // Errorf sends an error string to the client, passing it through the formatter.

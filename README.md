@@ -107,3 +107,4 @@ There isnt any way around this, gqlgen has no way to know what you want in a giv
 - [Christopher Biscardi @ Gophercon UK 2018](https://youtu.be/FdURVezcdcw)
 - [Introducing gqlgen: a GraphQL Server Generator for Go](https://99designs.com.au/blog/engineering/gqlgen-a-graphql-server-generator-for-go/)
 - [Dive into GraphQL by Iván Corrales Solera](https://medium.com/@ivan.corrales.solera/dive-into-graphql-9bfedf22e1a)
+- [Sample Project built on gqlgen with Postgres by Oleg Shalygin](https://github.com/oshalygin/gqlgen-pg-todo-example)

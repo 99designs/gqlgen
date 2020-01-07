@@ -31,6 +31,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		Query:         r.URL.Query().Get("query"),
 		OperationName: r.URL.Query().Get("operationName"),
 	}
+	raw.ReadTime.Start = graphql.Now()
 
 	if variables := r.URL.Query().Get("variables"); variables != "" {
 		if err := jsonDecode(strings.NewReader(variables), &raw.Variables); err != nil {
@@ -47,6 +48,8 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 			return
 		}
 	}
+
+	raw.ReadTime.End = graphql.Now()
 
 	rc, err := exec.CreateOperationContext(r.Context(), raw)
 	if err != nil {

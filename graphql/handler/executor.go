@@ -121,7 +121,10 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 		DisableIntrospection: true,
 		Recover:              graphql.DefaultRecover,
 		ResolverMiddleware:   e.fieldMiddleware,
-		Stats:                graphql.Stats{OperationStart: graphql.GetStartTime(ctx)},
+		Stats: graphql.Stats{
+			Read:           params.ReadTime,
+			OperationStart: graphql.GetStartTime(ctx),
+		},
 	}
 	ctx = graphql.WithOperationContext(ctx, rc)
 

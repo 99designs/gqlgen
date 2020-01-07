@@ -36,16 +36,16 @@ func TestApolloTracing(t *testing.T) {
 	require.EqualValues(t, 1, tracing.Version)
 
 	require.EqualValues(t, 0, tracing.StartTime.UnixNano())
-	require.EqualValues(t, 700, tracing.EndTime.UnixNano())
-	require.EqualValues(t, 700, tracing.Duration)
+	require.EqualValues(t, 900, tracing.EndTime.UnixNano())
+	require.EqualValues(t, 900, tracing.Duration)
 
-	require.EqualValues(t, 100, tracing.Parsing.StartOffset)
+	require.EqualValues(t, 300, tracing.Parsing.StartOffset)
 	require.EqualValues(t, 100, tracing.Parsing.Duration)
 
-	require.EqualValues(t, 300, tracing.Validation.StartOffset)
+	require.EqualValues(t, 500, tracing.Validation.StartOffset)
 	require.EqualValues(t, 100, tracing.Validation.Duration)
 
-	require.EqualValues(t, 500, tracing.Execution.Resolvers[0].StartOffset)
+	require.EqualValues(t, 700, tracing.Execution.Resolvers[0].StartOffset)
 	require.EqualValues(t, 100, tracing.Execution.Resolvers[0].Duration)
 	require.EqualValues(t, []interface{}{"name"}, tracing.Execution.Resolvers[0].Path)
 	require.EqualValues(t, "Query", tracing.Execution.Resolvers[0].ParentType)

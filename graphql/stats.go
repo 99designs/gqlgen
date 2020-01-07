@@ -8,6 +8,7 @@ import (
 
 type Stats struct {
 	OperationStart time.Time
+	Read           TraceTiming
 	Parsing        TraceTiming
 	Validation     TraceTiming
 

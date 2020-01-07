@@ -451,3 +451,69 @@ tr {
 tr td:first-child, th {
     font-weight: bold;
 }
+
+.version-switcher {
+    position: absolute;
+    top: 18px;
+    right: 16px;
+    display: inline-block;
+    width: 80px;
+    z-index: 3;
+    color: white;
+}
+
+
+.version-switcher-options {
+    display: none;
+    /*opacity: 40%;*/
+    color: var(--color-text);
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #f9f9f9;
+    width: 80px;
+    box-shadow: 0px 3px 7px 0px rgba(0,0,0,0.2);
+    z-index: 2;
+}
+
+@media (min-width: 768px) {
+    .version-switcher {
+        color: var(--color-text);
+    }
+}
+
+.version-switcher-options a, .version-switcher span {
+    list-style-type: none;
+    padding: 3px 10px;
+    display: block;
+    cursor: pointer;
+    font-family: var(--font-code);
+}
+
+.version-switcher-options a {
+    color: var(--color-text);
+}
+
+.version-switcher-options a:hover {
+    background: #bbb;
+    text-decoration: none;
+}
+
+.version-switcher-options a:first-child {
+    background: #ccc;
+}
+
+.version-switcher:hover .version-switcher-options {
+    display: block;
+}
+
+.alert-warning {
+    background-color: rgba(255, 85, 35, 0.84);
+    padding: 10px;
+    color: white;
+    font-weight: bolder;
+}
+
+.alert-warning a {
+    color: #ff6;
+}

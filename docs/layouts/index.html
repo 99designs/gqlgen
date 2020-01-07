@@ -10,6 +10,7 @@
 
 				<main>
 					<div class="content">
+						{{partial "version-banner"}}
 						{{ .Content }}
 						{{.Scratch.Set "intro" (readFile "content/_introduction.md")}}
 						{{.Scratch.Set "intro" (split (.Scratch.Get "intro") "\n")}}

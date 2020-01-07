@@ -28,9 +28,6 @@ joinVersions() {
 function version { echo "$@" | gawk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }'; }
 
 rebuild() {
-	echo -e "$(date) $GREEN Updating docs for branch: $1.$RESET"
-
-
 	VERSION_STRING=$(joinVersions)
 	export CURRENT_VERSION=${1}
 	export VERSIONS=${VERSION_STRING}
@@ -51,7 +48,8 @@ fi
 git fetch origin
 
 for version in "${VERSIONS_ARRAY[@]}" ; do
-    git checkout $branch
+    echo -e "$(date) $GREEN Updating docs for $version.$RESET"
+    git checkout $version
     rebuild "$version"
 done
 

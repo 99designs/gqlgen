@@ -45,7 +45,7 @@ currentBranch=$(git rev-parse --abbrev-ref HEAD)
 if ! git remote  | grep -q origin ; then
     git remote add origin https://github.com/99designs/gqlgen
 fi
-git fetch origin
+git fetch origin --tags
 
 for version in "${VERSIONS_ARRAY[@]}" ; do
     echo -e "$(date) $GREEN Updating docs for $version.$RESET"

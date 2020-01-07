@@ -32,7 +32,7 @@ rebuild() {
 	export CURRENT_VERSION=${1}
 	export VERSIONS=${VERSION_STRING}
 
-    hugo --quiet --destination="public/$CURRENT_VERSION" --baseURL="$HOST/$CURRENT_VERSION"
+    hugo --quiet --destination="public/$CURRENT_VERSION" --baseURL="$HOST/$CURRENT_VERSION/"
 
     if [[ $1 == "${VERSIONS_ARRAY[0]}" ]]; then
         hugo --quiet --destination=public/ --baseURL="$HOST/"

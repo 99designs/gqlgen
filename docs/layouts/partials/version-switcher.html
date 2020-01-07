@@ -8,7 +8,7 @@
 		<a class="version-switcher-option">{{$currentVersion}}</a>
 		{{ range $i, $version := $Versions }}
 			{{ if not (eq $currentVersion $version) }}
-				<a href="/{{$version}}/" class="version-switcher-option">{{$version}}</a>
+				<a href="https://gqlgen.com/{{$version}}/" class="version-switcher-option">{{$version}}</a>
 			{{ end }}
 		{{ end }}
 	</div>

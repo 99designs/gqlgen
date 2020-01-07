@@ -1597,488 +1597,347 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "builtinscalar.graphql", Input: `
+	&ast.Source{Name: "schema.graphql", Input: `directive @custom on ARGUMENT_DEFINITION
+directive @directive1 on FIELD_DEFINITION
+directive @directive2 on FIELD_DEFINITION
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @logged(id: UUID!) on FIELD
+directive @makeNil on FIELD_DEFINITION
+directive @makeTypedNil on FIELD_DEFINITION
+directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
+directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @unimplemented on FIELD_DEFINITION
+type A {
+	id: ID!
+}
+type AIt {
+	id: ID!
+}
+type AbIt {
+	id: ID!
+}
+interface Animal {
+	species: String!
+}
+type Autobind {
+	int: Int!
+	int32: Int!
+	int64: Int!
+	idStr: ID!
+	idInt: ID!
+}
+type B {
+	id: ID!
+}
+scalar Bytes
+type Cat implements Animal {
+	species: String!
+	catBreed: String!
+}
+input Changes @goModel(model: "map[string]interface{}") {
+	a: Int
+	b: Int
+}
+type CheckIssue896 {
+	id: Int
+}
+type Circle implements Shape {
+	radius: Float
+	area: Float
+}
+union Content_Child = Content_User | Content_Post
+type Content_Post {
+	foo: String
+}
+type Content_User {
+	foo: String
+}
+"""
+ This doesnt have an implementation in the typemap, so it should act like a string 
+"""
+scalar DefaultScalarImplementation
+type Dog implements Animal {
+	species: String!
+	dogBreed: String!
+}
+type EmbeddedCase1 @goModel(model: "testserver.EmbeddedCase1") {
+	exportedEmbeddedPointerExportedMethod: String!
+}
+type EmbeddedCase2 @goModel(model: "testserver.EmbeddedCase2") {
+	unexportedEmbeddedPointerExportedMethod: String!
+}
+type EmbeddedCase3 @goModel(model: "testserver.EmbeddedCase3") {
+	unexportedEmbeddedInterfaceExportedMethod: String!
+}
+type EmbeddedDefaultScalar {
+	value: DefaultScalarImplementation
+}
+type EmbeddedPointer @goModel(model: "testserver.EmbeddedPointerModel") {
+	ID: String
+	Title: String
+}
+enum EnumTest {
+	OK
+	NG
+}
+type Error {
+	id: ID!
+	errorOnNonRequiredField: String
+	errorOnRequiredField: String!
+	nilOnRequiredField: String!
+}
+type Errors {
+	a: Error!
+	b: Error!
+	c: Error!
+	d: Error!
+	e: Error!
+}
+enum FallbackToStringEncoding {
+	A
+	B
+	C
+}
+type ForcedResolver {
+	field: Circle @goField(forceResolver: true)
+}
+input InnerDirectives {
+	message: String! @length(min: 1, message: "not valid")
+}
+input InnerInput {
+	id: Int!
+}
+type InnerObject {
+	id: Int!
+}
+input InputDirectives {
+	text: String! @length(min: 0, max: 7, message: "not valid")
+	nullableText: String @toNull
+	inner: InnerDirectives!
+	innerNullable: InnerDirectives
+	thirdParty: ThirdParty @length(min: 0, max: 7)
+}
+input InputWithEnumValue {
+	enum: EnumTest!
+}
+type InvalidIdentifier {
+	id: Int!
+}
+type It {
+	id: ID!
+}
+type LoopA {
+	b: LoopB!
+}
+type LoopB {
+	a: LoopA!
+}
 """
 Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
 added to the TypeMap
 """
 type Map {
-    id: ID!
+	id: ID!
 }
-`},
-	&ast.Source{Name: "complexity.graphql", Input: `extend type Query {
-    overlapping: OverlappingFields
+input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
+	a: String
+	b: Int
 }
-
-type OverlappingFields {
-  oneFoo: Int! @goField(name: "foo")
-  twoFoo: Int! @goField(name: "foo")
-  oldFoo: Int! @goField(name: "foo", forceResolver: true)
-  newFoo: Int!
-  new_foo: Int!
+type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
+	a: String
+	b: Int
 }
-`},
-	&ast.Source{Name: "directive.graphql", Input: `directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
-directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
-directive @custom on ARGUMENT_DEFINITION
-directive @logged(id: UUID!) on FIELD
-directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
-directive @directive1 on FIELD_DEFINITION
-directive @directive2 on FIELD_DEFINITION
-directive @unimplemented on FIELD_DEFINITION
-
-extend type Query {
-    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
-    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range, arg3: String @toNull): String
-    directiveInputNullable(arg: InputDirectives): String
-    directiveInput(arg: InputDirectives!): String
-    directiveInputType(arg: InnerInput! @custom): String
-    directiveObject: ObjectDirectives
-    directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
-    directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
-    directiveField: String
-    directiveDouble: String @directive1 @directive2
-    directiveUnimplemented: String @unimplemented
+scalar MarshalPanic
+type ModelMethods {
+	resolverField: Boolean!
+	noContext: Boolean!
+	withContext: Boolean!
 }
-
-extend type Subscription {
-    directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
-    directiveNullableArg(arg: Int @range(min:0), arg2: Int @range, arg3: String @toNull): String
-    directiveDouble: String @directive1 @directive2
-    directiveUnimplemented: String @unimplemented
+input NestedMapInput {
+	map: MapStringInterfaceInput
 }
-
-input InputDirectives {
-    text: String! @length(min: 0, max: 7, message: "not valid")
-    nullableText: String @toNull
-    inner: InnerDirectives!
-    innerNullable: InnerDirectives
-    thirdParty: ThirdParty @length(min: 0, max: 7)
-}
-
-input InnerDirectives {
-    message: String! @length(min: 1, message: "not valid")
-}
-
 type ObjectDirectives {
-    text: String! @length(min: 0, max: 7, message: "not valid")
-    nullableText: String @toNull
+	text: String! @length(min: 0, max: 7, message: "not valid")
+	nullableText: String @toNull
 }
-
 type ObjectDirectivesWithCustomGoModel {
-    nullableText: String @toNull
+	nullableText: String @toNull
 }
-`},
-	&ast.Source{Name: "embedded.graphql", Input: `extend type Query {
-    embeddedCase1: EmbeddedCase1
-    embeddedCase2: EmbeddedCase2
-    embeddedCase3: EmbeddedCase3
+input OuterInput {
+	inner: InnerInput!
 }
-
-type EmbeddedCase1 @goModel(model:"testserver.EmbeddedCase1") {
-    exportedEmbeddedPointerExportedMethod: String!
+type OuterObject {
+	inner: InnerObject!
 }
-
-type EmbeddedCase2 @goModel(model:"testserver.EmbeddedCase2") {
-    unexportedEmbeddedPointerExportedMethod: String!
+type OverlappingFields {
+	oneFoo: Int! @goField(name: "foo")
+	twoFoo: Int! @goField(name: "foo")
+	oldFoo: Int! @goField(name: "foo", forceResolver: true)
+	newFoo: Int!
+	new_foo: Int!
 }
-
-type EmbeddedCase3 @goModel(model:"testserver.EmbeddedCase3") {
-    unexportedEmbeddedInterfaceExportedMethod: String!
+type Panics {
+	fieldScalarMarshal: [MarshalPanic!]!
+	fieldFuncMarshal(u: [MarshalPanic!]!): [MarshalPanic!]!
+	argUnmarshal(u: [MarshalPanic!]!): Boolean!
 }
-`},
-	&ast.Source{Name: "enum.graphql", Input: `enum EnumTest {
-    OK
-    NG
+type Primitive {
+	value: Int!
+	squared: Int!
 }
-
-input InputWithEnumValue {
-    enum: EnumTest!
+type PrimitiveString {
+	value: String!
+	doubled: String!
+	len: Int!
 }
-
-extend type Query {
-    enumInInput(input: InputWithEnumValue): EnumTest!
-}
-`},
-	&ast.Source{Name: "interfaces.graphql", Input: `extend type Query {
-    shapes: [Shape]
-    noShape: Shape @makeNil
-    noShapeTypedNil: Shape @makeTypedNil
-    animal: Animal @makeTypedNil
-}
-
-interface Animal {
-    species: String!
-}
-
-type Dog implements Animal {
-    species: String!
-    dogBreed: String!
-}
-
-type Cat implements Animal {
-    species: String!
-    catBreed: String!
-}
-
-interface Shape {
-    area: Float
-}
-type Circle implements Shape {
-    radius: Float
-    area: Float
+type Query {
+	invalidIdentifier: InvalidIdentifier
+	collision: It
+	mapInput(input: Changes): Boolean
+	recursive(input: RecursiveInputSlice): Boolean
+	nestedInputs(input: [[OuterInput]] = [[{inner:{id:1}}]]): Boolean
+	nestedOutputs: [[OuterObject]]
+	modelMethods: ModelMethods
+	user(id: Int!): User!
+	nullableArg(arg: Int = 123): String
+	inputSlice(arg: [String!]!): Boolean!
+	shapeUnion: ShapeUnion!
+	autobind: Autobind
+	deprecatedField: String! @deprecated(reason: "test deprecated directive")
+	overlapping: OverlappingFields
+	directiveArg(arg: String!): String
+	directiveNullableArg(arg: Int, arg2: Int, arg3: String): String
+	directiveInputNullable(arg: InputDirectives): String
+	directiveInput(arg: InputDirectives!): String
+	directiveInputType(arg: InnerInput!): String
+	directiveObject: ObjectDirectives
+	directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
+	directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
+	directiveField: String
+	directiveDouble: String @directive1 @directive2
+	directiveUnimplemented: String @unimplemented
+	embeddedCase1: EmbeddedCase1
+	embeddedCase2: EmbeddedCase2
+	embeddedCase3: EmbeddedCase3
+	enumInInput(input: InputWithEnumValue): EnumTest!
+	shapes: [Shape]
+	noShape: Shape @makeNil
+	noShapeTypedNil: Shape @makeTypedNil
+	animal: Animal @makeTypedNil
+	issue896a: [CheckIssue896!]
+	mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
+	mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
+	errorBubble: Error
+	errors: Errors
+	valid: String!
+	panics: Panics
+	primitiveObject: [Primitive!]!
+	primitiveStringObject: [PrimitiveString!]!
+	defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!
+	slices: Slices
+	scalarSlice: Bytes!
+	fallback(arg: FallbackToStringEncoding!): FallbackToStringEncoding!
+	optionalUnion: TestUnion
+	validType: ValidType
+	wrappedStruct: WrappedStruct!
+	wrappedScalar: WrappedScalar!
 }
 type Rectangle implements Shape {
-    length: Float
-    width: Float
-    area: Float
+	length: Float
+	width: Float
+	area: Float
 }
-union ShapeUnion @goModel(model:"testserver.ShapeUnion") = Circle | Rectangle
-
-directive @makeNil on FIELD_DEFINITION
-directive @makeTypedNil on FIELD_DEFINITION
-`},
-	&ast.Source{Name: "issue896.graphql", Input: `# This example should build stable output. If the file content starts
-# alternating nondeterministically between two outputs, then see
-# https://github.com/99designs/gqlgen/issues/896.
-
-extend schema {
-  query: Query
-  subscription: Subscription
-}
-
-type CheckIssue896 {id: Int}
-
-extend type Query {
-  issue896a: [CheckIssue896!] # Note the "!" or lack thereof.
-}
-
-extend type Subscription {
-  issue896b: [CheckIssue896] # Note the "!" or lack thereof.
-}
-`},
-	&ast.Source{Name: "loops.graphql", Input: `type LoopA {
-    b: LoopB!
-}
-
-type LoopB {
-    a: LoopA!
-}
-`},
-	&ast.Source{Name: "maps.graphql", Input: `extend type Query {
-    mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
-    mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
-}
-
-type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
-    a: String
-    b: Int
-}
-
-input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
-    a: String
-    b: Int
-}
-
-input NestedMapInput {
-    map: MapStringInterfaceInput
-}
-`},
-	&ast.Source{Name: "nulls.graphql", Input: `extend type Query {
-    errorBubble: Error
-    errors: Errors
-    valid: String!
-}
-
-type Errors {
-    a: Error!
-    b: Error!
-    c: Error!
-    d: Error!
-    e: Error!
-}
-
-type Error {
-    id: ID!
-    errorOnNonRequiredField: String
-    errorOnRequiredField: String!
-    nilOnRequiredField: String!
-}
-`},
-	&ast.Source{Name: "panics.graphql", Input: `extend type Query {
-    panics: Panics
-}
-
-type Panics {
-    fieldScalarMarshal: [MarshalPanic!]!
-    fieldFuncMarshal(u: [MarshalPanic!]!): [MarshalPanic!]!
-    argUnmarshal(u: [MarshalPanic!]!): Boolean!
-
-}
-
-scalar MarshalPanic
-`},
-	&ast.Source{Name: "primitive_objects.graphql", Input: `extend type Query {
-    primitiveObject: [Primitive!]!
-    primitiveStringObject: [PrimitiveString!]!
-}
-
-type Primitive {
-    value: Int!
-    squared: Int!
-}
-
-type PrimitiveString {
-    value: String!
-    doubled: String!
-    len: Int!
-}
-`},
-	&ast.Source{Name: "scalar_default.graphql", Input: `extend type Query {
-    defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!
-}
-
-""" This doesnt have an implementation in the typemap, so it should act like a string """
-scalar DefaultScalarImplementation
-
-type EmbeddedDefaultScalar {
-    value: DefaultScalarImplementation
-}
-`},
-	&ast.Source{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
-
-type Query {
-    invalidIdentifier: InvalidIdentifier
-    collision: It
-    mapInput(input: Changes): Boolean
-    recursive(input: RecursiveInputSlice): Boolean
-    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
-    nestedOutputs: [[OuterObject]]
-    modelMethods: ModelMethods
-    user(id: Int!): User!
-    nullableArg(arg: Int = 123): String
-    inputSlice(arg: [String!]!): Boolean!
-    shapeUnion: ShapeUnion!
-    autobind: Autobind
-    deprecatedField: String! @deprecated(reason: "test deprecated directive")
-}
-
-type Subscription {
-    updated: String!
-    initPayload: String!
-}
-
-type User {
-    id: Int!
-    friends: [User!]! @goField(forceResolver: true)
-    created: Time!
-    updated: Time
-}
-
-type Autobind {
-    int: Int!
-    int32: Int!
-    int64: Int!
-
-    idStr: ID!
-    idInt: ID!
-}
-
-type ModelMethods {
-    resolverField: Boolean!
-    noContext: Boolean!
-    withContext: Boolean!
-}
-
-type InvalidIdentifier {
-    id: Int!
-}
-
-type It {
-    id: ID!
-}
-
-input Changes @goModel(model:"map[string]interface{}") {
-    a: Int
-    b: Int
-}
-
 input RecursiveInputSlice {
-    self: [RecursiveInputSlice!]
+	self: [RecursiveInputSlice!]
 }
-
-input InnerInput {
-    id:Int!
+interface Shape {
+	area: Float
 }
-
-input OuterInput {
-    inner: InnerInput!
-}
-
-scalar ThirdParty @goModel(model:"testserver.ThirdParty")
-
-type OuterObject {
-    inner: InnerObject!
-}
-
-type InnerObject {
-    id: Int!
-}
-
-type ForcedResolver {
-    field: Circle @goField(forceResolver: true)
-}
-
-type EmbeddedPointer @goModel(model:"testserver.EmbeddedPointerModel") {
-    ID: String
-    Title: String
-}
-
-scalar UUID
-
-enum Status {
-    OK
-    ERROR
-}
-
-scalar Time
-`},
-	&ast.Source{Name: "slices.graphql", Input: `extend type Query {
-    slices: Slices
-    scalarSlice: Bytes!
-}
-
+union ShapeUnion @goModel(model: "testserver.ShapeUnion") = Circle | Rectangle
 type Slices {
-  test1: [String]
-  test2: [String!]
-  test3: [String]!
-  test4: [String!]!
+	test1: [String]
+	test2: [String!]
+	test3: [String]!
+	test4: [String!]!
 }
-
-scalar Bytes
-`},
-	&ast.Source{Name: "typefallback.graphql", Input: `extend type Query {
-    fallback(arg: FallbackToStringEncoding!): FallbackToStringEncoding!
+enum Status {
+	OK
+	ERROR
 }
-
-enum FallbackToStringEncoding {
-    A
-    B
-    C
+type Subscription {
+	updated: String!
+	initPayload: String!
+	directiveArg(arg: String!): String
+	directiveNullableArg(arg: Int, arg2: Int, arg3: String): String
+	directiveDouble: String @directive1 @directive2
+	directiveUnimplemented: String @unimplemented
+	issue896b: [CheckIssue896]
 }
-`},
-	&ast.Source{Name: "useptr.graphql", Input: `type A {
-    id: ID!
-}
-
-type B {
-    id: ID!
-}
-
 union TestUnion = A | B
-
-extend type Query {
-    optionalUnion: TestUnion
+scalar ThirdParty @goModel(model: "testserver.ThirdParty")
+scalar Time
+scalar UUID
+type User {
+	id: Int!
+	friends: [User!]! @goField(forceResolver: true)
+	created: Time!
+	updated: Time
 }
-`},
-	&ast.Source{Name: "validtypes.graphql", Input: `extend type Query {
-    validType: ValidType
-}
-
-""" These things are all valid, but without care generate invalid go code """
-type ValidType {
-    differentCase: String!
-    different_case: String! @goField(name:"DifferentCaseOld")
-    validInputKeywords(input: ValidInput): Boolean!
-    validArgs(
-        break:       String!,
-        default:     String!,
-        func:        String!,
-        interface:   String!,
-        select:      String!,
-        case:        String!,
-        defer:       String!,
-        go:          String!,
-        map:         String!,
-        struct:      String!,
-        chan:        String!,
-        else:        String!,
-        goto:        String!,
-        package:     String!,
-        switch:      String!,
-        const:       String!,
-        fallthrough: String!,
-        if:          String!,
-        range:       String!,
-        type:        String!,
-        continue:    String!,
-        for:         String!,
-        import:      String!,
-        return:      String!,
-        var:         String!,
-        _:           String!,
-    ): Boolean!
-}
-
 input ValidInput {
-    break:       String!
-    default:     String!
-    func:        String!
-    interface:   String!
-    select:      String!
-    case:        String!
-    defer:       String!
-    go:          String!
-    map:         String!
-    struct:      String!
-    chan:        String!
-    else:        String!
-    goto:        String!
-    package:     String!
-    switch:      String!
-    const:       String!
-    fallthrough: String!
-    if:          String!
-    range:       String!
-    type:        String!
-    continue:    String!
-    for:         String!
-    import:      String!
-    return:      String!
-    var:         String!
-    _:           String! @goField(name: "Underscore")
+	break: String!
+	default: String!
+	func: String!
+	interface: String!
+	select: String!
+	case: String!
+	defer: String!
+	go: String!
+	map: String!
+	struct: String!
+	chan: String!
+	else: String!
+	goto: String!
+	package: String!
+	switch: String!
+	const: String!
+	fallthrough: String!
+	if: String!
+	range: String!
+	type: String!
+	continue: String!
+	for: String!
+	import: String!
+	return: String!
+	var: String!
+	_: String! @goField(name: "Underscore")
 }
-
-# see https://github.com/99designs/gqlgen/issues/694
-type Content_User {
-  foo: String
+"""
+ These things are all valid, but without care generate invalid go code 
+"""
+type ValidType {
+	differentCase: String!
+	different_case: String! @goField(name: "DifferentCaseOld")
+	validInputKeywords(input: ValidInput): Boolean!
+	validArgs(break: String!, default: String!, func: String!, interface: String!, select: String!, case: String!, defer: String!, go: String!, map: String!, struct: String!, chan: String!, else: String!, goto: String!, package: String!, switch: String!, const: String!, fallthrough: String!, if: String!, range: String!, type: String!, continue: String!, for: String!, import: String!, return: String!, var: String!, _: String!): Boolean!
 }
-
-type Content_Post {
-  foo: String
-}
-
-union Content_Child = Content_User | Content_Post
-`},
-	&ast.Source{Name: "weird_type_cases.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/583
-
-type asdfIt { id: ID! }
-type iIt { id: ID! }
-type AIt { id: ID! }
-type XXIt { id: ID! }
-type AbIt { id: ID! }
-type XxIt { id: ID! }
-`},
-	&ast.Source{Name: "wrapped_type.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/721
-
-extend type Query {
-    wrappedStruct: WrappedStruct!
-    wrappedScalar: WrappedScalar!
-}
-
-type WrappedStruct { name: String! }
 scalar WrappedScalar
+type WrappedStruct {
+	name: String!
+}
+type XXIt {
+	id: ID!
+}
+type XxIt {
+	id: ID!
+}
+type asdfIt {
+	id: ID!
+}
+type iIt {
+	id: ID!
+}
 `},
 )
 

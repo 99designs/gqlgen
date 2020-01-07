@@ -1,0 +1,48 @@
+{{ reserveImport "context"  }}
+{{ reserveImport "errors"  }}
+
+{{ reserveImport "github.com/99designs/gqlgen/plugin/federation" }}
+
+func (ec *executionContext) __resolve__service(ctx context.Context) (federation.Service, error) {
+	if ec.DisableIntrospection {
+		return federation.Service{}, errors.New("federated introspection disabled")
+	}
+	return federation.Service{
+		SDL: `{{.SDL}}`,
+	}, nil
+}
+
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) ([]_Entity, error) {
+	list := []_Entity{}
+	for _, rep := range representations {
+		typeName, ok := rep["__typename"].(string)
+		if !ok {
+			return nil, errors.New("__typename must be an existing string")
+		}
+		switch typeName {
+		{{ range .Entities }}
+		case "{{.Def.Name}}":
+			id, ok := rep["{{.Field.Name}}"].({{.FieldTypeGo}})
+			if !ok {
+				return nil, errors.New("opsies")
+			}
+			resp, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, id)
+			if err != nil {
+				return nil, err
+			}
+			{{ range .Requires }}
+				{{ range .Fields}}
+					resp.{{.NameGo}}, err = ec.{{.TypeReference.UnmarshalFunc}}(ctx, rep["{{.Name}}"])
+					if err != nil {
+						return nil, err
+					}
+				{{ end }}
+			{{ end }}
+			list = append(list, resp)
+		{{ end }}
+		default:
+			return nil, errors.New("unknown type: "+typeName)
+		}
+	}
+	return list, nil
+}

@@ -252,56 +252,46 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `"This directive does magical things"
+	&ast.Source{Name: "schema.graphql", Input: `"""
+This directive does magical things
+"""
 directive @magic(kind: Int) on FIELD_DEFINITION
-
-type Element {
-    child: Element!
-    error: Boolean!
-    mismatched: [Boolean!]
-}
-
 enum DATE_FILTER_OP {
-    # multi
-    # line
-    # comment
-    EQ
-    NEQ
-    GT
-    GTE
-    LT
-    LTE
+	EQ
+	NEQ
+	GT
+	GTE
+	LT
+	LTE
 }
-
 input DateFilter {
-    value: String!
-    timezone: String = "UTC"
-    op: DATE_FILTER_OP = EQ
+	value: String!
+	timezone: String = "UTC"
+	op: DATE_FILTER_OP = EQ
 }
-
-type Viewer {
-    user: User
+type Element {
+	child: Element!
+	error: Boolean!
+	mismatched: [Boolean!]
 }
-
-type Query {
-    path: [Element]
-    date(filter: DateFilter!): Boolean!
-    viewer: Viewer
-    jsonEncoding: String!
-    error(type: ErrorType = NORMAL): Boolean!
-    complexity(value: Int!): Boolean!
-}
-
 enum ErrorType {
-    CUSTOM
-    NORMAL
+	CUSTOM
+	NORMAL
 }
-
-# this is a comment with a ` + "`" + `backtick` + "`" + `
-`},
-	&ast.Source{Name: "user.graphql", Input: `type User {
-    name: String!
-    likes: [String!]!
+type Query {
+	path: [Element]
+	date(filter: DateFilter!): Boolean!
+	viewer: Viewer
+	jsonEncoding: String!
+	error(type: ErrorType = NORMAL): Boolean!
+	complexity(value: Int!): Boolean!
+}
+type User {
+	name: String!
+	likes: [String!]!
+}
+type Viewer {
+	user: User
 }
 `},
 )

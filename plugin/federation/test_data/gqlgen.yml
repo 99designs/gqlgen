@@ -1,0 +1,3 @@
+schema:
+  - "test_data/schema.graphql"
+federated: true

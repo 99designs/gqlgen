@@ -1,0 +1,6 @@
+type Hello @key(fields: "name") {
+        	name: String!
+        }
+        type Query {
+        	hello: Hello!
+        }

@@ -1,12 +1,14 @@
 package codegen
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/formatter"
 )
 
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
@@ -35,13 +37,17 @@ type builder struct {
 	Directives map[string]*Directive
 }
 
-func BuildData(cfg *config.Config) (*Data, error) {
+type SchemaMutator interface {
+	MutateSchema(s *ast.Schema) error
+}
+
+func BuildData(cfg *config.Config, plugins []SchemaMutator) (*Data, error) {
 	b := builder{
 		Config: cfg,
 	}
 
 	var err error
-	b.Schema, b.SchemaStr, err = cfg.LoadSchema()
+	b.Schema, err = cfg.LoadSchema()
 	if err != nil {
 		return nil, err
 	}
@@ -57,6 +63,13 @@ func BuildData(cfg *config.Config) (*Data, error) {
 	}
 
 	cfg.InjectBuiltins(b.Schema)
+
+	for _, p := range plugins {
+		err = p.MutateSchema(b.Schema)
+		if err != nil {
+			return nil, fmt.Errorf("error running MutateSchema: %v", err)
+		}
+	}
 
 	b.Binder, err = b.Config.NewBinder(b.Schema)
 	if err != nil {
@@ -142,6 +155,10 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		// otherwise show a generic error message
 		return nil, fmt.Errorf("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
 	}
+
+	var buf bytes.Buffer
+	formatter.NewFormatter(&buf).FormatSchema(b.Schema)
+	s.SchemaStr = map[string]string{"schema.graphql": buf.String()}
 
 	return &s, nil
 }

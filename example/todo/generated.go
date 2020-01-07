@@ -229,44 +229,45 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `schema {
-    query: MyQuery
-    mutation: MyMutation
+	query: MyQuery
+	mutation: MyMutation
 }
-
-type MyQuery {
-    todo(id: ID!): Todo
-    lastTodo: Todo
-    todos: [Todo!]!
-}
-
-type MyMutation {
-    createTodo(todo: TodoInput!): Todo!
-    updateTodo(id: ID!, changes: Map!): Todo
-}
-
-type Todo {
-    id: ID!
-    text: String!
-    done: Boolean! @hasRole(role: OWNER) # only the owner can see if a todo is done
-}
-
-"Passed to createTodo to create a new todo"
-input TodoInput {
-    "The body text"
-    text: String!
-    "Is it done already?"
-    done: Boolean
-}
-
-scalar Map
-
-"Prevents access to a field if the user doesnt have the matching role"
+"""
+Prevents access to a field if the user doesnt have the matching role
+"""
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 directive @user(id: ID!) on MUTATION | QUERY | FIELD
-
+scalar Map
+type MyMutation {
+	createTodo(todo: TodoInput!): Todo!
+	updateTodo(id: ID!, changes: Map!): Todo
+}
+type MyQuery {
+	todo(id: ID!): Todo
+	lastTodo: Todo
+	todos: [Todo!]!
+}
 enum Role {
-    ADMIN
-    OWNER
+	ADMIN
+	OWNER
+}
+type Todo {
+	id: ID!
+	text: String!
+	done: Boolean! @hasRole(role: OWNER)
+}
+"""
+Passed to createTodo to create a new todo
+"""
+input TodoInput {
+	"""
+	The body text
+	"""
+	text: String!
+	"""
+	Is it done already?
+	"""
+	done: Boolean
 }
 `},
 )

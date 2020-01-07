@@ -194,28 +194,24 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `interface Event {
-    selection: [String!]
-    collected: [String!]
+	selection: [String!]
+	collected: [String!]
 }
-
-type Post implements Event {
-    message: String!
-    sent: Time!
-    selection: [String!]
-    collected: [String!]
-}
-
 type Like implements Event {
-    reaction: String!
-    sent: Time!
-    selection: [String!]
-    collected: [String!]
+	reaction: String!
+	sent: Time!
+	selection: [String!]
+	collected: [String!]
 }
-
+type Post implements Event {
+	message: String!
+	sent: Time!
+	selection: [String!]
+	collected: [String!]
+}
 type Query {
-    events: [Event!]
+	events: [Event!]
 }
-
 scalar Time
 `},
 )

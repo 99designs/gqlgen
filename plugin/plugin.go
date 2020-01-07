@@ -18,3 +18,7 @@ type ConfigMutator interface {
 type CodeGenerator interface {
 	GenerateCode(cfg *codegen.Data) error
 }
+
+type SourcesInjector interface {
+	InjectSources(cfg *config.Config)
+}

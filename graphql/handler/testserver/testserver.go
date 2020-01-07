@@ -15,14 +15,6 @@ import (
 // a generated server, but it aims to be good enough to test the handler package without relying on codegen.
 func New() *TestServer {
 	next := make(chan struct{})
-	now := time.Unix(0, 0)
-
-	graphql.Now = func() time.Time {
-		defer func() {
-			now = now.Add(100 * time.Nanosecond)
-		}()
-		return now
-	}
 
 	schema := gqlparser.MustLoadSchema(&ast.Source{Input: `
 		type Query {

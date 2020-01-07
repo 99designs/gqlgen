@@ -6,6 +6,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 
 	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -18,6 +21,15 @@ import (
 )
 
 func TestApolloTracing(t *testing.T) {
+	now := time.Unix(0, 0)
+
+	graphql.Now = func() time.Time {
+		defer func() {
+			now = now.Add(100 * time.Nanosecond)
+		}()
+		return now
+	}
+
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(apollotracing.Tracer{})
@@ -54,6 +66,15 @@ func TestApolloTracing(t *testing.T) {
 }
 
 func TestApolloTracing_withFail(t *testing.T) {
+	now := time.Unix(0, 0)
+
+	graphql.Now = func() time.Time {
+		defer func() {
+			now = now.Add(100 * time.Nanosecond)
+		}()
+		return now
+	}
+
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})

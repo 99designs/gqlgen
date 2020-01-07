@@ -6,7 +6,7 @@ menu: { main: { parent: "reference" } }
 ---
 
 Graphql server has an already built-in Upload scalar to upload files using a multipart request. \
-It implements the following spec https://github.com/jaydenseric/graphql-multipart-request-spec,
+It implements the following spec [https://github.com/jaydenseric/graphql-multipart-request-spec](https://github.com/jaydenseric/graphql-multipart-request-spec),
 that defines an interoperable multipart form field structure for GraphQL requests, used by
 various file upload client implementations.
 

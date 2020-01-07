@@ -100,7 +100,7 @@ func TestWebsocket(t *testing.T) {
 
 		msg := readOp(c)
 		assert.Equal(t, errorMsg, msg.Type)
-		assert.Equal(t, `[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}]`, string(msg.Payload))
+		assert.Equal(t, `[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}]`, string(msg.Payload))
 	})
 
 	t.Run("client can receive data", func(t *testing.T) {
@@ -164,7 +164,7 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 	msg := readOp(c)
 	assert.Equal(t, connectionKeepAliveMsg, msg.Type)
 
-	// server message
+	// server messageapollotracing_test
 	h.SendNextSubscriptionMessage()
 	msg = readOp(c)
 	assert.Equal(t, dataMsg, msg.Type)

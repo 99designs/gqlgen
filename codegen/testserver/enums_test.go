@@ -36,7 +36,7 @@ func TestEnumsResolver(t *testing.T) {
 			enumInInput(input: {enum: INVALID})
 		}
 		`, &resp)
-		require.EqualError(t, err, `http 422: {"errors":[{"message":"Expected type EnumTest!, found INVALID.","locations":[{"line":2,"column":30}]}],"data":null}`)
+		require.EqualError(t, err, `http 422: {"errors":[{"message":"Expected type EnumTest!, found INVALID.","locations":[{"line":2,"column":30}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
 	})
 
 	t.Run("input with invalid enum value via vars", func(t *testing.T) {
@@ -47,6 +47,6 @@ func TestEnumsResolver(t *testing.T) {
 			enumInInput(input: $input)
 		}
 		`, &resp, client.Var("input", map[string]interface{}{"enum": "INVALID"}))
-		require.EqualError(t, err, `http 422: {"errors":[{"message":"INVALID is not a valid EnumTest","path":["variable","input","enum"]}],"data":null}`)
+		require.EqualError(t, err, `http 422: {"errors":[{"message":"INVALID is not a valid EnumTest","path":["variable","input","enum"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
 	})
 }

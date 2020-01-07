@@ -28,13 +28,13 @@ func TestGET(t *testing.T) {
 	t.Run("invalid variable", func(t *testing.T) {
 		resp := doRequest(h, "GET", `/graphql?query=query($id:Int!){find(id:$id)}&variables={"id":false}`, "")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		assert.Equal(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"]}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {
 		resp := doRequest(h, "GET", "/graphql?query=!", "")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		assert.Equal(t, `{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("no mutations", func(t *testing.T) {

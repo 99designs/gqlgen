@@ -6,8 +6,11 @@ import (
 
 	"github.com/99designs/gqlgen/complexity"
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/errcode"
 	"github.com/vektah/gqlparser/gqlerror"
 )
+
+const errComplexityLimit = "COMPLEXITY_LIMIT_EXCEEDED"
 
 // ComplexityLimit allows you to define a limit on query complexity
 //
@@ -66,7 +69,9 @@ func (c ComplexityLimit) MutateOperationContext(ctx context.Context, rc *graphql
 	})
 
 	if complexity > limit {
-		return gqlerror.Errorf("operation has complexity %d, which exceeds the limit of %d", complexity, limit)
+		err := gqlerror.Errorf("operation has complexity %d, which exceeds the limit of %d", complexity, limit)
+		errcode.Set(err, errComplexityLimit)
+		return err
 	}
 
 	return nil

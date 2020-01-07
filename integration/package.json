@@ -3,19 +3,22 @@
     "test": "jest"
   },
   "devDependencies": {
-    "apollo-cache-inmemory": "^1.2.6",
-    "apollo-client": "^2.3.7",
-    "apollo-link-http": "^1.5.4",
-    "babel-core": "^6.26.3",
-    "babel-jest": "^23.4.2",
-    "graphql": "^0.13.2",
-    "graphql-cli": "^2.16.5",
-    "graphql-tag": "^2.9.2",
-    "jest": "^23.4.2",
-    "node-fetch": "^2.2.0",
-    "regenerator-runtime": "^0.12.1"
+    "apollo-cache-inmemory": "^1.6.5",
+    "apollo-client": "^2.6.8",
+    "apollo-link-http": "^1.5.16",
+    "apollo-link-persisted-queries": "^0.2.2",
+    "apollo-link-ws": "^1.0.19",
+    "subscriptions-transport-ws": "^0.9.16",
+    "ws": "^7.2.1",
+    "@babel/core": "^7.7.7",
+    "babel-jest": "^24.9.0",
+    "graphql": "^14.5.8",
+    "graphql-cli": "^3.0.14",
+    "graphql-tag": "^2.10.1",
+    "jest": "^24.9.0",
+    "node-fetch": "^2.6.0"
   },
   "dependencies": {
-    "babel-preset-env": "^1.7.0"
+    "@babel/preset-env": "^7.7.7"
   }
 }

@@ -189,7 +189,7 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 	rc, gerr := exec.CreateOperationContext(r.Context(), &params)
 	if gerr != nil {
 		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), gerr)
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.WriteHeader(statusFor(gerr))
 		writeJson(w, resp)
 		return
 	}

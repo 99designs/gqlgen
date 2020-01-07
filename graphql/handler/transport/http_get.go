@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/errcode"
 	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 // GET implements the GET side of the default HTTP transport
@@ -48,7 +50,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 
 	rc, err := exec.CreateOperationContext(r.Context(), raw)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.WriteHeader(statusFor(err))
 		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), err)
 		writeJson(w, resp)
 		return
@@ -68,4 +70,13 @@ func jsonDecode(r io.Reader, val interface{}) error {
 	dec := json.NewDecoder(r)
 	dec.UseNumber()
 	return dec.Decode(val)
+}
+
+func statusFor(errs gqlerror.List) int {
+	switch errcode.GetErrorKind(errs) {
+	case errcode.KindProtocol:
+		return http.StatusUnprocessableEntity
+	default:
+		return http.StatusOK
+	}
 }

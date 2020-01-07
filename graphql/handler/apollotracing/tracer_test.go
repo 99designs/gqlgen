@@ -60,7 +60,7 @@ func TestApolloTracing_withFail(t *testing.T) {
 	h.Use(apollotracing.Tracer{})
 
 	resp := doRequest(h, "POST", "/graphql", `{"operationName":"A","extensions":{"persistedQuery":{"version":1,"sha256Hash":"338bbc16ac780daf81845339fbf0342061c1e9d2b702c96d3958a13a557083a6"}}}`)
-	assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+	assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 	b := resp.Body.Bytes()
 	t.Log(string(b))
 	var respData struct {

@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/urfave/cli v1.20.0
 	github.com/vektah/dataloaden v0.2.1-0.20190515034641-a19b9a6e7c9e
-	github.com/vektah/gqlparser v1.2.0
+	github.com/vektah/gqlparser v1.2.1
 	golang.org/x/tools v0.0.0-20190515012406-7d7faa4812bd
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.2.2

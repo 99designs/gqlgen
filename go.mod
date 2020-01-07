@@ -11,7 +11,6 @@ require (
 	github.com/gorilla/websocket v1.2.0
 	github.com/hashicorp/golang-lru v0.5.0
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/matryer/moq v0.0.0-20190312154309-6cfb0558e1bd // indirect
 	github.com/mitchellh/mapstructure v0.0.0-20180203102830-a4e142e9c047
 	github.com/opentracing/basictracer-go v1.0.0 // indirect
 	github.com/opentracing/opentracing-go v1.0.2
@@ -29,6 +28,3 @@ require (
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20180110180208-2cc67fd64755
 	sourcegraph.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67 // indirect
 )
-
-// temporary until pr is merged
-replace github.com/vektah/gqlparser => github.com/marwan-at-work/gqlparser v1.1.3-0.20191208165912-fbc9893d5ef5

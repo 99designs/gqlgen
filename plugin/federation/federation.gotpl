@@ -12,6 +12,7 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (federation.
 	}, nil
 }
 
+{{if .Entities}}
 func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) ([]_Entity, error) {
 	list := []_Entity{}
 	for _, rep := range representations {
@@ -46,3 +47,4 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 	}
 	return list, nil
 }
+{{end}}

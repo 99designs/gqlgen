@@ -1,0 +1,3 @@
+schema:
+  - "test_data/nokey.graphql"
+federated: true

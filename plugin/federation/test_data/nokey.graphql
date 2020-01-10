@@ -1,7 +1,8 @@
-type Hello @key(fields: "name") {
+type Hello {
   name: String!
 }
 
 type Query {
   hello: Hello!
 }
+

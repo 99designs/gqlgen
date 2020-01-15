@@ -7,8 +7,11 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
+	"golang.org/x/tools/go/packages"
 )
 
 type BuildMutateHook = func(b *ModelBuild) *ModelBuild
@@ -245,6 +248,12 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	if m.MutateHook != nil {
 		b = m.MutateHook(b)
 	}
+
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName}, cfg.Models.ReferencedPackages()...)
+	if err != nil {
+		return errors.Wrap(err, "loading failed")
+	}
+	code.RecordPackagesList(pkgs)
 
 	return templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,

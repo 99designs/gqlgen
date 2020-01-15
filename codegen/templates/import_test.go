@@ -5,7 +5,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/packages"
 )
 
 func TestImports(t *testing.T) {
@@ -15,6 +17,11 @@ func TestImports(t *testing.T) {
 	aBar := "github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
 	bBar := "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
 	mismatch := "github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"
+
+	ps, err := packages.Load(nil, aBar, bBar, mismatch)
+	require.NoError(t, err)
+
+	code.RecordPackagesList(ps)
 
 	t.Run("multiple lookups is ok", func(t *testing.T) {
 		a := Imports{destDir: wd}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/packages"
 )
 
 func TestImportPathForDir(t *testing.T) {
@@ -31,11 +32,17 @@ func TestImportPathForDir(t *testing.T) {
 }
 
 func TestNameForPackage(t *testing.T) {
-	assert.Equal(t, "api", NameForPackage("github.com/99designs/gqlgen/api"))
+	testPkg1 := "github.com/99designs/gqlgen/api"
+	testPkg2 := "github.com/99designs/gqlgen/docs"
+	testPkg3 := "github.com"
+	ps, err := packages.Load(nil, testPkg1, testPkg2, testPkg3)
+	require.NoError(t, err)
+	RecordPackagesList(ps)
+	assert.Equal(t, "api", NameForPackage(testPkg1))
 
 	// does not contain go code, should still give a valid name
-	assert.Equal(t, "docs", NameForPackage("github.com/99designs/gqlgen/docs"))
-	assert.Equal(t, "github_com", NameForPackage("github.com"))
+	assert.Equal(t, "docs", NameForPackage(testPkg2))
+	assert.Equal(t, "github_com", NameForPackage(testPkg3))
 }
 
 func TestNameForDir(t *testing.T) {

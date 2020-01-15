@@ -10,6 +10,6 @@ go run integration/server/server.go
 And in another terminal:
 ```bash
 cd integration
-npm install
+npm ci
 npm run test
 ```

@@ -127,7 +127,6 @@ func (c *wsConnection) init() bool {
 }
 
 func (c *wsConnection) write(msg *operationMessage) {
-	//fmt.Println("write", msg.ID, msg.Type, string(msg.Payload))
 	c.mu.Lock()
 	c.conn.WriteJSON(msg)
 	c.mu.Unlock()
@@ -297,8 +296,6 @@ func (c *wsConnection) readOp() *operationMessage {
 		return nil
 	}
 
-	//fmt.Println("read", message.ID, message.Type, string(message.Payload))
-
 	return &message
 }
 
@@ -307,5 +304,4 @@ func (c *wsConnection) close(closeCode int, message string) {
 	_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, message))
 	c.mu.Unlock()
 	_ = c.conn.Close()
-	//fmt.Println("CLOSE", closeCode, message)
 }

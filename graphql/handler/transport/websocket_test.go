@@ -164,7 +164,7 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 	msg := readOp(c)
 	assert.Equal(t, connectionKeepAliveMsg, msg.Type)
 
-	// server messageapollotracing_test
+	// server message
 	h.SendNextSubscriptionMessage()
 	msg = readOp(c)
 	assert.Equal(t, dataMsg, msg.Type)

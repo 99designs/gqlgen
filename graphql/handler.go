@@ -24,6 +24,8 @@ type (
 		OperationName string                 `json:"operationName"`
 		Variables     map[string]interface{} `json:"variables"`
 		Extensions    map[string]interface{} `json:"extensions"`
+
+		ReadTime TraceTiming `json:"-"`
 	}
 
 	GraphExecutor interface {

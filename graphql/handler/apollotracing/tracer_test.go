@@ -6,6 +6,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 
 	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -18,6 +21,15 @@ import (
 )
 
 func TestApolloTracing(t *testing.T) {
+	now := time.Unix(0, 0)
+
+	graphql.Now = func() time.Time {
+		defer func() {
+			now = now.Add(100 * time.Nanosecond)
+		}()
+		return now
+	}
+
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(apollotracing.Tracer{})
@@ -36,16 +48,16 @@ func TestApolloTracing(t *testing.T) {
 	require.EqualValues(t, 1, tracing.Version)
 
 	require.EqualValues(t, 0, tracing.StartTime.UnixNano())
-	require.EqualValues(t, 700, tracing.EndTime.UnixNano())
-	require.EqualValues(t, 700, tracing.Duration)
+	require.EqualValues(t, 900, tracing.EndTime.UnixNano())
+	require.EqualValues(t, 900, tracing.Duration)
 
-	require.EqualValues(t, 100, tracing.Parsing.StartOffset)
+	require.EqualValues(t, 300, tracing.Parsing.StartOffset)
 	require.EqualValues(t, 100, tracing.Parsing.Duration)
 
-	require.EqualValues(t, 300, tracing.Validation.StartOffset)
+	require.EqualValues(t, 500, tracing.Validation.StartOffset)
 	require.EqualValues(t, 100, tracing.Validation.Duration)
 
-	require.EqualValues(t, 500, tracing.Execution.Resolvers[0].StartOffset)
+	require.EqualValues(t, 700, tracing.Execution.Resolvers[0].StartOffset)
 	require.EqualValues(t, 100, tracing.Execution.Resolvers[0].Duration)
 	require.EqualValues(t, []interface{}{"name"}, tracing.Execution.Resolvers[0].Path)
 	require.EqualValues(t, "Query", tracing.Execution.Resolvers[0].ParentType)
@@ -54,6 +66,15 @@ func TestApolloTracing(t *testing.T) {
 }
 
 func TestApolloTracing_withFail(t *testing.T) {
+	now := time.Unix(0, 0)
+
+	graphql.Now = func() time.Time {
+		defer func() {
+			now = now.Add(100 * time.Nanosecond)
+		}()
+		return now
+	}
+
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})

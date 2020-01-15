@@ -11,6 +11,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -110,7 +112,7 @@ func TestConfigCheck(t *testing.T) {
 		config, err := LoadConfig("testdata/cfg/conflictedPackages.yml")
 		require.NoError(t, err)
 
-		err = config.Check()
+		err = config.check()
 		require.EqualError(t, err, "exec and model define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (graphql vs generated)")
 	})
 }
@@ -122,14 +124,15 @@ func TestAutobinding(t *testing.T) {
 			"github.com/99designs/gqlgen/example/chat",
 			"github.com/99designs/gqlgen/example/scalars/model",
 		},
+		Packages: &code.Packages{},
 	}
 
-	s := gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
+	cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
 		scalar Banned
 		type Message { id: ID }
 	`})
 
-	require.NoError(t, cfg.Autobind(s))
+	require.NoError(t, cfg.autobind())
 
 	require.Equal(t, "github.com/99designs/gqlgen/example/scalars/model.Banned", cfg.Models["Banned"].Model[0])
 	require.Equal(t, "github.com/99designs/gqlgen/example/chat.Message", cfg.Models["Message"].Model[0])

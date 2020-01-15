@@ -24,7 +24,7 @@ func (fn visitFn) Visit(node ast.Node) ast.Visitor {
 }
 
 // Prune removes any unused imports
-func Prune(filename string, src []byte) ([]byte, error) {
+func Prune(filename string, src []byte, packages *code.Packages) ([]byte, error) {
 	fset := token.NewFileSet()
 
 	file, err := parser.ParseFile(fset, filename, src, parser.ParseComments|parser.AllErrors)
@@ -32,7 +32,7 @@ func Prune(filename string, src []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	unused := getUnusedImports(file)
+	unused := getUnusedImports(file, packages)
 	for ipath, name := range unused {
 		astutil.DeleteNamedImport(fset, file, name, ipath)
 	}
@@ -46,7 +46,7 @@ func Prune(filename string, src []byte) ([]byte, error) {
 	return imports.Process(filename, buf.Bytes(), &imports.Options{FormatOnly: true, Comments: true, TabIndent: true, TabWidth: 8})
 }
 
-func getUnusedImports(file ast.Node) map[string]string {
+func getUnusedImports(file ast.Node, packages *code.Packages) map[string]string {
 	imported := map[string]*ast.ImportSpec{}
 	used := map[string]bool{}
 
@@ -65,7 +65,7 @@ func getUnusedImports(file ast.Node) map[string]string {
 				break
 			}
 
-			local := code.NameForPackage(ipath)
+			local := packages.NameForPackage(ipath)
 
 			imported[local] = v
 		case *ast.SelectorExpr:

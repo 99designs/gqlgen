@@ -19,7 +19,9 @@ func TestLayoutSingleFile(t *testing.T) {
 	require.NoError(t, err)
 	p := Plugin{}
 
-	data, err := codegen.BuildData(cfg, nil)
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +37,9 @@ func TestLayoutFollowSchema(t *testing.T) {
 	require.NoError(t, err)
 	p := Plugin{}
 
-	data, err := codegen.BuildData(cfg, nil)
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg)
 	if err != nil {
 		panic(err)
 	}

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bytes"
 	"fmt"
 	"go/token"
 	"go/types"
@@ -10,73 +9,22 @@ import (
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
-	"golang.org/x/tools/go/packages"
 )
 
 // Binder connects graphql types to golang types using static analysis
 type Binder struct {
-	pkgs       map[string]*packages.Package
+	pkgs       *code.Packages
 	schema     *ast.Schema
 	cfg        *Config
 	References []*TypeReference
-	PkgErrors  PkgErrors
 	SawInvalid bool
 }
 
-func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
-	pkgs, err := packages.Load(&packages.Config{
-		Mode: packages.NeedName |
-			packages.NeedFiles |
-			packages.NeedCompiledGoFiles |
-			packages.NeedImports |
-			packages.NeedTypes |
-			packages.NeedTypesSizes |
-			packages.NeedSyntax |
-			packages.NeedTypesInfo,
-	}, c.Models.ReferencedPackages()...)
-	if err != nil {
-		return nil, err
-	}
-
-	mp := map[string]*packages.Package{}
-	var pkgErrs PkgErrors
-	for _, p := range pkgs {
-		populatePkg(mp, p)
-		for _, e := range p.Errors {
-			if e.Kind == packages.ListError {
-				return nil, e
-			}
-		}
-		pkgErrs = append(pkgErrs, p.Errors...)
-	}
-
+func (c *Config) NewBinder() *Binder {
 	return &Binder{
-		pkgs:      mp,
-		schema:    s,
-		cfg:       c,
-		PkgErrors: pkgErrs,
-	}, nil
-}
-
-type PkgErrors []packages.Error
-
-func (p PkgErrors) Error() string {
-	var b bytes.Buffer
-	b.WriteString("packages.Load: ")
-	for _, e := range p {
-		b.WriteString(e.Error() + "\n")
-	}
-	return b.String()
-}
-
-func populatePkg(mp map[string]*packages.Package, p *packages.Package) {
-	imp := code.NormalizeVendor(p.PkgPath)
-	if _, ok := mp[imp]; ok {
-		return
-	}
-	mp[imp] = p
-	for _, p := range p.Imports {
-		populatePkg(mp, p)
+		pkgs:   c.Packages,
+		schema: c.Schema,
+		cfg:    c,
 	}
 }
 
@@ -97,7 +45,7 @@ func (b *Binder) ObjectPosition(typ types.Object) token.Position {
 			Filename: "unknown",
 		}
 	}
-	pkg := b.getPkg(typ.Pkg().Path())
+	pkg := b.pkgs.Load(typ.Pkg().Path())
 	return pkg.Fset.Position(typ.Pos())
 }
 
@@ -126,14 +74,6 @@ func (b *Binder) FindType(pkgName string, typeName string) (types.Type, error) {
 		return fun.Type().(*types.Signature).Params().At(0).Type(), nil
 	}
 	return obj.Type(), nil
-}
-
-func (b *Binder) getPkg(find string) *packages.Package {
-	imp := code.NormalizeVendor(find)
-	if p, ok := b.pkgs[imp]; ok {
-		return p
-	}
-	return nil
 }
 
 var MapType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
@@ -175,7 +115,7 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 		fullName = pkgName + "." + typeName
 	}
 
-	pkg := b.getPkg(pkgName)
+	pkg := b.pkgs.LoadWithTypes(pkgName)
 	if pkg == nil {
 		return nil, errors.Errorf("required package was not loaded: %s", fullName)
 	}

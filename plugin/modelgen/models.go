@@ -7,11 +7,8 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
-	"golang.org/x/tools/go/packages"
 )
 
 type BuildMutateHook = func(b *ModelBuild) *ModelBuild
@@ -75,29 +72,14 @@ func (m *Plugin) Name() string {
 }
 
 func (m *Plugin) MutateConfig(cfg *config.Config) error {
-	schema, err := cfg.LoadSchema()
-	if err != nil {
-		return err
-	}
-
-	err = cfg.Autobind(schema)
-	if err != nil {
-		return err
-	}
-
-	cfg.InjectBuiltins(schema)
-
-	binder, err := cfg.NewBinder(schema)
-	if err != nil {
-		return err
-	}
+	binder := cfg.NewBinder()
 
 	b := &ModelBuild{
 		PackageName: cfg.Model.Package,
 	}
 
 	var hasEntity bool
-	for _, schemaType := range schema.Types {
+	for _, schemaType := range cfg.Schema.Types {
 		if cfg.Models.UserDefined(schemaType.Name) {
 			continue
 		}
@@ -117,14 +99,14 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 
 			b.Interfaces = append(b.Interfaces, it)
 		case ast.Object, ast.InputObject:
-			if schemaType == schema.Query || schemaType == schema.Mutation || schemaType == schema.Subscription {
+			if schemaType == cfg.Schema.Query || schemaType == cfg.Schema.Mutation || schemaType == cfg.Schema.Subscription {
 				continue
 			}
 			it := &Object{
 				Description: schemaType.Description,
 				Name:        schemaType.Name,
 			}
-			for _, implementor := range schema.GetImplements(schemaType) {
+			for _, implementor := range cfg.Schema.GetImplements(schemaType) {
 				it.Implements = append(it.Implements, implementor.Name)
 			}
 
@@ -133,9 +115,10 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			}
 			for _, field := range schemaType.Fields {
 				var typ types.Type
-				fieldDef := schema.Types[field.Type.Name()]
+				fieldDef := cfg.Schema.Types[field.Type.Name()]
 
 				if cfg.Models.UserDefined(field.Type.Name()) {
+					var err error
 					typ, err = binder.FindTypeFromName(cfg.Models[field.Type.Name()].Model[0])
 					if err != nil {
 						return err
@@ -249,17 +232,12 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		b = m.MutateHook(b)
 	}
 
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName}, cfg.Models.ReferencedPackages()...)
-	if err != nil {
-		return errors.Wrap(err, "loading failed")
-	}
-	code.RecordPackagesList(pkgs)
-
 	return templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,
 		Filename:        cfg.Model.Filename,
 		Data:            b,
 		GeneratedHeader: true,
+		Packages:        cfg.Packages,
 	})
 }
 

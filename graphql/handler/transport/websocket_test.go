@@ -141,7 +141,7 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 
 	h := testserver.New()
 	h.AddTransport(transport.Websocket{
-		KeepAlivePingInterval: 10 * time.Millisecond,
+		KeepAlivePingInterval: 100 * time.Millisecond,
 	})
 
 	srv := httptest.NewServer(h)

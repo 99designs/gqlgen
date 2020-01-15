@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/99designs/gqlgen/graphql/errcode"
+
 	"github.com/vektah/gqlparser/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -13,6 +15,7 @@ import (
 )
 
 const errPersistedQueryNotFound = "PersistedQueryNotFound"
+const errPersistedQueryNotFoundCode = "PERSISTED_QUERY_NOT_FOUND"
 
 // AutomaticPersistedQuery saves client upload by optimistically sending only the hashes of queries, if the server
 // does not yet know what the query is for the hash it will respond telling the client to send the query along with the
@@ -71,7 +74,9 @@ func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, 
 		// client sent optimistic query hash without query string, get it from the cache
 		query, ok := a.Cache.Get(extension.Sha256)
 		if !ok {
-			return gqlerror.Errorf(errPersistedQueryNotFound)
+			err := gqlerror.Errorf(errPersistedQueryNotFound)
+			errcode.Set(err, errPersistedQueryNotFoundCode)
+			return err
 		}
 		rawParams.Query = query.(string)
 	} else {

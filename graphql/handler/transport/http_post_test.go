@@ -33,21 +33,21 @@ func TestPOST(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "!"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}]}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("validation failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "{ title }"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"Cannot query field \"title\" on type \"Query\".","locations":[{"line":1,"column":3}]}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"Cannot query field \"title\" on type \"Query\".","locations":[{"line":1,"column":3}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("invalid variable", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query": "query($id:Int!){find(id:$id)}","variables":{"id":false}}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"]}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("execution failure", func(t *testing.T) {

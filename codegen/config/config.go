@@ -400,7 +400,15 @@ func (c *Config) Autobind(s *ast.Schema) error {
 	if len(c.AutoBind) == 0 {
 		return nil
 	}
-	ps, err := packages.Load(&packages.Config{Mode: packages.LoadTypes}, c.AutoBind...)
+
+	ps, err := packages.Load(&packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedTypes |
+			packages.NeedTypesSizes,
+	}, c.AutoBind...)
 	if err != nil {
 		return err
 	}

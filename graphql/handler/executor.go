@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/errcode"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
@@ -147,6 +148,7 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 	var err *gqlerror.Error
 	rc.Variables, err = validator.VariableValues(e.server.es.Schema(), rc.Operation, params.Variables)
 	if err != nil {
+		errcode.Set(err, errcode.ValidationFailed)
 		return rc, gqlerror.List{err}
 	}
 	rc.Stats.Validation.End = graphql.Now()
@@ -190,6 +192,7 @@ func (e executor) parseQuery(ctx context.Context, stats *graphql.Stats, query st
 
 	doc, err := parser.ParseQuery(&ast.Source{Input: query})
 	if err != nil {
+		errcode.Set(err, errcode.ParseFailed)
 		return nil, gqlerror.List{err}
 	}
 	stats.Parsing.End = graphql.Now()
@@ -197,6 +200,9 @@ func (e executor) parseQuery(ctx context.Context, stats *graphql.Stats, query st
 	stats.Validation.Start = graphql.Now()
 	listErr := validator.Validate(e.server.es.Schema(), doc)
 	if len(listErr) != 0 {
+		for _, e := range listErr {
+			errcode.Set(e, errcode.ValidationFailed)
+		}
 		return nil, listErr
 	}
 

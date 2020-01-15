@@ -46,8 +46,8 @@ func TestHandlerComplexity(t *testing.T) {
 		stats = nil
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
-		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2"}],"data":null}`, resp.Body.String())
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -89,8 +89,8 @@ func TestFixedComplexity(t *testing.T) {
 	t.Run("above complexity limit", func(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
-		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2"}],"data":null}`, resp.Body.String())
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)

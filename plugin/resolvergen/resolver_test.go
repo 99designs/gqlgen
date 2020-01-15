@@ -29,8 +29,12 @@ func TestPlugin(t *testing.T) {
 
 func assertNoErrors(t *testing.T, pkg string) {
 	pkgs, err := packages.Load(&packages.Config{
-		Mode: packages.LoadTypes,
-	}, pkg)
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedTypes |
+			packages.NeedTypesSizes}, pkg)
 	if err != nil {
 		panic(err)
 	}

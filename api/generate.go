@@ -95,7 +95,15 @@ func validate(cfg *config.Config) error {
 	if cfg.Resolver.IsDefined() {
 		roots = append(roots, cfg.Resolver.ImportPath())
 	}
-	_, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, roots...)
+	_, err := packages.Load(&packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedTypes |
+			packages.NeedTypesSizes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo}, roots...)
 	if err != nil {
 		return errors.Wrap(err, "validation failed")
 	}

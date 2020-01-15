@@ -1,8 +1,10 @@
 package testdata
 
-import _ "underscore"
-import a "fmt"
-import "time"
+import (
+	a "fmt"
+	"time"
+	_ "underscore"
+)
 
 type foo struct {
 	Time time.Time `json:"text"`

@@ -24,7 +24,16 @@ type Binder struct {
 }
 
 func (c *Config) NewBinder(s *ast.Schema) (*Binder, error) {
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadTypes | packages.LoadSyntax}, c.Models.ReferencedPackages()...)
+	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedTypes |
+			packages.NeedTypesSizes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo,
+	}, c.Models.ReferencedPackages()...)
 	if err != nil {
 		return nil, err
 	}

@@ -15,6 +15,8 @@ import (
 	"text/template"
 	"unicode"
 
+	"github.com/99designs/gqlgen/internal/code"
+
 	"github.com/99designs/gqlgen/internal/imports"
 	"github.com/pkg/errors"
 )
@@ -45,6 +47,9 @@ type Options struct {
 	// Data will be passed to the template execution.
 	Data  interface{}
 	Funcs template.FuncMap
+
+	// Packages cache, you can find me on config.Config
+	Packages *code.Packages
 }
 
 // Render renders a gql plugin template from the given Options. Render is an
@@ -55,7 +60,7 @@ func Render(cfg Options) error {
 	if CurrentImports != nil {
 		panic(fmt.Errorf("recursive or concurrent call to RenderToFile detected"))
 	}
-	CurrentImports = &Imports{destDir: filepath.Dir(cfg.Filename)}
+	CurrentImports = &Imports{packages: cfg.Packages, destDir: filepath.Dir(cfg.Filename)}
 
 	// load path relative to calling source file
 	_, callerFile, _, _ := runtime.Caller(1)
@@ -148,7 +153,13 @@ func Render(cfg Options) error {
 	}
 	CurrentImports = nil
 
-	return write(cfg.Filename, result.Bytes())
+	err = write(cfg.Filename, result.Bytes(), cfg.Packages)
+	if err != nil {
+		return err
+	}
+
+	cfg.Packages.Evict(code.ImportPathForDir(filepath.Dir(cfg.Filename)))
+	return nil
 }
 
 func center(width int, pad string, s string) string {
@@ -556,13 +567,13 @@ func render(filename string, tpldata interface{}) (*bytes.Buffer, error) {
 	return buf, t.Execute(buf, tpldata)
 }
 
-func write(filename string, b []byte) error {
+func write(filename string, b []byte, packages *code.Packages) error {
 	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil {
 		return errors.Wrap(err, "failed to create directory")
 	}
 
-	formatted, err := imports.Prune(filename, b)
+	formatted, err := imports.Prune(filename, b, packages)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "gofmt failed on %s: %s\n", filepath.Base(filename), err.Error())
 		formatted = b

@@ -48,6 +48,7 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 			TypeName: m.typeName,
 		},
 		GeneratedHeader: true,
+		Packages:        data.Config.Packages,
 	})
 }
 

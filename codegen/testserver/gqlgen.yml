@@ -1,6 +1,6 @@
 schema:
   - "*.graphql"
-
+skip_validation: true
 exec:
   filename: generated.go
 model:

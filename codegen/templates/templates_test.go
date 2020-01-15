@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/99designs/gqlgen/internal/code"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -110,7 +112,7 @@ func TestTemplateOverride(t *testing.T) {
 	}
 	defer f.Close()
 	defer os.RemoveAll(f.Name())
-	err = Render(Options{Template: "hello", Filename: f.Name()})
+	err = Render(Options{Template: "hello", Filename: f.Name(), Packages: &code.Packages{}})
 	if err != nil {
 		t.Fatal(err)
 	}

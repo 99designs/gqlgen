@@ -74,6 +74,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		PackageDoc:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
+		Packages:    data.Config.Packages,
 	})
 }
 
@@ -136,6 +137,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				// will be copied through when generating and any unknown code will be moved to the end.`,
 			Filename: filename,
 			Data:     resolverBuild,
+			Packages: data.Config.Packages,
 		})
 		if err != nil {
 			return err
@@ -152,6 +154,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			Template: `type {{.}} struct {}`,
 			Filename: data.Config.Resolver.Filename,
 			Data:     data.Config.Resolver.Type,
+			Packages: data.Config.Packages,
 		})
 		if err != nil {
 			return err

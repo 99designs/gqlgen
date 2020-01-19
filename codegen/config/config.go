@@ -310,6 +310,9 @@ func (tm TypeMap) ReferencedPackages() []string {
 			if pkg == "" || inStrSlice(pkgs, pkg) {
 				continue
 			}
+			if !strings.Contains(pkg, ".") {
+				continue
+			}
 			pkgs = append(pkgs, code.QualifyPackagePath(pkg))
 		}
 	}

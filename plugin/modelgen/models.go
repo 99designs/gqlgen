@@ -241,7 +241,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		cfg.Models.Add(it, "github.com/99designs/gqlgen/graphql.String")
 	}
 
-	if len(b.Models) == 0 && len(b.Enums) == 0 {
+	if len(b.Models) == 0 && len(b.Enums) == 0 && len(b.Interfaces) == 0 && len(b.Scalars) == 0 {
 		return nil
 	}
 

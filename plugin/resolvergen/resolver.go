@@ -1,6 +1,7 @@
 package resolvergen
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,6 +95,9 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				}
 			}
 
+			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
+			rewriter.GetMethodBody(data.Config.Resolver.Type, o.Name)
+			fmt.Println(data.Config.Resolver.Type, o.Name)
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
 		for _, f := range o.Fields {
@@ -115,6 +119,10 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 			files[fn].Resolvers = append(files[fn].Resolvers, &resolver)
 		}
+	}
+
+	for filename, file := range files {
+		file.RemainingSource = rewriter.RemainingSource(filename)
 	}
 
 	for filename, file := range files {
@@ -166,9 +174,10 @@ type ResolverBuild struct {
 type File struct {
 	// These are separated because the type definition of the resolver object may live in a different file from the
 	//resolver method implementations, for example when extending a type in a different graphql schema file
-	Objects   []*codegen.Object
-	Resolvers []*Resolver
-	imports   []rewrite.Import
+	Objects         []*codegen.Object
+	Resolvers       []*Resolver
+	imports         []rewrite.Import
+	RemainingSource string
 }
 
 func (f *File) Imports() string {

@@ -1,19 +1,22 @@
 package rewrite
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/token"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
 
 type Rewriter struct {
-	pkg   *packages.Package
-	files map[string]string
+	pkg    *packages.Package
+	files  map[string]string
+	copied map[ast.Decl]bool
 }
 
 func New(importPath string) (*Rewriter, error) {
@@ -25,8 +28,9 @@ func New(importPath string) (*Rewriter, error) {
 	}
 
 	return &Rewriter{
-		pkg:   pkgs[0],
-		files: map[string]string{},
+		pkg:    pkgs[0],
+		files:  map[string]string{},
+		copied: map[ast.Decl]bool{},
 	}, nil
 }
 
@@ -80,12 +84,38 @@ func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
 					continue
 				}
 
+				r.copied[d] = true
+
 				return r.getSource(d.Body.Pos()+1, d.Body.End()-1)
 			}
 		}
 	}
 
 	return ""
+}
+
+func (r *Rewriter) MarkStructCopied(name string) {
+	for _, f := range r.pkg.Syntax {
+		for _, d := range f.Decls {
+			switch d := d.(type) {
+			case *ast.GenDecl:
+				if d.Tok != token.TYPE || len(d.Specs) == 0 {
+					continue
+				}
+
+				spec, isTypeSpec := d.Specs[0].(*ast.TypeSpec)
+				if !isTypeSpec {
+					continue
+				}
+
+				if spec.Name.Name != name {
+					continue
+				}
+
+				r.copied[d] = true
+			}
+		}
+	}
 }
 
 func (r *Rewriter) ExistingImports(filename string) []Import {
@@ -115,6 +145,41 @@ func (r *Rewriter) ExistingImports(filename string) []Import {
 		return imps
 	}
 	return nil
+}
+
+func (r *Rewriter) RemainingSource(filename string) string {
+	filename, err := filepath.Abs(filename)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range r.pkg.Syntax {
+		pos := r.pkg.Fset.Position(f.Pos())
+
+		if filename != pos.Filename {
+			continue
+		}
+
+		var buf bytes.Buffer
+
+		for _, d := range f.Decls {
+			if r.copied[d] {
+				continue
+			}
+			switch d := d.(type) {
+			case *ast.GenDecl:
+				if d.Tok == token.IMPORT {
+					continue
+				}
+			}
+			fmt.Printf("%T\n", d)
+
+			buf.WriteString(r.getSource(d.Pos(), d.End()))
+			buf.WriteString("\n")
+		}
+
+		return strings.TrimSpace(buf.String())
+	}
+	return ""
 }
 
 type Import struct {

@@ -3,6 +3,7 @@ package rewrite
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,4 +20,17 @@ func TestRewriter(t *testing.T) {
 
 	// trailing comment
 `, body)
+
+	imps := r.ExistingImports("testdata/example.go")
+	require.Len(t, imps, 2)
+	assert.Equal(t, []Import{
+		{
+			Alias:      "",
+			ImportPath: "fmt",
+		},
+		{
+			Alias:      "lol",
+			ImportPath: "bytes",
+		},
+	}, imps)
 }

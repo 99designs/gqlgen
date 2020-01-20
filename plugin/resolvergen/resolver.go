@@ -89,7 +89,9 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		if o.HasResolvers() {
 			fn := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name)
 			if files[fn] == nil {
-				files[fn] = &File{}
+				files[fn] = &File{
+					imports: rewriter.ExistingImports(fn),
+				}
 			}
 
 			files[fn].Objects = append(files[fn].Objects, o)
@@ -166,6 +168,18 @@ type File struct {
 	//resolver method implementations, for example when extending a type in a different graphql schema file
 	Objects   []*codegen.Object
 	Resolvers []*Resolver
+	imports   []rewrite.Import
+}
+
+func (f *File) Imports() string {
+	for _, imp := range f.imports {
+		if imp.Alias == "" {
+			templates.CurrentImports.Reserve(imp.ImportPath)
+		} else {
+			templates.CurrentImports.Reserve(imp.ImportPath, imp.Alias)
+		}
+	}
+	return ""
 }
 
 type Resolver struct {

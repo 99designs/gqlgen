@@ -1,5 +1,9 @@
 package testdata
 
+import "fmt"
+
+import lol "bytes"
+
 type Foo struct {
 	Field int
 }
@@ -11,4 +15,10 @@ func (m *Foo) Method(arg int) {
 	m.Field++
 
 	// trailing comment
+}
+
+func (m *Foo) String() string {
+	var buf lol.Buffer
+	buf.WriteString(fmt.Sprintf("%d", m.Field))
+	return buf.String()
 }

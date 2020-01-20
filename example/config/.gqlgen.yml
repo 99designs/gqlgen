@@ -9,8 +9,9 @@ exec:
 model:
   filename: models_gen.go
 resolver:
-  filename: resolver.go
   type: Resolver
+  layout: follow-schema
+  dir: .
 
 models:
   Todo:    # Object

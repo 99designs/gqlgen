@@ -93,6 +93,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("query caching", func(t *testing.T) {
+		ctx := context.Background()
 		cache := &graphql.MapCache{}
 		srv.SetQueryCache(cache)
 		qry := `query Foo {name}`
@@ -102,7 +103,7 @@ func TestServer(t *testing.T) {
 			assert.Equal(t, http.StatusOK, resp.Code)
 			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
-			cacheDoc, ok := cache.Get(qry)
+			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
 			require.Equal(t, "Foo", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
 		})
@@ -110,13 +111,13 @@ func TestServer(t *testing.T) {
 		t.Run("cache hits use document from cache", func(t *testing.T) {
 			doc, err := parser.ParseQuery(&ast.Source{Input: `query Bar {name}`})
 			require.Nil(t, err)
-			cache.Add(qry, doc)
+			cache.Add(ctx, qry, doc)
 
 			resp := get(srv, "/foo?query="+url.QueryEscape(qry))
 			assert.Equal(t, http.StatusOK, resp.Code)
 			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
-			cacheDoc, ok := cache.Get(qry)
+			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
 			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
 		})

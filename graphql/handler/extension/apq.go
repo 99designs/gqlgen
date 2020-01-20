@@ -72,7 +72,7 @@ func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, 
 	fullQuery := false
 	if rawParams.Query == "" {
 		// client sent optimistic query hash without query string, get it from the cache
-		query, ok := a.Cache.Get(extension.Sha256)
+		query, ok := a.Cache.Get(ctx, extension.Sha256)
 		if !ok {
 			err := gqlerror.Errorf(errPersistedQueryNotFound)
 			errcode.Set(err, errPersistedQueryNotFoundCode)
@@ -84,7 +84,7 @@ func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, 
 		if computeQueryHash(rawParams.Query) != extension.Sha256 {
 			return gqlerror.Errorf("provided APQ hash does not match query")
 		}
-		a.Cache.Add(extension.Sha256, rawParams.Query)
+		a.Cache.Add(ctx, extension.Sha256, rawParams.Query)
 		fullQuery = true
 	}
 

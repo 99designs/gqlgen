@@ -1,6 +1,8 @@
 package lru
 
 import (
+	"context"
+
 	"github.com/99designs/gqlgen/graphql"
 	lru "github.com/hashicorp/golang-lru"
 )
@@ -21,10 +23,10 @@ func New(size int) *LRU {
 	return &LRU{cache}
 }
 
-func (l LRU) Get(key string) (value interface{}, ok bool) {
+func (l LRU) Get(ctx context.Context, key string) (value interface{}, ok bool) {
 	return l.lru.Get(key)
 }
 
-func (l LRU) Add(key string, value interface{}) {
+func (l LRU) Add(ctx context.Context, key string, value interface{}) {
 	l.lru.Add(key, value)
 }

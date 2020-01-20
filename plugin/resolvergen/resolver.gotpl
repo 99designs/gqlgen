@@ -1,5 +1,3 @@
-// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
-
 {{ reserveImport "context"  }}
 {{ reserveImport "fmt"  }}
 {{ reserveImport "io"  }}
@@ -14,26 +12,21 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
-type {{.ResolverType}} struct {}
+{{ if .HasRoot }}
+	type {{.ResolverType}} struct {}
+{{ end }}
 
-{{ range $object := .Objects -}}
-	{{- if $object.HasResolvers -}}
-		func (r *{{$.ResolverType}}) {{$object.Name}}() {{ $object.ResolverInterface | ref }} {
-			return &{{lcFirst $object.Name}}{{ucFirst $.ResolverType}}{r}
-		}
-	{{ end -}}
+{{ range $resolver := .Resolvers -}}
+	func (r *{{lcFirst $resolver.Object.Name}}{{ucFirst $.ResolverType}}) {{$resolver.Field.GoFieldName}}{{ $resolver.Field.ShortResolverDeclaration }} {
+		panic("not implemented")
+	}
 {{ end }}
 
 {{ range $object := .Objects -}}
-	{{- if $object.HasResolvers -}}
-		type {{lcFirst $object.Name}}{{ucFirst $.ResolverType}} struct { *{{$.ResolverType}} }
-
-		{{ range $field := $object.Fields -}}
-			{{- if $field.IsResolver -}}
-			func (r *{{lcFirst $object.Name}}{{ucFirst $.ResolverType}}) {{$field.GoFieldName}}{{ $field.ShortResolverDeclaration }} {
-				panic("not implemented")
-			}
-			{{ end -}}
-		{{ end -}}
-	{{ end -}}
+	func (r *{{$.ResolverType}}) {{$object.Name}}() {{ $object.ResolverInterface | ref }} { return &{{lcFirst $object.Name}}{{ucFirst $.ResolverType}}{r} }
 {{ end }}
+
+{{ range $object := .Objects -}}
+	type {{lcFirst $object.Name}}{{ucFirst $.ResolverType}} struct { *{{$.ResolverType}} }
+{{ end }}
+

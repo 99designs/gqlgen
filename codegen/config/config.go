@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"go/types"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -23,7 +22,7 @@ type Config struct {
 	SchemaFilename           StringList                 `yaml:"schema,omitempty"`
 	Exec                     PackageConfig              `yaml:"exec"`
 	Model                    PackageConfig              `yaml:"model,omitempty"`
-	Resolver                 PackageConfig              `yaml:"resolver,omitempty"`
+	Resolver                 ResolverConfig             `yaml:"resolver,omitempty"`
 	AutoBind                 []string                   `yaml:"autobind"`
 	Models                   TypeMap                    `yaml:"models,omitempty"`
 	StructTag                string                     `yaml:"struct_tag,omitempty"`
@@ -138,12 +137,6 @@ func LoadConfig(filename string) (*Config, error) {
 	return config, nil
 }
 
-type PackageConfig struct {
-	Filename string `yaml:"filename,omitempty"`
-	Package  string `yaml:"package,omitempty"`
-	Type     string `yaml:"type,omitempty"`
-}
-
 type TypeMapEntry struct {
 	Model  StringList              `yaml:"model"`
 	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
@@ -184,88 +177,25 @@ func (a StringList) Has(file string) bool {
 	return false
 }
 
-func (c *PackageConfig) normalize() error {
-	if c.Filename == "" {
-		return errors.New("Filename is required")
-	}
-	c.Filename = abs(c.Filename)
-	// If Package is not set, first attempt to load the package at the output dir. If that fails
-	// fallback to just the base dir name of the output filename.
-	if c.Package == "" {
-		c.Package = code.NameForDir(c.Dir())
-	}
-
-	return nil
-}
-
-func (c *PackageConfig) ImportPath() string {
-	return code.ImportPathForDir(c.Dir())
-}
-
-func (c *PackageConfig) Dir() string {
-	return filepath.Dir(c.Filename)
-}
-
-func (c *PackageConfig) Check() error {
-	if strings.ContainsAny(c.Package, "./\\") {
-		return fmt.Errorf("package should be the output package name only, do not include the output filename")
-	}
-	if c.Filename != "" && !strings.HasSuffix(c.Filename, ".go") {
-		return fmt.Errorf("filename should be path to a go source file")
-	}
-
-	return c.normalize()
-}
-
-func (c *PackageConfig) Pkg() *types.Package {
-	return types.NewPackage(c.ImportPath(), c.Dir())
-}
-
-func (c *PackageConfig) IsDefined() bool {
-	return c.Filename != ""
-}
-
 func (c *Config) Check() error {
+	filesMap := make(map[string]bool)
+	pkgConfigsByDir := make(map[string]*PackageConfig)
+
 	if err := c.Models.Check(); err != nil {
 		return errors.Wrap(err, "config.models")
 	}
-	if err := c.Exec.Check(); err != nil {
+	if err := c.Exec.Check(filesMap, pkgConfigsByDir); err != nil {
 		return errors.Wrap(err, "config.exec")
 	}
 	if c.Model.IsDefined() {
-		if err := c.Model.Check(); err != nil {
+		if err := c.Model.Check(filesMap, pkgConfigsByDir); err != nil {
 			return errors.Wrap(err, "config.model")
 		}
 	}
 	if c.Resolver.IsDefined() {
-		if err := c.Resolver.Check(); err != nil {
+		if err := c.Resolver.Check(filesMap, pkgConfigsByDir); err != nil {
 			return errors.Wrap(err, "config.resolver")
 		}
-	}
-
-	// check packages names against conflict, if present in the same dir
-	// and check filenames for uniqueness
-	packageConfigList := []PackageConfig{}
-	if c.Model.IsDefined() {
-		packageConfigList = append(packageConfigList, c.Model)
-	}
-	packageConfigList = append(packageConfigList, []PackageConfig{
-		c.Exec,
-		c.Resolver,
-	}...)
-	filesMap := make(map[string]bool)
-	pkgConfigsByDir := make(map[string]PackageConfig)
-	for _, current := range packageConfigList {
-		_, fileFound := filesMap[current.Filename]
-		if fileFound {
-			return fmt.Errorf("filename %s defined more than once", current.Filename)
-		}
-		filesMap[current.Filename] = true
-		previous, inSameDir := pkgConfigsByDir[current.Dir()]
-		if inSameDir && current.Package != previous.Package {
-			return fmt.Errorf("filenames %s and %s are in the same directory but have different package definitions", stripPath(current.Filename), stripPath(previous.Filename))
-		}
-		pkgConfigsByDir[current.Dir()] = current
 	}
 
 	return c.normalize()

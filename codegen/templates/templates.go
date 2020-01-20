@@ -162,8 +162,8 @@ func center(width int, pad string, s string) string {
 
 func Funcs() template.FuncMap {
 	return template.FuncMap{
-		"ucFirst":       ucFirst,
-		"lcFirst":       lcFirst,
+		"ucFirst":       UcFirst,
+		"lcFirst":       LcFirst,
 		"quote":         strconv.Quote,
 		"rawQuote":      rawQuote,
 		"dump":          Dump,
@@ -185,7 +185,7 @@ func Funcs() template.FuncMap {
 	}
 }
 
-func ucFirst(s string) string {
+func UcFirst(s string) string {
 	if s == "" {
 		return ""
 	}
@@ -194,7 +194,7 @@ func ucFirst(s string) string {
 	return string(r)
 }
 
-func lcFirst(s string) string {
+func LcFirst(s string) string {
 	if s == "" {
 		return ""
 	}
@@ -275,7 +275,7 @@ func ToGo(name string) string {
 			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
 				// FOO or foo → Foo
 				// FOo → FOo
-				word = ucFirst(strings.ToLower(word))
+				word = UcFirst(strings.ToLower(word))
 			}
 		}
 		runes = append(runes, []rune(word)...)
@@ -297,13 +297,13 @@ func ToGoPrivate(name string) string {
 				word = strings.ToLower(info.Word)
 			} else {
 				// ITicket → iTicket
-				word = lcFirst(info.Word)
+				word = LcFirst(info.Word)
 			}
 			first = false
 		case info.MatchCommonInitial:
 			word = strings.ToUpper(word)
 		case !info.HasCommonInitial:
-			word = ucFirst(strings.ToLower(word))
+			word = UcFirst(strings.ToLower(word))
 		}
 		runes = append(runes, []rune(word)...)
 	})

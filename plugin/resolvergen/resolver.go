@@ -5,12 +5,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
+	"github.com/pkg/errors"
 )
 
 func New() plugin.Plugin {
@@ -57,7 +57,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 				continue
 			}
 
-			resolver := Resolver{o, f}
+			resolver := Resolver{o, f, `panic("not implemented")`}
 			file.Resolvers = append(file.Resolvers, &resolver)
 		}
 	}
@@ -78,6 +78,11 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 }
 
 func (m *Plugin) generatePerSchema(data *codegen.Data) error {
+	rewriter, err := rewrite.New(data.Config.Resolver.ImportPath())
+	if err != nil {
+		return err
+	}
+
 	files := map[string]*File{}
 
 	for _, o := range data.Objects {
@@ -94,7 +99,13 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				continue
 			}
 
-			resolver := Resolver{o, f}
+			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
+			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
+			if implementation == "" {
+				implementation = `panic(fmt.Errorf("not implemented"))`
+			}
+
+			resolver := Resolver{o, f, implementation}
 			fn := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name)
 			if files[fn] == nil {
 				files[fn] = &File{}
@@ -124,23 +135,20 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 	}
 
-	if data.Config.Resolver.Layout == config.LayoutFollowSchema {
-		rootFilename := filepath.Join(data.Config.Resolver.Dir(), "resolver.go")
-
-		if _, err := os.Stat(rootFilename); os.IsNotExist(errors.Cause(err)) {
-			err := templates.Render(templates.Options{
-				PackageName: data.Config.Resolver.Package,
-				PackageDoc: `
-					// This file will not be regenerated automatically.
-					//
-					// It serves as dependency injection for your app, add any dependencies you require here.`,
-				Template: `type {{.}} struct {}`,
-				Filename: rootFilename,
-				Data:     data.Config.Resolver.Type,
-			})
-			if err != nil {
-				return err
-			}
+	rootFilename := filepath.Join(data.Config.Resolver.Dir(), "resolver.go")
+	if _, err := os.Stat(rootFilename); os.IsNotExist(errors.Cause(err)) {
+		err := templates.Render(templates.Options{
+			PackageName: data.Config.Resolver.Package,
+			PackageDoc: `
+				// This file will not be regenerated automatically.
+				//
+				// It serves as dependency injection for your app, add any dependencies you require here.`,
+			Template: `type {{.}} struct {}`,
+			Filename: rootFilename,
+			Data:     data.Config.Resolver.Type,
+		})
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -161,8 +169,9 @@ type File struct {
 }
 
 type Resolver struct {
-	Object *codegen.Object
-	Field  *codegen.Field
+	Object         *codegen.Object
+	Field          *codegen.Field
+	Implementation string
 }
 
 func (r *Resolver) filename(cfg config.ResolverConfig) string {

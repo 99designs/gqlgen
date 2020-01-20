@@ -12,6 +12,8 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
+{{ .Imports }}
+
 {{ if .HasRoot }}
 	type {{.ResolverType}} struct {}
 {{ end }}

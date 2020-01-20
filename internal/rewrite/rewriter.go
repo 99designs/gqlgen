@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"go/token"
 	"io/ioutil"
+	"path/filepath"
+	"strconv"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -62,7 +64,7 @@ func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
 				if d.Name.Name != methodname {
 					continue
 				}
-				if d.Recv.List == nil {
+				if d.Recv == nil || d.Recv.List == nil {
 					continue
 				}
 				recv := d.Recv.List[0].Type
@@ -84,4 +86,38 @@ func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
 	}
 
 	return ""
+}
+
+func (r *Rewriter) ExistingImports(filename string) []Import {
+	filename, err := filepath.Abs(filename)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range r.pkg.Syntax {
+		pos := r.pkg.Fset.Position(f.Pos())
+
+		if filename != pos.Filename {
+			continue
+		}
+
+		var imps []Import
+		for _, i := range f.Imports {
+			name := ""
+			if i.Name != nil {
+				name = i.Name.Name
+			}
+			path, err := strconv.Unquote(i.Path.Value)
+			if err != nil {
+				panic(err)
+			}
+			imps = append(imps, Import{name, path})
+		}
+		return imps
+	}
+	return nil
+}
+
+type Import struct {
+	Alias      string
+	ImportPath string
 }

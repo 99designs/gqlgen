@@ -1,3 +1,4 @@
+// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 package testserver
 
 import (
@@ -7,42 +8,7 @@ import (
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
 )
 
-// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
-
 type Resolver struct{}
-
-func (r *Resolver) Errors() ErrorsResolver {
-	return &errorsResolver{r}
-}
-func (r *Resolver) ForcedResolver() ForcedResolverResolver {
-	return &forcedResolverResolver{r}
-}
-func (r *Resolver) ModelMethods() ModelMethodsResolver {
-	return &modelMethodsResolver{r}
-}
-func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
-	return &overlappingFieldsResolver{r}
-}
-func (r *Resolver) Panics() PanicsResolver {
-	return &panicsResolver{r}
-}
-func (r *Resolver) Primitive() PrimitiveResolver {
-	return &primitiveResolver{r}
-}
-func (r *Resolver) PrimitiveString() PrimitiveStringResolver {
-	return &primitiveStringResolver{r}
-}
-func (r *Resolver) Query() QueryResolver {
-	return &queryResolver{r}
-}
-func (r *Resolver) Subscription() SubscriptionResolver {
-	return &subscriptionResolver{r}
-}
-func (r *Resolver) User() UserResolver {
-	return &userResolver{r}
-}
-
-type errorsResolver struct{ *Resolver }
 
 func (r *errorsResolver) A(ctx context.Context, obj *Errors) (*Error, error) {
 	panic("not implemented")
@@ -59,51 +25,30 @@ func (r *errorsResolver) D(ctx context.Context, obj *Errors) (*Error, error) {
 func (r *errorsResolver) E(ctx context.Context, obj *Errors) (*Error, error) {
 	panic("not implemented")
 }
-
-type forcedResolverResolver struct{ *Resolver }
-
 func (r *forcedResolverResolver) Field(ctx context.Context, obj *ForcedResolver) (*Circle, error) {
 	panic("not implemented")
 }
-
-type modelMethodsResolver struct{ *Resolver }
-
 func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
 	panic("not implemented")
 }
-
-type overlappingFieldsResolver struct{ *Resolver }
-
 func (r *overlappingFieldsResolver) OldFoo(ctx context.Context, obj *OverlappingFields) (int, error) {
 	panic("not implemented")
 }
-
-type panicsResolver struct{ *Resolver }
-
 func (r *panicsResolver) FieldScalarMarshal(ctx context.Context, obj *Panics) ([]MarshalPanic, error) {
 	panic("not implemented")
 }
 func (r *panicsResolver) ArgUnmarshal(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error) {
 	panic("not implemented")
 }
-
-type primitiveResolver struct{ *Resolver }
-
 func (r *primitiveResolver) Value(ctx context.Context, obj *Primitive) (int, error) {
 	panic("not implemented")
 }
-
-type primitiveStringResolver struct{ *Resolver }
-
 func (r *primitiveStringResolver) Value(ctx context.Context, obj *PrimitiveString) (string, error) {
 	panic("not implemented")
 }
 func (r *primitiveStringResolver) Len(ctx context.Context, obj *PrimitiveString) (int, error) {
 	panic("not implemented")
 }
-
-type queryResolver struct{ *Resolver }
-
 func (r *queryResolver) InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error) {
 	panic("not implemented")
 }
@@ -254,9 +199,6 @@ func (r *queryResolver) WrappedStruct(ctx context.Context) (*WrappedStruct, erro
 func (r *queryResolver) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
 	panic("not implemented")
 }
-
-type subscriptionResolver struct{ *Resolver }
-
 func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan string, error) {
 	panic("not implemented")
 }
@@ -278,9 +220,28 @@ func (r *subscriptionResolver) DirectiveUnimplemented(ctx context.Context) (<-ch
 func (r *subscriptionResolver) Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error) {
 	panic("not implemented")
 }
-
-type userResolver struct{ *Resolver }
-
 func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) {
 	panic("not implemented")
 }
+
+func (r *Resolver) Errors() ErrorsResolver                       { return &errorsResolver{r} }
+func (r *Resolver) ForcedResolver() ForcedResolverResolver       { return &forcedResolverResolver{r} }
+func (r *Resolver) ModelMethods() ModelMethodsResolver           { return &modelMethodsResolver{r} }
+func (r *Resolver) OverlappingFields() OverlappingFieldsResolver { return &overlappingFieldsResolver{r} }
+func (r *Resolver) Panics() PanicsResolver                       { return &panicsResolver{r} }
+func (r *Resolver) Primitive() PrimitiveResolver                 { return &primitiveResolver{r} }
+func (r *Resolver) PrimitiveString() PrimitiveStringResolver     { return &primitiveStringResolver{r} }
+func (r *Resolver) Query() QueryResolver                         { return &queryResolver{r} }
+func (r *Resolver) Subscription() SubscriptionResolver           { return &subscriptionResolver{r} }
+func (r *Resolver) User() UserResolver                           { return &userResolver{r} }
+
+type errorsResolver struct{ *Resolver }
+type forcedResolverResolver struct{ *Resolver }
+type modelMethodsResolver struct{ *Resolver }
+type overlappingFieldsResolver struct{ *Resolver }
+type panicsResolver struct{ *Resolver }
+type primitiveResolver struct{ *Resolver }
+type primitiveStringResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }

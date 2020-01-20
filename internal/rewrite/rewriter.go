@@ -63,31 +63,32 @@ func (r *Rewriter) getFile(filename string) string {
 func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
 	for _, f := range r.pkg.Syntax {
 		for _, d := range f.Decls {
-			switch d := d.(type) {
-			case *ast.FuncDecl:
-				if d.Name.Name != methodname {
-					continue
-				}
-				if d.Recv == nil || d.Recv.List == nil {
-					continue
-				}
-				recv := d.Recv.List[0].Type
-				if star, isStar := d.Recv.List[0].Type.(*ast.StarExpr); isStar {
-					recv = star.X
-				}
-				ident, ok := recv.(*ast.Ident)
-				if !ok {
-					continue
-				}
-
-				if ident.Name != structname {
-					continue
-				}
-
-				r.copied[d] = true
-
-				return r.getSource(d.Body.Pos()+1, d.Body.End()-1)
+			d, isFunc := d.(*ast.FuncDecl)
+			if !isFunc {
+				continue
 			}
+			if d.Name.Name != methodname {
+				continue
+			}
+			if d.Recv == nil || d.Recv.List == nil {
+				continue
+			}
+			recv := d.Recv.List[0].Type
+			if star, isStar := d.Recv.List[0].Type.(*ast.StarExpr); isStar {
+				recv = star.X
+			}
+			ident, ok := recv.(*ast.Ident)
+			if !ok {
+				continue
+			}
+
+			if ident.Name != structname {
+				continue
+			}
+
+			r.copied[d] = true
+
+			return r.getSource(d.Body.Pos()+1, d.Body.End()-1)
 		}
 	}
 
@@ -97,23 +98,24 @@ func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
 func (r *Rewriter) MarkStructCopied(name string) {
 	for _, f := range r.pkg.Syntax {
 		for _, d := range f.Decls {
-			switch d := d.(type) {
-			case *ast.GenDecl:
-				if d.Tok != token.TYPE || len(d.Specs) == 0 {
-					continue
-				}
-
-				spec, isTypeSpec := d.Specs[0].(*ast.TypeSpec)
-				if !isTypeSpec {
-					continue
-				}
-
-				if spec.Name.Name != name {
-					continue
-				}
-
-				r.copied[d] = true
+			d, isGen := d.(*ast.GenDecl)
+			if !isGen {
+				continue
 			}
+			if d.Tok != token.TYPE || len(d.Specs) == 0 {
+				continue
+			}
+
+			spec, isTypeSpec := d.Specs[0].(*ast.TypeSpec)
+			if !isTypeSpec {
+				continue
+			}
+
+			if spec.Name.Name != name {
+				continue
+			}
+
+			r.copied[d] = true
 		}
 	}
 }
@@ -165,12 +167,11 @@ func (r *Rewriter) RemainingSource(filename string) string {
 			if r.copied[d] {
 				continue
 			}
-			switch d := d.(type) {
-			case *ast.GenDecl:
-				if d.Tok == token.IMPORT {
-					continue
-				}
+
+			if d, isGen := d.(*ast.GenDecl); isGen && d.Tok == token.IMPORT {
+				continue
 			}
+
 			fmt.Printf("%T\n", d)
 
 			buf.WriteString(r.getSource(d.Pos(), d.End()))

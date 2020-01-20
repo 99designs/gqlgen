@@ -109,9 +109,12 @@ func initConfig(ctx *cli.Context) {
 	}
 	cfg = config.DefaultConfig()
 
-	cfg.Resolver = config.PackageConfig{
-		Filename: "resolver.go",
-		Type:     "Resolver",
+	cfg.Resolver = config.ResolverConfig{
+		PackageConfig: config.PackageConfig{
+			Type: "Resolver",
+		},
+		Layout:  config.LayoutFollowSchema,
+		DirName: ".",
 	}
 	cfg.SchemaFilename = config.StringList{ctx.String("schema")}
 

@@ -1,7 +1,6 @@
 package resolvergen
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -97,7 +96,6 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
 			rewriter.GetMethodBody(data.Config.Resolver.Type, o.Name)
-			fmt.Println(data.Config.Resolver.Type, o.Name)
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
 		for _, f := range o.Fields {
@@ -183,9 +181,9 @@ type File struct {
 func (f *File) Imports() string {
 	for _, imp := range f.imports {
 		if imp.Alias == "" {
-			templates.CurrentImports.Reserve(imp.ImportPath)
+			_, _ = templates.CurrentImports.Reserve(imp.ImportPath)
 		} else {
-			templates.CurrentImports.Reserve(imp.ImportPath, imp.Alias)
+			_, _ = templates.CurrentImports.Reserve(imp.ImportPath, imp.Alias)
 		}
 	}
 	return ""
@@ -195,17 +193,6 @@ type Resolver struct {
 	Object         *codegen.Object
 	Field          *codegen.Field
 	Implementation string
-}
-
-func (r *Resolver) filename(cfg config.ResolverConfig) string {
-	switch cfg.Layout {
-	case config.LayoutSingleFile:
-		return cfg.Filename
-	case config.LayoutFollowSchema:
-		return gqlToResolverName(cfg.Dir(), r.Field.Position.Src.Name)
-	default:
-		panic("bad config.resolver.layout " + cfg.Layout)
-	}
 }
 
 func gqlToResolverName(base string, gqlname string) string {

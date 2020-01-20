@@ -114,7 +114,7 @@ func TestConfigCheck(t *testing.T) {
 		require.NoError(t, err)
 
 		err = config.Check()
-		require.EqualError(t, err, "filenames exec.go and models.go are in the same directory but have different package definitions")
+		require.EqualError(t, err, "config.model: filenames models.go and exec.go are in the same directory but have different package definitions (generated vs graphql)")
 	})
 }
 
@@ -128,7 +128,7 @@ func TestAutobinding(t *testing.T) {
 	}
 
 	s := gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
-		scalar Banned 
+		scalar Banned
 		type Message { id: ID }
 	`})
 

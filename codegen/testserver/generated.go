@@ -52,24 +52,15 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Custom func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	Directive1 func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	Directive2 func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	Length func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (res interface{}, err error)
-
-	Logged func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
-
-	MakeNil func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	MakeTypedNil func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	Range func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
-
-	ToNull func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
+	Custom        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Directive1    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Directive2    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Length        func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (res interface{}, err error)
+	Logged        func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
+	MakeNil       func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	MakeTypedNil  func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Range         func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
+	ToNull        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Unimplemented func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 

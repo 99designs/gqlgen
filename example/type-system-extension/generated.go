@@ -40,19 +40,13 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	EnumLogging func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	FieldLogging func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	InputLogging func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
+	EnumLogging      func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	FieldLogging     func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	InputLogging     func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	InterfaceLogging func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	ObjectLogging func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	ScalarLogging func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-
-	UnionLogging func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	ObjectLogging    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	ScalarLogging    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	UnionLogging     func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {

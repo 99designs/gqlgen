@@ -39,7 +39,7 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 {{ range $directive := .Directives }}
-	{{ $directive.Declaration }}
+	{{- $directive.Declaration }}
 {{ end }}
 }
 

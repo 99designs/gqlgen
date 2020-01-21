@@ -41,8 +41,7 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
-
-	User func(ctx context.Context, obj interface{}, next graphql.Resolver, id int) (res interface{}, err error)
+	User    func(ctx context.Context, obj interface{}, next graphql.Resolver, id int) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {

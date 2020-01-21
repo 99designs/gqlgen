@@ -185,7 +185,7 @@ func (e executor) DispatchError(ctx context.Context, list gqlerror.List) *graphq
 func (e executor) parseQuery(ctx context.Context, stats *graphql.Stats, query string) (*ast.QueryDocument, gqlerror.List) {
 	stats.Parsing.Start = graphql.Now()
 
-	if doc, ok := e.server.queryCache.Get(query); ok {
+	if doc, ok := e.server.queryCache.Get(ctx, query); ok {
 		now := graphql.Now()
 
 		stats.Parsing.End = now
@@ -209,7 +209,7 @@ func (e executor) parseQuery(ctx context.Context, stats *graphql.Stats, query st
 		return nil, listErr
 	}
 
-	e.server.queryCache.Add(query, doc)
+	e.server.queryCache.Add(ctx, query, doc)
 
 	return doc, nil
 }

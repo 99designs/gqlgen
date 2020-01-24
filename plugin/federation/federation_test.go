@@ -10,11 +10,12 @@ import (
 )
 
 func TestInjectSources(t *testing.T) {
-	var cfg config.Config
+	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
+	require.NoError(t, err)
 	f := &federation{}
-	f.InjectSources(&cfg)
+	f.InjectSources(cfg)
 	if len(cfg.AdditionalSources) != 2 {
-		t.Fatalf("expected an additional source but got %v", len(cfg.AdditionalSources))
+		t.Fatalf("expected 2 additional sources but got %v", len(cfg.AdditionalSources))
 	}
 }
 
@@ -30,10 +31,9 @@ func TestMutateSchema(t *testing.T) {
 	if gqlErr != nil {
 		t.Fatal(gqlErr)
 	}
+
 	err := f.MutateSchema(schema)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 }
 
 func TestGetSDL(t *testing.T) {
@@ -46,6 +46,34 @@ func TestGetSDL(t *testing.T) {
 
 func TestMutateConfig(t *testing.T) {
 	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Check())
+
+	f := &federation{}
+	err = f.MutateConfig(cfg)
+	require.NoError(t, err)
+}
+
+func TestInjectSourcesNoKey(t *testing.T) {
+	cfg, err := config.LoadConfig("test_data/nokey.yml")
+	require.NoError(t, err)
+	f := &federation{}
+	f.InjectSources(cfg)
+	if len(cfg.AdditionalSources) != 1 {
+		t.Fatalf("expected an additional source but got %v", len(cfg.AdditionalSources))
+	}
+}
+
+func TestGetSDLNoKey(t *testing.T) {
+	cfg, err := config.LoadConfig("test_data/nokey.yml")
+	require.NoError(t, err)
+	f := &federation{}
+	_, err = f.getSDL(cfg)
+	require.NoError(t, err)
+}
+
+func TestMutateConfigNoKey(t *testing.T) {
+	cfg, err := config.LoadConfig("test_data/nokey.yml")
 	require.NoError(t, err)
 	require.NoError(t, cfg.Check())
 

@@ -56,9 +56,11 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		"_Any": {
 			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Map"},
 		},
-		"Entity": {
+	}
+	if len(entityFields) > 0 {
+		builtins["Entity"] = config.TypeMapEntry{
 			Fields: entityFields,
-		},
+		}
 	}
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
@@ -79,7 +81,14 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 // the fields that had the @key directive
 func (f *federation) InjectSources(cfg *config.Config) {
 	cfg.AdditionalSources = append(cfg.AdditionalSources, f.getSource(false))
+
 	f.setEntities(cfg)
+	if len(f.Entities) == 0 {
+		// It's unusual for a service not to have any entities, but
+		// possible if it only exports top-level queries and mutations.
+		return
+	}
+
 	s := "type Entity {\n"
 	for _, e := range f.Entities {
 		s += fmt.Sprintf("\t%s(%s: %s): %s!\n", e.ResolverName, e.Field.Name, e.Field.Type.String(), e.Def.Name)
@@ -88,9 +97,9 @@ func (f *federation) InjectSources(cfg *config.Config) {
 	cfg.AdditionalSources = append(cfg.AdditionalSources, &ast.Source{Name: "entity.graphql", Input: s, BuiltIn: true})
 }
 
-// MutateSchema creates types and query declarations
-// that are required by the federation spec.
-func (f *federation) MutateSchema(s *ast.Schema) error {
+// addEntityToSchema adds the _Entity Union and _entities query to schema.
+// This is part of MutateSchema.
+func (f *federation) addEntityToSchema(s *ast.Schema) {
 	// --- Set _Entity Union ---
 	union := &ast.Definition{
 		Name:        "_Entity",
@@ -124,8 +133,11 @@ func (f *federation) MutateSchema(s *ast.Schema) error {
 		s.Types["Query"] = s.Query
 	}
 	s.Query.Fields = append(s.Query.Fields, fieldDef)
+}
 
-	// --- set _Service type ---
+// addServiceToSchema adds the _Service type and _service query to schema.
+// This is part of MutateSchema.
+func (f *federation) addServiceToSchema(s *ast.Schema) {
 	typeDef := &ast.Definition{
 		Kind: ast.Object,
 		Name: "_Service",
@@ -144,6 +156,17 @@ func (f *federation) MutateSchema(s *ast.Schema) error {
 		Type: ast.NonNullNamedType("_Service", nil),
 	}
 	s.Query.Fields = append(s.Query.Fields, _serviceDef)
+}
+
+// MutateSchema creates types and query declarations
+// that are required by the federation spec.
+func (f *federation) MutateSchema(s *ast.Schema) error {
+	// It's unusual for a service not to have any entities, but
+	// possible if it only exports top-level queries and mutations.
+	if len(f.Entities) > 0 {
+		f.addEntityToSchema(s)
+	}
+	f.addServiceToSchema(s)
 	return nil
 }
 
@@ -196,18 +219,20 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		return err
 	}
 	f.SDL = sdl
-	data.Objects.ByName("Entity").Root = true
-	for _, e := range f.Entities {
-		obj := data.Objects.ByName(e.Def.Name)
-		for _, f := range obj.Fields {
-			if f.Name == e.Field.Name {
-				e.FieldTypeGo = f.TypeReference.GO.String()
-			}
-			for _, r := range e.Requires {
-				for _, rf := range r.Fields {
-					if rf.Name == f.Name {
-						rf.TypeReference = f.TypeReference
-						rf.NameGo = f.GoFieldName
+	if len(f.Entities) > 0 {
+		data.Objects.ByName("Entity").Root = true
+		for _, e := range f.Entities {
+			obj := data.Objects.ByName(e.Def.Name)
+			for _, f := range obj.Fields {
+				if f.Name == e.Field.Name {
+					e.FieldTypeGo = f.TypeReference.GO.String()
+				}
+				for _, r := range e.Requires {
+					for _, rf := range r.Fields {
+						if rf.Name == f.Name {
+							rf.TypeReference = f.TypeReference
+							rf.NameGo = f.GoFieldName
+						}
 					}
 				}
 			}

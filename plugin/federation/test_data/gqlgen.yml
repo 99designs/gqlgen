@@ -1,3 +1,5 @@
 schema:
   - "test_data/schema.graphql"
 federated: true
+federation:
+  filename: federation_gen.go

@@ -24,6 +24,7 @@ type Config struct {
 	Exec                     PackageConfig              `yaml:"exec"`
 	Model                    PackageConfig              `yaml:"model,omitempty"`
 	Resolver                 PackageConfig              `yaml:"resolver,omitempty"`
+	Federation               PackageConfig              `yaml:"federation,omitempty"`
 	AutoBind                 []string                   `yaml:"autobind"`
 	Models                   TypeMap                    `yaml:"models,omitempty"`
 	StructTag                string                     `yaml:"struct_tag,omitempty"`
@@ -42,6 +43,7 @@ func DefaultConfig() *Config {
 		SchemaFilename: StringList{"schema.graphql"},
 		Model:          PackageConfig{Filename: "models_gen.go"},
 		Exec:           PackageConfig{Filename: "generated.go"},
+		Federation:     PackageConfig{Filename: "service.go"},
 		Directives:     map[string]DirectiveConfig{},
 	}
 }
@@ -240,6 +242,11 @@ func (c *Config) Check() error {
 	if c.Resolver.IsDefined() {
 		if err := c.Resolver.Check(); err != nil {
 			return errors.Wrap(err, "config.resolver")
+		}
+	}
+	if c.Federation.IsDefined() {
+		if err := c.Federation.Check(); err != nil {
+			return errors.Wrap(err, "config.federation")
 		}
 	}
 

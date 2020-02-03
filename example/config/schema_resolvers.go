@@ -19,6 +19,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo
 
 	return newTodo, nil
 }
+
 func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
 	return r.todos, nil
 }

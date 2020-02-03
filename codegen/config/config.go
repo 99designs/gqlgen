@@ -178,31 +178,68 @@ func (a StringList) Has(file string) bool {
 }
 
 func (c *Config) Check() error {
-	filesMap := make(map[string]bool)
-	pkgConfigsByDir := make(map[string]*PackageConfig)
+	if c.Models == nil {
+		c.Models = TypeMap{}
+	}
+
+	type FilenamePackage struct {
+		Filename string
+		Package  string
+		Declaree string
+	}
+
+	fileList := map[string][]FilenamePackage{}
 
 	if err := c.Models.Check(); err != nil {
 		return errors.Wrap(err, "config.models")
 	}
-	if err := c.Exec.Check(filesMap, pkgConfigsByDir); err != nil {
+	if err := c.Exec.Check(); err != nil {
 		return errors.Wrap(err, "config.exec")
 	}
+	fileList[c.Exec.ImportPath()] = append(fileList[c.Exec.ImportPath()], FilenamePackage{
+		Filename: c.Exec.Filename,
+		Package:  c.Exec.Package,
+		Declaree: "exec",
+	})
+
 	if c.Model.IsDefined() {
-		if err := c.Model.Check(filesMap, pkgConfigsByDir); err != nil {
+		if err := c.Model.Check(); err != nil {
 			return errors.Wrap(err, "config.model")
 		}
+		fileList[c.Model.ImportPath()] = append(fileList[c.Model.ImportPath()], FilenamePackage{
+			Filename: c.Model.Filename,
+			Package:  c.Model.Package,
+			Declaree: "model",
+		})
 	}
 	if c.Resolver.IsDefined() {
-		if err := c.Resolver.Check(filesMap, pkgConfigsByDir); err != nil {
+		if err := c.Resolver.Check(); err != nil {
 			return errors.Wrap(err, "config.resolver")
+		}
+		fileList[c.Resolver.ImportPath()] = append(fileList[c.Resolver.ImportPath()], FilenamePackage{
+			Filename: c.Resolver.Filename,
+			Package:  c.Resolver.Package,
+			Declaree: "resolver",
+		})
+	}
+
+	for importPath, pkg := range fileList {
+		for _, file1 := range pkg {
+			for _, file2 := range pkg {
+				if file1.Package != file2.Package {
+					return fmt.Errorf("%s and %s define the same import path (%s) with different package names (%s vs %s)",
+						file1.Declaree,
+						file2.Declaree,
+						importPath,
+						file1.Package,
+						file2.Package,
+					)
+				}
+			}
 		}
 	}
 
-	return c.normalize()
-}
-
-func stripPath(path string) string {
-	return filepath.Base(path)
+	return nil
 }
 
 type TypeMap map[string]TypeMapEntry
@@ -300,30 +337,6 @@ func findCfgInDir(dir string) string {
 		}
 	}
 	return ""
-}
-
-func (c *Config) normalize() error {
-	if c.Model.IsDefined() {
-		if err := c.Model.normalize(); err != nil {
-			return errors.Wrap(err, "model")
-		}
-	}
-
-	if err := c.Exec.normalize(); err != nil {
-		return errors.Wrap(err, "exec")
-	}
-
-	if c.Resolver.IsDefined() {
-		if err := c.Resolver.normalize(); err != nil {
-			return errors.Wrap(err, "resolver")
-		}
-	}
-
-	if c.Models == nil {
-		c.Models = TypeMap{}
-	}
-
-	return nil
 }
 
 func (c *Config) Autobind(s *ast.Schema) error {

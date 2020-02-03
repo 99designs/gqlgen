@@ -14,6 +14,7 @@ func TestResolverConfig(t *testing.T) {
 			require.True(t, p.IsDefined())
 
 			require.NoError(t, p.Check())
+			require.NoError(t, p.Check())
 
 			require.Equal(t, p.Package, "config_test_data")
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
@@ -22,13 +23,14 @@ func TestResolverConfig(t *testing.T) {
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
-			require.Contains(t, p.Dir(), "codegen/config/testdata")
+			require.Contains(t, filepath.ToSlash(p.Dir()), "codegen/config/testdata")
 		})
 
 		t.Run("when given both", func(t *testing.T) {
 			p := ResolverConfig{Filename: "testdata/example.go", Package: "wololo"}
 			require.True(t, p.IsDefined())
 
+			require.NoError(t, p.Check())
 			require.NoError(t, p.Check())
 
 			require.Equal(t, p.Package, "wololo")
@@ -38,7 +40,7 @@ func TestResolverConfig(t *testing.T) {
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
-			require.Contains(t, p.Dir(), "codegen/config/testdata")
+			require.Contains(t, filepath.ToSlash(p.Dir()), "codegen/config/testdata")
 		})
 
 		t.Run("when given nothing", func(t *testing.T) {
@@ -77,6 +79,7 @@ func TestResolverConfig(t *testing.T) {
 			require.True(t, p.IsDefined())
 
 			require.NoError(t, p.Check())
+			require.NoError(t, p.Check())
 
 			require.Equal(t, p.Package, "config_test_data")
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
@@ -93,6 +96,7 @@ func TestResolverConfig(t *testing.T) {
 			require.True(t, p.IsDefined())
 
 			require.NoError(t, p.Check())
+			require.NoError(t, p.Check())
 
 			require.Equal(t, p.Package, "wololo")
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
@@ -105,9 +109,10 @@ func TestResolverConfig(t *testing.T) {
 		})
 
 		t.Run("when given a filename", func(t *testing.T) {
-			p := ResolverConfig{Layout: LayoutFollowSchema, DirName: "testdata", Filename: "asdf.go"}
+			p := ResolverConfig{Layout: LayoutFollowSchema, DirName: "testdata", Filename: "testdata/asdf.go"}
 			require.True(t, p.IsDefined())
 
+			require.NoError(t, p.Check())
 			require.NoError(t, p.Check())
 
 			require.Equal(t, p.Package, "config_test_data")

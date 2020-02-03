@@ -259,13 +259,21 @@ ul.menu a:hover {
 }
 
 code {
-    padding: 1px 5px;
     font-family: var(--font-code);
     font-weight: 500;
     color: var(--color-code-text);
     background-color: var(--color-code-background);
     border-radius: 3px;
+    display: inline-block;
+    padding: 0px 5px;
     font-size: 13px;
+    line-height: 1.5;
+}
+
+pre > code {
+    overflow: auto;
+    display: block;
+    padding: 5px 10px;
     margin-bottom: var(--margin-default);
 }
 

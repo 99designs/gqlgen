@@ -172,8 +172,6 @@ func (r *Rewriter) RemainingSource(filename string) string {
 				continue
 			}
 
-			fmt.Printf("%T\n", d)
-
 			buf.WriteString(r.getSource(d.Pos(), d.End()))
 			buf.WriteString("\n")
 		}

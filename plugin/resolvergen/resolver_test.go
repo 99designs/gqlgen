@@ -2,6 +2,7 @@ package resolvergen
 
 import (
 	"fmt"
+	"io/ioutil"
 	"syscall"
 	"testing"
 
@@ -41,6 +42,14 @@ func TestLayoutFollowSchema(t *testing.T) {
 
 	require.NoError(t, p.GenerateCode(data))
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/followschema/out")
+
+	b, err := ioutil.ReadFile("testdata/followschema/out/schema_resolvers.go")
+	require.NoError(t, err)
+	source := string(b)
+
+	require.Contains(t, source, "// CustomerResolverType.Resolver implementation")
+	require.Contains(t, source, "// CustomerResolverType.Name implementation")
+	require.Contains(t, source, "// AUserHelperFunction implementation")
 }
 
 func assertNoErrors(t *testing.T, pkg string) {

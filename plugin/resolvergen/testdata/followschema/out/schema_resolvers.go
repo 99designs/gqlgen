@@ -12,6 +12,7 @@ import (
 func (r *queryCustomResolverType) Resolver(ctx context.Context) (*customresolver.Resolver, error) {
 	panic(fmt.Errorf("not implemented"))
 }
+
 func (r *resolverCustomResolverType) Name(ctx context.Context, obj *customresolver.Resolver) (string, error) {
 	panic(fmt.Errorf("not implemented"))
 }

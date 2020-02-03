@@ -1,6 +1,7 @@
 package config
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -20,7 +21,7 @@ func TestResolverConfig(t *testing.T) {
 			require.Equal(t, "config_test_data", p.Pkg().Name())
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
-			require.Contains(t, p.Filename, "codegen/config/testdata/example.go")
+			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")
 		})
 
@@ -36,7 +37,7 @@ func TestResolverConfig(t *testing.T) {
 			require.Equal(t, "wololo", p.Pkg().Name())
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
-			require.Contains(t, p.Filename, "codegen/config/testdata/example.go")
+			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")
 		})
 
@@ -83,9 +84,7 @@ func TestResolverConfig(t *testing.T) {
 			require.Equal(t, "config_test_data", p.Pkg().Name())
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
-
-			require.Contains(t, p.Filename, "codegen/config/testdata/resolver.go")
+			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/resolver.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")
 		})
 
@@ -101,7 +100,7 @@ func TestResolverConfig(t *testing.T) {
 			require.Equal(t, "wololo", p.Pkg().Name())
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
-			require.Contains(t, p.Filename, "codegen/config/testdata/resolver.go")
+			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/resolver.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")
 		})
 
@@ -117,7 +116,7 @@ func TestResolverConfig(t *testing.T) {
 			require.Equal(t, "config_test_data", p.Pkg().Name())
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
-			require.Contains(t, p.Filename, "codegen/config/testdata/asdf.go")
+			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/asdf.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")
 		})
 

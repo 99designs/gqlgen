@@ -46,7 +46,7 @@ func (r *ResolverConfig) Check() error {
 		if r.Filename == "" {
 			r.Filename = filepath.Join(r.DirName, "resolver.go")
 		} else {
-			r.Filename = filepath.Join(r.DirName, r.Filename)
+			r.Filename = abs(r.Filename)
 		}
 	default:
 		return fmt.Errorf("invalid layout %s. must be %s or %s", r.Layout, LayoutSingleFile, LayoutFollowSchema)

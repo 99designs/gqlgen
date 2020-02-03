@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"go/types"
 	"path/filepath"
+	"strings"
 
 	"github.com/99designs/gqlgen/internal/code"
 )
 
 type ResolverConfig struct {
-	PackageConfig `yaml:",inline"`
-	Layout        ResolverLayout `yaml:"layout,omitempty"`
-	DirName       string         `yaml:"dir"`
+	Filename string         `yaml:"filename,omitempty"`
+	Package  string         `yaml:"package,omitempty"`
+	Type     string         `yaml:"type,omitempty"`
+	Layout   ResolverLayout `yaml:"layout,omitempty"`
+	DirName  string         `yaml:"dir"`
 }
 
 type ResolverLayout string
@@ -21,32 +24,58 @@ var (
 	LayoutFollowSchema ResolverLayout = "follow-schema"
 )
 
-func (r *ResolverConfig) Check(filesMap map[string]bool, pkgConfigsByDir map[string]*PackageConfig) error {
-	if r.DirName != "" {
-		r.DirName = abs(r.DirName)
-	}
-
+func (r *ResolverConfig) Check() error {
 	if r.Layout == "" {
-		r.Layout = "single-file"
-	}
-	if r.Layout != LayoutFollowSchema && r.Layout != LayoutSingleFile {
-		return fmt.Errorf("invalid layout %s. must be single-file or follow-schema", r.Layout)
+		r.Layout = LayoutSingleFile
 	}
 
-	if r.Layout == "follow-schema" && r.DirName == "" {
-		return fmt.Errorf("must specify dir when using laout:follow-schema")
+	switch r.Layout {
+	case LayoutSingleFile:
+		if r.Filename == "" {
+			return fmt.Errorf("filename must be specified with layout=%s", r.Layout)
+		}
+		if !strings.HasSuffix(r.Filename, ".go") {
+			return fmt.Errorf("filename should be path to a go source file with layout=%s", r.Layout)
+		}
+		r.Filename = abs(r.Filename)
+	case LayoutFollowSchema:
+		if r.DirName == "" {
+			return fmt.Errorf("dirname must be specified with layout=%s", r.Layout)
+		}
+		r.DirName = abs(r.DirName)
+		if r.Filename == "" {
+			r.Filename = filepath.Join(r.DirName, "resolver.go")
+		} else {
+			r.Filename = filepath.Join(r.DirName, r.Filename)
+		}
+	default:
+		return fmt.Errorf("invalid layout %s. must be %s or %s", r.Layout, LayoutSingleFile, LayoutFollowSchema)
 	}
 
-	return r.PackageConfig.Check(filesMap, pkgConfigsByDir)
+	if strings.ContainsAny(r.Package, "./\\") {
+		return fmt.Errorf("package should be the output package name only, do not include the output filename")
+	}
+
+	if r.Package == "" && r.Dir() != "" {
+		r.Package = code.NameForDir(r.Dir())
+	}
+
+	return nil
 }
 
 func (r *ResolverConfig) ImportPath() string {
+	if r.Dir() == "" {
+		return ""
+	}
 	return code.ImportPathForDir(r.Dir())
 }
 
 func (r *ResolverConfig) Dir() string {
 	switch r.Layout {
 	case LayoutSingleFile:
+		if r.Filename == "" {
+			return ""
+		}
 		return filepath.Dir(r.Filename)
 	case LayoutFollowSchema:
 		return r.DirName
@@ -56,16 +85,12 @@ func (r *ResolverConfig) Dir() string {
 }
 
 func (r *ResolverConfig) Pkg() *types.Package {
-	return types.NewPackage(r.ImportPath(), r.Dir())
+	if r.Dir() == "" {
+		return nil
+	}
+	return types.NewPackage(r.ImportPath(), r.Package)
 }
 
 func (r *ResolverConfig) IsDefined() bool {
-	switch r.Layout {
-	case LayoutSingleFile, "":
-		return r.Filename != ""
-	case LayoutFollowSchema:
-		return r.DirName != ""
-	default:
-		panic(fmt.Errorf("invalid layout %s", r.Layout))
-	}
+	return r.Filename != "" || r.DirName != ""
 }

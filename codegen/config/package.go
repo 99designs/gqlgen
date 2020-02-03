@@ -15,55 +15,49 @@ type PackageConfig struct {
 	Type     string `yaml:"type,omitempty"`
 }
 
-func (c *PackageConfig) normalize() error {
-	if c.Filename != "" {
-		c.Filename = abs(c.Filename)
-	}
-	// If Package is not set, first attempt to load the package at the output dir. If that fails
-	// fallback to just the base dir name of the output filename.
-	if c.Package == "" {
-		c.Package = code.NameForDir(c.Dir())
-	}
-
-	return nil
-}
-
 func (c *PackageConfig) ImportPath() string {
+	if !c.IsDefined() {
+		return ""
+	}
 	return code.ImportPathForDir(c.Dir())
 }
 
 func (c *PackageConfig) Dir() string {
+	if !c.IsDefined() {
+		return ""
+	}
 	return filepath.Dir(c.Filename)
 }
 
 func (c *PackageConfig) Pkg() *types.Package {
-	return types.NewPackage(c.ImportPath(), c.Dir())
+	if !c.IsDefined() {
+		return nil
+	}
+	return types.NewPackage(c.ImportPath(), c.Package)
 }
 
 func (c *PackageConfig) IsDefined() bool {
 	return c.Filename != ""
 }
 
-func (c *PackageConfig) Check(filesMap map[string]bool, pkgConfigsByDir map[string]*PackageConfig) error {
-	if err := c.normalize(); err != nil {
-		return err
-	}
+func (c *PackageConfig) Check() error {
 	if strings.ContainsAny(c.Package, "./\\") {
 		return fmt.Errorf("package should be the output package name only, do not include the output filename")
 	}
-	if c.Filename != "" && !strings.HasSuffix(c.Filename, ".go") {
+	if c.Filename == "" {
+		return fmt.Errorf("filename must be specified")
+	}
+	if !strings.HasSuffix(c.Filename, ".go") {
 		return fmt.Errorf("filename should be path to a go source file")
 	}
 
-	_, fileFound := filesMap[c.Filename]
-	if fileFound {
-		return fmt.Errorf("filename %s defined more than once", c.Filename)
+	c.Filename = abs(c.Filename)
+
+	// If Package is not set, first attempt to load the package at the output dir. If that fails
+	// fallback to just the base dir name of the output filename.
+	if c.Package == "" {
+		c.Package = code.NameForDir(c.Dir())
 	}
-	filesMap[c.Filename] = true
-	previous, inSameDir := pkgConfigsByDir[c.Dir()]
-	if inSameDir && c.Package != previous.Package {
-		return fmt.Errorf("filenames %s and %s are in the same directory but have different package definitions (%s vs %s)", stripPath(c.Filename), stripPath(previous.Filename), c.Package, previous.Package)
-	}
-	pkgConfigsByDir[c.Dir()] = c
+
 	return nil
 }

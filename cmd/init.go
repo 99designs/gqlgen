@@ -110,9 +110,7 @@ func initConfig(ctx *cli.Context) {
 	cfg = config.DefaultConfig()
 
 	cfg.Resolver = config.ResolverConfig{
-		PackageConfig: config.PackageConfig{
-			Type: "Resolver",
-		},
+		Type:    "Resolver",
 		Layout:  config.LayoutFollowSchema,
 		DirName: ".",
 	}

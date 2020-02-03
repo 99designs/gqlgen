@@ -143,7 +143,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 	}
 
-	rootFilename := filepath.Join(data.Config.Resolver.Dir(), "resolver.go")
+	rootFilename := filepath.Join(data.Config.Resolver.Dir(), data.Config.Resolver.Filename)
 	if _, err := os.Stat(rootFilename); os.IsNotExist(errors.Cause(err)) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,

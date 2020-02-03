@@ -55,13 +55,3 @@
 .chroma .vg { color: #aa0000 } /* Name.Variable.Global */
 .chroma .vi { color: #aa0000 } /* Name.Variable.Instance */
 .chroma .il { color: #009999 } /* Literal.Number.Integer.Long */
-
-.chroma code {
-    overflow: auto;
-    display: block;
-    padding: 5px 10px;
-    font-family: var(--font-code);
-    color: var(--color-code-text);
-    background-color: var(--color-code-background);
-    font-size: 13px;
-}

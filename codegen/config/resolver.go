@@ -28,6 +28,9 @@ func (r *ResolverConfig) Check() error {
 	if r.Layout == "" {
 		r.Layout = LayoutSingleFile
 	}
+	if r.Type == "" {
+		r.Type = "Resolver"
+	}
 
 	switch r.Layout {
 	case LayoutSingleFile:

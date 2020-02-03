@@ -21,7 +21,7 @@ func TestPackageConfig(t *testing.T) {
 		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 		require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
-		require.Contains(t, p.Dir(), "codegen/config/testdata")
+		require.Contains(t, filepath.ToSlash(p.Dir()), "codegen/config/testdata")
 	})
 
 	t.Run("when given both", func(t *testing.T) {
@@ -37,7 +37,7 @@ func TestPackageConfig(t *testing.T) {
 		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 		require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
-		require.Contains(t, p.Dir(), "codegen/config/testdata")
+		require.Contains(t, filepath.ToSlash(p.Dir()), "codegen/config/testdata")
 	})
 
 	t.Run("when given nothing", func(t *testing.T) {

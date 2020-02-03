@@ -43,7 +43,7 @@ func TestLayoutFollowSchema(t *testing.T) {
 	require.NoError(t, p.GenerateCode(data))
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/followschema/out")
 
-	b, err := ioutil.ReadFile("testdata/followschema/out/schema_resolvers.go")
+	b, err := ioutil.ReadFile("testdata/followschema/out/schema.resolvers.go")
 	require.NoError(t, err)
 	source := string(b)
 

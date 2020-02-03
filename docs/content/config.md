@@ -11,70 +11,58 @@ gqlgen can be configured using a `gqlgen.yml` file, by default it will be loaded
 Example:
 
 ```yml
-# You can pass a single schema file
-schema: schema.graphql
-
-# Or multiple files
+# Where are all the schema files located? globs are supported eg  src/**/*.graphqls
 schema:
- - schema.graphql
- - user.graphql
+  - graph/*.graphqls
 
-# Or you can use globs
-schema:
- - "*.graphql"
-
-# Or globs from a root directory
-schema:
- - "schema/**/*.graphql"
-
-# Let gqlgen know where to put the generated server
+# Where should the generated server code go?
 exec:
   filename: graph/generated/generated.go
   package: generated
 
-# Let gqlgen know where to put the generated models (if any)
-# Set to null to disable
+# Where should any generated models go?
 model:
-  filename: models/generated.go
-  package: models
+  filename: graph/model/models_gen.go
+  package: model
 
-# Optional, turns on resolver stub generation
+# Where should the resolver implementations go?
 resolver:
-  filename: resolver.go # where to write them
-  type: Resolver  # what's the resolver root implementation type called?
+  layout: follow-schema
+  dir: graph
+  package: graph
 
-# Optional, turns on binding to field names by tag provided
-struct_tag: json
+# Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
+# struct_tag: json
 
-# Optional, set to true if you prefer []Thing over []*Thing
-omit_slice_element_pointers: false
+# Optional: turn on to use []Thing instead of []*Thing
+# omit_slice_element_pointers: false
 
-# Optional, set to speed up generation time by not performing a final validation pass
-skip_validation: true
+# Optional: set to speed up generation time by not performing a final validation pass.
+# skip_validation: true
 
-# Instead of listing out every model like below, you can automatically bind to any matching types
-# within the given path by using `model: User` or `model: models.User`. EXPERIMENTAL in v0.9.1
+# gqlgen will search for any type names in the schema in these go packages
+# if they match it will use them, otherwise it will generate them.
 autobind:
- - github.com/my/app/models
+  - "{{.}}/graph/model"
 
-# Tell gqlgen about any existing models you want to reuse for
-# graphql. These normally come from the db or a remote api.
+# This section declares type mapping between the GraphQL and go type systems
+#
+# The first line in each type will be used as defaults for resolver arguments and
+# modelgen, the others will be allowed when binding to fields. Configure them to
+# your liking
 models:
-  User:
-    model: models.User # can use short paths when the package is listed in autobind
-  Todo:
-    model: github.com/my/app/models.Todo # or full paths if you need to go elsewhere
-    fields:
-      id:
-        resolver: true # force a resolver to be generated
-        fieldName: todoId # bind to a different go field name
-  # model also accepts multiple backing go types. When mapping onto structs
-  # any of these types can be used, the first one is used as the default for
-  # resolver args.
   ID:
     model:
-      - github.com/99designs/gqlgen/graphql.IntID
       - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+
 ```
 
 Everything has defaults, so add things as you need.
@@ -86,14 +74,14 @@ gqlgen ships with some builtin directives that make it a little easier to manage
 To start using them you first need to define them:
 
 ```graphql
-directive @goModel(model: String, models: [String!]) on OBJECT 
-    | INPUT_OBJECT 
-    | SCALAR 
-    | ENUM 
-    | INTERFACE 
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
     | UNION
 
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION 
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
 ```
 

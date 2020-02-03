@@ -143,8 +143,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 	}
 
-	rootFilename := filepath.Join(data.Config.Resolver.Dir(), data.Config.Resolver.Filename)
-	if _, err := os.Stat(rootFilename); os.IsNotExist(errors.Cause(err)) {
+	if _, err := os.Stat(data.Config.Resolver.Filename); os.IsNotExist(errors.Cause(err)) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
 			PackageDoc: `
@@ -152,7 +151,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				//
 				// It serves as dependency injection for your app, add any dependencies you require here.`,
 			Template: `type {{.}} struct {}`,
-			Filename: rootFilename,
+			Filename: data.Config.Resolver.Filename,
 			Data:     data.Config.Resolver.Type,
 		})
 		if err != nil {
@@ -199,5 +198,5 @@ func gqlToResolverName(base string, gqlname string) string {
 	gqlname = filepath.Base(gqlname)
 	ext := filepath.Ext(gqlname)
 
-	return filepath.Join(base, strings.TrimSuffix(gqlname, ext)+"_resolvers.go")
+	return filepath.Join(base, strings.TrimSuffix(gqlname, ext)+".resolvers.go")
 }

@@ -89,9 +89,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		if o.HasResolvers() {
 			fn := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name)
 			if files[fn] == nil {
-				files[fn] = &File{
-					imports: rewriter.ExistingImports(fn),
-				}
+				files[fn] = &File{}
 			}
 
 			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
@@ -120,6 +118,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 	}
 
 	for filename, file := range files {
+		file.imports = rewriter.ExistingImports(filename)
 		file.RemainingSource = rewriter.RemainingSource(filename)
 	}
 

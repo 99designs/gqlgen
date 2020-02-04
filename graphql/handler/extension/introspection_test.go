@@ -61,6 +61,16 @@ func TestIntrospection_InterceptField(t *testing.T) {
 			args:    args{kind: ast.InputObject},
 			wantRes: []string{"testField2", "testField3"},
 		},
+		{
+			name:    "nil AllowFieldFunc",
+			args:    args{kind: ast.Object},
+			wantRes: []string{"testField1", "testField2", "testField3"},
+		},
+		{
+			name:    "nil AllowInputValueFunc",
+			args:    args{kind: ast.Object},
+			wantRes: []string{"testField1", "testField2", "testField3"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -39,11 +39,11 @@ func (c Introspection) InterceptField(ctx context.Context, next graphql.Resolver
 	res, err = next(ctx)
 
 	fc := graphql.GetFieldContext(ctx)
-	t := fc.Parent.Result.(*introspection.Type)
 	if fields, ok := res.([]introspection.Field); ok {
 		if c.AllowFieldFunc == nil {
 			return
 		}
+		t := fc.Parent.Result.(*introspection.Type)
 		var newFields []introspection.Field
 		for _, field := range fields {
 			allow, err := c.AllowFieldFunc(ctx, t, &field)
@@ -59,6 +59,7 @@ func (c Introspection) InterceptField(ctx context.Context, next graphql.Resolver
 		if c.AllowInputValueFunc == nil {
 			return
 		}
+		t := fc.Parent.Result.(*introspection.Type)
 		var newFields []introspection.InputValue
 		for _, field := range fields {
 			allow, err := c.AllowInputValueFunc(ctx, t, &field)

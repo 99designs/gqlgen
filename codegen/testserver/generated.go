@@ -103,6 +103,12 @@ type ComplexityRoot struct {
 		Radius func(childComplexity int) int
 	}
 
+	ConcreteNodeA struct {
+		Child func(childComplexity int) int
+		ID    func(childComplexity int) int
+		Name  func(childComplexity int) int
+	}
+
 	ContentPost struct {
 		Foo func(childComplexity int) int
 	}
@@ -262,6 +268,7 @@ type ComplexityRoot struct {
 		NestedOutputs                    func(childComplexity int) int
 		NoShape                          func(childComplexity int) int
 		NoShapeTypedNil                  func(childComplexity int) int
+		Node                             func(childComplexity int) int
 		NullableArg                      func(childComplexity int, arg *int) int
 		OptionalUnion                    func(childComplexity int) int
 		Overlapping                      func(childComplexity int) int
@@ -399,6 +406,7 @@ type QueryResolver interface {
 	EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 	Shapes(ctx context.Context) ([]Shape, error)
 	NoShape(ctx context.Context) (Shape, error)
+	Node(ctx context.Context) (Node, error)
 	NoShapeTypedNil(ctx context.Context) (Shape, error)
 	Animal(ctx context.Context) (Animal, error)
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
@@ -544,6 +552,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Circle.Radius(childComplexity), true
+
+	case "ConcreteNodeA.child":
+		if e.complexity.ConcreteNodeA.Child == nil {
+			break
+		}
+
+		return e.complexity.ConcreteNodeA.Child(childComplexity), true
+
+	case "ConcreteNodeA.id":
+		if e.complexity.ConcreteNodeA.ID == nil {
+			break
+		}
+
+		return e.complexity.ConcreteNodeA.ID(childComplexity), true
+
+	case "ConcreteNodeA.name":
+		if e.complexity.ConcreteNodeA.Name == nil {
+			break
+		}
+
+		return e.complexity.ConcreteNodeA.Name(childComplexity), true
 
 	case "Content_Post.foo":
 		if e.complexity.ContentPost.Foo == nil {
@@ -1185,6 +1214,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.NoShapeTypedNil(childComplexity), true
 
+	case "Query.node":
+		if e.complexity.Query.Node == nil {
+			break
+		}
+
+		return e.complexity.Query.Node(childComplexity), true
+
 	case "Query.nullableArg":
 		if e.complexity.Query.NullableArg == nil {
 			break
@@ -1638,6 +1674,11 @@ type Circle implements Shape {
 	radius: Float
 	area: Float
 }
+type ConcreteNodeA implements Node {
+	id: ID!
+	child: Node!
+	name: String!
+}
 union Content_Child = Content_User | Content_Post
 type Content_Post {
 	foo: String
@@ -1749,6 +1790,10 @@ type ModelMethods {
 input NestedMapInput {
 	map: MapStringInterfaceInput
 }
+interface Node {
+	id: ID!
+	child: Node!
+}
 type ObjectDirectives {
 	text: String! @length(min: 0, max: 7, message: "not valid")
 	nullableText: String @toNull
@@ -1815,6 +1860,7 @@ type Query {
 	enumInInput(input: InputWithEnumValue): EnumTest!
 	shapes: [Shape]
 	noShape: Shape @makeNil
+	node: Node!
 	noShapeTypedNil: Shape @makeTypedNil
 	animal: Animal @makeTypedNil
 	issue896a: [CheckIssue896!]
@@ -3228,6 +3274,99 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	res := resTmp.(float64)
 	fc.Result = res
 	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ConcreteNodeA",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ConcreteNodeA_child(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ConcreteNodeA",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Child()
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Node)
+	fc.Result = res
+	return ec.marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ConcreteNodeA",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql.CollectedField, obj *ContentPost) (ret graphql.Marshaler) {
@@ -5858,6 +5997,37 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 	res := resTmp.(Shape)
 	fc.Result = res
 	return ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_node(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Node(rctx)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Node)
+	fc.Result = res
+	return ec.marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNode(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8908,6 +9078,20 @@ func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.Selectio
 	}
 }
 
+func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj Node) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case *ConcreteNodeA:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ConcreteNodeA(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) _Shape(ctx context.Context, sel ast.SelectionSet, obj Shape) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -9199,6 +9383,43 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec._Circle_radius(ctx, field, obj)
 		case "area":
 			out.Values[i] = ec._Circle_area(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var concreteNodeAImplementors = []string{"ConcreteNodeA", "Node"}
+
+func (ec *executionContext) _ConcreteNodeA(ctx context.Context, sel ast.SelectionSet, obj *ConcreteNodeA) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, concreteNodeAImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ConcreteNodeA")
+		case "id":
+			out.Values[i] = ec._ConcreteNodeA_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "child":
+			out.Values[i] = ec._ConcreteNodeA_child(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._ConcreteNodeA_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10498,6 +10719,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_noShape(ctx, field)
 				return res
 			})
+		case "node":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_node(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "noShapeTypedNil":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -11582,6 +11817,16 @@ func (ec *executionContext) marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋg
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNode(ctx context.Context, sel ast.SelectionSet, v Node) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Node(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNPrimitive2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitive(ctx context.Context, sel ast.SelectionSet, v Primitive) graphql.Marshaler {

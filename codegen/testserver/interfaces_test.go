@@ -18,6 +18,41 @@ func TestInterfaces(t *testing.T) {
 		require.Equal(t, "[]testserver.Shape", field.Type.Out(0).String())
 	})
 
+	t.Run("models returning interfaces", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.Node = func(ctx context.Context) (node Node, err error) {
+			return &ConcreteNodeA{
+				ID:   "1234",
+				Name: "asdf",
+				child: &ConcreteNodeA{
+					ID:    "5678",
+					Name:  "hjkl",
+					child: nil,
+				},
+			}, nil
+		}
+
+		srv := handler.NewDefaultServer(
+			NewExecutableSchema(Config{
+				Resolvers: resolvers,
+			}),
+		)
+
+		c := client.New(srv)
+
+		var resp struct {
+			Node struct {
+				ID    string
+				Child struct {
+					ID string
+				}
+			}
+		}
+		c.MustPost(`{ node { id, child { id } } }`, &resp)
+		require.Equal(t, "1234", resp.Node.ID)
+		require.Equal(t, "5678", resp.Node.Child.ID)
+	})
+
 	t.Run("interfaces can be nil", func(t *testing.T) {
 		resolvers := &Stub{}
 		resolvers.QueryResolver.NoShape = func(ctx context.Context) (shapes Shape, e error) {

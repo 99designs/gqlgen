@@ -32,3 +32,17 @@ func (r *Rectangle) Area() float64 {
 }
 func (r *Rectangle) isShapeUnion() {}
 func (r *Rectangle) isShape()      {}
+
+type Node interface {
+	Child() (Node, error)
+}
+
+type ConcreteNodeA struct {
+	ID    string
+	Name  string
+	child Node
+}
+
+func (n *ConcreteNodeA) Child() (Node, error) {
+	return n.child, nil
+}

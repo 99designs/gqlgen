@@ -2,7 +2,7 @@ version: 2
 jobs:
   lint:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.13
     steps:
       - checkout
       - run: go mod download
@@ -12,7 +12,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.13
     steps:
       - checkout
       - run: go mod download
@@ -20,7 +20,7 @@ jobs:
 
   cover:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.13
     steps:
       - checkout
       - run: go mod download

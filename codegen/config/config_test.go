@@ -6,11 +6,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/vektah/gqlparser"
-	"github.com/vektah/gqlparser/ast"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
 
 	"github.com/99designs/gqlgen/internal/code"
 )
@@ -118,22 +117,41 @@ func TestConfigCheck(t *testing.T) {
 }
 
 func TestAutobinding(t *testing.T) {
-	cfg := Config{
-		Models: TypeMap{},
-		AutoBind: []string{
-			"github.com/99designs/gqlgen/example/chat",
-			"github.com/99designs/gqlgen/example/scalars/model",
-		},
-		Packages: &code.Packages{},
-	}
+	t.Run("valid paths", func(t *testing.T) {
+		cfg := Config{
+			Models: TypeMap{},
+			AutoBind: []string{
+				"github.com/99designs/gqlgen/example/chat",
+				"github.com/99designs/gqlgen/example/scalars/model",
+			},
+			Packages: &code.Packages{},
+		}
 
-	cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
-		scalar Banned
-		type Message { id: ID }
-	`})
+		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
+			scalar Banned
+			type Message { id: ID }
+		`})
 
-	require.NoError(t, cfg.autobind())
+		require.NoError(t, cfg.autobind())
 
-	require.Equal(t, "github.com/99designs/gqlgen/example/scalars/model.Banned", cfg.Models["Banned"].Model[0])
-	require.Equal(t, "github.com/99designs/gqlgen/example/chat.Message", cfg.Models["Message"].Model[0])
+		require.Equal(t, "github.com/99designs/gqlgen/example/scalars/model.Banned", cfg.Models["Banned"].Model[0])
+		require.Equal(t, "github.com/99designs/gqlgen/example/chat.Message", cfg.Models["Message"].Model[0])
+	})
+
+	t.Run("with file path", func(t *testing.T) {
+		cfg := Config{
+			Models: TypeMap{},
+			AutoBind: []string{
+				"../chat",
+			},
+			Packages: &code.Packages{},
+		}
+
+		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
+			scalar Banned
+			type Message { id: ID }
+		`})
+
+		require.EqualError(t, cfg.autobind(), "unable to load ../chat - make sure you're using an import path to a package that exists")
+	})
 }

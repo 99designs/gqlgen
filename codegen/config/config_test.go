@@ -110,11 +110,8 @@ func TestConfigCheck(t *testing.T) {
 		config, err := LoadConfig("testdata/cfg/conflictedPackages.yml")
 		require.NoError(t, err)
 
-		err = config.normalize()
-		require.NoError(t, err)
-
 		err = config.Check()
-		require.EqualError(t, err, "filenames exec.go and models.go are in the same directory but have different package definitions")
+		require.EqualError(t, err, "exec and model define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (graphql vs generated)")
 	})
 }
 
@@ -128,7 +125,7 @@ func TestAutobinding(t *testing.T) {
 	}
 
 	s := gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
-		scalar Banned 
+		scalar Banned
 		type Message { id: ID }
 	`})
 

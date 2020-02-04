@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/internal/code"
+
 	"github.com/stretchr/testify/require"
-	"golang.org/x/tools/go/packages"
 )
 
 func TestImports(t *testing.T) {
@@ -18,20 +18,15 @@ func TestImports(t *testing.T) {
 	bBar := "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"
 	mismatch := "github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"
 
-	ps, err := packages.Load(nil, aBar, bBar, mismatch)
-	require.NoError(t, err)
-
-	code.RecordPackagesList(ps)
-
 	t.Run("multiple lookups is ok", func(t *testing.T) {
-		a := Imports{destDir: wd}
+		a := Imports{destDir: wd, packages: &code.Packages{}}
 
 		require.Equal(t, "bar", a.Lookup(aBar))
 		require.Equal(t, "bar", a.Lookup(aBar))
 	})
 
 	t.Run("lookup by type", func(t *testing.T) {
-		a := Imports{destDir: wd}
+		a := Imports{destDir: wd, packages: &code.Packages{}}
 
 		pkg := types.NewPackage("github.com/99designs/gqlgen/codegen/templates/testdata/b/bar", "bar")
 		typ := types.NewNamed(types.NewTypeName(0, pkg, "Boolean", types.Typ[types.Bool]), types.Typ[types.Bool], nil)
@@ -40,7 +35,7 @@ func TestImports(t *testing.T) {
 	})
 
 	t.Run("duplicates are decollisioned", func(t *testing.T) {
-		a := Imports{destDir: wd}
+		a := Imports{destDir: wd, packages: &code.Packages{}}
 
 		require.Equal(t, "bar", a.Lookup(aBar))
 		require.Equal(t, "bar1", a.Lookup(bBar))
@@ -51,13 +46,13 @@ func TestImports(t *testing.T) {
 	})
 
 	t.Run("package name defined in code will be used", func(t *testing.T) {
-		a := Imports{destDir: wd}
+		a := Imports{destDir: wd, packages: &code.Packages{}}
 
 		require.Equal(t, "turtles", a.Lookup(mismatch))
 	})
 
 	t.Run("string printing for import block", func(t *testing.T) {
-		a := Imports{destDir: wd}
+		a := Imports{destDir: wd, packages: &code.Packages{}}
 		a.Lookup(aBar)
 		a.Lookup(bBar)
 		a.Lookup(mismatch)
@@ -72,7 +67,7 @@ turtles "github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"`,
 	})
 
 	t.Run("aliased imports will not collide", func(t *testing.T) {
-		a := Imports{destDir: wd}
+		a := Imports{destDir: wd, packages: &code.Packages{}}
 
 		_, _ = a.Reserve(aBar, "abar")
 		_, _ = a.Reserve(bBar, "bbar")

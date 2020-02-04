@@ -14,7 +14,7 @@ import (
 func TestModelGeneration(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen.yml")
 	require.NoError(t, err)
-	require.NoError(t, cfg.Check())
+	require.NoError(t, cfg.Init())
 	p := Plugin{
 		MutateHook: mutateHook,
 	}

@@ -9,9 +9,7 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/99designs/gqlgen/plugin/modelgen"
 	"github.com/99designs/gqlgen/plugin/resolvergen"
-	"github.com/99designs/gqlgen/plugin/schemaconfig"
 	"github.com/pkg/errors"
-	"golang.org/x/tools/go/packages"
 )
 
 func Generate(cfg *config.Config, option ...Option) error {
@@ -19,11 +17,8 @@ func Generate(cfg *config.Config, option ...Option) error {
 	if cfg.Model.IsDefined() {
 		_ = syscall.Unlink(cfg.Model.Filename)
 	}
-	if err := cfg.Check(); err != nil {
-		return errors.Wrap(err, "generating core failed")
-	}
 
-	plugins := []plugin.Plugin{schemaconfig.New()}
+	plugins := []plugin.Plugin{}
 	if cfg.Model.IsDefined() {
 		plugins = append(plugins, modelgen.New())
 	}
@@ -36,14 +31,28 @@ func Generate(cfg *config.Config, option ...Option) error {
 		o(cfg, &plugins)
 	}
 
-	schemaMutators := []codegen.SchemaMutator{}
 	for _, p := range plugins {
 		if inj, ok := p.(plugin.SourcesInjector); ok {
 			inj.InjectSources(cfg)
 		}
-		if mut, ok := p.(codegen.SchemaMutator); ok {
-			schemaMutators = append(schemaMutators, mut)
+	}
+
+	err := cfg.LoadSchema()
+	if err != nil {
+		return errors.Wrap(err, "failed to load schema")
+	}
+
+	for _, p := range plugins {
+		if mut, ok := p.(plugin.SchemaMutator); ok {
+			err := mut.MutateSchema(cfg.Schema)
+			if err != nil {
+				return errors.Wrap(err, p.Name())
+			}
 		}
+	}
+
+	if err := cfg.Init(); err != nil {
+		return errors.Wrap(err, "generating core failed")
 	}
 
 	for _, p := range plugins {
@@ -55,7 +64,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 	// Merge again now that the generated models have been injected into the typemap
-	data, err := codegen.BuildData(cfg, schemaMutators)
+	data, err := codegen.BuildData(cfg)
 	if err != nil {
 		return errors.Wrap(err, "merging type systems failed")
 	}
@@ -95,17 +104,11 @@ func validate(cfg *config.Config) error {
 	if cfg.Resolver.IsDefined() {
 		roots = append(roots, cfg.Resolver.ImportPath())
 	}
-	_, err := packages.Load(&packages.Config{
-		Mode: packages.NeedName |
-			packages.NeedFiles |
-			packages.NeedCompiledGoFiles |
-			packages.NeedImports |
-			packages.NeedTypes |
-			packages.NeedTypesSizes |
-			packages.NeedSyntax |
-			packages.NeedTypesInfo}, roots...)
-	if err != nil {
-		return errors.Wrap(err, "validation failed")
+
+	cfg.Packages.LoadAll(roots...)
+	errs := cfg.Packages.Errors()
+	if len(errs) > 0 {
+		return errs
 	}
 	return nil
 }

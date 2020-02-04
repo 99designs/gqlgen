@@ -1,8 +1,6 @@
 package code
 
 import (
-	"errors"
-	"fmt"
 	"go/build"
 	"go/parser"
 	"go/token"
@@ -10,13 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
-
-	"golang.org/x/tools/go/packages"
 )
-
-var nameForPackageCacheLock sync.Mutex
-var nameForPackageCache []*packages.Package
 
 var gopaths []string
 
@@ -108,33 +100,3 @@ func ImportPathForDir(dir string) (res string) {
 }
 
 var modregex = regexp.MustCompile("module (.*)\n")
-
-// RecordPackagesList records the list of packages to be used later by NameForPackage.
-// It must be called exactly once during initialization, before NameForPackage is called.
-func RecordPackagesList(newNameForPackageCache []*packages.Package) {
-	nameForPackageCache = newNameForPackageCache
-}
-
-// NameForPackage returns the package name for a given import path. This can be really slow.
-func NameForPackage(importPath string) string {
-	if importPath == "" {
-		panic(errors.New("import path can not be empty"))
-	}
-	if nameForPackageCache == nil {
-		panic(fmt.Errorf("NameForPackage called for %s before RecordPackagesList", importPath))
-	}
-	nameForPackageCacheLock.Lock()
-	defer nameForPackageCacheLock.Unlock()
-	var p *packages.Package
-	for _, pkg := range nameForPackageCache {
-		if pkg.PkgPath == importPath {
-			p = pkg
-			break
-		}
-	}
-
-	if p == nil || p.Name == "" {
-		return SanitizePackageName(filepath.Base(importPath))
-	}
-	return p.Name
-}

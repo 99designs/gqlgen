@@ -47,11 +47,15 @@ func TestGetSDL(t *testing.T) {
 func TestMutateConfig(t *testing.T) {
 	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
 	require.NoError(t, err)
-	require.NoError(t, cfg.Check())
 
 	f := &federation{}
-	err = f.MutateConfig(cfg)
-	require.NoError(t, err)
+	f.InjectSources(cfg)
+
+	require.NoError(t, cfg.LoadSchema())
+	require.NoError(t, f.MutateSchema(cfg.Schema))
+	require.NoError(t, cfg.Init())
+	require.NoError(t, f.MutateConfig(cfg))
+
 }
 
 func TestInjectSourcesNoKey(t *testing.T) {
@@ -75,7 +79,7 @@ func TestGetSDLNoKey(t *testing.T) {
 func TestMutateConfigNoKey(t *testing.T) {
 	cfg, err := config.LoadConfig("test_data/nokey.yml")
 	require.NoError(t, err)
-	require.NoError(t, cfg.Check())
+	require.NoError(t, cfg.Init())
 
 	f := &federation{}
 	err = f.MutateConfig(cfg)

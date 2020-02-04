@@ -173,7 +173,7 @@ func (f *federation) MutateSchema(s *ast.Schema) error {
 func (f *federation) getSource(builtin bool) *ast.Source {
 	return &ast.Source{
 		Name: "federation.graphql",
-		Input: `# Declarations as required by the federation spec 
+		Input: `# Declarations as required by the federation spec
 # See: https://www.apollographql.com/docs/apollo-server/federation/federation-spec/
 
 scalar _Any
@@ -244,15 +244,18 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		Filename:        "service.go",
 		Data:            f,
 		GeneratedHeader: true,
+		Packages:        data.Config.Packages,
 	})
 }
 
 func (f *federation) setEntities(cfg *config.Config) {
-	schema, err := cfg.LoadSchema()
+	// crazy hack to get our injected code in so everything compiles, so we can generate the entity map
+	// so we can reload the full schema.
+	err := cfg.LoadSchema()
 	if err != nil {
 		panic(err)
 	}
-	for _, schemaType := range schema.Types {
+	for _, schemaType := range cfg.Schema.Types {
 		if schemaType.Kind == ast.Object {
 			dir := schemaType.Directives.ForName("key") // TODO: interfaces
 			if dir != nil {

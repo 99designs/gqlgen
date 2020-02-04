@@ -6,11 +6,9 @@ import (
 	"sort"
 
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
 	"github.com/vektah/gqlparser/formatter"
-	"golang.org/x/tools/go/packages"
 )
 
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
@@ -39,45 +37,15 @@ type builder struct {
 	Directives map[string]*Directive
 }
 
-type SchemaMutator interface {
-	MutateSchema(s *ast.Schema) error
-}
-
-func BuildData(cfg *config.Config, plugins []SchemaMutator) (*Data, error) {
+func BuildData(cfg *config.Config) (*Data, error) {
 	b := builder{
 		Config: cfg,
+		Schema: cfg.Schema,
 	}
+
+	b.Binder = b.Config.NewBinder()
 
 	var err error
-	b.Schema, err = cfg.LoadSchema()
-	if err != nil {
-		return nil, err
-	}
-
-	err = cfg.Check()
-	if err != nil {
-		return nil, err
-	}
-
-	err = cfg.Autobind(b.Schema)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg.InjectBuiltins(b.Schema)
-
-	for _, p := range plugins {
-		err = p.MutateSchema(b.Schema)
-		if err != nil {
-			return nil, fmt.Errorf("error running MutateSchema: %v", err)
-		}
-	}
-
-	b.Binder, err = b.Config.NewBinder(b.Schema)
-	if err != nil {
-		return nil, err
-	}
-
 	b.Directives, err = b.buildDirectives()
 	if err != nil {
 		return nil, err
@@ -89,12 +57,6 @@ func BuildData(cfg *config.Config, plugins []SchemaMutator) (*Data, error) {
 			dataDirectives[name] = d
 		}
 	}
-
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName}, cfg.Models.ReferencedPackages()...)
-	if err != nil {
-		return nil, errors.Wrap(err, "loading failed")
-	}
-	code.RecordPackagesList(pkgs)
 
 	s := Data{
 		Config:     cfg,
@@ -156,8 +118,9 @@ func BuildData(cfg *config.Config, plugins []SchemaMutator) (*Data, error) {
 
 	if b.Binder.SawInvalid {
 		// if we have a syntax error, show it
-		if len(b.Binder.PkgErrors) > 0 {
-			return nil, b.Binder.PkgErrors
+		err := cfg.Packages.Errors()
+		if len(err) > 0 {
+			return nil, err
 		}
 
 		// otherwise show a generic error message

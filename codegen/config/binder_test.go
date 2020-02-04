@@ -4,6 +4,8 @@ import (
 	"go/types"
 	"testing"
 
+	"github.com/99designs/gqlgen/internal/code"
+
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
@@ -49,8 +51,9 @@ func createBinder(cfg Config) (*Binder, *ast.Schema) {
 			Model: []string{"github.com/99designs/gqlgen/example/chat.Message"},
 		},
 	}
+	cfg.Packages = &code.Packages{}
 
-	s := gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
+	cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
 		type Message { id: ID }
 
 		type Query {
@@ -58,10 +61,7 @@ func createBinder(cfg Config) (*Binder, *ast.Schema) {
 		}
 	`})
 
-	b, err := cfg.NewBinder(s)
-	if err != nil {
-		panic(err)
-	}
+	b := cfg.NewBinder()
 
-	return b, s
+	return b, cfg.Schema
 }

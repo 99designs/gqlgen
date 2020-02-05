@@ -97,6 +97,17 @@ func (f *federation) InjectSources(cfg *config.Config) {
 	cfg.AdditionalSources = append(cfg.AdditionalSources, &ast.Source{Name: "entity.graphql", Input: s, BuiltIn: true})
 }
 
+// ensureQuery ensures that a "Query" node exists on the schema.
+func ensureQuery(s *ast.Schema) {
+	if s.Query == nil {
+		s.Query = &ast.Definition{
+			Kind: ast.Object,
+			Name: "Query",
+		}
+		s.Types["Query"] = s.Query
+	}
+}
+
 // addEntityToSchema adds the _Entity Union and _entities query to schema.
 // This is part of MutateSchema.
 func (f *federation) addEntityToSchema(s *ast.Schema) {
@@ -125,13 +136,7 @@ func (f *federation) addEntityToSchema(s *ast.Schema) {
 			},
 		},
 	}
-	if s.Query == nil {
-		s.Query = &ast.Definition{
-			Kind: ast.Object,
-			Name: "Query",
-		}
-		s.Types["Query"] = s.Query
-	}
+	ensureQuery(s)
 	s.Query.Fields = append(s.Query.Fields, fieldDef)
 }
 
@@ -155,6 +160,7 @@ func (f *federation) addServiceToSchema(s *ast.Schema) {
 		Name: "_service",
 		Type: ast.NonNullNamedType("_Service", nil),
 	}
+	ensureQuery(s)
 	s.Query.Fields = append(s.Query.Fields, _serviceDef)
 }
 

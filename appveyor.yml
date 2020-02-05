@@ -9,7 +9,7 @@ clone_folder: c:\projects\gqlgen
 
 environment:
   GOPATH: c:\gopath
-  GOVERSION: 1.11.5
+  GOVERSION: 1.13.7
   PATH: '%PATH%;c:\gopath\bin'
 
 init:

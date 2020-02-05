@@ -46,7 +46,7 @@ func TestLoadConfig(t *testing.T) {
 	t.Run("unwalkable path", func(t *testing.T) {
 		_, err := LoadConfig("testdata/cfg/unwalkable.yml")
 		if runtime.GOOS == "windows" {
-			require.EqualError(t, err, "failed to walk schema at root not_walkable/: FindFirstFile not_walkable/: The parameter is incorrect.")
+			require.EqualError(t, err, "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified.")
 		} else {
 			require.EqualError(t, err, "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory")
 		}

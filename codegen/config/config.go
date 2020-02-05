@@ -459,7 +459,10 @@ func (c *Config) autobind() error {
 			continue
 		}
 
-		for _, p := range ps {
+		for i, p := range ps {
+			if p == nil {
+				return fmt.Errorf("unable to load %s - make sure you're using an import path to a package that exists", c.AutoBind[i])
+			}
 			if t := p.Types.Scope().Lookup(t.Name); t != nil {
 				c.Models.Add(t.Name(), t.Pkg().Path()+"."+t.Name())
 				break

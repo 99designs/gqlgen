@@ -10,6 +10,9 @@ import (
 )
 
 type Stub struct {
+	BackedByInterfaceResolver struct {
+		ID func(ctx context.Context, obj BackedByInterface) (string, error)
+	}
 	ErrorsResolver struct {
 		A func(ctx context.Context, obj *Errors) (*Error, error)
 		B func(ctx context.Context, obj *Errors) (*Error, error)
@@ -69,8 +72,10 @@ type Stub struct {
 		EnumInInput                      func(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
+		Node                             func(ctx context.Context) (Node, error)
 		NoShapeTypedNil                  func(ctx context.Context) (Shape, error)
 		Animal                           func(ctx context.Context) (Animal, error)
+		NotAnInterface                   func(ctx context.Context) (BackedByInterface, error)
 		Issue896a                        func(ctx context.Context) ([]*CheckIssue896, error)
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
@@ -103,6 +108,9 @@ type Stub struct {
 	}
 }
 
+func (r *Stub) BackedByInterface() BackedByInterfaceResolver {
+	return &stubBackedByInterface{r}
+}
 func (r *Stub) Errors() ErrorsResolver {
 	return &stubErrors{r}
 }
@@ -132,6 +140,12 @@ func (r *Stub) Subscription() SubscriptionResolver {
 }
 func (r *Stub) User() UserResolver {
 	return &stubUser{r}
+}
+
+type stubBackedByInterface struct{ *Stub }
+
+func (r *stubBackedByInterface) ID(ctx context.Context, obj BackedByInterface) (string, error) {
+	return r.BackedByInterfaceResolver.ID(ctx, obj)
 }
 
 type stubErrors struct{ *Stub }
@@ -289,11 +303,17 @@ func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 func (r *stubQuery) NoShape(ctx context.Context) (Shape, error) {
 	return r.QueryResolver.NoShape(ctx)
 }
+func (r *stubQuery) Node(ctx context.Context) (Node, error) {
+	return r.QueryResolver.Node(ctx)
+}
 func (r *stubQuery) NoShapeTypedNil(ctx context.Context) (Shape, error) {
 	return r.QueryResolver.NoShapeTypedNil(ctx)
 }
 func (r *stubQuery) Animal(ctx context.Context) (Animal, error) {
 	return r.QueryResolver.Animal(ctx)
+}
+func (r *stubQuery) NotAnInterface(ctx context.Context) (BackedByInterface, error) {
+	return r.QueryResolver.NotAnInterface(ctx)
 }
 func (r *stubQuery) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
 	return r.QueryResolver.Issue896a(ctx)

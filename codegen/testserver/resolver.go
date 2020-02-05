@@ -10,6 +10,10 @@ import (
 
 type Resolver struct{}
 
+func (r *backedByInterfaceResolver) ID(ctx context.Context, obj BackedByInterface) (string, error) {
+	panic("not implemented")
+}
+
 func (r *errorsResolver) A(ctx context.Context, obj *Errors) (*Error, error) {
 	panic("not implemented")
 }
@@ -186,11 +190,19 @@ func (r *queryResolver) NoShape(ctx context.Context) (Shape, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) Node(ctx context.Context) (Node, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) NoShapeTypedNil(ctx context.Context) (Shape, error) {
 	panic("not implemented")
 }
 
 func (r *queryResolver) Animal(ctx context.Context) (Animal, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) NotAnInterface(ctx context.Context) (BackedByInterface, error) {
 	panic("not implemented")
 }
 
@@ -294,6 +306,7 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 	panic("not implemented")
 }
 
+func (r *Resolver) BackedByInterface() BackedByInterfaceResolver { return &backedByInterfaceResolver{r} }
 func (r *Resolver) Errors() ErrorsResolver                       { return &errorsResolver{r} }
 func (r *Resolver) ForcedResolver() ForcedResolverResolver       { return &forcedResolverResolver{r} }
 func (r *Resolver) ModelMethods() ModelMethodsResolver           { return &modelMethodsResolver{r} }
@@ -305,6 +318,7 @@ func (r *Resolver) Query() QueryResolver                         { return &query
 func (r *Resolver) Subscription() SubscriptionResolver           { return &subscriptionResolver{r} }
 func (r *Resolver) User() UserResolver                           { return &userResolver{r} }
 
+type backedByInterfaceResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }
 type forcedResolverResolver struct{ *Resolver }
 type modelMethodsResolver struct{ *Resolver }

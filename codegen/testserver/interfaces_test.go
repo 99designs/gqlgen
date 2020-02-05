@@ -2,6 +2,7 @@ package testserver
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -122,5 +123,57 @@ func TestInterfaces(t *testing.T) {
 
 		var resp interface{}
 		c.MustPost(`{ animal { species } }`, &resp)
+	})
+
+	t.Run("can bind to interfaces even when the graphql is not", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.BackedByInterfaceResolver.ID = func(ctx context.Context, obj BackedByInterface) (s string, err error) {
+			return "ID:" + obj.ThisShouldBind(), nil
+		}
+		resolvers.QueryResolver.NotAnInterface = func(ctx context.Context) (byInterface BackedByInterface, err error) {
+			return &BackedByInterfaceImpl{
+				Value: "A",
+				Error: nil,
+			}, nil
+		}
+
+		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+
+		var resp struct {
+			NotAnInterface struct {
+				ID                      string
+				ThisShouldBind          string
+				ThisShouldBindWithError string
+			}
+		}
+		c.MustPost(`{ notAnInterface { id, thisShouldBind, thisShouldBindWithError } }`, &resp)
+		require.Equal(t, "ID:A", resp.NotAnInterface.ID)
+		require.Equal(t, "A", resp.NotAnInterface.ThisShouldBind)
+		require.Equal(t, "A", resp.NotAnInterface.ThisShouldBindWithError)
+	})
+
+	t.Run("can return errors from interface funcs", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.BackedByInterfaceResolver.ID = func(ctx context.Context, obj BackedByInterface) (s string, err error) {
+			return "ID:" + obj.ThisShouldBind(), nil
+		}
+		resolvers.QueryResolver.NotAnInterface = func(ctx context.Context) (byInterface BackedByInterface, err error) {
+			return &BackedByInterfaceImpl{
+				Value: "A",
+				Error: fmt.Errorf("boom"),
+			}, nil
+		}
+
+		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+
+		var resp struct {
+			NotAnInterface struct {
+				ID                      string
+				ThisShouldBind          string
+				ThisShouldBindWithError string
+			}
+		}
+		err := c.Post(`{ notAnInterface { id, thisShouldBind, thisShouldBindWithError } }`, &resp)
+		require.EqualError(t, err, `[{"message":"boom","path":["notAnInterface","thisShouldBindWithError"]}]`)
 	})
 }

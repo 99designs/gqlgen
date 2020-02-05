@@ -4,10 +4,17 @@ extend type Query {
     node: Node!
     noShapeTypedNil: Shape @makeTypedNil
     animal: Animal @makeTypedNil
+    notAnInterface: BackedByInterface
 }
 
 interface Animal {
     species: String!
+}
+
+type BackedByInterface {
+    id: String!
+    thisShouldBind: String!
+    thisShouldBindWithError: String!
 }
 
 type Dog implements Animal {

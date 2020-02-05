@@ -46,3 +46,20 @@ type ConcreteNodeA struct {
 func (n *ConcreteNodeA) Child() (Node, error) {
 	return n.child, nil
 }
+
+type BackedByInterface interface {
+	ThisShouldBind() string
+	ThisShouldBindWithError() (string, error)
+}
+
+type BackedByInterfaceImpl struct {
+	Value string
+	Error error
+}
+
+func (b *BackedByInterfaceImpl) ThisShouldBind() string {
+	return b.Value
+}
+func (b *BackedByInterfaceImpl) ThisShouldBindWithError() (string, error) {
+	return b.Value, b.Error
+}

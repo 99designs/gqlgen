@@ -39,6 +39,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	BackedByInterface() BackedByInterfaceResolver
 	Errors() ErrorsResolver
 	ForcedResolver() ForcedResolverResolver
 	ModelMethods() ModelMethodsResolver
@@ -87,6 +88,12 @@ type ComplexityRoot struct {
 
 	B struct {
 		ID func(childComplexity int) int
+	}
+
+	BackedByInterface struct {
+		ID                      func(childComplexity int) int
+		ThisShouldBind          func(childComplexity int) int
+		ThisShouldBindWithError func(childComplexity int) int
 	}
 
 	Cat struct {
@@ -269,6 +276,7 @@ type ComplexityRoot struct {
 		NoShape                          func(childComplexity int) int
 		NoShapeTypedNil                  func(childComplexity int) int
 		Node                             func(childComplexity int) int
+		NotAnInterface                   func(childComplexity int) int
 		NullableArg                      func(childComplexity int, arg *int) int
 		OptionalUnion                    func(childComplexity int) int
 		Overlapping                      func(childComplexity int) int
@@ -345,6 +353,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type BackedByInterfaceResolver interface {
+	ID(ctx context.Context, obj BackedByInterface) (string, error)
+}
 type ErrorsResolver interface {
 	A(ctx context.Context, obj *Errors) (*Error, error)
 	B(ctx context.Context, obj *Errors) (*Error, error)
@@ -409,6 +420,7 @@ type QueryResolver interface {
 	Node(ctx context.Context) (Node, error)
 	NoShapeTypedNil(ctx context.Context) (Shape, error)
 	Animal(ctx context.Context) (Animal, error)
+	NotAnInterface(ctx context.Context) (BackedByInterface, error)
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
@@ -517,6 +529,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.B.ID(childComplexity), true
+
+	case "BackedByInterface.id":
+		if e.complexity.BackedByInterface.ID == nil {
+			break
+		}
+
+		return e.complexity.BackedByInterface.ID(childComplexity), true
+
+	case "BackedByInterface.thisShouldBind":
+		if e.complexity.BackedByInterface.ThisShouldBind == nil {
+			break
+		}
+
+		return e.complexity.BackedByInterface.ThisShouldBind(childComplexity), true
+
+	case "BackedByInterface.thisShouldBindWithError":
+		if e.complexity.BackedByInterface.ThisShouldBindWithError == nil {
+			break
+		}
+
+		return e.complexity.BackedByInterface.ThisShouldBindWithError(childComplexity), true
 
 	case "Cat.catBreed":
 		if e.complexity.Cat.CatBreed == nil {
@@ -1221,6 +1254,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Node(childComplexity), true
 
+	case "Query.notAnInterface":
+		if e.complexity.Query.NotAnInterface == nil {
+			break
+		}
+
+		return e.complexity.Query.NotAnInterface(childComplexity), true
+
 	case "Query.nullableArg":
 		if e.complexity.Query.NullableArg == nil {
 			break
@@ -1658,6 +1698,11 @@ type Autobind {
 type B {
 	id: ID!
 }
+type BackedByInterface {
+	id: String!
+	thisShouldBind: String!
+	thisShouldBindWithError: String!
+}
 scalar Bytes
 type Cat implements Animal {
 	species: String!
@@ -1863,6 +1908,7 @@ type Query {
 	node: Node!
 	noShapeTypedNil: Shape @makeTypedNil
 	animal: Animal @makeTypedNil
+	notAnInterface: BackedByInterface
 	issue896a: [CheckIssue896!]
 	mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
 	mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
@@ -3128,6 +3174,99 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "BackedByInterface",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.BackedByInterface().ID(rctx, obj)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "BackedByInterface",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ThisShouldBind(), nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "BackedByInterface",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ThisShouldBindWithError()
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
@@ -6124,6 +6263,34 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 	res := resTmp.(Animal)
 	fc.Result = res
 	return ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐAnimal(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_notAnInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().NotAnInterface(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(BackedByInterface)
+	fc.Result = res
+	return ec.marshalOBackedByInterface2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐBackedByInterface(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -9312,6 +9479,52 @@ func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B
 	return out
 }
 
+var backedByInterfaceImplementors = []string{"BackedByInterface"}
+
+func (ec *executionContext) _BackedByInterface(ctx context.Context, sel ast.SelectionSet, obj BackedByInterface) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, backedByInterfaceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BackedByInterface")
+		case "id":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._BackedByInterface_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "thisShouldBind":
+			out.Values[i] = ec._BackedByInterface_thisShouldBind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "thisShouldBindWithError":
+			out.Values[i] = ec._BackedByInterface_thisShouldBindWithError(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var catImplementors = []string{"Cat", "Animal"}
 
 func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj *Cat) graphql.Marshaler {
@@ -10753,6 +10966,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_animal(ctx, field)
+				return res
+			})
+		case "notAnInterface":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_notAnInterface(ctx, field)
 				return res
 			})
 		case "issue896a":
@@ -12365,6 +12589,13 @@ func (ec *executionContext) marshalOAutobind2ᚖgithubᚗcomᚋ99designsᚋgqlge
 		return graphql.Null
 	}
 	return ec._Autobind(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOBackedByInterface2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐBackedByInterface(ctx context.Context, sel ast.SelectionSet, v BackedByInterface) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._BackedByInterface(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

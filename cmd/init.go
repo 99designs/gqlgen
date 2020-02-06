@@ -26,6 +26,11 @@ exec:
   filename: graph/generated/generated.go
   package: generated
 
+# Uncomment to enable federation
+# federation:
+#   filename: graph/generated/federation.go
+#   package: generated
+
 # Where should any generated models go?
 model:
   filename: graph/model/models_gen.go

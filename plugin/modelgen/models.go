@@ -83,11 +83,6 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		if cfg.Models.UserDefined(schemaType.Name) {
 			continue
 		}
-		ent := false
-		if schemaType.Directives.ForName("key") != nil {
-			hasEntity = true
-			ent = true
-		}
 		switch schemaType.Kind {
 		case ast.Interface, ast.Union:
 			it := &Interface{
@@ -108,9 +103,6 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				it.Implements = append(it.Implements, implementor.Name)
 			}
 
-			if ent { // only when Object. Directive validation should have occurred on InputObject otherwise.
-				it.Implements = append(it.Implements, "_Entity")
-			}
 			for _, field := range schemaType.Fields {
 				var typ types.Type
 				fieldDef := cfg.Schema.Types[field.Type.Name()]

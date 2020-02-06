@@ -1,0 +1,16 @@
+package fedruntime
+
+// Everything with a @key implements this
+type Entity interface {
+	Is_Entity()
+}
+
+// Service is the service object that the
+// generated.go file will return for the _service
+// query
+type Service struct {
+	SDL string `json:"sdl"`
+}
+
+type TypeSafeEntityRoot interface {
+}

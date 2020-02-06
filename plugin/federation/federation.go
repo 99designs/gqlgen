@@ -35,33 +35,23 @@ func (f *federation) Name() string {
 
 // MutateConfig mutates the configuration
 func (f *federation) MutateConfig(cfg *config.Config) error {
-	entityFields := map[string]config.TypeMapField{}
-	for _, e := range f.Entities {
-		entityFields[e.ResolverName] = config.TypeMapField{Resolver: true}
-		for _, r := range e.Requires {
-			if cfg.Models[e.Def.Name].Fields == nil {
-				model := cfg.Models[e.Def.Name]
-				model.Fields = map[string]config.TypeMapField{}
-				cfg.Models[e.Def.Name] = model
-			}
-			cfg.Models[e.Def.Name].Fields[r.Name] = config.TypeMapField{Resolver: true}
-		}
-	}
 	builtins := config.TypeMap{
 		"_Service": {
 			Model: config.StringList{
-				"github.com/99designs/gqlgen/plugin/federation.Service",
+				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Service",
 			},
 		},
 		"_Any": {
 			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Map"},
 		},
+		"_Entity": {
+			Model: config.StringList{"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity"},
+		},
+		"TypeSafeEntityRoot": {
+			Model: config.StringList{"github.com/99designs/gqlgen/plugin/federation/fedruntime.TypeSafeEntityRoot"},
+		},
 	}
-	if len(entityFields) > 0 {
-		builtins["Entity"] = config.TypeMapEntry{
-			Fields: entityFields,
-		}
-	}
+
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
 			return fmt.Errorf("%v already exists which must be reserved when Federation is enabled", typeName)
@@ -77,112 +67,10 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	return nil
 }
 
-// InjectSources creates a GraphQL Entity type with all
-// the fields that had the @key directive
-func (f *federation) InjectSources(cfg *config.Config) {
-	cfg.AdditionalSources = append(cfg.AdditionalSources, f.getSource(false))
-
-	f.setEntities(cfg)
-	if len(f.Entities) == 0 {
-		// It's unusual for a service not to have any entities, but
-		// possible if it only exports top-level queries and mutations.
-		return
-	}
-
-	s := "type Entity {\n"
-	for _, e := range f.Entities {
-		resolverArgs := ""
-		for _, field := range e.KeyFields {
-			resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
-		}
-		s += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
-	}
-	s += "}"
-	cfg.AdditionalSources = append(cfg.AdditionalSources, &ast.Source{Name: "entity.graphql", Input: s, BuiltIn: true})
-}
-
-// ensureQuery ensures that a "Query" node exists on the schema.
-func ensureQuery(s *ast.Schema) {
-	if s.Query == nil {
-		s.Query = &ast.Definition{
-			Kind: ast.Object,
-			Name: "Query",
-		}
-		s.Types["Query"] = s.Query
-	}
-}
-
-// addEntityToSchema adds the _Entity Union and _entities query to schema.
-// This is part of MutateSchema.
-func (f *federation) addEntityToSchema(s *ast.Schema) {
-	// --- Set _Entity Union ---
-	union := &ast.Definition{
-		Name:        "_Entity",
-		Kind:        ast.Union,
-		Description: "A union unifies all @entity types (TODO: interfaces)",
-		Types:       []string{},
-	}
-	for _, ent := range f.Entities {
-		union.Types = append(union.Types, ent.Def.Name)
-		s.AddPossibleType("_Entity", ent.Def)
-		s.AddImplements(ent.Def.Name, union)
-	}
-	s.Types[union.Name] = union
-
-	// --- Set _entities query ---
-	fieldDef := &ast.FieldDefinition{
-		Name: "_entities",
-		Type: ast.NonNullListType(ast.NamedType("_Entity", nil), nil),
-		Arguments: ast.ArgumentDefinitionList{
-			{
-				Name: "representations",
-				Type: ast.NonNullListType(ast.NonNullNamedType("_Any", nil), nil),
-			},
-		},
-	}
-	ensureQuery(s)
-	s.Query.Fields = append(s.Query.Fields, fieldDef)
-}
-
-// addServiceToSchema adds the _Service type and _service query to schema.
-// This is part of MutateSchema.
-func (f *federation) addServiceToSchema(s *ast.Schema) {
-	typeDef := &ast.Definition{
-		Kind: ast.Object,
-		Name: "_Service",
-		Fields: ast.FieldList{
-			&ast.FieldDefinition{
-				Name: "sdl",
-				Type: ast.NonNullNamedType("String", nil),
-			},
-		},
-	}
-	s.Types[typeDef.Name] = typeDef
-
-	// --- set _service query ---
-	_serviceDef := &ast.FieldDefinition{
-		Name: "_service",
-		Type: ast.NonNullNamedType("_Service", nil),
-	}
-	ensureQuery(s)
-	s.Query.Fields = append(s.Query.Fields, _serviceDef)
-}
-
-// MutateSchema creates types and query declarations
-// that are required by the federation spec.
-func (f *federation) MutateSchema(s *ast.Schema) error {
-	// It's unusual for a service not to have any entities, but
-	// possible if it only exports top-level queries and mutations.
-	if len(f.Entities) > 0 {
-		f.addEntityToSchema(s)
-	}
-	f.addServiceToSchema(s)
-	return nil
-}
-
-func (f *federation) getSource(builtin bool) *ast.Source {
+// injects the directives required for the user sources to compile, so we can reflect them in a second
+func (f *federation) InjectSourcesEarly() *ast.Source {
 	return &ast.Source{
-		Name: "federation.graphql",
+		Name: "federation/directives.graphql",
 		Input: `# Declarations as required by the federation spec
 # See: https://www.apollographql.com/docs/apollo-server/federation/federation-spec/
 
@@ -195,7 +83,50 @@ directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
 directive @extends on OBJECT
 `,
-		BuiltIn: builtin,
+		BuiltIn: true,
+	}
+}
+
+// Injects
+func (f *federation) InjectSourcesLate(schema *ast.Schema) *ast.Source {
+	f.setEntities(schema)
+
+	entities := ""
+	resolvers := ""
+	for i, e := range f.Entities {
+		if i != 0 {
+			entities += " | "
+		}
+		entities += e.Name
+
+		resolverArgs := ""
+		for _, field := range e.KeyFields {
+			resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
+		}
+		resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
+
+	}
+
+	return &ast.Source{
+		Name: "federation/entity.graphql",
+		Input: `# a union of all types that use the @key directive
+union _Entity = ` + entities + `
+
+# fake type to build resolver interfaces for users to implement
+type TypeSafeEntityRoot {
+	` + resolvers + `
+}
+
+type _Service {
+  sdl: String
+}
+
+extend type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
+`,
+		BuiltIn: true,
 	}
 }
 
@@ -235,7 +166,14 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	}
 	f.SDL = sdl
 	if len(f.Entities) > 0 {
-		data.Objects.ByName("Entity").Root = true
+		root := data.Objects.ByName("TypeSafeEntityRoot")
+		root.Root = true
+
+		// make the follow-schema layout generate resolver stubs next to the definition, not entites.schema
+		for _, f := range root.Fields {
+			f.Position = data.Schema.Types[f.Type.Name()].Position
+		}
+
 		for _, e := range f.Entities {
 			obj := data.Objects.ByName(e.Def.Name)
 			for _, field := range obj.Fields {
@@ -276,14 +214,8 @@ func (f *federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyFi
 	return nil
 }
 
-func (f *federation) setEntities(cfg *config.Config) {
-	// crazy hack to get our injected code in so everything compiles, so we can generate the entity map
-	// so we can reload the full schema.
-	err := cfg.LoadSchema()
-	if err != nil {
-		panic(err)
-	}
-	for _, schemaType := range cfg.Schema.Types {
+func (f *federation) setEntities(schema *ast.Schema) {
+	for _, schemaType := range schema.Types {
 		if schemaType.Kind == ast.Object {
 			dir := schemaType.Directives.ForName("key") // TODO: interfaces
 			if dir != nil {
@@ -341,7 +273,7 @@ func (f *federation) setEntities(cfg *config.Config) {
 }
 
 func (f *federation) getSDL(c *config.Config) (string, error) {
-	sources := []*ast.Source{f.getSource(true)}
+	sources := []*ast.Source{f.InjectSourcesEarly()}
 	for _, filename := range c.SchemaFilename {
 		filename = filepath.ToSlash(filename)
 		var err error
@@ -360,11 +292,4 @@ func (f *federation) getSDL(c *config.Config) (string, error) {
 	var buf bytes.Buffer
 	formatter.NewFormatter(&buf).FormatSchema(schema)
 	return buf.String(), nil
-}
-
-// Service is the service object that the
-// generated.go file will return for the _service
-// query
-type Service struct {
-	SDL string `json:"sdl"`
 }

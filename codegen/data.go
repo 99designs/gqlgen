@@ -1,14 +1,12 @@
 package codegen
 
 import (
-	"bytes"
 	"fmt"
 	"sort"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/formatter"
 )
 
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
@@ -16,7 +14,6 @@ import (
 type Data struct {
 	Config          *config.Config
 	Schema          *ast.Schema
-	SchemaStr       map[string]string
 	Directives      DirectiveList
 	Objects         Objects
 	Inputs          Objects
@@ -32,7 +29,6 @@ type Data struct {
 type builder struct {
 	Config     *config.Config
 	Schema     *ast.Schema
-	SchemaStr  map[string]string
 	Binder     *config.Binder
 	Directives map[string]*Directive
 }
@@ -62,7 +58,6 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		Config:     cfg,
 		Directives: dataDirectives,
 		Schema:     b.Schema,
-		SchemaStr:  b.SchemaStr,
 		Interfaces: map[string]*Interface{},
 	}
 
@@ -126,10 +121,6 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		// otherwise show a generic error message
 		return nil, fmt.Errorf("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
 	}
-
-	var buf bytes.Buffer
-	formatter.NewFormatter(&buf).FormatSchema(b.Schema)
-	s.SchemaStr = map[string]string{"schema.graphql": buf.String()}
 
 	return &s, nil
 }

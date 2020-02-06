@@ -32,23 +32,28 @@ func Generate(cfg *config.Config, option ...Option) error {
 	}
 
 	for _, p := range plugins {
-		if inj, ok := p.(plugin.SourcesInjector); ok {
-			inj.InjectSources(cfg)
+		if inj, ok := p.(plugin.EarlySourcesInjector); ok {
+			if s := inj.InjectSourcesEarly(); s != nil {
+				cfg.AdditionalSources = append(cfg.AdditionalSources, s)
+			}
 		}
 	}
 
-	err := cfg.LoadSchema()
-	if err != nil {
+	if err := cfg.LoadSchema(); err != nil {
 		return errors.Wrap(err, "failed to load schema")
 	}
 
 	for _, p := range plugins {
-		if mut, ok := p.(plugin.SchemaMutator); ok {
-			err := mut.MutateSchema(cfg.Schema)
-			if err != nil {
-				return errors.Wrap(err, p.Name())
+		if inj, ok := p.(plugin.LateSourcesInjector); ok {
+			if s := inj.InjectSourcesLate(cfg.Schema); s != nil {
+				cfg.AdditionalSources = append(cfg.AdditionalSources, s)
 			}
 		}
+	}
+
+	// load schema a second time, now fully completed
+	if err := cfg.LoadSchema(); err != nil {
+		return errors.Wrap(err, "failed to load schema")
 	}
 
 	if err := cfg.Init(); err != nil {

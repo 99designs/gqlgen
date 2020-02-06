@@ -31,6 +31,7 @@ type Config struct {
 	AdditionalSources        []*ast.Source              `yaml:"-"`
 	Packages                 *code.Packages             `yaml:"-"`
 	Schema                   *ast.Schema                `yaml:"-"`
+	AllSources               []*ast.Source              `yaml:"-"`
 
 	// Deprecated use Federation instead. Will be removed next release
 	Federated bool `yaml:"federated,omitempty"`
@@ -569,7 +570,7 @@ func (c *Config) LoadSchema() error {
 		return err
 	}
 
-	sources := append([]*ast.Source{}, c.AdditionalSources...)
+	c.AllSources = nil
 	for _, filename := range c.SchemaFilename {
 		filename = filepath.ToSlash(filename)
 		var err error
@@ -579,14 +580,27 @@ func (c *Config) LoadSchema() error {
 			fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
 			os.Exit(1)
 		}
-		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
+		c.AllSources = append(c.AllSources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
 
-	schema, err := gqlparser.LoadSchema(sources...)
+	sort.Slice(c.AllSources, func(i, j int) bool {
+		return c.AllSources[i].Name < c.AllSources[j].Name
+	})
+	c.AllSources = append(c.AllSources, c.AdditionalSources...)
+
+	schema, err := gqlparser.LoadSchema(c.AllSources...)
 	if err != nil {
 		return err
 	}
+	if schema.Query == nil {
+		schema.Query = &ast.Definition{
+			Kind: ast.Object,
+			Name: "Query",
+		}
+		schema.Types["Query"] = schema.Query
+	}
 	c.Schema = schema
+
 	return nil
 }
 

@@ -20,10 +20,13 @@ type CodeGenerator interface {
 	GenerateCode(cfg *codegen.Data) error
 }
 
-type SourcesInjector interface {
-	InjectSources(cfg *config.Config)
+// This should be used to inject directives etc. Things that are required for user schema files to compile
+type EarlySourcesInjector interface {
+	InjectSourcesEarly() *ast.Source
 }
 
-type SchemaMutator interface {
-	MutateSchema(s *ast.Schema) error
+// This hook runs a bit later, after the schema is valid. This allows you to reflect on the users schema
+// and inject more, like a relay Node union.
+type LateSourcesInjector interface {
+	InjectSourcesLate(schema *ast.Schema) *ast.Source
 }

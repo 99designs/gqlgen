@@ -1,3 +1,6 @@
 schema:
   - "test_data/schema.graphql"
-federated: true
+exec:
+  filename: graph/generated/exec.go
+federation:
+  filename: graph/generated/federation.go

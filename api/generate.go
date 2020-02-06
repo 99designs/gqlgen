@@ -23,7 +23,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 		plugins = append(plugins, modelgen.New())
 	}
 	plugins = append(plugins, resolvergen.New())
-	if cfg.Federated {
+	if cfg.Federation.IsDefined() {
 		plugins = append([]plugin.Plugin{federation.New()}, plugins...)
 	}
 

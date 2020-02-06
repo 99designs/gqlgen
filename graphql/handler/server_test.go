@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
 )
 
@@ -90,6 +91,22 @@ func TestServer(t *testing.T) {
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.Equal(t, []string{"first", "second"}, calls)
+	})
+
+	t.Run("get query parse error in AroundResponses", func(t *testing.T) {
+		var errors1 gqlerror.List
+		var errors2 gqlerror.List
+		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			resp := next(ctx)
+			errors1 = graphql.GetErrors(ctx)
+			errors2 = resp.Errors
+			return resp
+		})
+
+		resp := get(srv, "/foo?query=invalid")
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, 1, len(errors1))
+		assert.Equal(t, 1, len(errors2))
 	})
 
 	t.Run("query caching", func(t *testing.T) {

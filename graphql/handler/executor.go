@@ -167,6 +167,10 @@ func (e executor) CreateOperationContext(ctx context.Context, params *graphql.Ra
 
 func (e executor) DispatchError(ctx context.Context, list gqlerror.List) *graphql.Response {
 	ctx = graphql.WithResponseContext(ctx, e.server.errorPresenter, e.server.recoverFunc)
+	for _, gErr := range list {
+		graphql.AddError(ctx, gErr)
+	}
+
 	resp := e.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
 		resp := &graphql.Response{
 			Errors: list,

@@ -2,20 +2,20 @@
 {{ reserveImport "errors"  }}
 {{ reserveImport "fmt"  }}
 
-{{ reserveImport "github.com/99designs/gqlgen/plugin/federation" }}
+{{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
 
-func (ec *executionContext) __resolve__service(ctx context.Context) (federation.Service, error) {
+func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
 	if ec.DisableIntrospection {
-		return federation.Service{}, errors.New("federated introspection disabled")
+		return fedruntime.Service{}, errors.New("federated introspection disabled")
 	}
-	return federation.Service{
+	return fedruntime.Service{
 		SDL: `{{.SDL}}`,
 	}, nil
 }
 
 {{if .Entities}}
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) ([]_Entity, error) {
-	list := []_Entity{}
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) ([]fedruntime.Entity, error) {
+	list := []fedruntime.Entity{}
 	for _, rep := range representations {
 		typeName, ok := rep["__typename"].(string)
 		if !ok {

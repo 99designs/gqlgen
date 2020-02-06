@@ -50,7 +50,12 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	builtins := config.TypeMap{
 		"_Service": {
 			Model: config.StringList{
-				"github.com/99designs/gqlgen/plugin/federation.Service",
+				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Service",
+			},
+		},
+		"_Entity": {
+			Model: config.StringList{
+				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity",
 			},
 		},
 		"_Any": {
@@ -360,11 +365,4 @@ func (f *federation) getSDL(c *config.Config) (string, error) {
 	var buf bytes.Buffer
 	formatter.NewFormatter(&buf).FormatSchema(schema)
 	return buf.String(), nil
-}
-
-// Service is the service object that the
-// generated.go file will return for the _service
-// query
-type Service struct {
-	SDL string `json:"sdl"`
 }

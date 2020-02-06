@@ -26,6 +26,7 @@ func TestMutateSchema(t *testing.T) {
 		Name: "schema.graphql",
 		Input: `type Query {
 			hello: String!
+			world: String!
 		}`,
 	})
 	if gqlErr != nil {

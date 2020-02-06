@@ -91,7 +91,11 @@ func (f *federation) InjectSources(cfg *config.Config) {
 
 	s := "type Entity {\n"
 	for _, e := range f.Entities {
-		s += fmt.Sprintf("\t%s(%s: %s): %s!\n", e.ResolverName, e.Field.Name, e.Field.Type.String(), e.Def.Name)
+		resolverArgs := ""
+		for _, field := range e.KeyFields {
+			resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
+		}
+		s += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
 	}
 	s += "}"
 	cfg.AdditionalSources = append(cfg.AdditionalSources, &ast.Source{Name: "entity.graphql", Input: s, BuiltIn: true})
@@ -198,11 +202,16 @@ directive @extends on OBJECT
 // Entity represents a federated type
 // that was declared in the GQL schema.
 type Entity struct {
-	Field        *ast.FieldDefinition
-	FieldTypeGo  string // The Go representation of that field type
-	ResolverName string // The resolver name, such as FindUserByID
+	Name         string      // The same name as the type declaration
+	KeyFields    []*KeyField // The fields declared in @key.
+	ResolverName string      // The resolver name, such as FindUserByID
 	Def          *ast.Definition
 	Requires     []*Requires
+}
+
+type KeyField struct {
+	Field         *ast.FieldDefinition
+	TypeReference *config.TypeReference // The Go representation of that field type
 }
 
 // Requires represents an @requires clause
@@ -229,15 +238,19 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		data.Objects.ByName("Entity").Root = true
 		for _, e := range f.Entities {
 			obj := data.Objects.ByName(e.Def.Name)
-			for _, f := range obj.Fields {
-				if f.Name == e.Field.Name {
-					e.FieldTypeGo = f.TypeReference.GO.String()
+			for _, field := range obj.Fields {
+				// Storing key fields in a slice rather than a map
+				// to preserve insertion order at the tradeoff of higher
+				// lookup complexity.
+				keyField := f.getKeyField(e.KeyFields, field.Name)
+				if keyField != nil {
+					keyField.TypeReference = field.TypeReference
 				}
 				for _, r := range e.Requires {
 					for _, rf := range r.Fields {
-						if rf.Name == f.Name {
-							rf.TypeReference = f.TypeReference
-							rf.NameGo = f.GoFieldName
+						if rf.Name == field.Name {
+							rf.TypeReference = field.TypeReference
+							rf.NameGo = field.GoFieldName
 						}
 					}
 				}
@@ -254,6 +267,15 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	})
 }
 
+func (f *federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyField {
+	for _, field := range keyFields {
+		if field.Field.Name == fieldName {
+			return field
+		}
+	}
+	return nil
+}
+
 func (f *federation) setEntities(cfg *config.Config) {
 	// crazy hack to get our injected code in so everything compiles, so we can generate the entity map
 	// so we can reload the full schema.
@@ -265,11 +287,14 @@ func (f *federation) setEntities(cfg *config.Config) {
 		if schemaType.Kind == ast.Object {
 			dir := schemaType.Directives.ForName("key") // TODO: interfaces
 			if dir != nil {
-				fieldName := dir.Arguments[0].Value.Raw // TODO: multiple arguments, and multiple keys
-				if strings.Contains(fieldName, " ") {
-					panic("only single fields are currently supported in @key declaration")
+				if len(dir.Arguments) > 1 {
+					panic("Multiple arguments are not currently supported in @key declaration.")
 				}
-				field := schemaType.Fields.ForName(fieldName)
+				fieldName := dir.Arguments[0].Value.Raw // TODO: multiple arguments
+				if strings.Contains(fieldName, "{") {
+					panic("Nested fields are not currently supported in @key declaration.")
+				}
+
 				requires := []*Requires{}
 				for _, f := range schemaType.Fields {
 					dir := f.Directives.ForName("requires")
@@ -288,10 +313,26 @@ func (f *federation) setEntities(cfg *config.Config) {
 						Fields: requireFields,
 					})
 				}
+
+				fieldNames := strings.Split(fieldName, " ")
+				keyFields := make([]*KeyField, len(fieldNames))
+				resolverName := fmt.Sprintf("find%sBy", schemaType.Name)
+				for i, f := range fieldNames {
+					field := schemaType.Fields.ForName(f)
+
+					keyFields[i] = &KeyField{Field: field}
+					if i > 0 {
+						resolverName += "And"
+					}
+					resolverName += templates.ToGo(f)
+
+				}
+
 				f.Entities = append(f.Entities, &Entity{
-					Field:        field,
+					Name:         schemaType.Name,
+					KeyFields:    keyFields,
 					Def:          schemaType,
-					ResolverName: fmt.Sprintf("find%sBy%s", schemaType.Name, templates.ToGo(fieldName)),
+					ResolverName: resolverName,
 					Requires:     requires,
 				})
 			}

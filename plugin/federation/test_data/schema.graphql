@@ -2,6 +2,12 @@ type Hello @key(fields: "name") {
   name: String!
 }
 
+type World @key(fields: "foo bar") {
+  foo: String!
+  bar: Int!
+}
+
 type Query {
   hello: Hello!
+  world: World!
 }

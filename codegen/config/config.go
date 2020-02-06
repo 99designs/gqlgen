@@ -20,6 +20,7 @@ type Config struct {
 	SchemaFilename           StringList                 `yaml:"schema,omitempty"`
 	Exec                     PackageConfig              `yaml:"exec"`
 	Model                    PackageConfig              `yaml:"model,omitempty"`
+	Federation               PackageConfig              `yaml:"federation,omitempty"`
 	Resolver                 ResolverConfig             `yaml:"resolver,omitempty"`
 	AutoBind                 []string                   `yaml:"autobind"`
 	Models                   TypeMap                    `yaml:"models,omitempty"`
@@ -27,10 +28,12 @@ type Config struct {
 	Directives               map[string]DirectiveConfig `yaml:"directives,omitempty"`
 	OmitSliceElementPointers bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	SkipValidation           bool                       `yaml:"skip_validation,omitempty"`
-	Federated                bool                       `yaml:"federated,omitempty"`
 	AdditionalSources        []*ast.Source              `yaml:"-"`
 	Packages                 *code.Packages             `yaml:"-"`
 	Schema                   *ast.Schema                `yaml:"-"`
+
+	// Deprecated use Federation instead. Will be removed next release
+	Federated bool `yaml:"federated,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
@@ -329,6 +332,22 @@ func (c *Config) check() error {
 			Package:  c.Resolver.Package,
 			Declaree: "resolver",
 		})
+	}
+	if c.Federation.IsDefined() {
+		if err := c.Federation.Check(); err != nil {
+			return errors.Wrap(err, "config.federation")
+		}
+		fileList[c.Federation.ImportPath()] = append(fileList[c.Federation.ImportPath()], FilenamePackage{
+			Filename: c.Federation.Filename,
+			Package:  c.Federation.Package,
+			Declaree: "federation",
+		})
+		if c.Federation.ImportPath() != c.Exec.ImportPath() {
+			return fmt.Errorf("federation and exec must be in the same package")
+		}
+	}
+	if c.Federated {
+		return fmt.Errorf("federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go")
 	}
 
 	for importPath, pkg := range fileList {

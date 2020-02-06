@@ -20,6 +20,11 @@ exec:
   filename: graph/generated/generated.go
   package: generated
 
+# Enable Apollo federation support
+federation:
+  filename: graph/generated/federation.go
+  package: generated
+
 # Where should any generated models go?
 model:
   filename: graph/model/models_gen.go

@@ -36,6 +36,16 @@ jobs:
       - run: cd integration ; npm install
       - run: .circleci/check-integration
 
+  federation:
+    docker:
+      - image: alpine:3.10
+    steps:
+      - checkout
+      - run: apk add --no-cache --no-progress nodejs npm go musl-dev git bash
+      - run: go mod download
+      - run: cd example/federation ; npm install
+      - run: .circleci/check-federation
+
 workflows:
   version: 2
   build_and_test:
@@ -44,4 +54,5 @@ workflows:
       - test
       - cover
       - integration
+      - federation
 

@@ -1,0 +1,15 @@
+type Review {
+    body: String!
+    author: User! @provides(fields: "username")
+    product: Product!
+}
+
+type User @extends @key(fields: "id") {
+    id: ID! @external
+    reviews: [Review]
+}
+
+type Product @extends @key(fields: "upc") {
+    upc: String! @external
+    reviews: [Review]
+}

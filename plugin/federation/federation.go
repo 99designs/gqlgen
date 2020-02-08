@@ -6,15 +6,17 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/formatter"
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin"
-	"github.com/vektah/gqlparser"
-	"github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/formatter"
 )
 
 type federation struct {
@@ -58,14 +60,14 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity",
 			},
 		},
+		"Entity": {
+			Model: config.StringList{
+				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity",
+			},
+		},
 		"_Any": {
 			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Map"},
 		},
-	}
-	if len(entityFields) > 0 {
-		builtins["Entity"] = config.TypeMapEntry{
-			Fields: entityFields,
-		}
 	}
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
@@ -343,6 +345,11 @@ func (f *federation) setEntities(cfg *config.Config) {
 			}
 		}
 	}
+
+	// make sure order remains stable across multiple builds
+	sort.Slice(f.Entities, func(i, j int) bool {
+		return f.Entities[i].Name < f.Entities[j].Name
+	})
 }
 
 func (f *federation) getSDL(c *config.Config) (string, error) {

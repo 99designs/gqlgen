@@ -5,84 +5,42 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser"
-	"github.com/vektah/gqlparser/ast"
 )
 
-func TestInjectSources(t *testing.T) {
-	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
-	require.NoError(t, err)
-	f := &federation{}
-	f.InjectSources(cfg)
-	if len(cfg.AdditionalSources) != 2 {
-		t.Fatalf("expected 2 additional sources but got %v", len(cfg.AdditionalSources))
-	}
-}
+func TestWithEntities(t *testing.T) {
+	f, cfg := load(t, "test_data/gqlgen.yml")
 
-func TestMutateSchema(t *testing.T) {
-	f := &federation{}
+	require.Equal(t, []string{"ExternalExtension", "Hello", "World"}, cfg.Schema.Types["_Entity"].Types)
 
-	schema, gqlErr := gqlparser.LoadSchema(&ast.Source{
-		Name: "schema.graphql",
-		Input: `type Query {
-			hello: String!
-			world: String!
-		}`,
-	})
-	if gqlErr != nil {
-		t.Fatal(gqlErr)
-	}
+	require.Equal(t, "findExternalExtensionByUpc", cfg.Schema.Types["Entity"].Fields[0].Name)
+	require.Equal(t, "findHelloByName", cfg.Schema.Types["Entity"].Fields[1].Name)
+	require.Equal(t, "findWorldByFooAndBar", cfg.Schema.Types["Entity"].Fields[2].Name)
 
-	err := f.MutateSchema(schema)
-	require.NoError(t, err)
-}
-
-func TestGetSDL(t *testing.T) {
-	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
-	require.NoError(t, err)
-	f := &federation{}
-	_, err = f.getSDL(cfg)
-	require.NoError(t, err)
-}
-
-func TestMutateConfig(t *testing.T) {
-	cfg, err := config.LoadConfig("test_data/gqlgen.yml")
-	require.NoError(t, err)
-
-	f := &federation{}
-	f.InjectSources(cfg)
-
-	require.NoError(t, cfg.LoadSchema())
-	require.NoError(t, f.MutateSchema(cfg.Schema))
-	require.NoError(t, cfg.Init())
 	require.NoError(t, f.MutateConfig(cfg))
-
 }
 
-func TestInjectSourcesNoKey(t *testing.T) {
-	cfg, err := config.LoadConfig("test_data/nokey.yml")
+func TestNoEntities(t *testing.T) {
+	f, cfg := load(t, "test_data/nokey.yml")
+
+	err := f.MutateConfig(cfg)
 	require.NoError(t, err)
+}
+
+func load(t *testing.T, name string) (*federation, *config.Config) {
+	t.Helper()
+
+	cfg, err := config.LoadConfig(name)
+	require.NoError(t, err)
+
 	f := &federation{}
-	f.InjectSources(cfg)
-	if len(cfg.AdditionalSources) != 1 {
-		t.Fatalf("expected an additional source but got %v", len(cfg.AdditionalSources))
+	cfg.Sources = append(cfg.Sources, f.InjectSourceEarly())
+	require.NoError(t, cfg.LoadSchema())
+
+	if src := f.InjectSourceLate(cfg.Schema); src != nil {
+		cfg.Sources = append(cfg.Sources, src)
 	}
-}
+	require.NoError(t, cfg.LoadSchema())
 
-func TestGetSDLNoKey(t *testing.T) {
-	cfg, err := config.LoadConfig("test_data/nokey.yml")
-	require.NoError(t, err)
-	f := &federation{}
-	_, err = f.getSDL(cfg)
-	require.NoError(t, err)
-}
-
-func TestMutateConfigNoKey(t *testing.T) {
-	cfg, err := config.LoadConfig("test_data/nokey.yml")
-	require.NoError(t, err)
 	require.NoError(t, cfg.Init())
-
-	f := &federation{}
-	err = f.MutateConfig(cfg)
-	require.NoError(t, err)
+	return f, cfg
 }

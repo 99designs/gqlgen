@@ -267,35 +267,42 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Address {
-	id: Int!
-	street: String!
-	country: String!
+var sources = []*ast.Source{
+	&ast.Source{Name: "schema.graphql", Input: `type Query {
+    customers: [Customer!]
+
+    # these methods are here to test code generation of nested arrays
+    torture1d(customerIds: [Int!]): [Customer!]
+    torture2d(customerIds: [[Int!]]): [[Customer!]]
 }
+
 type Customer {
-	id: Int!
-	name: String!
-	address: Address
-	orders: [Order!]
+    id: Int!
+    name: String!
+    address: Address
+    orders: [Order!]
 }
-type Item {
-	name: String!
+
+type Address {
+    id: Int!
+    street: String!
+    country: String!
 }
+
 type Order {
-	id: Int!
-	date: Time!
-	amount: Float!
-	items: [Item!]
+    id: Int!
+    date: Time!
+    amount: Float!
+    items: [Item!]
 }
-type Query {
-	customers: [Customer!]
-	torture1d(customerIds: [Int!]): [Customer!]
-	torture2d(customerIds: [[Int!]]): [[Customer!]]
+
+type Item {
+    name: String!
 }
 scalar Time
-`},
-)
+`, BuiltIn: false},
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 

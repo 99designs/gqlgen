@@ -255,30 +255,37 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `directive @user(username: String!) on SUBSCRIPTION
-type Chatroom {
-	name: String!
-	messages: [Message!]!
+var sources = []*ast.Source{
+	&ast.Source{Name: "schema.graphql", Input: `type Chatroom {
+    name: String!
+    messages: [Message!]!
 }
+
 type Message {
-	id: ID!
-	text: String!
-	createdBy: String!
-	createdAt: Time!
+    id: ID!
+    text: String!
+    createdBy: String!
+    createdAt: Time!
 }
-type Mutation {
-	post(text: String!, username: String!, roomName: String!): Message!
-}
+
 type Query {
-	room(name: String!): Chatroom
+    room(name:String!): Chatroom
 }
+
+type Mutation {
+    post(text: String!, username: String!, roomName: String!): Message!
+}
+
 type Subscription {
-	messageAdded(roomName: String!): Message!
+    messageAdded(roomName: String!): Message!
 }
+
 scalar Time
-`},
-)
+
+directive @user(username: String!) on SUBSCRIPTION
+`, BuiltIn: false},
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 

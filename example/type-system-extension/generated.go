@@ -212,44 +212,84 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `schema {
-	query: MyQuery
-	mutation: MyMutation
+var sources = []*ast.Source{
+	&ast.Source{Name: "schemas/enum-extension.graphql", Input: `directive @enumLogging on ENUM
+
+extend enum State @enumLogging
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/input-object-extension.graphql", Input: `directive @inputLogging on INPUT_OBJECT
+
+extend input TodoInput @inputLogging
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/interface-extension.graphql", Input: `directive @interfaceLogging on INTERFACE
+
+extend interface Node @interfaceLogging
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/object-extension.graphql", Input: `directive @objectLogging on OBJECT
+
+extend type Todo @objectLogging
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/scalar-extension.graphql", Input: `directive @scalarLogging on SCALAR
+
+extend scalar ID @scalarLogging
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/schema-extension.graphql", Input: `extend schema {
+  mutation: MyMutation
 }
-directive @enumLogging on ENUM
-directive @fieldLogging on FIELD_DEFINITION
-directive @inputLogging on INPUT_OBJECT
-directive @interfaceLogging on INTERFACE
-directive @objectLogging on OBJECT
-directive @scalarLogging on SCALAR
-directive @unionLogging on UNION
-union Data @unionLogging = Todo
+
+extend type MyQuery {
+  todo(id: ID!): Todo
+}
+
 type MyMutation {
-	createTodo(todo: TodoInput!): Todo!
+  createTodo(todo: TodoInput!): Todo!
 }
+
+input TodoInput {
+  text: String!
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/schema.graphql", Input: `# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+schema {
+  query: MyQuery
+}
+
+interface Node {
+  id: ID!
+}
+
+type Todo implements Node {
+  id: ID!
+  text: String!
+  state: State!
+}
+
 type MyQuery {
-	todos: [Todo!]!
-	todo(id: ID!): Todo
+  todos: [Todo!]!
 }
-interface Node @interfaceLogging {
-	id: ID!
+
+union Data = Todo
+
+enum State {
+  NOT_YET
+  DONE
 }
-enum State @enumLogging {
-	NOT_YET
-	DONE
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/type-extension.graphql", Input: `directive @fieldLogging on FIELD_DEFINITION
+
+extend type Todo {
+  verified: Boolean! @fieldLogging
 }
-type Todo implements Node @objectLogging {
-	id: ID!
-	text: String!
-	state: State!
-	verified: Boolean! @fieldLogging
+`, BuiltIn: false},
+	&ast.Source{Name: "schemas/union-extension.graphql", Input: `directive @unionLogging on UNION
+
+extend union Data @unionLogging
+`, BuiltIn: false},
 }
-input TodoInput @inputLogging {
-	text: String!
-}
-`},
-)
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 

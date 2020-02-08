@@ -28,7 +28,7 @@ type Config struct {
 	Directives               map[string]DirectiveConfig `yaml:"directives,omitempty"`
 	OmitSliceElementPointers bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	SkipValidation           bool                       `yaml:"skip_validation,omitempty"`
-	AdditionalSources        []*ast.Source              `yaml:"-"`
+	Sources                  []*ast.Source              `yaml:"-"`
 	Packages                 *code.Packages             `yaml:"-"`
 	Schema                   *ast.Schema                `yaml:"-"`
 
@@ -136,6 +136,18 @@ func LoadConfig(filename string) (*Config, error) {
 			}
 			config.SchemaFilename = append(config.SchemaFilename, m)
 		}
+	}
+
+	for _, filename := range config.SchemaFilename {
+		filename = filepath.ToSlash(filename)
+		var err error
+		var schemaRaw []byte
+		schemaRaw, err = ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to open schema")
+		}
+
+		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
 
 	return config, nil
@@ -569,23 +581,19 @@ func (c *Config) LoadSchema() error {
 		return err
 	}
 
-	sources := append([]*ast.Source{}, c.AdditionalSources...)
-	for _, filename := range c.SchemaFilename {
-		filename = filepath.ToSlash(filename)
-		var err error
-		var schemaRaw []byte
-		schemaRaw, err = ioutil.ReadFile(filename)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
-			os.Exit(1)
-		}
-		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
-	}
-
-	schema, err := gqlparser.LoadSchema(sources...)
+	schema, err := gqlparser.LoadSchema(c.Sources...)
 	if err != nil {
 		return err
 	}
+
+	if schema.Query == nil {
+		schema.Query = &ast.Definition{
+			Kind: ast.Object,
+			Name: "Query",
+		}
+		schema.Types["Query"] = schema.Query
+	}
+
 	c.Schema = schema
 	return nil
 }

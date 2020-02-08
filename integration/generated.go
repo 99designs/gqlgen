@@ -251,50 +251,61 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `"""
-This directive does magical things
-"""
+var sources = []*ast.Source{
+	&ast.Source{Name: "schema.graphql", Input: `"This directive does magical things"
 directive @magic(kind: Int) on FIELD_DEFINITION
-enum DATE_FILTER_OP {
-	EQ
-	NEQ
-	GT
-	GTE
-	LT
-	LTE
-}
-input DateFilter {
-	value: String!
-	timezone: String = "UTC"
-	op: DATE_FILTER_OP = EQ
-}
+
 type Element {
-	child: Element!
-	error: Boolean!
-	mismatched: [Boolean!]
+    child: Element!
+    error: Boolean!
+    mismatched: [Boolean!]
 }
-enum ErrorType {
-	CUSTOM
-	NORMAL
+
+enum DATE_FILTER_OP {
+    # multi
+    # line
+    # comment
+    EQ
+    NEQ
+    GT
+    GTE
+    LT
+    LTE
 }
-type Query {
-	path: [Element]
-	date(filter: DateFilter!): Boolean!
-	viewer: Viewer
-	jsonEncoding: String!
-	error(type: ErrorType = NORMAL): Boolean!
-	complexity(value: Int!): Boolean!
+
+input DateFilter {
+    value: String!
+    timezone: String = "UTC"
+    op: DATE_FILTER_OP = EQ
 }
-type User {
-	name: String!
-	likes: [String!]!
-}
+
 type Viewer {
-	user: User
+    user: User
 }
-`},
-)
+
+type Query {
+    path: [Element]
+    date(filter: DateFilter!): Boolean!
+    viewer: Viewer
+    jsonEncoding: String!
+    error(type: ErrorType = NORMAL): Boolean!
+    complexity(value: Int!): Boolean!
+}
+
+enum ErrorType {
+    CUSTOM
+    NORMAL
+}
+
+# this is a comment with a ` + "`" + `backtick` + "`" + `
+`, BuiltIn: false},
+	&ast.Source{Name: "user.graphql", Input: `type User {
+    name: String!
+    likes: [String!]!
+}
+`, BuiltIn: false},
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 

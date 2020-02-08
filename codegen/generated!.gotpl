@@ -206,8 +206,9 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
-	{{- range $filename, $schema := .SchemaStr }}
-		&ast.Source{Name: {{$filename|quote}}, Input: {{$schema|rawQuote}}},
-	{{- end }}
-)
+var sources = []*ast.Source{
+{{- range $source := .Config.Sources }}
+	&ast.Source{Name: {{$source.Name|quote}}, Input: {{$source.Input|rawQuote}}, BuiltIn: {{$source.BuiltIn}}},
+{{- end }}
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)

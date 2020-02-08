@@ -234,40 +234,46 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Address {
-	id: ID!
-	location: Point
+var sources = []*ast.Source{
+	&ast.Source{Name: "schema.graphql", Input: `type Query {
+    user(id: ID!): User
+    search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
 }
-scalar Banned
-scalar Point
-type Query {
-	user(id: ID!): User
-	search(input: SearchArgs = {location:"37,144",isBanned:false}): [User!]!
-}
-input SearchArgs {
-	location: Point
-	createdAfter: Timestamp
-	isBanned: Banned
-}
-enum Tier {
-	A
-	B
-	C
-}
-scalar Timestamp
+
 type User {
-	id: ID!
-	name: String!
-	created: Timestamp
-	isBanned: Banned!
-	primitiveResolver: String!
-	customResolver: Point!
-	address: Address
-	tier: Tier
+    id: ID!
+    name: String!
+    created: Timestamp
+    isBanned: Banned!
+    primitiveResolver: String!
+    customResolver: Point!
+    address: Address
+    tier: Tier
 }
-`},
-)
+
+type Address {
+    id: ID!
+    location: Point
+}
+
+input SearchArgs {
+    location: Point
+    createdAfter: Timestamp
+    isBanned: Banned # TODO: This can be a Boolean again once multiple backing types are allowed
+}
+
+enum Tier {
+    A
+    B
+    C
+}
+
+scalar Timestamp
+scalar Point
+scalar Banned
+`, BuiltIn: false},
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 

@@ -1,17 +1,11 @@
 package federation
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 
-	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/formatter"
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -20,7 +14,6 @@ import (
 )
 
 type federation struct {
-	SDL      string
 	Entities []*Entity
 }
 
@@ -37,18 +30,6 @@ func (f *federation) Name() string {
 
 // MutateConfig mutates the configuration
 func (f *federation) MutateConfig(cfg *config.Config) error {
-	entityFields := map[string]config.TypeMapField{}
-	for _, e := range f.Entities {
-		entityFields[e.ResolverName] = config.TypeMapField{Resolver: true}
-		for _, r := range e.Requires {
-			if cfg.Models[e.Def.Name].Fields == nil {
-				model := cfg.Models[e.Def.Name]
-				model.Fields = map[string]config.TypeMapField{}
-				cfg.Models[e.Def.Name] = model
-			}
-			cfg.Models[e.Def.Name].Fields[r.Name] = config.TypeMapField{Resolver: true}
-		}
-	}
 	builtins := config.TypeMap{
 		"_Service": {
 			Model: config.StringList{
@@ -84,115 +65,10 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	return nil
 }
 
-// InjectSources creates a GraphQL Entity type with all
-// the fields that had the @key directive
-func (f *federation) InjectSources(cfg *config.Config) {
-	cfg.AdditionalSources = append(cfg.AdditionalSources, f.getSource(false))
-
-	f.setEntities(cfg)
-	if len(f.Entities) == 0 {
-		// It's unusual for a service not to have any entities, but
-		// possible if it only exports top-level queries and mutations.
-		return
-	}
-
-	s := "type Entity {\n"
-	for _, e := range f.Entities {
-		resolverArgs := ""
-		for _, field := range e.KeyFields {
-			resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
-		}
-		s += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
-	}
-	s += "}"
-	cfg.AdditionalSources = append(cfg.AdditionalSources, &ast.Source{Name: "entity.graphql", Input: s, BuiltIn: true})
-}
-
-// ensureQuery ensures that a "Query" node exists on the schema.
-func ensureQuery(s *ast.Schema) {
-	if s.Query == nil {
-		s.Query = &ast.Definition{
-			Kind: ast.Object,
-			Name: "Query",
-		}
-		s.Types["Query"] = s.Query
-	}
-}
-
-// addEntityToSchema adds the _Entity Union and _entities query to schema.
-// This is part of MutateSchema.
-func (f *federation) addEntityToSchema(s *ast.Schema) {
-	// --- Set _Entity Union ---
-	union := &ast.Definition{
-		Name:        "_Entity",
-		Kind:        ast.Union,
-		Description: "A union unifies all @entity types (TODO: interfaces)",
-		Types:       []string{},
-	}
-	for _, ent := range f.Entities {
-		union.Types = append(union.Types, ent.Def.Name)
-		s.AddPossibleType("_Entity", ent.Def)
-		s.AddImplements(ent.Def.Name, union)
-	}
-	s.Types[union.Name] = union
-
-	// --- Set _entities query ---
-	fieldDef := &ast.FieldDefinition{
-		Name: "_entities",
-		Type: ast.NonNullListType(ast.NamedType("_Entity", nil), nil),
-		Arguments: ast.ArgumentDefinitionList{
-			{
-				Name: "representations",
-				Type: ast.NonNullListType(ast.NonNullNamedType("_Any", nil), nil),
-			},
-		},
-	}
-	ensureQuery(s)
-	s.Query.Fields = append(s.Query.Fields, fieldDef)
-}
-
-// addServiceToSchema adds the _Service type and _service query to schema.
-// This is part of MutateSchema.
-func (f *federation) addServiceToSchema(s *ast.Schema) {
-	typeDef := &ast.Definition{
-		Kind: ast.Object,
-		Name: "_Service",
-		Fields: ast.FieldList{
-			&ast.FieldDefinition{
-				Name: "sdl",
-				Type: ast.NonNullNamedType("String", nil),
-			},
-		},
-	}
-	s.Types[typeDef.Name] = typeDef
-
-	// --- set _service query ---
-	_serviceDef := &ast.FieldDefinition{
-		Name: "_service",
-		Type: ast.NonNullNamedType("_Service", nil),
-	}
-	ensureQuery(s)
-	s.Query.Fields = append(s.Query.Fields, _serviceDef)
-}
-
-// MutateSchema creates types and query declarations
-// that are required by the federation spec.
-func (f *federation) MutateSchema(s *ast.Schema) error {
-	// It's unusual for a service not to have any entities, but
-	// possible if it only exports top-level queries and mutations.
-	if len(f.Entities) > 0 {
-		f.addEntityToSchema(s)
-	}
-	f.addServiceToSchema(s)
-	return nil
-}
-
-func (f *federation) getSource(builtin bool) *ast.Source {
+func (f *federation) InjectSourceEarly() *ast.Source {
 	return &ast.Source{
-		Name: "federation.graphql",
-		Input: `# Declarations as required by the federation spec
-# See: https://www.apollographql.com/docs/apollo-server/federation/federation-spec/
-
+		Name: "federation/directives.graphql",
+		Input: `
 scalar _Any
 scalar _FieldSet
 
@@ -202,7 +78,58 @@ directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
 directive @extends on OBJECT
 `,
-		BuiltIn: builtin,
+		BuiltIn: true,
+	}
+}
+
+// InjectSources creates a GraphQL Entity type with all
+// the fields that had the @key directive
+func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
+	f.setEntities(schema)
+
+	entities := ""
+	resolvers := ""
+	for i, e := range f.Entities {
+		if i != 0 {
+			entities += " | "
+		}
+		entities += e.Name
+
+		resolverArgs := ""
+		for _, field := range e.KeyFields {
+			resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
+		}
+		resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
+
+	}
+
+	if len(f.Entities) == 0 {
+		// It's unusual for a service not to have any entities, but
+		// possible if it only exports top-level queries and mutations.
+		return nil
+	}
+
+	return &ast.Source{
+		Name:    "federation/entity.graphql",
+		BuiltIn: true,
+		Input: `
+# a union of all types that use the @key directive
+union _Entity = ` + entities + `
+
+# fake type to build resolver interfaces for users to implement
+type Entity {
+	` + resolvers + `
+}
+
+type _Service {
+  sdl: String
+}
+
+extend type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
+`,
 	}
 }
 
@@ -236,11 +163,6 @@ type RequireField struct {
 }
 
 func (f *federation) GenerateCode(data *codegen.Data) error {
-	sdl, err := f.getSDL(data.Config)
-	if err != nil {
-		return err
-	}
-	f.SDL = sdl
 	if len(f.Entities) > 0 {
 		data.Objects.ByName("Entity").Root = true
 		for _, e := range f.Entities {
@@ -283,14 +205,8 @@ func (f *federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyFi
 	return nil
 }
 
-func (f *federation) setEntities(cfg *config.Config) {
-	// crazy hack to get our injected code in so everything compiles, so we can generate the entity map
-	// so we can reload the full schema.
-	err := cfg.LoadSchema()
-	if err != nil {
-		panic(err)
-	}
-	for _, schemaType := range cfg.Schema.Types {
+func (f *federation) setEntities(schema *ast.Schema) {
+	for _, schemaType := range schema.Types {
 		if schemaType.Kind == ast.Object {
 			dir := schemaType.Directives.ForName("key") // TODO: interfaces
 			if dir != nil {
@@ -350,26 +266,4 @@ func (f *federation) setEntities(cfg *config.Config) {
 	sort.Slice(f.Entities, func(i, j int) bool {
 		return f.Entities[i].Name < f.Entities[j].Name
 	})
-}
-
-func (f *federation) getSDL(c *config.Config) (string, error) {
-	sources := []*ast.Source{f.getSource(true)}
-	for _, filename := range c.SchemaFilename {
-		filename = filepath.ToSlash(filename)
-		var err error
-		var schemaRaw []byte
-		schemaRaw, err = ioutil.ReadFile(filename)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "unable to open schema: "+err.Error())
-			os.Exit(1)
-		}
-		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
-	}
-	schema, err := gqlparser.LoadSchema(sources...)
-	if err != nil {
-		return "", err
-	}
-	var buf bytes.Buffer
-	formatter.NewFormatter(&buf).FormatSchema(schema)
-	return buf.String(), nil
 }

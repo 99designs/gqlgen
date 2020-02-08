@@ -251,40 +251,55 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `directive @extends on OBJECT
-directive @external on FIELD_DEFINITION
-directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
-directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
-directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
-type Product @extends @key(fields: "upc") {
-	upc: String! @external
-	reviews: [Review]
+var sources = []*ast.Source{
+	&ast.Source{Name: "graph/schema.graphqls", Input: `type Review {
+    body: String!
+    author: User! @provides(fields: "username")
+    product: Product!
 }
-type Query {
-	_entities(representations: [_Any!]!): [_Entity]!
-	_service: _Service!
+
+extend type User @key(fields: "id") {
+    id: ID! @external
+    reviews: [Review]
 }
-type Review {
-	body: String!
-	author: User! @provides(fields: "username")
-	product: Product!
+
+extend type Product @key(fields: "upc") {
+    upc: String! @external
+    reviews: [Review]
 }
-type User @extends @key(fields: "id") {
-	id: ID! @external
-	reviews: [Review]
-}
+`, BuiltIn: false},
+	&ast.Source{Name: "federation/directives.graphql", Input: `
 scalar _Any
-"""
-A union unifies all @entity types (TODO: interfaces)
-"""
-union _Entity = Product | User
 scalar _FieldSet
-type _Service {
-	sdl: String!
+
+directive @external on FIELD_DEFINITION
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
+directive @extends on OBJECT
+`, BuiltIn: true},
+	&ast.Source{Name: "federation/entity.graphql", Input: `
+# a union of all types that use the @key directive
+union _Entity = Product | User
+
+# fake type to build resolver interfaces for users to implement
+type Entity {
+		findProductByUpc(upc: String!,): Product!
+	findUserByID(id: ID!,): User!
+
 }
-`},
-)
+
+type _Service {
+  sdl: String
+}
+
+extend type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
+`, BuiltIn: true},
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 
@@ -864,14 +879,11 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2198,9 +2210,6 @@ func (ec *executionContext) __Service(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("_Service")
 		case "sdl":
 			out.Values[i] = ec.__Service_sdl(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

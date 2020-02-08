@@ -25,21 +25,16 @@ type Review {
   product: Product
 }
 
-type User @extends @key(fields: "id") {
+extend type User @key(fields: "id") {
   id: ID! @external
   reviews: [Review]
 }
 
-type Product @extends @key(fields: "upc") {
+extend type Product @key(fields: "upc") {
   upc: String! @external
   reviews: [Review]
 }
 ```
-
-> Note
->
-> gqlgen doesnt currently support `extend type Foo` syntax for apollo federation, we must use
-> the `@extends` directive instead.
 
 
 and regenerate

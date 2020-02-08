@@ -7,6 +7,11 @@ type World @key(fields: "foo bar") {
   bar: Int!
 }
 
+extend type ExternalExtension @key(fields: "upc") {
+    upc: String! @external
+    reviews: [World]
+}
+
 type Query {
   hello: Hello!
   world: World!

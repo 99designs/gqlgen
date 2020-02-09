@@ -18,6 +18,7 @@ func New() *TestServer {
 
 	schema := gqlparser.MustLoadSchema(&ast.Source{Input: `
 		type Query {
+			# TODO add scalar and non scalar object to show what gets traced
 			name: String!
 			find(id: Int!): String!
 		}

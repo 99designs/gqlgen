@@ -2,6 +2,7 @@ package apollotracing
 
 import (
 	"context"
+	"github.com/vektah/gqlparser/ast"
 	"sync"
 	"time"
 
@@ -60,26 +61,41 @@ func (a Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (res 
 		panic("missing tracing extension")
 	}
 
-	start := graphql.Now()
+	fc := graphql.GetFieldContext(ctx)
 
-	defer func() {
-		td.mu.Lock()
-		defer td.mu.Unlock()
-		fc := graphql.GetFieldContext(ctx)
+	if !fc.IsMethod && !isScalar(*fc.Field.Definition) &&
+		// Directives might do processing we want track
+		len(fc.Field.Directives) > 0 {
+		start := graphql.Now()
 
-		end := graphql.Now()
+		defer func() {
+			td.mu.Lock()
+			defer td.mu.Unlock()
 
-		td.Execution.Resolvers = append(td.Execution.Resolvers, ResolverExecution{
-			Path:        fc.Path(),
-			ParentType:  fc.Object,
-			FieldName:   fc.Field.Name,
-			ReturnType:  fc.Field.Definition.Type.String(),
-			StartOffset: start.Sub(rc.Stats.OperationStart),
-			Duration:    end.Sub(start),
-		})
-	}()
+			end := graphql.Now()
+
+			td.Execution.Resolvers = append(td.Execution.Resolvers, ResolverExecution{
+				Path:        fc.Path(),
+				ParentType:  fc.Object,
+				FieldName:   fc.Field.Name,
+				ReturnType:  fc.Field.Definition.Type.String(),
+				StartOffset: start.Sub(rc.Stats.OperationStart),
+				Duration:    end.Sub(start),
+			})
+		}()
+	}
 
 	return next(ctx)
+}
+
+func isScalar(definition ast.FieldDefinition) bool {
+	if definition.Type.Name() == "String" {
+		return true
+	}
+
+	// TODO: other scalar checks
+
+	return false
 }
 
 func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {

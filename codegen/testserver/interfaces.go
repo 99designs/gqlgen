@@ -47,6 +47,25 @@ func (n *ConcreteNodeA) Child() (Node, error) {
 	return n.child, nil
 }
 
+//  Implements the Node interface with another interface
+type ConcreteNodeInterface interface {
+	Node
+	ID() string
+}
+
+type ConcreteNodeInterfaceImplementor struct{}
+
+func (c ConcreteNodeInterfaceImplementor) ID() string {
+	return "CNII"
+}
+
+func (c ConcreteNodeInterfaceImplementor) Child() (Node, error) {
+	return &ConcreteNodeA{
+		ID:   "Child",
+		Name: "child",
+	}, nil
+}
+
 type BackedByInterface interface {
 	ThisShouldBind() string
 	ThisShouldBindWithError() (string, error)

@@ -80,7 +80,10 @@ func BuildData(cfg *config.Config) (*Data, error) {
 			s.Inputs = append(s.Inputs, input)
 
 		case ast.Union, ast.Interface:
-			s.Interfaces[schemaType.Name] = b.buildInterface(schemaType)
+			s.Interfaces[schemaType.Name], err = b.buildInterface(schemaType)
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to bind to interface")
+			}
 		}
 	}
 

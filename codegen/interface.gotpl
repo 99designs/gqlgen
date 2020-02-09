@@ -5,15 +5,13 @@ func (ec *executionContext) _{{$interface.Name}}(ctx context.Context, sel ast.Se
 	case nil:
 		return graphql.Null
 	{{- range $implementor := $interface.Implementors }}
-		{{- if $implementor.ValueReceiver }}
-			case {{$implementor.Type | ref}}:
-				return ec._{{$implementor.Name}}(ctx, sel, &obj)
-		{{- end}}
-		case *{{$implementor.Type | ref}}:
-			if obj == nil {
-				return graphql.Null
-			}
-			return ec._{{$implementor.Name}}(ctx, sel, obj)
+		case {{$implementor.Type | ref}}:
+			{{- if $implementor.CanBeNil }}
+				if obj == nil {
+					return graphql.Null
+				}
+			{{- end }}
+			return ec._{{$implementor.Name}}(ctx, sel, {{ if $implementor.TakeRef }}&{{ end }}obj)
 	{{- end }}
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))

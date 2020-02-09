@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/ast"
 )
 
 type (
@@ -30,7 +31,7 @@ type (
 	}
 
 	ResolverExecution struct {
-		Path        []interface{} `json:"path"`
+		Path        ast.Path      `json:"path"`
 		ParentType  string        `json:"parentType"`
 		FieldName   string        `json:"fieldName"`
 		ReturnType  string        `json:"returnType"`

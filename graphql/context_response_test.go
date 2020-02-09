@@ -43,7 +43,7 @@ func TestAddError(t *testing.T) {
 	AddError(ctx, errors.New("bar"))
 	AddError(ctx, &gqlerror.Error{
 		Message: "foo3",
-		Path:    append(child.Path(), "works"),
+		Path:    append(child.Path(), ast.PathName("works")),
 	})
 
 	specs := []struct {

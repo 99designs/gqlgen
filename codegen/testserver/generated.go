@@ -116,6 +116,11 @@ type ComplexityRoot struct {
 		Name  func(childComplexity int) int
 	}
 
+	ConcreteNodeInterface struct {
+		Child func(childComplexity int) int
+		ID    func(childComplexity int) int
+	}
+
 	ContentPost struct {
 		Foo func(childComplexity int) int
 	}
@@ -606,6 +611,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ConcreteNodeA.Name(childComplexity), true
+
+	case "ConcreteNodeInterface.child":
+		if e.complexity.ConcreteNodeInterface.Child == nil {
+			break
+		}
+
+		return e.complexity.ConcreteNodeInterface.Child(childComplexity), true
+
+	case "ConcreteNodeInterface.id":
+		if e.complexity.ConcreteNodeInterface.ID == nil {
+			break
+		}
+
+		return e.complexity.ConcreteNodeInterface.ID(childComplexity), true
 
 	case "Content_Post.foo":
 		if e.complexity.ContentPost.Foo == nil {
@@ -1822,6 +1841,12 @@ type ConcreteNodeA implements Node {
     id: ID!
     child: Node!
     name: String!
+}
+
+""" Implements the Node interface with another interface """
+type ConcreteNodeInterface implements Node {
+    id: ID!
+    child: Node!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "issue896.graphql", Input: `# This example should build stable output. If the file content starts
@@ -3651,6 +3676,68 @@ func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graph
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field graphql.CollectedField, obj ConcreteNodeInterface) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ConcreteNodeInterface",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID(), nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, field graphql.CollectedField, obj ConcreteNodeInterface) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ConcreteNodeInterface",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Child()
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Node)
+	fc.Result = res
+	return ec.marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNode(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql.CollectedField, obj *ContentPost) (ret graphql.Marshaler) {
@@ -9399,6 +9486,11 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._ConcreteNodeA(ctx, sel, obj)
+	case ConcreteNodeInterface:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ConcreteNodeInterface(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -9775,6 +9867,38 @@ func (ec *executionContext) _ConcreteNodeA(ctx context.Context, sel ast.Selectio
 			}
 		case "name":
 			out.Values[i] = ec._ConcreteNodeA_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var concreteNodeInterfaceImplementors = []string{"ConcreteNodeInterface", "Node"}
+
+func (ec *executionContext) _ConcreteNodeInterface(ctx context.Context, sel ast.SelectionSet, obj ConcreteNodeInterface) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, concreteNodeInterfaceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ConcreteNodeInterface")
+		case "id":
+			out.Values[i] = ec._ConcreteNodeInterface_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "child":
+			out.Values[i] = ec._ConcreteNodeInterface_child(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

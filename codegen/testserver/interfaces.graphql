@@ -54,3 +54,9 @@ type ConcreteNodeA implements Node {
     child: Node!
     name: String!
 }
+
+""" Implements the Node interface with another interface """
+type ConcreteNodeInterface implements Node {
+    id: ID!
+    child: Node!
+}

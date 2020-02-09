@@ -176,4 +176,25 @@ func TestInterfaces(t *testing.T) {
 		err := c.Post(`{ notAnInterface { id, thisShouldBind, thisShouldBindWithError } }`, &resp)
 		require.EqualError(t, err, `[{"message":"boom","path":["notAnInterface","thisShouldBindWithError"]}]`)
 	})
+
+	t.Run("interfaces can implement other interfaces", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.Node = func(ctx context.Context) (node Node, err error) {
+			return ConcreteNodeInterfaceImplementor{}, nil
+		}
+
+		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+
+		var resp struct {
+			Node struct {
+				ID    string
+				Child struct {
+					ID string
+				}
+			}
+		}
+		c.MustPost(`{ node { id, child { id } } }`, &resp)
+		require.Equal(t, "CNII", resp.Node.ID)
+		require.Equal(t, "Child", resp.Node.Child.ID)
+	})
 }

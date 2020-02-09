@@ -206,7 +206,7 @@ func (t *TypeReference) IsPtr() bool {
 }
 
 func (t *TypeReference) IsNilable() bool {
-	return isNilable(t.GO)
+	return IsNilable(t.GO)
 }
 
 func (t *TypeReference) IsSlice() bool {
@@ -403,14 +403,14 @@ func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 		_, isInterface = named.Underlying().(*types.Interface)
 	}
 
-	if !isInterface && !isNilable(base) && !t.NonNull {
+	if !isInterface && !IsNilable(base) && !t.NonNull {
 		return types.NewPointer(base)
 	}
 
 	return base
 }
 
-func isNilable(t types.Type) bool {
+func IsNilable(t types.Type) bool {
 	if namedType, isNamed := t.(*types.Named); isNamed {
 		t = namedType.Underlying()
 	}

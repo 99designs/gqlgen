@@ -16,7 +16,6 @@ import (
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
 )
-
 func TestServer(t *testing.T) {
 	srv := testserver.New()
 	srv.AddTransport(&transport.GET{})
@@ -141,6 +140,29 @@ func TestServer(t *testing.T) {
 	})
 
 }
+
+func TestErrorServer(t *testing.T) {
+	srv := testserver.NewError()
+	srv.AddTransport(&transport.GET{})
+
+	t.Run("get resolver error in AroundResponses", func(t *testing.T) {
+		var errors1 gqlerror.List
+		var errors2 gqlerror.List
+		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			resp := next(ctx)
+			errors1 = graphql.GetErrors(ctx)
+			errors2 = resp.Errors
+			return resp
+		})
+
+		resp := get(srv, "/foo?query={name}")
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.Equal(t, 1, len(errors1))
+		assert.Equal(t, 1, len(errors2))
+	})
+
+}
+
 
 func get(handler http.Handler, target string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest("GET", target, nil)

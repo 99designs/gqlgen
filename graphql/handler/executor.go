@@ -101,6 +101,7 @@ func (e executor) DispatchOperation(ctx context.Context, rc *graphql.OperationCo
 				if resp == nil {
 					return nil
 				}
+				resp.Errors = append(resp.Errors, graphql.GetErrors(ctx)...)
 				resp.Extensions = graphql.GetExtensions(ctx)
 				return resp
 			})
@@ -108,7 +109,6 @@ func (e executor) DispatchOperation(ctx context.Context, rc *graphql.OperationCo
 				return nil
 			}
 
-			resp.Errors = append(resp.Errors, graphql.GetErrors(ctx)...)
 			return resp
 		}
 	})

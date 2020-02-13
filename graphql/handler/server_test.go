@@ -16,6 +16,7 @@ import (
 	"github.com/vektah/gqlparser/gqlerror"
 	"github.com/vektah/gqlparser/parser"
 )
+
 func TestServer(t *testing.T) {
 	srv := testserver.New()
 	srv.AddTransport(&transport.GET{})
@@ -138,7 +139,6 @@ func TestServer(t *testing.T) {
 			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
 		})
 	})
-
 }
 
 func TestErrorServer(t *testing.T) {
@@ -160,9 +160,7 @@ func TestErrorServer(t *testing.T) {
 		assert.Equal(t, 1, len(errors1))
 		assert.Equal(t, 1, len(errors2))
 	})
-
 }
-
 
 func get(handler http.Handler, target string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest("GET", target, nil)

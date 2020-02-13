@@ -153,7 +153,6 @@ func (s *TestServer) SendNextSubscriptionMessage() {
 	case <-time.After(1 * time.Second):
 		fmt.Println("WARNING: no active subscription")
 	}
-
 }
 
 func (s *TestServer) SetCalculatedComplexity(complexity int) {

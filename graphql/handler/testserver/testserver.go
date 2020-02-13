@@ -117,7 +117,7 @@ func NewError() *TestServer {
 					}
 					ran = true
 
-					graphql.AddError(ctx,fmt.Errorf("resolver error"))
+					graphql.AddError(ctx, fmt.Errorf("resolver error"))
 
 					return &graphql.Response{
 						Data: []byte(`null`),
@@ -140,7 +140,6 @@ func NewError() *TestServer {
 	})
 	return srv
 }
-
 
 type TestServer struct {
 	*handler.Server

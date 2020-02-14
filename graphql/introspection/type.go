@@ -152,6 +152,10 @@ func (t *Type) EnumValues(includeDeprecated bool) []EnumValue {
 
 	res := []EnumValue{}
 	for _, val := range t.def.EnumValues {
+		if !includeDeprecated && val.Directives.ForName("deprecated") != nil {
+			continue
+		}
+
 		res = append(res, EnumValue{
 			Name:        val.Name,
 			Description: val.Description,

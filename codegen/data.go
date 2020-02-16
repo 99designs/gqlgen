@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/pkg/errors"
-	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
 )

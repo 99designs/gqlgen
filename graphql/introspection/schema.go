@@ -3,7 +3,7 @@ package introspection
 import (
 	"strings"
 
-	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type Schema struct {

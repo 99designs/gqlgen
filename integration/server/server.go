@@ -13,7 +13,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/99designs/gqlgen/integration"
 	"github.com/pkg/errors"
-	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const defaultPort = "8080"

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // SendError sends a best effort error to a raw response writer. It assumes the client can understand the standard

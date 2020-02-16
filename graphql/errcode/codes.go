@@ -1,7 +1,7 @@
 package errcode
 
 import (
-	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const ValidationFailed = "GRAPHQL_VALIDATION_FAILED"

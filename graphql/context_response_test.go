@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/ast"
-	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func TestAddError(t *testing.T) {
@@ -43,7 +43,7 @@ func TestAddError(t *testing.T) {
 	AddError(ctx, errors.New("bar"))
 	AddError(ctx, &gqlerror.Error{
 		Message: "foo3",
-		Path:    append(child.Path(), "works"),
+		Path:    append(child.Path(), ast.PathName("works")),
 	})
 
 	specs := []struct {

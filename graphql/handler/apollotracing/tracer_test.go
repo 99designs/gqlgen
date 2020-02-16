@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-
 	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -17,7 +16,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/gqlerror"
+	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func TestApolloTracing(t *testing.T) {
@@ -59,7 +59,7 @@ func TestApolloTracing(t *testing.T) {
 
 	require.EqualValues(t, 700, tracing.Execution.Resolvers[0].StartOffset)
 	require.EqualValues(t, 100, tracing.Execution.Resolvers[0].Duration)
-	require.EqualValues(t, []interface{}{"name"}, tracing.Execution.Resolvers[0].Path)
+	require.EqualValues(t, ast.Path{ast.PathName("name")}, tracing.Execution.Resolvers[0].Path)
 	require.EqualValues(t, "Query", tracing.Execution.Resolvers[0].ParentType)
 	require.EqualValues(t, "name", tracing.Execution.Resolvers[0].FieldName)
 	require.EqualValues(t, "String!", tracing.Execution.Resolvers[0].ReturnType)

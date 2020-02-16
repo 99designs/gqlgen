@@ -3,6 +3,8 @@ package graphql
 import (
 	"context"
 	"time"
+
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type key string
@@ -39,13 +41,13 @@ type FieldStats struct {
 	Completed time.Time
 }
 
-func (r *FieldContext) Path() []interface{} {
-	var path []interface{}
+func (r *FieldContext) Path() ast.Path {
+	var path ast.Path
 	for it := r; it != nil; it = it.Parent {
 		if it.Index != nil {
-			path = append(path, *it.Index)
+			path = append(path, ast.PathIndex(*it.Index))
 		} else if it.Field.Field != nil {
-			path = append(path, it.Field.Alias)
+			path = append(path, ast.PathName(it.Field.Alias))
 		}
 	}
 
@@ -75,7 +77,7 @@ func WithFieldContext(ctx context.Context, rc *FieldContext) context.Context {
 	return context.WithValue(ctx, resolverCtx, rc)
 }
 
-func equalPath(a []interface{}, b []interface{}) bool {
+func equalPath(a ast.Path, b ast.Path) bool {
 	if len(a) != len(b) {
 		return false
 	}

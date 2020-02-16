@@ -62,18 +62,7 @@ func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHand
 
 	fmt.Fprintln(a.out, "  resp:", Green(stringify(resp)))
 	for _, err := range resp.Errors {
-		pathstr := ""
-		for i, bit := range err.Path {
-			if biti, ok := bit.(int); ok {
-				pathstr += fmt.Sprintf("[%d]", biti)
-			} else {
-				if i != 0 {
-					pathstr += "."
-				}
-				pathstr += fmt.Sprint(bit)
-			}
-		}
-		fmt.Fprintln(a.out, "  error:", Bold(pathstr+":"), Red(err.Message))
+		fmt.Fprintln(a.out, "  error:", Bold(err.Path.String()+":"), Red(err.Message))
 	}
 	fmt.Fprintln(a.out, "}")
 	fmt.Fprintln(a.out)

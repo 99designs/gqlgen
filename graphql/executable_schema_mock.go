@@ -5,7 +5,7 @@ package graphql
 
 import (
 	"context"
-	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/v2/ast"
 	"sync"
 )
 

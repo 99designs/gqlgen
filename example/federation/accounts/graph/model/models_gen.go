@@ -7,4 +7,4 @@ type User struct {
 	Username string `json:"username"`
 }
 
-func (User) Is_Entity() {}
+func (User) IsEntity() {}

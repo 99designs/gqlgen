@@ -60,7 +60,7 @@ type ComplexityRoot struct {
 		Username func(childComplexity int) int
 	}
 
-	_Service struct {
+	Service struct {
 		SDL func(childComplexity int) int
 	}
 }
@@ -140,11 +140,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.User.Username(childComplexity), true
 
 	case "_Service.sdl":
-		if e.complexity._Service.SDL == nil {
+		if e.complexity.Service.SDL == nil {
 			break
 		}
 
-		return e.complexity._Service.SDL(childComplexity), true
+		return e.complexity.Service.SDL(childComplexity), true
 
 	}
 	return 0, false

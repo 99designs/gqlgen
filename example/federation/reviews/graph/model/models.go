@@ -4,7 +4,7 @@ type Product struct {
 	Upc string `json:"upc"`
 }
 
-func (Product) Is_Entity() {}
+func (Product) IsEntity() {}
 
 type Review struct {
 	Body    string
@@ -16,4 +16,4 @@ type User struct {
 	ID string `json:"id"`
 }
 
-func (User) Is_Entity() {}
+func (User) IsEntity() {}

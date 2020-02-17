@@ -276,6 +276,9 @@ func Call(p *types.Func) string {
 }
 
 func ToGo(name string) string {
+	if name == "_" {
+		return "_"
+	}
 	runes := make([]rune, 0, len(name))
 
 	wordWalker(name, func(info *wordInfo) {
@@ -296,6 +299,9 @@ func ToGo(name string) string {
 }
 
 func ToGoPrivate(name string) string {
+	if name == "_" {
+		return "_"
+	}
 	runes := make([]rune, 0, len(name))
 
 	first := true
@@ -331,7 +337,7 @@ type wordInfo struct {
 // This function is based on the following code.
 // https://github.com/golang/lint/blob/06c8688daad7faa9da5a0c2f163a3d14aac986ca/lint.go#L679
 func wordWalker(str string, f func(*wordInfo)) {
-	runes := []rune(str)
+	runes := []rune(strings.TrimFunc(str, isDelimiter))
 	w, i := 0, 0 // index of start of word, scan
 	hasCommonInitial := false
 	for i+1 <= len(runes) {

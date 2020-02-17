@@ -1,17 +1,28 @@
 ---
 title: "Migrating to 0.11"
-description: Using the new graphql/handler package in gqlgen 0.11 
+description: Changes in gqlgen 0.11
 linkTitle: Migrating to 0.11
 menu: { main: { parent: 'recipes' } }
 ---
 
-The handler package has grown organically for a long time, 0.11 is a large cleanup of the handler package to make it 
+## Updated gqlparser
+
+gqlparser had a breaking change, if you have any references to it in your project your going to need to update
+them from `github.com/vektah/gqlparser` to `github.com/vektah/gqlparser/v2`.
+
+```bash
+sed -i 's/github.com\/vektah\/gqlparser/github.com\/vektah\/gqlparser\/v2/' $(find -name '*.go')
+```
+
+## Handler Refactor
+
+The handler package has grown organically for a long time, 0.11 is a large cleanup of the handler package to make it
 more modular and easier to maintain once we get to 1.0.
- 
- 
+
+
 ### Transports
 
-Transports are the first thing that run, they handle decoding the incoming http request, and encoding the graphql 
+Transports are the first thing that run, they handle decoding the incoming http request, and encoding the graphql
 response. Supported transports are:
 
  - GET
@@ -51,18 +62,18 @@ There are a few convenience methods for defining middleware inline, instead of c
 ```go
 srv := handler.New(es)
 srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-	// this function will be called around every field. next() will evaluate the field and return 
-	// its computed value. 
+	// this function will be called around every field. next() will evaluate the field and return
+	// its computed value.
 	return next(ctx)
 })
 srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-	// This function will be called around every operation, next() will return a function that when 
-	// called will evaluate one response. Eventually next will return nil, signalling there are no 
+	// This function will be called around every operation, next() will return a function that when
+	// called will evaluate one response. Eventually next will return nil, signalling there are no
 	// more results to be returned by the server.
 	return next(ctx)
 })
 srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-	// This function will be called around each response in the operation. next() will evaluate 
+	// This function will be called around each response in the operation. next() will evaluate
 	// and return a single response.
 	return next(ctx)
 })
@@ -104,13 +115,29 @@ As part of cleaning up the names the RequestContext has been renamed to Operatio
 
 Many of the old interfaces collapse down into just a few extension points:
 
-![Anatomy of a request@2x (1)](https://user-images.githubusercontent.com/2247982/68181517-cb04d600-ffeb-11e9-9271-0295e6c4ff34.png)
+![Anatomy of a request](/request_anatomy.png)
 
-The tracing interface has also been removed, tracing stats are now measured in core (eg time to parse query) and made available on the operation/response contexts. Much of the old interface was designed so that users of a tracer dont need to know which extension points it was listening to, the new handler extensions have the same goal. 
+The tracing interface has also been removed, tracing stats are now measured in core (eg time to parse query) and made available on the operation/response contexts. Much of the old interface was designed so that users of a tracer dont need to know which extension points it was listening to, the new handler extensions have the same goal.
 
 ### Backward compatibility
 
 There is a backwards compatibility layer that keeps most of the original interface in place. There are a few places where BC is known to be broken:
- 
+
  - ResponseMiddleware: The signature used to be `func(ctx context.Context, next func(ctx context.Context) []byte) []byte` and is now `func(ctx context.Context) *Response`. We could maintain BC by marshalling to json before and after, but the change is pretty easy to make and is likely to cause less issues.
  - The Tracer interface has been removed, any tracers will need to be reimplemented against the new extension interface.
+
+## New resolver layout
+
+0.11 also added a new way to generate and layout resolvers on disk. We used to only generate resolver implementations
+whenever the file didnt exist. This behaviour is still there for those that are already used to it, However there is a
+new mode you can turn on in config:
+
+```yaml
+resolver:
+  layout: follow-schema
+  dir: graph
+```
+
+This tells gqlgen to generate resolvers next to the schema file that declared the graphql field, which looks like this:
+
+![follow-schema layout](/schema_layout.png)

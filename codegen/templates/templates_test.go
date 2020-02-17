@@ -16,6 +16,9 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "ToCamel", ToGo("toCamel"))
 	require.Equal(t, "ToCamel", ToGo("ToCamel"))
 	require.Equal(t, "ToCamel", ToGo("to-camel"))
+	require.Equal(t, "ToCamel", ToGo("-to-camel"))
+	require.Equal(t, "ToCamel", ToGo("_to-camel"))
+	require.Equal(t, "_", ToGo("_"))
 
 	require.Equal(t, "RelatedURLs", ToGo("RelatedURLs"))
 	require.Equal(t, "ImageIDs", ToGo("ImageIDs"))
@@ -63,6 +66,7 @@ func TestToGoPrivate(t *testing.T) {
 	require.Equal(t, "id", ToGoPrivate("ID"))
 	require.Equal(t, "id", ToGoPrivate("id"))
 	require.Equal(t, "", ToGoPrivate(""))
+	require.Equal(t, "_", ToGoPrivate("_"))
 }
 
 func Test_wordWalker(t *testing.T) {

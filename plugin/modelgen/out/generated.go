@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+type FooBarer interface {
+	IsFooBarer()
+}
+
 // InterfaceWithDescription is an interface with a description
 type InterfaceWithDescription interface {
 	IsInterfaceWithDescription()
@@ -63,6 +67,12 @@ type TypeWithDescription struct {
 }
 
 func (TypeWithDescription) IsUnionWithDescription() {}
+
+type FooBarr struct {
+	Name string `json:"name" database:"_Foo_Barrname"`
+}
+
+func (FooBarr) IsFooBarer() {}
 
 // EnumWithDescription is an enum with a description
 type EnumWithDescription string

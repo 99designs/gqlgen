@@ -9,5 +9,5 @@ type Service struct {
 
 // Everything with a @key implements this
 type Entity interface {
-	Is_Entity()
+	IsEntity()
 }

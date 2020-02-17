@@ -83,3 +83,12 @@ interface InterfaceWithDescription {
 
 "UnionWithDescription is an union with a description"
 union UnionWithDescription = TypeWithDescription | ExistingType
+
+
+interface Foo_Barer {
+    name: String!
+}
+
+type _Foo_Barr implements  Foo_Barer {
+    name: String!
+}

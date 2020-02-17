@@ -8,4 +8,4 @@ type Product struct {
 	Price int    `json:"price"`
 }
 
-func (Product) Is_Entity() {}
+func (Product) IsEntity() {}

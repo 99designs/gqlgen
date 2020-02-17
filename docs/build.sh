@@ -10,8 +10,9 @@ RESET='\033[0m'
 HOST=https://gqlgen.com
 
 VERSIONS_ARRAY=(
-    'v0.10.2'
+    'v0.11.0'
 	'master'
+	'v0.10.2'
     'v0.9.3'
     'v0.8.3'
     'v0.7.2'
@@ -49,9 +50,11 @@ git fetch origin --tags
 
 for version in "${VERSIONS_ARRAY[@]}" ; do
     echo -e "$(date) $GREEN Updating docs for $version.$RESET"
-    git checkout $version
+    rm -rf docs/content
+    git checkout $version -- docs/content
     rebuild "$version"
 done
 
-git checkout -q "$currentBranch"
+rm -rf docs/content
+git checkout "$currentBranch" -- docs/content
 

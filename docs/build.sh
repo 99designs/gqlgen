@@ -18,7 +18,7 @@ VERSIONS_ARRAY=(
 )
 
 joinVersions() {
-	versions=$(printf ",%s" "${VERSIONS_ARRAY[@]}")
+	versions=$(printf ",%s" "${VERSIONS_ARRAY[@]}" | sed 's/origin\/master/master/')
 	echo "${versions:1}"
 }
 

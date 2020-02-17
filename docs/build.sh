@@ -11,14 +11,10 @@ HOST=https://gqlgen.com
 
 VERSIONS_ARRAY=(
     'v0.11.0'
-    'master'
+    'origin/master'
     'v0.10.2'
     'v0.9.3'
     'v0.8.3'
-    'v0.7.2'
-    'v0.6.0'
-    'v0.5.1'
-    'v0.4.4'
 )
 
 joinVersions() {
@@ -31,6 +27,10 @@ function version { echo "$@" | gawk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }
 rebuild() {
 	VERSION_STRING=$(joinVersions)
 	export CURRENT_VERSION=${1}
+	if [[ $CURRENT_VERSION == 'origin/master' ]] ; then
+	    CURRENT_VERSION="master"
+    fi
+
 	export VERSIONS=${VERSION_STRING}
 
     hugo --quiet --destination="public/$CURRENT_VERSION" --baseURL="$HOST/$CURRENT_VERSION/"

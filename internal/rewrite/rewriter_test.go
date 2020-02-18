@@ -14,13 +14,13 @@ func TestRewriter(t *testing.T) {
 
 		body := r.GetMethodBody("Foo", "Method")
 		require.Equal(t, `
-			// leading comment
+	// leading comment
 
-			// field comment
-			m.Field++
+	// field comment
+	m.Field++
 
-			// trailing comment
-		`, body)
+	// trailing comment
+`, body)
 
 		imps := r.ExistingImports("testdata/example.go")
 		require.Len(t, imps, 2)

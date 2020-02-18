@@ -119,7 +119,7 @@ func (e executor) DispatchOperation(ctx context.Context, rc *graphql.OperationCo
 func (e executor) CreateOperationContext(ctx context.Context, params *graphql.RawParams) (*graphql.OperationContext, gqlerror.List) {
 	rc := &graphql.OperationContext{
 		DisableIntrospection: true,
-		Recover:              graphql.DefaultRecover,
+		Recover:              e.server.recoverFunc,
 		ResolverMiddleware:   e.fieldMiddleware,
 		Stats: graphql.Stats{
 			Read:           params.ReadTime,

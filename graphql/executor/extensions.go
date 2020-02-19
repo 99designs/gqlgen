@@ -7,27 +7,9 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-// ExtensionList manages a slice of graphql extensions validated against a schema.
-type ExtensionList struct {
-	es         graphql.ExecutableSchema
-	extensions []graphql.HandlerExtension
-}
-
-// Extensions creates a new ExtensionList validated with the given schema.
-func Extensions(es graphql.ExecutableSchema) *ExtensionList {
-	return &ExtensionList{
-		es: es,
-	}
-}
-
-// Extensions returns a copy of this ExtensionList's extensions.
-func (l *ExtensionList) Extensions() []graphql.HandlerExtension {
-	return append(l.extensions[:0:0], l.extensions...)
-}
-
-// Add adds the given extension to this ExtensionList.
-func (l *ExtensionList) Add(extension graphql.HandlerExtension) {
-	if err := extension.Validate(l.es); err != nil {
+// Use adds the given extension to this Executor.
+func (e *Executor) Use(extension graphql.HandlerExtension) {
+	if err := extension.Validate(e.es); err != nil {
 		panic(err)
 	}
 
@@ -37,7 +19,8 @@ func (l *ExtensionList) Add(extension graphql.HandlerExtension) {
 		graphql.OperationInterceptor,
 		graphql.FieldInterceptor,
 		graphql.ResponseInterceptor:
-		l.extensions = append(l.extensions, extension)
+		e.extensions = append(e.extensions, extension)
+		e.setExtensions()
 
 	default:
 		panic(fmt.Errorf("cannot Use %T as a gqlgen handler extension because it does not implement any extension hooks", extension))
@@ -45,18 +28,18 @@ func (l *ExtensionList) Add(extension graphql.HandlerExtension) {
 }
 
 // AroundFields is a convenience method for creating an extension that only implements field middleware
-func (l *ExtensionList) AroundFields(f graphql.FieldMiddleware) {
-	l.Add(FieldFunc(f))
+func (e *Executor) AroundFields(f graphql.FieldMiddleware) {
+	e.Use(FieldFunc(f))
 }
 
 // AroundOperations is a convenience method for creating an extension that only implements operation middleware
-func (l *ExtensionList) AroundOperations(f graphql.OperationMiddleware) {
-	l.Add(OperationFunc(f))
+func (e *Executor) AroundOperations(f graphql.OperationMiddleware) {
+	e.Use(OperationFunc(f))
 }
 
 // AroundResponses is a convenience method for creating an extension that only implements response middleware
-func (l *ExtensionList) AroundResponses(f graphql.ResponseMiddleware) {
-	l.Add(ResponseFunc(f))
+func (e *Executor) AroundResponses(f graphql.ResponseMiddleware) {
+	e.Use(ResponseFunc(f))
 }
 
 type OperationFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler

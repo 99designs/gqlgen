@@ -14,6 +14,7 @@ import (
 // Executor executes graphql queries against a schema.
 type Executor struct {
 	es                         graphql.ExecutableSchema
+	extensions                 []graphql.HandlerExtension
 	operationMiddleware        graphql.OperationMiddleware
 	responseMiddleware         graphql.ResponseMiddleware
 	fieldMiddleware            graphql.FieldMiddleware
@@ -34,7 +35,7 @@ func New(es graphql.ExecutableSchema) *Executor {
 		recoverFunc:    graphql.DefaultRecover,
 		queryCache:     graphql.NoCache{},
 	}
-	e.SetExtensions(nil)
+	e.setExtensions()
 	return e
 }
 
@@ -173,7 +174,7 @@ func (e *Executor) SetRecoverFunc(f graphql.RecoverFunc) {
 	e.recoverFunc = f
 }
 
-func (e *Executor) SetExtensions(extensions []graphql.HandlerExtension) {
+func (e *Executor) setExtensions() {
 	e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 		return next(ctx)
 	}
@@ -185,8 +186,8 @@ func (e *Executor) SetExtensions(extensions []graphql.HandlerExtension) {
 	}
 
 	// this loop goes backwards so the first extension is the outer most middleware and runs first.
-	for i := len(extensions) - 1; i >= 0; i-- {
-		p := extensions[i]
+	for i := len(e.extensions) - 1; i >= 0; i-- {
+		p := e.extensions[i]
 		if p, ok := p.(graphql.OperationInterceptor); ok {
 			previous := e.operationMiddleware
 			e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
@@ -215,7 +216,7 @@ func (e *Executor) SetExtensions(extensions []graphql.HandlerExtension) {
 		}
 	}
 
-	for _, p := range extensions {
+	for _, p := range e.extensions {
 		if p, ok := p.(graphql.OperationParameterMutator); ok {
 			e.operationParameterMutators = append(e.operationParameterMutators, p)
 		}

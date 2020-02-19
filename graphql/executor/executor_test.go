@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/executor"
 	"github.com/99designs/gqlgen/graphql/executor/testexecutor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,18 +22,15 @@ func TestExecutor(t *testing.T) {
 	})
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {
-		extlist := executor.Extensions(exec.Schema())
-
 		var calls []string
-		extlist.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		exec.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 			calls = append(calls, "first")
 			return next(ctx)
 		})
-		extlist.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		exec.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 			calls = append(calls, "second")
 			return next(ctx)
 		})
-		exec.SetExtensions(extlist.Extensions())
 
 		resp := query(exec, "", "{name}")
 		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
@@ -42,18 +38,15 @@ func TestExecutor(t *testing.T) {
 	})
 
 	t.Run("invokes response middleware in order", func(t *testing.T) {
-		extlist := executor.Extensions(exec.Schema())
-
 		var calls []string
-		extlist.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		exec.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 			calls = append(calls, "first")
 			return next(ctx)
 		})
-		extlist.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		exec.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 			calls = append(calls, "second")
 			return next(ctx)
 		})
-		exec.SetExtensions(extlist.Extensions())
 
 		resp := query(exec, "", "{name}")
 		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
@@ -61,18 +54,15 @@ func TestExecutor(t *testing.T) {
 	})
 
 	t.Run("invokes field middleware in order", func(t *testing.T) {
-		extlist := executor.Extensions(exec.Schema())
-
 		var calls []string
-		extlist.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		exec.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			calls = append(calls, "first")
 			return next(ctx)
 		})
-		extlist.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		exec.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 			calls = append(calls, "second")
 			return next(ctx)
 		})
-		exec.SetExtensions(extlist.Extensions())
 
 		resp := query(exec, "", "{name}")
 		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
@@ -80,17 +70,14 @@ func TestExecutor(t *testing.T) {
 	})
 
 	t.Run("get query parse error in AroundResponses", func(t *testing.T) {
-		extlist := executor.Extensions(exec.Schema())
-
 		var errors1 gqlerror.List
 		var errors2 gqlerror.List
-		extlist.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		exec.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 			resp := next(ctx)
 			errors1 = graphql.GetErrors(ctx)
 			errors2 = resp.Errors
 			return resp
 		})
-		exec.SetExtensions(extlist.Extensions())
 
 		resp := query(exec, "", "invalid")
 		assert.Equal(t, "", string(resp.Data))
@@ -133,17 +120,14 @@ func TestErrorServer(t *testing.T) {
 	exec := testexecutor.NewError()
 
 	t.Run("get resolver error in AroundResponses", func(t *testing.T) {
-		extlist := executor.Extensions(exec.Schema())
-
 		var errors1 gqlerror.List
 		var errors2 gqlerror.List
-		extlist.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		exec.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 			resp := next(ctx)
 			errors1 = graphql.GetErrors(ctx)
 			errors2 = resp.Errors
 			return resp
 		})
-		exec.SetExtensions(extlist.Extensions())
 
 		resp := query(exec, "", "{name}")
 		assert.Equal(t, "null", string(resp.Data))

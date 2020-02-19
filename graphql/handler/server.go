@@ -18,14 +18,12 @@ type (
 	Server struct {
 		transports []graphql.Transport
 		exec       *executor.Executor
-		extlist    *executor.ExtensionList
 	}
 )
 
 func New(es graphql.ExecutableSchema) *Server {
 	return &Server{
-		exec:    executor.New(es),
-		extlist: executor.Extensions(es),
+		exec: executor.New(es),
 	}
 }
 
@@ -67,26 +65,22 @@ func (s *Server) SetQueryCache(cache graphql.Cache) {
 }
 
 func (s *Server) Use(extension graphql.HandlerExtension) {
-	s.extlist.Add(extension)
-	s.exec.SetExtensions(s.extlist.Extensions())
+	s.exec.Use(extension)
 }
 
 // AroundFields is a convenience method for creating an extension that only implements field middleware
 func (s *Server) AroundFields(f graphql.FieldMiddleware) {
-	s.extlist.AroundFields(f)
-	s.exec.SetExtensions(s.extlist.Extensions())
+	s.exec.AroundFields(f)
 }
 
 // AroundOperations is a convenience method for creating an extension that only implements operation middleware
 func (s *Server) AroundOperations(f graphql.OperationMiddleware) {
-	s.extlist.AroundOperations(f)
-	s.exec.SetExtensions(s.extlist.Extensions())
+	s.exec.AroundOperations(f)
 }
 
 // AroundResponses is a convenience method for creating an extension that only implements response middleware
 func (s *Server) AroundResponses(f graphql.ResponseMiddleware) {
-	s.extlist.AroundResponses(f)
-	s.exec.SetExtensions(s.extlist.Extensions())
+	s.exec.AroundResponses(f)
 }
 
 func (s *Server) getTransport(r *http.Request) graphql.Transport {

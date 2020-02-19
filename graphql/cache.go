@@ -32,15 +32,21 @@ type NoCache struct{}
 func (n NoCache) Get(ctx context.Context, key string) (value interface{}, ok bool) { return nil, false }
 func (n NoCache) Add(ctx context.Context, key string, value interface{})           {}
 
+type CacheScope string
+const (
+	CacheScopePublic = CacheScope("PUBLIC")
+	CacheScopePrivate = CacheScope("PRIVATE")
+)
+
 type Hint struct {
 	Path   ast.Path `json:"path"`
 	MaxAge uint32       `json:"maxAge"`
-	Scope  string        `json:"scope"`
+	Scope  CacheScope        `json:"scope"`
 }
 
 type OverallCachePolicy struct {
 	MaxAge uint32
-	Scope string
+	Scope CacheScope
 }
 
 type CacheControl struct {
@@ -55,7 +61,7 @@ func (cache *CacheControl) AddHint(h Hint) {
 // OverallPolicy return a calculated cache policy
 // TODO should implement the spec. ref: https://www.apollographql.com/docs/apollo-server/performance/caching/#adding-cache-hints-statically-in-your-schema
 func (cache CacheControl) OverallPolicy() OverallCachePolicy {
-	scope := "PUBLIC"
+	var scope = CacheScopePublic
 	var maxAge *uint32
 	for _, c := range cache.Hints {
 
@@ -74,7 +80,7 @@ func (cache CacheControl) OverallPolicy() OverallCachePolicy {
 	}
 }
 
-func SetCacheHint(ctx context.Context, scope string, maxAge time.Duration) {
+func SetCacheHint(ctx context.Context, scope CacheScope, maxAge time.Duration) {
 	h := Hint{
 		Path:   GetFieldContext(ctx).Path(),
 		MaxAge: uint32(maxAge.Seconds()),

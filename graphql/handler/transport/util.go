@@ -37,7 +37,7 @@ func writeCacheControl(w http.ResponseWriter, response *graphql.Response) {
 	}
 
 	if cachePolicy, ok := graphql.GetOverallCachePolicy(response); ok {
-		cacheControl := fmt.Sprintf("max-age: %d %s", cachePolicy.MaxAge, strings.ToLower(cachePolicy.Scope))
+		cacheControl := fmt.Sprintf("max-age: %d %s", cachePolicy.MaxAge, strings.ToLower(string(cachePolicy.Scope)))
 		w.Header().Add("Cache-Control", cacheControl)
 	}
 }

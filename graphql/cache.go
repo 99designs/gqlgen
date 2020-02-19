@@ -1,6 +1,10 @@
 package graphql
 
-import "context"
+import (
+	"context"
+	"github.com/vektah/gqlparser/v2/ast"
+	"time"
+)
 
 // Cache is a shared store for APQ and query AST caching
 type Cache interface {
@@ -27,3 +31,76 @@ type NoCache struct{}
 
 func (n NoCache) Get(ctx context.Context, key string) (value interface{}, ok bool) { return nil, false }
 func (n NoCache) Add(ctx context.Context, key string, value interface{})           {}
+
+type Hint struct {
+	Path   ast.Path `json:"path"`
+	MaxAge uint32       `json:"maxAge"`
+	Scope  string        `json:"scope"`
+}
+
+type OverallCachePolicy struct {
+	MaxAge uint32
+	Scope string
+}
+
+type CacheControl struct {
+	Version int    `json:"version"`
+	Hints   []Hint `json:"hints"`
+}
+
+func (cache *CacheControl) AddHint(h Hint) {
+	cache.Hints = append(cache.Hints, h)
+}
+
+// OverallPolicy return a calculated cache policy
+// TODO should implement the spec. ref: https://www.apollographql.com/docs/apollo-server/performance/caching/#adding-cache-hints-statically-in-your-schema
+func (cache CacheControl) OverallPolicy() OverallCachePolicy {
+	scope := "PUBLIC"
+	var maxAge *uint32
+	for _, c := range cache.Hints {
+
+		if c.Scope == "PRIVATE" {
+			scope = c.Scope
+		}
+
+		if maxAge == nil || *maxAge > c.MaxAge {
+			maxAge = &c.MaxAge
+		}
+	}
+
+	return OverallCachePolicy{
+		MaxAge: *maxAge,
+		Scope:  scope,
+	}
+}
+
+func SetCacheHint(ctx context.Context, scope string, maxAge time.Duration) {
+	h := Hint{
+		Path:   GetFieldContext(ctx).Path(),
+		MaxAge: uint32(maxAge.Seconds()),
+		Scope:  scope,
+	}
+
+	c := GetExtension(ctx, "cacheControl")
+	if c == nil {
+		cache := &CacheControl{Version: 1}
+		cache.AddHint(h)
+		RegisterExtension(ctx, "cacheControl", cache)
+	}
+
+	if c, ok := c.(*CacheControl); ok {
+		c.AddHint(h)
+	}
+}
+
+
+func GetOverallCachePolicy(response *Response) (OverallCachePolicy, bool) {
+	if cache, ok := response.Extensions["cacheControl"].(*CacheControl); ok {
+		overallPolicy := cache.OverallPolicy()
+		if overallPolicy.MaxAge > 0 {
+			return overallPolicy, true
+		}
+	}
+
+	return OverallCachePolicy{}, false
+}

@@ -42,6 +42,59 @@ func (e *Executor) AroundResponses(f graphql.ResponseMiddleware) {
 	e.Use(ResponseFunc(f))
 }
 
+func (e *Executor) setExtensions() {
+	e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		return next(ctx)
+	}
+	e.responseMiddleware = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		return next(ctx)
+	}
+	e.fieldMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		return next(ctx)
+	}
+
+	// this loop goes backwards so the first extension is the outer most middleware and runs first.
+	for i := len(e.extensions) - 1; i >= 0; i-- {
+		p := e.extensions[i]
+		if p, ok := p.(graphql.OperationInterceptor); ok {
+			previous := e.operationMiddleware
+			e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+				return p.InterceptOperation(ctx, func(ctx context.Context) graphql.ResponseHandler {
+					return previous(ctx, next)
+				})
+			}
+		}
+
+		if p, ok := p.(graphql.ResponseInterceptor); ok {
+			previous := e.responseMiddleware
+			e.responseMiddleware = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+				return p.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
+					return previous(ctx, next)
+				})
+			}
+		}
+
+		if p, ok := p.(graphql.FieldInterceptor); ok {
+			previous := e.fieldMiddleware
+			e.fieldMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+				return p.InterceptField(ctx, func(ctx context.Context) (res interface{}, err error) {
+					return previous(ctx, next)
+				})
+			}
+		}
+	}
+
+	for _, p := range e.extensions {
+		if p, ok := p.(graphql.OperationParameterMutator); ok {
+			e.operationParameterMutators = append(e.operationParameterMutators, p)
+		}
+
+		if p, ok := p.(graphql.OperationContextMutator); ok {
+			e.operationContextMutators = append(e.operationContextMutators, p)
+		}
+	}
+}
+
 type OperationFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
 
 func (r OperationFunc) ExtensionName() string {

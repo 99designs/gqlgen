@@ -26,6 +26,8 @@ type Executor struct {
 	queryCache     graphql.Cache
 }
 
+var _ graphql.GraphExecutor = &Executor{}
+
 // New creates a new Executor with the given schema, and a default error and
 // recovery callbacks, and no query cache or extensions.
 func New(es graphql.ExecutableSchema) *Executor {

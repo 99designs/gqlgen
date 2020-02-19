@@ -3,22 +3,23 @@
 # https://gqlgen.com/getting-started/
 
 
-enum CacheControlScope {
-    PUBLIC
-    PRIVATE
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+type Todo {
+  id: ID!
+  text: String!
+  done: Boolean!
+  user: User! @goField(forceResolver: true)
 }
 
-directive @cacheControl (
-    maxAge: Int
-    scope: CacheControlScope
-) on FIELD_DEFINITION | OBJECT | INTERFACE
-
-type Todo  {
+type User {
   id: ID!
-  text: String! @cacheControl(maxAge: 20)
-  done: Boolean!
+  name: String!
 }
 
 type Query {
-  todos: [Todo!]! @cacheControl(maxAge: 100)
+  todos: [Todo!]!
+  todo(id: ID!): Todo!
 }
+

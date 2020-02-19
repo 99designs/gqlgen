@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/executor"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -16,26 +16,17 @@ import (
 
 type (
 	Server struct {
-		es         graphql.ExecutableSchema
 		transports []graphql.Transport
-		extensions []graphql.HandlerExtension
-		exec       executor
-
-		errorPresenter graphql.ErrorPresenterFunc
-		recoverFunc    graphql.RecoverFunc
-		queryCache     graphql.Cache
+		exec       *executor.Executor
+		extlist    *executor.ExtensionList
 	}
 )
 
 func New(es graphql.ExecutableSchema) *Server {
-	s := &Server{
-		es:             es,
-		errorPresenter: graphql.DefaultErrorPresenter,
-		recoverFunc:    graphql.DefaultRecover,
-		queryCache:     graphql.NoCache{},
+	return &Server{
+		exec:    executor.New(es),
+		extlist: executor.Extensions(es),
 	}
-	s.exec = newExecutor(s)
-	return s
 }
 
 func NewDefaultServer(es graphql.ExecutableSchema) *Server {
@@ -64,49 +55,38 @@ func (s *Server) AddTransport(transport graphql.Transport) {
 }
 
 func (s *Server) SetErrorPresenter(f graphql.ErrorPresenterFunc) {
-	s.errorPresenter = f
+	s.exec.SetErrorPresenter(f)
 }
 
 func (s *Server) SetRecoverFunc(f graphql.RecoverFunc) {
-	s.recoverFunc = f
+	s.exec.SetRecoverFunc(f)
 }
 
 func (s *Server) SetQueryCache(cache graphql.Cache) {
-	s.queryCache = cache
+	s.exec.SetQueryCache(cache)
 }
 
 func (s *Server) Use(extension graphql.HandlerExtension) {
-	if err := extension.Validate(s.es); err != nil {
-		panic(err)
-	}
-
-	switch extension.(type) {
-	case graphql.OperationParameterMutator,
-		graphql.OperationContextMutator,
-		graphql.OperationInterceptor,
-		graphql.FieldInterceptor,
-		graphql.ResponseInterceptor:
-		s.extensions = append(s.extensions, extension)
-		s.exec = newExecutor(s)
-
-	default:
-		panic(fmt.Errorf("cannot Use %T as a gqlgen handler extension because it does not implement any extension hooks", extension))
-	}
+	s.extlist.Add(extension)
+	s.exec.SetExtensions(s.extlist.Extensions())
 }
 
 // AroundFields is a convenience method for creating an extension that only implements field middleware
 func (s *Server) AroundFields(f graphql.FieldMiddleware) {
-	s.Use(FieldFunc(f))
+	s.extlist.AroundFields(f)
+	s.exec.SetExtensions(s.extlist.Extensions())
 }
 
 // AroundOperations is a convenience method for creating an extension that only implements operation middleware
 func (s *Server) AroundOperations(f graphql.OperationMiddleware) {
-	s.Use(OperationFunc(f))
+	s.extlist.AroundOperations(f)
+	s.exec.SetExtensions(s.extlist.Extensions())
 }
 
 // AroundResponses is a convenience method for creating an extension that only implements response middleware
 func (s *Server) AroundResponses(f graphql.ResponseMiddleware) {
-	s.Use(ResponseFunc(f))
+	s.extlist.AroundResponses(f)
+	s.exec.SetExtensions(s.extlist.Extensions())
 }
 
 func (s *Server) getTransport(r *http.Request) graphql.Transport {
@@ -121,7 +101,7 @@ func (s *Server) getTransport(r *http.Request) graphql.Transport {
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
-			err := s.errorPresenter(r.Context(), s.recoverFunc(r.Context(), err))
+			err := s.exec.PresentRecoveredError(r.Context(), err)
 			resp := &graphql.Response{Errors: []*gqlerror.Error{err}}
 			b, _ := json.Marshal(resp)
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -151,55 +131,4 @@ func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 
 func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
-}
-
-type OperationFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
-
-func (r OperationFunc) ExtensionName() string {
-	return "InlineOperationFunc"
-}
-
-func (r OperationFunc) Validate(schema graphql.ExecutableSchema) error {
-	if r == nil {
-		return fmt.Errorf("OperationFunc can not be nil")
-	}
-	return nil
-}
-
-func (r OperationFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-	return r(ctx, next)
-}
-
-type ResponseFunc func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response
-
-func (r ResponseFunc) ExtensionName() string {
-	return "InlineResponseFunc"
-}
-
-func (r ResponseFunc) Validate(schema graphql.ExecutableSchema) error {
-	if r == nil {
-		return fmt.Errorf("ResponseFunc can not be nil")
-	}
-	return nil
-}
-
-func (r ResponseFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-	return r(ctx, next)
-}
-
-type FieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
-
-func (f FieldFunc) ExtensionName() string {
-	return "InlineFieldFunc"
-}
-
-func (f FieldFunc) Validate(schema graphql.ExecutableSchema) error {
-	if f == nil {
-		return fmt.Errorf("FieldFunc can not be nil")
-	}
-	return nil
-}
-
-func (f FieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-	return f(ctx, next)
 }

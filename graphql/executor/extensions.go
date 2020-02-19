@@ -7,7 +7,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-// ExtensionList manages a slice of graphql extensions.
+// ExtensionList manages a slice of graphql extensions validated against a schema.
 type ExtensionList struct {
 	es         graphql.ExecutableSchema
 	extensions []graphql.HandlerExtension

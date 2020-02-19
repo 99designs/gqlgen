@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -39,6 +40,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	CacheControl func(ctx context.Context, obj interface{}, next graphql.Resolver, maxAge *int, scope *model.CacheControlScope) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -155,15 +157,24 @@ var sources = []*ast.Source{
 # https://gqlgen.com/getting-started/
 
 
+enum CacheControlScope {
+    PUBLIC
+    PRIVATE
+}
 
-type Todo {
+directive @cacheControl (
+    maxAge: Int
+    scope: CacheControlScope
+) on FIELD_DEFINITION | OBJECT | INTERFACE
+
+type Todo  {
   id: ID!
-  text: String!
+  text: String! @cacheControl(maxAge: 20)
   done: Boolean!
 }
 
 type Query {
-  todos: [Todo!]!
+  todos: [Todo!]! @cacheControl(maxAge: 100)
 }
 `, BuiltIn: false},
 }
@@ -172,6 +183,28 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_cacheControl_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["maxAge"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["maxAge"] = arg0
+	var arg1 *model.CacheControlScope
+	if tmp, ok := rawArgs["scope"]; ok {
+		arg1, err = ec.unmarshalOCacheControlScope2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋcacheᚋgraphᚋmodelᚐCacheControlScope(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["scope"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -239,8 +272,32 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Todos(rctx)
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Todos(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			maxAge, err := ec.unmarshalOInt2ᚖint(ctx, 100)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.CacheControl == nil {
+				return nil, errors.New("directive cacheControl is not implemented")
+			}
+			return ec.directives.CacheControl(ctx, nil, directive0, maxAge, nil)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*model.Todo); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/example/cache/graph/model.Todo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -376,8 +433,32 @@ func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.Collec
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Text, nil
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.Text, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			maxAge, err := ec.unmarshalOInt2ᚖint(ctx, 20)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.CacheControl == nil {
+				return nil, errors.New("directive cacheControl is not implemented")
+			}
+			return ec.directives.CacheControl(ctx, obj, directive0, maxAge, nil)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2157,6 +2238,53 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOCacheControlScope2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋcacheᚋgraphᚋmodelᚐCacheControlScope(ctx context.Context, v interface{}) (model.CacheControlScope, error) {
+	var res model.CacheControlScope
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalOCacheControlScope2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋcacheᚋgraphᚋmodelᚐCacheControlScope(ctx context.Context, sel ast.SelectionSet, v model.CacheControlScope) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOCacheControlScope2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋcacheᚋgraphᚋmodelᚐCacheControlScope(ctx context.Context, v interface{}) (*model.CacheControlScope, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOCacheControlScope2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋcacheᚋgraphᚋmodelᚐCacheControlScope(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOCacheControlScope2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋcacheᚋgraphᚋmodelᚐCacheControlScope(ctx context.Context, sel ast.SelectionSet, v *model.CacheControlScope) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	return graphql.MarshalInt(v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOInt2int(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOInt2int(ctx, sel, *v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

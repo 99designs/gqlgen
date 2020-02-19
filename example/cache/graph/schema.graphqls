@@ -3,13 +3,22 @@
 # https://gqlgen.com/getting-started/
 
 
+enum CacheControlScope {
+    PUBLIC
+    PRIVATE
+}
 
-type Todo {
+directive @cacheControl (
+    maxAge: Int
+    scope: CacheControlScope
+) on FIELD_DEFINITION | OBJECT | INTERFACE
+
+type Todo  {
   id: ID!
-  text: String!
+  text: String! @cacheControl(maxAge: 20)
   done: Boolean!
 }
 
 type Query {
-  todos: [Todo!]!
+  todos: [Todo!]! @cacheControl(maxAge: 100)
 }

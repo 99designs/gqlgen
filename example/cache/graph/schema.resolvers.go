@@ -4,14 +4,17 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/99designs/gqlgen/example/cache/graph/generated"
 	"github.com/99designs/gqlgen/example/cache/graph/model"
 )
 
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+	return []*model.Todo{
+		{"1", "Todo1", false},
+		{"2", "Todo2", true},
+		{"3", "Todo3", false},
+	}, nil
 }
 
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }

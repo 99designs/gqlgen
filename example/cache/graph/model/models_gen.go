@@ -2,8 +2,55 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Todo struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
 	Done bool   `json:"done"`
+}
+
+type CacheControlScope string
+
+const (
+	CacheControlScopePublic  CacheControlScope = "PUBLIC"
+	CacheControlScopePrivate CacheControlScope = "PRIVATE"
+)
+
+var AllCacheControlScope = []CacheControlScope{
+	CacheControlScopePublic,
+	CacheControlScopePrivate,
+}
+
+func (e CacheControlScope) IsValid() bool {
+	switch e {
+	case CacheControlScopePublic, CacheControlScopePrivate:
+		return true
+	}
+	return false
+}
+
+func (e CacheControlScope) String() string {
+	return string(e)
+}
+
+func (e *CacheControlScope) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CacheControlScope(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CacheControlScope", str)
+	}
+	return nil
+}
+
+func (e CacheControlScope) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

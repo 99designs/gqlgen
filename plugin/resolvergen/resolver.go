@@ -71,7 +71,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Resolver.Package,
-		PackageDoc:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
+		FileNotice:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,
@@ -132,7 +132,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
-			PackageDoc: `
+			FileNotice: `
 				// This file will be automatically regenerated based on the schema, any resolver implementations
 				// will be copied through when generating and any unknown code will be moved to the end.`,
 			Filename: filename,
@@ -147,7 +147,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 	if _, err := os.Stat(data.Config.Resolver.Filename); os.IsNotExist(errors.Cause(err)) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
-			PackageDoc: `
+			FileNotice: `
 				// This file will not be regenerated automatically.
 				//
 				// It serves as dependency injection for your app, add any dependencies you require here.`,

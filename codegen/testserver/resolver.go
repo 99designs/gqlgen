@@ -1,5 +1,6 @@
-// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 package testserver
+
+// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 import (
 	"context"
@@ -306,17 +307,38 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 	panic("not implemented")
 }
 
+// BackedByInterface returns BackedByInterfaceResolver implementation.
 func (r *Resolver) BackedByInterface() BackedByInterfaceResolver { return &backedByInterfaceResolver{r} }
-func (r *Resolver) Errors() ErrorsResolver                       { return &errorsResolver{r} }
-func (r *Resolver) ForcedResolver() ForcedResolverResolver       { return &forcedResolverResolver{r} }
-func (r *Resolver) ModelMethods() ModelMethodsResolver           { return &modelMethodsResolver{r} }
+
+// Errors returns ErrorsResolver implementation.
+func (r *Resolver) Errors() ErrorsResolver { return &errorsResolver{r} }
+
+// ForcedResolver returns ForcedResolverResolver implementation.
+func (r *Resolver) ForcedResolver() ForcedResolverResolver { return &forcedResolverResolver{r} }
+
+// ModelMethods returns ModelMethodsResolver implementation.
+func (r *Resolver) ModelMethods() ModelMethodsResolver { return &modelMethodsResolver{r} }
+
+// OverlappingFields returns OverlappingFieldsResolver implementation.
 func (r *Resolver) OverlappingFields() OverlappingFieldsResolver { return &overlappingFieldsResolver{r} }
-func (r *Resolver) Panics() PanicsResolver                       { return &panicsResolver{r} }
-func (r *Resolver) Primitive() PrimitiveResolver                 { return &primitiveResolver{r} }
-func (r *Resolver) PrimitiveString() PrimitiveStringResolver     { return &primitiveStringResolver{r} }
-func (r *Resolver) Query() QueryResolver                         { return &queryResolver{r} }
-func (r *Resolver) Subscription() SubscriptionResolver           { return &subscriptionResolver{r} }
-func (r *Resolver) User() UserResolver                           { return &userResolver{r} }
+
+// Panics returns PanicsResolver implementation.
+func (r *Resolver) Panics() PanicsResolver { return &panicsResolver{r} }
+
+// Primitive returns PrimitiveResolver implementation.
+func (r *Resolver) Primitive() PrimitiveResolver { return &primitiveResolver{r} }
+
+// PrimitiveString returns PrimitiveStringResolver implementation.
+func (r *Resolver) PrimitiveString() PrimitiveStringResolver { return &primitiveStringResolver{r} }
+
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+
+// Subscription returns SubscriptionResolver implementation.
+func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
+
+// User returns UserResolver implementation.
+func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
 type backedByInterfaceResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }

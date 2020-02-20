@@ -62,6 +62,14 @@ func WithOperationContext(ctx context.Context, rc *OperationContext) context.Con
 	return context.WithValue(ctx, operationCtx, rc)
 }
 
+// HasOperationContext checks if the given context is part of an ongoing operation
+//
+// Some errors can happen outside of an operation, eg json unmarshal errors.
+func HasOperationContext(ctx context.Context) bool {
+	_, ok := ctx.Value(operationCtx).(*OperationContext)
+	return ok
+}
+
 // This is just a convenient wrapper method for CollectFields
 func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
 	resctx := GetFieldContext(ctx)

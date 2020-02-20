@@ -55,3 +55,66 @@ The type `Circle` would satisfy `Circle`, `Shape`, and `Shapes` — these values
 > Note
 >
 > `CollectFieldsCtx` is just a convenience wrapper around `CollectFields` that calls the later with the selection set automatically passed through from the resolver context.
+
+## Practical example
+
+Say we have the following GraphQL query
+
+```graphql
+flowBlocks {
+	id
+	block{
+		id
+		title
+		type
+		choices{
+			id
+			title
+			description
+			slug
+		}
+	}
+}
+```
+
+We don't want to overfetch our database so we want to know which field are requested.
+Here is an example which get's all requested field as convenient string slice, which can be easily checked.
+
+```golang
+func GetPreloads(ctx context.Context) []string {
+	return GetNestedPreloads(
+		graphql.GetRequestContext(ctx),
+		graphql.CollectFieldsCtx(ctx, nil),
+		"",
+	)
+}
+
+func GetNestedPreloads(ctx *graphql.RequestContext, fields []graphql.CollectedField, prefix string) (preloads []string) {
+	for _, column := range fields {
+		prefixColumn := GetPreloadString(prefix, column.Name)
+		preloads = append(preloads, prefixColumn)
+		preloads = append(preloads, GetNestedPreloads(ctx, graphql.CollectFields(ctx, column.SelectionSet, nil), prefixColumn)...)
+		preloads = append(preloads, GetNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn)...)
+
+	}
+	return
+}
+
+func GetPreloadString(prefix, name string) string {
+	if len(prefix) > 0 {
+		return prefix + "." + name
+	}
+	return name
+}
+
+```
+
+So if we call these helpers in our resolver:
+```golang
+func (r *queryResolver) FlowBlocks(ctx context.Context) ([]*FlowBlock, error) {
+	preloads := getPreloads(ctx)
+```
+it will result in the following string slice:
+```
+["id", "block", "block.id", "block.title", "block.type", "block.choices", "block.choices.id", "block.choices.title", "block.choices.description", "block.choices.slug"]
+```

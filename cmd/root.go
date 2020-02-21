@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	// Required since otherwise dep will prune away these unused packages before codegen has a chance to run
 	_ "github.com/99designs/gqlgen/graphql/handler"
@@ -32,7 +32,7 @@ func Execute() {
 	}
 
 	app.Action = genCmd.Action
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		genCmd,
 		initCmd,
 		versionCmd,

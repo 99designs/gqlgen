@@ -13,7 +13,7 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin/servergen"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var configTemplate = template.Must(template.New("name").Parse(
@@ -105,16 +105,16 @@ type Mutation {
 }
 `
 
-var initCmd = cli.Command{
+var initCmd = &cli.Command{
 	Name:  "init",
 	Usage: "create a new gqlgen project",
 	Flags: []cli.Flag{
-		cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
-		cli.StringFlag{Name: "config, c", Usage: "the config filename"},
-		cli.StringFlag{Name: "server", Usage: "where to write the server stub to", Value: "server.go"},
-		cli.StringFlag{Name: "schema", Usage: "where to write the schema stub to", Value: "graph/schema.graphqls"},
+		&cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
+		&cli.StringFlag{Name: "config, c", Usage: "the config filename"},
+		&cli.StringFlag{Name: "server", Usage: "where to write the server stub to", Value: "server.go"},
+		&cli.StringFlag{Name: "schema", Usage: "where to write the schema stub to", Value: "graph/schema.graphqls"},
 	},
-	Action: func(ctx *cli.Context) {
+	Action: func(ctx *cli.Context) error {
 		configFilename := ctx.String("config")
 		serverFilename := ctx.String("server")
 
@@ -130,6 +130,7 @@ var initCmd = cli.Command{
 		}
 
 		GenerateGraphServer(serverFilename)
+		return nil
 	},
 }
 

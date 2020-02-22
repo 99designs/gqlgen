@@ -167,10 +167,10 @@ Create a new file called `graph/model/todo.go`
 package model
 
 type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	UserId int  `json:"user"`
+	ID     string `json:"id"`
+	Text   string `json:"text"`
+	Done   bool   `json:"done"`
+	UserID string `json:"user"`
 }
 ```
 

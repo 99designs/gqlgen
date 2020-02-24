@@ -44,6 +44,8 @@ type Options struct {
 	GeneratedHeader bool
 	// PackageDoc is documentation written above the package line
 	PackageDoc string
+	// FileNotice is notice written below the package line
+	FileNotice string
 	// Data will be passed to the template execution.
 	Data  interface{}
 	Funcs template.FuncMap
@@ -144,6 +146,10 @@ func Render(cfg Options) error {
 	result.WriteString("package ")
 	result.WriteString(cfg.PackageName)
 	result.WriteString("\n\n")
+	if cfg.FileNotice != "" {
+		result.WriteString(cfg.FileNotice)
+		result.WriteString("\n\n")
+	}
 	result.WriteString("import (\n")
 	result.WriteString(CurrentImports.String())
 	result.WriteString(")\n")

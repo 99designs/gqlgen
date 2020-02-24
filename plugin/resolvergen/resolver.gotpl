@@ -26,6 +26,7 @@
 {{ end }}
 
 {{ range $object := .Objects -}}
+	// {{$object.Name}} returns {{ $object.ResolverInterface | ref }} implementation.
 	func (r *{{$.ResolverType}}) {{$object.Name}}() {{ $object.ResolverInterface | ref }} { return &{{lcFirst $object.Name}}{{ucFirst $.ResolverType}}{r} }
 {{ end }}
 

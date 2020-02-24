@@ -1,6 +1,7 @@
+package config
+
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
-package config
 
 import (
 	"context"
@@ -17,6 +18,7 @@ func (r *todoResolver) ID(ctx context.Context, obj *Todo) (string, error) {
 	return obj.ID, nil
 }
 
+// Todo returns TodoResolver implementation.
 func (r *Resolver) Todo() TodoResolver { return &todoResolver{r} }
 
 type todoResolver struct{ *Resolver }

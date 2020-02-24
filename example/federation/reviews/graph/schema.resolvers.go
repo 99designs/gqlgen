@@ -1,6 +1,7 @@
+package graph
+
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
-package graph
 
 import (
 	"context"
@@ -33,8 +34,11 @@ func (r *userResolver) Reviews(ctx context.Context, obj *model.User) ([]*model.R
 	return res, nil
 }
 
+// Product returns generated.ProductResolver implementation.
 func (r *Resolver) Product() generated.ProductResolver { return &productResolver{r} }
-func (r *Resolver) User() generated.UserResolver       { return &userResolver{r} }
+
+// User returns generated.UserResolver implementation.
+func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 type productResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

@@ -39,7 +39,7 @@ work with whatever your favourite ORM is.
 
 The query executor will call the Query.Todos resolver which does a `select * from todo` and
 return N todos. Then for each of the todos, concurrently, call the Todo_user resolver,
-`SELECT from USER where id = todo.id`.
+`SELECT from USER where id = todo.user_id`.
 
 
 eg:

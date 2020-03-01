@@ -130,7 +130,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 
 We now have a working server, to start it:
 ```bash
-go run server/server.go
+go run server.go
 ```
 
 then open http://localhost:8080 in a browser. here are some queries to try:

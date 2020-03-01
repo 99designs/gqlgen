@@ -13,7 +13,7 @@ import (
 )
 
 func TestLayoutSingleFile(t *testing.T) {
-	_ = syscall.Unlink("testdata/out/singlefile/resolver.go")
+	_ = syscall.Unlink("testdata/singlefile/out/resolver.go")
 
 	cfg, err := config.LoadConfig("testdata/singlefile/gqlgen.yml")
 	require.NoError(t, err)
@@ -31,7 +31,7 @@ func TestLayoutSingleFile(t *testing.T) {
 }
 
 func TestLayoutFollowSchema(t *testing.T) {
-	_ = syscall.Unlink("testdata/out/followschema/resolver.go")
+	_ = syscall.Unlink("testdata/followschema/out/resolver.go")
 
 	cfg, err := config.LoadConfig("testdata/followschema/gqlgen.yml")
 	require.NoError(t, err)
@@ -63,7 +63,8 @@ func assertNoErrors(t *testing.T, pkg string) {
 			packages.NeedCompiledGoFiles |
 			packages.NeedImports |
 			packages.NeedTypes |
-			packages.NeedTypesSizes}, pkg)
+			packages.NeedTypesSizes,
+	}, pkg)
 	if err != nil {
 		panic(err)
 	}

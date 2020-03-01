@@ -74,10 +74,6 @@ func Generate(cfg *config.Config, option ...Option) error {
 		return errors.Wrap(err, "merging type systems failed")
 	}
 
-	if err = codegen.GenerateCode(data); err != nil {
-		return errors.Wrap(err, "generating code failed")
-	}
-
 	for _, p := range plugins {
 		if mut, ok := p.(plugin.CodeGenerator); ok {
 			err := mut.GenerateCode(data)

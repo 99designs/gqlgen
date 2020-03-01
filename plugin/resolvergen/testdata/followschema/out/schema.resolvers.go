@@ -1,6 +1,7 @@
+package customresolver
+
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
-package customresolver
 
 import (
 	"context"
@@ -18,7 +19,10 @@ func (r *resolverCustomResolverType) Name(ctx context.Context, obj *customresolv
 	return "", nil
 }
 
+// Query returns customresolver.QueryResolver implementation.
 func (r *CustomResolverType) Query() customresolver.QueryResolver { return &queryCustomResolverType{r} }
+
+// Resolver returns customresolver.ResolverResolver implementation.
 func (r *CustomResolverType) Resolver() customresolver.ResolverResolver {
 	return &resolverCustomResolverType{r}
 }

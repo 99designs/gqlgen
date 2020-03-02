@@ -44,9 +44,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	File struct {
-		Content func(childComplexity int) int
-		ID      func(childComplexity int) int
-		Name    func(childComplexity int) int
+		Content     func(childComplexity int) int
+		ContentType func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -92,6 +93,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.File.Content(childComplexity), true
+
+	case "File.contentType":
+		if e.complexity.File.ContentType == nil {
+			break
+		}
+
+		return e.complexity.File.ContentType(childComplexity), true
 
 	case "File.id":
 		if e.complexity.File.ID == nil {
@@ -234,6 +242,7 @@ type File {
     id: Int!
     name: String!
     content: String!
+    contentType: String!
 }
 
 "The ` + "`" + `UploadFile` + "`" + ` type, represents the request for uploading a file with certain payload."
@@ -455,6 +464,40 @@ func (ec *executionContext) _File_content(ctx context.Context, field graphql.Col
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Content, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _File_contentType(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "File",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContentType, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1848,6 +1891,11 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "content":
 			out.Values[i] = ec._File_content(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "contentType":
+			out.Values[i] = ec._File_contentType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

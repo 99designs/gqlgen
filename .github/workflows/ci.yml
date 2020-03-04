@@ -25,15 +25,15 @@ jobs:
       - run: go mod download
       - run: go test -race ./...
 
-  cover:
+  coverage:
     runs-on: ubuntu-latest
     container: golang:1.13
-    env:
-      REPOTOKEN: ${{ secrets.COVERALLS_TOKEN }}
     steps:
       - uses: actions/checkout@v1
       - run: go mod download
       - run: .github/workflows/check-coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   integration:
     runs-on: ubuntu-latest

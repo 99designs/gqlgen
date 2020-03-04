@@ -1,6 +1,7 @@
 package resolvergen
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -88,7 +89,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 	for _, o := range data.Objects {
 		if o.HasResolvers() {
-			fn := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name)
+			fn := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			if files[fn] == nil {
 				files[fn] = &File{}
 			}
@@ -109,7 +110,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 
 			resolver := Resolver{o, f, implementation}
-			fn := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name)
+			fn := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			if files[fn] == nil {
 				files[fn] = &File{}
 			}
@@ -196,9 +197,12 @@ type Resolver struct {
 	Implementation string
 }
 
-func gqlToResolverName(base string, gqlname string) string {
+func gqlToResolverName(base string, gqlname, filename string) string {
 	gqlname = filepath.Base(gqlname)
 	ext := filepath.Ext(gqlname)
+	if filename == "" {
+		filename = "%s.resolvers.go"
+	}
 
-	return filepath.Join(base, strings.TrimSuffix(gqlname, ext)+".resolvers.go")
+	return filepath.Join(base, fmt.Sprintf(filename, strings.TrimSuffix(gqlname, ext)))
 }

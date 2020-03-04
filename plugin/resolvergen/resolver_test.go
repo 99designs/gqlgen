@@ -32,6 +32,8 @@ func TestLayoutSingleFile(t *testing.T) {
 
 func TestLayoutFollowSchema(t *testing.T) {
 	_ = syscall.Unlink("testdata/followschema/out/resolver.go")
+	_ = syscall.Unlink("testdata/followschema/out/schema.custom.go")
+	_ = syscall.Unlink("testdata/followschema/out/schema.resolvers.go")
 
 	cfg, err := config.LoadConfig("testdata/followschema/gqlgen.yml")
 	require.NoError(t, err)
@@ -54,6 +56,28 @@ func TestLayoutFollowSchema(t *testing.T) {
 	require.Contains(t, source, "// CustomerResolverType.Resolver implementation")
 	require.Contains(t, source, "// CustomerResolverType.Name implementation")
 	require.Contains(t, source, "// AUserHelperFunction implementation")
+}
+
+func TestLayoutFollowSchemaWithCustomFilename(t *testing.T) {
+	_ = syscall.Unlink("testdata/followschema/out/resolver.go")
+	_ = syscall.Unlink("testdata/followschema/out/schema.custom.go")
+	_ = syscall.Unlink("testdata/followschema/out/schema.resolvers.go")
+
+	cfg, err := config.LoadConfig("testdata/followschema/gqlgen.customfilename.yml")
+	require.NoError(t, err)
+	p := Plugin{}
+
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	require.NoError(t, p.GenerateCode(data))
+	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/followschema/out")
+
+	require.FileExists(t, "testdata/followschema/out/schema.custom.go")
 }
 
 func assertNoErrors(t *testing.T, pkg string) {

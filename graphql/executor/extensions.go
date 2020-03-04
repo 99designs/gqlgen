@@ -29,17 +29,17 @@ func (e *Executor) Use(extension graphql.HandlerExtension) {
 
 // AroundFields is a convenience method for creating an extension that only implements field middleware
 func (e *Executor) AroundFields(f graphql.FieldMiddleware) {
-	e.Use(FieldFunc(f))
+	e.Use(aroundFieldFunc(f))
 }
 
 // AroundOperations is a convenience method for creating an extension that only implements operation middleware
 func (e *Executor) AroundOperations(f graphql.OperationMiddleware) {
-	e.Use(OperationFunc(f))
+	e.Use(aroundOpFunc(f))
 }
 
 // AroundResponses is a convenience method for creating an extension that only implements response middleware
 func (e *Executor) AroundResponses(f graphql.ResponseMiddleware) {
-	e.Use(ResponseFunc(f))
+	e.Use(aroundRespFunc(f))
 }
 
 func (e *Executor) setExtensions() {
@@ -95,53 +95,53 @@ func (e *Executor) setExtensions() {
 	}
 }
 
-type OperationFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
+type aroundOpFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler
 
-func (r OperationFunc) ExtensionName() string {
+func (r aroundOpFunc) ExtensionName() string {
 	return "InlineOperationFunc"
 }
 
-func (r OperationFunc) Validate(schema graphql.ExecutableSchema) error {
+func (r aroundOpFunc) Validate(schema graphql.ExecutableSchema) error {
 	if r == nil {
 		return fmt.Errorf("OperationFunc can not be nil")
 	}
 	return nil
 }
 
-func (r OperationFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+func (r aroundOpFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 	return r(ctx, next)
 }
 
-type ResponseFunc func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response
+type aroundRespFunc func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response
 
-func (r ResponseFunc) ExtensionName() string {
+func (r aroundRespFunc) ExtensionName() string {
 	return "InlineResponseFunc"
 }
 
-func (r ResponseFunc) Validate(schema graphql.ExecutableSchema) error {
+func (r aroundRespFunc) Validate(schema graphql.ExecutableSchema) error {
 	if r == nil {
 		return fmt.Errorf("ResponseFunc can not be nil")
 	}
 	return nil
 }
 
-func (r ResponseFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (r aroundRespFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	return r(ctx, next)
 }
 
-type FieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
+type aroundFieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
 
-func (f FieldFunc) ExtensionName() string {
+func (f aroundFieldFunc) ExtensionName() string {
 	return "InlineFieldFunc"
 }
 
-func (f FieldFunc) Validate(schema graphql.ExecutableSchema) error {
+func (f aroundFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	if f == nil {
 		return fmt.Errorf("FieldFunc can not be nil")
 	}
 	return nil
 }
 
-func (f FieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+func (f aroundFieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
 	return f(ctx, next)
 }

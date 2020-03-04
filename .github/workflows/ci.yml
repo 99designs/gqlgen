@@ -1,0 +1,56 @@
+name: Continuous Integration
+
+on:
+  push:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container: golang:1.13
+    steps:
+      - uses: actions/checkout@v1
+      - run: go mod download
+      - run: .github/workflows/check-fmt
+      - run: .github/workflows/check-linting
+      - run: .github/workflows/check-generate
+
+  test:
+    runs-on: ubuntu-latest
+    container: golang:1.13
+    steps:
+      - uses: actions/checkout@v1
+      - run: go mod download
+      - run: go test -race ./...
+
+  cover:
+    runs-on: ubuntu-latest
+    container: golang:1.13
+    env:
+      REPOTOKEN: ${{ secrets.COVERALLS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v1
+      - run: go mod download
+      - run: .github/workflows/check-coverage
+
+  integration:
+    runs-on: ubuntu-latest
+    container: alpine:3.10
+    steps:
+      - uses: actions/checkout@v1
+      - run: apk add --no-cache --no-progress nodejs npm go musl-dev git bash
+      - run: go mod download
+      - run: cd integration ; npm install
+      - run: .github/workflows/check-integration
+
+  federation:
+    runs-on: ubuntu-latest
+    container: alpine:3.10
+    steps:
+      - uses: actions/checkout@v1
+      - run: apk add --no-cache --no-progress nodejs npm go musl-dev git bash
+      - run: go mod download
+      - run: cd example/federation ; npm install
+      - run: .github/workflows/check-federation

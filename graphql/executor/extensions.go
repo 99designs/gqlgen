@@ -20,7 +20,7 @@ func (e *Executor) Use(extension graphql.HandlerExtension) {
 		graphql.FieldInterceptor,
 		graphql.ResponseInterceptor:
 		e.extensions = append(e.extensions, extension)
-		e.setExtensions()
+		e.ext = processExtensions(e.extensions)
 
 	default:
 		panic(fmt.Errorf("cannot Use %T as a gqlgen handler extension because it does not implement any extension hooks", extension))
@@ -42,7 +42,15 @@ func (e *Executor) AroundResponses(f graphql.ResponseMiddleware) {
 	e.Use(aroundRespFunc(f))
 }
 
-func (e *Executor) setExtensions() {
+type extensions struct {
+	operationMiddleware        graphql.OperationMiddleware
+	responseMiddleware         graphql.ResponseMiddleware
+	fieldMiddleware            graphql.FieldMiddleware
+	operationParameterMutators []graphql.OperationParameterMutator
+	operationContextMutators   []graphql.OperationContextMutator
+}
+
+func processExtensions(extensions []graphql.HandlerExtension) (e extensions) {
 	e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 		return next(ctx)
 	}
@@ -54,8 +62,8 @@ func (e *Executor) setExtensions() {
 	}
 
 	// this loop goes backwards so the first extension is the outer most middleware and runs first.
-	for i := len(e.extensions) - 1; i >= 0; i-- {
-		p := e.extensions[i]
+	for i := len(extensions) - 1; i >= 0; i-- {
+		p := extensions[i]
 		if p, ok := p.(graphql.OperationInterceptor); ok {
 			previous := e.operationMiddleware
 			e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
@@ -84,7 +92,7 @@ func (e *Executor) setExtensions() {
 		}
 	}
 
-	for _, p := range e.extensions {
+	for _, p := range extensions {
 		if p, ok := p.(graphql.OperationParameterMutator); ok {
 			e.operationParameterMutators = append(e.operationParameterMutators, p)
 		}
@@ -93,6 +101,8 @@ func (e *Executor) setExtensions() {
 			e.operationContextMutators = append(e.operationContextMutators, p)
 		}
 	}
+
+	return
 }
 
 type aroundOpFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler

@@ -69,6 +69,25 @@ func TestExecutor(t *testing.T) {
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
+	t.Run("invokes operation mutators", func(t *testing.T) {
+		var calls []string
+		exec.Use(&testParamMutator{
+			Mutate: func(ctx context.Context, req *graphql.RawParams) *gqlerror.Error {
+				calls = append(calls, "param")
+				return nil
+			},
+		})
+		exec.Use(&testCtxMutator{
+			Mutate: func(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
+				calls = append(calls, "context")
+				return nil
+			},
+		})
+		resp := query(exec, "", "{name}")
+		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.Equal(t, []string{"param", "context"}, calls)
+	})
+
 	t.Run("get query parse error in AroundResponses", func(t *testing.T) {
 		var errors1 gqlerror.List
 		var errors2 gqlerror.List
@@ -114,6 +133,38 @@ func TestExecutor(t *testing.T) {
 			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
 		})
 	})
+}
+
+type testParamMutator struct {
+	Mutate func(context.Context, *graphql.RawParams) *gqlerror.Error
+}
+
+func (m *testParamMutator) ExtensionName() string {
+	return "Operation: Mutate Parameters"
+}
+
+func (m *testParamMutator) Validate(s graphql.ExecutableSchema) error {
+	return nil
+}
+
+func (m *testParamMutator) MutateOperationParameters(ctx context.Context, r *graphql.RawParams) *gqlerror.Error {
+	return m.Mutate(ctx, r)
+}
+
+type testCtxMutator struct {
+	Mutate func(context.Context, *graphql.OperationContext) *gqlerror.Error
+}
+
+func (m *testCtxMutator) ExtensionName() string {
+	return "Operation: Mutate the Context"
+}
+
+func (m *testCtxMutator) Validate(s graphql.ExecutableSchema) error {
+	return nil
+}
+
+func (m *testCtxMutator) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
+	return m.Mutate(ctx, rc)
 }
 
 func TestErrorServer(t *testing.T) {

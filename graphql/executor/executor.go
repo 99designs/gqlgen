@@ -13,13 +13,9 @@ import (
 
 // Executor executes graphql queries against a schema.
 type Executor struct {
-	es                         graphql.ExecutableSchema
-	extensions                 []graphql.HandlerExtension
-	operationMiddleware        graphql.OperationMiddleware
-	responseMiddleware         graphql.ResponseMiddleware
-	fieldMiddleware            graphql.FieldMiddleware
-	operationParameterMutators []graphql.OperationParameterMutator
-	operationContextMutators   []graphql.OperationContextMutator
+	es         graphql.ExecutableSchema
+	extensions []graphql.HandlerExtension
+	ext        extensions
 
 	errorPresenter graphql.ErrorPresenterFunc
 	recoverFunc    graphql.RecoverFunc
@@ -36,8 +32,8 @@ func New(es graphql.ExecutableSchema) *Executor {
 		errorPresenter: graphql.DefaultErrorPresenter,
 		recoverFunc:    graphql.DefaultRecover,
 		queryCache:     graphql.NoCache{},
+		ext:            processExtensions(nil),
 	}
-	e.setExtensions()
 	return e
 }
 
@@ -63,7 +59,7 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 	rc := &graphql.OperationContext{
 		DisableIntrospection: true,
 		Recover:              e.recoverFunc,
-		ResolverMiddleware:   e.fieldMiddleware,
+		ResolverMiddleware:   e.ext.fieldMiddleware,
 		Stats: graphql.Stats{
 			Read:           params.ReadTime,
 			OperationStart: graphql.GetStartTime(ctx),
@@ -71,7 +67,7 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 	}
 	ctx = graphql.WithOperationContext(ctx, rc)
 
-	for _, p := range e.operationParameterMutators {
+	for _, p := range e.ext.operationParameterMutators {
 		if err := p.MutateOperationParameters(ctx, params); err != nil {
 			return rc, gqlerror.List{err}
 		}
@@ -99,7 +95,7 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 	}
 	rc.Stats.Validation.End = graphql.Now()
 
-	for _, p := range e.operationContextMutators {
+	for _, p := range e.ext.operationContextMutators {
 		if err := p.MutateOperationContext(ctx, rc); err != nil {
 			return rc, gqlerror.List{err}
 		}
@@ -112,7 +108,7 @@ func (e *Executor) DispatchOperation(ctx context.Context, rc *graphql.OperationC
 	ctx = graphql.WithOperationContext(ctx, rc)
 
 	var innerCtx context.Context
-	res := e.operationMiddleware(ctx, func(ctx context.Context) graphql.ResponseHandler {
+	res := e.ext.operationMiddleware(ctx, func(ctx context.Context) graphql.ResponseHandler {
 		innerCtx = ctx
 
 		tmpResponseContext := graphql.WithResponseContext(ctx, e.errorPresenter, e.recoverFunc)
@@ -123,7 +119,7 @@ func (e *Executor) DispatchOperation(ctx context.Context, rc *graphql.OperationC
 
 		return func(ctx context.Context) *graphql.Response {
 			ctx = graphql.WithResponseContext(ctx, e.errorPresenter, e.recoverFunc)
-			resp := e.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
+			resp := e.ext.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
 				resp := responses(ctx)
 				if resp == nil {
 					return nil
@@ -149,7 +145,7 @@ func (e *Executor) DispatchError(ctx context.Context, list gqlerror.List) *graph
 		graphql.AddError(ctx, gErr)
 	}
 
-	resp := e.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
+	resp := e.ext.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
 		resp := &graphql.Response{
 			Errors: list,
 		}

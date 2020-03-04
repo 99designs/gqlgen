@@ -1,10 +1,5 @@
 name: Continuous Integration
-
-on:
-  push:
-  pull_request:
-    branches:
-    - master
+on: push
 
 jobs:
   lint:

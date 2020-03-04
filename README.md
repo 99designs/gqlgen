@@ -1,4 +1,4 @@
-# gqlgen ![Continuous Integration](https://github.com/99designs/gqlgen/workflows/Continuous%20Integration/badge.svg) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
+# gqlgen [![Continuous Integration](https://github.com/99designs/gqlgen/workflows/Continuous%20Integration/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
 
 ## What is gqlgen?
 

@@ -3,10 +3,12 @@ package transport_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -52,9 +54,10 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.file"] }`
 		files := []file{
 			{
-				mapKey:  "0",
-				name:    "a.txt",
-				content: "test1",
+				mapKey:      "0",
+				name:        "a.txt",
+				content:     "test1",
+				contentType: "text/plain",
 			},
 		}
 		req := createUploadRequest(t, operations, mapData, files)
@@ -77,9 +80,10 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.req.file"] }`
 		files := []file{
 			{
-				mapKey:  "0",
-				name:    "a.txt",
-				content: "test1",
+				mapKey:      "0",
+				name:        "a.txt",
+				content:     "test1",
+				contentType: "text/plain",
 			},
 		}
 		req := createUploadRequest(t, operations, mapData, files)
@@ -102,14 +106,16 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`
 		files := []file{
 			{
-				mapKey:  "0",
-				name:    "a.txt",
-				content: "test1",
+				mapKey:      "0",
+				name:        "a.txt",
+				content:     "test1",
+				contentType: "text/plain",
 			},
 			{
-				mapKey:  "1",
-				name:    "b.txt",
-				content: "test2",
+				mapKey:      "1",
+				name:        "b.txt",
+				content:     "test2",
+				contentType: "text/plain",
 			},
 		}
 		req := createUploadRequest(t, operations, mapData, files)
@@ -132,14 +138,16 @@ func TestFileUpload(t *testing.T) {
 		mapData := `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`
 		files := []file{
 			{
-				mapKey:  "0",
-				name:    "a.txt",
-				content: "test1",
+				mapKey:      "0",
+				name:        "a.txt",
+				content:     "test1",
+				contentType: "text/plain",
 			},
 			{
-				mapKey:  "1",
-				name:    "b.txt",
-				content: "test2",
+				mapKey:      "1",
+				name:        "b.txt",
+				content:     "test2",
+				contentType: "text/plain",
 			},
 		}
 		req := createUploadRequest(t, operations, mapData, files)
@@ -164,9 +172,10 @@ func TestFileUpload(t *testing.T) {
 			mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
 			files := []file{
 				{
-					mapKey:  "0",
-					name:    "a.txt",
-					content: "test1",
+					mapKey:      "0",
+					name:        "a.txt",
+					content:     "test1",
+					contentType: "text/plain",
 				},
 			}
 			req := createUploadRequest(t, operations, mapData, files)
@@ -190,9 +199,10 @@ func TestFileUpload(t *testing.T) {
 	validMap := `{ "0": ["variables.file"] }`
 	validFiles := []file{
 		{
-			mapKey:  "0",
-			name:    "a.txt",
-			content: "test1",
+			mapKey:      "0",
+			name:        "a.txt",
+			content:     "test1",
+			contentType: "text/plain",
 		},
 	}
 
@@ -260,9 +270,10 @@ func TestFileUpload(t *testing.T) {
 }
 
 type file struct {
-	mapKey  string
-	name    string
-	content string
+	mapKey      string
+	name        string
+	content     string
+	contentType string
 }
 
 func createUploadRequest(t *testing.T, operations, mapData string, files []file) *http.Request {
@@ -276,7 +287,10 @@ func createUploadRequest(t *testing.T, operations, mapData string, files []file)
 	require.NoError(t, err)
 
 	for i := range files {
-		ff, err := bodyWriter.CreateFormFile(files[i].mapKey, files[i].name)
+		h := make(textproto.MIMEHeader)
+		h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, files[i].mapKey, files[i].name))
+		h.Set("Content-Type", files[i].contentType)
+		ff, err := bodyWriter.CreatePart(h)
 		require.NoError(t, err)
 		_, err = ff.Write([]byte(files[i].content))
 		require.NoError(t, err)

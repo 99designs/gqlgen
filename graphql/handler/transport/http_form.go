@@ -107,9 +107,10 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 
 		if len(paths) == 1 {
 			upload = graphql.Upload{
-				File:     file,
-				Size:     header.Size,
-				Filename: header.Filename,
+				File:        file,
+				Size:        header.Size,
+				Filename:    header.Filename,
+				ContentType: header.Header.Get("Content-Type"),
 			}
 
 			if err := params.AddUpload(upload, key, paths[0]); err != nil {
@@ -127,9 +128,10 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 				}
 				for _, path := range paths {
 					upload = graphql.Upload{
-						File:     &bytesReader{s: &fileBytes, i: 0, prevRune: -1},
-						Size:     header.Size,
-						Filename: header.Filename,
+						File:        &bytesReader{s: &fileBytes, i: 0, prevRune: -1},
+						Size:        header.Size,
+						Filename:    header.Filename,
+						ContentType: header.Header.Get("Content-Type"),
 					}
 
 					if err := params.AddUpload(upload, key, path); err != nil {
@@ -173,9 +175,10 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 					}
 					defer pathTmpFile.Close()
 					upload = graphql.Upload{
-						File:     pathTmpFile,
-						Size:     header.Size,
-						Filename: header.Filename,
+						File:        pathTmpFile,
+						Size:        header.Size,
+						Filename:    header.Filename,
+						ContentType: header.Header.Get("Content-Type"),
 					}
 
 					if err := params.AddUpload(upload, key, path); err != nil {

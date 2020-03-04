@@ -188,14 +188,19 @@ func TestErrorServer(t *testing.T) {
 }
 
 func query(exec *testexecutor.TestExecutor, op, q string) *graphql.Response {
-	ctx := context.Background()
+	ctx := graphql.StartOperationTrace(context.Background())
+	now := graphql.Now()
 	rc, err := exec.CreateOperationContext(ctx, &graphql.RawParams{
 		Query:         q,
 		OperationName: op,
+		ReadTime: graphql.TraceTiming{
+			Start: now,
+			End:   now,
+		},
 	})
 
 	if err != nil {
-		return exec.DispatchError(graphql.WithOperationContext(ctx, rc), err)
+		return exec.DispatchError(ctx, err)
 	}
 
 	resp, ctx2 := exec.DispatchOperation(ctx, rc)

@@ -120,13 +120,16 @@ var initCmd = &cli.Command{
 
 		pkgName := code.ImportPathForDir(".")
 		if pkgName == "" {
-			fmt.Fprintln(os.Stderr, "unable to determine import path for current directory, you probably need to run go mod init first")
-			os.Exit(1)
+			return fmt.Errorf("unable to determine import path for current directory, you probably need to run go mod init first")
 		}
 
-		initSchema(ctx.String("schema"))
+		if err := initSchema(ctx.String("schema")); err != nil {
+			return err
+		}
 		if !configExists(configFilename) {
-			initConfig(configFilename, pkgName)
+			if err := initConfig(configFilename, pkgName); err != nil {
+				return err
+			}
 		}
 
 		GenerateGraphServer(serverFilename)
@@ -158,14 +161,13 @@ func configExists(configFilename string) bool {
 	return cfg != nil
 }
 
-func initConfig(configFilename string, pkgName string) {
+func initConfig(configFilename string, pkgName string) error {
 	if configFilename == "" {
 		configFilename = "gqlgen.yml"
 	}
 
 	if err := os.MkdirAll(filepath.Dir(configFilename), 0755); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to create config dir: "+err.Error())
-		os.Exit(1)
+		return fmt.Errorf("unable to create config dir: " + err.Error())
 	}
 
 	var buf bytes.Buffer
@@ -174,24 +176,24 @@ func initConfig(configFilename string, pkgName string) {
 	}
 
 	if err := ioutil.WriteFile(configFilename, buf.Bytes(), 0644); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to write cfg file: "+err.Error())
-		os.Exit(1)
+		return fmt.Errorf("unable to write cfg file: " + err.Error())
 	}
+
+	return nil
 }
 
-func initSchema(schemaFilename string) {
+func initSchema(schemaFilename string) error {
 	_, err := os.Stat(schemaFilename)
 	if !os.IsNotExist(err) {
-		return
+		return nil
 	}
 
 	if err := os.MkdirAll(filepath.Dir(schemaFilename), 0755); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to create schema dir: "+err.Error())
-		os.Exit(1)
+		return fmt.Errorf("unable to create schema dir: " + err.Error())
 	}
 
 	if err = ioutil.WriteFile(schemaFilename, []byte(strings.TrimSpace(schemaDefault)), 0644); err != nil {
-		fmt.Fprintln(os.Stderr, "unable to write schema file: "+err.Error())
-		os.Exit(1)
+		return fmt.Errorf("unable to write schema file: " + err.Error())
 	}
+	return nil
 }

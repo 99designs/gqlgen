@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/99designs/gqlgen/api"
@@ -23,8 +22,6 @@ var genCmd = &cli.Command{
 		if configFilename := ctx.String("config"); configFilename != "" {
 			cfg, err = config.LoadConfig(configFilename)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error())
-				os.Exit(1)
 				return err
 			}
 		} else {
@@ -32,15 +29,11 @@ var genCmd = &cli.Command{
 			if os.IsNotExist(errors.Cause(err)) {
 				cfg = config.DefaultConfig()
 			} else if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error())
-				os.Exit(2)
 				return err
 			}
 		}
 
 		if err = api.Generate(cfg); err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(3)
 			return err
 		}
 		return nil

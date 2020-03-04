@@ -37,24 +37,6 @@ func New(es graphql.ExecutableSchema) *Executor {
 	return e
 }
 
-// Exec returns a graphql response from the given params.
-func (e *Executor) Exec(ctx context.Context, params *graphql.RawParams) *graphql.Response {
-	ctx = graphql.StartOperationTrace(ctx)
-	now := graphql.Now()
-	params.ReadTime = graphql.TraceTiming{
-		Start: now,
-		End:   now,
-	}
-
-	rc, err := e.CreateOperationContext(ctx, params)
-	if err != nil {
-		return e.DispatchError(graphql.WithOperationContext(ctx, rc), err)
-	}
-
-	resp, ctx2 := e.DispatchOperation(ctx, rc)
-	return resp(ctx2)
-}
-
 func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.RawParams) (*graphql.OperationContext, gqlerror.List) {
 	rc := &graphql.OperationContext{
 		DisableIntrospection: true,

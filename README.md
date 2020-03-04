@@ -1,4 +1,4 @@
-# gqlgen [![CircleCI](https://badgen.net/circleci/github/99designs/gqlgen/master)](https://circleci.com/gh/99designs/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
+# gqlgen ![Continuous Integration](https://github.com/99designs/gqlgen/workflows/Continuous%20Integration/badge.svg) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
 
 ## What is gqlgen?
 

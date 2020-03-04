@@ -50,20 +50,22 @@ type extensions struct {
 	operationContextMutators   []graphql.OperationContextMutator
 }
 
-func processExtensions(extensions []graphql.HandlerExtension) (e extensions) {
-	e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-		return next(ctx)
-	}
-	e.responseMiddleware = func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-		return next(ctx)
-	}
-	e.fieldMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		return next(ctx)
+func processExtensions(exts []graphql.HandlerExtension) extensions {
+	e := extensions{
+		operationMiddleware: func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+			return next(ctx)
+		},
+		responseMiddleware: func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+			return next(ctx)
+		},
+		fieldMiddleware: func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			return next(ctx)
+		},
 	}
 
 	// this loop goes backwards so the first extension is the outer most middleware and runs first.
-	for i := len(extensions) - 1; i >= 0; i-- {
-		p := extensions[i]
+	for i := len(exts) - 1; i >= 0; i-- {
+		p := exts[i]
 		if p, ok := p.(graphql.OperationInterceptor); ok {
 			previous := e.operationMiddleware
 			e.operationMiddleware = func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
@@ -92,7 +94,7 @@ func processExtensions(extensions []graphql.HandlerExtension) (e extensions) {
 		}
 	}
 
-	for _, p := range extensions {
+	for _, p := range exts {
 		if p, ok := p.(graphql.OperationParameterMutator); ok {
 			e.operationParameterMutators = append(e.operationParameterMutators, p)
 		}
@@ -102,7 +104,7 @@ func processExtensions(extensions []graphql.HandlerExtension) (e extensions) {
 		}
 	}
 
-	return
+	return e
 }
 
 type aroundOpFunc func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler

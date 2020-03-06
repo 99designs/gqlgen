@@ -51,10 +51,10 @@ func (f MultipartForm) maxUploadSize() int64 {
 }
 
 func (f MultipartForm) maxMemory() int64 {
-	if f.MaxUploadSize == 0 {
+	if f.MaxMemory == 0 {
 		return 32 << 20
 	}
-	return f.MaxUploadSize
+	return f.MaxMemory
 }
 
 func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {

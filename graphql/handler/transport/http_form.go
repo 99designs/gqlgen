@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // MultipartForm the Multipart request spec https://github.com/jaydenseric/graphql-multipart-request-spec
@@ -17,6 +18,9 @@ type MultipartForm struct {
 	// MaxUploadSize sets the maximum number of bytes used to parse a request body
 	// as multipart/form-data.
 	MaxUploadSize int64
+
+	// MaxUploadSizeError sets error for MaxUploadSize
+	MaxUploadSizeError *gqlerror.Error
 
 	// MaxMemory defines the maximum number of bytes used to parse a request body
 	// as multipart/form-data in memory, with the remainder stored on disk in
@@ -47,10 +51,10 @@ func (f MultipartForm) maxUploadSize() int64 {
 }
 
 func (f MultipartForm) maxMemory() int64 {
-	if f.MaxMemory == 0 {
+	if f.MaxUploadSize == 0 {
 		return 32 << 20
 	}
-	return f.MaxMemory
+	return f.MaxUploadSize
 }
 
 func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
@@ -60,14 +64,20 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 
 	var err error
 	if r.ContentLength > f.maxUploadSize() {
-		writeJsonError(w, "failed to parse multipart form, request body too large")
+		if f.MaxUploadSizeError == nil {
+			f.MaxUploadSizeError = &gqlerror.Error{Message: "failed to parse multipart form, request body too large"}
+		}
+		writeGQLError(w, f.MaxUploadSizeError)
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, f.maxUploadSize())
 	if err = r.ParseMultipartForm(f.maxUploadSize()); err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		if strings.Contains(err.Error(), "request body too large") {
-			writeJsonError(w, "failed to parse multipart form, request body too large")
+			if f.MaxUploadSizeError == nil {
+				f.MaxUploadSizeError = &gqlerror.Error{Message: "failed to parse multipart form, request body too large"}
+			}
+			writeGQLError(w, f.MaxUploadSizeError)
 			return
 		}
 		writeJsonError(w, "failed to parse multipart form")

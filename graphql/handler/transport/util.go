@@ -17,6 +17,10 @@ func writeJson(w io.Writer, response *graphql.Response) {
 	w.Write(b)
 }
 
+func writeGQLError(w io.Writer, err *gqlerror.Error) {
+	writeJson(w, &graphql.Response{Errors: gqlerror.List{err}})
+}
+
 func writeJsonError(w io.Writer, msg string) {
 	writeJson(w, &graphql.Response{Errors: gqlerror.List{{Message: msg}}})
 }

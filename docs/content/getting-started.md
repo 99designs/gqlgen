@@ -105,6 +105,7 @@ We just need to implement these two methods to get our server working:
 
 First we need somewhere to track our state, lets put it in `graph/resolver.go`:
 ```go
+import  github.com/[username]/gqlgen-todos/model
 type Resolver struct{
 	todos []*model.Todo
 }
@@ -116,7 +117,7 @@ we create the graph.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
 	todo := &model.Todo{
 		Text:   input.Text,
-		ID:     fmt.Sprintf("T%d", rand.Int()),
+		ID:     fmt.Sprintf("T%d", rand.Int()), // for this to work add "math/rand" to your imports
 		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
 	}
 	r.todos = append(r.todos, todo)

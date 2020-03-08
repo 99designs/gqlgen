@@ -8,6 +8,16 @@ menu: { main: { parent: 'recipes' } }
 In this quick guide we are going to implement the example [Apollo Federation](https://www.apollographql.com/docs/apollo-server/federation/introduction/)
 server in gqlgen. You can find the finished result in the [examples directory](https://github.com/99designs/gqlgen/tree/master/example/federation).
 
+## Enable federation
+
+Uncomment federation configuration in your `gqlgen.yml`
+
+```yml
+# Uncomment to enable federation
+federation:
+  filename: graph/generated/federation.go
+  package: generated
+```
 
 ## Create the federated servers
 

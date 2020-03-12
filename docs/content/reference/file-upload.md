@@ -142,3 +142,34 @@ That invokes the following operation:
 ```
 
 See the [example/fileupload](https://github.com/99designs/gqlgen/tree/master/example/fileupload) package for more examples.
+
+# Usage with Apollo
+
+[apollo-upload-client](https://github.com/jaydenseric/apollo-upload-client) needs to be installed in order for file uploading to work with Apollo:
+
+```javascript
+import ApolloClient from "apollo-client";
+import { createUploadLink } from "apollo-upload-client";
+
+const client = new ApolloClient({
+	cache: new InMemoryCache(),
+	link: createUploadLink({ uri: "/graphql" })
+});
+```
+
+A `File` object can then be passed into your mutation as a variable:
+
+```javascript
+{
+  query: `
+    mutation($file: Upload!) {
+      singleUpload(file: $file) {
+        id
+      }
+    }
+  `,
+  variables: {
+    file: new File(...)
+  }
+}
+```

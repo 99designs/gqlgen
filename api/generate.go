@@ -87,6 +87,10 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 
+	if err = codegen.GenerateCode(data); err != nil {
+		return errors.Wrap(err, "generating core failed")
+	}
+
 	if !cfg.SkipValidation {
 		if err := validate(cfg); err != nil {
 			return errors.Wrap(err, "validation failed")

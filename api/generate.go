@@ -74,6 +74,10 @@ func Generate(cfg *config.Config, option ...Option) error {
 		return errors.Wrap(err, "merging type systems failed")
 	}
 
+	if err = codegen.GenerateCode(data); err != nil {
+		return errors.Wrap(err, "generating core failed")
+	}
+
 	for _, p := range plugins {
 		if mut, ok := p.(plugin.CodeGenerator); ok {
 			err := mut.GenerateCode(data)
@@ -81,10 +85,6 @@ func Generate(cfg *config.Config, option ...Option) error {
 				return errors.Wrap(err, p.Name())
 			}
 		}
-	}
-
-	if err = codegen.GenerateCode(data); err != nil {
-		return errors.Wrap(err, "generating core failed")
 	}
 
 	if !cfg.SkipValidation {

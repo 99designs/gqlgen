@@ -2,8 +2,9 @@ package graphql
 
 import (
 	"context"
-	"github.com/vektah/gqlparser/v2/ast"
 	"time"
+
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // Cache is a shared store for APQ and query AST caching
@@ -33,20 +34,21 @@ func (n NoCache) Get(ctx context.Context, key string) (value interface{}, ok boo
 func (n NoCache) Add(ctx context.Context, key string, value interface{})           {}
 
 type CacheScope string
+
 const (
-	CacheScopePublic = CacheScope("PUBLIC")
+	CacheScopePublic  = CacheScope("PUBLIC")
 	CacheScopePrivate = CacheScope("PRIVATE")
 )
 
 type Hint struct {
-	Path   ast.Path `json:"path"`
-	MaxAge uint32       `json:"maxAge"`
-	Scope  CacheScope        `json:"scope"`
+	Path   ast.Path   `json:"path"`
+	MaxAge float64    `json:"maxAge"`
+	Scope  CacheScope `json:"scope"`
 }
 
 type OverallCachePolicy struct {
-	MaxAge uint32
-	Scope CacheScope
+	MaxAge float64
+	Scope  CacheScope
 }
 
 type CacheControl struct {
@@ -62,7 +64,7 @@ func (cache *CacheControl) AddHint(h Hint) {
 // TODO should implement the spec. ref: https://www.apollographql.com/docs/apollo-server/performance/caching/#adding-cache-hints-statically-in-your-schema
 func (cache CacheControl) OverallPolicy() OverallCachePolicy {
 	var scope = CacheScopePublic
-	var maxAge *uint32
+	var maxAge *float64
 	for _, c := range cache.Hints {
 
 		if c.Scope == "PRIVATE" {
@@ -83,7 +85,7 @@ func (cache CacheControl) OverallPolicy() OverallCachePolicy {
 func SetCacheHint(ctx context.Context, scope CacheScope, maxAge time.Duration) {
 	h := Hint{
 		Path:   GetFieldContext(ctx).Path(),
-		MaxAge: uint32(maxAge.Seconds()),
+		MaxAge: maxAge.Seconds(),
 		Scope:  scope,
 	}
 
@@ -98,7 +100,6 @@ func SetCacheHint(ctx context.Context, scope CacheScope, maxAge time.Duration) {
 		c.AddHint(h)
 	}
 }
-
 
 func GetOverallCachePolicy(response *Response) (OverallCachePolicy, bool) {
 	if cache, ok := response.Extensions["cacheControl"].(*CacheControl); ok {

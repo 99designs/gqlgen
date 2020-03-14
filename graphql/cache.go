@@ -101,6 +101,8 @@ func SetCacheHint(ctx context.Context, scope CacheScope, maxAge time.Duration) {
 	}
 }
 
+// GetOverallCachePolicy is responsible to extract cache policy from a Response.
+// If does not have any cacheControl in Extensions, it will return (empty, false)
 func GetOverallCachePolicy(response *Response) (OverallCachePolicy, bool) {
 	if cache, ok := response.Extensions["cacheControl"].(*CacheControl); ok {
 		overallPolicy := cache.OverallPolicy()

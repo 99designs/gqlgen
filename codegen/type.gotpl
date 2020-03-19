@@ -37,7 +37,18 @@
 					return v.(map[string]interface{}), nil
 				{{- else if $type.IsMarshaler }}
 					var res {{ $type.GO | ref }}
-					return res, res.UnmarshalGQL(v)
+					err := res.UnmarshalGQL(v)
+					if err != nil {
+						fic := graphql.GetFieldInputContext(ctx)
+						path := fic.Path()
+						if gerr, ok := err.(*gqlerror.Error); ok {
+							gerr.Path = path
+							return res, gerr
+						} else {
+							return res, gqlerror.WrapPath(path, err)
+						}
+					}
+					return res, nil
 				{{- else }}
 					return ec.unmarshalInput{{ $type.GQL.Name }}(ctx, v)
 				{{- end }}

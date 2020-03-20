@@ -2,7 +2,6 @@ package testserver
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
@@ -45,19 +44,6 @@ func TestErrorInsideMutationArgument(t *testing.T) {
 			&resp,
 			client.Var("input", input),
 		)
-		jsonErr, ok := err.(client.RawJsonError)
-		require.True(t, ok)
-		var errDetails []map[string]interface{}
-		err = json.Unmarshal(jsonErr.RawMessage, &errDetails)
-		require.NoError(t, err)
-		require.Len(t, errDetails, 1)
-		firstErr := errDetails[0]
-		path, ok := firstErr["path"].([]interface{})
-		require.Equal(t, path, []interface{}{
-			"updateSomething",
-			"input",
-			"nesting",
-			"field",
-		})
+		require.EqualError(t, err, `[{"message":"invalid email format","path":["updateSomething","input","nesting","field"]}]`)
 	})
 }

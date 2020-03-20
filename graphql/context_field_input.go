@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )

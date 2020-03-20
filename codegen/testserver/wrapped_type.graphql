@@ -3,7 +3,9 @@
 extend type Query {
     wrappedStruct: WrappedStruct!
     wrappedScalar: WrappedScalar!
+    wrappedMap: WrappedMap!
 }
 
 type WrappedStruct { name: String! }
 scalar WrappedScalar
+type WrappedMap { get(key: String!): String! }

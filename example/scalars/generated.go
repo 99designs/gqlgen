@@ -17,6 +17,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -284,7 +285,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -298,7 +300,8 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 *model.SearchArgs
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalOSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalOSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -312,7 +315,8 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 external.ObjectID
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -326,7 +330,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -340,7 +345,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1896,19 +1902,25 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 		switch k {
 		case "location":
 			var err error
-			it.Location, err = ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("location"))
+			it.Location, err = ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "createdAfter":
 			var err error
-			it.CreatedAfter, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("createdAfter"))
+			it.CreatedAfter, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "isBanned":
 			var err error
-			it.IsBanned, err = ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("isBanned"))
+			it.IsBanned, err = ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(childCtx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2328,7 +2340,18 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 func (ec *executionContext) unmarshalNBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(ctx context.Context, v interface{}) (model.Banned, error) {
 	var res model.Banned
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalNBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(ctx context.Context, sel ast.SelectionSet, v model.Banned) graphql.Marshaler {
@@ -2365,7 +2388,18 @@ func (ec *executionContext) marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexamp
 
 func (ec *executionContext) unmarshalNPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, v interface{}) (model.Point, error) {
 	var res model.Point
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalNPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v model.Point) graphql.Marshaler {
@@ -2687,7 +2721,18 @@ func (ec *executionContext) marshalOAddress2githubᚗcomᚋ99designsᚋgqlgenᚋ
 
 func (ec *executionContext) unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(ctx context.Context, v interface{}) (model.Banned, error) {
 	var res model.Banned
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(ctx context.Context, sel ast.SelectionSet, v model.Banned) graphql.Marshaler {
@@ -2719,7 +2764,18 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 
 func (ec *executionContext) unmarshalOPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, v interface{}) (model.Point, error) {
 	var res model.Point
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v model.Point) graphql.Marshaler {
@@ -2778,7 +2834,18 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 
 func (ec *executionContext) unmarshalOTier2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐTier(ctx context.Context, v interface{}) (model.Tier, error) {
 	var res model.Tier
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOTier2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐTier(ctx context.Context, sel ast.SelectionSet, v model.Tier) graphql.Marshaler {

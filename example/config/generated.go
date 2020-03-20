@@ -264,7 +264,8 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 	args := map[string]interface{}{}
 	var arg0 NewTodo
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐNewTodo(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋconfigᚐNewTodo(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -278,7 +279,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -292,7 +294,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +309,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1768,13 +1772,17 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 		switch k {
 		case "text":
 			var err error
-			it.Text, err = ec.unmarshalNString2string(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("text"))
+			it.Text, err = ec.unmarshalNString2string(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "userId":
 			var err error
-			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("userId"))
+			it.UserID, err = ec.unmarshalNString2string(childCtx, v)
 			if err != nil {
 				return it, err
 			}

@@ -17,6 +17,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -694,7 +695,8 @@ func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Conte
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -702,7 +704,8 @@ func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Conte
 	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := rawArgs["after"]; ok {
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -716,7 +719,8 @@ func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Conte
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -724,7 +728,8 @@ func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Conte
 	args["first"] = arg0
 	var arg1 *string
 	if tmp, ok := rawArgs["after"]; ok {
-		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -738,7 +743,8 @@ func (ec *executionContext) field_Human_height_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 models.LengthUnit
 	if tmp, ok := rawArgs["unit"]; ok {
-		arg0, err = ec.unmarshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("unit"))
+		arg0, err = ec.unmarshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -752,7 +758,8 @@ func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context
 	args := map[string]interface{}{}
 	var arg0 models.Episode
 	if tmp, ok := rawArgs["episode"]; ok {
-		arg0, err = ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("episode"))
+		arg0, err = ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -760,7 +767,8 @@ func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context
 	args["episode"] = arg0
 	var arg1 models.Review
 	if tmp, ok := rawArgs["review"]; ok {
-		arg1, err = ec.unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("review"))
+		arg1, err = ec.unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReview(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -774,7 +782,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -788,7 +797,8 @@ func (ec *executionContext) field_Query_character_args(ctx context.Context, rawA
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -802,7 +812,8 @@ func (ec *executionContext) field_Query_droid_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -816,7 +827,8 @@ func (ec *executionContext) field_Query_hero_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 *models.Episode
 	if tmp, ok := rawArgs["episode"]; ok {
-		arg0, err = ec.unmarshalOEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("episode"))
+		arg0, err = ec.unmarshalOEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -830,7 +842,8 @@ func (ec *executionContext) field_Query_human_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -844,7 +857,8 @@ func (ec *executionContext) field_Query_reviews_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 models.Episode
 	if tmp, ok := rawArgs["episode"]; ok {
-		arg0, err = ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("episode"))
+		arg0, err = ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -852,7 +866,8 @@ func (ec *executionContext) field_Query_reviews_args(ctx context.Context, rawArg
 	args["episode"] = arg0
 	var arg1 *time.Time
 	if tmp, ok := rawArgs["since"]; ok {
-		arg1, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("since"))
+		arg1, err = ec.unmarshalOTime2ᚖtimeᚐTime(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -866,7 +881,8 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["text"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("text"))
+		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -880,7 +896,8 @@ func (ec *executionContext) field_Query_starship_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -894,7 +911,8 @@ func (ec *executionContext) field_Starship_length_args(ctx context.Context, rawA
 	args := map[string]interface{}{}
 	var arg0 *models.LengthUnit
 	if tmp, ok := rawArgs["unit"]; ok {
-		arg0, err = ec.unmarshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("unit"))
+		arg0, err = ec.unmarshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -908,7 +926,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -922,7 +941,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3399,19 +3419,25 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj i
 		switch k {
 		case "stars":
 			var err error
-			it.Stars, err = ec.unmarshalNInt2int(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("stars"))
+			it.Stars, err = ec.unmarshalNInt2int(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "commentary":
 			var err error
-			it.Commentary, err = ec.unmarshalOString2ᚖstring(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("commentary"))
+			it.Commentary, err = ec.unmarshalOString2ᚖstring(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "time":
 			var err error
-			it.Time, err = ec.unmarshalOTime2timeᚐTime(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("time"))
+			it.Time, err = ec.unmarshalOTime2timeᚐTime(childCtx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4240,7 +4266,18 @@ func (ec *executionContext) marshalNCharacter2githubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx context.Context, v interface{}) (models.Episode, error) {
 	var res models.Episode
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx context.Context, sel ast.SelectionSet, v models.Episode) graphql.Marshaler {
@@ -4875,7 +4912,18 @@ func (ec *executionContext) marshalODroid2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) unmarshalOEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx context.Context, v interface{}) (models.Episode, error) {
 	var res models.Episode
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisode(ctx context.Context, sel ast.SelectionSet, v models.Episode) graphql.Marshaler {
@@ -5004,7 +5052,18 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 
 func (ec *executionContext) unmarshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(ctx context.Context, v interface{}) (models.LengthUnit, error) {
 	var res models.LengthUnit
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐLengthUnit(ctx context.Context, sel ast.SelectionSet, v models.LengthUnit) graphql.Marshaler {

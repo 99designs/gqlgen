@@ -16,6 +16,7 @@ import (
 	"github.com/99designs/gqlgen/integration/remote_api"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -316,7 +317,8 @@ func (ec *executionContext) dir_magic_args(ctx context.Context, rawArgs map[stri
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["kind"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("kind"))
+		arg0, err = ec.unmarshalOInt2ᚖint(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -330,7 +332,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -344,7 +347,8 @@ func (ec *executionContext) field_Query_complexity_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["value"]; ok {
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
+		arg0, err = ec.unmarshalNInt2int(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -358,7 +362,8 @@ func (ec *executionContext) field_Query_date_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 models.DateFilter
 	if tmp, ok := rawArgs["filter"]; ok {
-		arg0, err = ec.unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("filter"))
+		arg0, err = ec.unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -372,7 +377,8 @@ func (ec *executionContext) field_Query_error_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 *models.ErrorType
 	if tmp, ok := rawArgs["type"]; ok {
-		arg0, err = ec.unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("type"))
+		arg0, err = ec.unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -386,7 +392,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -400,7 +407,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1973,19 +1981,25 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj in
 		switch k {
 		case "value":
 			var err error
-			it.Value, err = ec.unmarshalNString2string(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "timezone":
 			var err error
-			it.Timezone, err = ec.unmarshalOString2ᚖstring(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("timezone"))
+			it.Timezone, err = ec.unmarshalOString2ᚖstring(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "op":
 			var err error
-			it.Op, err = ec.unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("op"))
+			it.Op, err = ec.unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(childCtx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2854,7 +2868,18 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 
 func (ec *executionContext) unmarshalODATE_FILTER_OP2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx context.Context, v interface{}) (models.DateFilterOp, error) {
 	var res models.DateFilterOp
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalODATE_FILTER_OP2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx context.Context, sel ast.SelectionSet, v models.DateFilterOp) graphql.Marshaler {
@@ -2929,7 +2954,18 @@ func (ec *executionContext) marshalOElement2ᚖgithubᚗcomᚋ99designsᚋgqlgen
 
 func (ec *executionContext) unmarshalOErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx context.Context, v interface{}) (models.ErrorType, error) {
 	var res models.ErrorType
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOErrorType2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx context.Context, sel ast.SelectionSet, v models.ErrorType) graphql.Marshaler {

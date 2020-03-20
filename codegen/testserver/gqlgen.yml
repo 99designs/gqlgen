@@ -14,3 +14,6 @@ autobind:
   - "github.com/99designs/gqlgen/codegen/testserver/introspection"
   - "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
 
+models:
+  Email:
+    model: "github.com/99designs/gqlgen/codegen/testserver.Email"

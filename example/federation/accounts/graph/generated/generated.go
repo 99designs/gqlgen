@@ -246,7 +246,8 @@ func (ec *executionContext) field_Entity_findUserByID_args(ctx context.Context, 
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -260,7 +261,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -274,7 +276,8 @@ func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawA
 	args := map[string]interface{}{}
 	var arg0 []map[string]interface{}
 	if tmp, ok := rawArgs["representations"]; ok {
-		arg0, err = ec.unmarshalN_Any2ᚕmapᚄ(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("representations"))
+		arg0, err = ec.unmarshalN_Any2ᚕmapᚄ(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -288,7 +291,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -302,7 +306,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}

@@ -43,6 +43,10 @@ func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMeth
 	panic("not implemented")
 }
 
+func (r *mutationResolver) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
+	panic("not implemented")
+}
+
 func (r *overlappingFieldsResolver) OldFoo(ctx context.Context, obj *OverlappingFields) (int, error) {
 	panic("not implemented")
 }
@@ -319,6 +323,9 @@ func (r *Resolver) ForcedResolver() ForcedResolverResolver { return &forcedResol
 // ModelMethods returns ModelMethodsResolver implementation.
 func (r *Resolver) ModelMethods() ModelMethodsResolver { return &modelMethodsResolver{r} }
 
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
 // OverlappingFields returns OverlappingFieldsResolver implementation.
 func (r *Resolver) OverlappingFields() OverlappingFieldsResolver { return &overlappingFieldsResolver{r} }
 
@@ -344,6 +351,7 @@ type backedByInterfaceResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }
 type forcedResolverResolver struct{ *Resolver }
 type modelMethodsResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
 type overlappingFieldsResolver struct{ *Resolver }
 type panicsResolver struct{ *Resolver }
 type primitiveResolver struct{ *Resolver }

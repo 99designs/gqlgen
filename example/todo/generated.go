@@ -15,6 +15,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -280,7 +281,8 @@ func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[st
 	args := map[string]interface{}{}
 	var arg0 Role
 	if tmp, ok := rawArgs["role"]; ok {
-		arg0, err = ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐRole(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("role"))
+		arg0, err = ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐRole(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -294,7 +296,8 @@ func (ec *executionContext) dir_user_args(ctx context.Context, rawArgs map[strin
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2int(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2int(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -308,7 +311,8 @@ func (ec *executionContext) field_MyMutation_createTodo_args(ctx context.Context
 	args := map[string]interface{}{}
 	var arg0 TodoInput
 	if tmp, ok := rawArgs["todo"]; ok {
-		arg0, err = ec.unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐTodoInput(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("todo"))
+		arg0, err = ec.unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐTodoInput(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -322,7 +326,8 @@ func (ec *executionContext) field_MyMutation_updateTodo_args(ctx context.Context
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2int(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2int(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -330,7 +335,8 @@ func (ec *executionContext) field_MyMutation_updateTodo_args(ctx context.Context
 	args["id"] = arg0
 	var arg1 map[string]interface{}
 	if tmp, ok := rawArgs["changes"]; ok {
-		arg1, err = ec.unmarshalNMap2map(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("changes"))
+		arg1, err = ec.unmarshalNMap2map(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -344,7 +350,8 @@ func (ec *executionContext) field_MyQuery___type_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -358,7 +365,8 @@ func (ec *executionContext) field_MyQuery_todo_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2int(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2int(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -372,7 +380,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -386,7 +395,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1811,13 +1821,17 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj int
 		switch k {
 		case "text":
 			var err error
-			it.Text, err = ec.unmarshalNString2string(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("text"))
+			it.Text, err = ec.unmarshalNString2string(childCtx, v)
 			if err != nil {
 				return it, err
 			}
 		case "done":
 			var err error
-			it.Done, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+
+			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("done"))
+			it.Done, err = ec.unmarshalOBoolean2ᚖbool(childCtx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2269,7 +2283,18 @@ func (ec *executionContext) marshalNMap2map(ctx context.Context, sel ast.Selecti
 
 func (ec *executionContext) unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐRole(ctx context.Context, v interface{}) (Role, error) {
 	var res Role
-	return res, res.UnmarshalGQL(v)
+	err := res.UnmarshalGQL(v)
+	if err != nil {
+		fic := graphql.GetFieldInputContext(ctx)
+		path := fic.Path()
+		if gerr, ok := err.(*gqlerror.Error); ok {
+			gerr.Path = path
+			return res, gerr
+		} else {
+			return res, gqlerror.WrapPath(path, err)
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtodoᚐRole(ctx context.Context, sel ast.SelectionSet, v Role) graphql.Marshaler {

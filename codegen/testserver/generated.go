@@ -60,6 +60,7 @@ type DirectiveRoot struct {
 	Logged        func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
 	MakeNil       func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	MakeTypedNil  func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Order         func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
 	Range         func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
 	ToNull        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Unimplemented func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
@@ -211,6 +212,7 @@ type ComplexityRoot struct {
 
 	ObjectDirectives struct {
 		NullableText func(childComplexity int) int
+		Order        func(childComplexity int) int
 		Text         func(childComplexity int) int
 	}
 
@@ -849,6 +851,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ObjectDirectives.NullableText(childComplexity), true
+
+	case "ObjectDirectives.order":
+		if e.complexity.ObjectDirectives.Order == nil {
+			break
+		}
+
+		return e.complexity.ObjectDirectives.Order(childComplexity), true
 
 	case "ObjectDirectives.text":
 		if e.complexity.ObjectDirectives.Text == nil {
@@ -1712,6 +1721,7 @@ directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINI
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
 directive @unimplemented on FIELD_DEFINITION
+directive @order(location: String!) on FIELD_DEFINITION | OBJECT
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
@@ -1719,7 +1729,7 @@ extend type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
-    directiveObject: ObjectDirectives
+    directiveObject: ObjectDirectives @order(location: "Query_field")
     directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
@@ -1746,9 +1756,10 @@ input InnerDirectives {
     message: String! @length(min: 1, message: "not valid")
 }
 
-type ObjectDirectives {
+type ObjectDirectives @order(location: "ObjectDirectives_object") {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
+    order: [String!]!
 }
 
 type ObjectDirectivesWithCustomGoModel {
@@ -2239,6 +2250,20 @@ func (ec *executionContext) dir_logged_args(ctx context.Context, rawArgs map[str
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) dir_order_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["location"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["location"] = arg0
 	return args, nil
 }
 
@@ -4803,6 +4828,37 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ObjectDirectives",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Order, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectivesWithCustomGoModel) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5936,8 +5992,42 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().DirectiveObject(rctx)
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().DirectiveObject(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Order == nil {
+				return nil, errors.New("directive order is not implemented")
+			}
+			return ec.directives.Order(ctx, nil, directive0, location)
+		}
+		directive2 := func(ctx context.Context) (interface{}, error) {
+			location, err := ec.unmarshalNString2string(ctx, "Query_field")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Order == nil {
+				return nil, errors.New("directive order is not implemented")
+			}
+			return ec.directives.Order(ctx, nil, directive1, location)
+		}
+
+		tmp, err := directive2(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*ObjectDirectives); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver.ObjectDirectives`, tmp)
 	})
 
 	if resTmp == nil {
@@ -10549,6 +10639,11 @@ func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.Selec
 			}
 		case "nullableText":
 			out.Values[i] = ec._ObjectDirectives_nullableText(ctx, field, obj)
+		case "order":
+			out.Values[i] = ec._ObjectDirectives_order(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

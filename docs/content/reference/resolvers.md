@@ -47,7 +47,7 @@ ignoring the case of the fields
 This is also very common use case that comes up where we want to bind a graphQL field to a Go struct method
 
 ```go
-type Person {
+type Person struct {
     Name string
 }
 

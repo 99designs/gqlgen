@@ -95,11 +95,13 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 		}
 		entities += e.Name
 
-		resolverArgs := ""
-		for _, field := range e.KeyFields {
-			resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
+		if e.ResolverName != "" {
+			resolverArgs := ""
+			for _, field := range e.KeyFields {
+				resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
+			}
+			resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
 		}
-		resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
 
 	}
 
@@ -160,6 +162,10 @@ type RequireField struct {
 	Name          string                // The same name as the type declaration
 	NameGo        string                // The Go struct field name
 	TypeReference *config.TypeReference // The Go representation of that field type
+}
+
+func (e *Entity) allFieldsAreKeyFields() bool {
+	return len(e.Def.Fields) == len(e.KeyFields)
 }
 
 func (f *federation) GenerateCode(data *codegen.Data) error {
@@ -251,13 +257,36 @@ func (f *federation) setEntities(schema *ast.Schema) {
 
 				}
 
-				f.Entities = append(f.Entities, &Entity{
+				e := &Entity{
 					Name:         schemaType.Name,
 					KeyFields:    keyFields,
 					Def:          schemaType,
 					ResolverName: resolverName,
 					Requires:     requires,
-				})
+				}
+				// If our schema has a field with a type defined in
+				// another service, then we need to define an "empty
+				// extend" of that type in this service, so this service
+				// knows what the type is like.  But the graphql-server
+				// will never ask us to actually resolve this "empty
+				// extend", so we don't require a resolver function for
+				// it.  (Well, it will never ask in practice; it's
+				// unclear whether the spec guarantees this.  See
+				// https://github.com/apollographql/apollo-server/issues/3852
+				// ).  Example:
+				//    type MyType {
+				//       myvar: TypeDefinedInOtherService
+				//    }
+				//    // Federation needs this type, but
+				//    // it doesn't need a resolver for it!
+				//    extend TypeDefinedInOtherService @key(fields: "id") {
+				//       id: ID @extends
+				//    }
+				if (e.allFieldsAreKeyFields()) {
+					e.ResolverName = ""
+				}
+
+				f.Entities = append(f.Entities, e)
 			}
 		}
 	}

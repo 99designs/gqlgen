@@ -141,6 +141,68 @@ func NewError() *TestServer {
 	return srv
 }
 
+func NewCache() *TestServer {
+	next := make(chan struct{})
+
+	schema := gqlparser.MustLoadSchema(&ast.Source{Input: `
+		type Query {
+			name: String!
+		}
+	`})
+
+	srv := &TestServer{
+		next: next,
+	}
+
+	srv.Server = handler.New(&graphql.ExecutableSchemaMock{
+		ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
+			rc := graphql.GetOperationContext(ctx)
+			switch rc.Operation.Operation {
+			case ast.Query:
+				ran := false
+				return func(ctx context.Context) *graphql.Response {
+					if ran {
+						return nil
+					}
+					ran = true
+					// Field execution happens inside the generated code, lets simulate some of it.
+					ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+						Object: "Query",
+						Field: graphql.CollectedField{
+							Field: &ast.Field{
+								Name:       "name",
+								Alias:      "name",
+								Definition: schema.Types["Query"].Fields.ForName("name"),
+							},
+						},
+					})
+					res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+						graphql.SetCacheHint(ctx, graphql.CacheScopePublic, time.Second*10)
+						return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
+					})
+					if err != nil {
+						panic(err)
+					}
+					return res.(*graphql.Response)
+				}
+			case ast.Mutation:
+				return graphql.OneShot(graphql.ErrorResponse(ctx, "mutations are not supported"))
+			case ast.Subscription:
+				return graphql.OneShot(graphql.ErrorResponse(ctx, "subscriptions are not supported"))
+			default:
+				return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
+			}
+		},
+		SchemaFunc: func() *ast.Schema {
+			return schema
+		},
+		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (i int, b bool) {
+			return srv.complexity, true
+		},
+	})
+	return srv
+}
+
 type TestServer struct {
 	*handler.Server
 	next       chan struct{}

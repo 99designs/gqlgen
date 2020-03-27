@@ -99,6 +99,38 @@ func TestPOST(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("cache control", func(t *testing.T) {
+		t.Run("write extensions", func(t *testing.T) {
+			hWithCache := testserver.NewCache()
+			hWithCache.AddTransport(transport.POST{
+				EnableCache: true,
+			})
+
+			resp := doRequest(hWithCache, "POST", "/graphql", `{"query":"{ name }"}`)
+			assert.Equal(t, http.StatusOK, resp.Code)
+			assert.Equal(t, `{"data":{"name":"test"},"extensions":{"cacheControl":{"version":1,"hints":[{"path":["name"],"maxAge":10,"scope":"PUBLIC"}]}}}`, resp.Body.String())
+		})
+
+		t.Run("write cache control header", func(t *testing.T) {
+			hWithCache := testserver.NewCache()
+			hWithCache.AddTransport(transport.POST{
+				EnableCache: true,
+			})
+
+			resp := doRequest(hWithCache, "POST", "/graphql", `{"query":"{ name }"}`)
+			assert.Equal(t, "max-age: 10 public", resp.Header().Get("Cache-Control"))
+		})
+
+		t.Run("not writes cache control header", func(t *testing.T) {
+			hWithCache := testserver.NewCache()
+			hWithCache.AddTransport(transport.POST{})
+
+			resp := doRequest(hWithCache, "POST", "/graphql", `{"query":"{ name }"}`)
+			assert.Empty(t, resp.Header().Get("Cache-Control"))
+		})
+
+	})
 }
 
 func doRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {

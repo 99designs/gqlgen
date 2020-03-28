@@ -20,16 +20,19 @@ func (c Cache) Validate(_ graphql.ExecutableSchema) error {
 }
 
 func (c Cache) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-	cache := &graphql.CacheControlExtension{Version: 1}
-	ctx = context.WithValue(ctx, graphql.CacheKey, cache)
+	ctx = graphql.WithCacheControlExtension(ctx)
 
 	result := next(ctx)
 
-	if result != nil && len(cache.Hints) > 0 {
-		if result.Extensions == nil {
-			result.Extensions = make(map[string]interface{})
+	if result != nil {
+		cache := graphql.CacheControl(ctx)
+
+		if len(cache.Hints) > 0 {
+			if result.Extensions == nil {
+				result.Extensions = make(map[string]interface{})
+			}
+			result.Extensions["cacheControl"] = cache
 		}
-		result.Extensions["cacheControl"] = cache
 	}
 
 	return result

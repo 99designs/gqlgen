@@ -28,15 +28,26 @@ func TestCacheControl_SetCacheHint(t *testing.T) {
 		fooCtx := createFieldContext("foo")
 
 		ctx := WithFieldContext(WithResponseContext(context.Background(), nil, nil), fooCtx)
+		ctx = WithCacheControlExtension(ctx)
+
 		SetCacheHint(ctx, CacheScopePublic, time.Minute)
 
-		c, ok := GetExtension(ctx, "cacheControl").(*CacheControlExtension)
-		require.True(t, ok)
-
+		c := CacheControl(ctx)
 		require.Equal(t, 1, c.Version)
 		require.Equal(t, fooCtx.Path(), c.Hints[0].Path)
 		require.Equal(t, time.Minute.Seconds(), c.Hints[0].MaxAge)
 		require.Equal(t, CacheScopePublic, c.Hints[0].Scope)
+	})
+
+	t.Run("should not add hint in context", func(t *testing.T) {
+		fooCtx := createFieldContext("foo")
+
+		ctx := WithFieldContext(WithResponseContext(context.Background(), nil, nil), fooCtx)
+
+		SetCacheHint(ctx, CacheScopePublic, time.Minute)
+
+		c := CacheControl(ctx)
+		require.Nil(t, c)
 	})
 
 }

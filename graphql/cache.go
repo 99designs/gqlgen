@@ -90,10 +90,24 @@ func (cache CacheControlExtension) OverallPolicy() OverallCachePolicy {
 	}
 }
 
-const CacheKey = "key"
+const cacheKey = "key"
+
+func WithCacheControlExtension(ctx context.Context) context.Context {
+	cache := &CacheControlExtension{Version: 1}
+	return context.WithValue(ctx, cacheKey, cache)
+}
+
+func CacheControl(ctx context.Context) *CacheControlExtension {
+	c := ctx.Value(cacheKey)
+	if c, ok := c.(*CacheControlExtension); ok {
+		return c
+	}
+
+	return nil
+}
 
 func SetCacheHint(ctx context.Context, scope CacheScope, maxAge time.Duration) {
-	c := ctx.Value(CacheKey)
+	c := ctx.Value(cacheKey)
 	if c, ok := c.(*CacheControlExtension); ok {
 		c.AddHint(Hint{
 			Path:   GetFieldContext(ctx).Path(),

@@ -164,8 +164,13 @@ type RequireField struct {
 	TypeReference *config.TypeReference // The Go representation of that field type
 }
 
-func (e *Entity) allFieldsAreKeyFields() bool {
-	return len(e.Def.Fields) == len(e.KeyFields)
+func (e *Entity) allFieldsAreExternal() bool {
+	for _, field := range e.Def.Fields {
+		if field.Directives.ForName("external") == nil {
+			return false
+		}
+	}
+	return true
 }
 
 func (f *federation) GenerateCode(data *codegen.Data) error {
@@ -280,9 +285,9 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				//    // Federation needs this type, but
 				//    // it doesn't need a resolver for it!
 				//    extend TypeDefinedInOtherService @key(fields: "id") {
-				//       id: ID @extends
+				//       id: ID @external
 				//    }
-				if (e.allFieldsAreKeyFields()) {
+				if (e.allFieldsAreExternal()) {
 					e.ResolverName = ""
 				}
 

@@ -71,7 +71,7 @@ func (cache CacheControl) OverallPolicy() OverallCachePolicy {
 
 	for _, c := range cache.Hints {
 
-		if c.Scope == "PRIVATE" {
+		if c.Scope == CacheScopePrivate {
 			scope = c.Scope
 		}
 

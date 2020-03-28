@@ -61,7 +61,6 @@ func (cache *CacheControl) AddHint(h Hint) {
 }
 
 // OverallPolicy return a calculated cache policy
-// TODO should implement the spec. ref: https://www.apollographql.com/docs/apollo-server/performance/caching/#adding-cache-hints-statically-in-your-schema
 func (cache CacheControl) OverallPolicy() OverallCachePolicy {
 	var (
 		scope     = CacheScopePublic

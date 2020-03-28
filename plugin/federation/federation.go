@@ -181,7 +181,9 @@ func (e *Entity) allFieldsAreExternal() bool {
 
 func (f *federation) GenerateCode(data *codegen.Data) error {
 	if len(f.Entities) > 0 {
-		data.Objects.ByName("Entity").Root = true
+		if data.Objects.ByName("Entity") != nil {
+			data.Objects.ByName("Entity").Root = true
+		}
 		for _, e := range f.Entities {
 			obj := data.Objects.ByName(e.Def.Name)
 			for _, field := range obj.Fields {

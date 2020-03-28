@@ -86,26 +86,10 @@ func (cache CacheControlExtension) OverallPolicy() OverallCachePolicy {
 	}
 }
 
-const cacheKey = "key"
-
-func EnableCacheMiddleware(ctx context.Context, next ResponseHandler) *Response {
-	cache := &CacheControlExtension{Version: 1}
-	ctx = context.WithValue(ctx, cacheKey, cache)
-
-	result := next(ctx)
-
-	if len(cache.Hints) > 0 {
-		if result.Extensions == nil {
-			result.Extensions = make(map[string]interface{})
-		}
-		result.Extensions["cacheControl"] = cache
-	}
-
-	return result
-}
+const CacheKey = "key"
 
 func SetCacheHint(ctx context.Context, scope CacheScope, maxAge time.Duration) {
-	c := ctx.Value(cacheKey)
+	c := ctx.Value(CacheKey)
 	if c, ok := c.(*CacheControlExtension); ok {
 		c.AddHint(Hint{
 			Path:   GetFieldContext(ctx).Path(),

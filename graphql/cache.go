@@ -65,7 +65,7 @@ func (cache *CacheControlExtension) AddHint(h Hint) {
 }
 
 // OverallPolicy return a calculated cache policy
-func (cache CacheControlExtension) OverallPolicy() OverallCachePolicy {
+func (cache *CacheControlExtension) OverallPolicy() OverallCachePolicy {
 	var (
 		scope     = CacheScopePublic
 		maxAge    float64

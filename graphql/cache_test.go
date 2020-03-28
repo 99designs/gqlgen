@@ -30,7 +30,7 @@ func TestCacheControl_SetCacheHint(t *testing.T) {
 		ctx := WithFieldContext(WithResponseContext(context.Background(), nil, nil), fooCtx)
 		SetCacheHint(ctx, CacheScopePublic, time.Minute)
 
-		c, ok := GetExtension(ctx, "cacheControl").(*CacheControl)
+		c, ok := GetExtension(ctx, "cacheControl").(*CacheControlExtension)
 		require.True(t, ok)
 
 		require.Equal(t, 1, c.Version)
@@ -133,7 +133,7 @@ func TestCacheControl_OverallPolicy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cache := CacheControl{
+			cache := CacheControlExtension{
 				Version: tt.fields.Version,
 				Hints:   tt.fields.Hints,
 			}

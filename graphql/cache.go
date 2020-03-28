@@ -51,17 +51,17 @@ type OverallCachePolicy struct {
 	Scope  CacheScope
 }
 
-type CacheControl struct {
+type CacheControlExtension struct {
 	Version int    `json:"version"`
 	Hints   []Hint `json:"hints"`
 }
 
-func (cache *CacheControl) AddHint(h Hint) {
+func (cache *CacheControlExtension) AddHint(h Hint) {
 	cache.Hints = append(cache.Hints, h)
 }
 
 // OverallPolicy return a calculated cache policy
-func (cache CacheControl) OverallPolicy() OverallCachePolicy {
+func (cache CacheControlExtension) OverallPolicy() OverallCachePolicy {
 	var (
 		scope     = CacheScopePublic
 		maxAge    float64
@@ -86,29 +86,39 @@ func (cache CacheControl) OverallPolicy() OverallCachePolicy {
 	}
 }
 
+const cacheKey = "key"
+
+func EnableCacheMiddleware(ctx context.Context, next ResponseHandler) *Response {
+	cache := &CacheControlExtension{Version: 1}
+	ctx = context.WithValue(ctx, cacheKey, cache)
+
+	result := next(ctx)
+
+	if len(cache.Hints) > 0 {
+		if result.Extensions == nil {
+			result.Extensions = make(map[string]interface{})
+		}
+		result.Extensions["cacheControl"] = cache
+	}
+
+	return result
+}
+
 func SetCacheHint(ctx context.Context, scope CacheScope, maxAge time.Duration) {
-	h := Hint{
-		Path:   GetFieldContext(ctx).Path(),
-		MaxAge: maxAge.Seconds(),
-		Scope:  scope,
-	}
-
-	c := GetExtension(ctx, "cacheControl")
-	if c == nil {
-		cache := &CacheControl{Version: 1}
-		cache.AddHint(h)
-		RegisterExtension(ctx, "cacheControl", cache)
-	}
-
-	if c, ok := c.(*CacheControl); ok {
-		c.AddHint(h)
+	c := ctx.Value(cacheKey)
+	if c, ok := c.(*CacheControlExtension); ok {
+		c.AddHint(Hint{
+			Path:   GetFieldContext(ctx).Path(),
+			MaxAge: maxAge.Seconds(),
+			Scope:  scope,
+		})
 	}
 }
 
 // GetOverallCachePolicy is responsible to extract cache policy from a Response.
 // If does not have any cacheControl in Extensions, it will return (empty, false)
 func GetOverallCachePolicy(response *Response) (OverallCachePolicy, bool) {
-	if cache, ok := response.Extensions["cacheControl"].(*CacheControl); ok {
+	if cache, ok := response.Extensions["cacheControl"].(*CacheControlExtension); ok {
 		overallPolicy := cache.OverallPolicy()
 		if overallPolicy.MaxAge > 0 {
 			return overallPolicy, true

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql"
+
 	"github.com/99designs/gqlgen/example/cachecontrol/graph"
 	"github.com/99designs/gqlgen/example/cachecontrol/graph/generated"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -15,7 +17,9 @@ const defaultPort = "8080"
 
 func new() *handler.Server {
 	cfg := generated.Config{Resolvers: &graph.Resolver{}}
-	return handler.NewDefaultServer(generated.NewExecutableSchema(cfg))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(cfg))
+	srv.AroundResponses(graphql.EnableCacheMiddleware)
+	return srv
 }
 
 func main() {

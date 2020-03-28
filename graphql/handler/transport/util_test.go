@@ -17,7 +17,7 @@ func TestWriteCacheControl(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := &graphql.Response{
 			Extensions: map[string]interface{}{
-				"cacheControl": &graphql.CacheControl{
+				"cacheControl": &graphql.CacheControlExtension{
 					Version: 1,
 					Hints: []graphql.Hint{
 						{MaxAge: time.Minute.Seconds(), Scope: graphql.CacheScopePublic},
@@ -45,7 +45,7 @@ func TestWriteCacheControl(t *testing.T) {
 				{},
 			},
 			Extensions: map[string]interface{}{
-				"cacheControl": &graphql.CacheControl{
+				"cacheControl": &graphql.CacheControlExtension{
 					Version: 1,
 					Hints: []graphql.Hint{
 						{MaxAge: time.Minute.Seconds(), Scope: graphql.CacheScopePublic},

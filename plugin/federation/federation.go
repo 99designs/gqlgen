@@ -287,7 +287,7 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				//    extend TypeDefinedInOtherService @key(fields: "id") {
 				//       id: ID @external
 				//    }
-				if (e.allFieldsAreExternal()) {
+				if e.allFieldsAreExternal() {
 					e.ResolverName = ""
 				}
 

@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -54,9 +55,12 @@ type OverallCachePolicy struct {
 type CacheControlExtension struct {
 	Version int    `json:"version"`
 	Hints   []Hint `json:"hints"`
+	mu      sync.Mutex
 }
 
 func (cache *CacheControlExtension) AddHint(h Hint) {
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
 	cache.Hints = append(cache.Hints, h)
 }
 

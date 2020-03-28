@@ -63,21 +63,26 @@ func (cache *CacheControl) AddHint(h Hint) {
 // OverallPolicy return a calculated cache policy
 // TODO should implement the spec. ref: https://www.apollographql.com/docs/apollo-server/performance/caching/#adding-cache-hints-statically-in-your-schema
 func (cache CacheControl) OverallPolicy() OverallCachePolicy {
-	var scope = CacheScopePublic
-	var maxAge *float64
+	var (
+		scope     = CacheScopePublic
+		maxAge    float64
+		hasMaxAge bool
+	)
+
 	for _, c := range cache.Hints {
 
 		if c.Scope == "PRIVATE" {
 			scope = c.Scope
 		}
 
-		if maxAge == nil || *maxAge > c.MaxAge {
-			maxAge = &c.MaxAge
+		if !hasMaxAge || c.MaxAge < maxAge {
+			hasMaxAge = true
+			maxAge = c.MaxAge
 		}
 	}
 
 	return OverallCachePolicy{
-		MaxAge: *maxAge,
+		MaxAge: maxAge,
 		Scope:  scope,
 	}
 }

@@ -111,18 +111,24 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 		return nil
 	}
 
+	// resolvers can be empty if a service defines only "empty
+	// extend" types.  This should be rare.
+	if resolvers != "" {
+		resolvers = `
+# fake type to build resolver interfaces for users to implement
+type Entity {
+	` + resolvers + `
+}
+`
+	}
+
 	return &ast.Source{
 		Name:    "federation/entity.graphql",
 		BuiltIn: true,
 		Input: `
 # a union of all types that use the @key directive
 union _Entity = ` + entities + `
-
-# fake type to build resolver interfaces for users to implement
-type Entity {
-	` + resolvers + `
-}
-
+` + resolvers + `
 type _Service {
   sdl: String
 }

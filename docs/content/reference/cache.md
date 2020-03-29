@@ -5,7 +5,7 @@ linkTitle: "Caching"
 menu: { main: { parent: 'reference' } }
 ---
 
-Gqlgen provides some cache capabilities that provide ways to setting caching directives in `extensions.cacheControl`
+Gqlgen provides some cache capabilities that provide ways to set caching directives in `extensions.cacheControl`
 and HTTP `Cache-Control` header.
 
 See more in `/example/cachecontrol`.
@@ -40,10 +40,10 @@ func main() {
 }
 ```
 
-the Cache extension is an `graphql.ResponseInterceptor` that provides cache control mechanism in each request context
+the Cache extension is a `graphql.ResponseInterceptor` that provides cache control mechanism in each request context
 and inject `cacheControl` into `graphql.Response`.
 
-### Setting cache hints
+### Set cache hints
 
 After you enable `extension.Cache`, you can set cache hints using `graphql.SetCacheHint` function in your resolvers.
 
@@ -59,7 +59,7 @@ func (r *commentResolver) Post(ctx context.Context, obj *model.Comment) (*model.
         return nil, err
 	}
 
-	// Setting a CacheHint
+	// Set a CacheHint
 	graphql.SetCacheHint(ctx, graphql.CacheScopePublic, 10*time.Second)
 
 	return post, nil
@@ -68,7 +68,7 @@ func (r *commentResolver) Post(ctx context.Context, obj *model.Comment) (*model.
 
 ### CDN Caching
 
-It's possible to enable the Gqlgen to provide an `Cache-Control` header based on your cache hints in `GET` or `POST` requests.
+It's possible to enable the Gqlgen to provide a `Cache-Control` header based on your cache hints in `GET` or `POST` requests.
 To do it you need to enable on `transport.GET` or `transport.POST`:
 
 ```go
@@ -85,4 +85,4 @@ func main() {
 }
 ```
 
-Doing it, Gqlgen will write the lowest max-age defined in cacheControl extensions.
+Doing it, Gqlgen write the lowest max-age defined in cacheControl extensions.

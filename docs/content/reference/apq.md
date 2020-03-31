@@ -25,8 +25,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/go-redis/redis"
-	"github.com/pkg/errors"
 )
 
 type Cache struct {
@@ -43,20 +45,20 @@ func NewCache(redisAddress string, password string, ttl time.Duration) (*Cache, 
 
 	err := client.Ping().Err()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, fmt.Errorf("could not create cache: %w", err)
 	}
 
 	return &Cache{client: client, ttl: ttl}, nil
 }
 
-func (c *Cache) Add(ctx context.Context, hash string, query string) {
-	c.client.Set(apqPrefix + hash, query, c.ttl)
+func (c *Cache) Add(ctx context.Context, key string, value interface{}) {
+	c.client.Set(apqPrefix+key, value, c.ttl)
 }
 
-func (c *Cache) Get(ctx context.Context, hash string) (string, bool) {
-	s, err := c.client.Get(apqPrefix + hash).Result()
+func (c *Cache) Get(ctx context.Context, key string) (interface{}, bool) {
+	s, err := c.client.Get(apqPrefix + key).Result()
 	if err != nil {
-		return "", false
+		return struct{}{}, false
 	}
 	return s, true
 }
@@ -68,10 +70,11 @@ func main() {
 	}
 	
 	c := Config{ Resolvers: &resolvers{} }
-	gqlHandler := handler.GraphQL(
-		blog.NewExecutableSchema(c),
-		handler.EnablePersistedQueryCache(cache),
+	gqlHandler := handler.New(
+		generated.NewExecutableSchema(c),
 	)
+	gqlHandler.AddTransport(transport.POST{})
+	gqlHandler.Use(extension.AutomaticPersistedQuery{Cache: cache})
 	http.Handle("/query", gqlHandler)
 }
 ```

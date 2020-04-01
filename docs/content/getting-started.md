@@ -44,7 +44,7 @@ This will create our suggested package layout. You can modify these paths in gql
 │   ├── model                - A package for all your graph models, generated or otherwise
 │   │   └── models_gen.go
 │   ├── resolver.go          - The root graph resolver type. This file wont get regenerated
-│   ├── schema.graphqls      - Some schema. You can split the schema into as many graphql files as you like
+│   ├── schema.graphql      - Some schema. You can split the schema into as many graphql files as you like
 │   └── schema.resolvers.go  - the resolver implementation for schema.graphql
 └── server.go                - The entry point to your app. Customize it however you see fit
 ```
@@ -85,7 +85,7 @@ type Mutation {
 
 ### Implement the resolvers
 
-`gqlgen generate` compares the schema file (`graph/schema.graphqls`) with the models `graph/model/*` and wherever it
+`gqlgen generate` compares the schema file (`graph/schema.graphql`) with the models `graph/model/*` and wherever it
 can it will bind directly to the model.
 
 If we take a look in `graph/schema.resolvers.go` we will see all the times that gqlgen couldn't match them up. For us

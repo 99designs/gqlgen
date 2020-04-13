@@ -2,7 +2,7 @@
 linkTitle: Changesets
 title: Using maps as changesets
 description: Falling back to map[string]interface{} to allow for presence checks.
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 Occasionally you need to distinguish presence from nil (undefined vs null). In gqlgen we do this using maps:

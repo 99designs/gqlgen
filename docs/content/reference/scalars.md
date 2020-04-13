@@ -2,7 +2,7 @@
 linkTitle: Scalars
 title: Mapping GraphQL scalar types to Go types
 description: Mapping GraphQL scalar types to Go types
-menu: { main: { parent: "reference" } }
+menu: { main: { parent: "reference", weight: 10 } }
 ---
 
 ## Built-in helpers

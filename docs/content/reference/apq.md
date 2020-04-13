@@ -1,8 +1,8 @@
 ---
 title: "Automatic persisted queries"
-description:   
+description:
 linkTitle: "APQ"
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 When you work with GraphQL by default your queries are transferred with every request. That can waste significant
@@ -13,10 +13,10 @@ to register query hash with original query on a server.
 
 ## Usage
 
-In order to enable Automatic Persisted Queries you need to change your client. For more information see 
+In order to enable Automatic Persisted Queries you need to change your client. For more information see
 [Automatic Persisted Queries Link](https://github.com/apollographql/apollo-link-persisted-queries) documentation.
 
-For the server you need to implement `PersistedQueryCache` interface and pass instance to 
+For the server you need to implement `PersistedQueryCache` interface and pass instance to
 `handler.EnablePersistedQueryCache` option.
 
 See example using [go-redis](https://github.com/go-redis/redis) package below:
@@ -66,7 +66,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot create APQ redis cache: %v", err)
 	}
-	
+
 	c := Config{ Resolvers: &resolvers{} }
 	gqlHandler := handler.GraphQL(
 		blog.NewExecutableSchema(c),

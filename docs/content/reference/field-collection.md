@@ -2,7 +2,7 @@
 title: 'Determining which fields were requested by a query'
 description: How to determine which fields a query requested in a resolver.
 linkTitle: Field Collection
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 Often it is useful to know which fields were queried for in a resolver.  Having this information can allow a resolver to only fetch the set of fields required from a data source, rather than over-fetching everything and allowing gqlgen to do the rest.

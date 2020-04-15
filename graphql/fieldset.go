@@ -36,15 +36,14 @@ func (m *FieldSet) Dispatch() {
 		// more than one concurrent task, use the main goroutine to do one, only spawn goroutines for the others
 
 		var wg sync.WaitGroup
-		for _, d := range m.delayed[1:] {
-			wg.Add(1)
+		wg.Add(len(m.delayed))
+		for _, d := range m.delayed {
 			go func(d delayedResult) {
 				m.Values[d.i] = d.f()
 				wg.Done()
 			}(d)
 		}
 
-		m.Values[m.delayed[0].i] = m.delayed[0].f()
 		wg.Wait()
 	}
 }

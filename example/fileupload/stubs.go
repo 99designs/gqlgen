@@ -24,9 +24,6 @@ type Stub struct {
 func (r *Stub) Mutation() MutationResolver {
 	return &stubMutation{r}
 }
-func (r *Stub) Query() QueryResolver {
-	return &stubQuery{r}
-}
 
 type stubMutation struct{ *Stub }
 
@@ -41,6 +38,10 @@ func (r *stubMutation) MultipleUpload(ctx context.Context, files []*graphql.Uplo
 }
 func (r *stubMutation) MultipleUploadWithPayload(ctx context.Context, req []*model.UploadFile) ([]*model.File, error) {
 	return r.MutationResolver.MultipleUploadWithPayload(ctx, req)
+}
+
+func (r *Stub) Query() QueryResolver {
+	return &stubQuery{r}
 }
 
 type stubQuery struct{ *Stub }

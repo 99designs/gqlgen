@@ -27,4 +27,3 @@ type Mutation {
     multipleUpload(files: [Upload!]!): [File!]!
     multipleUploadWithPayload(req: [UploadFile!]!): [File!]!
 }
-

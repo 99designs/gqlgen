@@ -268,7 +268,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "schema.graphql", Input: `type Query {
+	{Name: "schema.graphql", Input: `type Query {
     customers: [Customer!]
 
     # these methods are here to test code generation of nested arrays

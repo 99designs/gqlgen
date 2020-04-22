@@ -209,7 +209,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "graph/schema.graphqls", Input: `extend type Query {
+	{Name: "graph/schema.graphqls", Input: `extend type Query {
     topProducts(first: Int = 5): [Product]
 }
 
@@ -219,7 +219,7 @@ type Product @key(fields: "upc") {
     price: Int!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "federation/directives.graphql", Input: `
+	{Name: "federation/directives.graphql", Input: `
 scalar _Any
 scalar _FieldSet
 
@@ -229,7 +229,7 @@ directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
 directive @extends on OBJECT
 `, BuiltIn: true},
-	&ast.Source{Name: "federation/entity.graphql", Input: `
+	{Name: "federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
 union _Entity = Product
 

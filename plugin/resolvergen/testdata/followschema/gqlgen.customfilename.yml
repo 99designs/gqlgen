@@ -9,7 +9,7 @@ resolver:
   type: CustomResolverType
   layout: follow-schema
   dir: testdata/followschema/out
-  filename_template: "%s.custom.go"
+  filename_template: "{name}.custom.go"
 
 models:
   Resolver:

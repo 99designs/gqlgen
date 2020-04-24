@@ -1,7 +1,6 @@
 package resolvergen
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -197,12 +196,12 @@ type Resolver struct {
 	Implementation string
 }
 
-func gqlToResolverName(base string, gqlname, filename string) string {
+func gqlToResolverName(base string, gqlname, filenameTmpl string) string {
 	gqlname = filepath.Base(gqlname)
 	ext := filepath.Ext(gqlname)
-	if filename == "" {
-		filename = "%s.resolvers.go"
+	if filenameTmpl == "" {
+		filenameTmpl = "{name}.resolvers.go"
 	}
-
-	return filepath.Join(base, fmt.Sprintf(filename, strings.TrimSuffix(gqlname, ext)))
+	filename := strings.ReplaceAll(filenameTmpl, "{name}", strings.TrimSuffix(gqlname, ext))
+	return filepath.Join(base, filename)
 }

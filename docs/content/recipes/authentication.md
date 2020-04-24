@@ -5,7 +5,7 @@ linkTitle: Authentication
 menu: { main: { parent: 'recipes' } }
 ---
 
-We have an app where users are authenticated using a cookie in the HTTP request, and we want to check this authentication status somewhere in our graph. Because GraphQL is transport agnostic we can't assume there will even be an HTTP request, so we need to expose these authention details to our graph using a middleware.
+We have an app where users are authenticated using a cookie in the HTTP request, and we want to check this authentication status somewhere in our graph. Because GraphQL is transport agnostic we can't assume there will even be an HTTP request, so we need to expose these authentication details to our graph using a middleware.
 
 
 ```go

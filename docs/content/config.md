@@ -35,6 +35,7 @@ resolver:
   layout: follow-schema
   dir: graph
   package: graph
+  filename_template: "{name}.custom.go"
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json

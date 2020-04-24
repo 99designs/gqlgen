@@ -1,8 +1,8 @@
 ---
 title: Using schema directives to implement permission checks
-description: Implementing graphql schema directives in golang for permission checks.  
+description: Implementing graphql schema directives in golang for permission checks.
 linkTitle: Schema Directives
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 Directives are a bit like annotations in any other language. They give you a way to specify some behaviour without directly binding to the implementation. This can be really useful for cross cutting concerns like permission checks.
@@ -22,7 +22,7 @@ enum Role {
 }
 ```
 
-When we next run go generate, gqlgen will add this directive to the DirectiveRoot 
+When we next run go generate, gqlgen will add this directive to the DirectiveRoot
 ```go
 type DirectiveRoot struct {
 	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
@@ -61,7 +61,7 @@ func main() {
 			// block calling the next resolver
 			return nil, fmt.Errorf("Access denied")
 		}
-		
+
 		// or let it pass through
 		return next(ctx)
 	}

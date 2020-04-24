@@ -25,10 +25,12 @@
 			{{ end }}
 		{{- if .HasChildren }}
 			<ul class="submenu">
-			{{- range .Children }}
+			{{- range .Children.ByWeight }}
 				<li class="{{ if $currentPage.IsMenuCurrent "main" . }}active{{ end }}">
 					{{ if .URL }}
-						<a class="menu-item" href="{{ .URL }}">{{ .Name }}</a>
+						<a class="menu-item" href="{{ .URL }}">
+							{{ .Name | safeHTML }}
+						</a>
 					{{ else }}
 						<span class="menu-item">{{ .Name }}</span>
 					{{ end }}

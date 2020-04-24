@@ -2,7 +2,7 @@
 title: "Preventing overly complex queries"
 description: Avoid denial of service attacks by calculating query costs and limiting complexity.
 linkTitle: Query Complexity
-menu: { main: { parent: "reference" } }
+menu: { main: { parent: "reference", weight: 10 } }
 ---
 
 GraphQL provides a powerful way to query your data, but putting great power in the hands of your API clients also exposes you to a risk of denial of service attacks. You can mitigate that risk with gqlgen by limiting the complexity of the queries you allow.

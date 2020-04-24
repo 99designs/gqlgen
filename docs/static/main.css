@@ -525,3 +525,21 @@ tr td:first-child, th {
 .alert-warning a {
     color: #ff6;
 }
+
+.icon {
+    display: inline-block;
+    line-height: .75em;
+    width: 1em;
+}
+
+.icon svg {
+    display: block;
+}
+
+.icon svg path {
+    fill: currentColor;
+}
+
+ul.submenu span.icon {
+    padding: 0;
+}

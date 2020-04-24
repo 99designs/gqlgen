@@ -83,6 +83,13 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			}
 			f.TypeReference = tr
 		}
+		if f.TypeReference != nil {
+			dirs, err := b.getDirectives(f.TypeReference.Definition.Directives)
+			if err != nil {
+				errret = err
+			}
+			f.Directives = append(dirs, f.Directives...)
+		}
 	}()
 
 	f.Stream = obj.Stream

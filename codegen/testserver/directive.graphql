@@ -6,6 +6,7 @@ directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINI
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
 directive @unimplemented on FIELD_DEFINITION
+directive @order(location: String!) on FIELD_DEFINITION | OBJECT
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
@@ -13,7 +14,7 @@ extend type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
-    directiveObject: ObjectDirectives
+    directiveObject: ObjectDirectives @order(location: "Query_field")
     directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
@@ -40,9 +41,10 @@ input InnerDirectives {
     message: String! @length(min: 1, message: "not valid")
 }
 
-type ObjectDirectives {
+type ObjectDirectives @order(location: "ObjectDirectives_object") {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
+    order: [String!]!
 }
 
 type ObjectDirectivesWithCustomGoModel {

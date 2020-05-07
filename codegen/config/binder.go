@@ -417,7 +417,8 @@ func IsNilable(t types.Type) bool {
 	_, isPtr := t.(*types.Pointer)
 	_, isMap := t.(*types.Map)
 	_, isInterface := t.(*types.Interface)
-	return isPtr || isMap || isInterface
+	_, isSlice := t.(*types.Slice)
+	return isPtr || isMap || isInterface || isSlice
 }
 
 func hasMethod(it types.Type, name string) bool {

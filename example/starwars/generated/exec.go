@@ -4248,6 +4248,9 @@ func (ec *executionContext) marshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋ
 }
 
 func (ec *executionContext) unmarshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisodeᚄ(ctx context.Context, v interface{}) ([]models.Episode, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4268,6 +4271,12 @@ func (ec *executionContext) unmarshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []models.Episode) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4375,6 +4384,9 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 }
 
 func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v interface{}) ([]int, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4395,6 +4407,12 @@ func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
@@ -4404,6 +4422,9 @@ func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.S
 }
 
 func (ec *executionContext) unmarshalNInt2ᚕᚕintᚄ(ctx context.Context, v interface{}) ([][]int, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4424,6 +4445,12 @@ func (ec *executionContext) unmarshalNInt2ᚕᚕintᚄ(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalNInt2ᚕᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v [][]int) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNInt2ᚕintᚄ(ctx, sel, v[i])
@@ -4441,6 +4468,12 @@ func (ec *executionContext) marshalNReview2githubᚗcomᚋ99designsᚋgqlgenᚋe
 }
 
 func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐReviewᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Review) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4502,6 +4535,12 @@ func (ec *executionContext) marshalNSearchResult2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalNSearchResult2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐSearchResultᚄ(ctx context.Context, sel ast.SelectionSet, v []models.SearchResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4571,6 +4610,12 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4622,6 +4667,9 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 }
 
 func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4642,6 +4690,12 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4691,6 +4745,12 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4732,6 +4792,12 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4826,6 +4892,9 @@ func (ec *executionContext) marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlg
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4906,6 +4975,9 @@ func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.S
 }
 
 func (ec *executionContext) marshalOFriendsEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋstarwarsᚋmodelsᚐFriendsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.FriendsEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -5045,6 +5117,9 @@ func (ec *executionContext) marshalOStarship2ᚕᚖgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5138,6 +5213,9 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5178,6 +5256,9 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5215,6 +5296,9 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -5270,6 +5354,9 @@ func (ec *executionContext) marshalO__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}

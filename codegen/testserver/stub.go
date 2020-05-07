@@ -94,6 +94,7 @@ type Stub struct {
 		WrappedStruct                    func(ctx context.Context) (*WrappedStruct, error)
 		WrappedScalar                    func(ctx context.Context) (WrappedScalar, error)
 		WrappedMap                       func(ctx context.Context) (WrappedMap, error)
+		WrappedSlice                     func(ctx context.Context) (WrappedSlice, error)
 	}
 	SubscriptionResolver struct {
 		Updated                func(ctx context.Context) (<-chan string, error)
@@ -109,6 +110,9 @@ type Stub struct {
 	}
 	WrappedMapResolver struct {
 		Get func(ctx context.Context, obj WrappedMap, key string) (string, error)
+	}
+	WrappedSliceResolver struct {
+		Get func(ctx context.Context, obj WrappedSlice, idx int) (string, error)
 	}
 }
 
@@ -147,6 +151,9 @@ func (r *Stub) User() UserResolver {
 }
 func (r *Stub) WrappedMap() WrappedMapResolver {
 	return &stubWrappedMap{r}
+}
+func (r *Stub) WrappedSlice() WrappedSliceResolver {
+	return &stubWrappedSlice{r}
 }
 
 type stubBackedByInterface struct{ *Stub }
@@ -376,6 +383,9 @@ func (r *stubQuery) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
 func (r *stubQuery) WrappedMap(ctx context.Context) (WrappedMap, error) {
 	return r.QueryResolver.WrappedMap(ctx)
 }
+func (r *stubQuery) WrappedSlice(ctx context.Context) (WrappedSlice, error) {
+	return r.QueryResolver.WrappedSlice(ctx)
+}
 
 type stubSubscription struct{ *Stub }
 
@@ -411,4 +421,10 @@ type stubWrappedMap struct{ *Stub }
 
 func (r *stubWrappedMap) Get(ctx context.Context, obj WrappedMap, key string) (string, error) {
 	return r.WrappedMapResolver.Get(ctx, obj, key)
+}
+
+type stubWrappedSlice struct{ *Stub }
+
+func (r *stubWrappedSlice) Get(ctx context.Context, obj WrappedSlice, idx int) (string, error) {
+	return r.WrappedSliceResolver.Get(ctx, obj, idx)
 }

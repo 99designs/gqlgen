@@ -82,15 +82,7 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 }
 
 func (o *Object) Reference() types.Type {
-	switch v := o.Type.(type) {
-	case *types.Named:
-		if _, isInterface := v.Underlying().(*types.Interface); isInterface {
-			return o.Type
-		}
-		if _, isMap := v.Underlying().(*types.Map); isMap {
-			return o.Type
-		}
-	case *types.Pointer, *types.Slice, *types.Map:
+	if config.IsNilable(o.Type) {
 		return o.Type
 	}
 

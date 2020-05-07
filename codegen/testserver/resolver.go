@@ -279,6 +279,10 @@ func (r *queryResolver) WrappedMap(ctx context.Context) (WrappedMap, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) WrappedSlice(ctx context.Context) (WrappedSlice, error) {
+	panic("not implemented")
+}
+
 func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan string, error) {
 	panic("not implemented")
 }
@@ -315,8 +319,14 @@ func (r *wrappedMapResolver) Get(ctx context.Context, obj WrappedMap, key string
 	panic("not implemented")
 }
 
+func (r *wrappedSliceResolver) Get(ctx context.Context, obj WrappedSlice, idx int) (string, error) {
+	panic("not implemented")
+}
+
 // BackedByInterface returns BackedByInterfaceResolver implementation.
-func (r *Resolver) BackedByInterface() BackedByInterfaceResolver { return &backedByInterfaceResolver{r} }
+func (r *Resolver) BackedByInterface() BackedByInterfaceResolver {
+	return &backedByInterfaceResolver{r}
+}
 
 // Errors returns ErrorsResolver implementation.
 func (r *Resolver) Errors() ErrorsResolver { return &errorsResolver{r} }
@@ -328,7 +338,9 @@ func (r *Resolver) ForcedResolver() ForcedResolverResolver { return &forcedResol
 func (r *Resolver) ModelMethods() ModelMethodsResolver { return &modelMethodsResolver{r} }
 
 // OverlappingFields returns OverlappingFieldsResolver implementation.
-func (r *Resolver) OverlappingFields() OverlappingFieldsResolver { return &overlappingFieldsResolver{r} }
+func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
+	return &overlappingFieldsResolver{r}
+}
 
 // Panics returns PanicsResolver implementation.
 func (r *Resolver) Panics() PanicsResolver { return &panicsResolver{r} }
@@ -351,6 +363,9 @@ func (r *Resolver) User() UserResolver { return &userResolver{r} }
 // WrappedMap returns WrappedMapResolver implementation.
 func (r *Resolver) WrappedMap() WrappedMapResolver { return &wrappedMapResolver{r} }
 
+// WrappedSlice returns WrappedSliceResolver implementation.
+func (r *Resolver) WrappedSlice() WrappedSliceResolver { return &wrappedSliceResolver{r} }
+
 type backedByInterfaceResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }
 type forcedResolverResolver struct{ *Resolver }
@@ -363,3 +378,4 @@ type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
 type wrappedMapResolver struct{ *Resolver }
+type wrappedSliceResolver struct{ *Resolver }

@@ -51,6 +51,7 @@ type ResolverRoot interface {
 	Subscription() SubscriptionResolver
 	User() UserResolver
 	WrappedMap() WrappedMapResolver
+	WrappedSlice() WrappedSliceResolver
 }
 
 type DirectiveRoot struct {
@@ -299,6 +300,7 @@ type ComplexityRoot struct {
 		ValidType                        func(childComplexity int) int
 		WrappedMap                       func(childComplexity int) int
 		WrappedScalar                    func(childComplexity int) int
+		WrappedSlice                     func(childComplexity int) int
 		WrappedStruct                    func(childComplexity int) int
 	}
 
@@ -341,6 +343,10 @@ type ComplexityRoot struct {
 
 	WrappedMap struct {
 		Get func(childComplexity int, key string) int
+	}
+
+	WrappedSlice struct {
+		Get func(childComplexity int, idx int) int
 	}
 
 	WrappedStruct struct {
@@ -450,6 +456,7 @@ type QueryResolver interface {
 	WrappedStruct(ctx context.Context) (*WrappedStruct, error)
 	WrappedScalar(ctx context.Context) (WrappedScalar, error)
 	WrappedMap(ctx context.Context) (WrappedMap, error)
+	WrappedSlice(ctx context.Context) (WrappedSlice, error)
 }
 type SubscriptionResolver interface {
 	Updated(ctx context.Context) (<-chan string, error)
@@ -465,6 +472,9 @@ type UserResolver interface {
 }
 type WrappedMapResolver interface {
 	Get(ctx context.Context, obj WrappedMap, key string) (string, error)
+}
+type WrappedSliceResolver interface {
+	Get(ctx context.Context, obj WrappedSlice, idx int) (string, error)
 }
 
 type executableSchema struct {
@@ -1417,6 +1427,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.WrappedScalar(childComplexity), true
 
+	case "Query.wrappedSlice":
+		if e.complexity.Query.WrappedSlice == nil {
+			break
+		}
+
+		return e.complexity.Query.WrappedSlice(childComplexity), true
+
 	case "Query.wrappedStruct":
 		if e.complexity.Query.WrappedStruct == nil {
 			break
@@ -1609,6 +1626,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.WrappedMap.Get(childComplexity, args["key"].(string)), true
+
+	case "WrappedSlice.get":
+		if e.complexity.WrappedSlice.Get == nil {
+			break
+		}
+
+		args, err := ec.field_WrappedSlice_get_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.WrappedSlice.Get(childComplexity, args["idx"].(int)), true
 
 	case "WrappedStruct.name":
 		if e.complexity.WrappedStruct.Name == nil {
@@ -2216,11 +2245,13 @@ extend type Query {
     wrappedStruct: WrappedStruct!
     wrappedScalar: WrappedScalar!
     wrappedMap: WrappedMap!
+    wrappedSlice: WrappedSlice!
 }
 
 type WrappedStruct { name: String! }
 scalar WrappedScalar
 type WrappedMap { get(key: String!): String! }
+type WrappedSlice { get(idx: Int!): String! }
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -3045,6 +3076,20 @@ func (ec *executionContext) field_WrappedMap_get_args(ctx context.Context, rawAr
 		}
 	}
 	args["key"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_WrappedSlice_get_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["idx"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["idx"] = arg0
 	return args, nil
 }
 
@@ -7129,6 +7174,37 @@ func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql
 	return ec.marshalNWrappedMap2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedMap(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_wrappedSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().WrappedSlice(rctx)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(WrappedSlice)
+	fc.Result = res
+	return ec.marshalNWrappedSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedSlice(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8010,6 +8086,44 @@ func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.C
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.WrappedMap().Get(rctx, obj, args["key"].(string))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql.CollectedField, obj WrappedSlice) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "WrappedSlice",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_WrappedSlice_get_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.WrappedSlice().Get(rctx, obj, args["idx"].(int))
 	})
 
 	if resTmp == nil {
@@ -11587,6 +11701,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "wrappedSlice":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_wrappedSlice(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -11808,6 +11936,42 @@ func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSe
 					}
 				}()
 				res = ec._WrappedMap_get(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var wrappedSliceImplementors = []string{"WrappedSlice"}
+
+func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.SelectionSet, obj WrappedSlice) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, wrappedSliceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("WrappedSlice")
+		case "get":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._WrappedSlice_get(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -12219,10 +12383,19 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 }
 
 func (ec *executionContext) unmarshalNBytes2ᚕbyte(ctx context.Context, v interface{}) ([]byte, error) {
+	if v == nil {
+		return nil, nil
+	}
 	return UnmarshalBytes(v)
 }
 
 func (ec *executionContext) marshalNBytes2ᚕbyte(ctx context.Context, sel ast.SelectionSet, v []byte) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	res := MarshalBytes(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -12448,6 +12621,9 @@ func (ec *executionContext) marshalNMarshalPanic2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐMarshalPanicᚄ(ctx context.Context, v interface{}) ([]MarshalPanic, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -12468,6 +12644,12 @@ func (ec *executionContext) unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designs�
 }
 
 func (ec *executionContext) marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐMarshalPanicᚄ(ctx context.Context, sel ast.SelectionSet, v []MarshalPanic) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNMarshalPanic2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐMarshalPanic(ctx, sel, v[i])
@@ -12491,6 +12673,12 @@ func (ec *executionContext) marshalNPrimitive2githubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveᚄ(ctx context.Context, sel ast.SelectionSet, v []Primitive) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12532,6 +12720,12 @@ func (ec *executionContext) marshalNPrimitiveString2githubᚗcomᚋ99designsᚋg
 }
 
 func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveStringᚄ(ctx context.Context, sel ast.SelectionSet, v []PrimitiveString) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12597,6 +12791,9 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 }
 
 func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -12617,6 +12814,12 @@ func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v
 }
 
 func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
@@ -12626,6 +12829,9 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 }
 
 func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -12646,6 +12852,12 @@ func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v
 }
 
 func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
@@ -12705,6 +12917,12 @@ func (ec *executionContext) marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcod
 }
 
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12776,6 +12994,16 @@ func (ec *executionContext) marshalNWrappedScalar2githubᚗcomᚋ99designsᚋgql
 	return res
 }
 
+func (ec *executionContext) marshalNWrappedSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedSlice(ctx context.Context, sel ast.SelectionSet, v WrappedSlice) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._WrappedSlice(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNWrappedStruct2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedStruct(ctx context.Context, sel ast.SelectionSet, v WrappedStruct) graphql.Marshaler {
 	return ec._WrappedStruct(ctx, sel, &v)
 }
@@ -12795,6 +13023,12 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12846,6 +13080,9 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 }
 
 func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -12866,6 +13103,12 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12915,6 +13158,12 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12956,6 +13205,12 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -13079,6 +13334,9 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -13116,6 +13374,9 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 }
 
 func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐCheckIssue896ᚄ(ctx context.Context, sel ast.SelectionSet, v []*CheckIssue896) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -13404,6 +13665,9 @@ func (ec *executionContext) unmarshalOOuterInput2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) ([][]*OuterInput, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -13424,6 +13688,9 @@ func (ec *executionContext) unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99desig
 }
 
 func (ec *executionContext) unmarshalOOuterInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterInput(ctx context.Context, v interface{}) ([]*OuterInput, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -13456,6 +13723,9 @@ func (ec *executionContext) marshalOOuterObject2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx context.Context, sel ast.SelectionSet, v [][]*OuterObject) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -13496,6 +13766,9 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99design
 }
 
 func (ec *executionContext) marshalOOuterObject2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOuterObject(ctx context.Context, sel ast.SelectionSet, v []*OuterObject) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -13569,6 +13842,9 @@ func (ec *executionContext) unmarshalORecursiveInputSlice2githubᚗcomᚋ99desig
 }
 
 func (ec *executionContext) unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSliceᚄ(ctx context.Context, v interface{}) ([]RecursiveInputSlice, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -13604,6 +13880,9 @@ func (ec *executionContext) marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋco
 }
 
 func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx context.Context, sel ast.SelectionSet, v []Shape) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -13663,6 +13942,9 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -13686,6 +13968,9 @@ func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
@@ -13695,6 +13980,9 @@ func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel
 }
 
 func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -13715,6 +14003,9 @@ func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v
 }
 
 func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -13821,6 +14112,9 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -13861,6 +14155,9 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -13898,6 +14195,9 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}
@@ -13953,6 +14253,9 @@ func (ec *executionContext) marshalO__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	if v == nil {
 		return graphql.Null
 	}

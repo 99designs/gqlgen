@@ -16,7 +16,13 @@ func TestSlices(t *testing.T) {
 
 	t.Run("nulls vs empty slices", func(t *testing.T) {
 		resolvers.QueryResolver.Slices = func(ctx context.Context) (slices *Slices, e error) {
-			return &Slices{}, nil
+			// Test3 and Test4 are not allowed to be nil
+			return &Slices{
+				Test1: nil,
+				Test2: nil,
+				Test3: make([]*string, 0),
+				Test4: make([]string, 0),
+			}, nil
 		}
 
 		var resp struct {

@@ -1692,7 +1692,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "builtinscalar.graphql", Input: `
+	{Name: "builtinscalar.graphql", Input: `
 """
 Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
 added to the TypeMap
@@ -1701,7 +1701,7 @@ type Map {
     id: ID!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "complexity.graphql", Input: `extend type Query {
+	{Name: "complexity.graphql", Input: `extend type Query {
     overlapping: OverlappingFields
 }
 
@@ -1713,7 +1713,7 @@ type OverlappingFields {
   new_foo: Int!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "directive.graphql", Input: `directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+	{Name: "directive.graphql", Input: `directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 directive @custom on ARGUMENT_DEFINITION
 directive @logged(id: UUID!) on FIELD
@@ -1766,7 +1766,7 @@ type ObjectDirectivesWithCustomGoModel {
     nullableText: String @toNull
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "embedded.graphql", Input: `extend type Query {
+	{Name: "embedded.graphql", Input: `extend type Query {
     embeddedCase1: EmbeddedCase1
     embeddedCase2: EmbeddedCase2
     embeddedCase3: EmbeddedCase3
@@ -1784,7 +1784,7 @@ type EmbeddedCase3 @goModel(model:"testserver.EmbeddedCase3") {
     unexportedEmbeddedInterfaceExportedMethod: String!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "enum.graphql", Input: `enum EnumTest {
+	{Name: "enum.graphql", Input: `enum EnumTest {
     OK
     NG
 }
@@ -1797,7 +1797,7 @@ extend type Query {
     enumInInput(input: InputWithEnumValue): EnumTest!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "interfaces.graphql", Input: `extend type Query {
+	{Name: "interfaces.graphql", Input: `extend type Query {
     shapes: [Shape]
     noShape: Shape @makeNil
     node: Node!
@@ -1860,7 +1860,7 @@ type ConcreteNodeInterface implements Node {
     child: Node!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "issue896.graphql", Input: `# This example should build stable output. If the file content starts
+	{Name: "issue896.graphql", Input: `# This example should build stable output. If the file content starts
 # alternating nondeterministically between two outputs, then see
 # https://github.com/99designs/gqlgen/issues/896.
 
@@ -1879,7 +1879,7 @@ extend type Subscription {
   issue896b: [CheckIssue896] # Note the "!" or lack thereof.
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "loops.graphql", Input: `type LoopA {
+	{Name: "loops.graphql", Input: `type LoopA {
     b: LoopB!
 }
 
@@ -1887,7 +1887,7 @@ type LoopB {
     a: LoopA!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "maps.graphql", Input: `extend type Query {
+	{Name: "maps.graphql", Input: `extend type Query {
     mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
     mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
 }
@@ -1906,7 +1906,7 @@ input NestedMapInput {
     map: MapStringInterfaceInput
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "nulls.graphql", Input: `extend type Query {
+	{Name: "nulls.graphql", Input: `extend type Query {
     errorBubble: Error
     errors: Errors
     valid: String!
@@ -1927,7 +1927,7 @@ type Error {
     nilOnRequiredField: String!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "panics.graphql", Input: `extend type Query {
+	{Name: "panics.graphql", Input: `extend type Query {
     panics: Panics
 }
 
@@ -1940,7 +1940,7 @@ type Panics {
 
 scalar MarshalPanic
 `, BuiltIn: false},
-	&ast.Source{Name: "primitive_objects.graphql", Input: `extend type Query {
+	{Name: "primitive_objects.graphql", Input: `extend type Query {
     primitiveObject: [Primitive!]!
     primitiveStringObject: [PrimitiveString!]!
 }
@@ -1956,7 +1956,7 @@ type PrimitiveString {
     len: Int!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "scalar_default.graphql", Input: `extend type Query {
+	{Name: "scalar_default.graphql", Input: `extend type Query {
     defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!
 }
 
@@ -1967,7 +1967,7 @@ type EmbeddedDefaultScalar {
     value: DefaultScalarImplementation
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+	{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Query {
@@ -2066,7 +2066,7 @@ enum Status {
 
 scalar Time
 `, BuiltIn: false},
-	&ast.Source{Name: "slices.graphql", Input: `extend type Query {
+	{Name: "slices.graphql", Input: `extend type Query {
     slices: Slices
     scalarSlice: Bytes!
 }
@@ -2080,7 +2080,7 @@ type Slices {
 
 scalar Bytes
 `, BuiltIn: false},
-	&ast.Source{Name: "typefallback.graphql", Input: `extend type Query {
+	{Name: "typefallback.graphql", Input: `extend type Query {
     fallback(arg: FallbackToStringEncoding!): FallbackToStringEncoding!
 }
 
@@ -2090,7 +2090,7 @@ enum FallbackToStringEncoding {
     C
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "useptr.graphql", Input: `type A {
+	{Name: "useptr.graphql", Input: `type A {
     id: ID!
 }
 
@@ -2104,7 +2104,7 @@ extend type Query {
     optionalUnion: TestUnion
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "validtypes.graphql", Input: `extend type Query {
+	{Name: "validtypes.graphql", Input: `extend type Query {
     validType: ValidType
 }
 
@@ -2183,7 +2183,7 @@ type Content_Post {
 
 union Content_Child = Content_User | Content_Post
 `, BuiltIn: false},
-	&ast.Source{Name: "weird_type_cases.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/583
+	{Name: "weird_type_cases.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/583
 
 type asdfIt { id: ID! }
 type iIt { id: ID! }
@@ -2192,7 +2192,7 @@ type XXIt { id: ID! }
 type AbIt { id: ID! }
 type XxIt { id: ID! }
 `, BuiltIn: false},
-	&ast.Source{Name: "wrapped_type.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/721
+	{Name: "wrapped_type.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/721
 
 extend type Query {
     wrappedStruct: WrappedStruct!

@@ -222,7 +222,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+	{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Query {
@@ -233,7 +233,7 @@ type Mutation {
   createTodo(input: NewTodo!): Todo!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "todo.graphql", Input: `type Todo {
+	{Name: "todo.graphql", Input: `type Todo {
   id: ID! @goField(forceResolver: true)
   databaseId: Int!
   text: String!
@@ -246,7 +246,7 @@ input NewTodo {
   userId: String!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "user.graphql", Input: `type User
+	{Name: "user.graphql", Input: `type User
 @goModel(model:"github.com/99designs/gqlgen/example/config.User") {
   id: ID!
   name: String! @goField(name:"FullName")

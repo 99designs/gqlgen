@@ -235,7 +235,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "schema.graphql", Input: `type Query {
+	{Name: "schema.graphql", Input: `type Query {
     user(id: ID!): User
     search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
 }

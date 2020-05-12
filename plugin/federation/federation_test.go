@@ -10,6 +10,7 @@ import (
 func TestWithEntities(t *testing.T) {
 	f, cfg := load(t, "test_data/gqlgen.yml")
 
+	require.Equal(t, "sdl", cfg.Schema.Types["_Service"].Fields[0].Name)
 	require.Equal(t, []string{"ExternalExtension", "Hello", "World"}, cfg.Schema.Types["_Entity"].Types)
 
 	require.Equal(t, "findExternalExtensionByUpc", cfg.Schema.Types["Entity"].Fields[0].Name)
@@ -22,8 +23,9 @@ func TestWithEntities(t *testing.T) {
 func TestNoEntities(t *testing.T) {
 	f, cfg := load(t, "test_data/nokey.yml")
 
-	err := f.MutateConfig(cfg)
-	require.NoError(t, err)
+	require.Equal(t, "sdl", cfg.Schema.Types["_Service"].Fields[0].Name)
+
+	require.NoError(t, f.MutateConfig(cfg))
 }
 
 func load(t *testing.T, name string) (*federation, *config.Config) {

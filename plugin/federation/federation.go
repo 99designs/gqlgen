@@ -24,12 +24,12 @@ func New() plugin.Plugin {
 }
 
 // Name returns the plugin name
-func (f *federation) Name() string {
+func (federation) Name() string {
 	return "federation"
 }
 
 // MutateConfig mutates the configuration
-func (f *federation) MutateConfig(cfg *config.Config) error {
+func (federation) MutateConfig(cfg *config.Config) error {
 	builtins := config.TypeMap{
 		"_Service": {
 			Model: config.StringList{
@@ -52,20 +52,19 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	}
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
-			return fmt.Errorf("%v already exists which must be reserved when Federation is enabled", typeName)
+			return fmt.Errorf("%s already exists which must be reserved when Federation is enabled", typeName)
 		}
 		cfg.Models[typeName] = entry
 	}
-	cfg.Directives["external"] = config.DirectiveConfig{SkipRuntime: true}
-	cfg.Directives["requires"] = config.DirectiveConfig{SkipRuntime: true}
-	cfg.Directives["provides"] = config.DirectiveConfig{SkipRuntime: true}
-	cfg.Directives["key"] = config.DirectiveConfig{SkipRuntime: true}
-	cfg.Directives["extends"] = config.DirectiveConfig{SkipRuntime: true}
+	directives := [...]string{"external", "requires", "provides", "key", "extends"}
+	for _, directive := range directives {
+		cfg.Directives[directive] = config.DirectiveConfig{SkipRuntime: true}
+	}
 
 	return nil
 }
 
-func (f *federation) InjectSourceEarly() *ast.Source {
+func (federation) InjectSourceEarly() *ast.Source {
 	return &ast.Source{
 		Name: "federation/directives.graphql",
 		Input: `
@@ -87,49 +86,57 @@ directive @extends on OBJECT
 func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 	f.setEntities(schema)
 
-	entities := ""
-	resolvers := ""
-	for i, e := range f.Entities {
-		if i != 0 {
-			entities += " | "
+	input := `
+type _Service {
+    sdl: String
+}
+
+extend type Query {
+    _service: _Service!
+}
+`
+	if len(f.Entities) > 0 {
+		var entities, resolvers strings.Builder
+		for i, e := range f.Entities {
+			if i != 0 {
+				entities.WriteString(" | ")
+			}
+			entities.WriteString(e.Name)
+
+			resolvers.WriteString("    ")
+			resolvers.WriteString(e.ResolverName)
+			resolvers.WriteByte('(')
+			for i, field := range e.KeyFields {
+				if i != 0 {
+					resolvers.WriteString(", ")
+				}
+				resolvers.WriteString(field.Field.Name)
+				resolvers.WriteString(": ")
+				resolvers.WriteString(field.Field.Type.String())
+			}
+			resolvers.WriteString("): ")
+			resolvers.WriteString(e.Def.Name)
+			resolvers.WriteString("!\n")
 		}
-		entities += e.Name
+		input += `
+# a union of all types that use the @key directive
+union _Entity = ` + entities.String() + `
 
-		resolverArgs := ""
-		for _, field := range e.KeyFields {
-			resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
-		}
-		resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
+# fake type to build resolver interfaces for users to implement
+type Entity {
+` + resolvers.String() + `
+}
 
-	}
-
-	if len(f.Entities) == 0 {
-		// It's unusual for a service not to have any entities, but
-		// possible if it only exports top-level queries and mutations.
-		return nil
+extend type Query {
+    _entities(representations: [_Any!]!): [_Entity]!
+}
+`
 	}
 
 	return &ast.Source{
 		Name:    "federation/entity.graphql",
 		BuiltIn: true,
-		Input: `
-# a union of all types that use the @key directive
-union _Entity = ` + entities + `
-
-# fake type to build resolver interfaces for users to implement
-type Entity {
-	` + resolvers + `
-}
-
-type _Service {
-  sdl: String
-}
-
-extend type Query {
-  _entities(representations: [_Any!]!): [_Entity]!
-  _service: _Service!
-}
-`,
+		Input:   input,
 	}
 }
 
@@ -196,7 +203,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	})
 }
 
-func (f *federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyField {
+func (federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyField {
 	for _, field := range keyFields {
 		if field.Field.Name == fieldName {
 			return field
@@ -218,14 +225,14 @@ func (f *federation) setEntities(schema *ast.Schema) {
 					panic("Nested fields are not currently supported in @key declaration.")
 				}
 
-				requires := []*Requires{}
+				requires := make([]*Requires, 0, len(schemaType.Fields))
 				for _, f := range schemaType.Fields {
 					dir := f.Directives.ForName("requires")
 					if dir == nil {
 						continue
 					}
 					fields := strings.Split(dir.Arguments[0].Value.Raw, " ")
-					requireFields := []*RequireField{}
+					requireFields := make([]*RequireField, 0, len(fields))
 					for _, f := range fields {
 						requireFields = append(requireFields, &RequireField{
 							Name: f,

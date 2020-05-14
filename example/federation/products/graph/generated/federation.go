@@ -17,7 +17,6 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}
 
 	var sdl []string
-
 	for _, src := range sources {
 		if src.BuiltIn {
 			continue

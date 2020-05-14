@@ -15,6 +15,7 @@ func TestWithEntities(t *testing.T) {
 	require.Equal(t, "findExternalExtensionByUpc", cfg.Schema.Types["Entity"].Fields[0].Name)
 	require.Equal(t, "findHelloByName", cfg.Schema.Types["Entity"].Fields[1].Name)
 	require.Equal(t, "findWorldByFooAndBar", cfg.Schema.Types["Entity"].Fields[2].Name)
+	require.Equal(t, "sdl", cfg.Schema.Types["_Service"].Fields[0].Name)
 
 	require.NoError(t, f.MutateConfig(cfg))
 }
@@ -22,8 +23,11 @@ func TestWithEntities(t *testing.T) {
 func TestNoEntities(t *testing.T) {
 	f, cfg := load(t, "test_data/nokey.yml")
 
-	err := f.MutateConfig(cfg)
-	require.NoError(t, err)
+	require.NotContains(t, cfg.Schema.Types, "Entity")
+	require.Empty(t, cfg.Schema.Types["_Entity"].Types)
+	require.Equal(t, "sdl", cfg.Schema.Types["_Service"].Fields[0].Name)
+
+	require.NoError(t, f.MutateConfig(cfg))
 }
 
 func load(t *testing.T, name string) (*federation, *config.Config) {

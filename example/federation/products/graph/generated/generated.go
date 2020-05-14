@@ -230,13 +230,10 @@ directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
 directive @extends on OBJECT
 `, BuiltIn: true},
 	{Name: "federation/entity.graphql", Input: `
-# a union of all types that use the @key directive
 union _Entity = Product
 
-# fake type to build resolver interfaces for users to implement
 type Entity {
-		findProductByUpc(upc: String!,): Product!
-
+  findProductByUpc(upc: String!): Product!
 }
 
 type _Service {

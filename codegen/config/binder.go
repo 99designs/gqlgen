@@ -156,6 +156,7 @@ func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 		Unmarshaler: ref.Unmarshaler,
 		Marshaler:   ref.Marshaler,
 		IsMarshaler: ref.IsMarshaler,
+		Root:        ref.Root,
 	}
 
 	b.References = append(b.References, newRef)
@@ -171,6 +172,7 @@ type TypeReference struct {
 	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
 	IsMarshaler bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
+	Root        bool
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
@@ -183,6 +185,7 @@ func (ref *TypeReference) Elem() *TypeReference {
 			Unmarshaler: ref.Unmarshaler,
 			Marshaler:   ref.Marshaler,
 			IsMarshaler: ref.IsMarshaler,
+			Root:        ref.Root,
 		}
 	}
 
@@ -195,6 +198,7 @@ func (ref *TypeReference) Elem() *TypeReference {
 			Unmarshaler: ref.Unmarshaler,
 			Marshaler:   ref.Marshaler,
 			IsMarshaler: ref.IsMarshaler,
+			Root:        ref.Root,
 		}
 	}
 	return nil
@@ -313,6 +317,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 				Definition: def,
 				GQL:        schemaType,
 				GO:         MapType,
+				Root:       b.cfg.IsRootDefinition(def),
 			}, nil
 		}
 
@@ -324,6 +329,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 				Definition: def,
 				GQL:        schemaType,
 				GO:         InterfaceType,
+				Root:       b.cfg.IsRootDefinition(def),
 			}, nil
 		}
 
@@ -335,6 +341,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		ref := &TypeReference{
 			Definition: def,
 			GQL:        schemaType,
+			Root:       b.cfg.IsRootDefinition(def),
 		}
 
 		obj, err := b.FindObject(pkgName, typeName)

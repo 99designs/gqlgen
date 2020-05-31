@@ -122,7 +122,7 @@
 						return {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}(v){{else}}v{{- end }})
 					{{- end }}
 				{{- else }}
-					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)
+					return ec._{{$type.Definition.Name}}(ctx, sel{{ if not $type.Root }}, {{ if not $type.IsNilable}}&{{end}} v{{end}})
 				{{- end }}
 			{{- end }}
 		}

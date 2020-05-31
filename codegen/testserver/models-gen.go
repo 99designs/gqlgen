@@ -131,11 +131,17 @@ type OuterObject struct {
 	Inner *InnerObject `json:"inner"`
 }
 
+type Query struct {
+}
+
 type Slices struct {
 	Test1 []*string `json:"test1"`
 	Test2 []string  `json:"test2"`
 	Test3 []*string `json:"test3"`
 	Test4 []string  `json:"test4"`
+}
+
+type Subscription struct {
 }
 
 type User struct {

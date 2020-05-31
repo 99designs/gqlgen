@@ -8,6 +8,12 @@ import (
 	"strconv"
 )
 
+type MyMutation struct {
+}
+
+type MyQuery struct {
+}
+
 // Passed to createTodo to create a new todo
 type TodoInput struct {
 	// The body text

@@ -308,7 +308,9 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 }
 
 // BackedByInterface returns BackedByInterfaceResolver implementation.
-func (r *Resolver) BackedByInterface() BackedByInterfaceResolver { return &backedByInterfaceResolver{r} }
+func (r *Resolver) BackedByInterface() BackedByInterfaceResolver {
+	return &backedByInterfaceResolver{r}
+}
 
 // Errors returns ErrorsResolver implementation.
 func (r *Resolver) Errors() ErrorsResolver { return &errorsResolver{r} }
@@ -320,7 +322,9 @@ func (r *Resolver) ForcedResolver() ForcedResolverResolver { return &forcedResol
 func (r *Resolver) ModelMethods() ModelMethodsResolver { return &modelMethodsResolver{r} }
 
 // OverlappingFields returns OverlappingFieldsResolver implementation.
-func (r *Resolver) OverlappingFields() OverlappingFieldsResolver { return &overlappingFieldsResolver{r} }
+func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
+	return &overlappingFieldsResolver{r}
+}
 
 // Panics returns PanicsResolver implementation.
 func (r *Resolver) Panics() PanicsResolver { return &panicsResolver{r} }

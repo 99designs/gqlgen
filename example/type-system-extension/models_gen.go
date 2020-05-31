@@ -16,6 +16,12 @@ type Node interface {
 	IsNode()
 }
 
+type MyMutation struct {
+}
+
+type MyQuery struct {
+}
+
 type Todo struct {
 	ID       string `json:"id"`
 	Text     string `json:"text"`

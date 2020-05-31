@@ -2,6 +2,9 @@
 
 package model
 
+type Query struct {
+}
+
 type User struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`

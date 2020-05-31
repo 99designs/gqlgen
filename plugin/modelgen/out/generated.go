@@ -61,6 +61,15 @@ func (MissingTypeNullable) IsExistingInterface() {}
 func (MissingTypeNullable) IsMissingUnion()      {}
 func (MissingTypeNullable) IsExistingUnion()     {}
 
+type Mutation struct {
+}
+
+type Query struct {
+}
+
+type Subscription struct {
+}
+
 // TypeWithDescription is a type with a description
 type TypeWithDescription struct {
 	Name *string `json:"name" database:"TypeWithDescriptionname"`

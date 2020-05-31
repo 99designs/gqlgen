@@ -27,3 +27,6 @@ type Post struct {
 }
 
 func (Post) IsEvent() {}
+
+type Query struct {
+}

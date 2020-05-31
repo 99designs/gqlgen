@@ -21,10 +21,16 @@ type FriendsEdge struct {
 	Node   Character `json:"node"`
 }
 
+type Mutation struct {
+}
+
 type PageInfo struct {
 	StartCursor string `json:"startCursor"`
 	EndCursor   string `json:"endCursor"`
 	HasNextPage bool   `json:"hasNextPage"`
+}
+
+type Query struct {
 }
 
 type Starship struct {

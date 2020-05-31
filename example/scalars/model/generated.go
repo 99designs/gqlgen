@@ -10,3 +10,6 @@ type Address struct {
 	ID       external.ObjectID `json:"id"`
 	Location *Point            `json:"location"`
 }
+
+type Query struct {
+}

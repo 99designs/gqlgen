@@ -14,6 +14,9 @@ type DateFilter struct {
 	Op       *DateFilterOp `json:"op"`
 }
 
+type Query struct {
+}
+
 type DateFilterOp string
 
 const (

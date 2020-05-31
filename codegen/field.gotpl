@@ -28,45 +28,51 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		}
 		fc.Args = args
 	{{- end }}
-	{{- if  $.Directives.LocationDirectives "FIELD" }}
-		resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
-			{{ template "field" $field }}
-		})
-	{{ else }}
-		resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-			{{ template "field" $field }}
-		})
-		if err != nil {
-			ec.Error(ctx, err)
-			return {{ $null }}
-		}
-	{{- end }}
-	if resTmp == nil {
-		{{- if $field.TypeReference.GQL.NonNull }}
-			if !graphql.HasFieldError(ctx, fc) {
-				ec.Errorf(ctx, "must not be null")
-			}
-		{{- end }}
-		return {{ $null }}
-	}
-	{{- if $object.Stream }}
-		return func() graphql.Marshaler {
-			res, ok := <-resTmp.(<-chan {{$field.TypeReference.GO | ref}})
-			if !ok {
-				return nil
-			}
-			return graphql.WriterFunc(func(w io.Writer) {
-				w.Write([]byte{'{'})
-				graphql.MarshalString(field.Alias).MarshalGQL(w)
-				w.Write([]byte{':'})
-				ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res).MarshalGQL(w)
-				w.Write([]byte{'}'})
-			})
-		}
-	{{- else }}
-		res := resTmp.({{$field.TypeReference.GO | ref}})
+	{{- if $field.TypeReference.Root }}
+		res := &{{ $field.TypeReference.Definition.Name }}{}
 		fc.Result = res
 		return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
+	{{- else }}
+		{{- if  $.Directives.LocationDirectives "FIELD" }}
+			resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
+				{{ template "field" $field }}
+			})
+		{{ else }}
+			resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+				{{ template "field" $field }}
+			})
+			if err != nil {
+				ec.Error(ctx, err)
+				return {{ $null }}
+			}
+		{{- end }}
+		if resTmp == nil {
+			{{- if $field.TypeReference.GQL.NonNull }}
+				if !graphql.HasFieldError(ctx, fc) {
+					ec.Errorf(ctx, "must not be null")
+				}
+			{{- end }}
+			return {{ $null }}
+		}
+		{{- if $object.Stream }}
+			return func() graphql.Marshaler {
+				res, ok := <-resTmp.(<-chan {{$field.TypeReference.GO | ref}})
+				if !ok {
+					return nil
+				}
+				return graphql.WriterFunc(func(w io.Writer) {
+					w.Write([]byte{'{'})
+					graphql.MarshalString(field.Alias).MarshalGQL(w)
+					w.Write([]byte{':'})
+					ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res).MarshalGQL(w)
+					w.Write([]byte{'}'})
+				})
+			}
+		{{- else }}
+			res := resTmp.({{$field.TypeReference.GO | ref}})
+			fc.Result = res
+			return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
+		{{- end }}
 	{{- end }}
 }
 

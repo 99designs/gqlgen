@@ -139,14 +139,19 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 
 	switch target := target.(type) {
 	case nil:
-		objPos := b.Binder.TypePosition(obj.Type)
-		return fmt.Errorf(
-			"%s:%d adding resolver method for %s.%s, nothing matched",
-			objPos.Filename,
-			objPos.Line,
-			obj.Name,
-			f.Name,
-		)
+		if b.Config.IsRootDefinition(b.Schema.Types[f.Type.Name()]) {
+			// don't create resolver for field with root type because it will always be empty struct of root type
+			return nil
+		} else {
+			objPos := b.Binder.TypePosition(obj.Type)
+			return fmt.Errorf(
+				"%s:%d adding resolver method for %s.%s, nothing matched",
+				objPos.Filename,
+				objPos.Line,
+				obj.Name,
+				f.Name,
+			)
+		}
 
 	case *types.Func:
 		sig := target.Type().(*types.Signature)

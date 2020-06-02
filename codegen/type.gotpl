@@ -8,6 +8,7 @@
 				res, err := ec.{{ $type.Elem.UnmarshalFunc }}(ctx, v)
 				return &res, err
 			{{- else if $type.IsSlice }}
+			    if v == nil { return nil, nil }
 				var vSlice []interface{}
 				if v != nil {
 					if tmp1, ok := v.([]interface{}); ok {

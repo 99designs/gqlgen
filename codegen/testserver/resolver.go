@@ -107,6 +107,10 @@ func (r *queryResolver) InputSlice(ctx context.Context, arg []string) (bool, err
 	panic("not implemented")
 }
 
+func (r *queryResolver) InputNullableSlice(ctx context.Context, arg []string) (bool, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	panic("not implemented")
 }
@@ -308,7 +312,9 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 }
 
 // BackedByInterface returns BackedByInterfaceResolver implementation.
-func (r *Resolver) BackedByInterface() BackedByInterfaceResolver { return &backedByInterfaceResolver{r} }
+func (r *Resolver) BackedByInterface() BackedByInterfaceResolver {
+	return &backedByInterfaceResolver{r}
+}
 
 // Errors returns ErrorsResolver implementation.
 func (r *Resolver) Errors() ErrorsResolver { return &errorsResolver{r} }
@@ -320,7 +326,9 @@ func (r *Resolver) ForcedResolver() ForcedResolverResolver { return &forcedResol
 func (r *Resolver) ModelMethods() ModelMethodsResolver { return &modelMethodsResolver{r} }
 
 // OverlappingFields returns OverlappingFieldsResolver implementation.
-func (r *Resolver) OverlappingFields() OverlappingFieldsResolver { return &overlappingFieldsResolver{r} }
+func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
+	return &overlappingFieldsResolver{r}
+}
 
 // Panics returns PanicsResolver implementation.
 func (r *Resolver) Panics() PanicsResolver { return &panicsResolver{r} }

@@ -8,7 +8,7 @@ require (
 	github.com/gogo/protobuf v1.0.0 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
 	github.com/gorilla/mux v1.6.1 // indirect
-	github.com/gorilla/websocket v1.2.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/golang-lru v0.5.0
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
 	github.com/matryer/moq v0.0.0-20200106131100-75d0ddfc0007

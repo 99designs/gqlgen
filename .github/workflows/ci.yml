@@ -32,6 +32,7 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     container: alpine:3.10
     steps:
       - uses: actions/checkout@v1

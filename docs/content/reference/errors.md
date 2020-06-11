@@ -69,23 +69,20 @@ This hook gives you the ability to customise errors however makes sense in your 
 The default error presenter will capture the resolver path and use the Error() message in the response. It will
 also call an Extensions() method if one is present to return graphql extensions.
 
-You change this when creating the handler:
+You change this when creating the server:
 ```go
-server := handler.GraphQL(MakeExecutableSchema(resolvers),
-	handler.ErrorPresenter(
-		func(ctx context.Context, e error) *gqlerror.Error {
-			// any special logic you want to do here. Must specify path for correct null bubbling behaviour.
-			if myError, ok := e.(MyError) ; ok {
-				return gqlerror.ErrorPathf(graphql.GetResolverContext(ctx).Path(), "Eeek!")
-			}
+server := handler.NewDefaultServer(MakeExecutableSchema(resolvers)
+server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
+    // any special logic you want to do here. Must specify path for correct null bubbling behaviour.
+    if myError, ok := e.(MyError) ; ok {
+        return gqlerror.ErrorPathf(graphql.GetFieldContext(ctx).Path(), "Eeek!")
+    }
 
-			return graphql.DefaultErrorPresenter(ctx, e)
-		}
-	),
-)
+    return graphql.DefaultErrorPresenter(ctx, e)
+})
 ```
 
-This function will be called with the the same resolver context that generated it, so you can extract the
+This function will be called with the same resolver context that generated it, so you can extract the
 current resolver path and whatever other state you might want to notify the client about.
 
 
@@ -95,14 +92,13 @@ There is also a panic handler, called whenever a panic happens to gracefully ret
 stopping parsing. This is a good spot to notify your bug tracker and send a custom message to the user. Any errors
 returned from here will also go through the error presenter.
 
-You change this when creating the handler:
+You change this when creating the server:
 ```go
-server := handler.GraphQL(MakeExecutableSchema(resolvers),
-	handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
-		// notify bug tracker...
+server := handler.NewDefaultServer(MakeExecutableSchema(resolvers)
+server.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
+    // notify bug tracker...
 
-		return fmt.Errorf("Internal server error!")
-	}
-}
+    return errors.New("Internal server error!")
+})
 ```
 

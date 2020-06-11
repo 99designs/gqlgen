@@ -171,7 +171,7 @@ models:
 All of the rules from above apply to a struct that has an embedded struct.
 Here is an example
 ```go
-type Truck {
+type Truck struct {
     Car
 
     Is4x4 bool

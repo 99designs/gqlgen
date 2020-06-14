@@ -19,6 +19,11 @@ func TestGET(t *testing.T) {
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
+	t.Run("has json content-type header", func(t *testing.T) {
+		resp := doRequest(h, "GET", "/graphql?query={name}", ``)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+	})
+
 	t.Run("decode failure", func(t *testing.T) {
 		resp := doRequest(h, "GET", "/graphql?query={name}&variables=notjson", "")
 		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
@@ -42,4 +47,5 @@ func TestGET(t *testing.T) {
 		assert.Equal(t, http.StatusNotAcceptable, resp.Code, resp.Body.String())
 		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
+
 }

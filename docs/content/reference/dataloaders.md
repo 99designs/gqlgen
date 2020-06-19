@@ -130,7 +130,6 @@ func Middleware(conn *sql.DB, next http.Handler) http.Handler {
 					users := make([]*model.User, len(ids))
 					for i, id := range ids {
 						users[i] = userById[id]
-						i++
 					}
 
 					return users, nil

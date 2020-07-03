@@ -39,7 +39,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 
-	if err := cfg.LoadSchema(); err != nil {
+	if err := cfg.LoadSchema(false); err != nil {
 		return errors.Wrap(err, "failed to load schema")
 	}
 
@@ -52,7 +52,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 	}
 
 	// LoadSchema again now we have everything
-	if err := cfg.LoadSchema(); err != nil {
+	if err := cfg.LoadSchema(true); err != nil {
 		return errors.Wrap(err, "failed to load schema")
 	}
 

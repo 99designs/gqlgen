@@ -54,6 +54,8 @@ type Stub struct {
 		ShapeUnion                       func(ctx context.Context) (ShapeUnion, error)
 		Autobind                         func(ctx context.Context) (*Autobind, error)
 		DeprecatedField                  func(ctx context.Context) (string, error)
+		MakeForcedResolverReachable      func(ctx context.Context) (*ForcedResolver, error)
+		MakeStatusReachable              func(ctx context.Context) (*Status, error)
 		Overlapping                      func(ctx context.Context) (*OverlappingFields, error)
 		DirectiveArg                     func(ctx context.Context, arg string) (*string, error)
 		DirectiveNullableArg             func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
@@ -248,6 +250,12 @@ func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
 }
 func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 	return r.QueryResolver.DeprecatedField(ctx)
+}
+func (r *stubQuery) MakeForcedResolverReachable(ctx context.Context) (*ForcedResolver, error) {
+	return r.QueryResolver.MakeForcedResolverReachable(ctx)
+}
+func (r *stubQuery) MakeStatusReachable(ctx context.Context) (*Status, error) {
+	return r.QueryResolver.MakeStatusReachable(ctx)
 }
 func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	return r.QueryResolver.Overlapping(ctx)

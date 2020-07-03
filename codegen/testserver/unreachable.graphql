@@ -1,0 +1,24 @@
+# This part of the graph is unreachable.
+# The type from here shouldn't require an implementation in the resolver interface.
+# The enum and scalar TODO
+
+type UnreachableObject {
+    unreachable: String!
+}
+
+enum UnreachableEnum {
+    UNREACHABLE_ONE
+    UNREACHABLE_TWO
+}
+
+scalar UnreachableScalar
+
+union UnreachableUnion = UnreachableObject
+
+interface UnreachableInterface {
+    unreachable: String!
+}
+
+input UnreachableInput {
+    unreachable: String!
+}

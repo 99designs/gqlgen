@@ -1,5 +1,14 @@
 type Query {
-    thisShoudlntGetGenerated: Boolean
+    thisShoudlntGetGenerated(
+        makeMissingInputReachable: MissingInput
+        makeExistingInputReachable: ExistingInput
+    ): Boolean
+    makeMissingReachable: MissingUnion
+    makeExistingReachable: ExistingUnion
+    makeEnumReachable: EnumWithDescription
+    makeUnionReachable: UnionWithDescription
+    makeInterfaceReachable: InterfaceWithDescription
+    makeFooBarReachable: _Foo_Barr
 }
 
 type Mutation {

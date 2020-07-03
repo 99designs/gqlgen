@@ -34,12 +34,12 @@ func load(t *testing.T, name string) (*federation, *config.Config) {
 
 	f := &federation{}
 	cfg.Sources = append(cfg.Sources, f.InjectSourceEarly())
-	require.NoError(t, cfg.LoadSchema())
+	require.NoError(t, cfg.LoadSchema(false))
 
 	if src := f.InjectSourceLate(cfg.Schema); src != nil {
 		cfg.Sources = append(cfg.Sources, src)
 	}
-	require.NoError(t, cfg.LoadSchema())
+	require.NoError(t, cfg.LoadSchema(true))
 
 	require.NoError(t, cfg.Init())
 	return f, cfg

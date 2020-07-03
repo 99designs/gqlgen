@@ -71,14 +71,6 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
-	AIt struct {
-		ID func(childComplexity int) int
-	}
-
-	AbIt struct {
-		ID func(childComplexity int) int
-	}
-
 	Autobind struct {
 		IdInt func(childComplexity int) int
 		IdStr func(childComplexity int) int
@@ -122,14 +114,6 @@ type ComplexityRoot struct {
 		ID    func(childComplexity int) int
 	}
 
-	ContentPost struct {
-		Foo func(childComplexity int) int
-	}
-
-	ContentUser struct {
-		Foo func(childComplexity int) int
-	}
-
 	Dog struct {
 		DogBreed func(childComplexity int) int
 		Species  func(childComplexity int) int
@@ -145,15 +129,6 @@ type ComplexityRoot struct {
 
 	EmbeddedCase3 struct {
 		UnexportedEmbeddedInterfaceExportedMethod func(childComplexity int) int
-	}
-
-	EmbeddedDefaultScalar struct {
-		Value func(childComplexity int) int
-	}
-
-	EmbeddedPointer struct {
-		ID    func(childComplexity int) int
-		Title func(childComplexity int) int
 	}
 
 	Error struct {
@@ -184,18 +159,6 @@ type ComplexityRoot struct {
 	}
 
 	It struct {
-		ID func(childComplexity int) int
-	}
-
-	LoopA struct {
-		B func(childComplexity int) int
-	}
-
-	LoopB struct {
-		A func(childComplexity int) int
-	}
-
-	Map struct {
 		ID func(childComplexity int) int
 	}
 
@@ -274,6 +237,8 @@ type ComplexityRoot struct {
 		InputSlice                       func(childComplexity int, arg []string) int
 		InvalidIdentifier                func(childComplexity int) int
 		Issue896a                        func(childComplexity int) int
+		MakeForcedResolverReachable      func(childComplexity int) int
+		MakeStatusReachable              func(childComplexity int) int
 		MapInput                         func(childComplexity int, input map[string]interface{}) int
 		MapNestedStringInterface         func(childComplexity int, in *NestedMapInput) int
 		MapStringInterface               func(childComplexity int, in map[string]interface{}) int
@@ -342,22 +307,6 @@ type ComplexityRoot struct {
 	WrappedStruct struct {
 		Name func(childComplexity int) int
 	}
-
-	XXIt struct {
-		ID func(childComplexity int) int
-	}
-
-	XxIt struct {
-		ID func(childComplexity int) int
-	}
-
-	AsdfIt struct {
-		ID func(childComplexity int) int
-	}
-
-	IIt struct {
-		ID func(childComplexity int) int
-	}
 }
 
 type BackedByInterfaceResolver interface {
@@ -406,6 +355,8 @@ type QueryResolver interface {
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
 	DeprecatedField(ctx context.Context) (string, error)
+	MakeForcedResolverReachable(ctx context.Context) (*ForcedResolver, error)
+	MakeStatusReachable(ctx context.Context) (*Status, error)
 	Overlapping(ctx context.Context) (*OverlappingFields, error)
 	DirectiveArg(ctx context.Context, arg string) (*string, error)
 	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
@@ -480,20 +431,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.A.ID(childComplexity), true
-
-	case "AIt.id":
-		if e.complexity.AIt.ID == nil {
-			break
-		}
-
-		return e.complexity.AIt.ID(childComplexity), true
-
-	case "AbIt.id":
-		if e.complexity.AbIt.ID == nil {
-			break
-		}
-
-		return e.complexity.AbIt.ID(childComplexity), true
 
 	case "Autobind.idInt":
 		if e.complexity.Autobind.IdInt == nil {
@@ -628,20 +565,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ConcreteNodeInterface.ID(childComplexity), true
 
-	case "Content_Post.foo":
-		if e.complexity.ContentPost.Foo == nil {
-			break
-		}
-
-		return e.complexity.ContentPost.Foo(childComplexity), true
-
-	case "Content_User.foo":
-		if e.complexity.ContentUser.Foo == nil {
-			break
-		}
-
-		return e.complexity.ContentUser.Foo(childComplexity), true
-
 	case "Dog.dogBreed":
 		if e.complexity.Dog.DogBreed == nil {
 			break
@@ -676,27 +599,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod(childComplexity), true
-
-	case "EmbeddedDefaultScalar.value":
-		if e.complexity.EmbeddedDefaultScalar.Value == nil {
-			break
-		}
-
-		return e.complexity.EmbeddedDefaultScalar.Value(childComplexity), true
-
-	case "EmbeddedPointer.ID":
-		if e.complexity.EmbeddedPointer.ID == nil {
-			break
-		}
-
-		return e.complexity.EmbeddedPointer.ID(childComplexity), true
-
-	case "EmbeddedPointer.Title":
-		if e.complexity.EmbeddedPointer.Title == nil {
-			break
-		}
-
-		return e.complexity.EmbeddedPointer.Title(childComplexity), true
 
 	case "Error.errorOnNonRequiredField":
 		if e.complexity.Error.ErrorOnNonRequiredField == nil {
@@ -788,27 +690,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.It.ID(childComplexity), true
-
-	case "LoopA.b":
-		if e.complexity.LoopA.B == nil {
-			break
-		}
-
-		return e.complexity.LoopA.B(childComplexity), true
-
-	case "LoopB.a":
-		if e.complexity.LoopB.A == nil {
-			break
-		}
-
-		return e.complexity.LoopB.A(childComplexity), true
-
-	case "Map.id":
-		if e.complexity.Map.ID == nil {
-			break
-		}
-
-		return e.complexity.Map.ID(childComplexity), true
 
 	case "MapStringInterfaceType.a":
 		if e.complexity.MapStringInterfaceType.A == nil {
@@ -1198,6 +1079,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Issue896a(childComplexity), true
+
+	case "Query.makeForcedResolverReachable":
+		if e.complexity.Query.MakeForcedResolverReachable == nil {
+			break
+		}
+
+		return e.complexity.Query.MakeForcedResolverReachable(childComplexity), true
+
+	case "Query.makeStatusReachable":
+		if e.complexity.Query.MakeStatusReachable == nil {
+			break
+		}
+
+		return e.complexity.Query.MakeStatusReachable(childComplexity), true
 
 	case "Query.mapInput":
 		if e.complexity.Query.MapInput == nil {
@@ -1597,34 +1492,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WrappedStruct.Name(childComplexity), true
 
-	case "XXIt.id":
-		if e.complexity.XXIt.ID == nil {
-			break
-		}
-
-		return e.complexity.XXIt.ID(childComplexity), true
-
-	case "XxIt.id":
-		if e.complexity.XxIt.ID == nil {
-			break
-		}
-
-		return e.complexity.XxIt.ID(childComplexity), true
-
-	case "asdfIt.id":
-		if e.complexity.AsdfIt.ID == nil {
-			break
-		}
-
-		return e.complexity.AsdfIt.ID(childComplexity), true
-
-	case "iIt.id":
-		if e.complexity.IIt.ID == nil {
-			break
-		}
-
-		return e.complexity.IIt.ID(childComplexity), true
-
 	}
 	return 0, false
 }
@@ -1984,6 +1851,8 @@ type Query {
     shapeUnion: ShapeUnion!
     autobind: Autobind
     deprecatedField: String! @deprecated(reason: "test deprecated directive")
+    makeForcedResolverReachable: ForcedResolver
+    makeStatusReachable: Status
 }
 
 type Subscription {
@@ -2090,6 +1959,30 @@ enum FallbackToStringEncoding {
     C
 }
 `, BuiltIn: false},
+	{Name: "unreachable.graphql", Input: `# This part of the graph is unreachable.
+# The type from here shouldn't require an implementation in the resolver interface.
+# The enum and scalar TODO
+
+type UnreachableObject {
+    unreachable: String!
+}
+
+enum UnreachableEnum {
+    UNREACHABLE_ONE
+    UNREACHABLE_TWO
+}
+
+scalar UnreachableScalar
+
+union UnreachableUnion = UnreachableObject
+
+interface UnreachableInterface {
+    unreachable: String!
+}
+
+input UnreachableInput {
+    unreachable: String!
+}`, BuiltIn: false},
 	{Name: "useptr.graphql", Input: `type A {
     id: ID!
 }
@@ -3123,68 +3016,6 @@ func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedFi
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.CollectedField, obj *AIt) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "AIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.CollectedField, obj *AbIt) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "AbIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3765,62 +3596,6 @@ func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, fi
 	return ec.marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNode(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql.CollectedField, obj *ContentPost) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Content_Post",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Foo, nil
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql.CollectedField, obj *ContentUser) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Content_User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Foo, nil
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3974,90 +3749,6 @@ func (ec *executionContext) _EmbeddedCase3_unexportedEmbeddedInterfaceExportedMe
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, field graphql.CollectedField, obj *EmbeddedDefaultScalar) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "EmbeddedDefaultScalar",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Value, nil
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalODefaultScalarImplementation2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "EmbeddedPointer",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "EmbeddedPointer",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Title, nil
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Error_id(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
@@ -4435,99 +4126,6 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 	}()
 	fc := &graphql.FieldContext{
 		Object:   "It",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.CollectedField, obj *LoopA) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LoopA",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.B, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*LoopB)
-	fc.Result = res
-	return ec.marshalNLoopB2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopB(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.CollectedField, obj *LoopB) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LoopB",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.A, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*LoopA)
-	fc.Result = res
-	return ec.marshalNLoopA2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopA(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Map_id(ctx context.Context, field graphql.CollectedField, obj *Map) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Map",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -5771,6 +5369,62 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_makeForcedResolverReachable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MakeForcedResolverReachable(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ForcedResolver)
+	fc.Result = res
+	return ec.marshalOForcedResolver2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐForcedResolver(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_makeStatusReachable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MakeStatusReachable(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Status)
+	fc.Result = res
+	return ec.marshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8030,68 +7684,6 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.CollectedField, obj *XXIt) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "XXIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.CollectedField, obj *XxIt) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "XxIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9047,68 +8639,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.CollectedField, obj *AsdfIt) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "asdfIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.CollectedField, obj *IIt) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "iIt",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -9544,29 +9074,6 @@ func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, o
 	}
 }
 
-func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.SelectionSet, obj ContentChild) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case ContentUser:
-		return ec._Content_User(ctx, sel, &obj)
-	case *ContentUser:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Content_User(ctx, sel, obj)
-	case ContentPost:
-		return ec._Content_Post(ctx, sel, &obj)
-	case *ContentPost:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Content_Post(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj Node) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -9664,60 +9171,6 @@ func (ec *executionContext) _A(ctx context.Context, sel ast.SelectionSet, obj *A
 			out.Values[i] = graphql.MarshalString("A")
 		case "id":
 			out.Values[i] = ec._A_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var aItImplementors = []string{"AIt"}
-
-func (ec *executionContext) _AIt(ctx context.Context, sel ast.SelectionSet, obj *AIt) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, aItImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("AIt")
-		case "id":
-			out.Values[i] = ec._AIt_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var abItImplementors = []string{"AbIt"}
-
-func (ec *executionContext) _AbIt(ctx context.Context, sel ast.SelectionSet, obj *AbIt) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, abItImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("AbIt")
-		case "id":
-			out.Values[i] = ec._AbIt_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -10003,54 +9456,6 @@ func (ec *executionContext) _ConcreteNodeInterface(ctx context.Context, sel ast.
 	return out
 }
 
-var content_PostImplementors = []string{"Content_Post", "Content_Child"}
-
-func (ec *executionContext) _Content_Post(ctx context.Context, sel ast.SelectionSet, obj *ContentPost) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, content_PostImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Content_Post")
-		case "foo":
-			out.Values[i] = ec._Content_Post_foo(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var content_UserImplementors = []string{"Content_User", "Content_Child"}
-
-func (ec *executionContext) _Content_User(ctx context.Context, sel ast.SelectionSet, obj *ContentUser) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, content_UserImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Content_User")
-		case "foo":
-			out.Values[i] = ec._Content_User_foo(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var dogImplementors = []string{"Dog", "Animal"}
 
 func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *Dog) graphql.Marshaler {
@@ -10153,56 +9558,6 @@ func (ec *executionContext) _EmbeddedCase3(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var embeddedDefaultScalarImplementors = []string{"EmbeddedDefaultScalar"}
-
-func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedDefaultScalar) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedDefaultScalarImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmbeddedDefaultScalar")
-		case "value":
-			out.Values[i] = ec._EmbeddedDefaultScalar_value(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var embeddedPointerImplementors = []string{"EmbeddedPointer"}
-
-func (ec *executionContext) _EmbeddedPointer(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedPointerModel) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedPointerImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EmbeddedPointer")
-		case "ID":
-			out.Values[i] = ec._EmbeddedPointer_ID(ctx, field, obj)
-		case "Title":
-			out.Values[i] = ec._EmbeddedPointer_Title(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10445,87 +9800,6 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 			out.Values[i] = graphql.MarshalString("It")
 		case "id":
 			out.Values[i] = ec._It_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var loopAImplementors = []string{"LoopA"}
-
-func (ec *executionContext) _LoopA(ctx context.Context, sel ast.SelectionSet, obj *LoopA) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, loopAImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("LoopA")
-		case "b":
-			out.Values[i] = ec._LoopA_b(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var loopBImplementors = []string{"LoopB"}
-
-func (ec *executionContext) _LoopB(ctx context.Context, sel ast.SelectionSet, obj *LoopB) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, loopBImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("LoopB")
-		case "a":
-			out.Values[i] = ec._LoopB_a(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var mapImplementors = []string{"Map"}
-
-func (ec *executionContext) _Map(ctx context.Context, sel ast.SelectionSet, obj *Map) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, mapImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Map")
-		case "id":
-			out.Values[i] = ec._Map_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -11090,6 +10364,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "makeForcedResolverReachable":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_makeForcedResolverReachable(ctx, field)
+				return res
+			})
+		case "makeStatusReachable":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_makeStatusReachable(ctx, field)
 				return res
 			})
 		case "overlapping":
@@ -11782,60 +11078,6 @@ func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.Selectio
 	return out
 }
 
-var xXItImplementors = []string{"XXIt"}
-
-func (ec *executionContext) _XXIt(ctx context.Context, sel ast.SelectionSet, obj *XXIt) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, xXItImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("XXIt")
-		case "id":
-			out.Values[i] = ec._XXIt_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var xxItImplementors = []string{"XxIt"}
-
-func (ec *executionContext) _XxIt(ctx context.Context, sel ast.SelectionSet, obj *XxIt) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, xxItImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("XxIt")
-		case "id":
-			out.Values[i] = ec._XxIt_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var __DirectiveImplementors = []string{"__Directive"}
 
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
@@ -12077,60 +11319,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
-var asdfItImplementors = []string{"asdfIt"}
-
-func (ec *executionContext) _asdfIt(ctx context.Context, sel ast.SelectionSet, obj *AsdfIt) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, asdfItImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("asdfIt")
-		case "id":
-			out.Values[i] = ec._asdfIt_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var iItImplementors = []string{"iIt"}
-
-func (ec *executionContext) _iIt(ctx context.Context, sel ast.SelectionSet, obj *IIt) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, iItImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("iIt")
-		case "id":
-			out.Values[i] = ec._iIt_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -12339,34 +11527,6 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNLoopA2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopA(ctx context.Context, sel ast.SelectionSet, v LoopA) graphql.Marshaler {
-	return ec._LoopA(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNLoopA2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopA(ctx context.Context, sel ast.SelectionSet, v *LoopA) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._LoopA(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNLoopB2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopB(ctx context.Context, sel ast.SelectionSet, v LoopB) graphql.Marshaler {
-	return ec._LoopB(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNLoopB2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐLoopB(ctx context.Context, sel ast.SelectionSet, v *LoopB) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._LoopB(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNMarshalPanic2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐMarshalPanic(ctx context.Context, v interface{}) (MarshalPanic, error) {
@@ -13094,29 +12254,6 @@ func (ec *executionContext) marshalOCircle2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec._Circle(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalODefaultScalarImplementation2string(ctx context.Context, v interface{}) (string, error) {
-	return graphql.UnmarshalString(v)
-}
-
-func (ec *executionContext) marshalODefaultScalarImplementation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	return graphql.MarshalString(v)
-}
-
-func (ec *executionContext) unmarshalODefaultScalarImplementation2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalODefaultScalarImplementation2string(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalODefaultScalarImplementation2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec.marshalODefaultScalarImplementation2string(ctx, sel, *v)
-}
-
 func (ec *executionContext) marshalOEmbeddedCase12githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐEmbeddedCase1(ctx context.Context, sel ast.SelectionSet, v EmbeddedCase1) graphql.Marshaler {
 	return ec._EmbeddedCase1(ctx, sel, &v)
 }
@@ -13178,6 +12315,17 @@ func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
 	return graphql.MarshalFloat(v)
+}
+
+func (ec *executionContext) marshalOForcedResolver2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐForcedResolver(ctx context.Context, sel ast.SelectionSet, v ForcedResolver) graphql.Marshaler {
+	return ec._ForcedResolver(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOForcedResolver2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐForcedResolver(ctx context.Context, sel ast.SelectionSet, v *ForcedResolver) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ForcedResolver(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOInnerDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx context.Context, v interface{}) (InnerDirectives, error) {
@@ -13573,6 +12721,30 @@ func (ec *executionContext) marshalOSlices2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec._Slices(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOStatus2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐStatus(ctx context.Context, v interface{}) (Status, error) {
+	var res Status
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalOStatus2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐStatus(ctx context.Context, sel ast.SelectionSet, v Status) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐStatus(ctx context.Context, v interface{}) (*Status, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOStatus2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐStatus(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐStatus(ctx context.Context, sel ast.SelectionSet, v *Status) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

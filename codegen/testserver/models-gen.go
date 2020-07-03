@@ -13,10 +13,6 @@ type Animal interface {
 	IsAnimal()
 }
 
-type ContentChild interface {
-	IsContentChild()
-}
-
 type TestUnion interface {
 	IsTestUnion()
 }
@@ -26,14 +22,6 @@ type A struct {
 }
 
 func (A) IsTestUnion() {}
-
-type AIt struct {
-	ID string `json:"id"`
-}
-
-type AbIt struct {
-	ID string `json:"id"`
-}
 
 type B struct {
 	ID string `json:"id"`
@@ -52,28 +40,12 @@ type CheckIssue896 struct {
 	ID *int `json:"id"`
 }
 
-type ContentPost struct {
-	Foo *string `json:"foo"`
-}
-
-func (ContentPost) IsContentChild() {}
-
-type ContentUser struct {
-	Foo *string `json:"foo"`
-}
-
-func (ContentUser) IsContentChild() {}
-
 type Dog struct {
 	Species  string `json:"species"`
 	DogBreed string `json:"dogBreed"`
 }
 
 func (Dog) IsAnimal() {}
-
-type EmbeddedDefaultScalar struct {
-	Value *string `json:"value"`
-}
 
 type InnerDirectives struct {
 	Message string `json:"message"`
@@ -97,20 +69,6 @@ type InputDirectives struct {
 
 type InputWithEnumValue struct {
 	Enum EnumTest `json:"enum"`
-}
-
-type LoopA struct {
-	B *LoopB `json:"b"`
-}
-
-type LoopB struct {
-	A *LoopA `json:"a"`
-}
-
-// Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
-// added to the TypeMap
-type Map struct {
-	ID string `json:"id"`
 }
 
 type NestedMapInput struct {
@@ -180,22 +138,6 @@ type ValidType struct {
 	DifferentCaseOld   string `json:"different_case"`
 	ValidInputKeywords bool   `json:"validInputKeywords"`
 	ValidArgs          bool   `json:"validArgs"`
-}
-
-type XXIt struct {
-	ID string `json:"id"`
-}
-
-type XxIt struct {
-	ID string `json:"id"`
-}
-
-type AsdfIt struct {
-	ID string `json:"id"`
-}
-
-type IIt struct {
-	ID string `json:"id"`
 }
 
 type EnumTest string

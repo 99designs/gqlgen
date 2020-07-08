@@ -146,7 +146,7 @@ mutation createTodo {
 }
 
 query findTodos {
-  	todos {
+    todos {
       text
       done
       user {

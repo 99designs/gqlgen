@@ -275,6 +275,14 @@ func (r *queryResolver) WrappedScalar(ctx context.Context) (WrappedScalar, error
 	panic("not implemented")
 }
 
+func (r *queryResolver) WrappedMap(ctx context.Context) (WrappedMap, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) WrappedSlice(ctx context.Context) (WrappedSlice, error) {
+	panic("not implemented")
+}
+
 func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan string, error) {
 	panic("not implemented")
 }
@@ -304,6 +312,14 @@ func (r *subscriptionResolver) Issue896b(ctx context.Context) (<-chan []*CheckIs
 }
 
 func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) {
+	panic("not implemented")
+}
+
+func (r *wrappedMapResolver) Get(ctx context.Context, obj WrappedMap, key string) (string, error) {
+	panic("not implemented")
+}
+
+func (r *wrappedSliceResolver) Get(ctx context.Context, obj WrappedSlice, idx int) (string, error) {
 	panic("not implemented")
 }
 
@@ -340,6 +356,12 @@ func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionRes
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+// WrappedMap returns WrappedMapResolver implementation.
+func (r *Resolver) WrappedMap() WrappedMapResolver { return &wrappedMapResolver{r} }
+
+// WrappedSlice returns WrappedSliceResolver implementation.
+func (r *Resolver) WrappedSlice() WrappedSliceResolver { return &wrappedSliceResolver{r} }
+
 type backedByInterfaceResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }
 type forcedResolverResolver struct{ *Resolver }
@@ -351,3 +373,5 @@ type primitiveStringResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
+type wrappedMapResolver struct{ *Resolver }
+type wrappedSliceResolver struct{ *Resolver }

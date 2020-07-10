@@ -1,7 +1,7 @@
 {{- range $type := .ReferencedTypes }}
 	{{ with $type.UnmarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, v interface{}) ({{ $type.GO | ref }}, error) {
-			{{- if $type.IsNilable }}
+			{{- if and $type.IsNilable (not $type.GQL.NonNull) }}
 				if v == nil { return nil, nil }
 			{{- end }}
 			{{- if $type.IsPtr }}

@@ -28,4 +28,22 @@ func TestInput(t *testing.T) {
 		require.EqualError(t, err, `http 422: {"errors":[{"message":"Expected type String!, found 1.","locations":[{"line":1,"column":32}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}},{"message":"Expected type String!, found 2.","locations":[{"line":1,"column":35}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
 		require.Nil(t, resp.DirectiveArg)
 	})
+
+	t.Run("when input slice nullable", func(t *testing.T) {
+		resolvers.QueryResolver.InputNullableSlice = func(ctx context.Context, arg []string) (b bool, e error) {
+			return arg == nil, nil
+		}
+
+		var resp struct {
+			InputNullableSlice bool
+		}
+		var err error
+		err = c.Post(`query { inputNullableSlice(arg: null) }`, &resp)
+		require.NoError(t, err)
+		require.True(t, resp.InputNullableSlice)
+
+		err = c.Post(`query { inputNullableSlice(arg: []) }`, &resp)
+		require.NoError(t, err)
+		require.False(t, resp.InputNullableSlice)
+	})
 }

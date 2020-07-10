@@ -412,12 +412,14 @@ func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 
 func IsNilable(t types.Type) bool {
 	if namedType, isNamed := t.(*types.Named); isNamed {
-		t = namedType.Underlying()
+		return IsNilable(namedType.Underlying())
 	}
 	_, isPtr := t.(*types.Pointer)
 	_, isMap := t.(*types.Map)
 	_, isInterface := t.(*types.Interface)
-	return isPtr || isMap || isInterface
+	_, isSlice := t.(*types.Slice)
+	_, isChan := t.(*types.Chan)
+	return isPtr || isMap || isInterface || isSlice || isChan
 }
 
 func hasMethod(it types.Type, name string) bool {

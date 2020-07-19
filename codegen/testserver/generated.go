@@ -62,7 +62,8 @@ type DirectiveRoot struct {
 	Logged        func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
 	MakeNil       func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	MakeTypedNil  func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Order         func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
+	Order1        func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
+	Order2        func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
 	Range         func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
 	ToNull        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Unimplemented func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
@@ -1793,7 +1794,8 @@ directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINI
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
 directive @unimplemented on FIELD_DEFINITION
-directive @order(location: String!) on FIELD_DEFINITION | OBJECT
+directive @order1(location: String!) on FIELD_DEFINITION | OBJECT
+directive @order2(location: String!) on OBJECT
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
@@ -1801,7 +1803,7 @@ extend type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
-    directiveObject: ObjectDirectives @order(location: "Query_field")
+    directiveObject: ObjectDirectives @order1(location: "Query_field")
     directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
@@ -1828,7 +1830,7 @@ input InnerDirectives {
     message: String! @length(min: 1, message: "not valid")
 }
 
-type ObjectDirectives @order(location: "ObjectDirectives_object") {
+type ObjectDirectives @order1(location: "ObjectDirectives_object_1") @order2(location: "ObjectDirectives_object_2") {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
     order: [String!]!
@@ -2330,7 +2332,21 @@ func (ec *executionContext) dir_logged_args(ctx context.Context, rawArgs map[str
 	return args, nil
 }
 
-func (ec *executionContext) dir_order_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) dir_order1_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["location"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["location"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) dir_order2_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -6154,27 +6170,37 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			return ec.resolvers.Query().DirectiveObject(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object")
+			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object_1")
 			if err != nil {
 				return nil, err
 			}
-			if ec.directives.Order == nil {
-				return nil, errors.New("directive order is not implemented")
+			if ec.directives.Order1 == nil {
+				return nil, errors.New("directive order1 is not implemented")
 			}
-			return ec.directives.Order(ctx, nil, directive0, location)
+			return ec.directives.Order1(ctx, nil, directive0, location)
 		}
 		directive2 := func(ctx context.Context) (interface{}, error) {
+			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object_2")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Order2 == nil {
+				return nil, errors.New("directive order2 is not implemented")
+			}
+			return ec.directives.Order2(ctx, nil, directive1, location)
+		}
+		directive3 := func(ctx context.Context) (interface{}, error) {
 			location, err := ec.unmarshalNString2string(ctx, "Query_field")
 			if err != nil {
 				return nil, err
 			}
-			if ec.directives.Order == nil {
-				return nil, errors.New("directive order is not implemented")
+			if ec.directives.Order1 == nil {
+				return nil, errors.New("directive order1 is not implemented")
 			}
-			return ec.directives.Order(ctx, nil, directive1, location)
+			return ec.directives.Order1(ctx, nil, directive2, location)
 		}
 
-		tmp, err := directive2(rctx)
+		tmp, err := directive3(rctx)
 		if err != nil {
 			return nil, err
 		}

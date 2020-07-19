@@ -396,8 +396,28 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 	}
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MyMutation().CreateTodo(rctx, args["todo"].(TodoInput))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.MyMutation().CreateTodo(rctx, args["todo"].(TodoInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.ObjectLogging == nil {
+				return nil, errors.New("directive objectLogging is not implemented")
+			}
+			return ec.directives.ObjectLogging(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*Todo); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/example/type-system-extension.Todo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -430,8 +450,28 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MyQuery().Todos(rctx)
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.MyQuery().Todos(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.ObjectLogging == nil {
+				return nil, errors.New("directive objectLogging is not implemented")
+			}
+			return ec.directives.ObjectLogging(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*Todo); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/example/type-system-extension.Todo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -471,8 +511,28 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 	}
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MyQuery().Todo(rctx, args["id"].(string))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.MyQuery().Todo(rctx, args["id"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.ObjectLogging == nil {
+				return nil, errors.New("directive objectLogging is not implemented")
+			}
+			return ec.directives.ObjectLogging(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*Todo); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/example/type-system-extension.Todo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

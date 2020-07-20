@@ -167,6 +167,7 @@ type TypeReference struct {
 	Definition  *ast.Definition
 	GQL         *ast.Type
 	GO          types.Type
+	Target      types.Type
 	CastType    types.Type  // Before calling marshalling functions cast from/to this base type
 	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
@@ -177,6 +178,7 @@ func (ref *TypeReference) Elem() *TypeReference {
 	if p, isPtr := ref.GO.(*types.Pointer); isPtr {
 		return &TypeReference{
 			GO:          p.Elem(),
+			Target:      ref.Target,
 			GQL:         ref.GQL,
 			CastType:    ref.CastType,
 			Definition:  ref.Definition,
@@ -189,6 +191,7 @@ func (ref *TypeReference) Elem() *TypeReference {
 	if ref.IsSlice() {
 		return &TypeReference{
 			GO:          ref.GO.(*types.Slice).Elem(),
+			Target:      ref.Target,
 			GQL:         ref.GQL.Elem,
 			CastType:    ref.CastType,
 			Definition:  ref.Definition,
@@ -264,6 +267,10 @@ func (t *TypeReference) UnmarshalFunc() string {
 	}
 
 	return "unmarshal" + t.UniquenessKey()
+}
+
+func (t *TypeReference) IsTargetNilable() bool {
+	return IsNilable(t.Target)
 }
 
 func (b *Binder) PushRef(ret *TypeReference) {
@@ -366,6 +373,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			ref.GO = obj.Type()
 		}
 
+		ref.Target = ref.GO
 		ref.GO = b.CopyModifiersFromAst(schemaType, ref.GO)
 
 		if bindTarget != nil {

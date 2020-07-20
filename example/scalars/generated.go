@@ -51,8 +51,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Search func(childComplexity int, input *model.SearchArgs) int
-		User   func(childComplexity int, id external.ObjectID) int
+		Search     func(childComplexity int, input *model.SearchArgs) int
+		User       func(childComplexity int, id external.ObjectID) int
+		UserByTier func(childComplexity int, tier model.Tier, darkMode *model.Prefs) int
 	}
 
 	User struct {
@@ -61,15 +62,19 @@ type ComplexityRoot struct {
 		CustomResolver    func(childComplexity int) int
 		ID                func(childComplexity int) int
 		IsBanned          func(childComplexity int) int
+		Modified          func(childComplexity int) int
 		Name              func(childComplexity int) int
 		PrimitiveResolver func(childComplexity int) int
+		PtrPrefs          func(childComplexity int) int
 		Tier              func(childComplexity int) int
+		ValPrefs          func(childComplexity int) int
 	}
 }
 
 type QueryResolver interface {
 	User(ctx context.Context, id external.ObjectID) (*model.User, error)
 	Search(ctx context.Context, input *model.SearchArgs) ([]*model.User, error)
+	UserByTier(ctx context.Context, tier model.Tier, darkMode *model.Prefs) ([]*model.User, error)
 }
 type UserResolver interface {
 	PrimitiveResolver(ctx context.Context, obj *model.User) (string, error)
@@ -129,6 +134,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
 
+	case "Query.userByTier":
+		if e.complexity.Query.UserByTier == nil {
+			break
+		}
+
+		args, err := ec.field_Query_userByTier_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.UserByTier(childComplexity, args["tier"].(model.Tier), args["darkMode"].(*model.Prefs)), true
+
 	case "User.address":
 		if e.complexity.User.Address == nil {
 			break
@@ -164,6 +181,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.IsBanned(childComplexity), true
 
+	case "User.modified":
+		if e.complexity.User.Modified == nil {
+			break
+		}
+
+		return e.complexity.User.Modified(childComplexity), true
+
 	case "User.name":
 		if e.complexity.User.Name == nil {
 			break
@@ -178,12 +202,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.PrimitiveResolver(childComplexity), true
 
+	case "User.ptrPrefs":
+		if e.complexity.User.PtrPrefs == nil {
+			break
+		}
+
+		return e.complexity.User.PtrPrefs(childComplexity), true
+
 	case "User.tier":
 		if e.complexity.User.Tier == nil {
 			break
 		}
 
 		return e.complexity.User.Tier(childComplexity), true
+
+	case "User.valPrefs":
+		if e.complexity.User.ValPrefs == nil {
+			break
+		}
+
+		return e.complexity.User.ValPrefs(childComplexity), true
 
 	}
 	return 0, false
@@ -238,12 +276,16 @@ var sources = []*ast.Source{
 	{Name: "schema.graphql", Input: `type Query {
     user(id: ID!): User
     search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
+    userByTier(tier: Tier!, darkMode: DarkMode!): [User!]!
 }
 
 type User {
     id: ID!
     name: String!
     created: Timestamp
+    modified: Timestamp
+    valPrefs: DarkMode
+    ptrPrefs: DarkMode
     isBanned: Banned!
     primitiveResolver: String!
     customResolver: Point!
@@ -271,6 +313,7 @@ enum Tier {
 scalar Timestamp
 scalar Point
 scalar Banned
+scalar DarkMode
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -306,6 +349,30 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_userByTier_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.Tier
+	if tmp, ok := rawArgs["tier"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("tier"))
+		arg0, err = ec.unmarshalNTier2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐTier(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["tier"] = arg0
+	var arg1 *model.Prefs
+	if tmp, ok := rawArgs["darkMode"]; ok {
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("darkMode"))
+		arg1, err = ec.unmarshalNDarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["darkMode"] = arg1
 	return args, nil
 }
 
@@ -506,6 +573,47 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_userByTier(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_userByTier_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().UserByTier(rctx, args["tier"].(model.Tier), args["darkMode"].(*model.Prefs))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -672,6 +780,99 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 	res := resTmp.(time.Time)
 	fc.Result = res
 	return ec.marshalOTimestamp2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_modified(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Modified, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTimestamp2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_valPrefs(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ValPrefs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(model.Prefs)
+	fc.Result = res
+	return ec.marshalODarkMode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_ptrPrefs(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PtrPrefs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Prefs)
+	fc.Result = res
+	return ec.marshalODarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_isBanned(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -2006,6 +2207,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "userByTier":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_userByTier(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -2044,6 +2259,12 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "created":
 			out.Values[i] = ec._User_created(ctx, field, obj)
+		case "modified":
+			out.Values[i] = ec._User_modified(ctx, field, obj)
+		case "valPrefs":
+			out.Values[i] = ec._User_valPrefs(ctx, field, obj)
+		case "ptrPrefs":
+			out.Values[i] = ec._User_ptrPrefs(ctx, field, obj)
 		case "isBanned":
 			out.Values[i] = ec._User_isBanned(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -2353,7 +2574,30 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
-	res := graphql.MarshalBoolean(v)
+	in := v
+	res := graphql.MarshalBoolean(in)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNDarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, v interface{}) (*model.Prefs, error) {
+	res, err := model.UnmarshalPreferences(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, sel ast.SelectionSet, v *model.Prefs) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	in := v
+	res := model.MarshalPreferences(in)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2368,7 +2612,8 @@ func (ec *executionContext) unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexa
 }
 
 func (ec *executionContext) marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(ctx context.Context, sel ast.SelectionSet, v external.ObjectID) graphql.Marshaler {
-	res := model.MarshalID(v)
+	in := v
+	res := model.MarshalID(in)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2388,8 +2633,9 @@ func (ec *executionContext) marshalNPoint2githubᚗcomᚋ99designsᚋgqlgenᚋex
 }
 
 func (ec *executionContext) unmarshalNPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, v interface{}) (*model.Point, error) {
-	res, err := ec.unmarshalNPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	var res = new(model.Point)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v *model.Point) graphql.Marshaler {
@@ -2408,7 +2654,8 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
+	in := v
+	res := graphql.MarshalString(in)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2417,8 +2664,14 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
+func (ec *executionContext) unmarshalNTier2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐTier(ctx context.Context, v interface{}) (model.Tier, error) {
+	var res model.Tier
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTier2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐTier(ctx context.Context, sel ast.SelectionSet, v model.Tier) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
@@ -2515,7 +2768,8 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Con
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
+	in := v
+	res := graphql.MarshalString(in)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2688,7 +2942,8 @@ func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v i
 }
 
 func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
+	in := v
+	res := graphql.MarshalString(in)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2717,40 +2972,61 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
-	return graphql.MarshalBoolean(v)
+	in := v
+	return graphql.MarshalBoolean(in)
 }
 
 func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v interface{}) (*bool, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOBoolean2bool(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	tmp, err := graphql.UnmarshalBoolean(v)
+	res := &tmp
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast.SelectionSet, v *bool) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec.marshalOBoolean2bool(ctx, sel, *v)
+	in := *v
+	return graphql.MarshalBoolean(in)
 }
 
-func (ec *executionContext) unmarshalOPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, v interface{}) (model.Point, error) {
-	var res model.Point
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalODarkMode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, v interface{}) (model.Prefs, error) {
+	tmp, err := model.UnmarshalPreferences(v)
+	res := *tmp
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v model.Point) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalODarkMode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, sel ast.SelectionSet, v model.Prefs) graphql.Marshaler {
+	in := &v
+	return model.MarshalPreferences(in)
+}
+
+func (ec *executionContext) unmarshalODarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, v interface{}) (*model.Prefs, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := model.UnmarshalPreferences(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, sel ast.SelectionSet, v *model.Prefs) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	in := v
+	return model.MarshalPreferences(in)
 }
 
 func (ec *executionContext) unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, v interface{}) (*model.Point, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOPoint2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	var res = new(model.Point)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v *model.Point) graphql.Marshaler {
@@ -2760,17 +3036,13 @@ func (ec *executionContext) marshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return v
 }
 
-func (ec *executionContext) unmarshalOSearchArgs2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(ctx context.Context, v interface{}) (model.SearchArgs, error) {
-	res, err := ec.unmarshalInputSearchArgs(ctx, v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(ctx context.Context, v interface{}) (*model.SearchArgs, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOSearchArgs2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	tmp, err := ec.unmarshalInputSearchArgs(ctx, v)
+	res := &tmp
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2779,22 +3051,25 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	return graphql.MarshalString(v)
+	in := v
+	return graphql.MarshalString(in)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOString2string(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	tmp, err := graphql.UnmarshalString(v)
+	res := &tmp
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec.marshalOString2string(ctx, sel, *v)
+	in := *v
+	return graphql.MarshalString(in)
 }
 
 func (ec *executionContext) unmarshalOTier2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐTier(ctx context.Context, v interface{}) (model.Tier, error) {
@@ -2813,26 +3088,25 @@ func (ec *executionContext) unmarshalOTimestamp2timeᚐTime(ctx context.Context,
 }
 
 func (ec *executionContext) marshalOTimestamp2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	return model.MarshalTimestamp(v)
+	in := v
+	return model.MarshalTimestamp(in)
 }
 
 func (ec *executionContext) unmarshalOTimestamp2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOTimestamp2timeᚐTime(ctx, v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	tmp, err := model.UnmarshalTimestamp(v)
+	res := &tmp
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOTimestamp2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec.marshalOTimestamp2timeᚐTime(ctx, sel, *v)
-}
-
-func (ec *executionContext) marshalOUser2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
+	in := *v
+	return model.MarshalTimestamp(in)
 }
 
 func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
@@ -2962,19 +3236,11 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	return ret
 }
 
-func (ec *executionContext) marshalO__Schema2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, sel ast.SelectionSet, v introspection.Schema) graphql.Marshaler {
-	return ec.___Schema(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, sel ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec.___Schema(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalO__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v introspection.Type) graphql.Marshaler {
-	return ec.___Type(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {

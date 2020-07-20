@@ -25,7 +25,11 @@ func (b *builder) buildTypes() map[string]*config.TypeReference {
 			}
 			ret[key] = ref
 
-			ref = ref.Elem()
+			if ref.IsSlice() {
+				ref = ref.Elem()
+			} else {
+				break
+			}
 		}
 	}
 	return ret

@@ -300,8 +300,8 @@ func (ec *executionContext) field_MyMutation_createTodo_args(ctx context.Context
 	args := map[string]interface{}{}
 	var arg0 TodoInput
 	if tmp, ok := rawArgs["todo"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("todo"))
-		arg0, err = ec.unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtypeᚑsystemᚑextensionᚐTodoInput(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("todo"))
+		arg0, err = ec.unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋtypeᚑsystemᚑextensionᚐTodoInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -315,8 +315,8 @@ func (ec *executionContext) field_MyQuery___type_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
-		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -330,8 +330,8 @@ func (ec *executionContext) field_MyQuery_todo_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
-		arg0, err = ec.unmarshalNID2string(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -345,8 +345,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -360,8 +360,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1780,8 +1780,8 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj int
 		case "text":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("text"))
-			it.Text, err = ec.unmarshalNString2string(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("text"))
+			it.Text, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2383,10 +2383,10 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalN__DirectiveLocation2string(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalN__DirectiveLocation2string(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil

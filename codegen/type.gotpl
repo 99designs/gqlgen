@@ -19,10 +19,10 @@
 				var err error
 				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
 				for i := range vSlice {
-					nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-					res[i], err = ec.{{ $type.Elem.UnmarshalFunc }}(nctx, vSlice[i])
+					ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+					res[i], err = ec.{{ $type.Elem.UnmarshalFunc }}(ctx, vSlice[i])
 					if err != nil {
-						return nil, graphql.WrapErrorWithInputPath(nctx, err)
+						return nil, graphql.WrapErrorWithInputPath(ctx, err)
 					}
 				}
 				return res, nil

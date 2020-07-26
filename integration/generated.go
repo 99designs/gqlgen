@@ -316,8 +316,8 @@ func (ec *executionContext) dir_magic_args(ctx context.Context, rawArgs map[stri
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["kind"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("kind"))
-		arg0, err = ec.unmarshalOInt2ᚖint(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("kind"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -331,8 +331,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
-		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -346,8 +346,8 @@ func (ec *executionContext) field_Query_complexity_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 int
 	if tmp, ok := rawArgs["value"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
-		arg0, err = ec.unmarshalNInt2int(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -361,8 +361,8 @@ func (ec *executionContext) field_Query_date_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 models.DateFilter
 	if tmp, ok := rawArgs["filter"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("filter"))
-		arg0, err = ec.unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("filter"))
+		arg0, err = ec.unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -376,8 +376,8 @@ func (ec *executionContext) field_Query_error_args(ctx context.Context, rawArgs 
 	args := map[string]interface{}{}
 	var arg0 *models.ErrorType
 	if tmp, ok := rawArgs["type"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("type"))
-		arg0, err = ec.unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("type"))
+		arg0, err = ec.unmarshalOErrorType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐErrorType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -391,8 +391,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -406,8 +406,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1981,24 +1981,24 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj in
 		case "value":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
-			it.Value, err = ec.unmarshalNString2string(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "timezone":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("timezone"))
-			it.Timezone, err = ec.unmarshalOString2ᚖstring(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("timezone"))
+			it.Timezone, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "op":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("op"))
-			it.Op, err = ec.unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("op"))
+			it.Op, err = ec.unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilterOp(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2571,10 +2571,10 @@ func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalNString2string(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil
@@ -2657,10 +2657,10 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalN__DirectiveLocation2string(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalN__DirectiveLocation2string(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil
@@ -2842,10 +2842,10 @@ func (ec *executionContext) unmarshalOBoolean2ᚕboolᚄ(ctx context.Context, v 
 	var err error
 	res := make([]bool, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalNBoolean2bool(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalNBoolean2bool(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil

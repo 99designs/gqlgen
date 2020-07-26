@@ -277,8 +277,8 @@ func (ec *executionContext) field_Mutation_multipleUploadWithPayload_args(ctx co
 	args := map[string]interface{}{}
 	var arg0 []*model.UploadFile
 	if tmp, ok := rawArgs["req"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("req"))
-		arg0, err = ec.unmarshalNUploadFile2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFileᚄ(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("req"))
+		arg0, err = ec.unmarshalNUploadFile2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFileᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -292,8 +292,8 @@ func (ec *executionContext) field_Mutation_multipleUpload_args(ctx context.Conte
 	args := map[string]interface{}{}
 	var arg0 []*graphql.Upload
 	if tmp, ok := rawArgs["files"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("files"))
-		arg0, err = ec.unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUploadᚄ(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("files"))
+		arg0, err = ec.unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUploadᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -307,8 +307,8 @@ func (ec *executionContext) field_Mutation_singleUploadWithPayload_args(ctx cont
 	args := map[string]interface{}{}
 	var arg0 model.UploadFile
 	if tmp, ok := rawArgs["req"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("req"))
-		arg0, err = ec.unmarshalNUploadFile2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("req"))
+		arg0, err = ec.unmarshalNUploadFile2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -322,8 +322,8 @@ func (ec *executionContext) field_Mutation_singleUpload_args(ctx context.Context
 	args := map[string]interface{}{}
 	var arg0 graphql.Upload
 	if tmp, ok := rawArgs["file"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("file"))
-		arg0, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("file"))
+		arg0, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -337,8 +337,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
-		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -352,8 +352,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -367,8 +367,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1852,16 +1852,16 @@ func (ec *executionContext) unmarshalInputUploadFile(ctx context.Context, obj in
 		case "id":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
-			it.ID, err = ec.unmarshalNInt2int(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+			it.ID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "file":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("file"))
-			it.File, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("file"))
+			it.File, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2379,10 +2379,10 @@ func (ec *executionContext) unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgq
 	var err error
 	res := make([]*graphql.Upload, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil
@@ -2429,10 +2429,10 @@ func (ec *executionContext) unmarshalNUploadFile2ᚕᚖgithubᚗcomᚋ99designs�
 	var err error
 	res := make([]*model.UploadFile, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalNUploadFile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalNUploadFile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil
@@ -2511,10 +2511,10 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalN__DirectiveLocation2string(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalN__DirectiveLocation2string(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil

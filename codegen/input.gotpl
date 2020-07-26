@@ -17,11 +17,11 @@
 			case {{$field.Name|quote}}:
 				var err error
 
-				childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField({{$field.Name|quote}}))
+				ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField({{$field.Name|quote}}))
 				{{- if $field.ImplDirectives }}
-					directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(childCtx, v) }
+					directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }
 					{{ template "implDirectives" $field }}
-					tmp, err := directive{{$field.ImplDirectives|len}}(childCtx)
+					tmp, err := directive{{$field.ImplDirectives|len}}(ctx)
 					if err != nil {
 						return it, err
 					}
@@ -35,7 +35,7 @@
 						return it, fmt.Errorf(`unexpected type %T from directive, should be {{ $field.TypeReference.GO }}`, tmp)
 					}
 				{{- else }}
-					it.{{$field.GoFieldName}}, err = ec.{{ $field.TypeReference.UnmarshalFunc }}(childCtx, v)
+					it.{{$field.GoFieldName}}, err = ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
 					if err != nil {
 						return it, err
 					}

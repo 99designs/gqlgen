@@ -284,8 +284,8 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
-		arg0, err = ec.unmarshalNString2string(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -299,8 +299,8 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 *model.SearchArgs
 	if tmp, ok := rawArgs["input"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
-		arg0, err = ec.unmarshalOSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("input"))
+		arg0, err = ec.unmarshalOSearchArgs2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐSearchArgs(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -314,8 +314,8 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 	args := map[string]interface{}{}
 	var arg0 external.ObjectID
 	if tmp, ok := rawArgs["id"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
-		arg0, err = ec.unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("id"))
+		arg0, err = ec.unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋexternalᚐObjectID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -329,8 +329,8 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -344,8 +344,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(childCtx, tmp)
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1902,24 +1902,24 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 		case "location":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("location"))
-			it.Location, err = ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("location"))
+			it.Location, err = ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "createdAfter":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("createdAfter"))
-			it.CreatedAfter, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("createdAfter"))
+			it.CreatedAfter, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "isBanned":
 			var err error
 
-			childCtx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("isBanned"))
-			it.IsBanned, err = ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(childCtx, v)
+			ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("isBanned"))
+			it.IsBanned, err = ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐBanned(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2536,10 +2536,10 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		nctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
-		res[i], err = ec.unmarshalN__DirectiveLocation2string(nctx, vSlice[i])
+		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		res[i], err = ec.unmarshalN__DirectiveLocation2string(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(nctx, err)
+			return nil, graphql.WrapErrorWithInputPath(ctx, err)
 		}
 	}
 	return res, nil

@@ -31,13 +31,13 @@ func TestMiddleware(t *testing.T) {
 		NewExecutableSchema(Config{Resolvers: resolvers}),
 	)
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		path, _ := ctx.Value("path").([]int)
-		return next(context.WithValue(ctx, "path", append(path, 1)))
+		path, _ := ctx.Value(ckey("path")).([]int)
+		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))
 	})
 
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		path, _ := ctx.Value("path").([]int)
-		return next(context.WithValue(ctx, "path", append(path, 2)))
+		path, _ := ctx.Value(ckey("path")).([]int)
+		return next(context.WithValue(ctx, ckey("path"), append(path, 2)))
 	})
 
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
@@ -58,7 +58,7 @@ func TestMiddleware(t *testing.T) {
 
 	called := false
 	resolvers.UserResolver.Friends = func(ctx context.Context, obj *User) ([]*User, error) {
-		assert.Equal(t, []int{1, 2, 1, 2}, ctx.Value("path"))
+		assert.Equal(t, []int{1, 2, 1, 2}, ctx.Value(ckey("path")))
 		called = true
 		return []*User{}, nil
 	}

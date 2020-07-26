@@ -21,6 +21,8 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
+type ckey string
+
 func TestWebsocket(t *testing.T) {
 	handler := testserver.New()
 	handler.AddTransport(transport.Websocket{})
@@ -194,7 +196,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{
 			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
-				return context.WithValue(ctx, "newkey", "newvalue"), nil
+				return context.WithValue(ctx, ckey("newkey"), "newvalue"), nil
 			},
 		})
 		srv := httptest.NewServer(h)
@@ -232,7 +234,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 	t.Run("can return context for request from WebsocketInitFunc", func(t *testing.T) {
 		es := &graphql.ExecutableSchemaMock{
 			ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
-				assert.Equal(t, "newvalue", ctx.Value("newkey"))
+				assert.Equal(t, "newvalue", ctx.Value(ckey("newkey")))
 				return graphql.OneShot(&graphql.Response{Data: []byte(`{"empty":"ok"}`)})
 			},
 			SchemaFunc: func() *ast.Schema {
@@ -248,7 +250,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 
 		h.AddTransport(transport.Websocket{
 			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
-				return context.WithValue(ctx, "newkey", "newvalue"), nil
+				return context.WithValue(ctx, ckey("newkey"), "newvalue"), nil
 			},
 		})
 

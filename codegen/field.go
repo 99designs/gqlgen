@@ -491,7 +491,7 @@ func (f *Field) ShortResolverDeclaration() string {
 }
 
 func (f *Field) ComplexitySignature() string {
-	res := fmt.Sprintf("func(childComplexity int")
+	res := "func(childComplexity int"
 	for _, arg := range f.Args {
 		res += fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}

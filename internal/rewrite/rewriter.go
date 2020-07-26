@@ -29,6 +29,13 @@ func New(importPath string) (*Rewriter, error) {
 	if len(pkgs) == 0 {
 		return nil, fmt.Errorf("package not found for importPath: %s", importPath)
 	}
+	if len(pkgs[0].Errors) != 0 {
+		for _, e := range pkgs[0].Errors {
+			if e.Kind == packages.ListError {
+				return nil, e
+			}
+		}
+	}
 
 	return &Rewriter{
 		pkg:    pkgs[0],

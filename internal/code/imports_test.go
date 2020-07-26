@@ -12,6 +12,7 @@ import (
 
 func TestImportPathForDir(t *testing.T) {
 	wd, err := os.Getwd()
+
 	require.NoError(t, err)
 
 	assert.Equal(t, "github.com/99designs/gqlgen/internal/code", ImportPathForDir(wd))

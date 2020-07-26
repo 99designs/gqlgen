@@ -26,6 +26,9 @@ type Stub struct {
 	ModelMethodsResolver struct {
 		ResolverField func(ctx context.Context, obj *ModelMethods) (bool, error)
 	}
+	MutationResolver struct {
+		UpdateSomething func(ctx context.Context, input SpecialInput) (string, error)
+	}
 	OverlappingFieldsResolver struct {
 		OldFoo func(ctx context.Context, obj *OverlappingFields) (int, error)
 	}
@@ -129,6 +132,9 @@ func (r *Stub) ForcedResolver() ForcedResolverResolver {
 func (r *Stub) ModelMethods() ModelMethodsResolver {
 	return &stubModelMethods{r}
 }
+func (r *Stub) Mutation() MutationResolver {
+	return &stubMutation{r}
+}
 func (r *Stub) OverlappingFields() OverlappingFieldsResolver {
 	return &stubOverlappingFields{r}
 }
@@ -191,6 +197,12 @@ type stubModelMethods struct{ *Stub }
 
 func (r *stubModelMethods) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
 	return r.ModelMethodsResolver.ResolverField(ctx, obj)
+}
+
+type stubMutation struct{ *Stub }
+
+func (r *stubMutation) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
+	return r.MutationResolver.UpdateSomething(ctx, input)
 }
 
 type stubOverlappingFields struct{ *Stub }

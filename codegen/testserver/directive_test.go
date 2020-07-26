@@ -308,7 +308,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"invalid text",inner:{message:"123"}}) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable"]}]`)
+			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable","arg"]}]`)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function errors on inner directives", func(t *testing.T) {
@@ -318,7 +318,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"2",inner:{message:""}}) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable"]}]`)
+			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable","arg","inner"]}]`)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function errors on nullable inner directives", func(t *testing.T) {
@@ -328,7 +328,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"success",inner:{message:"1"},innerNullable:{message:""}}) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable"]}]`)
+			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable","arg","innerNullable"]}]`)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function success", func(t *testing.T) {

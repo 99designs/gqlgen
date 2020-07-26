@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type ckey string
+
 func TestDirectives(t *testing.T) {
 	resolvers := &Stub{}
 	ok := "Ok"
@@ -48,7 +50,7 @@ func TestDirectives(t *testing.T) {
 	}
 
 	resolvers.QueryResolver.DirectiveField = func(ctx context.Context) (*string, error) {
-		if s, ok := ctx.Value("request_id").(*string); ok {
+		if s, ok := ctx.Value(ckey("request_id")).(*string); ok {
 			return s, nil
 		}
 
@@ -149,7 +151,7 @@ func TestDirectives(t *testing.T) {
 				return next(ctx)
 			},
 			Logged: func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (interface{}, error) {
-				return next(context.WithValue(ctx, "request_id", &id))
+				return next(context.WithValue(ctx, ckey("request_id"), &id))
 			},
 			ToNull: func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
 				return nil, nil
@@ -172,13 +174,13 @@ func TestDirectives(t *testing.T) {
 	}))
 
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		path, _ := ctx.Value("path").([]int)
-		return next(context.WithValue(ctx, "path", append(path, 1)))
+		path, _ := ctx.Value(ckey("path")).([]int)
+		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))
 	})
 
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		path, _ := ctx.Value("path").([]int)
-		return next(context.WithValue(ctx, "path", append(path, 2)))
+		path, _ := ctx.Value(ckey("path")).([]int)
+		return next(context.WithValue(ctx, ckey("path"), append(path, 2)))
 	})
 
 	c := client.New(srv)

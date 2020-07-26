@@ -15,8 +15,10 @@ import (
 var you = &User{ID: 1, Name: "You"}
 var them = &User{ID: 2, Name: "Them"}
 
+type ckey string
+
 func getUserId(ctx context.Context) int {
-	if id, ok := ctx.Value("userId").(int); ok {
+	if id, ok := ctx.Value(ckey("userId")).(int); ok {
 		return id
 	}
 	return you.ID
@@ -53,7 +55,7 @@ func New() Config {
 		return next(ctx)
 	}
 	c.Directives.User = func(ctx context.Context, obj interface{}, next graphql.Resolver, id int) (interface{}, error) {
-		return next(context.WithValue(ctx, "userId", id))
+		return next(context.WithValue(ctx, ckey("userId"), id))
 	}
 	return c
 }

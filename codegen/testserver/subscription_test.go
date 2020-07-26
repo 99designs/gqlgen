@@ -72,13 +72,13 @@ func TestSubscriptions(t *testing.T) {
 		NewExecutableSchema(Config{Resolvers: resolvers}),
 	)
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		path, _ := ctx.Value("path").([]int)
-		return next(context.WithValue(ctx, "path", append(path, 1)))
+		path, _ := ctx.Value(ckey("path")).([]int)
+		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))
 	})
 
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		path, _ := ctx.Value("path").([]int)
-		return next(context.WithValue(ctx, "path", append(path, 2)))
+		path, _ := ctx.Value(ckey("path")).([]int)
+		return next(context.WithValue(ctx, ckey("path"), append(path, 2)))
 	})
 
 	c := client.New(srv)

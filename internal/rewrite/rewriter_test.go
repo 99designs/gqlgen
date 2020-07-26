@@ -1,6 +1,7 @@
 package rewrite
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ func TestRewriter(t *testing.T) {
 	m.Field++
 
 	// trailing comment
-`, body)
+`, strings.Replace(body, "\r\n", "\n", -1))
 
 		imps := r.ExistingImports("testdata/example.go")
 		require.Len(t, imps, 2)

@@ -234,7 +234,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "schema.graphql", Input: `"The ` + "`" + `Upload` + "`" + ` scalar type represents a multipart file upload."
+	{Name: "schema.graphql", Input: `"The ` + "`" + `Upload` + "`" + ` scalar type represents a multipart file upload."
 scalar Upload
 
 "The ` + "`" + `File` + "`" + ` type, represents the response of uploading a file."
@@ -2398,9 +2398,6 @@ func (ec *executionContext) marshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) unmarshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (*graphql.Upload, error) {
-	if v == nil {
-		return nil, nil
-	}
 	res, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }
@@ -2442,9 +2439,6 @@ func (ec *executionContext) unmarshalNUploadFile2ᚕᚖgithubᚗcomᚋ99designs�
 }
 
 func (ec *executionContext) unmarshalNUploadFile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx context.Context, v interface{}) (*model.UploadFile, error) {
-	if v == nil {
-		return nil, nil
-	}
 	res, err := ec.unmarshalNUploadFile2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfileuploadᚋmodelᚐUploadFile(ctx, v)
 	return &res, graphql.WrapErrorWithInputPath(ctx, err)
 }

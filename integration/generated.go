@@ -252,7 +252,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "schema.graphql", Input: `"This directive does magical things"
+	{Name: "schema.graphql", Input: `"This directive does magical things"
 directive @magic(kind: Int) on FIELD_DEFINITION
 
 type Element {
@@ -299,7 +299,7 @@ enum ErrorType {
 
 # this is a comment with a ` + "`" + `backtick` + "`" + `
 `, BuiltIn: false},
-	&ast.Source{Name: "user.graphql", Input: `type User {
+	{Name: "user.graphql", Input: `type User {
     name: String!
     likes: [String!]!
 }
@@ -2828,6 +2828,9 @@ func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.Se
 }
 
 func (ec *executionContext) unmarshalOBoolean2ᚕboolᚄ(ctx context.Context, v interface{}) ([]bool, error) {
+	if v == nil {
+		return nil, nil
+	}
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {

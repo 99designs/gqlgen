@@ -227,7 +227,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "schema.graphql", Input: `schema {
+	{Name: "schema.graphql", Input: `schema {
     query: MyQuery
     mutation: MyMutation
 }
@@ -2260,9 +2260,6 @@ func (ec *executionContext) marshalNID2int(ctx context.Context, sel ast.Selectio
 }
 
 func (ec *executionContext) unmarshalNMap2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
-	if v == nil {
-		return nil, nil
-	}
 	res, err := graphql.UnmarshalMap(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }

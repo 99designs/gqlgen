@@ -2,7 +2,7 @@
 linkTitle: Plugins
 title: How to write plugins for gqlgen
 description: Use plugins to customize code generation and integrate with other libraries
-menu: { main: { parent: "reference" } }
+menu: { main: { parent: "reference", weight: 10 } }
 ---
 
 Plugins provide a way to hook into the gqlgen code generation lifecycle. In order to use anything other than the

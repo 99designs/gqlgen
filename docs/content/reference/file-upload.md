@@ -2,7 +2,7 @@
 title: "File Upload"
 description: How to upload files.
 linkTitle: File Upload
-menu: { main: { parent: "reference" } }
+menu: { main: { parent: "reference", weight: 10 } }
 ---
 
 Graphql server has an already built-in Upload scalar to upload files using a multipart request. \

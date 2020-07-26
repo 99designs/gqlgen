@@ -21,7 +21,7 @@ type (
 		Parsing    Span          `json:"parsing"`
 		Validation Span          `json:"validation"`
 		Execution  struct {
-			Resolvers []ResolverExecution `json:"resolvers"`
+			Resolvers []*ResolverExecution `json:"resolvers"`
 		} `json:"execution"`
 	}
 
@@ -46,44 +46,45 @@ var _ interface {
 	graphql.FieldInterceptor
 } = Tracer{}
 
-func (a Tracer) ExtensionName() string {
+func (Tracer) ExtensionName() string {
 	return "ApolloTracing"
 }
 
-func (a Tracer) Validate(schema graphql.ExecutableSchema) error {
+func (Tracer) Validate(graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (a Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-	rc := graphql.GetOperationContext(ctx)
+func (Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (interface{}, error) {
 	td, ok := graphql.GetExtension(ctx, "tracing").(*TracingExtension)
 	if !ok {
-		panic("missing tracing extension")
+		return next(ctx)
 	}
 
 	start := graphql.Now()
 
 	defer func() {
-		td.mu.Lock()
-		defer td.mu.Unlock()
-		fc := graphql.GetFieldContext(ctx)
-
 		end := graphql.Now()
 
-		td.Execution.Resolvers = append(td.Execution.Resolvers, ResolverExecution{
+		rc := graphql.GetOperationContext(ctx)
+		fc := graphql.GetFieldContext(ctx)
+		resolver := &ResolverExecution{
 			Path:        fc.Path(),
 			ParentType:  fc.Object,
 			FieldName:   fc.Field.Name,
 			ReturnType:  fc.Field.Definition.Type.String(),
 			StartOffset: start.Sub(rc.Stats.OperationStart),
 			Duration:    end.Sub(start),
-		})
+		}
+
+		td.mu.Lock()
+		td.Execution.Resolvers = append(td.Execution.Resolvers, resolver)
+		td.mu.Unlock()
 	}()
 
 	return next(ctx)
 }
 
-func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	rc := graphql.GetOperationContext(ctx)
 
 	start := rc.Stats.OperationStart
@@ -100,10 +101,6 @@ func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHand
 			StartOffset: rc.Stats.Validation.Start.Sub(start),
 			Duration:    rc.Stats.Validation.End.Sub(rc.Stats.Validation.Start),
 		},
-
-		Execution: struct {
-			Resolvers []ResolverExecution `json:"resolvers"`
-		}{},
 	}
 
 	graphql.RegisterExtension(ctx, "tracing", td)

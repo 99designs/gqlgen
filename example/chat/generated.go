@@ -256,7 +256,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "schema.graphql", Input: `type Chatroom {
+	{Name: "schema.graphql", Input: `type Chatroom {
     name: String!
     messages: [Message!]!
 }

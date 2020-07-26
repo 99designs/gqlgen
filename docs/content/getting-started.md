@@ -146,7 +146,7 @@ mutation createTodo {
 }
 
 query findTodos {
-  	todos {
+    todos {
       text
       done
       user {
@@ -156,7 +156,7 @@ query findTodos {
 }
 ```
 
-### Dont eagarly fetch the user
+### Dont eagerly fetch the user
 
 This example is great, but in the real world fetching most objects is expensive. We dont want to load the User on the
 todo unless the user actually asked for it. So lets replace the generated `Todo` model with something slightly more

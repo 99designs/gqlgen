@@ -2,7 +2,7 @@
 title: "Optimizing N+1 database queries using Dataloaders"
 description: Speeding up your GraphQL requests by reducing the number of round trips to the database.
 linkTitle: Dataloaders
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 Have you noticed some GraphQL queries end can make hundreds of database
@@ -130,7 +130,6 @@ func Middleware(conn *sql.DB, next http.Handler) http.Handler {
 					users := make([]*model.User, len(ids))
 					for i, id := range ids {
 						users[i] = userById[id]
-						i++
 					}
 
 					return users, nil

@@ -1,8 +1,8 @@
 ---
 title: "Automatic persisted queries"
-description:   
+description:
 linkTitle: "APQ"
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 When you work with GraphQL by default your queries are transferred with every request. That can waste significant
@@ -13,10 +13,10 @@ to register query hash with original query on a server.
 
 ## Usage
 
-In order to enable Automatic Persisted Queries you need to change your client. For more information see 
+In order to enable Automatic Persisted Queries you need to change your client. For more information see
 [Automatic Persisted Queries Link](https://github.com/apollographql/apollo-link-persisted-queries) documentation.
 
-For the server you need to implement `PersistedQueryCache` interface and pass instance to 
+For the server you need to implement `PersistedQueryCache` interface and pass instance to
 `handler.EnablePersistedQueryCache` option.
 
 See example using [go-redis](https://github.com/go-redis/redis) package below:
@@ -25,8 +25,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/go-redis/redis"
-	"github.com/pkg/errors"
 )
 
 type Cache struct {
@@ -43,20 +45,20 @@ func NewCache(redisAddress string, password string, ttl time.Duration) (*Cache, 
 
 	err := client.Ping().Err()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, fmt.Errorf("could not create cache: %w", err)
 	}
 
 	return &Cache{client: client, ttl: ttl}, nil
 }
 
-func (c *Cache) Add(ctx context.Context, hash string, query string) {
-	c.client.Set(apqPrefix + hash, query, c.ttl)
+func (c *Cache) Add(ctx context.Context, key string, value interface{}) {
+	c.client.Set(apqPrefix+key, value, c.ttl)
 }
 
-func (c *Cache) Get(ctx context.Context, hash string) (string, bool) {
-	s, err := c.client.Get(apqPrefix + hash).Result()
+func (c *Cache) Get(ctx context.Context, key string) (interface{}, bool) {
+	s, err := c.client.Get(apqPrefix + key).Result()
 	if err != nil {
-		return "", false
+		return struct{}{}, false
 	}
 	return s, true
 }
@@ -66,12 +68,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot create APQ redis cache: %v", err)
 	}
-	
+
 	c := Config{ Resolvers: &resolvers{} }
-	gqlHandler := handler.GraphQL(
-		blog.NewExecutableSchema(c),
-		handler.EnablePersistedQueryCache(cache),
+	gqlHandler := handler.New(
+		generated.NewExecutableSchema(c),
 	)
+	gqlHandler.AddTransport(transport.POST{})
+	gqlHandler.Use(extension.AutomaticPersistedQuery{Cache: cache})
 	http.Handle("/query", gqlHandler)
 }
 ```

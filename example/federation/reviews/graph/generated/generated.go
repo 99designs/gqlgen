@@ -252,7 +252,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "graph/schema.graphqls", Input: `type Review {
+	{Name: "graph/schema.graphqls", Input: `type Review {
     body: String!
     author: User! @provides(fields: "username")
     product: Product!
@@ -268,7 +268,7 @@ extend type Product @key(fields: "upc") {
     reviews: [Review]
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "federation/directives.graphql", Input: `
+	{Name: "federation/directives.graphql", Input: `
 scalar _Any
 scalar _FieldSet
 
@@ -278,7 +278,7 @@ directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
 directive @extends on OBJECT
 `, BuiltIn: true},
-	&ast.Source{Name: "federation/entity.graphql", Input: `
+	{Name: "federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
 union _Entity = Product | User
 
@@ -2546,9 +2546,6 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ
 }
 
 func (ec *executionContext) unmarshalN_Any2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
-	if v == nil {
-		return nil, nil
-	}
 	res, err := graphql.UnmarshalMap(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }

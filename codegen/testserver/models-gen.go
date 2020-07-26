@@ -122,8 +122,9 @@ type NestedMapInput struct {
 }
 
 type ObjectDirectives struct {
-	Text         string  `json:"text"`
-	NullableText *string `json:"nullableText"`
+	Text         string   `json:"text"`
+	NullableText *string  `json:"nullableText"`
+	Order        []string `json:"order"`
 }
 
 type OuterInput struct {

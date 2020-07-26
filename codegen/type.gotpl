@@ -1,7 +1,7 @@
 {{- range $type := .ReferencedTypes }}
 	{{ with $type.UnmarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, v interface{}) ({{ $type.GO | ref }}, error) {
-			{{- if $type.IsNilable }}
+			{{- if and $type.IsNilable (not $type.GQL.NonNull) }}
 				if v == nil { return nil, nil }
 			{{- end }}
 			{{- if $type.IsPtr }}
@@ -51,17 +51,6 @@
 
 	{{ with $type.MarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
-			{{- if $type.IsNilable }}
-				if v == nil {
-					{{- if $type.GQL.NonNull }}
-						if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-							ec.Errorf(ctx, "must not be null")
-						}
-					{{- end }}
-					return graphql.Null
-				}
-			{{- end }}
-
 			{{- if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
@@ -108,7 +97,16 @@
 				{{ if not $type.IsScalar }} wg.Wait() {{ end }}
 				return ret
 			{{- else }}
-
+				{{- if $type.IsNilable }}
+					if v == nil {
+						{{- if $type.GQL.NonNull }}
+							if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+								ec.Errorf(ctx, "must not be null")
+							}
+						{{- end }}
+						return graphql.Null
+					}
+				{{- end }}
 				{{- if $type.IsMarshaler }}
 					return v
 				{{- else if $type.Marshaler }}

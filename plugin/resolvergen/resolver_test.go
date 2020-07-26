@@ -31,9 +31,33 @@ func TestLayoutSingleFile(t *testing.T) {
 }
 
 func TestLayoutFollowSchema(t *testing.T) {
-	_ = syscall.Unlink("testdata/followschema/out/resolver.go")
+	testFollowSchemaPersistence(t, "testdata/followschema")
 
-	cfg, err := config.LoadConfig("testdata/followschema/gqlgen.yml")
+	b, err := ioutil.ReadFile("testdata/followschema/out/schema.resolvers.go")
+	require.NoError(t, err)
+	source := string(b)
+
+	require.Contains(t, source, "// CustomerResolverType.Resolver implementation")
+	require.Contains(t, source, "// CustomerResolverType.Name implementation")
+	require.Contains(t, source, "// AUserHelperFunction implementation")
+}
+
+func TestLayoutFollowSchemaWithCustomFilename(t *testing.T) {
+	testFollowSchemaPersistence(t, "testdata/filetemplate")
+
+	b, err := ioutil.ReadFile("testdata/filetemplate/out/schema.custom.go")
+	require.NoError(t, err)
+	source := string(b)
+
+	require.Contains(t, source, "// CustomerResolverType.Resolver implementation")
+	require.Contains(t, source, "// CustomerResolverType.Name implementation")
+	require.Contains(t, source, "// AUserHelperFunction implementation")
+}
+
+func testFollowSchemaPersistence(t *testing.T, dir string) {
+	_ = syscall.Unlink(dir + "/out/resolver.go")
+
+	cfg, err := config.LoadConfig(dir + "/gqlgen.yml")
 	require.NoError(t, err)
 	p := Plugin{}
 
@@ -45,15 +69,7 @@ func TestLayoutFollowSchema(t *testing.T) {
 	}
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/followschema/out")
-
-	b, err := ioutil.ReadFile("testdata/followschema/out/schema.resolvers.go")
-	require.NoError(t, err)
-	source := string(b)
-
-	require.Contains(t, source, "// CustomerResolverType.Resolver implementation")
-	require.Contains(t, source, "// CustomerResolverType.Name implementation")
-	require.Contains(t, source, "// AUserHelperFunction implementation")
+	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/"+dir+"/out")
 }
 
 func assertNoErrors(t *testing.T, pkg string) {

@@ -36,7 +36,7 @@ func main() {
 	}).Handler)
 
 
-    srv := handler.New(starwars.NewExecutableSchema(starwars.NewResolver()))
+    srv := handler.NewDefaultServer(starwars.NewExecutableSchema(starwars.NewResolver()))
     srv.AddTransport(&transport.Websocket{
         Upgrader: websocket.Upgrader{
             CheckOrigin: func(r *http.Request) bool {

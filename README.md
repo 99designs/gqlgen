@@ -17,8 +17,8 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 - You could initialize a new project using the recommended folder structure by running this command `go run github.com/99designs/gqlgen init`.
 
 You could find a more comprehensive guide to help you get started [here](https://gqlgen.com/getting-started/).<br/>
-We also have a couple of real-world [examples](https://github.com/99designs/gqlgen/tree/master/example) to help you create GraphQL applicatons seamlessly,
-You can see the [examples](https://github.com/99designs/gqlgen/tree/master/example) here or visit [godoc](https://godoc.org/github.com/99designs/gqlgen).
+We also have a couple of real-world [examples](https://github.com/99designs/gqlgen/tree/master/example) that show how to GraphQL applicatons with **gqlgen** seamlessly,
+You can see these [examples](https://github.com/99designs/gqlgen/tree/master/example) here or visit [godoc](https://godoc.org/github.com/99designs/gqlgen).
 
 ## Reporting Issues
 
@@ -85,7 +85,7 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 }
 ```
 
-### Can I change the type of the ID from type Strings to Type Int?
+### Can I change the type of the ID from type String to Type Int?
 
 Yes! You can by remapping it in config as seen below:
 

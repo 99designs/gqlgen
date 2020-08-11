@@ -277,7 +277,6 @@ type ComplexityRoot struct {
 		EnumInInput                      func(childComplexity int, input *InputWithEnumValue) int
 		ErrorBubble                      func(childComplexity int) int
 		Errors                           func(childComplexity int) int
-		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
 		InputSlice                       func(childComplexity int, arg []string) int
 		InvalidIdentifier                func(childComplexity int) int
@@ -462,7 +461,6 @@ type QueryResolver interface {
 	DefaultScalar(ctx context.Context, arg string) (string, error)
 	Slices(ctx context.Context) (*Slices, error)
 	ScalarSlice(ctx context.Context) ([]byte, error)
-	Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 	OptionalUnion(ctx context.Context) (TestUnion, error)
 	ValidType(ctx context.Context) (*ValidType, error)
 	WrappedStruct(ctx context.Context) (*WrappedStruct, error)
@@ -1202,18 +1200,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Errors(childComplexity), true
-
-	case "Query.fallback":
-		if e.complexity.Query.Fallback == nil {
-			break
-		}
-
-		args, err := ec.field_Query_fallback_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
 
 	case "Query.inputNullableSlice":
 		if e.complexity.Query.InputNullableSlice == nil {
@@ -2201,16 +2187,6 @@ type Slices {
 
 scalar Bytes
 `, BuiltIn: false},
-	{Name: "typefallback.graphql", Input: `extend type Query {
-    fallback(arg: FallbackToStringEncoding!): FallbackToStringEncoding!
-}
-
-enum FallbackToStringEncoding {
-    A
-    B
-    C
-}
-`, BuiltIn: false},
 	{Name: "useptr.graphql", Input: `type A {
     id: ID!
 }
@@ -2709,21 +2685,6 @@ func (ec *executionContext) field_Query_enumInInput_args(ctx context.Context, ra
 		}
 	}
 	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_fallback_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 FallbackToStringEncoding
-	if tmp, ok := rawArgs["arg"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("arg"))
-		arg0, err = ec.unmarshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐFallbackToStringEncoding(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["arg"] = arg0
 	return args, nil
 }
 
@@ -7308,44 +7269,6 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 	res := resTmp.([]byte)
 	fc.Result = res
 	return ec.marshalNBytes2ᚕbyte(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_fallback_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Fallback(rctx, args["arg"].(FallbackToStringEncoding))
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(FallbackToStringEncoding)
-	fc.Result = res
-	return ec.marshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐFallbackToStringEncoding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -12110,20 +12033,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "fallback":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_fallback(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "optionalUnion":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -12953,22 +12862,6 @@ func (ec *executionContext) marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec._Error(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐFallbackToStringEncoding(ctx context.Context, v interface{}) (FallbackToStringEncoding, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	return FallbackToStringEncoding(tmp), graphql.WrapErrorWithInputPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐFallbackToStringEncoding(ctx context.Context, sel ast.SelectionSet, v FallbackToStringEncoding) graphql.Marshaler {
-	in := v
-	res := graphql.MarshalString(string(in))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNID2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalIntID(v)
 	return res, graphql.WrapErrorWithInputPath(ctx, err)
@@ -13452,19 +13345,13 @@ func (ec *executionContext) marshalNWrappedMap2githubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) unmarshalNWrappedScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedScalar(ctx context.Context, v interface{}) (WrappedScalar, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	return WrappedScalar(tmp), graphql.WrapErrorWithInputPath(ctx, err)
+	var res WrappedScalar
+	err := res.UnmarshalGQL(v)
+	return res, graphql.WrapErrorWithInputPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNWrappedScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedScalar(ctx context.Context, sel ast.SelectionSet, v WrappedScalar) graphql.Marshaler {
-	in := v
-	res := graphql.MarshalString(string(in))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return v
 }
 
 func (ec *executionContext) marshalNWrappedSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐWrappedSlice(ctx context.Context, sel ast.SelectionSet, v WrappedSlice) graphql.Marshaler {

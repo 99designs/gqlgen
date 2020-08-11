@@ -25,10 +25,7 @@
 				return res, nil
 			{{- else }}
 				{{- if $type.Unmarshaler }}
-					{{- if $type.CastType }}
-						tmp, err := {{ $type.Unmarshaler | call }}(v)
-						return {{ $type.GO | ref }}(tmp), graphql.WrapErrorWithInputPath(ctx, err)
-					{{- else if and $type.IsTargetNilable (not $type.IsNilable) }}
+					{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
 						tmp, err := {{ $type.Unmarshaler | call }}(v)
 						res := *tmp
 						return res, graphql.WrapErrorWithInputPath(ctx, err)
@@ -137,7 +134,7 @@
 						in := v
 					{{- end }}
 					{{- if $type.GQL.NonNull }}
-							res := {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}(in){{else}}in{{- end }})
+							res := {{ $type.Marshaler | call }}(in)
 							if res == graphql.Null {
 								if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 									ec.Errorf(ctx, "must not be null")
@@ -145,7 +142,7 @@
 							}
 							return res
 					{{- else }}
-						return {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}(in){{else}}in{{- end }})
+						return {{ $type.Marshaler | call }}(in)
 					{{- end }}
 				{{- else }}
 					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)

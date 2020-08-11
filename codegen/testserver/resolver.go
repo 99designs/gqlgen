@@ -263,10 +263,6 @@ func (r *queryResolver) ScalarSlice(ctx context.Context) ([]byte, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error) {
-	panic("not implemented")
-}
-
 func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
 	panic("not implemented")
 }

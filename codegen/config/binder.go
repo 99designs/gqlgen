@@ -151,7 +151,6 @@ func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 	newRef := &TypeReference{
 		GO:          types.NewPointer(ref.GO),
 		GQL:         ref.GQL,
-		CastType:    ref.CastType,
 		Definition:  ref.Definition,
 		Unmarshaler: ref.Unmarshaler,
 		Marshaler:   ref.Marshaler,
@@ -168,7 +167,6 @@ type TypeReference struct {
 	GQL         *ast.Type
 	GO          types.Type
 	Target      types.Type
-	CastType    types.Type  // Before calling marshalling functions cast from/to this base type
 	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
 	IsMarshaler bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
@@ -180,7 +178,6 @@ func (ref *TypeReference) Elem() *TypeReference {
 			GO:          p.Elem(),
 			Target:      ref.Target,
 			GQL:         ref.GQL,
-			CastType:    ref.CastType,
 			Definition:  ref.Definition,
 			Unmarshaler: ref.Unmarshaler,
 			Marshaler:   ref.Marshaler,
@@ -193,7 +190,6 @@ func (ref *TypeReference) Elem() *TypeReference {
 			GO:          ref.GO.(*types.Slice).Elem(),
 			Target:      ref.Target,
 			GQL:         ref.GQL.Elem,
-			CastType:    ref.CastType,
 			Definition:  ref.Definition,
 			Unmarshaler: ref.Unmarshaler,
 			Marshaler:   ref.Marshaler,
@@ -349,27 +345,16 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			return nil, err
 		}
 
-		if fun, isFunc := obj.(*types.Func); isFunc {
+		fun, isFunc := obj.(*types.Func)
+		switch {
+		case isFunc:
 			ref.GO = fun.Type().(*types.Signature).Params().At(0).Type()
 			ref.Marshaler = fun
 			ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
-		} else if hasMethod(obj.Type(), "MarshalGQL") && hasMethod(obj.Type(), "UnmarshalGQL") {
+		case hasMethod(obj.Type(), "MarshalGQL") && hasMethod(obj.Type(), "UnmarshalGQL"):
 			ref.GO = obj.Type()
 			ref.IsMarshaler = true
-		} else if underlying := basicUnderlying(obj.Type()); def.IsLeafType() && underlying != nil && underlying.Kind() == types.String {
-			// Special case for named types wrapping strings. Used by default enum implementations.
-
-			ref.GO = obj.Type()
-			ref.CastType = underlying
-
-			underlyingRef, err := b.TypeReference(&ast.Type{NamedType: "String"}, nil)
-			if err != nil {
-				return nil, err
-			}
-
-			ref.Marshaler = underlyingRef.Marshaler
-			ref.Unmarshaler = underlyingRef.Unmarshaler
-		} else {
+		default:
 			ref.GO = obj.Type()
 		}
 
@@ -445,20 +430,4 @@ func hasMethod(it types.Type, name string) bool {
 		}
 	}
 	return false
-}
-
-func basicUnderlying(it types.Type) *types.Basic {
-	if ptr, isPtr := it.(*types.Pointer); isPtr {
-		it = ptr.Elem()
-	}
-	namedType, ok := it.(*types.Named)
-	if !ok {
-		return nil
-	}
-
-	if basic, ok := namedType.Underlying().(*types.Basic); ok {
-		return basic
-	}
-
-	return nil
 }

@@ -166,8 +166,8 @@ func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 type TypeReference struct {
 	Definition  *ast.Definition
 	GQL         *ast.Type
-	GO          types.Type
-	Target      types.Type
+	GO          types.Type  // Type of the field being bound. Could be a pointer or a value type of Target.
+	Target      types.Type  // The actual type that we know how to bind to. May require pointer juggling when traversing to fields.
 	CastType    types.Type  // Before calling marshalling functions cast from/to this base type
 	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
@@ -357,7 +357,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			ref.GO = obj.Type()
 			ref.IsMarshaler = true
 		} else if underlying := basicUnderlying(obj.Type()); def.IsLeafType() && underlying != nil && underlying.Kind() == types.String {
-			// Special case for named types wrapping strings. Used by default enum implementations.
+			// TODO delete before v1. Backwards compatibility case for named types wrapping strings (see #595)
 
 			ref.GO = obj.Type()
 			ref.CastType = underlying

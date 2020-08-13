@@ -60,7 +60,6 @@ package mypkg
 import (
 	"fmt"
 	"io"
-	"strings"
 )
 
 type YesNo bool
@@ -69,7 +68,7 @@ type YesNo bool
 func (y *YesNo) UnmarshalGQL(v interface{}) error {
 	yes, ok := v.(string)
 	if !ok {
-		return fmt.Errorf("points must be strings")
+		return fmt.Errorf("YesNo must be a string")
 	}
 
 	if yes == "yes" {
@@ -90,7 +89,7 @@ func (y YesNo) MarshalGQL(w io.Writer) {
 }
 ```
 
-and then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+and then wire up the type in .gqlgen.yml or via directives like normal:
 
 ```yaml
 models:
@@ -100,8 +99,8 @@ models:
 
 ## Custom scalars with third party types
 
-Sometimes you cant add methods to a type because its in another repo, part of the standard
-library (eg string or time.Time). To do this we can build an external marshaler:
+Sometimes you are unable to add add methods to a type - perhaps you don't own the type, or it is part of the standard
+library (eg string or time.Time). To support this we can build an external marshaler:
 
 ```go
 package mypkg
@@ -146,6 +145,9 @@ models:
   MyCustomBooleanScalar:
     model: github.com/me/mypkg.MyCustomBooleanScalar
 ```
+
+**Note:** you also can un/marshal to pointer types via this approach, simply accept a pointer in your
+`Marshal...` func and return one in your `Unmarshal...` func.
 
 See the [example/scalars](https://github.com/99designs/gqlgen/tree/master/example/scalars) package for more examples.
 

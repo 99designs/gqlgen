@@ -7,6 +7,7 @@ import (
 
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
+	"github.com/99designs/gqlgen/codegen/testserver/otherpkg"
 )
 
 type Resolver struct{}
@@ -279,7 +280,7 @@ func (r *queryResolver) WrappedStruct(ctx context.Context) (*WrappedStruct, erro
 	panic("not implemented")
 }
 
-func (r *queryResolver) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
+func (r *queryResolver) WrappedScalar(ctx context.Context) (otherpkg.Scalar, error) {
 	panic("not implemented")
 }
 

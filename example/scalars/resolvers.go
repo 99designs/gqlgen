@@ -24,6 +24,10 @@ func (r *Resolver) User() UserResolver {
 
 type queryResolver struct{ *Resolver }
 
+func (r *queryResolver) UserByTier(ctx context.Context, tier model.Tier, darkMode *model.Prefs) ([]*model.User, error) {
+	panic("implement me")
+}
+
 func (r *queryResolver) User(ctx context.Context, id external.ObjectID) (*model.User, error) {
 	return &model.User{
 		ID:      id,

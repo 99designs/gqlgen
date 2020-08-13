@@ -7,5 +7,6 @@ type (
 )
 
 type Struct struct {
-	Name string
+	Name Scalar
+	Desc *Scalar
 }

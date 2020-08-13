@@ -7,6 +7,7 @@ import (
 
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
+	"github.com/99designs/gqlgen/codegen/testserver/otherpkg"
 )
 
 type Stub struct {
@@ -92,10 +93,11 @@ type Stub struct {
 		DefaultScalar                    func(ctx context.Context, arg string) (string, error)
 		Slices                           func(ctx context.Context) (*Slices, error)
 		ScalarSlice                      func(ctx context.Context) ([]byte, error)
+		Fallback                         func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 		OptionalUnion                    func(ctx context.Context) (TestUnion, error)
 		ValidType                        func(ctx context.Context) (*ValidType, error)
 		WrappedStruct                    func(ctx context.Context) (*WrappedStruct, error)
-		WrappedScalar                    func(ctx context.Context) (WrappedScalar, error)
+		WrappedScalar                    func(ctx context.Context) (otherpkg.Scalar, error)
 		WrappedMap                       func(ctx context.Context) (WrappedMap, error)
 		WrappedSlice                     func(ctx context.Context) (WrappedSlice, error)
 	}
@@ -380,6 +382,9 @@ func (r *stubQuery) Slices(ctx context.Context) (*Slices, error) {
 func (r *stubQuery) ScalarSlice(ctx context.Context) ([]byte, error) {
 	return r.QueryResolver.ScalarSlice(ctx)
 }
+func (r *stubQuery) Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error) {
+	return r.QueryResolver.Fallback(ctx, arg)
+}
 func (r *stubQuery) OptionalUnion(ctx context.Context) (TestUnion, error) {
 	return r.QueryResolver.OptionalUnion(ctx)
 }
@@ -389,7 +394,7 @@ func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 func (r *stubQuery) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
 	return r.QueryResolver.WrappedStruct(ctx)
 }
-func (r *stubQuery) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
+func (r *stubQuery) WrappedScalar(ctx context.Context) (otherpkg.Scalar, error) {
 	return r.QueryResolver.WrappedScalar(ctx)
 }
 func (r *stubQuery) WrappedMap(ctx context.Context) (WrappedMap, error) {

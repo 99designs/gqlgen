@@ -7,7 +7,7 @@ extend type Query {
     wrappedSlice: WrappedSlice!
 }
 
-type WrappedStruct { name: String! }
+type WrappedStruct { name: WrappedScalar!, desc: WrappedScalar }
 scalar WrappedScalar
 type WrappedMap { get(key: String!): String! }
 type WrappedSlice { get(idx: Int!): String! }

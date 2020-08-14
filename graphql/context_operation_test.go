@@ -85,8 +85,8 @@ func TestCollectAllFields(t *testing.T) {
 				TypeCondition: "ExampleTypeA",
 				SelectionSet: ast.SelectionSet{
 					&ast.Field{
-						Name: "fieldA",
-						ObjectDefinition:  &ast.Definition{Name:"ExampleTypeA"},
+						Name:             "fieldA",
+						ObjectDefinition: &ast.Definition{Name: "ExampleTypeA"},
 					},
 				},
 			},
@@ -94,8 +94,8 @@ func TestCollectAllFields(t *testing.T) {
 				TypeCondition: "ExampleTypeB",
 				SelectionSet: ast.SelectionSet{
 					&ast.Field{
-						Name: "fieldA",
-						ObjectDefinition:  &ast.Definition{Name:"ExampleTypeB"},
+						Name:             "fieldA",
+						ObjectDefinition: &ast.Definition{Name: "ExampleTypeB"},
 					},
 				},
 			},

@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	 "github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type ExecutableSchema interface {
@@ -33,10 +33,10 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				continue
 			}
 
-			if sel.ObjectDefinition==nil{
-			    sel.ObjectDefinition	=&ast.Definition{Name: ""}
+			if sel.ObjectDefinition == nil {
+				sel.ObjectDefinition = &ast.Definition{Name: ""}
 			}
-			f := getOrCreateAndAppendField(&groupedFields, sel.Alias,sel.ObjectDefinition.Name , func() CollectedField {
+			f := getOrCreateAndAppendField(&groupedFields, sel.Alias, sel.ObjectDefinition.Name, func() CollectedField {
 				return CollectedField{Field: sel}
 			})
 
@@ -49,10 +49,10 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				continue
 			}
 			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
-				if childField.ObjectDefinition==nil{
-					childField.ObjectDefinition	=&ast.Definition{Name: ""}
+				if childField.ObjectDefinition == nil {
+					childField.ObjectDefinition = &ast.Definition{Name: ""}
 				}
-				f := getOrCreateAndAppendField(&groupedFields, childField.Name,childField.ObjectDefinition.Name, func() CollectedField { return childField })
+				f := getOrCreateAndAppendField(&groupedFields, childField.Name, childField.ObjectDefinition.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
 
@@ -77,10 +77,10 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			}
 
 			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
-				if childField.ObjectDefinition==nil{
-					childField.ObjectDefinition	=&ast.Definition{Name: ""}
+				if childField.ObjectDefinition == nil {
+					childField.ObjectDefinition = &ast.Definition{Name: ""}
 				}
-				f := getOrCreateAndAppendField(&groupedFields, childField.Name,childField.ObjectDefinition.Name, func() CollectedField { return childField })
+				f := getOrCreateAndAppendField(&groupedFields, childField.Name, childField.ObjectDefinition.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
 		default:
@@ -106,9 +106,9 @@ func instanceOf(val string, satisfies []string) bool {
 	return false
 }
 
-func getOrCreateAndAppendField(c *[]CollectedField, name string,objectDefinitionName string, creator func() CollectedField) *CollectedField {
+func getOrCreateAndAppendField(c *[]CollectedField, name string, objectDefinitionName string, creator func() CollectedField) *CollectedField {
 	for i, cf := range *c {
-		if cf.Alias == name && cf.ObjectDefinition.Name==objectDefinitionName {
+		if cf.Alias == name && cf.ObjectDefinition.Name == objectDefinitionName {
 			return &(*c)[i]
 		}
 	}

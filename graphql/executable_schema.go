@@ -32,6 +32,10 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
 				continue
 			}
+
+			if sel.ObjectDefinition==nil{
+			    sel.ObjectDefinition	=&ast.Definition{Name: ""}
+			}
 			f := getOrCreateAndAppendField(&groupedFields, sel.Alias,sel.ObjectDefinition.Name , func() CollectedField {
 				return CollectedField{Field: sel}
 			})
@@ -45,6 +49,9 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				continue
 			}
 			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
+				if childField.ObjectDefinition==nil{
+					childField.ObjectDefinition	=&ast.Definition{Name: ""}
+				}
 				f := getOrCreateAndAppendField(&groupedFields, childField.Name,childField.ObjectDefinition.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
@@ -70,6 +77,9 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			}
 
 			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
+				if childField.ObjectDefinition==nil{
+					childField.ObjectDefinition	=&ast.Definition{Name: ""}
+				}
 				f := getOrCreateAndAppendField(&groupedFields, childField.Name,childField.ObjectDefinition.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}

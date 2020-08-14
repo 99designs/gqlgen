@@ -78,4 +78,35 @@ func TestCollectAllFields(t *testing.T) {
 		s := CollectAllFields(ctx)
 		require.Equal(t, []string{"fieldA", "fieldB"}, s)
 	})
+
+	t.Run("collect fragments with same field name", func(t *testing.T) {
+		ctx := testContext(ast.SelectionSet{
+			&ast.InlineFragment{
+				TypeCondition: "ExampleTypeA",
+				SelectionSet: ast.SelectionSet{
+					&ast.Field{
+						Name: "fieldA",
+						ObjectDefinition:  &ast.Definition{Name:"ExampleTypeA"},
+					},
+				},
+			},
+			&ast.InlineFragment{
+				TypeCondition: "ExampleTypeB",
+				SelectionSet: ast.SelectionSet{
+					&ast.Field{
+						Name: "fieldA",
+						ObjectDefinition:  &ast.Definition{Name:"ExampleTypeB"},
+					},
+				},
+			},
+		})
+
+		resctx := GetFieldContext(ctx)
+		collected := CollectFields(GetOperationContext(ctx), resctx.Field.Selections, nil)
+		s := make([]string, 0, len(collected))
+		for _, f := range collected {
+			s = append(s, f.Name)
+		}
+		require.Equal(t, []string{"fieldA", "fieldA"}, s)
+	})
 }

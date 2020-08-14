@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/cache"
 
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -108,7 +108,7 @@ func TestPOST(t *testing.T) {
 			hWithCache.AddTransport(transport.POST{
 				EnableCache: true,
 			})
-			hWithCache.Use(extension.Cache{})
+			hWithCache.Use(cache.Extension{})
 
 			resp := doRequest(hWithCache, "POST", "/graphql", `{"query":"{ name }"}`)
 			assert.Equal(t, http.StatusOK, resp.Code)
@@ -120,7 +120,7 @@ func TestPOST(t *testing.T) {
 			hWithCache.AddTransport(transport.POST{
 				EnableCache: true,
 			})
-			hWithCache.Use(extension.Cache{})
+			hWithCache.Use(cache.Extension{})
 
 			resp := doRequest(hWithCache, "POST", "/graphql", `{"query":"{ name }"}`)
 			assert.Equal(t, "max-age: 10 public", resp.Header().Get("Cache-Control"))
@@ -129,7 +129,7 @@ func TestPOST(t *testing.T) {
 		t.Run("not writes cache control header", func(t *testing.T) {
 			hWithCache := testserver.NewCache()
 			hWithCache.AddTransport(transport.POST{})
-			hWithCache.Use(extension.Cache{})
+			hWithCache.Use(cache.Extension{})
 
 			resp := doRequest(hWithCache, "POST", "/graphql", `{"query":"{ name }"}`)
 			assert.Empty(t, resp.Header().Get("Cache-Control"))

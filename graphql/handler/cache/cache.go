@@ -1,4 +1,4 @@
-package extension
+package cache
 
 import (
 	"context"
@@ -6,20 +6,20 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-type Cache struct{}
+type Extension struct{}
 
-var _ graphql.HandlerExtension = Cache{}
-var _ graphql.ResponseInterceptor = Cache{}
+var _ graphql.HandlerExtension = Extension{}
+var _ graphql.ResponseInterceptor = Extension{}
 
-func (c Cache) ExtensionName() string {
+func (c Extension) ExtensionName() string {
 	return "cache"
 }
 
-func (c Cache) Validate(_ graphql.ExecutableSchema) error {
+func (c Extension) Validate(_ graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (c Cache) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (c Extension) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	ctx = graphql.WithCacheControlExtension(ctx)
 
 	result := next(ctx)

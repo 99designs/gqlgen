@@ -15,13 +15,13 @@ See more in `/example/cachecontrol`.
 
 ### Enable
 
-To enable cache capabilities, you need to use `extension.Cache` like above:
+To enable cache capabilities, you need to use `cache.Extension` like above:
 
 ```go
 package main
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/cache"
 
 	"github.com/99designs/gqlgen/example/cachecontrol/graph"
 	"github.com/99designs/gqlgen/example/cachecontrol/graph/generated"
@@ -34,7 +34,7 @@ func main() {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(cfg))
 
 	// Enable cache extensions
-	srv.Use(extension.Cache{})
+	srv.Use(cache.Extension{})
 
 	//...
 }

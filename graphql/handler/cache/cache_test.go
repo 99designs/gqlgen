@@ -1,4 +1,4 @@
-package extension
+package cache
 
 import (
 	"context"
@@ -13,13 +13,13 @@ func TestCache(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Validate", func(t *testing.T) {
-		ext := Cache{}
+		ext := Extension{}
 		require.NoError(t, ext.Validate(nil))
 	})
 
 	t.Run("InterceptResponse", func(t *testing.T) {
 		t.Run("should inject CacheControl in context", func(t *testing.T) {
-			ext := Cache{}
+			ext := Extension{}
 
 			ctx := context.Background()
 			_ = ext.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
@@ -30,7 +30,7 @@ func TestCache(t *testing.T) {
 		})
 
 		t.Run("should not inject cacheControl extension", func(t *testing.T) {
-			ext := Cache{}
+			ext := Extension{}
 
 			ctx := context.Background()
 			resp := ext.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
@@ -41,7 +41,7 @@ func TestCache(t *testing.T) {
 		})
 
 		t.Run("should inject cacheControl extension", func(t *testing.T) {
-			ext := Cache{}
+			ext := Extension{}
 
 			ctx := context.Background()
 			resp := ext.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
@@ -57,7 +57,7 @@ func TestCache(t *testing.T) {
 		})
 
 		t.Run("should not override extensions", func(t *testing.T) {
-			ext := Cache{}
+			ext := Extension{}
 
 			ctx := context.Background()
 			resp := ext.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {

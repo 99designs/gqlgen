@@ -45,11 +45,11 @@ and inject `cacheControl` into `graphql.Response`.
 
 ### Set cache hints
 
-After you enable `extension.Cache`, you can set cache hints using `graphql.SetCacheHint` function in your resolvers.
+After you enable `cache.Extension`, you can set cache hints using `cache.SetHint` function in your resolvers.
 
 ```go
 import (
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/cache"
 	// ...
 )
 
@@ -60,7 +60,7 @@ func (r *commentResolver) Post(ctx context.Context, obj *model.Comment) (*model.
 	}
 
 	// Set a CacheHint
-	graphql.SetCacheHint(ctx, graphql.CacheScopePublic, 10*time.Second)
+	cache.SetHint(ctx, cache.ScopePublic, 10*time.Second)
 
 	return post, nil
 }

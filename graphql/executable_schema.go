@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vektah/gqlparser/v2/ast"
+	 "github.com/vektah/gqlparser/v2/ast"
 )
 
 type ExecutableSchema interface {
@@ -32,7 +32,7 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
 				continue
 			}
-			f := getOrCreateAndAppendField(&groupedFields, sel, func() CollectedField {
+			f := getOrCreateAndAppendField(&groupedFields, sel.Alias,sel.ObjectDefinition.Name , func() CollectedField {
 				return CollectedField{Field: sel}
 			})
 
@@ -45,7 +45,7 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				continue
 			}
 			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
-				f := getOrCreateAndAppendField(&groupedFields, childField.Field, func() CollectedField { return childField })
+				f := getOrCreateAndAppendField(&groupedFields, childField.Name,childField.ObjectDefinition.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
 
@@ -70,7 +70,7 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			}
 
 			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
-				f := getOrCreateAndAppendField(&groupedFields, childField.Field, func() CollectedField { return childField })
+				f := getOrCreateAndAppendField(&groupedFields, childField.Name,childField.ObjectDefinition.Name, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
 		default:
@@ -96,9 +96,9 @@ func instanceOf(val string, satisfies []string) bool {
 	return false
 }
 
-func getOrCreateAndAppendField(c *[]CollectedField, childField *ast.Field, creator func() CollectedField) *CollectedField {
+func getOrCreateAndAppendField(c *[]CollectedField, name string,objectDefinitionName string, creator func() CollectedField) *CollectedField {
 	for i, cf := range *c {
-		if cf.Alias == childField.Name && childField.ObjectDefinition.Name==cf.ObjectDefinition.Name {
+		if cf.Alias == name && cf.ObjectDefinition.Name==objectDefinitionName {
 			return &(*c)[i]
 		}
 	}
@@ -108,7 +108,6 @@ func getOrCreateAndAppendField(c *[]CollectedField, childField *ast.Field, creat
 	*c = append(*c, f)
 	return &(*c)[len(*c)-1]
 }
-
 
 func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interface{}) bool {
 	if len(directives) == 0 {

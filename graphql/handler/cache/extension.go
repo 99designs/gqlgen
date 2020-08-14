@@ -20,12 +20,12 @@ func (c Extension) Validate(_ graphql.ExecutableSchema) error {
 }
 
 func (c Extension) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-	ctx = graphql.WithCacheControlExtension(ctx)
+	ctx = WithCacheControlExtension(ctx)
 
 	result := next(ctx)
 
 	if result != nil {
-		cache := graphql.CacheControl(ctx)
+		cache := CacheControl(ctx)
 
 		if len(cache.Hints) > 0 {
 			if result.Extensions == nil {

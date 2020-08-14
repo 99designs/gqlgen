@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/cache"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -36,7 +37,7 @@ func writeCacheControl(w http.ResponseWriter, response *graphql.Response) {
 		return
 	}
 
-	if cachePolicy, ok := graphql.GetOverallCachePolicy(response); ok {
+	if cachePolicy, ok := cache.GetOverallCachePolicy(response); ok {
 		cacheControl := fmt.Sprintf("max-age: %v %s", cachePolicy.MaxAge, strings.ToLower(string(cachePolicy.Scope)))
 		w.Header().Add("Cache-Control", cacheControl)
 	}

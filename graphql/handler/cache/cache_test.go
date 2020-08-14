@@ -1,4 +1,4 @@
-package graphql
+package cache
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/stretchr/testify/require"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -14,9 +15,9 @@ import (
 func TestCacheControl_SetCacheHint(t *testing.T) {
 	t.Parallel()
 
-	createFieldContext := func(alias string) *FieldContext {
-		return &FieldContext{
-			Field: CollectedField{
+	createFieldContext := func(alias string) *graphql.FieldContext {
+		return &graphql.FieldContext{
+			Field: graphql.CollectedField{
 				Field: &ast.Field{
 					Alias: alias,
 				},
@@ -27,24 +28,24 @@ func TestCacheControl_SetCacheHint(t *testing.T) {
 	t.Run("should add hint in context", func(t *testing.T) {
 		fooCtx := createFieldContext("foo")
 
-		ctx := WithFieldContext(WithResponseContext(context.Background(), nil, nil), fooCtx)
+		ctx := graphql.WithFieldContext(graphql.WithResponseContext(context.Background(), nil, nil), fooCtx)
 		ctx = WithCacheControlExtension(ctx)
 
-		SetCacheHint(ctx, CacheScopePublic, time.Minute)
+		SetHint(ctx, ScopePublic, time.Minute)
 
 		c := CacheControl(ctx)
 		require.Equal(t, 1, c.Version)
 		require.Equal(t, fooCtx.Path(), c.Hints[0].Path)
 		require.Equal(t, time.Minute.Seconds(), c.Hints[0].MaxAge)
-		require.Equal(t, CacheScopePublic, c.Hints[0].Scope)
+		require.Equal(t, ScopePublic, c.Hints[0].Scope)
 	})
 
 	t.Run("should not add hint in context", func(t *testing.T) {
 		fooCtx := createFieldContext("foo")
 
-		ctx := WithFieldContext(WithResponseContext(context.Background(), nil, nil), fooCtx)
+		ctx := graphql.WithFieldContext(graphql.WithResponseContext(context.Background(), nil, nil), fooCtx)
 
-		SetCacheHint(ctx, CacheScopePublic, time.Minute)
+		SetHint(ctx, ScopePublic, time.Minute)
 
 		c := CacheControl(ctx)
 		require.Nil(t, c)
@@ -69,12 +70,12 @@ func TestCacheControl_OverallPolicy(t *testing.T) {
 				Hints: []Hint{{
 					Path:   nil,
 					MaxAge: (10 * time.Second).Seconds(),
-					Scope:  CacheScopePublic,
+					Scope:  ScopePublic,
 				}},
 			},
 			want: OverallCachePolicy{
 				MaxAge: (10 * time.Second).Seconds(),
-				Scope:  CacheScopePublic,
+				Scope:  ScopePublic,
 			},
 		},
 		{
@@ -84,12 +85,12 @@ func TestCacheControl_OverallPolicy(t *testing.T) {
 				Hints: []Hint{{
 					Path:   nil,
 					MaxAge: (5 * time.Second).Seconds(),
-					Scope:  CacheScopePrivate,
+					Scope:  ScopePrivate,
 				}},
 			},
 			want: OverallCachePolicy{
 				MaxAge: (5 * time.Second).Seconds(),
-				Scope:  CacheScopePrivate,
+				Scope:  ScopePrivate,
 			},
 		},
 		{
@@ -100,18 +101,18 @@ func TestCacheControl_OverallPolicy(t *testing.T) {
 					{
 						Path:   nil,
 						MaxAge: (5 * time.Second).Seconds(),
-						Scope:  CacheScopePublic,
+						Scope:  ScopePublic,
 					},
 					{
 						Path:   nil,
 						MaxAge: (10 * time.Second).Seconds(),
-						Scope:  CacheScopePrivate,
+						Scope:  ScopePrivate,
 					},
 				},
 			},
 			want: OverallCachePolicy{
 				MaxAge: (5 * time.Second).Seconds(),
-				Scope:  CacheScopePrivate,
+				Scope:  ScopePrivate,
 			},
 		},
 		{
@@ -122,23 +123,23 @@ func TestCacheControl_OverallPolicy(t *testing.T) {
 					{
 						Path:   nil,
 						MaxAge: (5 * time.Second).Seconds(),
-						Scope:  CacheScopePublic,
+						Scope:  ScopePublic,
 					},
 					{
 						Path:   nil,
 						MaxAge: (1 * time.Second).Seconds(),
-						Scope:  CacheScopePublic,
+						Scope:  ScopePublic,
 					},
 					{
 						Path:   nil,
 						MaxAge: (10 * time.Second).Seconds(),
-						Scope:  CacheScopePublic,
+						Scope:  ScopePublic,
 					},
 				},
 			},
 			want: OverallCachePolicy{
 				MaxAge: (1 * time.Second).Seconds(),
-				Scope:  CacheScopePublic,
+				Scope:  ScopePublic,
 			},
 		},
 	}

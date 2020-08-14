@@ -8,31 +8,31 @@ import (
 
 	"github.com/99designs/gqlgen/example/cachecontrol/graph/generated"
 	"github.com/99designs/gqlgen/example/cachecontrol/graph/model"
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/cache"
 )
 
 func (r *commentResolver) Post(ctx context.Context, obj *model.Comment) (*model.Post, error) {
-	graphql.SetCacheHint(ctx, graphql.CacheScopePublic, 10*time.Second)
+	cache.SetHint(ctx, cache.ScopePublic, 10*time.Second)
 	return obj.Post, nil
 }
 
 func (r *postResolver) Votes(ctx context.Context, obj *model.Post) (int, error) {
-	graphql.SetCacheHint(ctx, graphql.CacheScopePublic, 30*time.Second)
+	cache.SetHint(ctx, cache.ScopePublic, 30*time.Second)
 	return obj.Votes, nil
 }
 
 func (r *postResolver) Comments(ctx context.Context, obj *model.Post) ([]*model.Comment, error) {
-	graphql.SetCacheHint(ctx, graphql.CacheScopePublic, 1000*time.Second)
+	cache.SetHint(ctx, cache.ScopePublic, 1000*time.Second)
 	return obj.Comments, nil
 }
 
 func (r *postResolver) ReadByCurrentUser(ctx context.Context, obj *model.Post) (bool, error) {
-	graphql.SetCacheHint(ctx, graphql.CacheScopePrivate, 2*time.Second)
+	cache.SetHint(ctx, cache.ScopePrivate, 2*time.Second)
 	return obj.ReadByCurrentUser, nil
 }
 
 func (r *queryResolver) LatestPost(ctx context.Context) (*model.Post, error) {
-	graphql.SetCacheHint(ctx, graphql.CacheScopePublic, 10*time.Second)
+	cache.SetHint(ctx, cache.ScopePublic, 10*time.Second)
 	post := &model.Post{
 		ID:                10,
 		Votes:             3,
@@ -52,7 +52,7 @@ func (r *queryResolver) LatestPost(ctx context.Context) (*model.Post, error) {
 }
 
 func (r *queryResolver) Post(ctx context.Context, id int) (*model.Post, error) {
-	graphql.SetCacheHint(ctx, graphql.CacheScopePublic, 30*time.Second)
+	cache.SetHint(ctx, cache.ScopePublic, 30*time.Second)
 
 	post := &model.Post{
 		ID:                1,

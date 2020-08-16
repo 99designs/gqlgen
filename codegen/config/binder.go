@@ -188,6 +188,19 @@ func (ref *TypeReference) Elem() *TypeReference {
 		}
 	}
 
+	if p, isNamed := ref.GO.(*types.Named); isNamed {
+		return &TypeReference{
+			GO:          p.Underlying(),
+			Target:      ref.Target,
+			GQL:         ref.GQL,
+			CastType:    ref.CastType,
+			Definition:  ref.Definition,
+			Unmarshaler: ref.Unmarshaler,
+			Marshaler:   ref.Marshaler,
+			IsMarshaler: ref.IsMarshaler,
+		}
+	}
+
 	if ref.IsSlice() {
 		return &TypeReference{
 			GO:          ref.GO.(*types.Slice).Elem(),

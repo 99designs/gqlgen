@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/99designs/gqlgen/internal/code"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -19,7 +20,11 @@ type Rewriter struct {
 	copied map[ast.Decl]bool
 }
 
-func New(importPath string) (*Rewriter, error) {
+func New(dir string) (*Rewriter, error) {
+	importPath := code.ImportPathForDir(dir)
+	if importPath == "" {
+		return nil, fmt.Errorf("import path not found for directory: %q", dir)
+	}
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedTypes,
 	}, importPath)
@@ -28,13 +33,6 @@ func New(importPath string) (*Rewriter, error) {
 	}
 	if len(pkgs) == 0 {
 		return nil, fmt.Errorf("package not found for importPath: %s", importPath)
-	}
-	if len(pkgs[0].Errors) != 0 {
-		for _, e := range pkgs[0].Errors {
-			if e.Kind == packages.ListError {
-				return nil, e
-			}
-		}
 	}
 
 	return &Rewriter{

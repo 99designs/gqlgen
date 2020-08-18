@@ -79,7 +79,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 }
 
 func (m *Plugin) generatePerSchema(data *codegen.Data) error {
-	rewriter, err := rewrite.New(data.Config.Resolver.ImportPath())
+	rewriter, err := rewrite.New(data.Config.Resolver.Dir())
 	if err != nil {
 		return err
 	}

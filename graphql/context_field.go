@@ -90,3 +90,12 @@ func equalPath(a ast.Path, b ast.Path) bool {
 
 	return true
 }
+
+func equalOrParentPath(a ast.Path, b ast.Path) bool {
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}

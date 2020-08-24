@@ -23,6 +23,9 @@
 					{{ template "implDirectives" $field }}
 					tmp, err := directive{{$field.ImplDirectives|len}}(ctx)
 					if err != nil {
+						if !graphql.HasChildError(ctx) {
+							ec.Error(ctx, err)
+						}
 						return it, err
 					}
 					if data, ok := tmp.({{ $field.TypeReference.GO | ref }}) ; ok {
@@ -32,7 +35,11 @@
 							it.{{$field.GoFieldName}} = nil
 					{{- end }}
 					} else {
-						return it, fmt.Errorf(`unexpected type %T from directive, should be {{ $field.TypeReference.GO }}`, tmp)
+						err := fmt.Errorf(`unexpected type %T from directive, should be {{ $field.TypeReference.GO }}`, tmp)
+						if !graphql.HasChildError(ctx) {
+							ec.Error(ctx, err)
+						}
+						return it, err
 					}
 				{{- else }}
 					it.{{$field.GoFieldName}}, err = ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)

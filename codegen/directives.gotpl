@@ -141,7 +141,9 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 		{{- end }}
 		res, err := ec.ResolverMiddleware(ctx, next)
 		if err != nil {
-			ec.Error(ctx, err)
+			if !graphql.HasChildError(ctx) {
+				ec.Error(ctx, err)
+			}
 			return nil
 		}
 		return res

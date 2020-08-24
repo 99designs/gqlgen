@@ -81,6 +81,26 @@ func HasFieldError(ctx context.Context, rctx *FieldContext) bool {
 	return false
 }
 
+// HasChildError returns true if the given path has any errors
+func HasChildError(ctx context.Context) bool {
+	c := getResponseContext(ctx)
+
+	c.errorsMu.Lock()
+	defer c.errorsMu.Unlock()
+
+	if len(c.errors) == 0 {
+		return false
+	}
+
+	path := GetPathFromContext(ctx)
+	for _, err := range c.errors {
+		if equalOrParentPath(path, err.Path) {
+			return true
+		}
+	}
+	return false
+}
+
 // GetFieldErrors returns a list of errors that occurred in the given field
 func GetFieldErrors(ctx context.Context, rctx *FieldContext) gqlerror.List {
 	c := getResponseContext(ctx)

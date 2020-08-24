@@ -11,6 +11,9 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 				{{ template "implDirectives" $arg }}
 				tmp, err = directive{{$arg.ImplDirectives|len}}(ctx)
 				if err != nil {
+					if !graphql.HasChildError(ctx) {
+						ec.Error(ctx, err)
+					}
 					return nil, err
 				}
 				if data, ok := tmp.({{ $arg.TypeReference.GO | ref }}) ; ok {

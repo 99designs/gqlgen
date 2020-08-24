@@ -23,7 +23,9 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		rawArgs := field.ArgumentMap(ec.Variables)
 		args, err := ec.{{ $field.ArgsFunc }}(ctx,rawArgs)
 		if err != nil {
-			ec.Error(ctx, err)
+			if !graphql.HasChildError(ctx) {
+				ec.Error(ctx, err)
+			}
 			return {{ $null }}
 		}
 		fc.Args = args
@@ -81,6 +83,9 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		{{ template "implDirectives" . }}
 		tmp, err := directive{{.ImplDirectives|len}}(rctx)
 		if err != nil {
+			if !graphql.HasChildError(ctx) {
+				ec.Error(ctx, err)
+			}
 			return nil, err
 		}
 		if tmp == nil {

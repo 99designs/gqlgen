@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const fieldInputCtx key = "field_input_context"
@@ -65,21 +64,4 @@ func GetFieldInputContext(ctx context.Context) *FieldInputContext {
 		return val
 	}
 	return nil
-}
-
-func WrapErrorWithInputPath(ctx context.Context, err error) error {
-	if err == nil {
-		return nil
-	}
-
-	inputContext := GetFieldInputContext(ctx)
-	path := inputContext.Path()
-	if gerr, ok := err.(*gqlerror.Error); ok {
-		if gerr.Path == nil {
-			gerr.Path = path
-		}
-		return gerr
-	} else {
-		return gqlerror.WrapPath(path, err)
-	}
 }

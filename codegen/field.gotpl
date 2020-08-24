@@ -81,7 +81,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		{{ template "implDirectives" . }}
 		tmp, err := directive{{.ImplDirectives|len}}(rctx)
 		if err != nil {
-			return nil, err
+			return nil, graphql.ErrorOnPath(ctx, err)
 		}
 		if tmp == nil {
 		    return nil, nil

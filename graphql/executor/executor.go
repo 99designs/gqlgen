@@ -40,7 +40,7 @@ func New(es graphql.ExecutableSchema) *Executor {
 func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.RawParams) (*graphql.OperationContext, gqlerror.List) {
 	rc := &graphql.OperationContext{
 		DisableIntrospection: true,
-		Recover:              e.recoverFunc,
+		RecoverFunc:          e.recoverFunc,
 		ResolverMiddleware:   e.ext.fieldMiddleware,
 		Stats: graphql.Stats{
 			Read:           params.ReadTime,

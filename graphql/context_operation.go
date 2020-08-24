@@ -18,7 +18,7 @@ type OperationContext struct {
 
 	Operation            *ast.OperationDefinition
 	DisableIntrospection bool
-	Recover              RecoverFunc
+	RecoverFunc          RecoverFunc
 	ResolverMiddleware   FieldMiddleware
 
 	Stats Stats
@@ -37,8 +37,8 @@ func (c *OperationContext) Validate(ctx context.Context) error {
 	if c.ResolverMiddleware == nil {
 		return errors.New("field 'ResolverMiddleware' is required")
 	}
-	if c.Recover == nil {
-		c.Recover = DefaultRecover
+	if c.RecoverFunc == nil {
+		c.RecoverFunc = DefaultRecover
 	}
 
 	return nil
@@ -104,4 +104,8 @@ func (c *OperationContext) Errorf(ctx context.Context, format string, args ...in
 // Deprecated: use graphql.AddError(ctx, err) instead
 func (c *OperationContext) Error(ctx context.Context, err error) {
 	AddError(ctx, err)
+}
+
+func (c *OperationContext) Recover(ctx context.Context, err interface{}) error {
+	return ErrorOnPath(ctx, c.RecoverFunc(ctx, err))
 }

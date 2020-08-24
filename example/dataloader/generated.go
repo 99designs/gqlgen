@@ -313,7 +313,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("name"))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -328,7 +328,7 @@ func (ec *executionContext) field_Query_torture1d_args(ctx context.Context, rawA
 	args := map[string]interface{}{}
 	var arg0 []int
 	if tmp, ok := rawArgs["customerIds"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("customerIds"))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customerIds"))
 		arg0, err = ec.unmarshalOInt2ᚕintᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -343,7 +343,7 @@ func (ec *executionContext) field_Query_torture2d_args(ctx context.Context, rawA
 	args := map[string]interface{}{}
 	var arg0 [][]int
 	if tmp, ok := rawArgs["customerIds"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("customerIds"))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("customerIds"))
 		arg0, err = ec.unmarshalOInt2ᚕᚕint(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -358,7 +358,7 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -373,7 +373,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 	args := map[string]interface{}{}
 	var arg0 bool
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithField("includeDeprecated"))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
 		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
@@ -2505,7 +2505,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
@@ -2530,7 +2530,7 @@ func (ec *executionContext) marshalNCustomer2ᚖgithubᚗcomᚋ99designsᚋgqlge
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	res, err := graphql.UnmarshalFloat(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
@@ -2545,7 +2545,7 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
@@ -2580,7 +2580,7 @@ func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
@@ -2595,7 +2595,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
@@ -2651,7 +2651,7 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 
 func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
@@ -2676,10 +2676,10 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
 		res[i], err = ec.unmarshalN__DirectiveLocation2string(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(ctx, err)
+			return nil, err
 		}
 	}
 	return res, nil
@@ -2824,7 +2824,7 @@ func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
@@ -2846,7 +2846,7 @@ func (ec *executionContext) marshalOAddress2ᚖgithubᚗcomᚋ99designsᚋgqlgen
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
@@ -2858,7 +2858,7 @@ func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v int
 		return nil, nil
 	}
 	res, err := graphql.UnmarshalBoolean(v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast.SelectionSet, v *bool) graphql.Marshaler {
@@ -2963,10 +2963,10 @@ func (ec *executionContext) unmarshalOInt2ᚕintᚄ(ctx context.Context, v inter
 	var err error
 	res := make([]int, len(vSlice))
 	for i := range vSlice {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
 		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(ctx, err)
+			return nil, err
 		}
 	}
 	return res, nil
@@ -2999,10 +2999,10 @@ func (ec *executionContext) unmarshalOInt2ᚕᚕint(ctx context.Context, v inter
 	var err error
 	res := make([][]int, len(vSlice))
 	for i := range vSlice {
-		ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
 		res[i], err = ec.unmarshalOInt2ᚕintᚄ(ctx, vSlice[i])
 		if err != nil {
-			return nil, graphql.WrapErrorWithInputPath(ctx, err)
+			return nil, err
 		}
 	}
 	return res, nil
@@ -3102,7 +3102,7 @@ func (ec *executionContext) marshalOOrder2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
-	return res, graphql.WrapErrorWithInputPath(ctx, err)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
@@ -3114,7 +3114,7 @@ func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v in
 		return nil, nil
 	}
 	res, err := graphql.UnmarshalString(v)
-	return &res, graphql.WrapErrorWithInputPath(ctx, err)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {

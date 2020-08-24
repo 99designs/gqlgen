@@ -10,6 +10,6 @@ import (
 func TestGetFieldInputContext(t *testing.T) {
 	require.Nil(t, GetFieldContext(context.Background()))
 
-	rc := &FieldInputContext{}
-	require.Equal(t, rc, GetFieldInputContext(WithFieldInputContext(context.Background(), rc)))
+	rc := &PathContext{}
+	require.Equal(t, rc, GetPathContext(WithPathContext(context.Background(), rc)))
 }

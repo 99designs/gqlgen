@@ -33,7 +33,7 @@ func TestPanics(t *testing.T) {
 	srv.SetErrorPresenter(func(ctx context.Context, err error) *gqlerror.Error {
 		return &gqlerror.Error{
 			Message: "presented: " + err.Error(),
-			Path:    graphql.GetFieldContext(ctx).Path(),
+			Path:    graphql.GetPath(ctx),
 		}
 	})
 
@@ -50,14 +50,14 @@ func TestPanics(t *testing.T) {
 		var resp interface{}
 		err := c.Post(`query { panics { argUnmarshal(u: ["aa", "bb"]) } }`, &resp)
 
-		require.EqualError(t, err, "[{\"message\":\"presented: panic: BOOM\",\"path\":[\"panics\",\"argUnmarshal\"]}]")
+		require.EqualError(t, err, "[{\"message\":\"presented: input: panics.argUnmarshal panic: BOOM\",\"path\":[\"panics\",\"argUnmarshal\"]}]")
 	})
 
 	t.Run("panics in funcs unmarshal return errors", func(t *testing.T) {
 		var resp interface{}
 		err := c.Post(`query { panics { fieldFuncMarshal(u: ["aa", "bb"]) } }`, &resp)
 
-		require.EqualError(t, err, "[{\"message\":\"presented: panic: BOOM\",\"path\":[\"panics\",\"fieldFuncMarshal\"]}]")
+		require.EqualError(t, err, "[{\"message\":\"presented: input: panics.fieldFuncMarshal panic: BOOM\",\"path\":[\"panics\",\"fieldFuncMarshal\"]}]")
 	})
 
 	t.Run("panics in funcs marshal return errors", func(t *testing.T) {

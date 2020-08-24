@@ -124,4 +124,9 @@ describe('Websocket client', () => {
         });
 
     test(client);
+
+    afterAll(() => {
+        client.stop();
+        sc.close(true);
+    });
 });

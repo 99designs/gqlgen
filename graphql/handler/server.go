@@ -103,8 +103,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Write(b)
 		}
 	}()
-
-	r = r.WithContext(graphql.StartOperationTrace(r.Context()))
+	rootCtx := r.Context()
+	if rootCtx != nil {
+		rootCtx = context.WithValue(context.Background(), "root_ctx", r.Context())
+	}
+	r = r.WithContext(graphql.StartOperationTrace(rootCtx))
 
 	transport := s.getTransport(r)
 	if transport == nil {

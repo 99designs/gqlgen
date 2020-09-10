@@ -7,17 +7,17 @@
 [gqlgen](https://github.com/99designs/gqlgen) is a Go library for building GraphQL servers without any fuss.<br/> 
 
 - **gqlgen is based on a Schema first approach** — You get to Define your API using the GraphQL [Schema Definition Language](http://graphql.org/learn/schema/).
-- **gqlgen priortizes Type safety** — You should never see `map[string]interface{}` here.
+- **gqlgen prioritizes Type safety** — You should never see `map[string]interface{}` here.
 - **gqlgen enables Codegen** — We generate the boring bits, so you can focus on building your app quickly.
 
 Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go graphql [implementations](https://gqlgen.com/feature-comparison/)
 
 ## Getting Started
-- To install gqlgen run the comand `go get github.com/99designs/gqlgen` in your project directory.<br/> 
+- To install gqlgen run the command `go get github.com/99designs/gqlgen` in your project directory.<br/> 
 - You could initialize a new project using the recommended folder structure by running this command `go run github.com/99designs/gqlgen init`.
 
 You could find a more comprehensive guide to help you get started [here](https://gqlgen.com/getting-started/).<br/>
-We also have a couple of real-world [examples](https://github.com/99designs/gqlgen/tree/master/example) that show how to GraphQL applicatons with **gqlgen** seamlessly,
+We also have a couple of real-world [examples](https://github.com/99designs/gqlgen/tree/master/example) that show how to GraphQL applications with **gqlgen** seamlessly,
 You can see these [examples](https://github.com/99designs/gqlgen/tree/master/example) here or visit [godoc](https://godoc.org/github.com/99designs/gqlgen).
 
 ## Reporting Issues
@@ -103,7 +103,7 @@ first model in this list is used as the default type and it will always be used 
 - Generating models based on schema
 - As arguments in resolvers
 
-There isnt any way around this, gqlgen has no way to know what you want in a given context.
+There isn't any way around this, gqlgen has no way to know what you want in a given context.
 
 ## Other Resources
 

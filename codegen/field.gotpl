@@ -16,6 +16,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		Field: field,
 		Args:  nil,
 		IsMethod: {{or $field.IsMethod $field.IsResolver}},
+		IsResolver: {{ $field.IsResolver }},
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)

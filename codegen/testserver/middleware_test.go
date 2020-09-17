@@ -2,6 +2,7 @@ package testserver
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -26,7 +27,13 @@ func TestMiddleware(t *testing.T) {
 		return []*User{{ID: 1}}, nil
 	}
 
-	areMethods := []bool{}
+	resolvers.QueryResolver.ModelMethods = func(ctx context.Context) (methods *ModelMethods, e error) {
+		return &ModelMethods{}, nil
+	}
+
+	var mu sync.Mutex
+	areMethods := map[string]bool{}
+	areResolvers := map[string]bool{}
 	srv := handler.NewDefaultServer(
 		NewExecutableSchema(Config{Resolvers: resolvers}),
 	)
@@ -41,7 +48,11 @@ func TestMiddleware(t *testing.T) {
 	})
 
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-		areMethods = append(areMethods, graphql.GetFieldContext(ctx).IsMethod)
+		fc := graphql.GetFieldContext(ctx)
+		mu.Lock()
+		areMethods[fc.Field.Name] = fc.IsMethod
+		areResolvers[fc.Field.Name] = fc.IsResolver
+		mu.Unlock()
 		return next(ctx)
 	})
 
@@ -54,6 +65,9 @@ func TestMiddleware(t *testing.T) {
 				ID int
 			}
 		}
+		ModelMethods struct {
+			NoContext bool
+		}
 	}
 
 	called := false
@@ -63,12 +77,32 @@ func TestMiddleware(t *testing.T) {
 		return []*User{}, nil
 	}
 
-	err := c.Post(`query { user(id: 1) { id, friends { id } } }`, &resp)
+	err := c.Post(`query {
+		user(id: 1) {
+			id,
+			friends {
+				id
+			}
+		}
+		modelMethods {
+			noContext
+		}
+	}`, &resp)
 
-	// First resolves user which is a method
-	// Next resolves id which is not a method
-	// Finally resolves friends which is a method
-	assert.Equal(t, []bool{true, false, true}, areMethods)
+	assert.Equal(t, map[string]bool{
+		"user":         true,
+		"id":           false,
+		"friends":      true,
+		"modelMethods": true,
+		"noContext":    true,
+	}, areMethods)
+	assert.Equal(t, map[string]bool{
+		"user":         true,
+		"id":           false,
+		"friends":      true,
+		"modelMethods": true,
+		"noContext":    false,
+	}, areResolvers)
 
 	require.NoError(t, err)
 	require.True(t, called)

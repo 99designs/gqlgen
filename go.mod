@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli/v2 v2.1.1
 	github.com/vektah/dataloaden v0.2.1-0.20190515034641-a19b9a6e7c9e
-	github.com/vektah/gqlparser/v2 v2.0.2-0.20200909081404-83ee611670a5
+	github.com/vektah/gqlparser/v2 v2.1.0
 	golang.org/x/tools v0.0.0-20200114235610-7ae403b6b589
 	gopkg.in/yaml.v2 v2.2.4
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20180110180208-2cc67fd64755

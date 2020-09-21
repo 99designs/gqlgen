@@ -16,10 +16,10 @@
 				var err error
 				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
 				for i := range vSlice {
-					ctx := graphql.WithFieldInputContext(ctx, graphql.NewFieldInputWithIndex(i))
+					ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
 					res[i], err = ec.{{ $type.Elem.UnmarshalFunc }}(ctx, vSlice[i])
 					if err != nil {
-						return nil, graphql.WrapErrorWithInputPath(ctx, err)
+						return nil, err
 					}
 				}
 				return res, nil
@@ -36,11 +36,11 @@
 						res, err := {{ $type.Unmarshaler | call }}(v)
 					{{- end }}
 					{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
-						return *res, graphql.WrapErrorWithInputPath(ctx, err)
+						return *res, graphql.ErrorOnPath(ctx, err)
 					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
-						return &res, graphql.WrapErrorWithInputPath(ctx, err)
+						return &res, graphql.ErrorOnPath(ctx, err)
 					{{- else}}
-						return res, graphql.WrapErrorWithInputPath(ctx, err)
+						return res, graphql.ErrorOnPath(ctx, err)
 					{{- end }}
 				{{- else if eq ($type.GO | ref) "map[string]interface{}" }}
 					return v.(map[string]interface{}), nil
@@ -51,13 +51,13 @@
 						var res {{ $type.GO | ref }}
 					{{- end }}
 					err := res.UnmarshalGQL(v)
-					return res, graphql.WrapErrorWithInputPath(ctx, err)
+					return res, graphql.ErrorOnPath(ctx, err)
 				{{- else }}
 					res, err := ec.unmarshalInput{{ $type.GQL.Name }}(ctx, v)
 					{{- if $type.IsNilable }}
-						return &res, graphql.WrapErrorWithInputPath(ctx, err)
+						return &res, graphql.ErrorOnPath(ctx, err)
 					{{- else}}
-						return res, graphql.WrapErrorWithInputPath(ctx, err)
+						return res, graphql.ErrorOnPath(ctx, err)
 					{{- end }}
 				{{- end }}
 			{{- end }}

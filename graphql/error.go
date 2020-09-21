@@ -2,32 +2,27 @@ package graphql
 
 import (
 	"context"
+	"errors"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type ErrorPresenterFunc func(ctx context.Context, err error) *gqlerror.Error
 
-type ExtendedError interface {
-	Extensions() map[string]interface{}
+func DefaultErrorPresenter(ctx context.Context, err error) *gqlerror.Error {
+	return err.(*gqlerror.Error)
 }
 
-func DefaultErrorPresenter(ctx context.Context, err error) *gqlerror.Error {
-	if gqlerr, ok := err.(*gqlerror.Error); ok {
+func ErrorOnPath(ctx context.Context, err error) error {
+	if err == nil {
+		return nil
+	}
+	var gqlerr *gqlerror.Error
+	if errors.As(err, &gqlerr) {
 		if gqlerr.Path == nil {
-			gqlerr.Path = GetFieldContext(ctx).Path()
+			gqlerr.Path = GetPath(ctx)
 		}
 		return gqlerr
 	}
-
-	var extensions map[string]interface{}
-	if ee, ok := err.(ExtendedError); ok {
-		extensions = ee.Extensions()
-	}
-
-	return &gqlerror.Error{
-		Message:    err.Error(),
-		Path:       GetFieldContext(ctx).Path(),
-		Extensions: extensions,
-	}
+	return gqlerror.WrapPath(GetPath(ctx), err)
 }

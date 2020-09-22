@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
-
-	"github.com/99designs/gqlgen/codegen/config"
 )
 
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
@@ -25,6 +25,8 @@ type Data struct {
 	QueryRoot        *Object
 	MutationRoot     *Object
 	SubscriptionRoot *Object
+
+	Version string
 }
 
 type builder struct {
@@ -60,6 +62,7 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		Directives: dataDirectives,
 		Schema:     b.Schema,
 		Interfaces: map[string]*Interface{},
+		Version:    graphql.Version,
 	}
 
 	for _, schemaType := range b.Schema.Types {

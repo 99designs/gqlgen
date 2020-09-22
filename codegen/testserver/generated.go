@@ -24,6 +24,12 @@ import (
 
 // region    ************************** generated!.gotpl **************************
 
+func init() {
+	if graphql.Version != "v0.13.0-dev" {
+		panic(fmt.Errorf("gqlgen library (%s) and code generator (v0.13.0-dev) versions are different, please regenerate", graphql.Version))
+	}
+}
+
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{

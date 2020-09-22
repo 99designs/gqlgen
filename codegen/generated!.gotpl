@@ -13,6 +13,11 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
+func init() {
+	if graphql.Version != "{{ .Version }}" {
+		panic(fmt.Errorf("gqlgen library (%s) and code generator ({{ .Version }}) versions are different, please regenerate", graphql.Version))
+	}
+}
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {

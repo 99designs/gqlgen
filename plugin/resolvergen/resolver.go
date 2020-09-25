@@ -71,6 +71,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Resolver.Package,
+		PackageDoc:  "//go:generate go run github.com/99designs/gqlgen",
 		FileNotice:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
@@ -147,6 +148,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 	if _, err := os.Stat(data.Config.Resolver.Filename); os.IsNotExist(errors.Cause(err)) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
+			PackageDoc:  "//go:generate go run github.com/99designs/gqlgen",
 			FileNotice: `
 				// This file will not be regenerated automatically.
 				//

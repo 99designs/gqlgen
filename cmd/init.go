@@ -78,6 +78,18 @@ var schemaDefault = `# GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
 
+# goModel can be used to control how gqlgen binds GraphQL types to Go types
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+# goField can be used to force creation of a resolver and set the name of the Go field to bind to
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
 type Todo {
   id: ID!
   text: String!

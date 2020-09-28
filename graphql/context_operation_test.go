@@ -106,4 +106,31 @@ func TestCollectAllFields(t *testing.T) {
 		require.NotEqual(t, collected[0], collected[1])
 		require.Equal(t, collected[0].Name, collected[1].Name)
 	})
+
+	t.Run("collect fragments with same field name and different alias", func(t *testing.T) {
+		ctx := testContext(ast.SelectionSet{
+			&ast.InlineFragment{
+				TypeCondition: "ExampleTypeA",
+				SelectionSet: ast.SelectionSet{
+					&ast.Field{
+						Name:             "fieldA",
+						Alias:            "fieldA",
+						ObjectDefinition: &ast.Definition{Name: "ExampleTypeA"},
+					},
+					&ast.Field{
+						Name:             "fieldA",
+						Alias:            "fieldA Alias",
+						ObjectDefinition: &ast.Definition{Name: "ExampleTypeA"},
+					},
+				},
+				ObjectDefinition: &ast.Definition{Name: "Interface"},
+			},
+		})
+		resCtx := GetFieldContext(ctx)
+		collected := CollectFields(GetOperationContext(ctx), resCtx.Field.Selections, nil)
+		require.Len(t, collected, 2)
+		require.NotEqual(t, collected[0], collected[1])
+		require.Equal(t, collected[0].Name, collected[1].Name)
+		require.NotEqual(t, collected[0].Alias, collected[1].Alias)
+	})
 }

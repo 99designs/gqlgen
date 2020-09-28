@@ -123,7 +123,7 @@ func TestCollectAllFields(t *testing.T) {
 						ObjectDefinition: &ast.Definition{Name: "ExampleTypeA"},
 					},
 				},
-				ObjectDefinition: &ast.Definition{Name: "Interface"},
+				ObjectDefinition: &ast.Definition{Name: "ExampleType", Kind: ast.Interface},
 			},
 		})
 		resCtx := GetFieldContext(ctx)

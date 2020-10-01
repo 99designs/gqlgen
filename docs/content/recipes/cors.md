@@ -15,10 +15,10 @@ gqlgen doesn't include a CORS implementation, but it is built to work with all s
 package main
 
 import (
-    "net/http"
+	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-    "github.com/99designs/gqlgen/example/starwars"
+	"github.com/99designs/gqlgen/example/starwars"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"

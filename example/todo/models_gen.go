@@ -41,14 +41,13 @@ func (e Role) String() string {
 }
 
 func (e *Role) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = Role(str)
+	*e = Role(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Role", str)
+		return fmt.Errorf("%v is not a valid Role", value)
 	}
 	return nil
 }

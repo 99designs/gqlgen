@@ -47,14 +47,13 @@ func (e DateFilterOp) String() string {
 }
 
 func (e *DateFilterOp) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = DateFilterOp(str)
+	*e = DateFilterOp(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid DATE_FILTER_OP", str)
+		return fmt.Errorf("%v is not a valid DATE_FILTER_OP", value)
 	}
 	return nil
 }
@@ -88,14 +87,13 @@ func (e ErrorType) String() string {
 }
 
 func (e *ErrorType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = ErrorType(str)
+	*e = ErrorType(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ErrorType", str)
+		return fmt.Errorf("%v is not a valid ErrorType", value)
 	}
 	return nil
 }

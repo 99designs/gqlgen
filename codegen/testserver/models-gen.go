@@ -231,14 +231,13 @@ func (e EnumTest) String() string {
 }
 
 func (e *EnumTest) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = EnumTest(str)
+	*e = EnumTest(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EnumTest", str)
+		return fmt.Errorf("%v is not a valid EnumTest", value)
 	}
 	return nil
 }
@@ -272,14 +271,13 @@ func (e Status) String() string {
 }
 
 func (e *Status) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = Status(str)
+	*e = Status(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Status", str)
+		return fmt.Errorf("%v is not a valid Status", value)
 	}
 	return nil
 }

@@ -1,3 +1,5 @@
+directive @intEnum on ENUM
+
 type Query {
     thisShoudlntGetGenerated: Boolean
 }
@@ -36,6 +38,11 @@ enum MissingEnum {
     Goodbye
 }
 
+enum MissingIntEnum @intEnum {
+    Hello
+    Goodbye
+}
+
 interface MissingInterface {
     name: String
 }
@@ -55,6 +62,11 @@ input ExistingInput {
 }
 
 enum ExistingEnum {
+    Hello
+    Goodbye
+}
+
+enum ExistingIntEnum @intEnum {
     Hello
     Goodbye
 }

@@ -48,6 +48,7 @@ type Enum struct {
 	Description string
 	Name        string
 	Values      []*EnumValue
+	IntValues   bool // Whether generated types should be integers
 }
 
 type EnumValue struct {
@@ -175,6 +176,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			it := &Enum{
 				Name:        schemaType.Name,
 				Description: schemaType.Description,
+				IntValues:   schemaType.Directives.ForName("intEnum") != nil,
 			}
 
 			for _, v := range schemaType.EnumValues {

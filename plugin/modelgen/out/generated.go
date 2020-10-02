@@ -100,14 +100,13 @@ func (e EnumWithDescription) String() string {
 }
 
 func (e *EnumWithDescription) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = EnumWithDescription(str)
+	*e = EnumWithDescription(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EnumWithDescription", str)
+		return fmt.Errorf("%v is not a valid EnumWithDescription", value)
 	}
 	return nil
 }
@@ -141,18 +140,62 @@ func (e MissingEnum) String() string {
 }
 
 func (e *MissingEnum) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = MissingEnum(str)
+	*e = MissingEnum(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid MissingEnum", str)
+		return fmt.Errorf("%v is not a valid MissingEnum", value)
 	}
 	return nil
 }
 
 func (e MissingEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type MissingIntEnum int
+
+const (
+	MissingIntEnumHello   MissingIntEnum = 0
+	MissingIntEnumGoodbye MissingIntEnum = 1
+)
+
+var MissingIntEnumName = map[int]string{
+	0: "Hello",
+	1: "Goodbye",
+}
+
+var MissingIntEnumValue = map[string]int{
+	"Hello":   0,
+	"Goodbye": 1,
+}
+
+func (e MissingIntEnum) IsValid() bool {
+	switch e {
+	case MissingIntEnumHello, MissingIntEnumGoodbye:
+		return true
+	}
+	return false
+}
+
+func (e MissingIntEnum) String() string {
+	return MissingIntEnumName[int(e)]
+}
+
+func (e *MissingIntEnum) UnmarshalGQL(v interface{}) error {
+	value, ok := v.(int)
+	if !ok {
+		return fmt.Errorf("enums must be integers")
+	}
+	*e = MissingIntEnum(value)
+	if !e.IsValid() {
+		return fmt.Errorf("%v is not a valid MissingIntEnum", value)
+	}
+	return nil
+}
+
+func (e MissingIntEnum) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, e)
 }

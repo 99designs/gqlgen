@@ -21,6 +21,8 @@ type ExistingInput struct {
 
 type ExistingEnum string
 
+type ExistingIntEnum int
+
 type ExistingInterface interface {
 	IsExistingInterface()
 }

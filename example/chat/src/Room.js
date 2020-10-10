@@ -83,16 +83,18 @@ export const Room = ({ channel, name }) => {
             <div ref={messagesEndRef} />
         </Chat>
 
-        <input autoFocus value={text} onChange={(e) => setText(e.target.value)} />
+        <input value={text} onChange={(e) => setText(e.target.value)} />
 
         <p>
-            <button onClick={() => addMessage({
-            variables: {
-                text: text,
-                channel: channel,
-                name: name,
-            }
-            })} >
+            <button
+                onClick={() => addMessage({
+                    variables: {
+                        text: text,
+                        channel: channel,
+                        name: name,
+                    }
+                    })
+                } >
                 send
             </button>
         </p>

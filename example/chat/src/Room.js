@@ -1,60 +1,103 @@
-import React , {Component} from 'react';
-import { graphql, compose } from 'react-apollo';
+import React, { useState, useEffect, useRef } from 'react';
+import styled from 'styled-components';
 import gql from 'graphql-tag';
+import { useQuery, useMutation } from '@apollo/react-hooks';
 
-class Room extends Component {
-    constructor(props) {
-        super(props)
+export const Chat = styled.div`
+    padding: 4px;
+    margin: 0 0 12px;
+    max-width: 400px;
+    max-height: 400px;
+    border: 1px solid #ccc;
+    overflow-x: hidden;
+    overflow-y: scroll;
+`;
 
-        this.state = {text: ''}
-    }
+export const Room = ({ channel, name }) => {
+    const messagesEndRef = useRef(null)
+    const [ text, setText ] = useState('');
 
-    componentWillMount() {
-        this.props.data.subscribeToMore({
+    const [ addMessage ] = useMutation(Mutation, {
+        onCompleted: () => {
+            setText('');
+        }
+    });
+
+    const { loading, error, data, subscribeToMore } = useQuery(Query, {
+        variables: {
+            channel
+        },
+    });
+
+    // subscribe to more messages
+    useEffect(() => {
+        const subscription = subscribeToMore({
             document: Subscription,
             variables: {
-                channel: this.props.channel,
+                channel,
             },
-            updateQuery: (prev, {subscriptionData}) => {
+            updateQuery: (prev, { subscriptionData }) => {
+
                 if (!subscriptionData.data) {
                     return prev;
                 }
                 const newMessage = subscriptionData.data.messageAdded;
+
                 if (prev.room.messages.find((msg) => msg.id === newMessage.id)) {
                     return prev
                 }
+
                 return Object.assign({}, prev, {
                     room: Object.assign({}, prev.room, {
                         messages: [...prev.room.messages, newMessage],
                     })
                 });
-            }
+            },
         });
+
+
+        return () => subscription();
+
+    }, [subscribeToMore]);
+
+    // auto scroll down
+    useEffect(() => {
+        messagesEndRef && messagesEndRef.current && messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }, [messagesEndRef, data]);
+
+    if (loading) {
+        return <div>loading</div>
     }
 
-    render() {
-        const data = this.props.data;
-
-        if (data.loading) {
-            return <div>loading</div>
-        }
-
-        return <div>
-            <div>
-                {data.room.messages.map((msg) =>
-                    <div key={msg.id}>{msg.createdBy}: {msg.text}</div>
-                )}
-            </div>
-            <input value={this.state.text} onChange={(e) => this.setState({text: e.target.value})}/>
-            <button onClick={() => this.props.mutate({
-                variables: {
-                    text: this.state.text,
-                    channel: this.props.channel,
-                    name: this.props.name,
-                }
-            })} >send</button>
-        </div>;
+    if (error) {
+        return <div>error</div>
     }
+
+    return (<>
+        <Chat>
+            {data.room.messages.map((msg) =>
+                <div key={msg.id}>
+                    {msg.createdBy}: {msg.text}
+                </div>
+            )}
+            <div ref={messagesEndRef} />
+        </Chat>
+
+        <input autoFocus value={text} onChange={(e) => setText(e.target.value)} />
+
+        <p>
+            <button onClick={() => addMessage({
+            variables: {
+                text: text,
+                channel: channel,
+                name: name,
+            }
+            })} >
+                send
+            </button>
+        </p>
+    </>);
+
 }
 
 const Subscription = gql`
@@ -80,6 +123,3 @@ const Mutation = gql`
         post(text:$text, roomName:$channel, username:$name) { id }
     }
 `;
-
-
-export default compose(graphql(Mutation), graphql(Query))(Room);

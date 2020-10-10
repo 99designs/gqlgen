@@ -17,13 +17,13 @@ export const Room = ({ channel, name }) => {
     const messagesEndRef = useRef(null)
     const [ text, setText ] = useState('');
 
-    const [ addMessage ] = useMutation(Mutation, {
+    const [ addMessage ] = useMutation(MUTATION, {
         onCompleted: () => {
             setText('');
         }
     });
 
-    const { loading, error, data, subscribeToMore } = useQuery(Query, {
+    const { loading, error, data, subscribeToMore } = useQuery(QUERY, {
         variables: {
             channel
         },
@@ -32,7 +32,7 @@ export const Room = ({ channel, name }) => {
     // subscribe to more messages
     useEffect(() => {
         const subscription = subscribeToMore({
-            document: Subscription,
+            document: SUBSCRIPTION,
             variables: {
                 channel,
             },
@@ -102,7 +102,7 @@ export const Room = ({ channel, name }) => {
 
 }
 
-const Subscription = gql`
+const SUBSCRIPTION = gql`
     subscription MoreMessages($channel: String!) {
         messageAdded(roomName:$channel) {
             id
@@ -112,7 +112,7 @@ const Subscription = gql`
     }
 `;
 
-const Query = gql`
+const QUERY = gql`
     query Room($channel: String!) {
         room(name: $channel) {
             messages { id text createdBy }
@@ -120,7 +120,7 @@ const Query = gql`
     }
 `;
 
-const Mutation = gql`
+const MUTATION = gql`
     mutation sendMessage($text: String!, $channel: String!, $name: String!) {
         post(text:$text, roomName:$channel, username:$name) { id }
     }

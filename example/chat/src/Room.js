@@ -130,7 +130,7 @@ export const Room = ({ channel, name }) => {
 
         return () => subscription();
 
-    }, [subscribeToMore]);
+    }, [subscribeToMore, channel]);
 
     // auto scroll down
     useEffect(() => {

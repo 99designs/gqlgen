@@ -94,7 +94,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 
 			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
-			rewriter.GetMethodBody(data.Config.Resolver.Type, o.Name)
+			rewriter.GetMethodBody(data.Config.Resolver.Type, strings.Title(o.Name))
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
 		for _, f := range o.Fields {

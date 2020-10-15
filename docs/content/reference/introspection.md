@@ -12,12 +12,12 @@ One of the best features of GraphQL is it's powerful discoverability, but someti
 To turn introspection on and off at runtime, pass the `IntrospectionEnabled` handler option when starting the server:
 
 ```go
-srv := httptest.NewServer(
-	handler.GraphQL(
-		NewExecutableSchema(Config{Resolvers: resolvers}),
-		handler.IntrospectionEnabled(false),
-	),
-)
+
+ srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})) 
+ srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler { 
+ 	graphql.GetOperationContext(ctx).DisableIntrospection = true 
+ 	return next(ctx) 
+ }) 
 ```
 
 ## Disabling introspection based on authentication

@@ -217,6 +217,14 @@ func (t *TypeReference) IsSlice() bool {
 	return t.GQL.Elem != nil && isSlice
 }
 
+func (t *TypeReference) IsPtrToSlice() bool {
+	if t.IsPtr() {
+		_, isPointerToSlice := t.GO.(*types.Pointer).Elem().(*types.Slice)
+		return isPointerToSlice
+	}
+	return false
+}
+
 func (t *TypeReference) IsNamed() bool {
 	_, isSlice := t.GO.(*types.Named)
 	return isSlice

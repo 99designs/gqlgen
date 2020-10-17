@@ -252,6 +252,10 @@ func (r *queryResolver) PrimitiveStringObject(ctx context.Context) ([]PrimitiveS
 	panic("not implemented")
 }
 
+func (r *queryResolver) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	panic("not implemented")
 }

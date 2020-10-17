@@ -14,14 +14,12 @@ func TestPtrToSlice(t *testing.T) {
 
 	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
 
-
 	resolvers.QueryResolver.PtrToSliceContainer = func(ctx context.Context) (wrappedStruct *PtrToSliceContainer, e error) {
 		ptrToSliceContainer := PtrToSliceContainer{
 			PtrToSlice: &[]string{"hello"},
 		}
 		return &ptrToSliceContainer, nil
 	}
-
 
 	t.Run("pointer to slice", func(t *testing.T) {
 		var resp struct {

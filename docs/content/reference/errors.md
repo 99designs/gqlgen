@@ -49,7 +49,7 @@ They will be returned in the same order in the response, eg:
 ```json
 {
   "data": {
-    "todo": null
+    "todo": false
   },
   "errors": [
     { "message": "Error 1", "path": [ "todo" ] },

@@ -79,6 +79,14 @@ function test(client) {
 
             expect(res.errors[0].message).toEqual('normal error');
         });
+
+        it('should return data even if there are errors', async () => {
+            let res = await client.query({
+                query: gql`{ error(type: NORMAL) }`,
+            });
+
+            expect(res.data).toEqual({ error: false });
+        });
     });
 }
 

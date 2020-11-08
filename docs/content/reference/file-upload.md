@@ -40,7 +40,7 @@ type Query {
 
 "The `Mutation` type, represents all updates we can make to our data."
 type Mutation {
-    singleUpload(file: Upload!): Bool!
+    singleUpload(file: Upload!): Boolean!
 }
 ```
 
@@ -48,7 +48,7 @@ cURL can be used the make a query as follows:
 
 ```
 curl localhost:4000/graphql \
-  -F operations='{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }' \
+  -F operations='{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) }", "variables": { "file": null } }' \
   -F map='{ "0": ["variables.file"] }' \
   -F 0=@a.txt
 ```
@@ -59,9 +59,7 @@ That invokes the following operation:
 {
   query: `
     mutation($file: Upload!) {
-      singleUpload(file: $file) {
-        id
-      }
+      singleUpload(file: $file)
     }
   `,
   variables: {

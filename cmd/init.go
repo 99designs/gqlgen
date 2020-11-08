@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -192,7 +191,7 @@ func initSchema(schemaFilename string) error {
 		return fmt.Errorf("unable to create schema dir: " + err.Error())
 	}
 
-	if err = ioutil.WriteFile(schemaFilename, []byte(strings.TrimSpace(schemaDefault)), 0644); err != nil {
+	if err = ioutil.WriteFile(schemaFilename, []byte(schemaDefault), 0644); err != nil {
 		return fmt.Errorf("unable to write schema file: " + err.Error())
 	}
 	return nil

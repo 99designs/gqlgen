@@ -85,6 +85,25 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 }
 ```
 
+You can also use inline config with directives to achieve the same result
+
+```graphql
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+type User @goModel(model: "github.com/you/pkg/model.User") {
+    id: ID!         @goField(name: "todoId")
+    friends: [User!]!   @goField(forceResolver: true)
+}
+```
+
 ### Can I change the type of the ID from type String to Type Int?
 
 Yes! You can by remapping it in config as seen below:

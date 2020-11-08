@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Room } from './Room';
 
-export const Input = styled.div`
+const Input = styled.div`
     padding: 4px;
     margin: 0 0 4px;
 

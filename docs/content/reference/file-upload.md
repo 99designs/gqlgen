@@ -59,9 +59,7 @@ That invokes the following operation:
 {
   query: `
     mutation($file: Upload!) {
-      singleUpload(file: $file) {
-        id
-      }
+      singleUpload(file: $file)
     }
   `,
   variables: {

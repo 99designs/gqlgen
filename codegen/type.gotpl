@@ -46,8 +46,12 @@
 					return v.(map[string]interface{}), nil
 				{{- else if $type.IsMarshaler }}
 					{{- if $type.IsNilable }}
-						var res = new({{ $type.Elem.GO | ref }})
-					{{- else}}
+                      {{- if $type.Elem }}
+						  var res = new({{ $type.Elem.GO | ref }})
+                      {{- else }}
+						  var res {{ $type.GO | ref }}
+                      {{- end }}
+                    {{- else}}
 						var res {{ $type.GO | ref }}
 					{{- end }}
 					err := res.UnmarshalGQL(v)

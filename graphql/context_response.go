@@ -45,10 +45,11 @@ func AddErrorf(ctx context.Context, format string, args ...interface{}) {
 func AddError(ctx context.Context, err error) {
 	c := getResponseContext(ctx)
 
+	presentedError := c.errorPresenter(ctx, ErrorOnPath(ctx, err))
+
 	c.errorsMu.Lock()
 	defer c.errorsMu.Unlock()
-
-	c.errors = append(c.errors, c.errorPresenter(ctx, ErrorOnPath(ctx, err)))
+	c.errors = append(c.errors, presentedError)
 }
 
 func Recover(ctx context.Context, err interface{}) (userMessage error) {

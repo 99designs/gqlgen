@@ -35,6 +35,11 @@ type ResolverRoot interface {
 		{{$object.Name}}() {{$object.Name}}Resolver
 	{{ end }}
 {{- end }}
+{{- range $object := .Inputs -}}
+	{{ if $object.HasResolvers -}}
+		{{$object.Name}}() {{$object.Name}}Resolver
+	{{ end }}
+{{- end }}
 }
 
 type DirectiveRoot struct {
@@ -59,6 +64,18 @@ type ComplexityRoot struct {
 }
 
 {{ range $object := .Objects -}}
+	{{ if $object.HasResolvers }}
+		type {{$object.Name}}Resolver interface {
+		{{ range $field := $object.Fields -}}
+			{{- if $field.IsResolver }}
+				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}
+			{{- end }}
+		{{ end }}
+		}
+	{{- end }}
+{{- end }}
+
+{{ range $object := .Inputs -}}
 	{{ if $object.HasResolvers }}
 		type {{$object.Name}}Resolver interface {
 		{{ range $field := $object.Fields -}}

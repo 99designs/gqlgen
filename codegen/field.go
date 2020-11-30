@@ -452,6 +452,9 @@ func (f *Field) GoNameUnexported() string {
 }
 
 func (f *Field) ShortInvocation() string {
+	if f.Object.Kind == ast.InputObject {
+		return fmt.Sprintf("%s().%s(ctx, &it, data)", f.Object.Definition.Name, f.GoFieldName)
+	}
 	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.Name, f.GoFieldName, f.CallArgs())
 }
 
@@ -472,6 +475,13 @@ func (f *Field) ResolverType() string {
 }
 
 func (f *Field) ShortResolverDeclaration() string {
+	if f.Object.Kind == ast.InputObject {
+		return fmt.Sprintf("(ctx context.Context, obj %s, data %s) error",
+			templates.CurrentImports.LookupType(f.Object.Reference()),
+			templates.CurrentImports.LookupType(f.TypeReference.GO),
+		)
+	}
+
 	res := "(ctx context.Context"
 
 	if !f.Object.Root {

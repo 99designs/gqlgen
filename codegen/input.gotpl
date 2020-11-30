@@ -26,20 +26,38 @@
 						return it, graphql.ErrorOnPath(ctx, err)
 					}
 					if data, ok := tmp.({{ $field.TypeReference.GO | ref }}) ; ok {
-						it.{{$field.GoFieldName}} = data
+						{{- if $field.IsResolver }}
+							if err = ec.resolvers.{{ $field.ShortInvocation }}; err != nil {
+								return it, err
+							}
+						{{- else }}
+							it.{{$field.GoFieldName}} = data
+						{{- end }}
 					{{- if $field.TypeReference.IsNilable }}
+						{{- if not $field.IsResolver }}
 						} else if tmp == nil {
 							it.{{$field.GoFieldName}} = nil
+						{{- end }}
 					{{- end }}
 					} else {
 						err := fmt.Errorf(`unexpected type %T from directive, should be {{ $field.TypeReference.GO }}`, tmp)
 						return it, graphql.ErrorOnPath(ctx, err)
 					}
 				{{- else }}
-					it.{{$field.GoFieldName}}, err = ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
-					if err != nil {
-						return it, err
-					}
+					{{- if $field.IsResolver }}
+						data, err := ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
+						if err != nil {
+							return it, err
+						}
+						if err = ec.resolvers.{{ $field.ShortInvocation }}; err != nil {
+							return it, err
+						}
+					{{- else }}
+						it.{{$field.GoFieldName}}, err = ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
+						if err != nil {
+							return it, err
+						}
+					{{- end }}
 				{{- end }}
 			{{- end }}
 			}

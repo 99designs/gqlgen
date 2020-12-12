@@ -174,4 +174,51 @@ func TestWithFiles(t *testing.T) {
 			client.WithFiles(),
 		)
 	})
+
+	t.Run("with multiple files and file reuse", func(t *testing.T) {
+		h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			mediaType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+			require.NoError(t, err)
+			require.True(t, strings.HasPrefix(mediaType, "multipart/"))
+
+			mr := multipart.NewReader(r.Body, params["boundary"])
+			for {
+				p, err := mr.NextPart()
+				if err == io.EOF {
+					break
+				}
+				require.NoError(t, err)
+
+				slurp, err := ioutil.ReadAll(p)
+				require.NoError(t, err)
+
+				contentDisposition := p.Header.Get("Content-Disposition")
+				fmt.Printf("Part %q: %q\n", contentDisposition, slurp)
+
+				if contentDisposition == `form-data; name="operations"` {
+					require.Equal(t, []byte(`{"query":"{ id }","variables":{"files":[{},{},{}]}}`), slurp)
+				}
+				if contentDisposition == `form-data; name="map"` {
+					require.Equal(t, []byte(`{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`), slurp)
+				}
+				if regexp.MustCompile(`form-data; name="0"; filename=.*`).MatchString(contentDisposition) {
+					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
+					require.Equal(t, []byte(`The quick brown fox jumps over the lazy dog`), slurp)
+				}
+				if regexp.MustCompile(`form-data; name="1"; filename=.*`).MatchString(contentDisposition) {
+					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
+					require.Equal(t, []byte(`hello world`), slurp)
+				}
+			}
+			w.Write([]byte(`{}`))
+		})
+
+		c := client.New(h)
+
+		var resp struct{}
+		c.MustPost("{ id }", &resp,
+			client.Var("files", []*os.File{tempFile1, tempFile2, tempFile1}),
+			client.WithFiles(),
+		)
+	})
 }

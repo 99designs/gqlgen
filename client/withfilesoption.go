@@ -22,6 +22,10 @@ func findFiles(parentMapKey string, variables map[string]interface{}) []*fileFor
 	for key, value := range variables {
 		if v, ok := value.(map[string]interface{}); ok {
 			files = append(files, findFiles(parentMapKey+"."+key, v)...)
+		} else if v, ok := value.([]map[string]interface{}); ok {
+			for i, arr := range v {
+				files = append(files, findFiles(fmt.Sprintf(`%s.%s.%d`, parentMapKey, key, i), arr)...)
+			}
 		} else if v, ok := value.([]*os.File); ok {
 			for i, file := range v {
 				files = append(files, &fileFormDataMap{
@@ -59,16 +63,38 @@ func WithFiles() Option {
 		// `{ "0":["variables.input.file"] }`
 		// or
 		// `{ "0":["variables.input.files.0"], "1":["variables.input.files.1"] }`
+		// or
+		// `{ "0": ["variables.input.0.file"], "1": ["variables.input.1.file"] }`
+		// or
+		// `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
 		mapData := ""
 		filesData := findFiles("variables", bd.Variables)
-		if len(filesData) > 0 {
+		filesGroup := [][]*fileFormDataMap{}
+		for _, fd := range filesData {
+			foundDuplicate := false
+			for j, fg := range filesGroup {
+				f1, _ := fd.file.Stat()
+				f2, _ := fg[0].file.Stat()
+				if os.SameFile(f1, f2) {
+					foundDuplicate = true
+					filesGroup[j] = append(filesGroup[j], fd)
+				}
+			}
+
+			if !foundDuplicate {
+				filesGroup = append(filesGroup, []*fileFormDataMap{fd})
+			}
+		}
+		if len(filesGroup) > 0 {
 			mapDataFiles := []string{}
-			for i, fileData := range filesData {
+
+			for i, fileData := range filesGroup {
 				mapDataFiles = append(
 					mapDataFiles,
-					fmt.Sprintf(`"%d":["%s"]`, i, fileData.mapKey),
+					fmt.Sprintf(`"%d":[%s]`, i, strings.Join(collect(fileData, wrapMapKeyInQuotes)[:], ",")),
 				)
 			}
+
 			mapData = `{` + strings.Join(mapDataFiles, ",") + `}`
 		}
 		bodyWriter.WriteField("map", mapData)
@@ -92,4 +118,16 @@ func WithFiles() Option {
 		bd.HTTP.Body = ioutil.NopCloser(bodyBuf)
 		bd.HTTP.Header.Set("Content-Type", bodyWriter.FormDataContentType())
 	}
+}
+
+func collect(strArr []*fileFormDataMap, f func(s *fileFormDataMap) string) []string {
+	result := make([]string, len(strArr))
+	for i, str := range strArr {
+		result[i] = f(str)
+	}
+	return result
+}
+
+func wrapMapKeyInQuotes(s *fileFormDataMap) string {
+	return fmt.Sprintf("\"%s\"", s.mapKey)
 }

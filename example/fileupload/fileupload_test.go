@@ -11,8 +11,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/textproto"
+	"os"
 	"testing"
 
+	gqlclient "github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/example/fileupload/model"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -22,9 +24,12 @@ import (
 
 func TestFileUpload(t *testing.T) {
 	client := http.Client{}
+	resolver := &Stub{}
+	srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
+	defer srv.Close()
+	gql := gqlclient.New(srv.Config.Handler, gqlclient.Path("/graphql"))
 
 	t.Run("valid single file upload", func(t *testing.T) {
-		resolver := &Stub{}
 		resolver.MutationResolver.SingleUpload = func(ctx context.Context, file graphql.Upload) (*model.File, error) {
 			require.NotNil(t, file)
 			require.NotNil(t, file.File)
@@ -39,30 +44,29 @@ func TestFileUpload(t *testing.T) {
 				ContentType: file.ContentType,
 			}, nil
 		}
-		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
-		defer srv.Close()
 
-		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id, name, content, contentType } }", "variables": { "file": null } }`
-		mapData := `{ "0": ["variables.file"] }`
-		files := []file{
-			{
-				mapKey:      "0",
-				name:        "a.txt",
-				content:     "test",
-				contentType: "text/plain",
-			},
+		mutation := `mutation ($file: Upload!) {
+			singleUpload(file: $file) {
+				id
+				name
+				content
+				contentType
+			}
+		}`
+		var result struct {
+			SingleUpload *model.File
 		}
-		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		resp, err := client.Do(req)
+		aFile, _ := ioutil.TempFile(os.TempDir(), "aFile")
+		defer os.Remove(aFile.Name())
+		aFile.WriteString(`test`)
+
+		err := gql.Post(mutation, &result, gqlclient.Var("file", aFile), gqlclient.WithFiles())
 		require.Nil(t, err)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		require.Nil(t, err)
-		responseString := string(responseBody)
-		require.Equal(t, `{"data":{"singleUpload":{"id":1,"name":"a.txt","content":"test","contentType":"text/plain"}}}`, responseString)
-		err = resp.Body.Close()
-		require.Nil(t, err)
+		require.Equal(t, 1, result.SingleUpload.ID)
+		require.Contains(t, result.SingleUpload.Name, "aFile")
+		require.Equal(t, "test", result.SingleUpload.Content)
+		require.Equal(t, "text/plain; charset=utf-8", result.SingleUpload.ContentType)
 	})
 
 	t.Run("valid single file upload with payload", func(t *testing.T) {

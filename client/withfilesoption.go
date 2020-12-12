@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
+	"net/http"
 	"net/textproto"
 	"os"
 	"strings"
@@ -74,14 +75,16 @@ func WithFiles() Option {
 
 		// --b7955bd2e1d17b67ac157b9e9ddb6238888caefc6f3541920a1debad284d
 		// Content-Disposition: form-data; name="0"; filename="tempFile"
+		// Content-Type: text/plain; charset=utf-8
+		// or
 		// Content-Type: application/octet-stream
 		//
 		for i, fileData := range filesData {
 			h := make(textproto.MIMEHeader)
 			h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%d"; filename="%s"`, i, fileData.file.Name()))
-			h.Set("Content-Type", "application/octet-stream")
-			ff, _ := bodyWriter.CreatePart(h)
 			b, _ := ioutil.ReadFile(fileData.file.Name())
+			h.Set("Content-Type", http.DetectContentType(b))
+			ff, _ := bodyWriter.CreatePart(h)
 			ff.Write(b)
 		}
 		bodyWriter.Close()

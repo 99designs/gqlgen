@@ -209,6 +209,7 @@ func TestWithFiles(t *testing.T) {
 					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
 					require.Equal(t, []byte(`hello world`), slurp)
 				}
+				require.False(t, regexp.MustCompile(`form-data; name="2"; filename=.*`).MatchString(contentDisposition))
 			}
 			w.Write([]byte(`{}`))
 		})

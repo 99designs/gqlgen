@@ -91,7 +91,7 @@ func WithFiles() Option {
 			for i, fileData := range filesGroup {
 				mapDataFiles = append(
 					mapDataFiles,
-					fmt.Sprintf(`"%d":[%s]`, i, strings.Join(collect(fileData, wrapMapKeyInQuotes)[:], ",")),
+					fmt.Sprintf(`"%d":[%s]`, i, strings.Join(collect(fileData, wrapMapKeyInQuotes), ",")),
 				)
 			}
 
@@ -105,10 +105,10 @@ func WithFiles() Option {
 		// or
 		// Content-Type: application/octet-stream
 		//
-		for i, fileData := range filesData {
+		for i, fileData := range filesGroup {
 			h := make(textproto.MIMEHeader)
-			h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%d"; filename="%s"`, i, fileData.file.Name()))
-			b, _ := ioutil.ReadFile(fileData.file.Name())
+			h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%d"; filename="%s"`, i, fileData[0].file.Name()))
+			b, _ := ioutil.ReadFile(fileData[0].file.Name())
 			h.Set("Content-Type", http.DetectContentType(b))
 			ff, _ := bodyWriter.CreatePart(h)
 			ff.Write(b)

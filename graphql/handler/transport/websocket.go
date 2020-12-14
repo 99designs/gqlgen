@@ -5,11 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"

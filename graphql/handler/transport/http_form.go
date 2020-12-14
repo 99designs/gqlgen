@@ -1,13 +1,14 @@
 package transport
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"io"
 	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 
 	"github.com/99designs/gqlgen/graphql"
 )
@@ -136,7 +137,7 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 
 					if err := params.AddUpload(upload, key, path); err != nil {
 						w.WriteHeader(http.StatusUnprocessableEntity)
-						writeJsonGraphqlError(w,  serial, err)
+						writeJsonGraphqlError(w, serial, err)
 						return
 					}
 				}

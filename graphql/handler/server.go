@@ -3,9 +3,10 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"net/http"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/executor"
@@ -25,7 +26,7 @@ type (
 
 func New(es graphql.ExecutableSchema) *Server {
 	return &Server{
-		exec: executor.New(es),
+		exec:   executor.New(es),
 		serial: serial.Default(),
 	}
 }
@@ -99,11 +100,11 @@ func (s *Server) getTransport(r *http.Request) graphql.Transport {
 	return nil
 }
 
-func (s *Server) Marshal(v interface{}) ([]byte, error){
+func (s *Server) Marshal(v interface{}) ([]byte, error) {
 	return s.serial.Marshal(v)
 }
 
-func (s *Server) Unmarshal(data []byte, v interface{}) error{
+func (s *Server) Unmarshal(data []byte, v interface{}) error {
 	return s.serial.Unmarshal(data, v)
 }
 
@@ -120,7 +121,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r = r.WithContext(graphql.StartOperationTrace(r.Context()))
 
-	if s.serial == nil{
+	if s.serial == nil {
 		s.sendErrorf(w, http.StatusBadRequest, "serialization not configured")
 		return
 	}

@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/serial"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -169,7 +171,7 @@ func (t panicTransport) Supports(r *http.Request) bool {
 	return true
 }
 
-func (h panicTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (h panicTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor, serial serial.Serialization) {
 	panic(fmt.Errorf("panic in transport"))
 }
 

@@ -2,8 +2,9 @@ package transport
 
 import (
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"net/http"
+
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"

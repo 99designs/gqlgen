@@ -1,9 +1,10 @@
 package transport
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"mime"
 	"net/http"
+
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 
 	"github.com/99designs/gqlgen/graphql"
 )

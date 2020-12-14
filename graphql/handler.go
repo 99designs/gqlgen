@@ -2,10 +2,11 @@ package graphql
 
 import (
 	"context"
-	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )

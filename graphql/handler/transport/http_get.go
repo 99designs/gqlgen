@@ -2,10 +2,11 @@ package transport
 
 import (
 	"encoding/json"
-	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
@@ -39,7 +40,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	if variables := r.URL.Query().Get("variables"); variables != "" {
 		if err := jsonDecode(strings.NewReader(variables), &raw.Variables); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			writeJsonError(w, serial,"variables could not be decoded")
+			writeJsonError(w, serial, "variables could not be decoded")
 			return
 		}
 	}
@@ -47,7 +48,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	if extensions := r.URL.Query().Get("extensions"); extensions != "" {
 		if err := jsonDecode(strings.NewReader(extensions), &raw.Extensions); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			writeJsonError(w, serial,"extensions could not be decoded")
+			writeJsonError(w, serial, "extensions could not be decoded")
 			return
 		}
 	}
@@ -64,7 +65,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	op := rc.Doc.Operations.ForName(rc.OperationName)
 	if op.Operation != ast.Query {
 		w.WriteHeader(http.StatusNotAcceptable)
-		writeJsonError(w, serial,"GET requests only allow query operations")
+		writeJsonError(w, serial, "GET requests only allow query operations")
 		return
 	}
 

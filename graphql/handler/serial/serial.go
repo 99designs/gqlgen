@@ -7,16 +7,16 @@ type Serialization interface {
 	Unmarshal(data []byte, v interface{}) error
 }
 
-type defaultSerialization struct {}
+type defaultSerialization struct{}
 
-func (d *defaultSerialization) Marshal(v interface{}) ([]byte, error){
+func (d *defaultSerialization) Marshal(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func (d *defaultSerialization) Unmarshal(data []byte, v interface{}) error{
+func (d *defaultSerialization) Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }
 
-func Default() Serialization{
+func Default() Serialization {
 	return &defaultSerialization{}
 }

@@ -55,6 +55,10 @@ func (s *Server) AddTransport(transport graphql.Transport) {
 	s.transports = append(s.transports, transport)
 }
 
+func (s *Server) SetSerialization(serial serial.Serialization) {
+	s.serial = serial
+}
+
 func (s *Server) SetErrorPresenter(f graphql.ErrorPresenterFunc) {
 	s.exec.SetErrorPresenter(f)
 }

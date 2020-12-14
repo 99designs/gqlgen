@@ -131,7 +131,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transport.Do(w, r, s.exec)
+	transport.Do(w, r, s.exec, s.serial)
 }
 
 func (s *Server) sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {

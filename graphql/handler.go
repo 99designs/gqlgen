@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"net/http"
 	"strconv"
 	"strings"
@@ -84,7 +85,7 @@ type (
 	// Transport provides support for different wire level encodings of graphql requests, eg Form, Get, Post, Websocket
 	Transport interface {
 		Supports(r *http.Request) bool
-		Do(w http.ResponseWriter, r *http.Request, exec GraphExecutor)
+		Do(w http.ResponseWriter, r *http.Request, exec GraphExecutor, serial serial.Serialization)
 	}
 )
 

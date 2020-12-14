@@ -1,30 +1,30 @@
 package transport
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"io"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func writeJson(w io.Writer, response *graphql.Response) {
-	b, err := json.Marshal(response)
+func writeJson(w io.Writer, serial serial.Serialization, response *graphql.Response) {
+	b, err := serial.Marshal(response)
 	if err != nil {
 		panic(err)
 	}
 	w.Write(b)
 }
 
-func writeJsonError(w io.Writer, msg string) {
-	writeJson(w, &graphql.Response{Errors: gqlerror.List{{Message: msg}}})
+func writeJsonError(w io.Writer, serial serial.Serialization, msg string) {
+	writeJson(w, serial, &graphql.Response{Errors: gqlerror.List{{Message: msg}}})
 }
 
-func writeJsonErrorf(w io.Writer, format string, args ...interface{}) {
-	writeJson(w, &graphql.Response{Errors: gqlerror.List{{Message: fmt.Sprintf(format, args...)}}})
+func writeJsonErrorf(w io.Writer, serial serial.Serialization, format string, args ...interface{}) {
+	writeJson(w, serial, &graphql.Response{Errors: gqlerror.List{{Message: fmt.Sprintf(format, args...)}}})
 }
 
-func writeJsonGraphqlError(w io.Writer, err ...*gqlerror.Error) {
-	writeJson(w, &graphql.Response{Errors: err})
+func writeJsonGraphqlError(w io.Writer, serial serial.Serialization, err ...*gqlerror.Error) {
+	writeJson(w, serial, &graphql.Response{Errors: err})
 }

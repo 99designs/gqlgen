@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"log"
 	"net/http"
 	"sync"
@@ -43,6 +44,7 @@ type (
 		mu              sync.Mutex
 		keepAliveTicker *time.Ticker
 		exec            graphql.GraphExecutor
+		serial          serial.Serialization
 
 		initPayload InitPayload
 	}
@@ -60,13 +62,13 @@ func (t Websocket) Supports(r *http.Request) bool {
 	return r.Header.Get("Upgrade") != ""
 }
 
-func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor, serial serial.Serialization) {
 	ws, err := t.Upgrader.Upgrade(w, r, http.Header{
 		"Sec-Websocket-Protocol": []string{"graphql-ws"},
 	})
 	if err != nil {
 		log.Printf("unable to upgrade %T to websocket %s: ", w, err.Error())
-		SendErrorf(w, http.StatusBadRequest, "unable to upgrade")
+		SendErrorf(w, serial, http.StatusBadRequest, "unable to upgrade")
 		return
 	}
 
@@ -75,6 +77,7 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 		conn:      ws,
 		ctx:       r.Context(),
 		exec:      exec,
+		serial:    serial,
 		Websocket: t,
 	}
 
@@ -96,7 +99,7 @@ func (c *wsConnection) init() bool {
 	case connectionInitMsg:
 		if len(message.Payload) > 0 {
 			c.initPayload = make(InitPayload)
-			err := json.Unmarshal(message.Payload, &c.initPayload)
+			err := c.serial.Unmarshal(message.Payload, &c.initPayload)
 			if err != nil {
 				return false
 			}
@@ -255,7 +258,7 @@ func (c *wsConnection) subscribe(start time.Time, message *operationMessage) {
 }
 
 func (c *wsConnection) sendResponse(id string, response *graphql.Response) {
-	b, err := json.Marshal(response)
+	b, err := c.serial.Marshal(response)
 	if err != nil {
 		panic(err)
 	}
@@ -275,7 +278,7 @@ func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 	for i, err := range errors {
 		errs[i] = err
 	}
-	b, err := json.Marshal(errs)
+	b, err := c.serial.Marshal(errs)
 	if err != nil {
 		panic(err)
 	}
@@ -283,7 +286,7 @@ func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
-	b, err := json.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
+	b, err := c.serial.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 	if err != nil {
 		panic(err)
 	}

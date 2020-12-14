@@ -1,8 +1,8 @@
 package transport
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler/serial"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -11,9 +11,9 @@ import (
 
 // SendError sends a best effort error to a raw response writer. It assumes the client can understand the standard
 // json error response
-func SendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
+func SendError(w http.ResponseWriter, serial serial.Serialization, code int, errors ...*gqlerror.Error) {
 	w.WriteHeader(code)
-	b, err := json.Marshal(&graphql.Response{Errors: errors})
+	b, err := serial.Marshal(&graphql.Response{Errors: errors})
 	if err != nil {
 		panic(err)
 	}
@@ -21,6 +21,6 @@ func SendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 }
 
 // SendErrorf wraps SendError to add formatted messages
-func SendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
-	SendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
+func SendErrorf(w http.ResponseWriter, serial serial.Serialization, code int, format string, args ...interface{}) {
+	SendError(w, serial, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }

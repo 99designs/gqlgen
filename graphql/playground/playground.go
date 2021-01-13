@@ -50,10 +50,10 @@ func Handler(title string, endpoint string) http.HandlerFunc {
 		err := page.Execute(w, map[string]string{
 			"title":      title,
 			"endpoint":   endpoint,
-			"version":    "1.7.20",
-			"cssSRI":     "sha256-cS9Vc2OBt9eUf4sykRWukeFYaInL29+myBmFDSa7F/U=",
+			"version":    "1.7.26",
+			"cssSRI":     "sha256-dKnNLEFwKSVFpkpjRWe+o/jQDM6n/JsvQ0J3l5Dk3fc=",
 			"faviconSRI": "sha256-GhTyE+McTU79R4+pRO6ih+4TfsTOrpPwD8ReKFzb3PM=",
-			"jsSRI":      "sha256-4QG1Uza2GgGdlBL3RCBCGtGeZB6bDbsw8OltCMGeJsA=",
+			"jsSRI":      "sha256-SG9YAy4eywTcLckwij7V4oSCG3hOdV1m+2e1XuNxIgk=",
 		})
 		if err != nil {
 			panic(err)

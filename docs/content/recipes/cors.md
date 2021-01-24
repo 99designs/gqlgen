@@ -22,6 +22,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
+	"github.com/gorilla/websocket"
+	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 func main() {
@@ -48,7 +50,7 @@ func main() {
         },
     })
 
-	router.Handle("/", handler.Playground("Starwars", "/query"))
+	router.Handle("/", playground.Handler("Starwars", "/query"))
 	router.Handle("/query", srv)
 
 	err := http.ListenAndServe(":8080", router)

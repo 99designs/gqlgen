@@ -95,6 +95,8 @@ type Stub struct {
 		ScalarSlice                      func(ctx context.Context) ([]byte, error)
 		Fallback                         func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 		OptionalUnion                    func(ctx context.Context) (TestUnion, error)
+		VOkCaseValue                     func(ctx context.Context) (*VOkCaseValue, error)
+		VOkCaseNil                       func(ctx context.Context) (*VOkCaseNil, error)
 		ValidType                        func(ctx context.Context) (*ValidType, error)
 		WrappedStruct                    func(ctx context.Context) (*WrappedStruct, error)
 		WrappedScalar                    func(ctx context.Context) (otherpkg.Scalar, error)
@@ -387,6 +389,12 @@ func (r *stubQuery) Fallback(ctx context.Context, arg FallbackToStringEncoding) 
 }
 func (r *stubQuery) OptionalUnion(ctx context.Context) (TestUnion, error) {
 	return r.QueryResolver.OptionalUnion(ctx)
+}
+func (r *stubQuery) VOkCaseValue(ctx context.Context) (*VOkCaseValue, error) {
+	return r.QueryResolver.VOkCaseValue(ctx)
+}
+func (r *stubQuery) VOkCaseNil(ctx context.Context) (*VOkCaseNil, error) {
+	return r.QueryResolver.VOkCaseNil(ctx)
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)

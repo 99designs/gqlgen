@@ -136,7 +136,7 @@ go run server.go
 then open http://localhost:8080 in a browser. here are some queries to try:
 ```graphql
 mutation createTodo {
-  createTodo(input:{text:"todo", userId:"1"}) {
+  createTodo(input: { text: "todo", userId: "1" }) {
     user {
       id
     }
@@ -146,13 +146,13 @@ mutation createTodo {
 }
 
 query findTodos {
-    todos {
-      text
-      done
-      user {
-        name
-      }
+  todos {
+    text
+    done
+    user {
+      name
     }
+  }
 }
 ```
 
@@ -205,7 +205,7 @@ At the top of our `resolver.go`, between `package` and `import`, add the followi
 //go:generate go run github.com/99designs/gqlgen
 ```
 
-This magic comment tells `go generate` what command to run when we want to regenerate our code.  To run go generate recursively over your entire project, use this command:
+This magic comment tells `go generate` what command to run when we want to regenerate our code. To run go generate recursively over your entire project, use this command:
 
 ```go
 go generate ./...

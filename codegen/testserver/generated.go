@@ -9831,7 +9831,10 @@ func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.Collected
 
 func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, obj interface{}) (InnerDirectives, error) {
 	var it InnerDirectives
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9873,7 +9876,10 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj interface{}) (InnerInput, error) {
 	var it InnerInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9893,7 +9899,10 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj in
 
 func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, obj interface{}) (InputDirectives, error) {
 	var it InputDirectives
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10013,7 +10022,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context, obj interface{}) (InputWithEnumValue, error) {
 	var it InputWithEnumValue
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10033,7 +10045,10 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 
 func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj interface{}) (NestedInput, error) {
 	var it NestedInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10053,7 +10068,10 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj i
 
 func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj interface{}) (NestedMapInput, error) {
 	var it NestedMapInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10073,7 +10091,10 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 
 func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj interface{}) (OuterInput, error) {
 	var it OuterInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10093,7 +10114,10 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj in
 
 func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Context, obj interface{}) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10113,7 +10137,10 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 
 func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj interface{}) (SpecialInput, error) {
 	var it SpecialInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10133,7 +10160,10 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 
 func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj interface{}) (ValidInput, error) {
 	var it ValidInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {

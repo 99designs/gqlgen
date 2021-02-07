@@ -111,7 +111,7 @@ type Resolver struct{
 }
 ```
 
-Returning to `graph/schema.resolvers.go`, let's implement the bodies of our automatically generated resolver functions:
+Returning to `graph/schema.resolvers.go`, let's implement the bodies of those automatically generated resolver functions:
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {

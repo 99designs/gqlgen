@@ -135,7 +135,7 @@ We now have a working server, to start it:
 go run server.go
 ```
 
-Open http://localhost:8080 in a browser. Here are some queries to try:
+Open http://localhost:8080 in a browser. Here are some queries to try, starting with creating a todo:
 ```graphql
 mutation createTodo {
   createTodo(input:{text:"todo", userId:"1"}) {
@@ -146,7 +146,11 @@ mutation createTodo {
     done
   }
 }
+```
 
+And then querying for it:
+
+```graphql
 query findTodos {
     todos {
       text

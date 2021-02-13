@@ -20,8 +20,8 @@ In your router file, define the handlers for the GraphQL and Playground endpoint
 
 ```go
 import (
-	"api/graph"
-	"api/graph/generated"
+	"github.com/[username]/gqlgen-todos/graph"	// Replace username with your github username
+	"github.com/[username]/gqlgen-todos/graph/generated" // Replace username with your github username
 	"github.com/gin-gonic/gin"
 
 	"github.com/99designs/gqlgen/graphql/handler"

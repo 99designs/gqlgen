@@ -74,7 +74,7 @@ func main() {
     c.Complexity.Post.Related = countComplexity
 
     srv := handler.NewDefaultServer(blog.NewExecutableSchema(c))
-		srv.Use(extension.FixedComplexityLimit(5))
+	srv.Use(extension.FixedComplexityLimit(5))
     http.Handle("/query", gqlHandler)
 }
 ```

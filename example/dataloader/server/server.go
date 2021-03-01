@@ -7,7 +7,7 @@ import (
 	"github.com/99designs/gqlgen/example/dataloader"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 func main() {

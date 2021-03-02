@@ -89,6 +89,9 @@ directive @goModel(model: String, models: [String!]) on OBJECT
 
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
+
+directive @extraTag on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
 ```
 
 > Here be dragons
@@ -101,6 +104,6 @@ Now you can use these directives when defining types in your schema:
 ```graphql
 type User @goModel(model: "github.com/my/app/models.User") {
     id: ID!         @goField(name: "todoId")
-    name: String!   @goField(forceResolver: true)
+    name: String!   @goField(forceResolver: true) @extraTag(xorm: "-")
 }
 ```

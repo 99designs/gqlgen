@@ -44,6 +44,10 @@ type Field struct {
 	Tag         string
 }
 
+func (f *Field) Nullable(name string) {
+	f.Tag = `json:"` + name + `,omitempty"`
+}
+
 type Enum struct {
 	Description string
 	Name        string
@@ -162,12 +166,18 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					typ = types.NewPointer(typ)
 				}
 
-				it.Fields = append(it.Fields, &Field{
+				f := &Field{
 					Name:        name,
 					Type:        typ,
 					Description: field.Description,
 					Tag:         `json:"` + field.Name + `"`,
-				})
+				}
+				// if field is nullable, omit in json marshall to save bandwidth and avoid unexpected behaviour sending null
+				if !field.Type.NonNull {
+					f.Nullable(field.Name)
+				}
+
+				it.Fields = append(it.Fields, f)
 			}
 
 			b.Models = append(b.Models, it)

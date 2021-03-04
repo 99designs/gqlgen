@@ -8,5 +8,5 @@ import (
 
 type Address struct {
 	ID       external.ObjectID `json:"id"`
-	Location *Point            `json:"location"`
+	Location *Point            `json:"location,omitempty"`
 }

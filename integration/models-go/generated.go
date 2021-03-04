@@ -10,8 +10,8 @@ import (
 
 type DateFilter struct {
 	Value    string        `json:"value"`
-	Timezone *string       `json:"timezone"`
-	Op       *DateFilterOp `json:"op"`
+	Timezone *string       `json:"timezone,omitempty"`
+	Op       *DateFilterOp `json:"op,omitempty"`
 }
 
 type DateFilterOp string

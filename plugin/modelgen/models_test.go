@@ -55,9 +55,9 @@ func TestModelGeneration(t *testing.T) {
 
 		expectedTags := []string{
 			`json:"missing2" database:"MissingTypeNotNullmissing2"`,
-			`json:"name" database:"MissingInputname"`,
-			`json:"missing2" database:"MissingTypeNullablemissing2"`,
-			`json:"name" database:"TypeWithDescriptionname"`,
+			`json:"name,omitempty" database:"MissingInputname"`,
+			`json:"missing2,omitempty" database:"MissingTypeNullablemissing2"`,
+			`json:"name,omitempty" database:"TypeWithDescriptionname"`,
 		}
 
 		for _, tag := range expectedTags {

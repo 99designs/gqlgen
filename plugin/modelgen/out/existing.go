@@ -1,10 +1,10 @@
 package out
 
 type ExistingType struct {
-	Name     *string              `json:"name"`
-	Enum     *ExistingEnum        `json:"enum"`
-	Int      ExistingInterface    `json:"int"`
-	Existing *MissingTypeNullable `json:"existing"`
+	Name     *string              `json:"name,omitempty"`
+	Enum     *ExistingEnum        `json:"enum,omitempty"`
+	Int      ExistingInterface    `json:"int,omitempty"`
+	Existing *MissingTypeNullable `json:"existing,omitempty"`
 }
 
 type ExistingModel struct {

@@ -31,8 +31,8 @@ type UnionWithDescription interface {
 }
 
 type MissingInput struct {
-	Name *string      `json:"name" database:"MissingInputname"`
-	Enum *MissingEnum `json:"enum" database:"MissingInputenum"`
+	Name *string      `json:"name,omitempty" database:"MissingInputname"`
+	Enum *MissingEnum `json:"enum,omitempty" database:"MissingInputenum"`
 }
 
 type MissingTypeNotNull struct {
@@ -49,11 +49,11 @@ func (MissingTypeNotNull) IsMissingUnion()      {}
 func (MissingTypeNotNull) IsExistingUnion()     {}
 
 type MissingTypeNullable struct {
-	Name     *string             `json:"name" database:"MissingTypeNullablename"`
-	Enum     *MissingEnum        `json:"enum" database:"MissingTypeNullableenum"`
-	Int      MissingInterface    `json:"int" database:"MissingTypeNullableint"`
-	Existing *ExistingType       `json:"existing" database:"MissingTypeNullableexisting"`
-	Missing2 *MissingTypeNotNull `json:"missing2" database:"MissingTypeNullablemissing2"`
+	Name     *string             `json:"name,omitempty" database:"MissingTypeNullablename"`
+	Enum     *MissingEnum        `json:"enum,omitempty" database:"MissingTypeNullableenum"`
+	Int      MissingInterface    `json:"int,omitempty" database:"MissingTypeNullableint"`
+	Existing *ExistingType       `json:"existing,omitempty" database:"MissingTypeNullableexisting"`
+	Missing2 *MissingTypeNotNull `json:"missing2,omitempty" database:"MissingTypeNullablemissing2"`
 }
 
 func (MissingTypeNullable) IsMissingInterface()  {}
@@ -63,7 +63,7 @@ func (MissingTypeNullable) IsExistingUnion()     {}
 
 // TypeWithDescription is a type with a description
 type TypeWithDescription struct {
-	Name *string `json:"name" database:"TypeWithDescriptionname"`
+	Name *string `json:"name,omitempty" database:"TypeWithDescriptionname"`
 }
 
 func (TypeWithDescription) IsUnionWithDescription() {}

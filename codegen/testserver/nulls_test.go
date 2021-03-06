@@ -14,12 +14,14 @@ func TestNullBubbling(t *testing.T) {
 	resolvers.QueryResolver.Valid = func(ctx context.Context) (s string, e error) {
 		return "Ok", nil
 	}
-
 	resolvers.QueryResolver.Errors = func(ctx context.Context) (errors *Errors, e error) {
 		return &Errors{}, nil
 	}
 	resolvers.QueryResolver.ErrorBubble = func(ctx context.Context) (i *Error, e error) {
 		return &Error{ID: "E1234"}, nil
+	}
+	resolvers.QueryResolver.ErrorBubbleList = func(ctx context.Context) (i []*Error, e error) {
+		return []*Error{nil}, nil
 	}
 
 	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
@@ -65,6 +67,18 @@ func TestNullBubbling(t *testing.T) {
 
 		require.EqualError(t, err, `[{"message":"must not be null","path":["errorBubble","nilOnRequiredField"]}]`)
 		require.Nil(t, resp.ErrorBubble)
+		require.Equal(t, "Ok", resp.Valid)
+	})
+
+	t.Run("when non-null list element is null", func(t *testing.T) {
+		var resp struct {
+			Valid           string
+			ErrorBubbleList []*struct{}
+		}
+		err := c.Post(`query { valid, errorBubbleList { id } }`, &resp)
+
+		require.EqualError(t, err, `[{"message":"must not be null","path":["errorBubbleList", 0]}]`)
+		require.Nil(t, resp.ErrorBubbleList)
 		require.Equal(t, "Ok", resp.Valid)
 	})
 

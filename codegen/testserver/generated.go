@@ -278,6 +278,7 @@ type ComplexityRoot struct {
 		EmbeddedCase3                    func(childComplexity int) int
 		EnumInInput                      func(childComplexity int, input *InputWithEnumValue) int
 		ErrorBubble                      func(childComplexity int) int
+		ErrorBubbleList                  func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
@@ -457,6 +458,7 @@ type QueryResolver interface {
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
+	ErrorBubbleList(ctx context.Context) ([]*Error, error)
 	Errors(ctx context.Context) (*Errors, error)
 	Valid(ctx context.Context) (string, error)
 	Panics(ctx context.Context) (*Panics, error)
@@ -1198,6 +1200,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ErrorBubble(childComplexity), true
+
+	case "Query.errorBubbleList":
+		if e.complexity.Query.ErrorBubbleList == nil {
+			break
+		}
+
+		return e.complexity.Query.ErrorBubbleList(childComplexity), true
 
 	case "Query.errors":
 		if e.complexity.Query.Errors == nil {
@@ -2039,6 +2048,7 @@ input NestedInput {
 `, BuiltIn: false},
 	{Name: "nulls.graphql", Input: `extend type Query {
     errorBubble: Error
+    errorBubbleList: [Error!]
     errors: Errors
     valid: String!
 }
@@ -2204,10 +2214,10 @@ scalar Time
 }
 
 type Slices {
-  test1: [String]
-  test2: [String!]
-  test3: [String]!
-  test4: [String!]!
+    test1: [String]
+    test2: [String!]
+    test3: [String]!
+    test4: [String!]!
 }
 
 scalar Bytes
@@ -7210,6 +7220,35 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 	res := resTmp.(*Error)
 	fc.Result = res
 	return ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ErrorBubbleList(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Error)
+	fc.Result = res
+	return ec.marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐErrorᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -12266,6 +12305,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_errorBubble(ctx, field)
 				return res
 			})
+		case "errorBubbleList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_errorBubbleList(ctx, field)
+				return res
+			})
 		case "errors":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -14214,6 +14264,53 @@ func (ec *executionContext) marshalOEmbeddedCase32ᚖgithubᚗcomᚋ99designsᚋ
 		return graphql.Null
 	}
 	return ec._EmbeddedCase3(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []*Error) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v *Error) graphql.Marshaler {

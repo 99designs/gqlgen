@@ -90,11 +90,11 @@
 						ctx := graphql.WithFieldContext(ctx, fc)
 						f := func(i int) {
 							defer func() {
-                        		if r := recover(); r != nil {
-                        			ec.Error(ctx, ec.Recover(ctx, r))
-                        			ret = nil
-                        		}
-                        	}()
+								if r := recover(); r != nil {
+									ec.Error(ctx, ec.Recover(ctx, r))
+									ret = nil
+								}
+							}()
 							if !isLen1 {
 								defer wg.Done()
 							}
@@ -107,9 +107,16 @@
 						}
 					{{ else }}
 						ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
-					{{- end}}
+					{{- end }}
 				}
 				{{ if not $type.IsScalar }} wg.Wait() {{ end }}
+				{{ if $type.Elem.NonNull }}
+					for _, e := range ret {
+						if e == graphql.Null {
+							return graphql.Null
+						}
+					}
+				{{ end }}
 				return ret
 			{{- else }}
 				{{- if $type.IsNilable }}

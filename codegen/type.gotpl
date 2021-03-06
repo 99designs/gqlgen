@@ -110,7 +110,7 @@
 					{{- end }}
 				}
 				{{ if not $type.IsScalar }} wg.Wait() {{ end }}
-				{{ if $type.Elem.NonNull }}
+				{{ if $type.Elem.GQL.NonNull }}
 					for _, e := range ret {
 						if e == graphql.Null {
 							return graphql.Null

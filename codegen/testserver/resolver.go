@@ -236,6 +236,10 @@ func (r *queryResolver) ErrorBubbleList(ctx context.Context) ([]*Error, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) ErrorList(ctx context.Context) ([]*Error, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) Errors(ctx context.Context) (*Errors, error) {
 	panic("not implemented")
 }

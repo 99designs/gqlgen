@@ -85,6 +85,8 @@ type Stub struct {
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 		ErrorBubble                      func(ctx context.Context) (*Error, error)
+		ErrorBubbleList                  func(ctx context.Context) ([]*Error, error)
+		ErrorList                        func(ctx context.Context) ([]*Error, error)
 		Errors                           func(ctx context.Context) (*Errors, error)
 		Valid                            func(ctx context.Context) (string, error)
 		Panics                           func(ctx context.Context) (*Panics, error)
@@ -357,6 +359,12 @@ func (r *stubQuery) MapNestedStringInterface(ctx context.Context, in *NestedMapI
 }
 func (r *stubQuery) ErrorBubble(ctx context.Context) (*Error, error) {
 	return r.QueryResolver.ErrorBubble(ctx)
+}
+func (r *stubQuery) ErrorBubbleList(ctx context.Context) ([]*Error, error) {
+	return r.QueryResolver.ErrorBubbleList(ctx)
+}
+func (r *stubQuery) ErrorList(ctx context.Context) ([]*Error, error) {
+	return r.QueryResolver.ErrorList(ctx)
 }
 func (r *stubQuery) Errors(ctx context.Context) (*Errors, error) {
 	return r.QueryResolver.Errors(ctx)

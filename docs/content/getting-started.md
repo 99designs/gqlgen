@@ -103,14 +103,15 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 
 We just need to implement these two methods to get our server working:
 
-First we need somewhere to track our state, lets put it in `graph/resolver.go`:
+First we need somewhere to track our state, lets put it in `graph/resolver.go`. The `graph/resolver.go` file is where we declare our app's dependencies, like our database. It gets initialized once in `server.go` when we create the graph.
+
 ```go
 type Resolver struct{
 	todos []*model.Todo
 }
 ```
-This is where we declare any dependencies for our app like our database, it gets initialized once in `server.go` when
-we create the graph.
+
+Returning to `graph/schema.resolvers.go`, let's implement the bodies of those automatically generated resolver functions:
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {

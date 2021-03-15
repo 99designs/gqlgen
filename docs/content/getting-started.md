@@ -85,8 +85,8 @@ type Mutation {
 
 ### Implement the resolvers
 
-`gqlgen generate` compares the schema file (`graph/schema.graphqls`) with the models `graph/model/*` and wherever it
-can it will bind directly to the model.
+When executed, gqlgen's `generate` command compares the schema file (`graph/schema.graphqls`) with the models `graph/model/*`, and, wherever it
+can, it will bind directly to the model.  That was done alread when `init` was run.  We'll edit the schema later in the tutorial, but for now, let's look at what was generated already. 
 
 If we take a look in `graph/schema.resolvers.go` we will see all the times that gqlgen couldn't match them up. For us
 it was twice:

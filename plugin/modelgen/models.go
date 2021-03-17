@@ -214,13 +214,22 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		b = m.MutateHook(b)
 	}
 
-	return templates.Render(templates.Options{
+	err := templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,
 		Filename:        cfg.Model.Filename,
 		Data:            b,
 		GeneratedHeader: true,
 		Packages:        cfg.Packages,
 	})
+	if err != nil {
+		return err
+	}
+
+	// We may have generated code in a package we already loaded, so we reload all packages
+	// to allow packages to be compared correctly
+	cfg.ReloadAllPackages()
+
+	return nil
 }
 
 func isStruct(t types.Type) bool {

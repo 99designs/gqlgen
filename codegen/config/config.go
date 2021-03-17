@@ -194,15 +194,8 @@ func (c *Config) Init() error {
 	}
 
 	c.injectBuiltins()
-
 	// prefetch all packages in one big packages.Load call
-	pkgs := []string{
-		"github.com/99designs/gqlgen/graphql",
-		"github.com/99designs/gqlgen/graphql/introspection",
-	}
-	pkgs = append(pkgs, c.Models.ReferencedPackages()...)
-	pkgs = append(pkgs, c.AutoBind...)
-	c.Packages.LoadAll(pkgs...)
+	c.Packages.LoadAll(c.packageList()...)
 
 	//  check everything is valid on the way out
 	err = c.check()
@@ -211,6 +204,20 @@ func (c *Config) Init() error {
 	}
 
 	return nil
+}
+
+func (c *Config) packageList() []string {
+	pkgs := []string{
+		"github.com/99designs/gqlgen/graphql",
+		"github.com/99designs/gqlgen/graphql/introspection",
+	}
+	pkgs = append(pkgs, c.Models.ReferencedPackages()...)
+	pkgs = append(pkgs, c.AutoBind...)
+	return pkgs
+}
+
+func (c *Config) ReloadAllPackages() {
+	c.Packages.ReloadAll(c.packageList()...)
 }
 
 func (c *Config) injectTypesFromSchema() error {

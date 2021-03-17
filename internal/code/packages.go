@@ -26,6 +26,13 @@ type Packages struct {
 	numNameCalls int // stupid test steam. ignore.
 }
 
+// ReloadAll will call LoadAll after clearing the package cache, so we can reload
+// packages in the case that the packages have changed
+func (p *Packages) ReloadAll(importPaths ...string) []*packages.Package {
+	p.packages = nil
+	return p.LoadAll(importPaths...)
+}
+
 // LoadAll will call packages.Load and return the package data for the given packages,
 // but if the package already have been loaded it will return cached values instead.
 func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {

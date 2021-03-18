@@ -68,7 +68,7 @@ func (c ComplexityLimit) MutateOperationContext(ctx context.Context, rc *graphql
 		ComplexityLimit: limit,
 	})
 
-	if complexity > limit {
+	if complexity > limit && rc.OperationName != "IntrospectionQuery" {
 		err := gqlerror.Errorf("operation has complexity %d, which exceeds the limit of %d", complexity, limit)
 		errcode.Set(err, errComplexityLimit)
 		return err

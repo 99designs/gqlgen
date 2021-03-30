@@ -22,3 +22,11 @@ jobs:
       - run: go mod download
       - run: cd example/federation ; npm install
       - run: .github/workflows/check-federation
+
+  init:
+    runs-on: ubuntu-latest
+    container: golang:1.16-alpine
+    steps:
+      - uses: actions/checkout@v1
+      - run: apk add --no-cache --no-progress alpine-sdk bash
+      - run: .github/workflows/check-init

@@ -2,6 +2,7 @@ package code
 
 import (
 	"bytes"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -147,6 +148,15 @@ func (p *Packages) Evict(importPath string) {
 			}
 		}
 	}
+}
+
+func (p *Packages) ModTidy() error {
+	p.packages = nil
+	tidyCmd := exec.Command("go", "mod", "tidy")
+	if err := tidyCmd.Run(); err != nil {
+		return errors.Wrap(err, "go mod tidy failed")
+	}
+	return nil
 }
 
 // Errors returns any errors that were returned by Load, either from the call itself or any of the loaded packages.

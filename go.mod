@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/agnivade/levenshtein v1.0.3 // indirect
-	github.com/gogo/protobuf v1.0.0 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
 	github.com/gorilla/mux v1.6.1 // indirect
 	github.com/gorilla/websocket v1.4.2
@@ -24,8 +24,8 @@ require (
 	github.com/urfave/cli/v2 v2.1.1
 	github.com/vektah/dataloaden v0.2.1-0.20190515034641-a19b9a6e7c9e
 	github.com/vektah/gqlparser/v2 v2.1.0
-	golang.org/x/tools v0.0.0-20200114235610-7ae403b6b589
+	golang.org/x/tools v0.0.0-20210106214847-113979e3529a
 	gopkg.in/yaml.v2 v2.2.4
-	sourcegraph.com/sourcegraph/appdash v0.0.0-20180110180208-2cc67fd64755
+	sourcegraph.com/sourcegraph/appdash v0.0.0-20190731080439-ebfcffb1b5c0
 	sourcegraph.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67 // indirect
 )

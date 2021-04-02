@@ -22,6 +22,7 @@ type (
 		Upgrader              websocket.Upgrader
 		InitFunc              WebsocketInitFunc
 		KeepAlivePingInterval time.Duration
+		PingPongInterval      time.Duration
 
 		didInjectSubprotocols bool
 	}
@@ -33,6 +34,7 @@ type (
 		active          map[string]context.CancelFunc
 		mu              sync.Mutex
 		keepAliveTicker *time.Ticker
+		pingPongTicker  *time.Ticker
 		exec            graphql.GraphExecutor
 
 		initPayload InitPayload
@@ -157,6 +159,17 @@ func (c *wsConnection) run() {
 		go c.keepAlive(ctx)
 	}
 
+	// Create a timer that will fire every interval a ping message that should
+	// receive a pong (SetPongHandler in init() function)
+	if c.PingPongInterval != 0 {
+		c.mu.Lock()
+		c.pingPongTicker = time.NewTicker(c.PingPongInterval)
+		c.mu.Unlock()
+
+		c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+		go c.ping(ctx)
+	}
+
 	for {
 		start := graphql.Now()
 		m, err := c.me.NextMessage()
@@ -178,6 +191,10 @@ func (c *wsConnection) run() {
 		case connectionCloseMessageType:
 			c.close(websocket.CloseNormalClosure, "terminated")
 			return
+		case pingMesageType:
+			c.write(&message{t: pongMessageType, payload: m.payload})
+		case pongMessageType:
+			c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
 		default:
 			c.sendConnectionError("unexpected message %s", m.t)
 			c.close(websocket.CloseProtocolError, "unexpected message")
@@ -194,6 +211,18 @@ func (c *wsConnection) keepAlive(ctx context.Context) {
 			return
 		case <-c.keepAliveTicker.C:
 			c.write(&message{t: keepAliveMessageType})
+		}
+	}
+}
+
+func (c *wsConnection) ping(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			c.pingPongTicker.Stop()
+			return
+		case <-c.pingPongTicker.C:
+			c.write(&message{t: pingMesageType, payload: json.RawMessage{}})
 		}
 	}
 }
@@ -315,6 +344,9 @@ func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
 func (c *wsConnection) close(closeCode int, message string) {
 	c.mu.Lock()
 	_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, message))
+	for _, closer := range c.active {
+		closer()
+	}
 	c.mu.Unlock()
 	_ = c.conn.Close()
 }

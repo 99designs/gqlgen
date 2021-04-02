@@ -17,29 +17,19 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-const (
-	connectionInitMsg      = "connection_init"      // Client -> Server
-	connectionTerminateMsg = "connection_terminate" // Client -> Server
-	startMsg               = "start"                // Client -> Server
-	stopMsg                = "stop"                 // Client -> Server
-	connectionAckMsg       = "connection_ack"       // Server -> Client
-	connectionErrorMsg     = "connection_error"     // Server -> Client
-	dataMsg                = "data"                 // Server -> Client
-	errorMsg               = "error"                // Server -> Client
-	completeMsg            = "complete"             // Server -> Client
-	connectionKeepAliveMsg = "ka"                   // Server -> Client
-)
-
 type (
 	Websocket struct {
 		Upgrader              websocket.Upgrader
 		InitFunc              WebsocketInitFunc
 		KeepAlivePingInterval time.Duration
+
+		didInjectSubprotocols bool
 	}
 	wsConnection struct {
 		Websocket
 		ctx             context.Context
 		conn            *websocket.Conn
+		me              messageExchanger
 		active          map[string]context.CancelFunc
 		mu              sync.Mutex
 		keepAliveTicker *time.Ticker
@@ -62,13 +52,26 @@ func (t Websocket) Supports(r *http.Request) bool {
 }
 
 func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
-	ws, err := t.Upgrader.Upgrade(w, r, http.Header{
-		"Sec-Websocket-Protocol": []string{"graphql-ws"},
-	})
+	t.injectGraphQLWSSubprotocols()
+	ws, err := t.Upgrader.Upgrade(w, r, http.Header{})
 	if err != nil {
 		log.Printf("unable to upgrade %T to websocket %s: ", w, err.Error())
 		SendErrorf(w, http.StatusBadRequest, "unable to upgrade")
 		return
+	}
+
+	var me messageExchanger
+	switch ws.Subprotocol() {
+	default:
+		msg := websocket.FormatCloseMessage(websocket.CloseProtocolError, fmt.Sprintf("unsupported negotiated subprotocol %s", ws.Subprotocol()))
+		ws.WriteMessage(websocket.CloseMessage, msg)
+		return
+	case "":
+		// clients are required to send a subprotocol, to be backward compatible with the previous implemementation we select
+		// "graphql-ws" by default
+		me = graphqlwsMessageExchanger{c: ws}
+	case graphqlwsSubprotocol:
+		me = graphqlwsMessageExchanger{c: ws}
 	}
 
 	conn := wsConnection{
@@ -76,6 +79,7 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 		conn:      ws,
 		ctx:       r.Context(),
 		exec:      exec,
+		me:        me,
 		Websocket: t,
 	}
 
@@ -87,17 +91,21 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 }
 
 func (c *wsConnection) init() bool {
-	message := c.readOp()
-	if message == nil {
+	m, err := c.me.NextMessage()
+	if err != nil {
+		if err == errInvalidMsg {
+			c.sendConnectionError("invalid json")
+		}
+
 		c.close(websocket.CloseProtocolError, "decoding error")
 		return false
 	}
 
-	switch message.Type {
-	case connectionInitMsg:
-		if len(message.Payload) > 0 {
+	switch m.t {
+	case initMessageType:
+		if len(m.payload) > 0 {
 			c.initPayload = make(InitPayload)
-			err := json.Unmarshal(message.Payload, &c.initPayload)
+			err := json.Unmarshal(m.payload, &c.initPayload)
 			if err != nil {
 				return false
 			}
@@ -113,13 +121,13 @@ func (c *wsConnection) init() bool {
 			c.ctx = ctx
 		}
 
-		c.write(&operationMessage{Type: connectionAckMsg})
-		c.write(&operationMessage{Type: connectionKeepAliveMsg})
-	case connectionTerminateMsg:
+		c.write(&message{t: connectionAckMessageType})
+		c.write(&message{t: keepAliveMessageType})
+	case connectionCloseMessageType:
 		c.close(websocket.CloseNormalClosure, "terminated")
 		return false
 	default:
-		c.sendConnectionError("unexpected message %s", message.Type)
+		c.sendConnectionError("unexpected message %s", m.t)
 		c.close(websocket.CloseProtocolError, "unexpected message")
 		return false
 	}
@@ -127,9 +135,11 @@ func (c *wsConnection) init() bool {
 	return true
 }
 
-func (c *wsConnection) write(msg *operationMessage) {
+func (c *wsConnection) write(msg *message) {
 	c.mu.Lock()
-	c.conn.WriteJSON(msg)
+	// TODO: missing error handling here, err from previous implementation
+	// was ignored
+	_ = c.me.Send(msg)
 	c.mu.Unlock()
 }
 
@@ -153,26 +163,27 @@ func (c *wsConnection) run() {
 
 	for {
 		start := graphql.Now()
-		message := c.readOp()
-		if message == nil {
+		m, err := c.me.NextMessage()
+		if err != nil {
+			// TODO: better error handling here
 			return
 		}
 
-		switch message.Type {
-		case startMsg:
-			c.subscribe(start, message)
-		case stopMsg:
+		switch m.t {
+		case startMessageType:
+			c.subscribe(start, &m)
+		case stopMessageType:
 			c.mu.Lock()
-			closer := c.active[message.ID]
+			closer := c.active[m.id]
 			c.mu.Unlock()
 			if closer != nil {
 				closer()
 			}
-		case connectionTerminateMsg:
+		case connectionCloseMessageType:
 			c.close(websocket.CloseNormalClosure, "terminated")
 			return
 		default:
-			c.sendConnectionError("unexpected message %s", message.Type)
+			c.sendConnectionError("unexpected message %s", m.t)
 			c.close(websocket.CloseProtocolError, "unexpected message")
 			return
 		}
@@ -186,17 +197,17 @@ func (c *wsConnection) keepAlive(ctx context.Context) {
 			c.keepAliveTicker.Stop()
 			return
 		case <-c.keepAliveTicker.C:
-			c.write(&operationMessage{Type: connectionKeepAliveMsg})
+			c.write(&message{t: keepAliveMessageType})
 		}
 	}
 }
 
-func (c *wsConnection) subscribe(start time.Time, message *operationMessage) {
+func (c *wsConnection) subscribe(start time.Time, msg *message) {
 	ctx := graphql.StartOperationTrace(c.ctx)
 	var params *graphql.RawParams
-	if err := jsonDecode(bytes.NewReader(message.Payload), &params); err != nil {
-		c.sendError(message.ID, &gqlerror.Error{Message: "invalid json"})
-		c.complete(message.ID)
+	if err := jsonDecode(bytes.NewReader(msg.payload), &params); err != nil {
+		c.sendError(msg.id, &gqlerror.Error{Message: "invalid json"})
+		c.complete(msg.id)
 		return
 	}
 
@@ -210,12 +221,12 @@ func (c *wsConnection) subscribe(start time.Time, message *operationMessage) {
 		resp := c.exec.DispatchError(graphql.WithOperationContext(ctx, rc), err)
 		switch errcode.GetErrorKind(err) {
 		case errcode.KindProtocol:
-			c.sendError(message.ID, resp.Errors...)
+			c.sendError(msg.id, resp.Errors...)
 		default:
-			c.sendResponse(message.ID, &graphql.Response{Errors: err})
+			c.sendResponse(msg.id, &graphql.Response{Errors: err})
 		}
 
-		c.complete(message.ID)
+		c.complete(msg.id)
 		return
 	}
 
@@ -227,21 +238,14 @@ func (c *wsConnection) subscribe(start time.Time, message *operationMessage) {
 
 	ctx, cancel := context.WithCancel(ctx)
 	c.mu.Lock()
-	c.active[message.ID] = cancel
+	c.active[msg.id] = cancel
 	c.mu.Unlock()
 
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				err := rc.Recover(ctx, r)
-				var gqlerr *gqlerror.Error
-				if !errors.As(err, &gqlerr) {
-					gqlerr = &gqlerror.Error{}
-					if err != nil {
-						gqlerr.Message = err.Error()
-					}
-				}
-				c.sendError(message.ID, gqlerr)
+				userErr := rc.Recover(ctx, r)
+				c.sendError(msg.id, &gqlerror.Error{Message: userErr.Error()})
 			}
 			c.complete(message.ID)
 			c.mu.Lock()
@@ -256,8 +260,15 @@ func (c *wsConnection) subscribe(start time.Time, message *operationMessage) {
 			if response == nil {
 				break
 			}
-			c.sendResponse(message.ID, response)
+
+			c.sendResponse(msg.id, response)
 		}
+		c.complete(msg.id)
+
+		c.mu.Lock()
+		delete(c.active, msg.id)
+		c.mu.Unlock()
+		cancel()
 	}()
 }
 
@@ -266,15 +277,15 @@ func (c *wsConnection) sendResponse(id string, response *graphql.Response) {
 	if err != nil {
 		panic(err)
 	}
-	c.write(&operationMessage{
-		Payload: b,
-		ID:      id,
-		Type:    dataMsg,
+	c.write(&message{
+		payload: b,
+		id:      id,
+		t:       dataMessageType,
 	})
 }
 
 func (c *wsConnection) complete(id string) {
-	c.write(&operationMessage{ID: id, Type: completeMsg})
+	c.write(&message{id: id, t: completeMessageType})
 }
 
 func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
@@ -286,7 +297,7 @@ func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 	if err != nil {
 		panic(err)
 	}
-	c.write(&operationMessage{Type: errorMsg, ID: id, Payload: b})
+	c.write(&message{t: errorMessageType, id: id, payload: b})
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
@@ -295,24 +306,7 @@ func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
 		panic(err)
 	}
 
-	c.write(&operationMessage{Type: connectionErrorMsg, Payload: b})
-}
-
-func (c *wsConnection) readOp() *operationMessage {
-	_, r, err := c.conn.NextReader()
-	if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
-		return nil
-	} else if err != nil {
-		c.sendConnectionError("invalid json: %T %s", err, err.Error())
-		return nil
-	}
-	message := operationMessage{}
-	if err := jsonDecode(r, &message); err != nil {
-		c.sendConnectionError("invalid json")
-		return nil
-	}
-
-	return &message
+	c.write(&message{t: connectionErrorMessageType, payload: b})
 }
 
 func (c *wsConnection) close(closeCode int, message string) {

@@ -62,12 +62,12 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 		msg := websocket.FormatCloseMessage(websocket.CloseProtocolError, fmt.Sprintf("unsupported negotiated subprotocol %s", ws.Subprotocol()))
 		ws.WriteMessage(websocket.CloseMessage, msg)
 		return
-	case "":
+	case graphqlwsSubprotocol, "":
 		// clients are required to send a subprotocol, to be backward compatible with the previous implementation we select
 		// "graphql-ws" by default
 		me = graphqlwsMessageExchanger{c: ws}
-	case graphqlwsSubprotocol:
-		me = graphqlwsMessageExchanger{c: ws}
+	case graphqltransportwsSubprotocol:
+		me = graphqltransportwsMessageExchanger{c: ws}
 	}
 
 	conn := wsConnection{

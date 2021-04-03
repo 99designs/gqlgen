@@ -54,13 +54,7 @@ type (
 func (me graphqlwsMessageExchanger) NextMessage() (message, error) {
 	_, r, err := me.c.NextReader()
 	if err != nil {
-		// TODO: should we consider all closure scenarios here for the ws connection?
-		// for now we only list the error codes from the previous implementation
-		if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
-			err = errWsConnClosed
-		}
-
-		return message{}, err
+		return message{}, handleNextReaderError(err)
 	}
 
 	var graphqlwsMessage graphqlwsMessage

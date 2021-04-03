@@ -3,6 +3,8 @@ package transport
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -21,6 +23,7 @@ const (
 var (
 	supportedSubprotocols = []string{
 		graphqlwsSubprotocol,
+		graphqltransportwsSubprotocol,
 	}
 
 	errWsConnClosed = errors.New("websocket connection closed")
@@ -94,4 +97,14 @@ func (t *Websocket) injectGraphQLWSSubprotocols() {
 			}
 		}
 	}
+}
+
+func handleNextReaderError(err error) error {
+	// TODO: should we consider all closure scenarios here for the ws connection?
+	// for now we only list the error codes from the previous implementation
+	if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
+		return errWsConnClosed
+	}
+
+	return err
 }

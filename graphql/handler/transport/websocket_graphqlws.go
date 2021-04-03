@@ -10,16 +10,31 @@ import (
 const (
 	graphqlwsSubprotocol = "graphql-ws"
 
-	graphqlwsConnectionInitMsg = iota
-	graphqlwsConnectionTerminateMsg
-	graphqlwsStartMsg
-	graphqlwsStopMsg
-	graphqlwsConnectionAckMsg
-	graphqlwsConnectionErrorMsg
-	graphqlwsDataMsg
-	graphqlwsErrorMsg
-	graphqlwsCompleteMsg
-	graphqlwsConnectionKeepAliveMsg
+	graphqlwsConnectionInitMsg      = graphqlwsMessageType("connection_init")
+	graphqlwsConnectionTerminateMsg = graphqlwsMessageType("connection_terminate")
+	graphqlwsStartMsg               = graphqlwsMessageType("start")
+	graphqlwsStopMsg                = graphqlwsMessageType("stop")
+	graphqlwsConnectionAckMsg       = graphqlwsMessageType("connection_ack")
+	graphqlwsConnectionErrorMsg     = graphqlwsMessageType("connection_error")
+	graphqlwsDataMsg                = graphqlwsMessageType("data")
+	graphqlwsErrorMsg               = graphqlwsMessageType("error")
+	graphqlwsCompleteMsg            = graphqlwsMessageType("complete")
+	graphqlwsConnectionKeepAliveMsg = graphqlwsMessageType("ka")
+)
+
+var (
+	allGraphqlwsMessageTypes = []graphqlwsMessageType{
+		graphqlwsConnectionInitMsg,
+		graphqlwsConnectionTerminateMsg,
+		graphqlwsStartMsg,
+		graphqlwsStopMsg,
+		graphqlwsConnectionAckMsg,
+		graphqlwsConnectionErrorMsg,
+		graphqlwsDataMsg,
+		graphqlwsErrorMsg,
+		graphqlwsCompleteMsg,
+		graphqlwsConnectionKeepAliveMsg,
+	}
 )
 
 type (
@@ -33,7 +48,7 @@ type (
 		Type    graphqlwsMessageType `json:"type"`
 	}
 
-	graphqlwsMessageType int
+	graphqlwsMessageType string
 )
 
 func (me graphqlwsMessageExchanger) NextMessage() (message, error) {
@@ -66,69 +81,30 @@ func (me graphqlwsMessageExchanger) Send(m *message) error {
 }
 
 func (t *graphqlwsMessageType) UnmarshalText(text []byte) (err error) {
-	switch string(text) {
-	default:
+	var found bool
+	for _, candidate := range allGraphqlwsMessageTypes {
+		if string(candidate) == string(text) {
+			*t = candidate
+			found = true
+			break
+		}
+	}
+
+	if !found {
 		err = fmt.Errorf("invalid message type %s", string(text))
-	case "connection_init":
-		*t = graphqlwsConnectionInitMsg
-	case "connection_terminate":
-		*t = graphqlwsConnectionTerminateMsg
-	case "start":
-		*t = graphqlwsStartMsg
-	case "stop":
-		*t = graphqlwsStopMsg
-	case "connection_ack":
-		*t = graphqlwsConnectionAckMsg
-	case "connection_error":
-		*t = graphqlwsConnectionErrorMsg
-	case "data":
-		*t = graphqlwsDataMsg
-	case "error":
-		*t = graphqlwsErrorMsg
-	case "complete":
-		*t = graphqlwsCompleteMsg
-	case "ka":
-		*t = graphqlwsConnectionKeepAliveMsg
 	}
 
 	return err
 }
 
 func (t graphqlwsMessageType) MarshalText() ([]byte, error) {
-	var text string
-	var err error
-	switch t {
-	default:
-		err = fmt.Errorf("no text representation for message type %d", t)
-	case graphqlwsConnectionInitMsg:
-		text = "connection_init"
-	case graphqlwsConnectionTerminateMsg:
-		text = "connection_terminate"
-	case graphqlwsStartMsg:
-		text = "start"
-	case graphqlwsStopMsg:
-		text = "stop"
-	case graphqlwsConnectionAckMsg:
-		text = "connection_ack"
-	case graphqlwsConnectionErrorMsg:
-		text = "connection_error"
-	case graphqlwsDataMsg:
-		text = "data"
-	case graphqlwsErrorMsg:
-		text = "error"
-	case graphqlwsCompleteMsg:
-		text = "complete"
-	case graphqlwsConnectionKeepAliveMsg:
-		text = "ka"
-	}
-
-	return []byte(text), err
+	return []byte(string(t)), nil
 }
 
 func (t graphqlwsMessageType) toMessageType() (mt messageType, err error) {
 	switch t {
 	default:
-		err = fmt.Errorf("unknown message type mapping for %d", t)
+		err = fmt.Errorf("unknown message type mapping for %s", t)
 	case graphqlwsConnectionInitMsg:
 		mt = initMessageType
 	case graphqlwsConnectionTerminateMsg:

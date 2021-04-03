@@ -63,7 +63,7 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 		ws.WriteMessage(websocket.CloseMessage, msg)
 		return
 	case "":
-		// clients are required to send a subprotocol, to be backward compatible with the previous implemementation we select
+		// clients are required to send a subprotocol, to be backward compatible with the previous implementation we select
 		// "graphql-ws" by default
 		me = graphqlwsMessageExchanger{c: ws}
 	case graphqlwsSubprotocol:

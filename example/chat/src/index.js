@@ -7,7 +7,7 @@ import {
     split,
 } from '@apollo/client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { WebSocketLink } from 'apollo-link-ws';
+import { WebSocketLink } from '@apollo/client/link/ws';
 import { getMainDefinition } from 'apollo-utilities';
 import { App } from './App';
 

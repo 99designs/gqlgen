@@ -37,11 +37,7 @@ type (
 
 		initPayload InitPayload
 	}
-	operationMessage struct {
-		Payload json.RawMessage `json:"payload,omitempty"`
-		ID      string          `json:"id,omitempty"`
-		Type    string          `json:"type"`
-	}
+
 	WebsocketInitFunc func(ctx context.Context, initPayload InitPayload) (context.Context, error)
 )
 

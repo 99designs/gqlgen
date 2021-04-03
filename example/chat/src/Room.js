@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gql from 'graphql-tag';
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { useQuery, useMutation } from '@apollo/client';
 import { Chat, ChatContainer, Message, MessageReceived } from './components/room';
 
 export const Room = ({ channel, name }) => {

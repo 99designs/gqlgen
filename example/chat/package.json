@@ -16,6 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:graphql-transport-ws": "REACT_APP_WS_PROTOCOL=graphql-transport-ws npm run start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"

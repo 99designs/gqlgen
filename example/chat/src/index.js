@@ -7,16 +7,24 @@ import {
     split,
 } from '@apollo/client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { WebSocketLink } from '@apollo/client/link/ws';
+import { WebSocketLink as ApolloWebSocketLink} from '@apollo/client/link/ws';
 import { getMainDefinition } from 'apollo-utilities';
 import { App } from './App';
+import { WebSocketLink as GraphQLWSWebSocketLink } from './graphql-ws'
 
-const wsLink = new WebSocketLink({
-    uri: `ws://localhost:8085/query`,
-    options: {
-        reconnect: true
-    }
-});
+let wsLink;
+if (process.env.REACT_APP_WS_PROTOCOL === 'graphql-transport-ws') {
+    wsLink = new GraphQLWSWebSocketLink({
+        url: `ws://localhost:8085/query`
+    });
+} else {
+    wsLink = new ApolloWebSocketLink({
+        uri: `ws://localhost:8085/query`,
+        options: {
+            reconnect: true
+        }
+    });
+}
 
 const httpLink = new HttpLink({ uri: 'http://localhost:8085/query' });
 

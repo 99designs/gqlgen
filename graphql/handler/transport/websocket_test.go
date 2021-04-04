@@ -374,7 +374,6 @@ const (
 	graphqltransportwsConnectionAckMsg  = "connection_ack"
 	graphqltransportwsSubscribeMsg      = "subscribe"
 	graphqltransportwsNextMsg           = "next"
-	graphqltransportwsErrorMsg          = "error"
 	graphqltransportwsCompleteMsg       = "complete"
 )
 

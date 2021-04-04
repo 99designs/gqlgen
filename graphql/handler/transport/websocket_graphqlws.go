@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md
 const (
 	graphqlwsSubprotocol = "graphql-ws"
 

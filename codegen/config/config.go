@@ -70,8 +70,8 @@ func LoadDefaultConfig() (*Config, error) {
 
 // LoadConfigFromDefaultLocations looks for a config file in the current directory, and all parent directories
 // walking up the tree. The closest config file will be returned.
-func LoadConfigFromDefaultLocations() (*Config, error) {
-	cfgFile, err := findCfg()
+func LoadConfigFromDefaultLocations() (cfg *Config, err error) {
+	cfgFile, cwd, err := findCfg()
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +80,12 @@ func LoadConfigFromDefaultLocations() (*Config, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to enter config dir")
 	}
+	defer func() {
+		if cerr := os.Chdir(cwd); cerr != nil {
+			cfg = nil
+			err = errors.Wrap(cerr, "unable to restore working directory")
+		}
+	}()
 	return LoadConfig(cfgFile)
 }
 
@@ -467,24 +473,24 @@ func inStrSlice(haystack []string, needle string) bool {
 
 // findCfg searches for the config file in this directory and all parents up the tree
 // looking for the closest match
-func findCfg() (string, error) {
-	dir, err := os.Getwd()
+func findCfg() (string, string, error) {
+	cwd, err := os.Getwd()
 	if err != nil {
-		return "", errors.Wrap(err, "unable to get working dir to findCfg")
+		return "", "", errors.Wrap(err, "unable to get working dir to findCfg")
 	}
 
-	cfg := findCfgInDir(dir)
+	cfg := findCfgInDir(cwd)
 
-	for cfg == "" && dir != filepath.Dir(dir) {
+	for dir := cwd; cfg == "" && dir != filepath.Dir(dir); {
 		dir = filepath.Dir(dir)
 		cfg = findCfgInDir(dir)
 	}
 
 	if cfg == "" {
-		return "", os.ErrNotExist
+		return "", "", os.ErrNotExist
 	}
 
-	return cfg, nil
+	return cfg, cwd, nil
 }
 
 func findCfgInDir(dir string) string {

@@ -72,9 +72,14 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 		err = os.Chdir(filepath.Join(testDir, "testdata", "cfg", "otherdir"))
 		require.NoError(t, err)
 
+		before, err := os.Getwd()
+		require.NoError(t, err)
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
 		require.Equal(t, StringList{"outer"}, cfg.SchemaFilename)
+		after, err := os.Getwd()
+		require.NoError(t, err)
+		require.Equal(t, before, after)
 	})
 
 	t.Run("will return error if config doesn't exist", func(t *testing.T) {

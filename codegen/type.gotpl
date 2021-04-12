@@ -4,7 +4,10 @@
 			{{- if and $type.IsNilable (not $type.GQL.NonNull) }}
 				if v == nil { return nil, nil }
 			{{- end }}
-			{{- if $type.IsSlice }}
+			{{- if $type.IsPtrToSlice }}
+				res, err := ec.{{ $type.Elem.UnmarshalFunc }}(ctx, v)
+				return &res, graphql.ErrorOnPath(ctx, err)
+			{{- else if $type.IsSlice }}
 				var vSlice []interface{}
 				if v != nil {
 					if tmp1, ok := v.([]interface{}); ok {
@@ -66,7 +69,9 @@
 
 	{{ with $type.MarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
-			{{- if $type.IsSlice }}
+			{{- if $type.IsPtrToSlice }}
+				return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, *v)
+			{{- else if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
 						return graphql.Null

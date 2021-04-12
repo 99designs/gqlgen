@@ -280,6 +280,14 @@ func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) VOkCaseValue(ctx context.Context) (*VOkCaseValue, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) VOkCaseNil(ctx context.Context) (*VOkCaseNil, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
 	panic("not implemented")
 }

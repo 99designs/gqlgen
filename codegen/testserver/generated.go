@@ -1915,7 +1915,7 @@ directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINI
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
 directive @unimplemented on FIELD_DEFINITION
-directive @order1(location: String!) on FIELD_DEFINITION | OBJECT
+directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
 directive @order2(location: String!) on OBJECT
 
 extend type Query {
@@ -1951,7 +1951,7 @@ input InnerDirectives {
     message: String! @length(min: 1, message: "not valid")
 }
 
-type ObjectDirectives @order1(location: "ObjectDirectives_object_1") @order2(location: "ObjectDirectives_object_2") {
+type ObjectDirectives @order1(location: "order1_1") @order1(location: "order1_2") @order2(location: "order2_1") {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
     order: [String!]!
@@ -6569,7 +6569,7 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			return ec.resolvers.Query().DirectiveObject(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object_1")
+			location, err := ec.unmarshalNString2string(ctx, "order1_1")
 			if err != nil {
 				return nil, err
 			}
@@ -6579,16 +6579,26 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			return ec.directives.Order1(ctx, nil, directive0, location)
 		}
 		directive2 := func(ctx context.Context) (interface{}, error) {
-			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object_2")
+			location, err := ec.unmarshalNString2string(ctx, "order1_2")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Order1 == nil {
+				return nil, errors.New("directive order1 is not implemented")
+			}
+			return ec.directives.Order1(ctx, nil, directive1, location)
+		}
+		directive3 := func(ctx context.Context) (interface{}, error) {
+			location, err := ec.unmarshalNString2string(ctx, "order2_1")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Order2 == nil {
 				return nil, errors.New("directive order2 is not implemented")
 			}
-			return ec.directives.Order2(ctx, nil, directive1, location)
+			return ec.directives.Order2(ctx, nil, directive2, location)
 		}
-		directive3 := func(ctx context.Context) (interface{}, error) {
+		directive4 := func(ctx context.Context) (interface{}, error) {
 			location, err := ec.unmarshalNString2string(ctx, "Query_field")
 			if err != nil {
 				return nil, err
@@ -6596,10 +6606,10 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			if ec.directives.Order1 == nil {
 				return nil, errors.New("directive order1 is not implemented")
 			}
-			return ec.directives.Order1(ctx, nil, directive2, location)
+			return ec.directives.Order1(ctx, nil, directive3, location)
 		}
 
-		tmp, err := directive3(rctx)
+		tmp, err := directive4(rctx)
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
@@ -9241,6 +9251,38 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	fc.Result = res
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Directive",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRepeatable, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -13316,6 +13358,11 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			}
 		case "args":
 			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isRepeatable":
+			out.Values[i] = ec.___Directive_isRepeatable(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

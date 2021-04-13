@@ -60,9 +60,10 @@ func (s *Schema) directiveFromDef(d *ast.DirectiveDefinition) Directive {
 	}
 
 	return Directive{
-		Name:        d.Name,
-		Description: d.Description,
-		Locations:   locs,
-		Args:        args,
+		Name:         d.Name,
+		Description:  d.Description,
+		Locations:    locs,
+		Args:         args,
+		IsRepeatable: d.IsRepeatable,
 	}
 }

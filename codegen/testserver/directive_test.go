@@ -387,8 +387,9 @@ func TestDirectives(t *testing.T) {
 			require.Equal(t, "Ok", resp.DirectiveObject.Text)
 			require.True(t, resp.DirectiveObject.NullableText == nil)
 			require.Equal(t, "Query_field", resp.DirectiveObject.Order[0])
-			require.Equal(t, "ObjectDirectives_object_2", resp.DirectiveObject.Order[1])
-			require.Equal(t, "ObjectDirectives_object_1", resp.DirectiveObject.Order[2])
+			require.Equal(t, "order2_1", resp.DirectiveObject.Order[1])
+			require.Equal(t, "order1_2", resp.DirectiveObject.Order[2])
+			require.Equal(t, "order1_1", resp.DirectiveObject.Order[3])
 		})
 		t.Run("when directive returns nil & custom go field is not nilable", func(t *testing.T) {
 			var resp struct {

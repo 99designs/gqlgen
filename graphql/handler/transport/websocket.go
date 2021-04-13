@@ -343,7 +343,7 @@ func (c *wsConnection) readOp() *operationMessage {
 func (c *wsConnection) close(closeCode int, message string) {
 	c.mu.Lock()
 	_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, message))
-	for key, closer := range c.active {
+	for _, closer := range c.active {
 		closer()
 	}
 	c.mu.Unlock()

@@ -3,7 +3,7 @@ module github.com/99designs/gqlgen
 go 1.12
 
 require (
-	github.com/agnivade/levenshtein v1.0.3 // indirect
+	github.com/agnivade/levenshtein v1.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
 	github.com/gorilla/mux v1.6.1 // indirect
@@ -23,7 +23,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli/v2 v2.1.1
 	github.com/vektah/dataloaden v0.2.1-0.20190515034641-a19b9a6e7c9e
-	github.com/vektah/gqlparser/v2 v2.1.1-0.20210413003740-7cc8073a56b4
+	github.com/vektah/gqlparser/v2 v2.2.0
 	golang.org/x/tools v0.0.0-20210106214847-113979e3529a
 	gopkg.in/yaml.v2 v2.2.4
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20190731080439-ebfcffb1b5c0

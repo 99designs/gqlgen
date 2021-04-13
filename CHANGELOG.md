@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added 
 
-* Added a changelog :-) Following the same style as [Apollo Client](https://github.com/apollographql/apollo-client) because that feels like it gives good thanks to the community contributors.
+* Added a changelog :-) Following the same style as [Apollo Client](https://github.com/apollographql/apollo-client) because that feels like it gives good thanks to the community contributors. <br />
 By [@MichaelJCompton](https://github.com/MichaelJCompton) in [#1512](https://github.com/99designs/gqlgen/pull/1512)
 * Added support for methods returning `(v, ok)` shaped values to support Prisma Go client. <br />
 By [@steebchen](https://github.com/steebchen) in [#1449](https://github.com/99designs/gqlgen/pull/1449)

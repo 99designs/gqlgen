@@ -46,4 +46,24 @@ func TestInput(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, resp.InputNullableSlice)
 	})
+
+	t.Run("coerce single value to slice", func(t *testing.T) {
+		check := func(ctx context.Context, arg []string) (b bool, e error) {
+			return len(arg) == 1 && arg[0] == "coerced", nil
+		}
+		resolvers.QueryResolver.InputSlice = check
+		resolvers.QueryResolver.InputNullableSlice = check
+
+		var resp struct {
+			Coerced bool
+		}
+		var err error
+		err = c.Post(`query { coerced: inputSlice(arg: "coerced") }`, &resp)
+		require.NoError(t, err)
+		require.True(t, resp.Coerced)
+
+		err = c.Post(`query { coerced: inputNullableSlice(arg: "coerced") }`, &resp)
+		require.NoError(t, err)
+		require.True(t, resp.Coerced)
+	})
 }

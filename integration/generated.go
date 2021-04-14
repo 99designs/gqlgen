@@ -2048,7 +2048,10 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj interface{}) (models.DateFilter, error) {
 	var it models.DateFilter
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	if _, present := asMap["timezone"]; !present {
 		asMap["timezone"] = "UTC"

@@ -1,0 +1,21 @@
+project_name: gqlgen
+build:
+  skip: true
+checksum:
+  name_template: checksums.txt
+snapshot:
+  name_template: '{{ .Tag }}-next'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+release:
+  github:
+    owner: xplorfin
+    name: gqlgen
+
+# add a source archive at release time
+source:
+  enabled: true

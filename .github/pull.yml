@@ -1,0 +1,14 @@
+version: "1"
+rules:
+  - base: master
+    upstream: 99designs:master
+    mergeMethod: hardreset
+    mergeUnstable: false
+  - base: entropy
+    upstream: 99designs:master    # change `wei` to the owner of upstream repo
+    assignees:              # Optional
+      - jakesyl
+    reviewers:              # Optional
+      - jakesyl
+    conflictReviewers:      # Optional, on merge conflict assign a reviewer
+      - jakesyl

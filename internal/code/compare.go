@@ -5,10 +5,8 @@ import (
 	"go/types"
 )
 
-// CompatibleTypes isnt a strict comparison, it allows for pointer differences
+// CompatibleTypes isn't a strict comparison, it allows for pointer differences
 func CompatibleTypes(expected types.Type, actual types.Type) error {
-	//fmt.Println("Comparing ", expected.String(), actual.String())
-
 	// Special case to deal with pointer mismatches
 	{
 		expectedPtr, expectedIsPtr := expected.(*types.Pointer)

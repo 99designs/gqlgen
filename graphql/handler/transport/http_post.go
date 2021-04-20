@@ -9,7 +9,9 @@ import (
 
 // POST implements the POST side of the default HTTP transport
 // defined in https://github.com/APIs-guru/graphql-over-http#post
-type POST struct{}
+type POST struct {
+	EnableCache bool
+}
 
 var _ graphql.Transport = POST{}
 
@@ -48,7 +50,14 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		writeJson(w, resp)
 		return
 	}
+
 	ctx := graphql.WithOperationContext(r.Context(), rc)
 	responses, ctx := exec.DispatchOperation(ctx, rc)
-	writeJson(w, responses(ctx))
+	response := responses(ctx)
+
+	if h.EnableCache {
+		writeCacheControl(w, response)
+	}
+
+	writeJson(w, response)
 }

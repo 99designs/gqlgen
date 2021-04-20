@@ -487,7 +487,7 @@ var commonInitialisms = map[string]bool{
 }
 
 func rawQuote(s string) string {
-	return "`" + strings.Replace(s, "`", "`+\"`\"+`", -1) + "`"
+	return "`" + strings.ReplaceAll(s, "`", "`+\"`\"+`") + "`"
 }
 
 func notNil(field string, data interface{}) bool {
@@ -549,7 +549,7 @@ func Dump(val interface{}) string {
 }
 
 func prefixLines(prefix, s string) string {
-	return prefix + strings.Replace(s, "\n", "\n"+prefix, -1)
+	return prefix + strings.ReplaceAll(s, "\n", "\n"+prefix)
 }
 
 func resolveName(name string, skip int) string {

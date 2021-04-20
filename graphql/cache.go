@@ -1,6 +1,8 @@
 package graphql
 
-import "context"
+import (
+	"context"
+)
 
 // Cache is a shared store for APQ and query AST caching
 type Cache interface {

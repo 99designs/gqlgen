@@ -14,7 +14,9 @@ import (
 
 // GET implements the GET side of the default HTTP transport
 // defined in https://github.com/APIs-guru/graphql-over-http#get
-type GET struct{}
+type GET struct {
+	EnableCache bool
+}
 
 var _ graphql.Transport = GET{}
 
@@ -68,7 +70,13 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	}
 
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
-	writeJson(w, responses(ctx))
+	response := responses(ctx)
+
+	if h.EnableCache {
+		writeCacheControl(w, response)
+	}
+
+	writeJson(w, response)
 }
 
 func jsonDecode(r io.Reader, val interface{}) error {

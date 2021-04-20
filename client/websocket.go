@@ -62,7 +62,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 	}
 
 	srv := httptest.NewServer(p.h)
-	host := strings.Replace(srv.URL, "http://", "ws://", -1)
+	host := strings.ReplaceAll(srv.URL, "http://", "ws://")
 	c, _, err := websocket.DefaultDialer.Dial(host+r.URL.Path, r.Header)
 
 	if err != nil {

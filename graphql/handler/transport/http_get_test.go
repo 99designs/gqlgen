@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/cache"
+
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
@@ -48,4 +50,38 @@ func TestGET(t *testing.T) {
 		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
 
+	t.Run("cache control", func(t *testing.T) {
+		t.Run("write extensions", func(t *testing.T) {
+			hWithCache := testserver.NewCache()
+			hWithCache.AddTransport(transport.GET{
+				EnableCache: true,
+			})
+			hWithCache.Use(cache.Extension{})
+
+			resp := doRequest(hWithCache, "GET", "/graphql?query={name}", "")
+			assert.Equal(t, http.StatusOK, resp.Code)
+			assert.Equal(t, `{"data":{"name":"test"},"extensions":{"cacheControl":{"version":1,"hints":[{"path":["name"],"maxAge":10,"scope":"PUBLIC"}]}}}`, resp.Body.String())
+		})
+
+		t.Run("write cache control header", func(t *testing.T) {
+			hWithCache := testserver.NewCache()
+			hWithCache.AddTransport(transport.GET{
+				EnableCache: true,
+			})
+			hWithCache.Use(cache.Extension{})
+
+			resp := doRequest(hWithCache, "GET", "/graphql?query={name}", "")
+			assert.Equal(t, "max-age: 10 public", resp.Header().Get("Cache-Control"))
+		})
+
+		t.Run("not writes cache control header", func(t *testing.T) {
+			hWithCache := testserver.NewCache()
+			hWithCache.AddTransport(transport.GET{})
+			hWithCache.Use(cache.Extension{})
+
+			resp := doRequest(hWithCache, "GET", "/graphql?query={name}", "")
+			assert.Empty(t, resp.Header().Get("Cache-Control"))
+		})
+
+	})
 }

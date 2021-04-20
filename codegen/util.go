@@ -41,7 +41,7 @@ func findGoInterface(def types.Type) (*types.Interface, error) {
 }
 
 func equalFieldName(source, target string) bool {
-	source = strings.Replace(source, "_", "", -1)
-	target = strings.Replace(target, "_", "", -1)
+	source = strings.ReplaceAll(source, "_", "")
+	target = strings.ReplaceAll(target, "_", "")
 	return strings.EqualFold(source, target)
 }

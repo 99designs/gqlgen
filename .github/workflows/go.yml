@@ -3,7 +3,7 @@ name: goreleaser
 on:
   push:
     branches:
-      - master
+      - entropy
 jobs:
   goreleaser:
     runs-on: ubuntu-latest

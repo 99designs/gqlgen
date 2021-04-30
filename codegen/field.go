@@ -89,6 +89,11 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			if err != nil {
 				errret = err
 			}
+			for _, dir := range obj.Directives {
+				if dir.IsLocation(ast.LocationInputObject) {
+					dirs = append(dirs, dir)
+				}
+			}
 			f.Directives = append(dirs, f.Directives...)
 		}
 	}()
@@ -420,7 +425,8 @@ func (f *Field) ImplDirectives() []*Directive {
 		loc = ast.LocationInputFieldDefinition
 	}
 	for i := range f.Directives {
-		if !f.Directives[i].Builtin && f.Directives[i].IsLocation(loc, ast.LocationObject) {
+		if !f.Directives[i].Builtin &&
+			(f.Directives[i].IsLocation(loc, ast.LocationObject) || f.Directives[i].IsLocation(loc, ast.LocationInputObject)) {
 			d = append(d, f.Directives[i])
 		}
 	}

@@ -5,6 +5,7 @@ directive @logged(id: UUID!) on FIELD
 directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
+directive @directive3 on INPUT_OBJECT
 directive @unimplemented on FIELD_DEFINITION
 directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
 directive @order2(location: String!) on OBJECT
@@ -30,7 +31,7 @@ extend type Subscription {
     directiveUnimplemented: String @unimplemented
 }
 
-input InputDirectives {
+input InputDirectives @directive3 {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
     inner: InnerDirectives!

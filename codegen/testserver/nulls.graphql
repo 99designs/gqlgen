@@ -25,3 +25,21 @@ type Error {
 type NestedError {
   id: ID!
 }
+
+
+extend type Query {
+  latestHubPrediction(hubId: ID): Prediction
+}
+
+type Hub {
+  id: ID!
+  name: String
+}
+
+type Prediction {
+  hub: Hub!
+  predictionTime: Time!
+  latestForecastTime: Time!
+  latestActual: Float!
+  forecasts: [Float!]!
+}

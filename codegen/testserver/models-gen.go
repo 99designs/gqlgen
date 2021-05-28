@@ -75,6 +75,11 @@ type EmbeddedDefaultScalar struct {
 	Value *string `json:"value"`
 }
 
+type Hub struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name"`
+}
+
 type InnerDirectives struct {
 	Message string `json:"message"`
 }
@@ -137,6 +142,14 @@ type OuterInput struct {
 
 type OuterObject struct {
 	Inner *InnerObject `json:"inner"`
+}
+
+type Prediction struct {
+	Hub                *Hub      `json:"hub"`
+	PredictionTime     time.Time `json:"predictionTime"`
+	LatestForecastTime time.Time `json:"latestForecastTime"`
+	LatestActual       float64   `json:"latestActual"`
+	Forecasts          []float64 `json:"forecasts"`
 }
 
 type Slices struct {

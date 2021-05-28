@@ -29,6 +29,9 @@ func TestNullBubbling(t *testing.T) {
 	resolvers.ErrorResolver.Nested = func(ctx context.Context, err *Error) (n *NestedError, e error) {
 		return nil, nil
 	}
+	resolvers.QueryResolver.LatestHubPrediction = func(ctx context.Context, hubID *string) (p *Prediction, e error) {
+		return nil, nil
+	}
 
 	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
 
@@ -149,5 +152,25 @@ func TestNullBubbling(t *testing.T) {
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "must not be null")
+	})
+
+	t.Run("nested non-null fields", func(t *testing.T) {
+	  var resp struct {
+	    LatestHubPrediction *struct {
+		    prediction *struct {
+		      hub struct {
+			      id     string
+			      name   *string
+			    }
+			  }
+			}
+    }
+
+		err := c.Post(`query { latestHubPrediction(hubId: "not-there") { hub { id, name },     predictionTime,
+    latestForecastTime,
+    latestActual } }`, &resp)
+
+		require.Nil(t, err)
+		require.Nil(t, resp.LatestHubPrediction)
 	})
 }

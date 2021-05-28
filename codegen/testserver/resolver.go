@@ -252,6 +252,10 @@ func (r *queryResolver) Valid(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) LatestHubPrediction(ctx context.Context, hubID *string) (*Prediction, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
 	panic("not implemented")
 }

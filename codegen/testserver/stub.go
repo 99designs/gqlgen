@@ -92,6 +92,7 @@ type Stub struct {
 		ErrorList                        func(ctx context.Context) ([]*Error, error)
 		Errors                           func(ctx context.Context) (*Errors, error)
 		Valid                            func(ctx context.Context) (string, error)
+		LatestHubPrediction              func(ctx context.Context, hubID *string) (*Prediction, error)
 		Panics                           func(ctx context.Context) (*Panics, error)
 		PrimitiveObject                  func(ctx context.Context) ([]Primitive, error)
 		PrimitiveStringObject            func(ctx context.Context) ([]PrimitiveString, error)
@@ -386,6 +387,9 @@ func (r *stubQuery) Errors(ctx context.Context) (*Errors, error) {
 }
 func (r *stubQuery) Valid(ctx context.Context) (string, error) {
 	return r.QueryResolver.Valid(ctx)
+}
+func (r *stubQuery) LatestHubPrediction(ctx context.Context, hubID *string) (*Prediction, error) {
+	return r.QueryResolver.LatestHubPrediction(ctx, hubID)
 }
 func (r *stubQuery) Panics(ctx context.Context) (*Panics, error) {
 	return r.QueryResolver.Panics(ctx)

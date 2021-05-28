@@ -16,6 +16,10 @@ func (r *backedByInterfaceResolver) ID(ctx context.Context, obj BackedByInterfac
 	panic("not implemented")
 }
 
+func (r *errorResolver) Nested(ctx context.Context, obj *Error) (*NestedError, error) {
+	panic("not implemented")
+}
+
 func (r *errorsResolver) A(ctx context.Context, obj *Errors) (*Error, error) {
 	panic("not implemented")
 }
@@ -357,6 +361,9 @@ func (r *Resolver) BackedByInterface() BackedByInterfaceResolver {
 	return &backedByInterfaceResolver{r}
 }
 
+// Error returns ErrorResolver implementation.
+func (r *Resolver) Error() ErrorResolver { return &errorResolver{r} }
+
 // Errors returns ErrorsResolver implementation.
 func (r *Resolver) Errors() ErrorsResolver { return &errorsResolver{r} }
 
@@ -399,6 +406,7 @@ func (r *Resolver) WrappedMap() WrappedMapResolver { return &wrappedMapResolver{
 func (r *Resolver) WrappedSlice() WrappedSliceResolver { return &wrappedSliceResolver{r} }
 
 type backedByInterfaceResolver struct{ *Resolver }
+type errorResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }
 type forcedResolverResolver struct{ *Resolver }
 type modelMethodsResolver struct{ *Resolver }

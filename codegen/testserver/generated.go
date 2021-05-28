@@ -41,6 +41,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	BackedByInterface() BackedByInterfaceResolver
+	Error() ErrorResolver
 	Errors() ErrorsResolver
 	ForcedResolver() ForcedResolverResolver
 	ModelMethods() ModelMethodsResolver
@@ -165,6 +166,7 @@ type ComplexityRoot struct {
 		ErrorOnNonRequiredField func(childComplexity int) int
 		ErrorOnRequiredField    func(childComplexity int) int
 		ID                      func(childComplexity int) int
+		Nested                  func(childComplexity int) int
 		NilOnRequiredField      func(childComplexity int) int
 	}
 
@@ -217,6 +219,10 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		UpdateSomething func(childComplexity int, input SpecialInput) int
+	}
+
+	NestedError struct {
+		ID func(childComplexity int) int
 	}
 
 	ObjectDirectives struct {
@@ -400,6 +406,9 @@ type ComplexityRoot struct {
 
 type BackedByInterfaceResolver interface {
 	ID(ctx context.Context, obj BackedByInterface) (string, error)
+}
+type ErrorResolver interface {
+	Nested(ctx context.Context, obj *Error) (*NestedError, error)
 }
 type ErrorsResolver interface {
 	A(ctx context.Context, obj *Errors) (*Error, error)
@@ -774,6 +783,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Error.ID(childComplexity), true
 
+	case "Error.nested":
+		if e.complexity.Error.Nested == nil {
+			break
+		}
+
+		return e.complexity.Error.Nested(childComplexity), true
+
 	case "Error.nilOnRequiredField":
 		if e.complexity.Error.NilOnRequiredField == nil {
 			break
@@ -911,6 +927,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateSomething(childComplexity, args["input"].(SpecialInput)), true
+
+	case "NestedError.id":
+		if e.complexity.NestedError.ID == nil {
+			break
+		}
+
+		return e.complexity.NestedError.ID(childComplexity), true
 
 	case "ObjectDirectives.nullableText":
 		if e.complexity.ObjectDirectives.NullableText == nil {
@@ -2136,6 +2159,11 @@ type Error {
     errorOnNonRequiredField: String
     errorOnRequiredField: String!
     nilOnRequiredField: String!
+    nested: NestedError
+}
+
+type NestedError {
+  id: ID!
 }
 `, BuiltIn: false},
 	{Name: "panics.graphql", Input: `extend type Query {
@@ -4591,6 +4619,35 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Error_nested(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Error",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Error().Nested(rctx, obj)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*NestedError)
+	fc.Result = res
+	return ec.marshalONestedError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNestedError(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5181,6 +5238,38 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NestedError_id(ctx context.Context, field graphql.CollectedField, obj *NestedError) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "NestedError",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
@@ -11478,20 +11567,31 @@ func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Error_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "errorOnNonRequiredField":
 			out.Values[i] = ec._Error_errorOnNonRequiredField(ctx, field, obj)
 		case "errorOnRequiredField":
 			out.Values[i] = ec._Error_errorOnRequiredField(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "nilOnRequiredField":
 			out.Values[i] = ec._Error_nilOnRequiredField(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "nested":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Error_nested(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11888,6 +11988,33 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "updateSomething":
 			out.Values[i] = ec._Mutation_updateSomething(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var nestedErrorImplementors = []string{"NestedError"}
+
+func (ec *executionContext) _NestedError(ctx context.Context, sel ast.SelectionSet, obj *NestedError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, nestedErrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NestedError")
+		case "id":
+			out.Values[i] = ec._NestedError_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -14964,6 +15091,13 @@ func (ec *executionContext) marshalOModelMethods2ᚖgithubᚗcomᚋ99designsᚋg
 		return graphql.Null
 	}
 	return ec._ModelMethods(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalONestedError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNestedError(ctx context.Context, sel ast.SelectionSet, v *NestedError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._NestedError(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐNestedMapInput(ctx context.Context, v interface{}) (*NestedMapInput, error) {

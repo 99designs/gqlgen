@@ -113,6 +113,10 @@ type Map struct {
 	ID string `json:"id"`
 }
 
+type NestedError struct {
+	ID string `json:"id"`
+}
+
 type NestedInput struct {
 	Field Email `json:"field"`
 }

@@ -19,4 +19,9 @@ type Error {
     errorOnNonRequiredField: String
     errorOnRequiredField: String!
     nilOnRequiredField: String!
+    nested: NestedError
+}
+
+type NestedError {
+  id: ID!
 }

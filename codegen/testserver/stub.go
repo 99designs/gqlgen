@@ -14,6 +14,9 @@ type Stub struct {
 	BackedByInterfaceResolver struct {
 		ID func(ctx context.Context, obj BackedByInterface) (string, error)
 	}
+	ErrorResolver struct {
+		Nested func(ctx context.Context, obj *Error) (*NestedError, error)
+	}
 	ErrorsResolver struct {
 		A func(ctx context.Context, obj *Errors) (*Error, error)
 		B func(ctx context.Context, obj *Errors) (*Error, error)
@@ -129,6 +132,9 @@ type Stub struct {
 func (r *Stub) BackedByInterface() BackedByInterfaceResolver {
 	return &stubBackedByInterface{r}
 }
+func (r *Stub) Error() ErrorResolver {
+	return &stubError{r}
+}
 func (r *Stub) Errors() ErrorsResolver {
 	return &stubErrors{r}
 }
@@ -173,6 +179,12 @@ type stubBackedByInterface struct{ *Stub }
 
 func (r *stubBackedByInterface) ID(ctx context.Context, obj BackedByInterface) (string, error) {
 	return r.BackedByInterfaceResolver.ID(ctx, obj)
+}
+
+type stubError struct{ *Stub }
+
+func (r *stubError) Nested(ctx context.Context, obj *Error) (*NestedError, error) {
+	return r.ErrorResolver.Nested(ctx, obj)
 }
 
 type stubErrors struct{ *Stub }

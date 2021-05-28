@@ -62,7 +62,7 @@ func TestNullBubbling(t *testing.T) {
 		require.Equal(t, "Ok", resp.Valid)
 	})
 
-	t.Run("when user returns null on nullable field", func(t *testing.T) {
+	t.Run("when user returns null on required field", func(t *testing.T) {
 		var resp struct {
 			Valid       string
 			ErrorBubble *struct {

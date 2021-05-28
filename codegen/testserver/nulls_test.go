@@ -71,8 +71,8 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubble { id, nilOnRequiredField } }`, &resp)
 
-		t.Log(err)
-		require.Nil(t, err)
+		require.EqualError(t, err, `[{"message":"must not be null","path":["errorBubble","nilOnRequiredField"]}]`)
+		require.Nil(t, resp.ErrorBubble)
 		require.Equal(t, "Ok", resp.Valid)
 	})
 

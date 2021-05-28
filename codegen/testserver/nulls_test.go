@@ -26,6 +26,9 @@ func TestNullBubbling(t *testing.T) {
 	resolvers.QueryResolver.ErrorList = func(ctx context.Context) (i []*Error, e error) {
 		return []*Error{nil}, nil
 	}
+	resolvers.ErrorResolver.Nested = func(ctx context.Context, err *Error) (n *NestedError, e error) {
+		return nil, nil
+	}
 
 	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
 
@@ -59,7 +62,7 @@ func TestNullBubbling(t *testing.T) {
 		require.Equal(t, "Ok", resp.Valid)
 	})
 
-	t.Run("when user returns null on required field", func(t *testing.T) {
+	t.Run("when user returns null on nullable field", func(t *testing.T) {
 		var resp struct {
 			Valid       string
 			ErrorBubble *struct {
@@ -68,8 +71,8 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubble { id, nilOnRequiredField } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"must not be null","path":["errorBubble","nilOnRequiredField"]}]`)
-		require.Nil(t, resp.ErrorBubble)
+		t.Log(err)
+		require.Nil(t, err)
 		require.Equal(t, "Ok", resp.Valid)
 	})
 
@@ -91,32 +94,39 @@ func TestNullBubbling(t *testing.T) {
 			Valid           string
 			ErrorBubbleList []*struct{}
 		}
+		resp.ErrorBubbleList = append(resp.ErrorBubbleList, nil)
 		err := c.Post(`query { valid, errorBubbleList { id } }`, &resp)
 
 		require.EqualError(t, err, `[{"message":"must not be null","path":["errorBubbleList",0]}]`)
-		require.Nil(t, resp.ErrorBubbleList)
 		require.Equal(t, "Ok", resp.Valid)
 	})
 
 	t.Run("when nullable response is null but has non-null element", func(t *testing.T) {
-		err := c.Post(`query { valid, errorBubbleList { id } }`, nil)
+		var resp *struct {
+			ErrorBubbleList []*struct{}
+		}
+		err := c.Post(`query { errorBubbleList { id } }`, resp)
 
-    t.Log(err.Error())
+		t.Log(err)
 		require.Nil(t, err)
 	})
 
 	t.Run("when nullable element is null but has non-null element", func(t *testing.T) {
-    var resp struct {
-      ErrorOnNonRequiredField *string
-      Nested *struct {
-        ID  string
-      }
-    }
-    s := "non-null"
-    resp.ErrorOnNonRequiredField = &s
-		err := c.Post(`query { errorBubble { errorOnNonRequiredField, nested { id } } }`, resp)
+		type ErrorBubble struct {
+			ErrorOnNonRequiredField *string
+			Nested                  *struct {
+				ID string
+			}
+		}
+		type Resp struct {
+			ErrorBubble *ErrorBubble
+		}
+		resp := &Resp{ErrorBubble: &ErrorBubble{}}
+		s := "non-null"
+		resp.ErrorBubble.ErrorOnNonRequiredField = &s
+		err := c.Post(`query { errorBubble { errorOnNonRequiredField, nested { id } } }`, &resp)
 
-    t.Log(err.Error())
+		t.Log(err.Error())
 		require.Nil(t, err)
 	})
 

@@ -101,16 +101,6 @@ func TestNullBubbling(t *testing.T) {
 		require.Equal(t, "Ok", resp.Valid)
 	})
 
-	t.Run("when nullable response is null but has non-null element", func(t *testing.T) {
-		var resp *struct {
-			ErrorBubbleList []*struct{}
-		}
-		err := c.Post(`query { errorBubbleList { id } }`, resp)
-
-		t.Log(err)
-		require.Nil(t, err)
-	})
-
 	t.Run("when nullable element is null but has non-null element", func(t *testing.T) {
 		type ErrorBubble struct {
 			ID     string

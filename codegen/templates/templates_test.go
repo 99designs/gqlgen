@@ -38,6 +38,11 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "RelatedUrls", ToGo("RelatedUrls"))
 	require.Equal(t, "ITicket", ToGo("ITicket"))
 	require.Equal(t, "FooTicket", ToGo("fooTicket"))
+
+	require.Equal(t, "GqlgenEntity", ToGo("_Entity"))
+	require.Equal(t, "GqlgenService", ToGo("_Service"))
+	require.Equal(t, "Entity", ToGo("Entity"))
+	require.Equal(t, "Service", ToGo("Service"))
 }
 
 func TestToGoPrivate(t *testing.T) {

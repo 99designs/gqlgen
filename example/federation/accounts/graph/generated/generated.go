@@ -60,7 +60,7 @@ type ComplexityRoot struct {
 		Username func(childComplexity int) int
 	}
 
-	Service struct {
+	GqlgenService struct {
 		SDL func(childComplexity int) int
 	}
 }
@@ -140,11 +140,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.User.Username(childComplexity), true
 
 	case "_Service.sdl":
-		if e.complexity.Service.SDL == nil {
+		if e.complexity.GqlgenService.SDL == nil {
 			break
 		}
 
-		return e.complexity.Service.SDL(childComplexity), true
+		return e.complexity.GqlgenService.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -435,9 +435,9 @@ func (ec *executionContext) _Query__entities(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]fedruntime.Entity)
+	res := resTmp.([]fedruntime.GqlgenEntity)
 	fc.Result = res
-	return ec.marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx, field.Selections, res)
+	return ec.marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐGqlgenEntity(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query__service(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -470,9 +470,9 @@ func (ec *executionContext) _Query__service(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(fedruntime.Service)
+	res := resTmp.(fedruntime.GqlgenService)
 	fc.Result = res
-	return ec.marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐService(ctx, field.Selections, res)
+	return ec.marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐGqlgenService(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -616,7 +616,7 @@ func (ec *executionContext) _User_username(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.CollectedField, obj *fedruntime.Service) (ret graphql.Marshaler) {
+func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.CollectedField, obj *fedruntime.GqlgenService) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1774,7 +1774,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, obj fedruntime.Entity) graphql.Marshaler {
+func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, obj fedruntime.GqlgenEntity) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -1937,7 +1937,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 
 var _ServiceImplementors = []string{"_Service"}
 
-func (ec *executionContext) __Service(ctx context.Context, sel ast.SelectionSet, obj *fedruntime.Service) graphql.Marshaler {
+func (ec *executionContext) __Service(ctx context.Context, sel ast.SelectionSet, obj *fedruntime.GqlgenService) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, _ServiceImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -2325,7 +2325,7 @@ func (ec *executionContext) marshalN_Any2ᚕmapᚄ(ctx context.Context, sel ast.
 	return ret
 }
 
-func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx context.Context, sel ast.SelectionSet, v []fedruntime.Entity) graphql.Marshaler {
+func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐGqlgenEntity(ctx context.Context, sel ast.SelectionSet, v []fedruntime.GqlgenEntity) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2349,7 +2349,7 @@ func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalO_Entity2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx, sel, v[i])
+			ret[i] = ec.marshalO_Entity2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐGqlgenEntity(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2378,7 +2378,7 @@ func (ec *executionContext) marshalN_FieldSet2string(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐService(ctx context.Context, sel ast.SelectionSet, v fedruntime.Service) graphql.Marshaler {
+func (ec *executionContext) marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐGqlgenService(ctx context.Context, sel ast.SelectionSet, v fedruntime.GqlgenService) graphql.Marshaler {
 	return ec.__Service(ctx, sel, &v)
 }
 
@@ -2694,7 +2694,7 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalO_Entity2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx context.Context, sel ast.SelectionSet, v fedruntime.Entity) graphql.Marshaler {
+func (ec *executionContext) marshalO_Entity2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐGqlgenEntity(ctx context.Context, sel ast.SelectionSet, v fedruntime.GqlgenEntity) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

@@ -33,17 +33,17 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	builtins := config.TypeMap{
 		"_Service": {
 			Model: config.StringList{
-				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Service",
+				"github.com/99designs/gqlgen/plugin/federation/fedruntime.GqlgenService",
 			},
 		},
 		"_Entity": {
 			Model: config.StringList{
-				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity",
+				"github.com/99designs/gqlgen/plugin/federation/fedruntime.GqlgenEntity",
 			},
 		},
 		"Entity": {
 			Model: config.StringList{
-				"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity",
+				"github.com/99designs/gqlgen/plugin/federation/fedruntime.GqlgenEntity",
 			},
 		},
 		"_Any": {

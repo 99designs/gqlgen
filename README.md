@@ -1,3 +1,21 @@
+# Grand Rounds Fork of GQLgen
+
+This fork was created by:
+
+1. Forking the repository
+2. Resetting master of the fork to the tagged commit of the last stable release
+   of gqlgen. At the time of writing this, it's tag v0.13.0 and commit 07c1f93.
+3. Pushing -f to reset master of this fork the above commit.
+3. Opening a pull request of the patch we've applied, to this fork, and merging
+   the patch into the master branch of this fork.s
+
+Note that means the master branch of this fork diverges from the official
+repository. To update this fork to the latest version of gqlgen:
+
+1. Merge the latest version tagged commit of upstream into master of this fork.
+   **Don't** merge in the master branch of the main repository, just the commit
+   of the next tagged version.
+
 # gqlgen [![Continuous Integration](https://github.com/99designs/gqlgen/workflows/Continuous%20Integration/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/) [![GoDoc](https://godoc.org/github.com/99designs/gqlgen?status.svg)](https://godoc.org/github.com/99designs/gqlgen)
 
 ![gqlgen](https://user-images.githubusercontent.com/46195831/89802919-0bb8ef00-db2a-11ea-8ba4-88e7a58b2fd2.png)

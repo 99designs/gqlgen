@@ -282,10 +282,25 @@ func Call(p *types.Func) string {
 	return pkg + p.Name()
 }
 
+// Federated graphs have the types _Entity and _Service. With default Go struct
+// name generation, those become `Service`, which can conflict with users
+// of this library who have their own `type Service`. Special case handle the
+// federated entity names
+var internalNames = map[string]string{
+	"_Entity":  "GqlgenEntity",
+	"_Service": "GqlgenService",
+}
+
 func ToGo(name string) string {
 	if name == "_" {
 		return "_"
 	}
+
+	internalName, hasInternalName := internalNames[name]
+	if hasInternalName {
+		return internalName
+	}
+
 	runes := make([]rune, 0, len(name))
 
 	wordWalker(name, func(info *wordInfo) {

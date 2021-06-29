@@ -7,4 +7,4 @@ type User struct {
 	Username string `json:"username"`
 }
 
-func (User) IsEntity() {}
+func (User) IsGqlgenEntity() {}

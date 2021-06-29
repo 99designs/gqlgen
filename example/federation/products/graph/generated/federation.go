@@ -11,9 +11,9 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
-func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
+func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.GqlgenService, error) {
 	if ec.DisableIntrospection {
-		return fedruntime.Service{}, errors.New("federated introspection disabled")
+		return fedruntime.GqlgenService{}, errors.New("federated introspection disabled")
 	}
 
 	var sdl []string
@@ -25,13 +25,13 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 		sdl = append(sdl, src.Input)
 	}
 
-	return fedruntime.Service{
+	return fedruntime.GqlgenService{
 		SDL: strings.Join(sdl, "\n"),
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) ([]fedruntime.Entity, error) {
-	list := []fedruntime.Entity{}
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) ([]fedruntime.GqlgenEntity, error) {
+	list := []fedruntime.GqlgenEntity{}
 	for _, rep := range representations {
 		typeName, ok := rep["__typename"].(string)
 		if !ok {

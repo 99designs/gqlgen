@@ -1,3 +1,27 @@
+# Grand Rounds Fork of gqlgen
+
+This fork was created by:
+
+1. Forking the repository
+1. Resetting master of the fork to the tagged commit of the last stable release
+   of gqlgen. At the time of writing this, it's tag v0.13.0 and commit 07c1f93.
+1. Pushing -f to reset master of this fork the above commit.
+1. Creating a branch in this repo and applying the desired patch.
+1. Runing `go generate ./...` in the root of this repository.
+1. Opening a pull request of the patch we've applied, to this fork
+1. Testing the forked code in the downstream repo (bobs) using `replace` in
+   `go.mod`.
+1. Merging the patch into the master branch of this fork.
+1. Updating downstream consumers to use the master branch of this fork using
+   `replace` in `go.mod`
+
+Note that means the master branch of this fork diverges from the official
+repository. To update this fork to the latest version of gqlgen:
+
+1. Merge the latest version tagged commit of upstream into master of this fork.
+   **Don't** merge in the master branch of the main repository, just the commit
+   of the next tagged version.
+
 # gqlgen [![Continuous Integration](https://github.com/99designs/gqlgen/workflows/Continuous%20Integration/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/) [![GoDoc](https://godoc.org/github.com/99designs/gqlgen?status.svg)](https://godoc.org/github.com/99designs/gqlgen)
 
 ![gqlgen](https://user-images.githubusercontent.com/46195831/89802919-0bb8ef00-db2a-11ea-8ba4-88e7a58b2fd2.png)
@@ -82,6 +106,25 @@ After doing either of the above and running generate we will need to provide a r
 func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) {
   // select * from user where friendid = obj.ID
   return friends,  nil
+}
+```
+
+You can also use inline config with directives to achieve the same result
+
+```graphql
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+type User @goModel(model: "github.com/you/pkg/model.User") {
+    id: ID!         @goField(name: "todoId")
+    friends: [User!]!   @goField(forceResolver: true)
 }
 ```
 

@@ -8,4 +8,4 @@ type Product struct {
 	Price int    `json:"price"`
 }
 
-func (Product) IsEntity() {}
+func (Product) IsGqlgenEntity() {}

@@ -1,10 +1,10 @@
 type Hello @key(fields: "name") {
-  name: String!
+    name: String!
 }
 
 type World @key(fields: "foo bar") {
-  foo: String!
-  bar: Int!
+    foo: String!
+    bar: Int!
 }
 
 extend type ExternalExtension @key(fields: "upc") {
@@ -13,6 +13,6 @@ extend type ExternalExtension @key(fields: "upc") {
 }
 
 type Query {
-  hello: Hello!
-  world: World!
+    hello: Hello!
+    world: World!
 }

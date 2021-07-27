@@ -4,12 +4,23 @@ type Review {
     product: Product!
 }
 
-extend type User @key(fields: "id") {
-    id: ID! @external
-    reviews: [Review]
+extend type EmailHost @key(fields: "id") {
+    id: String! @external
 }
 
-extend type Product @key(fields: "upc") {
-    upc: String! @external
+extend type User @key(fields: "id") {
+    id: ID! @external
+    host: EmailHost! @external
+    email: String! @external
+    reviews: [Review] @requires(fields: "host {id} email")
+}
+
+extend type Manufacturer @key(fields: "id") {
+    id: String! @external
+}
+
+extend type Product @key(fields: " manufacturer{  id} id") {
+    id: String! @external
+    manufacturer: Manufacturer! @external
     reviews: [Review]
 }

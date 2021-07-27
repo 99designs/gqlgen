@@ -48,14 +48,33 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}
 		switch typeName {
 
-		case "Product":
-			id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
+		case "Manufacturer":
+			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
 			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "upc"))
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
 			}
 
-			entity, err := ec.resolvers.Entity().FindProductByUpc(ctx,
+			entity, err := ec.resolvers.Entity().FindManufacturerByID(ctx,
 				id0)
+			if err != nil {
+				return err
+			}
+
+			list[i] = entity
+			return nil
+
+		case "Product":
+			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "manufacturerID"))
+			}
+			id1, err := ec.unmarshalNString2string(ctx, rep["id"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+			}
+
+			entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx,
+				id0, id1)
 			if err != nil {
 				return err
 			}

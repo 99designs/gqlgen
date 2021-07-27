@@ -75,8 +75,8 @@ scalar _FieldSet
 directive @external on FIELD_DEFINITION
 directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
-directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
-directive @extends on OBJECT
+directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+directive @extends on OBJECT | INTERFACE
 `,
 		BuiltIn: true,
 	}
@@ -226,8 +226,18 @@ func (f *federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyFi
 
 func (f *federation) setEntities(schema *ast.Schema) {
 	for _, schemaType := range schema.Types {
+		if schemaType.Kind == ast.Interface {
+			// TODO: support @key and @extends for interfaces
+			if dir := schemaType.Directives.ForName("key"); dir != nil {
+				panic("@key directive is not currently supported for interfaces.")
+			}
+			if dir := schemaType.Directives.ForName("extends"); dir != nil {
+				panic("@extends directive is not currently supported for interfaces.")
+			}
+			continue
+		}
 		if schemaType.Kind == ast.Object {
-			dir := schemaType.Directives.ForName("key") // TODO: interfaces
+			dir := schemaType.Directives.ForName("key")
 			if dir != nil {
 				if len(dir.Arguments) > 1 {
 					panic("Multiple arguments are not currently supported in @key declaration.")

@@ -9,7 +9,7 @@ Occasionally you need to distinguish presence from nil (undefined vs null). In g
 
 
 ```graphql
-type Query {
+type Mutation {
 	updateUser(id: ID!, changes: UserChanges!): User
 }
 
@@ -28,7 +28,7 @@ models:
 
 After running go generate you should end up with a resolver that looks like this:
 ```go
-func (r *queryResolver) UpdateUser(ctx context.Context, id int, changes map[string]interface{}) (*User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, id int, changes map[string]interface{}) (*User, error) {
 	u := fetchFromDb(id)
 	/// apply the changes
 	saveToDb(u)

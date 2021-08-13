@@ -127,9 +127,11 @@ func (c *wsConnection) init() bool {
 }
 
 func (c *wsConnection) write(msg *operationMessage) {
-	c.mu.Lock()
-	c.conn.WriteJSON(msg)
-	c.mu.Unlock()
+	if msg.Type == "data" {
+		c.mu.Lock()
+		c.conn.WriteJSON(msg)
+		c.mu.Unlock()
+	}
 }
 
 func (c *wsConnection) run() {
@@ -283,12 +285,23 @@ func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 }
 
 func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
-	b, err := json.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
-	if err != nil {
-		panic(err)
-	}
+	for i, _ := range c.active {
+		select {
+		case <- c.ctx.Done():
+			b, err := json.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
+			if err != nil {
+				panic(err)
+			}
 
-	c.write(&operationMessage{Type: connectionErrorMsg, Payload: b})
+			c.write(&operationMessage{Type: connectionErrorMsg, Payload: b})
+		default:
+			c.mu.Lock()
+			closer := c.active[i]
+			c.mu.Unlock()
+			c.conn.Close()
+			closer()
+		}
+	}
 }
 
 func (c *wsConnection) readOp() *operationMessage {

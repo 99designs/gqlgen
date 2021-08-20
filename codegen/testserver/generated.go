@@ -223,6 +223,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		DefaultInput    func(childComplexity int, input DefaultInput) int
+		UpdatePtrToPtr  func(childComplexity int, input UpdatePtrToPtrOuter) int
 		UpdateSomething func(childComplexity int, input SpecialInput) int
 	}
 
@@ -261,6 +262,17 @@ type ComplexityRoot struct {
 		Doubled func(childComplexity int) int
 		Len     func(childComplexity int) int
 		Value   func(childComplexity int) int
+	}
+
+	PtrToPtrInner struct {
+		Key   func(childComplexity int) int
+		Value func(childComplexity int) int
+	}
+
+	PtrToPtrOuter struct {
+		Inner       func(childComplexity int) int
+		Name        func(childComplexity int) int
+		StupidInner func(childComplexity int) int
 	}
 
 	PtrToSliceContainer struct {
@@ -425,6 +437,7 @@ type ModelMethodsResolver interface {
 type MutationResolver interface {
 	DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
 	UpdateSomething(ctx context.Context, input SpecialInput) (string, error)
+	UpdatePtrToPtr(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
 }
 type OverlappingFieldsResolver interface {
 	OldFoo(ctx context.Context, obj *OverlappingFields) (int, error)
@@ -936,6 +949,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
 
+	case "Mutation.updatePtrToPtr":
+		if e.complexity.Mutation.UpdatePtrToPtr == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updatePtrToPtr_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePtrToPtr(childComplexity, args["input"].(UpdatePtrToPtrOuter)), true
+
 	case "Mutation.updateSomething":
 		if e.complexity.Mutation.UpdateSomething == nil {
 			break
@@ -1069,6 +1094,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PrimitiveString.Value(childComplexity), true
+
+	case "PtrToPtrInner.key":
+		if e.complexity.PtrToPtrInner.Key == nil {
+			break
+		}
+
+		return e.complexity.PtrToPtrInner.Key(childComplexity), true
+
+	case "PtrToPtrInner.value":
+		if e.complexity.PtrToPtrInner.Value == nil {
+			break
+		}
+
+		return e.complexity.PtrToPtrInner.Value(childComplexity), true
+
+	case "PtrToPtrOuter.inner":
+		if e.complexity.PtrToPtrOuter.Inner == nil {
+			break
+		}
+
+		return e.complexity.PtrToPtrOuter.Inner(childComplexity), true
+
+	case "PtrToPtrOuter.name":
+		if e.complexity.PtrToPtrOuter.Name == nil {
+			break
+		}
+
+		return e.complexity.PtrToPtrOuter.Name(childComplexity), true
+
+	case "PtrToPtrOuter.stupidInner":
+		if e.complexity.PtrToPtrOuter.StupidInner == nil {
+			break
+		}
+
+		return e.complexity.PtrToPtrOuter.StupidInner(childComplexity), true
 
 	case "PtrToSliceContainer.ptrToSlice":
 		if e.complexity.PtrToSliceContainer.PtrToSlice == nil {
@@ -2237,6 +2297,32 @@ type PrimitiveString {
     len: Int!
 }
 `, BuiltIn: false},
+	{Name: "ptr_to_ptr_input.graphql", Input: `type PtrToPtrOuter {
+    name: String!
+    inner: PtrToPtrInner
+    stupidInner: PtrToPtrInner
+}
+
+type PtrToPtrInner {
+    key: String!
+    value: String!
+}
+
+input UpdatePtrToPtrOuter {
+    name: String
+    inner: UpdatePtrToPtrInner
+    stupidInner: UpdatePtrToPtrInner
+}
+
+input UpdatePtrToPtrInner {
+    key: String
+    value: String
+}
+
+extend type Mutation {
+    updatePtrToPtr(input: UpdatePtrToPtrOuter!): PtrToPtrOuter!
+}
+`, BuiltIn: false},
 	{Name: "ptr_to_slice.graphql", Input: `type PtrToSliceContainer {
     ptrToSlice: [String!]
 }
@@ -2631,6 +2717,21 @@ func (ec *executionContext) field_Mutation_defaultInput_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐDefaultInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updatePtrToPtr_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 UpdatePtrToPtrOuter
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNUpdatePtrToPtrOuter2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrOuter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5395,6 +5496,45 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updatePtrToPtr_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePtrToPtr(rctx, args["input"].(UpdatePtrToPtrOuter))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*PtrToPtrOuter)
+	fc.Result = res
+	return ec.marshalNPtrToPtrOuter2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrOuter(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -6049,6 +6189,160 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PtrToPtrInner_key(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrInner) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PtrToPtrInner",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrInner) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PtrToPtrInner",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrOuter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PtrToPtrOuter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PtrToPtrOuter_inner(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrOuter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PtrToPtrOuter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Inner, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*PtrToPtrInner)
+	fc.Result = res
+	return ec.marshalOPtrToPtrInner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PtrToPtrOuter_stupidInner(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrOuter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PtrToPtrOuter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StupidInner, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*******PtrToPtrInner)
+	fc.Result = res
+	return ec.marshalOPtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context, field graphql.CollectedField, obj *PtrToSliceContainer) (ret graphql.Marshaler) {
@@ -10887,6 +11181,76 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Context, obj interface{}) (UpdatePtrToPtrInner, error) {
+	var it UpdatePtrToPtrInner
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "key":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+			it.Key, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Context, obj interface{}) (UpdatePtrToPtrOuter, error) {
+	var it UpdatePtrToPtrOuter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "inner":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
+			it.Inner, err = ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stupidInner":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stupidInner"))
+			it.StupidInner, err = ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj interface{}) (ValidInput, error) {
 	var it ValidInput
 	asMap := map[string]interface{}{}
@@ -12265,6 +12629,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updatePtrToPtr":
+			out.Values[i] = ec._Mutation_updatePtrToPtr(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12566,6 +12935,69 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 				}
 				return res
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var ptrToPtrInnerImplementors = []string{"PtrToPtrInner"}
+
+func (ec *executionContext) _PtrToPtrInner(ctx context.Context, sel ast.SelectionSet, obj *PtrToPtrInner) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToPtrInnerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PtrToPtrInner")
+		case "key":
+			out.Values[i] = ec._PtrToPtrInner_key(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+			out.Values[i] = ec._PtrToPtrInner_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var ptrToPtrOuterImplementors = []string{"PtrToPtrOuter"}
+
+func (ec *executionContext) _PtrToPtrOuter(ctx context.Context, sel ast.SelectionSet, obj *PtrToPtrOuter) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToPtrOuterImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PtrToPtrOuter")
+		case "name":
+			out.Values[i] = ec._PtrToPtrOuter_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "inner":
+			out.Values[i] = ec._PtrToPtrOuter_inner(ctx, field, obj)
+		case "stupidInner":
+			out.Values[i] = ec._PtrToPtrOuter_stupidInner(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -14467,6 +14899,20 @@ func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designs�
 	return ret
 }
 
+func (ec *executionContext) marshalNPtrToPtrOuter2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrOuter(ctx context.Context, sel ast.SelectionSet, v PtrToPtrOuter) graphql.Marshaler {
+	return ec._PtrToPtrOuter(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPtrToPtrOuter2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrOuter(ctx context.Context, sel ast.SelectionSet, v *PtrToPtrOuter) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PtrToPtrOuter(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNPtrToSliceContainer2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToSliceContainer(ctx context.Context, sel ast.SelectionSet, v PtrToSliceContainer) graphql.Marshaler {
 	return ec._PtrToSliceContainer(ctx, sel, &v)
 }
@@ -14631,6 +15077,11 @@ func (ec *executionContext) marshalNUUID2string(ctx context.Context, sel ast.Sel
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdatePtrToPtrOuter2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrOuter(ctx context.Context, v interface{}) (UpdatePtrToPtrOuter, error) {
+	res, err := ec.unmarshalInputUpdatePtrToPtrOuter(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
@@ -15554,6 +16005,20 @@ func (ec *executionContext) marshalOPanics2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec._Panics(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOPtrToPtrInner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v *PtrToPtrInner) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PtrToPtrInner(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v *******PtrToPtrInner) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PtrToPtrInner(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSliceᚄ(ctx context.Context, v interface{}) ([]RecursiveInputSlice, error) {
 	if v == nil {
 		return nil, nil
@@ -15790,6 +16255,22 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 		return graphql.Null
 	}
 	return graphql.MarshalTime(*v)
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (**UpdatePtrToPtrInner, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdatePtrToPtrInner(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (********UpdatePtrToPtrInner, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdatePtrToPtrInner(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOVOkCaseNil2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐVOkCaseNil(ctx context.Context, sel ast.SelectionSet, v *VOkCaseNil) graphql.Marshaler {

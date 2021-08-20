@@ -52,6 +52,10 @@ func (r *mutationResolver) UpdateSomething(ctx context.Context, input SpecialInp
 	panic("not implemented")
 }
 
+func (r *mutationResolver) UpdatePtrToPtr(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error) {
+	panic("not implemented")
+}
+
 func (r *overlappingFieldsResolver) OldFoo(ctx context.Context, obj *OverlappingFields) (int, error) {
 	panic("not implemented")
 }

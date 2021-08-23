@@ -10,6 +10,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -131,9 +132,19 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
-	target, err := b.findBindTarget(obj.Type.(*types.Named), f.GoFieldName)
-	if err != nil {
-		return err
+	var target types.Object
+	var err error
+
+	switch v := obj.Type.(type) {
+	case *types.Named:
+		target, err = b.findBindTarget(v, f.GoFieldName)
+		if err != nil {
+			return err
+		}
+	case *types.Signature:
+		spew.Dump(v)
+	default:
+		return fmt.Errorf("Unknown type")
 	}
 
 	pos := b.Binder.ObjectPosition(target)

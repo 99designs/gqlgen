@@ -3,6 +3,7 @@ package testserver
 import (
 	"context"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler/cache"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -177,7 +178,7 @@ func NewCache() *TestServer {
 						},
 					})
 					res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-						graphql.SetCacheHint(ctx, graphql.CacheScopePublic, time.Second*10)
+						cache.SetHint(ctx, cache.ScopePublic, time.Second*10)
 						return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
 					})
 					if err != nil {

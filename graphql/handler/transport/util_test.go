@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"github.com/99designs/gqlgen/graphql/handler/cache"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -17,10 +18,10 @@ func TestWriteCacheControl(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := &graphql.Response{
 			Extensions: map[string]interface{}{
-				"cacheControl": &graphql.CacheControlExtension{
+				"cacheControl": &cache.CacheControlExtension{
 					Version: 1,
-					Hints: []graphql.Hint{
-						{MaxAge: time.Minute.Seconds(), Scope: graphql.CacheScopePublic},
+					Hints: []cache.Hint{
+						{MaxAge: time.Minute.Seconds(), Scope: cache.ScopePublic},
 					},
 				},
 			},
@@ -45,10 +46,10 @@ func TestWriteCacheControl(t *testing.T) {
 				{},
 			},
 			Extensions: map[string]interface{}{
-				"cacheControl": &graphql.CacheControlExtension{
+				"cacheControl": &cache.CacheControlExtension{
 					Version: 1,
-					Hints: []graphql.Hint{
-						{MaxAge: time.Minute.Seconds(), Scope: graphql.CacheScopePublic},
+					Hints: []cache.Hint{
+						{MaxAge: time.Minute.Seconds(), Scope: cache.ScopePublic},
 					},
 				},
 			},

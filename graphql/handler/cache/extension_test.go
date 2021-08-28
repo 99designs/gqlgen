@@ -23,7 +23,7 @@ func TestCache(t *testing.T) {
 
 			ctx := context.Background()
 			_ = ext.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
-				cc := graphql.CacheControl(ctx)
+				cc := CacheControl(ctx)
 				require.NotNil(t, cc)
 				return &graphql.Response{}
 			})
@@ -45,10 +45,10 @@ func TestCache(t *testing.T) {
 
 			ctx := context.Background()
 			resp := ext.InterceptResponse(ctx, func(ctx context.Context) *graphql.Response {
-				cc := graphql.CacheControl(ctx)
-				cc.AddHint(graphql.Hint{
+				cc := CacheControl(ctx)
+				cc.AddHint(Hint{
 					MaxAge: 10,
-					Scope:  graphql.CacheScopePrivate,
+					Scope:  ScopePrivate,
 				})
 				return &graphql.Response{}
 			})

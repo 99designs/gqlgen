@@ -54,9 +54,5 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
 	response := responses(ctx)
 
-	if h.EnableCache {
-		writeCacheControl(w, response)
-	}
-
 	writeJson(w, response)
 }

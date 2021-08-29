@@ -70,10 +70,6 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	responses, ctx := exec.DispatchOperation(r.Context(), rc)
 	response := responses(ctx)
 
-	if h.EnableCache {
-		writeCacheControl(w, response)
-	}
-
 	writeJson(w, response)
 }
 

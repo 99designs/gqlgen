@@ -3,13 +3,9 @@ package transport
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"strings"
-
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler/cache"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"io"
 )
 
 func writeJson(w io.Writer, response *graphql.Response) {
@@ -30,15 +26,4 @@ func writeJsonErrorf(w io.Writer, format string, args ...interface{}) {
 
 func writeJsonGraphqlError(w io.Writer, err ...*gqlerror.Error) {
 	writeJson(w, &graphql.Response{Errors: err})
-}
-
-func writeCacheControl(w http.ResponseWriter, response *graphql.Response) {
-	if len(response.Errors) > 0 {
-		return
-	}
-
-	if cachePolicy, ok := cache.GetOverallCachePolicy(response); ok {
-		cacheControl := fmt.Sprintf("max-age: %v %s", cachePolicy.MaxAge, strings.ToLower(string(cachePolicy.Scope)))
-		w.Header().Add("Cache-Control", cacheControl)
-	}
 }

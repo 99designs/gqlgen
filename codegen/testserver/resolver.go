@@ -306,17 +306,21 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 	panic("not implemented")
 }
 
-func (r *Resolver) BackedByInterface() BackedByInterfaceResolver { return &backedByInterfaceResolver{r} }
-func (r *Resolver) Errors() ErrorsResolver                       { return &errorsResolver{r} }
-func (r *Resolver) ForcedResolver() ForcedResolverResolver       { return &forcedResolverResolver{r} }
-func (r *Resolver) ModelMethods() ModelMethodsResolver           { return &modelMethodsResolver{r} }
-func (r *Resolver) OverlappingFields() OverlappingFieldsResolver { return &overlappingFieldsResolver{r} }
-func (r *Resolver) Panics() PanicsResolver                       { return &panicsResolver{r} }
-func (r *Resolver) Primitive() PrimitiveResolver                 { return &primitiveResolver{r} }
-func (r *Resolver) PrimitiveString() PrimitiveStringResolver     { return &primitiveStringResolver{r} }
-func (r *Resolver) Query() QueryResolver                         { return &queryResolver{r} }
-func (r *Resolver) Subscription() SubscriptionResolver           { return &subscriptionResolver{r} }
-func (r *Resolver) User() UserResolver                           { return &userResolver{r} }
+func (r *Resolver) BackedByInterface() BackedByInterfaceResolver {
+	return &backedByInterfaceResolver{r}
+}
+func (r *Resolver) Errors() ErrorsResolver                 { return &errorsResolver{r} }
+func (r *Resolver) ForcedResolver() ForcedResolverResolver { return &forcedResolverResolver{r} }
+func (r *Resolver) ModelMethods() ModelMethodsResolver     { return &modelMethodsResolver{r} }
+func (r *Resolver) OverlappingFields() OverlappingFieldsResolver {
+	return &overlappingFieldsResolver{r}
+}
+func (r *Resolver) Panics() PanicsResolver                   { return &panicsResolver{r} }
+func (r *Resolver) Primitive() PrimitiveResolver             { return &primitiveResolver{r} }
+func (r *Resolver) PrimitiveString() PrimitiveStringResolver { return &primitiveStringResolver{r} }
+func (r *Resolver) Query() QueryResolver                     { return &queryResolver{r} }
+func (r *Resolver) Subscription() SubscriptionResolver       { return &subscriptionResolver{r} }
+func (r *Resolver) User() UserResolver                       { return &userResolver{r} }
 
 type backedByInterfaceResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }

@@ -58,6 +58,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		LatestPost func(childComplexity int) int
+		Name       func(childComplexity int) int
 		Post       func(childComplexity int, id int) int
 	}
 }
@@ -73,6 +74,7 @@ type PostResolver interface {
 type QueryResolver interface {
 	LatestPost(ctx context.Context) (*model.Post, error)
 	Post(ctx context.Context, id int) (*model.Post, error)
+	Name(ctx context.Context) (string, error)
 }
 
 type executableSchema struct {
@@ -138,6 +140,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.LatestPost(childComplexity), true
+
+	case "Query.name":
+		if e.complexity.Query.Name == nil {
+			break
+		}
+
+		return e.complexity.Query.Name(childComplexity), true
 
 	case "Query.post":
 		if e.complexity.Query.Post == nil {
@@ -223,6 +232,7 @@ type Comment  {
 type Query {
     latestPost: Post
     post(id: Int!): Post
+    name: String!
 }
 `, BuiltIn: false},
 }
@@ -564,6 +574,40 @@ func (ec *executionContext) _Query_post(ctx context.Context, field graphql.Colle
 	res := resTmp.(*model.Post)
 	fc.Result = res
 	return ec.marshalOPost2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋcachecontrolᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_name(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Name(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1840,6 +1884,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_post(ctx, field)
+				return res
+			})
+		case "name":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_name(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "__type":

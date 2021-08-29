@@ -94,12 +94,10 @@ func SetHint(ctx context.Context, scope Scope, maxAge time.Duration) {
 
 // GetOverallCachePolicy is responsible to extract cache policy from a Response.
 // If does not have any cacheControl in Extensions, it will return (empty, false)
-func GetOverallCachePolicy(response *graphql.Response) (OverallCachePolicy, bool) {
-	if cache, ok := response.Extensions["cacheControl"].(*CacheControlExtension); ok {
-		overallPolicy := cache.OverallPolicy()
-		if overallPolicy.MaxAge > 0 {
-			return overallPolicy, true
-		}
+func GetOverallCachePolicy(cache *CacheControlExtension) (OverallCachePolicy, bool) {
+	overallPolicy := cache.OverallPolicy()
+	if overallPolicy.MaxAge > 0 {
+		 return overallPolicy, true
 	}
 
 	return OverallCachePolicy{}, false

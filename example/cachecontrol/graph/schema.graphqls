@@ -20,4 +20,5 @@ type Comment  {
 type Query {
     latestPost: Post
     post(id: Int!): Post
+    name: String!
 }

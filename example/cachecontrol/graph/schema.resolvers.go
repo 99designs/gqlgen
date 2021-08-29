@@ -68,6 +68,11 @@ func (r *queryResolver) Post(ctx context.Context, id int) (*model.Post, error) {
 	return post, nil
 }
 
+func (r *queryResolver) Name(ctx context.Context) (string, error) {
+	cache.SetHint(ctx, cache.ScopePublic, 10*time.Second)
+	return "test", nil
+}
+
 func (r *Resolver) Comment() generated.CommentResolver { return &commentResolver{r} }
 func (r *Resolver) Post() generated.PostResolver       { return &postResolver{r} }
 func (r *Resolver) Query() generated.QueryResolver     { return &queryResolver{r} }

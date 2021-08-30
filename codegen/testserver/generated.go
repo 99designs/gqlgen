@@ -16012,11 +16012,46 @@ func (ec *executionContext) marshalOPtrToPtrInner2ᚖgithubᚗcomᚋ99designsᚋ
 	return ec._PtrToPtrInner(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOPtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v **PtrToPtrInner) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPtrToPtrInner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOPtrToPtrInner2ᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v ***PtrToPtrInner) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOPtrToPtrInner2ᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v ****PtrToPtrInner) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPtrToPtrInner2ᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOPtrToPtrInner2ᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v *****PtrToPtrInner) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPtrToPtrInner2ᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOPtrToPtrInner2ᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v ******PtrToPtrInner) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPtrToPtrInner2ᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, sel, *v)
+}
+
 func (ec *executionContext) marshalOPtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx context.Context, sel ast.SelectionSet, v *******PtrToPtrInner) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._PtrToPtrInner(ctx, sel, v)
+	return ec.marshalOPtrToPtrInner2ᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToPtrInner(ctx, sel, *v)
 }
 
 func (ec *executionContext) unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSliceᚄ(ctx context.Context, v interface{}) ([]RecursiveInputSlice, error) {
@@ -16257,7 +16292,7 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return graphql.MarshalTime(*v)
 }
 
-func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (**UpdatePtrToPtrInner, error) {
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (*UpdatePtrToPtrInner, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -16265,12 +16300,88 @@ func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ9
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (********UpdatePtrToPtrInner, error) {
-	if v == nil {
-		return nil, nil
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (**UpdatePtrToPtrInner, error) {
+	var pres *UpdatePtrToPtrInner
+	if v != nil {
+		res, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		pres = res
 	}
-	res, err := ec.unmarshalInputUpdatePtrToPtrInner(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return &pres, nil
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (***UpdatePtrToPtrInner, error) {
+	var pres **UpdatePtrToPtrInner
+	if v != nil {
+		res, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		pres = res
+	}
+	return &pres, nil
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (****UpdatePtrToPtrInner, error) {
+	var pres ***UpdatePtrToPtrInner
+	if v != nil {
+		res, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		pres = res
+	}
+	return &pres, nil
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (*****UpdatePtrToPtrInner, error) {
+	var pres ****UpdatePtrToPtrInner
+	if v != nil {
+		res, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		pres = res
+	}
+	return &pres, nil
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (******UpdatePtrToPtrInner, error) {
+	var pres *****UpdatePtrToPtrInner
+	if v != nil {
+		res, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		pres = res
+	}
+	return &pres, nil
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (*******UpdatePtrToPtrInner, error) {
+	var pres ******UpdatePtrToPtrInner
+	if v != nil {
+		res, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		pres = res
+	}
+	return &pres, nil
+}
+
+func (ec *executionContext) unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx context.Context, v interface{}) (********UpdatePtrToPtrInner, error) {
+	var pres *******UpdatePtrToPtrInner
+	if v != nil {
+		res, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐUpdatePtrToPtrInner(ctx, v)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		pres = res
+	}
+	return &pres, nil
 }
 
 func (ec *executionContext) marshalOVOkCaseNil2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐVOkCaseNil(ctx context.Context, sel ast.SelectionSet, v *VOkCaseNil) graphql.Marshaler {

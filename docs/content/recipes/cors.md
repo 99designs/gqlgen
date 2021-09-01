@@ -40,7 +40,7 @@ func main() {
 
     srv := handler.NewDefaultServer(starwars.NewExecutableSchema(starwars.NewResolver()))
     srv.AddTransport(&transport.Websocket{
-        Upgrader: websocket.Upgrader{
+        Upgrader: &websocket.Upgrader{
             CheckOrigin: func(r *http.Request) bool {
                 // Check against your desired domains here
                  return r.Host == "example.org"

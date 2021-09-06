@@ -29,7 +29,7 @@ Introspection can also be enabled on a per-request context basis. For example, y
 srv := handler.NewDefaultServer(es)
 srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
     if !userForContext(ctx).IsAdmin {
-        graphql.GetOperationContext(ctx).DisableIntrospection = true
+        graphql.GetRequestContext(ctx).DisableIntrospection = true
     }
 
     return next(ctx)

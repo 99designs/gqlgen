@@ -25,6 +25,7 @@ type Field struct {
 	Args             []*FieldArgument // A list of arguments to be passed to this field
 	MethodHasContext bool             // If this is bound to a go method, does the method also take a context
 	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
+	VOkFunc          bool             // If this is bound to a go method, is it of shape (interface{}, bool)
 	Object           *Object          // A link back to the parent object
 	Default          interface{}      // The default value
 	Stream           bool             // does this field return a channel?
@@ -152,6 +153,8 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		sig := target.Type().(*types.Signature)
 		if sig.Results().Len() == 1 {
 			f.NoErr = true
+		} else if s := sig.Results(); s.Len() == 2 && s.At(1).Type().String() == "bool" {
+			f.VOkFunc = true
 		} else if sig.Results().Len() != 2 {
 			return fmt.Errorf("method has wrong number of args")
 		}

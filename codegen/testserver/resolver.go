@@ -232,6 +232,14 @@ func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) ErrorBubbleList(ctx context.Context) ([]*Error, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) ErrorList(ctx context.Context) ([]*Error, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) Errors(ctx context.Context) (*Errors, error) {
 	panic("not implemented")
 }
@@ -252,6 +260,10 @@ func (r *queryResolver) PrimitiveStringObject(ctx context.Context) ([]PrimitiveS
 	panic("not implemented")
 }
 
+func (r *queryResolver) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	panic("not implemented")
 }
@@ -269,6 +281,14 @@ func (r *queryResolver) Fallback(ctx context.Context, arg FallbackToStringEncodi
 }
 
 func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) VOkCaseValue(ctx context.Context) (*VOkCaseValue, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) VOkCaseNil(ctx context.Context) (*VOkCaseNil, error) {
 	panic("not implemented")
 }
 

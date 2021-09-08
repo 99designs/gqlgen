@@ -111,6 +111,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoReceiverName = "ec"
 		f.GoFieldName = "__resolve_entities"
 		f.MethodHasContext = true
+		f.NoErr = true
 		return nil
 	case f.Name == "_service":
 		f.GoFieldType = GoFieldMethod

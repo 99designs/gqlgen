@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -67,14 +66,14 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		case ast.Object:
 			obj, err := b.buildObject(schemaType)
 			if err != nil {
-				return nil, errors.Wrap(err, "unable to build object definition")
+				return nil, fmt.Errorf("unable to build object definition: %w", err)
 			}
 
 			s.Objects = append(s.Objects, obj)
 		case ast.InputObject:
 			input, err := b.buildObject(schemaType)
 			if err != nil {
-				return nil, errors.Wrap(err, "unable to build input definition")
+				return nil, fmt.Errorf("unable to build input definition: %w", err)
 			}
 
 			s.Inputs = append(s.Inputs, input)
@@ -82,7 +81,7 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		case ast.Union, ast.Interface:
 			s.Interfaces[schemaType.Name], err = b.buildInterface(schemaType)
 			if err != nil {
-				return nil, errors.Wrap(err, "unable to bind to interface")
+				return nil, fmt.Errorf("unable to bind to interface: %w", err)
 			}
 		}
 	}

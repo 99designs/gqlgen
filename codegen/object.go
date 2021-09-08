@@ -1,13 +1,13 @@
 package codegen
 
 import (
+	"fmt"
 	"go/types"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -36,7 +36,7 @@ type Object struct {
 func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	dirs, err := b.getDirectives(typ.Directives)
 	if err != nil {
-		return nil, errors.Wrap(err, typ.Name)
+		return nil, fmt.Errorf("%s: %w", typ.Name, err)
 	}
 
 	obj := &Object{

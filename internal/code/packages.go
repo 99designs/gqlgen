@@ -2,10 +2,11 @@ package code
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"os/exec"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -154,7 +155,7 @@ func (p *Packages) ModTidy() error {
 	p.packages = nil
 	tidyCmd := exec.Command("go", "mod", "tidy")
 	if err := tidyCmd.Run(); err != nil {
-		return errors.Wrap(err, "go mod tidy failed")
+		return fmt.Errorf("go mod tidy failed: %w", err)
 	}
 	return nil
 }

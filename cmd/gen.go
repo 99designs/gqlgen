@@ -1,11 +1,11 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,7 +26,7 @@ var genCmd = &cli.Command{
 			}
 		} else {
 			cfg, err = config.LoadConfigFromDefaultLocations()
-			if os.IsNotExist(errors.Cause(err)) {
+			if os.IsNotExist(errors.Unwrap(err)) {
 				cfg, err = config.LoadDefaultConfig()
 			}
 

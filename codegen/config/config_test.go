@@ -1,12 +1,12 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
@@ -105,7 +105,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadDefaultConfig()
-		require.True(t, os.IsNotExist(errors.Cause(err)))
+		require.True(t, os.IsNotExist(errors.Unwrap(err)))
 	})
 }
 

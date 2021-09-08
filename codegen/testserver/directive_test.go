@@ -162,6 +162,9 @@ func TestDirectives(t *testing.T) {
 			Directive2: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
 				return next(ctx)
 			},
+			Directive3: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+				return next(ctx)
+			},
 			Order1: func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error) {
 				order := []string{location}
 				res, err = next(ctx)

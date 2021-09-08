@@ -10,8 +10,9 @@ RESET='\033[0m'
 HOST=https://gqlgen.com
 
 VERSIONS_ARRAY=(
-    'v0.13.0'
+    'v0.14.0'
     'origin/master'
+    'v0.13.0'
     'v0.12.2'
     'v0.11.3'
     'v0.10.2'

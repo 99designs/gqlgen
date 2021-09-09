@@ -5,9 +5,8 @@ package graphql
 
 import (
 	"context"
-	"sync"
-
 	"github.com/vektah/gqlparser/v2/ast"
+	"sync"
 )
 
 var (

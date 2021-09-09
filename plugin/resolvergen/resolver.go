@@ -2,6 +2,7 @@ package resolvergen
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"

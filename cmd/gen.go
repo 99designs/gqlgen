@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"errors"
-	"os"
+	"io/fs"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"

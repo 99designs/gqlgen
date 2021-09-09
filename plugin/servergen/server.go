@@ -2,6 +2,7 @@ package servergen
 
 import (
 	"errors"
+	"io/fs"
 	"log"
 	"os"
 

@@ -29,7 +29,7 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 		ResolverPackageName: data.Config.Resolver.ImportPath(),
 	}
 
-	if _, err := os.Stat(m.filename); os.IsNotExist(errors.Unwrap(err)) {
+	if _, err := os.Stat(m.filename); errors.Is(err, fs.ErrNotExist) {
 		return templates.Render(templates.Options{
 			PackageName: "main",
 			Filename:    m.filename,

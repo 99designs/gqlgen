@@ -26,7 +26,7 @@ var genCmd = &cli.Command{
 			}
 		} else {
 			cfg, err = config.LoadConfigFromDefaultLocations()
-			if os.IsNotExist(errors.Unwrap(err)) {
+			if errors.Is(err, fs.ErrNotExist) {
 				cfg, err = config.LoadDefaultConfig()
 			}
 

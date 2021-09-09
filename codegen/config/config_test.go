@@ -105,7 +105,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadDefaultConfig()
-		require.True(t, os.IsNotExist(errors.Unwrap(err)))
+		require.True(t, errors.Is(err, fs.ErrNotExist))
 	})
 }
 

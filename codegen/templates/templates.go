@@ -484,8 +484,9 @@ var commonInitialisms = map[string]bool{
 	"XMPP":  true,
 	"XSRF":  true,
 	"XSS":   true,
-	"QR":   true,
+	"QR":    true,
 	"KVK":   true,
+	"SVG":   true,
 }
 
 func rawQuote(s string) string {

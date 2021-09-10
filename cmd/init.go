@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -122,77 +124,74 @@ var initCmd = &cli.Command{
 			return fmt.Errorf("unable to determine import path for current directory, you probably need to run go mod init first")
 		}
 
-		if err := initSchema(ctx.String("schema")); err != nil {
+		if err := initFile(ctx.String("schema"), schemaDefault); err != nil {
 			return err
 		}
-		if !configExists(configFilename) {
-			if err := initConfig(configFilename, pkgName); err != nil {
+
+		cfg, err := loadConfig(configFilename)
+
+		if err != nil {
+			if configFilename == "" {
+				configFilename = "gqlgen.yml"
+			}
+
+			fmt.Println("Creating", configFilename)
+			if err := initFile(configFilename, executeConfigTemplate(pkgName)); err != nil {
 				return err
 			}
+
+			// create the package directory with a temporary file so that go recognises it as a package
+			// and autobinding doesn't error out
+			tmpPackageNameFile := "graph/model/_tmp_gqlgen_init.go"
+			if err := initFile(tmpPackageNameFile, "package model"); err != nil {
+				return err
+			}
+			defer os.Remove(tmpPackageNameFile)
+
+			if cfg, err = loadConfig(configFilename); err != nil {
+				panic(err)
+			}
+		} else {
+			fmt.Println("Skipping creating gqlgen.yml as it already exists")
 		}
 
-		GenerateGraphServer(serverFilename)
+		fmt.Println("Creating graph/...")
+		fmt.Println("Creating", serverFilename)
+		if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+		}
+
+		fmt.Fprintf(os.Stdout, "\nExec \"go run ./%s\" to start GraphQL server\n", serverFilename)
 		return nil
 	},
 }
 
-func GenerateGraphServer(serverFilename string) {
-	cfg, err := config.LoadConfigFromDefaultLocations()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-	}
-
-	if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-	}
-
-	fmt.Fprintf(os.Stdout, "Exec \"go run ./%s\" to start GraphQL server\n", serverFilename)
-}
-
-func configExists(configFilename string) bool {
-	var cfg *config.Config
-
+func loadConfig(configFilename string) (*config.Config, error) {
 	if configFilename != "" {
-		cfg, _ = config.LoadConfig(configFilename)
+		return config.LoadConfig(configFilename)
 	} else {
-		cfg, _ = config.LoadConfigFromDefaultLocations()
+		return config.LoadConfigFromDefaultLocations()
 	}
-	return cfg != nil
 }
 
-func initConfig(configFilename string, pkgName string) error {
-	if configFilename == "" {
-		configFilename = "gqlgen.yml"
-	}
-
-	if err := os.MkdirAll(filepath.Dir(configFilename), 0755); err != nil {
-		return fmt.Errorf("unable to create config dir: " + err.Error())
-	}
-
+func executeConfigTemplate(pkgName string) string {
 	var buf bytes.Buffer
 	if err := configTemplate.Execute(&buf, pkgName); err != nil {
 		panic(err)
 	}
 
-	if err := ioutil.WriteFile(configFilename, buf.Bytes(), 0644); err != nil {
-		return fmt.Errorf("unable to write cfg file: " + err.Error())
-	}
-
-	return nil
+	return buf.String()
 }
 
-func initSchema(schemaFilename string) error {
-	_, err := os.Stat(schemaFilename)
-	if !os.IsNotExist(err) {
-		return nil
-	}
-
-	if err := os.MkdirAll(filepath.Dir(schemaFilename), 0755); err != nil {
-		return fmt.Errorf("unable to create schema dir: " + err.Error())
-	}
-
-	if err = ioutil.WriteFile(schemaFilename, []byte(schemaDefault), 0644); err != nil {
-		return fmt.Errorf("unable to write schema file: " + err.Error())
+func initFile(filename, contents string) error {
+	_, err := os.Stat(filename)
+	if errors.Is(err, fs.ErrNotExist) {
+		if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+			return fmt.Errorf("unable to create directory for file '%s': %w", filename, err)
+		}
+		if err = ioutil.WriteFile(filename, []byte(contents), 0644); err != nil {
+			return fmt.Errorf("unable to write file '%s': %w", filename, err)
+		}
 	}
 	return nil
 }

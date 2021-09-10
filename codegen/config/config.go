@@ -519,7 +519,7 @@ func (c *Config) autobind() error {
 		}
 
 		for i, p := range ps {
-			if p.Module == nil {
+			if p == nil || p.Module == nil {
 				return fmt.Errorf("unable to load %s - make sure you're using an import path to a package that exists", c.AutoBind[i])
 			}
 			if t := p.Types.Scope().Lookup(t.Name); t != nil {

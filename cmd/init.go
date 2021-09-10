@@ -111,67 +111,69 @@ var initCmd = &cli.Command{
 	Usage: "create a new gqlgen project",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
-		&cli.StringFlag{Name: "config, c", Usage: "the config filename"},
+		&cli.StringFlag{Name: "config, c", Usage: "the config filename", Value: "gqlgen.yml"},
 		&cli.StringFlag{Name: "server", Usage: "where to write the server stub to", Value: "server.go"},
 		&cli.StringFlag{Name: "schema", Usage: "where to write the schema stub to", Value: "graph/schema.graphqls"},
 	},
 	Action: func(ctx *cli.Context) error {
 		configFilename := ctx.String("config")
 		serverFilename := ctx.String("server")
+		schemaFilename := ctx.String("schema")
 
 		pkgName := code.ImportPathForDir(".")
 		if pkgName == "" {
 			return fmt.Errorf("unable to determine import path for current directory, you probably need to run go mod init first")
 		}
 
-		if err := initFile(ctx.String("schema"), schemaDefault); err != nil {
+		// check schema and config don't already exist
+		if fileExists(configFilename) {
+			return fmt.Errorf("%s already exists\n", configFilename)
+		}
+		if fileExists(schemaFilename) {
+			return fmt.Errorf("%s already exists\n", schemaFilename)
+		}
+		if fileExists(serverFilename) {
+			return fmt.Errorf("%s already exists\n", serverFilename)
+		}
+		_, err := config.LoadConfigFromDefaultLocations()
+		if err == nil {
+			return fmt.Errorf("gqlgen.yml already exists in a parent directory\n")
+		}
+
+		// create config
+		fmt.Println("Creating", configFilename)
+		if err := initFile(configFilename, executeConfigTemplate(pkgName)); err != nil {
 			return err
 		}
 
-		cfg, err := loadConfig(configFilename)
-
-		if err != nil {
-			if configFilename == "" {
-				configFilename = "gqlgen.yml"
-			}
-
-			fmt.Println("Creating", configFilename)
-			if err := initFile(configFilename, executeConfigTemplate(pkgName)); err != nil {
-				return err
-			}
-
-			// create the package directory with a temporary file so that go recognises it as a package
-			// and autobinding doesn't error out
-			tmpPackageNameFile := "graph/model/_tmp_gqlgen_init.go"
-			if err := initFile(tmpPackageNameFile, "package model"); err != nil {
-				return err
-			}
-			defer os.Remove(tmpPackageNameFile)
-
-			if cfg, err = loadConfig(configFilename); err != nil {
-				panic(err)
-			}
-		} else {
-			fmt.Println("Skipping creating gqlgen.yml as it already exists")
+		// create schema
+		fmt.Println("Creating", schemaFilename)
+		if err := initFile(schemaFilename, schemaDefault); err != nil {
+			return err
 		}
 
-		fmt.Println("Creating graph/...")
+		// create the package directory with a temporary file so that go recognises it as a package
+		// and autobinding doesn't error out
+		tmpPackageNameFile := "graph/model/_tmp_gqlgen_init.go"
+		if err := initFile(tmpPackageNameFile, "package model"); err != nil {
+			return err
+		}
+		defer os.Remove(tmpPackageNameFile)
+
+		var cfg *config.Config
+		if cfg, err = config.LoadConfig(configFilename); err != nil {
+			panic(err)
+		}
+
 		fmt.Println("Creating", serverFilename)
+		fmt.Println("Generating...")
 		if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 		}
 
-		fmt.Fprintf(os.Stdout, "\nExec \"go run ./%s\" to start GraphQL server\n", serverFilename)
+		fmt.Printf("\nExec \"go run ./%s\" to start GraphQL server\n", serverFilename)
 		return nil
 	},
-}
-
-func loadConfig(configFilename string) (*config.Config, error) {
-	if configFilename != "" {
-		return config.LoadConfig(configFilename)
-	} else {
-		return config.LoadConfigFromDefaultLocations()
-	}
 }
 
 func executeConfigTemplate(pkgName string) string {
@@ -183,15 +185,18 @@ func executeConfigTemplate(pkgName string) string {
 	return buf.String()
 }
 
-func initFile(filename, contents string) error {
+func fileExists(filename string) bool {
 	_, err := os.Stat(filename)
-	if errors.Is(err, fs.ErrNotExist) {
-		if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
-			return fmt.Errorf("unable to create directory for file '%s': %w", filename, err)
-		}
-		if err = ioutil.WriteFile(filename, []byte(contents), 0644); err != nil {
-			return fmt.Errorf("unable to write file '%s': %w", filename, err)
-		}
+	return !errors.Is(err, fs.ErrNotExist)
+}
+
+func initFile(filename, contents string) error {
+	if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+		return fmt.Errorf("unable to create directory for file '%s': %w\n", filename, err)
 	}
+	if err := ioutil.WriteFile(filename, []byte(contents), 0644); err != nil {
+		return fmt.Errorf("unable to write file '%s': %w\n", filename, err)
+	}
+
 	return nil
 }

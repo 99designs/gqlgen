@@ -15,9 +15,10 @@ func TestAddUploadToOperations(t *testing.T) {
 		params := &RawParams{}
 
 		upload := Upload{
-			File:     file,
-			Filename: "a.txt",
-			Size:     int64(5),
+			File:        file,
+			Filename:    "a.txt",
+			Size:        int64(5),
+			ContentType: "text/plain",
 		}
 		path := "variables.req.0.file"
 		err := params.AddUpload(upload, key, path)
@@ -34,9 +35,10 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		upload := Upload{
-			File:     file,
-			Filename: "a.txt",
-			Size:     int64(5),
+			File:        file,
+			Filename:    "a.txt",
+			Size:        int64(5),
+			ContentType: "text/plain",
 		}
 
 		expected := &RawParams{
@@ -65,9 +67,10 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		upload := Upload{
-			File:     file,
-			Filename: "a.txt",
-			Size:     int64(5),
+			File:        file,
+			Filename:    "a.txt",
+			Size:        int64(5),
+			ContentType: "text/plain",
 		}
 
 		expected := &RawParams{

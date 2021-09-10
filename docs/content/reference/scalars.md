@@ -2,7 +2,7 @@
 linkTitle: Scalars
 title: Mapping GraphQL scalar types to Go types
 description: Mapping GraphQL scalar types to Go types
-menu: { main: { parent: "reference" } }
+menu: { main: { parent: "reference", weight: 10 } }
 ---
 
 ## Built-in helpers
@@ -35,9 +35,10 @@ Maps a `Upload` GraphQL scalar to a `graphql.Upload` struct, defined as follows:
 
 ```go
 type Upload struct {
-	File     io.Reader
-	Filename string
-	Size     int64
+	File        io.Reader
+	Filename    string
+	Size        int64
+	ContentType string
 }
 ```
 
@@ -59,7 +60,6 @@ package mypkg
 import (
 	"fmt"
 	"io"
-	"strings"
 )
 
 type YesNo bool
@@ -68,7 +68,7 @@ type YesNo bool
 func (y *YesNo) UnmarshalGQL(v interface{}) error {
 	yes, ok := v.(string)
 	if !ok {
-		return fmt.Errorf("points must be strings")
+		return fmt.Errorf("YesNo must be a string")
 	}
 
 	if yes == "yes" {
@@ -89,7 +89,7 @@ func (y YesNo) MarshalGQL(w io.Writer) {
 }
 ```
 
-and then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+and then wire up the type in .gqlgen.yml or via directives like normal:
 
 ```yaml
 models:
@@ -99,8 +99,8 @@ models:
 
 ## Custom scalars with third party types
 
-Sometimes you cant add methods to a type because its in another repo, part of the standard
-library (eg string or time.Time). To do this we can build an external marshaler:
+Sometimes you are unable to add add methods to a type - perhaps you don't own the type, or it is part of the standard
+library (eg string or time.Time). To support this we can build an external marshaler:
 
 ```go
 package mypkg
@@ -146,4 +146,61 @@ models:
     model: github.com/me/mypkg.MyCustomBooleanScalar
 ```
 
+**Note:** you also can un/marshal to pointer types via this approach, simply accept a pointer in your
+`Marshal...` func and return one in your `Unmarshal...` func.
+
 See the [example/scalars](https://github.com/99designs/gqlgen/tree/master/example/scalars) package for more examples.
+
+## Unmarshaling Errors
+
+The errors that occur as part of custom scalar unmarshaling will return a full path to the field.
+For example, given the following schema ...
+
+```graphql
+extend type Mutation{
+    updateUser(userInput: UserInput!): User!
+}
+
+input UserInput {
+    name: String!
+    primaryContactDetails: ContactDetailsInput!
+    secondaryContactDetails: ContactDetailsInput!
+}
+
+scalar Email
+input ContactDetailsInput {
+    email: Email!
+}
+```
+
+... and the following variables:
+
+```json
+
+{
+  "userInput": {
+    "name": "George",
+    "primaryContactDetails": {
+      "email": "not-an-email"
+    },
+    "secondaryContactDetails": {
+      "email": "george@gmail.com"
+    }
+  }
+}
+```
+
+... and an unmarshal function that returns an error if the email is invalid. The mutation will return an error containing the full path:
+```json
+{
+  "message": "email invalid",
+  "path": [
+    "updateUser",
+    "userInput",
+    "primaryContactDetails",
+    "email"
+  ]
+}
+```
+
+

@@ -25,6 +25,7 @@ type Field struct {
 	Args             []*FieldArgument // A list of arguments to be passed to this field
 	MethodHasContext bool             // If this is bound to a go method, does the method also take a context
 	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
+	VOkFunc          bool             // If this is bound to a go method, is it of shape (interface{}, bool)
 	Object           *Object          // A link back to the parent object
 	Default          interface{}      // The default value
 	Stream           bool             // does this field return a channel?
@@ -83,6 +84,18 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			}
 			f.TypeReference = tr
 		}
+		if f.TypeReference != nil {
+			dirs, err := b.getDirectives(f.TypeReference.Definition.Directives)
+			if err != nil {
+				errret = err
+			}
+			for _, dir := range obj.Directives {
+				if dir.IsLocation(ast.LocationInputObject) {
+					dirs = append(dirs, dir)
+				}
+			}
+			f.Directives = append(dirs, f.Directives...)
+		}
 	}()
 
 	f.Stream = obj.Stream
@@ -103,6 +116,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoReceiverName = "ec"
 		f.GoFieldName = "__resolve_entities"
 		f.MethodHasContext = true
+		f.NoErr = true
 		return nil
 	case f.Name == "_service":
 		f.GoFieldType = GoFieldMethod
@@ -145,6 +159,8 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		sig := target.Type().(*types.Signature)
 		if sig.Results().Len() == 1 {
 			f.NoErr = true
+		} else if s := sig.Results(); s.Len() == 2 && s.At(1).Type().String() == "bool" {
+			f.VOkFunc = true
 		} else if sig.Results().Len() != 2 {
 			return fmt.Errorf("method has wrong number of args")
 		}
@@ -410,7 +426,8 @@ func (f *Field) ImplDirectives() []*Directive {
 		loc = ast.LocationInputFieldDefinition
 	}
 	for i := range f.Directives {
-		if !f.Directives[i].Builtin && f.Directives[i].IsLocation(loc) {
+		if !f.Directives[i].Builtin &&
+			(f.Directives[i].IsLocation(loc, ast.LocationObject) || f.Directives[i].IsLocation(loc, ast.LocationInputObject)) {
 			d = append(d, f.Directives[i])
 		}
 	}
@@ -484,7 +501,7 @@ func (f *Field) ShortResolverDeclaration() string {
 }
 
 func (f *Field) ComplexitySignature() string {
-	res := fmt.Sprintf("func(childComplexity int")
+	res := "func(childComplexity int"
 	for _, arg := range f.Args {
 		res += fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}

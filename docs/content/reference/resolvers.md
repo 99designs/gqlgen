@@ -2,7 +2,7 @@
 linkTitle: Resolvers
 title: Resolving graphQL requests
 description: Different ways of binding graphQL requests to resolvers
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 There are multiple ways that a graphQL type can be bound to a Go struct that allows for many usecases.
@@ -47,7 +47,7 @@ ignoring the case of the fields
 This is also very common use case that comes up where we want to bind a graphQL field to a Go struct method
 
 ```go
-type Person {
+type Person struct {
     Name string
 }
 
@@ -102,7 +102,7 @@ The first way is you can bind resolvers to a struct based off of struct tags lik
 ```go
 type Car struct {
     Make string
-    ShortState string 
+    ShortState string
     LongState string `gqlgen:"state"`
     Model string
     Color string
@@ -171,7 +171,7 @@ models:
 All of the rules from above apply to a struct that has an embedded struct.
 Here is an example
 ```go
-type Truck {
+type Truck struct {
     Car
 
     Is4x4 bool
@@ -179,7 +179,7 @@ type Truck {
 
 type Car struct {
     Make string
-    ShortState string 
+    ShortState string
     LongState string
     Model string
     Color string

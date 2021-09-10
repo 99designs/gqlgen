@@ -1,12 +1,16 @@
 type Query {
     user(id: ID!): User
     search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
+    userByTier(tier: Tier!, darkMode: DarkMode!): [User!]!
 }
 
 type User {
     id: ID!
     name: String!
     created: Timestamp
+    modified: Timestamp
+    valPrefs: DarkMode
+    ptrPrefs: DarkMode
     isBanned: Banned!
     primitiveResolver: String!
     customResolver: Point!
@@ -34,3 +38,4 @@ enum Tier {
 scalar Timestamp
 scalar Point
 scalar Banned
+scalar DarkMode

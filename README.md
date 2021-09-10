@@ -1,20 +1,24 @@
-# gqlgen [![CircleCI](https://badgen.net/circleci/github/99designs/gqlgen/master)](https://circleci.com/gh/99designs/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
+# gqlgen [![Integration](https://github.com/99designs/gqlgen/actions/workflows/integration.yml/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/) [![Coverage Status](https://coveralls.io/repos/github/99designs/gqlgen/badge.svg?branch=master)](https://coveralls.io/github/99designs/gqlgen?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/99designs/gqlgen)](https://goreportcard.com/report/github.com/99designs/gqlgen) [![GoDoc](https://godoc.org/github.com/99designs/gqlgen?status.svg)](https://godoc.org/github.com/99designs/gqlgen)
+
+![gqlgen](https://user-images.githubusercontent.com/46195831/89802919-0bb8ef00-db2a-11ea-8ba4-88e7a58b2fd2.png)
 
 ## What is gqlgen?
 
-[gqlgen](https://github.com/99designs/gqlgen) is a Go library for building GraphQL servers without any fuss. gqlgen is:
+[gqlgen](https://github.com/99designs/gqlgen) is a Go library for building GraphQL servers without any fuss.<br/> 
 
-- **Schema first** — Define your API using the GraphQL [Schema Definition Language](http://graphql.org/learn/schema/).
-- **Type safe** — You should never see `map[string]interface{}` here.
-- **Codegen** — Let us generate the boring bits, so you can build your app quickly.
+- **gqlgen is based on a Schema first approach** — You get to Define your API using the GraphQL [Schema Definition Language](http://graphql.org/learn/schema/).
+- **gqlgen prioritizes Type safety** — You should never see `map[string]interface{}` here.
+- **gqlgen enables Codegen** — We generate the boring bits, so you can focus on building your app quickly.
 
-[Feature Comparison](https://gqlgen.com/feature-comparison/)
+Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go graphql [implementations](https://gqlgen.com/feature-comparison/)
 
 ## Getting Started
+- To install gqlgen run the command `go get github.com/99designs/gqlgen` in your project directory.<br/> 
+- You could initialize a new project using the recommended folder structure by running this command `go run github.com/99designs/gqlgen init`.
 
-First work your way through the [Getting Started](https://gqlgen.com/getting-started/) tutorial.
-
-If you can't find what your looking for, look at our [examples](https://github.com/99designs/gqlgen/tree/master/example) for example usage of gqlgen.
+You could find a more comprehensive guide to help you get started [here](https://gqlgen.com/getting-started/).<br/>
+We also have a couple of real-world [examples](https://github.com/99designs/gqlgen/tree/master/example) that show how to GraphQL applications with **gqlgen** seamlessly,
+You can see these [examples](https://github.com/99designs/gqlgen/tree/master/example) here or visit [godoc](https://godoc.org/github.com/99designs/gqlgen).
 
 ## Reporting Issues
 
@@ -22,8 +26,7 @@ If you think you've found a bug, or something isn't behaving the way you think i
 
 ## Contributing
 
-Read our [Contribution Guidelines](https://github.com/99designs/gqlgen/blob/master/CONTRIBUTING.md) for information on how you can help out gqlgen.
-
+We welcome contributions, Read our [Contribution Guidelines](https://github.com/99designs/gqlgen/blob/master/CONTRIBUTING.md) to learn more about contributing to **gqlgen**
 ## Frequently asked questions
 
 ### How do I prevent fetching child objects that might not be used?
@@ -38,11 +41,11 @@ type User {
 }
 ```
 
-You need to tell gqlgen that we should only fetch friends if the user requested it. There are two ways to do this.
+You need to tell gqlgen that it should only fetch friends if the user requested it. There are two ways to do this;
 
-#### Custom Models
+- #### Using Custom Models
 
-Write a custom model that omits the Friends model:
+Write a custom model that omits the friends field:
 
 ```go
 type User struct {
@@ -60,9 +63,9 @@ models:
     model: github.com/you/pkg/model.User # go import path to the User struct above
 ```
 
-#### Explicit Resolvers
+- #### Using Explicit Resolvers
 
-If you want to Keep using the generated model: mark the field as requiring a resolver explicitly in `gqlgen.yml`:
+If you want to Keep using the generated model, mark the field as requiring a resolver explicitly in `gqlgen.yml` like this:
 
 ```yaml
 # gqlgen.yml
@@ -82,9 +85,28 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 }
 ```
 
-### IDs are strings but I like ints, why cant I have ints?
+You can also use inline config with directives to achieve the same result
 
-You can by remapping it in config:
+```graphql
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+type User @goModel(model: "github.com/you/pkg/model.User") {
+    id: ID!         @goField(name: "todoId")
+    friends: [User!]!   @goField(forceResolver: true)
+}
+```
+
+### Can I change the type of the ID from type String to Type Int?
+
+Yes! You can by remapping it in config as seen below:
 
 ```yaml
 models:
@@ -100,7 +122,7 @@ first model in this list is used as the default type and it will always be used 
 - Generating models based on schema
 - As arguments in resolvers
 
-There isnt any way around this, gqlgen has no way to know what you want in a given context.
+There isn't any way around this, gqlgen has no way to know what you want in a given context.
 
 ## Other Resources
 

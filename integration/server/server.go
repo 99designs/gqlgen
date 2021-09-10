@@ -2,17 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/99designs/gqlgen/integration"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -33,10 +32,11 @@ func main() {
 
 	srv := handler.NewDefaultServer(integration.NewExecutableSchema(cfg))
 	srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
-		if e, ok := errors.Cause(e).(*integration.CustomError); ok {
+		var ie *integration.CustomError
+		if errors.As(e, &ie) {
 			return &gqlerror.Error{
-				Message: e.UserMessage,
-				Path:    graphql.GetFieldContext(ctx).Path(),
+				Message: ie.UserMessage,
+				Path:    graphql.GetPath(ctx),
 			}
 		}
 		return graphql.DefaultErrorPresenter(ctx, e)

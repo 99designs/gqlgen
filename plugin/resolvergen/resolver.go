@@ -71,7 +71,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Resolver.Package,
-		PackageDoc:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
+		FileNotice:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,
@@ -79,7 +79,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 }
 
 func (m *Plugin) generatePerSchema(data *codegen.Data) error {
-	rewriter, err := rewrite.New(data.Config.Resolver.ImportPath())
+	rewriter, err := rewrite.New(data.Config.Resolver.Dir())
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 	for _, o := range data.Objects {
 		if o.HasResolvers() {
-			fn := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name)
+			fn := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			if files[fn] == nil {
 				files[fn] = &File{}
 			}
@@ -109,7 +109,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 
 			resolver := Resolver{o, f, implementation}
-			fn := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name)
+			fn := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			if files[fn] == nil {
 				files[fn] = &File{}
 			}
@@ -132,7 +132,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
-			PackageDoc: `
+			FileNotice: `
 				// This file will be automatically regenerated based on the schema, any resolver implementations
 				// will be copied through when generating and any unknown code will be moved to the end.`,
 			Filename: filename,
@@ -147,7 +147,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 	if _, err := os.Stat(data.Config.Resolver.Filename); os.IsNotExist(errors.Cause(err)) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
-			PackageDoc: `
+			FileNotice: `
 				// This file will not be regenerated automatically.
 				//
 				// It serves as dependency injection for your app, add any dependencies you require here.`,
@@ -196,9 +196,12 @@ type Resolver struct {
 	Implementation string
 }
 
-func gqlToResolverName(base string, gqlname string) string {
+func gqlToResolverName(base string, gqlname, filenameTmpl string) string {
 	gqlname = filepath.Base(gqlname)
 	ext := filepath.Ext(gqlname)
-
-	return filepath.Join(base, strings.TrimSuffix(gqlname, ext)+".resolvers.go")
+	if filenameTmpl == "" {
+		filenameTmpl = "{name}.resolvers.go"
+	}
+	filename := strings.ReplaceAll(filenameTmpl, "{name}", strings.TrimSuffix(gqlname, ext))
+	return filepath.Join(base, filename)
 }

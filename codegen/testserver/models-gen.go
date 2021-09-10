@@ -113,13 +113,18 @@ type Map struct {
 	ID string `json:"id"`
 }
 
+type NestedInput struct {
+	Field Email `json:"field"`
+}
+
 type NestedMapInput struct {
 	Map map[string]interface{} `json:"map"`
 }
 
 type ObjectDirectives struct {
-	Text         string  `json:"text"`
-	NullableText *string `json:"nullableText"`
+	Text         string   `json:"text"`
+	NullableText *string  `json:"nullableText"`
+	Order        []string `json:"order"`
 }
 
 type OuterInput struct {
@@ -135,6 +140,10 @@ type Slices struct {
 	Test2 []string  `json:"test2"`
 	Test3 []*string `json:"test3"`
 	Test4 []string  `json:"test4"`
+}
+
+type SpecialInput struct {
+	Nesting *NestedInput `json:"nesting"`
 }
 
 type User struct {

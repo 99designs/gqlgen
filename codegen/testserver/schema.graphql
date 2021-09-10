@@ -12,6 +12,7 @@ type Query {
     user(id: Int!): User!
     nullableArg(arg: Int = 123): String
     inputSlice(arg: [String!]!): Boolean!
+    inputNullableSlice(arg: [String!]): Boolean!
     shapeUnion: ShapeUnion!
     autobind: Autobind
     deprecatedField: String! @deprecated(reason: "test deprecated directive")

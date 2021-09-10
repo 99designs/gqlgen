@@ -12,6 +12,7 @@ import (
 
 func TestImportPathForDir(t *testing.T) {
 	wd, err := os.Getwd()
+
 	require.NoError(t, err)
 
 	assert.Equal(t, "github.com/99designs/gqlgen/internal/code", ImportPathForDir(wd))
@@ -22,6 +23,9 @@ func TestImportPathForDir(t *testing.T) {
 
 	// directory does not exist
 	assert.Equal(t, "github.com/99designs/gqlgen/dos", ImportPathForDir(filepath.Join(wd, "..", "..", "dos")))
+
+	// out of module
+	assert.Equal(t, "", ImportPathForDir(filepath.Join(wd, "..", "..", "..")))
 
 	if runtime.GOOS == "windows" {
 		assert.Equal(t, "", ImportPathForDir("C:/doesnotexist"))

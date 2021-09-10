@@ -1,28 +1,33 @@
-import React, { Component } from 'react';
-import Room from './Room';
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { Room } from './Room';
 
-class App extends Component {
-    constructor(props) {
-        super(props);
+const Input = styled.div`
+    padding: 4px;
+    margin: 0 0 4px;
 
-        this.state = {
-            name: 'tester',
-            channel: '#gophers',
-        }
+    input {
+        border: 1px solid #ccc;
+        padding: 2px;
+        font-size: 14px;
     }
-    render() {
-        return (<div>
-            name: <br/>
-            <input value={this.state.name} onChange={(e) => this.setState({name: e.target.value })} /> <br />
+`;
 
-            channel: <br />
-            <input value={this.state.channel} onChange={(e) => this.setState({channel: e.target.value })}/> <br/>
+export const App = () => {
+    const [name, setName] = useState('tester');
+    const [channel, setChannel] = useState('#gophers');
 
-            <Room channel={this.state.channel} name={this.state.name} />
-        </div>
-        );
-    }
-}
+    return (
+        <>
+            <Input>
+                name: <input value={name} onChange={(e) => setName(e.target.value)} />
+            </Input>
+            <Input>
+                channel: <input value={channel} onChange={(e) => setChannel(e.target.value)} />
+            </Input>
 
+            <Room channel={channel} name={name} />
+        </>
+    );
 
-export default App;
+};

@@ -2,7 +2,7 @@
 title: "Optimizing N+1 database queries using Dataloaders"
 description: Speeding up your GraphQL requests by reducing the number of round trips to the database.
 linkTitle: Dataloaders
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 Have you noticed some GraphQL queries end can make hundreds of database
@@ -39,7 +39,7 @@ work with whatever your favourite ORM is.
 
 The query executor will call the Query.Todos resolver which does a `select * from todo` and
 return N todos. Then for each of the todos, concurrently, call the Todo_user resolver,
-`SELECT from USER where id = todo.id`.
+`SELECT from USER where id = todo.user_id`.
 
 
 eg:
@@ -83,6 +83,7 @@ doesnt have generics. Instead we generate the code manually for our instance.
 go get github.com/vektah/dataloaden
 mkdir dataloader
 cd dataloader
+echo 'package dataloader' > gen.go
 go run github.com/vektah/dataloaden UserLoader int *gqlgen-tutorials/dataloader/graph/model.User
 ```
 
@@ -130,7 +131,6 @@ func Middleware(conn *sql.DB, next http.Handler) http.Handler {
 					users := make([]*model.User, len(ids))
 					for i, id := range ids {
 						users[i] = userById[id]
-						i++
 					}
 
 					return users, nil
@@ -158,7 +158,7 @@ func (r *todoResolver) UserLoader(ctx context.Context, obj *model.Todo) (*model.
 }
 ```
 
-The end result? just 2 queries!
+The end result? Just 2 queries!
 ```sql
 SELECT id, todo, user_id FROM todo
 SELECT id, name from user WHERE id IN (?,?,?,?,?)

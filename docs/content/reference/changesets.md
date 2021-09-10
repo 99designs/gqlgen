@@ -2,14 +2,14 @@
 linkTitle: Changesets
 title: Using maps as changesets
 description: Falling back to map[string]interface{} to allow for presence checks.
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 Occasionally you need to distinguish presence from nil (undefined vs null). In gqlgen we do this using maps:
 
 
 ```graphql
-type Query {
+type Mutation {
 	updateUser(id: ID!, changes: UserChanges!): User
 }
 
@@ -28,7 +28,7 @@ models:
 
 After running go generate you should end up with a resolver that looks like this:
 ```go
-func (r *queryResolver) UpdateUser(ctx context.Context, id int, changes map[string]interface{}) (*User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, id int, changes map[string]interface{}) (*User, error) {
 	u := fetchFromDb(id)
 	/// apply the changes
 	saveToDb(u)

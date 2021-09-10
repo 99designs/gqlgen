@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/executor"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -16,26 +17,15 @@ import (
 
 type (
 	Server struct {
-		es         graphql.ExecutableSchema
 		transports []graphql.Transport
-		extensions []graphql.HandlerExtension
-		exec       executor
-
-		errorPresenter graphql.ErrorPresenterFunc
-		recoverFunc    graphql.RecoverFunc
-		queryCache     graphql.Cache
+		exec       *executor.Executor
 	}
 )
 
 func New(es graphql.ExecutableSchema) *Server {
-	s := &Server{
-		es:             es,
-		errorPresenter: graphql.DefaultErrorPresenter,
-		recoverFunc:    graphql.DefaultRecover,
-		queryCache:     graphql.NoCache{},
+	return &Server{
+		exec: executor.New(es),
 	}
-	s.exec = newExecutor(s)
-	return s
 }
 
 func NewDefaultServer(es graphql.ExecutableSchema) *Server {
@@ -64,49 +54,34 @@ func (s *Server) AddTransport(transport graphql.Transport) {
 }
 
 func (s *Server) SetErrorPresenter(f graphql.ErrorPresenterFunc) {
-	s.errorPresenter = f
+	s.exec.SetErrorPresenter(f)
 }
 
 func (s *Server) SetRecoverFunc(f graphql.RecoverFunc) {
-	s.recoverFunc = f
+	s.exec.SetRecoverFunc(f)
 }
 
 func (s *Server) SetQueryCache(cache graphql.Cache) {
-	s.queryCache = cache
+	s.exec.SetQueryCache(cache)
 }
 
 func (s *Server) Use(extension graphql.HandlerExtension) {
-	if err := extension.Validate(s.es); err != nil {
-		panic(err)
-	}
-
-	switch extension.(type) {
-	case graphql.OperationParameterMutator,
-		graphql.OperationContextMutator,
-		graphql.OperationInterceptor,
-		graphql.FieldInterceptor,
-		graphql.ResponseInterceptor:
-		s.extensions = append(s.extensions, extension)
-		s.exec = newExecutor(s)
-
-	default:
-		panic(fmt.Errorf("cannot Use %T as a gqlgen handler extension because it does not implement any extension hooks", extension))
-	}
+	s.exec.Use(extension)
 }
 
 // AroundFields is a convenience method for creating an extension that only implements field middleware
 func (s *Server) AroundFields(f graphql.FieldMiddleware) {
-	s.Use(FieldFunc(f))
+	s.exec.AroundFields(f)
 }
 
 // AroundOperations is a convenience method for creating an extension that only implements operation middleware
 func (s *Server) AroundOperations(f graphql.OperationMiddleware) {
-	s.Use(OperationFunc(f))
+	s.exec.AroundOperations(f)
 }
 
 // AroundResponses is a convenience method for creating an extension that only implements response middleware
 func (s *Server) AroundResponses(f graphql.ResponseMiddleware) {
-	s.Use(ResponseFunc(f))
+	s.exec.AroundResponses(f)
 }
 
 func (s *Server) getTransport(r *http.Request) graphql.Transport {
@@ -121,7 +96,7 @@ func (s *Server) getTransport(r *http.Request) graphql.Transport {
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
-			err := s.errorPresenter(r.Context(), s.recoverFunc(r.Context(), err))
+			err := s.exec.PresentRecoveredError(r.Context(), err)
 			resp := &graphql.Response{Errors: []*gqlerror.Error{err}}
 			b, _ := json.Marshal(resp)
 			w.WriteHeader(http.StatusUnprocessableEntity)

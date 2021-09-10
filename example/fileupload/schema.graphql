@@ -6,6 +6,7 @@ type File {
     id: Int!
     name: String!
     content: String!
+    contentType: String!
 }
 
 "The `UploadFile` type, represents the request for uploading a file with certain payload."

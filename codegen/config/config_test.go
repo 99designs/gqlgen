@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
@@ -53,7 +54,7 @@ func TestLoadConfig(t *testing.T) {
 	})
 }
 
-func TestLoadDefaultConfig(t *testing.T) {
+func TestLoadConfigFromDefaultLocation(t *testing.T) {
 	testDir, err := os.Getwd()
 	require.NoError(t, err)
 	var cfg *Config
@@ -82,6 +83,29 @@ func TestLoadDefaultConfig(t *testing.T) {
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.True(t, os.IsNotExist(err))
+	})
+}
+
+func TestLoadDefaultConfig(t *testing.T) {
+	testDir, err := os.Getwd()
+	require.NoError(t, err)
+	var cfg *Config
+
+	t.Run("will find the schema", func(t *testing.T) {
+		err = os.Chdir(filepath.Join(testDir, "testdata", "defaultconfig"))
+		require.NoError(t, err)
+
+		cfg, err = LoadDefaultConfig()
+		require.NoError(t, err)
+		require.NotEmpty(t, cfg.Sources)
+	})
+
+	t.Run("will return error if schema doesn't exist", func(t *testing.T) {
+		err = os.Chdir(testDir)
+		require.NoError(t, err)
+
+		cfg, err = LoadDefaultConfig()
+		require.True(t, os.IsNotExist(errors.Cause(err)))
 	})
 }
 

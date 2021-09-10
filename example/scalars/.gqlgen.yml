@@ -16,3 +16,5 @@ models:
     model: github.com/99designs/gqlgen/example/scalars/model.Tier
   Banned:
     model: github.com/99designs/gqlgen/example/scalars/model.Banned
+  DarkMode:
+    model: github.com/99designs/gqlgen/example/scalars/model.Preferences

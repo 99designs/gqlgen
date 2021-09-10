@@ -5,7 +5,10 @@ directive @logged(id: UUID!) on FIELD
 directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
+directive @directive3 on INPUT_OBJECT
 directive @unimplemented on FIELD_DEFINITION
+directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
+directive @order2(location: String!) on OBJECT
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
@@ -13,7 +16,7 @@ extend type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
-    directiveObject: ObjectDirectives
+    directiveObject: ObjectDirectives @order1(location: "Query_field")
     directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
     directiveField: String
@@ -28,7 +31,7 @@ extend type Subscription {
     directiveUnimplemented: String @unimplemented
 }
 
-input InputDirectives {
+input InputDirectives @directive3 {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
     inner: InnerDirectives!
@@ -40,9 +43,10 @@ input InnerDirectives {
     message: String! @length(min: 1, message: "not valid")
 }
 
-type ObjectDirectives {
+type ObjectDirectives @order1(location: "order1_1") @order1(location: "order1_2") @order2(location: "order2_1") {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
+    order: [String!]!
 }
 
 type ObjectDirectivesWithCustomGoModel {

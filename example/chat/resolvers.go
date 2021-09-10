@@ -11,6 +11,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type ckey string
+
 type resolver struct {
 	Rooms map[string]*Chatroom
 	mu    sync.Mutex // nolint: structcheck
@@ -35,14 +37,14 @@ func New() Config {
 		},
 		Directives: DirectiveRoot{
 			User: func(ctx context.Context, obj interface{}, next graphql.Resolver, username string) (res interface{}, err error) {
-				return next(context.WithValue(ctx, "username", username))
+				return next(context.WithValue(ctx, ckey("username"), username))
 			},
 		},
 	}
 }
 
 func getUsername(ctx context.Context) string {
-	if username, ok := ctx.Value("username").(string); ok {
+	if username, ok := ctx.Value(ckey("username")).(string); ok {
 		return username
 	}
 	return ""

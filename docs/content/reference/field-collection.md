@@ -2,7 +2,7 @@
 title: 'Determining which fields were requested by a query'
 description: How to determine which fields a query requested in a resolver.
 linkTitle: Field Collection
-menu: { main: { parent: 'reference' } }
+menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
 Often it is useful to know which fields were queried for in a resolver.  Having this information can allow a resolver to only fetch the set of fields required from a data source, rather than over-fetching everything and allowing gqlgen to do the rest.
@@ -55,3 +55,66 @@ The type `Circle` would satisfy `Circle`, `Shape`, and `Shapes` — these values
 > Note
 >
 > `CollectFieldsCtx` is just a convenience wrapper around `CollectFields` that calls the later with the selection set automatically passed through from the resolver context.
+
+## Practical example
+
+Say we have the following GraphQL query
+
+```graphql
+query {
+  flowBlocks {
+    id
+    block {
+      id
+      title
+      type
+      choices {
+        id
+        title
+        description
+        slug
+      }
+    }
+  }
+}
+```
+
+We don't want to overfetch our database so we want to know which field are requested.
+Here is an example which get's all requested field as convenient string slice, which can be easily checked.
+
+```golang
+func GetPreloads(ctx context.Context) []string {
+	return GetNestedPreloads(
+		graphql.GetOperationContext(ctx),
+		graphql.CollectFieldsCtx(ctx, nil),
+		"",
+	)
+}
+
+func GetNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string) (preloads []string) {
+	for _, column := range fields {
+		prefixColumn := GetPreloadString(prefix, column.Name)
+		preloads = append(preloads, prefixColumn)
+		preloads = append(preloads, GetNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn)...)
+	}
+	return
+}
+
+func GetPreloadString(prefix, name string) string {
+	if len(prefix) > 0 {
+		return prefix + "." + name
+	}
+	return name
+}
+
+```
+
+So if we call these helpers in our resolver:
+```golang
+func (r *queryResolver) FlowBlocks(ctx context.Context) ([]*FlowBlock, error) {
+	preloads := getPreloads(ctx)
+```
+it will result in the following string slice:
+```
+["id", "block", "block.id", "block.title", "block.type", "block.choices", "block.choices.id", "block.choices.title", "block.choices.description", "block.choices.slug"]
+```

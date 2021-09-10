@@ -7,6 +7,7 @@ import (
 
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/introspection"
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/invalid-packagename"
+	"github.com/99designs/gqlgen/codegen/testserver/otherpkg"
 )
 
 type Stub struct {
@@ -25,6 +26,9 @@ type Stub struct {
 	}
 	ModelMethodsResolver struct {
 		ResolverField func(ctx context.Context, obj *ModelMethods) (bool, error)
+	}
+	MutationResolver struct {
+		UpdateSomething func(ctx context.Context, input SpecialInput) (string, error)
 	}
 	OverlappingFieldsResolver struct {
 		OldFoo func(ctx context.Context, obj *OverlappingFields) (int, error)
@@ -51,6 +55,7 @@ type Stub struct {
 		User                             func(ctx context.Context, id int) (*User, error)
 		NullableArg                      func(ctx context.Context, arg *int) (*string, error)
 		InputSlice                       func(ctx context.Context, arg []string) (bool, error)
+		InputNullableSlice               func(ctx context.Context, arg []string) (bool, error)
 		ShapeUnion                       func(ctx context.Context) (ShapeUnion, error)
 		Autobind                         func(ctx context.Context) (*Autobind, error)
 		DeprecatedField                  func(ctx context.Context) (string, error)
@@ -80,19 +85,26 @@ type Stub struct {
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 		ErrorBubble                      func(ctx context.Context) (*Error, error)
+		ErrorBubbleList                  func(ctx context.Context) ([]*Error, error)
+		ErrorList                        func(ctx context.Context) ([]*Error, error)
 		Errors                           func(ctx context.Context) (*Errors, error)
 		Valid                            func(ctx context.Context) (string, error)
 		Panics                           func(ctx context.Context) (*Panics, error)
 		PrimitiveObject                  func(ctx context.Context) ([]Primitive, error)
 		PrimitiveStringObject            func(ctx context.Context) ([]PrimitiveString, error)
+		PtrToSliceContainer              func(ctx context.Context) (*PtrToSliceContainer, error)
 		DefaultScalar                    func(ctx context.Context, arg string) (string, error)
 		Slices                           func(ctx context.Context) (*Slices, error)
 		ScalarSlice                      func(ctx context.Context) ([]byte, error)
 		Fallback                         func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 		OptionalUnion                    func(ctx context.Context) (TestUnion, error)
+		VOkCaseValue                     func(ctx context.Context) (*VOkCaseValue, error)
+		VOkCaseNil                       func(ctx context.Context) (*VOkCaseNil, error)
 		ValidType                        func(ctx context.Context) (*ValidType, error)
 		WrappedStruct                    func(ctx context.Context) (*WrappedStruct, error)
-		WrappedScalar                    func(ctx context.Context) (WrappedScalar, error)
+		WrappedScalar                    func(ctx context.Context) (otherpkg.Scalar, error)
+		WrappedMap                       func(ctx context.Context) (WrappedMap, error)
+		WrappedSlice                     func(ctx context.Context) (WrappedSlice, error)
 	}
 	SubscriptionResolver struct {
 		Updated                func(ctx context.Context) (<-chan string, error)
@@ -105,6 +117,12 @@ type Stub struct {
 	}
 	UserResolver struct {
 		Friends func(ctx context.Context, obj *User) ([]*User, error)
+	}
+	WrappedMapResolver struct {
+		Get func(ctx context.Context, obj WrappedMap, key string) (string, error)
+	}
+	WrappedSliceResolver struct {
+		Get func(ctx context.Context, obj WrappedSlice, idx int) (string, error)
 	}
 }
 
@@ -119,6 +137,9 @@ func (r *Stub) ForcedResolver() ForcedResolverResolver {
 }
 func (r *Stub) ModelMethods() ModelMethodsResolver {
 	return &stubModelMethods{r}
+}
+func (r *Stub) Mutation() MutationResolver {
+	return &stubMutation{r}
 }
 func (r *Stub) OverlappingFields() OverlappingFieldsResolver {
 	return &stubOverlappingFields{r}
@@ -140,6 +161,12 @@ func (r *Stub) Subscription() SubscriptionResolver {
 }
 func (r *Stub) User() UserResolver {
 	return &stubUser{r}
+}
+func (r *Stub) WrappedMap() WrappedMapResolver {
+	return &stubWrappedMap{r}
+}
+func (r *Stub) WrappedSlice() WrappedSliceResolver {
+	return &stubWrappedSlice{r}
 }
 
 type stubBackedByInterface struct{ *Stub }
@@ -176,6 +203,12 @@ type stubModelMethods struct{ *Stub }
 
 func (r *stubModelMethods) ResolverField(ctx context.Context, obj *ModelMethods) (bool, error) {
 	return r.ModelMethodsResolver.ResolverField(ctx, obj)
+}
+
+type stubMutation struct{ *Stub }
+
+func (r *stubMutation) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
+	return r.MutationResolver.UpdateSomething(ctx, input)
 }
 
 type stubOverlappingFields struct{ *Stub }
@@ -239,6 +272,9 @@ func (r *stubQuery) NullableArg(ctx context.Context, arg *int) (*string, error) 
 }
 func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) {
 	return r.QueryResolver.InputSlice(ctx, arg)
+}
+func (r *stubQuery) InputNullableSlice(ctx context.Context, arg []string) (bool, error) {
+	return r.QueryResolver.InputNullableSlice(ctx, arg)
 }
 func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	return r.QueryResolver.ShapeUnion(ctx)
@@ -327,6 +363,12 @@ func (r *stubQuery) MapNestedStringInterface(ctx context.Context, in *NestedMapI
 func (r *stubQuery) ErrorBubble(ctx context.Context) (*Error, error) {
 	return r.QueryResolver.ErrorBubble(ctx)
 }
+func (r *stubQuery) ErrorBubbleList(ctx context.Context) ([]*Error, error) {
+	return r.QueryResolver.ErrorBubbleList(ctx)
+}
+func (r *stubQuery) ErrorList(ctx context.Context) ([]*Error, error) {
+	return r.QueryResolver.ErrorList(ctx)
+}
 func (r *stubQuery) Errors(ctx context.Context) (*Errors, error) {
 	return r.QueryResolver.Errors(ctx)
 }
@@ -341,6 +383,9 @@ func (r *stubQuery) PrimitiveObject(ctx context.Context) ([]Primitive, error) {
 }
 func (r *stubQuery) PrimitiveStringObject(ctx context.Context) ([]PrimitiveString, error) {
 	return r.QueryResolver.PrimitiveStringObject(ctx)
+}
+func (r *stubQuery) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
+	return r.QueryResolver.PtrToSliceContainer(ctx)
 }
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)
@@ -357,14 +402,26 @@ func (r *stubQuery) Fallback(ctx context.Context, arg FallbackToStringEncoding) 
 func (r *stubQuery) OptionalUnion(ctx context.Context) (TestUnion, error) {
 	return r.QueryResolver.OptionalUnion(ctx)
 }
+func (r *stubQuery) VOkCaseValue(ctx context.Context) (*VOkCaseValue, error) {
+	return r.QueryResolver.VOkCaseValue(ctx)
+}
+func (r *stubQuery) VOkCaseNil(ctx context.Context) (*VOkCaseNil, error) {
+	return r.QueryResolver.VOkCaseNil(ctx)
+}
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)
 }
 func (r *stubQuery) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
 	return r.QueryResolver.WrappedStruct(ctx)
 }
-func (r *stubQuery) WrappedScalar(ctx context.Context) (WrappedScalar, error) {
+func (r *stubQuery) WrappedScalar(ctx context.Context) (otherpkg.Scalar, error) {
 	return r.QueryResolver.WrappedScalar(ctx)
+}
+func (r *stubQuery) WrappedMap(ctx context.Context) (WrappedMap, error) {
+	return r.QueryResolver.WrappedMap(ctx)
+}
+func (r *stubQuery) WrappedSlice(ctx context.Context) (WrappedSlice, error) {
+	return r.QueryResolver.WrappedSlice(ctx)
 }
 
 type stubSubscription struct{ *Stub }
@@ -395,4 +452,16 @@ type stubUser struct{ *Stub }
 
 func (r *stubUser) Friends(ctx context.Context, obj *User) ([]*User, error) {
 	return r.UserResolver.Friends(ctx, obj)
+}
+
+type stubWrappedMap struct{ *Stub }
+
+func (r *stubWrappedMap) Get(ctx context.Context, obj WrappedMap, key string) (string, error) {
+	return r.WrappedMapResolver.Get(ctx, obj, key)
+}
+
+type stubWrappedSlice struct{ *Stub }
+
+func (r *stubWrappedSlice) Get(ctx context.Context, obj WrappedSlice, idx int) (string, error) {
+	return r.WrappedSliceResolver.Get(ctx, obj, idx)
 }

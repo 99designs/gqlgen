@@ -2,7 +2,7 @@
 title: "File Upload"
 description: How to upload files.
 linkTitle: File Upload
-menu: { main: { parent: "reference" } }
+menu: { main: { parent: "reference", weight: 10 } }
 ---
 
 Graphql server has an already built-in Upload scalar to upload files using a multipart request. \
@@ -40,7 +40,7 @@ type Query {
 
 "The `Mutation` type, represents all updates we can make to our data."
 type Mutation {
-    singleUpload(file: Upload!): Bool!
+    singleUpload(file: Upload!): Boolean!
 }
 ```
 
@@ -48,7 +48,7 @@ cURL can be used the make a query as follows:
 
 ```
 curl localhost:4000/graphql \
-  -F operations='{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id } }", "variables": { "file": null } }' \
+  -F operations='{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) }", "variables": { "file": null } }' \
   -F map='{ "0": ["variables.file"] }' \
   -F 0=@a.txt
 ```
@@ -59,9 +59,7 @@ That invokes the following operation:
 {
   query: `
     mutation($file: Upload!) {
-      singleUpload(file: $file) {
-        id
-      }
+      singleUpload(file: $file)
     }
   `,
   variables: {
@@ -142,3 +140,34 @@ That invokes the following operation:
 ```
 
 See the [example/fileupload](https://github.com/99designs/gqlgen/tree/master/example/fileupload) package for more examples.
+
+# Usage with Apollo
+
+[apollo-upload-client](https://github.com/jaydenseric/apollo-upload-client) needs to be installed in order for file uploading to work with Apollo:
+
+```javascript
+import ApolloClient from "apollo-client";
+import { createUploadLink } from "apollo-upload-client";
+
+const client = new ApolloClient({
+	cache: new InMemoryCache(),
+	link: createUploadLink({ uri: "/graphql" })
+});
+```
+
+A `File` object can then be passed into your mutation as a variable:
+
+```javascript
+{
+  query: `
+    mutation($file: Upload!) {
+      singleUpload(file: $file) {
+        id
+      }
+    }
+  `,
+  variables: {
+    file: new File(...)
+  }
+}
+```

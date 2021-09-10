@@ -8,9 +8,7 @@ import (
 )
 
 func MarshalID(s string) Marshaler {
-	return WriterFunc(func(w io.Writer) {
-		io.WriteString(w, strconv.Quote(s))
-	})
+	return MarshalString(s)
 }
 func UnmarshalID(v interface{}) (string, error) {
 	switch v := v.(type) {

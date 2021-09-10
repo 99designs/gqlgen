@@ -20,7 +20,7 @@ weight: -1
 | Interfaces | 👍 | 👍 | 👍 | ⛔️ [is](https://github.com/samsarahq/thunder/issues/78) |
 | Generated Enums | 👍 | ⛔️ | ⛔️ | ⛔️ |
 | Generated Inputs | 👍 | ⛔️ | ⛔️ | ⛔️ |
-| Stitching gql | 🕐 [is](https://github.com/99designs/gqlgen/issues/5) | ⛔️ | ⛔️ | ⛔️ |
+| Federation | 👍 | ⛔️ | ⛔️ | ⛔️ |
 | Opentracing | 👍 | 👍 | ⛔️ | ✂️[pr](https://github.com/samsarahq/thunder/pull/77) |
 | Hooks for error logging | 👍 | ⛔️ | ⛔️ | ⛔️ |
 | Dataloading | 👍 | 👍 | 👍 | ⚠️ |

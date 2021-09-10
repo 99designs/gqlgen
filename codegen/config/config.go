@@ -49,6 +49,25 @@ func DefaultConfig() *Config {
 	}
 }
 
+// LoadDefaultConfig loads the default config so that it is ready to be used
+func LoadDefaultConfig() (*Config, error) {
+	config := DefaultConfig()
+
+	for _, filename := range config.SchemaFilename {
+		filename = filepath.ToSlash(filename)
+		var err error
+		var schemaRaw []byte
+		schemaRaw, err = ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to open schema")
+		}
+
+		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
+	}
+
+	return config, nil
+}
+
 // LoadConfigFromDefaultLocations looks for a config file in the current directory, and all parent directories
 // walking up the tree. The closest config file will be returned.
 func LoadConfigFromDefaultLocations() (*Config, error) {
@@ -84,6 +103,16 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, errors.Wrap(err, "unable to parse config")
 	}
 
+	if err := CompleteConfig(config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+// CompleteConfig fills in the schema and other values to a config loaded from
+// YAML.
+func CompleteConfig(config *Config) error {
 	defaultDirectives := map[string]DirectiveConfig{
 		"skip":       {SkipRuntime: true},
 		"include":    {SkipRuntime: true},
@@ -121,12 +150,13 @@ func LoadConfig(filename string) (*Config, error) {
 
 				return nil
 			}); err != nil {
-				return nil, errors.Wrapf(err, "failed to walk schema at root %s", pathParts[0])
+				return errors.Wrapf(err, "failed to walk schema at root %s", pathParts[0])
 			}
 		} else {
+			var err error
 			matches, err = filepath.Glob(f)
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+				return errors.Wrapf(err, "failed to glob schema filename %s", f)
 			}
 		}
 
@@ -144,13 +174,12 @@ func LoadConfig(filename string) (*Config, error) {
 		var schemaRaw []byte
 		schemaRaw, err = ioutil.ReadFile(filename)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to open schema")
+			return errors.Wrap(err, "unable to open schema")
 		}
 
 		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
-
-	return config, nil
+	return nil
 }
 
 func (c *Config) Init() error {

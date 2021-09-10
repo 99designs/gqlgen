@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -euo pipefail
-
-curl -sL --fail https://github.com/golangci/golangci-lint/releases/download/v1.23.2/golangci-lint-1.23.2-linux-amd64.tar.gz | tar zxv --strip-components=1 --dir=/go/bin
-
-golangci-lint run

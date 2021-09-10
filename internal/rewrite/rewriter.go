@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/99designs/gqlgen/internal/code"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -19,12 +20,19 @@ type Rewriter struct {
 	copied map[ast.Decl]bool
 }
 
-func New(importPath string) (*Rewriter, error) {
+func New(dir string) (*Rewriter, error) {
+	importPath := code.ImportPathForDir(dir)
+	if importPath == "" {
+		return nil, fmt.Errorf("import path not found for directory: %q", dir)
+	}
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedTypes,
 	}, importPath)
 	if err != nil {
 		return nil, err
+	}
+	if len(pkgs) == 0 {
+		return nil, fmt.Errorf("package not found for importPath: %s", importPath)
 	}
 
 	return &Rewriter{
@@ -70,11 +78,11 @@ func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
 			if d.Name.Name != methodname {
 				continue
 			}
-			if d.Recv == nil || d.Recv.List == nil {
+			if d.Recv == nil || len(d.Recv.List) == 0 {
 				continue
 			}
 			recv := d.Recv.List[0].Type
-			if star, isStar := d.Recv.List[0].Type.(*ast.StarExpr); isStar {
+			if star, isStar := recv.(*ast.StarExpr); isStar {
 				recv = star.X
 			}
 			ident, ok := recv.(*ast.Ident)

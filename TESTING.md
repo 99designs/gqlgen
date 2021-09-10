@@ -5,7 +5,7 @@ Testing generated code is a little tricky, heres how its currently set up.
 
 ### Testing responses from a server
 
-There is a server in `codegen/testserver` that is generated as part 
+There is a server in `codegen/testserver` that is generated as part
 of `go generate ./...`, and tests written against it.
 
 There are also a bunch of tests in against the examples, feel free to take examples from there.
@@ -15,7 +15,7 @@ There are also a bunch of tests in against the examples, feel free to take examp
 
 These tests are **really** slow, because they need to run the whole codegen step. Use them very sparingly. If you can, find a way to unit test it instead.
 
-Take a look at `codegen/input_test.go` for an example.
+Take a look at `codegen/testserver/input_test.go` for an example.
 
 ### Testing introspection
 

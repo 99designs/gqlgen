@@ -53,12 +53,12 @@ func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option
 func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
-		return errorSubscription(fmt.Errorf("request: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("request: %w", err))
 	}
 
 	requestBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return errorSubscription(fmt.Errorf("parse body: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("parse body: %w", err))
 	}
 
 	srv := httptest.NewServer(p.h)
@@ -66,24 +66,24 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 	c, _, err := websocket.DefaultDialer.Dial(host+r.URL.Path, r.Header)
 
 	if err != nil {
-		return errorSubscription(fmt.Errorf("dial: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("dial: %w", err))
 	}
 
 	initMessage := operationMessage{Type: connectionInitMsg}
 	if initPayload != nil {
 		initMessage.Payload, err = json.Marshal(initPayload)
 		if err != nil {
-			return errorSubscription(fmt.Errorf("parse payload: %s", err.Error()))
+			return errorSubscription(fmt.Errorf("parse payload: %w", err))
 		}
 	}
 
 	if err = c.WriteJSON(initMessage); err != nil {
-		return errorSubscription(fmt.Errorf("init: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("init: %w", err))
 	}
 
 	var ack operationMessage
 	if err = c.ReadJSON(&ack); err != nil {
-		return errorSubscription(fmt.Errorf("ack: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("ack: %w", err))
 	}
 
 	if ack.Type != connectionAckMsg {
@@ -92,7 +92,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 
 	var ka operationMessage
 	if err = c.ReadJSON(&ka); err != nil {
-		return errorSubscription(fmt.Errorf("ack: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("ack: %w", err))
 	}
 
 	if ka.Type != connectionKaMsg {
@@ -100,7 +100,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 	}
 
 	if err = c.WriteJSON(operationMessage{Type: startMsg, ID: "1", Payload: requestBody}); err != nil {
-		return errorSubscription(fmt.Errorf("start: %s", err.Error()))
+		return errorSubscription(fmt.Errorf("start: %w", err))
 	}
 
 	return &Subscription{
@@ -125,7 +125,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 			var respDataRaw Response
 			err = json.Unmarshal(op.Payload, &respDataRaw)
 			if err != nil {
-				return fmt.Errorf("decode: %s", err.Error())
+				return fmt.Errorf("decode: %w", err)
 			}
 
 			// we want to unpack even if there is an error, so we can see partial responses

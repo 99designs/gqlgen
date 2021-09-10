@@ -83,7 +83,7 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadConfigFromDefaultLocations()
-		require.True(t, os.IsNotExist(err))
+		require.True(t, errors.Is(err, fs.ErrNotExist))
 	})
 }
 

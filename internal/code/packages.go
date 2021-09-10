@@ -15,7 +15,8 @@ var mode = packages.NeedName |
 	packages.NeedImports |
 	packages.NeedTypes |
 	packages.NeedSyntax |
-	packages.NeedTypesInfo
+	packages.NeedTypesInfo |
+	packages.NeedModule
 
 // Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache of packages
 // that can be invalidated as writes are made and packages are known to change.

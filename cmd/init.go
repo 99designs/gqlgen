@@ -120,60 +120,66 @@ var initCmd = &cli.Command{
 		serverFilename := ctx.String("server")
 		schemaFilename := ctx.String("schema")
 
-		pkgName := code.ImportPathForDir(".")
-		if pkgName == "" {
-			return fmt.Errorf("unable to determine import path for current directory, you probably need to run go mod init first")
-		}
-
-		// check schema and config don't already exist
-		if fileExists(configFilename) {
-			return fmt.Errorf("%s already exists\n", configFilename)
-		}
-		if fileExists(schemaFilename) {
-			return fmt.Errorf("%s already exists\n", schemaFilename)
-		}
-		if fileExists(serverFilename) {
-			return fmt.Errorf("%s already exists\n", serverFilename)
-		}
-		_, err := config.LoadConfigFromDefaultLocations()
-		if err == nil {
-			return fmt.Errorf("gqlgen.yml already exists in a parent directory\n")
-		}
-
-		// create config
-		fmt.Println("Creating", configFilename)
-		if err := initFile(configFilename, executeConfigTemplate(pkgName)); err != nil {
-			return err
-		}
-
-		// create schema
-		fmt.Println("Creating", schemaFilename)
-		if err := initFile(schemaFilename, schemaDefault); err != nil {
-			return err
-		}
-
-		// create the package directory with a temporary file so that go recognises it as a package
-		// and autobinding doesn't error out
-		tmpPackageNameFile := "graph/model/_tmp_gqlgen_init.go"
-		if err := initFile(tmpPackageNameFile, "package model"); err != nil {
-			return err
-		}
-		defer os.Remove(tmpPackageNameFile)
-
-		var cfg *config.Config
-		if cfg, err = config.LoadConfig(configFilename); err != nil {
-			panic(err)
-		}
-
-		fmt.Println("Creating", serverFilename)
-		fmt.Println("Generating...")
-		if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-		}
-
-		fmt.Printf("\nExec \"go run ./%s\" to start GraphQL server\n", serverFilename)
-		return nil
+		return DoInit(configFilename, serverFilename, schemaFilename)
 	},
+}
+
+var ErrGoModNotExist = fmt.Errorf("unable to determine import path for current directory, you probably need to run go mod init first")
+
+func DoInit(configFilename, serverFilename, schemaFilename string) error {
+	pkgName := code.ImportPathForDir(".")
+	if pkgName == "" {
+		return ErrGoModNotExist
+	}
+
+	// check schema and config don't already exist
+	if fileExists(configFilename) {
+		return fmt.Errorf("%s already exists\n", configFilename)
+	}
+	if fileExists(schemaFilename) {
+		return fmt.Errorf("%s already exists\n", schemaFilename)
+	}
+	if fileExists(serverFilename) {
+		return fmt.Errorf("%s already exists\n", serverFilename)
+	}
+	_, err := config.LoadConfigFromDefaultLocations()
+	if err == nil {
+		return fmt.Errorf("gqlgen.yml already exists in a parent directory\n")
+	}
+
+	// create config
+	fmt.Println("Creating", configFilename)
+	if err := initFile(configFilename, executeConfigTemplate(pkgName)); err != nil {
+		return err
+	}
+
+	// create schema
+	fmt.Println("Creating", schemaFilename)
+	if err := initFile(schemaFilename, schemaDefault); err != nil {
+		return err
+	}
+
+	// create the package directory with a temporary file so that go recognises it as a package
+	// and autobinding doesn't error out
+	tmpPackageNameFile := "graph/model/_tmp_gqlgen_init.go"
+	if err := initFile(tmpPackageNameFile, "package model"); err != nil {
+		return err
+	}
+	defer os.Remove(tmpPackageNameFile)
+
+	var cfg *config.Config
+	if cfg, err = config.LoadConfig(configFilename); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Creating", serverFilename)
+	fmt.Println("Generating...")
+	if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
+		return err
+	}
+
+	fmt.Printf("\nExec \"go run ./%s\" to start GraphQL server\n", serverFilename)
+	return nil
 }
 
 func executeConfigTemplate(pkgName string) string {

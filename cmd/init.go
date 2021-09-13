@@ -126,14 +126,10 @@ var initCmd = &cli.Command{
 		}
 
 		// check schema and config don't already exist
-		if fileExists(configFilename) {
-			return fmt.Errorf("%s already exists\n", configFilename)
-		}
-		if fileExists(schemaFilename) {
-			return fmt.Errorf("%s already exists\n", schemaFilename)
-		}
-		if fileExists(serverFilename) {
-			return fmt.Errorf("%s already exists\n", serverFilename)
+		for _, filename := range []string{configFilename, schemaFilename, serverFilename} {
+			if fileExists(filename) {
+				return fmt.Errorf("%s already exists", filename)
+			}
 		}
 		_, err := config.LoadConfigFromDefaultLocations()
 		if err == nil {

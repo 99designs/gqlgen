@@ -10,7 +10,6 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -51,7 +50,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		var err error
 		f.Default, err = field.DefaultValue.Value(nil)
 		if err != nil {
-			return nil, errors.Errorf("default value %s is not valid: %s", field.Name, err.Error())
+			return nil, fmt.Errorf("default value %s is not valid: %w", field.Name, err)
 		}
 	}
 
@@ -177,7 +176,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		}
 
 		if err = b.bindArgs(f, params); err != nil {
-			return errors.Wrapf(err, "%s:%d", pos.Filename, pos.Line)
+			return fmt.Errorf("%s:%d: %w", pos.Filename, pos.Line, err)
 		}
 
 		result := sig.Results().At(0)
@@ -246,7 +245,7 @@ func (b *builder) findBindTarget(t types.Type, name string) (types.Object, error
 		return foundField, nil
 	case foundField != nil && foundMethod != nil:
 		// Error
-		return nil, errors.Errorf("found more than one way to bind for %s", name)
+		return nil, fmt.Errorf("found more than one way to bind for %s", name)
 	}
 
 	// Search embeds
@@ -271,7 +270,7 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 			tags := reflect.StructTag(t.Tag(i))
 			if val, ok := tags.Lookup(b.Config.StructTag); ok && equalFieldName(val, name) {
 				if found != nil {
-					return nil, errors.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", b.Config.StructTag, val)
+					return nil, fmt.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", b.Config.StructTag, val)
 				}
 
 				found = field
@@ -309,7 +308,7 @@ func (b *builder) findBindMethoderTarget(methodFunc func(i int) *types.Func, met
 		}
 
 		if found != nil {
-			return nil, errors.Errorf("found more than one matching method to bind for %s", name)
+			return nil, fmt.Errorf("found more than one matching method to bind for %s", name)
 		}
 
 		found = method
@@ -331,7 +330,7 @@ func (b *builder) findBindFieldTarget(in types.Type, name string) (types.Object,
 			}
 
 			if found != nil {
-				return nil, errors.Errorf("found more than one matching field to bind for %s", name)
+				return nil, fmt.Errorf("found more than one matching field to bind for %s", name)
 			}
 
 			found = field
@@ -375,7 +374,7 @@ func (b *builder) findBindStructEmbedsTarget(strukt *types.Struct, name string) 
 		}
 
 		if f != nil && found != nil {
-			return nil, errors.Errorf("found more than one way to bind for %s", name)
+			return nil, fmt.Errorf("found more than one way to bind for %s", name)
 		}
 
 		if f != nil {
@@ -397,7 +396,7 @@ func (b *builder) findBindInterfaceEmbedsTarget(iface *types.Interface, name str
 		}
 
 		if f != nil && found != nil {
-			return nil, errors.Errorf("found more than one way to bind for %s", name)
+			return nil, fmt.Errorf("found more than one way to bind for %s", name)
 		}
 
 		if f != nil {

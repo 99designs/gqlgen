@@ -1,12 +1,13 @@
 package config
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
@@ -82,7 +83,7 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadConfigFromDefaultLocations()
-		require.True(t, os.IsNotExist(err))
+		require.True(t, errors.Is(err, fs.ErrNotExist))
 	})
 }
 
@@ -105,7 +106,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadDefaultConfig()
-		require.True(t, os.IsNotExist(errors.Cause(err)))
+		require.True(t, errors.Is(err, fs.ErrNotExist))
 	})
 }
 

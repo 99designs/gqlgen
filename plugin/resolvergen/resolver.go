@@ -1,6 +1,8 @@
 package resolvergen
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,7 +12,6 @@ import (
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
-	"github.com/pkg/errors"
 )
 
 func New() plugin.Plugin {
@@ -144,7 +145,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 	}
 
-	if _, err := os.Stat(data.Config.Resolver.Filename); os.IsNotExist(errors.Cause(err)) {
+	if _, err := os.Stat(data.Config.Resolver.Filename); errors.Is(err, fs.ErrNotExist) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
 			FileNotice: `

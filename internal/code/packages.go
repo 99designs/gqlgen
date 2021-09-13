@@ -2,10 +2,11 @@ package code
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"os/exec"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -14,7 +15,8 @@ var mode = packages.NeedName |
 	packages.NeedImports |
 	packages.NeedTypes |
 	packages.NeedSyntax |
-	packages.NeedTypesInfo
+	packages.NeedTypesInfo |
+	packages.NeedModule
 
 // Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache of packages
 // that can be invalidated as writes are made and packages are known to change.
@@ -154,7 +156,7 @@ func (p *Packages) ModTidy() error {
 	p.packages = nil
 	tidyCmd := exec.Command("go", "mod", "tidy")
 	if err := tidyCmd.Run(); err != nil {
-		return errors.Wrap(err, "go mod tidy failed")
+		return fmt.Errorf("go mod tidy failed: %w", err)
 	}
 	return nil
 }

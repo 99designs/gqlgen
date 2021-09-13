@@ -18,7 +18,6 @@ import (
 	"github.com/99designs/gqlgen/internal/code"
 
 	"github.com/99designs/gqlgen/internal/imports"
-	"github.com/pkg/errors"
 )
 
 // CurrentImports keeps track of all the import declarations that are needed during the execution of a plugin.
@@ -79,7 +78,7 @@ func Render(cfg Options) error {
 		var err error
 		t, err = t.New("template.gotpl").Parse(cfg.Template)
 		if err != nil {
-			return errors.Wrap(err, "error with provided template")
+			return fmt.Errorf("error with provided template: %w", err)
 		}
 		roots = append(roots, "template.gotpl")
 	} else {
@@ -99,7 +98,7 @@ func Render(cfg Options) error {
 
 			t, err = t.New(name).Parse(string(b))
 			if err != nil {
-				return errors.Wrap(err, cfg.Filename)
+				return fmt.Errorf("%s: %w", cfg.Filename, err)
 			}
 
 			roots = append(roots, name)
@@ -107,7 +106,7 @@ func Render(cfg Options) error {
 			return nil
 		})
 		if err != nil {
-			return errors.Wrap(err, "locating templates")
+			return fmt.Errorf("locating templates: %w", err)
 		}
 	}
 
@@ -129,7 +128,7 @@ func Render(cfg Options) error {
 		}
 		err := t.Lookup(root).Execute(&buf, cfg.Data)
 		if err != nil {
-			return errors.Wrap(err, root)
+			return fmt.Errorf("%s: %w", root, err)
 		}
 		if cfg.RegionTags {
 			buf.WriteString("\n// endregion " + center(70, "*", " "+root+" ") + "\n")
@@ -584,7 +583,7 @@ func render(filename string, tpldata interface{}) (*bytes.Buffer, error) {
 func write(filename string, b []byte, packages *code.Packages) error {
 	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil {
-		return errors.Wrap(err, "failed to create directory")
+		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
 	formatted, err := imports.Prune(filename, b, packages)
@@ -595,7 +594,7 @@ func write(filename string, b []byte, packages *code.Packages) error {
 
 	err = ioutil.WriteFile(filename, formatted, 0644)
 	if err != nil {
-		return errors.Wrapf(err, "failed to write %s", filename)
+		return fmt.Errorf("failed to write %s: %w", filename, err)
 	}
 
 	return nil

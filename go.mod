@@ -1,6 +1,6 @@
 module github.com/99designs/gqlgen
 
-go 1.12
+go 1.17
 
 require (
 	github.com/agnivade/levenshtein v1.1.0 // indirect
@@ -16,16 +16,27 @@ require (
 	github.com/mitchellh/mapstructure v0.0.0-20180203102830-a4e142e9c047
 	github.com/opentracing/basictracer-go v1.0.0 // indirect
 	github.com/opentracing/opentracing-go v1.0.2
-	github.com/pkg/errors v0.8.1
 	github.com/rs/cors v1.6.0
 	github.com/shurcooL/httpfs v0.0.0-20171119174359-809beceb2371 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20180121065927-ffb13db8def0 // indirect
 	github.com/stretchr/testify v1.4.0
-	github.com/urfave/cli/v2 v2.1.1
+	github.com/urfave/cli/v2 v2.3.0
 	github.com/vektah/dataloaden v0.2.1-0.20190515034641-a19b9a6e7c9e
 	github.com/vektah/gqlparser/v2 v2.2.0
-	golang.org/x/tools v0.0.0-20210106214847-113979e3529a
+	golang.org/x/tools v0.1.5
 	gopkg.in/yaml.v2 v2.2.4
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20190731080439-ebfcffb1b5c0
 	sourcegraph.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67 // indirect
+)
+
+require (
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	golang.org/x/mod v0.4.2 // indirect
+	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )

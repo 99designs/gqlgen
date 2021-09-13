@@ -22,7 +22,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
-	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381 // indirect
+	github.com/logrusorgru/aurora/v3 v3.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/opentracing/basictracer-go v1.1.0 // indirect

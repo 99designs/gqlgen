@@ -20,7 +20,7 @@ require (
 	github.com/shurcooL/httpfs v0.0.0-20171119174359-809beceb2371 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20180121065927-ffb13db8def0 // indirect
 	github.com/stretchr/testify v1.4.0
-	github.com/urfave/cli/v2 v2.1.1
+	github.com/urfave/cli/v2 v2.3.0
 	github.com/vektah/dataloaden v0.2.1-0.20190515034641-a19b9a6e7c9e
 	github.com/vektah/gqlparser/v2 v2.2.0
 	golang.org/x/tools v0.1.5
@@ -30,12 +30,11 @@ require (
 )
 
 require (
-	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/russross/blackfriday/v2 v2.0.1 // indirect
-	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect

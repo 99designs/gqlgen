@@ -39,7 +39,7 @@ func Execute() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+		fmt.Fprint(os.Stderr, err.Error()+"\n")
 		os.Exit(1)
 	}
 }

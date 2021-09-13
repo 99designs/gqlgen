@@ -31,7 +31,7 @@ type Config struct {
 	Packages                 *code.Packages             `yaml:"-"`
 	Schema                   *ast.Schema                `yaml:"-"`
 
-	// Deprecated use Federation instead. Will be removed next release
+	// Deprecated: use Federation instead. Will be removed next release
 	Federated bool `yaml:"federated,omitempty"`
 }
 

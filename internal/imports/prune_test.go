@@ -14,7 +14,7 @@ func TestPrune(t *testing.T) {
 
 	b, err := Prune("testdata/unused.go", mustReadFile("testdata/unused.go"), &code.Packages{})
 	require.NoError(t, err)
-	require.Equal(t, strings.Replace(string(mustReadFile("testdata/unused.expected.go")), "\r\n", "\n", -1), string(b))
+	require.Equal(t, strings.ReplaceAll(string(mustReadFile("testdata/unused.expected.go")), "\r\n", "\n"), string(b))
 }
 
 func mustReadFile(filename string) []byte {

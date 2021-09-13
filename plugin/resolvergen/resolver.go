@@ -173,7 +173,7 @@ type ResolverBuild struct {
 
 type File struct {
 	// These are separated because the type definition of the resolver object may live in a different file from the
-	//resolver method implementations, for example when extending a type in a different graphql schema file
+	// resolver method implementations, for example when extending a type in a different graphql schema file
 	Objects         []*codegen.Object
 	Resolvers       []*Resolver
 	imports         []rewrite.Import

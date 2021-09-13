@@ -25,7 +25,7 @@ type FieldArgument struct {
 	Value         interface{} // value set in Data
 }
 
-//ImplDirectives get not Builtin and location ARGUMENT_DEFINITION directive
+// ImplDirectives get not Builtin and location ARGUMENT_DEFINITION directive
 func (f *FieldArgument) ImplDirectives() []*Directive {
 	d := make([]*Directive, 0)
 	for i := range f.Directives {

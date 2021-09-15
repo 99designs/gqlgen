@@ -5,7 +5,7 @@
 
 ## What is gqlgen?
 
-[gqlgen](https://github.com/99designs/gqlgen) is a Go library for building GraphQL servers without any fuss.<br/> 
+[gqlgen](https://github.com/99designs/gqlgen) is a Go library for building GraphQL servers without any fuss.<br/>
 
 - **gqlgen is based on a Schema first approach** — You get to Define your API using the GraphQL [Schema Definition Language](http://graphql.org/learn/schema/).
 - **gqlgen prioritizes Type safety** — You should never see `map[string]interface{}` here.
@@ -13,13 +13,36 @@
 
 Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go graphql [implementations](https://gqlgen.com/feature-comparison/)
 
-## Getting Started
-- To install gqlgen run the command `go get github.com/99designs/gqlgen` in your project directory.<br/> 
-- You could initialize a new project using the recommended folder structure by running this command `go run github.com/99designs/gqlgen init`.
+## Quick start
+```shell
+# Initialise a new go module
+mkdir example
+cd example
+go mod init gqlgen.com/example
 
-You could find a more comprehensive guide to help you get started [here](https://gqlgen.com/getting-started/).<br/>
-We also have a couple of real-world [examples](https://github.com/99designs/gqlgen/tree/master/example) that show how to GraphQL applications with **gqlgen** seamlessly,
-You can see these [examples](https://github.com/99designs/gqlgen/tree/master/example) here or visit [godoc](https://godoc.org/github.com/99designs/gqlgen).
+# Add github.com/99designs/gqlgen to your project's tools.go
+cat <<EOD > tools.go
+// +build tools
+
+package tools
+
+import (
+	_ "github.com/99designs/gqlgen"
+)
+EOD
+go mod tidy
+
+# Initialise gqlgen config
+go run github.com/99designs/gqlgen init
+
+# Start the graphql server
+go run server.go
+```
+
+More help to get started:
+ - [Getting started guide](https://gqlgen.com/getting-started/) - a comprehensive guide to help you get started
+ - [Real-world examples](https://github.com/99designs/gqlgen/tree/master/example) show how to create GraphQL applications
+ - [Reference docs](https://pkg.go.dev/github.com/99designs/gqlgen) for the APIs
 
 ## Reporting Issues
 

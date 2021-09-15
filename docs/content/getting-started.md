@@ -18,19 +18,33 @@ You can find the finished code for this tutorial [here](https://github.com/vekta
 
 Create a directory for your project, and initialise it as a Go Module:
 
-```sh
-$ mkdir gqlgen-todos
-$ cd gqlgen-todos
-$ go mod init github.com/[username]/gqlgen-todos
-$ go get github.com/99designs/gqlgen
+```shell
+mkdir gqlgen-todos
+cd gqlgen-todos
+go mod init github.com/[username]/gqlgen-todos
+```
+
+Next, add the gqlgen tool as a dependency [using your project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
+
+```shell
+cat <<EOD > tools.go
+// +build tools
+
+package tools
+
+import (
+	_ "github.com/99designs/gqlgen"
+)
+EOD
+go mod tidy
 ```
 
 ## Building the server
 
 ### Create the project skeleton
 
-```bash
-$ go run github.com/99designs/gqlgen init
+```shell
+go run github.com/99designs/gqlgen init
 ```
 
 This will create our suggested package layout. You can modify these paths in gqlgen.yml if you need to.
@@ -86,7 +100,7 @@ type Mutation {
 ### Implement the resolvers
 
 When executed, gqlgen's `generate` command compares the schema file (`graph/schema.graphqls`) with the models `graph/model/*`, and, wherever it
-can, it will bind directly to the model.  That was done alread when `init` was run.  We'll edit the schema later in the tutorial, but for now, let's look at what was generated already. 
+can, it will bind directly to the model.  That was done alread when `init` was run.  We'll edit the schema later in the tutorial, but for now, let's look at what was generated already.
 
 If we take a look in `graph/schema.resolvers.go` we will see all the times that gqlgen couldn't match them up. For us
 it was twice:

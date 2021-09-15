@@ -14,30 +14,33 @@
 Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go graphql [implementations](https://gqlgen.com/feature-comparison/)
 
 ## Quick start
-```shell
-# Initialise a new go module
-mkdir example
-cd example
-go mod init gqlgen.com/example
+1. [Initialise a new go module](https://golang.org/doc/tutorial/create-module)
 
-# Add github.com/99designs/gqlgen to your project's tools.go
-cat <<EOD > tools.go
-// +build tools
+       mkdir example
+       cd example
+       go mod init gqlgen.com/example
 
-package tools
+2. Add gqlgen to your [project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
 
-import (
-	_ "github.com/99designs/gqlgen"
-)
-EOD
-go mod tidy
+       cat <<EOD > tools.go
+       // +build tools
+       
+       package tools
+       
+       import (
+       	_ "github.com/99designs/gqlgen"
+       )
+       EOD
+       
+       go mod tidy
 
-# Initialise gqlgen config
-go run github.com/99designs/gqlgen init
+3. Initialise gqlgen config and generate models
 
-# Start the graphql server
-go run server.go
-```
+       go run github.com/99designs/gqlgen init
+
+4. Start the graphql server
+
+       go run server.go
 
 More help to get started:
  - [Getting started guide](https://gqlgen.com/getting-started/) - a comprehensive guide to help you get started

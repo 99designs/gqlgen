@@ -22,16 +22,7 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 
 2. Add gqlgen to your [project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
 
-       cat <<EOD > tools.go
-       // +build tools
-       
-       package tools
-       
-       import (
-       	_ "github.com/99designs/gqlgen"
-       )
-       EOD
-       
+       printf '// +build tools\npackage tools\nimport _ "github.com/99designs/gqlgen"' | gofmt > tools.go
        go mod tidy
 
 3. Initialise gqlgen config and generate models

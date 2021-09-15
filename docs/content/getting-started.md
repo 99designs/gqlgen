@@ -14,9 +14,9 @@ This tutorial will take you through the process of building a GraphQL server wit
 
 You can find the finished code for this tutorial [here](https://github.com/vektah/gqlgen-tutorials/tree/master/gettingstarted)
 
-## Setup Project
+## Set up Project
 
-Create a directory for your project, and initialise it as a Go Module:
+Create a directory for your project, and [initialise it as a Go Module](https://golang.org/doc/tutorial/create-module):
 
 ```shell
 mkdir gqlgen-todos
@@ -24,10 +24,10 @@ cd gqlgen-todos
 go mod init github.com/[username]/gqlgen-todos
 ```
 
-Next, add the gqlgen tool as a dependency [using your project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
+Next, create a `tools.go` file and add gqlgen as a [tool dependency for your module](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module).
 
-```shell
-cat <<EOD > tools.go
+```go
+//go:build tools
 // +build tools
 
 package tools
@@ -35,8 +35,16 @@ package tools
 import (
 	_ "github.com/99designs/gqlgen"
 )
-EOD
+```
+
+To automatically add the dependency to your `go.mod` run
+```shell
 go mod tidy
+```
+
+If you want to specify a particular version of gqlgen, you can use `go get`. For example
+```shell
+go get -d github.com/99designs/gqlgen@v0.14.0
 ```
 
 ## Building the server

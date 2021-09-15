@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -155,6 +156,8 @@ func (p *Packages) Evict(importPath string) {
 func (p *Packages) ModTidy() error {
 	p.packages = nil
 	tidyCmd := exec.Command("go", "mod", "tidy")
+	tidyCmd.Stdout = os.Stdout
+	tidyCmd.Stderr = os.Stdout
 	if err := tidyCmd.Run(); err != nil {
 		return fmt.Errorf("go mod tidy failed: %w", err)
 	}

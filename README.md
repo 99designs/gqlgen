@@ -18,7 +18,7 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 
        mkdir example
        cd example
-       go mod init gqlgen.com/example
+       go mod init example
 
 2. Add gqlgen to your [project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
 

@@ -3,6 +3,7 @@ package customresolver
 import "context"
 
 type Resolver struct {
+	Name string
 }
 
 type QueryResolver interface {

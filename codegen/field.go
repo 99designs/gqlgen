@@ -3,7 +3,6 @@ package codegen
 import (
 	"fmt"
 	"go/types"
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -64,7 +63,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 
 	if err = b.bindField(obj, &f); err != nil {
 		f.IsResolver = true
-		log.Println(err.Error())
+		return nil, err
 	}
 
 	if f.IsResolver && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {

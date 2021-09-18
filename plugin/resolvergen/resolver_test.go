@@ -54,6 +54,18 @@ func TestLayoutFollowSchemaWithCustomFilename(t *testing.T) {
 	require.Contains(t, source, "// AUserHelperFunction implementation")
 }
 
+func TestLayoutInvalidModelPath(t *testing.T) {
+
+	cfg, err := config.LoadConfig("testdata/invalid_model_path/gqlgen.yml")
+	require.NoError(t, err)
+
+	require.NoError(t, cfg.Init())
+
+	_, err = codegen.BuildData(cfg)
+	require.Error(t, err)
+
+}
+
 func testFollowSchemaPersistence(t *testing.T, dir string) {
 	_ = syscall.Unlink(dir + "/out/resolver.go")
 

@@ -12,9 +12,12 @@ func TestWithEntities(t *testing.T) {
 
 	require.Equal(t, []string{"ExternalExtension", "Hello", "World"}, cfg.Schema.Types["_Entity"].Types)
 
+	require.Equal(t, []string{"ExternalExtension", "ExternalThing", "Hello", "World"}, cfg.Schema.Types["_Entity"].Types)
+
 	require.Equal(t, "findExternalExtensionByUpc", cfg.Schema.Types["Entity"].Fields[0].Name)
-	require.Equal(t, "findHelloByName", cfg.Schema.Types["Entity"].Fields[1].Name)
-	require.Equal(t, "findWorldByFooAndBar", cfg.Schema.Types["Entity"].Fields[2].Name)
+	require.Equal(t, "findExternalThingById", cfg.Schema.Types["Entity"].Fields[1].Name)
+	require.Equal(t, "findHelloByName", cfg.Schema.Types["Entity"].Fields[2].Name)
+	require.Equal(t, "findWorldByFooAndBar", cfg.Schema.Types["Entity"].Fields[3].Name)
 
 	require.NoError(t, f.MutateConfig(cfg))
 }

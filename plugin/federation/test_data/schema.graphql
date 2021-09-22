@@ -7,9 +7,14 @@ type World @key(fields: "foo bar") {
   bar: Int!
 }
 
+extend type ExternalType @key(fields: "name") {
+  name: String!
+}
+
 extend type ExternalExtension @key(fields: "upc") {
     upc: String! @external
-    reviews: [World]
+    foos: [ExternalType] @external
+    reviews: [World] @requires(fields: "foos { name }")
 }
 
 type Query {

@@ -49,6 +49,9 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		"_Any": {
 			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Map"},
 		},
+		"_FieldSet": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.FieldSet"},
+		},
 	}
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
@@ -75,8 +78,8 @@ scalar _FieldSet
 directive @external on FIELD_DEFINITION
 directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
-directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
-directive @extends on OBJECT
+directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+directive @extends on OBJECT | INTERFACE
 `,
 		BuiltIn: true,
 	}
@@ -226,8 +229,19 @@ func (f *federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyFi
 
 func (f *federation) setEntities(schema *ast.Schema) {
 	for _, schemaType := range schema.Types {
+		if schemaType.Kind == ast.Interface {
+			// TODO: support @key and @extends for interfaces
+			if dir := schemaType.Directives.ForName("key"); dir != nil {
+				panic("@key directive is not currently supported for interfaces.")
+			}
+			if dir := schemaType.Directives.ForName("extends"); dir != nil {
+				panic("@extends directive is not currently supported for interfaces.")
+			}
+			continue
+		}
+
 		if schemaType.Kind == ast.Object {
-			dir := schemaType.Directives.ForName("key") // TODO: interfaces
+			dir := schemaType.Directives.ForName("key")
 			if dir != nil {
 				if len(dir.Arguments) > 1 {
 					panic("Multiple arguments are not currently supported in @key declaration.")
@@ -236,6 +250,13 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				if strings.Contains(fieldName, "{") {
 					panic("Nested fields are not currently supported in @key declaration.")
 				}
+				fieldNames := strings.Fields(fieldName)
+				requireFields := []*RequireField{}
+				for _, name := range fieldNames {
+					requireFields = append(requireFields, &RequireField{
+						Name: name,
+					})
+				}
 
 				requires := []*Requires{}
 				for _, f := range schemaType.Fields {
@@ -243,20 +264,12 @@ func (f *federation) setEntities(schema *ast.Schema) {
 					if dir == nil {
 						continue
 					}
-					fields := strings.Split(dir.Arguments[0].Value.Raw, " ")
-					requireFields := []*RequireField{}
-					for _, f := range fields {
-						requireFields = append(requireFields, &RequireField{
-							Name: f,
-						})
-					}
 					requires = append(requires, &Requires{
 						Name:   f.Name,
 						Fields: requireFields,
 					})
 				}
 
-				fieldNames := strings.Split(fieldName, " ")
 				keyFields := make([]*KeyField, len(fieldNames))
 				resolverName := fmt.Sprintf("find%sBy", schemaType.Name)
 				for i, f := range fieldNames {

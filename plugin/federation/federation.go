@@ -78,7 +78,7 @@ scalar _FieldSet
 directive @external on FIELD_DEFINITION
 directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
-directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
 directive @extends on OBJECT | INTERFACE
 `,
 		BuiltIn: true,

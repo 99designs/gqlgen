@@ -30,6 +30,7 @@ type (
 		Query         string                 `json:"query"`
 		Variables     map[string]interface{} `json:"variables,omitempty"`
 		OperationName string                 `json:"operationName,omitempty"`
+		Extensions    map[string]interface{} `json:"extensions,omitempty"`
 		HTTP          *http.Request          `json:"-"`
 	}
 

@@ -83,6 +83,7 @@ doesnt have generics. Instead we generate the code manually for our instance.
 go get github.com/vektah/dataloaden
 mkdir dataloader
 cd dataloader
+echo 'package dataloader' > gen.go
 go run github.com/vektah/dataloaden UserLoader int *gqlgen-tutorials/dataloader/graph/model.User
 ```
 
@@ -157,7 +158,7 @@ func (r *todoResolver) UserLoader(ctx context.Context, obj *model.Todo) (*model.
 }
 ```
 
-The end result? just 2 queries!
+The end result? Just 2 queries!
 ```sql
 SELECT id, todo, user_id FROM todo
 SELECT id, name from user WHERE id IN (?,?,?,?,?)

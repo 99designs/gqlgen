@@ -7,7 +7,6 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -26,7 +25,7 @@ type FieldArgument struct {
 	Value         interface{} // value set in Data
 }
 
-//ImplDirectives get not Builtin and location ARGUMENT_DEFINITION directive
+// ImplDirectives get not Builtin and location ARGUMENT_DEFINITION directive
 func (f *FieldArgument) ImplDirectives() []*Directive {
 	d := make([]*Directive, 0)
 	for i := range f.Directives {
@@ -67,7 +66,7 @@ func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgu
 	if arg.DefaultValue != nil {
 		newArg.Default, err = arg.DefaultValue.Value(nil)
 		if err != nil {
-			return nil, errors.Errorf("default value is not valid: %s", err.Error())
+			return nil, fmt.Errorf("default value is not valid: %w", err)
 		}
 	}
 

@@ -1,6 +1,7 @@
 package introspection
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -11,12 +12,20 @@ type Schema struct {
 }
 
 func (s *Schema) Types() []Type {
-	types := make([]Type, 0, len(s.schema.Types))
+	typeIndex := map[string]Type{}
+	typeNames := make([]string, 0, len(s.schema.Types))
 	for _, typ := range s.schema.Types {
 		if strings.HasPrefix(typ.Name, "__") {
 			continue
 		}
-		types = append(types, *WrapTypeFromDef(s.schema, typ))
+		typeNames = append(typeNames, typ.Name)
+		typeIndex[typ.Name] = *WrapTypeFromDef(s.schema, typ)
+	}
+	sort.Strings(typeNames)
+
+	types := make([]Type, len(typeNames))
+	for i, t := range typeNames {
+		types[i] = typeIndex[t]
 	}
 	return types
 }
@@ -34,10 +43,18 @@ func (s *Schema) SubscriptionType() *Type {
 }
 
 func (s *Schema) Directives() []Directive {
-	res := make([]Directive, 0, len(s.schema.Directives))
+	dIndex := map[string]Directive{}
+	dNames := make([]string, 0, len(s.schema.Directives))
 
 	for _, d := range s.schema.Directives {
-		res = append(res, s.directiveFromDef(d))
+		dNames = append(dNames, d.Name)
+		dIndex[d.Name] = s.directiveFromDef(d)
+	}
+	sort.Strings(dNames)
+
+	res := make([]Directive, len(dNames))
+	for i, d := range dNames {
+		res[i] = dIndex[d]
 	}
 
 	return res
@@ -60,9 +77,10 @@ func (s *Schema) directiveFromDef(d *ast.DirectiveDefinition) Directive {
 	}
 
 	return Directive{
-		Name:        d.Name,
-		Description: d.Description,
-		Locations:   locs,
-		Args:        args,
+		Name:         d.Name,
+		Description:  d.Description,
+		Locations:    locs,
+		Args:         args,
+		IsRepeatable: d.IsRepeatable,
 	}
 }

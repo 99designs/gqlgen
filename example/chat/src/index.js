@@ -1,13 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ApolloProvider } from 'react-apollo';
-import ApolloClient from 'apollo-client';
-import App from './App';
+import {
+    ApolloClient,
+    ApolloProvider,
+    HttpLink,
+    split,
+} from '@apollo/client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { split } from 'apollo-link';
-import { HttpLink } from 'apollo-link-http';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
+import { App } from './App';
 
 const wsLink = new WebSocketLink({
     uri: `ws://localhost:8085/query`,

@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"gopkg.in/yaml.v2"
@@ -32,7 +31,7 @@ type Config struct {
 	Packages                 *code.Packages             `yaml:"-"`
 	Schema                   *ast.Schema                `yaml:"-"`
 
-	// Deprecated use Federation instead. Will be removed next release
+	// Deprecated: use Federation instead. Will be removed next release
 	Federated bool `yaml:"federated,omitempty"`
 }
 
@@ -59,7 +58,7 @@ func LoadDefaultConfig() (*Config, error) {
 		var schemaRaw []byte
 		schemaRaw, err = ioutil.ReadFile(filename)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to open schema")
+			return nil, fmt.Errorf("unable to open schema: %w", err)
 		}
 
 		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
@@ -78,7 +77,7 @@ func LoadConfigFromDefaultLocations() (*Config, error) {
 
 	err = os.Chdir(filepath.Dir(cfgFile))
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to enter config dir")
+		return nil, fmt.Errorf("unable to enter config dir: %w", err)
 	}
 	return LoadConfig(cfgFile)
 }
@@ -96,13 +95,23 @@ func LoadConfig(filename string) (*Config, error) {
 
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to read config")
+		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
 
 	if err := yaml.UnmarshalStrict(b, config); err != nil {
-		return nil, errors.Wrap(err, "unable to parse config")
+		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
 
+	if err := CompleteConfig(config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+// CompleteConfig fills in the schema and other values to a config loaded from
+// YAML.
+func CompleteConfig(config *Config) error {
 	defaultDirectives := map[string]DirectiveConfig{
 		"skip":       {SkipRuntime: true},
 		"include":    {SkipRuntime: true},
@@ -140,12 +149,13 @@ func LoadConfig(filename string) (*Config, error) {
 
 				return nil
 			}); err != nil {
-				return nil, errors.Wrapf(err, "failed to walk schema at root %s", pathParts[0])
+				return fmt.Errorf("failed to walk schema at root %s: %w", pathParts[0], err)
 			}
 		} else {
+			var err error
 			matches, err = filepath.Glob(f)
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+				return fmt.Errorf("failed to glob schema filename %s: %w", f, err)
 			}
 		}
 
@@ -163,13 +173,12 @@ func LoadConfig(filename string) (*Config, error) {
 		var schemaRaw []byte
 		schemaRaw, err = ioutil.ReadFile(filename)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to open schema")
+			return fmt.Errorf("unable to open schema: %w", err)
 		}
 
 		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
-
-	return config, nil
+	return nil
 }
 
 func (c *Config) Init() error {
@@ -333,10 +342,10 @@ func (c *Config) check() error {
 	fileList := map[string][]FilenamePackage{}
 
 	if err := c.Models.Check(); err != nil {
-		return errors.Wrap(err, "config.models")
+		return fmt.Errorf("config.models: %w", err)
 	}
 	if err := c.Exec.Check(); err != nil {
-		return errors.Wrap(err, "config.exec")
+		return fmt.Errorf("config.exec: %w", err)
 	}
 	fileList[c.Exec.ImportPath()] = append(fileList[c.Exec.ImportPath()], FilenamePackage{
 		Filename: c.Exec.Filename,
@@ -346,7 +355,7 @@ func (c *Config) check() error {
 
 	if c.Model.IsDefined() {
 		if err := c.Model.Check(); err != nil {
-			return errors.Wrap(err, "config.model")
+			return fmt.Errorf("config.model: %w", err)
 		}
 		fileList[c.Model.ImportPath()] = append(fileList[c.Model.ImportPath()], FilenamePackage{
 			Filename: c.Model.Filename,
@@ -356,7 +365,7 @@ func (c *Config) check() error {
 	}
 	if c.Resolver.IsDefined() {
 		if err := c.Resolver.Check(); err != nil {
-			return errors.Wrap(err, "config.resolver")
+			return fmt.Errorf("config.resolver: %w", err)
 		}
 		fileList[c.Resolver.ImportPath()] = append(fileList[c.Resolver.ImportPath()], FilenamePackage{
 			Filename: c.Resolver.Filename,
@@ -366,7 +375,7 @@ func (c *Config) check() error {
 	}
 	if c.Federation.IsDefined() {
 		if err := c.Federation.Check(); err != nil {
-			return errors.Wrap(err, "config.federation")
+			return fmt.Errorf("config.federation: %w", err)
 		}
 		fileList[c.Federation.ImportPath()] = append(fileList[c.Federation.ImportPath()], FilenamePackage{
 			Filename: c.Federation.Filename,
@@ -470,7 +479,7 @@ func inStrSlice(haystack []string, needle string) bool {
 func findCfg() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
-		return "", errors.Wrap(err, "unable to get working dir to findCfg")
+		return "", fmt.Errorf("unable to get working dir to findCfg: %w", err)
 	}
 
 	cfg := findCfgInDir(dir)
@@ -510,7 +519,7 @@ func (c *Config) autobind() error {
 		}
 
 		for i, p := range ps {
-			if p == nil {
+			if p == nil || p.Module == nil {
 				return fmt.Errorf("unable to load %s - make sure you're using an import path to a package that exists", c.AutoBind[i])
 			}
 			if t := p.Types.Scope().Lookup(t.Name); t != nil {

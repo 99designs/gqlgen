@@ -82,7 +82,7 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 func (p *Client) RawPost(query string, options ...Option) (*Response, error) {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
-		return nil, fmt.Errorf("build: %s", err.Error())
+		return nil, fmt.Errorf("build: %w", err)
 	}
 
 	w := httptest.NewRecorder()
@@ -97,7 +97,7 @@ func (p *Client) RawPost(query string, options ...Option) (*Response, error) {
 	respDataRaw := &Response{}
 	err = json.Unmarshal(w.Body.Bytes(), &respDataRaw)
 	if err != nil {
-		return nil, fmt.Errorf("decode: %s", err.Error())
+		return nil, fmt.Errorf("decode: %w", err)
 	}
 
 	return respDataRaw, nil
@@ -123,7 +123,7 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 	case "application/json":
 		requestBody, err := json.Marshal(bd)
 		if err != nil {
-			return nil, fmt.Errorf("encode: %s", err.Error())
+			return nil, fmt.Errorf("encode: %w", err)
 		}
 		bd.HTTP.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
 	default:
@@ -141,7 +141,7 @@ func unpack(data interface{}, into interface{}) error {
 		ZeroFields:  true,
 	})
 	if err != nil {
-		return fmt.Errorf("mapstructure: %s", err.Error())
+		return fmt.Errorf("mapstructure: %w", err)
 	}
 
 	return d.Decode(data)

@@ -60,6 +60,7 @@ type DirectiveRoot struct {
 	Custom        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Directive1    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Directive2    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Directive3    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Length        func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (res interface{}, err error)
 	Logged        func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
 	MakeNil       func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
@@ -256,6 +257,10 @@ type ComplexityRoot struct {
 		Value   func(childComplexity int) int
 	}
 
+	PtrToSliceContainer struct {
+		PtrToSlice func(childComplexity int) int
+	}
+
 	Query struct {
 		Animal                           func(childComplexity int) int
 		Autobind                         func(childComplexity int) int
@@ -278,6 +283,8 @@ type ComplexityRoot struct {
 		EmbeddedCase3                    func(childComplexity int) int
 		EnumInInput                      func(childComplexity int, input *InputWithEnumValue) int
 		ErrorBubble                      func(childComplexity int) int
+		ErrorBubbleList                  func(childComplexity int) int
+		ErrorList                        func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
@@ -300,12 +307,15 @@ type ComplexityRoot struct {
 		Panics                           func(childComplexity int) int
 		PrimitiveObject                  func(childComplexity int) int
 		PrimitiveStringObject            func(childComplexity int) int
+		PtrToSliceContainer              func(childComplexity int) int
 		Recursive                        func(childComplexity int, input *RecursiveInputSlice) int
 		ScalarSlice                      func(childComplexity int) int
 		ShapeUnion                       func(childComplexity int) int
 		Shapes                           func(childComplexity int) int
 		Slices                           func(childComplexity int) int
 		User                             func(childComplexity int, id int) int
+		VOkCaseNil                       func(childComplexity int) int
+		VOkCaseValue                     func(childComplexity int) int
 		Valid                            func(childComplexity int) int
 		ValidType                        func(childComplexity int) int
 		WrappedMap                       func(childComplexity int) int
@@ -342,6 +352,14 @@ type ComplexityRoot struct {
 		Friends func(childComplexity int) int
 		ID      func(childComplexity int) int
 		Updated func(childComplexity int) int
+	}
+
+	VOkCaseNil struct {
+		Value func(childComplexity int) int
+	}
+
+	VOkCaseValue struct {
+		Value func(childComplexity int) int
 	}
 
 	ValidType struct {
@@ -457,16 +475,21 @@ type QueryResolver interface {
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
+	ErrorBubbleList(ctx context.Context) ([]*Error, error)
+	ErrorList(ctx context.Context) ([]*Error, error)
 	Errors(ctx context.Context) (*Errors, error)
 	Valid(ctx context.Context) (string, error)
 	Panics(ctx context.Context) (*Panics, error)
 	PrimitiveObject(ctx context.Context) ([]Primitive, error)
 	PrimitiveStringObject(ctx context.Context) ([]PrimitiveString, error)
+	PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
 	Slices(ctx context.Context) (*Slices, error)
 	ScalarSlice(ctx context.Context) ([]byte, error)
 	Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
 	OptionalUnion(ctx context.Context) (TestUnion, error)
+	VOkCaseValue(ctx context.Context) (*VOkCaseValue, error)
+	VOkCaseNil(ctx context.Context) (*VOkCaseNil, error)
 	ValidType(ctx context.Context) (*ValidType, error)
 	WrappedStruct(ctx context.Context) (*WrappedStruct, error)
 	WrappedScalar(ctx context.Context) (otherpkg.Scalar, error)
@@ -1012,6 +1035,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PrimitiveString.Value(childComplexity), true
 
+	case "PtrToSliceContainer.ptrToSlice":
+		if e.complexity.PtrToSliceContainer.PtrToSlice == nil {
+			break
+		}
+
+		return e.complexity.PtrToSliceContainer.PtrToSlice(childComplexity), true
+
 	case "Query.animal":
 		if e.complexity.Query.Animal == nil {
 			break
@@ -1198,6 +1228,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ErrorBubble(childComplexity), true
+
+	case "Query.errorBubbleList":
+		if e.complexity.Query.ErrorBubbleList == nil {
+			break
+		}
+
+		return e.complexity.Query.ErrorBubbleList(childComplexity), true
+
+	case "Query.errorList":
+		if e.complexity.Query.ErrorList == nil {
+			break
+		}
+
+		return e.complexity.Query.ErrorList(childComplexity), true
 
 	case "Query.errors":
 		if e.complexity.Query.Errors == nil {
@@ -1393,6 +1437,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.PrimitiveStringObject(childComplexity), true
 
+	case "Query.ptrToSliceContainer":
+		if e.complexity.Query.PtrToSliceContainer == nil {
+			break
+		}
+
+		return e.complexity.Query.PtrToSliceContainer(childComplexity), true
+
 	case "Query.recursive":
 		if e.complexity.Query.Recursive == nil {
 			break
@@ -1444,6 +1495,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
+
+	case "Query.vOkCaseNil":
+		if e.complexity.Query.VOkCaseNil == nil {
+			break
+		}
+
+		return e.complexity.Query.VOkCaseNil(childComplexity), true
+
+	case "Query.vOkCaseValue":
+		if e.complexity.Query.VOkCaseValue == nil {
+			break
+		}
+
+		return e.complexity.Query.VOkCaseValue(childComplexity), true
 
 	case "Query.valid":
 		if e.complexity.Query.Valid == nil {
@@ -1622,6 +1687,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Updated(childComplexity), true
+
+	case "VOkCaseNil.value":
+		if e.complexity.VOkCaseNil.Value == nil {
+			break
+		}
+
+		return e.complexity.VOkCaseNil.Value(childComplexity), true
+
+	case "VOkCaseValue.value":
+		if e.complexity.VOkCaseValue.Value == nil {
+			break
+		}
+
+		return e.complexity.VOkCaseValue.Value(childComplexity), true
 
 	case "ValidType.differentCase":
 		if e.complexity.ValidType.DifferentCase == nil {
@@ -1836,8 +1915,9 @@ directive @logged(id: UUID!) on FIELD
 directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
+directive @directive3 on INPUT_OBJECT
 directive @unimplemented on FIELD_DEFINITION
-directive @order1(location: String!) on FIELD_DEFINITION | OBJECT
+directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
 directive @order2(location: String!) on OBJECT
 
 extend type Query {
@@ -1861,7 +1941,7 @@ extend type Subscription {
     directiveUnimplemented: String @unimplemented
 }
 
-input InputDirectives {
+input InputDirectives @directive3 {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
     inner: InnerDirectives!
@@ -1873,7 +1953,7 @@ input InnerDirectives {
     message: String! @length(min: 1, message: "not valid")
 }
 
-type ObjectDirectives @order1(location: "ObjectDirectives_object_1") @order2(location: "ObjectDirectives_object_2") {
+type ObjectDirectives @order1(location: "order1_1") @order1(location: "order1_2") @order2(location: "order2_1") {
     text: String! @length(min: 0, max: 7, message: "not valid")
     nullableText: String @toNull
     order: [String!]!
@@ -2039,6 +2119,8 @@ input NestedInput {
 `, BuiltIn: false},
 	{Name: "nulls.graphql", Input: `extend type Query {
     errorBubble: Error
+    errorBubbleList: [Error!]
+    errorList: [Error]
     errors: Errors
     valid: String!
 }
@@ -2085,6 +2167,14 @@ type PrimitiveString {
     value: String!
     doubled: String!
     len: Int!
+}
+`, BuiltIn: false},
+	{Name: "ptr_to_slice.graphql", Input: `type PtrToSliceContainer {
+    ptrToSlice: [String!]
+}
+
+extend type Query {
+    ptrToSliceContainer: PtrToSliceContainer!
 }
 `, BuiltIn: false},
 	{Name: "scalar_default.graphql", Input: `extend type Query {
@@ -2204,10 +2294,10 @@ scalar Time
 }
 
 type Slices {
-  test1: [String]
-  test2: [String!]
-  test3: [String]!
-  test4: [String!]!
+    test1: [String]
+    test2: [String!]
+    test3: [String]!
+    test4: [String!]!
 }
 
 scalar Bytes
@@ -2234,6 +2324,19 @@ union TestUnion = A | B
 
 extend type Query {
     optionalUnion: TestUnion
+}
+`, BuiltIn: false},
+	{Name: "v-ok.graphql", Input: `extend type Query {
+    vOkCaseValue: VOkCaseValue
+    vOkCaseNil: VOkCaseNil
+}
+
+type VOkCaseValue @goModel(model:"testserver.VOkCaseValue") {
+  value: String
+}
+
+type VOkCaseNil @goModel(model:"testserver.VOkCaseNil") {
+  value: String
 }
 `, BuiltIn: false},
 	{Name: "validtypes.graphql", Input: `extend type Query {
@@ -5738,6 +5841,35 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context, field graphql.CollectedField, obj *PtrToSliceContainer) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PtrToSliceContainer",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PtrToSlice, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*[]string)
+	fc.Result = res
+	return ec.marshalOString2ᚖᚕstringᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -6439,7 +6571,7 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			return ec.resolvers.Query().DirectiveObject(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object_1")
+			location, err := ec.unmarshalNString2string(ctx, "order1_1")
 			if err != nil {
 				return nil, err
 			}
@@ -6449,16 +6581,26 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			return ec.directives.Order1(ctx, nil, directive0, location)
 		}
 		directive2 := func(ctx context.Context) (interface{}, error) {
-			location, err := ec.unmarshalNString2string(ctx, "ObjectDirectives_object_2")
+			location, err := ec.unmarshalNString2string(ctx, "order1_2")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Order1 == nil {
+				return nil, errors.New("directive order1 is not implemented")
+			}
+			return ec.directives.Order1(ctx, nil, directive1, location)
+		}
+		directive3 := func(ctx context.Context) (interface{}, error) {
+			location, err := ec.unmarshalNString2string(ctx, "order2_1")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Order2 == nil {
 				return nil, errors.New("directive order2 is not implemented")
 			}
-			return ec.directives.Order2(ctx, nil, directive1, location)
+			return ec.directives.Order2(ctx, nil, directive2, location)
 		}
-		directive3 := func(ctx context.Context) (interface{}, error) {
+		directive4 := func(ctx context.Context) (interface{}, error) {
 			location, err := ec.unmarshalNString2string(ctx, "Query_field")
 			if err != nil {
 				return nil, err
@@ -6466,10 +6608,10 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			if ec.directives.Order1 == nil {
 				return nil, errors.New("directive order1 is not implemented")
 			}
-			return ec.directives.Order1(ctx, nil, directive2, location)
+			return ec.directives.Order1(ctx, nil, directive3, location)
 		}
 
-		tmp, err := directive3(rctx)
+		tmp, err := directive4(rctx)
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
@@ -7212,6 +7354,64 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 	return ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ErrorBubbleList(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Error)
+	fc.Result = res
+	return ec.marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_errorList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ErrorList(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*Error)
+	fc.Result = res
+	return ec.marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7364,6 +7564,38 @@ func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, fi
 	res := resTmp.([]PrimitiveString)
 	fc.Result = res
 	return ec.marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPrimitiveStringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_ptrToSliceContainer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PtrToSliceContainer(rctx)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*PtrToSliceContainer)
+	fc.Result = res
+	return ec.marshalNPtrToSliceContainer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToSliceContainer(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -7532,6 +7764,64 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 	res := resTmp.(TestUnion)
 	fc.Result = res
 	return ec.marshalOTestUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐTestUnion(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VOkCaseValue(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*VOkCaseValue)
+	fc.Result = res
+	return ec.marshalOVOkCaseValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐVOkCaseValue(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_vOkCaseNil(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VOkCaseNil(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*VOkCaseNil)
+	fc.Result = res
+	return ec.marshalOVOkCaseNil2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐVOkCaseNil(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8429,6 +8719,72 @@ func (ec *executionContext) _User_updated(ctx context.Context, field graphql.Col
 	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _VOkCaseNil_value(ctx context.Context, field graphql.CollectedField, obj *VOkCaseNil) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VOkCaseNil",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		v, ok := obj.Value()
+		if !ok {
+			return nil, nil
+		}
+		return v, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VOkCaseValue_value(ctx context.Context, field graphql.CollectedField, obj *VOkCaseValue) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VOkCaseValue",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		v, ok := obj.Value()
+		if !ok {
+			return nil, nil
+		}
+		return v, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8897,6 +9253,38 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	fc.Result = res
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Directive",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRepeatable, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -9831,7 +10219,10 @@ func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.Collected
 
 func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, obj interface{}) (InnerDirectives, error) {
 	var it InnerDirectives
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9873,7 +10264,10 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj interface{}) (InnerInput, error) {
 	var it InnerInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9893,7 +10287,10 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj in
 
 func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, obj interface{}) (InputDirectives, error) {
 	var it InputDirectives
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9903,6 +10300,12 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Directive3 == nil {
+					return nil, errors.New("directive directive3 is not implemented")
+				}
+				return ec.directives.Directive3(ctx, obj, directive0)
+			}
+			directive2 := func(ctx context.Context) (interface{}, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					return nil, err
@@ -9918,10 +10321,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				if ec.directives.Length == nil {
 					return nil, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive0, min, max, message)
+				return ec.directives.Length(ctx, obj, directive1, min, max, message)
 			}
 
-			tmp, err := directive1(ctx)
+			tmp, err := directive2(ctx)
 			if err != nil {
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
@@ -9937,13 +10340,19 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nullableText"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Directive3 == nil {
+					return nil, errors.New("directive directive3 is not implemented")
+				}
+				return ec.directives.Directive3(ctx, obj, directive0)
+			}
+			directive2 := func(ctx context.Context) (interface{}, error) {
 				if ec.directives.ToNull == nil {
 					return nil, errors.New("directive toNull is not implemented")
 				}
-				return ec.directives.ToNull(ctx, obj, directive0)
+				return ec.directives.ToNull(ctx, obj, directive1)
 			}
 
-			tmp, err := directive1(ctx)
+			tmp, err := directive2(ctx)
 			if err != nil {
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
@@ -9959,17 +10368,53 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
-			it.Inner, err = ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
+			directive0 := func(ctx context.Context) (interface{}, error) {
+				return ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
+			}
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Directive3 == nil {
+					return nil, errors.New("directive directive3 is not implemented")
+				}
+				return ec.directives.Directive3(ctx, obj, directive0)
+			}
+
+			tmp, err := directive1(ctx)
 			if err != nil {
-				return it, err
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*InnerDirectives); ok {
+				it.Inner = data
+			} else if tmp == nil {
+				it.Inner = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver.InnerDirectives`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "innerNullable":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("innerNullable"))
-			it.InnerNullable, err = ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
+			directive0 := func(ctx context.Context) (interface{}, error) {
+				return ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx, v)
+			}
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Directive3 == nil {
+					return nil, errors.New("directive directive3 is not implemented")
+				}
+				return ec.directives.Directive3(ctx, obj, directive0)
+			}
+
+			tmp, err := directive1(ctx)
 			if err != nil {
-				return it, err
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*InnerDirectives); ok {
+				it.InnerNullable = data
+			} else if tmp == nil {
+				it.InnerNullable = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver.InnerDirectives`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "thirdParty":
 			var err error
@@ -9979,6 +10424,12 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐThirdParty(ctx, v)
 			}
 			directive1 := func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Directive3 == nil {
+					return nil, errors.New("directive directive3 is not implemented")
+				}
+				return ec.directives.Directive3(ctx, obj, directive0)
+			}
+			directive2 := func(ctx context.Context) (interface{}, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					return nil, err
@@ -9990,10 +10441,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				if ec.directives.Length == nil {
 					return nil, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive0, min, max, nil)
+				return ec.directives.Length(ctx, obj, directive1, min, max, nil)
 			}
 
-			tmp, err := directive1(ctx)
+			tmp, err := directive2(ctx)
 			if err != nil {
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
@@ -10013,7 +10464,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context, obj interface{}) (InputWithEnumValue, error) {
 	var it InputWithEnumValue
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10033,7 +10487,10 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 
 func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj interface{}) (NestedInput, error) {
 	var it NestedInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10053,7 +10510,10 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj i
 
 func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj interface{}) (NestedMapInput, error) {
 	var it NestedMapInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10073,7 +10533,10 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 
 func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj interface{}) (OuterInput, error) {
 	var it OuterInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10093,7 +10556,10 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj in
 
 func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Context, obj interface{}) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10113,7 +10579,10 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 
 func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj interface{}) (SpecialInput, error) {
 	var it SpecialInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10133,7 +10602,10 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 
 func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj interface{}) (ValidInput, error) {
 	var it ValidInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -11787,6 +12259,30 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 	return out
 }
 
+var ptrToSliceContainerImplementors = []string{"PtrToSliceContainer"}
+
+func (ec *executionContext) _PtrToSliceContainer(ctx context.Context, sel ast.SelectionSet, obj *PtrToSliceContainer) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToSliceContainerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PtrToSliceContainer")
+		case "ptrToSlice":
+			out.Values[i] = ec._PtrToSliceContainer_ptrToSlice(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -12266,6 +12762,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_errorBubble(ctx, field)
 				return res
 			})
+		case "errorBubbleList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_errorBubbleList(ctx, field)
+				return res
+			})
+		case "errorList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_errorList(ctx, field)
+				return res
+			})
 		case "errors":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -12325,6 +12843,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_primitiveStringObject(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "ptrToSliceContainer":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_ptrToSliceContainer(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -12392,6 +12924,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_optionalUnion(ctx, field)
+				return res
+			})
+		case "vOkCaseValue":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vOkCaseValue(ctx, field)
+				return res
+			})
+		case "vOkCaseNil":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vOkCaseNil(ctx, field)
 				return res
 			})
 		case "validType":
@@ -12609,6 +13163,54 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "updated":
 			out.Values[i] = ec._User_updated(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vOkCaseNilImplementors = []string{"VOkCaseNil"}
+
+func (ec *executionContext) _VOkCaseNil(ctx context.Context, sel ast.SelectionSet, obj *VOkCaseNil) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vOkCaseNilImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VOkCaseNil")
+		case "value":
+			out.Values[i] = ec._VOkCaseNil_value(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vOkCaseValueImplementors = []string{"VOkCaseValue"}
+
+func (ec *executionContext) _VOkCaseValue(ctx context.Context, sel ast.SelectionSet, obj *VOkCaseValue) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vOkCaseValueImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VOkCaseValue")
+		case "value":
+			out.Values[i] = ec._VOkCaseValue_value(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12842,6 +13444,11 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			}
 		case "args":
 			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isRepeatable":
+			out.Values[i] = ec.___Directive_isRepeatable(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -13389,6 +13996,12 @@ func (ec *executionContext) marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋg
 		ret[i] = ec.marshalNMarshalPanic2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐMarshalPanic(ctx, sel, v[i])
 	}
 
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13445,6 +14058,13 @@ func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13486,7 +14106,28 @@ func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designs�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
+}
+
+func (ec *executionContext) marshalNPtrToSliceContainer2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToSliceContainer(ctx context.Context, sel ast.SelectionSet, v PtrToSliceContainer) graphql.Marshaler {
+	return ec._PtrToSliceContainer(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPtrToSliceContainer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐPtrToSliceContainer(ctx context.Context, sel ast.SelectionSet, v *PtrToSliceContainer) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PtrToSliceContainer(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx context.Context, v interface{}) (RecursiveInputSlice, error) {
@@ -13549,6 +14190,12 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
 	}
 
 	return ret
@@ -13673,6 +14320,13 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13774,6 +14428,13 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13847,6 +14508,13 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13896,6 +14564,13 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13937,6 +14612,13 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14054,6 +14736,7 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 
 	}
 	wg.Wait()
+
 	return ret
 }
 
@@ -14094,6 +14777,13 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14145,6 +14835,94 @@ func (ec *executionContext) marshalOEmbeddedCase32ᚖgithubᚗcomᚋ99designsᚋ
 		return graphql.Null
 	}
 	return ec._EmbeddedCase3(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v []*Error) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []*Error) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐError(ctx context.Context, sel ast.SelectionSet, v *Error) graphql.Marshaler {
@@ -14359,6 +15137,7 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99design
 
 	}
 	wg.Wait()
+
 	return ret
 }
 
@@ -14399,6 +15178,7 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚖgithubᚗcomᚋ99designs�
 
 	}
 	wg.Wait()
+
 	return ret
 }
 
@@ -14499,6 +15279,7 @@ func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
 	return ret
 }
 
@@ -14549,6 +15330,12 @@ func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
 	}
 
 	return ret
@@ -14605,6 +15392,18 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
+func (ec *executionContext) unmarshalOString2ᚖᚕstringᚄ(ctx context.Context, v interface{}) (*[]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2ᚖᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v *[]string) graphql.Marshaler {
+	return ec.marshalOString2ᚕstringᚄ(ctx, sel, *v)
+}
+
 func (ec *executionContext) marshalOTestUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐTestUnion(ctx context.Context, sel ast.SelectionSet, v TestUnion) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -14640,6 +15439,20 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 		return graphql.Null
 	}
 	return graphql.MarshalTime(*v)
+}
+
+func (ec *executionContext) marshalOVOkCaseNil2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐVOkCaseNil(ctx context.Context, sel ast.SelectionSet, v *VOkCaseNil) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._VOkCaseNil(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOVOkCaseValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐVOkCaseValue(ctx context.Context, sel ast.SelectionSet, v *VOkCaseValue) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._VOkCaseValue(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐValidInput(ctx context.Context, v interface{}) (*ValidInput, error) {
@@ -14710,6 +15523,13 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14750,6 +15570,13 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14790,6 +15617,13 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14837,6 +15671,13 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 

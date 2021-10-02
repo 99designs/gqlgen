@@ -8,7 +8,7 @@ This server demonstrates a few advanced features of graphql:
 
 to run this server
 ```bash
-go run ./example/starwars/server/server.go
+go run ./server/server.go
 ```
 
 and open http://localhost:8080 in your browser

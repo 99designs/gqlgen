@@ -27,6 +27,7 @@ type Config struct {
 	Directives               map[string]DirectiveConfig `yaml:"directives,omitempty"`
 	OmitSliceElementPointers bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	SkipValidation           bool                       `yaml:"skip_validation,omitempty"`
+	SkipModTidy              bool                       `yaml:"skip_mod_tidy,omitempty"`
 	Sources                  []*ast.Source              `yaml:"-"`
 	Packages                 *code.Packages             `yaml:"-"`
 	Schema                   *ast.Schema                `yaml:"-"`

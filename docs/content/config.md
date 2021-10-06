@@ -46,6 +46,9 @@ resolver:
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
 
+# Optional: set to skip running `go mod tidy` when generating server code
+# skip_mod_tidy: true
+
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:

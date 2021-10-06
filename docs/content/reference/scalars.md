@@ -157,43 +157,48 @@ The errors that occur as part of custom scalar unmarshaling will return a full p
 For example, given the following schema ...
 
 ```graphql
-extend type Mutation {
-	updateUser(userInput: UserInput!): User!
+extend type Mutation{
+    updateUser(userInput: UserInput!): User!
 }
 
 input UserInput {
-	name: String!
-	primaryContactDetails: ContactDetailsInput!
-	secondaryContactDetails: ContactDetailsInput!
+    name: String!
+    primaryContactDetails: ContactDetailsInput!
+    secondaryContactDetails: ContactDetailsInput!
 }
 
 scalar Email
 input ContactDetailsInput {
-	email: Email!
+    email: Email!
 }
 ```
 
 ... and the following variables:
 
 ```json
+
 {
-	"userInput": {
-		"name": "George",
-		"primaryContactDetails": {
-			"email": "not-an-email"
-		},
-		"secondaryContactDetails": {
-			"email": "george@gmail.com"
-		}
-	}
+  "userInput": {
+    "name": "George",
+    "primaryContactDetails": {
+      "email": "not-an-email"
+    },
+    "secondaryContactDetails": {
+      "email": "george@gmail.com"
+    }
+  }
 }
 ```
 
 ... and an unmarshal function that returns an error if the email is invalid. The mutation will return an error containing the full path:
-
 ```json
 {
-	"message": "email invalid",
-	"path": ["updateUser", "userInput", "primaryContactDetails", "email"]
+  "message": "email invalid",
+  "path": [
+    "updateUser",
+    "userInput",
+    "primaryContactDetails",
+    "email"
+  ]
 }
 ```

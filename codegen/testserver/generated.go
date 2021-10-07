@@ -136,6 +136,11 @@ type ComplexityRoot struct {
 		Foo func(childComplexity int) int
 	}
 
+	DefaultParametersMirror struct {
+		FalsyBoolean  func(childComplexity int) int
+		TruthyBoolean func(childComplexity int) int
+	}
+
 	Dog struct {
 		DogBreed func(childComplexity int) int
 		Species  func(childComplexity int) int
@@ -217,6 +222,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		DefaultInput    func(childComplexity int, input DefaultInput) int
 		UpdateSomething func(childComplexity int, input SpecialInput) int
 	}
 
@@ -265,6 +271,7 @@ type ComplexityRoot struct {
 		Animal                           func(childComplexity int) int
 		Autobind                         func(childComplexity int) int
 		Collision                        func(childComplexity int) int
+		DefaultParameters                func(childComplexity int, falsyBoolean *bool, truthyBoolean *bool) int
 		DefaultScalar                    func(childComplexity int, arg string) int
 		DeprecatedField                  func(childComplexity int) int
 		DirectiveArg                     func(childComplexity int, arg string) int
@@ -416,6 +423,7 @@ type ModelMethodsResolver interface {
 	ResolverField(ctx context.Context, obj *ModelMethods) (bool, error)
 }
 type MutationResolver interface {
+	DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
 	UpdateSomething(ctx context.Context, input SpecialInput) (string, error)
 }
 type OverlappingFieldsResolver interface {
@@ -450,6 +458,7 @@ type QueryResolver interface {
 	Autobind(ctx context.Context) (*Autobind, error)
 	DeprecatedField(ctx context.Context) (string, error)
 	Overlapping(ctx context.Context) (*OverlappingFields, error)
+	DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
 	DirectiveArg(ctx context.Context, arg string) (*string, error)
 	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
 	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
@@ -698,6 +707,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ContentUser.Foo(childComplexity), true
 
+	case "DefaultParametersMirror.falsyBoolean":
+		if e.complexity.DefaultParametersMirror.FalsyBoolean == nil {
+			break
+		}
+
+		return e.complexity.DefaultParametersMirror.FalsyBoolean(childComplexity), true
+
+	case "DefaultParametersMirror.truthyBoolean":
+		if e.complexity.DefaultParametersMirror.TruthyBoolean == nil {
+			break
+		}
+
+		return e.complexity.DefaultParametersMirror.TruthyBoolean(childComplexity), true
+
 	case "Dog.dogBreed":
 		if e.complexity.Dog.DogBreed == nil {
 			break
@@ -901,6 +924,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ModelMethods.WithContext(childComplexity), true
 
+	case "Mutation.defaultInput":
+		if e.complexity.Mutation.DefaultInput == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_defaultInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
+
 	case "Mutation.updateSomething":
 		if e.complexity.Mutation.UpdateSomething == nil {
 			break
@@ -1062,6 +1097,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Collision(childComplexity), true
+
+	case "Query.defaultParameters":
+		if e.complexity.Query.DefaultParameters == nil {
+			break
+		}
+
+		args, err := ec.field_Query_defaultParameters_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DefaultParameters(childComplexity, args["falsyBoolean"].(*bool), args["truthyBoolean"].(*bool)), true
 
 	case "Query.defaultScalar":
 		if e.complexity.Query.DefaultScalar == nil {
@@ -1908,6 +1955,27 @@ type OverlappingFields {
   new_foo: Int!
 }
 `, BuiltIn: false},
+	{Name: "defaults.graphql", Input: `extend type Query {
+    defaultParameters(
+        falsyBoolean: Boolean = false
+        truthyBoolean: Boolean = true
+    ): DefaultParametersMirror!
+}
+
+extend type Mutation {
+    defaultInput(input: DefaultInput!): DefaultParametersMirror!
+}
+
+input DefaultInput {
+    falsyBoolean: Boolean = false
+    truthyBoolean: Boolean = true
+}
+
+type DefaultParametersMirror {
+    falsyBoolean: Boolean
+    truthyBoolean: Boolean
+}
+`, BuiltIn: false},
 	{Name: "directive.graphql", Input: `directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
 directive @custom on ARGUMENT_DEFINITION
@@ -2188,15 +2256,21 @@ type EmbeddedDefaultScalar {
     value: DefaultScalarImplementation
 }
 `, BuiltIn: false},
-	{Name: "schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+	{Name: "schema.graphql", Input: `directive @goModel(
+    model: String
+    models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goField(
+    forceResolver: Boolean
+    name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Query {
     invalidIdentifier: InvalidIdentifier
     collision: It
     mapInput(input: Changes): Boolean
     recursive(input: RecursiveInputSlice): Boolean
-    nestedInputs(input: [[OuterInput]] = [[{inner: {id: 1}}]]): Boolean
+    nestedInputs(input: [[OuterInput]] = [[{ inner: { id: 1 } }]]): Boolean
     nestedOutputs: [[OuterObject]]
     modelMethods: ModelMethods
     user(id: Int!): User!
@@ -2243,7 +2317,7 @@ type It {
     id: ID!
 }
 
-input Changes @goModel(model:"map[string]interface{}") {
+input Changes @goModel(model: "map[string]interface{}") {
     a: Int
     b: Int
 }
@@ -2253,14 +2327,14 @@ input RecursiveInputSlice {
 }
 
 input InnerInput {
-    id:Int!
+    id: Int!
 }
 
 input OuterInput {
     inner: InnerInput!
 }
 
-scalar ThirdParty @goModel(model:"testserver.ThirdParty")
+scalar ThirdParty @goModel(model: "testserver.ThirdParty")
 
 type OuterObject {
     inner: InnerObject!
@@ -2274,7 +2348,7 @@ type ForcedResolver {
     field: Circle @goField(forceResolver: true)
 }
 
-type EmbeddedPointer @goModel(model:"testserver.EmbeddedPointerModel") {
+type EmbeddedPointer @goModel(model: "testserver.EmbeddedPointerModel") {
     ID: String
     Title: String
 }
@@ -2550,6 +2624,21 @@ func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[stri
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_defaultInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 DefaultInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐDefaultInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateSomething_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2607,6 +2696,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_defaultParameters_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["falsyBoolean"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("falsyBoolean"))
+		arg0, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["falsyBoolean"] = arg0
+	var arg1 *bool
+	if tmp, ok := rawArgs["truthyBoolean"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("truthyBoolean"))
+		arg1, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["truthyBoolean"] = arg1
 	return args, nil
 }
 
@@ -4221,6 +4334,64 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Context, field graphql.CollectedField, obj *DefaultParametersMirror) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DefaultParametersMirror",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FalsyBoolean, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.Context, field graphql.CollectedField, obj *DefaultParametersMirror) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DefaultParametersMirror",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TruthyBoolean, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5144,6 +5315,45 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 	res := resTmp.(bool)
 	fc.Result = res
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_defaultInput_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DefaultInput(rctx, args["input"].(DefaultInput))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*DefaultParametersMirror)
+	fc.Result = res
+	return ec.marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐDefaultParametersMirror(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6367,6 +6577,45 @@ func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphq
 	res := resTmp.(*OverlappingFields)
 	fc.Result = res
 	return ec.marshalOOverlappingFields2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐOverlappingFields(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_defaultParameters_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DefaultParameters(rctx, args["falsyBoolean"].(*bool), args["truthyBoolean"].(*bool))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*DefaultParametersMirror)
+	fc.Result = res
+	return ec.marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐDefaultParametersMirror(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -10217,6 +10466,44 @@ func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.Collected
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj interface{}) (DefaultInput, error) {
+	var it DefaultInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["falsyBoolean"]; !present {
+		asMap["falsyBoolean"] = false
+	}
+	if _, present := asMap["truthyBoolean"]; !present {
+		asMap["truthyBoolean"] = true
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "falsyBoolean":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("falsyBoolean"))
+			it.FalsyBoolean, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "truthyBoolean":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("truthyBoolean"))
+			it.TruthyBoolean, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, obj interface{}) (InnerDirectives, error) {
 	var it InnerDirectives
 	asMap := map[string]interface{}{}
@@ -11357,6 +11644,32 @@ func (ec *executionContext) _Content_User(ctx context.Context, sel ast.Selection
 	return out
 }
 
+var defaultParametersMirrorImplementors = []string{"DefaultParametersMirror"}
+
+func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel ast.SelectionSet, obj *DefaultParametersMirror) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, defaultParametersMirrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DefaultParametersMirror")
+		case "falsyBoolean":
+			out.Values[i] = ec._DefaultParametersMirror_falsyBoolean(ctx, field, obj)
+		case "truthyBoolean":
+			out.Values[i] = ec._DefaultParametersMirror_truthyBoolean(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var dogImplementors = []string{"Dog", "Animal"}
 
 func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *Dog) graphql.Marshaler {
@@ -11942,6 +12255,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "defaultInput":
+			out.Values[i] = ec._Mutation_defaultInput(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "updateSomething":
 			out.Values[i] = ec._Mutation_updateSomething(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -12476,6 +12794,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_overlapping(ctx, field)
+				return res
+			})
+		case "defaultParameters":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_defaultParameters(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "directiveArg":
@@ -13767,6 +14099,25 @@ func (ec *executionContext) marshalNCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋ
 		return graphql.Null
 	}
 	return ec._CheckIssue896(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐDefaultInput(ctx context.Context, v interface{}) (DefaultInput, error) {
+	res, err := ec.unmarshalInputDefaultInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDefaultParametersMirror2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐDefaultParametersMirror(ctx context.Context, sel ast.SelectionSet, v DefaultParametersMirror) graphql.Marshaler {
+	return ec._DefaultParametersMirror(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐDefaultParametersMirror(ctx context.Context, sel ast.SelectionSet, v *DefaultParametersMirror) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._DefaultParametersMirror(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNDefaultScalarImplementation2string(ctx context.Context, v interface{}) (string, error) {

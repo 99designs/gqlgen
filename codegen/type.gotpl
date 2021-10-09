@@ -53,7 +53,11 @@
 					{{- else}}
 						var res {{ $type.GO | ref }}
 					{{- end }}
-					err := res.UnmarshalGQL(v)
+					{{- if $type.IsContext }}
+						err := res.UnmarshalGQLContext(ctx, v)
+					{{- else }}
+						err := res.UnmarshalGQL(v)
+					{{- end }}
 					return res, graphql.ErrorOnPath(ctx, err)
 				{{- else }}
 					res, err := ec.unmarshalInput{{ $type.GQL.Name }}(ctx, v)
@@ -135,7 +139,11 @@
 					}
 				{{- end }}
 				{{- if $type.IsMarshaler }}
-					return v
+					{{- if $type.IsContext }}
+						return graphql.WrapContextMarshaler(ctx, v)
+					{{- else }}
+						return v
+					{{- end }}
 				{{- else if $type.Marshaler }}
 					{{- $v := "v" }}
 					{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
@@ -143,16 +151,18 @@
 					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
 						{{- $v = "*v" }}
 					{{- end }}
+					res := {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
 					{{- if $type.GQL.NonNull }}
-							res := {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
-							if res == graphql.Null {
-								if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-									ec.Errorf(ctx, "must not be null")
-								}
+						if res == graphql.Null {
+							if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+								ec.Errorf(ctx, "must not be null")
 							}
-							return res
+						}
+					{{- end }}
+					{{- if $type.IsContext }}
+						return graphql.WrapContextMarshaler(ctx, res)
 					{{- else }}
-						return {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
+						return res
 					{{- end }}
 				{{- else }}
 					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)

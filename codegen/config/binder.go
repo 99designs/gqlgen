@@ -152,18 +152,10 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 }
 
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
-	newRef := &TypeReference{
-		GO:          types.NewPointer(ref.GO),
-		GQL:         ref.GQL,
-		CastType:    ref.CastType,
-		Definition:  ref.Definition,
-		Unmarshaler: ref.Unmarshaler,
-		Marshaler:   ref.Marshaler,
-		IsMarshaler: ref.IsMarshaler,
-	}
-
-	b.References = append(b.References, newRef)
-	return newRef
+	newRef := *ref
+	newRef.GO = types.NewPointer(ref.GO)
+	b.References = append(b.References, &newRef)
+	return &newRef
 }
 
 // TypeReference is used by args and field types. The Definition can refer to both input and output types.
@@ -176,33 +168,21 @@ type TypeReference struct {
 	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
 	IsMarshaler bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
+	IsContext   bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
 	if p, isPtr := ref.GO.(*types.Pointer); isPtr {
-		return &TypeReference{
-			GO:          p.Elem(),
-			Target:      ref.Target,
-			GQL:         ref.GQL,
-			CastType:    ref.CastType,
-			Definition:  ref.Definition,
-			Unmarshaler: ref.Unmarshaler,
-			Marshaler:   ref.Marshaler,
-			IsMarshaler: ref.IsMarshaler,
-		}
+		newRef := *ref
+		newRef.GO = p.Elem()
+		return &newRef
 	}
 
 	if ref.IsSlice() {
-		return &TypeReference{
-			GO:          ref.GO.(*types.Slice).Elem(),
-			Target:      ref.Target,
-			GQL:         ref.GQL.Elem,
-			CastType:    ref.CastType,
-			Definition:  ref.Definition,
-			Unmarshaler: ref.Unmarshaler,
-			Marshaler:   ref.Marshaler,
-			IsMarshaler: ref.IsMarshaler,
-		}
+		newRef := *ref
+		newRef.GO = ref.GO.(*types.Slice).Elem()
+		newRef.GQL = ref.GQL.Elem
+		return &newRef
 	}
 	return nil
 }
@@ -362,9 +342,21 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		}
 
 		if fun, isFunc := obj.(*types.Func); isFunc {
-			ref.GO = fun.Type().(*types.Signature).Params().At(0).Type()
+			sig := fun.Type().(*types.Signature)
+			switch sig.Params().Len() {
+			case 2:
+				ref.GO = sig.Params().At(1).Type()
+			case 1:
+				ref.GO = sig.Params().At(0).Type()
+			default:
+				return nil, errors.New("Marshaller must have 1 or to arguments")
+			}
 			ref.Marshaler = fun
 			ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
+		} else if hasMethod(obj.Type(), "MarshalGQLContext") && hasMethod(obj.Type(), "UnmarshalGQLContext") {
+			ref.GO = obj.Type()
+			ref.IsContext = true
+			ref.IsMarshaler = true
 		} else if hasMethod(obj.Type(), "MarshalGQL") && hasMethod(obj.Type(), "UnmarshalGQL") {
 			ref.GO = obj.Type()
 			ref.IsMarshaler = true

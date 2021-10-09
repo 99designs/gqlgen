@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"context"
 	"io"
 )
 
@@ -24,6 +25,31 @@ type Marshaler interface {
 
 type Unmarshaler interface {
 	UnmarshalGQL(v interface{}) error
+}
+
+type ContextMarshaler interface {
+	MarshalGQLContext(ctx context.Context, w io.Writer) error
+}
+
+type ContextUnmarshaler interface {
+	UnmarshalGQLContext(ctx context.Context, v interface{}) error
+}
+
+type contextMarshalerAdapter struct {
+	Context context.Context
+	ContextMarshaler
+}
+
+func WrapContextMarshaler(ctx context.Context, m ContextMarshaler) Marshaler {
+	return contextMarshalerAdapter{Context: ctx, ContextMarshaler: m}
+}
+
+func (a contextMarshalerAdapter) MarshalGQL(w io.Writer) {
+	err := a.MarshalGQLContext(a.Context, w)
+	if err != nil {
+		AddError(a.Context, err)
+		Null.MarshalGQL(w)
+	}
 }
 
 type WriterFunc func(writer io.Writer)

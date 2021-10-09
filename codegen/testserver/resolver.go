@@ -200,6 +200,10 @@ func (r *queryResolver) NoShape(ctx context.Context) (Shape, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) Rectangle(ctx context.Context) (*Rectangle, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) Node(ctx context.Context) (Node, error) {
 	panic("not implemented")
 }

@@ -563,9 +563,12 @@ func (c *Config) injectBuiltins() {
 		"__EnumValue":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"}},
 		"__InputValue":        {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.InputValue"}},
 		"__Schema":            {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Schema"}},
-		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.Float"}},
 		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
+		"Float": {Model: StringList{
+			"github.com/99designs/gqlgen/graphql.FloatContext",
+			"github.com/99designs/gqlgen/graphql.Float",
+		}},
 		"Int": {Model: StringList{
 			"github.com/99designs/gqlgen/graphql.Int",
 			"github.com/99designs/gqlgen/graphql.Int32",

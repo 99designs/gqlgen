@@ -29,14 +29,22 @@
 			{{- else }}
 				{{- if $type.Unmarshaler }}
 					{{- if $type.CastType }}
-						tmp, err := {{ $type.Unmarshaler | call }}(v)
+						{{- if $type.IsContext }}
+							tmp, err := {{ $type.Unmarshaler | call }}(ctx, v)
+						{{- else }}
+							tmp, err := {{ $type.Unmarshaler | call }}(v)
+						{{- end }}
 						{{- if $type.IsNilable }}
 							res := {{ $type.Elem.GO | ref }}(tmp)
 						{{- else}}
 							res := {{ $type.GO | ref }}(tmp)
 						{{- end }}
 					{{- else}}
-						res, err := {{ $type.Unmarshaler | call }}(v)
+						{{- if $type.IsContext }}
+							res, err := {{ $type.Unmarshaler | call }}(ctx, v)
+						{{- else }}
+							res, err := {{ $type.Unmarshaler | call }}(v)
+						{{- end }}
 					{{- end }}
 					{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
 						return *res, graphql.ErrorOnPath(ctx, err)

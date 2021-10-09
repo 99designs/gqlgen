@@ -77,6 +77,7 @@ type Stub struct {
 		EnumInInput                      func(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
+		Rectangle                        func(ctx context.Context) (*Rectangle, error)
 		Node                             func(ctx context.Context) (Node, error)
 		NoShapeTypedNil                  func(ctx context.Context) (Shape, error)
 		Animal                           func(ctx context.Context) (Animal, error)
@@ -338,6 +339,9 @@ func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 }
 func (r *stubQuery) NoShape(ctx context.Context) (Shape, error) {
 	return r.QueryResolver.NoShape(ctx)
+}
+func (r *stubQuery) Rectangle(ctx context.Context) (*Rectangle, error) {
+	return r.QueryResolver.Rectangle(ctx)
 }
 func (r *stubQuery) Node(ctx context.Context) (Node, error) {
 	return r.QueryResolver.Node(ctx)

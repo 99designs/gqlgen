@@ -308,6 +308,7 @@ type ComplexityRoot struct {
 		PrimitiveObject                  func(childComplexity int) int
 		PrimitiveStringObject            func(childComplexity int) int
 		PtrToSliceContainer              func(childComplexity int) int
+		Rectangle                        func(childComplexity int) int
 		Recursive                        func(childComplexity int, input *RecursiveInputSlice) int
 		ScalarSlice                      func(childComplexity int) int
 		ShapeUnion                       func(childComplexity int) int
@@ -467,6 +468,7 @@ type QueryResolver interface {
 	EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 	Shapes(ctx context.Context) ([]Shape, error)
 	NoShape(ctx context.Context) (Shape, error)
+	Rectangle(ctx context.Context) (*Rectangle, error)
 	Node(ctx context.Context) (Node, error)
 	NoShapeTypedNil(ctx context.Context) (Shape, error)
 	Animal(ctx context.Context) (Animal, error)
@@ -1444,6 +1446,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.PtrToSliceContainer(childComplexity), true
 
+	case "Query.rectangle":
+		if e.complexity.Query.Rectangle == nil {
+			break
+		}
+
+		return e.complexity.Query.Rectangle(childComplexity), true
+
 	case "Query.recursive":
 		if e.complexity.Query.Recursive == nil {
 			break
@@ -1997,6 +2006,7 @@ extend type Query {
 	{Name: "interfaces.graphql", Input: `extend type Query {
     shapes: [Shape]
     noShape: Shape @makeNil
+    rectangle: Rectangle!
     node: Node!
     noShapeTypedNil: Shape @makeTypedNil
     animal: Animal @makeTypedNil
@@ -2035,7 +2045,7 @@ type Rectangle implements Shape {
     width: Float
     area: Float
 }
-union ShapeUnion @goModel(model:"testserver.ShapeUnion") = Circle | Rectangle
+union ShapeUnion @goModel(model: "testserver.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION
 directive @makeTypedNil on FIELD_DEFINITION
@@ -2051,7 +2061,9 @@ type ConcreteNodeA implements Node {
     name: String!
 }
 
-""" Implements the Node interface with another interface """
+"""
+Implements the Node interface with another interface
+"""
 type ConcreteNodeInterface implements Node {
     id: ID!
     child: Node!
@@ -7063,6 +7075,38 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 	res := resTmp.(Shape)
 	fc.Result = res
 	return ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐShape(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_rectangle(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Rectangle(rctx)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Rectangle)
+	fc.Result = res
+	return ec.marshalNRectangle2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRectangle(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_node(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -12671,6 +12715,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_noShape(ctx, field)
 				return res
 			})
+		case "rectangle":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_rectangle(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "node":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -14130,6 +14188,20 @@ func (ec *executionContext) marshalNPtrToSliceContainer2ᚖgithubᚗcomᚋ99desi
 	return ec._PtrToSliceContainer(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNRectangle2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRectangle(ctx context.Context, sel ast.SelectionSet, v Rectangle) graphql.Marshaler {
+	return ec._Rectangle(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRectangle2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRectangle(ctx context.Context, sel ast.SelectionSet, v *Rectangle) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Rectangle(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNRecursiveInputSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐRecursiveInputSlice(ctx context.Context, v interface{}) (RecursiveInputSlice, error) {
 	res, err := ec.unmarshalInputRecursiveInputSlice(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -14943,13 +15015,13 @@ func (ec *executionContext) marshalOErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {
-	res, err := graphql.UnmarshalFloat(v)
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
-	res := graphql.MarshalFloat(v)
-	return res
+	res := graphql.MarshalFloatContext(v)
+	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚐInnerDirectives(ctx context.Context, v interface{}) (*InnerDirectives, error) {

@@ -58,6 +58,12 @@ func (f WriterFunc) MarshalGQL(w io.Writer) {
 	f(w)
 }
 
+type ContextWriterFunc func(ctx context.Context, writer io.Writer) error
+
+func (f ContextWriterFunc) MarshalGQLContext(ctx context.Context, w io.Writer) error {
+	return f(ctx, w)
+}
+
 type Array []Marshaler
 
 func (a Array) MarshalGQL(writer io.Writer) {

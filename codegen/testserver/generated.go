@@ -2045,7 +2045,7 @@ type Rectangle implements Shape {
     width: Float
     area: Float
 }
-union ShapeUnion @goModel(model: "testserver.ShapeUnion") = Circle | Rectangle
+union ShapeUnion @goModel(model:"testserver.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION
 directive @makeTypedNil on FIELD_DEFINITION
@@ -2061,9 +2061,7 @@ type ConcreteNodeA implements Node {
     name: String!
 }
 
-"""
-Implements the Node interface with another interface
-"""
+""" Implements the Node interface with another interface """
 type ConcreteNodeInterface implements Node {
     id: ID!
     child: Node!

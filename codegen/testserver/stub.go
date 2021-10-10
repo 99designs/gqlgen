@@ -77,7 +77,6 @@ type Stub struct {
 		EnumInInput                      func(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
-		Rectangle                        func(ctx context.Context) (*Rectangle, error)
 		Node                             func(ctx context.Context) (Node, error)
 		NoShapeTypedNil                  func(ctx context.Context) (Shape, error)
 		Animal                           func(ctx context.Context) (Animal, error)
@@ -94,6 +93,9 @@ type Stub struct {
 		PrimitiveObject                  func(ctx context.Context) ([]Primitive, error)
 		PrimitiveStringObject            func(ctx context.Context) ([]PrimitiveString, error)
 		PtrToSliceContainer              func(ctx context.Context) (*PtrToSliceContainer, error)
+		Infinity                         func(ctx context.Context) (float64, error)
+		StringFromContextInterface       func(ctx context.Context) (*StringFromContextInterface, error)
+		StringFromContextFunction        func(ctx context.Context) (string, error)
 		DefaultScalar                    func(ctx context.Context, arg string) (string, error)
 		Slices                           func(ctx context.Context) (*Slices, error)
 		ScalarSlice                      func(ctx context.Context) ([]byte, error)
@@ -340,9 +342,6 @@ func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 func (r *stubQuery) NoShape(ctx context.Context) (Shape, error) {
 	return r.QueryResolver.NoShape(ctx)
 }
-func (r *stubQuery) Rectangle(ctx context.Context) (*Rectangle, error) {
-	return r.QueryResolver.Rectangle(ctx)
-}
 func (r *stubQuery) Node(ctx context.Context) (Node, error) {
 	return r.QueryResolver.Node(ctx)
 }
@@ -390,6 +389,15 @@ func (r *stubQuery) PrimitiveStringObject(ctx context.Context) ([]PrimitiveStrin
 }
 func (r *stubQuery) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
 	return r.QueryResolver.PtrToSliceContainer(ctx)
+}
+func (r *stubQuery) Infinity(ctx context.Context) (float64, error) {
+	return r.QueryResolver.Infinity(ctx)
+}
+func (r *stubQuery) StringFromContextInterface(ctx context.Context) (*StringFromContextInterface, error) {
+	return r.QueryResolver.StringFromContextInterface(ctx)
+}
+func (r *stubQuery) StringFromContextFunction(ctx context.Context) (string, error) {
+	return r.QueryResolver.StringFromContextFunction(ctx)
 }
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)

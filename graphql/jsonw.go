@@ -82,3 +82,8 @@ type lit struct{ b []byte }
 func (l lit) MarshalGQL(w io.Writer) {
 	w.Write(l.b)
 }
+
+func (l lit) MarshalGQLContext(ctx context.Context, w io.Writer) error {
+	w.Write(l.b)
+	return nil
+}

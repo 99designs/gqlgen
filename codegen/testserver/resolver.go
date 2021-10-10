@@ -200,10 +200,6 @@ func (r *queryResolver) NoShape(ctx context.Context) (Shape, error) {
 	panic("not implemented")
 }
 
-func (r *queryResolver) Rectangle(ctx context.Context) (*Rectangle, error) {
-	panic("not implemented")
-}
-
 func (r *queryResolver) Node(ctx context.Context) (Node, error) {
 	panic("not implemented")
 }
@@ -265,6 +261,18 @@ func (r *queryResolver) PrimitiveStringObject(ctx context.Context) ([]PrimitiveS
 }
 
 func (r *queryResolver) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) Infinity(ctx context.Context) (float64, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) StringFromContextInterface(ctx context.Context) (*StringFromContextInterface, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) StringFromContextFunction(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
 

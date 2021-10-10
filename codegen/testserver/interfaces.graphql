@@ -1,7 +1,6 @@
 extend type Query {
     shapes: [Shape]
     noShape: Shape @makeNil
-    rectangle: Rectangle!
     node: Node!
     noShapeTypedNil: Shape @makeTypedNil
     animal: Animal @makeTypedNil

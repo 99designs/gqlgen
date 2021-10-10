@@ -19,7 +19,7 @@ func MarshalTime(t time.Time) Marshaler {
 
 func UnmarshalTime(v interface{}) (time.Time, error) {
 	if tmpStr, ok := v.(string); ok {
-		return time.Parse(time.RFC3339, tmpStr)
+		return time.Parse(time.RFC3339Nano, tmpStr)
 	}
-	return time.Time{}, errors.New("time should be RFC3339 formatted string")
+	return time.Time{}, errors.New("time should be RFC3339Nano formatted string")
 }

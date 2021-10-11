@@ -44,6 +44,10 @@ func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMeth
 	panic("not implemented")
 }
 
+func (r *mutationResolver) DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error) {
+	panic("not implemented")
+}
+
 func (r *mutationResolver) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	panic("not implemented")
 }
@@ -129,6 +133,10 @@ func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
 }
 
 func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error) {
 	panic("not implemented")
 }
 

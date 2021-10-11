@@ -28,6 +28,7 @@ type Stub struct {
 		ResolverField func(ctx context.Context, obj *ModelMethods) (bool, error)
 	}
 	MutationResolver struct {
+		DefaultInput    func(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
 		UpdateSomething func(ctx context.Context, input SpecialInput) (string, error)
 	}
 	OverlappingFieldsResolver struct {
@@ -60,6 +61,7 @@ type Stub struct {
 		Autobind                         func(ctx context.Context) (*Autobind, error)
 		DeprecatedField                  func(ctx context.Context) (string, error)
 		Overlapping                      func(ctx context.Context) (*OverlappingFields, error)
+		DefaultParameters                func(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
 		DirectiveArg                     func(ctx context.Context, arg string) (*string, error)
 		DirectiveNullableArg             func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
 		DirectiveInputNullable           func(ctx context.Context, arg *InputDirectives) (*string, error)
@@ -207,6 +209,9 @@ func (r *stubModelMethods) ResolverField(ctx context.Context, obj *ModelMethods)
 
 type stubMutation struct{ *Stub }
 
+func (r *stubMutation) DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error) {
+	return r.MutationResolver.DefaultInput(ctx, input)
+}
 func (r *stubMutation) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	return r.MutationResolver.UpdateSomething(ctx, input)
 }
@@ -287,6 +292,9 @@ func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 }
 func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	return r.QueryResolver.Overlapping(ctx)
+}
+func (r *stubQuery) DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error) {
+	return r.QueryResolver.DefaultParameters(ctx, falsyBoolean, truthyBoolean)
 }
 func (r *stubQuery) DirectiveArg(ctx context.Context, arg string) (*string, error) {
 	return r.QueryResolver.DirectiveArg(ctx, arg)

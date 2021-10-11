@@ -1,13 +1,13 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"go/token"
 	"go/types"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -117,7 +117,11 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 
 	pkg := b.pkgs.LoadWithTypes(pkgName)
 	if pkg == nil {
-		return nil, errors.Errorf("required package was not loaded: %s", fullName)
+		err := b.pkgs.Errors()
+		if err != nil {
+			return nil, fmt.Errorf("package could not be loaded: %s: %w", fullName, err)
+		}
+		return nil, fmt.Errorf("required package was not loaded: %s", fullName)
 	}
 
 	// function based marshalers take precedence
@@ -144,7 +148,7 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 		}
 	}
 
-	return nil, errors.Errorf("unable to find type %s\n", fullName)
+	return nil, fmt.Errorf("unable to find type %s\n", fullName)
 }
 
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {

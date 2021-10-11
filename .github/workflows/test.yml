@@ -5,7 +5,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go: [1.13, 1.14]
+        go: [1.16, 1.17]
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
@@ -14,5 +14,5 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - run: go mod download
-      - run: go test -race ./...
+      - run: go mod download && go test -race ./...
+      - run: cd example && go mod download && go test -race ./...

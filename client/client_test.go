@@ -101,3 +101,30 @@ func TestAddCookie(t *testing.T) {
 		client.AddCookie(&http.Cookie{Name: "foo", Value: "value"}),
 	)
 }
+
+func TestAddExtensions(t *testing.T) {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		require.Equal(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
+		err = json.NewEncoder(w).Encode(map[string]interface{}{
+			"data": map[string]interface{}{
+				"Name": "Bob",
+			},
+		})
+		if err != nil {
+			panic(err)
+		}
+	})
+
+	c := client.New(h)
+
+	var resp struct {
+		Name string
+	}
+	c.MustPost("user(id:1){name}", &resp,
+		client.Extensions(map[string]interface{}{"persistedQuery": map[string]interface{}{"version": 1, "sha256Hash": "ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7"}}),
+	)
+}

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
@@ -30,32 +31,67 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) ([]fedruntime.Entity, error) {
-	list := []fedruntime.Entity{}
-	for _, rep := range representations {
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
+	list := make([]fedruntime.Entity, len(representations))
+	resolveEntity := func(ctx context.Context, i int, rep map[string]interface{}) (err error) {
+		// we need to do our own panic handling, because we may be called in a
+		// goroutine, where the usual panic handling can't catch us
+		defer func() {
+			if r := recover(); r != nil {
+				err = ec.Recover(ctx, r)
+			}
+		}()
+
 		typeName, ok := rep["__typename"].(string)
 		if !ok {
-			return nil, errors.New("__typename must be an existing string")
+			return errors.New("__typename must be an existing string")
 		}
 		switch typeName {
 
 		case "Product":
 			id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
 			if err != nil {
-				return nil, errors.New(fmt.Sprintf("Field %s undefined in schema.", "upc"))
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "upc"))
 			}
 
 			entity, err := ec.resolvers.Entity().FindProductByUpc(ctx,
 				id0)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
-			list = append(list, entity)
+			list[i] = entity
+			return nil
 
 		default:
-			return nil, errors.New("unknown type: " + typeName)
+			return errors.New("unknown type: " + typeName)
 		}
 	}
-	return list, nil
+
+	// if there are multiple entities to resolve, parallelize (similar to
+	// graphql.FieldSet.Dispatch)
+	switch len(representations) {
+	case 0:
+		return list
+	case 1:
+		err := resolveEntity(ctx, 0, representations[0])
+		if err != nil {
+			ec.Error(ctx, err)
+		}
+		return list
+	default:
+		var g sync.WaitGroup
+		g.Add(len(representations))
+		for i, rep := range representations {
+			go func(i int, rep map[string]interface{}) {
+				err := resolveEntity(ctx, i, rep)
+				if err != nil {
+					ec.Error(ctx, err)
+				}
+				g.Done()
+			}(i, rep)
+		}
+		g.Wait()
+		return list
+	}
 }

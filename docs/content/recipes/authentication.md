@@ -88,7 +88,7 @@ func main() {
 
 	router.Use(auth.Middleware(db))
 
-    srv := handler.NewDefaultServer(starwars.NewExecutableSchema(starwars.NewResolver()))
+	srv := handler.NewDefaultServer(starwars.NewExecutableSchema(starwars.NewResolver()))
 	router.Handle("/", playground.Handler("Starwars", "/query"))
 	router.Handle("/query", srv)
 

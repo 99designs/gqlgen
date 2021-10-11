@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"bytes"
 	"math"
 	"testing"
 
@@ -8,6 +9,25 @@ import (
 )
 
 func TestMarshalID(t *testing.T) {
+	marshalID := func(s string) string {
+		var buf bytes.Buffer
+		MarshalID(s).MarshalGQL(&buf)
+		return buf.String()
+	}
+
+	assert.Equal(t, `"hello"`, marshalID("hello"))
+	assert.Equal(t, `"he\tllo"`, marshalID("he\tllo"))
+	assert.Equal(t, `"he\tllo"`, marshalID("he	llo"))
+	assert.Equal(t, `"he\nllo"`, marshalID("he\nllo"))
+	assert.Equal(t, `"he\r\nllo"`, marshalID("he\r\nllo"))
+	assert.Equal(t, `"he\\llo"`, marshalID(`he\llo`))
+	assert.Equal(t, `"quotes\"nested\"in\"quotes\""`, marshalID(`quotes"nested"in"quotes"`))
+	assert.Equal(t, `"\u0000"`, marshalID("\u0000"))
+	assert.Equal(t, "\"\U000fe4ed\"", marshalID("\U000fe4ed"))
+	assert.Equal(t, "\"\\u001B\"", marshalID("\u001B"))
+}
+
+func TestUnmarshalID(t *testing.T) {
 	tests := []struct {
 		Name        string
 		Input       interface{}

@@ -114,7 +114,7 @@ server := handler.NewDefaultServer(MakeExecutableSchema(resolvers)
 server.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
     // notify bug tracker...
 
-    return errors.New("Internal server error!")
+		return gqlerror.Errorf("Internal server error!")
 })
 ```
 

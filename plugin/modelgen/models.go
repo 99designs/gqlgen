@@ -162,11 +162,16 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					typ = types.NewPointer(typ)
 				}
 
+				tag := `json:"` + field.Name + `"`
+				if extraTag := cfg.Models[schemaType.Name].Fields[field.Name].ExtraTag; extraTag != "" {
+					tag = tag + " " + extraTag
+				}
+
 				it.Fields = append(it.Fields, &Field{
 					Name:        name,
 					Type:        typ,
 					Description: field.Description,
-					Tag:         `json:"` + field.Name + `"`,
+					Tag:         tag,
 				})
 			}
 

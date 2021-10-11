@@ -32,7 +32,7 @@ type Config struct {
 type ResolverRoot interface {
 {{- range $object := .Objects -}}
 	{{ if $object.HasResolvers -}}
-		{{$object.Name}}() {{$object.Name}}Resolver
+		{{ucFirst $object.Name}}() {{ucFirst $object.Name}}Resolver
 	{{ end }}
 {{- end }}
 }
@@ -46,7 +46,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 {{ range $object := .Objects }}
 	{{ if not $object.IsReserved -}}
-		{{ $object.Name|go }} struct {
+		{{ucFirst $object.Name|go }} struct {
 		{{ range $_, $fields := $object.UniqueFields }}
 			{{- $field := index $fields 0 -}}
 			{{ if not $field.IsReserved -}}
@@ -60,7 +60,7 @@ type ComplexityRoot struct {
 
 {{ range $object := .Objects -}}
 	{{ if $object.HasResolvers }}
-		type {{$object.Name}}Resolver interface {
+		type {{ucFirst $object.Name}}Resolver interface {
 		{{ range $field := $object.Fields -}}
 			{{- if $field.IsResolver }}
 				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}

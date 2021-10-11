@@ -1,12 +1,13 @@
 package modelgen
 
 import (
-	"github.com/vektah/gqlparser/v2/ast"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin/modelgen/out"

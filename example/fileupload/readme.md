@@ -4,7 +4,7 @@ This server demonstrates how to handle file upload
 
 to run this server
 ```bash
-go run ./example/fileupload/server/server.go
+go run ./server/server.go
 ```
 
 and open http://localhost:8087 in your browser

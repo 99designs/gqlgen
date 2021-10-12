@@ -2,4 +2,10 @@ type User
 @goModel(model:"github.com/99designs/gqlgen/example/config.User") {
   id: ID!
   name: String! @goField(name:"FullName")
+  role: role!
+}
+
+type role
+@goModel(model:"github.com/99designs/gqlgen/example/config.UserRole") {
+    name: String!
 }

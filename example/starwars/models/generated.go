@@ -63,14 +63,13 @@ func (e Episode) String() string {
 }
 
 func (e *Episode) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = Episode(str)
+	*e = Episode(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Episode", str)
+		return fmt.Errorf("%v is not a valid Episode", value)
 	}
 	return nil
 }
@@ -104,14 +103,13 @@ func (e LengthUnit) String() string {
 }
 
 func (e *LengthUnit) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
-
-	*e = LengthUnit(str)
+	*e = LengthUnit(value)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid LengthUnit", str)
+		return fmt.Errorf("%v is not a valid LengthUnit", value)
 	}
 	return nil
 }

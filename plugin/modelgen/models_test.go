@@ -24,6 +24,7 @@ func TestModelGeneration(t *testing.T) {
 	require.True(t, cfg.Models.UserDefined("MissingTypeNotNull"))
 	require.True(t, cfg.Models.UserDefined("MissingTypeNullable"))
 	require.True(t, cfg.Models.UserDefined("MissingEnum"))
+	require.True(t, cfg.Models.UserDefined("MissingIntEnum"))
 	require.True(t, cfg.Models.UserDefined("MissingUnion"))
 	require.True(t, cfg.Models.UserDefined("MissingInterface"))
 	require.True(t, cfg.Models.UserDefined("TypeWithDescription"))

@@ -128,11 +128,11 @@ type ComplexityRoot struct {
 		ID    func(childComplexity int) int
 	}
 
-	ContentPost struct {
+	Content_Post struct {
 		Foo func(childComplexity int) int
 	}
 
-	ContentUser struct {
+	Content_User struct {
 		Foo func(childComplexity int) int
 	}
 
@@ -694,18 +694,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.ConcreteNodeInterface.ID(childComplexity), true
 
 	case "Content_Post.foo":
-		if e.complexity.ContentPost.Foo == nil {
+		if e.complexity.Content_Post.Foo == nil {
 			break
 		}
 
-		return e.complexity.ContentPost.Foo(childComplexity), true
+		return e.complexity.Content_Post.Foo(childComplexity), true
 
 	case "Content_User.foo":
-		if e.complexity.ContentUser.Foo == nil {
+		if e.complexity.Content_User.Foo == nil {
 			break
 		}
 
-		return e.complexity.ContentUser.Foo(childComplexity), true
+		return e.complexity.Content_User.Foo(childComplexity), true
 
 	case "DefaultParametersMirror.falsyBoolean":
 		if e.complexity.DefaultParametersMirror.FalsyBoolean == nil {

@@ -30,7 +30,7 @@
 				{{- if $type.Unmarshaler }}
 					{{- if $type.CastType }}
 						tmp, err := {{ $type.Unmarshaler | call }}(v)
-						{{- if $type.IsNilable }}
+						{{- if and $type.IsNilable $type.Elem }}
 							res := {{ $type.Elem.GO | ref }}(tmp)
 						{{- else}}
 							res := {{ $type.GO | ref }}(tmp)
@@ -48,7 +48,7 @@
 				{{- else if eq ($type.GO | ref) "map[string]interface{}" }}
 					return v.(map[string]interface{}), nil
 				{{- else if $type.IsMarshaler }}
-					{{- if $type.IsNilable }}
+					{{- if and $type.IsNilable $type.Elem }}
 						var res = new({{ $type.Elem.GO | ref }})
 					{{- else}}
 						var res {{ $type.GO | ref }}

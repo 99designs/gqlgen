@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin/modelgen/out"
 	"github.com/stretchr/testify/require"
@@ -18,6 +20,7 @@ func TestModelGeneration(t *testing.T) {
 	require.NoError(t, cfg.Init())
 	p := Plugin{
 		MutateHook: mutateHook,
+		FieldHook:  mutateFieldHook,
 	}
 	require.NoError(t, p.MutateConfig(cfg))
 
@@ -65,6 +68,22 @@ func TestModelGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("field hooks are applied", func(t *testing.T) {
+		file, err := ioutil.ReadFile("./out/generated.go")
+		require.NoError(t, err)
+
+		fileText := string(file)
+
+		expectedTags := []string{
+			`json:"name" anotherTag:"tag"`,
+			`json:"enum" yetAnotherTag:"12"`,
+		}
+
+		for _, tag := range expectedTags {
+			require.True(t, strings.Contains(fileText, tag))
+		}
+	})
+
 	t.Run("concrete types implement interface", func(t *testing.T) {
 		var _ out.FooBarer = out.FooBarr{}
 	})
@@ -78,4 +97,20 @@ func mutateHook(b *ModelBuild) *ModelBuild {
 	}
 
 	return b
+}
+
+func mutateFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+
+	if fd.Directives == nil || td.Name != "FieldMutationHook" {
+		return f, nil
+	}
+
+	directive := fd.Directives.ForName("addTag")
+	if directive != nil {
+		args := directive.ArgumentMap(map[string]interface{}{})
+		if tag, ok := args["tag"]; ok {
+			f.Tag += " " + tag.(string)
+		}
+	}
+	return f, nil
 }

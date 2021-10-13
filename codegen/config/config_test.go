@@ -132,41 +132,45 @@ func TestReferencedPackages(t *testing.T) {
 }
 
 func TestConfigCheck(t *testing.T) {
-	t.Run("invalid config format due to conflicting package names", func(t *testing.T) {
-		config := Config{
-			Exec:  ExecConfig{Filename: "generated/exec.go", Package: "graphql"},
-			Model: PackageConfig{Filename: "generated/models.go"},
-		}
+	for _, execLayout := range []ExecLayout{ExecLayoutSingleFile, ExecLayoutFollowSchema} {
+		t.Run(string(execLayout), func(t *testing.T) {
+			t.Run("invalid config format due to conflicting package names", func(t *testing.T) {
+				config := Config{
+					Exec:  ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated", Package: "graphql"},
+					Model: PackageConfig{Filename: "generated/models.go"},
+				}
 
-		require.EqualError(t, config.check(), "exec and model define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (graphql vs generated)")
-	})
+				require.EqualError(t, config.check(), "exec and model define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (graphql vs generated)")
+			})
 
-	t.Run("federation must be in exec package", func(t *testing.T) {
-		config := Config{
-			Exec:       ExecConfig{Filename: "generated/exec.go"},
-			Federation: PackageConfig{Filename: "anotherpkg/federation.go"},
-		}
+			t.Run("federation must be in exec package", func(t *testing.T) {
+				config := Config{
+					Exec:       ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated"},
+					Federation: PackageConfig{Filename: "anotherpkg/federation.go"},
+				}
 
-		require.EqualError(t, config.check(), "federation and exec must be in the same package")
-	})
+				require.EqualError(t, config.check(), "federation and exec must be in the same package")
+			})
 
-	t.Run("federation must have same package name as exec", func(t *testing.T) {
-		config := Config{
-			Exec:       ExecConfig{Filename: "generated/exec.go"},
-			Federation: PackageConfig{Filename: "generated/federation.go", Package: "federation"},
-		}
+			t.Run("federation must have same package name as exec", func(t *testing.T) {
+				config := Config{
+					Exec:       ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated"},
+					Federation: PackageConfig{Filename: "generated/federation.go", Package: "federation"},
+				}
 
-		require.EqualError(t, config.check(), "exec and federation define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (generated vs federation)")
-	})
+				require.EqualError(t, config.check(), "exec and federation define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (generated vs federation)")
+			})
 
-	t.Run("deprecated federated flag raises an error", func(t *testing.T) {
-		config := Config{
-			Exec:      ExecConfig{Filename: "generated/exec.go"},
-			Federated: true,
-		}
+			t.Run("deprecated federated flag raises an error", func(t *testing.T) {
+				config := Config{
+					Exec:      ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated"},
+					Federated: true,
+				}
 
-		require.EqualError(t, config.check(), "federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go")
-	})
+				require.EqualError(t, config.check(), "federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go")
+			})
+		})
+	}
 }
 
 func TestAutobinding(t *testing.T) {

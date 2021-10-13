@@ -12,9 +12,15 @@ import (
 // Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
 // resolvers or directives automatically (eg grpc, validation)
 type Data struct {
-	Config          *config.Config
-	Schema          *ast.Schema
-	Directives      DirectiveList
+	Config *config.Config
+	Schema *ast.Schema
+	// If a schema is broken up into multiple Data instance, each representing part of the schema,
+	// AllDirectives should contain the directives for the entire schema. Directives() can
+	// then be used to get the directives that were defined in this Data instance's sources.
+	// If a single Data instance is used for the entire schema, AllDirectives and Directives()
+	// will be identical.
+	// AllDirectives should rarely be used directly.
+	AllDirectives   DirectiveList
 	Objects         Objects
 	Inputs          Objects
 	Interfaces      map[string]*Interface
@@ -31,6 +37,20 @@ type builder struct {
 	Schema     *ast.Schema
 	Binder     *config.Binder
 	Directives map[string]*Directive
+}
+
+// Get only the directives which are defined in the config's sources.
+func (d *Data) Directives() DirectiveList {
+	res := DirectiveList{}
+	for k, directive := range d.AllDirectives {
+		for _, s := range d.Config.Sources {
+			if directive.Position.Src.Name == s.Name {
+				res[k] = directive
+				break
+			}
+		}
+	}
+	return res
 }
 
 func BuildData(cfg *config.Config) (*Data, error) {
@@ -55,10 +75,10 @@ func BuildData(cfg *config.Config) (*Data, error) {
 	}
 
 	s := Data{
-		Config:     cfg,
-		Directives: dataDirectives,
-		Schema:     b.Schema,
-		Interfaces: map[string]*Interface{},
+		Config:        cfg,
+		AllDirectives: dataDirectives,
+		Schema:        b.Schema,
+		Interfaces:    map[string]*Interface{},
 	}
 
 	for _, schemaType := range b.Schema.Types {

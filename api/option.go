@@ -19,7 +19,7 @@ func AddPlugin(p plugin.Plugin) Option {
 	}
 }
 
-//ReplacePlugin replaces any existing plugin with a matching plugin name
+// ReplacePlugin replaces any existing plugin with a matching plugin name
 func ReplacePlugin(p plugin.Plugin) Option {
 	return func(cfg *config.Config, plugins *[]plugin.Plugin) {
 		if plugins != nil {

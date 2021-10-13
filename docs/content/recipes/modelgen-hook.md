@@ -49,10 +49,8 @@ func main() {
 		MutateHook: mutateHook,
 	}
 
-	err = api.Generate(cfg,
-		api.NoPlugins(),
-		api.AddPlugin(&p),
-	)
+	err = api.Generate(cfg, api.ReplacePlugin(&p))
+
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(3)
@@ -82,7 +80,7 @@ type Object struct {
 
 ## FieldMutateHook
 
-For more fine grained control over model generation, a graphql schema aware a FieldHook can be provided. This hook has access to type and field graphql definitions enabling the hook to modify the `modelgen.Field` using directives defined within the schema. 
+For more fine grained control over model generation, a graphql schema aware a FieldHook can be provided. This hook has access to type and field graphql definitions enabling the hook to modify the `modelgen.Field` using directives defined within the schema.
 
 The below recipe uses this feature to add validate tags to the generated model for use with `go-playground/validator` where the validate tags are defined in a constraint directive in the schema.
 
@@ -103,11 +101,11 @@ func constraintFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *modelge
 	c := fd.Directives.ForName("constraint")
 	if c != nil {
 		formatConstraint := c.Arguments.ForName("format")
-		
+
 		if formatConstraint != nil{
 			f.Tag += " validate:"+formatConstraint.Value.String()
 		}
-		
+
 	}
 
 	return f, nil
@@ -125,10 +123,8 @@ func main() {
 		FieldHook: constraintFieldHook,
 	}
 
-	err = api.Generate(cfg,
-		api.NoPlugins(),
-		api.AddPlugin(&p),
-	)
+	err = api.Generate(cfg, api.ReplacePlugin(&p))
+
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(3)

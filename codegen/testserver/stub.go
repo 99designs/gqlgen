@@ -30,6 +30,7 @@ type Stub struct {
 	MutationResolver struct {
 		DefaultInput    func(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
 		UpdateSomething func(ctx context.Context, input SpecialInput) (string, error)
+		UpdatePtrToPtr  func(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
 	}
 	OverlappingFieldsResolver struct {
 		OldFoo func(ctx context.Context, obj *OverlappingFields) (int, error)
@@ -214,6 +215,9 @@ func (r *stubMutation) DefaultInput(ctx context.Context, input DefaultInput) (*D
 }
 func (r *stubMutation) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	return r.MutationResolver.UpdateSomething(ctx, input)
+}
+func (r *stubMutation) UpdatePtrToPtr(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error) {
+	return r.MutationResolver.UpdatePtrToPtr(ctx, input)
 }
 
 type stubOverlappingFields struct{ *Stub }

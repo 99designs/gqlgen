@@ -2,17 +2,14 @@
 package fileupload
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"mime/multipart"
-	"net/http"
 	"net/http/httptest"
-	"net/textproto"
+	"os"
 	"testing"
 
+	gqlclient "github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/example/fileupload/model"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -21,10 +18,23 @@ import (
 )
 
 func TestFileUpload(t *testing.T) {
-	client := http.Client{}
+	resolver := &Stub{}
+	srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
+	defer srv.Close()
+	gql := gqlclient.New(srv.Config.Handler, gqlclient.Path("/graphql"))
+
+	aTxtFile, _ := ioutil.TempFile(os.TempDir(), "a.txt")
+	defer os.Remove(aTxtFile.Name())
+	aTxtFile.WriteString(`test`)
+
+	a1TxtFile, _ := ioutil.TempFile(os.TempDir(), "a.txt")
+	b1TxtFile, _ := ioutil.TempFile(os.TempDir(), "b.txt")
+	defer os.Remove(a1TxtFile.Name())
+	defer os.Remove(b1TxtFile.Name())
+	a1TxtFile.WriteString(`test1`)
+	b1TxtFile.WriteString(`test2`)
 
 	t.Run("valid single file upload", func(t *testing.T) {
-		resolver := &Stub{}
 		resolver.MutationResolver.SingleUpload = func(ctx context.Context, file graphql.Upload) (*model.File, error) {
 			require.NotNil(t, file)
 			require.NotNil(t, file.File)
@@ -39,34 +49,28 @@ func TestFileUpload(t *testing.T) {
 				ContentType: file.ContentType,
 			}, nil
 		}
-		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
-		defer srv.Close()
 
-		operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) { id, name, content, contentType } }", "variables": { "file": null } }`
-		mapData := `{ "0": ["variables.file"] }`
-		files := []file{
-			{
-				mapKey:      "0",
-				name:        "a.txt",
-				content:     "test",
-				contentType: "text/plain",
-			},
+		mutation := `mutation ($file: Upload!) {
+			singleUpload(file: $file) {
+				id
+				name
+				content
+				contentType
+			}
+		}`
+		var result struct {
+			SingleUpload *model.File
 		}
-		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		resp, err := client.Do(req)
+		err := gql.Post(mutation, &result, gqlclient.Var("file", aTxtFile), gqlclient.WithFiles())
 		require.Nil(t, err)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		require.Nil(t, err)
-		responseString := string(responseBody)
-		require.Equal(t, `{"data":{"singleUpload":{"id":1,"name":"a.txt","content":"test","contentType":"text/plain"}}}`, responseString)
-		err = resp.Body.Close()
-		require.Nil(t, err)
+		require.Equal(t, 1, result.SingleUpload.ID)
+		require.Contains(t, result.SingleUpload.Name, "a.txt")
+		require.Equal(t, "test", result.SingleUpload.Content)
+		require.Equal(t, "text/plain; charset=utf-8", result.SingleUpload.ContentType)
 	})
 
 	t.Run("valid single file upload with payload", func(t *testing.T) {
-		resolver := &Stub{}
 		resolver.MutationResolver.SingleUploadWithPayload = func(ctx context.Context, req model.UploadFile) (*model.File, error) {
 			require.Equal(t, req.ID, 1)
 			require.NotNil(t, req.File)
@@ -82,33 +86,28 @@ func TestFileUpload(t *testing.T) {
 				ContentType: req.File.ContentType,
 			}, nil
 		}
-		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
-		defer srv.Close()
 
-		operations := `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) { id, name, content, contentType } }", "variables": { "req": {"file": null, "id": 1 } } }`
-		mapData := `{ "0": ["variables.req.file"] }`
-		files := []file{
-			{
-				mapKey:      "0",
-				name:        "a.txt",
-				content:     "test",
-				contentType: "text/plain",
-			},
+		mutation := `mutation ($req: UploadFile!) {
+			singleUploadWithPayload(req: $req) {
+				id
+				name
+				content
+				contentType
+			}
+		}`
+		var result struct {
+			SingleUploadWithPayload *model.File
 		}
-		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		resp, err := client.Do(req)
+		err := gql.Post(mutation, &result, gqlclient.Var("req", map[string]interface{}{"id": 1, "file": aTxtFile}), gqlclient.WithFiles())
 		require.Nil(t, err)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		require.Nil(t, err)
-		require.Equal(t, `{"data":{"singleUploadWithPayload":{"id":1,"name":"a.txt","content":"test","contentType":"text/plain"}}}`, string(responseBody))
-		err = resp.Body.Close()
-		require.Nil(t, err)
+		require.Equal(t, 1, result.SingleUploadWithPayload.ID)
+		require.Contains(t, result.SingleUploadWithPayload.Name, "a.txt")
+		require.Equal(t, "test", result.SingleUploadWithPayload.Content)
+		require.Equal(t, "text/plain; charset=utf-8", result.SingleUploadWithPayload.ContentType)
 	})
 
 	t.Run("valid file list upload", func(t *testing.T) {
-		resolver := &Stub{}
 		resolver.MutationResolver.MultipleUpload = func(ctx context.Context, files []*graphql.Upload) ([]*model.File, error) {
 			require.Len(t, files, 2)
 			var contents []string
@@ -128,39 +127,32 @@ func TestFileUpload(t *testing.T) {
 			require.ElementsMatch(t, []string{"test1", "test2"}, contents)
 			return resp, nil
 		}
-		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
-		defer srv.Close()
 
-		operations := `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) { id, name, content, contentType } }", "variables": { "files": [null, null] } }`
-		mapData := `{ "0": ["variables.files.0"], "1": ["variables.files.1"] }`
-		files := []file{
-			{
-				mapKey:      "0",
-				name:        "a.txt",
-				content:     "test1",
-				contentType: "text/plain",
-			},
-			{
-				mapKey:      "1",
-				name:        "b.txt",
-				content:     "test2",
-				contentType: "text/plain",
-			},
+		mutation := `mutation($files: [Upload!]!) {
+			multipleUpload(files: $files) {
+				id
+				name
+				content
+				contentType
+			}
+		}`
+		var result struct {
+			MultipleUpload []*model.File
 		}
-		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		resp, err := client.Do(req)
+		err := gql.Post(mutation, &result, gqlclient.Var("files", []*os.File{a1TxtFile, b1TxtFile}), gqlclient.WithFiles())
 		require.Nil(t, err)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		require.Nil(t, err)
-		require.Equal(t, `{"data":{"multipleUpload":[{"id":1,"name":"a.txt","content":"test1","contentType":"text/plain"},{"id":2,"name":"b.txt","content":"test2","contentType":"text/plain"}]}}`, string(responseBody))
-		err = resp.Body.Close()
-		require.Nil(t, err)
+		require.Equal(t, 1, result.MultipleUpload[0].ID)
+		require.Contains(t, result.MultipleUpload[0].Name, "a.txt")
+		require.Equal(t, "test1", result.MultipleUpload[0].Content)
+		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUpload[0].ContentType)
+		require.Equal(t, 2, result.MultipleUpload[1].ID)
+		require.Contains(t, result.MultipleUpload[1].Name, "b.txt")
+		require.Equal(t, "test2", result.MultipleUpload[1].Content)
+		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUpload[1].ContentType)
 	})
 
 	t.Run("valid file list upload with payload", func(t *testing.T) {
-		resolver := &Stub{}
 		resolver.MutationResolver.MultipleUploadWithPayload = func(ctx context.Context, req []*model.UploadFile) ([]*model.File, error) {
 			require.Len(t, req, 2)
 			var ids []int
@@ -184,35 +176,32 @@ func TestFileUpload(t *testing.T) {
 			require.ElementsMatch(t, []string{"test1", "test2"}, contents)
 			return resp, nil
 		}
-		srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
-		defer srv.Close()
 
-		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content, contentType } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
-		mapData := `{ "0": ["variables.req.0.file"], "1": ["variables.req.1.file"] }`
-		files := []file{
-			{
-				mapKey:      "0",
-				name:        "a.txt",
-				content:     "test1",
-				contentType: "text/plain",
-			},
-			{
-				mapKey:      "1",
-				name:        "b.txt",
-				content:     "test2",
-				contentType: "text/plain",
-			},
+		mutation := `mutation($req: [UploadFile!]!) {
+			multipleUploadWithPayload(req: $req) {
+				id
+				name
+				content
+				contentType
+			}
+		}`
+		var result struct {
+			MultipleUploadWithPayload []*model.File
 		}
-		req := createUploadRequest(t, srv.URL, operations, mapData, files)
 
-		resp, err := client.Do(req)
+		err := gql.Post(mutation, &result, gqlclient.Var("req", []map[string]interface{}{
+			{"id": 1, "file": a1TxtFile},
+			{"id": 2, "file": b1TxtFile},
+		}), gqlclient.WithFiles())
 		require.Nil(t, err)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		require.Nil(t, err)
-		require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1","contentType":"text/plain"},{"id":2,"name":"b.txt","content":"test2","contentType":"text/plain"}]}}`, string(responseBody))
-		err = resp.Body.Close()
-		require.Nil(t, err)
+		require.Equal(t, 1, result.MultipleUploadWithPayload[0].ID)
+		require.Contains(t, result.MultipleUploadWithPayload[0].Name, "a.txt")
+		require.Equal(t, "test1", result.MultipleUploadWithPayload[0].Content)
+		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[0].ContentType)
+		require.Equal(t, 2, result.MultipleUploadWithPayload[1].ID)
+		require.Contains(t, result.MultipleUploadWithPayload[1].Name, "b.txt")
+		require.Equal(t, "test2", result.MultipleUploadWithPayload[1].Content)
+		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[1].ContentType)
 	})
 
 	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
@@ -252,32 +241,39 @@ func TestFileUpload(t *testing.T) {
 			return resp, nil
 		}
 
-		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) { id, name, content, contentType } }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
-		mapData := `{ "0": ["variables.req.0.file", "variables.req.1.file"] }`
-		files := []file{
-			{
-				mapKey:      "0",
-				name:        "a.txt",
-				content:     "test1",
-				contentType: "text/plain",
-			},
-		}
-
 		test := func(uploadMaxMemory int64) {
 			hndlr := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
 			hndlr.AddTransport(transport.MultipartForm{MaxMemory: uploadMaxMemory})
 
 			srv := httptest.NewServer(hndlr)
 			defer srv.Close()
-			req := createUploadRequest(t, srv.URL, operations, mapData, files)
-			resp, err := client.Do(req)
+			gql := gqlclient.New(srv.Config.Handler, gqlclient.Path("/graphql"))
+
+			mutation := `mutation($req: [UploadFile!]!) {
+				multipleUploadWithPayload(req: $req) {
+					id
+					name
+					content
+					contentType
+				}
+			}`
+			var result struct {
+				MultipleUploadWithPayload []*model.File
+			}
+
+			err := gql.Post(mutation, &result, gqlclient.Var("req", []map[string]interface{}{
+				{"id": 1, "file": a1TxtFile},
+				{"id": 2, "file": a1TxtFile},
+			}), gqlclient.WithFiles())
 			require.Nil(t, err)
-			require.Equal(t, http.StatusOK, resp.StatusCode)
-			responseBody, err := ioutil.ReadAll(resp.Body)
-			require.Nil(t, err)
-			require.Equal(t, `{"data":{"multipleUploadWithPayload":[{"id":1,"name":"a.txt","content":"test1","contentType":"text/plain"},{"id":2,"name":"a.txt","content":"test1","contentType":"text/plain"}]}}`, string(responseBody))
-			err = resp.Body.Close()
-			require.Nil(t, err)
+			require.Equal(t, 1, result.MultipleUploadWithPayload[0].ID)
+			require.Contains(t, result.MultipleUploadWithPayload[0].Name, "a.txt")
+			require.Equal(t, "test1", result.MultipleUploadWithPayload[0].Content)
+			require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[0].ContentType)
+			require.Equal(t, 2, result.MultipleUploadWithPayload[1].ID)
+			require.Contains(t, result.MultipleUploadWithPayload[1].Name, "a.txt")
+			require.Equal(t, "test1", result.MultipleUploadWithPayload[1].Content)
+			require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[1].ContentType)
 		}
 
 		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T) {
@@ -288,40 +284,4 @@ func TestFileUpload(t *testing.T) {
 			test(2)
 		})
 	})
-}
-
-type file struct {
-	mapKey      string
-	name        string
-	content     string
-	contentType string
-}
-
-func createUploadRequest(t *testing.T, url, operations, mapData string, files []file) *http.Request {
-	bodyBuf := &bytes.Buffer{}
-	bodyWriter := multipart.NewWriter(bodyBuf)
-
-	err := bodyWriter.WriteField("operations", operations)
-	require.NoError(t, err)
-
-	err = bodyWriter.WriteField("map", mapData)
-	require.NoError(t, err)
-
-	for i := range files {
-		h := make(textproto.MIMEHeader)
-		h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, files[i].mapKey, files[i].name))
-		h.Set("Content-Type", files[i].contentType)
-		ff, err := bodyWriter.CreatePart(h)
-		require.NoError(t, err)
-		_, err = ff.Write([]byte(files[i].content))
-		require.NoError(t, err)
-	}
-	err = bodyWriter.Close()
-	require.NoError(t, err)
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/graphql", url), bodyBuf)
-	require.NoError(t, err)
-
-	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
-	return req
 }

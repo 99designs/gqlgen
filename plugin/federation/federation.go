@@ -243,7 +243,12 @@ func (f *federation) setEntities(schema *ast.Schema) {
 					if dir == nil {
 						continue
 					}
-					fields := strings.Split(dir.Arguments[0].Value.Raw, " ")
+					args := dir.Arguments[0].Value.Raw
+					if strings.Contains(args, "{") {
+						// TODO: see. https://github.com/99designs/gqlgen/issues/1138
+						panic("Nested fields are not currently supported in @requires declaration.")
+					}
+					fields := strings.Split(args, " ")
 					requireFields := []*RequireField{}
 					for _, f := range fields {
 						requireFields = append(requireFields, &RequireField{

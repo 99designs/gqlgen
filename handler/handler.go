@@ -11,6 +11,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gorilla/websocket"
 )
 
 // Deprecated: switch to graphql/handler.New
@@ -73,7 +74,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 // Deprecated: switch to graphql/handler.New
 type Config struct {
 	cacheSize                       int
-	upgrader                        transport.WebsocketUpgrader
+	upgrader                        websocket.Upgrader
 	websocketInitFunc               transport.WebsocketInitFunc
 	connectionKeepAlivePingInterval time.Duration
 	recover                         graphql.RecoverFunc
@@ -92,7 +93,7 @@ type Config struct {
 type Option func(cfg *Config)
 
 // Deprecated: switch to graphql/handler.New
-func WebsocketUpgrader(upgrader transport.WebsocketUpgrader) Option {
+func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 	return func(cfg *Config) {
 		cfg.upgrader = upgrader
 	}

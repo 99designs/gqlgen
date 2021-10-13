@@ -32,7 +32,7 @@ const (
 
 type (
 	Websocket struct {
-		Upgrader              WebsocketUpgrader
+		Upgrader              websocket.Upgrader
 		InitFunc              WebsocketInitFunc
 		KeepAlivePingInterval time.Duration
 	}
@@ -52,16 +52,10 @@ type (
 		ID      string          `json:"id,omitempty"`
 		Type    string          `json:"type"`
 	}
-	WebsocketUpgrader interface {
-		Upgrade(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (*websocket.Conn, error)
-	}
 	WebsocketInitFunc func(ctx context.Context, initPayload InitPayload) (context.Context, error)
 )
 
-var (
-	_ graphql.Transport = Websocket{}
-	_ WebsocketUpgrader = &websocket.Upgrader{}
-)
+var _ graphql.Transport = Websocket{}
 
 func (t Websocket) Supports(r *http.Request) bool {
 	return r.Header.Get("Upgrade") != ""

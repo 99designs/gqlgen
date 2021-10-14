@@ -16,10 +16,11 @@ type OperationContext struct {
 	OperationName string
 	Doc           *ast.QueryDocument
 
-	Operation            *ast.OperationDefinition
-	DisableIntrospection bool
-	RecoverFunc          RecoverFunc
-	ResolverMiddleware   FieldMiddleware
+	Operation              *ast.OperationDefinition
+	DisableIntrospection   bool
+	RecoverFunc            RecoverFunc
+	ResolverMiddleware     FieldMiddleware
+	RootResolverMiddleware RootFieldMiddleware
 
 	Stats Stats
 }
@@ -36,6 +37,9 @@ func (c *OperationContext) Validate(ctx context.Context) error {
 	}
 	if c.ResolverMiddleware == nil {
 		return errors.New("field 'ResolverMiddleware' is required")
+	}
+	if c.RootResolverMiddleware == nil {
+		return errors.New("field 'RootResolverMiddleware' is required")
 	}
 	if c.RecoverFunc == nil {
 		c.RecoverFunc = DefaultRecover

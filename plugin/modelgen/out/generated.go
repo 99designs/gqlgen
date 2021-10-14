@@ -30,6 +30,11 @@ type UnionWithDescription interface {
 	IsUnionWithDescription()
 }
 
+type FieldMutationHook struct {
+	Name *string       `json:"name" anotherTag:"tag" database:"FieldMutationHookname"`
+	Enum *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`
+}
+
 type MissingInput struct {
 	Name *string      `json:"name" database:"MissingInputname"`
 	Enum *MissingEnum `json:"enum" database:"MissingInputenum"`

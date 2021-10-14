@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -27,6 +28,13 @@ type Packages struct {
 
 	numLoadCalls int // stupid test steam. ignore.
 	numNameCalls int // stupid test steam. ignore.
+}
+
+// ReloadAll will call LoadAll after clearing the package cache, so we can reload
+// packages in the case that the packages have changed
+func (p *Packages) ReloadAll(importPaths ...string) []*packages.Package {
+	p.packages = nil
+	return p.LoadAll(importPaths...)
 }
 
 // LoadAll will call packages.Load and return the package data for the given packages,
@@ -155,6 +163,8 @@ func (p *Packages) Evict(importPath string) {
 func (p *Packages) ModTidy() error {
 	p.packages = nil
 	tidyCmd := exec.Command("go", "mod", "tidy")
+	tidyCmd.Stdout = os.Stdout
+	tidyCmd.Stderr = os.Stdout
 	if err := tidyCmd.Run(); err != nil {
 		return fmt.Errorf("go mod tidy failed: %w", err)
 	}

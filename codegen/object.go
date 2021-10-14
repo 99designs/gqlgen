@@ -46,7 +46,7 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 		Stream:             typ == b.Schema.Subscription,
 		Directives:         dirs,
 		ResolverInterface: types.NewNamed(
-			types.NewTypeName(0, b.Config.Exec.Pkg(), typ.Name+"Resolver", nil),
+			types.NewTypeName(0, b.Config.Exec.Pkg(), strings.Title(typ.Name)+"Resolver", nil),
 			nil,
 			nil,
 		),

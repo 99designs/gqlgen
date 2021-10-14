@@ -461,7 +461,7 @@ func (f *Field) GoNameUnexported() string {
 }
 
 func (f *Field) ShortInvocation() string {
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.Name, f.GoFieldName, f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", strings.Title(f.Object.Definition.Name), f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ArgsFunc() string {

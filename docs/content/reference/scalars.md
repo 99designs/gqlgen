@@ -15,7 +15,7 @@ gqlgen ships with some built-in helpers for common custom scalar use-cases, `Tim
 scalar Time
 ```
 
-Maps a `Time` GraphQL scalar to a Go `time.Time` struct.
+Maps a `Time` GraphQL scalar to a Go `time.Time` struct. This scalar adheres to the [time.RFC3339Nano](https://pkg.go.dev/time#pkg-constants) format.
 
 ### Map
 

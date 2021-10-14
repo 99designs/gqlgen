@@ -64,6 +64,16 @@ type ContentUser struct {
 
 func (ContentUser) IsContentChild() {}
 
+type DefaultInput struct {
+	FalsyBoolean  *bool `json:"falsyBoolean"`
+	TruthyBoolean *bool `json:"truthyBoolean"`
+}
+
+type DefaultParametersMirror struct {
+	FalsyBoolean  *bool `json:"falsyBoolean"`
+	TruthyBoolean *bool `json:"truthyBoolean"`
+}
+
 type Dog struct {
 	Species  string `json:"species"`
 	DogBreed string `json:"dogBreed"`

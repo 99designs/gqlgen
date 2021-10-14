@@ -2199,7 +2199,12 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				invalids++
 			}
 		case "role":
-			out.Values[i] = ec._User_role(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._User_role(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2623,7 +2628,6 @@ var roleImplementors = []string{"role"}
 
 func (ec *executionContext) _role(ctx context.Context, sel ast.SelectionSet, obj *UserRole) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, roleImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2632,7 +2636,8 @@ func (ec *executionContext) _role(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = graphql.MarshalString("role")
 		case "name":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -2643,6 +2648,11 @@ func (ec *executionContext) _role(ctx context.Context, sel ast.SelectionSet, obj
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

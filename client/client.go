@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"regexp"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -121,18 +120,15 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 		option(bd)
 	}
 
-	contentType := bd.HTTP.Header.Get("Content-Type")
-	switch {
-	case regexp.MustCompile(`multipart/form-data; ?boundary=.*`).MatchString(contentType):
-		break
-	case "application/json" == contentType:
+	switch bd.HTTP.Header.Get("Content-Type") {
+	case "application/json":
 		requestBody, err := json.Marshal(bd)
 		if err != nil {
 			return nil, fmt.Errorf("encode: %w", err)
 		}
 		bd.HTTP.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
 	default:
-		panic("unsupported encoding " + bd.HTTP.Header.Get("Content-Type"))
+		panic("unsupported encoding" + bd.HTTP.Header.Get("Content-Type"))
 	}
 
 	return bd.HTTP, nil

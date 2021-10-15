@@ -1,7 +1,6 @@
 package client_test
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -45,17 +44,16 @@ func TestWithFiles(t *testing.T) {
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")
-				fmt.Printf("Part %q: %q\n", contentDisposition, slurp)
 
 				if contentDisposition == `form-data; name="operations"` {
-					require.Equal(t, `{"query":"{ id }","variables":{"file":{}}}`, string(slurp))
+					require.EqualValues(t, `{"query":"{ id }","variables":{"file":{}}}`, slurp)
 				}
 				if contentDisposition == `form-data; name="map"` {
-					require.Equal(t, `{"0":["variables.file"]}`, string(slurp))
+					require.EqualValues(t, `{"0":["variables.file"]}`, slurp)
 				}
 				if regexp.MustCompile(`form-data; name="0"; filename=.*`).MatchString(contentDisposition) {
 					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `The quick brown fox jumps over the lazy dog`, string(slurp))
+					require.EqualValues(t, `The quick brown fox jumps over the lazy dog`, slurp)
 				}
 			}
 			w.Write([]byte(`{}`))
@@ -88,21 +86,25 @@ func TestWithFiles(t *testing.T) {
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")
-				fmt.Printf("Part %q: %q\n", contentDisposition, slurp)
 
 				if contentDisposition == `form-data; name="operations"` {
-					require.Equal(t, `{"query":"{ id }","variables":{"input":{"files":[{},{}]}}}`, string(slurp))
+					require.EqualValues(t, `{"query":"{ id }","variables":{"input":{"files":[{},{}]}}}`, slurp)
 				}
 				if contentDisposition == `form-data; name="map"` {
-					require.Equal(t, `{"0":["variables.input.files.0"],"1":["variables.input.files.1"]}`, string(slurp))
+					// returns `{"0":["variables.input.files.0"],"1":["variables.input.files.1"]}`
+					// but the order of file inputs is unpredictable between different OS systems
+					require.Contains(t, string(slurp), `{"0":`)
+					require.Contains(t, string(slurp), `["variables.input.files.0"]`)
+					require.Contains(t, string(slurp), `,"1":`)
+					require.Contains(t, string(slurp), `["variables.input.files.1"]`)
+					require.Contains(t, string(slurp), `}`)
 				}
-				if regexp.MustCompile(`form-data; name="0"; filename=.*`).MatchString(contentDisposition) {
+				if regexp.MustCompile(`form-data; name="[0,1]"; filename=.*`).MatchString(contentDisposition) {
 					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `The quick brown fox jumps over the lazy dog`, string(slurp))
-				}
-				if regexp.MustCompile(`form-data; name="1"; filename=.*`).MatchString(contentDisposition) {
-					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `hello world`, string(slurp))
+					require.Contains(t, []string{
+						`The quick brown fox jumps over the lazy dog`,
+						`hello world`,
+					}, string(slurp))
 				}
 			}
 			w.Write([]byte(`{}`))
@@ -137,25 +139,28 @@ func TestWithFiles(t *testing.T) {
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")
-				fmt.Printf("Part %q: %q\n", contentDisposition, slurp)
 
 				if contentDisposition == `form-data; name="operations"` {
-					require.Equal(t, `{"query":"{ id }","variables":{"req":{"files":[{},{}],"foo":{"bar":{}}}}}`, string(slurp))
+					require.EqualValues(t, `{"query":"{ id }","variables":{"req":{"files":[{},{}],"foo":{"bar":{}}}}}`, slurp)
 				}
 				if contentDisposition == `form-data; name="map"` {
-					require.Equal(t, `{"0":["variables.req.files.0"],"1":["variables.req.files.1"],"2":["variables.req.foo.bar"]}`, string(slurp))
+					// returns `{"0":["variables.req.files.0"],"1":["variables.req.files.1"],"2":["variables.req.foo.bar"]}`
+					// but the order of file inputs is unpredictable between different OS systems
+					require.Contains(t, string(slurp), `{"0":`)
+					require.Contains(t, string(slurp), `["variables.req.files.0"]`)
+					require.Contains(t, string(slurp), `,"1":`)
+					require.Contains(t, string(slurp), `["variables.req.files.1"]`)
+					require.Contains(t, string(slurp), `,"2":`)
+					require.Contains(t, string(slurp), `["variables.req.foo.bar"]`)
+					require.Contains(t, string(slurp), `}`)
 				}
-				if regexp.MustCompile(`form-data; name="0"; filename=.*`).MatchString(contentDisposition) {
+				if regexp.MustCompile(`form-data; name="[0,1,2]"; filename=.*`).MatchString(contentDisposition) {
 					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `The quick brown fox jumps over the lazy dog`, string(slurp))
-				}
-				if regexp.MustCompile(`form-data; name="1"; filename=.*`).MatchString(contentDisposition) {
-					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `hello world`, string(slurp))
-				}
-				if regexp.MustCompile(`form-data; name="2"; filename=.*`).MatchString(contentDisposition) {
-					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `La-Li-Lu-Le-Lo`, string(slurp))
+					require.Contains(t, []string{
+						`The quick brown fox jumps over the lazy dog`,
+						`La-Li-Lu-Le-Lo`,
+						`hello world`,
+					}, string(slurp))
 				}
 			}
 			w.Write([]byte(`{}`))
@@ -193,21 +198,28 @@ func TestWithFiles(t *testing.T) {
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")
-				fmt.Printf("Part %q: %q\n", contentDisposition, slurp)
 
 				if contentDisposition == `form-data; name="operations"` {
-					require.Equal(t, `{"query":"{ id }","variables":{"files":[{},{},{}]}}`, string(slurp))
+					require.EqualValues(t, `{"query":"{ id }","variables":{"files":[{},{},{}]}}`, slurp)
 				}
 				if contentDisposition == `form-data; name="map"` {
-					require.Equal(t, `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`, string(slurp))
+					require.EqualValues(t, `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`, slurp)
+					// returns `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`
+					// but the order of file inputs is unpredictable between different OS systems
+					require.Contains(t, string(slurp), `{"0":`)
+					require.Contains(t, string(slurp), `["variables.files.0"`)
+					require.Contains(t, string(slurp), `,"1":`)
+					require.Contains(t, string(slurp), `"variables.files.1"]`)
+					require.Contains(t, string(slurp), `"variables.files.2"]`)
+					require.NotContains(t, string(slurp), `,"2":`)
+					require.Contains(t, string(slurp), `}`)
 				}
-				if regexp.MustCompile(`form-data; name="0"; filename=.*`).MatchString(contentDisposition) {
+				if regexp.MustCompile(`form-data; name="[0,1]"; filename=.*`).MatchString(contentDisposition) {
 					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `The quick brown fox jumps over the lazy dog`, string(slurp))
-				}
-				if regexp.MustCompile(`form-data; name="1"; filename=.*`).MatchString(contentDisposition) {
-					require.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
-					require.Equal(t, `hello world`, string(slurp))
+					require.Contains(t, []string{
+						`The quick brown fox jumps over the lazy dog`,
+						`hello world`,
+					}, string(slurp))
 				}
 				require.False(t, regexp.MustCompile(`form-data; name="2"; filename=.*`).MatchString(contentDisposition))
 			}

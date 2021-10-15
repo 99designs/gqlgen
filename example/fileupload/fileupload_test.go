@@ -143,13 +143,16 @@ func TestFileUpload(t *testing.T) {
 		err := gql.Post(mutation, &result, gqlclient.Var("files", []*os.File{a1TxtFile, b1TxtFile}), gqlclient.WithFiles())
 		require.Nil(t, err)
 		require.Equal(t, 1, result.MultipleUpload[0].ID)
-		require.Contains(t, result.MultipleUpload[0].Name, "a.txt")
-		require.Equal(t, "test1", result.MultipleUpload[0].Content)
-		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUpload[0].ContentType)
 		require.Equal(t, 2, result.MultipleUpload[1].ID)
-		require.Contains(t, result.MultipleUpload[1].Name, "b.txt")
-		require.Equal(t, "test2", result.MultipleUpload[1].Content)
-		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUpload[1].ContentType)
+		for _, mu := range result.MultipleUpload {
+			if mu.Name == "a.txt" {
+				require.Equal(t, "test1", mu.Content)
+			}
+			if mu.Name == "b.txt" {
+				require.Equal(t, "test2", mu.Content)
+			}
+			require.Equal(t, "text/plain; charset=utf-8", mu.ContentType)
+		}
 	})
 
 	t.Run("valid file list upload with payload", func(t *testing.T) {
@@ -195,13 +198,16 @@ func TestFileUpload(t *testing.T) {
 		}), gqlclient.WithFiles())
 		require.Nil(t, err)
 		require.Equal(t, 1, result.MultipleUploadWithPayload[0].ID)
-		require.Contains(t, result.MultipleUploadWithPayload[0].Name, "a.txt")
-		require.Equal(t, "test1", result.MultipleUploadWithPayload[0].Content)
-		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[0].ContentType)
 		require.Equal(t, 2, result.MultipleUploadWithPayload[1].ID)
-		require.Contains(t, result.MultipleUploadWithPayload[1].Name, "b.txt")
-		require.Equal(t, "test2", result.MultipleUploadWithPayload[1].Content)
-		require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[1].ContentType)
+		for _, mu := range result.MultipleUploadWithPayload {
+			if mu.Name == "a.txt" {
+				require.Equal(t, "test1", mu.Content)
+			}
+			if mu.Name == "b.txt" {
+				require.Equal(t, "test2", mu.Content)
+			}
+			require.Equal(t, "text/plain; charset=utf-8", mu.ContentType)
+		}
 	})
 
 	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {

@@ -162,6 +162,9 @@ func TestDirectives(t *testing.T) {
 			Directive2: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
 				return next(ctx)
 			},
+			Directive3: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+				return next(ctx)
+			},
 			Order1: func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error) {
 				order := []string{location}
 				res, err = next(ctx)
@@ -387,8 +390,9 @@ func TestDirectives(t *testing.T) {
 			require.Equal(t, "Ok", resp.DirectiveObject.Text)
 			require.True(t, resp.DirectiveObject.NullableText == nil)
 			require.Equal(t, "Query_field", resp.DirectiveObject.Order[0])
-			require.Equal(t, "ObjectDirectives_object_2", resp.DirectiveObject.Order[1])
-			require.Equal(t, "ObjectDirectives_object_1", resp.DirectiveObject.Order[2])
+			require.Equal(t, "order2_1", resp.DirectiveObject.Order[1])
+			require.Equal(t, "order1_2", resp.DirectiveObject.Order[2])
+			require.Equal(t, "order1_1", resp.DirectiveObject.Order[3])
 		})
 		t.Run("when directive returns nil & custom go field is not nilable", func(t *testing.T) {
 			var resp struct {

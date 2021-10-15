@@ -2,9 +2,12 @@
 	{{- if not .HasUnmarshal }}
 	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj interface{}) ({{.Type | ref}}, error) {
 		var it {{.Type | ref}}
-		var asMap = obj.(map[string]interface{})
+		asMap := map[string]interface{}{}
+		for k, v := range obj.(map[string]interface{}) {
+			asMap[k] = v
+		}
 		{{ range $field := .Fields}}
-			{{- if $field.Default}}
+			{{- if notNil "Default" $field }}
 				if _, present := asMap[{{$field.Name|quote}}] ; !present {
 					asMap[{{$field.Name|quote}}] = {{ $field.Default | dump }}
 				}

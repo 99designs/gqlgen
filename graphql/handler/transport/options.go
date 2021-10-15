@@ -20,8 +20,8 @@ func (o Options) Supports(r *http.Request) bool {
 func (o Options) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor, serial serial.Serialization) {
 	switch r.Method {
 	case http.MethodOptions:
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Allow", "OPTIONS, GET, POST")
+		w.WriteHeader(http.StatusOK)
 	case http.MethodHead:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}

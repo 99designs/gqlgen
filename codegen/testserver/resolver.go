@@ -44,7 +44,15 @@ func (r *modelMethodsResolver) ResolverField(ctx context.Context, obj *ModelMeth
 	panic("not implemented")
 }
 
+func (r *mutationResolver) DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error) {
+	panic("not implemented")
+}
+
 func (r *mutationResolver) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
+	panic("not implemented")
+}
+
+func (r *mutationResolver) UpdatePtrToPtr(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error) {
 	panic("not implemented")
 }
 
@@ -129,6 +137,10 @@ func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
 }
 
 func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error) {
 	panic("not implemented")
 }
 
@@ -232,6 +244,14 @@ func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) ErrorBubbleList(ctx context.Context) ([]*Error, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) ErrorList(ctx context.Context) ([]*Error, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) Errors(ctx context.Context) (*Errors, error) {
 	panic("not implemented")
 }
@@ -252,6 +272,10 @@ func (r *queryResolver) PrimitiveStringObject(ctx context.Context) ([]PrimitiveS
 	panic("not implemented")
 }
 
+func (r *queryResolver) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	panic("not implemented")
 }
@@ -269,6 +293,14 @@ func (r *queryResolver) Fallback(ctx context.Context, arg FallbackToStringEncodi
 }
 
 func (r *queryResolver) OptionalUnion(ctx context.Context) (TestUnion, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) VOkCaseValue(ctx context.Context) (*VOkCaseValue, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) VOkCaseNil(ctx context.Context) (*VOkCaseNil, error) {
 	panic("not implemented")
 }
 

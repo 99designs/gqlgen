@@ -1,12 +1,13 @@
 package config
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
@@ -82,7 +83,7 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadConfigFromDefaultLocations()
-		require.True(t, os.IsNotExist(err))
+		require.True(t, errors.Is(err, fs.ErrNotExist))
 	})
 }
 
@@ -105,7 +106,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadDefaultConfig()
-		require.True(t, os.IsNotExist(errors.Cause(err)))
+		require.True(t, errors.Is(err, fs.ErrNotExist))
 	})
 }
 
@@ -173,8 +174,8 @@ func TestAutobinding(t *testing.T) {
 		cfg := Config{
 			Models: TypeMap{},
 			AutoBind: []string{
-				"github.com/99designs/gqlgen/example/chat",
-				"github.com/99designs/gqlgen/example/scalars/model",
+				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat",
+				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model",
 			},
 			Packages: &code.Packages{},
 		}
@@ -186,8 +187,8 @@ func TestAutobinding(t *testing.T) {
 
 		require.NoError(t, cfg.autobind())
 
-		require.Equal(t, "github.com/99designs/gqlgen/example/scalars/model.Banned", cfg.Models["Banned"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/example/chat.Message", cfg.Models["Message"].Model[0])
+		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned", cfg.Models["Banned"].Model[0])
+		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message", cfg.Models["Message"].Model[0])
 	})
 
 	t.Run("with file path", func(t *testing.T) {

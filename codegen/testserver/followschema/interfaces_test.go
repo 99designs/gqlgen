@@ -197,4 +197,60 @@ func TestInterfaces(t *testing.T) {
 		require.Equal(t, "CNII", resp.Node.ID)
 		require.Equal(t, "Child", resp.Node.Child.ID)
 	})
+
+	t.Run("interface implementors should return merged base fields", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.Shapes = func(ctx context.Context) (shapes []Shape, err error) {
+			return []Shape{
+				&Rectangle{
+					Coordinates: Coordinates{
+						X: -1,
+						Y: -1,
+					},
+				},
+				&Circle{
+					Coordinates: Coordinates{
+						X: 1,
+						Y: 1,
+					},
+				},
+			}, nil
+		}
+
+		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		var resp struct {
+			Shapes []struct {
+				Coordinates struct {
+					X float64
+					Y float64
+				}
+			}
+		}
+
+		c.MustPost(`
+			{
+				shapes {
+					coordinates {
+						x
+					}
+					... on Rectangle {
+						coordinates {
+							x
+						}
+					}
+					... on Circle {
+						coordinates {
+							y
+						}
+					}
+				}
+			}
+		`, &resp)
+
+		require.Equal(t, 2, len(resp.Shapes))
+		require.Equal(t, float64(-1), resp.Shapes[0].Coordinates.X)
+		require.Equal(t, float64(0), resp.Shapes[0].Coordinates.Y)
+		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.X)
+		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.Y)
+	})
 }

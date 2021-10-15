@@ -113,8 +113,9 @@ type ComplexityRoot struct {
 	}
 
 	Circle struct {
-		Area   func(childComplexity int) int
-		Radius func(childComplexity int) int
+		Area        func(childComplexity int) int
+		Coordinates func(childComplexity int) int
+		Radius      func(childComplexity int) int
 	}
 
 	ConcreteNodeA struct {
@@ -134,6 +135,11 @@ type ComplexityRoot struct {
 
 	Content_User struct {
 		Foo func(childComplexity int) int
+	}
+
+	Coordinates struct {
+		X func(childComplexity int) int
+		Y func(childComplexity int) int
 	}
 
 	DefaultParametersMirror struct {
@@ -344,9 +350,10 @@ type ComplexityRoot struct {
 	}
 
 	Rectangle struct {
-		Area   func(childComplexity int) int
-		Length func(childComplexity int) int
-		Width  func(childComplexity int) int
+		Area        func(childComplexity int) int
+		Coordinates func(childComplexity int) int
+		Length      func(childComplexity int) int
+		Width       func(childComplexity int) int
 	}
 
 	Slices struct {
@@ -664,6 +671,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Circle.Area(childComplexity), true
 
+	case "Circle.coordinates":
+		if e.complexity.Circle.Coordinates == nil {
+			break
+		}
+
+		return e.complexity.Circle.Coordinates(childComplexity), true
+
 	case "Circle.radius":
 		if e.complexity.Circle.Radius == nil {
 			break
@@ -719,6 +733,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Content_User.Foo(childComplexity), true
+
+	case "Coordinates.x":
+		if e.complexity.Coordinates.X == nil {
+			break
+		}
+
+		return e.complexity.Coordinates.X(childComplexity), true
+
+	case "Coordinates.y":
+		if e.complexity.Coordinates.Y == nil {
+			break
+		}
+
+		return e.complexity.Coordinates.Y(childComplexity), true
 
 	case "DefaultParametersMirror.falsyBoolean":
 		if e.complexity.DefaultParametersMirror.FalsyBoolean == nil {
@@ -1666,6 +1694,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Rectangle.Area(childComplexity), true
 
+	case "Rectangle.coordinates":
+		if e.complexity.Rectangle.Coordinates == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Coordinates(childComplexity), true
+
 	case "Rectangle.length":
 		if e.complexity.Rectangle.Length == nil {
 			break
@@ -2151,19 +2186,27 @@ type Cat implements Animal {
     catBreed: String!
 }
 
+type Coordinates {
+    x: Float!
+    y: Float!
+}
 interface Shape {
     area: Float
+    coordinates: Coordinates
 }
+
 type Circle implements Shape {
     radius: Float
     area: Float
+    coordinates: Coordinates
 }
 type Rectangle implements Shape {
     length: Float
     width: Float
     area: Float
+    coordinates: Coordinates
 }
-union ShapeUnion @goModel(model:"singlefile.ShapeUnion") = Circle | Rectangle
+union ShapeUnion @goModel(model: "singlefile.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION
 directive @makeTypedNil on FIELD_DEFINITION
@@ -2179,7 +2222,7 @@ type ConcreteNodeA implements Node {
     name: String!
 }
 
-""" Implements the Node interface with another interface """
+" Implements the Node interface with another interface "
 type ConcreteNodeInterface implements Node {
     id: ID!
     child: Node!
@@ -4217,6 +4260,35 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	return ec.marshalOFloat2float64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Circle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Coordinates, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Coordinates)
+	fc.Result = res
+	return ec.marshalOCoordinates2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCoordinates(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4433,6 +4505,70 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.CollectedField, obj *Coordinates) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Coordinates",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.X, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.CollectedField, obj *Coordinates) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Coordinates",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Y, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Context, field graphql.CollectedField, obj *DefaultParametersMirror) (ret graphql.Marshaler) {
@@ -8676,6 +8812,35 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 	return ec.marshalOFloat2float64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Rectangle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Coordinates, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Coordinates)
+	fc.Result = res
+	return ec.marshalOCoordinates2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCoordinates(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -11957,6 +12122,13 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 
 			out.Values[i] = innerFunc(ctx)
 
+		case "coordinates":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Circle_coordinates(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12105,6 +12277,47 @@ func (ec *executionContext) _Content_User(ctx context.Context, sel ast.Selection
 
 			out.Values[i] = innerFunc(ctx)
 
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var coordinatesImplementors = []string{"Coordinates"}
+
+func (ec *executionContext) _Coordinates(ctx context.Context, sel ast.SelectionSet, obj *Coordinates) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, coordinatesImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Coordinates")
+		case "x":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Coordinates_x(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "y":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Coordinates_y(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -14777,6 +14990,13 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 
 			out.Values[i] = innerFunc(ctx)
 
+		case "coordinates":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Rectangle_coordinates(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15843,6 +16063,21 @@ func (ec *executionContext) marshalNFallbackToStringEncoding2githubᚗcomᚋ99de
 	return res
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloat(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNID2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalIntID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -16827,6 +17062,10 @@ func (ec *executionContext) marshalOCircle2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec._Circle(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCoordinates2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCoordinates(ctx context.Context, sel ast.SelectionSet, v Coordinates) graphql.Marshaler {
+	return ec._Coordinates(ctx, sel, &v)
 }
 
 func (ec *executionContext) unmarshalODefaultScalarImplementation2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

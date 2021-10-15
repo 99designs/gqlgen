@@ -37,6 +37,7 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			})
 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
+
 		case *ast.InlineFragment:
 			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
 				continue
@@ -73,6 +74,7 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				f := getOrCreateAndAppendField(&groupedFields, childField.Name, childField.Alias, childField.ObjectDefinition, func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 			}
+
 		default:
 			panic(fmt.Errorf("unsupported %T", sel))
 		}
@@ -98,8 +100,24 @@ func instanceOf(val string, satisfies []string) bool {
 
 func getOrCreateAndAppendField(c *[]CollectedField, name string, alias string, objectDefinition *ast.Definition, creator func() CollectedField) *CollectedField {
 	for i, cf := range *c {
-		if cf.Name == name && cf.Alias == alias && (cf.ObjectDefinition == objectDefinition || (cf.ObjectDefinition != nil && objectDefinition != nil && cf.ObjectDefinition.Name == objectDefinition.Name)) {
-			return &(*c)[i]
+		if cf.Name == name && cf.Alias == alias {
+			if cf.ObjectDefinition == objectDefinition {
+				return &(*c)[i]
+			}
+
+			if cf.ObjectDefinition == nil || objectDefinition == nil {
+				continue
+			}
+
+			if cf.ObjectDefinition.Name == objectDefinition.Name {
+				return &(*c)[i]
+			}
+
+			for _, ifc := range objectDefinition.Interfaces {
+				if ifc == cf.ObjectDefinition.Name {
+					return &(*c)[i]
+				}
+			}
 		}
 	}
 

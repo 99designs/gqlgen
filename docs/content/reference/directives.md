@@ -5,7 +5,7 @@ linkTitle: Schema Directives
 menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
-Directives act a bit like annotations, decorators, or HTTP middleware. They give you a way to specify some behaviour based on a field or argument in a generic and reusable way. This can be really useful for things like permission checks which can be applied broadly across your API.
+Directives act a bit like annotations, decorators, or HTTP middleware. They give you a way to specify some behaviour based on a field or argument in a generic and reusable way. This can be really useful for cross-cutting concerns like permission checks which can be applied broadly across your API.
 
 **Note**: The current directives implementation is still fairly limited, and is designed to cover the most common "field middleware" case.
 

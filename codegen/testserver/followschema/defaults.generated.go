@@ -304,7 +304,6 @@ var defaultParametersMirrorImplementors = []string{"DefaultParametersMirror"}
 
 func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel ast.SelectionSet, obj *DefaultParametersMirror) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, defaultParametersMirrorImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -312,9 +311,19 @@ func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel as
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("DefaultParametersMirror")
 		case "falsyBoolean":
-			out.Values[i] = ec._DefaultParametersMirror_falsyBoolean(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DefaultParametersMirror_falsyBoolean(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "truthyBoolean":
-			out.Values[i] = ec._DefaultParametersMirror_truthyBoolean(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DefaultParametersMirror_truthyBoolean(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -330,7 +339,6 @@ var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
-
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Mutation",
 	})
@@ -338,21 +346,41 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "defaultInput":
-			out.Values[i] = ec._Mutation_defaultInput(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_defaultInput(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "updateSomething":
-			out.Values[i] = ec._Mutation_updateSomething(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateSomething(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "updatePtrToPtr":
-			out.Values[i] = ec._Mutation_updatePtrToPtr(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updatePtrToPtr(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

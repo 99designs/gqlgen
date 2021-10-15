@@ -140,7 +140,6 @@ var mapStringInterfaceTypeImplementors = []string{"MapStringInterfaceType"}
 
 func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]interface{}) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapStringInterfaceTypeImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -148,9 +147,19 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("MapStringInterfaceType")
 		case "a":
-			out.Values[i] = ec._MapStringInterfaceType_a(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MapStringInterfaceType_a(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "b":
-			out.Values[i] = ec._MapStringInterfaceType_b(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MapStringInterfaceType_b(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

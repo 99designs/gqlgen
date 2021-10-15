@@ -69,7 +69,6 @@ var ptrToSliceContainerImplementors = []string{"PtrToSliceContainer"}
 
 func (ec *executionContext) _PtrToSliceContainer(ctx context.Context, sel ast.SelectionSet, obj *PtrToSliceContainer) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToSliceContainerImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -77,7 +76,12 @@ func (ec *executionContext) _PtrToSliceContainer(ctx context.Context, sel ast.Se
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PtrToSliceContainer")
 		case "ptrToSlice":
-			out.Values[i] = ec._PtrToSliceContainer_ptrToSlice(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PtrToSliceContainer_ptrToSlice(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

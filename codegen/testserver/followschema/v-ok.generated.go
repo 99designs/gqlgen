@@ -106,7 +106,6 @@ var vOkCaseNilImplementors = []string{"VOkCaseNil"}
 
 func (ec *executionContext) _VOkCaseNil(ctx context.Context, sel ast.SelectionSet, obj *VOkCaseNil) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, vOkCaseNilImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -114,7 +113,12 @@ func (ec *executionContext) _VOkCaseNil(ctx context.Context, sel ast.SelectionSe
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("VOkCaseNil")
 		case "value":
-			out.Values[i] = ec._VOkCaseNil_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._VOkCaseNil_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -130,7 +134,6 @@ var vOkCaseValueImplementors = []string{"VOkCaseValue"}
 
 func (ec *executionContext) _VOkCaseValue(ctx context.Context, sel ast.SelectionSet, obj *VOkCaseValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, vOkCaseValueImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -138,7 +141,12 @@ func (ec *executionContext) _VOkCaseValue(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("VOkCaseValue")
 		case "value":
-			out.Values[i] = ec._VOkCaseValue_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._VOkCaseValue_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -218,7 +218,6 @@ var wrappedMapImplementors = []string{"WrappedMap"}
 
 func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSet, obj WrappedMap) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, wrappedMapImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -227,7 +226,8 @@ func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = graphql.MarshalString("WrappedMap")
 		case "get":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -238,6 +238,11 @@ func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSe
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -254,7 +259,6 @@ var wrappedSliceImplementors = []string{"WrappedSlice"}
 
 func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.SelectionSet, obj WrappedSlice) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, wrappedSliceImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -263,7 +267,8 @@ func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("WrappedSlice")
 		case "get":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -274,6 +279,11 @@ func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -290,7 +300,6 @@ var wrappedStructImplementors = []string{"WrappedStruct"}
 
 func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.SelectionSet, obj *WrappedStruct) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, wrappedStructImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -298,12 +307,22 @@ func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("WrappedStruct")
 		case "name":
-			out.Values[i] = ec._WrappedStruct_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._WrappedStruct_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "desc":
-			out.Values[i] = ec._WrappedStruct_desc(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._WrappedStruct_desc(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

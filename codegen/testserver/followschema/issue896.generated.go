@@ -70,7 +70,6 @@ var checkIssue896Implementors = []string{"CheckIssue896"}
 
 func (ec *executionContext) _CheckIssue896(ctx context.Context, sel ast.SelectionSet, obj *CheckIssue896) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, checkIssue896Implementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -78,7 +77,12 @@ func (ec *executionContext) _CheckIssue896(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CheckIssue896")
 		case "id":
-			out.Values[i] = ec._CheckIssue896_id(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CheckIssue896_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

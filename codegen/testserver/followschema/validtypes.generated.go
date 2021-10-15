@@ -742,7 +742,6 @@ var content_PostImplementors = []string{"Content_Post", "Content_Child"}
 
 func (ec *executionContext) _Content_Post(ctx context.Context, sel ast.SelectionSet, obj *ContentPost) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, content_PostImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -750,7 +749,12 @@ func (ec *executionContext) _Content_Post(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Content_Post")
 		case "foo":
-			out.Values[i] = ec._Content_Post_foo(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Content_Post_foo(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -766,7 +770,6 @@ var content_UserImplementors = []string{"Content_User", "Content_Child"}
 
 func (ec *executionContext) _Content_User(ctx context.Context, sel ast.SelectionSet, obj *ContentUser) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, content_UserImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -774,7 +777,12 @@ func (ec *executionContext) _Content_User(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Content_User")
 		case "foo":
-			out.Values[i] = ec._Content_User_foo(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Content_User_foo(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -790,7 +798,6 @@ var validTypeImplementors = []string{"ValidType"}
 
 func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet, obj *ValidType) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, validTypeImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -798,22 +805,42 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ValidType")
 		case "differentCase":
-			out.Values[i] = ec._ValidType_differentCase(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ValidType_differentCase(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "different_case":
-			out.Values[i] = ec._ValidType_different_case(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ValidType_different_case(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "validInputKeywords":
-			out.Values[i] = ec._ValidType_validInputKeywords(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ValidType_validInputKeywords(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "validArgs":
-			out.Values[i] = ec._ValidType_validArgs(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ValidType_validArgs(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

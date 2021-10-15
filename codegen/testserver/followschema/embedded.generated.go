@@ -136,7 +136,6 @@ var embeddedCase1Implementors = []string{"EmbeddedCase1"}
 
 func (ec *executionContext) _EmbeddedCase1(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedCase1) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedCase1Implementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -144,7 +143,12 @@ func (ec *executionContext) _EmbeddedCase1(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedCase1")
 		case "exportedEmbeddedPointerExportedMethod":
-			out.Values[i] = ec._EmbeddedCase1_exportedEmbeddedPointerExportedMethod(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._EmbeddedCase1_exportedEmbeddedPointerExportedMethod(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -163,7 +167,6 @@ var embeddedCase2Implementors = []string{"EmbeddedCase2"}
 
 func (ec *executionContext) _EmbeddedCase2(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedCase2) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedCase2Implementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -171,7 +174,12 @@ func (ec *executionContext) _EmbeddedCase2(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedCase2")
 		case "unexportedEmbeddedPointerExportedMethod":
-			out.Values[i] = ec._EmbeddedCase2_unexportedEmbeddedPointerExportedMethod(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._EmbeddedCase2_unexportedEmbeddedPointerExportedMethod(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -190,7 +198,6 @@ var embeddedCase3Implementors = []string{"EmbeddedCase3"}
 
 func (ec *executionContext) _EmbeddedCase3(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedCase3) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedCase3Implementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -198,7 +205,12 @@ func (ec *executionContext) _EmbeddedCase3(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedCase3")
 		case "unexportedEmbeddedInterfaceExportedMethod":
-			out.Values[i] = ec._EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

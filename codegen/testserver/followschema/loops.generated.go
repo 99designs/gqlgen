@@ -104,7 +104,6 @@ var loopAImplementors = []string{"LoopA"}
 
 func (ec *executionContext) _LoopA(ctx context.Context, sel ast.SelectionSet, obj *LoopA) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, loopAImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -112,7 +111,12 @@ func (ec *executionContext) _LoopA(ctx context.Context, sel ast.SelectionSet, ob
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LoopA")
 		case "b":
-			out.Values[i] = ec._LoopA_b(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._LoopA_b(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -131,7 +135,6 @@ var loopBImplementors = []string{"LoopB"}
 
 func (ec *executionContext) _LoopB(ctx context.Context, sel ast.SelectionSet, obj *LoopB) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, loopBImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -139,7 +142,12 @@ func (ec *executionContext) _LoopB(ctx context.Context, sel ast.SelectionSet, ob
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LoopB")
 		case "a":
-			out.Values[i] = ec._LoopB_a(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._LoopB_a(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

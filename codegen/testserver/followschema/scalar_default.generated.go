@@ -69,7 +69,6 @@ var embeddedDefaultScalarImplementors = []string{"EmbeddedDefaultScalar"}
 
 func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedDefaultScalar) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedDefaultScalarImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -77,7 +76,12 @@ func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedDefaultScalar")
 		case "value":
-			out.Values[i] = ec._EmbeddedDefaultScalar_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._EmbeddedDefaultScalar_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

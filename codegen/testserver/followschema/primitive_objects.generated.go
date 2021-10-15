@@ -211,7 +211,6 @@ var primitiveImplementors = []string{"Primitive"}
 
 func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet, obj *Primitive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, primitiveImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -220,7 +219,8 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = graphql.MarshalString("Primitive")
 		case "value":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -231,9 +231,19 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "squared":
-			out.Values[i] = ec._Primitive_squared(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Primitive_squared(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -252,7 +262,6 @@ var primitiveStringImplementors = []string{"PrimitiveString"}
 
 func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.SelectionSet, obj *PrimitiveString) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, primitiveStringImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -261,7 +270,8 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 			out.Values[i] = graphql.MarshalString("PrimitiveString")
 		case "value":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -272,15 +282,26 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "doubled":
-			out.Values[i] = ec._PrimitiveString_doubled(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PrimitiveString_doubled(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "len":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -291,6 +312,11 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

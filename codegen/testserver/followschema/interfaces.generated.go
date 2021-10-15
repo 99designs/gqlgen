@@ -656,7 +656,6 @@ var backedByInterfaceImplementors = []string{"BackedByInterface"}
 
 func (ec *executionContext) _BackedByInterface(ctx context.Context, sel ast.SelectionSet, obj BackedByInterface) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, backedByInterfaceImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -665,7 +664,8 @@ func (ec *executionContext) _BackedByInterface(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("BackedByInterface")
 		case "id":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -676,14 +676,29 @@ func (ec *executionContext) _BackedByInterface(ctx context.Context, sel ast.Sele
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "thisShouldBind":
-			out.Values[i] = ec._BackedByInterface_thisShouldBind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._BackedByInterface_thisShouldBind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "thisShouldBindWithError":
-			out.Values[i] = ec._BackedByInterface_thisShouldBindWithError(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._BackedByInterface_thisShouldBindWithError(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -702,7 +717,6 @@ var catImplementors = []string{"Cat", "Animal"}
 
 func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj *Cat) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, catImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -710,12 +724,22 @@ func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Cat")
 		case "species":
-			out.Values[i] = ec._Cat_species(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Cat_species(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "catBreed":
-			out.Values[i] = ec._Cat_catBreed(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Cat_catBreed(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -734,7 +758,6 @@ var circleImplementors = []string{"Circle", "Shape", "ShapeUnion"}
 
 func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, obj *Circle) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, circleImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -742,9 +765,19 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Circle")
 		case "radius":
-			out.Values[i] = ec._Circle_radius(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Circle_radius(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "area":
-			out.Values[i] = ec._Circle_area(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Circle_area(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -760,7 +793,6 @@ var concreteNodeAImplementors = []string{"ConcreteNodeA", "Node"}
 
 func (ec *executionContext) _ConcreteNodeA(ctx context.Context, sel ast.SelectionSet, obj *ConcreteNodeA) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, concreteNodeAImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -768,17 +800,32 @@ func (ec *executionContext) _ConcreteNodeA(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ConcreteNodeA")
 		case "id":
-			out.Values[i] = ec._ConcreteNodeA_id(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ConcreteNodeA_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "child":
-			out.Values[i] = ec._ConcreteNodeA_child(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ConcreteNodeA_child(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "name":
-			out.Values[i] = ec._ConcreteNodeA_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ConcreteNodeA_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -797,7 +844,6 @@ var concreteNodeInterfaceImplementors = []string{"ConcreteNodeInterface", "Node"
 
 func (ec *executionContext) _ConcreteNodeInterface(ctx context.Context, sel ast.SelectionSet, obj ConcreteNodeInterface) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, concreteNodeInterfaceImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -805,12 +851,22 @@ func (ec *executionContext) _ConcreteNodeInterface(ctx context.Context, sel ast.
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ConcreteNodeInterface")
 		case "id":
-			out.Values[i] = ec._ConcreteNodeInterface_id(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ConcreteNodeInterface_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "child":
-			out.Values[i] = ec._ConcreteNodeInterface_child(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ConcreteNodeInterface_child(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -829,7 +885,6 @@ var dogImplementors = []string{"Dog", "Animal"}
 
 func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *Dog) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, dogImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -837,12 +892,22 @@ func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Dog")
 		case "species":
-			out.Values[i] = ec._Dog_species(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Dog_species(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "dogBreed":
-			out.Values[i] = ec._Dog_dogBreed(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Dog_dogBreed(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -861,7 +926,6 @@ var rectangleImplementors = []string{"Rectangle", "Shape", "ShapeUnion"}
 
 func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet, obj *Rectangle) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, rectangleImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -869,11 +933,26 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Rectangle")
 		case "length":
-			out.Values[i] = ec._Rectangle_length(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Rectangle_length(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "width":
-			out.Values[i] = ec._Rectangle_width(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Rectangle_width(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "area":
-			out.Values[i] = ec._Rectangle_area(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Rectangle_area(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

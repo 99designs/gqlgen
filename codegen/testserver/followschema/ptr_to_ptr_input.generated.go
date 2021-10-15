@@ -264,7 +264,6 @@ var ptrToPtrInnerImplementors = []string{"PtrToPtrInner"}
 
 func (ec *executionContext) _PtrToPtrInner(ctx context.Context, sel ast.SelectionSet, obj *PtrToPtrInner) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToPtrInnerImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -272,12 +271,22 @@ func (ec *executionContext) _PtrToPtrInner(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PtrToPtrInner")
 		case "key":
-			out.Values[i] = ec._PtrToPtrInner_key(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PtrToPtrInner_key(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "value":
-			out.Values[i] = ec._PtrToPtrInner_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PtrToPtrInner_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -296,7 +305,6 @@ var ptrToPtrOuterImplementors = []string{"PtrToPtrOuter"}
 
 func (ec *executionContext) _PtrToPtrOuter(ctx context.Context, sel ast.SelectionSet, obj *PtrToPtrOuter) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToPtrOuterImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -304,14 +312,29 @@ func (ec *executionContext) _PtrToPtrOuter(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PtrToPtrOuter")
 		case "name":
-			out.Values[i] = ec._PtrToPtrOuter_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PtrToPtrOuter_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "inner":
-			out.Values[i] = ec._PtrToPtrOuter_inner(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PtrToPtrOuter_inner(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "stupidInner":
-			out.Values[i] = ec._PtrToPtrOuter_stupidInner(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PtrToPtrOuter_stupidInner(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

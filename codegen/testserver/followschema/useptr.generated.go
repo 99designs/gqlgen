@@ -128,7 +128,6 @@ var aImplementors = []string{"A", "TestUnion"}
 
 func (ec *executionContext) _A(ctx context.Context, sel ast.SelectionSet, obj *A) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -136,7 +135,12 @@ func (ec *executionContext) _A(ctx context.Context, sel ast.SelectionSet, obj *A
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("A")
 		case "id":
-			out.Values[i] = ec._A_id(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._A_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -155,7 +159,6 @@ var bImplementors = []string{"B", "TestUnion"}
 
 func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, bImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -163,7 +166,12 @@ func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("B")
 		case "id":
-			out.Values[i] = ec._B_id(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._B_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

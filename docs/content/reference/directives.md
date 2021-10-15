@@ -5,13 +5,22 @@ linkTitle: Schema Directives
 menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
-Directives are a bit like annotations in any other language. They give you a way to specify some behaviour without directly binding to the implementation. This can be really useful for cross cutting concerns like permission checks.
+Directives act a bit like annotations, decorators, or HTTP middleware. They give you a way to specify some behaviour based on a field or argument in a generic and reusable way. This can be really useful for things like permission checks which can be applied broadly across your API.
 
 **Note**: The current directives implementation is still fairly limited, and is designed to cover the most common "field middleware" case.
 
-## Declare it in the schema
+## Restricting access based on user role
 
-Directives are declared in your schema, along with all your other types. Lets define a @hasRole directive:
+For example, we might want to restrict which mutations or queries a client can make based on the authenticated user's role:
+```graphql
+type Mutation {
+	deleteUser(userID: ID!): Bool @hasRole(role: ADMIN)
+}
+```
+
+### Declare it in the schema
+
+Before we can use a directive we must declare it in the schema. Here's how we would define the `@hasRole` directive:
 
 ```graphql
 directive @hasRole(role: Role!) on FIELD_DEFINITION
@@ -22,7 +31,7 @@ enum Role {
 }
 ```
 
-When we next run go generate, gqlgen will add this directive to the DirectiveRoot
+Next, run `go generate` and gqlgen will add the directive to the DirectiveRoot:
 ```go
 type DirectiveRoot struct {
 	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (res interface{}, err error)
@@ -31,31 +40,22 @@ type DirectiveRoot struct {
 
 The arguments are:
  - *ctx*: the parent context
- - *obj*: the object containing the value this was applied to, eg:
-    - for field definition directives, the object/input object that contains the field
-    - for argument directives, a map containing all arguments
+ - *obj*: the object containing the value this was applied to, e.g.:
+    - for field definition directives (`FIELD_DEFINITION`), the object/input object that contains the field
+    - for argument directives (`ARGUMENT_DEFINITION`), a map containing all arguments
  - *next*: the next directive in the directive chain, or the field resolver. This should be called to get the
-           value of the field/argument/whatever. You can block access to the field by not calling next for permission
-           checks etc.
- - *...args*: Any args to the directive will be passed in too.
-
-## Use it in the schema
-
-We can call this on any field definition now:
-```graphql
-type Mutation {
-	deleteUser(userID: ID!): Bool @hasRole(role: ADMIN)
-}
-```
+           value of the field/argument/whatever. You can block access to the field by not calling `next(ctx)`
+           after checking whether a user has a required permission, for example.
+ - *...args*: finally, any args defined in the directive schema definition are passed in
 
 ## Implement the directive
 
-Finally, we need to implement the directive, and pass it in when starting the server:
+Now we must implement the directive. The directive function is assigned to the Config object before registering the GraphQL handler.
 ```go
 package main
 
 func main() {
-	c := Config{ Resolvers: &resolvers{} }
+	c := generated.Config{ Resolvers: &resolvers{} }
 	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (interface{}, error) {
 		if !getCurrentUser(ctx).HasRole(role) {
 			// block calling the next resolver
@@ -66,7 +66,9 @@ func main() {
 		return next(ctx)
 	}
 
-	http.Handle("/query", handler.GraphQL(todo.NewExecutableSchema(c), ))
+	http.Handle("/query", handler.NewDefaultServer(generated.NewExecutableSchema(c), ))
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 ```
+
+That's it! You can now apply the `@hasRole` directive to any mutation or query in your schema.

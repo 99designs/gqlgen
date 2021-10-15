@@ -17,7 +17,8 @@ schema:
 
 # Where should the generated server code go?
 exec:
-  filename: graph/generated/generated.go
+  layout: follow-schema
+  dir: graph/generated
   package: generated
 
 # Enable Apollo federation support

@@ -29,7 +29,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		}
 		fc.Args = args
 	{{- end }}
-	{{- if  $.Directives.LocationDirectives "FIELD" }}
+	{{- if  $.AllDirectives.LocationDirectives "FIELD" }}
 		resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
 			{{ template "field" $field }}
 		})

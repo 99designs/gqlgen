@@ -17,7 +17,7 @@ import (
 
 type Config struct {
 	SchemaFilename           StringList                 `yaml:"schema,omitempty"`
-	Exec                     PackageConfig              `yaml:"exec"`
+	Exec                     ExecConfig                 `yaml:"exec"`
 	Model                    PackageConfig              `yaml:"model,omitempty"`
 	Federation               PackageConfig              `yaml:"federation,omitempty"`
 	Resolver                 ResolverConfig             `yaml:"resolver,omitempty"`
@@ -43,7 +43,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		SchemaFilename: StringList{"schema.graphql"},
 		Model:          PackageConfig{Filename: "models_gen.go"},
-		Exec:           PackageConfig{Filename: "generated.go"},
+		Exec:           ExecConfig{Filename: "generated.go"},
 		Directives:     map[string]DirectiveConfig{},
 		Models:         TypeMap{},
 	}

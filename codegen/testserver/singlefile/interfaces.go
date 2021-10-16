@@ -14,6 +14,7 @@ type ShapeUnion interface {
 
 type Circle struct {
 	Radius float64
+	Coordinates
 }
 
 func (c *Circle) Area() float64 {
@@ -25,6 +26,7 @@ func (c *Circle) isShape()      {}
 
 type Rectangle struct {
 	Length, Width float64
+	Coordinates
 }
 
 func (r *Rectangle) Area() float64 {
@@ -79,6 +81,7 @@ type BackedByInterfaceImpl struct {
 func (b *BackedByInterfaceImpl) ThisShouldBind() string {
 	return b.Value
 }
+
 func (b *BackedByInterfaceImpl) ThisShouldBindWithError() (string, error) {
 	return b.Value, b.Error
 }

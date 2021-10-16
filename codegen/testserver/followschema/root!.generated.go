@@ -102,8 +102,9 @@ type ComplexityRoot struct {
 	}
 
 	Circle struct {
-		Area   func(childComplexity int) int
-		Radius func(childComplexity int) int
+		Area        func(childComplexity int) int
+		Coordinates func(childComplexity int) int
+		Radius      func(childComplexity int) int
 	}
 
 	ConcreteNodeA struct {
@@ -123,6 +124,11 @@ type ComplexityRoot struct {
 
 	Content_User struct {
 		Foo func(childComplexity int) int
+	}
+
+	Coordinates struct {
+		X func(childComplexity int) int
+		Y func(childComplexity int) int
 	}
 
 	DefaultParametersMirror struct {
@@ -333,9 +339,10 @@ type ComplexityRoot struct {
 	}
 
 	Rectangle struct {
-		Area   func(childComplexity int) int
-		Length func(childComplexity int) int
-		Width  func(childComplexity int) int
+		Area        func(childComplexity int) int
+		Coordinates func(childComplexity int) int
+		Length      func(childComplexity int) int
+		Width       func(childComplexity int) int
 	}
 
 	Slices struct {
@@ -534,6 +541,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Circle.Area(childComplexity), true
 
+	case "Circle.coordinates":
+		if e.complexity.Circle.Coordinates == nil {
+			break
+		}
+
+		return e.complexity.Circle.Coordinates(childComplexity), true
+
 	case "Circle.radius":
 		if e.complexity.Circle.Radius == nil {
 			break
@@ -589,6 +603,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Content_User.Foo(childComplexity), true
+
+	case "Coordinates.x":
+		if e.complexity.Coordinates.X == nil {
+			break
+		}
+
+		return e.complexity.Coordinates.X(childComplexity), true
+
+	case "Coordinates.y":
+		if e.complexity.Coordinates.Y == nil {
+			break
+		}
+
+		return e.complexity.Coordinates.Y(childComplexity), true
 
 	case "DefaultParametersMirror.falsyBoolean":
 		if e.complexity.DefaultParametersMirror.FalsyBoolean == nil {
@@ -1536,6 +1564,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Rectangle.Area(childComplexity), true
 
+	case "Rectangle.coordinates":
+		if e.complexity.Rectangle.Coordinates == nil {
+			break
+		}
+
+		return e.complexity.Rectangle.Coordinates(childComplexity), true
+
 	case "Rectangle.length":
 		if e.complexity.Rectangle.Length == nil {
 			break
@@ -2021,19 +2056,27 @@ type Cat implements Animal {
     catBreed: String!
 }
 
+type Coordinates {
+    x: Float!
+    y: Float!
+}
 interface Shape {
     area: Float
+    coordinates: Coordinates
 }
+
 type Circle implements Shape {
     radius: Float
     area: Float
+    coordinates: Coordinates
 }
 type Rectangle implements Shape {
     length: Float
     width: Float
     area: Float
+    coordinates: Coordinates
 }
-union ShapeUnion @goModel(model:"followschema.ShapeUnion") = Circle | Rectangle
+union ShapeUnion @goModel(model: "followschema.ShapeUnion") = Circle | Rectangle
 
 directive @makeNil on FIELD_DEFINITION
 directive @makeTypedNil on FIELD_DEFINITION
@@ -2049,7 +2092,7 @@ type ConcreteNodeA implements Node {
     name: String!
 }
 
-""" Implements the Node interface with another interface """
+" Implements the Node interface with another interface "
 type ConcreteNodeInterface implements Node {
     id: ID!
     child: Node!

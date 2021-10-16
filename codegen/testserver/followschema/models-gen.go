@@ -64,6 +64,11 @@ type ContentUser struct {
 
 func (ContentUser) IsContentChild() {}
 
+type Coordinates struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+}
+
 type DefaultInput struct {
 	FalsyBoolean  *bool `json:"falsyBoolean"`
 	TruthyBoolean *bool `json:"truthyBoolean"`

@@ -301,6 +301,7 @@ type ComplexityRoot struct {
 		ErrorList                        func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
+		Infinity                         func(childComplexity int) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
 		InputSlice                       func(childComplexity int, arg []string) int
 		InvalidIdentifier                func(childComplexity int) int
@@ -327,6 +328,8 @@ type ComplexityRoot struct {
 		ShapeUnion                       func(childComplexity int) int
 		Shapes                           func(childComplexity int) int
 		Slices                           func(childComplexity int) int
+		StringFromContextFunction        func(childComplexity int) int
+		StringFromContextInterface       func(childComplexity int) int
 		User                             func(childComplexity int, id int) int
 		VOkCaseNil                       func(childComplexity int) int
 		VOkCaseValue                     func(childComplexity int) int
@@ -1267,6 +1270,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
 
+	case "Query.infinity":
+		if e.complexity.Query.Infinity == nil {
+			break
+		}
+
+		return e.complexity.Query.Infinity(childComplexity), true
+
 	case "Query.inputNullableSlice":
 		if e.complexity.Query.InputNullableSlice == nil {
 			break
@@ -1488,6 +1498,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Slices(childComplexity), true
+
+	case "Query.stringFromContextFunction":
+		if e.complexity.Query.StringFromContextFunction == nil {
+			break
+		}
+
+		return e.complexity.Query.StringFromContextFunction(childComplexity), true
+
+	case "Query.stringFromContextInterface":
+		if e.complexity.Query.StringFromContextInterface == nil {
+			break
+		}
+
+		return e.complexity.Query.StringFromContextInterface(childComplexity), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -2243,6 +2267,15 @@ extend type Mutation {
 extend type Query {
     ptrToSliceContainer: PtrToSliceContainer!
 }
+`, BuiltIn: false},
+	{Name: "scalar_context.graphql", Input: `extend type Query {
+    infinity: Float!
+    stringFromContextInterface: StringFromContextInterface!
+    stringFromContextFunction: StringFromContextFunction!
+}
+
+scalar StringFromContextInterface
+scalar StringFromContextFunction
 `, BuiltIn: false},
 	{Name: "scalar_default.graphql", Input: `extend type Query {
     defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!

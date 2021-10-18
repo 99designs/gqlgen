@@ -17,5 +17,3 @@ autobind:
 models:
   Email:
     model: "github.com/99designs/gqlgen/codegen/testserver.Email"
-  StringFromContextFunction:
-    model: "github.com/99designs/gqlgen/codegen/testserver.StringFromContextFunction"

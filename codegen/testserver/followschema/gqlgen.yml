@@ -22,3 +22,5 @@ autobind:
 models:
   Email:
     model: "github.com/99designs/gqlgen/codegen/testserver/followschema.Email"
+  StringFromContextFunction:
+    model: "github.com/99designs/gqlgen/codegen/testserver/followschema.StringFromContextFunction"

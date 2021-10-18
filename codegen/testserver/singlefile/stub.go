@@ -96,6 +96,9 @@ type Stub struct {
 		PrimitiveObject                  func(ctx context.Context) ([]Primitive, error)
 		PrimitiveStringObject            func(ctx context.Context) ([]PrimitiveString, error)
 		PtrToSliceContainer              func(ctx context.Context) (*PtrToSliceContainer, error)
+		Infinity                         func(ctx context.Context) (float64, error)
+		StringFromContextInterface       func(ctx context.Context) (*StringFromContextInterface, error)
+		StringFromContextFunction        func(ctx context.Context) (string, error)
 		DefaultScalar                    func(ctx context.Context, arg string) (string, error)
 		Slices                           func(ctx context.Context) (*Slices, error)
 		ScalarSlice                      func(ctx context.Context) ([]byte, error)
@@ -398,6 +401,15 @@ func (r *stubQuery) PrimitiveStringObject(ctx context.Context) ([]PrimitiveStrin
 }
 func (r *stubQuery) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
 	return r.QueryResolver.PtrToSliceContainer(ctx)
+}
+func (r *stubQuery) Infinity(ctx context.Context) (float64, error) {
+	return r.QueryResolver.Infinity(ctx)
+}
+func (r *stubQuery) StringFromContextInterface(ctx context.Context) (*StringFromContextInterface, error) {
+	return r.QueryResolver.StringFromContextInterface(ctx)
+}
+func (r *stubQuery) StringFromContextFunction(ctx context.Context) (string, error) {
+	return r.QueryResolver.StringFromContextFunction(ctx)
 }
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)

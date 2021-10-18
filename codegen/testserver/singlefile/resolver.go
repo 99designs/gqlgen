@@ -276,6 +276,18 @@ func (r *queryResolver) PtrToSliceContainer(ctx context.Context) (*PtrToSliceCon
 	panic("not implemented")
 }
 
+func (r *queryResolver) Infinity(ctx context.Context) (float64, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) StringFromContextInterface(ctx context.Context) (*StringFromContextInterface, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) StringFromContextFunction(ctx context.Context) (string, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	panic("not implemented")
 }

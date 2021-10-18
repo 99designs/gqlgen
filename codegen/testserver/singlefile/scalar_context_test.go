@@ -1,4 +1,4 @@
-package testserver
+package singlefile
 
 import (
 	"context"

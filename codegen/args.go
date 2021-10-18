@@ -110,7 +110,7 @@ func (a *Data) Args() map[string][]*FieldArgument {
 		}
 	}
 
-	for _, d := range a.Directives {
+	for _, d := range a.Directives() {
 		if len(d.Args) > 0 {
 			ret[d.ArgsFunc()] = d.Args
 		}

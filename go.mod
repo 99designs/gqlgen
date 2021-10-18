@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/golang-lru v0.5.0
+	github.com/kevinmbeaulieu/eq-go v1.0.0
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/matryer/moq v0.2.3
 	github.com/mattn/go-colorable v0.1.4

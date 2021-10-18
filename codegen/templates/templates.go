@@ -91,6 +91,10 @@ func Render(cfg Options) error {
 			if !strings.HasSuffix(info.Name(), ".gotpl") {
 				return nil
 			}
+			// omit any templates with "_" at the end of their name, which are meant for specific contexts only
+			if strings.HasSuffix(info.Name(), "_.gotpl") {
+				return nil
+			}
 			b, err := ioutil.ReadFile(path)
 			if err != nil {
 				return err

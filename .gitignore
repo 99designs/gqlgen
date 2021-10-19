@@ -9,6 +9,7 @@
 /codegen/gen
 /gen
 
+/.vscode
 .idea/
 *.test
 *.out

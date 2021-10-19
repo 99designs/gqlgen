@@ -3359,7 +3359,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
-	return graphql.MarshalBoolean(v)
+	res := graphql.MarshalBoolean(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v interface{}) (*bool, error) {
@@ -3374,7 +3375,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalBoolean(*v)
+	res := graphql.MarshalBoolean(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalODarkMode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, v interface{}) (model.Prefs, error) {
@@ -3383,7 +3385,8 @@ func (ec *executionContext) unmarshalODarkMode2githubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) marshalODarkMode2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, sel ast.SelectionSet, v model.Prefs) graphql.Marshaler {
-	return model.MarshalPreferences(&v)
+	res := model.MarshalPreferences(&v)
+	return res
 }
 
 func (ec *executionContext) unmarshalODarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPrefs(ctx context.Context, v interface{}) (*model.Prefs, error) {
@@ -3398,7 +3401,8 @@ func (ec *executionContext) marshalODarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlge
 	if v == nil {
 		return graphql.Null
 	}
-	return model.MarshalPreferences(v)
+	res := model.MarshalPreferences(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐPoint(ctx context.Context, v interface{}) (*model.Point, error) {
@@ -3431,7 +3435,8 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	return graphql.MarshalString(v)
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
@@ -3446,7 +3451,8 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalString(*v)
+	res := graphql.MarshalString(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOTier2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐTier(ctx context.Context, v interface{}) (model.Tier, error) {
@@ -3465,7 +3471,8 @@ func (ec *executionContext) unmarshalOTimestamp2timeᚐTime(ctx context.Context,
 }
 
 func (ec *executionContext) marshalOTimestamp2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	return model.MarshalTimestamp(v)
+	res := model.MarshalTimestamp(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOTimestamp2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
@@ -3480,7 +3487,8 @@ func (ec *executionContext) marshalOTimestamp2ᚖtimeᚐTime(ctx context.Context
 	if v == nil {
 		return graphql.Null
 	}
-	return model.MarshalTimestamp(*v)
+	res := model.MarshalTimestamp(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋscalarsᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

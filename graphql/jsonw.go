@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"context"
 	"io"
 )
 
@@ -26,10 +27,41 @@ type Unmarshaler interface {
 	UnmarshalGQL(v interface{}) error
 }
 
+type ContextMarshaler interface {
+	MarshalGQLContext(ctx context.Context, w io.Writer) error
+}
+
+type ContextUnmarshaler interface {
+	UnmarshalGQLContext(ctx context.Context, v interface{}) error
+}
+
+type contextMarshalerAdapter struct {
+	Context context.Context
+	ContextMarshaler
+}
+
+func WrapContextMarshaler(ctx context.Context, m ContextMarshaler) Marshaler {
+	return contextMarshalerAdapter{Context: ctx, ContextMarshaler: m}
+}
+
+func (a contextMarshalerAdapter) MarshalGQL(w io.Writer) {
+	err := a.MarshalGQLContext(a.Context, w)
+	if err != nil {
+		AddError(a.Context, err)
+		Null.MarshalGQL(w)
+	}
+}
+
 type WriterFunc func(writer io.Writer)
 
 func (f WriterFunc) MarshalGQL(w io.Writer) {
 	f(w)
+}
+
+type ContextWriterFunc func(ctx context.Context, writer io.Writer) error
+
+func (f ContextWriterFunc) MarshalGQLContext(ctx context.Context, w io.Writer) error {
+	return f(ctx, w)
 }
 
 type Array []Marshaler
@@ -49,4 +81,9 @@ type lit struct{ b []byte }
 
 func (l lit) MarshalGQL(w io.Writer) {
 	w.Write(l.b)
+}
+
+func (l lit) MarshalGQLContext(ctx context.Context, w io.Writer) error {
+	w.Write(l.b)
+	return nil
 }

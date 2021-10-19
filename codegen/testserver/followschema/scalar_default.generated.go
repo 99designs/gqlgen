@@ -124,7 +124,8 @@ func (ec *executionContext) marshalODefaultScalarImplementation2ᚖstring(ctx co
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalString(*v)
+	res := graphql.MarshalString(*v)
+	return res
 }
 
 // endregion ***************************** type.gotpl *****************************

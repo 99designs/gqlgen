@@ -401,7 +401,8 @@ func (ec *executionContext) marshalOWrappedScalar2ᚖgithubᚗcomᚋ99designsᚋ
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalString(string(*v))
+	res := graphql.MarshalString(string(*v))
+	return res
 }
 
 // endregion ***************************** type.gotpl *****************************

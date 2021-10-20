@@ -49,13 +49,17 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		switch typeName {
 
 		case "Product":
-			id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
+			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
 			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "upc"))
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "manufacturerID"))
+			}
+			id1, err := ec.unmarshalNString2string(ctx, rep["id"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
 			}
 
-			entity, err := ec.resolvers.Entity().FindProductByUpc(ctx,
-				id0)
+			entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx,
+				id0, id1)
 			if err != nil {
 				return err
 			}
@@ -71,6 +75,16 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 			entity, err := ec.resolvers.Entity().FindUserByID(ctx,
 				id0)
+			if err != nil {
+				return err
+			}
+
+			entity.Host.ID, err = ec.unmarshalNString2string(ctx, rep["hostID"])
+			if err != nil {
+				return err
+			}
+
+			entity.Email, err = ec.unmarshalNString2string(ctx, rep["email"])
 			if err != nil {
 				return err
 			}

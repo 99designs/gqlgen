@@ -46,25 +46,23 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			{{ if .ResolverName }}
 			case "{{.Def.Name}}":
 				{{ range $i, $keyField := .KeyFields -}}
-					id{{$i}}, err := ec.{{.TypeReference.UnmarshalFunc}}(ctx, rep["{{$keyField.Field.Name}}"])
+					id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
 					if err != nil {
-						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{$keyField.Field.Name}}"))
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
 					}
 				{{end}}
-	
+
 				entity, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx,
 					{{ range $i, $_ := .KeyFields -}} id{{$i}}, {{end}})
 				if err != nil {
 					return err
 				}
-	
+
 				{{ range .Requires }}
-					{{ range .Fields}}
-						entity.{{.NameGo}}, err = ec.{{.TypeReference.UnmarshalFunc}}(ctx, rep["{{.Name}}"])
-						if err != nil {
-							return err
-						}
-					{{ end }}
+					entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Name}}"])
+					if err != nil {
+						return err
+					}
 				{{ end }}
 				list[i] = entity
 				return nil

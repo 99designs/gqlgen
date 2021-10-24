@@ -36,7 +36,12 @@
 			{{ucFirst $object.Name}}() {{ucFirst $object.Name}}Resolver
 		{{ end }}
 	{{- end }}
-	}
+	{{- range $object := .Inputs -}}
+	{{ if $object.HasResolvers -}}
+		{{ucFirst $object.Name}}() {{ucFirst $object.Name}}Resolver
+	{{ end }}
+{{- end }}
+}
 
 	type DirectiveRoot struct {
 	{{ range $directive := .Directives }}
@@ -63,6 +68,18 @@
 {{ range $object := .Objects -}}
 	{{ if $object.HasResolvers }}
 		type {{ucFirst $object.Name}}Resolver interface {
+		{{ range $field := $object.Fields -}}
+			{{- if $field.IsResolver }}
+				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}
+			{{- end }}
+		{{ end }}
+		}
+	{{- end }}
+{{- end }}
+
+{{ range $object := .Inputs -}}
+	{{ if $object.HasResolvers }}
+		type {{$object.Name}}Resolver interface {
 		{{ range $field := $object.Fields -}}
 			{{- if $field.IsResolver }}
 				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}

@@ -1,10 +1,11 @@
-# gqlgen [![Continuous Integration](https://github.com/99designs/gqlgen/workflows/Continuous%20Integration/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/) [![GoDoc](https://godoc.org/github.com/99designs/gqlgen?status.svg)](https://godoc.org/github.com/99designs/gqlgen)
+![gqlgen](https://user-images.githubusercontent.com/980499/133180111-d064b38c-6eb9-444b-a60f-7005a6e68222.png)
 
-![gqlgen](https://user-images.githubusercontent.com/46195831/89802919-0bb8ef00-db2a-11ea-8ba4-88e7a58b2fd2.png)
+
+# gqlgen [![Integration](https://github.com/99designs/gqlgen/actions/workflows/integration.yml/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Coverage Status](https://coveralls.io/repos/github/99designs/gqlgen/badge.svg?branch=master)](https://coveralls.io/github/99designs/gqlgen?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/99designs/gqlgen)](https://goreportcard.com/report/github.com/99designs/gqlgen) [![Go Reference](https://pkg.go.dev/badge/github.com/99designs/gqlgen.svg)](https://pkg.go.dev/github.com/99designs/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
 
 ## What is gqlgen?
 
-[gqlgen](https://github.com/99designs/gqlgen) is a Go library for building GraphQL servers without any fuss.<br/> 
+[gqlgen](https://github.com/99designs/gqlgen) is a Go library for building GraphQL servers without any fuss.<br/>
 
 - **gqlgen is based on a Schema first approach** — You get to Define your API using the GraphQL [Schema Definition Language](http://graphql.org/learn/schema/).
 - **gqlgen prioritizes Type safety** — You should never see `map[string]interface{}` here.
@@ -12,13 +13,30 @@
 
 Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go graphql [implementations](https://gqlgen.com/feature-comparison/)
 
-## Getting Started
-- To install gqlgen run the command `go get github.com/99designs/gqlgen` in your project directory.<br/> 
-- You could initialize a new project using the recommended folder structure by running this command `go run github.com/99designs/gqlgen init`.
+## Quick start
+1. [Initialise a new go module](https://golang.org/doc/tutorial/create-module)
 
-You could find a more comprehensive guide to help you get started [here](https://gqlgen.com/getting-started/).<br/>
-We also have a couple of real-world [examples](https://github.com/99designs/gqlgen/tree/master/example) that show how to GraphQL applications with **gqlgen** seamlessly,
-You can see these [examples](https://github.com/99designs/gqlgen/tree/master/example) here or visit [godoc](https://godoc.org/github.com/99designs/gqlgen).
+       mkdir example
+       cd example
+       go mod init example
+
+2. Add `github.com/99designs/gqlgen` to your [project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
+
+       printf '// +build tools\npackage tools\nimport _ "github.com/99designs/gqlgen"' | gofmt > tools.go
+       go mod tidy
+
+3. Initialise gqlgen config and generate models
+
+       go run github.com/99designs/gqlgen init
+
+4. Start the graphql server
+
+       go run server.go
+
+More help to get started:
+ - [Getting started tutorial](https://gqlgen.com/getting-started/) - a comprehensive guide to help you get started
+ - [Real-world examples](https://github.com/99designs/gqlgen/tree/master/example) show how to create GraphQL applications
+ - [Reference docs](https://pkg.go.dev/github.com/99designs/gqlgen) for the APIs
 
 ## Reporting Issues
 

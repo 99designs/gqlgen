@@ -47,8 +47,8 @@ describe('Json', () => {
                         "body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.",
                         "product": {
                             "__typename": "Product",
-                            "name": "Trilby",
-                            "upc": "top-1"
+                            "name": "Fedora",
+                            "upc": "top-2"
                         }
                     }
                 ]

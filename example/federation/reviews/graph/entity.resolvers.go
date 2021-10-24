@@ -10,15 +10,27 @@ import (
 	"github.com/99designs/gqlgen/example/federation/reviews/graph/model"
 )
 
-func (r *entityResolver) FindProductByUpc(ctx context.Context, upc string) (*model.Product, error) {
+func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID string, id string) (*model.Product, error) {
+	var productReviews []*model.Review
+
+	for _, review := range reviews {
+		if review.Product.ID == id && review.Product.Manufacturer.ID == manufacturerID {
+			productReviews = append(productReviews, review)
+		}
+	}
 	return &model.Product{
-		Upc: upc,
+		ID: id,
+		Manufacturer: &model.Manufacturer{
+			ID: manufacturerID,
+		},
+		Reviews: productReviews,
 	}, nil
 }
 
 func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*model.User, error) {
 	return &model.User{
-		ID: id,
+		ID:   id,
+		Host: &model.EmailHost{},
 	}, nil
 }
 

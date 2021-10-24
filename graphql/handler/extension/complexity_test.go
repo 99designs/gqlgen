@@ -95,6 +95,16 @@ func TestFixedComplexity(t *testing.T) {
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
 	})
+
+	t.Run("bypass __schema field", func(t *testing.T) {
+		h.SetCalculatedComplexity(4)
+		resp := doRequest(h, "POST", "/graphql", `{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`)
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+
+		require.Equal(t, 2, stats.ComplexityLimit)
+		require.Equal(t, 0, stats.Complexity)
+	})
 }
 
 func doRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {

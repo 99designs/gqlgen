@@ -1,8 +1,11 @@
 package testexecutor
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -10,6 +13,27 @@ import (
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
+
+type MockResponse struct {
+	Name string `json:"name"`
+}
+
+func (mr *MockResponse) UnmarshalGQL(v interface{}) error {
+	return nil
+}
+
+func (mr *MockResponse) MarshalGQL(w io.Writer) {
+	buf := new(bytes.Buffer)
+	err := json.NewEncoder(buf).Encode(mr)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ba := bytes.NewBuffer(bytes.TrimRight(buf.Bytes(), "\n"))
+
+	fmt.Fprint(w, ba)
+}
 
 // New provides a server for use in tests that isn't relying on generated code. It isnt a perfect reproduction of
 // a generated server, but it aims to be good enough to test the handler package without relying on codegen.
@@ -55,13 +79,23 @@ func New() *TestExecutor {
 							},
 						},
 					})
-					res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-						return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
+					data := graphql.GetOperationContext(ctx).RootResolverMiddleware(ctx, func(ctx context.Context) graphql.Marshaler {
+						res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+							// return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
+							return &MockResponse{Name: "test"}, nil
+						})
+
+						if err != nil {
+							panic(err)
+						}
+
+						return res.(*MockResponse)
 					})
-					if err != nil {
-						panic(err)
-					}
-					return res.(*graphql.Response)
+
+					var buf bytes.Buffer
+					data.MarshalGQL(&buf)
+
+					return &graphql.Response{Data: buf.Bytes()}
 				}
 			case ast.Mutation:
 				return graphql.OneShot(graphql.ErrorResponse(ctx, "mutations are not supported"))

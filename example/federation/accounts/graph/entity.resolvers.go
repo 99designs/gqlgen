@@ -10,6 +10,13 @@ import (
 	"github.com/99designs/gqlgen/example/federation/accounts/graph/model"
 )
 
+func (r *entityResolver) FindEmailHostByID(ctx context.Context, id string) (*model.EmailHost, error) {
+	return &model.EmailHost{
+		ID:   id,
+		Name: "Email Host " + id,
+	}, nil
+}
+
 func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*model.User, error) {
 	name := "User " + id
 	if id == "1234" {

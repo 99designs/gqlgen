@@ -3,7 +3,6 @@ package federation
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin"
+	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
 
 type federation struct {
@@ -75,8 +75,8 @@ scalar _FieldSet
 directive @external on FIELD_DEFINITION
 directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
-directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
-directive @extends on OBJECT
+directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+directive @extends on OBJECT | INTERFACE
 `,
 		BuiltIn: true,
 	}
@@ -97,12 +97,11 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 
 		if e.ResolverName != "" {
 			resolverArgs := ""
-			for _, field := range e.KeyFields {
-				resolverArgs += fmt.Sprintf("%s: %s,", field.Field.Name, field.Field.Type.String())
+			for _, keyField := range e.KeyFields {
+				resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
 			}
 			resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
 		}
-
 	}
 
 	if len(f.Entities) == 0 {
@@ -152,22 +151,16 @@ type Entity struct {
 }
 
 type KeyField struct {
-	Field         *ast.FieldDefinition
-	TypeReference *config.TypeReference // The Go representation of that field type
+	Definition *ast.FieldDefinition
+	Field      fieldset.Field        // len > 1 for nested fields
+	Type       *config.TypeReference // The Go representation of that field type
 }
 
 // Requires represents an @requires clause
 type Requires struct {
-	Name   string          // the name of the field
-	Fields []*RequireField // the name of the sibling fields
-}
-
-// RequireField is similar to an entity but it is a field not
-// an object
-type RequireField struct {
-	Name          string                // The same name as the type declaration
-	NameGo        string                // The Go struct field name
-	TypeReference *config.TypeReference // The Go representation of that field type
+	Name  string                // the name of the field
+	Field fieldset.Field        // source Field, len > 1 for nested fields
+	Type  *config.TypeReference // The Go representation of that field type
 }
 
 func (e *Entity) allFieldsAreExternal() bool {
@@ -186,22 +179,27 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		}
 		for _, e := range f.Entities {
 			obj := data.Objects.ByName(e.Def.Name)
-			for _, field := range obj.Fields {
-				// Storing key fields in a slice rather than a map
-				// to preserve insertion order at the tradeoff of higher
-				// lookup complexity.
-				keyField := f.getKeyField(e.KeyFields, field.Name)
-				if keyField != nil {
-					keyField.TypeReference = field.TypeReference
+
+			// fill in types for key fields
+			//
+			for _, keyField := range e.KeyFields {
+				if len(keyField.Field) == 0 {
+					fmt.Println("skipping key field " + keyField.Definition.Name + " in " + e.Def.Name)
+					continue
 				}
-				for _, r := range e.Requires {
-					for _, rf := range r.Fields {
-						if rf.Name == field.Name {
-							rf.TypeReference = field.TypeReference
-							rf.NameGo = field.GoFieldName
-						}
-					}
+				cgField := keyField.Field.TypeReference(obj, data.Objects)
+				keyField.Type = cgField.TypeReference
+			}
+
+			// fill in types for requires fields
+			//
+			for _, reqField := range e.Requires {
+				if len(reqField.Field) == 0 {
+					fmt.Println("skipping requires field " + reqField.Name + " in " + e.Def.Name)
+					continue
 				}
+				cgField := reqField.Field.TypeReference(obj, data.Objects)
+				reqField.Type = cgField.TypeReference
 			}
 		}
 	}
@@ -215,59 +213,63 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	})
 }
 
-func (f *federation) getKeyField(keyFields []*KeyField, fieldName string) *KeyField {
-	for _, field := range keyFields {
-		if field.Field.Name == fieldName {
-			return field
-		}
-	}
-	return nil
-}
-
 func (f *federation) setEntities(schema *ast.Schema) {
 	for _, schemaType := range schema.Types {
+		if schemaType.Kind == ast.Interface {
+			// TODO: support @key and @extends for interfaces
+			if dir := schemaType.Directives.ForName("key"); dir != nil {
+				panic("@key directive is not currently supported for interfaces.")
+			}
+			if dir := schemaType.Directives.ForName("extends"); dir != nil {
+				panic("@extends directive is not currently supported for interfaces.")
+			}
+			continue
+		}
 		if schemaType.Kind == ast.Object {
-			dir := schemaType.Directives.ForName("key") // TODO: interfaces
-			if dir != nil {
-				if len(dir.Arguments) > 1 {
-					panic("Multiple arguments are not currently supported in @key declaration.")
-				}
-				fieldName := dir.Arguments[0].Value.Raw // TODO: multiple arguments
-				if strings.Contains(fieldName, "{") {
-					panic("Nested fields are not currently supported in @key declaration.")
-				}
+			keys := schemaType.Directives.ForNames("key")
+			if len(keys) > 1 {
+				// TODO: support multiple keys -- multiple resolvers per Entity
+				panic("only one @key directive currently supported")
+			}
 
+			if len(keys) > 0 {
+				dir := keys[0]
+				if len(dir.Arguments) != 1 || dir.Arguments[0].Name != "fields" {
+					panic("Exactly one `fields` argument needed for @key declaration.")
+				}
+				arg := dir.Arguments[0]
+				keyFieldSet := fieldset.New(arg.Value.Raw, nil)
+
+				// TODO: why is this nested inside the @key handling? -- because it's per-Entity, and we make one per @key
 				requires := []*Requires{}
 				for _, f := range schemaType.Fields {
 					dir := f.Directives.ForName("requires")
 					if dir == nil {
 						continue
 					}
-					fields := strings.Split(dir.Arguments[0].Value.Raw, " ")
-					requireFields := []*RequireField{}
-					for _, f := range fields {
-						requireFields = append(requireFields, &RequireField{
-							Name: f,
+					requiresFieldSet := fieldset.New(dir.Arguments[0].Value.Raw, nil)
+					for _, field := range requiresFieldSet {
+						requires = append(requires, &Requires{
+							Name:  field.ToGoPrivate(),
+							Field: field,
 						})
 					}
-					requires = append(requires, &Requires{
-						Name:   f.Name,
-						Fields: requireFields,
-					})
 				}
 
-				fieldNames := strings.Split(fieldName, " ")
-				keyFields := make([]*KeyField, len(fieldNames))
+				keyFields := make([]*KeyField, len(keyFieldSet))
 				resolverName := fmt.Sprintf("find%sBy", schemaType.Name)
-				for i, f := range fieldNames {
-					field := schemaType.Fields.ForName(f)
+				for i, field := range keyFieldSet {
+					def := field.FieldDefinition(schemaType, schema)
 
-					keyFields[i] = &KeyField{Field: field}
+					if def == nil {
+						panic(fmt.Sprintf("no field for %v", field))
+					}
+
+					keyFields[i] = &KeyField{Definition: def, Field: field}
 					if i > 0 {
 						resolverName += "And"
 					}
-					resolverName += templates.ToGo(f)
-
+					resolverName += field.ToGo()
 				}
 
 				e := &Entity{

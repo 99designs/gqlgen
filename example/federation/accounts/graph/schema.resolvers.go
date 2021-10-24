@@ -12,7 +12,12 @@ import (
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	return &model.User{
-		ID:       "1234",
+		ID: "1234",
+		Host: &model.EmailHost{
+			ID:   "4567",
+			Name: "Email Host 4567",
+		},
+		Email:    "me@example.com",
 		Username: "Me",
 	}, nil
 }

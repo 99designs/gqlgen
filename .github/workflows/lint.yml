@@ -5,20 +5,21 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
-        with: { go-version: 1.14 }
+        with: { go-version: 1.17 }
       - run: go mod download
       - run: .github/workflows/check-fmt
-      - run: .github/workflows/check-linting
       - run: .github/workflows/check-generate
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
 
   coverage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-go@v2
-        with: { go-version: 1.14 }
+        with: { go-version: 1.17 }
       - run: go mod download
       - run: .github/workflows/check-coverage
         env:

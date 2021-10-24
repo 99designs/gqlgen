@@ -13,13 +13,13 @@ Consider a schema that allows listing blog posts. Each blog post is also related
 
 ```graphql
 type Query {
-	posts(count: Int = 10): [Post!]!
+  posts(count: Int = 10): [Post!]!
 }
 
 type Post {
-	title: String!
-	text: String!
-	related(count: Int = 10): [Post!]!
+  title: String!
+  text: String!
+  related(count: Int = 10): [Post!]!
 }
 ```
 
@@ -27,15 +27,15 @@ It's not too hard to craft a query that will cause a very large response:
 
 ```graphql
 {
-	posts(count: 100) {
-		related(count: 100) {
-			related(count: 100) {
-				related(count: 100) {
-					title
-				}
-			}
-		}
-	}
+  posts(count: 100) {
+    related(count: 100) {
+      related(count: 100) {
+        related(count: 100) {
+          title
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -47,12 +47,12 @@ Limiting query complexity is as simple as specifying it with the provided extens
 
 ```go
 func main() {
-    c := Config{ Resolvers: &resolvers{} }
+	c := Config{ Resolvers: &resolvers{} }
 
 
 		srv := handler.NewDefaultServer(blog.NewExecutableSchema(c))
 		srv.Use(extension.FixedComplexityLimit(5)) // This line is key
-    r.Handle("/query", srv)
+	r.Handle("/query", srv)
 }
 ```
 
@@ -66,17 +66,17 @@ To apply higher costs to certain fields, we can use custom complexity functions.
 
 ```go
 func main() {
-    c := Config{ Resolvers: &resolvers{} }
+	c := Config{ Resolvers: &resolvers{} }
 
-    countComplexity := func(childComplexity, count int) int {
-        return count * childComplexity
-    }
-    c.Complexity.Query.Posts = countComplexity
-    c.Complexity.Post.Related = countComplexity
+	countComplexity := func(childComplexity, count int) int {
+		return count * childComplexity
+	}
+	c.Complexity.Query.Posts = countComplexity
+	c.Complexity.Post.Related = countComplexity
 
-    srv := handler.NewDefaultServer(blog.NewExecutableSchema(c))
+	srv := handler.NewDefaultServer(blog.NewExecutableSchema(c))
 		srv.Use(extension.FixedComplexityLimit(5))
-    http.Handle("/query", gqlHandler)
+	http.Handle("/query", gqlHandler)
 }
 ```
 

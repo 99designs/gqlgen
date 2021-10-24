@@ -10,10 +10,17 @@ import (
 	"github.com/99designs/gqlgen/example/federation/products/graph/model"
 )
 
-func (r *entityResolver) FindProductByUpc(ctx context.Context, upc string) (*model.Product, error) {
-	for _, h := range hats {
-		if h.Upc == upc {
-			return h, nil
+func (r *entityResolver) FindManufacturerByID(ctx context.Context, id string) (*model.Manufacturer, error) {
+	return &model.Manufacturer{
+		ID:   id,
+		Name: "Millinery " + id,
+	}, nil
+}
+
+func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID string, id string) (*model.Product, error) {
+	for _, hat := range hats {
+		if hat.ID == id && hat.Manufacturer.ID == manufacturerID {
+			return hat, nil
 		}
 	}
 	return nil, nil

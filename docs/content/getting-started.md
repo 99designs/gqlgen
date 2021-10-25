@@ -75,7 +75,7 @@ This will create our suggested package layout. You can modify these paths in gql
 
 gqlgen is a schema-first library — before writing code, you describe your API using the GraphQL
 [Schema Definition Language](http://graphql.org/learn/schema/). By default this goes into a file called
-`schema.graphql` but you can break it up into as many different files as you want.
+`schema.graphqls` but you can break it up into as many different files as you want.
 
 The schema that was generated for us was:
 ```graphql

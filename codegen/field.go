@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go/types"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -67,7 +68,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		if errors.Is(err, config.ErrTypeNotFound) {
 			return nil, err
 		}
-		fmt.Println(err)
+		log.Println(err.Error())
 	}
 
 	if f.IsResolver && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {

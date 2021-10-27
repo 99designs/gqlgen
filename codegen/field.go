@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"errors"
 	"fmt"
 	"go/types"
 	"reflect"
@@ -63,7 +64,10 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 
 	if err = b.bindField(obj, &f); err != nil {
 		f.IsResolver = true
-		return nil, err
+		if errors.Is(err, config.ErrTypeNotFound) {
+			return nil, err
+		}
+		fmt.Println(err)
 	}
 
 	if f.IsResolver && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {

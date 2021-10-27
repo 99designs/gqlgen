@@ -11,6 +11,8 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
+var ErrTypeNotFound = errors.New("unable to find type")
+
 // Binder connects graphql types to golang types using static analysis
 type Binder struct {
 	pkgs       *code.Packages
@@ -148,7 +150,7 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 		}
 	}
 
-	return nil, fmt.Errorf("unable to find type %s\n", fullName)
+	return nil, fmt.Errorf("%w: %s", ErrTypeNotFound, fullName)
 }
 
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {

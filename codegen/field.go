@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"errors"
 	"fmt"
 	"go/types"
 	"log"
@@ -64,6 +65,9 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 
 	if err = b.bindField(obj, &f); err != nil {
 		f.IsResolver = true
+		if errors.Is(err, config.ErrTypeNotFound) {
+			return nil, err
+		}
 		log.Println(err.Error())
 	}
 

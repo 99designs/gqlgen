@@ -109,6 +109,9 @@ Now you can use these directives when defining types in your schema:
 ```graphql
 type User @goModel(model: "github.com/my/app/models.User") {
 	id: ID! @goField(name: "todoId")
-	name: String! @goField(forceResolver: true) @goTag(xorm: "-")
+	name: String!
+		@goField(forceResolver: true)
+		@goTag(key: "xorm", value: "-")
+		@goTag(key: "yaml")
 }
 ```

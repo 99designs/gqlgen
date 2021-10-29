@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/types"
 	"sort"
+	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
@@ -18,6 +19,7 @@ type FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Fiel
 func defaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
 	return f, nil
 }
+
 func defaultBuildMutateHook(b *ModelBuild) *ModelBuild {
 	return b
 }
@@ -169,16 +171,14 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					typ = types.NewPointer(typ)
 				}
 
-				tag := `json:"` + field.Name + `"`
-				if extraTag := cfg.Models[schemaType.Name].Fields[field.Name].ExtraTag; extraTag != "" {
-					tag = tag + " " + extraTag
-				}
+				tags := []string{`json:"` + field.Name + `"`}
+				tags = append(tags, cfg.Models[schemaType.Name].Fields[field.Name].ExtraTags...)
 
 				f := &Field{
 					Name:        name,
 					Type:        typ,
 					Description: field.Description,
-					Tag:         tag,
+					Tag:         strings.Join(tags, " "),
 				}
 
 				if m.FieldHook != nil {

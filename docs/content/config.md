@@ -72,7 +72,6 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
-
 ```
 
 Everything has defaults, so add things as you need.
@@ -84,18 +83,20 @@ gqlgen ships with some builtin directives that make it a little easier to manage
 To start using them you first need to define them:
 
 ```graphql
-directive @goModel(model: String, models: [String!]) on OBJECT
-    | INPUT_OBJECT
-    | SCALAR
-    | ENUM
-    | INTERFACE
-    | UNION
+directive @goModel(
+	model: String
+	models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
-    | FIELD_DEFINITION
+directive @goField(
+	forceResolver: Boolean
+	name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
-directive @extraTag on INPUT_FIELD_DEFINITION
-    | FIELD_DEFINITION
+directive @goTag(
+	key: String!
+	value: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 ```
 
 > Here be dragons
@@ -107,7 +108,7 @@ Now you can use these directives when defining types in your schema:
 
 ```graphql
 type User @goModel(model: "github.com/my/app/models.User") {
-    id: ID!         @goField(name: "todoId")
-    name: String!   @goField(forceResolver: true) @extraTag(xorm: "-")
+	id: ID! @goField(name: "todoId")
+	name: String! @goField(forceResolver: true) @goTag(xorm: "-")
 }
 ```

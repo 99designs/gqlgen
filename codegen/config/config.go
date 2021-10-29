@@ -293,7 +293,8 @@ func (c *Config) injectTypesFromSchema() error {
 				}
 
 				for _, goTag := range field.Directives.ForNames("goTag") {
-					var key, value string
+					key := ""
+					value := field.Name
 					if arg := goTag.Arguments.ForName("key"); arg != nil {
 						if k, err := arg.Value.Value(nil); err == nil {
 							key = k.(string)
@@ -306,7 +307,7 @@ func (c *Config) injectTypesFromSchema() error {
 						}
 					}
 
-					typeMapField.ExtraTags = append(typeMapField.ExtraTags, key+":"+value)
+					typeMapField.ExtraTags = append(typeMapField.ExtraTags, key+":\""+value+"\"")
 					directive = true
 				}
 

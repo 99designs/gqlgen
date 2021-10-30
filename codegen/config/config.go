@@ -239,7 +239,7 @@ func (c *Config) injectTypesFromSchema() error {
 		SkipRuntime: true,
 	}
 
-	c.Directives["extraTag"] = DirectiveConfig{
+	c.Directives["goTag"] = DirectiveConfig{
 		SkipRuntime: true,
 	}
 
@@ -266,7 +266,7 @@ func (c *Config) injectTypesFromSchema() error {
 		if schemaType.Kind == ast.Object || schemaType.Kind == ast.InputObject {
 			for _, field := range schemaType.Fields {
 				typeMapField := TypeMapField{
-					ExtraTag:  c.Models[schemaType.Name].Fields[field.Name].ExtraTag,
+					ExtraTags: c.Models[schemaType.Name].Fields[field.Name].ExtraTags,
 					FieldName: c.Models[schemaType.Name].Fields[field.Name].FieldName,
 					Resolver:  c.Models[schemaType.Name].Fields[field.Name].Resolver,
 				}
@@ -292,12 +292,22 @@ func (c *Config) injectTypesFromSchema() error {
 					directive = true
 				}
 
-				if ex := field.Directives.ForName("extraTag"); ex != nil {
-					args := []string{}
-					for _, arg := range ex.Arguments {
-						args = append(args, arg.Name+`:"`+arg.Value.Raw+`"`)
+				for _, goTag := range field.Directives.ForNames("goTag") {
+					key := ""
+					value := field.Name
+					if arg := goTag.Arguments.ForName("key"); arg != nil {
+						if k, err := arg.Value.Value(nil); err == nil {
+							key = k.(string)
+						}
 					}
-					typeMapField.ExtraTag = strings.Join(args, " ")
+
+					if arg := goTag.Arguments.ForName("value"); arg != nil {
+						if v, err := arg.Value.Value(nil); err == nil {
+							value = v.(string)
+						}
+					}
+
+					typeMapField.ExtraTags = append(typeMapField.ExtraTags, key+":\""+value+"\"")
 					directive = true
 				}
 
@@ -323,10 +333,10 @@ type TypeMapEntry struct {
 }
 
 type TypeMapField struct {
-	Resolver        bool   `yaml:"resolver"`
-	FieldName       string `yaml:"fieldName"`
-	ExtraTag        string `yaml:"extraTag"`
-	GeneratedMethod string `yaml:"-"`
+	Resolver        bool     `yaml:"resolver"`
+	FieldName       string   `yaml:"fieldName"`
+	ExtraTags       []string `yaml:"extraTags"`
+	GeneratedMethod string   `yaml:"-"`
 }
 
 type StringList []string

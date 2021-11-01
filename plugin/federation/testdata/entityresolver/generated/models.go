@@ -2,6 +2,14 @@
 
 package generated
 
+type EntityResolverfindManyMultiHelloWithErrorsByNameInput struct {
+	Name string `json:"Name"`
+}
+
+type EntityResolverfindManyMultiHellosByNameInput struct {
+	Name string `json:"Name"`
+}
+
 type Hello struct {
 	Name      string `json:"name"`
 	Secondary string `json:"secondary"`
@@ -14,6 +22,18 @@ type HelloWithErrors struct {
 }
 
 func (HelloWithErrors) IsEntity() {}
+
+type MultiHello struct {
+	Name string `json:"name"`
+}
+
+func (MultiHello) IsEntity() {}
+
+type MultiHelloWithError struct {
+	Name string `json:"name"`
+}
+
+func (MultiHelloWithError) IsEntity() {}
 
 type PlanetRequires struct {
 	Name     string `json:"name"`

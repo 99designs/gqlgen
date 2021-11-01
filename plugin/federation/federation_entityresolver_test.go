@@ -20,7 +20,7 @@ func TestEntityResolver(t *testing.T) {
 			Resolvers: &entityresolver.Resolver{}}),
 	))
 
-	t.Run("Hello entities - single federation key", func(t *testing.T) {
+	t.Run("Hello entities", func(t *testing.T) {
 		representations := []map[string]interface{}{
 			{
 				"__typename": "Hello",
@@ -50,7 +50,7 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[1].Name, "first name - 2")
 	})
 
-	t.Run("HelloWithError entities - single federation key", func(t *testing.T) {
+	t.Run("HelloWithError entities", func(t *testing.T) {
 		representations := []map[string]interface{}{
 			{
 				"__typename": "HelloWithErrors",
@@ -104,7 +104,7 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[4].Name, "")
 	})
 
-	t.Run("World entity with nested key", func(t *testing.T) {
+	t.Run("World entities with nested key", func(t *testing.T) {
 		representations := []map[string]interface{}{
 			{
 				"__typename": "World",
@@ -231,6 +231,123 @@ func TestEntityResolver(t *testing.T) {
 	})
 }
 
+func TestMultiEntityResolver(t *testing.T) {
+	c := client.New(handler.NewDefaultServer(
+		generated.NewExecutableSchema(generated.Config{
+			Resolvers: &entityresolver.Resolver{}}),
+	))
+
+	t.Run("MultiHello entities", func(t *testing.T) {
+		itemCount := 10
+		representations := []map[string]interface{}{}
+
+		for i := 0; i < itemCount; i++ {
+			representations = append(representations, map[string]interface{}{
+				"__typename": "MultiHello",
+				"name":       "world name - " + strconv.Itoa(i),
+			})
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name string `json:"name"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"MultiHello {name}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+
+		for i := 0; i < itemCount; i++ {
+			require.Equal(t, resp.Entities[i].Name, "world name - "+strconv.Itoa(i)+" - from multiget")
+		}
+	})
+
+	t.Run("MultiHello and Hello (heterogeneous) entities", func(t *testing.T) {
+		itemCount := 20
+		representations := []map[string]interface{}{}
+
+		for i := 0; i < itemCount; i++ {
+			// Let's interleve the representations to test ordering of the
+			// responses from the entity query
+			if i%2 == 0 {
+				representations = append(representations, map[string]interface{}{
+					"__typename": "MultiHello",
+					"name":       "world name - " + strconv.Itoa(i),
+				})
+			} else {
+				representations = append(representations, map[string]interface{}{
+					"__typename": "Hello",
+					"name":       "hello - " + strconv.Itoa(i),
+				})
+			}
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name string `json:"name"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"MultiHello {name}",
+				"Hello {name}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+
+		for i := 0; i < itemCount; i++ {
+			if i%2 == 0 {
+				require.Equal(t, resp.Entities[i].Name, "world name - "+strconv.Itoa(i)+" - from multiget")
+			} else {
+				require.Equal(t, resp.Entities[i].Name, "hello - "+strconv.Itoa(i))
+			}
+		}
+	})
+
+	t.Run("MultiHelloWithError entities", func(t *testing.T) {
+		itemCount := 10
+		representations := []map[string]interface{}{}
+
+		for i := 0; i < itemCount; i++ {
+			representations = append(representations, map[string]interface{}{
+				"__typename": "MultiHelloWithError",
+				"name":       "world name - " + strconv.Itoa(i),
+			})
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name string `json:"name"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"MultiHelloWithError {name}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.Error(t, err)
+		entityErrors, err := getEntityErrors(err)
+		require.NoError(t, err)
+		require.Len(t, entityErrors, 1)
+		require.Contains(t, entityErrors[0].Message, "error resolving MultiHelloWorldWithError")
+	})
+}
+
 func entityQuery(queries []string) string {
 	// What we want!
 	// query($representations:[_Any!]!){_entities(representations:$representations){ ...on Hello{secondary} }}
@@ -242,13 +359,13 @@ func entityQuery(queries []string) string {
 	return "query($representations:[_Any!]!){_entities(representations:$representations){" + strings.Join(entityQueries, "") + "}}"
 }
 
-type entityResolverErrors []struct {
+type entityResolverError struct {
 	Message string   `json:"message"`
 	Path    []string `json:"path"`
 }
 
-func getEntityErrors(err error) (entityResolverErrors, error) {
-	var errors entityResolverErrors
+func getEntityErrors(err error) ([]*entityResolverError, error) {
+	var errors []*entityResolverError
 	err = json.Unmarshal([]byte(err.Error()), &errors)
 	return errors, err
 }

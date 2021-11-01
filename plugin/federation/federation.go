@@ -89,6 +89,7 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 
 	entities := ""
 	resolvers := ""
+	entityResolverInputDefinitions := ""
 	for i, e := range f.Entities {
 		if i != 0 {
 			entities += " | "
@@ -96,11 +97,21 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 		entities += e.Name
 
 		if e.ResolverName != "" {
-			resolverArgs := ""
-			for _, keyField := range e.KeyFields {
-				resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
+			if e.Multi {
+				entityResolverInputTypeName := "EntityResolver" + e.ResolverName + "Input"
+				entityResolverInputDefinitions += "input " + entityResolverInputTypeName + " {\n"
+				for _, keyField := range e.KeyFields {
+					entityResolverInputDefinitions += fmt.Sprintf("\t%s: %s\n", keyField.Field.ToGo(), keyField.Definition.Type.String())
+				}
+				entityResolverInputDefinitions += "}\n"
+				resolvers += fmt.Sprintf("\t%s(reps: [%s!]!): [%s]\n", e.ResolverName, entityResolverInputTypeName, e.Name)
+			} else {
+				resolverArgs := ""
+				for _, keyField := range e.KeyFields {
+					resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
+				}
+				resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Name)
 			}
-			resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
 		}
 	}
 
@@ -113,7 +124,7 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 	// resolvers can be empty if a service defines only "empty
 	// extend" types.  This should be rare.
 	if resolvers != "" {
-		resolvers = `
+		resolvers = entityResolverInputDefinitions + `
 # fake type to build resolver interfaces for users to implement
 type Entity {
 	` + resolvers + `
@@ -148,6 +159,7 @@ type Entity struct {
 	ResolverName string      // The resolver name, such as FindUserByID
 	Def          *ast.Definition
 	Requires     []*Requires
+	Multi        bool
 }
 
 type KeyField struct {
@@ -257,7 +269,6 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				}
 
 				keyFields := make([]*KeyField, len(keyFieldSet))
-				resolverName := fmt.Sprintf("find%sBy", schemaType.Name)
 				for i, field := range keyFieldSet {
 					def := field.FieldDefinition(schemaType, schema)
 
@@ -266,19 +277,25 @@ func (f *federation) setEntities(schema *ast.Schema) {
 					}
 
 					keyFields[i] = &KeyField{Definition: def, Field: field}
-					if i > 0 {
-						resolverName += "And"
-					}
-					resolverName += field.ToGo()
 				}
 
 				e := &Entity{
-					Name:         schemaType.Name,
-					KeyFields:    keyFields,
-					Def:          schemaType,
-					ResolverName: resolverName,
-					Requires:     requires,
+					Name:      schemaType.Name,
+					KeyFields: keyFields,
+					Def:       schemaType,
+					Requires:  requires,
 				}
+
+				// Let's process custom entity resolver settings.
+				dir = schemaType.Directives.ForName("entityResolver")
+				if dir != nil {
+					if dirArg := dir.Arguments.ForName("multi"); dirArg != nil {
+						if dirVal, err := dirArg.Value.Value(nil); err == nil {
+							e.Multi = dirVal.(bool)
+						}
+					}
+				}
+
 				// If our schema has a field with a type defined in
 				// another service, then we need to define an "empty
 				// extend" of that type in this service, so this service
@@ -297,8 +314,23 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				//    extend TypeDefinedInOtherService @key(fields: "id") {
 				//       id: ID @external
 				//    }
-				if e.allFieldsAreExternal() {
-					e.ResolverName = ""
+				if !e.allFieldsAreExternal() {
+					resolverName := ""
+
+					if e.Multi {
+						resolverName = fmt.Sprintf("findMany%ssBy", schemaType.Name)
+					} else {
+						resolverName = fmt.Sprintf("find%sBy", schemaType.Name)
+					}
+
+					for i, f := range e.KeyFields {
+						if i > 0 {
+							resolverName += "And"
+						}
+						resolverName += f.Field.ToGo()
+					}
+
+					e.ResolverName = resolverName
 				}
 
 				f.Entities = append(f.Entities, e)

@@ -1,3 +1,5 @@
+directive @entityResolver(multi: Boolean) on OBJECT
+
 type Hello @key(fields: "name") {
     name: String!
     secondary: String!
@@ -23,7 +25,10 @@ type PlanetRequires @key(fields: "name") {
     diameter: Int!
 }
 
-type Query {
-    hello: Hello!
-    world: World!
+type MultiHello @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+}
+
+type MultiHelloWithError @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
 }

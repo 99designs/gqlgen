@@ -15,3 +15,25 @@ Running entity resolver tests.
 # Architecture
 
 TODO(miguel): add details.
+
+# Entity resolvers - GetMany entities
+
+The federation plugin implements `GetMany` semantics in which entity resolvers get the entire list of representations that need to be resolved. This functionality is currently optin tho, and to enable it you need to specify the directive `@entityResolver` in the federated entity you want this feature for.  E.g.
+
+```
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type MultiHello @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+}
+```
+
+That allows the federation plugin to generate `GetMany` resolver function that can take a list of representations to be resolved.
+
+From that entity type, the resolver function would be
+
+```
+func (r *entityResolver) FindManyMultiHellosByName(ctx context.Context, reps []*generated.EntityResolverfindManyMultiHellosByNameInput) ([]*generated.MultiHello, error) {
+  /// <Your code to resolve the list of items>
+}
+```

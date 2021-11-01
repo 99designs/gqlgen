@@ -76,6 +76,7 @@ func TestModelGeneration(t *testing.T) {
 			`json:"name" anotherTag:"tag"`,
 			`json:"enum" yetAnotherTag:"12"`,
 			`json:"noVal" yaml:"noVal"`,
+			`json:"repeated" someTag:"value" repeated:"true"`,
 		}
 
 		for _, tag := range expectedTags {

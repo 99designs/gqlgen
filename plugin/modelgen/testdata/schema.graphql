@@ -62,7 +62,9 @@ input ExistingInput {
 type FieldMutationHook {
     name: String @goTag(key :"anotherTag", value: "tag")
     enum: ExistingEnum @goTag(key: "yetAnotherTag", value: "12")
-    noVal: String @goTag(key: "yaml")
+    noVal: String @goTag(key: "yaml") @goTag(key : "repeated", value: "true")
+    repeated: String @goTag(key: "someTag", value: "value") @goTag(key : "repeated", value: "true")
+
 }
 
 enum ExistingEnum {

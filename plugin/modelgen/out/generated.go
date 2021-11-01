@@ -31,8 +31,10 @@ type UnionWithDescription interface {
 }
 
 type FieldMutationHook struct {
-	Name *string       `json:"name" anotherTag:"tag" database:"FieldMutationHookname"`
-	Enum *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`
+	Name     *string       `json:"name" anotherTag:"tag" database:"FieldMutationHookname"`
+	Enum     *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`
+	NoVal    *string       `json:"noVal" yaml:"noVal" repeated:"true" database:"FieldMutationHooknoVal"`
+	Repeated *string       `json:"repeated" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
 }
 
 type MissingInput struct {

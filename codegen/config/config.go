@@ -239,10 +239,6 @@ func (c *Config) injectTypesFromSchema() error {
 		SkipRuntime: true,
 	}
 
-	c.Directives["goTag"] = DirectiveConfig{
-		SkipRuntime: true,
-	}
-
 	for _, schemaType := range c.Schema.Types {
 		if schemaType == c.Schema.Query || schemaType == c.Schema.Mutation || schemaType == c.Schema.Subscription {
 			continue
@@ -265,15 +261,9 @@ func (c *Config) injectTypesFromSchema() error {
 
 		if schemaType.Kind == ast.Object || schemaType.Kind == ast.InputObject {
 			for _, field := range schemaType.Fields {
-				typeMapField := TypeMapField{
-					ExtraTags: c.Models[schemaType.Name].Fields[field.Name].ExtraTags,
-					FieldName: c.Models[schemaType.Name].Fields[field.Name].FieldName,
-					Resolver:  c.Models[schemaType.Name].Fields[field.Name].Resolver,
-				}
-				directive := false
 				if fd := field.Directives.ForName("goField"); fd != nil {
-					forceResolver := typeMapField.Resolver
-					fieldName := typeMapField.FieldName
+					forceResolver := c.Models[schemaType.Name].Fields[field.Name].Resolver
+					fieldName := c.Models[schemaType.Name].Fields[field.Name].FieldName
 
 					if ra := fd.Arguments.ForName("forceResolver"); ra != nil {
 						if fr, err := ra.Value.Value(nil); err == nil {
@@ -287,38 +277,17 @@ func (c *Config) injectTypesFromSchema() error {
 						}
 					}
 
-					typeMapField.FieldName = fieldName
-					typeMapField.Resolver = forceResolver
-					directive = true
-				}
-
-				for _, goTag := range field.Directives.ForNames("goTag") {
-					key := ""
-					value := field.Name
-					if arg := goTag.Arguments.ForName("key"); arg != nil {
-						if k, err := arg.Value.Value(nil); err == nil {
-							key = k.(string)
-						}
-					}
-
-					if arg := goTag.Arguments.ForName("value"); arg != nil {
-						if v, err := arg.Value.Value(nil); err == nil {
-							value = v.(string)
-						}
-					}
-
-					typeMapField.ExtraTags = append(typeMapField.ExtraTags, key+":\""+value+"\"")
-					directive = true
-				}
-
-				if directive {
 					if c.Models[schemaType.Name].Fields == nil {
 						c.Models[schemaType.Name] = TypeMapEntry{
 							Model:  c.Models[schemaType.Name].Model,
 							Fields: map[string]TypeMapField{},
 						}
 					}
-					c.Models[schemaType.Name].Fields[field.Name] = typeMapField
+
+					c.Models[schemaType.Name].Fields[field.Name] = TypeMapField{
+						FieldName: fieldName,
+						Resolver:  forceResolver,
+					}
 				}
 			}
 		}
@@ -333,10 +302,9 @@ type TypeMapEntry struct {
 }
 
 type TypeMapField struct {
-	Resolver        bool     `yaml:"resolver"`
-	FieldName       string   `yaml:"fieldName"`
-	ExtraTags       []string `yaml:"extraTags"`
-	GeneratedMethod string   `yaml:"-"`
+	Resolver        bool   `yaml:"resolver"`
+	FieldName       string `yaml:"fieldName"`
+	GeneratedMethod string `yaml:"-"`
 }
 
 type StringList []string

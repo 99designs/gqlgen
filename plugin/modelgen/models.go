@@ -16,10 +16,10 @@ type BuildMutateHook = func(b *ModelBuild) *ModelBuild
 
 type FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error)
 
+// defaultFieldMutateHook is the default hook for the Plugin which applies the GoTagFieldHook.
 func defaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
-	return f, nil
+	return GoTagFieldHook(td, fd, f)
 }
-
 func defaultBuildMutateHook(b *ModelBuild) *ModelBuild {
 	return b
 }
@@ -171,14 +171,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					typ = types.NewPointer(typ)
 				}
 
-				tags := []string{`json:"` + field.Name + `"`}
-				tags = append(tags, cfg.Models[schemaType.Name].Fields[field.Name].ExtraTags...)
-
 				f := &Field{
 					Name:        name,
 					Type:        typ,
 					Description: field.Description,
-					Tag:         strings.Join(tags, " "),
+					Tag:         `json:"` + field.Name + `"`,
 				}
 
 				if m.FieldHook != nil {
@@ -252,6 +249,36 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	cfg.ReloadAllPackages()
 
 	return nil
+}
+
+// GoTagFieldHook applies the goTag directive to the generated Field f. When applying the Tag to the field, the field
+// name is used when no value argument is present.
+func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+	args := make([]string, 0)
+	for _, goTag := range fd.Directives.ForNames("goTag") {
+		key := ""
+		value := fd.Name
+
+		if arg := goTag.Arguments.ForName("key"); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				key = k.(string)
+			}
+		}
+
+		if arg := goTag.Arguments.ForName("value"); arg != nil {
+			if v, err := arg.Value.Value(nil); err == nil {
+				value = v.(string)
+			}
+		}
+
+		args = append(args, key+":\""+value+"\"")
+	}
+
+	if len(args) > 0 {
+		f.Tag = f.Tag + " " + strings.Join(args, " ")
+	}
+
+	return f, nil
 }
 
 func isStruct(t types.Type) bool {

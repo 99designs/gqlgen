@@ -154,9 +154,11 @@ type ObjectInput struct {
 }
 ```
 
-If a constraint being used during generation shoud not be published during introspection, the directive should be listed with `skip_runtime:true` in gqlgen.yml
+If a constraint being used during generation should not be published during introspection, the directive should be listed with `skip_runtime:true` in gqlgen.yml
 ```yaml
 directives:
   constraint:
     skip_runtime: true
 ```
+
+The built-in directive `@goTag` is implemented using the FieldMutateHook. See: `plugin/modelgen/models.go` function `GoTagFieldHook`

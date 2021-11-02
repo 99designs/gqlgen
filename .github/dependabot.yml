@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/example"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/example/init"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/integration"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -3,6 +3,7 @@ package federation
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 )
@@ -78,11 +79,32 @@ func TestWithEntities(t *testing.T) {
 	require.Equal(t, "Int", f.Entities[5].Resolvers[1].KeyFields[0].Definition.Type.Name())
 }
 
+func TestCodeGeneration(t *testing.T) {
+	f, cfg := load(t, "test_data/gqlgen.yml")
+
+	require.Len(t, cfg.Schema.Types["_Entity"].Types, 6)
+	require.Len(t, f.Entities, 6)
+
+	require.NoError(t, f.MutateConfig(cfg))
+
+	data, err := codegen.BuildData(cfg)
+	if err != nil {
+		panic(err)
+	}
+	require.NoError(t, f.GenerateCode(data))
+}
+
 func TestNoEntities(t *testing.T) {
 	f, cfg := load(t, "test_data/nokey.yml")
 
 	err := f.MutateConfig(cfg)
 	require.NoError(t, err)
+}
+
+func TestInterfaces(t *testing.T) {
+	require.Panics(t, func() {
+		load(t, "test_data/interfaces.yml")
+	})
 }
 
 func load(t *testing.T, name string) (*federation, *config.Config) {

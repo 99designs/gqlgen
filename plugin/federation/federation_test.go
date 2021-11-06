@@ -9,7 +9,7 @@ import (
 )
 
 func TestWithEntities(t *testing.T) {
-	f, cfg := load(t, "test_data/gqlgen.yml")
+	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 
 	require.Equal(t, []string{"ExternalExtension", "Hello", "MoreNesting", "NestedKey", "VeryNestedKey", "World"}, cfg.Schema.Types["_Entity"].Types)
 
@@ -80,7 +80,7 @@ func TestWithEntities(t *testing.T) {
 }
 
 func TestCodeGeneration(t *testing.T) {
-	f, cfg := load(t, "test_data/gqlgen.yml")
+	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 
 	require.Len(t, cfg.Schema.Types["_Entity"].Types, 6)
 	require.Len(t, f.Entities, 6)
@@ -95,15 +95,16 @@ func TestCodeGeneration(t *testing.T) {
 }
 
 func TestNoEntities(t *testing.T) {
-	f, cfg := load(t, "test_data/nokey.yml")
+	f, cfg := load(t, "testdata/entities/nokey.yml")
 
 	err := f.MutateConfig(cfg)
 	require.NoError(t, err)
+	require.Len(t, f.Entities, 0)
 }
 
 func TestInterfaces(t *testing.T) {
 	require.Panics(t, func() {
-		load(t, "test_data/interfaces.yml")
+		load(t, "testdata/interfaces/gqlgen.yml")
 	})
 }
 

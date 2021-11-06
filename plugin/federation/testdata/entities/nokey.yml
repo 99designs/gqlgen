@@ -1,0 +1,6 @@
+schema:
+  - "testdata/entities/nokey.graphql"
+exec:
+  filename: testdata/entities/generated/exec.go
+federation:
+  filename: testdata/entities/generated/federation.go

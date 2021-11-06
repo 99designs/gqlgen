@@ -1,6 +1,0 @@
-schema:
-  - "test_data/schema.graphql"
-exec:
-  filename: graph/generated/exec.go
-federation:
-  filename: graph/generated/federation.go

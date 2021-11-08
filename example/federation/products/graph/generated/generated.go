@@ -48,7 +48,6 @@ type ComplexityRoot struct {
 	Entity struct {
 		FindManufacturerByID             func(childComplexity int, id string) int
 		FindProductByManufacturerIDAndID func(childComplexity int, manufacturerID string, id string) int
-		FindProductByUpc                 func(childComplexity int, upc string) int
 	}
 
 	Manufacturer struct {
@@ -78,7 +77,6 @@ type ComplexityRoot struct {
 type EntityResolver interface {
 	FindManufacturerByID(ctx context.Context, id string) (*model.Manufacturer, error)
 	FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID string, id string) (*model.Product, error)
-	FindProductByUpc(ctx context.Context, upc string) (*model.Product, error)
 }
 type QueryResolver interface {
 	TopProducts(ctx context.Context, first *int) ([]*model.Product, error)
@@ -122,18 +120,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entity.FindProductByManufacturerIDAndID(childComplexity, args["manufacturerID"].(string), args["id"].(string)), true
-
-	case "Entity.findProductByUpc":
-		if e.complexity.Entity.FindProductByUpc == nil {
-			break
-		}
-
-		args, err := ec.field_Entity_findProductByUpc_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Entity.FindProductByUpc(childComplexity, args["upc"].(string)), true
 
 	case "Manufacturer.id":
 		if e.complexity.Manufacturer.ID == nil {
@@ -281,7 +267,7 @@ type Manufacturer @key(fields: "id") {
     name: String!
 }
 
-type Product @key(fields: "manufacturer { id } id") @key(fields: "upc") {
+type Product @key(fields: "manufacturer { id } id") {
     id: String!
     manufacturer: Manufacturer!
     upc: String!
@@ -307,7 +293,6 @@ union _Entity = Manufacturer | Product
 type Entity {
 		findManufacturerByID(id: String!,): Manufacturer!
 	findProductByManufacturerIDAndID(manufacturerID: String!,id: String!,): Product!
-	findProductByUpc(upc: String!,): Product!
 
 }
 
@@ -363,21 +348,6 @@ func (ec *executionContext) field_Entity_findProductByManufacturerIDAndID_args(c
 		}
 	}
 	args["id"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Entity_findProductByUpc_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["upc"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("upc"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["upc"] = arg0
 	return args, nil
 }
 
@@ -532,48 +502,6 @@ func (ec *executionContext) _Entity_findProductByManufacturerIDAndID(ctx context
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindProductByManufacturerIDAndID(rctx, args["manufacturerID"].(string), args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Product)
-	fc.Result = res
-	return ec.marshalNProduct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋfederationᚋproductsᚋgraphᚋmodelᚐProduct(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entity_findProductByUpc(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Entity",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Entity_findProductByUpc_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Entity().FindProductByUpc(rctx, args["upc"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2259,29 +2187,6 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 					}
 				}()
 				res = ec._Entity_findProductByManufacturerIDAndID(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "findProductByUpc":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Entity_findProductByUpc(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

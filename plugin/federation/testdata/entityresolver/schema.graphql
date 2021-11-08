@@ -1,0 +1,15 @@
+type Hello @key(fields: "name") {
+    name: String!
+    secondary: String!
+}
+
+type World @key(fields: "hello { name } foo   ") {
+    foo: String!
+    bar: Int!
+    hello: Hello
+}
+
+type Query {
+    hello: Hello!
+    world: World!
+}

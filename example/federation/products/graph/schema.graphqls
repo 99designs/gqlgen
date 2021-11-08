@@ -7,7 +7,7 @@ type Manufacturer @key(fields: "id") {
     name: String!
 }
 
-type Product @key(fields: "manufacturer { id } id") @key(fields: "upc") {
+type Product @key(fields: "manufacturer { id } id") {
     id: String!
     manufacturer: Manufacturer!
     upc: String!

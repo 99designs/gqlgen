@@ -3,7 +3,7 @@ type Hello @key(fields: "name") {
     secondary: String!
 }
 
-type World @key(fields: " foo   ") @key(fields: "bar") {
+type World @key(fields: " foo  bar   ") {
     foo: String!
     bar: Int!
 }

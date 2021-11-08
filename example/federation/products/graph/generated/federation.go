@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/99designs/gqlgen/example/federation/products/graph/model"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
@@ -48,52 +47,36 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			return errors.New("__typename must be an existing string")
 		}
 		switch typeName {
-		case "Manufacturer":
-			entity, err := func() (*model.Manufacturer, error) {
-				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
-				if err == nil {
-					return ec.resolvers.Entity().FindManufacturerByID(ctx, id0)
-				}
-				return nil, nil
-			}()
 
+		case "Manufacturer":
+			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
 			if err != nil {
-				return fmt.Errorf(`resolving Entity "Manufacturer": %w`, err)
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
 			}
-			if entity == nil {
-				return errors.New(`unable to resolve Entity "Manufacturer"`)
+
+			entity, err := ec.resolvers.Entity().FindManufacturerByID(ctx,
+				id0)
+			if err != nil {
+				return err
 			}
 
 			list[i] = entity
 			return nil
 
 		case "Product":
-			entity, err := func() (*model.Product, error) {
-				id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
-				if err == nil {
-					id1, err := ec.unmarshalNString2string(ctx, rep["id"])
-					if err == nil {
-						return ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx, id0, id1)
-					}
-				}
-				return nil, nil
-			}()
-
-			if entity == nil {
-				entity, err = func() (*model.Product, error) {
-					id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
-					if err == nil {
-						return ec.resolvers.Entity().FindProductByUpc(ctx, id0)
-					}
-					return nil, nil
-				}()
-			}
-
+			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
 			if err != nil {
-				return fmt.Errorf(`resolving Entity "Product": %w`, err)
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "manufacturerID"))
 			}
-			if entity == nil {
-				return errors.New(`unable to resolve Entity "Product"`)
+			id1, err := ec.unmarshalNString2string(ctx, rep["id"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+			}
+
+			entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx,
+				id0, id1)
+			if err != nil {
+				return err
 			}
 
 			list[i] = entity

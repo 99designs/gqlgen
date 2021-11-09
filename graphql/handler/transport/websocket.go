@@ -240,12 +240,19 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := rc.Recover(ctx, r)
-				c.sendError(msg.id, &gqlerror.Error{Message: userErr.Error()})
+				err := rc.Recover(ctx, r)
+				var gqlerr *gqlerror.Error
+				if !errors.As(err, &gqlerr) {
+					gqlerr = &gqlerror.Error{}
+					if err != nil {
+						gqlerr.Message = err.Error()
+					}
+				}
+				c.sendError(msg.id, gqlerr)
 			}
-			c.complete(message.ID)
+			c.complete(msg.id)
 			c.mu.Lock()
-			delete(c.active, message.ID)
+			delete(c.active, msg.id)
 			c.mu.Unlock()
 			cancel()
 		}()

@@ -318,6 +318,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 }
 
 func wsConnect(url string) *websocket.Conn {
+
 	return wsConnectWithSubprocotol(url, "")
 }
 
@@ -327,7 +328,7 @@ func wsConnectWithSubprocotol(url, subprocotol string) *websocket.Conn {
 		h.Add("Sec-WebSocket-Protocol", subprocotol)
 	}
 
-	c, resp, err := websocket.DefaultDialer.Dial(strings.Replace(url, "http://", "ws://", -1), h)
+	c, resp, err := websocket.DefaultDialer.Dial(strings.ReplaceAll(url, "http://", "ws://"), h)
 	if err != nil {
 		panic(err)
 	}

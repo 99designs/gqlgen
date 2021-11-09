@@ -22,7 +22,7 @@ Then to run the app with the `apollo-link-ws` implementation do
 npm run start
 ```
 
-or to run the app with the `graphql-ws` implementation do
+or to run the app with the `graphql-ws` implementation (and the newer `graphql-transport-ws` protocol) do
 ```bash
 npm run start:graphql-transport-ws
 ```

@@ -8,7 +8,7 @@ import (
 )
 
 func TestWithEntities(t *testing.T) {
-	f, cfg := load(t, "test_data/gqlgen.yml")
+	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 
 	require.Equal(t, []string{"ExternalExtension", "Hello", "MoreNesting", "NestedKey", "VeryNestedKey", "World"}, cfg.Schema.Types["_Entity"].Types)
 
@@ -70,10 +70,11 @@ func TestWithEntities(t *testing.T) {
 }
 
 func TestNoEntities(t *testing.T) {
-	f, cfg := load(t, "test_data/nokey.yml")
+	f, cfg := load(t, "testdata/entities/nokey.yml")
 
 	err := f.MutateConfig(cfg)
 	require.NoError(t, err)
+	require.Len(t, f.Entities, 0)
 }
 
 func load(t *testing.T, name string) (*federation, *config.Config) {

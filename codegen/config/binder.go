@@ -112,45 +112,47 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 	if pkgName == "" {
 		return nil, fmt.Errorf("package cannot be nil")
 	}
-	fullName := typeName
-	if pkgName != "" {
-		fullName = pkgName + "." + typeName
-	}
 
 	pkg := b.pkgs.LoadWithTypes(pkgName)
 	if pkg == nil {
 		err := b.pkgs.Errors()
 		if err != nil {
-			return nil, fmt.Errorf("package could not be loaded: %s: %w", fullName, err)
+			return nil, fmt.Errorf("package could not be loaded: %s.%s: %w", pkgName, typeName, err)
 		}
-		return nil, fmt.Errorf("required package was not loaded: %s", fullName)
+		return nil, fmt.Errorf("required package was not loaded: %s.%s", pkgName, typeName)
 	}
 
-	// function based marshalers take precedence
+	marshalType := "Marshal" + typeName
+	scope := pkg.Types.Scope()
+	var obj types.Object
+	found := false
+
 	for astNode, def := range pkg.TypesInfo.Defs {
 		// only look at defs in the top scope
-		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {
+		if def == nil {
+			continue
+		}
+		parent := def.Parent()
+		if parent == nil || parent != scope {
 			continue
 		}
 
-		if astNode.Name == "Marshal"+typeName {
+		if astNode.Name == marshalType {
+			// function based marshalers take precedence
 			return def, nil
+		}
+
+		if !found && astNode.Name == typeName {
+			obj = def
+			found = true
 		}
 	}
 
-	// then look for types directly
-	for astNode, def := range pkg.TypesInfo.Defs {
-		// only look at defs in the top scope
-		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {
-			continue
-		}
-
-		if astNode.Name == typeName {
-			return def, nil
-		}
+	if found {
+		return obj, nil
 	}
 
-	return nil, fmt.Errorf("%w: %s", ErrTypeNotFound, fullName)
+	return nil, fmt.Errorf("%w: %s.%s", ErrTypeNotFound, pkgName, typeName)
 }
 
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {

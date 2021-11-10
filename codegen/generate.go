@@ -127,7 +127,7 @@ func addBuild(filename string, p *ast.Position, data *Data, builds *map[string]*
 // files for each schema file.
 func generateRootFile(data *Data) error {
 	dir := data.Config.Exec.DirName
-	path := filepath.Join(dir, "root!.generated.go")
+	path := filepath.Join(dir, "root_.generated.go")
 
 	_, thisFile, _, _ := runtime.Caller(0)
 	rootDir := filepath.Dir(thisFile)

@@ -83,6 +83,13 @@ func (p *Packages) addToCache(pkg *packages.Package) {
 
 // Load works the same as LoadAll, except a single package at a time.
 func (p *Packages) Load(importPath string) *packages.Package {
+	// Quick cache check first to avoid expensive allocations of LoadAll()
+	if p.packages != nil {
+		if pkg, ok := p.packages[importPath]; ok {
+			return pkg
+		}
+	}
+
 	pkgs := p.LoadAll(importPath)
 	if len(pkgs) == 0 {
 		return nil

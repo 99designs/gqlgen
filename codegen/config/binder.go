@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
@@ -15,11 +16,12 @@ var ErrTypeNotFound = errors.New("unable to find type")
 
 // Binder connects graphql types to golang types using static analysis
 type Binder struct {
-	pkgs       *code.Packages
-	schema     *ast.Schema
-	cfg        *Config
-	References []*TypeReference
-	SawInvalid bool
+	pkgs        *code.Packages
+	schema      *ast.Schema
+	cfg         *Config
+	References  []*TypeReference
+	SawInvalid  bool
+	objectCache map[string]map[string]types.Object
 }
 
 func (c *Config) NewBinder() *Binder {
@@ -122,11 +124,33 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 		return nil, fmt.Errorf("required package was not loaded: %s.%s", pkgName, typeName)
 	}
 
-	marshalType := "Marshal" + typeName
-	scope := pkg.Types.Scope()
-	var obj types.Object
-	found := false
+	if b.objectCache == nil {
+		b.objectCache = make(map[string]map[string]types.Object, b.pkgs.Count())
+	}
 
+	defsIndex, ok := b.objectCache[pkgName]
+	if !ok {
+		defsIndex = indexDefs(pkg)
+		b.objectCache[pkgName] = defsIndex
+	}
+
+	// function based marshalers take precedence
+	if val, ok := defsIndex["Marshal"+typeName]; ok {
+		return val, nil
+	}
+
+	if val, ok := defsIndex[typeName]; ok {
+		return val, nil
+	}
+
+	return nil, fmt.Errorf("%w: %s.%s", ErrTypeNotFound, pkgName, typeName)
+}
+
+func indexDefs(pkg *packages.Package) map[string]types.Object {
+
+	res := make(map[string]types.Object)
+
+	scope := pkg.Types.Scope()
 	for astNode, def := range pkg.TypesInfo.Defs {
 		// only look at defs in the top scope
 		if def == nil {
@@ -137,22 +161,15 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 			continue
 		}
 
-		if astNode.Name == marshalType {
-			// function based marshalers take precedence
-			return def, nil
-		}
-
-		if !found && astNode.Name == typeName {
-			obj = def
-			found = true
+		if _, ok := res[astNode.Name]; !ok {
+			// The above check may not be really needed, it is only here to have a consistent behavior with
+			// previous implementation of FindObject() function which only honored the first inclusion of a def.
+			// If this is still needed, we can consider something like sync.Map.LoadOrStore() to avoid two lookups.
+			res[astNode.Name] = def
 		}
 	}
 
-	if found {
-		return obj, nil
-	}
-
-	return nil, fmt.Errorf("%w: %s.%s", ErrTypeNotFound, pkgName, typeName)
+	return res
 }
 
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {

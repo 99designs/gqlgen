@@ -190,6 +190,10 @@ func (p *Packages) Errors() PkgErrors {
 	return res
 }
 
+func (p *Packages) Count() int {
+	return len(p.packages)
+}
+
 type PkgErrors []error
 
 func (p PkgErrors) Error() string {

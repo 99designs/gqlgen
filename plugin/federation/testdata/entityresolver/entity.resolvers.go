@@ -5,6 +5,7 @@ package entityresolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated"
 )
@@ -15,12 +16,36 @@ func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*gen
 	}, nil
 }
 
+func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name string) (*generated.HelloWithErrors, error) {
+	if name == "inject error" {
+		return nil, fmt.Errorf("error resolving HelloWithErrorsByName")
+	} else if name == "" {
+		return nil, fmt.Errorf("error (empty key) resolving HelloWithErrorsByName")
+	}
+
+	return &generated.HelloWithErrors{
+		Name: name,
+	}, nil
+}
+
+func (r *entityResolver) FindPlanetRequiresByName(ctx context.Context, name string) (*generated.PlanetRequires, error) {
+	return &generated.PlanetRequires{
+		Name: name,
+	}, nil
+}
+
 func (r *entityResolver) FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.World, error) {
 	return &generated.World{
 		Hello: &generated.Hello{
 			Name: helloName,
 		},
 		Foo: foo,
+	}, nil
+}
+
+func (r *entityResolver) FindWorldNameByName(ctx context.Context, name string) (*generated.WorldName, error) {
+	return &generated.WorldName{
+		Name: name,
 	}, nil
 }
 

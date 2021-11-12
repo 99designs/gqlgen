@@ -9,6 +9,20 @@ type Hello struct {
 
 func (Hello) IsEntity() {}
 
+type HelloWithErrors struct {
+	Name string `json:"name"`
+}
+
+func (HelloWithErrors) IsEntity() {}
+
+type PlanetRequires struct {
+	Name     string `json:"name"`
+	Size     int    `json:"size"`
+	Diameter int    `json:"diameter"`
+}
+
+func (PlanetRequires) IsEntity() {}
+
 type World struct {
 	Foo   string `json:"foo"`
 	Bar   int    `json:"bar"`
@@ -16,3 +30,9 @@ type World struct {
 }
 
 func (World) IsEntity() {}
+
+type WorldName struct {
+	Name string `json:"name"`
+}
+
+func (WorldName) IsEntity() {}

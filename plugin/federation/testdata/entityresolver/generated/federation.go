@@ -63,6 +63,41 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			list[i] = entity
 			return nil
 
+		case "HelloWithErrors":
+			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+			}
+
+			entity, err := ec.resolvers.Entity().FindHelloWithErrorsByName(ctx,
+				id0)
+			if err != nil {
+				return err
+			}
+
+			list[i] = entity
+			return nil
+
+		case "PlanetRequires":
+			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+			}
+
+			entity, err := ec.resolvers.Entity().FindPlanetRequiresByName(ctx,
+				id0)
+			if err != nil {
+				return err
+			}
+
+			entity.Diameter, err = ec.unmarshalNInt2int(ctx, rep["diameter"])
+			if err != nil {
+				return err
+			}
+
+			list[i] = entity
+			return nil
+
 		case "World":
 			id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
 			if err != nil {
@@ -75,6 +110,21 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 			entity, err := ec.resolvers.Entity().FindWorldByHelloNameAndFoo(ctx,
 				id0, id1)
+			if err != nil {
+				return err
+			}
+
+			list[i] = entity
+			return nil
+
+		case "WorldName":
+			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+			}
+
+			entity, err := ec.resolvers.Entity().FindWorldNameByName(ctx,
+				id0)
 			if err != nil {
 				return err
 			}

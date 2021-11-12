@@ -88,8 +88,13 @@ func TestEntityResolver(t *testing.T) {
 		entityErrors, err := getEntityErrors(err)
 		require.NoError(t, err)
 		require.Len(t, entityErrors, 2)
-		require.Equal(t, entityErrors[0].Message, "error resolving HelloWithErrorsByName. empty key")
-		require.Equal(t, entityErrors[1].Message, "error resolving HelloWithErrorsByName")
+		errMessages := []string{
+			entityErrors[0].Message,
+			entityErrors[1].Message,
+		}
+
+		require.Contains(t, errMessages, "error (empty key) resolving HelloWithErrorsByName")
+		require.Contains(t, errMessages, "error resolving HelloWithErrorsByName")
 
 		require.Len(t, resp.Entities, 5)
 		require.Equal(t, resp.Entities[0].Name, "first name - 1")

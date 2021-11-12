@@ -20,7 +20,7 @@ func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name str
 	if name == "inject error" {
 		return nil, fmt.Errorf("error resolving HelloWithErrorsByName")
 	} else if name == "" {
-		return nil, fmt.Errorf("error resolving HelloWithErrorsByName. empty key")
+		return nil, fmt.Errorf("error (empty key) resolving HelloWithErrorsByName")
 	}
 
 	return &generated.HelloWithErrors{

@@ -79,47 +79,58 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-
 		case "Hello":
-			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-			}
+			entity, err := func() (*Hello, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err == nil {
+					return ec.resolvers.Entity().FindHelloByName(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindHelloByName(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "Hello": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "Hello"`)
 			}
 
 			list[idx[i]] = entity
 			return nil
 
 		case "HelloWithErrors":
-			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-			}
+			entity, err := func() (*HelloWithErrors, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err == nil {
+					return ec.resolvers.Entity().FindHelloWithErrorsByName(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindHelloWithErrorsByName(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "HelloWithErrors": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "HelloWithErrors"`)
 			}
 
 			list[idx[i]] = entity
 			return nil
 
 		case "PlanetRequires":
-			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-			}
+			entity, err := func() (*PlanetRequires, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err == nil {
+					return ec.resolvers.Entity().FindPlanetRequiresByName(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindPlanetRequiresByName(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "PlanetRequires": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "PlanetRequires"`)
 			}
 
 			entity.Diameter, err = ec.unmarshalNInt2int(ctx, rep["diameter"])
@@ -131,15 +142,19 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			return nil
 
 		case "PlanetRequiresNested":
-			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-			}
+			entity, err := func() (*PlanetRequiresNested, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err == nil {
+					return ec.resolvers.Entity().FindPlanetRequiresNestedByName(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindPlanetRequiresNestedByName(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "PlanetRequiresNested": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "PlanetRequiresNested"`)
 			}
 
 			entity.World.Foo, err = ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
@@ -151,34 +166,41 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			return nil
 
 		case "World":
-			id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "helloName"))
-			}
-			id1, err := ec.unmarshalNString2string(ctx, rep["foo"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "foo"))
-			}
+			entity, err := func() (*World, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
+				if err == nil {
+					id1, err := ec.unmarshalNString2string(ctx, rep["foo"])
+					if err == nil {
+						return ec.resolvers.Entity().FindWorldByHelloNameAndFoo(ctx, id0, id1)
+					}
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindWorldByHelloNameAndFoo(ctx,
-				id0, id1)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "World": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "World"`)
 			}
 
 			list[idx[i]] = entity
 			return nil
 
 		case "WorldName":
-			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-			}
+			entity, err := func() (*WorldName, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err == nil {
+					return ec.resolvers.Entity().FindWorldNameByName(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindWorldNameByName(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "WorldName": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "WorldName"`)
 			}
 
 			list[idx[i]] = entity
@@ -277,7 +299,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			e.Wait()
 		}
 	}
-
 	buildRepresentationGroups(representations)
 
 	switch len(repsMap) {

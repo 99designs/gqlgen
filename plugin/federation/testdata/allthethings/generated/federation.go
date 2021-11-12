@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+	"github.com/99designs/gqlgen/plugin/federation/testdata/allthethings/model"
 )
 
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
@@ -75,82 +76,92 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-
 		case "ExternalExtension":
-			id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "upc"))
-			}
+			entity, err := func() (*model.ExternalExtension, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
+				if err == nil {
+					return ec.resolvers.Entity().FindExternalExtensionByUpc(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindExternalExtensionByUpc(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "ExternalExtension": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "ExternalExtension"`)
 			}
 
 			list[idx[i]] = entity
 			return nil
 
 		case "Hello":
-			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-			}
+			entity, err := func() (*model.Hello, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err == nil {
+					return ec.resolvers.Entity().FindHelloByName(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindHelloByName(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "Hello": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "Hello"`)
 			}
 
 			list[idx[i]] = entity
 			return nil
 
 		case "NestedKey":
-			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
-			}
-			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "helloName"))
-			}
+			entity, err := func() (*model.NestedKey, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
+				if err == nil {
+					id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
+					if err == nil {
+						return ec.resolvers.Entity().FindNestedKeyByIDAndHelloName(ctx, id0, id1)
+					}
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindNestedKeyByIDAndHelloName(ctx,
-				id0, id1)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "NestedKey": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "NestedKey"`)
 			}
 
 			list[idx[i]] = entity
 			return nil
 
 		case "VeryNestedKey":
-			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
-			}
-			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "helloName"))
-			}
-			id2, err := ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "worldFoo"))
-			}
-			id3, err := ec.unmarshalNInt2int(ctx, rep["world"].(map[string]interface{})["bar"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "worldBar"))
-			}
-			id4, err := ec.unmarshalNString2string(ctx, rep["more"].(map[string]interface{})["world"].(map[string]interface{})["foo"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "moreWorldFoo"))
-			}
+			entity, err := func() (*model.VeryNestedKey, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
+				if err == nil {
+					id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
+					if err == nil {
+						id2, err := ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
+						if err == nil {
+							id3, err := ec.unmarshalNInt2int(ctx, rep["world"].(map[string]interface{})["bar"])
+							if err == nil {
+								id4, err := ec.unmarshalNString2string(ctx, rep["more"].(map[string]interface{})["world"].(map[string]interface{})["foo"])
+								if err == nil {
+									return ec.resolvers.Entity().FindVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(ctx, id0, id1, id2, id3, id4)
+								}
+							}
+						}
+					}
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(ctx,
-				id0, id1, id2, id3, id4)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "VeryNestedKey": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "VeryNestedKey"`)
 			}
 
 			entity.ID, err = ec.unmarshalNString2string(ctx, rep["id"])
@@ -167,19 +178,29 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			return nil
 
 		case "World":
-			id0, err := ec.unmarshalNString2string(ctx, rep["foo"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "foo"))
-			}
-			id1, err := ec.unmarshalNInt2int(ctx, rep["bar"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "bar"))
+			entity, err := func() (*model.World, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["foo"])
+				if err == nil {
+					return ec.resolvers.Entity().FindWorldByFoo(ctx, id0)
+				}
+				return nil, nil
+			}()
+
+			if entity == nil {
+				entity, err = func() (*model.World, error) {
+					id0, err := ec.unmarshalNInt2int(ctx, rep["bar"])
+					if err == nil {
+						return ec.resolvers.Entity().FindWorldByBar(ctx, id0)
+					}
+					return nil, nil
+				}()
 			}
 
-			entity, err := ec.resolvers.Entity().FindWorldByFooAndBar(ctx,
-				id0, id1)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "World": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "World"`)
 			}
 
 			list[idx[i]] = entity
@@ -230,7 +251,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			e.Wait()
 		}
 	}
-
 	buildRepresentationGroups(representations)
 
 	switch len(repsMap) {

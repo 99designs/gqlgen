@@ -18,9 +18,9 @@ func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*gen
 
 func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name string) (*generated.HelloWithErrors, error) {
 	if name == "inject error" {
-		return nil, fmt.Errorf("error resolving HelloWithErrorsByName")
+		return nil, generated.ErrResolvingHelloWithErrorsByName
 	} else if name == "" {
-		return nil, fmt.Errorf("error (empty key) resolving HelloWithErrorsByName")
+		return nil, generated.ErrEmptyKeyResolvingHelloWithErrorsByName
 	}
 
 	return &generated.HelloWithErrors{

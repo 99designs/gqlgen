@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/99designs/gqlgen/example/federation/accounts/graph/model"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
@@ -75,32 +76,39 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-
 		case "EmailHost":
-			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
-			}
+			entity, err := func() (*model.EmailHost, error) {
+				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
+				if err == nil {
+					return ec.resolvers.Entity().FindEmailHostByID(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindEmailHostByID(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "EmailHost": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "EmailHost"`)
 			}
 
 			list[idx[i]] = entity
 			return nil
 
 		case "User":
-			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
-			}
+			entity, err := func() (*model.User, error) {
+				id0, err := ec.unmarshalNID2string(ctx, rep["id"])
+				if err == nil {
+					return ec.resolvers.Entity().FindUserByID(ctx, id0)
+				}
+				return nil, nil
+			}()
 
-			entity, err := ec.resolvers.Entity().FindUserByID(ctx,
-				id0)
 			if err != nil {
-				return err
+				return fmt.Errorf(`resolving Entity "User": %w`, err)
+			}
+			if entity == nil {
+				return errors.New(`unable to resolve Entity "User"`)
 			}
 
 			list[idx[i]] = entity
@@ -151,7 +159,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			e.Wait()
 		}
 	}
-
 	buildRepresentationGroups(representations)
 
 	switch len(repsMap) {

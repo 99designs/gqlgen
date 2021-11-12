@@ -6,6 +6,8 @@
 
 {{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
 
+{{ .Imports }}
+
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
 	if ec.DisableIntrospection {
 		return fedruntime.Service{}, errors.New("federated introspection disabled")
@@ -56,7 +58,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 	isMulti := func(typeName string) bool {
 		switch typeName {
 		{{- range .Entities -}}
-			{{- if .ResolverName -}}
+			{{- if .Resolvers -}}
 				{{- if .Multi -}}
 			case "{{.Def.Name}}":
 				return true
@@ -78,24 +80,31 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-		{{ range .Entities }}
-			{{ if .ResolverName }}
+		{{ range $_, $entity := .Entities }}
+			{{- if .Resolvers -}}
 				{{ if not .Multi -}}
-
 			case "{{.Def.Name}}":
-				{{ range $i, $keyField := .KeyFields -}}
-					id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
-					if err != nil {
-						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
-					}
+				{{range $i, $_ := .Resolvers -}}
+					{{- if ne $i 0 -}}if entity == nil { {{- end -}}
+						entity, err {{- if eq $i 0 -}}:{{- end -}}= func() (*{{$entity.Type}}, error) {
+							{{- range $j, $keyField := .KeyFields -}}
+								id{{$j}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+								if err == nil {
+							{{- end}}
+							return ec.resolvers.Entity().{{.ResolverName | go}}(ctx, {{- range $j, $_ := .KeyFields -}} id{{$j}}, {{end}})
+							{{- range .KeyFields -}}
+								}
+							{{- end}}
+							return nil, nil
+						}()
+					{{ if ne $i 0 -}} } {{- end}}
 				{{end}}
-
-				entity, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx,
-					{{ range $i, $_ := .KeyFields -}} id{{$i}}, {{end}})
 				if err != nil {
-					return err
+					return fmt.Errorf(`resolving Entity "{{.Def.Name}}": %w`, err)
 				}
-
+				if entity == nil {
+					return errors.New(`unable to resolve Entity "{{.Def.Name}}"`)
+				}
 				{{ range .Requires }}
 					entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
 					if err != nil {
@@ -112,7 +121,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			return errors.New("unknown type: "+typeName)
 		}
 	}
-	
+
 	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
 		// we need to do our own panic handling, because we may be called in a
 		// goroutine, where the usual panic handling can't catch us
@@ -123,10 +132,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-		{{ range .Entities -}}
-			{{ if .ResolverName -}}
+		{{ range $_, $entity := .Entities }}
+			{{ if .Resolvers -}}
 				{{ if .Multi -}}
 				case "{{.Def.Name}}":
+				{{range $i, $_ := .Resolvers -}}
 					_reps := make([]*{{.InputType}}, len(reps))
 
 					for i, rep := range reps {
@@ -150,7 +160,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					}
 
 					for i, entity := range entities {
-						{{- range .Requires -}}
+						{{- range $entity.Requires -}}
 							{{- range .Fields -}}
 								entity.{{.NameGo}}, err = ec.{{.TypeReference.UnmarshalFunc}}(ctx, reps[i]["{{.Name}}"])
 								if err != nil {
@@ -163,7 +173,8 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return nil
 				{{ end }}
 			{{ end }}
-		{{- end }}
+		{{ end }}
+	{{- end }}
 		default:
 			return errors.New("unknown type: "+typeName)
 		}
@@ -193,7 +204,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			e.Wait()
 		}
 	}
- 
 	buildRepresentationGroups(representations)
 
 	switch len(repsMap) {

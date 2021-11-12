@@ -1,6 +1,8 @@
 package federation
 
 import (
+	"encoding/json"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -48,6 +50,55 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[1].Name, "first name - 2")
 	})
 
+	t.Run("HelloWithError entities - single federation key", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "HelloWithErrors",
+				"name":       "first name - 1",
+			}, {
+				"__typename": "HelloWithErrors",
+				"name":       "first name - 2",
+			}, {
+				"__typename": "HelloWithErrors",
+				"name":       "inject error",
+			}, {
+				"__typename": "HelloWithErrors",
+				"name":       "first name - 3",
+			}, {
+				"__typename": "HelloWithErrors",
+				"name":       "",
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name string `json:"name"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"HelloWithErrors {name}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.Error(t, err)
+		entityErrors, err := getEntityErrors(err)
+		require.NoError(t, err)
+		require.Len(t, entityErrors, 2)
+		require.Equal(t, entityErrors[0].Message, "error resolving HelloWithErrorsByName. empty key")
+		require.Equal(t, entityErrors[1].Message, "error resolving HelloWithErrorsByName")
+
+		require.Len(t, resp.Entities, 5)
+		require.Equal(t, resp.Entities[0].Name, "first name - 1")
+		require.Equal(t, resp.Entities[1].Name, "first name - 2")
+		require.Equal(t, resp.Entities[2].Name, "")
+		require.Equal(t, resp.Entities[3].Name, "first name - 3")
+		require.Equal(t, resp.Entities[4].Name, "")
+	})
+
 	t.Run("World entity with nested key", func(t *testing.T) {
 		representations := []map[string]interface{}{
 			{
@@ -88,6 +139,91 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[1].Foo, "foo 2")
 		require.Equal(t, resp.Entities[1].Hello.Name, "world name - 2")
 	})
+
+	t.Run("Hello WorldName entities (heterogeneous)", func(t *testing.T) {
+		// Entity resolution can handle heterogenenous representations. Meaning,
+		// the representations for resolving entities can be of different
+		// __typename. So the tests here will interleve two different entity
+		// types so that we can test support for resolving different types and
+		// correctly handle ordering.
+		representations := []map[string]interface{}{}
+		count := 10
+
+		for i := 0; i < count; i++ {
+			if i%2 == 0 {
+				representations = append(representations, map[string]interface{}{
+					"__typename": "Hello",
+					"name":       "hello - " + strconv.Itoa(i),
+				})
+			} else {
+				representations = append(representations, map[string]interface{}{
+					"__typename": "WorldName",
+					"name":       "world name - " + strconv.Itoa(i),
+				})
+			}
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name string `json:"name"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"Hello {name}",
+				"WorldName {name}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Len(t, resp.Entities, count)
+
+		for i := 0; i < count; i++ {
+			if i%2 == 0 {
+				require.Equal(t, resp.Entities[i].Name, "hello - "+strconv.Itoa(i))
+			} else {
+				require.Equal(t, resp.Entities[i].Name, "world name - "+strconv.Itoa(i))
+			}
+		}
+	})
+
+	t.Run("PlanetRequires entities with requires directive", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "PlanetRequires",
+				"name":       "earth",
+				"diameter":   12,
+			}, {
+				"__typename": "PlanetRequires",
+				"name":       "mars",
+				"diameter":   10,
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name     string `json:"name"`
+				Diameter int    `json:"diameter"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"PlanetRequires {name, diameter}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, resp.Entities[0].Name, "earth")
+		require.Equal(t, resp.Entities[0].Diameter, 12)
+		require.Equal(t, resp.Entities[1].Name, "mars")
+		require.Equal(t, resp.Entities[1].Diameter, 10)
+	})
 }
 
 func entityQuery(queries []string) string {
@@ -99,4 +235,15 @@ func entityQuery(queries []string) string {
 	}
 
 	return "query($representations:[_Any!]!){_entities(representations:$representations){" + strings.Join(entityQueries, "") + "}}"
+}
+
+type entityResolverErrors []struct {
+	Message string   `json:"message"`
+	Path    []string `json:"path"`
+}
+
+func getEntityErrors(err error) (entityResolverErrors, error) {
+	var errors entityResolverErrors
+	err = json.Unmarshal([]byte(err.Error()), &errors)
+	return errors, err
 }

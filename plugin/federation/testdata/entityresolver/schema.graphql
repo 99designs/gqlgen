@@ -9,6 +9,20 @@ type World @key(fields: "hello { name } foo   ") {
     hello: Hello
 }
 
+type WorldName @key(fields: "name") {
+    name: String!
+}
+
+type HelloWithErrors @key(fields: "name") {
+    name: String!
+}
+
+type PlanetRequires @key(fields: "name") {
+    name: String!
+    size: Int! @requires(fields: "diameter")
+    diameter: Int!
+}
+
 type Query {
     hello: Hello!
     world: World!

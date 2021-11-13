@@ -127,7 +127,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			{{ if .ResolverName -}}
 				{{ if .Multi -}}
 				case "{{.Def.Name}}":
-					_reps := make([]*EntityResolver{{.ResolverName}}Input, len(reps))
+					_reps := make([]*{{.InputType}}, len(reps))
 
 					for i, rep := range reps {
 						{{ range $i, $keyField := .KeyFields -}}
@@ -137,7 +137,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 							}
 						{{end}}
 
-						_reps[i] = &EntityResolver{{.ResolverName}}Input {
+						_reps[i] = &{{.InputType}} {
 						{{ range $i, $keyField := .KeyFields -}}
 							{{$keyField.Field.ToGo}}: id{{$i}},
 						{{end}}
@@ -217,5 +217,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
+
+	return list
 }
 {{end}}

@@ -28,7 +28,7 @@ func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name str
 	}, nil
 }
 
-func (r *entityResolver) FindManyMultiHellosByName(ctx context.Context, reps []*generated.EntityResolverfindManyMultiHellosByNameInput) ([]*generated.MultiHello, error) {
+func (r *entityResolver) FindManyMultiHelloByNames(ctx context.Context, reps []*generated.MultiHelloByNamesInput) ([]*generated.MultiHello, error) {
 	results := []*generated.MultiHello{}
 
 	for _, item := range reps {
@@ -40,7 +40,7 @@ func (r *entityResolver) FindManyMultiHellosByName(ctx context.Context, reps []*
 	return results, nil
 }
 
-func (r *entityResolver) FindManyMultiHelloWithErrorsByName(ctx context.Context, reps []*generated.EntityResolverfindManyMultiHelloWithErrorsByNameInput) ([]*generated.MultiHelloWithError, error) {
+func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*generated.MultiHelloWithErrorByNamesInput) ([]*generated.MultiHelloWithError, error) {
 	return nil, fmt.Errorf("error resolving MultiHelloWorldWithError")
 }
 

@@ -180,7 +180,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 		switch typeName {
 		case "MultiHello":
-			_reps := make([]*EntityResolverfindManyMultiHellosByNameInput, len(reps))
+			_reps := make([]*MultiHelloByNamesInput, len(reps))
 
 			for i, rep := range reps {
 				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
@@ -188,12 +188,12 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 				}
 
-				_reps[i] = &EntityResolverfindManyMultiHellosByNameInput{
+				_reps[i] = &MultiHelloByNamesInput{
 					Name: id0,
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyMultiHellosByName(ctx, _reps)
+			entities, err := ec.resolvers.Entity().FindManyMultiHelloByNames(ctx, _reps)
 			if err != nil {
 				return err
 			}
@@ -202,7 +202,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				list[idx[i]] = entity
 			}
 		case "MultiHelloWithError":
-			_reps := make([]*EntityResolverfindManyMultiHelloWithErrorsByNameInput, len(reps))
+			_reps := make([]*MultiHelloWithErrorByNamesInput, len(reps))
 
 			for i, rep := range reps {
 				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
@@ -210,12 +210,12 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 				}
 
-				_reps[i] = &EntityResolverfindManyMultiHelloWithErrorsByNameInput{
+				_reps[i] = &MultiHelloWithErrorByNamesInput{
 					Name: id0,
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloWithErrorsByName(ctx, _reps)
+			entities, err := ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, _reps)
 			if err != nil {
 				return err
 			}
@@ -278,4 +278,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
+
+	return list
 }

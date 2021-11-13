@@ -47,8 +47,8 @@ type ComplexityRoot struct {
 	Entity struct {
 		FindHelloByName                    func(childComplexity int, name string) int
 		FindHelloWithErrorsByName          func(childComplexity int, name string) int
-		FindManyMultiHelloWithErrorsByName func(childComplexity int, reps []*EntityResolverfindManyMultiHelloWithErrorsByNameInput) int
-		FindManyMultiHellosByName          func(childComplexity int, reps []*EntityResolverfindManyMultiHellosByNameInput) int
+		FindManyMultiHelloByNames          func(childComplexity int, reps []*MultiHelloByNamesInput) int
+		FindManyMultiHelloWithErrorByNames func(childComplexity int, reps []*MultiHelloWithErrorByNamesInput) int
 		FindPlanetRequiresByName           func(childComplexity int, name string) int
 		FindWorldByHelloNameAndFoo         func(childComplexity int, helloName string, foo string) int
 		FindWorldNameByName                func(childComplexity int, name string) int
@@ -100,8 +100,8 @@ type ComplexityRoot struct {
 type EntityResolver interface {
 	FindHelloByName(ctx context.Context, name string) (*Hello, error)
 	FindHelloWithErrorsByName(ctx context.Context, name string) (*HelloWithErrors, error)
-	FindManyMultiHellosByName(ctx context.Context, reps []*EntityResolverfindManyMultiHellosByNameInput) ([]*MultiHello, error)
-	FindManyMultiHelloWithErrorsByName(ctx context.Context, reps []*EntityResolverfindManyMultiHelloWithErrorsByNameInput) ([]*MultiHelloWithError, error)
+	FindManyMultiHelloByNames(ctx context.Context, reps []*MultiHelloByNamesInput) ([]*MultiHello, error)
+	FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*MultiHelloWithErrorByNamesInput) ([]*MultiHelloWithError, error)
 	FindPlanetRequiresByName(ctx context.Context, name string) (*PlanetRequires, error)
 	FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*World, error)
 	FindWorldNameByName(ctx context.Context, name string) (*WorldName, error)
@@ -146,29 +146,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Entity.FindHelloWithErrorsByName(childComplexity, args["name"].(string)), true
 
-	case "Entity.findManyMultiHelloWithErrorsByName":
-		if e.complexity.Entity.FindManyMultiHelloWithErrorsByName == nil {
+	case "Entity.findManyMultiHelloByNames":
+		if e.complexity.Entity.FindManyMultiHelloByNames == nil {
 			break
 		}
 
-		args, err := ec.field_Entity_findManyMultiHelloWithErrorsByName_args(context.TODO(), rawArgs)
+		args, err := ec.field_Entity_findManyMultiHelloByNames_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyMultiHelloWithErrorsByName(childComplexity, args["reps"].([]*EntityResolverfindManyMultiHelloWithErrorsByNameInput)), true
+		return e.complexity.Entity.FindManyMultiHelloByNames(childComplexity, args["reps"].([]*MultiHelloByNamesInput)), true
 
-	case "Entity.findManyMultiHellosByName":
-		if e.complexity.Entity.FindManyMultiHellosByName == nil {
+	case "Entity.findManyMultiHelloWithErrorByNames":
+		if e.complexity.Entity.FindManyMultiHelloWithErrorByNames == nil {
 			break
 		}
 
-		args, err := ec.field_Entity_findManyMultiHellosByName_args(context.TODO(), rawArgs)
+		args, err := ec.field_Entity_findManyMultiHelloWithErrorByNames_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyMultiHellosByName(childComplexity, args["reps"].([]*EntityResolverfindManyMultiHellosByNameInput)), true
+		return e.complexity.Entity.FindManyMultiHelloWithErrorByNames(childComplexity, args["reps"].([]*MultiHelloWithErrorByNamesInput)), true
 
 	case "Entity.findPlanetRequiresByName":
 		if e.complexity.Entity.FindPlanetRequiresByName == nil {
@@ -414,10 +414,10 @@ directive @extends on OBJECT | INTERFACE
 	{Name: "federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
 union _Entity = Hello | HelloWithErrors | MultiHello | MultiHelloWithError | PlanetRequires | World | WorldName
-input EntityResolverfindManyMultiHellosByNameInput {
+input MultiHelloByNamesInput {
 	Name: String!
 }
-input EntityResolverfindManyMultiHelloWithErrorsByNameInput {
+input MultiHelloWithErrorByNamesInput {
 	Name: String!
 }
 
@@ -425,8 +425,8 @@ input EntityResolverfindManyMultiHelloWithErrorsByNameInput {
 type Entity {
 		findHelloByName(name: String!,): Hello!
 	findHelloWithErrorsByName(name: String!,): HelloWithErrors!
-	findManyMultiHellosByName(reps: [EntityResolverfindManyMultiHellosByNameInput!]!): [MultiHello]
-	findManyMultiHelloWithErrorsByName(reps: [EntityResolverfindManyMultiHelloWithErrorsByNameInput!]!): [MultiHelloWithError]
+	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput!]!): [MultiHello]
+	findManyMultiHelloWithErrorByNames(reps: [MultiHelloWithErrorByNamesInput!]!): [MultiHelloWithError]
 	findPlanetRequiresByName(name: String!,): PlanetRequires!
 	findWorldByHelloNameAndFoo(helloName: String!,foo: String!,): World!
 	findWorldNameByName(name: String!,): WorldName!
@@ -494,13 +494,13 @@ func (ec *executionContext) field_Entity_findHelloWithErrorsByName_args(ctx cont
 	return args, nil
 }
 
-func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorsByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Entity_findManyMultiHelloByNames_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*EntityResolverfindManyMultiHelloWithErrorsByNameInput
+	var arg0 []*MultiHelloByNamesInput
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNEntityResolverfindManyMultiHelloWithErrorsByNameInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHelloWithErrorsByNameInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloByNamesInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -509,13 +509,13 @@ func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorsByName_args
 	return args, nil
 }
 
-func (ec *executionContext) field_Entity_findManyMultiHellosByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*EntityResolverfindManyMultiHellosByNameInput
+	var arg0 []*MultiHelloWithErrorByNamesInput
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNEntityResolverfindManyMultiHellosByNameInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHellosByNameInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloWithErrorByNamesInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -730,7 +730,7 @@ func (ec *executionContext) _Entity_findHelloWithErrorsByName(ctx context.Contex
 	return ec.marshalNHelloWithErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHelloWithErrors(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Entity_findManyMultiHellosByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -747,7 +747,7 @@ func (ec *executionContext) _Entity_findManyMultiHellosByName(ctx context.Contex
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Entity_findManyMultiHellosByName_args(ctx, rawArgs)
+	args, err := ec.field_Entity_findManyMultiHelloByNames_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -756,7 +756,7 @@ func (ec *executionContext) _Entity_findManyMultiHellosByName(ctx context.Contex
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHellosByName(rctx, args["reps"].([]*EntityResolverfindManyMultiHellosByNameInput))
+			return ec.resolvers.Entity().FindManyMultiHelloByNames(rctx, args["reps"].([]*MultiHelloByNamesInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
@@ -793,7 +793,7 @@ func (ec *executionContext) _Entity_findManyMultiHellosByName(ctx context.Contex
 	return ec.marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHello(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Entity_findManyMultiHelloWithErrorsByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -810,7 +810,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorsByName(ctx conte
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Entity_findManyMultiHelloWithErrorsByName_args(ctx, rawArgs)
+	args, err := ec.field_Entity_findManyMultiHelloWithErrorByNames_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -819,7 +819,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorsByName(ctx conte
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloWithErrorsByName(rctx, args["reps"].([]*EntityResolverfindManyMultiHelloWithErrorsByNameInput))
+			return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(rctx, args["reps"].([]*MultiHelloWithErrorByNamesInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
@@ -2701,8 +2701,8 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputEntityResolverfindManyMultiHelloWithErrorsByNameInput(ctx context.Context, obj interface{}) (EntityResolverfindManyMultiHelloWithErrorsByNameInput, error) {
-	var it EntityResolverfindManyMultiHelloWithErrorsByNameInput
+func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Context, obj interface{}) (MultiHelloByNamesInput, error) {
+	var it MultiHelloByNamesInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -2724,8 +2724,8 @@ func (ec *executionContext) unmarshalInputEntityResolverfindManyMultiHelloWithEr
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputEntityResolverfindManyMultiHellosByNameInput(ctx context.Context, obj interface{}) (EntityResolverfindManyMultiHellosByNameInput, error) {
-	var it EntityResolverfindManyMultiHellosByNameInput
+func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, obj interface{}) (MultiHelloWithErrorByNamesInput, error) {
+	var it MultiHelloWithErrorByNamesInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -2878,7 +2878,7 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "findManyMultiHellosByName":
+		case "findManyMultiHelloByNames":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2887,7 +2887,7 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Entity_findManyMultiHellosByName(ctx, field)
+				res = ec._Entity_findManyMultiHelloByNames(ctx, field)
 				return res
 			}
 
@@ -2898,7 +2898,7 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "findManyMultiHelloWithErrorsByName":
+		case "findManyMultiHelloWithErrorByNames":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2907,7 +2907,7 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Entity_findManyMultiHelloWithErrorsByName(ctx, field)
+				res = ec._Entity_findManyMultiHelloWithErrorByNames(ctx, field)
 				return res
 			}
 
@@ -3804,58 +3804,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNEntityResolverfindManyMultiHelloWithErrorsByNameInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHelloWithErrorsByNameInputᚄ(ctx context.Context, v interface{}) ([]*EntityResolverfindManyMultiHelloWithErrorsByNameInput, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*EntityResolverfindManyMultiHelloWithErrorsByNameInput, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNEntityResolverfindManyMultiHelloWithErrorsByNameInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHelloWithErrorsByNameInput(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNEntityResolverfindManyMultiHelloWithErrorsByNameInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHelloWithErrorsByNameInput(ctx context.Context, v interface{}) (*EntityResolverfindManyMultiHelloWithErrorsByNameInput, error) {
-	res, err := ec.unmarshalInputEntityResolverfindManyMultiHelloWithErrorsByNameInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNEntityResolverfindManyMultiHellosByNameInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHellosByNameInputᚄ(ctx context.Context, v interface{}) ([]*EntityResolverfindManyMultiHellosByNameInput, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*EntityResolverfindManyMultiHellosByNameInput, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNEntityResolverfindManyMultiHellosByNameInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHellosByNameInput(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNEntityResolverfindManyMultiHellosByNameInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐEntityResolverfindManyMultiHellosByNameInput(ctx context.Context, v interface{}) (*EntityResolverfindManyMultiHellosByNameInput, error) {
-	res, err := ec.unmarshalInputEntityResolverfindManyMultiHellosByNameInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) marshalNHello2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHello(ctx context.Context, sel ast.SelectionSet, v Hello) graphql.Marshaler {
 	return ec._Hello(ctx, sel, &v)
 }
@@ -3897,6 +3845,58 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloByNamesInputᚄ(ctx context.Context, v interface{}) ([]*MultiHelloByNamesInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*MultiHelloByNamesInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloByNamesInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloByNamesInput(ctx context.Context, v interface{}) (*MultiHelloByNamesInput, error) {
+	res, err := ec.unmarshalInputMultiHelloByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloWithErrorByNamesInputᚄ(ctx context.Context, v interface{}) ([]*MultiHelloWithErrorByNamesInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*MultiHelloWithErrorByNamesInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloWithErrorByNamesInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloWithErrorByNamesInput(ctx context.Context, v interface{}) (*MultiHelloWithErrorByNamesInput, error) {
+	res, err := ec.unmarshalInputMultiHelloWithErrorByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNPlanetRequires2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐPlanetRequires(ctx context.Context, sel ast.SelectionSet, v PlanetRequires) graphql.Marshaler {

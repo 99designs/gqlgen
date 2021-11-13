@@ -11,8 +11,6 @@ jobs:
       - run: go mod download
       - run: .github/workflows/check-fmt
       - run: .github/workflows/check-generate
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
 
   coverage:
     runs-on: ubuntu-latest

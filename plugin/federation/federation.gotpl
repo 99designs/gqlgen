@@ -160,14 +160,13 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						{{- end -}}
 						list[idx[i]] = entity
 					}
+					return nil
 				{{ end }}
-			{{- end }}
+			{{ end }}
 		{{- end }}
 		default:
 			return errors.New("unknown type: "+typeName)
 		}
-
-		return nil
 	}
 
 	resolveEntityGroup := func(typeName string, reps []map[string]interface{}, idx []int) {
@@ -217,7 +216,5 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
-
-	return list
 }
 {{end}}

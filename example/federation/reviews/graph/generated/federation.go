@@ -139,8 +139,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		default:
 			return errors.New("unknown type: " + typeName)
 		}
-
-		return nil
 	}
 
 	resolveEntityGroup := func(typeName string, reps []map[string]interface{}, idx []int) {
@@ -190,6 +188,4 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
-
-	return list
 }

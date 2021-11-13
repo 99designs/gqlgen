@@ -54,7 +54,6 @@ func TestImports(t *testing.T) {
 				require.Equal(t, fmt.Sprintf("bar%d", i), a.Lookup(cBar))
 			} else {
 				require.Equal(t, "bar", a.Lookup(cBar))
-
 			}
 		}
 	})
@@ -89,5 +88,4 @@ turtles "github.com/99designs/gqlgen/codegen/templates/testdata/pkg_mismatch"`,
 		require.Equal(t, `abar "github.com/99designs/gqlgen/codegen/templates/testdata/a/bar"
 bbar "github.com/99designs/gqlgen/codegen/templates/testdata/b/bar"`, a.String())
 	})
-
 }

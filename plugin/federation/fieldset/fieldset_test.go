@@ -58,7 +58,6 @@ func TestWithPrefix(t *testing.T) {
 }
 
 func TestInvalid(t *testing.T) {
-
 	require.Panics(t, func() {
 		New("foo bar{baz", nil)
 	})

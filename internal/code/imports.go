@@ -62,7 +62,7 @@ func goModuleRoot(dir string) (string, bool) {
 	}
 	dir = filepath.ToSlash(dir)
 
-	var dirs = []string{dir}
+	dirs := []string{dir}
 	result := goModuleSearchResult{}
 
 	for {
@@ -129,7 +129,6 @@ func goModuleRoot(dir string) (string, bool) {
 // ImportPathForDir takes a path and returns a golang import path for the package
 func ImportPathForDir(dir string) (res string) {
 	dir, err := filepath.Abs(dir)
-
 	if err != nil {
 		panic(err)
 	}

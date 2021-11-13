@@ -23,20 +23,18 @@ const (
 	graphqlwsConnectionKeepAliveMsg = graphqlwsMessageType("ka")
 )
 
-var (
-	allGraphqlwsMessageTypes = []graphqlwsMessageType{
-		graphqlwsConnectionInitMsg,
-		graphqlwsConnectionTerminateMsg,
-		graphqlwsStartMsg,
-		graphqlwsStopMsg,
-		graphqlwsConnectionAckMsg,
-		graphqlwsConnectionErrorMsg,
-		graphqlwsDataMsg,
-		graphqlwsErrorMsg,
-		graphqlwsCompleteMsg,
-		graphqlwsConnectionKeepAliveMsg,
-	}
-)
+var allGraphqlwsMessageTypes = []graphqlwsMessageType{
+	graphqlwsConnectionInitMsg,
+	graphqlwsConnectionTerminateMsg,
+	graphqlwsStartMsg,
+	graphqlwsStopMsg,
+	graphqlwsConnectionAckMsg,
+	graphqlwsConnectionErrorMsg,
+	graphqlwsDataMsg,
+	graphqlwsErrorMsg,
+	graphqlwsCompleteMsg,
+	graphqlwsConnectionKeepAliveMsg,
+}
 
 type (
 	graphqlwsMessageExchanger struct {

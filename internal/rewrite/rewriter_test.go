@@ -35,7 +35,6 @@ func TestRewriter(t *testing.T) {
 				ImportPath: "bytes",
 			},
 		}, imps)
-
 	})
 
 	t.Run("out of scope dir", func(t *testing.T) {

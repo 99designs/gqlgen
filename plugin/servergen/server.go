@@ -24,6 +24,7 @@ var _ plugin.CodeGenerator = &Plugin{}
 func (m *Plugin) Name() string {
 	return "servergen"
 }
+
 func (m *Plugin) GenerateCode(data *codegen.Data) error {
 	serverBuild := &ServerBuild{
 		ExecPackageName:     data.Config.Exec.ImportPath(),

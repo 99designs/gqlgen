@@ -16,7 +16,6 @@ func TestGetResolverContext(t *testing.T) {
 }
 
 func testContext(sel ast.SelectionSet) context.Context {
-
 	ctx := context.Background()
 
 	rqCtx := &OperationContext{}

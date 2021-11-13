@@ -19,16 +19,14 @@ const (
 	graphqltransportwsCompleteMsg       = graphqltransportwsMessageType("complete")
 )
 
-var (
-	allGraphqltransportwsMessageTypes = []graphqltransportwsMessageType{
-		graphqltransportwsConnectionInitMsg,
-		graphqltransportwsConnectionAckMsg,
-		graphqltransportwsSubscribeMsg,
-		graphqltransportwsNextMsg,
-		graphqltransportwsErrorMsg,
-		graphqltransportwsCompleteMsg,
-	}
-)
+var allGraphqltransportwsMessageTypes = []graphqltransportwsMessageType{
+	graphqltransportwsConnectionInitMsg,
+	graphqltransportwsConnectionAckMsg,
+	graphqltransportwsSubscribeMsg,
+	graphqltransportwsNextMsg,
+	graphqltransportwsErrorMsg,
+	graphqltransportwsCompleteMsg,
+}
 
 type (
 	graphqltransportwsMessageExchanger struct {

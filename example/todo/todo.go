@@ -12,8 +12,10 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-var you = &User{ID: 1, Name: "You"}
-var them = &User{ID: 2, Name: "Them"}
+var (
+	you  = &User{ID: 1, Name: "You"}
+	them = &User{ID: 2, Name: "Them"}
+)
 
 type ckey string
 

@@ -128,7 +128,6 @@ func TestReferencedPackages(t *testing.T) {
 
 		assert.Equal(t, []string{"github.com/test", "github.com/otherpkg"}, pkgs)
 	})
-
 }
 
 func TestConfigCheck(t *testing.T) {

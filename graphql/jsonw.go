@@ -5,19 +5,23 @@ import (
 	"io"
 )
 
-var nullLit = []byte(`null`)
-var trueLit = []byte(`true`)
-var falseLit = []byte(`false`)
-var openBrace = []byte(`{`)
-var closeBrace = []byte(`}`)
-var openBracket = []byte(`[`)
-var closeBracket = []byte(`]`)
-var colon = []byte(`:`)
-var comma = []byte(`,`)
+var (
+	nullLit      = []byte(`null`)
+	trueLit      = []byte(`true`)
+	falseLit     = []byte(`false`)
+	openBrace    = []byte(`{`)
+	closeBrace   = []byte(`}`)
+	openBracket  = []byte(`[`)
+	closeBracket = []byte(`]`)
+	colon        = []byte(`:`)
+	comma        = []byte(`,`)
+)
 
-var Null = &lit{nullLit}
-var True = &lit{trueLit}
-var False = &lit{falseLit}
+var (
+	Null  = &lit{nullLit}
+	True  = &lit{trueLit}
+	False = &lit{falseLit}
+)
 
 type Marshaler interface {
 	MarshalGQL(w io.Writer)

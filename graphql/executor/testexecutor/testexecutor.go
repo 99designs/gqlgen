@@ -25,7 +25,6 @@ func (mr *MockResponse) UnmarshalGQL(v interface{}) error {
 func (mr *MockResponse) MarshalGQL(w io.Writer) {
 	buf := new(bytes.Buffer)
 	err := json.NewEncoder(buf).Encode(mr)
-
 	if err != nil {
 		panic(err)
 	}
@@ -84,7 +83,6 @@ func New() *TestExecutor {
 							// return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
 							return &MockResponse{Name: "test"}, nil
 						})
-
 						if err != nil {
 							panic(err)
 						}

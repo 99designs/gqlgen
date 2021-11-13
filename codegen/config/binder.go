@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+
 	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/codegen/templates"
@@ -80,8 +81,10 @@ func (b *Binder) FindType(pkgName string, typeName string) (types.Type, error) {
 	return obj.Type(), nil
 }
 
-var MapType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
-var InterfaceType = types.NewInterfaceType(nil, nil)
+var (
+	MapType       = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
+	InterfaceType = types.NewInterfaceType(nil, nil)
+)
 
 func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 	models := b.cfg.Models[name].Model
@@ -147,7 +150,6 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 }
 
 func indexDefs(pkg *packages.Package) map[string]types.Object {
-
 	res := make(map[string]types.Object)
 
 	scope := pkg.Types.Scope()
@@ -255,12 +257,12 @@ func (t *TypeReference) IsScalar() bool {
 }
 
 func (t *TypeReference) UniquenessKey() string {
-	var nullability = "O"
+	nullability := "O"
 	if t.GQL.NonNull {
 		nullability = "N"
 	}
 
-	var elemNullability = ""
+	elemNullability := ""
 	if t.GQL.Elem != nil && t.GQL.Elem.NonNull {
 		// Fix for #896
 		elemNullability = "ᚄ"

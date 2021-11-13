@@ -141,7 +141,6 @@ func TestWebsocket(t *testing.T) {
 }
 
 func TestWebsocketWithKeepAlive(t *testing.T) {
-
 	h := testserver.New()
 	h.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 100 * time.Millisecond,
@@ -318,7 +317,6 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 }
 
 func wsConnect(url string) *websocket.Conn {
-
 	return wsConnectWithSubprocotol(url, "")
 }
 

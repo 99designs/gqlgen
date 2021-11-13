@@ -107,7 +107,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				return err
 			}
 
-			entity.Host.ID, err = ec.unmarshalNString2string(ctx, rep["hostID"])
+			entity.Host.ID, err = ec.unmarshalNString2string(ctx, rep["host"].(map[string]interface{})["id"])
 			if err != nil {
 				return err
 			}

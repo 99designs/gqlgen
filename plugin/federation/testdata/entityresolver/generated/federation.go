@@ -130,6 +130,26 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			list[idx[i]] = entity
 			return nil
 
+		case "PlanetRequiresNested":
+			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+			}
+
+			entity, err := ec.resolvers.Entity().FindPlanetRequiresNestedByName(ctx,
+				id0)
+			if err != nil {
+				return err
+			}
+
+			entity.World.Foo, err = ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
+			if err != nil {
+				return err
+			}
+
+			list[idx[i]] = entity
+			return nil
+
 		case "World":
 			id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
 			if err != nil {

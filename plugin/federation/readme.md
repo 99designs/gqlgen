@@ -9,7 +9,7 @@ There are several different tests. Some will process the configuration file dire
 
 Running entity resolver tests.
 1. Go to `plugin/federation`
-2. Run the command `go run github.com/99designs/gqlgen --config testdata/entityresolver/gqlgen.yml`
+2. Run the command `go generate`
 3. Run the tests with `go test ./...`.
 
 # Architecture
@@ -33,7 +33,7 @@ That allows the federation plugin to generate `GetMany` resolver function that c
 From that entity type, the resolver function would be
 
 ```
-func (r *entityResolver) FindManyMultiHellosByName(ctx context.Context, reps []*generated.EntityResolverfindManyMultiHellosByNameInput) ([]*generated.MultiHello, error) {
+func (r *entityResolver) FindManyMultiHellosByName(ctx context.Context, reps []*generated.ManyMultiHellosByNameInput) ([]*generated.MultiHello, error) {
   /// <Your code to resolve the list of items>
 }
 ```

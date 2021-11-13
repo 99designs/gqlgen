@@ -1,3 +1,4 @@
+//go:generate go run ../../testdata/gqlgen.go -config testdata/entityresolver/gqlgen.yml
 package federation
 
 import (

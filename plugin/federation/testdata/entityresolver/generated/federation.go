@@ -179,6 +179,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
+
 		case "MultiHello":
 			_reps := make([]*MultiHelloByNamesInput, len(reps))
 
@@ -201,6 +202,8 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			for i, entity := range entities {
 				list[idx[i]] = entity
 			}
+			return nil
+
 		case "MultiHelloWithError":
 			_reps := make([]*MultiHelloWithErrorByNamesInput, len(reps))
 
@@ -223,12 +226,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			for i, entity := range entities {
 				list[idx[i]] = entity
 			}
+			return nil
 
 		default:
 			return errors.New("unknown type: " + typeName)
 		}
-
-		return nil
 	}
 
 	resolveEntityGroup := func(typeName string, reps []map[string]interface{}, idx []int) {
@@ -278,6 +280,4 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
-
-	return list
 }

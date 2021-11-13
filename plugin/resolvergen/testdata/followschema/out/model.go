@@ -2,8 +2,7 @@ package customresolver
 
 import "context"
 
-type Resolver struct {
-}
+type Resolver struct{}
 
 type QueryResolver interface {
 	Resolver(ctx context.Context) (*Resolver, error)

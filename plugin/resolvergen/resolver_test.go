@@ -55,7 +55,6 @@ func TestLayoutFollowSchemaWithCustomFilename(t *testing.T) {
 }
 
 func TestLayoutInvalidModelPath(t *testing.T) {
-
 	cfg, err := config.LoadConfig("testdata/invalid_model_path/gqlgen.yml")
 	require.NoError(t, err)
 
@@ -63,7 +62,6 @@ func TestLayoutInvalidModelPath(t *testing.T) {
 
 	_, err = codegen.BuildData(cfg)
 	require.Error(t, err)
-
 }
 
 func testFollowSchemaPersistence(t *testing.T, dir string) {

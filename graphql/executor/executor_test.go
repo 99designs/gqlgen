@@ -214,7 +214,6 @@ func query(exec *testexecutor.TestExecutor, op, q string) *graphql.Response {
 			End:   now,
 		},
 	})
-
 	if err != nil {
 		return exec.DispatchError(ctx, err)
 	}

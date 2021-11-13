@@ -10,8 +10,7 @@ type ForcedResolver struct {
 	Field Circle
 }
 
-type ModelMethods struct {
-}
+type ModelMethods struct{}
 
 func (m ModelMethods) NoContext() bool {
 	return true
@@ -58,8 +57,7 @@ func (m MarshalPanic) MarshalGQL(w io.Writer) {
 	panic("BOOM")
 }
 
-type Panics struct {
-}
+type Panics struct{}
 
 func (p *Panics) FieldFuncMarshal(ctx context.Context, u []MarshalPanic) []MarshalPanic {
 	return []MarshalPanic{MarshalPanic("aa"), MarshalPanic("bb")}

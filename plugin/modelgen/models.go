@@ -20,6 +20,7 @@ type FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Fiel
 func defaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
 	return GoTagFieldHook(td, fd, f)
 }
+
 func defaultBuildMutateHook(b *ModelBuild) *ModelBuild {
 	return b
 }

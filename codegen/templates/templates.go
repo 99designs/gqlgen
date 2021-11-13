@@ -589,7 +589,7 @@ func render(filename string, tpldata interface{}) (*bytes.Buffer, error) {
 }
 
 func write(filename string, b []byte, packages *code.Packages) error {
-	err := os.MkdirAll(filepath.Dir(filename), 0755)
+	err := os.MkdirAll(filepath.Dir(filename), 0o755)
 	if err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
@@ -600,7 +600,7 @@ func write(filename string, b []byte, packages *code.Packages) error {
 		formatted = b
 	}
 
-	err = ioutil.WriteFile(filename, formatted, 0644)
+	err = ioutil.WriteFile(filename, formatted, 0o644)
 	if err != nil {
 		return fmt.Errorf("failed to write %s: %w", filename, err)
 	}

@@ -12,13 +12,16 @@ type StringFromContextInterface struct {
 	OperationName string
 }
 
-var _ graphql.ContextMarshaler = StringFromContextInterface{}
-var _ graphql.ContextUnmarshaler = (*StringFromContextInterface)(nil)
+var (
+	_ graphql.ContextMarshaler   = StringFromContextInterface{}
+	_ graphql.ContextUnmarshaler = (*StringFromContextInterface)(nil)
+)
 
 func (StringFromContextInterface) MarshalGQLContext(ctx context.Context, w io.Writer) error {
 	io.WriteString(w, strconv.Quote(graphql.GetFieldContext(ctx).Field.Name))
 	return nil
 }
+
 func (i *StringFromContextInterface) UnmarshalGQLContext(ctx context.Context, v interface{}) error {
 	i.OperationName = graphql.GetFieldContext(ctx).Field.Name
 	return nil

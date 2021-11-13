@@ -10,6 +10,7 @@ import (
 func MarshalID(s string) Marshaler {
 	return MarshalString(s)
 }
+
 func UnmarshalID(v interface{}) (string, error) {
 	switch v := v.(type) {
 	case string:

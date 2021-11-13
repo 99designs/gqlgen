@@ -21,8 +21,10 @@ type Plugin struct {
 	typeName string
 }
 
-var _ plugin.CodeGenerator = &Plugin{}
-var _ plugin.ConfigMutator = &Plugin{}
+var (
+	_ plugin.CodeGenerator = &Plugin{}
+	_ plugin.ConfigMutator = &Plugin{}
+)
 
 func (m *Plugin) Name() string {
 	return "stubgen"

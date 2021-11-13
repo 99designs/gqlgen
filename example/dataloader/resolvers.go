@@ -14,6 +14,7 @@ type Customer struct {
 	Name      string `json:"name"`
 	AddressID int
 }
+
 type Order struct {
 	ID     int       `json:"id"`
 	Date   time.Time `json:"date"`

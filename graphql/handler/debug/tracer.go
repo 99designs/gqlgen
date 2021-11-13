@@ -67,5 +67,4 @@ func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHand
 	fmt.Fprintln(a.out, "}")
 	fmt.Fprintln(a.out)
 	return resp
-
 }

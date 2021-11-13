@@ -11,8 +11,7 @@ import (
 	"github.com/99designs/gqlgen/example/scalars/model"
 )
 
-type Resolver struct {
-}
+type Resolver struct{}
 
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}

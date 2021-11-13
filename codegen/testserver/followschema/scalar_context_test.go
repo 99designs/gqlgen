@@ -23,7 +23,6 @@ func TestFloatInfAndNaN(t *testing.T) {
 		err := c.Post(`query { infinity }`, nil)
 		require.Error(t, err)
 	})
-
 }
 
 func TestContextPassedToMarshal(t *testing.T) {

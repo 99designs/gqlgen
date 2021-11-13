@@ -84,5 +84,4 @@ func TestTodo(t *testing.T) {
 
 		require.EqualError(t, err, "[{\"message\":\"map[string]interface {} is not an int\",\"path\":[\"torture2d\",\"customerIds\",0,0]}]")
 	})
-
 }

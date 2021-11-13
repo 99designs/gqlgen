@@ -47,5 +47,4 @@ func TestGET(t *testing.T) {
 		assert.Equal(t, http.StatusNotAcceptable, resp.Code, resp.Body.String())
 		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
-
 }

@@ -17,7 +17,8 @@ import (
 func TestEntityResolver(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(
 		generated.NewExecutableSchema(generated.Config{
-			Resolvers: &entityresolver.Resolver{}}),
+			Resolvers: &entityresolver.Resolver{},
+		}),
 	))
 
 	t.Run("Hello entities", func(t *testing.T) {
@@ -234,7 +235,8 @@ func TestEntityResolver(t *testing.T) {
 func TestMultiEntityResolver(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(
 		generated.NewExecutableSchema(generated.Config{
-			Resolvers: &entityresolver.Resolver{}}),
+			Resolvers: &entityresolver.Resolver{},
+		}),
 	))
 
 	t.Run("MultiHello entities", func(t *testing.T) {

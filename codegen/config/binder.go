@@ -6,6 +6,8 @@ import (
 	"go/token"
 	"go/types"
 
+	"golang.org/x/tools/go/packages"
+
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -15,11 +17,12 @@ var ErrTypeNotFound = errors.New("unable to find type")
 
 // Binder connects graphql types to golang types using static analysis
 type Binder struct {
-	pkgs       *code.Packages
-	schema     *ast.Schema
-	cfg        *Config
-	References []*TypeReference
-	SawInvalid bool
+	pkgs        *code.Packages
+	schema      *ast.Schema
+	cfg         *Config
+	References  []*TypeReference
+	SawInvalid  bool
+	objectCache map[string]map[string]types.Object
 }
 
 func (c *Config) NewBinder() *Binder {
@@ -78,8 +81,10 @@ func (b *Binder) FindType(pkgName string, typeName string) (types.Type, error) {
 	return obj.Type(), nil
 }
 
-var MapType = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
-var InterfaceType = types.NewInterfaceType(nil, nil)
+var (
+	MapType       = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
+	InterfaceType = types.NewInterfaceType(nil, nil)
+)
 
 func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 	models := b.cfg.Models[name].Model
@@ -112,45 +117,61 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 	if pkgName == "" {
 		return nil, fmt.Errorf("package cannot be nil")
 	}
-	fullName := typeName
-	if pkgName != "" {
-		fullName = pkgName + "." + typeName
-	}
 
 	pkg := b.pkgs.LoadWithTypes(pkgName)
 	if pkg == nil {
 		err := b.pkgs.Errors()
 		if err != nil {
-			return nil, fmt.Errorf("package could not be loaded: %s: %w", fullName, err)
+			return nil, fmt.Errorf("package could not be loaded: %s.%s: %w", pkgName, typeName, err)
 		}
-		return nil, fmt.Errorf("required package was not loaded: %s", fullName)
+		return nil, fmt.Errorf("required package was not loaded: %s.%s", pkgName, typeName)
+	}
+
+	if b.objectCache == nil {
+		b.objectCache = make(map[string]map[string]types.Object, b.pkgs.Count())
+	}
+
+	defsIndex, ok := b.objectCache[pkgName]
+	if !ok {
+		defsIndex = indexDefs(pkg)
+		b.objectCache[pkgName] = defsIndex
 	}
 
 	// function based marshalers take precedence
+	if val, ok := defsIndex["Marshal"+typeName]; ok {
+		return val, nil
+	}
+
+	if val, ok := defsIndex[typeName]; ok {
+		return val, nil
+	}
+
+	return nil, fmt.Errorf("%w: %s.%s", ErrTypeNotFound, pkgName, typeName)
+}
+
+func indexDefs(pkg *packages.Package) map[string]types.Object {
+	res := make(map[string]types.Object)
+
+	scope := pkg.Types.Scope()
 	for astNode, def := range pkg.TypesInfo.Defs {
 		// only look at defs in the top scope
-		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {
+		if def == nil {
+			continue
+		}
+		parent := def.Parent()
+		if parent == nil || parent != scope {
 			continue
 		}
 
-		if astNode.Name == "Marshal"+typeName {
-			return def, nil
+		if _, ok := res[astNode.Name]; !ok {
+			// The above check may not be really needed, it is only here to have a consistent behavior with
+			// previous implementation of FindObject() function which only honored the first inclusion of a def.
+			// If this is still needed, we can consider something like sync.Map.LoadOrStore() to avoid two lookups.
+			res[astNode.Name] = def
 		}
 	}
 
-	// then look for types directly
-	for astNode, def := range pkg.TypesInfo.Defs {
-		// only look at defs in the top scope
-		if def == nil || def.Parent() == nil || def.Parent() != pkg.Types.Scope() {
-			continue
-		}
-
-		if astNode.Name == typeName {
-			return def, nil
-		}
-	}
-
-	return nil, fmt.Errorf("%w: %s", ErrTypeNotFound, fullName)
+	return res
 }
 
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
@@ -236,12 +257,12 @@ func (t *TypeReference) IsScalar() bool {
 }
 
 func (t *TypeReference) UniquenessKey() string {
-	var nullability = "O"
+	nullability := "O"
 	if t.GQL.NonNull {
 		nullability = "N"
 	}
 
-	var elemNullability = ""
+	elemNullability := ""
 	if t.GQL.Elem != nil && t.GQL.Elem.NonNull {
 		// Fix for #896
 		elemNullability = "ᚄ"

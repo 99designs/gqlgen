@@ -70,7 +70,6 @@ func TestToGoPrivate(t *testing.T) {
 }
 
 func Test_wordWalker(t *testing.T) {
-
 	helper := func(str string) []*wordInfo {
 		resultList := []*wordInfo{}
 		wordWalker(str, func(info *wordInfo) {

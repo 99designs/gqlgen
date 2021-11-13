@@ -15,6 +15,26 @@ type HelloWithErrors struct {
 
 func (HelloWithErrors) IsEntity() {}
 
+type MultiHello struct {
+	Name string `json:"name"`
+}
+
+func (MultiHello) IsEntity() {}
+
+type MultiHelloByNamesInput struct {
+	Name string `json:"Name"`
+}
+
+type MultiHelloWithError struct {
+	Name string `json:"name"`
+}
+
+func (MultiHelloWithError) IsEntity() {}
+
+type MultiHelloWithErrorByNamesInput struct {
+	Name string `json:"Name"`
+}
+
 type PlanetRequires struct {
 	Name     string `json:"name"`
 	Size     int    `json:"size"`

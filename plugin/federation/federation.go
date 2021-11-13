@@ -3,6 +3,7 @@ package federation
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -89,6 +90,7 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 
 	entities := ""
 	resolvers := ""
+	entityResolverInputDefinitions := ""
 	for i, e := range f.Entities {
 		if i != 0 {
 			entities += " | "
@@ -96,11 +98,20 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 		entities += e.Name
 
 		if e.ResolverName != "" {
-			resolverArgs := ""
-			for _, keyField := range e.KeyFields {
-				resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
+			if e.Multi {
+				entityResolverInputDefinitions += "input " + e.InputType + " {\n"
+				for _, keyField := range e.KeyFields {
+					entityResolverInputDefinitions += fmt.Sprintf("\t%s: %s\n", keyField.Field.ToGo(), keyField.Definition.Type.String())
+				}
+				entityResolverInputDefinitions += "}\n"
+				resolvers += fmt.Sprintf("\t%s(reps: [%s!]!): [%s]\n", e.ResolverName, e.InputType, e.Name)
+			} else {
+				resolverArgs := ""
+				for _, keyField := range e.KeyFields {
+					resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
+				}
+				resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Name)
 			}
-			resolvers += fmt.Sprintf("\t%s(%s): %s!\n", e.ResolverName, resolverArgs, e.Def.Name)
 		}
 	}
 
@@ -113,7 +124,7 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 	// resolvers can be empty if a service defines only "empty
 	// extend" types.  This should be rare.
 	if resolvers != "" {
-		resolvers = `
+		resolvers = entityResolverInputDefinitions + `
 # fake type to build resolver interfaces for users to implement
 type Entity {
 	` + resolvers + `
@@ -143,11 +154,16 @@ extend type Query {
 // Entity represents a federated type
 // that was declared in the GQL schema.
 type Entity struct {
+	// TODO(miguel): encapsulate resolver information in its own
+	// struct for future work to support multiple federated keys.
+
 	Name         string      // The same name as the type declaration
 	KeyFields    []*KeyField // The fields declared in @key.
 	ResolverName string      // The resolver name, such as FindUserByID
+	InputType    string      // The Go generated input type for multi entity resolvers
 	Def          *ast.Definition
 	Requires     []*Requires
+	Multi        bool
 }
 
 type KeyField struct {
@@ -257,7 +273,6 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				}
 
 				keyFields := make([]*KeyField, len(keyFieldSet))
-				resolverName := fmt.Sprintf("find%sBy", schemaType.Name)
 				for i, field := range keyFieldSet {
 					def := field.FieldDefinition(schemaType, schema)
 
@@ -266,19 +281,25 @@ func (f *federation) setEntities(schema *ast.Schema) {
 					}
 
 					keyFields[i] = &KeyField{Definition: def, Field: field}
-					if i > 0 {
-						resolverName += "And"
-					}
-					resolverName += field.ToGo()
 				}
 
 				e := &Entity{
-					Name:         schemaType.Name,
-					KeyFields:    keyFields,
-					Def:          schemaType,
-					ResolverName: resolverName,
-					Requires:     requires,
+					Name:      schemaType.Name,
+					KeyFields: keyFields,
+					Def:       schemaType,
+					Requires:  requires,
 				}
+
+				// Let's process custom entity resolver settings.
+				dir = schemaType.Directives.ForName("entityResolver")
+				if dir != nil {
+					if dirArg := dir.Arguments.ForName("multi"); dirArg != nil {
+						if dirVal, err := dirArg.Value.Value(nil); err == nil {
+							e.Multi = dirVal.(bool)
+						}
+					}
+				}
+
 				// If our schema has a field with a type defined in
 				// another service, then we need to define an "empty
 				// extend" of that type in this service, so this service
@@ -297,8 +318,21 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				//    extend TypeDefinedInOtherService @key(fields: "id") {
 				//       id: ID @external
 				//    }
-				if e.allFieldsAreExternal() {
-					e.ResolverName = ""
+				if !e.allFieldsAreExternal() {
+					resolverFields := []string{}
+					for _, f := range e.KeyFields {
+						resolverFields = append(resolverFields, f.Field.ToGo())
+					}
+
+					resolverFieldsToGo := schemaType.Name + "By" + strings.Join(resolverFields, "And")
+					if e.Multi {
+						resolverFieldsToGo += "s" // Pluralize for better API readability
+						e.ResolverName = fmt.Sprintf("findMany%s", resolverFieldsToGo)
+					} else {
+						e.ResolverName = fmt.Sprintf("find%s", resolverFieldsToGo)
+					}
+
+					e.InputType = resolverFieldsToGo + "Input"
 				}
 
 				f.Entities = append(f.Entities, e)

@@ -28,6 +28,22 @@ func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name str
 	}, nil
 }
 
+func (r *entityResolver) FindManyMultiHelloByNames(ctx context.Context, reps []*generated.MultiHelloByNamesInput) ([]*generated.MultiHello, error) {
+	results := []*generated.MultiHello{}
+
+	for _, item := range reps {
+		results = append(results, &generated.MultiHello{
+			Name: item.Name + " - from multiget",
+		})
+	}
+
+	return results, nil
+}
+
+func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*generated.MultiHelloWithErrorByNamesInput) ([]*generated.MultiHelloWithError, error) {
+	return nil, fmt.Errorf("error resolving MultiHelloWorldWithError")
+}
+
 func (r *entityResolver) FindPlanetRequiresByName(ctx context.Context, name string) (*generated.PlanetRequires, error) {
 	return &generated.PlanetRequires{
 		Name: name,

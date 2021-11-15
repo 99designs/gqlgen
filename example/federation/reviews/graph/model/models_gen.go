@@ -6,10 +6,10 @@ type EmailHost struct {
 	ID string `json:"id"`
 }
 
-func (EmailHost) IsEntity() {}
+func (EmailHost) IsGqlgenEntity() {}
 
 type Manufacturer struct {
 	ID string `json:"id"`
 }
 
-func (Manufacturer) IsEntity() {}
+func (Manufacturer) IsGqlgenEntity() {}

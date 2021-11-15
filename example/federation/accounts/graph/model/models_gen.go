@@ -7,7 +7,7 @@ type EmailHost struct {
 	Name string `json:"name"`
 }
 
-func (EmailHost) IsEntity() {}
+func (EmailHost) IsGqlgenEntity() {}
 
 type User struct {
 	ID       string     `json:"id"`

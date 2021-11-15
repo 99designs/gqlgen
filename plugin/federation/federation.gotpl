@@ -26,8 +26,8 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 }
 
 {{if .Entities}}
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
-	list := make([]fedruntime.Entity, len(representations))
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.GqlgenEntity {
+	list := make([]fedruntime.GqlgenEntity, len(representations))
 	resolveEntity := func(ctx context.Context, i int, rep map[string]interface{}) (err error) {
 		// we need to do our own panic handling, because we may be called in a
 		// goroutine, where the usual panic handling can't catch us

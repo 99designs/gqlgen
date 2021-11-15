@@ -7,7 +7,7 @@ type Manufacturer struct {
 	Name string `json:"name"`
 }
 
-func (Manufacturer) IsEntity() {}
+func (Manufacturer) IsGqlgenEntity() {}
 
 type Product struct {
 	ID           string        `json:"id"`

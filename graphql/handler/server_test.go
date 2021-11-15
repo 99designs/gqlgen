@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -159,6 +160,27 @@ func TestErrorServer(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.Equal(t, 1, len(errors1))
 		assert.Equal(t, 1, len(errors2))
+	})
+}
+
+type panicTransport struct{}
+
+func (t panicTransport) Supports(r *http.Request) bool {
+	return true
+}
+
+func (h panicTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+	panic(fmt.Errorf("panic in transport"))
+}
+
+func TestRecover(t *testing.T) {
+	srv := testserver.New()
+	srv.AddTransport(&panicTransport{})
+
+	t.Run("recover from panic", func(t *testing.T) {
+		resp := get(srv, "/foo?query={name}")
+
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 	})
 }
 

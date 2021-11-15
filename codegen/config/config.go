@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"gopkg.in/yaml.v2"
@@ -18,7 +17,7 @@ import (
 
 type Config struct {
 	SchemaFilename           StringList                 `yaml:"schema,omitempty"`
-	Exec                     PackageConfig              `yaml:"exec"`
+	Exec                     ExecConfig                 `yaml:"exec"`
 	Model                    PackageConfig              `yaml:"model,omitempty"`
 	Federation               PackageConfig              `yaml:"federation,omitempty"`
 	Resolver                 ResolverConfig             `yaml:"resolver,omitempty"`
@@ -28,11 +27,12 @@ type Config struct {
 	Directives               map[string]DirectiveConfig `yaml:"directives,omitempty"`
 	OmitSliceElementPointers bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	SkipValidation           bool                       `yaml:"skip_validation,omitempty"`
+	SkipModTidy              bool                       `yaml:"skip_mod_tidy,omitempty"`
 	Sources                  []*ast.Source              `yaml:"-"`
 	Packages                 *code.Packages             `yaml:"-"`
 	Schema                   *ast.Schema                `yaml:"-"`
 
-	// Deprecated use Federation instead. Will be removed next release
+	// Deprecated: use Federation instead. Will be removed next release
 	Federated bool `yaml:"federated,omitempty"`
 }
 
@@ -43,7 +43,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		SchemaFilename: StringList{"schema.graphql"},
 		Model:          PackageConfig{Filename: "models_gen.go"},
-		Exec:           PackageConfig{Filename: "generated.go"},
+		Exec:           ExecConfig{Filename: "generated.go"},
 		Directives:     map[string]DirectiveConfig{},
 		Models:         TypeMap{},
 	}
@@ -59,7 +59,7 @@ func LoadDefaultConfig() (*Config, error) {
 		var schemaRaw []byte
 		schemaRaw, err = ioutil.ReadFile(filename)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to open schema")
+			return nil, fmt.Errorf("unable to open schema: %w", err)
 		}
 
 		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
@@ -78,7 +78,7 @@ func LoadConfigFromDefaultLocations() (*Config, error) {
 
 	err = os.Chdir(filepath.Dir(cfgFile))
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to enter config dir")
+		return nil, fmt.Errorf("unable to enter config dir: %w", err)
 	}
 	return LoadConfig(cfgFile)
 }
@@ -96,13 +96,23 @@ func LoadConfig(filename string) (*Config, error) {
 
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to read config")
+		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
 
 	if err := yaml.UnmarshalStrict(b, config); err != nil {
-		return nil, errors.Wrap(err, "unable to parse config")
+		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
 
+	if err := CompleteConfig(config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+// CompleteConfig fills in the schema and other values to a config loaded from
+// YAML.
+func CompleteConfig(config *Config) error {
 	defaultDirectives := map[string]DirectiveConfig{
 		"skip":       {SkipRuntime: true},
 		"include":    {SkipRuntime: true},
@@ -140,12 +150,13 @@ func LoadConfig(filename string) (*Config, error) {
 
 				return nil
 			}); err != nil {
-				return nil, errors.Wrapf(err, "failed to walk schema at root %s", pathParts[0])
+				return fmt.Errorf("failed to walk schema at root %s: %w", pathParts[0], err)
 			}
 		} else {
+			var err error
 			matches, err = filepath.Glob(f)
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+				return fmt.Errorf("failed to glob schema filename %s: %w", f, err)
 			}
 		}
 
@@ -163,13 +174,12 @@ func LoadConfig(filename string) (*Config, error) {
 		var schemaRaw []byte
 		schemaRaw, err = ioutil.ReadFile(filename)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to open schema")
+			return fmt.Errorf("unable to open schema: %w", err)
 		}
 
 		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
-
-	return config, nil
+	return nil
 }
 
 func (c *Config) Init() error {
@@ -194,15 +204,8 @@ func (c *Config) Init() error {
 	}
 
 	c.injectBuiltins()
-
 	// prefetch all packages in one big packages.Load call
-	pkgs := []string{
-		"github.com/99designs/gqlgen/graphql",
-		"github.com/99designs/gqlgen/graphql/introspection",
-	}
-	pkgs = append(pkgs, c.Models.ReferencedPackages()...)
-	pkgs = append(pkgs, c.AutoBind...)
-	c.Packages.LoadAll(pkgs...)
+	c.Packages.LoadAll(c.packageList()...)
 
 	//  check everything is valid on the way out
 	err = c.check()
@@ -213,12 +216,30 @@ func (c *Config) Init() error {
 	return nil
 }
 
+func (c *Config) packageList() []string {
+	pkgs := []string{
+		"github.com/99designs/gqlgen/graphql",
+		"github.com/99designs/gqlgen/graphql/introspection",
+	}
+	pkgs = append(pkgs, c.Models.ReferencedPackages()...)
+	pkgs = append(pkgs, c.AutoBind...)
+	return pkgs
+}
+
+func (c *Config) ReloadAllPackages() {
+	c.Packages.ReloadAll(c.packageList()...)
+}
+
 func (c *Config) injectTypesFromSchema() error {
 	c.Directives["goModel"] = DirectiveConfig{
 		SkipRuntime: true,
 	}
 
 	c.Directives["goField"] = DirectiveConfig{
+		SkipRuntime: true,
+	}
+
+	c.Directives["extraTag"] = DirectiveConfig{
 		SkipRuntime: true,
 	}
 
@@ -244,9 +265,15 @@ func (c *Config) injectTypesFromSchema() error {
 
 		if schemaType.Kind == ast.Object || schemaType.Kind == ast.InputObject {
 			for _, field := range schemaType.Fields {
+				typeMapField := TypeMapField{
+					ExtraTag:  c.Models[schemaType.Name].Fields[field.Name].ExtraTag,
+					FieldName: c.Models[schemaType.Name].Fields[field.Name].FieldName,
+					Resolver:  c.Models[schemaType.Name].Fields[field.Name].Resolver,
+				}
+				directive := false
 				if fd := field.Directives.ForName("goField"); fd != nil {
-					forceResolver := c.Models[schemaType.Name].Fields[field.Name].Resolver
-					fieldName := c.Models[schemaType.Name].Fields[field.Name].FieldName
+					forceResolver := typeMapField.Resolver
+					fieldName := typeMapField.FieldName
 
 					if ra := fd.Arguments.ForName("forceResolver"); ra != nil {
 						if fr, err := ra.Value.Value(nil); err == nil {
@@ -260,17 +287,28 @@ func (c *Config) injectTypesFromSchema() error {
 						}
 					}
 
+					typeMapField.FieldName = fieldName
+					typeMapField.Resolver = forceResolver
+					directive = true
+				}
+
+				if ex := field.Directives.ForName("extraTag"); ex != nil {
+					args := []string{}
+					for _, arg := range ex.Arguments {
+						args = append(args, arg.Name+`:"`+arg.Value.Raw+`"`)
+					}
+					typeMapField.ExtraTag = strings.Join(args, " ")
+					directive = true
+				}
+
+				if directive {
 					if c.Models[schemaType.Name].Fields == nil {
 						c.Models[schemaType.Name] = TypeMapEntry{
 							Model:  c.Models[schemaType.Name].Model,
 							Fields: map[string]TypeMapField{},
 						}
 					}
-
-					c.Models[schemaType.Name].Fields[field.Name] = TypeMapField{
-						FieldName: fieldName,
-						Resolver:  forceResolver,
-					}
+					c.Models[schemaType.Name].Fields[field.Name] = typeMapField
 				}
 			}
 		}
@@ -287,6 +325,7 @@ type TypeMapEntry struct {
 type TypeMapField struct {
 	Resolver        bool   `yaml:"resolver"`
 	FieldName       string `yaml:"fieldName"`
+	ExtraTag        string `yaml:"extraTag"`
 	GeneratedMethod string `yaml:"-"`
 }
 
@@ -333,10 +372,10 @@ func (c *Config) check() error {
 	fileList := map[string][]FilenamePackage{}
 
 	if err := c.Models.Check(); err != nil {
-		return errors.Wrap(err, "config.models")
+		return fmt.Errorf("config.models: %w", err)
 	}
 	if err := c.Exec.Check(); err != nil {
-		return errors.Wrap(err, "config.exec")
+		return fmt.Errorf("config.exec: %w", err)
 	}
 	fileList[c.Exec.ImportPath()] = append(fileList[c.Exec.ImportPath()], FilenamePackage{
 		Filename: c.Exec.Filename,
@@ -346,7 +385,7 @@ func (c *Config) check() error {
 
 	if c.Model.IsDefined() {
 		if err := c.Model.Check(); err != nil {
-			return errors.Wrap(err, "config.model")
+			return fmt.Errorf("config.model: %w", err)
 		}
 		fileList[c.Model.ImportPath()] = append(fileList[c.Model.ImportPath()], FilenamePackage{
 			Filename: c.Model.Filename,
@@ -356,7 +395,7 @@ func (c *Config) check() error {
 	}
 	if c.Resolver.IsDefined() {
 		if err := c.Resolver.Check(); err != nil {
-			return errors.Wrap(err, "config.resolver")
+			return fmt.Errorf("config.resolver: %w", err)
 		}
 		fileList[c.Resolver.ImportPath()] = append(fileList[c.Resolver.ImportPath()], FilenamePackage{
 			Filename: c.Resolver.Filename,
@@ -366,7 +405,7 @@ func (c *Config) check() error {
 	}
 	if c.Federation.IsDefined() {
 		if err := c.Federation.Check(); err != nil {
-			return errors.Wrap(err, "config.federation")
+			return fmt.Errorf("config.federation: %w", err)
 		}
 		fileList[c.Federation.ImportPath()] = append(fileList[c.Federation.ImportPath()], FilenamePackage{
 			Filename: c.Federation.Filename,
@@ -470,7 +509,7 @@ func inStrSlice(haystack []string, needle string) bool {
 func findCfg() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
-		return "", errors.Wrap(err, "unable to get working dir to findCfg")
+		return "", fmt.Errorf("unable to get working dir to findCfg: %w", err)
 	}
 
 	cfg := findCfgInDir(dir)
@@ -510,7 +549,7 @@ func (c *Config) autobind() error {
 		}
 
 		for i, p := range ps {
-			if p == nil {
+			if p == nil || p.Module == nil {
 				return fmt.Errorf("unable to load %s - make sure you're using an import path to a package that exists", c.AutoBind[i])
 			}
 			if t := p.Types.Scope().Lookup(t.Name); t != nil {
@@ -554,7 +593,7 @@ func (c *Config) injectBuiltins() {
 		"__EnumValue":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"}},
 		"__InputValue":        {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.InputValue"}},
 		"__Schema":            {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Schema"}},
-		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.Float"}},
+		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.FloatContext"}},
 		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
 		"Int": {Model: StringList{

@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -30,6 +31,7 @@ type (
 		Query         string                 `json:"query"`
 		Variables     map[string]interface{} `json:"variables,omitempty"`
 		OperationName string                 `json:"operationName,omitempty"`
+		Extensions    map[string]interface{} `json:"extensions,omitempty"`
 		HTTP          *http.Request          `json:"-"`
 	}
 
@@ -82,7 +84,7 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 func (p *Client) RawPost(query string, options ...Option) (*Response, error) {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
-		return nil, fmt.Errorf("build: %s", err.Error())
+		return nil, fmt.Errorf("build: %w", err)
 	}
 
 	w := httptest.NewRecorder()
@@ -97,7 +99,7 @@ func (p *Client) RawPost(query string, options ...Option) (*Response, error) {
 	respDataRaw := &Response{}
 	err = json.Unmarshal(w.Body.Bytes(), &respDataRaw)
 	if err != nil {
-		return nil, fmt.Errorf("decode: %s", err.Error())
+		return nil, fmt.Errorf("decode: %w", err)
 	}
 
 	return respDataRaw, nil
@@ -119,15 +121,18 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 		option(bd)
 	}
 
-	switch bd.HTTP.Header.Get("Content-Type") {
-	case "application/json":
+	contentType := bd.HTTP.Header.Get("Content-Type")
+	switch {
+	case regexp.MustCompile(`multipart/form-data; ?boundary=.*`).MatchString(contentType):
+		break
+	case "application/json" == contentType:
 		requestBody, err := json.Marshal(bd)
 		if err != nil {
-			return nil, fmt.Errorf("encode: %s", err.Error())
+			return nil, fmt.Errorf("encode: %w", err)
 		}
 		bd.HTTP.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
 	default:
-		panic("unsupported encoding" + bd.HTTP.Header.Get("Content-Type"))
+		panic("unsupported encoding " + bd.HTTP.Header.Get("Content-Type"))
 	}
 
 	return bd.HTTP, nil
@@ -141,7 +146,7 @@ func unpack(data interface{}, into interface{}) error {
 		ZeroFields:  true,
 	})
 	if err != nil {
-		return fmt.Errorf("mapstructure: %s", err.Error())
+		return fmt.Errorf("mapstructure: %w", err)
 	}
 
 	return d.Decode(data)

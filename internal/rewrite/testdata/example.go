@@ -1,8 +1,10 @@
 package testdata
 
-import "fmt"
+import (
+	"fmt"
 
-import lol "bytes"
+	lol "bytes"
+)
 
 type Foo struct {
 	Field int

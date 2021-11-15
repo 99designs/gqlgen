@@ -14,10 +14,10 @@ to register query hash with original query on a server.
 ## Usage
 
 In order to enable Automatic Persisted Queries you need to change your client. For more information see
-[Automatic Persisted Queries Link](https://github.com/apollographql/apollo-link-persisted-queries) documentation.
+[Automatic Persisted Queries Link](https://www.apollographql.com/docs/resources/graphql-glossary/#automatic-persisted-queries-apq) documentation.
 
-For the server you need to implement `PersistedQueryCache` interface and pass instance to
-`handler.EnablePersistedQueryCache` option.
+For the server you need to implement the `graphql.Cache` interface and pass an instance to
+the `extension.AutomaticPersistedQuery` type. Make sure the extension is applied to your GraphQL handler.
 
 See example using [go-redis](https://github.com/go-redis/redis) package below:
 ```go
@@ -38,7 +38,7 @@ type Cache struct {
 
 const apqPrefix = "apq:"
 
-func NewCache(redisAddress string, password string, ttl time.Duration) (*Cache, error) {
+func NewCache(redisAddress string, ttl time.Duration) (*Cache, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     redisAddress,
 	})

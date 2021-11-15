@@ -15,7 +15,7 @@ gqlgen ships with some built-in helpers for common custom scalar use-cases, `Tim
 scalar Time
 ```
 
-Maps a `Time` GraphQL scalar to a Go `time.Time` struct.
+Maps a `Time` GraphQL scalar to a Go `time.Time` struct. This scalar adheres to the [time.RFC3339Nano](https://pkg.go.dev/time#pkg-constants) format.
 
 ### Map
 
@@ -52,15 +52,21 @@ Maps an arbitrary GraphQL value to a `interface{}` Go type.
 
 ## Custom scalars with user defined types
 
-For user defined types you can implement the graphql.Marshaler and graphql.Unmarshaler interfaces and they will be called.
+For user defined types you can implement the [graphql.Marshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#Marshaler) and [graphql.Unmarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#Unmarshaler) or implement the [graphql.ContextMarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#ContextMarshaler) and [graphql.ContextUnmarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#ContextUnmarshaler) interfaces and they will be called.
 
 ```go
 package mypkg
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"strconv"
 )
+
+//
+// Most common scalars
+//
 
 type YesNo bool
 
@@ -87,6 +93,42 @@ func (y YesNo) MarshalGQL(w io.Writer) {
 		w.Write([]byte(`"no"`))
 	}
 }
+
+//
+// Scalars that need access to the request context
+//
+
+type Length float64
+
+// UnmarshalGQLContext implements the graphql.ContextUnmarshaler interface
+func (l *Length) UnmarshalGQLContext(ctx context.Context, v interface{}) error {
+	s, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("Length must be a string")
+	}
+	length, err := ParseLength(s)
+	if err != nil {
+		return err
+	}
+	*l = length
+	return nil
+}
+
+// MarshalGQLContext implements the graphql.ContextMarshaler interface
+func (l Length) MarshalGQLContext(ctx context.Context, w io.Writer) error {
+	s, err := l.FormatContext(ctx)
+	if err != nil {
+		return err
+	}
+	w.Write([]byte(strconv.Quote(s)))
+	return nil
+}
+
+// ParseLength parses a length measurement string with unit on the end (eg: "12.45in")
+func ParseLength(string) (Length, error)
+
+// ParseLength formats the string using a value in the context to specify format
+func (l Length) FormatContext(ctx context.Context) (string, error)
 ```
 
 and then wire up the type in .gqlgen.yml or via directives like normal:
@@ -149,11 +191,14 @@ models:
 **Note:** you also can un/marshal to pointer types via this approach, simply accept a pointer in your
 `Marshal...` func and return one in your `Unmarshal...` func.
 
+**Note:** you can also un/marshal with a context by having your custom marshal function return a
+`graphql.ContextMarshaler` _and_ your unmarshal function take a `context.Context` as the first argument.
+
 See the [example/scalars](https://github.com/99designs/gqlgen/tree/master/example/scalars) package for more examples.
 
-## Unmarshaling Errors
+## Marshaling/Unmarshaling Errors
 
-The errors that occur as part of custom scalar unmarshaling will return a full path to the field.
+The errors that occur as part of custom scalar marshaling/unmarshaling will return a full path to the field.
 For example, given the following schema ...
 
 ```graphql
@@ -203,4 +248,4 @@ input ContactDetailsInput {
 }
 ```
 
-
+**Note:** Marshaling errors can only be returned when using the `graphql.ContextMarshaler` style interface.

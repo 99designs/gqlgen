@@ -53,6 +53,22 @@ func TestExecutor(t *testing.T) {
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
+	t.Run("invokes root field middleware in order", func(t *testing.T) {
+		var calls []string
+		exec.AroundRootFields(func(ctx context.Context, next graphql.RootResolver) graphql.Marshaler {
+			calls = append(calls, "first")
+			return next(ctx)
+		})
+		exec.AroundRootFields(func(ctx context.Context, next graphql.RootResolver) graphql.Marshaler {
+			calls = append(calls, "second")
+			return next(ctx)
+		})
+
+		resp := query(exec, "", "{name}")
+		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.Equal(t, []string{"first", "second"}, calls)
+	})
+
 	t.Run("invokes field middleware in order", func(t *testing.T) {
 		var calls []string
 		exec.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {

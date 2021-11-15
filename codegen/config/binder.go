@@ -1,13 +1,13 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"go/token"
 	"go/types"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -117,7 +117,11 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 
 	pkg := b.pkgs.LoadWithTypes(pkgName)
 	if pkg == nil {
-		return nil, errors.Errorf("required package was not loaded: %s", fullName)
+		err := b.pkgs.Errors()
+		if err != nil {
+			return nil, fmt.Errorf("package could not be loaded: %s: %w", fullName, err)
+		}
+		return nil, fmt.Errorf("required package was not loaded: %s", fullName)
 	}
 
 	// function based marshalers take precedence
@@ -144,22 +148,14 @@ func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, erro
 		}
 	}
 
-	return nil, errors.Errorf("unable to find type %s\n", fullName)
+	return nil, fmt.Errorf("unable to find type %s\n", fullName)
 }
 
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
-	newRef := &TypeReference{
-		GO:          types.NewPointer(ref.GO),
-		GQL:         ref.GQL,
-		CastType:    ref.CastType,
-		Definition:  ref.Definition,
-		Unmarshaler: ref.Unmarshaler,
-		Marshaler:   ref.Marshaler,
-		IsMarshaler: ref.IsMarshaler,
-	}
-
-	b.References = append(b.References, newRef)
-	return newRef
+	newRef := *ref
+	newRef.GO = types.NewPointer(ref.GO)
+	b.References = append(b.References, &newRef)
+	return &newRef
 }
 
 // TypeReference is used by args and field types. The Definition can refer to both input and output types.
@@ -172,33 +168,21 @@ type TypeReference struct {
 	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
 	IsMarshaler bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
+	IsContext   bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
 	if p, isPtr := ref.GO.(*types.Pointer); isPtr {
-		return &TypeReference{
-			GO:          p.Elem(),
-			Target:      ref.Target,
-			GQL:         ref.GQL,
-			CastType:    ref.CastType,
-			Definition:  ref.Definition,
-			Unmarshaler: ref.Unmarshaler,
-			Marshaler:   ref.Marshaler,
-			IsMarshaler: ref.IsMarshaler,
-		}
+		newRef := *ref
+		newRef.GO = p.Elem()
+		return &newRef
 	}
 
 	if ref.IsSlice() {
-		return &TypeReference{
-			GO:          ref.GO.(*types.Slice).Elem(),
-			Target:      ref.Target,
-			GQL:         ref.GQL.Elem,
-			CastType:    ref.CastType,
-			Definition:  ref.Definition,
-			Unmarshaler: ref.Unmarshaler,
-			Marshaler:   ref.Marshaler,
-			IsMarshaler: ref.IsMarshaler,
-		}
+		newRef := *ref
+		newRef.GO = ref.GO.(*types.Slice).Elem()
+		newRef.GQL = ref.GQL.Elem
+		return &newRef
 	}
 	return nil
 }
@@ -208,6 +192,16 @@ func (t *TypeReference) IsPtr() bool {
 	return isPtr
 }
 
+// fix for https://github.com/golang/go/issues/31103 may make it possible to remove this (may still be useful)
+//
+func (t *TypeReference) IsPtrToPtr() bool {
+	if p, isPtr := t.GO.(*types.Pointer); isPtr {
+		_, isPtr := p.Elem().(*types.Pointer)
+		return isPtr
+	}
+	return false
+}
+
 func (t *TypeReference) IsNilable() bool {
 	return IsNilable(t.GO)
 }
@@ -215,6 +209,14 @@ func (t *TypeReference) IsNilable() bool {
 func (t *TypeReference) IsSlice() bool {
 	_, isSlice := t.GO.(*types.Slice)
 	return t.GQL.Elem != nil && isSlice
+}
+
+func (t *TypeReference) IsPtrToSlice() bool {
+	if t.IsPtr() {
+		_, isPointerToSlice := t.GO.(*types.Pointer).Elem().(*types.Slice)
+		return isPointerToSlice
+	}
+	return false
 }
 
 func (t *TypeReference) IsNamed() bool {
@@ -351,8 +353,13 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 
 		if fun, isFunc := obj.(*types.Func); isFunc {
 			ref.GO = fun.Type().(*types.Signature).Params().At(0).Type()
+			ref.IsContext = fun.Type().(*types.Signature).Results().At(0).Type().String() == "github.com/99designs/gqlgen/graphql.ContextMarshaler"
 			ref.Marshaler = fun
 			ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
+		} else if hasMethod(obj.Type(), "MarshalGQLContext") && hasMethod(obj.Type(), "UnmarshalGQLContext") {
+			ref.GO = obj.Type()
+			ref.IsContext = true
+			ref.IsMarshaler = true
 		} else if hasMethod(obj.Type(), "MarshalGQL") && hasMethod(obj.Type(), "UnmarshalGQL") {
 			ref.GO = obj.Type()
 			ref.IsMarshaler = true

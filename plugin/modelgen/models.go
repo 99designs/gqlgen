@@ -13,6 +13,11 @@ import (
 
 type BuildMutateHook = func(b *ModelBuild) *ModelBuild
 
+type FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error)
+
+func defaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+	return f, nil
+}
 func defaultBuildMutateHook(b *ModelBuild) *ModelBuild {
 	return b
 }
@@ -58,11 +63,13 @@ type EnumValue struct {
 func New() plugin.Plugin {
 	return &Plugin{
 		MutateHook: defaultBuildMutateHook,
+		FieldHook:  defaultFieldMutateHook,
 	}
 }
 
 type Plugin struct {
 	MutateHook BuildMutateHook
+	FieldHook  FieldMutateHook
 }
 
 var _ plugin.ConfigMutator = &Plugin{}
@@ -162,12 +169,27 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					typ = types.NewPointer(typ)
 				}
 
-				it.Fields = append(it.Fields, &Field{
+				tag := `json:"` + field.Name + `"`
+				if extraTag := cfg.Models[schemaType.Name].Fields[field.Name].ExtraTag; extraTag != "" {
+					tag = tag + " " + extraTag
+				}
+
+				f := &Field{
 					Name:        name,
 					Type:        typ,
 					Description: field.Description,
-					Tag:         `json:"` + field.Name + `"`,
-				})
+					Tag:         tag,
+				}
+
+				if m.FieldHook != nil {
+					mf, err := m.FieldHook(schemaType, field, f)
+					if err != nil {
+						return fmt.Errorf("generror: field %v.%v: %w", it.Name, field.Name, err)
+					}
+					f = mf
+				}
+
+				it.Fields = append(it.Fields, f)
 			}
 
 			b.Models = append(b.Models, it)
@@ -214,13 +236,22 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		b = m.MutateHook(b)
 	}
 
-	return templates.Render(templates.Options{
+	err := templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,
 		Filename:        cfg.Model.Filename,
 		Data:            b,
 		GeneratedHeader: true,
 		Packages:        cfg.Packages,
 	})
+	if err != nil {
+		return err
+	}
+
+	// We may have generated code in a package we already loaded, so we reload all packages
+	// to allow packages to be compared correctly
+	cfg.ReloadAllPackages()
+
+	return nil
 }
 
 func isStruct(t types.Type) bool {

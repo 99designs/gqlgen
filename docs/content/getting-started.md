@@ -14,23 +14,45 @@ This tutorial will take you through the process of building a GraphQL server wit
 
 You can find the finished code for this tutorial [here](https://github.com/vektah/gqlgen-tutorials/tree/master/gettingstarted)
 
-## Setup Project
+## Set up Project
 
-Create a directory for your project, and initialise it as a Go Module:
+Create a directory for your project, and [initialise it as a Go Module](https://golang.org/doc/tutorial/create-module):
 
-```sh
-$ mkdir gqlgen-todos
-$ cd gqlgen-todos
-$ go mod init github.com/[username]/gqlgen-todos
-$ go get github.com/99designs/gqlgen
+```shell
+mkdir gqlgen-todos
+cd gqlgen-todos
+go mod init github.com/[username]/gqlgen-todos
+```
+
+Next, create a `tools.go` file and add gqlgen as a [tool dependency for your module](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module).
+
+```go
+//go:build tools
+// +build tools
+
+package tools
+
+import (
+	_ "github.com/99designs/gqlgen"
+)
+```
+
+To automatically add the dependency to your `go.mod` run
+```shell
+go mod tidy
+```
+
+If you want to specify a particular version of gqlgen, you can use `go get`. For example
+```shell
+go get -d github.com/99designs/gqlgen@v0.14.0
 ```
 
 ## Building the server
 
 ### Create the project skeleton
 
-```bash
-$ go run github.com/99designs/gqlgen init
+```shell
+go run github.com/99designs/gqlgen init
 ```
 
 This will create our suggested package layout. You can modify these paths in gqlgen.yml if you need to.
@@ -85,8 +107,8 @@ type Mutation {
 
 ### Implement the resolvers
 
-`gqlgen generate` compares the schema file (`graph/schema.graphqls`) with the models `graph/model/*` and wherever it
-can it will bind directly to the model.
+When executed, gqlgen's `generate` command compares the schema file (`graph/schema.graphqls`) with the models `graph/model/*`, and, wherever it
+can, it will bind directly to the model.  That was done already when `init` was run.  We'll edit the schema later in the tutorial, but for now, let's look at what was generated already.
 
 If we take a look in `graph/schema.resolvers.go` we will see all the times that gqlgen couldn't match them up. For us
 it was twice:
@@ -103,14 +125,15 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 
 We just need to implement these two methods to get our server working:
 
-First we need somewhere to track our state, lets put it in `graph/resolver.go`:
+First we need somewhere to track our state, lets put it in `graph/resolver.go`. The `graph/resolver.go` file is where we declare our app's dependencies, like our database. It gets initialized once in `server.go` when we create the graph.
+
 ```go
 type Resolver struct{
 	todos []*model.Todo
 }
 ```
-This is where we declare any dependencies for our app like our database, it gets initialized once in `server.go` when
-we create the graph.
+
+Returning to `graph/schema.resolvers.go`, let's implement the bodies of those automatically generated resolver functions.  For `CreateTodo`, we'll use `math.rand` to simply return a todo with a randomly generated ID and store that in the in-memory todos list --- in a real app, you're likely to use a database or some other backend service.
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
@@ -128,15 +151,17 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 }
 ```
 
+### Run the server
+
 We now have a working server, to start it:
 ```bash
 go run server.go
 ```
 
-then open http://localhost:8080 in a browser. here are some queries to try:
+Open http://localhost:8080 in a browser. Here are some queries to try, starting with creating a todo:
 ```graphql
 mutation createTodo {
-  createTodo(input:{text:"todo", userId:"1"}) {
+  createTodo(input: { text: "todo", userId: "1" }) {
     user {
       id
     }
@@ -144,15 +169,19 @@ mutation createTodo {
     done
   }
 }
+```
 
+And then querying for it:
+
+```graphql
 query findTodos {
-    todos {
-      text
-      done
-      user {
-        name
-      }
+  todos {
+    text
+    done
+    user {
+      name
     }
+  }
 }
 ```
 
@@ -202,10 +231,10 @@ func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, 
 At the top of our `resolver.go`, between `package` and `import`, add the following line:
 
 ```go
-//go:generate go run github.com/99designs/gqlgen
+//go:generate go run github.com/99designs/gqlgen generate
 ```
 
-This magic comment tells `go generate` what command to run when we want to regenerate our code.  To run go generate recursively over your entire project, use this command:
+This magic comment tells `go generate` what command to run when we want to regenerate our code. To run go generate recursively over your entire project, use this command:
 
 ```go
 go generate ./...

@@ -17,7 +17,8 @@ schema:
 
 # Where should the generated server code go?
 exec:
-  filename: graph/generated/generated.go
+  layout: follow-schema
+  dir: graph/generated
   package: generated
 
 # Enable Apollo federation support
@@ -45,6 +46,9 @@ resolver:
 
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
+
+# Optional: set to skip running `go mod tidy` when generating server code
+# skip_mod_tidy: true
 
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
@@ -89,6 +93,9 @@ directive @goModel(model: String, models: [String!]) on OBJECT
 
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
+
+directive @extraTag on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
 ```
 
 > Here be dragons
@@ -101,6 +108,6 @@ Now you can use these directives when defining types in your schema:
 ```graphql
 type User @goModel(model: "github.com/my/app/models.User") {
     id: ID!         @goField(name: "todoId")
-    name: String!   @goField(forceResolver: true)
+    name: String!   @goField(forceResolver: true) @extraTag(xorm: "-")
 }
 ```

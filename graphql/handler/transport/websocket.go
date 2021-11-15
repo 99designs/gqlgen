@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -232,25 +233,31 @@ func (c *wsConnection) subscribe(start time.Time, message *operationMessage) {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				userErr := rc.Recover(ctx, r)
-				c.sendError(message.ID, &gqlerror.Error{Message: userErr.Error()})
+				err := rc.Recover(ctx, r)
+				var gqlerr *gqlerror.Error
+				if !errors.As(err, &gqlerr) {
+					gqlerr = &gqlerror.Error{}
+					if err != nil {
+						gqlerr.Message = err.Error()
+					}
+				}
+				c.sendError(message.ID, gqlerr)
 			}
+			c.complete(message.ID)
+			c.mu.Lock()
+			delete(c.active, message.ID)
+			c.mu.Unlock()
+			cancel()
 		}()
+
 		responses, ctx := c.exec.DispatchOperation(ctx, rc)
 		for {
 			response := responses(ctx)
 			if response == nil {
 				break
 			}
-
 			c.sendResponse(message.ID, response)
 		}
-		c.complete(message.ID)
-
-		c.mu.Lock()
-		delete(c.active, message.ID)
-		c.mu.Unlock()
-		cancel()
 	}()
 }
 

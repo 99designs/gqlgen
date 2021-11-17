@@ -15,7 +15,7 @@ func NoPlugins() Option {
 
 func AddPlugin(p plugin.Plugin) Option {
 	return func(cfg *config.Config, plugins *[]plugin.Plugin) {
-		*plugins = append(*plugins, p)
+		*plugins = append([]plugin.Plugin{p}, *plugins...)
 	}
 }
 

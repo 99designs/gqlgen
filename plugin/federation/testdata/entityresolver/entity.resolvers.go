@@ -50,6 +50,26 @@ func (r *entityResolver) FindPlanetRequiresByName(ctx context.Context, name stri
 	}, nil
 }
 
+func (r *entityResolver) FindPlanetRequiresNestedByName(ctx context.Context, name string) (*generated.PlanetRequiresNested, error) {
+	worlds := map[string]*generated.World{
+		"earth": {
+			Foo: "A",
+		},
+		"mars": {
+			Foo: "B",
+		},
+	}
+	world, ok := worlds[name]
+	if !ok {
+		return nil, fmt.Errorf("unknown planet: %s", name)
+	}
+
+	return &generated.PlanetRequiresNested{
+		Name:  name,
+		World: world,
+	}, nil
+}
+
 func (r *entityResolver) FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.World, error) {
 	return &generated.World{
 		Hello: &generated.Hello{

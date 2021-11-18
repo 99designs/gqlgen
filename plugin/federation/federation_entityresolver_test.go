@@ -231,6 +231,47 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[1].Name, "mars")
 		require.Equal(t, resp.Entities[1].Diameter, 10)
 	})
+
+	t.Run("PlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "PlanetRequiresNested",
+				"name":       "earth",
+				"world": map[string]interface{}{
+					"foo": "A",
+				},
+			}, {
+				"__typename": "PlanetRequiresNested",
+				"name":       "mars",
+				"world": map[string]interface{}{
+					"foo": "B",
+				},
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name  string `json:"name"`
+				World struct {
+					Foo string `json:"foo"`
+				} `json:"world"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"PlanetRequiresNested {name, world { foo }}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, resp.Entities[0].Name, "earth")
+		require.Equal(t, resp.Entities[0].World.Foo, "A")
+		require.Equal(t, resp.Entities[1].Name, "mars")
+		require.Equal(t, resp.Entities[1].World.Foo, "B")
+	})
 }
 
 func TestMultiEntityResolver(t *testing.T) {

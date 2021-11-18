@@ -97,7 +97,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				}
 
 				{{ range .Requires }}
-					entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Name}}"])
+					entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
 					if err != nil {
 						return err
 					}

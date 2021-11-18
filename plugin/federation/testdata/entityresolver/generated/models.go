@@ -43,6 +43,14 @@ type PlanetRequires struct {
 
 func (PlanetRequires) IsEntity() {}
 
+type PlanetRequiresNested struct {
+	Name  string `json:"name"`
+	World *World `json:"world"`
+	Size  int    `json:"size"`
+}
+
+func (PlanetRequiresNested) IsEntity() {}
+
 type World struct {
 	Foo   string `json:"foo"`
 	Bar   int    `json:"bar"`

@@ -29,6 +29,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		Upgrader:              cfg.upgrader,
 		InitFunc:              cfg.websocketInitFunc,
 		KeepAlivePingInterval: cfg.connectionKeepAlivePingInterval,
+		PingPongInterval:      cfg.connectionPingPongInterval,
 	})
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -77,6 +78,7 @@ type Config struct {
 	upgrader                        websocket.Upgrader
 	websocketInitFunc               transport.WebsocketInitFunc
 	connectionKeepAlivePingInterval time.Duration
+	connectionPingPongInterval      time.Duration
 	recover                         graphql.RecoverFunc
 	errorPresenter                  graphql.ErrorPresenterFunc
 	fieldHooks                      []graphql.FieldMiddleware
@@ -207,6 +209,12 @@ func UploadMaxMemory(size int64) Option {
 func WebsocketKeepAliveDuration(duration time.Duration) Option {
 	return func(cfg *Config) {
 		cfg.connectionKeepAlivePingInterval = duration
+	}
+}
+
+func WebsocketPingPongDuration(duration time.Duration) Option {
+	return func(cfg *Config) {
+		cfg.connectionPingPongInterval = duration
 	}
 }
 

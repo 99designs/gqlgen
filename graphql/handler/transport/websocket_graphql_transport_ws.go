@@ -17,16 +17,22 @@ const (
 	graphqltransportwsNextMsg           = graphqltransportwsMessageType("next")
 	graphqltransportwsErrorMsg          = graphqltransportwsMessageType("error")
 	graphqltransportwsCompleteMsg       = graphqltransportwsMessageType("complete")
+	graphqltransportwsPingMsg           = graphqltransportwsMessageType("ping")
+	graphqltransportwsPongMsg           = graphqltransportwsMessageType("pong")
 )
 
-var allGraphqltransportwsMessageTypes = []graphqltransportwsMessageType{
-	graphqltransportwsConnectionInitMsg,
-	graphqltransportwsConnectionAckMsg,
-	graphqltransportwsSubscribeMsg,
-	graphqltransportwsNextMsg,
-	graphqltransportwsErrorMsg,
-	graphqltransportwsCompleteMsg,
-}
+var (
+	allGraphqltransportwsMessageTypes = []graphqltransportwsMessageType{
+		graphqltransportwsConnectionInitMsg,
+		graphqltransportwsConnectionAckMsg,
+		graphqltransportwsSubscribeMsg,
+		graphqltransportwsNextMsg,
+		graphqltransportwsErrorMsg,
+		graphqltransportwsCompleteMsg,
+		graphqltransportwsPingMsg,
+		graphqltransportwsPongMsg,
+	}
+)
 
 type (
 	graphqltransportwsMessageExchanger struct {
@@ -103,6 +109,10 @@ func (m graphqltransportwsMessage) toMessage() (message, error) {
 		t = startMessageType
 	case graphqltransportwsCompleteMsg:
 		t = stopMessageType
+	case graphqltransportwsPingMsg:
+		t = pingMesageType
+	case graphqltransportwsPongMsg:
+		t = pongMessageType
 	}
 
 	return message{
@@ -131,6 +141,10 @@ func (m *graphqltransportwsMessage) fromMessage(msg *message) (err error) {
 		m.Type = graphqltransportwsCompleteMsg
 	case errorMessageType:
 		m.Type = graphqltransportwsErrorMsg
+	case pingMesageType:
+		m.Type = graphqltransportwsPingMsg
+	case pongMessageType:
+		m.Type = graphqltransportwsPongMsg
 	}
 
 	return err

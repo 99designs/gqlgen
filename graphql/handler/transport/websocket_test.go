@@ -316,6 +316,39 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 	})
 }
 
+func TestWebsocketWithPingPongInterval(t *testing.T) {
+	handler := testserver.New()
+	handler.AddTransport(transport.Websocket{
+		PingPongInterval: time.Second * 1,
+	})
+
+	srv := httptest.NewServer(handler)
+	defer srv.Close()
+
+	t.Run("client receives ping and responds with pong", func(t *testing.T) {
+		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		assert.Equal(t, graphqltransportwsPingMsg, readOp(c).Type)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsPongMsg}))
+		assert.Equal(t, graphqltransportwsPingMsg, readOp(c).Type)
+	})
+
+	t.Run("client sends ping and expects pong", func(t *testing.T) {
+		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsPingMsg}))
+		assert.Equal(t, graphqltransportwsPongMsg, readOp(c).Type)
+	})
+}
+
 func wsConnect(url string) *websocket.Conn {
 	return wsConnectWithSubprocotol(url, "")
 }
@@ -374,6 +407,8 @@ const (
 	graphqltransportwsSubscribeMsg      = "subscribe"
 	graphqltransportwsNextMsg           = "next"
 	graphqltransportwsCompleteMsg       = "complete"
+	graphqltransportwsPingMsg           = "ping"
+	graphqltransportwsPongMsg           = "pong"
 )
 
 type operationMessage struct {

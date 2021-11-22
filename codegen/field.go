@@ -179,10 +179,13 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			params = types.NewTuple(vars...)
 		}
 
-		if err = b.bindArgs(f, params); err != nil {
+		// Try to match target function's arguments with GraphQL field arguments
+		newArgs, err := b.bindArgs(f, params)
+		if err != nil {
 			return fmt.Errorf("%s:%d: %w", pos.Filename, pos.Line, err)
 		}
 
+		// Try to match target function's return types with GraphQL field return type
 		result := sig.Results().At(0)
 		tr, err := b.Binder.TypeReference(f.Type, result.Type())
 		if err != nil {
@@ -193,6 +196,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldType = GoFieldMethod
 		f.GoReceiverName = "obj"
 		f.GoFieldName = target.Name()
+		f.Args = newArgs
 		f.TypeReference = tr
 
 		return nil

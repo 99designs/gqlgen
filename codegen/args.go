@@ -73,7 +73,7 @@ func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgu
 	return &newArg, nil
 }
 
-func (b *builder) bindArgs(field *Field, params *types.Tuple) error {
+func (b *builder) bindArgs(field *Field, params *types.Tuple) ([]*FieldArgument, error) {
 	var newArgs []*FieldArgument
 
 nextArg:
@@ -83,7 +83,7 @@ nextArg:
 			if strings.EqualFold(oldArg.Name, param.Name()) {
 				tr, err := b.Binder.TypeReference(oldArg.Type, param.Type())
 				if err != nil {
-					return err
+					return nil, err
 				}
 				oldArg.TypeReference = tr
 
@@ -93,11 +93,10 @@ nextArg:
 		}
 
 		// no matching arg found, abort
-		return fmt.Errorf("arg %s not in schema", param.Name())
+		return nil, fmt.Errorf("arg %s not in schema", param.Name())
 	}
 
-	field.Args = newArgs
-	return nil
+	return newArgs, nil
 }
 
 func (a *Data) Args() map[string][]*FieldArgument {

@@ -265,6 +265,28 @@ func TestWebsocketInitFunc(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "ok", resp.Empty)
 	})
+
+	t.Run("can set a deadline on a websocket connection and close it with a reason", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
+				newCtx, _ := context.WithTimeout(transport.AppendCloseReason(ctx, "beep boop"), time.Millisecond*5)
+				return newCtx, nil
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+
+		time.Sleep(time.Millisecond*10)
+		m := readOp(c)
+		assert.Equal(t, m.Type, connectionErrorMsg)
+		assert.Equal(t, string(m.Payload), `{"message":"beep boop"}`)
+	})
 }
 
 func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {

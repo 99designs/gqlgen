@@ -7,6 +7,7 @@ import (
 // A private key for context that only this package can access. This is important
 // to prevent collisions between different context uses
 var closeReasonCtxKey = &wsCloseReasonContextKey{"close-reason"}
+
 type wsCloseReasonContextKey struct {
 	name string
 }

@@ -21,18 +21,16 @@ const (
 	graphqltransportwsPongMsg           = graphqltransportwsMessageType("pong")
 )
 
-var (
-	allGraphqltransportwsMessageTypes = []graphqltransportwsMessageType{
-		graphqltransportwsConnectionInitMsg,
-		graphqltransportwsConnectionAckMsg,
-		graphqltransportwsSubscribeMsg,
-		graphqltransportwsNextMsg,
-		graphqltransportwsErrorMsg,
-		graphqltransportwsCompleteMsg,
-		graphqltransportwsPingMsg,
-		graphqltransportwsPongMsg,
-	}
-)
+var allGraphqltransportwsMessageTypes = []graphqltransportwsMessageType{
+	graphqltransportwsConnectionInitMsg,
+	graphqltransportwsConnectionAckMsg,
+	graphqltransportwsSubscribeMsg,
+	graphqltransportwsNextMsg,
+	graphqltransportwsErrorMsg,
+	graphqltransportwsCompleteMsg,
+	graphqltransportwsPingMsg,
+	graphqltransportwsPongMsg,
+}
 
 type (
 	graphqltransportwsMessageExchanger struct {

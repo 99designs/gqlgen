@@ -282,7 +282,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		assert.Equal(t, connectionAckMsg, readOp(c).Type)
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 
-		time.Sleep(time.Millisecond*10)
+		time.Sleep(time.Millisecond * 10)
 		m := readOp(c)
 		assert.Equal(t, m.Type, connectionErrorMsg)
 		assert.Equal(t, string(m.Payload), `{"message":"beep boop"}`)

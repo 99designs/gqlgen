@@ -170,6 +170,10 @@ func (c *wsConnection) run() {
 		go c.ping(ctx)
 	}
 
+	// Close the connection when the context is cancelled.
+	// Will optionally send a "close reason" that is retrieved from the context.
+	go c.closeOnCancel(ctx)
+
 	for {
 		start := graphql.Now()
 		m, err := c.me.NextMessage()
@@ -225,6 +229,15 @@ func (c *wsConnection) ping(ctx context.Context) {
 			c.write(&message{t: pingMesageType, payload: json.RawMessage{}})
 		}
 	}
+}
+
+func (c *wsConnection) closeOnCancel(ctx context.Context) {
+	<-ctx.Done()
+
+	if r := closeReasonForContext(ctx); r != "" {
+		c.sendConnectionError(r)
+	}
+	c.close(websocket.CloseNormalClosure, "terminated")
 }
 
 func (c *wsConnection) subscribe(start time.Time, msg *message) {

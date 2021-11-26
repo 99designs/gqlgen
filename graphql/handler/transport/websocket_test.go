@@ -268,10 +268,11 @@ func TestWebsocketInitFunc(t *testing.T) {
 
 	t.Run("can set a deadline on a websocket connection and close it with a reason", func(t *testing.T) {
 		h := testserver.New()
+		var cancel func()
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
-				newCtx, _ := context.WithTimeout(transport.AppendCloseReason(ctx, "beep boop"), time.Millisecond*5)
-				return newCtx, nil
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (newCtx context.Context, _ error) {
+				newCtx, cancel = context.WithTimeout(transport.AppendCloseReason(ctx, "beep boop"), time.Millisecond*5)
+				return
 			},
 		})
 		srv := httptest.NewServer(h)
@@ -281,6 +282,9 @@ func TestWebsocketInitFunc(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 		assert.Equal(t, connectionAckMsg, readOp(c).Type)
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+
+		// Cancel should contain an actual value now, so let's call it when we exit this scope (to make the linter happy)
+		defer cancel()
 
 		time.Sleep(time.Millisecond * 10)
 		m := readOp(c)

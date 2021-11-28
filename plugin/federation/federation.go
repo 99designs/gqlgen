@@ -2,7 +2,6 @@ package federation
 
 import (
 	"fmt"
-	"go/types"
 	"sort"
 	"strings"
 
@@ -17,8 +16,6 @@ import (
 
 type federation struct {
 	Entities []*Entity
-
-	imports []string
 }
 
 // New returns a federation plugin that injects
@@ -161,9 +158,7 @@ type Entity struct {
 	Def       *ast.Definition
 	Resolvers []*EntityResolver
 	Requires  []*Requires
-	// Type      *config.TypeReference // The Go representation of that field type
-	Type  string // The Go representation of that field type
-	Multi bool
+	Multi     bool
 }
 
 type EntityResolver struct {
@@ -201,23 +196,15 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		}
 		for _, e := range f.Entities {
 			obj := data.Objects.ByName(e.Def.Name)
-			e.Type = types.TypeString(obj.Type, func(i *types.Package) string {
-				f.imports = append(f.imports, i.Path())
-				if pkg := data.Config.Packages.NameForPackage(i.Path()); pkg != data.Config.Federation.Package {
-					return pkg
-				}
-				return ""
-			})
-			if e.Type == "" {
-				panic("unknown type " + obj.Type.String())
-			}
 
 			for _, r := range e.Resolvers {
 				// fill in types for key fields
 				//
 				for _, keyField := range r.KeyFields {
 					if len(keyField.Field) == 0 {
-						fmt.Println("skipping field " + keyField.Definition.Name + " in " + r.ResolverName + " in " + e.Def.Name)
+						fmt.Println(
+							"skipping @key field " + keyField.Definition.Name + " in " + r.ResolverName + " in " + e.Def.Name,
+						)
 						continue
 					}
 					cgField := keyField.Field.TypeReference(obj, data.Objects)
@@ -229,7 +216,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 			//
 			for _, reqField := range e.Requires {
 				if len(reqField.Field) == 0 {
-					fmt.Println("skipping requires field " + reqField.Name + " in " + e.Def.Name)
+					fmt.Println("skipping @requires field " + reqField.Name + " in " + e.Def.Name)
 					continue
 				}
 				cgField := reqField.Field.TypeReference(obj, data.Objects)
@@ -247,128 +234,128 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	})
 }
 
-func (f *federation) Imports() string {
-	for _, path := range f.imports {
-		_, _ = templates.CurrentImports.Reserve(path)
-	}
-	return ""
-}
-
 func (f *federation) setEntities(schema *ast.Schema) {
 	for _, schemaType := range schema.Types {
-		if schemaType.Kind == ast.Interface {
-			// TODO: support @key and @extends for interfaces
-			if dir := schemaType.Directives.ForName("key"); dir != nil {
-				panic("@key directive is not currently supported for interfaces.")
-			}
-			if dir := schemaType.Directives.ForName("extends"); dir != nil {
-				panic("@extends directive is not currently supported for interfaces.")
-			}
+		keys, ok := isFederatedEntity(schemaType)
+		if !ok {
 			continue
 		}
-		if schemaType.Kind == ast.Object {
-			keys := schemaType.Directives.ForNames("key")
-			if len(keys) == 0 {
-				continue
-			}
-
-			e := &Entity{
-				Name:      schemaType.Name,
-				Def:       schemaType,
-				Resolvers: nil,
-				Requires:  nil,
-			}
-
-			// Let's process custom entity resolver settings.
-			dir := schemaType.Directives.ForName("entityResolver")
-			if dir != nil {
-				if dirArg := dir.Arguments.ForName("multi"); dirArg != nil {
-					if dirVal, err := dirArg.Value.Value(nil); err == nil {
-						e.Multi = dirVal.(bool)
-					}
-				}
-			}
-
-			// If our schema has a field with a type defined in
-			// another service, then we need to define an "empty
-			// extend" of that type in this service, so this service
-			// knows what the type is like.  But the graphql-server
-			// will never ask us to actually resolve this "empty
-			// extend", so we don't require a resolver function for
-			// it.  (Well, it will never ask in practice; it's
-			// unclear whether the spec guarantees this.  See
-			// https://github.com/apollographql/apollo-server/issues/3852
-			// ).  Example:
-			//    type MyType {
-			//       myvar: TypeDefinedInOtherService
-			//    }
-			//    // Federation needs this type, but
-			//    // it doesn't need a resolver for it!
-			//    extend TypeDefinedInOtherService @key(fields: "id") {
-			//       id: ID @external
-			//    }
-			if !e.allFieldsAreExternal() {
-
-				for _, dir := range keys {
-					if len(dir.Arguments) != 1 || dir.Arguments[0].Name != "fields" {
-						panic("Exactly one `fields` argument needed for @key declaration.")
-					}
-					arg := dir.Arguments[0]
-					keyFieldSet := fieldset.New(arg.Value.Raw, nil)
-
-					keyFields := make([]*KeyField, len(keyFieldSet))
-					resolverFields := []string{}
-					for i, field := range keyFieldSet {
-						def := field.FieldDefinition(schemaType, schema)
-
-						if def == nil {
-							panic(fmt.Sprintf("no field for %v", field))
-						}
-
-						keyFields[i] = &KeyField{Definition: def, Field: field}
-						resolverFields = append(resolverFields, keyFields[i].Field.ToGo())
-					}
-
-					resolverFieldsToGo := schemaType.Name + "By" + strings.Join(resolverFields, "And")
-					var resolverName string
-					if e.Multi {
-						resolverFieldsToGo += "s" // Pluralize for better API readability
-						resolverName = fmt.Sprintf("findMany%s", resolverFieldsToGo)
-					} else {
-						resolverName = fmt.Sprintf("find%s", resolverFieldsToGo)
-					}
-
-					e.Resolvers = append(e.Resolvers, &EntityResolver{
-						ResolverName: resolverName,
-						KeyFields:    keyFields,
-						InputType:    resolverFieldsToGo + "Input",
-					})
-
-					e.Requires = []*Requires{}
-					for _, f := range schemaType.Fields {
-						dir := f.Directives.ForName("requires")
-						if dir == nil {
-							continue
-						}
-						if len(dir.Arguments) != 1 || dir.Arguments[0].Name != "fields" {
-							panic("Exactly one `fields` argument needed for @requires declaration.")
-						}
-						requiresFieldSet := fieldset.New(dir.Arguments[0].Value.Raw, nil)
-						for _, field := range requiresFieldSet {
-							e.Requires = append(e.Requires, &Requires{
-								Name:  field.ToGoPrivate(),
-								Field: field,
-							})
-						}
-					}
-				}
-			}
-			f.Entities = append(f.Entities, e)
+		e := &Entity{
+			Name:      schemaType.Name,
+			Def:       schemaType,
+			Resolvers: nil,
+			Requires:  nil,
 		}
+
+		// Let's process custom entity resolver settings.
+		dir := schemaType.Directives.ForName("entityResolver")
+		if dir != nil {
+			if dirArg := dir.Arguments.ForName("multi"); dirArg != nil {
+				if dirVal, err := dirArg.Value.Value(nil); err == nil {
+					e.Multi = dirVal.(bool)
+				}
+			}
+		}
+
+		// If our schema has a field with a type defined in
+		// another service, then we need to define an "empty
+		// extend" of that type in this service, so this service
+		// knows what the type is like.  But the graphql-server
+		// will never ask us to actually resolve this "empty
+		// extend", so we don't require a resolver function for
+		// it.  (Well, it will never ask in practice; it's
+		// unclear whether the spec guarantees this.  See
+		// https://github.com/apollographql/apollo-server/issues/3852
+		// ).  Example:
+		//    type MyType {
+		//       myvar: TypeDefinedInOtherService
+		//    }
+		//    // Federation needs this type, but
+		//    // it doesn't need a resolver for it!
+		//    extend TypeDefinedInOtherService @key(fields: "id") {
+		//       id: ID @external
+		//    }
+		if !e.allFieldsAreExternal() {
+			for _, dir := range keys {
+				if len(dir.Arguments) != 1 || dir.Arguments[0].Name != "fields" {
+					panic("Exactly one `fields` argument needed for @key declaration.")
+				}
+				arg := dir.Arguments[0]
+				keyFieldSet := fieldset.New(arg.Value.Raw, nil)
+
+				keyFields := make([]*KeyField, len(keyFieldSet))
+				resolverFields := []string{}
+				for i, field := range keyFieldSet {
+					def := field.FieldDefinition(schemaType, schema)
+
+					if def == nil {
+						panic(fmt.Sprintf("no field for %v", field))
+					}
+
+					keyFields[i] = &KeyField{Definition: def, Field: field}
+					resolverFields = append(resolverFields, keyFields[i].Field.ToGo())
+				}
+
+				resolverFieldsToGo := schemaType.Name + "By" + strings.Join(resolverFields, "And")
+				var resolverName string
+				if e.Multi {
+					resolverFieldsToGo += "s" // Pluralize for better API readability
+					resolverName = fmt.Sprintf("findMany%s", resolverFieldsToGo)
+				} else {
+					resolverName = fmt.Sprintf("find%s", resolverFieldsToGo)
+				}
+
+				e.Resolvers = append(e.Resolvers, &EntityResolver{
+					ResolverName: resolverName,
+					KeyFields:    keyFields,
+					InputType:    resolverFieldsToGo + "Input",
+				})
+			}
+
+			e.Requires = []*Requires{}
+			for _, f := range schemaType.Fields {
+				dir := f.Directives.ForName("requires")
+				if dir == nil {
+					continue
+				}
+				if len(dir.Arguments) != 1 || dir.Arguments[0].Name != "fields" {
+					panic("Exactly one `fields` argument needed for @requires declaration.")
+				}
+				requiresFieldSet := fieldset.New(dir.Arguments[0].Value.Raw, nil)
+				for _, field := range requiresFieldSet {
+					e.Requires = append(e.Requires, &Requires{
+						Name:  field.ToGoPrivate(),
+						Field: field,
+					})
+				}
+			}
+		}
+		f.Entities = append(f.Entities, e)
 	}
 
 	// make sure order remains stable across multiple builds
 	sort.Slice(f.Entities, func(i, j int) bool {
 		return f.Entities[i].Name < f.Entities[j].Name
 	})
+}
+
+func isFederatedEntity(schemaType *ast.Definition) ([]*ast.Directive, bool) {
+	switch schemaType.Kind {
+	case ast.Object:
+		keys := schemaType.Directives.ForNames("key")
+		if len(keys) > 0 {
+			return keys, true
+		}
+	case ast.Interface:
+		// TODO: support @key and @extends for interfaces
+		if dir := schemaType.Directives.ForName("key"); dir != nil {
+			panic("@key directive is not currently supported for interfaces.")
+		}
+		if dir := schemaType.Directives.ForName("extends"); dir != nil {
+			panic("@extends directive is not currently supported for interfaces.")
+		}
+	default:
+		// ignore
+	}
+	return nil, false
 }

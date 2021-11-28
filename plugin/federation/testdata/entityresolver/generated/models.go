@@ -64,3 +64,11 @@ type WorldName struct {
 }
 
 func (WorldName) IsEntity() {}
+
+type WorldWithMultipleKeys struct {
+	Foo   string `json:"foo"`
+	Bar   int    `json:"bar"`
+	Hello *Hello `json:"hello"`
+}
+
+func (WorldWithMultipleKeys) IsEntity() {}

@@ -85,6 +85,21 @@ func (r *entityResolver) FindWorldNameByName(ctx context.Context, name string) (
 	}, nil
 }
 
+func (r *entityResolver) FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.WorldWithMultipleKeys, error) {
+	return &generated.WorldWithMultipleKeys{
+		Hello: &generated.Hello{
+			Name: helloName,
+		},
+		Foo: foo,
+	}, nil
+}
+
+func (r *entityResolver) FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*generated.WorldWithMultipleKeys, error) {
+	return &generated.WorldWithMultipleKeys{
+		Bar: bar,
+	}, nil
+}
+
 // Entity returns generated.EntityResolver implementation.
 func (r *Resolver) Entity() generated.EntityResolver { return &entityResolver{r} }
 

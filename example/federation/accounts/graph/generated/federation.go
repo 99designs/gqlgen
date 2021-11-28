@@ -9,8 +9,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/99designs/gqlgen/example/federation/accounts/graph/model"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+)
+
+var (
+	ErrUnknownType  = errors.New("unknown type")
+	ErrTypeNotFound = errors.New("type not found")
 )
 
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
@@ -77,46 +81,48 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 		switch typeName {
 		case "EmailHost":
-			entity, err := func() (*model.EmailHost, error) {
+			resolverName, err := entityResolverNameForEmailHost(ctx, rep)
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "EmailHost": %w`, err)
+			}
+			switch resolverName {
+
+			case "findEmailHostByID":
 				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
-				if err == nil {
-					return ec.resolvers.Entity().FindEmailHostByID(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findEmailHostByID(): %w`, err)
 				}
-				return nil, nil
-			}()
+				entity, err := ec.resolvers.Entity().FindEmailHostByID(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "EmailHost": %w`, err)
+				}
 
-			if err != nil {
-				return fmt.Errorf(`resolving Entity "EmailHost": %w`, err)
+				list[idx[i]] = entity
+				return nil
 			}
-			if entity == nil {
-				return errors.New(`unable to resolve Entity "EmailHost"`)
-			}
-
-			list[idx[i]] = entity
-			return nil
-
 		case "User":
-			entity, err := func() (*model.User, error) {
-				id0, err := ec.unmarshalNID2string(ctx, rep["id"])
-				if err == nil {
-					return ec.resolvers.Entity().FindUserByID(ctx, id0)
-				}
-				return nil, nil
-			}()
-
+			resolverName, err := entityResolverNameForUser(ctx, rep)
 			if err != nil {
-				return fmt.Errorf(`resolving Entity "User": %w`, err)
+				return fmt.Errorf(`finding resolver for Entity "User": %w`, err)
 			}
-			if entity == nil {
-				return errors.New(`unable to resolve Entity "User"`)
+			switch resolverName {
+
+			case "findUserByID":
+				id0, err := ec.unmarshalNID2string(ctx, rep["id"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findUserByID(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindUserByID(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "User": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
 			}
 
-			list[idx[i]] = entity
-			return nil
-
-		default:
-			return errors.New("unknown type: " + typeName)
 		}
+		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
 	}
 
 	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
@@ -181,4 +187,34 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
+}
+
+func entityResolverNameForEmailHost(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m  map[string]interface{}
+			ok bool
+		)
+		m = rep
+		if _, ok = m["id"]; !ok {
+			break
+		}
+		return "findEmailHostByID", nil
+	}
+	return "", fmt.Errorf("%w for EmailHost", ErrTypeNotFound)
+}
+
+func entityResolverNameForUser(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m  map[string]interface{}
+			ok bool
+		)
+		m = rep
+		if _, ok = m["id"]; !ok {
+			break
+		}
+		return "findUserByID", nil
+	}
+	return "", fmt.Errorf("%w for User", ErrTypeNotFound)
 }

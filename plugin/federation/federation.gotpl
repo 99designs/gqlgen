@@ -6,7 +6,10 @@
 
 {{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
 
-{{ .Imports }}
+var (
+	ErrUnknownType = errors.New("unknown type")
+	ErrTypeNotFound = errors.New("type not found")
+)
 
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
 	if ec.DisableIntrospection {
@@ -80,46 +83,40 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-		{{ range $_, $entity := .Entities }}
-			{{- if .Resolvers -}}
-				{{ if not .Multi -}}
-			case "{{.Def.Name}}":
-				{{range $i, $_ := .Resolvers -}}
-					{{- if ne $i 0 -}}if entity == nil { {{- end -}}
-						entity, err {{- if eq $i 0 -}}:{{- end -}}= func() (*{{$entity.Type}}, error) {
-							{{- range $j, $keyField := .KeyFields -}}
-								id{{$j}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
-								if err == nil {
-							{{- end}}
-							return ec.resolvers.Entity().{{.ResolverName | go}}(ctx, {{- range $j, $_ := .KeyFields -}} id{{$j}}, {{end}})
-							{{- range .KeyFields -}}
-								}
-							{{- end}}
-							return nil, nil
-						}()
-					{{ if ne $i 0 -}} } {{- end}}
-				{{end}}
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "{{.Def.Name}}": %w`, err)
-				}
-				if entity == nil {
-					return errors.New(`unable to resolve Entity "{{.Def.Name}}"`)
-				}
-				{{ range .Requires }}
-					entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+			{{ range $_, $entity := .Entities }}
+				{{- if and .Resolvers (not .Multi) -}}
+				case "{{.Def.Name}}":
+					resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, rep)
 					if err != nil {
-						return err
+						return fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
+					}
+					switch resolverName {
+					{{ range $i, $resolver := .Resolvers }}
+					case "{{.ResolverName}}":
+						{{- range $j, $keyField := .KeyFields }}
+							id{{$j}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+							if err != nil {
+								return fmt.Errorf(`unmarshalling param {{$j}} for {{$resolver.ResolverName}}(): %w`, err)
+							}
+						{{- end}}
+						entity, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, {{- range $j, $_ := .KeyFields -}} id{{$j}}, {{end}})
+						if err != nil {
+							return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
+						}
+						{{ range $entity.Requires }}
+							entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+							if err != nil {
+								return err
+							}
+						{{- end }}
+						list[idx[i]] = entity
+						return nil
+					{{- end }}
 					}
 				{{ end }}
-
-				list[idx[i]] = entity
-				return nil
-				{{ end }}
-			{{ end }}
-		{{- end }}
-		default:
-			return errors.New("unknown type: "+typeName)
+			{{- end }}
 		}
+		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
 	}
 
 	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
@@ -132,49 +129,47 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-		{{ range $_, $entity := .Entities }}
-			{{ if .Resolvers -}}
-				{{ if .Multi -}}
+			{{ range $_, $entity := .Entities }}
+				{{ if and .Resolvers .Multi -}}
 				case "{{.Def.Name}}":
-				{{range $i, $_ := .Resolvers -}}
-					_reps := make([]*{{.InputType}}, len(reps))
+					{{range $i, $_ := .Resolvers -}}
+						_reps := make([]*{{.InputType}}, len(reps))
 
-					for i, rep := range reps {
-						{{ range $i, $keyField := .KeyFields -}}
-							id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
-							if err != nil {
-								return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
-							}
-						{{end}}
-
-						_reps[i] = &{{.InputType}} {
-						{{ range $i, $keyField := .KeyFields -}}
-							{{$keyField.Field.ToGo}}: id{{$i}},
-						{{end}}
-						}
-					}
-
-					entities, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, _reps)
-					if err != nil {
-						return err
-					}
-
-					for i, entity := range entities {
-						{{- range $entity.Requires -}}
-							{{- range .Fields -}}
-								entity.{{.NameGo}}, err = ec.{{.TypeReference.UnmarshalFunc}}(ctx, reps[i]["{{.Name}}"])
+						for i, rep := range reps {
+							{{ range $i, $keyField := .KeyFields -}}
+								id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
 								if err != nil {
-									return err
+									return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
 								}
+							{{end}}
+
+							_reps[i] = &{{.InputType}} {
+							{{ range $i, $keyField := .KeyFields -}}
+								{{$keyField.Field.ToGo}}: id{{$i}},
+							{{end}}
+							}
+						}
+
+						entities, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, _reps)
+						if err != nil {
+							return err
+						}
+
+						for i, entity := range entities {
+							{{- range $entity.Requires -}}
+								{{- range .Fields -}}
+									entity.{{.NameGo}}, err = ec.{{.TypeReference.UnmarshalFunc}}(ctx, reps[i]["{{.Name}}"])
+									if err != nil {
+										return err
+									}
+								{{- end -}}
 							{{- end -}}
-						{{- end -}}
-						list[idx[i]] = entity
-					}
-					return nil
+							list[idx[i]] = entity
+						}
+						return nil
+					{{ end }}
 				{{ end }}
-			{{ end }}
-		{{ end }}
-	{{- end }}
+			{{- end }}
 		default:
 			return errors.New("unknown type: "+typeName)
 		}
@@ -227,4 +222,41 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		return list
 	}
 }
+
+{{- /* Make sure the required fields are in the given entity representation and return the name of the proper resolver. */ -}}
+
+{{ range $_, $entity := .Entities }}
+	{{- if .Resolvers }}
+
+		func entityResolverNameFor{{$entity.Name}}(ctx context.Context, rep map[string]interface{}) (string, error) {
+			{{- range .Resolvers }}
+				for {
+					var (
+						m    map[string]interface{}
+						{{- if gt (len .KeyFields) 1 }}
+							val interface{}
+						{{- end }}
+						ok bool
+					)
+					{{- range $_, $keyField := .KeyFields }}
+						m = rep
+						{{- range $i, $field := .Field }}
+							if {{ if (ne $i $keyField.Field.LastIndex ) -}}val{{- else -}}_{{- end -}}, ok = m["{{.}}"]; !ok {
+								break
+							}
+							{{- if (ne $i $keyField.Field.LastIndex ) }}
+								if m, ok = val.(map[string]interface{}); !ok {
+									break
+								}
+							{{- end}}
+						{{- end}}
+					{{- end }}
+					return "{{.ResolverName}}", nil
+				}
+			{{- end }}
+			return "", fmt.Errorf("%w for {{$entity.Name}}", ErrTypeNotFound)
+		}
+	{{- end }}
+{{- end }}
+
 {{end}}

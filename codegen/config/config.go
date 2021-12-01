@@ -239,6 +239,10 @@ func (c *Config) injectTypesFromSchema() error {
 		SkipRuntime: true,
 	}
 
+	c.Directives["goTag"] = DirectiveConfig{
+		SkipRuntime: true,
+	}
+
 	for _, schemaType := range c.Schema.Types {
 		if schemaType == c.Schema.Query || schemaType == c.Schema.Mutation || schemaType == c.Schema.Subscription {
 			continue

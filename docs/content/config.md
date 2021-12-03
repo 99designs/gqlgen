@@ -115,3 +115,16 @@ type User @goModel(model: "github.com/my/app/models.User") {
 		@goTag(key: "yaml")
 }
 ```
+
+The builtin directives `goField`, `goModel` and `goTag` are automatically registered to `skip_runtime`. Any directives registered as `skip_runtime` will not exposed during introspection and are used during code generation only. 
+
+If you have created a new code generation plugin using a directive which does not require runtime execution, the directive will need to be set to `skip_runtime`.
+
+e.g. a custom directive called `constraint` would be set as `skip_runtime` using the following configuration
+```yml
+# custom directives which are not exposed during introspection. These directives are
+# used for code generation only
+directives:
+  constraint:
+    skip_runtime: true
+```

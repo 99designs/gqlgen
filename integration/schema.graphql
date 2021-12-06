@@ -1,6 +1,8 @@
 "This directive does magical things"
 directive @magic(kind: Int) on FIELD_DEFINITION
 
+scalar Map
+
 type Element {
     child: Element!
     error: Boolean!
@@ -29,6 +31,13 @@ type Viewer {
     user: User
 }
 
+input ListCoercion {
+    enumVal: [ErrorType]
+    strVal: [String]
+    intVal: [Int]
+    scalarVal: [Map]
+}
+
 type Query {
     path: [Element]
     date(filter: DateFilter!): Boolean!
@@ -36,6 +45,7 @@ type Query {
     jsonEncoding: String!
     error(type: ErrorType = NORMAL): Boolean!
     complexity(value: Int!): Boolean!
+    coercion(value: [ListCoercion!]): Boolean!
 }
 
 enum ErrorType {

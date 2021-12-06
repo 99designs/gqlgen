@@ -1,5 +1,5 @@
 # source: http://localhost:8080/query
-# timestamp: Thu Aug 23 2018 10:30:37 GMT+1000 (AEST)
+# timestamp: Mon Dec 06 2021 17:56:42 GMT+0000 (Greenwich Mean Time)
 
 """This directive does magical things"""
 directive @magic(kind: Int) on FIELD_DEFINITION
@@ -30,6 +30,15 @@ enum ErrorType {
   NORMAL
 }
 
+input ListCoercion {
+  enumVal: [ErrorType]
+  strVal: [String]
+  intVal: [Int]
+  scalarVal: [Map]
+}
+
+scalar Map
+
 type Query {
   path: [Element]
   date(filter: DateFilter!): Boolean!
@@ -37,6 +46,7 @@ type Query {
   jsonEncoding: String!
   error(type: ErrorType = NORMAL): Boolean!
   complexity(value: Int!): Boolean!
+  coercion(value: [ListCoercion!]): Boolean!
 }
 
 type User {

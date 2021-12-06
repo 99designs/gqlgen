@@ -1,8 +1,8 @@
-import { createPersistedQueryLink } from "apollo-link-persisted-queries";
+import {createPersistedQueryLink} from "apollo-link-persisted-queries";
 import {InMemoryCache} from "apollo-cache-inmemory";
 import {HttpLink} from "apollo-link-http";
-import { WebSocketLink } from "apollo-link-ws";
-import { SubscriptionClient } from "subscriptions-transport-ws";
+import {WebSocketLink} from "apollo-link-ws";
+import {SubscriptionClient} from "subscriptions-transport-ws";
 import ws from 'ws';
 import {ApolloClient} from "apollo-client";
 import fetch from "node-fetch";
@@ -50,6 +50,56 @@ function test(client) {
             expect(res.data.complexity).toBe(true);
             expect(res.errors).toBe(undefined);
         });
+    });
+
+    describe('List Coercion', () => {
+
+        it('should succeed when nested single values are passed', async () => {
+            const variable = {
+                enumVal: "CUSTOM",
+                strVal: "test",
+                intVal: 1,
+            }
+            let res = await client.query({
+                variables: {in: variable},
+                query: gql`query coercion($in: [ListCoercion!]){ coercion(value: $in ) }`,
+            });
+
+            expect(res.data.coercion).toBe(true);
+        });
+
+        it('should succeed when single value is passed', async () => {
+            let res = await client.query({
+                query: gql`{ coercion(value: [{
+                    enumVal: CUSTOM
+                }]) }`,
+            });
+
+            expect(res.data.coercion).toBe(true);
+        });
+
+        it('should succeed when single scalar value is passed', async () => {
+            let res = await client.query({
+                query: gql`{ coercion(value: [{
+                    scalarVal: {
+                        key : someValue
+                    }
+                }]) }`,
+            });
+
+            expect(res.data.coercion).toBe(true);
+        });
+
+        it('should succeed when multiple values are passed', async () => {
+            let res = await client.query({
+                query: gql`{ coercion(value: [{
+                    enumVal: [CUSTOM,NORMAL]
+                }]) }`,
+            });
+
+            expect(res.data.coercion).toBe(true);
+        });
+
     });
 
     describe('Errors', () => {

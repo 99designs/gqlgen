@@ -65,6 +65,10 @@ func (r *queryResolver) Path(ctx context.Context) ([]*models.Element, error) {
 	return []*models.Element{{ID: 1}, {ID: 2}, {ID: 3}, {ID: 4}}, nil
 }
 
+func (r *queryResolver) Coercion(ctx context.Context, input []*models.ListCoercion) (bool, error) {
+	return true, nil
+}
+
 func (r *queryResolver) Date(ctx context.Context, filter models.DateFilter) (bool, error) {
 	if filter.Value != "asdf" {
 		return false, fmt.Errorf("value must be asdf")

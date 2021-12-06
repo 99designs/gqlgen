@@ -14,6 +14,13 @@ type DateFilter struct {
 	Op       *DateFilterOp `json:"op"`
 }
 
+type ListCoercion struct {
+	EnumVal   []*ErrorType             `json:"enumVal"`
+	StrVal    []*string                `json:"strVal"`
+	IntVal    []*int                   `json:"intVal"`
+	ScalarVal []map[string]interface{} `json:"scalarVal"`
+}
+
 type DateFilterOp string
 
 const (

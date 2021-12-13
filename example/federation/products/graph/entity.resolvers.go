@@ -26,6 +26,15 @@ func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, m
 	return nil, nil
 }
 
+func (r *entityResolver) FindProductByUpc(ctx context.Context, upc string) (*model.Product, error) {
+	for _, hat := range hats {
+		if hat.Upc == upc {
+			return hat, nil
+		}
+	}
+	return nil, nil
+}
+
 // Entity returns generated.EntityResolver implementation.
 func (r *Resolver) Entity() generated.EntityResolver { return &entityResolver{r} }
 

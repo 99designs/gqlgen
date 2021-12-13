@@ -45,14 +45,16 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Entity struct {
-		FindHelloByName                    func(childComplexity int, name string) int
-		FindHelloWithErrorsByName          func(childComplexity int, name string) int
-		FindManyMultiHelloByNames          func(childComplexity int, reps []*MultiHelloByNamesInput) int
-		FindManyMultiHelloWithErrorByNames func(childComplexity int, reps []*MultiHelloWithErrorByNamesInput) int
-		FindPlanetRequiresByName           func(childComplexity int, name string) int
-		FindPlanetRequiresNestedByName     func(childComplexity int, name string) int
-		FindWorldByHelloNameAndFoo         func(childComplexity int, helloName string, foo string) int
-		FindWorldNameByName                func(childComplexity int, name string) int
+		FindHelloByName                            func(childComplexity int, name string) int
+		FindHelloWithErrorsByName                  func(childComplexity int, name string) int
+		FindManyMultiHelloByNames                  func(childComplexity int, reps []*MultiHelloByNamesInput) int
+		FindManyMultiHelloWithErrorByNames         func(childComplexity int, reps []*MultiHelloWithErrorByNamesInput) int
+		FindPlanetRequiresByName                   func(childComplexity int, name string) int
+		FindPlanetRequiresNestedByName             func(childComplexity int, name string) int
+		FindWorldByHelloNameAndFoo                 func(childComplexity int, helloName string, foo string) int
+		FindWorldNameByName                        func(childComplexity int, name string) int
+		FindWorldWithMultipleKeysByBar             func(childComplexity int, bar int) int
+		FindWorldWithMultipleKeysByHelloNameAndFoo func(childComplexity int, helloName string, foo string) int
 	}
 
 	Hello struct {
@@ -99,6 +101,12 @@ type ComplexityRoot struct {
 		Name func(childComplexity int) int
 	}
 
+	WorldWithMultipleKeys struct {
+		Bar   func(childComplexity int) int
+		Foo   func(childComplexity int) int
+		Hello func(childComplexity int) int
+	}
+
 	_Service struct {
 		SDL func(childComplexity int) int
 	}
@@ -113,6 +121,8 @@ type EntityResolver interface {
 	FindPlanetRequiresNestedByName(ctx context.Context, name string) (*PlanetRequiresNested, error)
 	FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*World, error)
 	FindWorldNameByName(ctx context.Context, name string) (*WorldName, error)
+	FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*WorldWithMultipleKeys, error)
+	FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*WorldWithMultipleKeys, error)
 }
 
 type executableSchema struct {
@@ -225,6 +235,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entity.FindWorldNameByName(childComplexity, args["name"].(string)), true
+
+	case "Entity.findWorldWithMultipleKeysByBar":
+		if e.complexity.Entity.FindWorldWithMultipleKeysByBar == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findWorldWithMultipleKeysByBar_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Entity.FindWorldWithMultipleKeysByBar(childComplexity, args["bar"].(int)), true
+
+	case "Entity.findWorldWithMultipleKeysByHelloNameAndFoo":
+		if e.complexity.Entity.FindWorldWithMultipleKeysByHelloNameAndFoo == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Entity.FindWorldWithMultipleKeysByHelloNameAndFoo(childComplexity, args["helloName"].(string), args["foo"].(string)), true
 
 	case "Hello.name":
 		if e.complexity.Hello.Name == nil {
@@ -350,6 +384,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WorldName.Name(childComplexity), true
 
+	case "WorldWithMultipleKeys.bar":
+		if e.complexity.WorldWithMultipleKeys.Bar == nil {
+			break
+		}
+
+		return e.complexity.WorldWithMultipleKeys.Bar(childComplexity), true
+
+	case "WorldWithMultipleKeys.foo":
+		if e.complexity.WorldWithMultipleKeys.Foo == nil {
+			break
+		}
+
+		return e.complexity.WorldWithMultipleKeys.Foo(childComplexity), true
+
+	case "WorldWithMultipleKeys.hello":
+		if e.complexity.WorldWithMultipleKeys.Hello == nil {
+			break
+		}
+
+		return e.complexity.WorldWithMultipleKeys.Hello(childComplexity), true
+
 	case "_Service.sdl":
 		if e.complexity._Service.SDL == nil {
 			break
@@ -420,6 +475,12 @@ type World @key(fields: "hello { name } foo   ") {
     hello: Hello
 }
 
+type WorldWithMultipleKeys @key(fields: "hello { name } foo   ") @key(fields: "bar") {
+    foo: String!
+    bar: Int!
+    hello: Hello
+}
+
 type WorldName @key(fields: "name") {
     name: String!
 }
@@ -460,7 +521,7 @@ directive @extends on OBJECT | INTERFACE
 `, BuiltIn: true},
 	{Name: "federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Hello | HelloWithErrors | MultiHello | MultiHelloWithError | PlanetRequires | PlanetRequiresNested | World | WorldName
+union _Entity = Hello | HelloWithErrors | MultiHello | MultiHelloWithError | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
 input MultiHelloByNamesInput {
 	Name: String!
 }
@@ -478,6 +539,8 @@ type Entity {
 	findPlanetRequiresNestedByName(name: String!,): PlanetRequiresNested!
 	findWorldByHelloNameAndFoo(helloName: String!,foo: String!,): World!
 	findWorldNameByName(name: String!,): WorldName!
+	findWorldWithMultipleKeysByHelloNameAndFoo(helloName: String!,foo: String!,): WorldWithMultipleKeys!
+	findWorldWithMultipleKeysByBar(bar: Int!,): WorldWithMultipleKeys!
 
 }
 
@@ -638,6 +701,45 @@ func (ec *executionContext) field_Entity_findWorldNameByName_args(ctx context.Co
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByBar_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["bar"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bar"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["bar"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["helloName"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("helloName"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["helloName"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["foo"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("foo"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["foo"] = arg1
 	return args, nil
 }
 
@@ -1085,6 +1187,90 @@ func (ec *executionContext) _Entity_findWorldNameByName(ctx context.Context, fie
 	res := resTmp.(*WorldName)
 	fc.Result = res
 	return ec.marshalNWorldName2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐWorldName(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Entity_findWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(rctx, args["helloName"].(string), args["foo"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*WorldWithMultipleKeys)
+	fc.Result = res
+	return ec.marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐWorldWithMultipleKeys(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Entity_findWorldWithMultipleKeysByBar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Entity_findWorldWithMultipleKeysByBar_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindWorldWithMultipleKeysByBar(rctx, args["bar"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*WorldWithMultipleKeys)
+	fc.Result = res
+	return ec.marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐWorldWithMultipleKeys(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Hello_name(ctx context.Context, field graphql.CollectedField, obj *Hello) (ret graphql.Marshaler) {
@@ -1755,6 +1941,108 @@ func (ec *executionContext) _WorldName_name(ctx context.Context, field graphql.C
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WorldWithMultipleKeys_foo(ctx context.Context, field graphql.CollectedField, obj *WorldWithMultipleKeys) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "WorldWithMultipleKeys",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Foo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WorldWithMultipleKeys_bar(ctx context.Context, field graphql.CollectedField, obj *WorldWithMultipleKeys) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "WorldWithMultipleKeys",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bar, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WorldWithMultipleKeys_hello(ctx context.Context, field graphql.CollectedField, obj *WorldWithMultipleKeys) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "WorldWithMultipleKeys",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Hello, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Hello)
+	fc.Result = res
+	return ec.marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHello(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.CollectedField, obj *fedruntime.Service) (ret graphql.Marshaler) {
@@ -3021,6 +3309,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._WorldName(ctx, sel, obj)
+	case WorldWithMultipleKeys:
+		return ec._WorldWithMultipleKeys(ctx, sel, &obj)
+	case *WorldWithMultipleKeys:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._WorldWithMultipleKeys(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -3214,6 +3509,52 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 					}
 				}()
 				res = ec._Entity_findWorldNameByName(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "findWorldWithMultipleKeysByHelloNameAndFoo":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entity_findWorldWithMultipleKeysByHelloNameAndFoo(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "findWorldWithMultipleKeysByBar":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entity_findWorldWithMultipleKeysByBar(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3632,6 +3973,54 @@ func (ec *executionContext) _WorldName(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var worldWithMultipleKeysImplementors = []string{"WorldWithMultipleKeys", "_Entity"}
+
+func (ec *executionContext) _WorldWithMultipleKeys(ctx context.Context, sel ast.SelectionSet, obj *WorldWithMultipleKeys) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, worldWithMultipleKeysImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("WorldWithMultipleKeys")
+		case "foo":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._WorldWithMultipleKeys_foo(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "bar":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._WorldWithMultipleKeys_bar(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hello":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._WorldWithMultipleKeys_hello(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4251,6 +4640,20 @@ func (ec *executionContext) marshalNWorldName2ᚖgithubᚗcomᚋ99designsᚋgqlg
 		return graphql.Null
 	}
 	return ec._WorldName(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNWorldWithMultipleKeys2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐWorldWithMultipleKeys(ctx context.Context, sel ast.SelectionSet, v WorldWithMultipleKeys) graphql.Marshaler {
+	return ec._WorldWithMultipleKeys(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐWorldWithMultipleKeys(ctx context.Context, sel ast.SelectionSet, v *WorldWithMultipleKeys) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._WorldWithMultipleKeys(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalN_Any2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {

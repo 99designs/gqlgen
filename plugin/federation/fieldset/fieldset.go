@@ -131,6 +131,10 @@ func (f Field) JoinGo(str string) string {
 	return strings.Join(strs, str)
 }
 
+func (f Field) LastIndex() int {
+	return len(f) - 1
+}
+
 // local functions
 
 // parseUnnestedKeyFieldSet // handles simple case where none of the fields are nested.

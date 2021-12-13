@@ -11,6 +11,12 @@ type World @key(fields: "hello { name } foo   ") {
     hello: Hello
 }
 
+type WorldWithMultipleKeys @key(fields: "hello { name } foo   ") @key(fields: "bar") {
+    foo: String!
+    bar: Int!
+    hello: Hello
+}
+
 type WorldName @key(fields: "name") {
     name: String!
 }

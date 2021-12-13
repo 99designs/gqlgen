@@ -12,6 +12,11 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
+var (
+	ErrUnknownType  = errors.New("unknown type")
+	ErrTypeNotFound = errors.New("type not found")
+)
+
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
 	if ec.DisableIntrospection {
 		return fedruntime.Service{}, errors.New("federated introspection disabled")
@@ -75,44 +80,65 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-
 		case "Manufacturer":
-			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
+			resolverName, err := entityResolverNameForManufacturer(ctx, rep)
 			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+				return fmt.Errorf(`finding resolver for Entity "Manufacturer": %w`, err)
 			}
+			switch resolverName {
 
-			entity, err := ec.resolvers.Entity().FindManufacturerByID(ctx,
-				id0)
-			if err != nil {
-				return err
+			case "findManufacturerByID":
+				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findManufacturerByID(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindManufacturerByID(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "Manufacturer": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
 			}
-
-			list[idx[i]] = entity
-			return nil
-
 		case "Product":
-			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
+			resolverName, err := entityResolverNameForProduct(ctx, rep)
 			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "manufacturerID"))
+				return fmt.Errorf(`finding resolver for Entity "Product": %w`, err)
 			}
-			id1, err := ec.unmarshalNString2string(ctx, rep["id"])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+			switch resolverName {
+
+			case "findProductByManufacturerIDAndID":
+				id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findProductByManufacturerIDAndID(): %w`, err)
+				}
+				id1, err := ec.unmarshalNString2string(ctx, rep["id"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 1 for findProductByManufacturerIDAndID(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx, id0, id1)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "Product": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
+			case "findProductByUpc":
+				id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findProductByUpc(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindProductByUpc(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "Product": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
 			}
 
-			entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx,
-				id0, id1)
-			if err != nil {
-				return err
-			}
-
-			list[idx[i]] = entity
-			return nil
-
-		default:
-			return errors.New("unknown type: " + typeName)
 		}
+		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
 	}
 
 	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
@@ -155,7 +181,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			e.Wait()
 		}
 	}
-
 	buildRepresentationGroups(representations)
 
 	switch len(repsMap) {
@@ -178,4 +203,56 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
+}
+
+func entityResolverNameForManufacturer(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m  map[string]interface{}
+			ok bool
+		)
+		m = rep
+		if _, ok = m["id"]; !ok {
+			break
+		}
+		return "findManufacturerByID", nil
+	}
+	return "", fmt.Errorf("%w for Manufacturer", ErrTypeNotFound)
+}
+
+func entityResolverNameForProduct(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		m = rep
+		if val, ok = m["manufacturer"]; !ok {
+			break
+		}
+		if m, ok = val.(map[string]interface{}); !ok {
+			break
+		}
+		if _, ok = m["id"]; !ok {
+			break
+		}
+		m = rep
+		if _, ok = m["id"]; !ok {
+			break
+		}
+		return "findProductByManufacturerIDAndID", nil
+	}
+	for {
+		var (
+			m  map[string]interface{}
+			ok bool
+		)
+		m = rep
+		if _, ok = m["upc"]; !ok {
+			break
+		}
+		return "findProductByUpc", nil
+	}
+	return "", fmt.Errorf("%w for Product", ErrTypeNotFound)
 }

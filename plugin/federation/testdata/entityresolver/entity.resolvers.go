@@ -18,9 +18,9 @@ func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*gen
 
 func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name string) (*generated.HelloWithErrors, error) {
 	if name == "inject error" {
-		return nil, fmt.Errorf("error resolving HelloWithErrorsByName")
+		return nil, generated.ErrResolvingHelloWithErrorsByName
 	} else if name == "" {
-		return nil, fmt.Errorf("error (empty key) resolving HelloWithErrorsByName")
+		return nil, generated.ErrEmptyKeyResolvingHelloWithErrorsByName
 	}
 
 	return &generated.HelloWithErrors{
@@ -82,6 +82,21 @@ func (r *entityResolver) FindWorldByHelloNameAndFoo(ctx context.Context, helloNa
 func (r *entityResolver) FindWorldNameByName(ctx context.Context, name string) (*generated.WorldName, error) {
 	return &generated.WorldName{
 		Name: name,
+	}, nil
+}
+
+func (r *entityResolver) FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.WorldWithMultipleKeys, error) {
+	return &generated.WorldWithMultipleKeys{
+		Hello: &generated.Hello{
+			Name: helloName,
+		},
+		Foo: foo,
+	}, nil
+}
+
+func (r *entityResolver) FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*generated.WorldWithMultipleKeys, error) {
+	return &generated.WorldWithMultipleKeys{
+		Bar: bar,
 	}, nil
 }
 

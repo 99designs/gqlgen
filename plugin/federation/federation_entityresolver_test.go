@@ -95,8 +95,8 @@ func TestEntityResolver(t *testing.T) {
 			entityErrors[1].Message,
 		}
 
-		require.Contains(t, errMessages, "error (empty key) resolving HelloWithErrorsByName")
-		require.Contains(t, errMessages, "error resolving HelloWithErrorsByName")
+		require.Contains(t, errMessages, "resolving Entity \"HelloWithErrors\": error (empty key) resolving HelloWithErrorsByName")
+		require.Contains(t, errMessages, "resolving Entity \"HelloWithErrors\": error resolving HelloWithErrorsByName")
 
 		require.Len(t, resp.Entities, 5)
 		require.Equal(t, resp.Entities[0].Name, "first name - 1")
@@ -145,6 +145,45 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[0].Hello.Name, "world name - 1")
 		require.Equal(t, resp.Entities[1].Foo, "foo 2")
 		require.Equal(t, resp.Entities[1].Hello.Name, "world name - 2")
+	})
+
+	t.Run("World entities with multiple keys", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "WorldWithMultipleKeys",
+				"hello": map[string]interface{}{
+					"name": "world name - 1",
+				},
+				"foo": "foo 1",
+			}, {
+				"__typename": "WorldWithMultipleKeys",
+				"bar":        11,
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Foo   string `json:"foo"`
+				Hello struct {
+					Name string `json:"name"`
+				} `json:"hello"`
+				Bar int `json:"bar"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"WorldWithMultipleKeys {foo hello {name}}",
+				"WorldWithMultipleKeys {bar}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, resp.Entities[0].Foo, "foo 1")
+		require.Equal(t, resp.Entities[0].Hello.Name, "world name - 1")
+		require.Equal(t, resp.Entities[1].Bar, 11)
 	})
 
 	t.Run("Hello WorldName entities (heterogeneous)", func(t *testing.T) {

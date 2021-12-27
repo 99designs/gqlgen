@@ -289,7 +289,12 @@ func ToGo(name string) string {
 	if name == "_" {
 		return "_"
 	}
+
 	runes := make([]rune, 0, len(name))
+	for strings.HasPrefix(name, "_") {
+		name = name[1:]
+		runes = append(runes, '_')
+	}
 
 	wordWalker(name, func(info *wordInfo) {
 		word := info.Word
@@ -312,7 +317,12 @@ func ToGoPrivate(name string) string {
 	if name == "_" {
 		return "_"
 	}
+
 	runes := make([]rune, 0, len(name))
+	for strings.HasPrefix(name, "_") {
+		name = name[1:]
+		runes = append(runes, '_')
+	}
 
 	first := true
 	wordWalker(name, func(info *wordInfo) {

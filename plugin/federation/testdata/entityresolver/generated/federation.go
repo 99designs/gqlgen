@@ -372,9 +372,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 func entityResolverNameForHello(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -387,9 +389,11 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 func entityResolverNameForHelloWithErrors(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -402,9 +406,11 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep map[string]in
 func entityResolverNameForMultiHello(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -417,9 +423,11 @@ func entityResolverNameForMultiHello(ctx context.Context, rep map[string]interfa
 func entityResolverNameForMultiHelloWithError(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -432,9 +440,11 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep map[strin
 func entityResolverNameForPlanetRequires(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -447,9 +457,11 @@ func entityResolverNameForPlanetRequires(ctx context.Context, rep map[string]int
 func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -466,6 +478,7 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 			val interface{}
 			ok  bool
 		)
+		_ = val
 		m = rep
 		if val, ok = m["hello"]; !ok {
 			break
@@ -488,9 +501,11 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 func entityResolverNameForWorldName(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -507,6 +522,7 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep map[str
 			val interface{}
 			ok  bool
 		)
+		_ = val
 		m = rep
 		if val, ok = m["hello"]; !ok {
 			break
@@ -525,9 +541,11 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep map[str
 	}
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["bar"]; !ok {
 			break

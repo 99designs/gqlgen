@@ -104,6 +104,30 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				list[idx[i]] = entity
 				return nil
 			}
+		case "HelloMultiSingleKeys":
+			resolverName, err := entityResolverNameForHelloMultiSingleKeys(ctx, rep)
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "HelloMultiSingleKeys": %w`, err)
+			}
+			switch resolverName {
+
+			case "findHelloMultiSingleKeysByKey1AndKey2":
+				id0, err := ec.unmarshalNString2string(ctx, rep["key1"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findHelloMultiSingleKeysByKey1AndKey2(): %w`, err)
+				}
+				id1, err := ec.unmarshalNString2string(ctx, rep["key2"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 1 for findHelloMultiSingleKeysByKey1AndKey2(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(ctx, id0, id1)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "HelloMultiSingleKeys": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
+			}
 		case "HelloWithErrors":
 			resolverName, err := entityResolverNameForHelloWithErrors(ctx, rep)
 			if err != nil {
@@ -384,6 +408,27 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 		return "findHelloByName", nil
 	}
 	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
+}
+
+func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["key1"]; !ok {
+			break
+		}
+		m = rep
+		if _, ok = m["key2"]; !ok {
+			break
+		}
+		return "findHelloMultiSingleKeysByKey1AndKey2", nil
+	}
+	return "", fmt.Errorf("%w for HelloMultiSingleKeys", ErrTypeNotFound)
 }
 
 func entityResolverNameForHelloWithErrors(ctx context.Context, rep map[string]interface{}) (string, error) {

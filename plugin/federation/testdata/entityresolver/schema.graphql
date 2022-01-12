@@ -44,3 +44,8 @@ type MultiHello @key(fields: "name") @entityResolver(multi: true) {
 type MultiHelloWithError @key(fields: "name") @entityResolver(multi: true) {
     name: String!
 }
+
+type HelloMultiSingleKeys @key(fields: "key1 key2") {
+    key1: String!
+    key2: String!
+}

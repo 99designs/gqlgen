@@ -46,6 +46,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Entity struct {
 		FindHelloByName                            func(childComplexity int, name string) int
+		FindHelloMultiSingleKeysByKey1AndKey2      func(childComplexity int, key1 string, key2 string) int
 		FindHelloWithErrorsByName                  func(childComplexity int, name string) int
 		FindManyMultiHelloByNames                  func(childComplexity int, reps []*MultiHelloByNamesInput) int
 		FindManyMultiHelloWithErrorByNames         func(childComplexity int, reps []*MultiHelloWithErrorByNamesInput) int
@@ -60,6 +61,11 @@ type ComplexityRoot struct {
 	Hello struct {
 		Name      func(childComplexity int) int
 		Secondary func(childComplexity int) int
+	}
+
+	HelloMultiSingleKeys struct {
+		Key1 func(childComplexity int) int
+		Key2 func(childComplexity int) int
 	}
 
 	HelloWithErrors struct {
@@ -114,6 +120,7 @@ type ComplexityRoot struct {
 
 type EntityResolver interface {
 	FindHelloByName(ctx context.Context, name string) (*Hello, error)
+	FindHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, key1 string, key2 string) (*HelloMultiSingleKeys, error)
 	FindHelloWithErrorsByName(ctx context.Context, name string) (*HelloWithErrors, error)
 	FindManyMultiHelloByNames(ctx context.Context, reps []*MultiHelloByNamesInput) ([]*MultiHello, error)
 	FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*MultiHelloWithErrorByNamesInput) ([]*MultiHelloWithError, error)
@@ -151,6 +158,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entity.FindHelloByName(childComplexity, args["name"].(string)), true
+
+	case "Entity.findHelloMultiSingleKeysByKey1AndKey2":
+		if e.complexity.Entity.FindHelloMultiSingleKeysByKey1AndKey2 == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Entity.FindHelloMultiSingleKeysByKey1AndKey2(childComplexity, args["key1"].(string), args["key2"].(string)), true
 
 	case "Entity.findHelloWithErrorsByName":
 		if e.complexity.Entity.FindHelloWithErrorsByName == nil {
@@ -273,6 +292,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Hello.Secondary(childComplexity), true
+
+	case "HelloMultiSingleKeys.key1":
+		if e.complexity.HelloMultiSingleKeys.Key1 == nil {
+			break
+		}
+
+		return e.complexity.HelloMultiSingleKeys.Key1(childComplexity), true
+
+	case "HelloMultiSingleKeys.key2":
+		if e.complexity.HelloMultiSingleKeys.Key2 == nil {
+			break
+		}
+
+		return e.complexity.HelloMultiSingleKeys.Key2(childComplexity), true
 
 	case "HelloWithErrors.name":
 		if e.complexity.HelloWithErrors.Name == nil {
@@ -508,6 +541,11 @@ type MultiHello @key(fields: "name") @entityResolver(multi: true) {
 type MultiHelloWithError @key(fields: "name") @entityResolver(multi: true) {
     name: String!
 }
+
+type HelloMultiSingleKeys @key(fields: "key1 key2") {
+    key1: String!
+    key2: String!
+}
 `, BuiltIn: false},
 	{Name: "federation/directives.graphql", Input: `
 scalar _Any
@@ -521,7 +559,7 @@ directive @extends on OBJECT | INTERFACE
 `, BuiltIn: true},
 	{Name: "federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Hello | HelloWithErrors | MultiHello | MultiHelloWithError | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
+union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloWithError | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
 input MultiHelloByNamesInput {
 	Name: String!
 }
@@ -532,6 +570,7 @@ input MultiHelloWithErrorByNamesInput {
 # fake type to build resolver interfaces for users to implement
 type Entity {
 		findHelloByName(name: String!,): Hello!
+	findHelloMultiSingleKeysByKey1AndKey2(key1: String!,key2: String!,): HelloMultiSingleKeys!
 	findHelloWithErrorsByName(name: String!,): HelloWithErrors!
 	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput!]!): [MultiHello]
 	findManyMultiHelloWithErrorByNames(reps: [MultiHelloWithErrorByNamesInput!]!): [MultiHelloWithError]
@@ -587,6 +626,30 @@ func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Contex
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["key1"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key1"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["key1"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["key2"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key2"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["key2"] = arg1
 	return args, nil
 }
 
@@ -851,6 +914,48 @@ func (ec *executionContext) _Entity_findHelloByName(ctx context.Context, field g
 	res := resTmp.(*Hello)
 	fc.Result = res
 	return ec.marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHello(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(rctx, args["key1"].(string), args["key2"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*HelloMultiSingleKeys)
+	fc.Result = res
+	return ec.marshalNHelloMultiSingleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHelloMultiSingleKeys(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Entity_findHelloWithErrorsByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1327,6 +1432,76 @@ func (ec *executionContext) _Hello_secondary(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Secondary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HelloMultiSingleKeys_key1(ctx context.Context, field graphql.CollectedField, obj *HelloMultiSingleKeys) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HelloMultiSingleKeys",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key1, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HelloMultiSingleKeys_key2(ctx context.Context, field graphql.CollectedField, obj *HelloMultiSingleKeys) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HelloMultiSingleKeys",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key2, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3260,6 +3435,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._Hello(ctx, sel, obj)
+	case HelloMultiSingleKeys:
+		return ec._HelloMultiSingleKeys(ctx, sel, &obj)
+	case *HelloMultiSingleKeys:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._HelloMultiSingleKeys(ctx, sel, obj)
 	case HelloWithErrors:
 		return ec._HelloWithErrors(ctx, sel, &obj)
 	case *HelloWithErrors:
@@ -3354,6 +3536,29 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 					}
 				}()
 				res = ec._Entity_findHelloByName(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "findHelloMultiSingleKeysByKey1AndKey2":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3602,6 +3807,47 @@ func (ec *executionContext) _Hello(ctx context.Context, sel ast.SelectionSet, ob
 		case "secondary":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Hello_secondary(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var helloMultiSingleKeysImplementors = []string{"HelloMultiSingleKeys", "_Entity"}
+
+func (ec *executionContext) _HelloMultiSingleKeys(ctx context.Context, sel ast.SelectionSet, obj *HelloMultiSingleKeys) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, helloMultiSingleKeysImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("HelloMultiSingleKeys")
+		case "key1":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HelloMultiSingleKeys_key1(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "key2":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HelloMultiSingleKeys_key2(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -4496,6 +4742,20 @@ func (ec *executionContext) marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec._Hello(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNHelloMultiSingleKeys2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHelloMultiSingleKeys(ctx context.Context, sel ast.SelectionSet, v HelloMultiSingleKeys) graphql.Marshaler {
+	return ec._HelloMultiSingleKeys(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNHelloMultiSingleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHelloMultiSingleKeys(ctx context.Context, sel ast.SelectionSet, v *HelloMultiSingleKeys) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._HelloMultiSingleKeys(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNHelloWithErrors2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐHelloWithErrors(ctx context.Context, sel ast.SelectionSet, v HelloWithErrors) graphql.Marshaler {

@@ -292,9 +292,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["upc"]; !ok {
 			break
@@ -307,9 +309,11 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]
 func entityResolverNameForHello(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["name"]; !ok {
 			break
@@ -326,6 +330,7 @@ func entityResolverNameForNestedKey(ctx context.Context, rep map[string]interfac
 			val interface{}
 			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["id"]; !ok {
 			break
@@ -352,6 +357,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 			val interface{}
 			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["id"]; !ok {
 			break
@@ -410,9 +416,11 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["foo"]; !ok {
 			break
@@ -421,9 +429,11 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 	}
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["bar"]; !ok {
 			break

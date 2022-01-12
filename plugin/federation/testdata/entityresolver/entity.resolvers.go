@@ -16,6 +16,10 @@ func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*gen
 	}, nil
 }
 
+func (r *entityResolver) FindHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, key1 string, key2 string) (*generated.HelloMultiSingleKeys, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name string) (*generated.HelloWithErrors, error) {
 	if name == "inject error" {
 		return nil, generated.ErrResolvingHelloWithErrorsByName

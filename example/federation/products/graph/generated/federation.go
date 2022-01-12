@@ -208,9 +208,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 func entityResolverNameForManufacturer(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["id"]; !ok {
 			break
@@ -227,6 +229,7 @@ func entityResolverNameForProduct(ctx context.Context, rep map[string]interface{
 			val interface{}
 			ok  bool
 		)
+		_ = val
 		m = rep
 		if val, ok = m["manufacturer"]; !ok {
 			break
@@ -245,9 +248,11 @@ func entityResolverNameForProduct(ctx context.Context, rep map[string]interface{
 	}
 	for {
 		var (
-			m  map[string]interface{}
-			ok bool
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
 		)
+		_ = val
 		m = rep
 		if _, ok = m["upc"]; !ok {
 			break

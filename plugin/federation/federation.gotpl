@@ -233,11 +233,10 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				for {
 					var (
 						m    map[string]interface{}
-						{{- if gt (len .KeyFields) 1 }}
-							val interface{}
-						{{- end }}
+						val interface{}
 						ok bool
 					)
+					_ = val
 					{{- range $_, $keyField := .KeyFields }}
 						m = rep
 						{{- range $i, $field := .Field }}

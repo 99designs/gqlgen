@@ -9,6 +9,13 @@ type Hello struct {
 
 func (Hello) IsEntity() {}
 
+type HelloMultiSingleKeys struct {
+	Key1 string `json:"key1"`
+	Key2 string `json:"key2"`
+}
+
+func (HelloMultiSingleKeys) IsEntity() {}
+
 type HelloWithErrors struct {
 	Name string `json:"name"`
 }

@@ -54,6 +54,9 @@ func (d *Data) Directives() DirectiveList {
 }
 
 func BuildData(cfg *config.Config) (*Data, error) {
+	// We reload all packages to allow packages to be compared correctly.
+	cfg.ReloadAllPackages()
+
 	b := builder{
 		Config: cfg,
 		Schema: cfg.Schema,

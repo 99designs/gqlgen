@@ -5,12 +5,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.15.0...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.15.1...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.15.1"></a>
+## [v0.15.1](https://github.com/99designs/gqlgen/compare/v0.15.0...v0.15.1) - 2022-01-16
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/2b8f50b3b38b129f56e06c3dadccd0cb8667a741"><tt>2b8f50b3</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/67">#1765](https://github.com/99designs/gqlgen/issues/1765): Sometimes module info not exists or not loaded. ([#1767</a>)</summary>
+
+* Remove failing test
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/46502e5e5af713208143f089fa2db5b266aa5fc7"><tt>46502e5e</tt></a> fixed broken link (<a href="https://github.com/99designs/gqlgen/pull/68">#1768</a>)
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.15.0"></a>
 ## [v0.15.0](https://github.com/99designs/gqlgen/compare/v0.14.0...v0.15.0) - 2022-01-14
+- <a href="https://github.com/99designs/gqlgen/commit/99be19512eb2f7c5f3db3d699eecc8cdd2020d25"><tt>99be1951</tt></a> Prepare for release
+
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/931271a2f3af4cf50de702855d396cde02a3d99f"><tt>931271a2</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/63">#1762](https://github.com/99designs/gqlgen/issues/1762): Reload packages before merging type systems ([#1763</a>)</summary>
 
 * run gofmt on file

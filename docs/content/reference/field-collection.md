@@ -7,7 +7,7 @@ menu: { main: { parent: 'reference', weight: 10 } }
 
 Often it is useful to know which fields were queried for in a resolver.  Having this information can allow a resolver to only fetch the set of fields required from a data source, rather than over-fetching everything and allowing gqlgen to do the rest.
 
-This process is known as [Field Collection](https://facebook.github.io/graphql/draft/#sec-Field-Collection) — gqlgen automatically does this in order to know which fields should be a part of the response payload.  The set of collected fields does however depend on the type being resolved.  Queries can contain fragments, and resolvers can return interfaces and unions, therefore the set of collected fields cannot be fully determined until the type of the resolved object is known.
+This process is known as [Field Collection](https://spec.graphql.org/draft/#sec-Field-Collection) — gqlgen automatically does this in order to know which fields should be a part of the response payload.  The set of collected fields does however depend on the type being resolved.  Queries can contain fragments, and resolvers can return interfaces and unions, therefore the set of collected fields cannot be fully determined until the type of the resolved object is known.
 
 Within a resolver, there are several API methods available to query the selected fields.
 

@@ -32,6 +32,18 @@ type MultiHelloByNamesInput struct {
 	Name string `json:"Name"`
 }
 
+type MultiHelloRequires struct {
+	Name string `json:"name"`
+	Key1 string `json:"key1"`
+	Key2 string `json:"key2"`
+}
+
+func (MultiHelloRequires) IsEntity() {}
+
+type MultiHelloRequiresByNamesInput struct {
+	Name string `json:"Name"`
+}
+
 type MultiHelloWithError struct {
 	Name string `json:"name"`
 }

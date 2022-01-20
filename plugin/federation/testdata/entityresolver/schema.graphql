@@ -49,3 +49,9 @@ type HelloMultiSingleKeys @key(fields: "key1 key2") {
     key1: String!
     key2: String!
 }
+
+type MultiHelloRequires @key(fields: "name") @entityResolver(multi: true) {
+    name: String! @external
+    key1: String! @external
+    key2: String! @requires(fields: "key1")
+}

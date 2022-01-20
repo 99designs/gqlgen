@@ -67,6 +67,8 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		switch typeName {
 		case "MultiHello":
 			return true
+		case "MultiHelloRequires":
+			return true
 		case "MultiHelloWithError":
 			return true
 		default:
@@ -316,6 +318,34 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			}
 			return nil
 
+		case "MultiHelloRequires":
+			_reps := make([]*MultiHelloRequiresByNamesInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+				}
+
+				_reps[i] = &MultiHelloRequiresByNamesInput{
+					Name: id0,
+				}
+			}
+
+			entities, err := ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, _reps)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i]["key1"])
+				if err != nil {
+					return err
+				}
+				list[idx[i]] = entity
+			}
+			return nil
+
 		case "MultiHelloWithError":
 			_reps := make([]*MultiHelloWithErrorByNamesInput, len(reps))
 
@@ -463,6 +493,23 @@ func entityResolverNameForMultiHello(ctx context.Context, rep map[string]interfa
 		return "findManyMultiHelloByNames", nil
 	}
 	return "", fmt.Errorf("%w for MultiHello", ErrTypeNotFound)
+}
+
+func entityResolverNameForMultiHelloRequires(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["name"]; !ok {
+			break
+		}
+		return "findManyMultiHelloRequiresByNames", nil
+	}
+	return "", fmt.Errorf("%w for MultiHelloRequires", ErrTypeNotFound)
 }
 
 func entityResolverNameForMultiHelloWithError(ctx context.Context, rep map[string]interface{}) (string, error) {

@@ -49,6 +49,7 @@ type ComplexityRoot struct {
 		FindHelloMultiSingleKeysByKey1AndKey2      func(childComplexity int, key1 string, key2 string) int
 		FindHelloWithErrorsByName                  func(childComplexity int, name string) int
 		FindManyMultiHelloByNames                  func(childComplexity int, reps []*MultiHelloByNamesInput) int
+		FindManyMultiHelloRequiresByNames          func(childComplexity int, reps []*MultiHelloRequiresByNamesInput) int
 		FindManyMultiHelloWithErrorByNames         func(childComplexity int, reps []*MultiHelloWithErrorByNamesInput) int
 		FindPlanetRequiresByName                   func(childComplexity int, name string) int
 		FindPlanetRequiresNestedByName             func(childComplexity int, name string) int
@@ -73,6 +74,12 @@ type ComplexityRoot struct {
 	}
 
 	MultiHello struct {
+		Name func(childComplexity int) int
+	}
+
+	MultiHelloRequires struct {
+		Key1 func(childComplexity int) int
+		Key2 func(childComplexity int) int
 		Name func(childComplexity int) int
 	}
 
@@ -123,6 +130,7 @@ type EntityResolver interface {
 	FindHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, key1 string, key2 string) (*HelloMultiSingleKeys, error)
 	FindHelloWithErrorsByName(ctx context.Context, name string) (*HelloWithErrors, error)
 	FindManyMultiHelloByNames(ctx context.Context, reps []*MultiHelloByNamesInput) ([]*MultiHello, error)
+	FindManyMultiHelloRequiresByNames(ctx context.Context, reps []*MultiHelloRequiresByNamesInput) ([]*MultiHelloRequires, error)
 	FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*MultiHelloWithErrorByNamesInput) ([]*MultiHelloWithError, error)
 	FindPlanetRequiresByName(ctx context.Context, name string) (*PlanetRequires, error)
 	FindPlanetRequiresNestedByName(ctx context.Context, name string) (*PlanetRequiresNested, error)
@@ -194,6 +202,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Entity.FindManyMultiHelloByNames(childComplexity, args["reps"].([]*MultiHelloByNamesInput)), true
+
+	case "Entity.findManyMultiHelloRequiresByNames":
+		if e.complexity.Entity.FindManyMultiHelloRequiresByNames == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findManyMultiHelloRequiresByNames_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Entity.FindManyMultiHelloRequiresByNames(childComplexity, args["reps"].([]*MultiHelloRequiresByNamesInput)), true
 
 	case "Entity.findManyMultiHelloWithErrorByNames":
 		if e.complexity.Entity.FindManyMultiHelloWithErrorByNames == nil {
@@ -320,6 +340,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MultiHello.Name(childComplexity), true
+
+	case "MultiHelloRequires.key1":
+		if e.complexity.MultiHelloRequires.Key1 == nil {
+			break
+		}
+
+		return e.complexity.MultiHelloRequires.Key1(childComplexity), true
+
+	case "MultiHelloRequires.key2":
+		if e.complexity.MultiHelloRequires.Key2 == nil {
+			break
+		}
+
+		return e.complexity.MultiHelloRequires.Key2(childComplexity), true
+
+	case "MultiHelloRequires.name":
+		if e.complexity.MultiHelloRequires.Name == nil {
+			break
+		}
+
+		return e.complexity.MultiHelloRequires.Name(childComplexity), true
 
 	case "MultiHelloWithError.name":
 		if e.complexity.MultiHelloWithError.Name == nil {
@@ -546,6 +587,12 @@ type HelloMultiSingleKeys @key(fields: "key1 key2") {
     key1: String!
     key2: String!
 }
+
+type MultiHelloRequires @key(fields: "name") @entityResolver(multi: true) {
+    name: String! @external
+    key1: String! @external
+    key2: String! @requires(fields: "key1")
+}
 `, BuiltIn: false},
 	{Name: "federation/directives.graphql", Input: `
 scalar _Any
@@ -559,8 +606,11 @@ directive @extends on OBJECT | INTERFACE
 `, BuiltIn: true},
 	{Name: "federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloWithError | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
+union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloRequires | MultiHelloWithError | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
 input MultiHelloByNamesInput {
+	Name: String!
+}
+input MultiHelloRequiresByNamesInput {
 	Name: String!
 }
 input MultiHelloWithErrorByNamesInput {
@@ -573,6 +623,7 @@ type Entity {
 	findHelloMultiSingleKeysByKey1AndKey2(key1: String!,key2: String!,): HelloMultiSingleKeys!
 	findHelloWithErrorsByName(name: String!,): HelloWithErrors!
 	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput!]!): [MultiHello]
+	findManyMultiHelloRequiresByNames(reps: [MultiHelloRequiresByNamesInput!]!): [MultiHelloRequires]
 	findManyMultiHelloWithErrorByNames(reps: [MultiHelloWithErrorByNamesInput!]!): [MultiHelloWithError]
 	findPlanetRequiresByName(name: String!,): PlanetRequires!
 	findPlanetRequiresNestedByName(name: String!,): PlanetRequiresNested!
@@ -675,6 +726,21 @@ func (ec *executionContext) field_Entity_findManyMultiHelloByNames_args(ctx cont
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
 		arg0, err = ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloByNamesInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["reps"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*MultiHelloRequiresByNamesInput
+	if tmp, ok := rawArgs["reps"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
+		arg0, err = ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequiresByNamesInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1061,6 +1127,69 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 	res := resTmp.([]*MultiHello)
 	fc.Result = res
 	return ec.marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHello(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Entity_findManyMultiHelloRequiresByNames_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(rctx, args["reps"].([]*MultiHelloRequiresByNamesInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.EntityResolver == nil {
+				return nil, errors.New("directive entityResolver is not implemented")
+			}
+			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*MultiHelloRequires); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated.MultiHelloRequires`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*MultiHelloRequires)
+	fc.Result = res
+	return ec.marshalOMultiHelloRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequires(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1572,6 +1701,111 @@ func (ec *executionContext) _MultiHello_name(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MultiHelloRequires_name(ctx context.Context, field graphql.CollectedField, obj *MultiHelloRequires) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MultiHelloRequires",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MultiHelloRequires_key1(ctx context.Context, field graphql.CollectedField, obj *MultiHelloRequires) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MultiHelloRequires",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key1, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MultiHelloRequires_key2(ctx context.Context, field graphql.CollectedField, obj *MultiHelloRequires) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MultiHelloRequires",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key2, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3397,6 +3631,29 @@ func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, obj interface{}) (MultiHelloRequiresByNamesInput, error) {
+	var it MultiHelloRequiresByNamesInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, obj interface{}) (MultiHelloWithErrorByNamesInput, error) {
 	var it MultiHelloWithErrorByNamesInput
 	asMap := map[string]interface{}{}
@@ -3456,6 +3713,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._MultiHello(ctx, sel, obj)
+	case MultiHelloRequires:
+		return ec._MultiHelloRequires(ctx, sel, &obj)
+	case *MultiHelloRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHelloRequires(ctx, sel, obj)
 	case MultiHelloWithError:
 		return ec._MultiHelloWithError(ctx, sel, &obj)
 	case *MultiHelloWithError:
@@ -3605,6 +3869,26 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 					}
 				}()
 				res = ec._Entity_findManyMultiHelloByNames(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "findManyMultiHelloRequiresByNames":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Entity_findManyMultiHelloRequiresByNames(ctx, field)
 				return res
 			}
 
@@ -3910,6 +4194,57 @@ func (ec *executionContext) _MultiHello(ctx context.Context, sel ast.SelectionSe
 		case "name":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._MultiHello_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var multiHelloRequiresImplementors = []string{"MultiHelloRequires", "_Entity"}
+
+func (ec *executionContext) _MultiHelloRequires(ctx context.Context, sel ast.SelectionSet, obj *MultiHelloRequires) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, multiHelloRequiresImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MultiHelloRequires")
+		case "name":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MultiHelloRequires_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "key1":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MultiHelloRequires_key1(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "key2":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MultiHelloRequires_key2(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -4809,6 +5144,28 @@ func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚖgithubᚗcomᚋ9
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequiresByNamesInputᚄ(ctx context.Context, v interface{}) ([]*MultiHelloRequiresByNamesInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*MultiHelloRequiresByNamesInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequiresByNamesInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequiresByNamesInput(ctx context.Context, v interface{}) (*MultiHelloRequiresByNamesInput, error) {
+	res, err := ec.unmarshalInputMultiHelloRequiresByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloWithErrorByNamesInputᚄ(ctx context.Context, v interface{}) ([]*MultiHelloWithErrorByNamesInput, error) {
 	var vSlice []interface{}
 	if v != nil {
@@ -5358,6 +5715,54 @@ func (ec *executionContext) marshalOMultiHello2ᚖgithubᚗcomᚋ99designsᚋgql
 		return graphql.Null
 	}
 	return ec._MultiHello(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMultiHelloRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequires(ctx context.Context, sel ast.SelectionSet, v []*MultiHelloRequires) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOMultiHelloRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequires(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOMultiHelloRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloRequires(ctx context.Context, sel ast.SelectionSet, v *MultiHelloRequires) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MultiHelloRequires(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOMultiHelloWithError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚐMultiHelloWithError(ctx context.Context, sel ast.SelectionSet, v []*MultiHelloWithError) graphql.Marshaler {

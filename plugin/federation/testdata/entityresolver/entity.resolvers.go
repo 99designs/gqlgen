@@ -44,6 +44,18 @@ func (r *entityResolver) FindManyMultiHelloByNames(ctx context.Context, reps []*
 	return results, nil
 }
 
+func (r *entityResolver) FindManyMultiHelloRequiresByNames(ctx context.Context, reps []*generated.MultiHelloRequiresByNamesInput) ([]*generated.MultiHelloRequires, error) {
+	results := make([]*generated.MultiHelloRequires, len(reps))
+
+	for i := range reps {
+		results[i] = &generated.MultiHelloRequires{
+			Name: reps[i].Name,
+		}
+	}
+
+	return results, nil
+}
+
 func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*generated.MultiHelloWithErrorByNamesInput) ([]*generated.MultiHelloWithError, error) {
 	return nil, fmt.Errorf("error resolving MultiHelloWorldWithError")
 }

@@ -429,6 +429,41 @@ func TestMultiEntityResolver(t *testing.T) {
 		require.Len(t, entityErrors, 1)
 		require.Contains(t, entityErrors[0].Message, "error resolving MultiHelloWorldWithError")
 	})
+
+	t.Run("MultiHelloRequires entities with requires directive", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "MultiHelloRequires",
+				"name":       "first name - 1",
+				"key1":   "key1 - 1",
+			}, {
+				"__typename": "MultiHelloRequires",
+				"name":       "first name - 2",
+				"key1":   "key1 - 2",
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name     string `json:"name"`
+				Key1 string    `json:"key1"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"MultiHelloRequires {name, key1}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, resp.Entities[0].Name, "first name - 1")
+		require.Equal(t, resp.Entities[0].Key1, "key1 - 1")
+		require.Equal(t, resp.Entities[1].Name, "first name - 2")
+		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
+	})
 }
 
 func entityQuery(queries []string) string {

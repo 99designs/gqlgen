@@ -115,10 +115,10 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 		}
 	}
 
-	if len(f.Entities) == 0 {
-		// It's unusual for a service not to have any entities, but
-		// possible if it only exports top-level queries and mutations.
-		return nil
+	if entities != "" {
+		entities = `
+# a union of all types that use the @key directive
+union _Entity = ` + entities
 	}
 
 	// resolvers can be empty if a service defines only "empty
@@ -132,22 +132,33 @@ type Entity {
 `
 	}
 
+	_serviceTypeDef := `
+type _Service {
+  sdl: String
+}`
+	additionalQueryFields := ``
+	// Quote from the Apollo Federation subgraph specification:
+	// If no types are annotated with the key directive, then the
+	// _Entity union and Query._entities field should be removed from the schema
+	if len(f.Entities) > 0 {
+		additionalQueryFields += `  _entities(representations: [_Any!]!): [_Entity]!
+`
+	}
+	// Query._service is required in any case
+	additionalQueryFields += `  _service: _Service!`
+
+	extendTypeQueryDef := `
+extend type ` + schema.Query.Name + ` {
+` + additionalQueryFields + `
+}
+`
 	return &ast.Source{
 		Name:    "federation/entity.graphql",
 		BuiltIn: true,
-		Input: `
-# a union of all types that use the @key directive
-union _Entity = ` + entities + `
+		Input: entities + `
 ` + resolvers + `
-type _Service {
-  sdl: String
-}
-
-extend type Query {
-  _entities(representations: [_Any!]!): [_Entity]!
-  _service: _Service!
-}
-`,
+` + _serviceTypeDef + `
+` + extendTypeQueryDef,
 	}
 }
 

@@ -435,18 +435,18 @@ func TestMultiEntityResolver(t *testing.T) {
 			{
 				"__typename": "MultiHelloRequires",
 				"name":       "first name - 1",
-				"key1":   "key1 - 1",
+				"key1":       "key1 - 1",
 			}, {
 				"__typename": "MultiHelloRequires",
 				"name":       "first name - 2",
-				"key1":   "key1 - 2",
+				"key1":       "key1 - 2",
 			},
 		}
 
 		var resp struct {
 			Entities []struct {
-				Name     string `json:"name"`
-				Key1 string    `json:"key1"`
+				Name string `json:"name"`
+				Key1 string `json:"key1"`
 			} `json:"_entities"`
 		}
 

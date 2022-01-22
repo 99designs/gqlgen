@@ -88,9 +88,7 @@ directive @extends on OBJECT | INTERFACE
 func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 	f.setEntities(schema)
 
-	entities := ""
-	resolvers := ""
-	entityResolverInputDefinitions := ""
+	var entities, resolvers, entityResolverInputDefinitions string
 	for i, e := range f.Entities {
 		if i != 0 {
 			entities += " | "
@@ -99,11 +97,14 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 
 		for _, r := range e.Resolvers {
 			if e.Multi {
+				if entityResolverInputDefinitions != "" {
+					entityResolverInputDefinitions += "\n\n"
+				}
 				entityResolverInputDefinitions += "input " + r.InputType + " {\n"
 				for _, keyField := range r.KeyFields {
 					entityResolverInputDefinitions += fmt.Sprintf("\t%s: %s\n", keyField.Field.ToGo(), keyField.Definition.Type.String())
 				}
-				entityResolverInputDefinitions += "}\n"
+				entityResolverInputDefinitions += "}"
 				resolvers += fmt.Sprintf("\t%s(reps: [%s!]!): [%s]\n", r.ResolverName, r.InputType, e.Name)
 			} else {
 				resolverArgs := ""
@@ -115,39 +116,51 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 		}
 	}
 
-	if len(f.Entities) == 0 {
-		// It's unusual for a service not to have any entities, but
-		// possible if it only exports top-level queries and mutations.
-		return nil
+	var blocks []string
+	if entities != "" {
+		entities = `# a union of all types that use the @key directive
+union _Entity = ` + entities
+		blocks = append(blocks, entities)
 	}
 
 	// resolvers can be empty if a service defines only "empty
 	// extend" types.  This should be rare.
 	if resolvers != "" {
-		resolvers = entityResolverInputDefinitions + `
-# fake type to build resolver interfaces for users to implement
+		if entityResolverInputDefinitions != "" {
+			blocks = append(blocks, entityResolverInputDefinitions)
+		}
+		resolvers = `# fake type to build resolver interfaces for users to implement
 type Entity {
 	` + resolvers + `
-}
+}`
+		blocks = append(blocks, resolvers)
+	}
+
+	_serviceTypeDef := `type _Service {
+  sdl: String
+}`
+	blocks = append(blocks, _serviceTypeDef)
+
+	var additionalQueryFields string
+	// Quote from the Apollo Federation subgraph specification:
+	// If no types are annotated with the key directive, then the
+	// _Entity union and _entities field should be removed from the schema
+	if len(f.Entities) > 0 {
+		additionalQueryFields += `  _entities(representations: [_Any!]!): [_Entity]!
 `
 	}
+	// _service field is required in any case
+	additionalQueryFields += `  _service: _Service!`
+
+	extendTypeQueryDef := `extend type ` + schema.Query.Name + ` {
+` + additionalQueryFields + `
+}`
+	blocks = append(blocks, extendTypeQueryDef)
 
 	return &ast.Source{
 		Name:    "federation/entity.graphql",
 		BuiltIn: true,
-		Input: `
-# a union of all types that use the @key directive
-union _Entity = ` + entities + `
-` + resolvers + `
-type _Service {
-  sdl: String
-}
-
-extend type Query {
-  _entities(representations: [_Any!]!): [_Entity]!
-  _service: _Service!
-}
-`,
+		Input:   "\n" + strings.Join(blocks, "\n\n") + "\n",
 	}
 }
 

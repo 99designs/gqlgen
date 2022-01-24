@@ -156,14 +156,12 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						}
 
 						for i, entity := range entities {
-							{{- range $entity.Requires -}}
-								{{- range .Fields -}}
-									entity.{{.NameGo}}, err = ec.{{.TypeReference.UnmarshalFunc}}(ctx, reps[i]["{{.Name}}"])
+							{{- range $entity.Requires }}
+									entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, reps[i]["{{.Name}}"])
 									if err != nil {
 										return err
 									}
-								{{- end -}}
-							{{- end -}}
+							{{- end}}
 							list[idx[i]] = entity
 						}
 						return nil

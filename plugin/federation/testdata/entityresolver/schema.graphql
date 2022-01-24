@@ -31,6 +31,13 @@ type PlanetRequires @key(fields: "name") {
     diameter: Int!
 }
 
+type PlanetMultipleRequires @key(fields: "name") {
+    name: String! @external
+    diameter: Int! @external
+    density: Int! @external
+    weight: Int! @requires(fields: "diameter density")
+}
+
 type PlanetRequiresNested @key(fields: "name") {
     name: String! @external
     world: World! @external
@@ -48,4 +55,17 @@ type MultiHelloWithError @key(fields: "name") @entityResolver(multi: true) {
 type HelloMultiSingleKeys @key(fields: "key1 key2") {
     key1: String!
     key2: String!
+}
+
+type MultiHelloRequires @key(fields: "name") @entityResolver(multi: true) {
+    name: String! @external
+    key1: String! @external
+    key2: String! @requires(fields: "key1")
+}
+
+type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true) {
+    name: String! @external
+    key1: String! @external
+    key2: String! @external
+    key3: String! @requires(fields: "key1 key2")
 }

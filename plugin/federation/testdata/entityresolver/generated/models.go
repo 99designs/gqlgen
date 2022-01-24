@@ -32,6 +32,31 @@ type MultiHelloByNamesInput struct {
 	Name string `json:"Name"`
 }
 
+type MultiHelloMultipleRequires struct {
+	Name string `json:"name"`
+	Key1 string `json:"key1"`
+	Key2 string `json:"key2"`
+	Key3 string `json:"key3"`
+}
+
+func (MultiHelloMultipleRequires) IsEntity() {}
+
+type MultiHelloMultipleRequiresByNamesInput struct {
+	Name string `json:"Name"`
+}
+
+type MultiHelloRequires struct {
+	Name string `json:"name"`
+	Key1 string `json:"key1"`
+	Key2 string `json:"key2"`
+}
+
+func (MultiHelloRequires) IsEntity() {}
+
+type MultiHelloRequiresByNamesInput struct {
+	Name string `json:"Name"`
+}
+
 type MultiHelloWithError struct {
 	Name string `json:"name"`
 }
@@ -41,6 +66,15 @@ func (MultiHelloWithError) IsEntity() {}
 type MultiHelloWithErrorByNamesInput struct {
 	Name string `json:"Name"`
 }
+
+type PlanetMultipleRequires struct {
+	Name     string `json:"name"`
+	Diameter int    `json:"diameter"`
+	Density  int    `json:"density"`
+	Weight   int    `json:"weight"`
+}
+
+func (PlanetMultipleRequires) IsEntity() {}
 
 type PlanetRequires struct {
 	Name     string `json:"name"`

@@ -53,3 +53,16 @@ func TestReplacePlugin(t *testing.T) {
 		require.EqualValues(t, expectedPlugin, pg[2])
 	})
 }
+
+func TestPrependPlugin(t *testing.T) {
+	modelgenPlugin := modelgen.New()
+	pg := []plugin.Plugin{
+		modelgenPlugin,
+	}
+
+	expectedPlugin := &testPlugin{}
+	PrependPlugin(expectedPlugin)(config.DefaultConfig(), &pg)
+
+	require.EqualValues(t, expectedPlugin, pg[0])
+	require.EqualValues(t, modelgenPlugin, pg[1])
+}

@@ -44,6 +44,18 @@ func (r *entityResolver) FindManyMultiHelloByNames(ctx context.Context, reps []*
 	return results, nil
 }
 
+func (r *entityResolver) FindManyMultiHelloMultipleRequiresByNames(ctx context.Context, reps []*generated.MultiHelloMultipleRequiresByNamesInput) ([]*generated.MultiHelloMultipleRequires, error) {
+	results := make([]*generated.MultiHelloMultipleRequires, len(reps))
+
+	for i := range reps {
+		results[i] = &generated.MultiHelloMultipleRequires{
+			Name: reps[i].Name,
+		}
+	}
+
+	return results, nil
+}
+
 func (r *entityResolver) FindManyMultiHelloRequiresByNames(ctx context.Context, reps []*generated.MultiHelloRequiresByNamesInput) ([]*generated.MultiHelloRequires, error) {
 	results := make([]*generated.MultiHelloRequires, len(reps))
 
@@ -58,6 +70,10 @@ func (r *entityResolver) FindManyMultiHelloRequiresByNames(ctx context.Context, 
 
 func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*generated.MultiHelloWithErrorByNamesInput) ([]*generated.MultiHelloWithError, error) {
 	return nil, fmt.Errorf("error resolving MultiHelloWorldWithError")
+}
+
+func (r *entityResolver) FindPlanetMultipleRequiresByName(ctx context.Context, name string) (*generated.PlanetMultipleRequires, error) {
+	return &generated.PlanetMultipleRequires{Name: name}, nil
 }
 
 func (r *entityResolver) FindPlanetRequiresByName(ctx context.Context, name string) (*generated.PlanetRequires, error) {

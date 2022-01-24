@@ -271,6 +271,46 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[1].Diameter, 10)
 	})
 
+	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "PlanetMultipleRequires",
+				"name":       "earth",
+				"density":    800,
+				"diameter":   12,
+			}, {
+				"__typename": "PlanetMultipleRequires",
+				"name":       "mars",
+				"density":    850,
+				"diameter":   10,
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name     string `json:"name"`
+				Density  int    `json:"density"`
+				Diameter int    `json:"diameter"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"PlanetMultipleRequires {name, diameter, density}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, resp.Entities[0].Name, "earth")
+		require.Equal(t, resp.Entities[0].Diameter, 12)
+		require.Equal(t, resp.Entities[0].Density, 800)
+		require.Equal(t, resp.Entities[1].Name, "mars")
+		require.Equal(t, resp.Entities[1].Diameter, 10)
+		require.Equal(t, resp.Entities[1].Density, 850)
+	})
+
 	t.Run("PlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
 		representations := []map[string]interface{}{
 			{
@@ -463,6 +503,46 @@ func TestMultiEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[0].Key1, "key1 - 1")
 		require.Equal(t, resp.Entities[1].Name, "first name - 2")
 		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
+	})
+
+	t.Run("MultiHelloMultipleRequires entities with multiple required fields", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "MultiHelloMultipleRequires",
+				"name":       "first name - 1",
+				"key1":       "key1 - 1",
+				"key2":       "key2 - 1",
+			}, {
+				"__typename": "MultiHelloMultipleRequires",
+				"name":       "first name - 2",
+				"key1":       "key1 - 2",
+				"key2":       "key2 - 2",
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name string `json:"name"`
+				Key1 string `json:"key1"`
+				Key2 string `json:"key2"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"MultiHelloMultipleRequires {name, key1, key2}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, resp.Entities[0].Name, "first name - 1")
+		require.Equal(t, resp.Entities[0].Key1, "key1 - 1")
+		require.Equal(t, resp.Entities[0].Key2, "key2 - 1")
+		require.Equal(t, resp.Entities[1].Name, "first name - 2")
+		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
+		require.Equal(t, resp.Entities[1].Key2, "key2 - 2")
 	})
 }
 

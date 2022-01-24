@@ -719,15 +719,19 @@ directive @extends on OBJECT | INTERFACE
 	{Name: "federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
 union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
+
 input MultiHelloByNamesInput {
 	Name: String!
 }
+
 input MultiHelloMultipleRequiresByNamesInput {
 	Name: String!
 }
+
 input MultiHelloRequiresByNamesInput {
 	Name: String!
 }
+
 input MultiHelloWithErrorByNamesInput {
 	Name: String!
 }

@@ -5,12 +5,75 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.15.1...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.16.0...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.16.0"></a>
+## [v0.16.0](https://github.com/99designs/gqlgen/compare/v0.15.1...v0.16.0) - 2022-01-24
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/7cefef26f7b714eb9d5be117ba2159d4e40168f3"><tt>7cefef26</tt></a> add PrependPlugin (<a href="https://github.com/99designs/gqlgen/pull/39">#1839</a>)</summary>
+
+* add PrependPlugin
+
+related: https://github.com/99designs/gqlgen/pull/1838
+
+* added test for PrependPlugin
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/972878a04fc8e9065df212b7cdbe934f141d069b"><tt>972878a0</tt></a> Revert "Fix plugin addition (<a href="https://github.com/99designs/gqlgen/pull/38">#1717](https://github.com/99designs/gqlgen/issues/1717))" ([#1838</a>)</summary>
+
+This reverts commit f591c8f797e35635fb5eb0e4465c77b6a073896b.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1ed7e050a1f736b7395dd3e61f771d3ddcf80a8d"><tt>1ed7e050</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/33">#1832](https://github.com/99designs/gqlgen/issues/1832) [@requires](https://github.com/requires) directive when [@entityResolver](https://github.com/entityResolver) is used ([#1833</a>)</summary>
+
+* fix requires directive for multipleEntity directive
+
+
+* fix lint
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/fcee4c404f52c2debcb8b8acaa31421804f625ea"><tt>fcee4c40</tt></a> Update README.md (<a href="https://github.com/99designs/gqlgen/pull/36">#1836</a>)</summary>
+
+Corrected a simple grammar typo.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3fb5fd9916896d2c084c646093b3cbd634f61121"><tt>3fb5fd99</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/35">#1834](https://github.com/99designs/gqlgen/issues/1834): Implement federation correctly ([#1835</a>)</summary>
+
+* Fix federation implementation which does not conform to Apollo Federation subgraph specification
+
+* Optimize generated line breaks
+
+* Run go generate
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/986650718267770018139713df874a70e1e79e16"><tt>98665071</tt></a> Imporve gqlgen test cases (<a href="https://github.com/99designs/gqlgen/pull/73">#1773</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/1765"> #1765</a>)</summary>
+
+* Imporve test cases for init and generate
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5d904d8782833d85ca6fedb47420237b3258eb66"><tt>5d904d87</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/78">#1778</a> from ipfans/gh-pages-patch</summary>
+
+Bump gqlgen.com version list
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/196ee13bc364a4dea800edc0a9e60c6e7e2bd03b"><tt>196ee13b</tt></a> Bump gqlgen.com version
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.15.1"></a>
 ## [v0.15.1](https://github.com/99designs/gqlgen/compare/v0.15.0...v0.15.1) - 2022-01-16
+- <a href="https://github.com/99designs/gqlgen/commit/7102a36bbde485fbbb671499fdde8697232c0725"><tt>7102a36b</tt></a> Prepare for 0.15.1 release
+
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/2b8f50b3b38b129f56e06c3dadccd0cb8667a741"><tt>2b8f50b3</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/67">#1765](https://github.com/99designs/gqlgen/issues/1765): Sometimes module info not exists or not loaded. ([#1767</a>)</summary>
 
 * Remove failing test

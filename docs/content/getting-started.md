@@ -44,7 +44,7 @@ go mod tidy
 
 If you want to specify a particular version of gqlgen, you can use `go get`. For example
 ```shell
-go get -d github.com/99designs/gqlgen@v0.16.1
+go get -d github.com/99designs/gqlgen
 ```
 
 ## Building the server

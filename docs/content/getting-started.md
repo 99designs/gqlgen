@@ -53,6 +53,7 @@ go get -d github.com/99designs/gqlgen@v0.14.0
 
 ```shell
 go run github.com/99designs/gqlgen init
+printf 'package model' | gofmt > graph/model/doc.go
 ```
 
 This will create our suggested package layout. You can modify these paths in gqlgen.yml if you need to.

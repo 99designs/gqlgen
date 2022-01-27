@@ -544,6 +544,47 @@ func TestMultiEntityResolver(t *testing.T) {
 		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
 		require.Equal(t, resp.Entities[1].Key2, "key2 - 2")
 	})
+
+	t.Run("MultiPlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "MultiPlanetRequiresNested",
+				"name":       "earth",
+				"world": map[string]interface{}{
+					"foo": "A",
+				},
+			}, {
+				"__typename": "MultiPlanetRequiresNested",
+				"name":       "mars",
+				"world": map[string]interface{}{
+					"foo": "B",
+				},
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name  string `json:"name"`
+				World struct {
+					Foo string `json:"foo"`
+				} `json:"world"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"MultiPlanetRequiresNested {name, world { foo }}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, resp.Entities[0].Name, "earth")
+		require.Equal(t, resp.Entities[0].World.Foo, "A")
+		require.Equal(t, resp.Entities[1].Name, "mars")
+		require.Equal(t, resp.Entities[1].World.Foo, "B")
+	})
 }
 
 func entityQuery(queries []string) string {

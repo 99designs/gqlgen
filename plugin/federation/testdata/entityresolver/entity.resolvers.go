@@ -72,6 +72,34 @@ func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context,
 	return nil, fmt.Errorf("error resolving MultiHelloWorldWithError")
 }
 
+func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Context, reps []*generated.MultiPlanetRequiresNestedByNamesInput) ([]*generated.MultiPlanetRequiresNested, error) {
+	worlds := map[string]*generated.World{
+		"earth": {
+			Foo: "A",
+		},
+		"mars": {
+			Foo: "B",
+		},
+	}
+
+	results := make([]*generated.MultiPlanetRequiresNested, len(reps))
+
+	for i := range reps {
+		name := reps[i].Name
+		world, ok := worlds[name]
+		if !ok {
+			return nil, fmt.Errorf("unknown planet: %s", name)
+		}
+
+		results[i] = &generated.MultiPlanetRequiresNested{
+			Name:  name,
+			World: world,
+		}
+	}
+
+	return results, nil
+}
+
 func (r *entityResolver) FindPlanetMultipleRequiresByName(ctx context.Context, name string) (*generated.PlanetMultipleRequires, error) {
 	return &generated.PlanetMultipleRequires{Name: name}, nil
 }

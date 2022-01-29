@@ -67,6 +67,18 @@ type MultiHelloWithErrorByNamesInput struct {
 	Name string `json:"Name"`
 }
 
+type MultiPlanetRequiresNested struct {
+	Name  string `json:"name"`
+	World *World `json:"world"`
+	Size  int    `json:"size"`
+}
+
+func (MultiPlanetRequiresNested) IsEntity() {}
+
+type MultiPlanetRequiresNestedByNamesInput struct {
+	Name string `json:"Name"`
+}
+
 type PlanetMultipleRequires struct {
 	Name     string `json:"name"`
 	Diameter int    `json:"diameter"`

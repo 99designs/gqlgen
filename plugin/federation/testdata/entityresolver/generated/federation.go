@@ -73,6 +73,8 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			return true
 		case "MultiHelloWithError":
 			return true
+		case "MultiPlanetRequiresNested":
+			return true
 		default:
 			return false
 		}
@@ -432,6 +434,34 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			}
 			return nil
 
+		case "MultiPlanetRequiresNested":
+			_reps := make([]*MultiPlanetRequiresNestedByNamesInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+				}
+
+				_reps[i] = &MultiPlanetRequiresNestedByNamesInput{
+					Name: id0,
+				}
+			}
+
+			entities, err := ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, _reps)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i]["world"].(map[string]interface{})["foo"])
+				if err != nil {
+					return err
+				}
+				list[idx[i]] = entity
+			}
+			return nil
+
 		default:
 			return errors.New("unknown type: " + typeName)
 		}
@@ -606,6 +636,23 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep map[strin
 		return "findManyMultiHelloWithErrorByNames", nil
 	}
 	return "", fmt.Errorf("%w for MultiHelloWithError", ErrTypeNotFound)
+}
+
+func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["name"]; !ok {
+			break
+		}
+		return "findManyMultiPlanetRequiresNestedByNames", nil
+	}
+	return "", fmt.Errorf("%w for MultiPlanetRequiresNested", ErrTypeNotFound)
 }
 
 func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep map[string]interface{}) (string, error) {

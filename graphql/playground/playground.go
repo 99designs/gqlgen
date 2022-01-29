@@ -41,9 +41,12 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
       const subscriptionUrl = wsProto + '//' + location.host + '{{.endpoint}}';
 
       const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl });
-
       ReactDOM.render(
-        React.createElement(GraphiQL, { fetcher: fetcher }),
+        React.createElement(GraphiQL, {
+          fetcher: fetcher,
+          headerEditorEnabled: true,
+          shouldPersistHeaders: true
+        }),
         document.getElementById('graphiql'),
       );
     </script>

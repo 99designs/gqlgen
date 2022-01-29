@@ -15,7 +15,7 @@ require (
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/vektah/gqlparser/v2 v2.3.1
 	golang.org/x/tools v0.1.5
-	gopkg.in/yaml.v2 v2.2.4
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 require (

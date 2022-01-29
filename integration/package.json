@@ -14,7 +14,7 @@
     "graphql-cli": "^3.0.14",
     "graphql-tag": "^2.11.0",
     "jest": "^24.9.0",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "subscriptions-transport-ws": "^0.9.18",
     "ws": "^7.4.6"
   },

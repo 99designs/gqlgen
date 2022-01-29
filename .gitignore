@@ -1,5 +1,6 @@
 /vendor
 /docs/public
+/docs/.hugo_build.lock
 /example/chat/node_modules
 /integration/node_modules
 /integration/schema-fetched.graphql

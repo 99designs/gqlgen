@@ -64,6 +64,8 @@ go get -u github.com/graph-gophers/dataloader
 Next, we implement a data loader and a middleware for injecting the data loader on a request context.
 
 ```go
+package storage
+
 // import graph gophers with your other imports
 import (
 	"github.com/graph-gophers/dataloader"

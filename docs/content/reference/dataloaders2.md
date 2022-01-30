@@ -1,6 +1,6 @@
 ---
-title: "Optimizing resolvers using Dataloaders"
-description: Speeding up your GraphQL requests with fewer, batched calls
+title: "Optimizing N+1 database queries using Dataloaders"
+description: Speeding up your GraphQL requests by reducing the number of round trips to the database.
 linkTitle: Dataloaders2
 menu: { main: { parent: 'reference', weight: 10 } }
 ---
@@ -121,7 +121,7 @@ func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*data
 
 // Loaders wrap your data loaders to inject via middleware
 type Loaders struct {
-	userLoader *dataloader.Loader
+	UserLoader *dataloader.Loader
 }
 
 // NewLoaders instantiates data loaders for the middleware
@@ -129,19 +129,9 @@ func NewLoaders(conn *sql.DB) *Loaders {
 	// define the data loader
 	userReader := &UserReader{conn: conn}
 	loaders := &Loaders{
-		userLoader: dataloader.NewBatchedLoader(u.GetUsers),
+		UserLoader: dataloader.NewBatchedLoader(u.GetUsers),
 	}
 	return loaders
-}
-
-// GetUser wraps the User dataloader for efficient retrieval by user ID
-func (i *Loaders) GetUser(ctx context.Context, userID string) (*model.User, error) {
-	thunk := i.userLoader.Load(ctx, gopher_dataloader.StringKey(userID))
-	result, err := thunk()
-	if err != nil {
-		return nil, err
-	}
-	return result.(*model.User), nil
 }
 
 // Middleware injects data loaders into the context
@@ -155,15 +145,27 @@ func Middleware(loaders *Loaders, next http.Handler) http.Handler {
 }
 
 // For returns the dataloader for a given context
-func For(ctx context.Context) *DataLoader {
-	return ctx.Value(loadersKey).(*DataLoader)
+func For(ctx context.Context) *Loaders {
+	return ctx.Value(loadersKey).(*Loaders)
 }
+
+// GetUser wraps the User dataloader for efficient retrieval by user ID
+func GetUser(ctx context.Context, userID string) (*model.User, error) {
+	loaders := For(ctx)
+	thunk := loaders.UserLoader.Load(ctx, dataloader.StringKey(userID))
+	result, err := thunk()
+	if err != nil {
+		return nil, err
+	}
+	return result.(*model.User), nil
+}
+
 ```
 
 Now lets update our resolver to call the dataloader:
 ```go
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	return dataloader.For(ctx).GetUser(ctx, obj.UserID)
+	return dataloader.GetUser(ctx, obj.UserID)
 }
 ```
 

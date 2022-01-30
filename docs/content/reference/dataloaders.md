@@ -167,7 +167,7 @@ func GetUser(ctx context.Context, userID string) (*model.User, error) {
 Now lets update our resolver to call the dataloader:
 ```go
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	return dataloader.GetUser(ctx, obj.UserID)
+	return storage.GetUser(ctx, obj.UserID)
 }
 ```
 

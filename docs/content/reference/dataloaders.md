@@ -5,7 +5,7 @@ linkTitle: Dataloaders
 menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
-Dataloaders consolidate the retrieval of information into fewer, batched calls. This example implements a dataloader that reduces SQL queries by emitting bulk reads.
+Dataloaders consolidate the retrieval of information into fewer, batched calls. This example demonstrates the value of dataloaders by consolidating many SQL queries into a single bulk query.
 
 ## The Problem
 

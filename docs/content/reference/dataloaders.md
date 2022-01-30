@@ -97,7 +97,7 @@ func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*data
 	)
 	defer res.Close()
 	// return User records into a map by ID
-	userById := map[int]*model.User{}
+	userById := map[string]*model.User{}
 	for res.Next() {
 		user := model.User{}
 		if err := res.Scan(&user.ID, &user.Name); err != nil {

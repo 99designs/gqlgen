@@ -172,3 +172,5 @@ The end result? Just 2 queries!
 SELECT id, todo, user_id FROM todo
 SELECT id, name from user WHERE id IN (?,?,?,?,?)
 ```
+
+You can see an end-to-end example [here](https://github.com/zenyui/gqlgen-dataloader).

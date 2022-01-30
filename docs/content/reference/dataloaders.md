@@ -5,22 +5,24 @@ linkTitle: Dataloaders
 menu: { main: { parent: 'reference', weight: 10 } }
 ---
 
-Have you noticed some GraphQL queries end can make hundreds of database
-queries, often with mostly repeated data? Lets take a look why and how to
-fix it.
+Dataloaders consolidate the retrieval of information into fewer, batched calls. This example implements a dataloader that reduces SQL queries by emitting bulk reads.
 
-## Query Resolution
+## The Problem
 
-Imagine if you had a simple query like this:
+Imagine your graph has query that lists todos...
 
 ```graphql
-query { todos { users { name } } }
+query { todos { user { name } } }
 ```
 
-and our todo.user resolver looks like this:
+and the `todo.user` resolver reads the `User` from a database...
 ```go
-func (r *todoResolver) UserRaw(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	res := db.LogAndQuery(r.Conn, "SELECT id, name FROM dataloader_example.user WHERE id = ?", obj.UserID)
+func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
+	res := db.LogAndQuery(
+		r.Conn,
+		"SELECT id, name FROM users WHERE id = ?",
+		obj.UserID,
+	)
 	defer res.Close()
 
 	if !res.Next() {
@@ -34,127 +36,136 @@ func (r *todoResolver) UserRaw(ctx context.Context, obj *model.Todo) (*model.Use
 }
 ```
 
-**Note**: I'm going to use go's low level `sql.DB` here. All of this will
-work with whatever your favourite ORM is.
-
-The query executor will call the Query.Todos resolver which does a `select * from todo` and
-return N todos. Then for each of the todos, concurrently, call the Todo_user resolver,
-`SELECT from USER where id = todo.user_id`.
-
+The query executor will call the `Query.Todos` resolver which does a `select * from todo` and returns N todos. If the nested `User` is selected, the above `UserRaw` resolver will run a separate query for each user, resulting in `N+1` database queries.
 
 eg:
 ```sql
 SELECT id, todo, user_id FROM todo
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
-SELECT id, name FROM user WHERE id = ?
+SELECT id, name FROM users WHERE id = ?
+SELECT id, name FROM users WHERE id = ?
+SELECT id, name FROM users WHERE id = ?
+SELECT id, name FROM users WHERE id = ?
+SELECT id, name FROM users WHERE id = ?
+SELECT id, name FROM users WHERE id = ?
 ```
 
 Whats even worse? most of those todos are all owned by the same user! We can do better than this.
 
 ## Dataloader
 
-What we need is a way to group up all of those concurrent requests, take out any duplicates, and
-store them in case they are needed later on in request. The dataloader is just that, a request-scoped
-batching and caching solution popularised by [facebook](https://github.com/facebook/dataloader).
+Dataloaders allow us to consolidate the fetching of `todo.user` across all resolvers for a given GraphQL request into a single database query and even cache the results for subsequent requests.
 
-We're going to use [dataloaden](https://github.com/vektah/dataloaden) to build our dataloaders.
-In languages with generics, we could probably just create a DataLoader<User>, but golang
-doesnt have generics. Instead we generate the code manually for our instance.
+We're going to use [graph-gophers/dataloader](https://github.com/graph-gophers/dataloader) to implement a dataloader for bulk-fetching users.
 
 ```bash
-go get github.com/vektah/dataloaden
-mkdir dataloader
-cd dataloader
-echo 'package dataloader' > gen.go
-go run github.com/vektah/dataloaden UserLoader int *gqlgen-tutorials/dataloader/graph/model.User
+go get -u github.com/graph-gophers/dataloader
 ```
 
-Next we need to create an instance of our new dataloader and tell how to fetch data.
-Because dataloaders are request scoped, they are a good fit for `context`.
+Next, we implement a data loader and a middleware for injecting the data loader on a request context.
 
 ```go
+// import graph gophers with your other imports
+import (
+	"github.com/graph-gophers/dataloader"
+)
 
-const loadersKey = "dataloaders"
+type ctxKey string
 
-type Loaders struct {
-	UserById UserLoader
+const (
+	loadersKey = ctxKey("dataloaders")
+)
+
+// UserReader reads Users from a database
+type UserReader struct {
+	conn *sql.DB
 }
 
-func Middleware(conn *sql.DB, next http.Handler) http.Handler {
+// GetUsers implements a batch function that can retrieve many users by ID,
+// for use in a dataloader
+func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
+	// read all requested users in a single query
+	userIDs := make([]string, len(keys))
+	for ix, k := range keys {
+		userIDs[ix] = key.String()
+	}
+	res := u.db.Exec(
+		r.Conn,
+		"SELECT id, name
+		FROM users
+		WHERE id IN (?" + strings.Repeat(",?", len(userIDs-1)) + ")",
+		userIDs...,
+	)
+	defer res.Close()
+	// return User records into a map by ID
+	userById := map[int]*model.User{}
+	for res.Next() {
+		user := model.User{}
+		if err := res.Scan(&user.ID, &user.Name); err != nil {
+			panic(err)
+		}
+		userById[user.ID] = &user
+	}
+	// return users in the same order requested
+	output := make([]*dataloader.Result, len(keys))
+	for index, userKey := range keys {
+		user, ok := userById[userKey.String()]
+		if ok {
+			output[index] = &dataloader.Result{Data: record, Error: nil}
+		} else {
+			err := fmt.Errorf("user not found %s", userKey.String())
+			output[index] = &dataloader.Result{Data: nil, Error: err}
+		}
+	}
+	return output
+}
+
+// Loaders wrap your data loaders to inject via middleware
+type Loaders struct {
+	UserLoader *dataloader.Loader
+}
+
+// NewLoaders instantiates data loaders for the middleware
+func NewLoaders(conn *sql.DB) *Loaders {
+	// define the data loader
+	userReader := &UserReader{conn: conn}
+	loaders := &Loaders{
+		UserLoader: dataloader.NewBatchedLoader(u.GetUsers),
+	}
+	return loaders
+}
+
+// Middleware injects data loaders into the context
+func Middleware(loaders *Loaders, next http.Handler) http.Handler {
+	// return a middleware that injects the loader to the request context
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), loadersKey, &Loaders{
-			UserById: UserLoader{
-				maxBatch: 100,
-				wait:     1 * time.Millisecond,
-				fetch: func(ids []int) ([]*model.User, []error) {
-					placeholders := make([]string, len(ids))
-					args := make([]interface{}, len(ids))
-					for i := 0; i < len(ids); i++ {
-						placeholders[i] = "?"
-						args[i] = i
-					}
-
-					res := db.LogAndQuery(conn,
-						"SELECT id, name from dataloader_example.user WHERE id IN ("+strings.Join(placeholders, ",")+")",
-						args...,
-					)
-					defer res.Close()
-
-					userById := map[int]*model.User{}
-					for res.Next() {
-						user := model.User{}
-						err := res.Scan(&user.ID, &user.Name)
-						if err != nil {
-							panic(err)
-						}
-						userById[user.ID] = &user
-					}
-
-					users := make([]*model.User, len(ids))
-					for i, id := range ids {
-						users[i] = userById[id]
-					}
-
-					return users, nil
-				},
-			},
-		})
-		r = r.WithContext(ctx)
+		nextCtx := context.WithValue(r.Context(), loadersKey, loader)
+		r = r.WithContext(nextCtx)
 		next.ServeHTTP(w, r)
 	})
 }
 
+// For returns the dataloader for a given context
 func For(ctx context.Context) *Loaders {
 	return ctx.Value(loadersKey).(*Loaders)
 }
 
-```
+// GetUser wraps the User dataloader for efficient retrieval by user ID
+func GetUser(ctx context.Context, userID string) (*model.User, error) {
+	loaders := For(ctx)
+	thunk := loaders.UserLoader.Load(ctx, dataloader.StringKey(userID))
+	result, err := thunk()
+	if err != nil {
+		return nil, err
+	}
+	return result.(*model.User), nil
+}
 
-This dataloader will wait for up to 1 millisecond to get 100 unique requests and then call
-the fetch function. This function is a little ugly, but half of it is just building the SQL!
+```
 
 Now lets update our resolver to call the dataloader:
 ```go
-func (r *todoResolver) UserLoader(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	return dataloader.For(ctx).UserById.Load(obj.UserID)
+func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
+	return dataloader.GetUser(ctx, obj.UserID)
 }
 ```
 
@@ -164,9 +175,4 @@ SELECT id, todo, user_id FROM todo
 SELECT id, name from user WHERE id IN (?,?,?,?,?)
 ```
 
-The generated UserLoader has a few other useful methods on it:
-
- - `LoadAll(keys)`: If you know up front you want a bunch users
- - `Prime(key, user)`: Used to sync state between similar loaders (usersById, usersByNote)
-
-You can see the full working example [here](https://github.com/vektah/gqlgen-tutorials/tree/master/dataloader).
+You can see an end-to-end example [here](https://github.com/zenyui/gqlgen-dataloader).

@@ -24,3 +24,10 @@ menu:
     - name: pkg.go.dev →
       parent: reference
       url: https://pkg.go.dev/github.com/99designs/gqlgen
+
+security:
+  funcs:
+    getenv:
+    - '^HUGO_'
+    - 'VERSIONS'
+    - 'CURRENT_VERSION'

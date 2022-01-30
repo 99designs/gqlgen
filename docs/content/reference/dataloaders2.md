@@ -17,7 +17,7 @@ query { todos { user { name } } }
 
 and the `todo.user` resolver reads the `User` from a database...
 ```go
-func (r *todoResolver) UserRaw(ctx context.Context, obj *model.Todo) (*model.User, error) {
+func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
 	res := db.LogAndQuery(
 		r.Conn,
 		"SELECT id, name FROM users WHERE id = ?",
@@ -53,7 +53,7 @@ Whats even worse? most of those todos are all owned by the same user! We can do 
 
 ## Dataloader
 
-Dataloaders allow us to consolidate all of the user queries for a given GraphQL request into a single database query and even cache the results for subsequenet requests.
+Dataloaders allow us to consolidate the fetching of `todo.user` across all resolvers for a given GraphQL request into a single database query and even cache the results for subsequent requests.
 
 We're going to use [graph-gophers/dataloader](https://github.com/graph-gophers/dataloader) to implement a dataloader for bulk-fetching users.
 
@@ -121,7 +121,7 @@ func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*data
 
 // Loaders wrap your data loaders to inject via middleware
 type Loaders struct {
-	UserById *dataloader.Loader
+	userLoader *dataloader.Loader
 }
 
 // NewLoaders instantiates data loaders for the middleware
@@ -129,9 +129,19 @@ func NewLoaders(conn *sql.DB) *Loaders {
 	// define the data loader
 	userReader := &UserReader{conn: conn}
 	loaders := &Loaders{
-		UserById: dataloader.NewBatchedLoader(u.GetUsers),
+		userLoader: dataloader.NewBatchedLoader(u.GetUsers),
 	}
 	return loaders
+}
+
+// GetUser wraps the User dataloader for efficient retrieval by user ID
+func (i *Loaders) GetUser(ctx context.Context, userID string) (*model.User, error) {
+	thunk := i.userLoader.Load(ctx, gopher_dataloader.StringKey(userID))
+	result, err := thunk()
+	if err != nil {
+		return nil, err
+	}
+	return result.(*model.User), nil
 }
 
 // Middleware injects data loaders into the context
@@ -148,4 +158,17 @@ func Middleware(loaders *Loaders, next http.Handler) http.Handler {
 func For(ctx context.Context) *DataLoader {
 	return ctx.Value(loadersKey).(*DataLoader)
 }
+```
+
+Now lets update our resolver to call the dataloader:
+```go
+func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
+	return dataloader.For(ctx).GetUser(ctx, obj.UserID)
+}
+```
+
+The end result? Just 2 queries!
+```sql
+SELECT id, todo, user_id FROM todo
+SELECT id, name from user WHERE id IN (?,?,?,?,?)
 ```

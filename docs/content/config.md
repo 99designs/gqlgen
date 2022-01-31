@@ -52,8 +52,8 @@ resolver:
 
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
-autobind:
-  - "github.com/your/app/graph/model"
+# autobind:
+#   - "github.com/[YOUR_APP_DIR]/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #

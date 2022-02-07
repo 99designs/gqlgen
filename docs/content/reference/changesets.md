@@ -13,7 +13,7 @@ type Mutation {
 	updateUser(id: ID!, changes: UserChanges!): User
 }
 
-type UserChanges {
+input UserChanges {
 	name: String
 	email: String
 }

@@ -1,3 +1,0 @@
-models:
-  Chatroom:
-    model: github.com/99designs/gqlgen/example/chat.Chatroom

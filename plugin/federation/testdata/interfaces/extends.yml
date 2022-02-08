@@ -1,5 +1,5 @@
 schema:
-  - "testdata/interfaces/interfaces.graphqls"
+  - "testdata/interfaces/extends.graphqls"
 exec:
   filename: testdata/interfaces/generated/exec.go
 federation:

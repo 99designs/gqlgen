@@ -590,7 +590,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]Event)
 	fc.Result = res
-	return ec.marshalOEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋselectionᚐEventᚄ(ctx, field.Selections, res)
+	return ec.marshalOEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋselectionᚐEventᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2422,7 +2422,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNEvent2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋselectionᚐEvent(ctx context.Context, sel ast.SelectionSet, v Event) graphql.Marshaler {
+func (ec *executionContext) marshalNEvent2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋselectionᚐEvent(ctx context.Context, sel ast.SelectionSet, v Event) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2741,7 +2741,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋselectionᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []Event) graphql.Marshaler {
+func (ec *executionContext) marshalOEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋselectionᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []Event) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -2768,7 +2768,7 @@ func (ec *executionContext) marshalOEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNEvent2githubᚗcomᚋ99designsᚋgqlgenᚋexampleᚋselectionᚐEvent(ctx, sel, v[i])
+			ret[i] = ec.marshalNEvent2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋselectionᚐEvent(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

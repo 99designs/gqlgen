@@ -362,10 +362,14 @@ func isFederatedEntity(schemaType *ast.Definition) ([]*ast.Directive, bool) {
 	case ast.Interface:
 		// TODO: support @key and @extends for interfaces
 		if dir := schemaType.Directives.ForName("key"); dir != nil {
-			panic("@key directive is not currently supported for interfaces.")
+			fmt.Printf("@key directive found on \"interface %s\". Will be ignored.\n", schemaType.Name)
 		}
 		if dir := schemaType.Directives.ForName("extends"); dir != nil {
-			panic("@extends directive is not currently supported for interfaces.")
+			panic(
+				fmt.Sprintf(
+					"@extends directive is not currently supported for interfaces, use \"extend interface %s\" instead.",
+					schemaType.Name,
+				))
 		}
 	default:
 		// ignore

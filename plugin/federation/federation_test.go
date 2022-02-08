@@ -87,9 +87,17 @@ func TestNoEntities(t *testing.T) {
 	require.Len(t, f.Entities, 0)
 }
 
-func TestInterfaces(t *testing.T) {
+func TestInterfaceKeyDirective(t *testing.T) {
+	f, cfg := load(t, "testdata/interfaces/key.yml")
+
+	err := f.MutateConfig(cfg)
+	require.NoError(t, err)
+	require.Len(t, f.Entities, 0)
+}
+
+func TestInterfaceExtendsDirective(t *testing.T) {
 	require.Panics(t, func() {
-		load(t, "testdata/interfaces/gqlgen.yml")
+		load(t, "testdata/interfaces/extends.yml")
 	})
 }
 

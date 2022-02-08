@@ -140,7 +140,7 @@ func NewLoaders(conn *sql.DB) *Loaders {
 func Middleware(loaders *Loaders, next http.Handler) http.Handler {
 	// return a middleware that injects the loader to the request context
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		nextCtx := context.WithValue(r.Context(), loadersKey, loader)
+		nextCtx := context.WithValue(r.Context(), loadersKey, loaders)
 		r = r.WithContext(nextCtx)
 		next.ServeHTTP(w, r)
 	})

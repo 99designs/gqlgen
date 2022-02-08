@@ -87,7 +87,7 @@ type UserReader struct {
 func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 	// read all requested users in a single query
 	userIDs := make([]string, len(keys))
-	for ix, k := range keys {
+	for ix, key := range keys {
 		userIDs[ix] = key.String()
 	}
 	res := u.db.Exec(

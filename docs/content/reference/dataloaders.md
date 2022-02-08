@@ -87,7 +87,7 @@ type UserReader struct {
 func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 	// read all requested users in a single query
 	userIDs := make([]string, len(keys))
-	for ix, k := range keys {
+	for ix, key := range keys {
 		userIDs[ix] = key.String()
 	}
 	res := u.db.Exec(
@@ -140,7 +140,7 @@ func NewLoaders(conn *sql.DB) *Loaders {
 func Middleware(loaders *Loaders, next http.Handler) http.Handler {
 	// return a middleware that injects the loader to the request context
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		nextCtx := context.WithValue(r.Context(), loadersKey, loader)
+		nextCtx := context.WithValue(r.Context(), loadersKey, loaders)
 		r = r.WithContext(nextCtx)
 		next.ServeHTTP(w, r)
 	})

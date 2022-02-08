@@ -1,0 +1,24 @@
+# .gqlgen.yml _examples
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema: "*.graphql"
+exec:
+  filename: generated.go
+model:
+  filename: models_gen.go
+resolver:
+  type: Resolver
+  layout: follow-schema
+  dir: .
+
+models:
+  Todo:    # Object
+    fields:
+      text:
+        fieldName: Description # Field
+  NewTodo: # Input
+    fields:
+      userId:
+        fieldName: UserID      # Field

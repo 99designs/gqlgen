@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-cd example/init
+cd _examples/init
 
 go get -d github.com/99designs/gqlgen@master
 

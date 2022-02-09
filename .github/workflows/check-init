@@ -2,11 +2,13 @@
 
 set -euo pipefail
 
-cd _examples/init
+gqlgen_dir=$(pwd)
+cd $(mktemp -d)
+go mod init inittest
+go mod edit -replace=github.com/99designs/gqlgen="$gqlgen_dir"
+go get -d github.com/99designs/gqlgen
 
-go get -d github.com/99designs/gqlgen@master
-
-if { go run github.com/99designs/gqlgen init 2>&1 >&3 3>&- | grep '^' >&2; } 3>&1; then
-    echo "gqlgen init failed validation"
+if ! go run github.com/99designs/gqlgen init &>/dev/null ; then
+    echo "gqlgen init failed"
     exit 125
 fi

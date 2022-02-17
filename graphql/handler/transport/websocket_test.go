@@ -347,7 +347,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 	})
 
 	t.Run("receives no graphql-ws keep alive messages", func(t *testing.T) {
-		_, srv := initialize(transport.Websocket{KeepAlivePingInterval: 5*time.Millisecond})
+		_, srv := initialize(transport.Websocket{KeepAlivePingInterval: 5 * time.Millisecond})
 		defer srv.Close()
 
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
@@ -357,7 +357,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
 
 		// If the keep-alives are sent, this deadline will not be used, and no timeout error will be found
-		c.SetReadDeadline(time.Now().UTC().Add(50*time.Millisecond))
+		c.SetReadDeadline(time.Now().UTC().Add(50 * time.Millisecond))
 		var msg operationMessage
 		err := c.ReadJSON(&msg)
 		require.Error(t, err)
@@ -373,7 +373,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	}
 
 	t.Run("client receives ping and responds with pong", func(t *testing.T) {
-		_, srv := initialize(transport.Websocket{PingPongInterval: 10*time.Millisecond})
+		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
 		defer srv.Close()
 
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
@@ -388,7 +388,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	})
 
 	t.Run("client sends ping and expects pong", func(t *testing.T) {
-		_, srv := initialize(transport.Websocket{PingPongInterval: 10*time.Millisecond})
+		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
 		defer srv.Close()
 
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
@@ -408,8 +408,8 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		// But since this message type does not exist in the graphql-ws sub protocol, it would fail
 
 		_, srv := initialize(transport.Websocket{
-			PingPongInterval:      5*time.Millisecond,
-			KeepAlivePingInterval: 10*time.Millisecond,
+			PingPongInterval:      5 * time.Millisecond,
+			KeepAlivePingInterval: 10 * time.Millisecond,
 		})
 		defer srv.Close()
 

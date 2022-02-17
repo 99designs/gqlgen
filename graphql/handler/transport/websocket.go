@@ -150,8 +150,9 @@ func (c *wsConnection) run() {
 		c.close(websocket.CloseAbnormalClosure, "unexpected closure")
 	}()
 
-	// Create a timer that will fire every interval to keep the connection alive.
-	if c.KeepAlivePingInterval != 0 {
+	// If we're running in graphql-ws mode, create a timer that will trigger a
+	// keep alive message every interval
+	if (c.conn.Subprotocol() == "" || c.conn.Subprotocol() == graphqlwsSubprotocol) && c.KeepAlivePingInterval != 0 {
 		c.mu.Lock()
 		c.keepAliveTicker = time.NewTicker(c.KeepAlivePingInterval)
 		c.mu.Unlock()
@@ -159,13 +160,15 @@ func (c *wsConnection) run() {
 		go c.keepAlive(ctx)
 	}
 
-	// Create a timer that will fire every interval a ping message that should
-	// receive a pong (SetPongHandler in init() function)
-	if c.PingPongInterval != 0 {
+	// If we're running in graphql-transport-ws mode, create a timer that will
+	// trigger a ping message every interval
+	if c.conn.Subprotocol() == graphqltransportwsSubprotocol && c.PingPongInterval != 0 {
 		c.mu.Lock()
 		c.pingPongTicker = time.NewTicker(c.PingPongInterval)
 		c.mu.Unlock()
 
+		// Note: when the connection is closed by this deadline, the client
+		// will receive an "invalid close code"
 		c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
 		go c.ping(ctx)
 	}

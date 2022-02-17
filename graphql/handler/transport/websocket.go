@@ -195,7 +195,7 @@ func (c *wsConnection) run() {
 		case connectionCloseMessageType:
 			c.close(websocket.CloseNormalClosure, "terminated")
 			return
-		case pingMesageType:
+		case pingMessageType:
 			c.write(&message{t: pongMessageType, payload: m.payload})
 		case pongMessageType:
 			c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
@@ -226,7 +226,7 @@ func (c *wsConnection) ping(ctx context.Context) {
 			c.pingPongTicker.Stop()
 			return
 		case <-c.pingPongTicker.C:
-			c.write(&message{t: pingMesageType, payload: json.RawMessage{}})
+			c.write(&message{t: pingMessageType, payload: json.RawMessage{}})
 		}
 	}
 }

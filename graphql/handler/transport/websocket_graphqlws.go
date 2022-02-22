@@ -45,6 +45,7 @@ type (
 		Payload json.RawMessage      `json:"payload,omitempty"`
 		ID      string               `json:"id,omitempty"`
 		Type    graphqlwsMessageType `json:"type"`
+		noOp    bool
 	}
 
 	graphqlwsMessageType string
@@ -68,6 +69,10 @@ func (me graphqlwsMessageExchanger) Send(m *message) error {
 	msg := &graphqlwsMessage{}
 	if err := msg.fromMessage(m); err != nil {
 		return err
+	}
+
+	if msg.noOp {
+		return nil
 	}
 
 	return me.c.WriteJSON(msg)
@@ -94,76 +99,73 @@ func (t graphqlwsMessageType) MarshalText() ([]byte, error) {
 	return []byte(string(t)), nil
 }
 
-func (t graphqlwsMessageType) toMessageType() (mt messageType, err error) {
-	switch t {
-	default:
-		err = fmt.Errorf("unknown message type mapping for %s", t)
-	case graphqlwsConnectionInitMsg:
-		mt = initMessageType
-	case graphqlwsConnectionTerminateMsg:
-		mt = connectionCloseMessageType
-	case graphqlwsStartMsg:
-		mt = startMessageType
-	case graphqlwsStopMsg:
-		mt = stopMessageType
-	case graphqlwsConnectionAckMsg:
-		mt = connectionAckMessageType
-	case graphqlwsConnectionErrorMsg:
-		mt = connectionErrorMessageType
-	case graphqlwsDataMsg:
-		mt = dataMessageType
-	case graphqlwsErrorMsg:
-		mt = errorMessageType
-	case graphqlwsCompleteMsg:
-		mt = completeMessageType
-	case graphqlwsConnectionKeepAliveMsg:
-		mt = keepAliveMessageType
-	}
-
-	return mt, err
-}
-
-func (t *graphqlwsMessageType) fromMessageType(mt messageType) (err error) {
-	switch mt {
-	default:
-		err = fmt.Errorf("failed to convert message %s to %s subprotocol", mt, graphqlwsSubprotocol)
-	case initMessageType:
-		*t = graphqlwsConnectionInitMsg
-	case connectionAckMessageType:
-		*t = graphqlwsConnectionAckMsg
-	case keepAliveMessageType:
-		*t = graphqlwsConnectionKeepAliveMsg
-	case connectionErrorMessageType:
-		*t = graphqlwsConnectionErrorMsg
-	case connectionCloseMessageType:
-		*t = graphqlwsConnectionTerminateMsg
-	case startMessageType:
-		*t = graphqlwsStartMsg
-	case stopMessageType:
-		*t = graphqlwsStopMsg
-	case dataMessageType:
-		*t = graphqlwsDataMsg
-	case completeMessageType:
-		*t = graphqlwsCompleteMsg
-	case errorMessageType:
-		*t = graphqlwsErrorMsg
-	}
-
-	return err
-}
-
 func (m graphqlwsMessage) toMessage() (message, error) {
-	mt, err := m.Type.toMessageType()
+	var t messageType
+	var err error
+	switch m.Type {
+	default:
+		err = fmt.Errorf("invalid client->server message type %s", m.Type)
+	case graphqlwsConnectionInitMsg:
+		t = initMessageType
+	case graphqlwsConnectionTerminateMsg:
+		t = connectionCloseMessageType
+	case graphqlwsStartMsg:
+		t = startMessageType
+	case graphqlwsStopMsg:
+		t = stopMessageType
+	case graphqlwsConnectionAckMsg:
+		t = connectionAckMessageType
+	case graphqlwsConnectionErrorMsg:
+		t = connectionErrorMessageType
+	case graphqlwsDataMsg:
+		t = dataMessageType
+	case graphqlwsErrorMsg:
+		t = errorMessageType
+	case graphqlwsCompleteMsg:
+		t = completeMessageType
+	case graphqlwsConnectionKeepAliveMsg:
+		t = keepAliveMessageType
+	}
+
 	return message{
 		payload: m.Payload,
 		id:      m.ID,
-		t:       mt,
+		t:       t,
 	}, err
 }
 
 func (m *graphqlwsMessage) fromMessage(msg *message) (err error) {
-	err = m.Type.fromMessageType(msg.t)
 	m.ID = msg.id
 	m.Payload = msg.payload
+
+	switch msg.t {
+	default:
+		err = fmt.Errorf("invalid server->client message type %s", msg.t)
+	case initMessageType:
+		m.Type = graphqlwsConnectionInitMsg
+	case connectionAckMessageType:
+		m.Type = graphqlwsConnectionAckMsg
+	case keepAliveMessageType:
+		m.Type = graphqlwsConnectionKeepAliveMsg
+	case connectionErrorMessageType:
+		m.Type = graphqlwsConnectionErrorMsg
+	case connectionCloseMessageType:
+		m.Type = graphqlwsConnectionTerminateMsg
+	case startMessageType:
+		m.Type = graphqlwsStartMsg
+	case stopMessageType:
+		m.Type = graphqlwsStopMsg
+	case dataMessageType:
+		m.Type = graphqlwsDataMsg
+	case completeMessageType:
+		m.Type = graphqlwsCompleteMsg
+	case errorMessageType:
+		m.Type = graphqlwsErrorMsg
+	case pingMessageType:
+		m.noOp = true
+	case pongMessageType:
+		m.noOp = true
+	}
+
 	return err
 }

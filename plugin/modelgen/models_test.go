@@ -4,8 +4,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/fs"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -95,7 +95,8 @@ func TestModelGeneration(t *testing.T) {
 		pkg, err := parseAst("out")
 		require.NoError(t, err)
 
-		generated := pkg.Files["out/generated.go"]
+		path := filepath.Join("out", "generated.go")
+		generated := pkg.Files[path]
 
 		type field struct {
 			typ  string
@@ -191,7 +192,7 @@ func mutateHook(b *ModelBuild) *ModelBuild {
 func parseAst(path string) (*ast.Package, error) {
 	// test setup to parse the types
 	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, path, func(fs.FileInfo) bool { return true }, parser.AllErrors)
+	pkgs, err := parser.ParseDir(fset, path, nil, parser.AllErrors)
 	if err != nil {
 		return nil, err
 	}

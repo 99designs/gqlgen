@@ -105,3 +105,23 @@ interface Foo_Barer {
 type _Foo_Barr implements  Foo_Barer {
     name: String!
 }
+
+# https://spec.graphql.org/October2021/#sec-Interfaces
+interface A {
+    a: String!
+}
+
+interface B {
+    b: Int!
+}
+
+interface C implements A {
+    a: String!
+    c: Boolean!
+}
+
+interface D implements A & B {
+    a: String!
+    b: Int!
+    d: String
+}

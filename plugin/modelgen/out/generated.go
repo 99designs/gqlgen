@@ -8,6 +8,25 @@ import (
 	"strconv"
 )
 
+type A interface {
+	IsA()
+}
+
+type B interface {
+	IsB()
+}
+
+type C interface {
+	A
+	IsC()
+}
+
+type D interface {
+	A
+	B
+	IsD()
+}
+
 type FooBarer interface {
 	IsFooBarer()
 }

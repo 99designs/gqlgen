@@ -5,7 +5,7 @@ go 1.16
 replace github.com/99designs/gqlgen => ../
 
 require (
-	github.com/99designs/gqlgen v0.0.0-00010101000000-000000000000
+	github.com/99designs/gqlgen v0.16.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/opentracing/opentracing-go v1.2.0

@@ -293,6 +293,102 @@ func TestWebsocketInitFunc(t *testing.T) {
 	})
 }
 
+func TestWebSocketErrorFunc(t *testing.T) {
+	t.Run("the error handler gets called when an error occurs", func(t *testing.T) {
+		errFuncCalled := make(chan bool, 1)
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			ErrorFunc: func(_ context.Context, err error) {
+				require.Error(t, err)
+				assert.Equal(t, err.Error(), "invalid message received")
+				errFuncCalled <- true
+			},
+		})
+
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+		require.NoError(t, c.WriteMessage(websocket.TextMessage, []byte("mark my words, you will regret this")))
+
+		select {
+		case res := <-errFuncCalled:
+			assert.True(t, res)
+		case <-time.NewTimer(time.Millisecond * 20).C:
+			assert.Fail(t, "The fail handler was not called in time")
+		}
+	})
+
+	t.Run("init func errors do not call the error handler", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
+				return ctx, errors.New("this is not what we agreed upon")
+			},
+			ErrorFunc: func(_ context.Context, err error) {
+				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		time.Sleep(time.Millisecond * 20)
+	})
+
+	t.Run("init func context closes do not call the error handler", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
+				newCtx, cancel := context.WithCancel(ctx)
+				time.AfterFunc(time.Millisecond*5, cancel)
+				return newCtx, nil
+			},
+			ErrorFunc: func(_ context.Context, err error) {
+				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+		time.Sleep(time.Millisecond * 20)
+	})
+
+	t.Run("init func context deadlines do not call the error handler", func(t *testing.T) {
+		h := testserver.New()
+		var cancel func()
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (newCtx context.Context, _ error) {
+				newCtx, cancel = context.WithDeadline(ctx, time.Now().Add(time.Millisecond*5))
+				return newCtx, nil
+			},
+			ErrorFunc: func(_ context.Context, err error) {
+				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+
+		// Cancel should contain an actual value now, so let's call it when we exit this scope (to make the linter happy)
+		defer cancel()
+
+		time.Sleep(time.Millisecond * 20)
+	})
+}
+
 func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 	initialize := func(ws transport.Websocket) (*testserver.TestServer, *httptest.Server) {
 		h := testserver.New()

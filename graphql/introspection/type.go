@@ -81,6 +81,7 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 				Name:         arg.Name,
 				Description:  arg.Description,
 				DefaultValue: defaultValue(arg.DefaultValue),
+				deprecation:  arg.Directives.ForName("deprecated"),
 			})
 		}
 
@@ -95,18 +96,25 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 	return fields
 }
 
+// TODO(codehex): update prelude in gqlparser to support deprecated directive for input object type.
+// func (t *Type) InputFields(includeDeprecated bool) []InputValue {
 func (t *Type) InputFields() []InputValue {
+	includeDeprecated := false // remove if updated
 	if t.def == nil || t.def.Kind != ast.InputObject {
 		return []InputValue{}
 	}
 
 	res := []InputValue{}
 	for _, f := range t.def.Fields {
+		if !includeDeprecated && f.Directives.ForName("deprecated") != nil {
+			continue
+		}
 		res = append(res, InputValue{
 			Name:         f.Name,
 			Description:  f.Description,
 			Type:         WrapTypeFromType(t.schema, f.Type),
 			DefaultValue: defaultValue(f.DefaultValue),
+			deprecation:  f.Directives.ForName("deprecated"),
 		})
 	}
 	return res

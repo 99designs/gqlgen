@@ -7,7 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-func TestType(t *testing.T) {
+func TestObjectType(t *testing.T) {
 	schemaType := Type{
 		def: &ast.Definition{
 			Name:        "Query",
@@ -37,10 +37,49 @@ func TestType(t *testing.T) {
 		require.Equal(t, "test", fields[0].Name)
 	})
 
-	t.Run("fields includeDepricated", func(t *testing.T) {
+	t.Run("fields includeDeprecated", func(t *testing.T) {
 		fields := schemaType.Fields(true)
 		require.Len(t, fields, 2)
 		require.Equal(t, "test", fields[0].Name)
 		require.Equal(t, "deprecated", fields[1].Name)
 	})
+}
+
+func TestInputObjectType(t *testing.T) {
+	schemaType := Type{
+		def: &ast.Definition{
+			Name:        "AnyInput",
+			Description: "test description",
+			Fields: ast.FieldList{
+				&ast.FieldDefinition{Name: "test"},
+				&ast.FieldDefinition{Name: "deprecated",
+					Directives: ast.DirectiveList{
+						&ast.Directive{Name: "deprecated"},
+					},
+				},
+			},
+			Kind: ast.InputObject,
+		},
+	}
+
+	t.Run("name", func(t *testing.T) {
+		require.Equal(t, "AnyInput", *schemaType.Name())
+	})
+
+	t.Run("description", func(t *testing.T) {
+		require.Equal(t, "test description", schemaType.Description())
+	})
+
+	t.Run("input fields", func(t *testing.T) {
+		fields := schemaType.InputFields() // change to InputFields(false) if updated prelude
+		require.Len(t, fields, 1)
+		require.Equal(t, "test", fields[0].Name)
+	})
+
+	// t.Run("fields includeDeprecated", func(t *testing.T) {
+	// 	fields := schemaType.InputFields(true)
+	// 	require.Len(t, fields, 2)
+	// 	require.Equal(t, "test", fields[0].Name)
+	// 	require.Equal(t, "deprecated", fields[1].Name)
+	// })
 }

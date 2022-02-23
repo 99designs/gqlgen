@@ -31,6 +31,7 @@ type (
 		Description  string
 		DefaultValue *string
 		Type         *Type
+		deprecation  *ast.Directive
 	}
 )
 
@@ -65,6 +66,23 @@ func (f *Field) DeprecationReason() *string {
 	}
 
 	reason := f.deprecation.Arguments.ForName("reason")
+	if reason == nil {
+		return nil
+	}
+
+	return &reason.Value.Raw
+}
+
+func (i *InputValue) IsDeprecated() bool {
+	return i.deprecation != nil
+}
+
+func (i *InputValue) DeprecationReason() *string {
+	if i.deprecation == nil {
+		return nil
+	}
+
+	reason := i.deprecation.Arguments.ForName("reason")
 	if reason == nil {
 		return nil
 	}

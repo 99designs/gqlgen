@@ -178,3 +178,14 @@ func (t *Type) OfType() *Type {
 	}
 	return WrapTypeFromType(t.schema, t.typ.Elem)
 }
+
+func (t *Type) SpecifiedByURL() *string {
+	directive := t.def.Directives.ForName("specifiedBy")
+	if t.def.Kind != ast.Scalar || directive == nil {
+		return nil
+	}
+	// def: directive @specifiedBy(url: String!) on SCALAR
+	// the argument "url" is required.
+	url := directive.Arguments.ForName("url")
+	return &url.Value.Raw
+}

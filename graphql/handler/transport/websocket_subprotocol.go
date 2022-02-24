@@ -18,7 +18,7 @@ const (
 	dataMessageType
 	completeMessageType
 	errorMessageType
-	pingMesageType
+	pingMessageType
 	pongMessageType
 )
 
@@ -70,7 +70,7 @@ func (t messageType) String() string {
 		text = "complete"
 	case errorMessageType:
 		text = "error"
-	case pingMesageType:
+	case pingMessageType:
 		text = "ping"
 	case pongMessageType:
 		text = "pong"

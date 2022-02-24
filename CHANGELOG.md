@@ -250,7 +250,7 @@ Also added `go:generate` in federation entity resolver tests to make it simpler 
 
 To test:
 ```
-go generate ./... && cd example/ && go generate ./... && cd ..
+go generate ./... && cd _examples/ && go generate ./... && cd ..
 go test -race ./... && cd example && go test -race ./... && cd ..
 ```
 
@@ -341,7 +341,7 @@ To run tests:
 
 * removed unused const in tests
 
-* Update example/chat/readme.md
+* Update _examples/chat/readme.md
 
 </details></dd></dl>
 
@@ -867,8 +867,8 @@ listed in a few example readmes [2]. Using relative paths from the
 respective example directory should be clear enough.
 
 [2]:
-example/todo/server/server.go:10:2: no required module provides package github.com/99designs/gqlgen/example/todo; to add it:
-	go get github.com/99designs/gqlgen/example/todo
+_examples/todo/server/server.go:10:2: no required module provides package github.com/99designs/gqlgen/_examples/todo; to add it:
+	go get github.com/99designs/gqlgen/_examples/todo
 
 </details></dd></dl>
 
@@ -5071,10 +5071,10 @@ Performance improvments
 
 goos: linux
 goarch: amd64
-pkg: github.com/99designs/gqlgen/example/starwars
+pkg: github.com/99designs/gqlgen/_examples/starwars
 BenchmarkSimpleQueryNoArgs-8      300000             25093 ns/op            6453 B/op        114 allocs/op
 PASS
-ok      github.com/99designs/gqlgen/example/starwars    10.807s
+ok      github.com/99designs/gqlgen/_examples/starwars    10.807s
 
 </details></dd></dl>
 
@@ -5083,10 +5083,10 @@ ok      github.com/99designs/gqlgen/example/starwars    10.807s
 go test -benchtime=5s -bench=. -benchmem
 goos: linux
 goarch: amd64
-pkg: github.com/99designs/gqlgen/example/starwars
+pkg: github.com/99designs/gqlgen/_examples/starwars
 BenchmarkSimpleQueryNoArgs-8      200000             32125 ns/op            6277 B/op        118 allocs/op
 PASS
-ok      github.com/99designs/gqlgen/example/starwars    9.768s
+ok      github.com/99designs/gqlgen/_examples/starwars    9.768s
 
 </details></dd></dl>
 
@@ -5095,10 +5095,10 @@ ok      github.com/99designs/gqlgen/example/starwars    9.768s
 go test -benchtime=5s -bench=. -benchmem
 goos: linux
 goarch: amd64
-pkg: github.com/99designs/gqlgen/example/starwars
+pkg: github.com/99designs/gqlgen/_examples/starwars
 BenchmarkSimpleQueryNoArgs-8      200000             32680 ns/op            6357 B/op        126 allocs/op
 PASS
-ok      github.com/99designs/gqlgen/example/starwars    9.901s
+ok      github.com/99designs/gqlgen/_examples/starwars    9.901s
 
 </details></dd></dl>
 
@@ -8187,7 +8187,7 @@ package "query" does not depend on "schema" any more
 
 - <a href="https://github.com/99designs/gqlgen/commit/1a959516cacda256f52b3ba2f5cf2e7fd03c85da"><tt>1a959516</tt></a> refactor
 
-- <a href="https://github.com/99designs/gqlgen/commit/f8cb11c10ab15ad4a547a1695efe538a7b5209a8"><tt>f8cb11c1</tt></a> example/starwars: use interface base type to make type assertions nicer
+- <a href="https://github.com/99designs/gqlgen/commit/f8cb11c10ab15ad4a547a1695efe538a7b5209a8"><tt>f8cb11c1</tt></a> _examples/starwars: use interface base type to make type assertions nicer
 
 - <a href="https://github.com/99designs/gqlgen/commit/746da4b8e1dff2ec72167060487e1441506a97c3"><tt>746da4b8</tt></a> star wars example: friendsConnection
 
@@ -8315,7 +8315,7 @@ This reverts commit fb3a6fc969b0c8c286c7d024a108f5696627639c.
 
 - <a href="https://github.com/99designs/gqlgen/commit/d70d16c4ebc4a9a8513ccab945b4e0ad77de6cfe"><tt>d70d16c4</tt></a> added server example
 
-- <a href="https://github.com/99designs/gqlgen/commit/6f9a89db8ecf538d72ece47158d2ef7f487d8a06"><tt>6f9a89db</tt></a> separate example/starwars package
+- <a href="https://github.com/99designs/gqlgen/commit/6f9a89db8ecf538d72ece47158d2ef7f487d8a06"><tt>6f9a89db</tt></a> separate _examples/starwars package
 
 - <a href="https://github.com/99designs/gqlgen/commit/e4060db594dbd7ca6a98e7bb9cf967b6bc51e063"><tt>e4060db5</tt></a> added support for directives
 

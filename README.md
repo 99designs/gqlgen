@@ -36,7 +36,7 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 
 More help to get started:
  - [Getting started tutorial](https://gqlgen.com/getting-started/) - a comprehensive guide to help you get started
- - [Real-world examples](https://github.com/99designs/gqlgen/tree/master/example) show how to create GraphQL applications
+ - [Real-world examples](https://github.com/99designs/gqlgen/tree/master/_examples) show how to create GraphQL applications
  - [Reference docs](https://pkg.go.dev/github.com/99designs/gqlgen) for the APIs
 
 ## Reporting Issues

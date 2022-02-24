@@ -1,0 +1,20 @@
+model:
+  filename: model/generated.go
+
+models:
+  User:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.User
+  Timestamp:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.Timestamp
+  SearchArgs:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.SearchArgs
+  Point:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.Point
+  ID:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.ID
+  Tier:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.Tier
+  Banned:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.Banned
+  DarkMode:
+    model: github.com/99designs/gqlgen/_examples/scalars/model.Preferences

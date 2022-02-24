@@ -194,7 +194,7 @@ models:
 **Note:** you can also un/marshal with a context by having your custom marshal function return a
 `graphql.ContextMarshaler` _and_ your unmarshal function take a `context.Context` as the first argument.
 
-See the [example/scalars](https://github.com/99designs/gqlgen/tree/master/example/scalars) package for more examples.
+See the [_examples/scalars](https://github.com/99designs/gqlgen/tree/master/_examples/scalars) package for more examples.
 
 ## Marshaling/Unmarshaling Errors
 

@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v1
       - run: apk add --no-cache --no-progress nodejs npm git bash
       - run: go mod download
-      - run: cd example/federation ; npm install
+      - run: cd _examples/federation ; npm install
       - run: .github/workflows/check-federation
 
   init:

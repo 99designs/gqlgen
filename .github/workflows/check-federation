@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-cd example/federation
+cd _examples/federation
 
 ./start.sh &
 

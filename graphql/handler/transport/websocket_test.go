@@ -294,22 +294,27 @@ func TestWebsocketInitFunc(t *testing.T) {
 }
 
 func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
-	handler := testserver.New()
-	handler.AddTransport(transport.Websocket{})
-
-	srv := httptest.NewServer(handler)
-	defer srv.Close()
+	initialize := func(ws transport.Websocket) (*testserver.TestServer, *httptest.Server) {
+		h := testserver.New()
+		h.AddTransport(ws)
+		return h, httptest.NewServer(h)
+	}
 
 	t.Run("server acks init", func(t *testing.T) {
+		_, srv := initialize(transport.Websocket{})
+		defer srv.Close()
+
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
-
 		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
 	})
 
 	t.Run("client can receive data", func(t *testing.T) {
+		handler, srv := initialize(transport.Websocket{})
+		defer srv.Close()
+
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
@@ -340,18 +345,37 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		require.Equal(t, graphqltransportwsCompleteMsg, msg.Type)
 		require.Equal(t, "test_1", msg.ID)
 	})
+
+	t.Run("receives no graphql-ws keep alive messages", func(t *testing.T) {
+		_, srv := initialize(transport.Websocket{KeepAlivePingInterval: 5 * time.Millisecond})
+		defer srv.Close()
+
+		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		// If the keep-alives are sent, this deadline will not be used, and no timeout error will be found
+		c.SetReadDeadline(time.Now().UTC().Add(50 * time.Millisecond))
+		var msg operationMessage
+		err := c.ReadJSON(&msg)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "timeout")
+	})
 }
 
 func TestWebsocketWithPingPongInterval(t *testing.T) {
-	handler := testserver.New()
-	handler.AddTransport(transport.Websocket{
-		PingPongInterval: time.Second * 1,
-	})
-
-	srv := httptest.NewServer(handler)
-	defer srv.Close()
+	initialize := func(ws transport.Websocket) (*testserver.TestServer, *httptest.Server) {
+		h := testserver.New()
+		h.AddTransport(ws)
+		return h, httptest.NewServer(h)
+	}
 
 	t.Run("client receives ping and responds with pong", func(t *testing.T) {
+		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
+		defer srv.Close()
+
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
@@ -364,6 +388,9 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	})
 
 	t.Run("client sends ping and expects pong", func(t *testing.T) {
+		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
+		defer srv.Close()
+
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
@@ -372,6 +399,33 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsPingMsg}))
 		assert.Equal(t, graphqltransportwsPongMsg, readOp(c).Type)
+	})
+
+	t.Run("ping-pongs are not sent when the graphql-ws sub protocol is used", func(t *testing.T) {
+		// Regression test
+		// ---
+		// Before the refactor, the code would try to convert a ping message to a graphql-ws message type
+		// But since this message type does not exist in the graphql-ws sub protocol, it would fail
+
+		_, srv := initialize(transport.Websocket{
+			PingPongInterval:      5 * time.Millisecond,
+			KeepAlivePingInterval: 10 * time.Millisecond,
+		})
+		defer srv.Close()
+
+		// Create connection
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		// Initialize connection
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+
+		// Wait for a few more keep alives to be sure nothing goes wrong
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
 }
 

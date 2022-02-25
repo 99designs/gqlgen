@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -21,6 +22,7 @@ type (
 	Websocket struct {
 		Upgrader              websocket.Upgrader
 		InitFunc              WebsocketInitFunc
+		ErrorFunc             WebsocketErrorFunc
 		KeepAlivePingInterval time.Duration
 		PingPongInterval      time.Duration
 
@@ -40,7 +42,8 @@ type (
 		initPayload InitPayload
 	}
 
-	WebsocketInitFunc func(ctx context.Context, initPayload InitPayload) (context.Context, error)
+	WebsocketInitFunc  func(ctx context.Context, initPayload InitPayload) (context.Context, error)
+	WebsocketErrorFunc func(ctx context.Context, err error)
 )
 
 var _ graphql.Transport = Websocket{}
@@ -86,6 +89,12 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	}
 
 	conn.run()
+}
+
+func (c *wsConnection) handlePossibleError(err error) {
+	if c.ErrorFunc != nil && err != nil {
+		c.ErrorFunc(c.ctx, err)
+	}
 }
 
 func (c *wsConnection) init() bool {
@@ -135,9 +144,7 @@ func (c *wsConnection) init() bool {
 
 func (c *wsConnection) write(msg *message) {
 	c.mu.Lock()
-	// TODO: missing error handling here, err from previous implementation
-	// was ignored
-	_ = c.me.Send(msg)
+	c.handlePossibleError(c.me.Send(msg))
 	c.mu.Unlock()
 }
 
@@ -181,7 +188,10 @@ func (c *wsConnection) run() {
 		start := graphql.Now()
 		m, err := c.me.NextMessage()
 		if err != nil {
-			// TODO: better error handling here
+			// If the connection got closed by us, don't report the error
+			if !errors.Is(err, net.ErrClosed) {
+				c.handlePossibleError(err)
+			}
 			return
 		}
 

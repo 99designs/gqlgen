@@ -87,7 +87,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 	files := map[string]*File{}
 
-	for _, o := range data.Objects {
+	objects := make(codegen.Objects, len(data.Objects)+len(data.Inputs))
+	copy(objects, data.Objects)
+	copy(objects[len(data.Objects):], data.Inputs)
+
+	for _, o := range objects {
 		if o.HasResolvers() {
 			fn := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			if files[fn] == nil {

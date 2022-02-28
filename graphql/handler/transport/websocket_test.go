@@ -293,6 +293,49 @@ func TestWebsocketInitFunc(t *testing.T) {
 	})
 }
 
+func TestWebSocketInitTimeout(t *testing.T) {
+	t.Run("times out if no init message is received within the configured duration", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			InitTimeout: 5 * time.Millisecond,
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		var msg operationMessage
+		err := c.ReadJSON(&msg)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "timeout")
+	})
+
+	t.Run("keeps waiting for an init message if no time out is configured", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		done := make(chan interface{}, 1)
+		go func() {
+			var msg operationMessage
+			_ = c.ReadJSON(&msg)
+			done <- 1
+		}()
+
+		select {
+		case <-done:
+			assert.Fail(t, "")
+		case <-time.After(100 * time.Millisecond):
+			// Success! I guess? Can't really wait forever to see if the read waits forever...
+		}
+	})
+}
+
 func TestWebSocketErrorFunc(t *testing.T) {
 	t.Run("the error handler gets called when an error occurs", func(t *testing.T) {
 		errFuncCalled := make(chan bool, 1)

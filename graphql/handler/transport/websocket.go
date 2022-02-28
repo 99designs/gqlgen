@@ -22,6 +22,7 @@ type (
 	Websocket struct {
 		Upgrader              websocket.Upgrader
 		InitFunc              WebsocketInitFunc
+		InitTimeout           time.Duration
 		ErrorFunc             WebsocketErrorFunc
 		KeepAlivePingInterval time.Duration
 		PingPongInterval      time.Duration
@@ -45,6 +46,8 @@ type (
 	WebsocketInitFunc  func(ctx context.Context, initPayload InitPayload) (context.Context, error)
 	WebsocketErrorFunc func(ctx context.Context, err error)
 )
+
+var errReadTimeout = errors.New("read timeout")
 
 var _ graphql.Transport = Websocket{}
 
@@ -97,9 +100,43 @@ func (c *wsConnection) handlePossibleError(err error) {
 	}
 }
 
+func (c *wsConnection) nextMessageWithTimeout(timeout time.Duration) (message, error) {
+	messages, errs := make(chan message, 1), make(chan error, 1)
+
+	go func() {
+		if m, err := c.me.NextMessage(); err != nil {
+			errs <- err
+		} else {
+			messages <- m
+		}
+	}()
+
+	select {
+	case m := <-messages:
+		return m, nil
+	case err := <-errs:
+		return message{}, err
+	case <-time.After(timeout):
+		return message{}, errReadTimeout
+	}
+}
+
 func (c *wsConnection) init() bool {
-	m, err := c.me.NextMessage()
+	var m message
+	var err error
+
+	if c.InitTimeout != 0 {
+		m, err = c.nextMessageWithTimeout(c.InitTimeout)
+	} else {
+		m, err = c.me.NextMessage()
+	}
+
 	if err != nil {
+		if err == errReadTimeout {
+			c.close(websocket.CloseProtocolError, "connection initialisation timeout")
+			return false
+		}
+
 		if err == errInvalidMsg {
 			c.sendConnectionError("invalid json")
 		}

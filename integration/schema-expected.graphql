@@ -1,22 +1,19 @@
-# source: http://localhost:8080/query
-# timestamp: Mon Dec 06 2021 17:56:42 GMT+0000 (Greenwich Mean Time)
-
 """This directive does magical things"""
 directive @magic(kind: Int) on FIELD_DEFINITION
 
 enum DATE_FILTER_OP {
   EQ
-  NEQ
   GT
   GTE
   LT
   LTE
+  NEQ
 }
 
 input DateFilter {
-  value: String!
-  timezone: String = "UTC"
   op: DATE_FILTER_OP = EQ
+  timezone: String = "UTC"
+  value: String!
 }
 
 type Element {
@@ -32,26 +29,27 @@ enum ErrorType {
 
 input ListCoercion {
   enumVal: [ErrorType]
-  strVal: [String]
   intVal: [Int]
   scalarVal: [Map]
+  strVal: [String]
 }
 
+""""""
 scalar Map
 
 type Query {
-  path: [Element]
-  date(filter: DateFilter!): Boolean!
-  viewer: Viewer
-  jsonEncoding: String!
-  error(type: ErrorType = NORMAL): Boolean!
-  complexity(value: Int!): Boolean!
   coercion(value: [ListCoercion!]): Boolean!
+  complexity(value: Int!): Boolean!
+  date(filter: DateFilter!): Boolean!
+  error(type: ErrorType = NORMAL): Boolean!
+  jsonEncoding: String!
+  path: [Element]
+  viewer: Viewer
 }
 
 type User {
-  name: String!
   likes: [String!]!
+  name: String!
 }
 
 type Viewer {

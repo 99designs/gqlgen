@@ -11,6 +11,10 @@ type Schema struct {
 	schema *ast.Schema
 }
 
+func (s *Schema) Description() string {
+	return s.schema.Description
+}
+
 func (s *Schema) Types() []Type {
 	typeIndex := map[string]Type{}
 	typeNames := make([]string, 0, len(s.schema.Types))

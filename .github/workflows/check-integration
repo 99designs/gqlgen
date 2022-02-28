@@ -13,7 +13,7 @@ echo "### running jest integration spec"
 
 
 echo "### validating introspected schema"
-SERVER_URL=http://localhost:8080/query ./node_modules/.bin/graphql get-schema
+./node_modules/.bin/graphql-codegen
 
 if ! diff <(tail -n +3 schema-expected.graphql) <(tail -n +3 schema-fetched.graphql) ; then
     echo "The expected schema has changed, you need to update schema-expected.graphql with any expected changes"

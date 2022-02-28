@@ -329,7 +329,7 @@ func TestWebSocketInitTimeout(t *testing.T) {
 
 		select {
 		case <-done:
-			assert.Fail(t, "")
+			assert.Fail(t, "web socket read operation finished while it shouldn't have")
 		case <-time.After(100 * time.Millisecond):
 			// Success! I guess? Can't really wait forever to see if the read waits forever...
 		}

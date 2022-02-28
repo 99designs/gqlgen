@@ -36,6 +36,7 @@ type ModelBuild struct {
 type Interface struct {
 	Description string
 	Name        string
+	Implements  []string
 }
 
 type Object struct {
@@ -97,6 +98,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			it := &Interface{
 				Description: schemaType.Description,
 				Name:        schemaType.Name,
+				Implements:  schemaType.Interfaces,
 			}
 
 			b.Interfaces = append(b.Interfaces, it)

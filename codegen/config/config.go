@@ -114,9 +114,10 @@ func LoadConfig(filename string) (*Config, error) {
 // YAML.
 func CompleteConfig(config *Config) error {
 	defaultDirectives := map[string]DirectiveConfig{
-		"skip":       {SkipRuntime: true},
-		"include":    {SkipRuntime: true},
-		"deprecated": {SkipRuntime: true},
+		"skip":        {SkipRuntime: true},
+		"include":     {SkipRuntime: true},
+		"deprecated":  {SkipRuntime: true},
+		"specifiedBy": {SkipRuntime: true},
 	}
 
 	for key, value := range defaultDirectives {

@@ -12,8 +12,7 @@ type Schema struct {
 }
 
 func (s *Schema) Description() string {
-	// TODO(codehex): implement description in gqlparser/ast.Schema
-	return ""
+	return s.schema.Description
 }
 
 func (s *Schema) Types() []Type {

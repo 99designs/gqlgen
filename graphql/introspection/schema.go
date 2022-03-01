@@ -11,8 +11,11 @@ type Schema struct {
 	schema *ast.Schema
 }
 
-func (s *Schema) Description() string {
-	return s.schema.Description
+func (s *Schema) Description() *string {
+	if s.schema.Description == "" {
+		return nil
+	}
+	return &s.schema.Description
 }
 
 func (s *Schema) Types() []Type {

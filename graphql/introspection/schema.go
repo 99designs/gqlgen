@@ -74,7 +74,7 @@ func (s *Schema) directiveFromDef(d *ast.DirectiveDefinition) Directive {
 	for i, arg := range d.Arguments {
 		args[i] = InputValue{
 			Name:         arg.Name,
-			Description:  arg.Description,
+			description:  arg.Description,
 			DefaultValue: defaultValue(arg.DefaultValue),
 			Type:         WrapTypeFromType(s.schema, arg.Type),
 		}
@@ -82,7 +82,7 @@ func (s *Schema) directiveFromDef(d *ast.DirectiveDefinition) Directive {
 
 	return Directive{
 		Name:         d.Name,
-		Description:  d.Description,
+		description:  d.Description,
 		Locations:    locs,
 		Args:         args,
 		IsRepeatable: d.IsRepeatable,

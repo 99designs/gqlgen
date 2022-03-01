@@ -28,7 +28,7 @@ func TestType(t *testing.T) {
 	})
 
 	t.Run("description", func(t *testing.T) {
-		require.Equal(t, "test description", schemaType.Description())
+		require.Equal(t, "test description", *schemaType.Description())
 	})
 
 	t.Run("fields", func(t *testing.T) {

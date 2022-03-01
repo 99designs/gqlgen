@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"errors"
 	"fmt"
 	"html/template"
@@ -19,101 +20,17 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var configTemplate = template.Must(template.New("name").Parse(
-	`# Where are all the schema files located? globs are supported eg  src/**/*.graphqls
-schema:
-  - graph/*.graphqls
+//go:embed init-templates/schema.graphqls
+var schemaFileContent string
 
-# Where should the generated server code go?
-exec:
-  filename: graph/generated/generated.go
-  package: generated
+//go:embed init-templates/gqlgen.yml.gotmpl
+var configFileTemplate string
 
-# Uncomment to enable federation
-# federation:
-#   filename: graph/generated/federation.go
-#   package: generated
-
-# Where should any generated models go?
-model:
-  filename: graph/model/models_gen.go
-  package: model
-
-# Where should the resolver implementations go?
-resolver:
-  layout: follow-schema
-  dir: graph
-  package: graph
-
-# Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
-# struct_tag: json
-
-# Optional: turn on to use []Thing instead of []*Thing
-# omit_slice_element_pointers: false
-
-# Optional: set to speed up generation time by not performing a final validation pass.
-# skip_validation: true
-
-# gqlgen will search for any type names in the schema in these go packages
-# if they match it will use them, otherwise it will generate them.
-autobind:
-#  - "{{.}}/graph/model"
-
-# This section declares type mapping between the GraphQL and go type systems
-#
-# The first line in each type will be used as defaults for resolver arguments and
-# modelgen, the others will be allowed when binding to fields. Configure them to
-# your liking
-models:
-  ID:
-    model:
-      - github.com/99designs/gqlgen/graphql.ID
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
-  Int:
-    model:
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
-`))
-
-var schemaDefault = `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
-type User {
-  id: ID!
-  name: String!
-}
-
-type Query {
-  todos: [Todo!]!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
-}
-
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
-}
-`
-
-func executeConfigTemplate(pkgName string) string {
+func getConfigFileContent(pkgName string) string {
 	var buf bytes.Buffer
-	if err := configTemplate.Execute(&buf, pkgName); err != nil {
+	if err := template.Must(template.New("gqlgen.yml").Parse(configFileTemplate)).Execute(&buf, pkgName); err != nil {
 		panic(err)
 	}
-
 	return buf.String()
 }
 
@@ -149,7 +66,7 @@ var initCmd = &cli.Command{
 
 		pkgName := code.ImportPathForDir(".")
 		if pkgName == "" {
-			return fmt.Errorf("unable to determine import path for current directory, you probably need to run go mod init first")
+			return fmt.Errorf("unable to determine import path for current directory, you probably need to run 'go mod init' first")
 		}
 
 		// check schema and config don't already exist
@@ -165,13 +82,14 @@ var initCmd = &cli.Command{
 
 		// create config
 		fmt.Println("Creating", configFilename)
-		if err := initFile(configFilename, executeConfigTemplate(pkgName)); err != nil {
+		if err := initFile(configFilename, getConfigFileContent(pkgName)); err != nil {
 			return err
 		}
 
 		// create schema
 		fmt.Println("Creating", schemaFilename)
-		if err := initFile(schemaFilename, schemaDefault); err != nil {
+
+		if err := initFile(schemaFilename, schemaFileContent); err != nil {
 			return err
 		}
 

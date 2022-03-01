@@ -42,10 +42,12 @@ To automatically add the dependency to your `go.mod` run
 go mod tidy
 ```
 
-If you want to specify a particular version of gqlgen, you can use `go get`. For example, to use v0.14.0 of gqlgen
+By default you'll be using the latest version of gqlgen, but if you want to specify a particular version you can use `go get` (replacing `VERSION` with the particular version desired)
 ```shell
-go get -d github.com/99designs/gqlgen@v0.14.0
+go get -d github.com/99designs/gqlgen@VERSION
 ```
+
+
 
 ## Building the server
 

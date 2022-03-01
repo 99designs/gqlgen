@@ -177,11 +177,10 @@ var initCmd = &cli.Command{
 
 		// create the package directory with a temporary file so that go recognises it as a package
 		// and autobinding doesn't error out
-		tmpPackageNameFile := "graph/model/_tmp_gqlgen_init.go"
+		tmpPackageNameFile := "graph/model/doc.go"
 		if err := initFile(tmpPackageNameFile, "package model"); err != nil {
 			return err
 		}
-		defer os.Remove(tmpPackageNameFile)
 
 		var cfg *config.Config
 		if cfg, err = config.LoadConfig(configFilename); err != nil {

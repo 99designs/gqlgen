@@ -284,11 +284,15 @@ func load(t *testing.T, name string) (*federation, *config.Config) {
 	}
 
 	f := &federation{Version: cfg.Federation.Version}
-	cfg.Sources = append(cfg.Sources, f.InjectSourceEarly())
+	s, err := f.InjectSourcesEarly()
+	require.NoError(t, err)
+	cfg.Sources = append(cfg.Sources, s...)
 	require.NoError(t, cfg.LoadSchema())
 
-	if src := f.InjectSourceLate(cfg.Schema); src != nil {
-		cfg.Sources = append(cfg.Sources, src)
+	l, err := f.InjectSourcesLate(cfg.Schema)
+	require.NoError(t, err)
+	if l != nil {
+		cfg.Sources = append(cfg.Sources, l...)
 	}
 	require.NoError(t, cfg.LoadSchema())
 

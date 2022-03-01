@@ -66,8 +66,8 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	return nil
 }
 
-func (f *federation) InjectSourceEarly() *ast.Source {
-	return &ast.Source{
+func (f *federation) InjectSourcesEarly() ([]*ast.Source, error) {
+	return []*ast.Source{{
 		Name: "federation/directives.graphql",
 		Input: `
 scalar _Any
@@ -80,12 +80,12 @@ directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
 directive @extends on OBJECT | INTERFACE
 `,
 		BuiltIn: true,
-	}
+	}}, nil
 }
 
 // InjectSources creates a GraphQL Entity type with all
 // the fields that had the @key directive
-func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
+func (f *federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error) {
 	f.setEntities(schema)
 
 	var entities, resolvers, entityResolverInputDefinitions string
@@ -157,11 +157,11 @@ type Entity {
 }`
 	blocks = append(blocks, extendTypeQueryDef)
 
-	return &ast.Source{
+	return []*ast.Source{{
 		Name:    "federation/entity.graphql",
 		BuiltIn: true,
 		Input:   "\n" + strings.Join(blocks, "\n\n") + "\n",
-	}
+	}}, nil
 }
 
 // Entity represents a federated type

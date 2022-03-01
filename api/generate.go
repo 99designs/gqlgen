@@ -37,6 +37,13 @@ func Generate(cfg *config.Config, option ...Option) error {
 				cfg.Sources = append(cfg.Sources, s)
 			}
 		}
+		if inj, ok := p.(plugin.EarlySourcesInjector); ok {
+			s, err := inj.InjectSourcesEarly()
+			if err != nil {
+				return fmt.Errorf("%s: %w", p.Name(), err)
+			}
+			cfg.Sources = append(cfg.Sources, s...)
+		}
 	}
 
 	if err := cfg.LoadSchema(); err != nil {
@@ -48,6 +55,13 @@ func Generate(cfg *config.Config, option ...Option) error {
 			if s := inj.InjectSourceLate(cfg.Schema); s != nil {
 				cfg.Sources = append(cfg.Sources, s)
 			}
+		}
+		if inj, ok := p.(plugin.LateSourcesInjector); ok {
+			s, err := inj.InjectSourcesLate(cfg.Schema)
+			if err != nil {
+				return fmt.Errorf("%s: %w", p.Name(), err)
+			}
+			cfg.Sources = append(cfg.Sources, s...)
 		}
 	}
 

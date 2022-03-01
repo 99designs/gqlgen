@@ -28,7 +28,6 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 3. Initialise gqlgen config and generate models
 
        go run github.com/99designs/gqlgen init
-       printf 'package model' | gofmt > graph/model/doc.go
 
 4. Start the graphql server
 

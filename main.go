@@ -175,10 +175,9 @@ var initCmd = &cli.Command{
 			return err
 		}
 
-		// create the package directory with a temporary file so that go recognises it as a package
-		// and autobinding doesn't error out
-		tmpPackageNameFile := "graph/model/doc.go"
-		if err := initFile(tmpPackageNameFile, "package model"); err != nil {
+		// create initial file for initial autobind
+		modelFilename := "graph/model/doc.go"
+		if err := initFile(modelFilename, "package model"); err != nil {
 			return err
 		}
 

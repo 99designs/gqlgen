@@ -53,11 +53,11 @@ func (t *Type) Name() *string {
 	return &t.def.Name
 }
 
-func (t *Type) Description() string {
-	if t.def == nil {
-		return ""
+func (t *Type) Description() *string {
+	if t.def == nil || t.def.Description == "" {
+		return nil
 	}
-	return t.def.Description
+	return &t.def.Description
 }
 
 func (t *Type) Fields(includeDeprecated bool) []Field {
@@ -79,14 +79,14 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 			args = append(args, InputValue{
 				Type:         WrapTypeFromType(t.schema, arg.Type),
 				Name:         arg.Name,
-				Description:  arg.Description,
+				description:  arg.Description,
 				DefaultValue: defaultValue(arg.DefaultValue),
 			})
 		}
 
 		fields = append(fields, Field{
 			Name:        f.Name,
-			Description: f.Description,
+			description: f.Description,
 			Args:        args,
 			Type:        WrapTypeFromType(t.schema, f.Type),
 			deprecation: f.Directives.ForName("deprecated"),
@@ -104,7 +104,7 @@ func (t *Type) InputFields() []InputValue {
 	for _, f := range t.def.Fields {
 		res = append(res, InputValue{
 			Name:         f.Name,
-			Description:  f.Description,
+			description:  f.Description,
 			Type:         WrapTypeFromType(t.schema, f.Type),
 			DefaultValue: defaultValue(f.DefaultValue),
 		})
@@ -158,7 +158,7 @@ func (t *Type) EnumValues(includeDeprecated bool) []EnumValue {
 
 		res = append(res, EnumValue{
 			Name:        val.Name,
-			Description: val.Description,
+			description: val.Description,
 			deprecation: val.Directives.ForName("deprecated"),
 		})
 	}

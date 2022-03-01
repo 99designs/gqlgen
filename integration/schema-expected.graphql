@@ -34,7 +34,6 @@ input ListCoercion {
   strVal: [String]
 }
 
-""""""
 scalar Map
 
 type Query {

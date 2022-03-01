@@ -191,7 +191,7 @@ var initCmd = &cli.Command{
 		fmt.Println("Creating", serverFilename)
 		fmt.Println("Generating...")
 		if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
+			return err
 		}
 
 		fmt.Printf("\nExec \"go run ./%s\" to start GraphQL server\n", serverFilename)

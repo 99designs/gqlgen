@@ -49,6 +49,18 @@ type UnionWithDescription interface {
 	IsUnionWithDescription()
 }
 
+type CDImplemented struct {
+	A string  `json:"a" database:"CDImplementeda"`
+	B int     `json:"b" database:"CDImplementedb"`
+	C bool    `json:"c" database:"CDImplementedc"`
+	D *string `json:"d" database:"CDImplementedd"`
+}
+
+func (CDImplemented) IsC() {}
+func (CDImplemented) IsA() {}
+func (CDImplemented) IsD() {}
+func (CDImplemented) IsB() {}
+
 type FieldMutationHook struct {
 	Name     *string       `json:"name" anotherTag:"tag" database:"FieldMutationHookname"`
 	Enum     *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`

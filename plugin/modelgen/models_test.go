@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -176,6 +177,38 @@ func TestModelGeneration(t *testing.T) {
 				}
 			})
 		}
+	})
+
+	t.Run("implemented interfaces type CDImplemented", func(t *testing.T) {
+		pkg, err := parseAst("out")
+		require.NoError(t, err)
+
+		path := filepath.Join("out", "generated.go")
+		generated := pkg.Files[path]
+
+		wantMethods := []string{
+			"IsA",
+			"IsB",
+			"IsC",
+			"IsD",
+		}
+
+		gots := make([]string, 0, len(wantMethods))
+		for _, decl := range generated.Decls {
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+				switch funcDecl.Name.Name {
+				case "IsA", "IsB", "IsC", "IsD":
+					gots = append(gots, funcDecl.Name.Name)
+					require.Len(t, funcDecl.Recv.List, 1)
+					recvIdent, ok := funcDecl.Recv.List[0].Type.(*ast.Ident)
+					require.True(t, ok)
+					require.Equal(t, "CDImplemented", recvIdent.Name)
+				}
+			}
+		}
+
+		sort.Strings(gots)
+		require.Equal(t, wantMethods, gots)
 	})
 }
 

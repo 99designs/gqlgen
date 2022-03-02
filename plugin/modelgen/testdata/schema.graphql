@@ -125,3 +125,10 @@ interface D implements A & B {
     b: Int!
     d: String
 }
+
+type CDImplemented implements C & D {
+    a: String!
+    b: Int!
+    c: Boolean!
+    d: String
+}

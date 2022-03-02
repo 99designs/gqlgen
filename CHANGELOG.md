@@ -5,12 +5,289 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.16.0...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.1...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.1"></a>
+## [v0.17.1](https://github.com/99designs/gqlgen/compare/v0.17.0...v0.17.1) - 2022-03-02
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9f520a2897cf42750e7290cbd83de6fdf13f2e75"><tt>9f520a28</tt></a> Update golangci-lint and fix resource leak (<a href="https://github.com/99designs/gqlgen/pull/24">#2024</a>)</summary>
+
+* Fix golangci-lint in CI
+
+* Fix resource leak
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/74baaa14c924871d100b56e8103ec27d678c33d0"><tt>74baaa14</tt></a> fixed model gen for multiple implemented type (<a href="https://github.com/99designs/gqlgen/pull/21">#2021</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/d31cf6bed5712e4015c286498ede649894e48d01"><tt>d31cf6be</tt></a> v0.17.0 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.0"></a>
+## [v0.17.0](https://github.com/99designs/gqlgen/compare/v0.16.0...v0.17.0) - 2022-03-01
+- <a href="https://github.com/99designs/gqlgen/commit/e4be56513300286729b1276de2741ce6a93f3afa"><tt>e4be5651</tt></a> release v0.17.0
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/082bbff65eaf9931d4637001635d72014033523f"><tt>082bbff6</tt></a> Revert "Update quickstart (<a href="https://github.com/99designs/gqlgen/pull/14">#1850](https://github.com/99designs/gqlgen/issues/1850))" ([#2014</a>)</summary>
+
+This reverts commit 0ab636144bfc875f86e4d9fd7a2686bc57d5050c.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/a58411b804f848aa7e2e4547a1ba768f5dfdc8d3"><tt>a58411b8</tt></a> Embed templates instead of inlining them (<a href="https://github.com/99designs/gqlgen/pull/19">#2019</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/839b50df1c068e6b17adb27a68a26984ea363bcc"><tt>839b50df</tt></a> Test gqlgen generate in CI (<a href="https://github.com/99designs/gqlgen/pull/17">#2017</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/00dc14ad817806840ca4df4a04d7a658f6f38105"><tt>00dc14ad</tt></a> Remove ambient imports (<a href="https://github.com/99designs/gqlgen/pull/16">#2016</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/45e192ea9fa2af6ed3b16e1a8b5c67276f13d34f"><tt>45e192ea</tt></a> Clean up docs to clarify how to use a particular version (<a href="https://github.com/99designs/gqlgen/pull/15">#2015</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/1851"> #1851</a>)</summary>
+
+This reverts commit 57a148f6d12572fe585ecfcafafbb7441dbf9cab.
+
+* Update getting-started.md
+
+* Update getting-started.md
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/3a9413f718b217866c89cb88e268e8f2c461fb95"><tt>3a9413f7</tt></a> Fix issue template
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5236fb096802dc66ba9d11d096b2c6fa1ad24b14"><tt>5236fb09</tt></a> fix introspection for description to be nullable (<a href="https://github.com/99designs/gqlgen/pull/08">#2008</a>)</summary>
+
+* fixed introspection for description to be nullable
+
+* regenerated for integration
+
+* regenerated
+
+* fixed introspection package
+
+* regenerated
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/82fefdb51046ca80506292f25dcb2d636301f865"><tt>82fefdb5</tt></a> support to generate model for intermediate interface (<a href="https://github.com/99designs/gqlgen/pull/82">#1982</a>)</summary>
+
+* support to generate model for intermediate interface
+
+* go generate ./... in example
+
+* fixed filepath generation
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3ec8363554ff17e3ffb3e86c58f1ee2d5689e798"><tt>3ec83635</tt></a> Bump ajv from 6.10.2 to 6.12.6 in /integration (<a href="https://github.com/99designs/gqlgen/pull/07">#2007</a>)</summary>
+
+Bumps [ajv](https://github.com/ajv-validator/ajv) from 6.10.2 to 6.12.6.
+- [Release notes](https://github.com/ajv-validator/ajv/releases)
+- [Commits](https://github.com/ajv-validator/ajv/compare/v6.10.2...v6.12.6)
+
+---
+updated-dependencies:
+- dependency-name: ajv
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9546de2c825c92318230d21d525791dfa3f0f184"><tt>9546de2c</tt></a> Web Socket initialization message timeout (<a href="https://github.com/99designs/gqlgen/pull/06">#2006</a>)</summary>
+
+* Added an optional timeout to the web socket initialization message read operation.
+
+* Added a fail message to a web socket init read timeout test.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f6ea623003fe8b8f40beb1b545a6dc91a2af0f12"><tt>f6ea6230</tt></a> fixed introspection for schema description and specifiedByhttps://github.com/99designs/gqlgen (<a href="https://github.com/99designs/gqlgen/pull/86">#1986</a>)</summary>
+
+* fixed introspection for schema description and specifiedByURL
+
+* updated to the master latest
+
+* fixed Description resolver
+
+* updated integration go file
+
+* fixed codegen tests for the latest gqlparser
+
+* updated go mod in example
+
+* go generate
+
+* skip specifiedBy
+
+* regenerate
+
+* fixed schema-expected.graphql for the latest
+
+* fixed integration test to use latest tools
+
+* fixed integration workflow
+
+* use v2.4.0
+
+* fixed sum
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/f17ca15e1fab4837ebcca99958e1651034e48852"><tt>f17ca15e</tt></a> Fix broken links in docs (<a href="https://github.com/99designs/gqlgen/pull/83">#1983</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/1734"> #1734</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/a0c856b72e1e001633388644310a388342d7d0ff"><tt>a0c856b7</tt></a> Added a callback error handling function to the websocket and added tests for it. (<a href="https://github.com/99designs/gqlgen/pull/75">#1975</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/cfea9f07627143fd184e8f36448cb501006bc63a"><tt>cfea9f07</tt></a> generate resolvers for input types (<a href="https://github.com/99designs/gqlgen/pull/50">#1950</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/ffa857ef346e87215bd985b5e84330b0f31afe96"><tt>ffa857ef</tt></a> Websocket i/o timeout fix (<a href="https://github.com/99designs/gqlgen/pull/73">#1973</a>)</summary>
+
+* Renamed "pingMesageType" to "pingMessageType" and refactored websocket_graphqlws.go to look more like websocket_graphql_transport_ws.go for the sake of consistency.
+
+* Made the keep-alive messages graphql-ws only, and the ping-pong messages graphql-transport-ws only (and added tests for it).
+
+* gofmt
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d7da5b0d3b3cffa0cdb30fa7dcf16c87d8434e7e"><tt>d7da5b0d</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/58">#1958</a> from 99designs/cleanup-main</summary>
+
+Cleanup main
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/42f32432b068b381d4666a56da50ebf73520831f"><tt>42f32432</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/57">#1957</a> from 99designs/move-init-ci</summary>
+
+Upate init CI step
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/be1647480a2c89bac80c094e0fa7f5ffda7fe602"><tt>be164748</tt></a> Cleanup main
+
+- <a href="https://github.com/99designs/gqlgen/commit/8ea290c0854579f7cb6746fb7e51485fda01a6b6"><tt>8ea290c0</tt></a> Upate init CI step
+
+- <a href="https://github.com/99designs/gqlgen/commit/56bfb1880603486189025f043d8155beaa9f53d2"><tt>56bfb188</tt></a> Fix 1955: only print message on <a href="https://github.com/99designs/gqlgen/pull/56">@key](https://github.com/key) found on interfaces ([#1956</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/213a085b954945eeaa1fc87f0fedef2c07fe14c1"><tt>213a085b</tt></a> rename "example" dir to "_examples" (<a href="https://github.com/99designs/gqlgen/pull/34">#1734</a>)</summary>
+
+* rename "example" dir to "_examples"
+
+* fix lint
+
+* Adjust permissions
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9262b35865e4a8c62749a0bdf4cce075877a8b4f"><tt>9262b358</tt></a> fix: typo in dataloader code sample (<a href="https://github.com/99designs/gqlgen/pull/54">#1954</a>)</summary>
+
+* fix: typo in dataloader code sample
+
+* rename k to key for sample to compile
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/a05437332754fab8bebce18ae8371dcdbe05460b"><tt>a0543733</tt></a> remove autobind example (<a href="https://github.com/99designs/gqlgen/pull/49">#1949</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/06bbca37286edb32db2480db6d200b709ae071a9"><tt>06bbca37</tt></a> docs: migrate dataloaders sample to graph-gophers/dataloader (<a href="https://github.com/99designs/gqlgen/pull/71">#1871</a>)</summary>
+
+* docs: add dataloader sample
+
+* finish example
+
+* add example
+
+* simplify method
+
+* replace old example
+
+* styling
+
+* Update docs/content/reference/dataloaders.md
+
+* Update docs/content/reference/dataloaders.md
+
+* Update docs/content/reference/dataloaders.md
+
+* Update docs/content/reference/dataloaders.md
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f9fcfa16a13c64ecfb298ad6cf97b3548b7ee0ff"><tt>f9fcfa16</tt></a> Comment out autobind in the sample config file (<a href="https://github.com/99designs/gqlgen/pull/72">#1872</a>)</summary>
+
+The reason is that many people using it for the first time copy exactly that configuration example and then open the issues to say it doesn't work.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/a30b68de58cbd5fa19e88bd5a198e7ca67147f3b"><tt>a30b68de</tt></a> fix: whitelist VERSION and CURRENT_VERSION env vars (<a href="https://github.com/99designs/gqlgen/pull/70">#1870</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/76a533b8161ad3ee56b721404650697cce808221"><tt>76a533b8</tt></a> Bump gopkg.in/yaml.v2 from 2.2.4 to 2.2.8 (<a href="https://github.com/99designs/gqlgen/pull/58">#1858</a>)</summary>
+
+* Bump gopkg.in/yaml.v2 from 2.2.4 to 2.2.8
+
+Bumps [gopkg.in/yaml.v2](https://github.com/go-yaml/yaml) from 2.2.4 to 2.2.8.
+- [Release notes](https://github.com/go-yaml/yaml/releases)
+- [Commits](https://github.com/go-yaml/yaml/compare/v2.2.4...v2.2.8)
+
+---
+updated-dependencies:
+- dependency-name: gopkg.in/yaml.v2
+  dependency-type: direct:production
+...
+
+
+* Update go sum for example
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/eed4301c7123e329e067600fe25aa1c876c99b8d"><tt>eed4301c</tt></a> Bump node-fetch from 2.6.1 to 2.6.7 in /integration (<a href="https://github.com/99designs/gqlgen/pull/59">#1859</a>)</summary>
+
+Bumps [node-fetch](https://github.com/node-fetch/node-fetch) from 2.6.1 to 2.6.7.
+- [Release notes](https://github.com/node-fetch/node-fetch/releases)
+- [Commits](https://github.com/node-fetch/node-fetch/compare/v2.6.1...v2.6.7)
+
+---
+updated-dependencies:
+- dependency-name: node-fetch
+  dependency-type: direct:development
+...
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/7f5dce6d9eebe829edf20ba67e5c5019921fa1ee"><tt>7f5dce6d</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/56">#1776](https://github.com/99designs/gqlgen/issues/1776) : Edit and persist headers in GraphiQL ([#1856</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/e0b42f9981825814e9ec7c216d9c393b2486831c"><tt>e0b42f99</tt></a> fix requires directive with nested field when entityResolver directive is used (<a href="https://github.com/99designs/gqlgen/pull/63">#1863</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/25c2cdcb12d574e597e8902ab9e2d94b1e5ef974"><tt>25c2cdcb</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/57">#1636](https://github.com/99designs/gqlgen/issues/1636) by updating gqlparser ([#1857</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/c161ab382547948feb9a54e7bf9ff17458b8c3c9"><tt>c161ab38</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/71">#1770](https://github.com/99designs/gqlgen/issues/1770) minor error in getting-started.md ([#1771</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/57a148f6d12572fe585ecfcafafbb7441dbf9cab"><tt>57a148f6</tt></a> Remove outdated version reference so example is always for latest (<a href="https://github.com/99designs/gqlgen/pull/51">#1851</a>)</summary>
+
+* Also update version reference to next
+
+* Update getting-started.md
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/0ab636144bfc875f86e4d9fd7a2686bc57d5050c"><tt>0ab63614</tt></a> Update quickstart (<a href="https://github.com/99designs/gqlgen/pull/50">#1850</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a8eba26dec863c5d34905ab6408f970b4d2abdb5"><tt>a8eba26d</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/48">#1777](https://github.com/99designs/gqlgen/issues/1777) by updating version constant and adding release checklist ([#1848</a>)</summary>
+
+* Revise to use script 🤦
+
+</details></dd></dl>
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.16.0"></a>
 ## [v0.16.0](https://github.com/99designs/gqlgen/compare/v0.15.1...v0.16.0) - 2022-01-24
+- <a href="https://github.com/99designs/gqlgen/commit/b90f9750f40583823a3e875d6bbe1538ce50f527"><tt>b90f9750</tt></a> Merge branch 'master' of github.com:99designs/gqlgen
+
+- <a href="https://github.com/99designs/gqlgen/commit/99523e44ae67633ecfa714794a209191d3519017"><tt>99523e44</tt></a> Prepare for v0.16.0 release (<a href="https://github.com/99designs/gqlgen/pull/42">#1842</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/0563146c6bd7188b2ae187040c5a7f3d17cc9f89"><tt>0563146c</tt></a> Prepare for v0.16.0 release
+
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/7cefef26f7b714eb9d5be117ba2159d4e40168f3"><tt>7cefef26</tt></a> add PrependPlugin (<a href="https://github.com/99designs/gqlgen/pull/39">#1839</a>)</summary>
 
 * add PrependPlugin
@@ -250,7 +527,7 @@ Also added `go:generate` in federation entity resolver tests to make it simpler 
 
 To test:
 ```
-go generate ./... && cd _examples/ && go generate ./... && cd ..
+go generate ./... && cd example/ && go generate ./... && cd ..
 go test -race ./... && cd example && go test -race ./... && cd ..
 ```
 
@@ -341,7 +618,7 @@ To run tests:
 
 * removed unused const in tests
 
-* Update _examples/chat/readme.md
+* Update example/chat/readme.md
 
 </details></dd></dl>
 
@@ -867,8 +1144,8 @@ listed in a few example readmes [2]. Using relative paths from the
 respective example directory should be clear enough.
 
 [2]:
-_examples/todo/server/server.go:10:2: no required module provides package github.com/99designs/gqlgen/_examples/todo; to add it:
-	go get github.com/99designs/gqlgen/_examples/todo
+example/todo/server/server.go:10:2: no required module provides package github.com/99designs/gqlgen/example/todo; to add it:
+	go get github.com/99designs/gqlgen/example/todo
 
 </details></dd></dl>
 
@@ -5071,10 +5348,10 @@ Performance improvments
 
 goos: linux
 goarch: amd64
-pkg: github.com/99designs/gqlgen/_examples/starwars
+pkg: github.com/99designs/gqlgen/example/starwars
 BenchmarkSimpleQueryNoArgs-8      300000             25093 ns/op            6453 B/op        114 allocs/op
 PASS
-ok      github.com/99designs/gqlgen/_examples/starwars    10.807s
+ok      github.com/99designs/gqlgen/example/starwars    10.807s
 
 </details></dd></dl>
 
@@ -5083,10 +5360,10 @@ ok      github.com/99designs/gqlgen/_examples/starwars    10.807s
 go test -benchtime=5s -bench=. -benchmem
 goos: linux
 goarch: amd64
-pkg: github.com/99designs/gqlgen/_examples/starwars
+pkg: github.com/99designs/gqlgen/example/starwars
 BenchmarkSimpleQueryNoArgs-8      200000             32125 ns/op            6277 B/op        118 allocs/op
 PASS
-ok      github.com/99designs/gqlgen/_examples/starwars    9.768s
+ok      github.com/99designs/gqlgen/example/starwars    9.768s
 
 </details></dd></dl>
 
@@ -5095,10 +5372,10 @@ ok      github.com/99designs/gqlgen/_examples/starwars    9.768s
 go test -benchtime=5s -bench=. -benchmem
 goos: linux
 goarch: amd64
-pkg: github.com/99designs/gqlgen/_examples/starwars
+pkg: github.com/99designs/gqlgen/example/starwars
 BenchmarkSimpleQueryNoArgs-8      200000             32680 ns/op            6357 B/op        126 allocs/op
 PASS
-ok      github.com/99designs/gqlgen/_examples/starwars    9.901s
+ok      github.com/99designs/gqlgen/example/starwars    9.901s
 
 </details></dd></dl>
 
@@ -8187,7 +8464,7 @@ package "query" does not depend on "schema" any more
 
 - <a href="https://github.com/99designs/gqlgen/commit/1a959516cacda256f52b3ba2f5cf2e7fd03c85da"><tt>1a959516</tt></a> refactor
 
-- <a href="https://github.com/99designs/gqlgen/commit/f8cb11c10ab15ad4a547a1695efe538a7b5209a8"><tt>f8cb11c1</tt></a> _examples/starwars: use interface base type to make type assertions nicer
+- <a href="https://github.com/99designs/gqlgen/commit/f8cb11c10ab15ad4a547a1695efe538a7b5209a8"><tt>f8cb11c1</tt></a> example/starwars: use interface base type to make type assertions nicer
 
 - <a href="https://github.com/99designs/gqlgen/commit/746da4b8e1dff2ec72167060487e1441506a97c3"><tt>746da4b8</tt></a> star wars example: friendsConnection
 
@@ -8315,7 +8592,7 @@ This reverts commit fb3a6fc969b0c8c286c7d024a108f5696627639c.
 
 - <a href="https://github.com/99designs/gqlgen/commit/d70d16c4ebc4a9a8513ccab945b4e0ad77de6cfe"><tt>d70d16c4</tt></a> added server example
 
-- <a href="https://github.com/99designs/gqlgen/commit/6f9a89db8ecf538d72ece47158d2ef7f487d8a06"><tt>6f9a89db</tt></a> separate _examples/starwars package
+- <a href="https://github.com/99designs/gqlgen/commit/6f9a89db8ecf538d72ece47158d2ef7f487d8a06"><tt>6f9a89db</tt></a> separate example/starwars package
 
 - <a href="https://github.com/99designs/gqlgen/commit/e4060db594dbd7ca6a98e7bb9cf967b6bc51e063"><tt>e4060db5</tt></a> added support for directives
 

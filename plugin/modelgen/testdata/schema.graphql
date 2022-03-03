@@ -126,7 +126,7 @@ interface D implements A & B {
     d: String
 }
 
-type CDImplemented implements C & D {
+type CDImplemented implements C & D & A & B {
     a: String!
     b: Int!
     c: Boolean!

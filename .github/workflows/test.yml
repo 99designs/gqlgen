@@ -5,7 +5,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go: [1.16]
+        go: [1.17]
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}

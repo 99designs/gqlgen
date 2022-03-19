@@ -5,7 +5,7 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    container: golang:1.16-alpine
+    container: golang:1.17-alpine
     steps:
       - uses: actions/checkout@v2
       - run: apk add --no-cache --no-progress nodejs npm git bash
@@ -15,7 +15,7 @@ jobs:
 
   federation:
     runs-on: ubuntu-latest
-    container: golang:1.16-alpine
+    container: golang:1.17-alpine
     steps:
       - uses: actions/checkout@v2
       - run: apk add --no-cache --no-progress nodejs npm git bash

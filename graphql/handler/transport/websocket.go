@@ -235,6 +235,10 @@ func (c *wsConnection) run() {
 		switch m.t {
 		case startMessageType:
 			c.subscribe(start, &m)
+			c.write(&message{
+				id: m.id,
+				t:  startMessageType,
+			})
 		case stopMessageType:
 			c.mu.Lock()
 			closer := c.active[m.id]

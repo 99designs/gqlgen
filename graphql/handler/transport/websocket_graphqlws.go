@@ -14,6 +14,7 @@ const (
 	graphqlwsConnectionInitMsg      = graphqlwsMessageType("connection_init")
 	graphqlwsConnectionTerminateMsg = graphqlwsMessageType("connection_terminate")
 	graphqlwsStartMsg               = graphqlwsMessageType("start")
+	graphqlwsStartAckMsg            = graphqlwsMessageType("start_ack")
 	graphqlwsStopMsg                = graphqlwsMessageType("stop")
 	graphqlwsConnectionAckMsg       = graphqlwsMessageType("connection_ack")
 	graphqlwsConnectionErrorMsg     = graphqlwsMessageType("connection_error")
@@ -152,7 +153,7 @@ func (m *graphqlwsMessage) fromMessage(msg *message) (err error) {
 	case connectionCloseMessageType:
 		m.Type = graphqlwsConnectionTerminateMsg
 	case startMessageType:
-		m.Type = graphqlwsStartMsg
+		m.Type = graphqlwsStartAckMsg
 	case stopMessageType:
 		m.Type = graphqlwsStopMsg
 	case dataMessageType:

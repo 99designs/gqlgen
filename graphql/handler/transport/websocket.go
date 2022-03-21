@@ -15,6 +15,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
 	"github.com/gorilla/websocket"
+	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -348,6 +349,13 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 			c.mu.Unlock()
 			cancel()
 		}()
+
+		if rc.Operation.Operation == ast.Subscription {
+			c.write(&message{
+				id: msg.id,
+				t:  startMessageType,
+			})
+		}
 
 		responses, ctx := c.exec.DispatchOperation(ctx, rc)
 		for {

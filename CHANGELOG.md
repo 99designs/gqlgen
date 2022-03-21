@@ -5,12 +5,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.1...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.2...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.2"></a>
+## [v0.17.2](https://github.com/99designs/gqlgen/compare/v0.17.1...v0.17.2) - 2022-03-21
+- <a href="https://github.com/99designs/gqlgen/commit/1f04d38a4441c5de6171400218b9dd25cebb3639"><tt>1f04d38a</tt></a> release v0.17.2
+
+- <a href="https://github.com/99designs/gqlgen/commit/87fc5f22e8fbfa28a180cbf0e7008af9f830273e"><tt>87fc5f22</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/52">#1961](https://github.com/99designs/gqlgen/issues/1961) for Go 1.18 ([#2052</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/f85d59d30ae055fd89b79aa3d7e3ca1c7fcaedfa"><tt>f85d59d3</tt></a> fixed modelgen test schema (<a href="https://github.com/99designs/gqlgen/pull/32">#2032</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/d873ff8bb9927b302752bd48d7836f2597db558e"><tt>d873ff8b</tt></a> v0.17.1 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.1"></a>
 ## [v0.17.1](https://github.com/99designs/gqlgen/compare/v0.17.0...v0.17.1) - 2022-03-02
+- <a href="https://github.com/99designs/gqlgen/commit/5ea50aee16088ed414be73ca9a59a90f622c9483"><tt>5ea50aee</tt></a> release v0.17.1
+
+- <a href="https://github.com/99designs/gqlgen/commit/a493a4239673c5922281628fc8b94c727398283e"><tt>a493a423</tt></a> Prepare for new release
+
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9f520a2897cf42750e7290cbd83de6fdf13f2e75"><tt>9f520a28</tt></a> Update golangci-lint and fix resource leak (<a href="https://github.com/99designs/gqlgen/pull/24">#2024</a>)</summary>
 
 * Fix golangci-lint in CI

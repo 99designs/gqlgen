@@ -36,6 +36,7 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	OverlappingFields() OverlappingFieldsResolver
 	Panics() PanicsResolver
+	Pet() PetResolver
 	Primitive() PrimitiveResolver
 	PrimitiveString() PrimitiveStringResolver
 	Query() QueryResolver
@@ -248,6 +249,11 @@ type ComplexityRoot struct {
 		FieldScalarMarshal func(childComplexity int) int
 	}
 
+	Pet struct {
+		Friends func(childComplexity int, limit *int) int
+		ID      func(childComplexity int) int
+	}
+
 	Primitive struct {
 		Squared func(childComplexity int) int
 		Value   func(childComplexity int) int
@@ -370,6 +376,7 @@ type ComplexityRoot struct {
 		Created func(childComplexity int) int
 		Friends func(childComplexity int) int
 		ID      func(childComplexity int) int
+		Pets    func(childComplexity int, limit *int) int
 		Updated func(childComplexity int) int
 	}
 
@@ -965,6 +972,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Panics.FieldScalarMarshal(childComplexity), true
+
+	case "Pet.friends":
+		if e.complexity.Pet.Friends == nil {
+			break
+		}
+
+		args, err := ec.field_Pet_friends_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Pet.Friends(childComplexity, args["limit"].(*int)), true
+
+	case "Pet.id":
+		if e.complexity.Pet.ID == nil {
+			break
+		}
+
+		return e.complexity.Pet.ID(childComplexity), true
 
 	case "Primitive.squared":
 		if e.complexity.Primitive.Squared == nil {
@@ -1729,6 +1755,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.ID(childComplexity), true
 
+	case "User.pets":
+		if e.complexity.User.Pets == nil {
+			break
+		}
+
+		args, err := ec.field_User_pets_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.User.Pets(childComplexity, args["limit"].(*int)), true
+
 	case "User.updated":
 		if e.complexity.User.Updated == nil {
 			break
@@ -2343,11 +2381,17 @@ type Subscription {
     initPayload: String!
 }
 
+type Pet {
+    id: Int!
+    friends(limit: Int): [Pet!] @goField(forceResolver: true)
+}
+
 type User {
     id: Int!
     friends: [User!]! @goField(forceResolver: true)
     created: Time!
     updated: Time
+    pets(limit: Int): [Pet!] @goField(forceResolver: true)
 }
 
 type Autobind {

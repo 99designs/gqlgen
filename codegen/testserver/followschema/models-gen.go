@@ -150,6 +150,11 @@ type OuterObject struct {
 	Inner *InnerObject `json:"inner"`
 }
 
+type Pet struct {
+	ID      int    `json:"id"`
+	Friends []*Pet `json:"friends"`
+}
+
 type Slices struct {
 	Test1 []*string `json:"test1"`
 	Test2 []string  `json:"test2"`
@@ -166,6 +171,7 @@ type User struct {
 	Friends []*User    `json:"friends"`
 	Created time.Time  `json:"created"`
 	Updated *time.Time `json:"updated"`
+	Pets    []*Pet     `json:"pets"`
 }
 
 type ValidInput struct {

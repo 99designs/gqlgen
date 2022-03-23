@@ -335,6 +335,7 @@ type ComplexityRoot struct {
 		VOkCaseValue                     func(childComplexity int) int
 		Valid                            func(childComplexity int) int
 		ValidType                        func(childComplexity int) int
+		VariadicModel                    func(childComplexity int) int
 		WrappedMap                       func(childComplexity int) int
 		WrappedScalar                    func(childComplexity int) int
 		WrappedSlice                     func(childComplexity int) int
@@ -385,6 +386,10 @@ type ComplexityRoot struct {
 		DifferentCaseOld   func(childComplexity int) int
 		ValidArgs          func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _ string) int
 		ValidInputKeywords func(childComplexity int, input *ValidInput) int
+	}
+
+	VariadicModel struct {
+		Value func(childComplexity int, rank int) int
 	}
 
 	WrappedMap struct {
@@ -1553,6 +1558,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ValidType(childComplexity), true
 
+	case "Query.variadicModel":
+		if e.complexity.Query.VariadicModel == nil {
+			break
+		}
+
+		return e.complexity.Query.VariadicModel(childComplexity), true
+
 	case "Query.wrappedMap":
 		if e.complexity.Query.WrappedMap == nil {
 			break
@@ -1775,6 +1787,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
+
+	case "VariadicModel.value":
+		if e.complexity.VariadicModel.Value == nil {
+			break
+		}
+
+		args, err := ec.field_VariadicModel_value_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.VariadicModel.Value(childComplexity, args["rank"].(int)), true
 
 	case "WrappedMap.get":
 		if e.complexity.WrappedMap.Get == nil {
@@ -2523,6 +2547,14 @@ type Content_Post {
 }
 
 union Content_Child = Content_User | Content_Post
+`, BuiltIn: false},
+	{Name: "variadic.graphql", Input: `extend type Query {
+    variadicModel: VariadicModel
+}
+
+type VariadicModel {
+    value(rank: Int!): String
+}
 `, BuiltIn: false},
 	{Name: "weird_type_cases.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/583
 

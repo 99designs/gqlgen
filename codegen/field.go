@@ -179,8 +179,8 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			params = types.NewTuple(vars...)
 		}
 
-		// Try to match target function's arguments with GraphQL field arguments
-		newArgs, err := b.bindArgs(f, params)
+		// Try to match target function's arguments with GraphQL field arguments.
+		newArgs, err := b.bindArgs(f, sig, params)
 		if err != nil {
 			return fmt.Errorf("%s:%d: %w", pos.Filename, pos.Line, err)
 		}

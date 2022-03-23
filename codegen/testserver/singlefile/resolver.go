@@ -320,6 +320,10 @@ func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) VariadicModel(ctx context.Context) (*VariadicModel, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
 	panic("not implemented")
 }

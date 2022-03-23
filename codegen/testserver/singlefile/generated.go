@@ -346,6 +346,7 @@ type ComplexityRoot struct {
 		VOkCaseValue                     func(childComplexity int) int
 		Valid                            func(childComplexity int) int
 		ValidType                        func(childComplexity int) int
+		VariadicModel                    func(childComplexity int) int
 		WrappedMap                       func(childComplexity int) int
 		WrappedScalar                    func(childComplexity int) int
 		WrappedSlice                     func(childComplexity int) int
@@ -396,6 +397,10 @@ type ComplexityRoot struct {
 		DifferentCaseOld   func(childComplexity int) int
 		ValidArgs          func(childComplexity int, breakArg string, defaultArg string, funcArg string, interfaceArg string, selectArg string, caseArg string, deferArg string, goArg string, mapArg string, structArg string, chanArg string, elseArg string, gotoArg string, packageArg string, switchArg string, constArg string, fallthroughArg string, ifArg string, rangeArg string, typeArg string, continueArg string, forArg string, importArg string, returnArg string, varArg string, _ string) int
 		ValidInputKeywords func(childComplexity int, input *ValidInput) int
+	}
+
+	VariadicModel struct {
+		Value func(childComplexity int, rank int) int
 	}
 
 	WrappedMap struct {
@@ -526,6 +531,7 @@ type QueryResolver interface {
 	VOkCaseValue(ctx context.Context) (*VOkCaseValue, error)
 	VOkCaseNil(ctx context.Context) (*VOkCaseNil, error)
 	ValidType(ctx context.Context) (*ValidType, error)
+	VariadicModel(ctx context.Context) (*VariadicModel, error)
 	WrappedStruct(ctx context.Context) (*WrappedStruct, error)
 	WrappedScalar(ctx context.Context) (otherpkg.Scalar, error)
 	WrappedMap(ctx context.Context) (WrappedMap, error)
@@ -1686,6 +1692,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ValidType(childComplexity), true
 
+	case "Query.variadicModel":
+		if e.complexity.Query.VariadicModel == nil {
+			break
+		}
+
+		return e.complexity.Query.VariadicModel(childComplexity), true
+
 	case "Query.wrappedMap":
 		if e.complexity.Query.WrappedMap == nil {
 			break
@@ -1908,6 +1921,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
+
+	case "VariadicModel.value":
+		if e.complexity.VariadicModel.Value == nil {
+			break
+		}
+
+		args, err := ec.field_VariadicModel_value_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.VariadicModel.Value(childComplexity, args["rank"].(int)), true
 
 	case "WrappedMap.get":
 		if e.complexity.WrappedMap.Get == nil {
@@ -2656,6 +2681,14 @@ type Content_Post {
 }
 
 union Content_Child = Content_User | Content_Post
+`, BuiltIn: false},
+	{Name: "variadic.graphql", Input: `extend type Query {
+    variadicModel: VariadicModel
+}
+
+type VariadicModel {
+    value(rank: Int!): String
+}
 `, BuiltIn: false},
 	{Name: "weird_type_cases.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/583
 
@@ -3662,6 +3695,21 @@ func (ec *executionContext) field_ValidType_validInputKeywords_args(ctx context.
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_VariadicModel_value_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["rank"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rank"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["rank"] = arg0
 	return args, nil
 }
 
@@ -8664,6 +8712,35 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 	return ec.marshalOValidType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐValidType(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_variadicModel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VariadicModel(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*VariadicModel)
+	fc.Result = res
+	return ec.marshalOVariadicModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐVariadicModel(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9765,6 +9842,42 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 	res := resTmp.(bool)
 	fc.Result = res
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VariadicModel_value(ctx context.Context, field graphql.CollectedField, obj *VariadicModel) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VariadicModel",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_VariadicModel_value_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value(ctx, args["rank"].(int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.CollectedField, obj WrappedMap) (ret graphql.Marshaler) {
@@ -15101,6 +15214,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "variadicModel":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_variadicModel(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "wrappedStruct":
 			field := field
 
@@ -15528,6 +15661,44 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var variadicModelImplementors = []string{"VariadicModel"}
+
+func (ec *executionContext) _VariadicModel(ctx context.Context, sel ast.SelectionSet, obj *VariadicModel) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, variadicModelImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VariadicModel")
+		case "value":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._VariadicModel_value(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18163,6 +18334,13 @@ func (ec *executionContext) marshalOValidType2ᚖgithubᚗcomᚋ99designsᚋgqlg
 		return graphql.Null
 	}
 	return ec._ValidType(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOVariadicModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐVariadicModel(ctx context.Context, sel ast.SelectionSet, v *VariadicModel) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._VariadicModel(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOWrappedScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚋotherpkgᚐScalar(ctx context.Context, v interface{}) (*otherpkg.Scalar, error) {

@@ -107,6 +107,7 @@ type Stub struct {
 		VOkCaseValue                     func(ctx context.Context) (*VOkCaseValue, error)
 		VOkCaseNil                       func(ctx context.Context) (*VOkCaseNil, error)
 		ValidType                        func(ctx context.Context) (*ValidType, error)
+		VariadicModel                    func(ctx context.Context) (*VariadicModel, error)
 		WrappedStruct                    func(ctx context.Context) (*WrappedStruct, error)
 		WrappedScalar                    func(ctx context.Context) (otherpkg.Scalar, error)
 		WrappedMap                       func(ctx context.Context) (WrappedMap, error)
@@ -434,6 +435,9 @@ func (r *stubQuery) VOkCaseNil(ctx context.Context) (*VOkCaseNil, error) {
 }
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)
+}
+func (r *stubQuery) VariadicModel(ctx context.Context) (*VariadicModel, error) {
+	return r.QueryResolver.VariadicModel(ctx)
 }
 func (r *stubQuery) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
 	return r.QueryResolver.WrappedStruct(ctx)

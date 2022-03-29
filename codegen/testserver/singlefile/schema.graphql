@@ -29,11 +29,17 @@ type Subscription {
     initPayload: String!
 }
 
+type Pet {
+    id: Int!
+    friends(limit: Int): [Pet!] @goField(forceResolver: true)
+}
+
 type User {
     id: Int!
     friends: [User!]! @goField(forceResolver: true)
     created: Time!
     updated: Time
+    pets(limit: Int): [Pet!] @goField(forceResolver: true)
 }
 
 type Autobind {

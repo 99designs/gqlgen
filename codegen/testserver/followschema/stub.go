@@ -39,6 +39,9 @@ type Stub struct {
 		FieldScalarMarshal func(ctx context.Context, obj *Panics) ([]MarshalPanic, error)
 		ArgUnmarshal       func(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error)
 	}
+	PetResolver struct {
+		Friends func(ctx context.Context, obj *Pet, limit *int) ([]*Pet, error)
+	}
 	PrimitiveResolver struct {
 		Value func(ctx context.Context, obj *Primitive) (int, error)
 	}
@@ -124,6 +127,7 @@ type Stub struct {
 	}
 	UserResolver struct {
 		Friends func(ctx context.Context, obj *User) ([]*User, error)
+		Pets    func(ctx context.Context, obj *User, limit *int) ([]*Pet, error)
 	}
 	WrappedMapResolver struct {
 		Get func(ctx context.Context, obj WrappedMap, key string) (string, error)
@@ -153,6 +157,9 @@ func (r *Stub) OverlappingFields() OverlappingFieldsResolver {
 }
 func (r *Stub) Panics() PanicsResolver {
 	return &stubPanics{r}
+}
+func (r *Stub) Pet() PetResolver {
+	return &stubPet{r}
 }
 func (r *Stub) Primitive() PrimitiveResolver {
 	return &stubPrimitive{r}
@@ -237,6 +244,12 @@ func (r *stubPanics) FieldScalarMarshal(ctx context.Context, obj *Panics) ([]Mar
 }
 func (r *stubPanics) ArgUnmarshal(ctx context.Context, obj *Panics, u []MarshalPanic) (bool, error) {
 	return r.PanicsResolver.ArgUnmarshal(ctx, obj, u)
+}
+
+type stubPet struct{ *Stub }
+
+func (r *stubPet) Friends(ctx context.Context, obj *Pet, limit *int) ([]*Pet, error) {
+	return r.PetResolver.Friends(ctx, obj, limit)
 }
 
 type stubPrimitive struct{ *Stub }
@@ -480,6 +493,9 @@ type stubUser struct{ *Stub }
 
 func (r *stubUser) Friends(ctx context.Context, obj *User) ([]*User, error) {
 	return r.UserResolver.Friends(ctx, obj)
+}
+func (r *stubUser) Pets(ctx context.Context, obj *User, limit *int) ([]*Pet, error) {
+	return r.UserResolver.Pets(ctx, obj, limit)
 }
 
 type stubWrappedMap struct{ *Stub }

@@ -44,6 +44,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
       ReactDOM.render(
         React.createElement(GraphiQL, {
           fetcher: fetcher,
+          tabs: true,
           headerEditorEnabled: true,
           shouldPersistHeaders: true
         }),
@@ -54,6 +55,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 </html>
 `))
 
+// Handler responsible for setting up the playground
 func Handler(title string, endpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html")

@@ -193,7 +193,17 @@ This example is great, but in the real world fetching most objects is expensive.
 todo unless the user actually asked for it. So lets replace the generated `Todo` model with something slightly more
 realistic.
 
-Create a new file called `graph/model/todo.go`
+First let's enable `autobind`, allowing gqlgen to use your custom models if it can find them rather than generating them. We do this by uncommenting the `autobind` config line in `gqlgen.yml`:
+
+```yml
+# gqlgen will search for any type names in the schema in these go packages
+# if they match it will use them, otherwise it will generate them.
+autobind:
+ - "github.com/[username]/gqlgen-todos/graph/model"
+```
+
+Next, create a new file called `graph/model/todo.go`
+
 ```go
 package model
 
@@ -204,10 +214,6 @@ type Todo struct {
 	User   *User  `json:"user"`
 }
 ```
-
-> Note
->
-> By default gqlgen will use any models in the model directory that match on name, this can be configured in `gqlgen.yml`.
 
 And run `go run github.com/99designs/gqlgen generate`.
 

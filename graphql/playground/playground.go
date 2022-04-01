@@ -44,6 +44,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
       ReactDOM.render(
         React.createElement(GraphiQL, {
           fetcher: fetcher,
+          tabs: true,
           headerEditorEnabled: true,
           shouldPersistHeaders: true
         }),
@@ -54,15 +55,16 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 </html>
 `))
 
+// Handler responsible for setting up the playground
 func Handler(title string, endpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html")
 		err := page.Execute(w, map[string]string{
 			"title":       title,
 			"endpoint":    endpoint,
-			"version":     "1.5.16",
-			"cssSRI":      "sha256-HADQowUuFum02+Ckkv5Yu5ygRoLllHZqg0TFZXY7NHI=",
-			"jsSRI":       "sha256-uHp12yvpXC4PC9+6JmITxKuLYwjlW9crq9ywPE5Rxco=",
+			"version":     "1.8.2",
+			"cssSRI":      "sha256-CDHiHbYkDSUc3+DS2TU89I9e2W3sJRUOqSmp7JC+LBw=",
+			"jsSRI":       "sha256-X8vqrqZ6Rvvoq4tvRVM3LoMZCQH8jwW92tnX0iPiHPc=",
 			"reactSRI":    "sha256-Ipu/TQ50iCCVZBUsZyNJfxrDk0E2yhaEIz0vqI+kFG8=",
 			"reactDOMSRI": "sha256-nbMykgB6tsOFJ7OdVmPpdqMFVk4ZsqWocT6issAPUF0=",
 		})

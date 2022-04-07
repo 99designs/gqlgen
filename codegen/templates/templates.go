@@ -6,6 +6,7 @@ import (
 	"go/types"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -167,7 +168,30 @@ func Render(cfg Options) error {
 		return err
 	}
 
-	cfg.Packages.Evict(code.ImportPathForDir(filepath.Dir(cfg.Filename)))
+	// Fieldalign the file's structs to save memory.
+	// TODO: if (cfg.fieldalignment enabled)
+	fileDir := filepath.Dir(cfg.Filename)
+
+	// change the current working directory to ensure the file is in the current module.
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	if err := os.Chdir(fileDir); err != nil {
+		return err
+	}
+
+	cmd := exec.Command("fieldalignment", "-fix", cfg.Filename)
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	// change the current working directory back.
+	if err := os.Chdir(cwd); err != nil {
+		return err
+	}
+
+	cfg.Packages.Evict(code.ImportPathForDir(fileDir))
 	return nil
 }
 

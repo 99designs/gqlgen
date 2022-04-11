@@ -30,7 +30,7 @@ func (o Options) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphEx
 }
 
 func (o Options) allowedMethods() string {
-	if o.AllowedMethods == nil {
+	if len(o.AllowedMethods) == 0 {
 		return "OPTIONS, GET, POST"
 	}
 	return strings.Join(o.AllowedMethods, ", ")

@@ -358,12 +358,8 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 
 			c.sendResponse(msg.id, response)
 		}
-		c.complete(msg.id)
 
-		c.mu.Lock()
-		delete(c.active, msg.id)
-		c.mu.Unlock()
-		cancel()
+		// complete and context cancel comes from the defer
 	}()
 }
 

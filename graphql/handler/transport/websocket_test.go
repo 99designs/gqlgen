@@ -137,6 +137,19 @@ func TestWebsocket(t *testing.T) {
 		msg = readOp(c)
 		require.Equal(t, completeMsg, msg.Type)
 		require.Equal(t, "test_1", msg.ID)
+
+		// At this point we should be done and should not receive another message.
+		c.SetReadDeadline(time.Now().UTC().Add(1 * time.Millisecond))
+
+		err := c.ReadJSON(&msg)
+		if err == nil {
+			// This should not send a second close message for the same id.
+			require.NotEqual(t, completeMsg, msg.Type)
+			require.NotEqual(t, "test_1", msg.ID)
+		} else {
+			assert.Contains(t, err.Error(), "timeout")
+		}
+
 	})
 }
 

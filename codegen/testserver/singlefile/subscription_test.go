@@ -51,6 +51,24 @@ func TestSubscriptions(t *testing.T) {
 		return channel, nil
 	}
 
+	errorTick := make(chan *Error, 1)
+	resolvers.SubscriptionResolver.ErrorRequired = func(ctx context.Context) (<-chan *Error, error) {
+		res := make(chan *Error, 1)
+
+		go func() {
+			for {
+				select {
+				case t := <-errorTick:
+					res <- t
+				case <-ctx.Done():
+					close(res)
+					return
+				}
+			}
+		}()
+		return res, nil
+	}
+
 	resolvers.SubscriptionResolver.Updated = func(ctx context.Context) (<-chan string, error) {
 		res := make(chan string, 1)
 
@@ -137,5 +155,40 @@ func TestSubscriptions(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "strings = []interface {}{\"hello\", \"world\"}", msg.resp.InitPayload)
 		sub.Close()
+	})
+
+	t.Run("websocket gets errors", func(t *testing.T) {
+		runtime.GC() // ensure no go-routines left from preceding tests
+		initialGoroutineCount := runtime.NumGoroutine()
+
+		sub := c.Websocket(`subscription { errorRequired { id } }`)
+
+		errorTick <- &Error{ID: "ID1234"}
+
+		var msg struct {
+			resp struct {
+				ErrorRequired *struct {
+					Id string
+				}
+			}
+		}
+
+		err := sub.Next(&msg.resp)
+		require.NoError(t, err)
+		require.Equal(t, "ID1234", msg.resp.ErrorRequired.Id)
+
+		errorTick <- nil
+		err = sub.Next(&msg.resp)
+		require.Error(t, err)
+
+		sub.Close()
+
+		// need a little bit of time for goroutines to settle
+		start := time.Now()
+		for time.Since(start).Seconds() < 2 && initialGoroutineCount != runtime.NumGoroutine() {
+			time.Sleep(5 * time.Millisecond)
+		}
+
+		require.Equal(t, initialGoroutineCount, runtime.NumGoroutine())
 	})
 }

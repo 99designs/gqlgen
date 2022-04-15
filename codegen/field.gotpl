@@ -1,6 +1,6 @@
 {{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
-func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(){{ end }}graphql.Marshaler) {
+func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
 	{{- $null := "graphql.Null" }}
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
@@ -38,7 +38,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		return {{ $null }}
 	}
 	{{- if $object.Stream }}
-		return func() graphql.Marshaler {
+		return func(ctx context.Context) graphql.Marshaler {
 			res, ok := <-resTmp.(<-chan {{$field.TypeReference.GO | ref}})
 			if !ok {
 				return nil

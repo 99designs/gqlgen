@@ -124,6 +124,7 @@ type Stub struct {
 		DirectiveDouble        func(ctx context.Context) (<-chan *string, error)
 		DirectiveUnimplemented func(ctx context.Context) (<-chan *string, error)
 		Issue896b              func(ctx context.Context) (<-chan []*CheckIssue896, error)
+		ErrorRequired          func(ctx context.Context) (<-chan *Error, error)
 	}
 	UserResolver struct {
 		Friends func(ctx context.Context, obj *User) ([]*User, error)
@@ -487,6 +488,9 @@ func (r *stubSubscription) DirectiveUnimplemented(ctx context.Context) (<-chan *
 }
 func (r *stubSubscription) Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error) {
 	return r.SubscriptionResolver.Issue896b(ctx)
+}
+func (r *stubSubscription) ErrorRequired(ctx context.Context) (<-chan *Error, error) {
+	return r.SubscriptionResolver.ErrorRequired(ctx)
 }
 
 type stubUser struct{ *Stub }

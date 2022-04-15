@@ -372,6 +372,10 @@ func (r *subscriptionResolver) Issue896b(ctx context.Context) (<-chan []*CheckIs
 	panic("not implemented")
 }
 
+func (r *subscriptionResolver) ErrorRequired(ctx context.Context) (<-chan *Error, error) {
+	panic("not implemented")
+}
+
 func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) {
 	panic("not implemented")
 }

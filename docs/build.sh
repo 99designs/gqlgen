@@ -3,11 +3,13 @@
 # This was adapted from https://github.com/dgraph-io/dgraph/blob/master/wiki/scripts/build.sh
 #
 
+set -e
+
 GREEN='\033[32;1m'
 RESET='\033[0m'
 HOST=https://gqlgen.com
 
-IFS=$'\n' read -r -d '' -a VERSIONS_ARRAY < <(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/99designs/gqlgen/releases?per_page=20" | jq -r '.[].tag_name')
+IFS=$'\n' read -r -d '' -a VERSIONS_ARRAY < <(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/99designs/gqlgen/releases?per_page=20" | jq -r '.[].tag_name' ) || true
 
 VERSIONS_ARRAY+=( "origin/master" )
 

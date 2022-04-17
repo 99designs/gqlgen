@@ -1,17 +1,21 @@
 name: Test
 on: [push, pull_request]
 
+
+env:
+  GO_VERSION: 1.16
+
 jobs:
   test:
     strategy:
       matrix:
-        go: [1.16]
+        go: [${{ env.GO_VERSION }}]
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
       - run: go mod download && go test -race ./...

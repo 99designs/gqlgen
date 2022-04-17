@@ -1,13 +1,17 @@
 name: Lint
 on: [push, pull_request]
 
+env:
+  GO_VERSION: 1.16
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with: { go-version: 1.16 }
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
       - run: go mod download
       - run: .github/workflows/check-fmt
       - run: .github/workflows/check-generate
@@ -15,9 +19,10 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with: { go-version: 1.16 }
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
       - run: go mod download
       - run: .github/workflows/check-coverage
         env:
@@ -26,10 +31,15 @@ jobs:
   golangci-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with: { go-version: 1.16 }
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+      - uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
         with:
-          version: v1.44.2
+          go-version: ${{ env.GO_VERSION }}
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3.1.0
+        with:
+          version: latest
+          # skip cache because of flaky behaviors
+          skip-build-cache: true
+          skip-pkg-cache: true

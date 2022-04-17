@@ -9,19 +9,9 @@ GREEN='\033[32;1m'
 RESET='\033[0m'
 HOST=https://gqlgen.com
 
-VERSIONS_ARRAY=(
-    'v0.16.0'
-    'v0.15.1'
-    'origin/master'
-    'v0.15.0'
-    'v0.14.0'
-    'v0.13.0'
-    'v0.12.2'
-    'v0.11.3'
-    'v0.10.2'
-    'v0.9.3'
-    'v0.8.3'
-)
+IFS=$'\n' read -r -d '' -a VERSIONS_ARRAY < <(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/99designs/gqlgen/releases?per_page=20" | jq -r '.[].tag_name' ) || true
+
+VERSIONS_ARRAY+=( "origin/master" )
 
 joinVersions() {
 	versions=$(printf ",%s" "${VERSIONS_ARRAY[@]}" | sed 's/origin\/master/master/')

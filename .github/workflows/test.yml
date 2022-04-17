@@ -7,16 +7,11 @@ env:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        go: [${{ env.GO_VERSION }}]
-        os: [ubuntu-latest, windows-latest]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go }}
+          go-version: ${{ env.GO_VERSION }}
       - run: go mod download && go test -race ./...
       - run: cd _examples && go mod download && go test -race ./...

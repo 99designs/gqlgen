@@ -21,7 +21,7 @@ func TestNullBubbling(t *testing.T) {
 		return &Error{ID: "E1234"}, nil
 	}
 	resolvers.QueryResolver.ErrorBubbleList = func(ctx context.Context) (i []*Error, e error) {
-		return []*Error{nil}, nil
+		return []*Error{{ID: "1"}, nil, nil}, nil
 	}
 	resolvers.QueryResolver.ErrorList = func(ctx context.Context) (i []*Error, e error) {
 		return []*Error{nil}, nil
@@ -68,7 +68,7 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubble { id, nilOnRequiredField } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"must not be null","path":["errorBubble","nilOnRequiredField"]}]`)
+		require.EqualError(t, err, `[{"message":"the requested element is null which the schema does not allow","path":["errorBubble","nilOnRequiredField"]}]`)
 		require.Nil(t, resp.ErrorBubble)
 		require.Equal(t, "Ok", resp.Valid)
 	})
@@ -93,7 +93,8 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubbleList { id } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"must not be null","path":["errorBubbleList",0]}]`)
+		require.Contains(t, err.Error(), `{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",2]}`)
+		require.Contains(t, err.Error(), `{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",1]}`)
 		require.Nil(t, resp.ErrorBubbleList)
 		require.Equal(t, "Ok", resp.Valid)
 	})
@@ -129,6 +130,6 @@ func TestNullBubbling(t *testing.T) {
 		} }`, &resp)
 
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "must not be null")
+		require.Contains(t, err.Error(), "the requested element is null which the schema does not allow")
 	})
 }

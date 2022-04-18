@@ -40,7 +40,7 @@ func TestTime(t *testing.T) {
 		}
 
 		err := c.Post(`query { user(id: 1) { created } }`, &resp)
-		require.EqualError(t, err, `[{"message":"must not be null","path":["user","created"]}]`)
+		require.EqualError(t, err, `[{"message":"the requested element is null which the schema does not allow","path":["user","created"]}]`)
 	})
 
 	t.Run("with values", func(t *testing.T) {

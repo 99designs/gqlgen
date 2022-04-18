@@ -378,6 +378,7 @@ type ComplexityRoot struct {
 		DirectiveDouble        func(childComplexity int) int
 		DirectiveNullableArg   func(childComplexity int, arg *int, arg2 *int, arg3 *string) int
 		DirectiveUnimplemented func(childComplexity int) int
+		ErrorRequired          func(childComplexity int) int
 		InitPayload            func(childComplexity int) int
 		Issue896b              func(childComplexity int) int
 		Updated                func(childComplexity int) int
@@ -555,6 +556,7 @@ type SubscriptionResolver interface {
 	DirectiveDouble(ctx context.Context) (<-chan *string, error)
 	DirectiveUnimplemented(ctx context.Context) (<-chan *string, error)
 	Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error)
+	ErrorRequired(ctx context.Context) (<-chan *Error, error)
 }
 type UserResolver interface {
 	Friends(ctx context.Context, obj *User) ([]*User, error)
@@ -1852,6 +1854,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.DirectiveUnimplemented(childComplexity), true
 
+	case "Subscription.errorRequired":
+		if e.complexity.Subscription.ErrorRequired == nil {
+			break
+		}
+
+		return e.complexity.Subscription.ErrorRequired(childComplexity), true
+
 	case "Subscription.initPayload":
 		if e.complexity.Subscription.InitPayload == nil {
 			break
@@ -2087,7 +2096,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			data := next()
+			data := next(ctx)
 
 			if data == nil {
 				return nil
@@ -2389,6 +2398,10 @@ input NestedInput {
     errorList: [Error]
     errors: Errors
     valid: String!
+}
+
+extend type Subscription {
+	errorRequired: Error!
 }
 
 type Errors {
@@ -11255,7 +11268,7 @@ func (ec *executionContext) fieldContext_Slices_test4(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_updated(ctx, field)
 	if err != nil {
 		return nil
@@ -11278,7 +11291,7 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 		}
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan string)
 		if !ok {
 			return nil
@@ -11306,7 +11319,7 @@ func (ec *executionContext) fieldContext_Subscription_updated(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_initPayload(ctx, field)
 	if err != nil {
 		return nil
@@ -11329,7 +11342,7 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 		}
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan string)
 		if !ok {
 			return nil
@@ -11357,7 +11370,7 @@ func (ec *executionContext) fieldContext_Subscription_initPayload(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_directiveArg(ctx, field)
 	if err != nil {
 		return nil
@@ -11377,7 +11390,7 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 	if resTmp == nil {
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan *string)
 		if !ok {
 			return nil
@@ -11416,7 +11429,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveArg(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_directiveNullableArg(ctx, field)
 	if err != nil {
 		return nil
@@ -11436,7 +11449,7 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 	if resTmp == nil {
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan *string)
 		if !ok {
 			return nil
@@ -11475,7 +11488,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveNullableArg(ctx c
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_directiveDouble(ctx, field)
 	if err != nil {
 		return nil
@@ -11521,7 +11534,7 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 	if resTmp == nil {
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan *string)
 		if !ok {
 			return nil
@@ -11549,7 +11562,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveDouble(ctx contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_directiveUnimplemented(ctx, field)
 	if err != nil {
 		return nil
@@ -11589,7 +11602,7 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 	if resTmp == nil {
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan *string)
 		if !ok {
 			return nil
@@ -11617,7 +11630,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveUnimplemented(ctx
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_issue896b(ctx, field)
 	if err != nil {
 		return nil
@@ -11637,7 +11650,7 @@ func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field g
 	if resTmp == nil {
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan []*CheckIssue896)
 		if !ok {
 			return nil
@@ -11664,6 +11677,67 @@ func (ec *executionContext) fieldContext_Subscription_issue896b(ctx context.Cont
 				return ec.fieldContext_CheckIssue896_id(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CheckIssue896", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_errorRequired(ctx, field)
+	if err != nil {
+		return nil
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().ErrorRequired(rctx)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func(ctx context.Context) graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *Error)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐError(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) fieldContext_Subscription_errorRequired(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Error_id(ctx, field)
+			case "errorOnNonRequiredField":
+				return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
+			case "errorOnRequiredField":
+				return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
+			case "nilOnRequiredField":
+				return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
 		},
 	}
 	return fc, nil
@@ -18508,7 +18582,7 @@ func (ec *executionContext) _Slices(ctx context.Context, sel ast.SelectionSet, o
 
 var subscriptionImplementors = []string{"Subscription"}
 
-func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Subscription",
@@ -18533,6 +18607,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_directiveUnimplemented(ctx, fields[0])
 	case "issue896b":
 		return ec._Subscription_issue896b(ctx, fields[0])
+	case "errorRequired":
+		return ec._Subscription_errorRequired(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}

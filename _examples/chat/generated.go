@@ -220,7 +220,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			data := next()
+			data := next(ctx)
 
 			if data == nil {
 				return nil
@@ -419,7 +419,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    ************************** directives.gotpl **************************
 
-func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) func() graphql.Marshaler {
+func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) func(ctx context.Context) graphql.Marshaler {
 	for _, d := range obj.Directives {
 		switch d.Name {
 		case "user":
@@ -427,7 +427,7 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			args, err := ec.dir_user_args(ctx, rawArgs)
 			if err != nil {
 				ec.Error(ctx, err)
-				return func() graphql.Marshaler {
+				return func(ctx context.Context) graphql.Marshaler {
 					return graphql.Null
 				}
 			}
@@ -443,15 +443,15 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 	tmp, err := next(ctx)
 	if err != nil {
 		ec.Error(ctx, err)
-		return func() graphql.Marshaler {
+		return func(ctx context.Context) graphql.Marshaler {
 			return graphql.Null
 		}
 	}
-	if data, ok := tmp.(func() graphql.Marshaler); ok {
+	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
 		return data
 	}
 	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		return graphql.Null
 	}
 }
@@ -986,7 +986,7 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	fc, err := ec.fieldContext_Subscription_messageAdded(ctx, field)
 	if err != nil {
 		return nil
@@ -1012,7 +1012,7 @@ func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, fiel
 		}
 		return nil
 	}
-	return func() graphql.Marshaler {
+	return func(ctx context.Context) graphql.Marshaler {
 		res, ok := <-resTmp.(<-chan *Message)
 		if !ok {
 			return nil
@@ -3050,7 +3050,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var subscriptionImplementors = []string{"Subscription"}
 
-func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Subscription",

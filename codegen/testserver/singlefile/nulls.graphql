@@ -6,6 +6,10 @@ extend type Query {
     valid: String!
 }
 
+extend type Subscription {
+	errorRequired: Error!
+}
+
 type Errors {
     a: Error!
     b: Error!

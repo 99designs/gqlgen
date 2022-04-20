@@ -5,10 +5,138 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.2...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.3...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.3"></a>
+## [v0.17.3](https://github.com/99designs/gqlgen/compare/v0.17.2...v0.17.3) - 2022-04-20
+- <a href="https://github.com/99designs/gqlgen/commit/0bb262d1a0143f60640f60ebbb516e0f4cd79042"><tt>0bb262d1</tt></a> release v0.17.3
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8d0bd22aff1cdb6ad2e36190e11871b169f8da0a"><tt>8d0bd22a</tt></a> Update gqlparser (<a href="https://github.com/99designs/gqlgen/pull/09">#2109</a>)</summary>
+
+* Update gqlparser
+
+
+* Update tests to be NoError
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/ec0dea883a2c967d533e5f1530791ad72a08198b"><tt>ec0dea88</tt></a> Fix the ability of websockets to get errors (<a href="https://github.com/99designs/gqlgen/pull/97">#2097</a>)</summary>
+
+Because DispatchOperation creates tempResponseContext,
+which is passed into Exec, which is then used in _Subscription to
+generate the next function. Inside the various subscription functions
+when generating next the context was captured there.
+
+Which means later when the returned function from DispatchOperation is
+called. The responseContext which accumulates the errors is the
+tempResponseContext which we no longer have access to to read the errors
+out of it.
+
+Instead add a context to next() so that it can be passed through and
+accumulated the errors as expected.
+
+Added a unit test for this as well.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e3f04b42f1fc5d4b13dc0579b2ec713f770a4fd0"><tt>e3f04b42</tt></a> Change the error message to be consumer targeted (<a href="https://github.com/99designs/gqlgen/pull/96">#2096</a>)</summary>
+
+* Change the error message to be slightly more clear
+
+* Rebase on updated origin/master.
+
+Fix the test to not be sensitive to array ordering.
+Re-generate on master as there was a schema change.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5a49764956ffb674df2c9bee19455bb1fd3407db"><tt>5a497649</tt></a> Fix websocket subscriptions to not double close. (<a href="https://github.com/99designs/gqlgen/pull/95">#2095</a>)</summary>
+
+We were closing at the end of the loop and also in the defer.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/a15a9bfdbad30b2f5ce7a966ec1190c108c4df3e"><tt>a15a9bfd</tt></a> Update test.yml to be valid
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a1538928a569a09834579db941863ccce28113e3"><tt>a1538928</tt></a> Use Github API to update the docs (<a href="https://github.com/99designs/gqlgen/pull/01">#2101</a>)</summary>
+
+* Use Github API to update the docs
+
+Instead of a hard-coded version of the docs we want to realease, this
+uses the Github API to get the last 20 versions and publish those. This
+will allow any script invoking this to make sure to always have the
+latest version of the docs
+
+* Reinstate set -e
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/3bf437c232f8be30a473cf94495a1014c0583af2"><tt>3bf437c2</tt></a> Update golangci-lint (<a href="https://github.com/99designs/gqlgen/pull/03">#2103</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/12c6d0bf15431f666d08c4c82581957e1b727898"><tt>12c6d0bf</tt></a> Fix misprint (<a href="https://github.com/99designs/gqlgen/pull/02">#2102</a>)</summary>
+
+* Fix misprint
+
+* Update websocket_graphql_transport_ws.go
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9f5fad13fa6275139e051788cc5fe8c2b2630428"><tt>9f5fad13</tt></a> Bump minimist from 1.2.5 to 1.2.6 in /integration (<a href="https://github.com/99designs/gqlgen/pull/85">#2085</a>)</summary>
+
+Bumps [minimist](https://github.com/substack/minimist) from 1.2.5 to 1.2.6.
+- [Release notes](https://github.com/substack/minimist/releases)
+- [Commits](https://github.com/substack/minimist/compare/1.2.5...1.2.6)
+
+---
+updated-dependencies:
+- dependency-name: minimist
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/035e1d6eeb81179ddec3d36d8776212d8fe35cd6"><tt>035e1d6e</tt></a> Add AllowedMethods field to transport.Options (<a href="https://github.com/99designs/gqlgen/pull/80">#2080</a>)</summary>
+
+* Add AllowedMethods field to transport.Options
+
+to enable users to specify allowed HTTP methods.
+
+* Update graphql/handler/transport/options.go
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/f0fdb116f45350aabf698c20bf6410283f96bb11"><tt>f0fdb116</tt></a> Add instructions for enabling autobinding (<a href="https://github.com/99designs/gqlgen/pull/79">#2079</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/12b0b38583e2c7b2174585bf1243a98cbbc2eba6"><tt>12b0b385</tt></a> Bump Playground version (<a href="https://github.com/99designs/gqlgen/pull/78">#2078</a>)</summary>
+
+* update playground
+
+* enables tabs
+
+* update shas
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1324c3ffb9ff0afef6e9cc41d99b5b4b9bc928b6"><tt>1324c3ff</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/62">#2062</a> from a8m/childfield</summary>
+
+graphql: add FieldContext.Child field function and enable it in codegen
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/bf9caeaee091e32178fe2906894a7c7e72fdd66d"><tt>bf9caeae</tt></a> graphql: add FieldContext.ChildArgs field and enable it in codegen
+
+- <a href="https://github.com/99designs/gqlgen/commit/36fb3dc6733601f96162bc80fccda42e34b3b7ff"><tt>36fb3dc6</tt></a> codegen: allow binding methods with optional variadic arguments (<a href="https://github.com/99designs/gqlgen/pull/66">#2066</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/fba5edd4fa1176ef0f2840f3bb90fe10b9f4b695"><tt>fba5edd4</tt></a> Update Changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/48b2b7e1521c50d03cabf524bbb78805e3fb023f"><tt>48b2b7e1</tt></a> v0.17.2 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.2"></a>
 ## [v0.17.2](https://github.com/99designs/gqlgen/compare/v0.17.1...v0.17.2) - 2022-03-21
 - <a href="https://github.com/99designs/gqlgen/commit/1f04d38a4441c5de6171400218b9dd25cebb3639"><tt>1f04d38a</tt></a> release v0.17.2

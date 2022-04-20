@@ -350,7 +350,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"23",inner:{message:"1"}}) }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputNullable)
 		})
 		t.Run("when function inner nullable success", func(t *testing.T) {
@@ -360,7 +360,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputNullable(arg: {text:"23",nullableText:"23",inner:{message:"1"},innerNullable:{message:"success"}}) }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputNullable)
 		})
 		t.Run("when arg has directive", func(t *testing.T) {
@@ -370,7 +370,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveInputType(arg: {id: 1}) }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputType)
 		})
 	})
@@ -386,7 +386,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveObject{ text nullableText order} }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, "Ok", resp.DirectiveObject.Text)
 			require.True(t, resp.DirectiveObject.NullableText == nil)
 			require.Equal(t, "Query_field", resp.DirectiveObject.Order[0])
@@ -403,7 +403,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveObjectWithCustomGoModel{ nullableText } }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.True(t, resp.DirectiveObjectWithCustomGoModel.NullableText == nil)
 		})
 	})
@@ -437,7 +437,8 @@ func TestDirectives(t *testing.T) {
 
 				err := c.WebsocketOnce(`subscription { directiveNullableArg }`, &resp)
 
-				require.Nil(t, err)
+				require.NoError(t, err)
+				require.NotNil(t, resp.DirectiveNullableArg)
 				require.Equal(t, "Ok", *resp.DirectiveNullableArg)
 			})
 			t.Run("when function success on valid nullable arg directives", func(t *testing.T) {
@@ -447,7 +448,8 @@ func TestDirectives(t *testing.T) {
 
 				err := c.WebsocketOnce(`subscription { directiveNullableArg(arg: 1) }`, &resp)
 
-				require.Nil(t, err)
+				require.NoError(t, err)
+				require.NotNil(t, resp.DirectiveNullableArg)
 				require.Equal(t, "Ok", *resp.DirectiveNullableArg)
 			})
 			t.Run("when function success", func(t *testing.T) {
@@ -457,7 +459,8 @@ func TestDirectives(t *testing.T) {
 
 				err := c.WebsocketOnce(`subscription { directiveArg(arg: "test") }`, &resp)
 
-				require.Nil(t, err)
+				require.NoError(t, err)
+				require.NotNil(t, resp.DirectiveArg)
 				require.Equal(t, "Ok", *resp.DirectiveArg)
 			})
 		})

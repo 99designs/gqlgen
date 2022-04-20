@@ -13,12 +13,12 @@ require (
 	github.com/mitchellh/mapstructure v1.2.3
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli/v2 v2.3.0
-	github.com/vektah/gqlparser/v2 v2.4.0
+	github.com/vektah/gqlparser/v2 v2.4.2
 	golang.org/x/tools v0.1.9
 	gopkg.in/yaml.v2 v2.2.8
 )
 
 require (
-	github.com/agnivade/levenshtein v1.1.0 // indirect
+	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 )

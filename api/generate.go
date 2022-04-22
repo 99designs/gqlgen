@@ -24,7 +24,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 	}
 	plugins = append(plugins, resolvergen.New())
 	if cfg.Federation.IsDefined() {
-		plugins = append([]plugin.Plugin{federation.New()}, plugins...)
+		plugins = append([]plugin.Plugin{federation.New(cfg.Federation.Version)}, plugins...)
 	}
 
 	for _, o := range option {

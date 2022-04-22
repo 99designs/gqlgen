@@ -11,3 +11,6 @@ type Service struct {
 type Entity interface {
 	IsEntity()
 }
+
+// Used for the Link directive
+type Link interface{}

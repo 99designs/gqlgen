@@ -1,0 +1,10 @@
+schema:
+  - "testdata/federation2/federation2.graphql"
+exec:
+  filename: testdata/federation2/generated/exec.go
+federation:
+  filename: testdata/federation2/generated/federation.go
+  version: 2
+
+autobind:
+  - "github.com/99designs/gqlgen/plugin/federation/test_data/model"

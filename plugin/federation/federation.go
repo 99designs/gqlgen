@@ -57,6 +57,12 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		},
 	}
 
+	if f.Version == 2 {
+		builtins["link__Import"] = config.TypeMapEntry{
+			Model: config.StringList{"github.com/99designs/gqlgen/fedruntime.Link"},
+		}
+	}
+
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
 			return fmt.Errorf("%v already exists which must be reserved when Federation is enabled", typeName)
@@ -321,10 +327,21 @@ func (f *federation) setEntities(schema *ast.Schema) {
 		//    }
 		if !e.allFieldsAreExternal() {
 			for _, dir := range keys {
-				if len(dir.Arguments) != 1 || dir.Arguments[0].Name != "fields" {
-					panic("Exactly one `fields` argument needed for @key declaration.")
+				if len(dir.Arguments) > 2 {
+					panic("More than two arguments provided for @key declaration.")
 				}
-				arg := dir.Arguments[0]
+				var arg *ast.Argument
+
+				// since keys are able to now have multiple arguments, we need to check both possible for a possible @key(fields="" fields="")
+				for _, a := range dir.Arguments {
+					if a.Name == "fields" {
+						if arg != nil {
+							panic("More than one `fields` provided for @key declaration.")
+						}
+						arg = a
+					}
+				}
+
 				keyFieldSet := fieldset.New(arg.Value.Raw, nil)
 
 				keyFields := make([]*KeyField, len(keyFieldSet))

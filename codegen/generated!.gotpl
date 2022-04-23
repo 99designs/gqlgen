@@ -7,6 +7,7 @@
 {{ reserveImport "sync/atomic" }}
 {{ reserveImport "errors"  }}
 {{ reserveImport "bytes"  }}
+{{ reserveImport "embed"  }}
 
 {{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}
 {{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}
@@ -235,9 +236,20 @@
 		return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 	}
 
+	//go:embed{{- range $source := .Config.Sources }} {{$source.Name|quote}}{{- end }}
+	var sourcesFS embed.FS
+
+	func sourceData(filename string) string {
+		data, err := sourcesFS.ReadFile(filename)
+		if err != nil {
+			panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+		}
+		return string(data)
+	}
+
 	var sources = []*ast.Source{
 	{{- range $source := .Config.Sources }}
-		{Name: {{$source.Name|quote}}, Input: {{$source.Input|rawQuote}}, BuiltIn: {{$source.BuiltIn}}},
+		{Name: {{$source.Name|quote}}, Input: sourceData({{$source.Name|quote}}), BuiltIn: {{$source.BuiltIn}}},
 	{{- end }}
 	}
 	var parsedSchema = gqlparser.MustLoadSchema(sources...)

@@ -10,7 +10,7 @@ require (
 	github.com/matryer/moq v0.2.7
 	github.com/mattn/go-colorable v0.1.12
 	github.com/mattn/go-isatty v0.0.14
-	github.com/mitchellh/mapstructure v1.2.3
+	github.com/mitchellh/mapstructure v1.3.1
 	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/vektah/gqlparser/v2 v2.4.2

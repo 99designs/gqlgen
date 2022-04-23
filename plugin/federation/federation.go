@@ -59,7 +59,7 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 
 	if f.Version == 2 {
 		builtins["link__Import"] = config.TypeMapEntry{
-			Model: config.StringList{"github.com/99designs/gqlgen/fedruntime.Link"},
+			Model: config.StringList{"github.com/99designs/gqlgen/plugin/federation/fedruntime.Link"},
 		}
 	}
 

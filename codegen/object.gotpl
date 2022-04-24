@@ -80,13 +80,12 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
                     {{end}}
                 })
             {{- else }}
-                innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-                    return ec._{{$object.Name}}_{{$field.Name}}(ctx, field{{if not $object.Root}}, obj{{end}})
-                }
                 {{if $object.Root}}
-                    out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+                    out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+                        return ec._{{$object.Name}}_{{$field.Name}}(ctx, field)
+                    })
                 {{else}}
-                    out.Values[i] = innerFunc(ctx)
+                    out.Values[i] = ec._{{$object.Name}}_{{$field.Name}}(ctx, field, obj)
                 {{end}}
 
                 {{- if $field.TypeReference.GQL.NonNull }}

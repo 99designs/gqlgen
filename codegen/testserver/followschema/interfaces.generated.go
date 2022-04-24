@@ -1007,21 +1007,15 @@ func (ec *executionContext) _BackedByInterface(ctx context.Context, sel ast.Sele
 
 			})
 		case "thisShouldBind":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._BackedByInterface_thisShouldBind(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._BackedByInterface_thisShouldBind(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "thisShouldBindWithError":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._BackedByInterface_thisShouldBindWithError(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._BackedByInterface_thisShouldBindWithError(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -1048,21 +1042,15 @@ func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Cat")
 		case "species":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Cat_species(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Cat_species(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "catBreed":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Cat_catBreed(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Cat_catBreed(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -1089,25 +1077,16 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Circle")
 		case "radius":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Circle_radius(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Circle_radius(ctx, field, obj)
 
 		case "area":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Circle_area(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Circle_area(ctx, field, obj)
 
 		case "coordinates":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Circle_coordinates(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Circle_coordinates(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -1131,31 +1110,22 @@ func (ec *executionContext) _ConcreteNodeA(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ConcreteNodeA")
 		case "id":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ConcreteNodeA_id(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ConcreteNodeA_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "child":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ConcreteNodeA_child(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ConcreteNodeA_child(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "name":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ConcreteNodeA_name(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ConcreteNodeA_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -1182,21 +1152,15 @@ func (ec *executionContext) _ConcreteNodeInterface(ctx context.Context, sel ast.
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ConcreteNodeInterface")
 		case "id":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ConcreteNodeInterface_id(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ConcreteNodeInterface_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "child":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ConcreteNodeInterface_child(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ConcreteNodeInterface_child(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -1223,21 +1187,15 @@ func (ec *executionContext) _Coordinates(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Coordinates")
 		case "x":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Coordinates_x(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Coordinates_x(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "y":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Coordinates_y(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Coordinates_y(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -1264,21 +1222,15 @@ func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Dog")
 		case "species":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Dog_species(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Dog_species(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "dogBreed":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Dog_dogBreed(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Dog_dogBreed(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -1305,32 +1257,20 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Rectangle")
 		case "length":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Rectangle_length(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Rectangle_length(ctx, field, obj)
 
 		case "width":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Rectangle_width(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Rectangle_width(ctx, field, obj)
 
 		case "area":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Rectangle_area(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Rectangle_area(ctx, field, obj)
 
 		case "coordinates":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Rectangle_coordinates(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Rectangle_coordinates(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

@@ -138,11 +138,8 @@ func (ec *executionContext) _LoopA(ctx context.Context, sel ast.SelectionSet, ob
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LoopA")
 		case "b":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._LoopA_b(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._LoopA_b(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -169,11 +166,8 @@ func (ec *executionContext) _LoopB(ctx context.Context, sel ast.SelectionSet, ob
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LoopB")
 		case "a":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._LoopB_a(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._LoopB_a(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

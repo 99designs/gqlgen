@@ -206,35 +206,23 @@ func (ec *executionContext) _Slices(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Slices")
 		case "test1":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Slices_test1(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Slices_test1(ctx, field, obj)
 
 		case "test2":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Slices_test2(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Slices_test2(ctx, field, obj)
 
 		case "test3":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Slices_test3(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Slices_test3(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "test4":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Slices_test4(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Slices_test4(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

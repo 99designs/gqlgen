@@ -631,28 +631,19 @@ func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.Selec
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ObjectDirectives")
 		case "text":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ObjectDirectives_text(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ObjectDirectives_text(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "nullableText":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ObjectDirectives_nullableText(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ObjectDirectives_nullableText(ctx, field, obj)
 
 		case "order":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ObjectDirectives_order(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ObjectDirectives_order(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -679,11 +670,8 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel(ctx context.Conte
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ObjectDirectivesWithCustomGoModel")
 		case "nullableText":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ObjectDirectivesWithCustomGoModel_nullableText(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ObjectDirectivesWithCustomGoModel_nullableText(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

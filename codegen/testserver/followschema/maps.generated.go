@@ -166,18 +166,12 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("MapStringInterfaceType")
 		case "a":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._MapStringInterfaceType_a(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._MapStringInterfaceType_a(ctx, field, obj)
 
 		case "b":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._MapStringInterfaceType_b(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._MapStringInterfaceType_b(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

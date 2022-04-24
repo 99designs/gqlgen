@@ -236,7 +236,7 @@
 		return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 	}
 
-	//go:embed{{- range $source := .Config.Sources }} {{$source.Name|quote}}{{- end }}
+	//go:embed{{- range $source := .Config.Sources }}{{if (not $source.BuiltIn)}} {{$source.Name|quote}}{{end}}{{- end }}
 	var sourcesFS embed.FS
 
 	func sourceData(filename string) string {
@@ -249,7 +249,7 @@
 
 	var sources = []*ast.Source{
 	{{- range $source := .Config.Sources }}
-		{Name: {{$source.Name|quote}}, Input: sourceData({{$source.Name|quote}}), BuiltIn: {{$source.BuiltIn}}},
+		{Name: {{$source.Name|quote}}, Input: {{if $source.BuiltIn}}{{$source.Input|rawQuote}}{{else}}sourceData({{$source.Name|quote}}){{end}}, BuiltIn: {{$source.BuiltIn}}},
 	{{- end }}
 	}
 	var parsedSchema = gqlparser.MustLoadSchema(sources...)

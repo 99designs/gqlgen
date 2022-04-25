@@ -1,0 +1,16 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.0",
+        import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override", "@inaccessible"])
+
+schema {
+    query: CustomQuery
+}
+
+type Hello @key(fields:"name", resolvable: false) {
+  name: String!
+}
+
+type CustomQuery {
+  hello: Hello!
+}
+

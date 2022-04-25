@@ -19,6 +19,16 @@ federation:
   package: generated
 ```
 
+### Federation 2
+
+If you are using Apollo's Federation 2 standard, your schema should automatically be upgraded so long as you include the required `@link` directive within your schema. If you want to force Federation 2 composition, the `federation` configuration supports a `version` flag to override that. For example:
+
+```yml
+federation:
+  filename: graph/generated/federation.go
+  package: generated
+```
+
 ## Create the federated servers
 
 For each server to be federated we will create a new gqlgen project.

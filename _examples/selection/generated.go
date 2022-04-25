@@ -5,6 +5,7 @@ package selection
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -194,32 +195,19 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
+//go:embed "schema.graphql"
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "../../../../../schema.graphql", Input: `interface Event {
-    selection: [String!]
-    collected: [String!]
-}
-
-type Post implements Event {
-    message: String!
-    sent: Time!
-    selection: [String!]
-    collected: [String!]
-}
-
-type Like implements Event {
-    reaction: String!
-    sent: Time!
-    selection: [String!]
-    collected: [String!]
-}
-
-type Query {
-    events: [Event!]
-}
-
-scalar Time
-`, BuiltIn: false},
+	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

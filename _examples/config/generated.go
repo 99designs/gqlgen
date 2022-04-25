@@ -5,6 +5,7 @@ package config
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -250,43 +251,21 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
+//go:embed "schema.graphql" "todo.graphql" "user.graphql"
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "../../../../../schema.graphql", Input: `directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
-
-type Query {
-  todos: [Todo!]!
-}
-
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
-}
-`, BuiltIn: false},
-	{Name: "../../../../../todo.graphql", Input: `type Todo {
-  id: ID! @goField(forceResolver: true)
-  databaseId: Int!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
-}
-`, BuiltIn: false},
-	{Name: "../../../../../user.graphql", Input: `type User
-@goModel(model:"github.com/99designs/gqlgen/_examples/config.User") {
-  id: ID!
-  name: String! @goField(name:"FullName")
-  role: role!
-}
-
-type role
-@goModel(model:"github.com/99designs/gqlgen/_examples/config.UserRole") {
-    name: String!
-}
-`, BuiltIn: false},
+	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+	{Name: "todo.graphql", Input: sourceData("todo.graphql"), BuiltIn: false},
+	{Name: "user.graphql", Input: sourceData("user.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

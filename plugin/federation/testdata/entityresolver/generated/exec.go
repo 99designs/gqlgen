@@ -683,7 +683,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../../../../../../../../testdata/entityresolver/schema.graphql", Input: `directive @entityResolver(multi: Boolean) on OBJECT
+	{Name: "../schema.graphql", Input: `directive @entityResolver(multi: Boolean) on OBJECT
 
 type Hello @key(fields: "name") {
     name: String!
@@ -761,7 +761,7 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
     key3: String! @requires(fields: "key1 key2")
 }
 `, BuiltIn: false},
-	{Name: "../../../../../../../../federation/directives.graphql", Input: `
+	{Name: "../../../federation/directives.graphql", Input: `
 	scalar _Any
 	scalar _FieldSet
 	
@@ -772,7 +772,7 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
 
 	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
 `, BuiltIn: true},
-	{Name: "../../../../../../../../federation/entity.graphql", Input: `
+	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
 union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
 

@@ -5,6 +5,7 @@ package type_system_extension
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -217,82 +218,27 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
+//go:embed "schemas/enum-extension.graphql" "schemas/input-object-extension.graphql" "schemas/interface-extension.graphql" "schemas/object-extension.graphql" "schemas/scalar-extension.graphql" "schemas/schema-extension.graphql" "schemas/schema.graphql" "schemas/type-extension.graphql" "schemas/union-extension.graphql"
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "../../../../../schemas/enum-extension.graphql", Input: `directive @enumLogging on ENUM
-
-extend enum State @enumLogging
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/input-object-extension.graphql", Input: `directive @inputLogging on INPUT_OBJECT
-
-extend input TodoInput @inputLogging
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/interface-extension.graphql", Input: `directive @interfaceLogging on INTERFACE
-
-extend interface Node @interfaceLogging
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/object-extension.graphql", Input: `directive @objectLogging on OBJECT
-
-extend type Todo @objectLogging
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/scalar-extension.graphql", Input: `directive @scalarLogging on SCALAR
-
-extend scalar ID @scalarLogging
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/schema-extension.graphql", Input: `extend schema {
-  mutation: MyMutation
-}
-
-extend type MyQuery {
-  todo(id: ID!): Todo
-}
-
-type MyMutation {
-  createTodo(todo: TodoInput!): Todo!
-}
-
-input TodoInput {
-  text: String!
-}
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/schema.graphql", Input: `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-schema {
-  query: MyQuery
-}
-
-interface Node {
-  id: ID!
-}
-
-type Todo implements Node {
-  id: ID!
-  text: String!
-  state: State!
-}
-
-type MyQuery {
-  todos: [Todo!]!
-}
-
-union Data = Todo
-
-enum State {
-  NOT_YET
-  DONE
-}
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/type-extension.graphql", Input: `directive @fieldLogging on FIELD_DEFINITION
-
-extend type Todo {
-  verified: Boolean! @fieldLogging
-}
-`, BuiltIn: false},
-	{Name: "../../../../../schemas/union-extension.graphql", Input: `directive @unionLogging on UNION
-
-extend union Data @unionLogging
-`, BuiltIn: false},
+	{Name: "schemas/enum-extension.graphql", Input: sourceData("schemas/enum-extension.graphql"), BuiltIn: false},
+	{Name: "schemas/input-object-extension.graphql", Input: sourceData("schemas/input-object-extension.graphql"), BuiltIn: false},
+	{Name: "schemas/interface-extension.graphql", Input: sourceData("schemas/interface-extension.graphql"), BuiltIn: false},
+	{Name: "schemas/object-extension.graphql", Input: sourceData("schemas/object-extension.graphql"), BuiltIn: false},
+	{Name: "schemas/scalar-extension.graphql", Input: sourceData("schemas/scalar-extension.graphql"), BuiltIn: false},
+	{Name: "schemas/schema-extension.graphql", Input: sourceData("schemas/schema-extension.graphql"), BuiltIn: false},
+	{Name: "schemas/schema.graphql", Input: sourceData("schemas/schema.graphql"), BuiltIn: false},
+	{Name: "schemas/type-extension.graphql", Input: sourceData("schemas/type-extension.graphql"), BuiltIn: false},
+	{Name: "schemas/union-extension.graphql", Input: sourceData("schemas/union-extension.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

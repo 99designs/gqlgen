@@ -53,8 +53,7 @@ func (d *Data) AugmentedSources() []AugmentedSource {
 		if err != nil {
 			panic(err)
 		}
-		outputDir := filepath.Dir(d.Config.Exec.Filename)
-		outputDir = filepath.Join(wd, outputDir)
+		outputDir := d.Config.Exec.Dir()
 		relative, err := filepath.Rel(outputDir, filepath.Join(wd, s.Name))
 		if err != nil {
 			panic("TODO: handle" + err.Error() + " inputs:" + d.Config.Exec.Filename + " and " + filepath.Join(wd, s.Name))

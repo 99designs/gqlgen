@@ -2,7 +2,10 @@ package codegen
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -30,6 +33,43 @@ type Data struct {
 	QueryRoot        *Object
 	MutationRoot     *Object
 	SubscriptionRoot *Object
+}
+
+func (d *Data) AugmentedSources() []AugmentedSource {
+	sources := []AugmentedSource{}
+	for _, s := range d.Config.Sources {
+
+		wd, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+		outputDir := filepath.Dir(d.Config.Exec.Filename)
+		outputDir = filepath.Join(wd, outputDir)
+		relative, err := filepath.Rel(outputDir, filepath.Join(wd, s.Name))
+		if err != nil {
+			panic("TODO: handle" + err.Error() + " inputs:" + d.Config.Exec.Filename + " and " + filepath.Join(wd, s.Name))
+		}
+		embeddable := true
+		if strings.HasPrefix(relative, "..") {
+			embeddable = false
+		}
+		sources = append(sources, AugmentedSource{
+			RelativePath: relative,
+			Embeddable:   embeddable,
+			BuiltIn:      s.BuiltIn,
+			Source:       s.Input, // TODO: remove this
+		})
+	}
+	return sources
+}
+
+// AugmentedSource contains extra information about graphql schema files which is not known directly from the Config.Sources data
+type AugmentedSource struct {
+	// path relative to Config.Exec.Filename
+	RelativePath string
+	Embeddable   bool
+	BuiltIn      bool
+	Source       string
 }
 
 type builder struct {

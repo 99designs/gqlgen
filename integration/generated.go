@@ -5,6 +5,7 @@ package integration
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -271,8 +272,19 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
+//go:embed
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "schema.graphql", Input: `"This directive does magical things"
+	{Name: "../../../../schema.graphql", Input: `"This directive does magical things"
 directive @magic(kind: Int) on FIELD_DEFINITION
 
 scalar Map
@@ -329,7 +341,7 @@ enum ErrorType {
 
 # this is a comment with a ` + "`" + `backtick` + "`" + `
 `, BuiltIn: false},
-	{Name: "user.graphql", Input: `type User {
+	{Name: "../../../../user.graphql", Input: `type User {
     name: String!
     likes: [String!]!
 }

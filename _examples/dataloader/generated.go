@@ -5,6 +5,7 @@ package dataloader
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -270,40 +271,19 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
+//go:embed "schema.graphql"
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "schema.graphql", Input: `type Query {
-    customers: [Customer!]
-
-    # these methods are here to test code generation of nested arrays
-    torture1d(customerIds: [Int!]): [Customer!]
-    torture2d(customerIds: [[Int!]]): [[Customer!]]
-}
-
-type Customer {
-    id: Int!
-    name: String!
-    address: Address
-    orders: [Order!]
-}
-
-type Address {
-    id: Int!
-    street: String!
-    country: String!
-}
-
-type Order {
-    id: Int!
-    date: Time!
-    amount: Float!
-    items: [Item!]
-}
-
-type Item {
-    name: String!
-}
-scalar Time
-`, BuiltIn: false},
+	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

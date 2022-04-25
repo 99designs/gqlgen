@@ -284,11 +284,8 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 
 			})
 		case "squared":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Primitive_squared(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Primitive_squared(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -335,11 +332,8 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 
 			})
 		case "doubled":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._PrimitiveString_doubled(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._PrimitiveString_doubled(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)

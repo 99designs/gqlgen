@@ -475,38 +475,26 @@ func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, ob
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Error")
 		case "id":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Error_id(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Error_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "errorOnNonRequiredField":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Error_errorOnNonRequiredField(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Error_errorOnNonRequiredField(ctx, field, obj)
 
 		case "errorOnRequiredField":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Error_errorOnRequiredField(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Error_errorOnRequiredField(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "nilOnRequiredField":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Error_nilOnRequiredField(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Error_nilOnRequiredField(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

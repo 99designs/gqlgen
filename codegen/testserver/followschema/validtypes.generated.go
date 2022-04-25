@@ -812,11 +812,8 @@ func (ec *executionContext) _Content_Post(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Content_Post")
 		case "foo":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Content_Post_foo(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Content_Post_foo(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -840,11 +837,8 @@ func (ec *executionContext) _Content_User(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Content_User")
 		case "foo":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Content_User_foo(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Content_User_foo(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -868,41 +862,29 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ValidType")
 		case "differentCase":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ValidType_differentCase(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ValidType_differentCase(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "different_case":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ValidType_different_case(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ValidType_different_case(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "validInputKeywords":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ValidType_validInputKeywords(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ValidType_validInputKeywords(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "validArgs":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ValidType_validArgs(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._ValidType_validArgs(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

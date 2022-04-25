@@ -171,11 +171,8 @@ func (ec *executionContext) _EmbeddedCase1(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedCase1")
 		case "exportedEmbeddedPointerExportedMethod":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._EmbeddedCase1_exportedEmbeddedPointerExportedMethod(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._EmbeddedCase1_exportedEmbeddedPointerExportedMethod(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -202,11 +199,8 @@ func (ec *executionContext) _EmbeddedCase2(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedCase2")
 		case "unexportedEmbeddedPointerExportedMethod":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._EmbeddedCase2_unexportedEmbeddedPointerExportedMethod(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._EmbeddedCase2_unexportedEmbeddedPointerExportedMethod(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -233,11 +227,8 @@ func (ec *executionContext) _EmbeddedCase3(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedCase3")
 		case "unexportedEmbeddedInterfaceExportedMethod":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

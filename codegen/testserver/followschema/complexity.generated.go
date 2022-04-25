@@ -258,21 +258,15 @@ func (ec *executionContext) _OverlappingFields(ctx context.Context, sel ast.Sele
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("OverlappingFields")
 		case "oneFoo":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._OverlappingFields_oneFoo(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._OverlappingFields_oneFoo(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "twoFoo":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._OverlappingFields_twoFoo(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._OverlappingFields_twoFoo(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -298,21 +292,15 @@ func (ec *executionContext) _OverlappingFields(ctx context.Context, sel ast.Sele
 
 			})
 		case "newFoo":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._OverlappingFields_newFoo(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._OverlappingFields_newFoo(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "new_foo":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._OverlappingFields_new_foo(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._OverlappingFields_new_foo(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)

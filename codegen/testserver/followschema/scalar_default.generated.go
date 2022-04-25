@@ -86,11 +86,8 @@ func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedDefaultScalar")
 		case "value":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._EmbeddedDefaultScalar_value(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._EmbeddedDefaultScalar_value(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

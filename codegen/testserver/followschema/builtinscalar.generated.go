@@ -89,11 +89,8 @@ func (ec *executionContext) _Map(ctx context.Context, sel ast.SelectionSet, obj 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Map")
 		case "id":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Map_id(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._Map_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

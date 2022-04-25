@@ -352,21 +352,15 @@ func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("WrappedStruct")
 		case "name":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._WrappedStruct_name(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._WrappedStruct_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "desc":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._WrappedStruct_desc(ctx, field, obj)
-			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Values[i] = ec._WrappedStruct_desc(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

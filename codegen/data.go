@@ -66,7 +66,7 @@ func (d *Data) AugmentedSources() []AugmentedSource {
 			RelativePath: relative,
 			Embeddable:   embeddable,
 			BuiltIn:      s.BuiltIn,
-			Source:       s.Input, // TODO: remove this
+			Source:       s.Input,
 		})
 	}
 	return sources

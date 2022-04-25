@@ -5,7 +5,6 @@ package singlefile
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"io"
@@ -2148,17 +2147,6 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 		return nil, errors.New("introspection disabled")
 	}
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
-}
-
-//go:embed
-var sourcesFS embed.FS
-
-func sourceData(filename string) string {
-	data, err := sourcesFS.ReadFile(filename)
-	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
-	}
-	return string(data)
 }
 
 var sources = []*ast.Source{

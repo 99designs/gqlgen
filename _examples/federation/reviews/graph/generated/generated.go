@@ -5,7 +5,6 @@ package generated
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -296,19 +295,8 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed
-var sourcesFS embed.FS
-
-func sourceData(filename string) string {
-	data, err := sourcesFS.ReadFile(filename)
-	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
-	}
-	return string(data)
-}
-
 var sources = []*ast.Source{
-	{Name: "../schema.graphqls", Input: `type Review {
+	{Name: "../../../../../../../../graph/schema.graphqls", Input: `type Review {
     body: String!
     author: User! @provides(fields: "username")
     product: Product!
@@ -335,8 +323,7 @@ extend type Product @key(fields: " manufacturer{  id} id") {
     reviews: [Review]
 }
 `, BuiltIn: false},
-<<<<<<< HEAD
-	{Name: "federation/directives.graphql", Input: `
+	{Name: "../../../../../../../../federation/directives.graphql", Input: `
 	scalar _Any
 	scalar _FieldSet
 	
@@ -346,19 +333,8 @@ extend type Product @key(fields: " manufacturer{  id} id") {
 	directive @extends on OBJECT | INTERFACE
 
 	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
-=======
-	{Name: "../../federation/directives.graphql", Input: `
-scalar _Any
-scalar _FieldSet
-
-directive @external on FIELD_DEFINITION
-directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
-directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
-directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
-directive @extends on OBJECT | INTERFACE
->>>>>>> c657a54f (working poc)
 `, BuiltIn: true},
-	{Name: "../../federation/entity.graphql", Input: `
+	{Name: "../../../../../../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
 union _Entity = EmailHost | Manufacturer | Product | User
 

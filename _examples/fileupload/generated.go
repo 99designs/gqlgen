@@ -5,7 +5,6 @@ package fileupload
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -240,19 +239,38 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "schema.graphql"
-var sourcesFS embed.FS
+var sources = []*ast.Source{
+	{Name: "../../../../../schema.graphql", Input: `"The ` + "`" + `Upload` + "`" + ` scalar type represents a multipart file upload."
+scalar Upload
 
-func sourceData(filename string) string {
-	data, err := sourcesFS.ReadFile(filename)
-	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
-	}
-	return string(data)
+"The ` + "`" + `File` + "`" + ` type, represents the response of uploading a file."
+type File {
+    id: Int!
+    name: String!
+    content: String!
+    contentType: String!
 }
 
-var sources = []*ast.Source{
-	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+"The ` + "`" + `UploadFile` + "`" + ` type, represents the request for uploading a file with certain payload."
+input UploadFile {
+    id: Int!
+    file: Upload!
+}
+
+"The ` + "`" + `Query` + "`" + ` type, represents all of the entry points into our object graph."
+type Query {
+    empty: String!
+}
+
+"The ` + "`" + `Mutation` + "`" + ` type, represents all updates we can make to our data."
+type Mutation {
+    singleUpload(file: Upload!): File!
+    singleUploadWithPayload(req: UploadFile!): File!
+    multipleUpload(files: [Upload!]!): [File!]!
+    multipleUploadWithPayload(req: [UploadFile!]!): [File!]!
+}
+
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

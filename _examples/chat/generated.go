@@ -5,7 +5,6 @@ package chat
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"io"
@@ -260,19 +259,35 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "schema.graphql"
-var sourcesFS embed.FS
-
-func sourceData(filename string) string {
-	data, err := sourcesFS.ReadFile(filename)
-	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
-	}
-	return string(data)
+var sources = []*ast.Source{
+	{Name: "../../../../../schema.graphql", Input: `type Chatroom {
+    name: String!
+    messages: [Message!]!
 }
 
-var sources = []*ast.Source{
-	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+type Message {
+    id: ID!
+    text: String!
+    createdBy: String!
+    createdAt: Time!
+}
+
+type Query {
+    room(name:String!): Chatroom
+}
+
+type Mutation {
+    post(text: String!, username: String!, roomName: String!): Message!
+}
+
+type Subscription {
+    messageAdded(roomName: String!): Message!
+}
+
+scalar Time
+
+directive @user(username: String!) on SUBSCRIPTION
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

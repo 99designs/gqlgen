@@ -35,6 +35,16 @@ type Data struct {
 	SubscriptionRoot *Object
 }
 
+func (d *Data) HasEmbeddableSources() bool {
+	hasEmbeddableSources := false
+	for _, s := range d.AugmentedSources() {
+		if s.Embeddable {
+			hasEmbeddableSources = true
+		}
+	}
+	return hasEmbeddableSources
+}
+
 func (d *Data) AugmentedSources() []AugmentedSource {
 	sources := []AugmentedSource{}
 	for _, s := range d.Config.Sources {

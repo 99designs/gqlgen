@@ -5,10 +5,64 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.3...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.4...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.4"></a>
+## [v0.17.4](https://github.com/99designs/gqlgen/compare/v0.17.3...v0.17.4) - 2022-04-25
+- <a href="https://github.com/99designs/gqlgen/commit/d6de831a28a0f1d8834c5dba4216dcd763814d3f"><tt>d6de831a</tt></a> release v0.17.4
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/2a2a3dcb67c7d713e41476eac47e20ab0e21fba7"><tt>2a2a3dcb</tt></a> Feature: Adds Federation 2 Support (<a href="https://github.com/99designs/gqlgen/pull/15">#2115</a>)</summary>
+
+* fed2 rough support
+
+* autodetection of fed2
+
+* adding basic tests for changes
+
+* fixing docs
+
+* Update plugin/federation/federation.go
+
+* removing custom scalar since it was causing issues
+
+* fixing lint test
+
+* should fix for real this time
+
+* fixing test failures
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/77260e88c853a047e4e61a5357ceda4a5ea26405"><tt>77260e88</tt></a> shorten some generated code (<a href="https://github.com/99designs/gqlgen/pull/20">#2120</a>)</summary>
+
+* shorten some generated code
+
+* generate examples
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4da17e1c7a59149eb6c2f5d60fcf11a2374b2488"><tt>4da17e1c</tt></a> update modules except mapstructure (<a href="https://github.com/99designs/gqlgen/pull/18">#2118</a>)</summary>
+
+* Update modules
+
+
+* Update modules except for mapstructure
+
+
+* Try to update to v1.3.1
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/cddbf02d494e3aeaac3f60d1708b25facc5b767d"><tt>cddbf02d</tt></a> Update Changelog file
+
+- <a href="https://github.com/99designs/gqlgen/commit/8f80f4efe8947b55919ce37291f4e908f57fd8dc"><tt>8f80f4ef</tt></a> v0.17.3 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.3"></a>
 ## [v0.17.3](https://github.com/99designs/gqlgen/compare/v0.17.2...v0.17.3) - 2022-04-20
 - <a href="https://github.com/99designs/gqlgen/commit/0bb262d1a0143f60640f60ebbb516e0f4cd79042"><tt>0bb262d1</tt></a> release v0.17.3

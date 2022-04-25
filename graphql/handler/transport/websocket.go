@@ -44,7 +44,7 @@ type (
 	}
 
 	WebsocketInitFunc  func(ctx context.Context, initPayload InitPayload) (context.Context, error)
-	WebsocketErrorFunc func(ctx context.Context, err error)
+	WebsocketErrorFunc func(ctx context.Context, err error, isOnRead bool)
 )
 
 var errReadTimeout = errors.New("read timeout")
@@ -94,9 +94,9 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	conn.run()
 }
 
-func (c *wsConnection) handlePossibleError(err error) {
+func (c *wsConnection) handlePossibleError(err error, isOnRead bool) {
 	if c.ErrorFunc != nil && err != nil {
-		c.ErrorFunc(c.ctx, err)
+		c.ErrorFunc(c.ctx, err, isOnRead)
 	}
 }
 
@@ -181,7 +181,7 @@ func (c *wsConnection) init() bool {
 
 func (c *wsConnection) write(msg *message) {
 	c.mu.Lock()
-	c.handlePossibleError(c.me.Send(msg))
+	c.handlePossibleError(c.me.Send(msg), false)
 	c.mu.Unlock()
 }
 
@@ -227,7 +227,7 @@ func (c *wsConnection) run() {
 		if err != nil {
 			// If the connection got closed by us, don't report the error
 			if !errors.Is(err, net.ErrClosed) {
-				c.handlePossibleError(err)
+				c.handlePossibleError(err, true)
 			}
 			return
 		}

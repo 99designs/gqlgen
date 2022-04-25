@@ -354,9 +354,10 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		errFuncCalled := make(chan bool, 1)
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{
-			ErrorFunc: func(_ context.Context, err error) {
+			ErrorFunc: func(_ context.Context, err error, isOnRead bool) {
 				require.Error(t, err)
 				assert.Equal(t, err.Error(), "invalid message received")
+				assert.True(t, isOnRead)
 				errFuncCalled <- true
 			},
 		})
@@ -384,7 +385,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
 				return ctx, errors.New("this is not what we agreed upon")
 			},
-			ErrorFunc: func(_ context.Context, err error) {
+			ErrorFunc: func(_ context.Context, err error, isOnRead bool) {
 				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
 			},
 		})
@@ -404,7 +405,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 				time.AfterFunc(time.Millisecond*5, cancel)
 				return newCtx, nil
 			},
-			ErrorFunc: func(_ context.Context, err error) {
+			ErrorFunc: func(_ context.Context, err error, isOnRead bool) {
 				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
 			},
 		})
@@ -426,7 +427,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 				newCtx, cancel = context.WithDeadline(ctx, time.Now().Add(time.Millisecond*5))
 				return newCtx, nil
 			},
-			ErrorFunc: func(_ context.Context, err error) {
+			ErrorFunc: func(_ context.Context, err error, isOnRead bool) {
 				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
 			},
 		})

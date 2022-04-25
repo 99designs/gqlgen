@@ -57,12 +57,6 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		},
 	}
 
-	if f.Version == 2 {
-		builtins["link__Import"] = config.TypeMapEntry{
-			Model: config.StringList{"github.com/99designs/gqlgen/plugin/federation/fedruntime.Link"},
-		}
-	}
-
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
 			return fmt.Errorf("%v already exists which must be reserved when Federation is enabled", typeName)
@@ -104,9 +98,8 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 `
 	} else if f.Version == 2 {
 		input += `
-	scalar link__Import
 	directive @key(fields: _FieldSet!, resolvable: Boolean) repeatable on OBJECT | INTERFACE
-	directive @link(import: [link__Import], url: String!) repeatable on SCHEMA
+	directive @link(import: [String!], url: String!) repeatable on SCHEMA
 	directive @shareable on OBJECT | FIELD_DEFINITION
 	directive @tag repeatable on OBJECT | FIELD_DEFINITION | INTERFACE | UNION
 	directive @override(from: String!) on FIELD_DEFINITION

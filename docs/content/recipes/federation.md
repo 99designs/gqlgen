@@ -27,6 +27,7 @@ If you are using Apollo's Federation 2 standard, your schema should automaticall
 federation:
   filename: graph/generated/federation.go
   package: generated
+	version: 2
 ```
 
 ## Create the federated servers

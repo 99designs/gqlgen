@@ -56,7 +56,7 @@ package main
 
 func main() {
 	c := generated.Config{ Resolvers: &resolvers{} }
-	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (interface{}, error) {
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
 		if !getCurrentUser(ctx).HasRole(role) {
 			// block calling the next resolver
 			return nil, fmt.Errorf("Access denied")

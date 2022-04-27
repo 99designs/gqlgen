@@ -91,8 +91,6 @@ func (t *Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHan
 
 		// ... then set the previously instantiated string as the base64 formatted string as required
 		ftv1 = base64.StdEncoding.EncodeToString(p)
-		//j, _ := json.Marshal(&t.TreeBuilder.Trace)
-		graphql.RegisterExtension(ctx, "fj", t.TreeBuilder.Trace)
 	}()
 
 	resp := next(ctx)

@@ -166,6 +166,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
+	inputUnmarshalMap := graphql.BuildMap(
+		ec.unmarshalInputTodoInput,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -175,6 +178,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				return nil
 			}
 			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error) {
 				return ec._MyQuery(ctx, rc.Operation.SelectionSet), nil
 			})
@@ -191,6 +195,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				return nil
 			}
 			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._mutationMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error) {
 				return ec._MyMutation(ctx, rc.Operation.SelectionSet), nil
 			})

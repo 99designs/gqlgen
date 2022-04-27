@@ -135,6 +135,13 @@
 	func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		rc := graphql.GetOperationContext(ctx)
 		ec := executionContext{rc, e}
+		inputUnmarshalMap := graphql.BuildMap(
+			{{- range $input := .Inputs -}}
+			{{ if not $input.HasUnmarshal }}
+			ec.unmarshalInput{{ $input.Name }},
+			{{- end }}
+			{{- end }}
+		)
 		first := true
 
 		switch rc.Operation.Operation {
@@ -142,6 +149,7 @@
 			return func(ctx context.Context) *graphql.Response {
 				if !first { return nil }
 				first = false
+				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				{{ if .Directives.LocationDirectives "QUERY" -}}
 					data := ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
 						return ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet), nil
@@ -162,6 +170,7 @@
 			return func(ctx context.Context) *graphql.Response {
 				if !first { return nil }
 				first = false
+				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				{{ if .Directives.LocationDirectives "MUTATION" -}}
 					data := ec._mutationMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
 						return ec._{{.MutationRoot.Name}}(ctx, rc.Operation.SelectionSet), nil

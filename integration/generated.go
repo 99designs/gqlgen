@@ -224,7 +224,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildMap(
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputDateFilter,
 		ec.unmarshalInputListCoercion,
 	)

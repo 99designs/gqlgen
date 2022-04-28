@@ -32,6 +32,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	raw := &graphql.RawParams{
 		Query:         r.URL.Query().Get("query"),
 		OperationName: r.URL.Query().Get("operationName"),
+		Headers:       r.Header,
 	}
 	raw.ReadTime.Start = graphql.Now()
 

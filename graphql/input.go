@@ -27,28 +27,28 @@ func WithUnmarshalerMap(ctx context.Context, maps map[reflect.Type]reflect.Value
 }
 
 // UnmarshalInputFromContext allows unmarshaling input object from a context.
-func UnmarshalInputFromContext(ctx context.Context, raw, inputObj interface{}) error {
+func UnmarshalInputFromContext(ctx context.Context, raw, v interface{}) error {
 	m, ok := ctx.Value(unmarshalInputCtx).(map[reflect.Type]reflect.Value)
 	if m == nil || !ok {
-		return nil
+		return errors.New("graphql: the input context is empty")
 	}
 
-	out := reflect.ValueOf(inputObj)
-	if out.Kind() != reflect.Ptr {
-		return errors.New("input must be a pointer")
+	rv := reflect.ValueOf(v)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return errors.New("graphql: input must be a non-nil pointer")
 	}
-	if fn, ok := m[out.Elem().Type()]; ok {
+	if fn, ok := m[rv.Elem().Type()]; ok {
 		res := fn.Call([]reflect.Value{
 			reflect.ValueOf(ctx),
 			reflect.ValueOf(raw),
 		})
-		if v := res[1].Interface(); v != nil {
-			return v.(error)
+		if err := res[1].Interface(); err != nil {
+			return err.(error)
 		}
 
-		out.Elem().Set(res[0])
+		rv.Elem().Set(res[0])
 		return nil
 	}
 
-	return nil
+	return errors.New("graphql: no unmarshal function found")
 }

@@ -22,6 +22,7 @@ func BuildUnmarshalerMap(unmarshaler ...interface{}) map[reflect.Type]reflect.Va
 	return maps
 }
 
+// WithUnmarshalerMap returns a new context with InputMaps attached
 func WithUnmarshalerMap(ctx context.Context, maps map[reflect.Type]reflect.Value) context.Context {
 	return context.WithValue(ctx, unmarshalInputCtx, maps)
 }

@@ -5,10 +5,67 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.4...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.5...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.5"></a>
+## [v0.17.5](https://github.com/99designs/gqlgen/compare/v0.17.4...v0.17.5) - 2022-04-29
+- <a href="https://github.com/99designs/gqlgen/commit/fd97e74eafc898278fd4b74477cb053393672232"><tt>fd97e74e</tt></a> release v0.17.5
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9250f9ac1f90b27da0bd8583ef8dcf0894d70686"><tt>9250f9ac</tt></a> Feature: Add FTV1 Support via Handler (<a href="https://github.com/99designs/gqlgen/pull/32">#2132</a>)</summary>
+
+* initial support for ftv1 traces via handler
+
+* remove testing json extension
+
+* remove binary from commit and add to .gitignore
+
+* updating go.mod
+
+* updating examples go.sum
+
+* rerunning generate within the examples folder
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/fce3a11a9f570ffed3e9035d32deddfb3076c2cf"><tt>fce3a11a</tt></a> feat: added graphql.UnmarshalInputFromContext (<a href="https://github.com/99designs/gqlgen/pull/31">#2131</a>)</summary>
+
+* feat: added graphql.UnmarshalInputFromContext
+
+* chore: run go generate for _examples
+
+* fix: apply suggestions from code review
+
+
+* fix: update error cases
+
+* fix: fixed unit-test by update root_.gotpl
+
+* fix: apply suggestions from code review
+
+* fix: update graphql/input.go
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/6a24e88147fb2523af0163d7fa84d296b5e32e4d"><tt>6a24e881</tt></a> update instructions to specify package of Role (<a href="https://github.com/99designs/gqlgen/pull/30">#2130</a>)</summary>
+
+Can't compile with the example unless I also include `model.` for Role.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/ccfa245b1eb2657e588bf73f4df0e99f96869cbd"><tt>ccfa245b</tt></a> Ignore protobuf files in coverage (<a href="https://github.com/99designs/gqlgen/pull/33">#2133</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/0465dcb1e8e4177945c2670f15316ac96e4b992a"><tt>0465dcb1</tt></a> Update federation.md (<a href="https://github.com/99designs/gqlgen/pull/29">#2129</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/8f0631dcd3ca6fcfcd3dc6e69f4a92fec54e6dc7"><tt>8f0631dc</tt></a> Update Changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/41611560d45f1226b860e795bcb35b5ecf09c5b3"><tt>41611560</tt></a> v0.17.4 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.4"></a>
 ## [v0.17.4](https://github.com/99designs/gqlgen/compare/v0.17.3...v0.17.4) - 2022-04-25
 - <a href="https://github.com/99designs/gqlgen/commit/d6de831a28a0f1d8834c5dba4216dcd763814d3f"><tt>d6de831a</tt></a> release v0.17.4

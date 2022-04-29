@@ -44,12 +44,29 @@ type (
 	}
 
 	WebsocketInitFunc  func(ctx context.Context, initPayload InitPayload) (context.Context, error)
-	WebsocketErrorFunc func(ctx context.Context, err error, isOnRead bool)
+	WebsocketErrorFunc func(ctx context.Context, err error)
 )
 
 var errReadTimeout = errors.New("read timeout")
 
-var _ graphql.Transport = Websocket{}
+type WebsocketError struct {
+	Err error
+
+	// IsReadError flags whether the error occurred on read or write to the websocket
+	IsReadError bool
+}
+
+func (e WebsocketError) Error() string {
+	if e.IsReadError {
+		return fmt.Sprintf("websocket read: %v", e.Err)
+	}
+	return fmt.Sprintf("websocket write: %v", e.Err)
+}
+
+var (
+	_ graphql.Transport = Websocket{}
+	_ error             = WebsocketError{}
+)
 
 func (t Websocket) Supports(r *http.Request) bool {
 	return r.Header.Get("Upgrade") != ""
@@ -94,9 +111,12 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	conn.run()
 }
 
-func (c *wsConnection) handlePossibleError(err error, isOnRead bool) {
+func (c *wsConnection) handlePossibleError(err error, isReadError bool) {
 	if c.ErrorFunc != nil && err != nil {
-		c.ErrorFunc(c.ctx, err, isOnRead)
+		c.ErrorFunc(c.ctx, WebsocketError{
+			Err:         err,
+			IsReadError: isReadError,
+		})
 	}
 }
 

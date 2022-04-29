@@ -206,7 +206,7 @@ func TestFileUpload(t *testing.T) {
 		},
 	}
 
-	t.Run("failed to parse multipart", func(t *testing.T) {
+	t.Run("failed invalid multipart", func(t *testing.T) {
 		req := &http.Request{
 			Method: "POST",
 			Header: http.Header{"Content-Type": {`multipart/form-data; boundary="foo123"`}},
@@ -215,7 +215,7 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.Equal(t, `{"errors":[{"message":"failed to parse multipart form"}],"data":null}`, resp.Body.String())
+		require.Equal(t, `{"errors":[{"message":"first part must be operations"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("fail parse operation", func(t *testing.T) {

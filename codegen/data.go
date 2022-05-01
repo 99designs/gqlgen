@@ -33,43 +33,17 @@ type Data struct {
 	QueryRoot        *Object
 	MutationRoot     *Object
 	SubscriptionRoot *Object
+	AugmentedSources []AugmentedSource
 }
 
 func (d *Data) HasEmbeddableSources() bool {
 	hasEmbeddableSources := false
-	for _, s := range d.AugmentedSources() {
+	for _, s := range d.AugmentedSources {
 		if s.Embeddable {
 			hasEmbeddableSources = true
 		}
 	}
 	return hasEmbeddableSources
-}
-
-func (d *Data) AugmentedSources() []AugmentedSource {
-	sources := []AugmentedSource{}
-	for _, s := range d.Config.Sources {
-
-		wd, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-		outputDir := d.Config.Exec.Dir()
-		relative, err := filepath.Rel(outputDir, filepath.Join(wd, s.Name))
-		if err != nil {
-			panic("TODO: handle" + err.Error() + " inputs:" + d.Config.Exec.Filename + " and " + filepath.Join(wd, s.Name))
-		}
-		embeddable := true
-		if strings.HasPrefix(relative, "..") {
-			embeddable = false
-		}
-		sources = append(sources, AugmentedSource{
-			RelativePath: relative,
-			Embeddable:   embeddable,
-			BuiltIn:      s.BuiltIn,
-			Source:       s.Input,
-		})
-	}
-	return sources
 }
 
 // AugmentedSource contains extra information about graphql schema files which is not known directly from the Config.Sources data
@@ -196,6 +170,30 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		// otherwise show a generic error message
 		return nil, fmt.Errorf("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
 	}
+	aSources := []AugmentedSource{}
+	for _, s := range cfg.Sources {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get working directory: %w", err)
+		}
+		outputDir := cfg.Exec.Dir()
+		sourcePath := filepath.Join(wd, s.Name)
+		relative, err := filepath.Rel(outputDir, sourcePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to compute path of %s relative to %s: %w"+sourcePath, outputDir, err)
+		}
+		embeddable := true
+		if strings.HasPrefix(relative, "..") {
+			embeddable = false
+		}
+		aSources = append(aSources, AugmentedSource{
+			RelativePath: relative,
+			Embeddable:   embeddable,
+			BuiltIn:      s.BuiltIn,
+			Source:       s.Input,
+		})
+	}
+	s.AugmentedSources = aSources
 
 	return &s, nil
 }

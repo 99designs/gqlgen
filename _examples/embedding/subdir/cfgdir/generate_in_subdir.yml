@@ -1,0 +1,12 @@
+schema:
+  - schemadir/*.graphqls
+  - ../*.graphqls
+  - '*.graphqls'
+exec:
+  layout: follow-schema
+  dir: .
+  package: subdir
+
+model:
+  filename: model.go
+  package: subdir

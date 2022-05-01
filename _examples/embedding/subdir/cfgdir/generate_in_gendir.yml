@@ -1,0 +1,12 @@
+schema:
+  - schemadir/*.graphqls
+  - ../*.graphqls
+  - '*.graphqls'
+exec:
+  dir: gendir
+  filename: gendir/generated.go
+  package: gendir
+
+model:
+  filename: gendir/model.go
+  package: gendir

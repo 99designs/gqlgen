@@ -1,5 +1,14 @@
 # regression test for https://github.com/99designs/gqlgen/issues/583
 
+extend type Query {
+    asdfIt: asdfIt!
+    AIt: AIt!
+    iIt: iIt!
+    XXIt: XXIt!
+    AbIt: AbIt!
+    XxIt: XxIt!
+}
+
 type asdfIt { id: ID! }
 type iIt { id: ID! }
 type AIt { id: ID! }

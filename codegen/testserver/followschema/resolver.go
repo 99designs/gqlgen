@@ -140,6 +140,22 @@ func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) EmbeddedPointer(ctx context.Context) (*EmbeddedPointerModel, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) ForcedResolver(ctx context.Context) (*ForcedResolver, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) Status(ctx context.Context) (Status, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) Map(ctx context.Context) (*Map, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	panic("not implemented")
 }
@@ -236,6 +252,10 @@ func (r *queryResolver) Issue896a(ctx context.Context) ([]*CheckIssue896, error)
 	panic("not implemented")
 }
 
+func (r *queryResolver) LoopA(ctx context.Context) (*LoopA, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	panic("not implemented")
 }
@@ -296,6 +316,10 @@ func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, 
 	panic("not implemented")
 }
 
+func (r *queryResolver) EmbeddedDefaultScalar(ctx context.Context) (*EmbeddedDefaultScalar, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) Slices(ctx context.Context) (*Slices, error) {
 	panic("not implemented")
 }
@@ -324,7 +348,35 @@ func (r *queryResolver) ValidType(ctx context.Context) (*ValidType, error) {
 	panic("not implemented")
 }
 
+func (r *queryResolver) ContentChild(ctx context.Context) (ContentChild, error) {
+	panic("not implemented")
+}
+
 func (r *queryResolver) VariadicModel(ctx context.Context) (*VariadicModel, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) AsdfIt(ctx context.Context) (*AsdfIt, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) AIt(ctx context.Context) (*AIt, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) IIt(ctx context.Context) (*IIt, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) XXIt(ctx context.Context) (*XXIt, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) AbIt(ctx context.Context) (*AbIt, error) {
+	panic("not implemented")
+}
+
+func (r *queryResolver) XxIt(ctx context.Context) (*XxIt, error) {
 	panic("not implemented")
 }
 

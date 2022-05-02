@@ -1,3 +1,7 @@
+extend type Query {
+    LoopA: LoopA
+}
+
 type LoopA {
     b: LoopB!
 }

@@ -904,6 +904,13 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalOContent_Child2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐContentChild(ctx context.Context, sel ast.SelectionSet, v ContentChild) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Content_Child(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidInput(ctx context.Context, v interface{}) (*ValidInput, error) {
 	if v == nil {
 		return nil, nil

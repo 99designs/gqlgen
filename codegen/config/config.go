@@ -189,7 +189,7 @@ func (c *Config) Init() error {
 	}
 
 	if c.Schema == nil {
-		if err := c.LoadSchema(); err != nil {
+		if err := c.LoadSchema(true); err != nil {
 			return err
 		}
 	}
@@ -613,7 +613,7 @@ func (c *Config) injectBuiltins() {
 	}
 }
 
-func (c *Config) LoadSchema() error {
+func (c *Config) LoadSchema(removeUnreachable bool) error {
 	if c.Packages != nil {
 		c.Packages = &code.Packages{}
 	}
@@ -633,6 +633,10 @@ func (c *Config) LoadSchema() error {
 			Name: "Query",
 		}
 		schema.Types["Query"] = schema.Query
+	}
+
+	if removeUnreachable {
+		removeUnreachableTypes(schema)
 	}
 
 	c.Schema = schema

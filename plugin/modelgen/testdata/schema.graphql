@@ -5,6 +5,15 @@ directive @goTag(
 
 type Query {
     thisShoudlntGetGenerated: Boolean
+    ExistingUnion: ExistingUnion!
+    EnumWithDescription: EnumWithDescription!
+    InterfaceWithDescription: InterfaceWithDescription!
+    _Foo_Barr: _Foo_Barr!
+    A: A!
+    B: B!
+    C: C!
+    D(e: ExistingInput!, m: MissingInput): D!
+    FieldMutationHook: FieldMutationHook!
 }
 
 type Mutation {

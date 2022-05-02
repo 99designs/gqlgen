@@ -1,5 +1,6 @@
 extend type Query {
     validType: ValidType
+    Content_Child: Content_Child
 }
 
 """ These things are all valid, but without care generate invalid go code """

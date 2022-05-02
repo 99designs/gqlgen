@@ -455,4 +455,88 @@ func (ec *executionContext) _iIt(ctx context.Context, sel ast.SelectionSet, obj 
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAIt2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAIt(ctx context.Context, sel ast.SelectionSet, v AIt) graphql.Marshaler {
+	return ec._AIt(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAIt(ctx context.Context, sel ast.SelectionSet, v *AIt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AIt(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNAbIt2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAbIt(ctx context.Context, sel ast.SelectionSet, v AbIt) graphql.Marshaler {
+	return ec._AbIt(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAbIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAbIt(ctx context.Context, sel ast.SelectionSet, v *AbIt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AbIt(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNXXIt2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐXXIt(ctx context.Context, sel ast.SelectionSet, v XXIt) graphql.Marshaler {
+	return ec._XXIt(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNXXIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐXXIt(ctx context.Context, sel ast.SelectionSet, v *XXIt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._XXIt(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNXxIt2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐXxIt(ctx context.Context, sel ast.SelectionSet, v XxIt) graphql.Marshaler {
+	return ec._XxIt(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNXxIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐXxIt(ctx context.Context, sel ast.SelectionSet, v *XxIt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._XxIt(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNasdfIt2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAsdfIt(ctx context.Context, sel ast.SelectionSet, v AsdfIt) graphql.Marshaler {
+	return ec._asdfIt(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNasdfIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAsdfIt(ctx context.Context, sel ast.SelectionSet, v *AsdfIt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._asdfIt(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNiIt2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐIIt(ctx context.Context, sel ast.SelectionSet, v IIt) graphql.Marshaler {
+	return ec._iIt(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNiIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐIIt(ctx context.Context, sel ast.SelectionSet, v *IIt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._iIt(ctx, sel, v)
+}
+
 // endregion ***************************** type.gotpl *****************************

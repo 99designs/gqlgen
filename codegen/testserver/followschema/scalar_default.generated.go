@@ -119,6 +119,20 @@ func (ec *executionContext) marshalNDefaultScalarImplementation2string(ctx conte
 	return res
 }
 
+func (ec *executionContext) marshalNEmbeddedDefaultScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedDefaultScalar(ctx context.Context, sel ast.SelectionSet, v EmbeddedDefaultScalar) graphql.Marshaler {
+	return ec._EmbeddedDefaultScalar(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEmbeddedDefaultScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedDefaultScalar(ctx context.Context, sel ast.SelectionSet, v *EmbeddedDefaultScalar) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EmbeddedDefaultScalar(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalODefaultScalarImplementation2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil

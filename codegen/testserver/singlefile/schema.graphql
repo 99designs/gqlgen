@@ -22,6 +22,9 @@ type Query {
     shapeUnion: ShapeUnion!
     autobind: Autobind
     deprecatedField: String! @deprecated(reason: "test deprecated directive")
+    EmbeddedPointer: EmbeddedPointer!
+    ForcedResolver: ForcedResolver!
+    Status: Status!
 }
 
 type Subscription {

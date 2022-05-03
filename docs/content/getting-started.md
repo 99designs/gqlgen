@@ -135,11 +135,11 @@ type Resolver struct{
 }
 ```
 
-Returning to `graph/schema.resolvers.go`, let's implement the bodies of those automatically generated resolver functions.  For `CreateTodo`, we'll use `math.rand` to simply return a todo with a randomly generated ID and store that in the in-memory todos list --- in a real app, you're likely to use a database or some other backend service.
+Returning to `graph/schema.resolvers.go`, let's implement the bodies of those automatically generated resolver functions.  For `CreateTodo`, we'll use the [`math.rand` package](https://pkg.go.dev/math/rand#Rand.Int) to simply return a todo with a randomly generated ID and store that in the in-memory todos list --- in a real app, you're likely to use a database or some other backend service.
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	rndInt, _ := rand.Int(rand.Reader, big.NewInt(256)) 
+	rndInt, _ := rand.Int()), 
 	todo := &model.Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rndInt),

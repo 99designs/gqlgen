@@ -139,10 +139,9 @@ Returning to `graph/schema.resolvers.go`, let's implement the bodies of those au
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	rndInt, _ := rand.Int()), 
 	todo := &model.Todo{
 		Text:   input.Text,
-		ID:     fmt.Sprintf("T%d", rndInt),
+		ID:     fmt.Sprintf("T%d", rand.Int()), 
 		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
 	}
 	r.todos = append(r.todos, todo)

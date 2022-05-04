@@ -211,7 +211,7 @@ type Todo struct {
 	ID     string `json:"id"`
 	Text   string `json:"text"`
 	Done   bool   `json:"done"`
-	User   *User  `json:"user"`
+	UserID string `json:"user"`
 }
 ```
 
@@ -226,7 +226,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 	todo := &model.Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
-		User:   &model.User{ID: input.UserID, Name: "user " + input.UserID},
+		UserID: input.UserID,
 	}
 	r.todos = append(r.todos, todo)
 	return todo, nil

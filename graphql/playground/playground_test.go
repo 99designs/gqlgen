@@ -16,6 +16,7 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 	h.ServeHTTP(rec, req)
 
 	res := rec.Result()
+	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("res.StatusCode = %d; want %d", res.StatusCode, http.StatusOK)
 	}
@@ -38,6 +39,7 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 	h.ServeHTTP(rec, req)
 
 	res := rec.Result()
+	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("res.StatusCode = %d; want %d", res.StatusCode, http.StatusOK)
 	}

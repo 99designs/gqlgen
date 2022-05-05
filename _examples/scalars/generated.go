@@ -5,6 +5,7 @@ package scalars
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -277,49 +278,19 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
+//go:embed "schema.graphql"
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "schema.graphql", Input: `type Query {
-    user(id: ID!): User
-    search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
-    userByTier(tier: Tier!, darkMode: DarkMode!): [User!]!
-}
-
-type User {
-    id: ID!
-    name: String!
-    created: Timestamp
-    modified: Timestamp
-    valPrefs: DarkMode
-    ptrPrefs: DarkMode
-    isBanned: Banned!
-    primitiveResolver: String!
-    customResolver: Point!
-    address: Address
-    tier: Tier
-}
-
-type Address {
-    id: ID!
-    location: Point
-}
-
-input SearchArgs {
-    location: Point
-    createdAfter: Timestamp
-    isBanned: Banned # TODO: This can be a Boolean again once multiple backing types are allowed
-}
-
-enum Tier {
-    A
-    B
-    C
-}
-
-scalar Timestamp
-scalar Point
-scalar Banned
-scalar DarkMode
-`, BuiltIn: false},
+	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

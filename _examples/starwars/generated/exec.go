@@ -555,7 +555,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "schema.graphql", Input: `# The query type, represents all of the entry points into our object graph
+	{Name: "../schema.graphql", Input: `# The query type, represents all of the entry points into our object graph
 type Query {
     hero(episode: Episode = NEWHOPE): Character
     reviews(episode: Episode!, since: Time): [Review!]!

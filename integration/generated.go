@@ -5,6 +5,7 @@ package integration
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"strconv"
@@ -271,69 +272,20 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
+//go:embed "schema.graphql" "user.graphql"
+var sourcesFS embed.FS
+
+func sourceData(filename string) string {
+	data, err := sourcesFS.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+	}
+	return string(data)
+}
+
 var sources = []*ast.Source{
-	{Name: "schema.graphql", Input: `"This directive does magical things"
-directive @magic(kind: Int) on FIELD_DEFINITION
-
-scalar Map
-
-type Element {
-    child: Element!
-    error: Boolean!
-    mismatched: [Boolean!]
-}
-
-enum DATE_FILTER_OP {
-    # multi
-    # line
-    # comment
-    EQ
-    NEQ
-    GT
-    GTE
-    LT
-    LTE
-}
-
-input DateFilter {
-    value: String!
-    timezone: String = "UTC"
-    op: DATE_FILTER_OP = EQ
-}
-
-type Viewer {
-    user: User
-}
-
-input ListCoercion {
-    enumVal: [ErrorType]
-    strVal: [String]
-    intVal: [Int]
-    scalarVal: [Map]
-}
-
-type Query {
-    path: [Element]
-    date(filter: DateFilter!): Boolean!
-    viewer: Viewer
-    jsonEncoding: String!
-    error(type: ErrorType = NORMAL): Boolean!
-    complexity(value: Int!): Boolean!
-    coercion(value: [ListCoercion!]): Boolean!
-}
-
-enum ErrorType {
-    CUSTOM
-    NORMAL
-}
-
-# this is a comment with a ` + "`" + `backtick` + "`" + `
-`, BuiltIn: false},
-	{Name: "user.graphql", Input: `type User {
-    name: String!
-    likes: [String!]!
-}
-`, BuiltIn: false},
+	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+	{Name: "user.graphql", Input: sourceData("user.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

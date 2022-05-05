@@ -64,6 +64,10 @@ type Stub struct {
 		ShapeUnion                       func(ctx context.Context) (ShapeUnion, error)
 		Autobind                         func(ctx context.Context) (*Autobind, error)
 		DeprecatedField                  func(ctx context.Context) (string, error)
+		EmbeddedPointer                  func(ctx context.Context) (*EmbeddedPointerModel, error)
+		ForcedResolver                   func(ctx context.Context) (*ForcedResolver, error)
+		Status                           func(ctx context.Context) (Status, error)
+		Map                              func(ctx context.Context) (*Map, error)
 		Overlapping                      func(ctx context.Context) (*OverlappingFields, error)
 		DefaultParameters                func(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
 		DirectiveArg                     func(ctx context.Context, arg string) (*string, error)
@@ -88,6 +92,7 @@ type Stub struct {
 		Animal                           func(ctx context.Context) (Animal, error)
 		NotAnInterface                   func(ctx context.Context) (BackedByInterface, error)
 		Issue896a                        func(ctx context.Context) ([]*CheckIssue896, error)
+		LoopA                            func(ctx context.Context) (*LoopA, error)
 		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 		ErrorBubble                      func(ctx context.Context) (*Error, error)
@@ -103,6 +108,7 @@ type Stub struct {
 		StringFromContextInterface       func(ctx context.Context) (*StringFromContextInterface, error)
 		StringFromContextFunction        func(ctx context.Context) (string, error)
 		DefaultScalar                    func(ctx context.Context, arg string) (string, error)
+		EmbeddedDefaultScalar            func(ctx context.Context) (*EmbeddedDefaultScalar, error)
 		Slices                           func(ctx context.Context) (*Slices, error)
 		ScalarSlice                      func(ctx context.Context) ([]byte, error)
 		Fallback                         func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
@@ -110,7 +116,14 @@ type Stub struct {
 		VOkCaseValue                     func(ctx context.Context) (*VOkCaseValue, error)
 		VOkCaseNil                       func(ctx context.Context) (*VOkCaseNil, error)
 		ValidType                        func(ctx context.Context) (*ValidType, error)
+		ContentChild                     func(ctx context.Context) (ContentChild, error)
 		VariadicModel                    func(ctx context.Context) (*VariadicModel, error)
+		AsdfIt                           func(ctx context.Context) (*AsdfIt, error)
+		AIt                              func(ctx context.Context) (*AIt, error)
+		IIt                              func(ctx context.Context) (*IIt, error)
+		XXIt                             func(ctx context.Context) (*XXIt, error)
+		AbIt                             func(ctx context.Context) (*AbIt, error)
+		XxIt                             func(ctx context.Context) (*XxIt, error)
 		WrappedStruct                    func(ctx context.Context) (*WrappedStruct, error)
 		WrappedScalar                    func(ctx context.Context) (otherpkg.Scalar, error)
 		WrappedMap                       func(ctx context.Context) (WrappedMap, error)
@@ -312,6 +325,18 @@ func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
 func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 	return r.QueryResolver.DeprecatedField(ctx)
 }
+func (r *stubQuery) EmbeddedPointer(ctx context.Context) (*EmbeddedPointerModel, error) {
+	return r.QueryResolver.EmbeddedPointer(ctx)
+}
+func (r *stubQuery) ForcedResolver(ctx context.Context) (*ForcedResolver, error) {
+	return r.QueryResolver.ForcedResolver(ctx)
+}
+func (r *stubQuery) Status(ctx context.Context) (Status, error) {
+	return r.QueryResolver.Status(ctx)
+}
+func (r *stubQuery) Map(ctx context.Context) (*Map, error) {
+	return r.QueryResolver.Map(ctx)
+}
 func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	return r.QueryResolver.Overlapping(ctx)
 }
@@ -384,6 +409,9 @@ func (r *stubQuery) NotAnInterface(ctx context.Context) (BackedByInterface, erro
 func (r *stubQuery) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
 	return r.QueryResolver.Issue896a(ctx)
 }
+func (r *stubQuery) LoopA(ctx context.Context) (*LoopA, error) {
+	return r.QueryResolver.LoopA(ctx)
+}
 func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)
 }
@@ -429,6 +457,9 @@ func (r *stubQuery) StringFromContextFunction(ctx context.Context) (string, erro
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)
 }
+func (r *stubQuery) EmbeddedDefaultScalar(ctx context.Context) (*EmbeddedDefaultScalar, error) {
+	return r.QueryResolver.EmbeddedDefaultScalar(ctx)
+}
 func (r *stubQuery) Slices(ctx context.Context) (*Slices, error) {
 	return r.QueryResolver.Slices(ctx)
 }
@@ -450,8 +481,29 @@ func (r *stubQuery) VOkCaseNil(ctx context.Context) (*VOkCaseNil, error) {
 func (r *stubQuery) ValidType(ctx context.Context) (*ValidType, error) {
 	return r.QueryResolver.ValidType(ctx)
 }
+func (r *stubQuery) ContentChild(ctx context.Context) (ContentChild, error) {
+	return r.QueryResolver.ContentChild(ctx)
+}
 func (r *stubQuery) VariadicModel(ctx context.Context) (*VariadicModel, error) {
 	return r.QueryResolver.VariadicModel(ctx)
+}
+func (r *stubQuery) AsdfIt(ctx context.Context) (*AsdfIt, error) {
+	return r.QueryResolver.AsdfIt(ctx)
+}
+func (r *stubQuery) AIt(ctx context.Context) (*AIt, error) {
+	return r.QueryResolver.AIt(ctx)
+}
+func (r *stubQuery) IIt(ctx context.Context) (*IIt, error) {
+	return r.QueryResolver.IIt(ctx)
+}
+func (r *stubQuery) XXIt(ctx context.Context) (*XXIt, error) {
+	return r.QueryResolver.XXIt(ctx)
+}
+func (r *stubQuery) AbIt(ctx context.Context) (*AbIt, error) {
+	return r.QueryResolver.AbIt(ctx)
+}
+func (r *stubQuery) XxIt(ctx context.Context) (*XxIt, error) {
+	return r.QueryResolver.XxIt(ctx)
 }
 func (r *stubQuery) WrappedStruct(ctx context.Context) (*WrappedStruct, error) {
 	return r.QueryResolver.WrappedStruct(ctx)

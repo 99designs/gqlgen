@@ -207,4 +207,11 @@ func (ec *executionContext) marshalNLoopB2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec._LoopB(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOLoopA2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐLoopA(ctx context.Context, sel ast.SelectionSet, v *LoopA) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._LoopA(ctx, sel, v)
+}
+
 // endregion ***************************** type.gotpl *****************************

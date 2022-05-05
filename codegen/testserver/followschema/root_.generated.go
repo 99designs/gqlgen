@@ -281,9 +281,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		AIt                              func(childComplexity int) int
+		AbIt                             func(childComplexity int) int
 		Animal                           func(childComplexity int) int
+		AsdfIt                           func(childComplexity int) int
 		Autobind                         func(childComplexity int) int
 		Collision                        func(childComplexity int) int
+		ContentChild                     func(childComplexity int) int
 		DefaultParameters                func(childComplexity int, falsyBoolean *bool, truthyBoolean *bool) int
 		DefaultScalar                    func(childComplexity int, arg string) int
 		DeprecatedField                  func(childComplexity int) int
@@ -301,17 +305,23 @@ type ComplexityRoot struct {
 		EmbeddedCase1                    func(childComplexity int) int
 		EmbeddedCase2                    func(childComplexity int) int
 		EmbeddedCase3                    func(childComplexity int) int
+		EmbeddedDefaultScalar            func(childComplexity int) int
+		EmbeddedPointer                  func(childComplexity int) int
 		EnumInInput                      func(childComplexity int, input *InputWithEnumValue) int
 		ErrorBubble                      func(childComplexity int) int
 		ErrorBubbleList                  func(childComplexity int) int
 		ErrorList                        func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
+		ForcedResolver                   func(childComplexity int) int
+		IIt                              func(childComplexity int) int
 		Infinity                         func(childComplexity int) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
 		InputSlice                       func(childComplexity int, arg []string) int
 		InvalidIdentifier                func(childComplexity int) int
 		Issue896a                        func(childComplexity int) int
+		LoopA                            func(childComplexity int) int
+		Map                              func(childComplexity int) int
 		MapInput                         func(childComplexity int, input map[string]interface{}) int
 		MapNestedStringInterface         func(childComplexity int, in *NestedMapInput) int
 		MapStringInterface               func(childComplexity int, in map[string]interface{}) int
@@ -334,6 +344,7 @@ type ComplexityRoot struct {
 		ShapeUnion                       func(childComplexity int) int
 		Shapes                           func(childComplexity int) int
 		Slices                           func(childComplexity int) int
+		Status                           func(childComplexity int) int
 		StringFromContextFunction        func(childComplexity int) int
 		StringFromContextInterface       func(childComplexity int) int
 		User                             func(childComplexity int, id int) int
@@ -346,6 +357,8 @@ type ComplexityRoot struct {
 		WrappedScalar                    func(childComplexity int) int
 		WrappedSlice                     func(childComplexity int) int
 		WrappedStruct                    func(childComplexity int) int
+		XXIt                             func(childComplexity int) int
+		XxIt                             func(childComplexity int) int
 	}
 
 	Rectangle struct {
@@ -1070,12 +1083,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PtrToSliceContainer.PtrToSlice(childComplexity), true
 
+	case "Query.AIt":
+		if e.complexity.Query.AIt == nil {
+			break
+		}
+
+		return e.complexity.Query.AIt(childComplexity), true
+
+	case "Query.AbIt":
+		if e.complexity.Query.AbIt == nil {
+			break
+		}
+
+		return e.complexity.Query.AbIt(childComplexity), true
+
 	case "Query.animal":
 		if e.complexity.Query.Animal == nil {
 			break
 		}
 
 		return e.complexity.Query.Animal(childComplexity), true
+
+	case "Query.asdfIt":
+		if e.complexity.Query.AsdfIt == nil {
+			break
+		}
+
+		return e.complexity.Query.AsdfIt(childComplexity), true
 
 	case "Query.autobind":
 		if e.complexity.Query.Autobind == nil {
@@ -1090,6 +1124,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Collision(childComplexity), true
+
+	case "Query.Content_Child":
+		if e.complexity.Query.ContentChild == nil {
+			break
+		}
+
+		return e.complexity.Query.ContentChild(childComplexity), true
 
 	case "Query.defaultParameters":
 		if e.complexity.Query.DefaultParameters == nil {
@@ -1250,6 +1291,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.EmbeddedCase3(childComplexity), true
 
+	case "Query.EmbeddedDefaultScalar":
+		if e.complexity.Query.EmbeddedDefaultScalar == nil {
+			break
+		}
+
+		return e.complexity.Query.EmbeddedDefaultScalar(childComplexity), true
+
+	case "Query.EmbeddedPointer":
+		if e.complexity.Query.EmbeddedPointer == nil {
+			break
+		}
+
+		return e.complexity.Query.EmbeddedPointer(childComplexity), true
+
 	case "Query.enumInInput":
 		if e.complexity.Query.EnumInInput == nil {
 			break
@@ -1302,6 +1357,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
 
+	case "Query.ForcedResolver":
+		if e.complexity.Query.ForcedResolver == nil {
+			break
+		}
+
+		return e.complexity.Query.ForcedResolver(childComplexity), true
+
+	case "Query.iIt":
+		if e.complexity.Query.IIt == nil {
+			break
+		}
+
+		return e.complexity.Query.IIt(childComplexity), true
+
 	case "Query.infinity":
 		if e.complexity.Query.Infinity == nil {
 			break
@@ -1346,6 +1415,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Issue896a(childComplexity), true
+
+	case "Query.LoopA":
+		if e.complexity.Query.LoopA == nil {
+			break
+		}
+
+		return e.complexity.Query.LoopA(childComplexity), true
+
+	case "Query.Map":
+		if e.complexity.Query.Map == nil {
+			break
+		}
+
+		return e.complexity.Query.Map(childComplexity), true
 
 	case "Query.mapInput":
 		if e.complexity.Query.MapInput == nil {
@@ -1531,6 +1614,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Slices(childComplexity), true
 
+	case "Query.Status":
+		if e.complexity.Query.Status == nil {
+			break
+		}
+
+		return e.complexity.Query.Status(childComplexity), true
+
 	case "Query.stringFromContextFunction":
 		if e.complexity.Query.StringFromContextFunction == nil {
 			break
@@ -1619,6 +1709,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.WrappedStruct(childComplexity), true
+
+	case "Query.XXIt":
+		if e.complexity.Query.XXIt == nil {
+			break
+		}
+
+		return e.complexity.Query.XXIt(childComplexity), true
+
+	case "Query.XxIt":
+		if e.complexity.Query.XxIt == nil {
+			break
+		}
+
+		return e.complexity.Query.XxIt(childComplexity), true
 
 	case "Rectangle.area":
 		if e.complexity.Rectangle.Area == nil {
@@ -2010,7 +2114,10 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "builtinscalar.graphql", Input: `
+	{Name: "builtinscalar.graphql", Input: `extend type Query {
+    Map: Map!
+}
+
 """
 Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
 added to the TypeMap
@@ -2228,7 +2335,11 @@ extend type Subscription {
   issue896b: [CheckIssue896] # Note the "!" or lack thereof.
 }
 `, BuiltIn: false},
-	{Name: "loops.graphql", Input: `type LoopA {
+	{Name: "loops.graphql", Input: `extend type Query {
+    LoopA: LoopA
+}
+
+type LoopA {
     b: LoopB!
 }
 
@@ -2370,6 +2481,7 @@ scalar StringFromContextFunction
 `, BuiltIn: false},
 	{Name: "scalar_default.graphql", Input: `extend type Query {
     defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!
+    EmbeddedDefaultScalar: EmbeddedDefaultScalar!
 }
 
 """ This doesnt have an implementation in the typemap, so it should act like a string """
@@ -2403,6 +2515,9 @@ type Query {
     shapeUnion: ShapeUnion!
     autobind: Autobind
     deprecatedField: String! @deprecated(reason: "test deprecated directive")
+    EmbeddedPointer: EmbeddedPointer!
+    ForcedResolver: ForcedResolver!
+    Status: Status!
 }
 
 type Subscription {
@@ -2544,6 +2659,7 @@ type VOkCaseNil @goModel(model:"followschema.VOkCaseNil") {
 `, BuiltIn: false},
 	{Name: "validtypes.graphql", Input: `extend type Query {
     validType: ValidType
+    Content_Child: Content_Child
 }
 
 """ These things are all valid, but without care generate invalid go code """
@@ -2630,6 +2746,15 @@ type VariadicModel {
 }
 `, BuiltIn: false},
 	{Name: "weird_type_cases.graphql", Input: `# regression test for https://github.com/99designs/gqlgen/issues/583
+
+extend type Query {
+    asdfIt: asdfIt!
+    AIt: AIt!
+    iIt: iIt!
+    XXIt: XXIt!
+    AbIt: AbIt!
+    XxIt: XxIt!
+}
 
 type asdfIt { id: ID! }
 type iIt { id: ID! }

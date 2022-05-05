@@ -43,7 +43,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 {{- else}}
       const url = location.protocol + '//' + location.host + {{.endpoint}};
       const wsProto = location.protocol == 'https:' ? 'wss:' : 'ws:';
-      const subscriptionUrl = wsProto + '//' + location.host + '/foo';
+      const subscriptionUrl = wsProto + '//' + location.host + {{.endpoint}};
 {{- end}}
 
       const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl });

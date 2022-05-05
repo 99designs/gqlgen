@@ -30,12 +30,17 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 	if !want.Match(b) {
 		t.Errorf("no match for %s in response body", want.String())
 	}
+
+	wantSubURL := regexp.MustCompile(`(?m)^.*subscriptionUrl\s*=\s*['"]wss:\/\/example\.org\/query["'].*$`)
+	if !wantSubURL.Match(b) {
+		t.Errorf("no match for %s in response body", wantSubURL.String())
+	}
 }
 
 func TestHandler_createsRelativeURLs(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "http://localhost:8080/query", nil)
-	h := Handler("example.org API", "/query")
+	h := Handler("example.org API", "/customquery")
 	h.ServeHTTP(rec, req)
 
 	res := rec.Result()
@@ -49,8 +54,12 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 		panic(fmt.Errorf("reading res.Body: %w", err))
 	}
 
-	want := regexp.MustCompile(`(?m)^.*url\s*=\s*location.protocol.*$`)
-	if !want.Match(b) {
-		t.Errorf("no match for %s in response body", want.String())
+	wantURL := regexp.MustCompile(`(?m)^.*url\s*=\s*location\.protocol.*$`)
+	if !wantURL.Match(b) {
+		t.Errorf("no match for %s in response body", wantURL.String())
+	}
+	wantSubURL := regexp.MustCompile(`(?m)^.*subscriptionUrl\s*=\s*wsProto.*['"]\/customquery['"].*$`)
+	if !wantSubURL.Match(b) {
+		t.Errorf("no match for %s in response body", wantSubURL.String())
 	}
 }

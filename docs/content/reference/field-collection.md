@@ -112,7 +112,7 @@ func GetPreloadString(prefix, name string) string {
 So if we call these helpers in our resolver:
 ```golang
 func (r *queryResolver) FlowBlocks(ctx context.Context) ([]*FlowBlock, error) {
-	preloads := getPreloads(ctx)
+	preloads := GetPreloads(ctx)
 ```
 it will result in the following string slice:
 ```

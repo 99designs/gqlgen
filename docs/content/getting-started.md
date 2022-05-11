@@ -202,6 +202,31 @@ autobind:
  - "github.com/[username]/gqlgen-todos/graph/model"
 ```
 
+And add `Todo` fields resolver config in `gqlgen.yml` to generate resolver for `user` field
+```yml
+# This section declares type mapping between the GraphQL and go type systems
+#
+# The first line in each type will be used as defaults for resolver arguments and
+# modelgen, the others will be allowed when binding to fields. Configure them to
+# your liking
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Todo:
+    fields:
+      user:
+        resolver: true
+```
+
 Next, create a new file called `graph/model/todo.go`
 
 ```go
@@ -211,6 +236,7 @@ type Todo struct {
 	ID     string `json:"id"`
 	Text   string `json:"text"`
 	Done   bool   `json:"done"`
+	UserID string `json:"userId"`
 	User   *User  `json:"user"`
 }
 ```

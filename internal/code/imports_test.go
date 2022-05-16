@@ -34,6 +34,16 @@ func TestImportPathForDir(t *testing.T) {
 	}
 }
 
+func TestImportPathForDirCustomRoot(t *testing.T) {
+	AddGoRoot(GoModuleSearchResult{
+		Path:       "go.code.root",
+		GoModPath:  "/home/user/go.code.root",
+		ModuleName: "go.code.root",
+	})
+
+	assert.Equal(t, "go.code.root/99designs", ImportPathForDir("/home/user/go.code.root/99designs"))
+}
+
 func TestNameForDir(t *testing.T) {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
@@ -42,4 +52,14 @@ func TestNameForDir(t *testing.T) {
 	assert.Equal(t, "code", NameForDir(wd))
 	assert.Equal(t, "internal", NameForDir(wd+"/.."))
 	assert.Equal(t, "main", NameForDir(wd+"/../.."))
+}
+
+func TestAddGoRoot(t *testing.T) {
+	AddGoRoot(GoModuleSearchResult{
+		Path:       "go.code.root",
+		GoModPath:  "/home/user/go.code.root",
+		ModuleName: "go.code.root",
+	})
+
+	assert.Equal(t, 1, len(goModuleRootCache))
 }

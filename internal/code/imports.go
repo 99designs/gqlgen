@@ -58,7 +58,7 @@ var goModuleRootCache = map[string]GoModuleSearchResult{}
 // with default roots. This helps with environments like Bazel where
 // you may not have a go.mod file.
 func AddGoRoot(root GoModuleSearchResult) {
-	goModuleRootCache[root.Path] = root
+	goModuleRootCache[root.GoModPath] = root
 }
 
 // goModuleRoot returns the root of the current go module if there is a go.mod file in the directory tree

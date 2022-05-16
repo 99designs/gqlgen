@@ -45,13 +45,21 @@ func NameForDir(dir string) string {
 	return SanitizePackageName(filepath.Base(dir))
 }
 
-type goModuleSearchResult struct {
-	path       string
-	goModPath  string
-	moduleName string
+// GoModuleSearchResult describes a root path
+type GoModuleSearchResult struct {
+	Path       string
+	GoModPath  string
+	ModuleName string
 }
 
-var goModuleRootCache = map[string]goModuleSearchResult{}
+var goModuleRootCache = map[string]GoModuleSearchResult{}
+
+// AddGoRoot enables you to augment the default mobile lookup behavior
+// with default roots. This helps with environments like Bazel where
+// you may not have a go.mod file.
+func AddGoRoot(root GoModuleSearchResult) {
+	goModuleRootCache[root.Path] = root
+}
 
 // goModuleRoot returns the root of the current go module if there is a go.mod file in the directory tree
 // If not, it returns false
@@ -63,7 +71,7 @@ func goModuleRoot(dir string) (string, bool) {
 	dir = filepath.ToSlash(dir)
 
 	dirs := []string{dir}
-	result := goModuleSearchResult{}
+	result := GoModuleSearchResult{}
 
 	for {
 		modDir := dirs[len(dirs)-1]
@@ -75,10 +83,10 @@ func goModuleRoot(dir string) (string, bool) {
 
 		if content, err := ioutil.ReadFile(filepath.Join(modDir, "go.mod")); err == nil {
 			moduleName := string(modregex.FindSubmatch(content)[1])
-			result = goModuleSearchResult{
-				path:       moduleName,
-				goModPath:  modDir,
-				moduleName: moduleName,
+			result = GoModuleSearchResult{
+				Path:       moduleName,
+				GoModPath:  modDir,
+				ModuleName: moduleName,
 			}
 			goModuleRootCache[modDir] = result
 			break
@@ -96,34 +104,34 @@ func goModuleRoot(dir string) (string, bool) {
 
 	// create a cache for each path in a tree traversed, except the top one as it is already cached
 	for _, d := range dirs[:len(dirs)-1] {
-		if result.moduleName == "" {
+		if result.ModuleName == "" {
 			// go.mod is not found in the tree, so the same sentinel value fits all the directories in a tree
 			goModuleRootCache[d] = result
 		} else {
-			if relPath, err := filepath.Rel(result.goModPath, d); err != nil {
+			if relPath, err := filepath.Rel(result.GoModPath, d); err != nil {
 				panic(err)
 			} else {
-				path := result.moduleName
+				path := result.ModuleName
 				relPath := filepath.ToSlash(relPath)
 				if !strings.HasSuffix(relPath, "/") {
 					path += "/"
 				}
 				path += relPath
 
-				goModuleRootCache[d] = goModuleSearchResult{
-					path:       path,
-					goModPath:  result.goModPath,
-					moduleName: result.moduleName,
+				goModuleRootCache[d] = GoModuleSearchResult{
+					Path:       path,
+					GoModPath:  result.GoModPath,
+					ModuleName: result.ModuleName,
 				}
 			}
 		}
 	}
 
 	res := goModuleRootCache[dir]
-	if res.moduleName == "" {
+	if res.ModuleName == "" {
 		return "", false
 	}
-	return res.path, true
+	return res.Path, true
 }
 
 // ImportPathForDir takes a path and returns a golang import path for the package

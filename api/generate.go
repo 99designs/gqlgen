@@ -7,6 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/99designs/gqlgen/plugin/modelgen"
@@ -43,6 +44,19 @@ func Generate(cfg *config.Config, option ...Option) error {
 
 	for _, o := range option {
 		o(cfg, &plugins)
+	}
+
+	for _, p := range plugins {
+		if inj, ok := p.(plugin.GoRootInjector); ok {
+			roots := inj.GoRoots()
+			for _, root := range roots {
+				code.AddGoRoot(code.GoModuleSearchResult{
+					Path:       root.Path,
+					GoModPath:  root.GoModPath,
+					ModuleName: root.ModuleName,
+				})
+			}
+		}
 	}
 
 	for _, p := range plugins {

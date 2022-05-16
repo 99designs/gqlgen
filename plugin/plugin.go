@@ -8,6 +8,13 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
+// GoModuleSearchResult describes a root path
+type GoModuleSearchResult struct {
+	Path       string
+	GoModPath  string
+	ModuleName string
+}
+
 type Plugin interface {
 	Name() string
 }
@@ -28,4 +35,9 @@ type EarlySourceInjector interface {
 // LateSourceInjector is used to inject more sources, after we have loaded the users schema.
 type LateSourceInjector interface {
 	InjectSourceLate(schema *ast.Schema) *ast.Source
+}
+
+// GoRootInjector is used to inject more sources, after we have loaded the users schema.
+type GoRootInjector interface {
+	GoRoots() []GoModuleSearchResult
 }

@@ -76,7 +76,7 @@ func goModuleRoot(dir string) (string, bool) {
 	for {
 		modDir := dirs[len(dirs)-1]
 
-		if val, ok := goModuleRootCache[dir]; ok {
+		if val, ok := goModuleRootCache[modDir]; ok {
 			result = val
 			break
 		}

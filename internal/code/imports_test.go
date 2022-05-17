@@ -11,6 +11,8 @@ import (
 )
 
 func TestImportPathForDir(t *testing.T) {
+	goModuleRootCache = map[string]GoModuleSearchResult{}
+
 	wd, err := os.Getwd()
 
 	require.NoError(t, err)
@@ -35,6 +37,8 @@ func TestImportPathForDir(t *testing.T) {
 }
 
 func TestImportPathForDirCustomRoot(t *testing.T) {
+	goModuleRootCache = map[string]GoModuleSearchResult{}
+
 	AddGoRoot(GoModuleSearchResult{
 		Path:       "go.code.root",
 		GoModPath:  "/home/user/go.code.root",
@@ -45,6 +49,8 @@ func TestImportPathForDirCustomRoot(t *testing.T) {
 }
 
 func TestNameForDir(t *testing.T) {
+	goModuleRootCache = map[string]GoModuleSearchResult{}
+
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 
@@ -55,6 +61,8 @@ func TestNameForDir(t *testing.T) {
 }
 
 func TestAddGoRoot(t *testing.T) {
+	goModuleRootCache = map[string]GoModuleSearchResult{}
+
 	AddGoRoot(GoModuleSearchResult{
 		Path:       "go.code.root",
 		GoModPath:  "/home/user/go.code.root",

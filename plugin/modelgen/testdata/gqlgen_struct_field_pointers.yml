@@ -1,0 +1,24 @@
+schema:
+  - "testdata/schema.graphql"
+
+exec:
+  filename: out_struct_pointers/ignored.go
+model:
+  filename: out_struct_pointers/generated.go
+
+struct_fields_always_pointers: false
+
+models:
+  ExistingModel:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers.ExistingModel
+  ExistingInput:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers.ExistingInput
+  ExistingEnum:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers.ExistingEnum
+  ExistingInterface:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers.ExistingInterface
+  ExistingUnion:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers.ExistingUnion
+  ExistingType:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers.ExistingType
+

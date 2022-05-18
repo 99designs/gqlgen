@@ -132,3 +132,35 @@ type CDImplemented implements C & D & A & B {
     c: Boolean!
     d: String
 }
+
+type CyclicalA {
+    field_one: CyclicalB
+    field_two: CyclicalB
+    field_three: CyclicalB
+    field_four: String!
+}
+
+type CyclicalB {
+    field_one: CyclicalA
+    field_two: CyclicalA
+    field_three: CyclicalA
+    field_four: CyclicalA
+    field_five: String!
+}
+
+type NotCyclicalA {
+    FieldOne: String!
+    FieldTwo: Int!
+}
+
+type NotCyclicalB {
+    FieldOne: String!
+    FieldTwo: NotCyclicalA!
+}
+
+type Recursive {
+    FieldOne: Recursive!
+    FieldTwo: Recursive!
+    FieldThree: Recursive!
+    FieldFour: String!
+}

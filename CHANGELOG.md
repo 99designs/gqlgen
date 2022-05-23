@@ -5,10 +5,131 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.5...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.6...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.6"></a>
+## [v0.17.6](https://github.com/99designs/gqlgen/compare/v0.17.5...v0.17.6) - 2022-05-23
+- <a href="https://github.com/99designs/gqlgen/commit/358d45dcfc2b022fdda9476a37f44c0622607ae9"><tt>358d45dc</tt></a> release v0.17.6
+
+- <a href="https://github.com/99designs/gqlgen/commit/7c95938c5f1278fa14a13a92eb88d117102e0330"><tt>7c95938c</tt></a> Improve operation error handling (<a href="https://github.com/99designs/gqlgen/pull/84">#2184</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/2526f6871166377b4f444ad8d22577a632b0abf4"><tt>2526f687</tt></a> Correct identation (<a href="https://github.com/99designs/gqlgen/pull/82">#2182</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f7bf453c79d82b01ed4baed894043aaff645bf2f"><tt>f7bf453c</tt></a> Bump dset from 3.1.1 to 3.1.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/76">#2176</a>)</summary>
+
+Bumps [dset](https://github.com/lukeed/dset) from 3.1.1 to 3.1.2.
+- [Release notes](https://github.com/lukeed/dset/releases)
+- [Commits](https://github.com/lukeed/dset/compare/v3.1.1...v3.1.2)
+
+---
+updated-dependencies:
+- dependency-name: dset
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4cdf70261a9dc8af589399f09b56d0f90606a9fa"><tt>4cdf7026</tt></a> Update getting-started.md (<a href="https://github.com/99designs/gqlgen/pull/57">#2157</a>)</summary>
+
+Fix getting-started missing fields resolver config
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/eef7bfaad1b524f9e2fc0c1150fdb321c276069e"><tt>eef7bfaa</tt></a> fix: prevents goroutine leak at websocket transport (<a href="https://github.com/99designs/gqlgen/pull/68">#2168</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/b8ec51d8629a24288353b4ee4be70fff3645b03e"><tt>b8ec51d8</tt></a> go: update gqlparser to latest (<a href="https://github.com/99designs/gqlgen/pull/49">#2149</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/ec3e597e7b45e17464cd8c7faaa51e75755ce3cf"><tt>ec3e597e</tt></a> Fix docs bug in field collection (<a href="https://github.com/99designs/gqlgen/pull/41">#2141</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f6b352316fae4b4fdc6317e24ea94ba48ac29e85"><tt>f6b35231</tt></a> Add argument to WebsocketErrorFunc (<a href="https://github.com/99designs/gqlgen/pull/24">#2124</a>)</summary>
+
+* Add argument to WebsocketErrorFunc
+
+to determine whether the error ocured on read or write to the websocket.
+
+* Wrap websocket error
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/0f016df3ae7ee4898358dc67a491689164297df6"><tt>0f016df3</tt></a> Fix invalid query parameter for playground subscription endpoint (<a href="https://github.com/99designs/gqlgen/pull/48">#2148</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/fb5751ab478603a864977f9fbe70655776d7fb55"><tt>fb5751ab</tt></a> use "embed" in generated code (<a href="https://github.com/99designs/gqlgen/pull/19">#2119</a>)</summary>
+
+* use "embed" in generated code
+
+* don't use embed for builtins
+
+* working poc
+
+* handle no embeddable sources
+
+* fix dir
+
+* comment
+
+* add test for embedding
+
+* improve error handling
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d38911f1a9d7f0ec39a74a95994d95291f1922c3"><tt>d38911f1</tt></a> Allow absolute https://github.com/99designs/gqlgens to the GraphQL playground (<a href="https://github.com/99designs/gqlgen/pull/42">#2142</a>)</summary>
+
+* Allow absolute URLs to the GraphQL playground
+
+* Add test for playground URLs
+
+* Close res.Body in playground test
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3228f36fec50930483801b27b92658592fab5e87"><tt>3228f36f</tt></a> Update getting-started.md (<a href="https://github.com/99designs/gqlgen/pull/40">#2140</a>)</summary>
+
+* Update getting-started.md
+
+function rand.Int requires two parameters and returns two value in golang version 1.18.1.
+
+* Highlight the package used so people don't pick crypto/rand
+
+* Revert to original
+
+* Remove extra space
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/33fe0b9b824ec86699059f410505c02659fc6c81"><tt>33fe0b9b</tt></a> Update package.json (<a href="https://github.com/99designs/gqlgen/pull/38">#2138</a>)</summary>
+
+I added `graphql-ws` because there is no graphql-ws in package.json
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f8e837b824ef4903a60f3cb974ef72fb4718a858"><tt>f8e837b8</tt></a> Use MultipartReader to parse file uploads (<a href="https://github.com/99designs/gqlgen/pull/35">#2135</a>)</summary>
+
+Use a streaming MultipartReader to parse requests with file
+uploads. The GraphQL multipart request specification guarantees
+that the operations and map form fields will come first.
+
+There are two reasons motivating this change:
+
+- This allows for file uploads without specifying a specific
+  filename.
+- This avoids unnecessary copies for requests with more than one
+  file. Go's ParseForm already copies the request's body into
+  memory or on disk. We were also doing this manually as a second
+  step.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/05bfc1fb12f73648833e1055e775e074a6df7eed"><tt>05bfc1fb</tt></a> Upddate Changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/62f694f0a8cf24f52dffca5823bb44fa1c32f97b"><tt>62f694f0</tt></a> v0.17.5 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.5"></a>
 ## [v0.17.5](https://github.com/99designs/gqlgen/compare/v0.17.4...v0.17.5) - 2022-04-29
 - <a href="https://github.com/99designs/gqlgen/commit/fd97e74eafc898278fd4b74477cb053393672232"><tt>fd97e74e</tt></a> release v0.17.5

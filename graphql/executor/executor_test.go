@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/errcode"
 	"github.com/99designs/gqlgen/graphql/executor/testexecutor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,6 +20,22 @@ func TestExecutor(t *testing.T) {
 	t.Run("calls query on executable schema", func(t *testing.T) {
 		resp := query(exec, "", "{name}")
 		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+	})
+
+	t.Run("validates operation", func(t *testing.T) {
+		t.Run("no operation", func(t *testing.T) {
+			resp := query(exec, "", "")
+			assert.Equal(t, "", string(resp.Data))
+			assert.Equal(t, 1, len(resp.Errors))
+			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
+		})
+
+		t.Run("bad operation", func(t *testing.T) {
+			resp := query(exec, "badOp", "query test { name }")
+			assert.Equal(t, "", string(resp.Data))
+			assert.Equal(t, 1, len(resp.Errors))
+			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
+		})
 	})
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {

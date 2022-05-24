@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -177,11 +178,12 @@ func BuildData(cfg *config.Config) (*Data, error) {
 			return nil, fmt.Errorf("failed to get working directory: %w", err)
 		}
 		outputDir := cfg.Exec.Dir()
-		sourcePath := filepath.Join(wd, s.Name)
+		sourcePath := path.Join(wd, s.Name)
 		relative, err := filepath.Rel(outputDir, sourcePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to compute path of %s relative to %s: %w"+sourcePath, outputDir, err)
 		}
+		relative = filepath.ToSlash(relative)
 		embeddable := true
 		if strings.HasPrefix(relative, "..") {
 			embeddable = false

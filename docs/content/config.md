@@ -48,6 +48,9 @@ resolver:
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
 # struct_fields_always_pointers: true
 
+# Optional: turn off to make resolvers return values instead of pointers for structs
+# resolvers_always_return_pointers: true
+
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
 

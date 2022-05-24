@@ -238,7 +238,7 @@ var sourcesFS embed.FS
 func sourceData(filename string) string {
 	data, err := sourcesFS.ReadFile(filename)
 	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not availalbe", filename))
+		panic(fmt.Sprintf("codegen problem: %s not available", filename))
 	}
 	return string(data)
 }

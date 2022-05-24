@@ -12,8 +12,8 @@ require (
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mitchellh/mapstructure v1.3.1
 	github.com/stretchr/testify v1.7.1
-	github.com/urfave/cli/v2 v2.4.0
-	github.com/vektah/gqlparser/v2 v2.4.3-0.20220508162109-d3d9eb001575
+	github.com/urfave/cli/v2 v2.8.1
+	github.com/vektah/gqlparser/v2 v2.4.3
 	golang.org/x/tools v0.1.10
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v2 v2.4.0

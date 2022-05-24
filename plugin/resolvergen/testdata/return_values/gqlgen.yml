@@ -1,0 +1,11 @@
+schema:
+  - schema.graphqls
+
+exec:
+  filename: ignored.go
+model:
+  filename: model.go
+resolver:
+  filename: resolvers.go
+
+resolvers_always_return_pointers: false

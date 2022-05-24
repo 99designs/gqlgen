@@ -5,10 +5,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.6...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.7...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.7"></a>
+## [v0.17.7](https://github.com/99designs/gqlgen/compare/v0.17.6...v0.17.7) - 2022-05-24
+- <a href="https://github.com/99designs/gqlgen/commit/2b1dff1b71f89c95e946bbe5948b7061f9c47aa8"><tt>2b1dff1b</tt></a> release v0.17.7
+
+- <a href="https://github.com/99designs/gqlgen/commit/b2087f944d9b9af6e776a9d97662c9e8b86a8c3b"><tt>b2087f94</tt></a> Update module dependencies (<a href="https://github.com/99designs/gqlgen/pull/92">#2192</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8825ac460b047e22724ed7728c7d7ffbf1b523a9"><tt>8825ac46</tt></a> Fix misprint (<a href="https://github.com/99designs/gqlgen/pull/87">#2187</a>)</summary>
+
+* Fix misprint
+
+* Fix misprint
+
+* Re-generate
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/41daa5d8dc1e35bdbfe68e95b37c10599b224456"><tt>41daa5d8</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/91">#2190](https://github.com/99designs/gqlgen/issues/2190) - don't use backslash for "embed" paths on windows ([#2191</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/0cce5544f06fd84831ef2ca0f60e16f7f554814d"><tt>0cce5544</tt></a> Update Changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/26644541aafbcdb46f10a6ff0f5894637227c331"><tt>26644541</tt></a> v0.17.6 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.6"></a>
 ## [v0.17.6](https://github.com/99designs/gqlgen/compare/v0.17.5...v0.17.6) - 2022-05-23
 - <a href="https://github.com/99designs/gqlgen/commit/358d45dcfc2b022fdda9476a37f44c0622607ae9"><tt>358d45dc</tt></a> release v0.17.6

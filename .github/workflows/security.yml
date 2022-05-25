@@ -12,5 +12,5 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
-      - run: go mod download && go list -json -m all > go.list
+      - run: go mod download && go list -json -deps all > go.list
       - uses: sonatype-nexus-community/nancy-github-action@main

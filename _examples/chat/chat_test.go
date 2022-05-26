@@ -16,7 +16,7 @@ import (
 func TestChatSubscriptions(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(NewExecutableSchema(New())))
 
-	const batchSize = 16
+	const batchSize = 128
 	var wg sync.WaitGroup
 	for i := 0; i < 1024; i++ {
 		wg.Add(1)
@@ -30,7 +30,8 @@ func TestChatSubscriptions(t *testing.T) {
 
 			go func() {
 				var resp interface{}
-				time.Sleep(10 * time.Millisecond)
+				// TODO: get rid of the sleep and wait for the subscription to actually pass
+				time.Sleep(100 * time.Millisecond)
 				err := c.Post(fmt.Sprintf(`mutation {
 					a:post(text:"Hello!", roomName:"#gophers%d", username:"vektah") { id }
 					b:post(text:"Hello Vektah!", roomName:"#gophers%d", username:"andrey") { id }
@@ -59,9 +60,8 @@ func TestChatSubscriptions(t *testing.T) {
 			require.Equal(t, "Whats up?", msg.resp.MessageAdded.Text)
 			require.Equal(t, "vektah", msg.resp.MessageAdded.CreatedBy)
 		}(i)
-		// wait for goroutines to finish every N tests to not get unhandled keepalives while starving on CPU
-		// TODO: add proper handling of keepalives to properly test concurrency?
-		if i%batchSize == 0 {
+		// wait for goroutines to finish every N tests to not starve on CPU
+		if (i+1)%batchSize == 0 {
 			wg.Wait()
 		}
 	}

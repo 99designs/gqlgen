@@ -12,6 +12,10 @@ type A interface {
 	IsA()
 }
 
+type Animal interface {
+	IsAnimal()
+}
+
 type B interface {
 	IsB()
 }
@@ -50,6 +54,10 @@ type UnionWithDescription interface {
 }
 
 type CDImplemented struct {
+	C
+	A
+	D
+	B
 	A string  `json:"a" database:"CDImplementeda"`
 	B int     `json:"b" database:"CDImplementedb"`
 	C bool    `json:"c" database:"CDImplementedc"`
@@ -83,12 +91,24 @@ type FieldMutationHook struct {
 	Repeated *string       `json:"repeated" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
 }
 
+type Human struct {
+	Animal
+	Species string `json:"species" database:"Humanspecies"`
+	Name    string `json:"name" database:"Humanname"`
+}
+
+func (Human) IsAnimal() {}
+
 type MissingInput struct {
 	Name *string      `json:"name" database:"MissingInputname"`
 	Enum *MissingEnum `json:"enum" database:"MissingInputenum"`
 }
 
 type MissingTypeNotNull struct {
+	MissingInterface
+	ExistingInterface
+	MissingUnion
+	ExistingUnion
 	Name     string               `json:"name" database:"MissingTypeNotNullname"`
 	Enum     MissingEnum          `json:"enum" database:"MissingTypeNotNullenum"`
 	Int      MissingInterface     `json:"int" database:"MissingTypeNotNullint"`
@@ -102,6 +122,10 @@ func (MissingTypeNotNull) IsMissingUnion()      {}
 func (MissingTypeNotNull) IsExistingUnion()     {}
 
 type MissingTypeNullable struct {
+	MissingInterface
+	ExistingInterface
+	MissingUnion
+	ExistingUnion
 	Name     *string             `json:"name" database:"MissingTypeNullablename"`
 	Enum     *MissingEnum        `json:"enum" database:"MissingTypeNullableenum"`
 	Int      MissingInterface    `json:"int" database:"MissingTypeNullableint"`
@@ -133,12 +157,14 @@ type Recursive struct {
 
 // TypeWithDescription is a type with a description
 type TypeWithDescription struct {
+	UnionWithDescription
 	Name *string `json:"name" database:"TypeWithDescriptionname"`
 }
 
 func (TypeWithDescription) IsUnionWithDescription() {}
 
 type FooBarr struct {
+	FooBarer
 	Name string `json:"name" database:"_Foo_Barrname"`
 }
 

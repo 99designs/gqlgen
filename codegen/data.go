@@ -109,7 +109,15 @@ func BuildData(cfg *config.Config) (*Data, error) {
 
 	for _, schemaType := range b.Schema.Types {
 		switch schemaType.Kind {
-		case ast.Object:
+		case ast.Union, ast.Interface, ast.Object:
+			if (schemaType.Kind == ast.Union || schemaType.Kind == ast.Interface) && !cfg.GenerateEmbeddedStructsForInterfaces {
+				s.Interfaces[schemaType.Name], err = b.buildInterface(schemaType)
+				if err != nil {
+					return nil, fmt.Errorf("unable to bind to interface: %w", err)
+				}
+
+				continue
+			}
 			obj, err := b.buildObject(schemaType)
 			if err != nil {
 				return nil, fmt.Errorf("unable to build object definition: %w", err)
@@ -123,12 +131,6 @@ func BuildData(cfg *config.Config) (*Data, error) {
 			}
 
 			s.Inputs = append(s.Inputs, input)
-
-		case ast.Union, ast.Interface:
-			s.Interfaces[schemaType.Name], err = b.buildInterface(schemaType)
-			if err != nil {
-				return nil, fmt.Errorf("unable to bind to interface: %w", err)
-			}
 		}
 	}
 

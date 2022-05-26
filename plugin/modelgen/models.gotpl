@@ -12,29 +12,64 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
-{{- range $model := .Interfaces }}
-	{{ with .Description }} {{.|prefixLines "// "}} {{ end }}
-	type {{.Name|go }} interface {
-		{{- range $impl := .Implements }}
-			{{ $impl|go }}
-		{{- end }}
-		Is{{.Name|go }}()
-	}
+{{- if not $.Config.GenerateEmbeddedStructsForInterfaces }}
+	{{- range $interface := .Interfaces }}
+		{{ with .Description }} {{.|prefixLines "// "}} {{ end }}
+		type {{.Name|go }} interface {
+			{{- range $impl := .Implements }}
+				{{ $impl|go }}
+			{{- end }}
+			Is{{.Name|go }}()
+		}
+	{{- end }}
 {{- end }}
 
 {{ range $model := .Models }}
 	{{with .Description }} {{.|prefixLines "// "}} {{end}}
 	type {{ .Name|go }} struct {
+		{{- range $impl := $model.Implements }}
+			{{ $impl|go }}
+		{{- end}}
 		{{- range $field := .Fields }}
-			{{- with .Description }}
-				{{.|prefixLines "// "}}
+            {{- /*	If we are generating embedded structs for GraphQL interfaces,
+		 		we need to determine which of the struct's fields are for the purpose of implementing an interface
+		 		and ignore those in favor of simply embedding the interface's struct */ -}}
+            {{- $found := false }}
+			{{- if and $.Config.GenerateEmbeddedStructsForInterfaces $model.Implements}}
+				{{- range $impl := $model.Implements }}
+					{{- range $interface := $.Interfaces }}
+						{{- if eq $impl $interface.Name }}
+							{{- range $interfaceField := $interface.Fields }}
+								{{- if eq $interfaceField.Name $field.Name }}
+									{{- $found = true }}
+									{{- break}}
+                                {{- end }}
+							{{- end }}
+						{{- end }}
+
+						{{- if $found }}
+							{{- break}}
+						{{- end }}
+					{{- end }}
+
+					{{- if $found }}
+                        {{- break}}
+					{{- end }}
+				{{- end }}
+			{{- end }}
+			{{- if not $found }}
+				{{- with .Description }}
+					{{.|prefixLines "// "}}
+				{{- end}}
+				{{ $field.Name|go }}  {{$field.Type | ref}} `{{$field.Tag}}`
 			{{- end}}
-			{{ $field.Name|go }} {{$field.Type | ref}} `{{$field.Tag}}`
 		{{- end }}
 	}
 
-	{{- range $iface := .Implements }}
-		func ({{ $model.Name|go }}) Is{{ $iface|go }}() {}
+	{{- if not $.Config.GenerateEmbeddedStructsForInterfaces }}
+		{{- range $iface := .Implements }}
+			func ({{ $model.Name|go }}) Is{{ $iface|go }}() {}
+		{{- end }}
 	{{- end }}
 {{- end}}
 

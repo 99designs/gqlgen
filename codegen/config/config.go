@@ -16,23 +16,24 @@ import (
 )
 
 type Config struct {
-	SchemaFilename                StringList                 `yaml:"schema,omitempty"`
-	Exec                          ExecConfig                 `yaml:"exec"`
-	Model                         PackageConfig              `yaml:"model,omitempty"`
-	Federation                    PackageConfig              `yaml:"federation,omitempty"`
-	Resolver                      ResolverConfig             `yaml:"resolver,omitempty"`
-	AutoBind                      []string                   `yaml:"autobind"`
-	Models                        TypeMap                    `yaml:"models,omitempty"`
-	StructTag                     string                     `yaml:"struct_tag,omitempty"`
-	Directives                    map[string]DirectiveConfig `yaml:"directives,omitempty"`
-	OmitSliceElementPointers      bool                       `yaml:"omit_slice_element_pointers,omitempty"`
-	StructFieldsAlwaysPointers    bool                       `yaml:"struct_fields_always_pointers,omitempty"`
-	ResolversAlwaysReturnPointers bool                       `yaml:"resolvers_always_return_pointers,omitempty"`
-	SkipValidation                bool                       `yaml:"skip_validation,omitempty"`
-	SkipModTidy                   bool                       `yaml:"skip_mod_tidy,omitempty"`
-	Sources                       []*ast.Source              `yaml:"-"`
-	Packages                      *code.Packages             `yaml:"-"`
-	Schema                        *ast.Schema                `yaml:"-"`
+	SchemaFilename                       StringList                 `yaml:"schema,omitempty"`
+	Exec                                 ExecConfig                 `yaml:"exec"`
+	Model                                PackageConfig              `yaml:"model,omitempty"`
+	Federation                           PackageConfig              `yaml:"federation,omitempty"`
+	Resolver                             ResolverConfig             `yaml:"resolver,omitempty"`
+	AutoBind                             []string                   `yaml:"autobind"`
+	Models                               TypeMap                    `yaml:"models,omitempty"`
+	StructTag                            string                     `yaml:"struct_tag,omitempty"`
+	Directives                           map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	OmitSliceElementPointers             bool                       `yaml:"omit_slice_element_pointers,omitempty"`
+	StructFieldsAlwaysPointers           bool                       `yaml:"struct_fields_always_pointers,omitempty"`
+	ResolversAlwaysReturnPointers        bool                       `yaml:"resolvers_always_return_pointers,omitempty"`
+	GenerateEmbeddedStructsForInterfaces bool                       `yaml:"generate_embedded_structs_for_interfaces,omitempty"`
+	SkipValidation                       bool                       `yaml:"skip_validation,omitempty"`
+	SkipModTidy                          bool                       `yaml:"skip_mod_tidy,omitempty"`
+	Sources                              []*ast.Source              `yaml:"-"`
+	Packages                             *code.Packages             `yaml:"-"`
+	Schema                               *ast.Schema                `yaml:"-"`
 
 	// Deprecated: use Federation instead. Will be removed next release
 	Federated bool `yaml:"federated,omitempty"`

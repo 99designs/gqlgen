@@ -51,6 +51,9 @@ resolver:
 # Optional: turn off to make resolvers return values instead of pointers for structs
 # resolvers_always_return_pointers: true
 
+# Optional: turn on to generate getter/setter methods for accessing interface fields instead of exporting the fields
+# generate_interface_getters_setters: false
+
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
 

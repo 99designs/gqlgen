@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -276,6 +277,32 @@ func TestModelGenerationStructFieldPointers(t *testing.T) {
 		require.Nil(t, out_struct_pointers.Recursive{}.FieldTwo)
 		require.Nil(t, out_struct_pointers.Recursive{}.FieldThree)
 		require.NotNil(t, out_struct_pointers.Recursive{}.FieldFour)
+	})
+}
+
+func TestModelGenerationInterfaceFieldMethods(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_interface_field_methods.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  defaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+
+	t.Run("no pointer pointers", func(t *testing.T) {
+		generated, err := ioutil.ReadFile("./out_interface_field_methods/generated.go")
+		require.NoError(t, err)
+		require.NotContains(t, string(generated), "**")
+	})
+
+	t.Run("interfaces become embedded structs", func(t *testing.T) {
+		human := out_interface_field_methods.Human{
+			Animal: out_interface_field_methods.Animal{Species: "human"},
+			Name:   "ian",
+		}
+		require.Equal(t, "human", human.Species)
+		require.Equal(t, "ian", human.Name)
 	})
 }
 

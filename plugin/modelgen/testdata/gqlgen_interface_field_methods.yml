@@ -1,0 +1,24 @@
+schema:
+  - "testdata/schema.graphql"
+
+exec:
+  filename: out_interface_field_methods/ignored.go
+model:
+  filename: out_interface_field_methods/generated.go
+
+generate_embedded_structs_for_interfaces: true
+
+models:
+  ExistingModel:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods.ExistingModel
+  ExistingInput:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods.ExistingInput
+  ExistingEnum:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods.ExistingEnum
+  ExistingInterface:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods.ExistingInterface
+  ExistingUnion:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods.ExistingUnion
+  ExistingType:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods.ExistingType
+

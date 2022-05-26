@@ -164,3 +164,12 @@ type Recursive {
     FieldThree: Recursive!
     FieldFour: String!
 }
+
+interface Animal {
+    species: String!
+}
+
+type Human implements Animal {
+    species: String!
+    name: String!
+}

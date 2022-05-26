@@ -180,11 +180,11 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		sourcePath := filepath.Join(wd, s.Name)
 		relative, err := filepath.Rel(outputDir, sourcePath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to compute path of %s relative to %s: %w"+sourcePath, outputDir, err)
+			return nil, fmt.Errorf("failed to compute path of %s relative to %s: %w", sourcePath, outputDir, err)
 		}
 		relative = filepath.ToSlash(relative)
 		embeddable := true
-		if strings.HasPrefix(relative, "..") {
+		if strings.HasPrefix(relative, "..") || s.BuiltIn {
 			embeddable = false
 		}
 		aSources = append(aSources, AugmentedSource{

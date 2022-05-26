@@ -39,9 +39,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Query struct {
-		InSchemadir func(childComplexity int) int
-		Parentdir   func(childComplexity int) int
-		Subdir      func(childComplexity int) int
+		InSchemadir        func(childComplexity int) int
+		Parentdir          func(childComplexity int) int
+		Subdir             func(childComplexity int) int
+		__resolve__service func(childComplexity int) int
+	}
+
+	_Service struct {
+		SDL func(childComplexity int) int
 	}
 }
 
@@ -80,6 +85,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Subdir(childComplexity), true
+
+	case "Query._service":
+		if e.complexity.Query.__resolve__service == nil {
+			break
+		}
+
+		return e.complexity.Query.__resolve__service(childComplexity), true
+
+	case "_Service.sdl":
+		if e.complexity._Service.SDL == nil {
+			break
+		}
+
+		return e.complexity._Service.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -150,5 +169,25 @@ var sources = []*ast.Source{
 }
 `, BuiltIn: false},
 	{Name: "subdir.graphqls", Input: sourceData("subdir.graphqls"), BuiltIn: false},
+	{Name: "federation/directives.graphql", Input: `
+	scalar _Any
+	scalar _FieldSet
+	
+	directive @external on FIELD_DEFINITION
+	directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+	directive @extends on OBJECT | INTERFACE
+
+	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+`, BuiltIn: true},
+	{Name: "federation/entity.graphql", Input: `
+type _Service {
+  sdl: String
+}
+
+extend type Query {
+  _service: _Service!
+}
+`, BuiltIn: true},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

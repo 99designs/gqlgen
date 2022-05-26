@@ -50,7 +50,11 @@ func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option
 	return sock.Next(&resp)
 }
 
-func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
+func (p *Client) WebsocketWithPayload(
+	query string,
+	initPayload map[string]interface{},
+	options ...Option,
+) *Subscription {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
 		return errorSubscription(fmt.Errorf("request: %w", err))
@@ -116,11 +120,12 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 					return err
 				}
 				if op.Type != dataMsg {
-					if op.Type == connectionKaMsg {
+					switch op.Type {
+					case connectionKaMsg:
 						continue
-					} else if op.Type == errorMsg {
+					case errorMsg:
 						return fmt.Errorf(string(op.Payload))
-					} else {
+					default:
 						return fmt.Errorf("expected data message, got %#v", op)
 					}
 				}

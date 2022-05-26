@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import { useQuery, useMutation } from '@apollo/client';
 import { Chat, ChatContainer, Message, MessageReceived } from './components/room';
 
+let queuedMessages = []
 export const Room = ({ channel, name }) => {
     const messagesEndRef = useRef(null)
     const [ text, setText ] = useState('');
@@ -13,11 +14,24 @@ export const Room = ({ channel, name }) => {
         }
     });
 
-    const { loading, error, data, subscribeToMore } = useQuery(QUERY, {
+    let { loading, error, data, subscribeToMore } = useQuery(QUERY, {
         variables: {
             channel
         },
     });
+
+    if (data && data.room) {
+        data = Object.assign({}, data, {
+            room: Object.assign({}, data.room, {
+                messages: [
+                    ...data.room.messages,
+                    ...queuedMessages.filter((queuedMessage) => (
+                        !data.room.messages.find((msg) => msg.id === queuedMessage.id)
+                    )),
+                ],
+            })
+        });
+    }
 
     // subscribe to more messages
     useEffect(() => {
@@ -32,16 +46,29 @@ export const Room = ({ channel, name }) => {
                     return prev;
                 }
                 const newMessage = subscriptionData.data.messageAdded;
+                if (!prev.room) {
+                    queuedMessages.push(newMessage)
+                    return prev;
+                }
 
                 if (prev.room.messages.find((msg) => msg.id === newMessage.id)) {
                     return prev
                 }
 
-                return Object.assign({}, prev, {
+                prev = Object.assign({}, prev, {
                     room: Object.assign({}, prev.room, {
-                        messages: [...prev.room.messages, newMessage],
-                    })
+                        messages: [
+                            ...prev.room.messages,
+                            ...queuedMessages.filter((queuedMessage) => (
+                                newMessage.id !== queuedMessage.id
+                                && !prev.room.messages.find((msg) => msg.id === queuedMessage.id)
+                            )),
+                            newMessage,
+                        ],
+                    }),
                 });
+                queuedMessages = [];
+                return prev;
             },
         });
 
@@ -88,8 +115,7 @@ export const Room = ({ channel, name }) => {
                         channel: channel,
                         name: name,
                     }
-                    })
-                } >
+                })}>
                 send
             </button>
         </p>

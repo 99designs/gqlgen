@@ -1,6 +1,7 @@
 package modelgen
 
 import (
+	"github.com/99designs/gqlgen/plugin/modelgen/out_interface_field_methods"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -276,6 +277,32 @@ func TestModelGenerationStructFieldPointers(t *testing.T) {
 		require.Nil(t, out_struct_pointers.Recursive{}.FieldTwo)
 		require.Nil(t, out_struct_pointers.Recursive{}.FieldThree)
 		require.NotNil(t, out_struct_pointers.Recursive{}.FieldFour)
+	})
+}
+
+func TestModelGenerationInterfaceFieldMethods(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_interface_field_methods.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  defaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+
+	t.Run("no pointer pointers", func(t *testing.T) {
+		generated, err := ioutil.ReadFile("./out_interface_field_methods/generated.go")
+		require.NoError(t, err)
+		require.NotContains(t, string(generated), "**")
+	})
+
+	t.Run("interface fields are methods", func(t *testing.T) {
+		human := out_interface_field_methods.Human{}
+		human.SetSpecies("human")
+		human.Name = "name 123"
+		require.Equal(t, "human", human.Species())
+		require.Equal(t, "name 123", human.Name)
+		require.Equal(t, "human", func(animal out_interface_field_methods.Animal) string { return animal.Species() }(&human))
 	})
 }
 

@@ -12,6 +12,10 @@ type A interface {
 	IsA()
 }
 
+type Animal interface {
+	IsAnimal()
+}
+
 type B interface {
 	IsB()
 }
@@ -82,6 +86,13 @@ type FieldMutationHook struct {
 	NoVal    *string       `json:"noVal" yaml:"noVal" repeated:"true" database:"FieldMutationHooknoVal"`
 	Repeated *string       `json:"repeated" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
 }
+
+type Human struct {
+	Species string `json:"species" database:"Humanspecies"`
+	Name    string `json:"name" database:"Humanname"`
+}
+
+func (Human) IsAnimal() {}
 
 type MissingInput struct {
 	Name *string      `json:"name" database:"MissingInputname"`

@@ -26,16 +26,17 @@ func defaultBuildMutateHook(b *ModelBuild) *ModelBuild {
 }
 
 type ModelBuild struct {
-	PackageName string
-	Interfaces  []*Interface
-	Models      []*Object
-	Enums       []*Enum
-	Scalars     []string
+	Config     *config.Config
+	Interfaces []*Interface
+	Models     []*Object
+	Enums      []*Enum
+	Scalars    []string
 }
 
 type Interface struct {
 	Description string
 	Name        string
+	Fields      ast.FieldList
 	Implements  []string
 }
 
@@ -86,7 +87,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	binder := cfg.NewBinder()
 
 	b := &ModelBuild{
-		PackageName: cfg.Model.Package,
+		Config: cfg,
 	}
 
 	for _, schemaType := range cfg.Schema.Types {
@@ -99,6 +100,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				Description: schemaType.Description,
 				Name:        schemaType.Name,
 				Implements:  schemaType.Interfaces,
+				Fields:      schemaType.Fields,
 			}
 
 			b.Interfaces = append(b.Interfaces, it)

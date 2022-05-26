@@ -12,13 +12,43 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
-{{- range $model := .Interfaces }}
+{{- range $interface := .Interfaces }}
 	{{ with .Description }} {{.|prefixLines "// "}} {{ end }}
 	type {{.Name|go }} interface {
 		{{- range $impl := .Implements }}
 			{{ $impl|go }}
 		{{- end }}
 		Is{{.Name|go }}()
+
+		{{- /*
+			If Interfaces should generate methods for convenient field access,
+			we have to find a Model that implements the interface in order to iterate over the interface's fields.
+			The Model contains the fields with their Go types, the Interface simply contains the fields' names.
+
+			If there is no Model that implements the Interface, we can't find the Interface's fields.
+		*/ -}}
+		{{- if $.Config.GenerateInterfaceGettersSetters }}
+			{{- range $model := $.Models }}
+				{{- $found := false }}
+				{{- range $impl := $model.Implements }}
+					{{- if eq $impl $interface.Name }}
+						{{- range $modelField := $model.Fields }}
+							{{- range $interfaceField := $interface.Fields }}
+								{{- if eq $modelField.Name $interfaceField.Name }}
+									{{ $modelField.Name|go }}() {{$modelField.Type | ref}}
+									Set{{ $modelField.Name|go }}(value {{$modelField.Type | ref}})
+                                    {{- break}}
+								{{- end }}
+							{{- end }}
+						{{- end }}
+						{{- $found = true}}
+					{{- end }}
+				{{- end }}
+				{{- if $found }}
+                    {{- break}}
+				{{- end }}
+			{{- end }}
+		{{- end }}
 	}
 {{- end }}
 
@@ -26,12 +56,74 @@
 	{{with .Description }} {{.|prefixLines "// "}} {{end}}
 	type {{ .Name|go }} struct {
 		{{- range $field := .Fields }}
-			{{- with .Description }}
-				{{.|prefixLines "// "}}
+            {{- $found := false }}
+			{{- if and $.Config.GenerateInterfaceGettersSetters $model.Implements}}
+				{{- range $impl := $model.Implements }}
+					{{- range $interface := $.Interfaces }}
+						{{- if eq $impl $interface.Name }}
+							{{- range $interfaceField := $interface.Fields }}
+								{{- if ne $interfaceField.Name $field.Name }}
+									{{- continue}}
+								{{- end }}
+								{{ $field.Name|goPrivate }}  {{$field.Type | ref}}
+								{{- $found = true }}
+								{{- break}}
+							{{- end }}
+						{{- end }}
+
+						{{- if $found }}
+							{{- break}}
+						{{- end }}
+					{{- end }}
+
+					{{- if $found }}
+                        {{- break}}
+					{{- end }}
+				{{- end }}
+			{{- end }}
+			{{- if not $found }}
+				{{- with .Description }}
+					{{.|prefixLines "// "}}
+				{{- end}}
+				{{ $field.Name|go }}  {{$field.Type | ref}} `{{$field.Tag}}`
 			{{- end}}
-			{{ $field.Name|go }} {{$field.Type | ref}} `{{$field.Tag}}`
 		{{- end }}
 	}
+
+	{{- if and $.Config.GenerateInterfaceGettersSetters .Implements }}
+		{{- /*	If we are generating methods for interface field access,
+		 		we need to find the interface that is being implemented for each field
+		 		to determine which fields are for satisfying the interface */ -}}
+        {{- range $field := $model.Fields }}
+			{{- $found := false }}
+			{{- range $impl := $model.Implements }}
+				{{- range $interface := $.Interfaces }}
+					{{- if eq $impl $interface.Name }}
+						{{- range $interfaceField := $interface.Fields }}
+							{{- if ne $interfaceField.Name $field.Name }}
+								{{- continue}}
+							{{- end }}
+							{{- with $field.Description }}
+								{{.|prefixLines "// "}}
+							{{- end}}
+							func (model *{{ $model.Name|go }}) {{ $field.Name|go }}() {{$field.Type | ref}} {return model.{{ $field.Name|goPrivate }}}
+							func (model *{{ $model.Name|go }}) Set{{ $field.Name|go }}(value {{$field.Type | ref}}) {model.{{ $field.Name|goPrivate }} = value}
+							{{- $found = true }}
+                            {{- break}}
+						{{- end }}
+					{{- end }}
+
+                    {{- if $found }}
+                        {{- break}}
+                    {{- end }}
+				{{- end }}
+
+                {{- if $found }}
+                    {{- break}}
+                {{- end }}
+			{{- end }}
+		{{- end }}
+	{{- end }}
 
 	{{- range $iface := .Implements }}
 		func ({{ $model.Name|go }}) Is{{ $iface|go }}() {}

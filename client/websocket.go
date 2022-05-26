@@ -50,11 +50,7 @@ func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option
 	return sock.Next(&resp)
 }
 
-func (p *Client) WebsocketWithPayload(
-	query string,
-	initPayload map[string]interface{},
-	options ...Option,
-) *Subscription {
+func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
 		return errorSubscription(fmt.Errorf("request: %w", err))
@@ -113,37 +109,32 @@ func (p *Client) WebsocketWithPayload(
 			return c.Close()
 		},
 		Next: func(response interface{}) error {
-			for {
-				var op operationMessage
-				err := c.ReadJSON(&op)
-				if err != nil {
-					return err
-				}
-				if op.Type != dataMsg {
-					switch op.Type {
-					case connectionKaMsg:
-						continue
-					case errorMsg:
-						return fmt.Errorf(string(op.Payload))
-					default:
-						return fmt.Errorf("expected data message, got %#v", op)
-					}
-				}
-
-				var respDataRaw Response
-				err = json.Unmarshal(op.Payload, &respDataRaw)
-				if err != nil {
-					return fmt.Errorf("decode: %w", err)
-				}
-
-				// we want to unpack even if there is an error, so we can see partial responses
-				unpackErr := unpack(respDataRaw.Data, response)
-
-				if respDataRaw.Errors != nil {
-					return RawJsonError{respDataRaw.Errors}
-				}
-				return unpackErr
+			var op operationMessage
+			err := c.ReadJSON(&op)
+			if err != nil {
+				return err
 			}
+			if op.Type != dataMsg {
+				if op.Type == errorMsg {
+					return fmt.Errorf(string(op.Payload))
+				} else {
+					return fmt.Errorf("expected data message, got %#v", op)
+				}
+			}
+
+			var respDataRaw Response
+			err = json.Unmarshal(op.Payload, &respDataRaw)
+			if err != nil {
+				return fmt.Errorf("decode: %w", err)
+			}
+
+			// we want to unpack even if there is an error, so we can see partial responses
+			unpackErr := unpack(respDataRaw.Data, response)
+
+			if respDataRaw.Errors != nil {
+				return RawJsonError{respDataRaw.Errors}
+			}
+			return unpackErr
 		},
 	}
 }

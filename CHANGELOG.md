@@ -5,10 +5,86 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.7...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.9...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.9"></a>
+## [v0.17.9](https://github.com/99designs/gqlgen/compare/v0.17.8...v0.17.9) - 2022-05-26
+- <a href="https://github.com/99designs/gqlgen/commit/7f0611b2d19833a740afcfaf5708febff942da2d"><tt>7f0611b2</tt></a> release v0.17.9
+
+- <a href="https://github.com/99designs/gqlgen/commit/738209b26337bc1116be7b0afacc83eae6bb93b0"><tt>738209b2</tt></a> Update gqlparser (<a href="https://github.com/99designs/gqlgen/pull/16">#2216</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/6855b7290cab62a1fc6a26a2b633e0b5bbf248da"><tt>6855b729</tt></a> fix: prevent goroutine leak and CPU spinning at websocket transport (<a href="https://github.com/99designs/gqlgen/pull/09">#2209</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2168"> #2168</a>)</summary>
+
+* Added goroutine leak test for chat example
+
+* Improved chat example with proper concurrency
+
+
+This reverts commit eef7bfaad1b524f9e2fc0c1150fdb321c276069e.
+
+* Improved subscription channel usage
+
+* Regenerated examples and codegen
+
+* Add support for subscription keepalives in websocket client
+
+* Update chat example test
+
+* if else chain to switch
+
+
+* Revert "Add support for subscription keepalives in websocket client"
+
+This reverts commits 64b882c3c9901f25edc0684ce2a1f9b63443416b and 670cf22272b490005d46dc2bee1634de1cd06d68.
+
+* Fixed chat example race condition
+
+* Fixed chatroom#Messages type
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5f5bfcb97fdb01026cf35a5dc46f1246a30f9b26"><tt>5f5bfcb9</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/14">#2204](https://github.com/99designs/gqlgen/issues/2204) - don't try to embed builtin sources ([#2214</a>)</summary>
+
+* dont't try to embed builtins
+
+* add test
+
+* generated code
+
+* fix error message string
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/8d9d3f125f13dcd19f59072d3c38366dc520758b"><tt>8d9d3f12</tt></a> Check only direct dependencies (<a href="https://github.com/99designs/gqlgen/pull/05">#2205</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/b262e40a485f67d2659e239a156418938d0fe2e9"><tt>b262e40a</tt></a> v0.17.8 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.8"></a>
+## [v0.17.8](https://github.com/99designs/gqlgen/compare/v0.17.7...v0.17.8) - 2022-05-25
+- <a href="https://github.com/99designs/gqlgen/commit/25367e0a24998aea40f09218f60d1d0e6d1cce4a"><tt>25367e0a</tt></a> release v0.17.8
+
+- <a href="https://github.com/99designs/gqlgen/commit/5a56b69d89c7414e21b2f01e0e5042a26b69c5cb"><tt>5a56b69d</tt></a> Add security workflow with nancy (<a href="https://github.com/99designs/gqlgen/pull/02">#2202</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/482f4ce08e65458cec2dbfaf7d184f1c8fccb129"><tt>482f4ce0</tt></a> Run CI tests on windows (<a href="https://github.com/99designs/gqlgen/pull/99">#2199</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/656045d3fa643b898932c3f5332544b0baed1af4"><tt>656045d3</tt></a> This works on Windows too! (<a href="https://github.com/99designs/gqlgen/pull/97">#2197</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/f6aeed60a508dae102b2b821d3a947e24e5e0826"><tt>f6aeed60</tt></a> Merge branch 'master' of github.com:99designs/gqlgen
+
+- <a href="https://github.com/99designs/gqlgen/commit/d91080be396af96266941499d369d0f8279761b0"><tt>d91080be</tt></a> Update changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/752d2d7e9fff08c82a6d3ffc1c8c7ffe2a2e9fe2"><tt>752d2d7e</tt></a> v0.17.7 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.7"></a>
 ## [v0.17.7](https://github.com/99designs/gqlgen/compare/v0.17.6...v0.17.7) - 2022-05-24
 - <a href="https://github.com/99designs/gqlgen/commit/2b1dff1b71f89c95e946bbe5948b7061f9c47aa8"><tt>2b1dff1b</tt></a> release v0.17.7

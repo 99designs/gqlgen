@@ -2,15 +2,13 @@ package chat
 
 import (
 	"fmt"
-	"runtime"
-	"sync"
-	"testing"
-	"time"
-
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"runtime"
+	"sync"
+	"testing"
 )
 
 func TestChatSubscriptions(t *testing.T) {
@@ -18,7 +16,7 @@ func TestChatSubscriptions(t *testing.T) {
 
 	const batchSize = 128
 	var wg sync.WaitGroup
-	for i := 0; i < 1024; i++ {
+	for i := 0; i < batchSize*8; i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
@@ -27,18 +25,6 @@ func TestChatSubscriptions(t *testing.T) {
 				i,
 			))
 			defer sub.Close()
-
-			go func() {
-				var resp interface{}
-				// TODO: get rid of the sleep and wait for the subscription to actually pass
-				time.Sleep(100 * time.Millisecond)
-				err := c.Post(fmt.Sprintf(`mutation {
-					a:post(text:"Hello!", roomName:"#gophers%d", username:"vektah") { id }
-					b:post(text:"Hello Vektah!", roomName:"#gophers%d", username:"andrey") { id }
-					c:post(text:"Whats up?", roomName:"#gophers%d", username:"vektah") { id }
-				}`, i, i, i), &resp)
-				assert.NoError(t, err)
-			}()
 
 			var msg struct {
 				resp struct {
@@ -49,6 +35,21 @@ func TestChatSubscriptions(t *testing.T) {
 				}
 				err error
 			}
+
+			msg.err = sub.Next(&msg.resp)
+			require.NoError(t, msg.err, "sub.Next")
+			require.Equal(t, "You've joined the room", msg.resp.MessageAdded.Text)
+			require.Equal(t, "system", msg.resp.MessageAdded.CreatedBy)
+
+			go func() {
+				var resp interface{}
+				err := c.Post(fmt.Sprintf(`mutation {
+					a:post(text:"Hello!", roomName:"#gophers%d", username:"vektah") { id }
+					b:post(text:"Hello Vektah!", roomName:"#gophers%d", username:"andrey") { id }
+					c:post(text:"Whats up?", roomName:"#gophers%d", username:"vektah") { id }
+				}`, i, i, i), &resp)
+				assert.NoError(t, err)
+			}()
 
 			msg.err = sub.Next(&msg.resp)
 			require.NoError(t, msg.err, "sub.Next")

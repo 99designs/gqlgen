@@ -56,7 +56,7 @@ type Observer struct {
 
 type Chatroom struct {
 	Name      string
-	Messages  []Message
+	Messages  []*Message
 	Observers sync.Map
 }
 
@@ -65,7 +65,7 @@ type mutationResolver struct{ *resolver }
 func (r *mutationResolver) Post(ctx context.Context, text string, username string, roomName string) (*Message, error) {
 	room := r.getRoom(roomName)
 
-	message := Message{
+	message := &Message{
 		ID:        randString(8),
 		CreatedAt: time.Now(),
 		Text:      text,
@@ -76,11 +76,11 @@ func (r *mutationResolver) Post(ctx context.Context, text string, username strin
 	room.Observers.Range(func(_, v interface{}) bool {
 		observer := v.(*Observer)
 		if observer.Username == "" || observer.Username == message.CreatedBy {
-			observer.Message <- &message
+			observer.Message <- message
 		}
 		return true
 	})
-	return &message, nil
+	return message, nil
 }
 
 type queryResolver struct{ *resolver }
@@ -114,6 +114,13 @@ func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string
 		Username: getUsername(ctx),
 		Message:  events,
 	})
+
+	events <- &Message{
+		ID:        randString(8),
+		CreatedAt: time.Now(),
+		Text:      "You've joined the room",
+		CreatedBy: "system",
+	}
 
 	return events, nil
 }

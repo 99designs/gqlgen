@@ -56,7 +56,7 @@ type Observer struct {
 
 type Chatroom struct {
 	Name      string
-	Messages  []*Message
+	Messages  []Message
 	Observers sync.Map
 }
 
@@ -72,7 +72,7 @@ func (r *mutationResolver) Post(ctx context.Context, text string, username strin
 		CreatedBy: username,
 	}
 
-	room.Messages = append(room.Messages, message)
+	room.Messages = append(room.Messages, *message)
 	room.Observers.Range(func(_, v interface{}) bool {
 		observer := v.(*Observer)
 		if observer.Username == "" || observer.Username == message.CreatedBy {

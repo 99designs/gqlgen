@@ -184,7 +184,7 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		}
 		relative = filepath.ToSlash(relative)
 		embeddable := true
-		if strings.HasPrefix(relative, "..") {
+		if strings.HasPrefix(relative, "..") || s.BuiltIn {
 			embeddable = false
 		}
 		aSources = append(aSources, AugmentedSource{

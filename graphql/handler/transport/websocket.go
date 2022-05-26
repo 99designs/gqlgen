@@ -371,20 +371,12 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 
 		responses, ctx := c.exec.DispatchOperation(ctx, rc)
 		for {
-			// prevents goroutine leak
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				{
-					response := responses(ctx)
-					if response == nil {
-						break
-					}
-
-					c.sendResponse(msg.id, response)
-				}
+			response := responses(ctx)
+			if response == nil {
+				break
 			}
+
+			c.sendResponse(msg.id, response)
 		}
 
 		// complete and context cancel comes from the defer

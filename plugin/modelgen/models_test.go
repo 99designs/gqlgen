@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin/modelgen/out"
 	"github.com/stretchr/testify/assert"
@@ -209,6 +211,71 @@ func TestModelGeneration(t *testing.T) {
 
 		sort.Strings(gots)
 		require.Equal(t, wantMethods, gots)
+	})
+
+	t.Run("cyclical struct fields become pointers", func(t *testing.T) {
+		require.Nil(t, out.CyclicalA{}.FieldOne)
+		require.Nil(t, out.CyclicalA{}.FieldTwo)
+		require.Nil(t, out.CyclicalA{}.FieldThree)
+		require.NotNil(t, out.CyclicalA{}.FieldFour)
+		require.Nil(t, out.CyclicalB{}.FieldOne)
+		require.Nil(t, out.CyclicalB{}.FieldTwo)
+		require.Nil(t, out.CyclicalB{}.FieldThree)
+		require.Nil(t, out.CyclicalB{}.FieldFour)
+		require.NotNil(t, out.CyclicalB{}.FieldFive)
+	})
+
+	t.Run("non-cyclical struct fields become pointers", func(t *testing.T) {
+		require.NotNil(t, out.NotCyclicalB{}.FieldOne)
+		require.Nil(t, out.NotCyclicalB{}.FieldTwo)
+	})
+
+	t.Run("recursive struct fields become pointers", func(t *testing.T) {
+		require.Nil(t, out.Recursive{}.FieldOne)
+		require.Nil(t, out.Recursive{}.FieldTwo)
+		require.Nil(t, out.Recursive{}.FieldThree)
+		require.NotNil(t, out.Recursive{}.FieldFour)
+	})
+}
+
+func TestModelGenerationStructFieldPointers(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_struct_field_pointers.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  defaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+
+	t.Run("no pointer pointers", func(t *testing.T) {
+		generated, err := ioutil.ReadFile("./out_struct_pointers/generated.go")
+		require.NoError(t, err)
+		require.NotContains(t, string(generated), "**")
+	})
+
+	t.Run("cyclical struct fields become pointers", func(t *testing.T) {
+		require.Nil(t, out_struct_pointers.CyclicalA{}.FieldOne)
+		require.Nil(t, out_struct_pointers.CyclicalA{}.FieldTwo)
+		require.Nil(t, out_struct_pointers.CyclicalA{}.FieldThree)
+		require.NotNil(t, out_struct_pointers.CyclicalA{}.FieldFour)
+		require.Nil(t, out_struct_pointers.CyclicalB{}.FieldOne)
+		require.Nil(t, out_struct_pointers.CyclicalB{}.FieldTwo)
+		require.Nil(t, out_struct_pointers.CyclicalB{}.FieldThree)
+		require.Nil(t, out_struct_pointers.CyclicalB{}.FieldFour)
+		require.NotNil(t, out_struct_pointers.CyclicalB{}.FieldFive)
+	})
+
+	t.Run("non-cyclical struct fields do not become pointers", func(t *testing.T) {
+		require.NotNil(t, out_struct_pointers.NotCyclicalB{}.FieldOne)
+		require.NotNil(t, out_struct_pointers.NotCyclicalB{}.FieldTwo)
+	})
+
+	t.Run("recursive struct fields become pointers", func(t *testing.T) {
+		require.Nil(t, out_struct_pointers.Recursive{}.FieldOne)
+		require.Nil(t, out_struct_pointers.Recursive{}.FieldTwo)
+		require.Nil(t, out_struct_pointers.Recursive{}.FieldThree)
+		require.NotNil(t, out_struct_pointers.Recursive{}.FieldFour)
 	})
 }
 

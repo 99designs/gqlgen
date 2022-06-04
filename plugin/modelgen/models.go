@@ -185,8 +185,10 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 
 				typ = binder.CopyModifiersFromAst(field.Type, typ)
 
-				if isStruct(typ) && (fieldDef.Kind == ast.Object || fieldDef.Kind == ast.InputObject) {
-					typ = types.NewPointer(typ)
+				if cfg.StructFieldsAlwaysPointers {
+					if isStruct(typ) && (fieldDef.Kind == ast.Object || fieldDef.Kind == ast.InputObject) {
+						typ = types.NewPointer(typ)
+					}
 				}
 
 				f := &Field{
@@ -229,6 +231,12 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	sort.Slice(b.Enums, func(i, j int) bool { return b.Enums[i].Name < b.Enums[j].Name })
 	sort.Slice(b.Models, func(i, j int) bool { return b.Models[i].Name < b.Models[j].Name })
 	sort.Slice(b.Interfaces, func(i, j int) bool { return b.Interfaces[i].Name < b.Interfaces[j].Name })
+
+	// if we are not just turning all struct-type fields in generated structs into pointers, we need to at least
+	// check for cyclical relationships and recursive structs
+	if !cfg.StructFieldsAlwaysPointers {
+		findAndHandleCyclicalRelationships(b)
+	}
 
 	for _, it := range b.Enums {
 		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+templates.ToGo(it.Name))
@@ -302,4 +310,56 @@ func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Fie
 func isStruct(t types.Type) bool {
 	_, is := t.Underlying().(*types.Struct)
 	return is
+}
+
+// findAndHandleCyclicalRelationships checks for cyclical relationships between generated structs and replaces them
+// with pointers. These relationships will produce compilation errors if they are not pointers.
+// Also handles recursive structs.
+func findAndHandleCyclicalRelationships(b *ModelBuild) {
+	for ii, structA := range b.Models {
+		for _, fieldA := range structA.Fields {
+			if strings.Contains(fieldA.Type.String(), "NotCyclicalA") {
+				fmt.Print()
+			}
+			if !isStruct(fieldA.Type) {
+				continue
+			}
+
+			// the field Type string will be in the form "github.com/99designs/gqlgen/codegen/testserver/followschema.LoopA"
+			// we only want the part after the last dot: "LoopA"
+			// this could lead to false positives, as we are only checking the name of the struct type, but these
+			// should be extremely rare, if it is even possible at all.
+			fieldAStructNameParts := strings.Split(fieldA.Type.String(), ".")
+			fieldAStructName := fieldAStructNameParts[len(fieldAStructNameParts)-1]
+
+			// find this struct type amongst the generated structs
+			for jj, structB := range b.Models {
+				if structB.Name != fieldAStructName {
+					continue
+				}
+
+				// check if structB contains a cyclical reference back to structA
+				var cyclicalReferenceFound bool
+				for _, fieldB := range structB.Fields {
+					if !isStruct(fieldB.Type) {
+						continue
+					}
+
+					fieldBStructNameParts := strings.Split(fieldB.Type.String(), ".")
+					fieldBStructName := fieldBStructNameParts[len(fieldBStructNameParts)-1]
+					if fieldBStructName == structA.Name {
+						cyclicalReferenceFound = true
+						fieldB.Type = types.NewPointer(fieldB.Type)
+						// keep looping in case this struct has additional fields of this type
+					}
+				}
+
+				// if this is a recursive struct (i.e. structA == structB), ensure that we only change this field to a pointer once
+				if cyclicalReferenceFound && ii != jj {
+					fieldA.Type = types.NewPointer(fieldA.Type)
+					break
+				}
+			}
+		}
+	}
 }

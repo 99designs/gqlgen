@@ -1,0 +1,9 @@
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  user: User!
+  userPointer: User
+}

@@ -71,7 +71,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		log.Println(err.Error())
 	}
 
-	if f.IsResolver && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {
+	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {
 		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
 	}
 

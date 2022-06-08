@@ -140,7 +140,7 @@ func TestField_CallArgs(t *testing.T) {
 							Name: "test2",
 						},
 						TypeReference: &config.TypeReference{
-							GO: types.Typ[types.Int],
+							GO: types.Typ[types.String],
 						},
 					},
 				},
@@ -151,7 +151,7 @@ func TestField_CallArgs(t *testing.T) {
 						return nil
 					}
 					return fc.Args["test"].(interface{})
-				}(), fc.Args["test2"].(int)`,
+				}(), fc.Args["test2"].(string)`,
 		},
 		{
 			Name: "Resolver field that isn't root object with single int argument",

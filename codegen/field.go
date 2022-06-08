@@ -557,7 +557,20 @@ func (f *Field) CallArgs() string {
 	}
 
 	for _, arg := range f.Args {
-		args = append(args, "fc.Args["+strconv.Quote(arg.Name)+"].("+templates.CurrentImports.LookupType(arg.TypeReference.GO)+")")
+		tmp := "fc.Args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
+
+		if types.IsInterface(arg.TypeReference.GO) {
+			tmp = fmt.Sprintf(`
+				func () interface{} {
+					if fc.Args["%s"] == nil {
+						return nil
+					}
+					return fc.Args["%s"].(interface{})
+				}()`, arg.Name, arg.Name,
+			)
+		}
+
+		args = append(args, tmp)
 	}
 
 	return strings.Join(args, ", ")

@@ -132,7 +132,7 @@ func (e *Executor) DispatchError(ctx context.Context, list gqlerror.List) *graph
 
 	resp := e.ext.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
 		resp := &graphql.Response{
-			Errors: list,
+			Errors: graphql.GetErrors(ctx),
 		}
 		resp.Extensions = graphql.GetExtensions(ctx)
 		return resp

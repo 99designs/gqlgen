@@ -164,3 +164,8 @@ type Recursive {
     FieldThree: Recursive!
     FieldFour: String!
 }
+
+type RenameFieldTest {
+    badName: String!
+    otherField: String!
+}

@@ -236,6 +236,10 @@ func TestModelGeneration(t *testing.T) {
 		require.Nil(t, out.Recursive{}.FieldThree)
 		require.NotNil(t, out.Recursive{}.FieldFour)
 	})
+
+	t.Run("overridden struct field names use same capitalization as config", func(t *testing.T) {
+		require.NotNil(t, out.RenameFieldTest{}.GOODnaME)
+	})
 }
 
 func TestModelGenerationStructFieldPointers(t *testing.T) {

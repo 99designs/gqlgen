@@ -29,7 +29,7 @@
 			{{- with .Description }}
 				{{.|prefixLines "// "}}
 			{{- end}}
-			{{ $field.Name|go }} {{$field.Type | ref}} `{{$field.Tag}}`
+			{{ $field.GoName }} {{$field.Type | ref}} `{{$field.Tag}}`
 		{{- end }}
 	}
 

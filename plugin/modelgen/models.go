@@ -48,9 +48,12 @@ type Object struct {
 
 type Field struct {
 	Description string
-	Name        string
-	Type        types.Type
-	Tag         string
+	// Name is the field's name as it appears in the schema
+	Name string
+	// GoName is the field's name as it appears in the generated Go code
+	GoName string
+	Type   types.Type
+	Tag    string
 }
 
 type Enum struct {
@@ -178,7 +181,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 					}
 				}
 
-				name := field.Name
+				name := templates.ToGo(field.Name)
 				if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
 					name = nameOveride
 				}
@@ -192,7 +195,8 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				}
 
 				f := &Field{
-					Name:        name,
+					Name:        field.Name,
+					GoName:      name,
 					Type:        typ,
 					Description: field.Description,
 					Tag:         `json:"` + field.Name + `"`,

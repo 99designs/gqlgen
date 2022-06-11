@@ -131,6 +131,11 @@ type Recursive struct {
 	FieldFour  string     `json:"FieldFour" database:"RecursiveFieldFour"`
 }
 
+type RenameFieldTest struct {
+	BadName    string `json:"badName" database:"RenameFieldTestbadName"`
+	OtherField string `json:"otherField" database:"RenameFieldTestotherField"`
+}
+
 // TypeWithDescription is a type with a description
 type TypeWithDescription struct {
 	Name *string `json:"name" database:"TypeWithDescriptionname"`

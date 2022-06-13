@@ -5,10 +5,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.9...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.10...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.10"></a>
+## [v0.17.10](https://github.com/99designs/gqlgen/compare/v0.17.9...v0.17.10) - 2022-06-13
+- <a href="https://github.com/99designs/gqlgen/commit/4ff9ea92b0d90f7fdc7c22bec592fbec1aca60a6"><tt>4ff9ea92</tt></a> release v0.17.10
+
+- <a href="https://github.com/99designs/gqlgen/commit/cac4f40486edd280654412485979ff619238a877"><tt>cac4f404</tt></a> update gqlparser (<a href="https://github.com/99designs/gqlgen/pull/39">#2239</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/d07ec12d69d3db0e5b502be7528884fdb5fb7593"><tt>d07ec12d</tt></a> Use exact capitalization from field names overridden in config (<a href="https://github.com/99designs/gqlgen/pull/37">#2237</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/3a64078299f0417fca48c652620015937cb19c5a"><tt>3a640782</tt></a> fix: <a href="https://github.com/99designs/gqlgen/pull/35">#2234](https://github.com/99designs/gqlgen/issues/2234) ([#2235</a>) Response.Errors in DispatchError function is not PresentedError
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c355df9efc910053e888922edc14170271968671"><tt>c355df9e</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/31">#1876](https://github.com/99designs/gqlgen/issues/1876): Optional Any type should allow nil values ([#2231</a>)</summary>
+
+* Anonymous func that checks value of arg type interface for nil
+
+* Added unit test for `CallArgs()`
+
+* Fixed type of argument in unit test
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/65e68108d926faf635285144d7b6670f7f6d9ce4"><tt>65e68108</tt></a> Add config boolean for whether resolvers return pointers (<a href="https://github.com/99designs/gqlgen/pull/75">#2175</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/ddd825ef62f1fa7cbc0824c1696f72a3c67d78e0"><tt>ddd825ef</tt></a> Only make cyclical struct fields pointers (<a href="https://github.com/99designs/gqlgen/pull/74">#2174</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/5a87fe29353e3fee987a39431df0322d12b575f9"><tt>5a87fe29</tt></a> Update websocket.go (<a href="https://github.com/99designs/gqlgen/pull/23">#2223</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/e2edda5d5d02a1496dcf9eb48ab95ecd8f07f018"><tt>e2edda5d</tt></a> Update dataloaders.MD (<a href="https://github.com/99designs/gqlgen/pull/21">#2221</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/3de7d2cf730cc060a27f6d1c815742d1a9f479cd"><tt>3de7d2cf</tt></a> fix: chat example frontend race condition (<a href="https://github.com/99designs/gqlgen/pull/19">#2219</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/11f405724f19fa4b93120746fdf74c1d97f4575b"><tt>11f40572</tt></a> Update Changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/caca01fb6c64ad078ff195cddf52dd6966e7995e"><tt>caca01fb</tt></a> v0.17.9 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.9"></a>
 ## [v0.17.9](https://github.com/99designs/gqlgen/compare/v0.17.8...v0.17.9) - 2022-05-26
 - <a href="https://github.com/99designs/gqlgen/commit/7f0611b2d19833a740afcfaf5708febff942da2d"><tt>7f0611b2</tt></a> release v0.17.9

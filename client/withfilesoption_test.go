@@ -2,7 +2,6 @@ package client_test
 
 import (
 	"io"
-	"io/ioutil"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -16,9 +15,9 @@ import (
 )
 
 func TestWithFiles(t *testing.T) {
-	tempFile1, _ := ioutil.TempFile(os.TempDir(), "tempFile1")
-	tempFile2, _ := ioutil.TempFile(os.TempDir(), "tempFile2")
-	tempFile3, _ := ioutil.TempFile(os.TempDir(), "tempFile3")
+	tempFile1, _ := os.CreateTemp(os.TempDir(), "tempFile1")
+	tempFile2, _ := os.CreateTemp(os.TempDir(), "tempFile2")
+	tempFile3, _ := os.CreateTemp(os.TempDir(), "tempFile3")
 	defer os.Remove(tempFile1.Name())
 	defer os.Remove(tempFile2.Name())
 	defer os.Remove(tempFile3.Name())
@@ -40,7 +39,7 @@ func TestWithFiles(t *testing.T) {
 				}
 				require.NoError(t, err)
 
-				slurp, err := ioutil.ReadAll(p)
+				slurp, err := io.ReadAll(p)
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")
@@ -82,7 +81,7 @@ func TestWithFiles(t *testing.T) {
 				}
 				require.NoError(t, err)
 
-				slurp, err := ioutil.ReadAll(p)
+				slurp, err := io.ReadAll(p)
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")
@@ -135,7 +134,7 @@ func TestWithFiles(t *testing.T) {
 				}
 				require.NoError(t, err)
 
-				slurp, err := ioutil.ReadAll(p)
+				slurp, err := io.ReadAll(p)
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")
@@ -194,7 +193,7 @@ func TestWithFiles(t *testing.T) {
 				}
 				require.NoError(t, err)
 
-				slurp, err := ioutil.ReadAll(p)
+				slurp, err := io.ReadAll(p)
 				require.NoError(t, err)
 
 				contentDisposition := p.Header.Get("Content-Disposition")

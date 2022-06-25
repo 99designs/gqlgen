@@ -3,7 +3,7 @@ package codegen
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -131,7 +131,7 @@ func generateRootFile(data *Data) error {
 	_, thisFile, _, _ := runtime.Caller(0)
 	rootDir := filepath.Dir(thisFile)
 	templatePath := filepath.Join(rootDir, "root_.gotpl")
-	templateBytes, err := ioutil.ReadFile(templatePath)
+	templateBytes, err := os.ReadFile(templatePath)
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/types"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -95,7 +94,7 @@ func Render(cfg Options) error {
 			if strings.HasSuffix(info.Name(), "_.gotpl") {
 				return nil
 			}
-			b, err := ioutil.ReadFile(path)
+			b, err := os.ReadFile(path)
 			if err != nil {
 				return err
 			}
@@ -576,7 +575,7 @@ func resolveName(name string, skip int) string {
 func render(filename string, tpldata interface{}) (*bytes.Buffer, error) {
 	t := template.New("").Funcs(Funcs())
 
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -602,7 +601,7 @@ func write(filename string, b []byte, packages *code.Packages) error {
 		formatted = b
 	}
 
-	err = ioutil.WriteFile(filename, formatted, 0o644)
+	err = os.WriteFile(filename, formatted, 0o644)
 	if err != nil {
 		return fmt.Errorf("failed to write %s: %w", filename, err)
 	}

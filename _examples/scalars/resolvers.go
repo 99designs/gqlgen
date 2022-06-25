@@ -3,9 +3,9 @@
 package scalars
 
 import (
-	context "context"
+	"context"
 	"fmt"
-	time "time"
+	"time"
 
 	"github.com/99designs/gqlgen/_examples/scalars/external"
 	"github.com/99designs/gqlgen/_examples/scalars/model"

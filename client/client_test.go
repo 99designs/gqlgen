@@ -3,7 +3,7 @@ package client_test
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
@@ -15,7 +15,7 @@ import (
 
 func TestClient(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		b, err := ioutil.ReadAll(r.Body)
+		b, err := io.ReadAll(r.Body)
 		if err != nil {
 			panic(err)
 		}
@@ -44,7 +44,7 @@ func TestClient(t *testing.T) {
 
 func TestClientMultipartFormData(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		bodyBytes, err := ioutil.ReadAll(r.Body)
+		bodyBytes, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
 		require.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="operations"`)
 		require.Contains(t, string(bodyBytes), `{"query":"mutation ($input: Input!) {}","variables":{"file":{}}`)
@@ -74,7 +74,7 @@ func TestClientMultipartFormData(t *testing.T) {
 			ff.Write([]byte("Hello World"))
 			bodyWriter.Close()
 
-			bd.HTTP.Body = ioutil.NopCloser(bodyBuf)
+			bd.HTTP.Body = io.NopCloser(bodyBuf)
 			bd.HTTP.Header.Set("Content-Type", bodyWriter.FormDataContentType())
 		},
 	)
@@ -145,7 +145,7 @@ func TestAddCookie(t *testing.T) {
 
 func TestAddExtensions(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		b, err := ioutil.ReadAll(r.Body)
+		b, err := io.ReadAll(r.Body)
 		if err != nil {
 			panic(err)
 		}

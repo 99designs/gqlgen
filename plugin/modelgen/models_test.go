@@ -4,7 +4,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -39,7 +39,7 @@ func TestModelGeneration(t *testing.T) {
 	require.True(t, cfg.Models.UserDefined("UnionWithDescription"))
 
 	t.Run("no pointer pointers", func(t *testing.T) {
-		generated, err := ioutil.ReadFile("./out/generated.go")
+		generated, err := os.ReadFile("./out/generated.go")
 		require.NoError(t, err)
 		require.NotContains(t, string(generated), "**")
 	})
@@ -55,7 +55,7 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("tags are applied", func(t *testing.T) {
-		file, err := ioutil.ReadFile("./out/generated.go")
+		file, err := os.ReadFile("./out/generated.go")
 		require.NoError(t, err)
 
 		fileText := string(file)
@@ -73,7 +73,7 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("field hooks are applied", func(t *testing.T) {
-		file, err := ioutil.ReadFile("./out/generated.go")
+		file, err := os.ReadFile("./out/generated.go")
 		require.NoError(t, err)
 
 		fileText := string(file)
@@ -253,7 +253,7 @@ func TestModelGenerationStructFieldPointers(t *testing.T) {
 	require.NoError(t, p.MutateConfig(cfg))
 
 	t.Run("no pointer pointers", func(t *testing.T) {
-		generated, err := ioutil.ReadFile("./out_struct_pointers/generated.go")
+		generated, err := os.ReadFile("./out_struct_pointers/generated.go")
 		require.NoError(t, err)
 		require.NotContains(t, string(generated), "**")
 	})

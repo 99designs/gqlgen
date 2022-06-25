@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -56,7 +56,7 @@ func (r *Rewriter) getSource(start, end token.Pos) string {
 
 func (r *Rewriter) getFile(filename string) string {
 	if _, ok := r.files[filename]; !ok {
-		b, err := ioutil.ReadFile(filename)
+		b, err := os.ReadFile(filename)
 		if err != nil {
 			panic(fmt.Errorf("unable to load file, already exists: %w", err))
 		}

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -210,7 +210,7 @@ func TestFileUpload(t *testing.T) {
 		req := &http.Request{
 			Method: "POST",
 			Header: http.Header{"Content-Type": {`multipart/form-data; boundary="foo123"`}},
-			Body:   ioutil.NopCloser(new(bytes.Buffer)),
+			Body:   io.NopCloser(new(bytes.Buffer)),
 		}
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)

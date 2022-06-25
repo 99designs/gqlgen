@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -130,7 +130,7 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 		if err != nil {
 			return nil, fmt.Errorf("encode: %w", err)
 		}
-		bd.HTTP.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
+		bd.HTTP.Body = io.NopCloser(bytes.NewBuffer(requestBody))
 	default:
 		panic("unsupported encoding " + bd.HTTP.Header.Get("Content-Type"))
 	}

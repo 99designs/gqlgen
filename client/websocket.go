@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http/httptest"
 	"strings"
 
@@ -56,7 +56,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 		return errorSubscription(fmt.Errorf("request: %w", err))
 	}
 
-	requestBody, err := ioutil.ReadAll(r.Body)
+	requestBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		return errorSubscription(fmt.Errorf("parse body: %w", err))
 	}

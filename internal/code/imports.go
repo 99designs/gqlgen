@@ -4,7 +4,7 @@ import (
 	"go/build"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -26,7 +26,7 @@ func NameForDir(dir string) string {
 	if err != nil {
 		return SanitizePackageName(filepath.Base(dir))
 	}
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return SanitizePackageName(filepath.Base(dir))
 	}
@@ -73,7 +73,7 @@ func goModuleRoot(dir string) (string, bool) {
 			break
 		}
 
-		if content, err := ioutil.ReadFile(filepath.Join(modDir, "go.mod")); err == nil {
+		if content, err := os.ReadFile(filepath.Join(modDir, "go.mod")); err == nil {
 			moduleName := string(modregex.FindSubmatch(content)[1])
 			result = goModuleSearchResult{
 				path:       moduleName,

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
@@ -50,7 +50,7 @@ func WithFiles() Option {
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
 
-		//-b7955bd2e1d17b67ac157b9e9ddb6238888caefc6f3541920a1debad284d
+		// -b7955bd2e1d17b67ac157b9e9ddb6238888caefc6f3541920a1debad284d
 		// Content-Disposition: form-data; name="operations"
 		//
 		// {"query":"mutation ($input: Input!) {}","variables":{"input":{"file":{}}}
@@ -108,14 +108,14 @@ func WithFiles() Option {
 		for i, fileData := range filesGroup {
 			h := make(textproto.MIMEHeader)
 			h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%d"; filename="%s"`, i, fileData[0].file.Name()))
-			b, _ := ioutil.ReadFile(fileData[0].file.Name())
+			b, _ := os.ReadFile(fileData[0].file.Name())
 			h.Set("Content-Type", http.DetectContentType(b))
 			ff, _ := bodyWriter.CreatePart(h)
 			ff.Write(b)
 		}
 		bodyWriter.Close()
 
-		bd.HTTP.Body = ioutil.NopCloser(bodyBuf)
+		bd.HTTP.Body = io.NopCloser(bodyBuf)
 		bd.HTTP.Header.Set("Content-Type", bodyWriter.FormDataContentType())
 	}
 }

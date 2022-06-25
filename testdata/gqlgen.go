@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -19,7 +19,7 @@ func main() {
 	cfgPath := flag.String("config", "", "path to config file (use default if omitted)")
 	flag.Parse()
 
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	start := graphql.Now()
 

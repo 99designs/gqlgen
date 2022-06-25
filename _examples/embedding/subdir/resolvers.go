@@ -4,7 +4,7 @@
 package subdir
 
 import (
-	context "context"
+	"context"
 
 	"github.com/99designs/gqlgen/_examples/embedding/subdir/gendir"
 )

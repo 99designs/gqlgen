@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 
@@ -41,7 +41,7 @@ func getResolver() *fileupload.Stub {
 	resolver := &fileupload.Stub{}
 
 	resolver.MutationResolver.SingleUpload = func(ctx context.Context, file graphql.Upload) (*model.File, error) {
-		content, err := ioutil.ReadAll(file.File)
+		content, err := io.ReadAll(file.File)
 		if err != nil {
 			return nil, err
 		}
@@ -52,7 +52,7 @@ func getResolver() *fileupload.Stub {
 		}, nil
 	}
 	resolver.MutationResolver.SingleUploadWithPayload = func(ctx context.Context, req model.UploadFile) (*model.File, error) {
-		content, err := ioutil.ReadAll(req.File.File)
+		content, err := io.ReadAll(req.File.File)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func getResolver() *fileupload.Stub {
 		}
 		var resp []*model.File
 		for i := range files {
-			content, err := ioutil.ReadAll(files[i].File)
+			content, err := io.ReadAll(files[i].File)
 			if err != nil {
 				return []*model.File{}, err
 			}
@@ -86,7 +86,7 @@ func getResolver() *fileupload.Stub {
 		}
 		var resp []*model.File
 		for i := range req {
-			content, err := ioutil.ReadAll(req[i].File.File)
+			content, err := io.ReadAll(req[i].File.File)
 			if err != nil {
 				return []*model.File{}, err
 			}

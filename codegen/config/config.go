@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -61,7 +60,7 @@ func LoadDefaultConfig() (*Config, error) {
 		filename = filepath.ToSlash(filename)
 		var err error
 		var schemaRaw []byte
-		schemaRaw, err = ioutil.ReadFile(filename)
+		schemaRaw, err = os.ReadFile(filename)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open schema: %w", err)
 		}
@@ -98,7 +97,7 @@ var path2regex = strings.NewReplacer(
 func LoadConfig(filename string) (*Config, error) {
 	config := DefaultConfig()
 
-	b, err := ioutil.ReadFile(filename)
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
@@ -177,7 +176,7 @@ func CompleteConfig(config *Config) error {
 		filename = filepath.ToSlash(filename)
 		var err error
 		var schemaRaw []byte
-		schemaRaw, err = ioutil.ReadFile(filename)
+		schemaRaw, err = os.ReadFile(filename)
 		if err != nil {
 			return fmt.Errorf("unable to open schema: %w", err)
 		}

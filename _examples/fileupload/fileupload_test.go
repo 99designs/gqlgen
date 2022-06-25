@@ -4,7 +4,6 @@ package fileupload
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -23,12 +22,12 @@ func TestFileUpload(t *testing.T) {
 	defer srv.Close()
 	gql := gqlclient.New(srv.Config.Handler, gqlclient.Path("/graphql"))
 
-	aTxtFile, _ := ioutil.TempFile(os.TempDir(), "a.txt")
+	aTxtFile, _ := os.CreateTemp(os.TempDir(), "a.txt")
 	defer os.Remove(aTxtFile.Name())
 	aTxtFile.WriteString(`test`)
 
-	a1TxtFile, _ := ioutil.TempFile(os.TempDir(), "a.txt")
-	b1TxtFile, _ := ioutil.TempFile(os.TempDir(), "b.txt")
+	a1TxtFile, _ := os.CreateTemp(os.TempDir(), "a.txt")
+	b1TxtFile, _ := os.CreateTemp(os.TempDir(), "b.txt")
 	defer os.Remove(a1TxtFile.Name())
 	defer os.Remove(b1TxtFile.Name())
 	a1TxtFile.WriteString(`test1`)
@@ -38,7 +37,7 @@ func TestFileUpload(t *testing.T) {
 		resolver.MutationResolver.SingleUpload = func(ctx context.Context, file graphql.Upload) (*model.File, error) {
 			require.NotNil(t, file)
 			require.NotNil(t, file.File)
-			content, err := ioutil.ReadAll(file.File)
+			content, err := io.ReadAll(file.File)
 			require.Nil(t, err)
 			require.Equal(t, string(content), "test")
 
@@ -75,7 +74,7 @@ func TestFileUpload(t *testing.T) {
 			require.Equal(t, req.ID, 1)
 			require.NotNil(t, req.File)
 			require.NotNil(t, req.File.File)
-			content, err := ioutil.ReadAll(req.File.File)
+			content, err := io.ReadAll(req.File.File)
 			require.Nil(t, err)
 			require.Equal(t, string(content), "test")
 
@@ -114,7 +113,7 @@ func TestFileUpload(t *testing.T) {
 			var resp []*model.File
 			for i := range files {
 				require.NotNil(t, files[i].File)
-				content, err := ioutil.ReadAll(files[i].File)
+				content, err := io.ReadAll(files[i].File)
 				require.Nil(t, err)
 				contents = append(contents, string(content))
 				resp = append(resp, &model.File{
@@ -164,7 +163,7 @@ func TestFileUpload(t *testing.T) {
 			for i := range req {
 				require.NotNil(t, req[i].File)
 				require.NotNil(t, req[i].File.File)
-				content, err := ioutil.ReadAll(req[i].File.File)
+				content, err := io.ReadAll(req[i].File.File)
 				require.Nil(t, err)
 				ids = append(ids, req[i].ID)
 				contents = append(contents, string(content))

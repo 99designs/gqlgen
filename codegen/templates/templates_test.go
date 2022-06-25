@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -109,7 +108,7 @@ func TestCenter(t *testing.T) {
 }
 
 func TestTemplateOverride(t *testing.T) {
-	f, err := ioutil.TempFile("", "gqlgen")
+	f, err := os.CreateTemp("", "gqlgen")
 	if err != nil {
 		t.Fatal(err)
 	}

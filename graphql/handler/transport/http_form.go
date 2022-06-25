@@ -3,7 +3,6 @@ package transport
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
@@ -124,7 +123,7 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 
 		var upload graphql.Upload
 		if r.ContentLength < f.maxMemory() {
-			fileBytes, err := ioutil.ReadAll(part)
+			fileBytes, err := io.ReadAll(part)
 			if err != nil {
 				w.WriteHeader(http.StatusUnprocessableEntity)
 				writeJsonErrorf(w, "failed to read file for key %s", key)
@@ -145,7 +144,7 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 				}
 			}
 		} else {
-			tmpFile, err := ioutil.TempFile(os.TempDir(), "gqlgen-")
+			tmpFile, err := os.CreateTemp(os.TempDir(), "gqlgen-")
 			if err != nil {
 				w.WriteHeader(http.StatusUnprocessableEntity)
 				writeJsonErrorf(w, "failed to create temp file for key %s", key)

@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 {{ range .Commits -}}
 
 {{- /** Remove markdown urls when there's a pull request linked and replace it with a tag **/ -}}
-{{- $subject := (regexReplaceAll `URL` (regexReplaceAll `\[(.*)(\d\d)\]\(.*?\)` .Subject "<a href=\"URL/pull/${2}\">${1}${2}</a>") $repourl) -}}
+{{- $subject := (regexReplaceAll `URL` (regexReplaceAll `\[#(\d+)\]\(.*?\)` .Subject "<a href=\"URL/pull/${1}\">#${1}</a>") $repourl) -}}
 {{- /** Filter out refs mentioned in the title **/ -}}
 {{- $list := (list) -}}
 {{- range $idx, $ref := .Refs -}}
@@ -52,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### {{ .Title }}
 {{ range .Commits -}}
 {{- /** Remove markdown urls when there's a pull request linked and replace it with a tag **/ -}}
-{{- $subject := (regexReplaceAll `URL` (regexReplaceAll `\[(.*)(\d\d)\]\(.*?\)` .Subject "<a href=\"URL/pull/${2}\">${1}${2}</a>") $repourl) -}}
+{{- $subject := (regexReplaceAll `URL` (regexReplaceAll `\[#(\d+)\]\(.*?\)` .Subject "<a href=\"URL/pull/${1}\">#${1}</a>") $repourl) -}}
 {{- /** Filter out refs mentioned in the title **/ -}}
 {{- $list := (list) -}}
 {{- range $idx, $ref := .Refs -}}
@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 {{ range .Commits -}}
 
 {{- /** Remove markdown urls when there's a pull request linked and replace it with a tag **/ -}}
-{{- $subject := (regexReplaceAll `URL` (regexReplaceAll `\[(.*)(\d\d)\]\(.*?\)` .Subject "<a href=\"URL/pull/${2}\">${1}${2}</a>") $repourl) -}}
+{{- $subject := (regexReplaceAll `URL` (regexReplaceAll `\[#(\d+)\]\(.*?\)` .Subject "<a href=\"URL/pull/${1}\">#${1}</a>") $repourl) -}}
 {{- /** Filter out refs mentioned in the title **/ -}}
 {{- $list := (list) -}}
 {{- range $idx, $ref := .Refs -}}

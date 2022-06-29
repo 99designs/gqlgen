@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"os"
@@ -12,6 +13,9 @@ import (
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/v2/ast"
 )
+
+//go:embed *.gotpl
+var CodegenTemplates embed.FS
 
 func GenerateCode(data *Data) error {
 	if !data.Config.Exec.IsDefined() {
@@ -36,6 +40,7 @@ func generateSingleFile(data *Data) error {
 		RegionTags:      true,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
+		TemplateFS:      CodegenTemplates,
 	})
 }
 

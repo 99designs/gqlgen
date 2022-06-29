@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/types"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -35,6 +36,11 @@ type Options struct {
 	// the plugin processor will look for .gotpl files
 	// in the same directory of where you wrote the plugin.
 	Template string
+
+	// Use the go:embed API to collect all the template files you want to pass into Render
+	// this is an alternative to passing the Template option
+	TemplateFS fs.FS
+
 	// Filename is the name of the file that will be
 	// written to the system disk once the template is rendered.
 	Filename        string
@@ -62,70 +68,41 @@ func Render(cfg Options) error {
 	}
 	CurrentImports = &Imports{packages: cfg.Packages, destDir: filepath.Dir(cfg.Filename)}
 
-	// load path relative to calling source file
-	_, callerFile, _, _ := runtime.Caller(1)
-	rootDir := filepath.Dir(callerFile)
-
 	funcs := Funcs()
 	for n, f := range cfg.Funcs {
 		funcs[n] = f
 	}
+
 	t := template.New("").Funcs(funcs)
+	t, err := parseTemplates(cfg, t)
+	if err != nil {
+		return err
+	}
 
-	var roots []string
-	if cfg.Template != "" {
-		var err error
-		t, err = t.New("template.gotpl").Parse(cfg.Template)
-		if err != nil {
-			return fmt.Errorf("error with provided template: %w", err)
+	var allTemplates []string
+	for _, template := range t.Templates() {
+		// templates that end with _.gotpl are special files we don't want to include
+		if strings.HasSuffix(template.Name(), "_.gotpl") {
+			continue
 		}
-		roots = append(roots, "template.gotpl")
-	} else {
-		// load all the templates in the directory
-		err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			name := filepath.ToSlash(strings.TrimPrefix(path, rootDir+string(os.PathSeparator)))
-			if !strings.HasSuffix(info.Name(), ".gotpl") {
-				return nil
-			}
-			// omit any templates with "_" at the end of their name, which are meant for specific contexts only
-			if strings.HasSuffix(info.Name(), "_.gotpl") {
-				return nil
-			}
-			b, err := os.ReadFile(path)
-			if err != nil {
-				return err
-			}
 
-			t, err = t.New(name).Parse(string(b))
-			if err != nil {
-				return fmt.Errorf("%s: %w", cfg.Filename, err)
-			}
-
-			roots = append(roots, name)
-
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("locating templates: %w", err)
-		}
+		allTemplates = append(allTemplates, template.Name())
 	}
 
 	// then execute all the important looking ones in order, adding them to the same file
-	sort.Slice(roots, func(i, j int) bool {
+	sort.Slice(allTemplates, func(i, j int) bool {
 		// important files go first
-		if strings.HasSuffix(roots[i], "!.gotpl") {
+		if strings.HasSuffix(allTemplates[i], "!.gotpl") {
 			return true
 		}
-		if strings.HasSuffix(roots[j], "!.gotpl") {
+		if strings.HasSuffix(allTemplates[j], "!.gotpl") {
 			return false
 		}
-		return roots[i] < roots[j]
+		return allTemplates[i] < allTemplates[j]
 	})
+
 	var buf bytes.Buffer
-	for _, root := range roots {
+	for _, root := range allTemplates {
 		if cfg.RegionTags {
 			buf.WriteString("\n// region    " + center(70, "*", " "+root+" ") + "\n")
 		}
@@ -155,7 +132,7 @@ func Render(cfg Options) error {
 	result.WriteString("import (\n")
 	result.WriteString(CurrentImports.String())
 	result.WriteString(")\n")
-	_, err := buf.WriteTo(&result)
+	_, err = buf.WriteTo(&result)
 	if err != nil {
 		return err
 	}
@@ -168,6 +145,34 @@ func Render(cfg Options) error {
 
 	cfg.Packages.Evict(code.ImportPathForDir(filepath.Dir(cfg.Filename)))
 	return nil
+}
+
+func parseTemplates(cfg Options, t *template.Template) (*template.Template, error) {
+	if cfg.Template != "" {
+		var err error
+		t, err = t.New("template.gotpl").Parse(cfg.Template)
+		if err != nil {
+			return nil, fmt.Errorf("error with provided template: %w", err)
+		}
+		return t, nil
+	}
+
+	var fileSystem fs.FS
+	if cfg.TemplateFS != nil {
+		fileSystem = cfg.TemplateFS
+	} else {
+		// load path relative to calling source file
+		_, callerFile, _, _ := runtime.Caller(1)
+		rootDir := filepath.Dir(callerFile)
+		fileSystem = os.DirFS(rootDir)
+	}
+
+	t, err := t.ParseFS(fileSystem, "*.gotpl")
+	if err != nil {
+		return nil, fmt.Errorf("locating templates: %w", err)
+	}
+
+	return t, nil
 }
 
 func center(width int, pad string, s string) string {

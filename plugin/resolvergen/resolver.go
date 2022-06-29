@@ -1,6 +1,7 @@
 package resolvergen
 
 import (
+	"embed"
 	"errors"
 	"io/fs"
 	"os"
@@ -13,6 +14,9 @@ import (
 	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
 )
+
+//go:embed *.gotpl
+var codegenTemplates embed.FS
 
 func New() plugin.Plugin {
 	return &Plugin{}
@@ -76,6 +80,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,
+		TemplateFS:  codegenTemplates,
 	})
 }
 
@@ -140,9 +145,10 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			FileNotice: `
 				// This file will be automatically regenerated based on the schema, any resolver implementations
 				// will be copied through when generating and any unknown code will be moved to the end.`,
-			Filename: filename,
-			Data:     resolverBuild,
-			Packages: data.Config.Packages,
+			Filename:   filename,
+			Data:       resolverBuild,
+			Packages:   data.Config.Packages,
+			TemplateFS: codegenTemplates,
 		})
 		if err != nil {
 			return err

@@ -15,7 +15,7 @@ import (
 )
 
 //go:embed *.gotpl
-var CodegenTemplates embed.FS
+var codegenTemplates embed.FS
 
 func GenerateCode(data *Data) error {
 	if !data.Config.Exec.IsDefined() {
@@ -40,7 +40,7 @@ func generateSingleFile(data *Data) error {
 		RegionTags:      true,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
-		TemplateFS:      CodegenTemplates,
+		TemplateFS:      codegenTemplates,
 	})
 }
 
@@ -87,6 +87,7 @@ func generatePerSchema(data *Data) error {
 			RegionTags:      true,
 			GeneratedHeader: true,
 			Packages:        data.Config.Packages,
+			TemplateFS:      codegenTemplates,
 		})
 		if err != nil {
 			return err
@@ -150,6 +151,7 @@ func generateRootFile(data *Data) error {
 		RegionTags:      false,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
+		TemplateFS:      codegenTemplates,
 	})
 }
 

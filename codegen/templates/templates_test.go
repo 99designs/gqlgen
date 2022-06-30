@@ -1,13 +1,19 @@
 package templates
 
 import (
+	"embed"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/99designs/gqlgen/internal/code"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+//go:embed *.gotpl
+var templateFS embed.FS
 
 func TestToGo(t *testing.T) {
 	require.Equal(t, "ToCamel", ToGo("TO_CAMEL"))
@@ -118,4 +124,31 @@ func TestTemplateOverride(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestRenderFS(t *testing.T) {
+
+	tempDir := t.TempDir()
+
+	outDir := filepath.Join(tempDir, "output")
+
+	_ = os.Mkdir(outDir, 0o755)
+
+	f, err := os.CreateTemp(outDir, "gqlgen.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	defer os.RemoveAll(f.Name())
+	err = Render(Options{TemplateFS: templateFS, Filename: f.Name(), Packages: &code.Packages{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedString := "package \n\nimport (\n)\nthis is my test package"
+	actualContents, _ := os.ReadFile(f.Name())
+	actualContentsStr := string(actualContents)
+
+	// don't look at last character since it's \n on Linux and \r\n on Windows
+	assert.Equal(t, expectedString, actualContentsStr[:len(expectedString)])
 }

@@ -1,6 +1,7 @@
 package federation
 
 import (
+	_ "embed"
 	"fmt"
 	"sort"
 	"strings"
@@ -13,6 +14,9 @@ import (
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
+
+//go:embed federation.gotpl
+var federationTemplate string
 
 type federation struct {
 	Entities []*Entity
@@ -85,7 +89,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	input := `
 	scalar _Any
 	scalar _FieldSet
-	
+
 	directive @external on FIELD_DEFINITION
 	directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
@@ -274,6 +278,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		Data:            f,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
+		Template:        federationTemplate,
 	})
 }
 

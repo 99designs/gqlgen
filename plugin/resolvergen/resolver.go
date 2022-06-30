@@ -1,6 +1,7 @@
 package resolvergen
 
 import (
+	_ "embed"
 	"errors"
 	"io/fs"
 	"os"
@@ -13,6 +14,9 @@ import (
 	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
 )
+
+//go:embed resolver.gotpl
+var resolverTemplate string
 
 func New() plugin.Plugin {
 	return &Plugin{}
@@ -76,6 +80,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,
+		Template:    resolverTemplate,
 	})
 }
 
@@ -143,6 +148,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			Filename: filename,
 			Data:     resolverBuild,
 			Packages: data.Config.Packages,
+			Template: resolverTemplate,
 		})
 		if err != nil {
 			return err

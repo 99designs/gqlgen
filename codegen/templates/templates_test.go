@@ -127,6 +127,7 @@ func TestTemplateOverride(t *testing.T) {
 }
 
 func TestRenderFS(t *testing.T) {
+
 	tempDir := t.TempDir()
 
 	outDir := filepath.Join(tempDir, "output")
@@ -144,6 +145,10 @@ func TestRenderFS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	contents, _ := os.ReadFile(f.Name())
-	assert.Equal(t, "package \n\nimport (\n)\nthis is my test package\n", string(contents))
+	expectedString := "package \n\nimport (\n)\nthis is my test package"
+	actualContents, _ := os.ReadFile(f.Name())
+	actualContentsStr := string(actualContents)
+
+	// don't look at last character since it's \n on Linux and \r\n on Windows
+	assert.Equal(t, expectedString, actualContentsStr[:len(expectedString)])
 }

@@ -35,7 +35,7 @@ Maps a `Upload` GraphQL scalar to a `graphql.Upload` struct, defined as follows:
 
 ```go
 type Upload struct {
-	File        io.Reader
+	File        io.ReadSeeker
 	Filename    string
 	Size        int64
 	ContentType string

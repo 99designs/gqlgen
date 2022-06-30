@@ -82,4 +82,46 @@ func TestBytesRead(t *testing.T) {
 		}
 		require.Equal(t, "0193456789", string(got))
 	})
+
+	t.Run("read using buffer multiple times", func(t *testing.T) {
+		data := []byte("0123456789")
+		r := bytesReader{s: &data}
+
+		got := make([]byte, 0, 11)
+		buf := make([]byte, 1)
+		for {
+			n, err := r.Read(buf)
+			if n < 0 {
+				require.Fail(t, "unexpected bytes read size")
+			}
+			got = append(got, buf[:n]...)
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				require.Fail(t, "unexpected error while reading", err.Error())
+			}
+		}
+		require.Equal(t, "0123456789", string(got))
+
+		pos, err := r.Seek(0, io.SeekStart)
+		require.NoError(t, err)
+		require.Equal(t, int64(0), pos)
+
+		got = make([]byte, 0, 11)
+		for {
+			n, err := r.Read(buf)
+			if n < 0 {
+				require.Fail(t, "unexpected bytes read size")
+			}
+			got = append(got, buf[:n]...)
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				require.Fail(t, "unexpected error while reading", err.Error())
+			}
+		}
+		require.Equal(t, "0123456789", string(got))
+	})
 }

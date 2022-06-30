@@ -2,19 +2,18 @@ name: Test
 on: [push, pull_request]
 
 
-env:
-  GO_VERSION: 1.16
-
 jobs:
   test:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        go: [1.16, 1.17, 1.18]
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: ${{ matrix.go }}
       - run: go mod download && go test -race ./...
       - run: cd _examples && go mod download && go test -race ./...

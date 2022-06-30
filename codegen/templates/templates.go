@@ -79,7 +79,7 @@ func Render(cfg Options) error {
 		return err
 	}
 
-	var allTemplates []string
+	roots := make([]string, 0, len(t.Templates()))
 	for _, template := range t.Templates() {
 		// templates that end with _.gotpl are special files we don't want to include
 		if strings.HasSuffix(template.Name(), "_.gotpl") ||
@@ -88,23 +88,23 @@ func Render(cfg Options) error {
 			continue
 		}
 
-		allTemplates = append(allTemplates, template.Name())
+		roots = append(roots, template.Name())
 	}
 
 	// then execute all the important looking ones in order, adding them to the same file
-	sort.Slice(allTemplates, func(i, j int) bool {
+	sort.Slice(roots, func(i, j int) bool {
 		// important files go first
-		if strings.HasSuffix(allTemplates[i], "!.gotpl") {
+		if strings.HasSuffix(roots[i], "!.gotpl") {
 			return true
 		}
-		if strings.HasSuffix(allTemplates[j], "!.gotpl") {
+		if strings.HasSuffix(roots[j], "!.gotpl") {
 			return false
 		}
-		return allTemplates[i] < allTemplates[j]
+		return roots[i] < roots[j]
 	})
 
 	var buf bytes.Buffer
-	for _, root := range allTemplates {
+	for _, root := range roots {
 		if cfg.RegionTags {
 			buf.WriteString("\n// region    " + center(70, "*", " "+root+" ") + "\n")
 		}

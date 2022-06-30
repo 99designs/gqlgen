@@ -82,7 +82,9 @@ func Render(cfg Options) error {
 	var allTemplates []string
 	for _, template := range t.Templates() {
 		// templates that end with _.gotpl are special files we don't want to include
-		if strings.HasSuffix(template.Name(), "_.gotpl") {
+		if strings.HasSuffix(template.Name(), "_.gotpl") ||
+			// filter out templates added with {{ template xxx }} syntax inside the template file
+			!strings.HasSuffix(template.Name(), ".gotpl") {
 			continue
 		}
 

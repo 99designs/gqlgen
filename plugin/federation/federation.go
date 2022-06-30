@@ -1,7 +1,7 @@
 package federation
 
 import (
-	"embed"
+	_ "embed"
 	"fmt"
 	"sort"
 	"strings"
@@ -15,8 +15,8 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
 
-//go:embed *.gotpl
-var codegenTemplates embed.FS
+//go:embed federation.gotpl
+var federationTemplate string
 
 type federation struct {
 	Entities []*Entity
@@ -278,7 +278,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		Data:            f,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
-		TemplateFS:      codegenTemplates,
+		Template:        federationTemplate,
 	})
 }
 

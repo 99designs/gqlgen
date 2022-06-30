@@ -1,7 +1,7 @@
 package modelgen
 
 import (
-	"embed"
+	_ "embed"
 	"fmt"
 	"go/types"
 	"sort"
@@ -13,8 +13,8 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-//go:embed *.gotpl
-var codegenTemplates embed.FS
+//go:embed models.gotpl
+var modelTemplate string
 
 type BuildMutateHook = func(b *ModelBuild) *ModelBuild
 
@@ -273,7 +273,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		Data:            b,
 		GeneratedHeader: true,
 		Packages:        cfg.Packages,
-		TemplateFS:      codegenTemplates,
+		Template:        modelTemplate,
 	})
 	if err != nil {
 		return err

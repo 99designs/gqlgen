@@ -1,7 +1,7 @@
 package servergen
 
 import (
-	"embed"
+	_ "embed"
 	"errors"
 	"io/fs"
 	"log"
@@ -12,8 +12,8 @@ import (
 	"github.com/99designs/gqlgen/plugin"
 )
 
-//go:embed *.gotpl
-var codegenTemplates embed.FS
+//go:embed server.gotpl
+var serverTemplate string
 
 func New(filename string) plugin.Plugin {
 	return &Plugin{filename}
@@ -41,7 +41,7 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 			Filename:    m.filename,
 			Data:        serverBuild,
 			Packages:    data.Config.Packages,
-			TemplateFS:  codegenTemplates,
+			Template:    serverTemplate,
 		})
 	}
 

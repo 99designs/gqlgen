@@ -1,7 +1,7 @@
 package stubgen
 
 import (
-	"embed"
+	_ "embed"
 	"path/filepath"
 	"syscall"
 
@@ -13,8 +13,8 @@ import (
 	"github.com/99designs/gqlgen/plugin"
 )
 
-//go:embed *.gotpl
-var codegenTemplates embed.FS
+//go:embed stubs.gotpl
+var stubsTemplate string
 
 func New(filename string, typename string) plugin.Plugin {
 	return &Plugin{filename: filename, typeName: typename}
@@ -55,7 +55,7 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 		},
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
-		TemplateFS:      codegenTemplates,
+		Template:        stubsTemplate,
 	})
 }
 

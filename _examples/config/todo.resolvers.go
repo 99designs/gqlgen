@@ -8,6 +8,7 @@ import (
 	"fmt"
 )
 
+// ID is the resolver for the id field.
 func (r *todoResolver) ID(ctx context.Context, obj *Todo) (string, error) {
 	if obj.ID != "" {
 		return obj.ID, nil

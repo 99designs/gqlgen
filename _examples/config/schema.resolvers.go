@@ -7,6 +7,7 @@ import (
 	"context"
 )
 
+// CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
 	newID := r.nextID
 	r.nextID++
@@ -21,6 +22,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo
 	return newTodo, nil
 }
 
+// Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
 	return r.todos, nil
 }

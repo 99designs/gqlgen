@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
 
+// Reviews is the resolver for the reviews field.
 func (r *userResolver) Reviews(ctx context.Context, obj *model.User) ([]*model.Review, error) {
 	var productReviews []*model.Review
 	for _, review := range reviews {

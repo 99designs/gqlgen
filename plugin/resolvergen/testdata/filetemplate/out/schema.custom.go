@@ -9,11 +9,13 @@ import (
 	customresolver "github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile/out"
 )
 
+// Resolver is the resolver for the resolver field.
 func (r *queryCustomResolverType) Resolver(ctx context.Context) (*customresolver.Resolver, error) {
 	// CustomerResolverType.Resolver implementation
 	return nil, nil
 }
 
+// Name is the resolver for the name field.
 func (r *resolverCustomResolverType) Name(ctx context.Context, obj *customresolver.Resolver) (string, error) {
 	// CustomerResolverType.Name implementation
 	return "", nil

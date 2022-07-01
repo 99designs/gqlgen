@@ -2,6 +2,7 @@ package resolvergen
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -58,7 +59,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 				continue
 			}
 
-			resolver := Resolver{o, f, `panic("not implemented")`}
+			resolver := Resolver{o, f, "// foo", `panic("not implemented")`}
 			file.Resolvers = append(file.Resolvers, &resolver)
 		}
 	}
@@ -109,11 +110,15 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
+			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
 			if implementation == "" {
 				implementation = `panic(fmt.Errorf("not implemented"))`
 			}
+			if comment == "" {
+				comment = fmt.Sprintf("%v is the resolver for the %v field.", f.GoFieldName, f.Name)
+			}
 
-			resolver := Resolver{o, f, implementation}
+			resolver := Resolver{o, f, comment, implementation}
 			fn := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			if files[fn] == nil {
 				files[fn] = &File{}
@@ -198,6 +203,7 @@ func (f *File) Imports() string {
 type Resolver struct {
 	Object         *codegen.Object
 	Field          *codegen.Field
+	Comment        string
 	Implementation string
 }
 

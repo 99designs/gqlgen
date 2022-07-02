@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
 
+// FindProductByManufacturerIDAndID is the resolver for the findProductByManufacturerIDAndID field.
 func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID string, id string) (*model.Product, error) {
 	var productReviews []*model.Review
 
@@ -27,6 +28,7 @@ func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, m
 	}, nil
 }
 
+// FindUserByID is the resolver for the findUserByID field.
 func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*model.User, error) {
 	return &model.User{
 		ID:   id,

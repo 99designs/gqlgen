@@ -5,7 +5,8 @@ jobs:
   integration:
     strategy:
       matrix:
-        go: [1.16]
+        go: [1.16, 1.18]
+        node: [14, 16]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -15,7 +16,7 @@ jobs:
           go-version: ${{ matrix.go }}
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: ${{ matrix.node }}
       - run: go mod download
       - run: cd integration ; npm install
       - run: .github/workflows/check-integration
@@ -23,7 +24,8 @@ jobs:
   federation:
     strategy:
       matrix:
-        go: [1.16]
+        go: [1.16, 1.18]
+        node: [14, 16]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -32,7 +34,7 @@ jobs:
           go-version: ${{ matrix.go }}
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: ${{ matrix.node }}
       - run: go mod download
       - run: cd _examples/federation ; npm install
       - run: .github/workflows/check-federation
@@ -40,7 +42,7 @@ jobs:
   init:
     strategy:
       matrix:
-        go: [1.16]
+        go: [1.16, 1.18]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

@@ -5,7 +5,7 @@ jobs:
   nancy:
     strategy:
       matrix:
-        go: [1.16, 1.17, 1.18]
+        go: [1.16, 1.18]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

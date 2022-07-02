@@ -4,7 +4,7 @@ set -euo pipefail
 
 cd _examples/federation
 
-bash ./start.sh &
+./start.sh &
 
 sleep 5
 curl -s --connect-timeout 5 \

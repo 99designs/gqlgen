@@ -397,7 +397,12 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"message"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "message":
 			var err error
@@ -442,7 +447,12 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"text", "nullableText", "inner", "innerNullable", "thirdParty"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "text":
 			var err error

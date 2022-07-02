@@ -341,7 +341,12 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 		asMap["truthyBoolean"] = true
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"falsyBoolean", "truthyBoolean"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "falsyBoolean":
 			var err error

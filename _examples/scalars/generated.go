@@ -3105,7 +3105,12 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"location", "createdAfter", "isBanned"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "location":
 			var err error

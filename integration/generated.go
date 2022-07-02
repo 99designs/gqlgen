@@ -2967,7 +2967,12 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj in
 		asMap["op"] = "EQ"
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"value", "timezone", "op"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "value":
 			var err error
@@ -3006,7 +3011,12 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"enumVal", "strVal", "intVal", "scalarVal"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "enumVal":
 			var err error

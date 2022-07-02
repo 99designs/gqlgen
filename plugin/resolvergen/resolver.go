@@ -12,6 +12,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func New() plugin.Plugin {
@@ -99,7 +101,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 
 			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
-			rewriter.GetMethodBody(data.Config.Resolver.Type, strings.Title(o.Name))
+			rewriter.GetMethodBody(data.Config.Resolver.Type, cases.Title(language.English).String(o.Name))
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
 		for _, f := range o.Fields {

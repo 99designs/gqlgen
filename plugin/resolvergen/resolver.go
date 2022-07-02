@@ -100,8 +100,9 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				files[fn] = &File{}
 			}
 
+			caser := cases.Title(language.English, cases.NoLower)
 			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
-			rewriter.GetMethodBody(data.Config.Resolver.Type, cases.Title(language.English).String(o.Name))
+			rewriter.GetMethodBody(data.Config.Resolver.Type, caser.String(o.Name))
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
 		for _, f := range o.Fields {

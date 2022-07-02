@@ -471,10 +471,11 @@ func (f *Field) GoNameUnexported() string {
 }
 
 func (f *Field) ShortInvocation() string {
+	caser := cases.Title(language.English, cases.NoLower)
 	if f.Object.Kind == ast.InputObject {
-		return fmt.Sprintf("%s().%s(ctx, &it, data)", cases.Title(language.English).String(f.Object.Definition.Name), f.GoFieldName)
+		return fmt.Sprintf("%s().%s(ctx, &it, data)", caser.String(f.Object.Definition.Name), f.GoFieldName)
 	}
-	return fmt.Sprintf("%s().%s(%s)", cases.Title(language.English).String(f.Object.Definition.Name), f.GoFieldName, f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", caser.String(f.Object.Definition.Name), f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ArgsFunc() string {

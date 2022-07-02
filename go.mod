@@ -14,12 +14,10 @@ require (
 	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.8.1
 	github.com/vektah/gqlparser/v2 v2.4.5
+	golang.org/x/text v0.3.7
 	golang.org/x/tools v0.1.10
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require (
-	github.com/agnivade/levenshtein v1.1.1 // indirect
-	golang.org/x/text v0.3.7
-)
+require github.com/agnivade/levenshtein v1.1.1 // indirect

@@ -1,0 +1,12 @@
+type FieldsOrderPayload {
+    firstFieldValue: String
+}
+
+input FieldsOrderInput {
+    firstField: String
+    overrideFirstField: String
+}
+
+extend type Mutation {
+    overrideValueViaInput(input: FieldsOrderInput!): FieldsOrderPayload!
+}

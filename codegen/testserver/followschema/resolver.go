@@ -58,6 +58,11 @@ func (r *mutationResolver) DefaultInput(ctx context.Context, input DefaultInput)
 }
 
 // // foo
+func (r *mutationResolver) OverrideValueViaInput(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error) {
+	panic("not implemented")
+}
+
+// // foo
 func (r *mutationResolver) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	panic("not implemented")
 }

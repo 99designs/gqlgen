@@ -46,6 +46,7 @@ type ResolverRoot interface {
 	User() UserResolver
 	WrappedMap() WrappedMapResolver
 	WrappedSlice() WrappedSliceResolver
+	FieldsOrderInput() FieldsOrderInputResolver
 }
 
 type DirectiveRoot struct {
@@ -180,6 +181,10 @@ type ComplexityRoot struct {
 		E func(childComplexity int) int
 	}
 
+	FieldsOrderPayload struct {
+		FirstFieldValue func(childComplexity int) int
+	}
+
 	ForcedResolver struct {
 		Field func(childComplexity int) int
 	}
@@ -220,9 +225,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		DefaultInput    func(childComplexity int, input DefaultInput) int
-		UpdatePtrToPtr  func(childComplexity int, input UpdatePtrToPtrOuter) int
-		UpdateSomething func(childComplexity int, input SpecialInput) int
+		DefaultInput          func(childComplexity int, input DefaultInput) int
+		OverrideValueViaInput func(childComplexity int, input FieldsOrderInput) int
+		UpdatePtrToPtr        func(childComplexity int, input UpdatePtrToPtrOuter) int
+		UpdateSomething       func(childComplexity int, input SpecialInput) int
 	}
 
 	ObjectDirectives struct {
@@ -769,6 +775,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Errors.E(childComplexity), true
 
+	case "FieldsOrderPayload.firstFieldValue":
+		if e.complexity.FieldsOrderPayload.FirstFieldValue == nil {
+			break
+		}
+
+		return e.complexity.FieldsOrderPayload.FirstFieldValue(childComplexity), true
+
 	case "ForcedResolver.field":
 		if e.complexity.ForcedResolver.Field == nil {
 			break
@@ -864,6 +877,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
+
+	case "Mutation.overrideValueViaInput":
+		if e.complexity.Mutation.OverrideValueViaInput == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_overrideValueViaInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.OverrideValueViaInput(childComplexity, args["input"].(FieldsOrderInput)), true
 
 	case "Mutation.updatePtrToPtr":
 		if e.complexity.Mutation.UpdatePtrToPtr == nil {
@@ -1923,6 +1948,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputDefaultInput,
+		ec.unmarshalInputFieldsOrderInput,
 		ec.unmarshalInputInnerDirectives,
 		ec.unmarshalInputInnerInput,
 		ec.unmarshalInputInputDirectives,
@@ -2011,7 +2037,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
+//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -2029,6 +2055,7 @@ var sources = []*ast.Source{
 	{Name: "directive.graphql", Input: sourceData("directive.graphql"), BuiltIn: false},
 	{Name: "embedded.graphql", Input: sourceData("embedded.graphql"), BuiltIn: false},
 	{Name: "enum.graphql", Input: sourceData("enum.graphql"), BuiltIn: false},
+	{Name: "fields_order.graphql", Input: sourceData("fields_order.graphql"), BuiltIn: false},
 	{Name: "interfaces.graphql", Input: sourceData("interfaces.graphql"), BuiltIn: false},
 	{Name: "issue896.graphql", Input: sourceData("issue896.graphql"), BuiltIn: false},
 	{Name: "loops.graphql", Input: sourceData("loops.graphql"), BuiltIn: false},

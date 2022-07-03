@@ -56,6 +56,7 @@ type ResolverRoot interface {
 	User() UserResolver
 	WrappedMap() WrappedMapResolver
 	WrappedSlice() WrappedSliceResolver
+	FieldsOrderInput() FieldsOrderInputResolver
 }
 
 type DirectiveRoot struct {
@@ -190,6 +191,10 @@ type ComplexityRoot struct {
 		E func(childComplexity int) int
 	}
 
+	FieldsOrderPayload struct {
+		FirstFieldValue func(childComplexity int) int
+	}
+
 	ForcedResolver struct {
 		Field func(childComplexity int) int
 	}
@@ -230,9 +235,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		DefaultInput    func(childComplexity int, input DefaultInput) int
-		UpdatePtrToPtr  func(childComplexity int, input UpdatePtrToPtrOuter) int
-		UpdateSomething func(childComplexity int, input SpecialInput) int
+		DefaultInput          func(childComplexity int, input DefaultInput) int
+		OverrideValueViaInput func(childComplexity int, input FieldsOrderInput) int
+		UpdatePtrToPtr        func(childComplexity int, input UpdatePtrToPtrOuter) int
+		UpdateSomething       func(childComplexity int, input SpecialInput) int
 	}
 
 	ObjectDirectives struct {
@@ -460,6 +466,7 @@ type ModelMethodsResolver interface {
 }
 type MutationResolver interface {
 	DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
+	OverrideValueViaInput(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error)
 	UpdateSomething(ctx context.Context, input SpecialInput) (string, error)
 	UpdatePtrToPtr(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
 }
@@ -569,6 +576,10 @@ type WrappedMapResolver interface {
 }
 type WrappedSliceResolver interface {
 	Get(ctx context.Context, obj WrappedSlice, idx int) (string, error)
+}
+
+type FieldsOrderInputResolver interface {
+	OverrideFirstField(ctx context.Context, obj *FieldsOrderInput, data *string) error
 }
 
 type executableSchema struct {
@@ -908,6 +919,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Errors.E(childComplexity), true
 
+	case "FieldsOrderPayload.firstFieldValue":
+		if e.complexity.FieldsOrderPayload.FirstFieldValue == nil {
+			break
+		}
+
+		return e.complexity.FieldsOrderPayload.FirstFieldValue(childComplexity), true
+
 	case "ForcedResolver.field":
 		if e.complexity.ForcedResolver.Field == nil {
 			break
@@ -1003,6 +1021,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
+
+	case "Mutation.overrideValueViaInput":
+		if e.complexity.Mutation.OverrideValueViaInput == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_overrideValueViaInput_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.OverrideValueViaInput(childComplexity, args["input"].(FieldsOrderInput)), true
 
 	case "Mutation.updatePtrToPtr":
 		if e.complexity.Mutation.UpdatePtrToPtr == nil {
@@ -2062,6 +2092,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputDefaultInput,
+		ec.unmarshalInputFieldsOrderInput,
 		ec.unmarshalInputInnerDirectives,
 		ec.unmarshalInputInnerInput,
 		ec.unmarshalInputInputDirectives,
@@ -2150,7 +2181,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
+//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -2168,6 +2199,7 @@ var sources = []*ast.Source{
 	{Name: "directive.graphql", Input: sourceData("directive.graphql"), BuiltIn: false},
 	{Name: "embedded.graphql", Input: sourceData("embedded.graphql"), BuiltIn: false},
 	{Name: "enum.graphql", Input: sourceData("enum.graphql"), BuiltIn: false},
+	{Name: "fields_order.graphql", Input: sourceData("fields_order.graphql"), BuiltIn: false},
 	{Name: "interfaces.graphql", Input: sourceData("interfaces.graphql"), BuiltIn: false},
 	{Name: "issue896.graphql", Input: sourceData("issue896.graphql"), BuiltIn: false},
 	{Name: "loops.graphql", Input: sourceData("loops.graphql"), BuiltIn: false},
@@ -2305,6 +2337,21 @@ func (ec *executionContext) field_Mutation_defaultInput_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDefaultInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_overrideValueViaInput_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 FieldsOrderInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNFieldsOrderInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFieldsOrderInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5221,6 +5268,44 @@ func (ec *executionContext) fieldContext_Errors_e(ctx context.Context, field gra
 	return fc, nil
 }
 
+func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Context, field graphql.CollectedField, obj *FieldsOrderPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FieldsOrderPayload_firstFieldValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FirstFieldValue, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FieldsOrderPayload_firstFieldValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FieldsOrderPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field graphql.CollectedField, obj *ForcedResolver) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ForcedResolver_field(ctx, field)
 	if err != nil {
@@ -5790,6 +5875,62 @@ func (ec *executionContext) fieldContext_Mutation_defaultInput(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_defaultInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_overrideValueViaInput(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().OverrideValueViaInput(rctx, fc.Args["input"].(FieldsOrderInput))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*FieldsOrderPayload)
+	fc.Result = res
+	return ec.marshalNFieldsOrderPayload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFieldsOrderPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_overrideValueViaInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "firstFieldValue":
+				return ec.fieldContext_FieldsOrderPayload_firstFieldValue(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FieldsOrderPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_overrideValueViaInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -13794,6 +13935,45 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, obj interface{}) (FieldsOrderInput, error) {
+	var it FieldsOrderInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"firstField", "overrideFirstField"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "firstField":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstField"))
+			it.FirstField, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "overrideFirstField":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("overrideFirstField"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			if err = ec.resolvers.FieldsOrderInput().OverrideFirstField(ctx, &it, data); err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, obj interface{}) (InnerDirectives, error) {
 	var it InnerDirectives
 	asMap := map[string]interface{}{}
@@ -15511,6 +15691,31 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var fieldsOrderPayloadImplementors = []string{"FieldsOrderPayload"}
+
+func (ec *executionContext) _FieldsOrderPayload(ctx context.Context, sel ast.SelectionSet, obj *FieldsOrderPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fieldsOrderPayloadImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FieldsOrderPayload")
+		case "firstFieldValue":
+
+			out.Values[i] = ec._FieldsOrderPayload_firstFieldValue(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var forcedResolverImplementors = []string{"ForcedResolver"}
 
 func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.SelectionSet, obj *ForcedResolver) graphql.Marshaler {
@@ -15837,6 +16042,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_defaultInput(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "overrideValueViaInput":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_overrideValueViaInput(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -18780,6 +18994,25 @@ func (ec *executionContext) marshalNFallbackToStringEncoding2githubᚗcomᚋ99de
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNFieldsOrderInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFieldsOrderInput(ctx context.Context, v interface{}) (FieldsOrderInput, error) {
+	res, err := ec.unmarshalInputFieldsOrderInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFieldsOrderPayload2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFieldsOrderPayload(ctx context.Context, sel ast.SelectionSet, v FieldsOrderPayload) graphql.Marshaler {
+	return ec._FieldsOrderPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFieldsOrderPayload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFieldsOrderPayload(ctx context.Context, sel ast.SelectionSet, v *FieldsOrderPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._FieldsOrderPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {

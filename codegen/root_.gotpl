@@ -35,6 +35,11 @@ type ResolverRoot interface {
 		{{ucFirst $object.Name}}() {{ucFirst $object.Name}}Resolver
 	{{ end }}
 {{- end }}
+{{- range $object := .Inputs -}}
+	{{ if $object.HasResolvers -}}
+		{{ucFirst $object.Name}}() {{ucFirst $object.Name}}Resolver
+	{{ end }}
+{{- end }}
 }
 
 type DirectiveRoot struct {

@@ -10,16 +10,19 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated"
 )
 
+// FindHelloByName is the resolver for the findHelloByName field.
 func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*generated.Hello, error) {
 	return &generated.Hello{
 		Name: name,
 	}, nil
 }
 
+// FindHelloMultiSingleKeysByKey1AndKey2 is the resolver for the findHelloMultiSingleKeysByKey1AndKey2 field.
 func (r *entityResolver) FindHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, key1 string, key2 string) (*generated.HelloMultiSingleKeys, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
+// FindHelloWithErrorsByName is the resolver for the findHelloWithErrorsByName field.
 func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name string) (*generated.HelloWithErrors, error) {
 	if name == "inject error" {
 		return nil, generated.ErrResolvingHelloWithErrorsByName
@@ -32,6 +35,7 @@ func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name str
 	}, nil
 }
 
+// FindManyMultiHelloByNames is the resolver for the findManyMultiHelloByNames field.
 func (r *entityResolver) FindManyMultiHelloByNames(ctx context.Context, reps []*generated.MultiHelloByNamesInput) ([]*generated.MultiHello, error) {
 	results := []*generated.MultiHello{}
 
@@ -44,6 +48,7 @@ func (r *entityResolver) FindManyMultiHelloByNames(ctx context.Context, reps []*
 	return results, nil
 }
 
+// FindManyMultiHelloMultipleRequiresByNames is the resolver for the findManyMultiHelloMultipleRequiresByNames field.
 func (r *entityResolver) FindManyMultiHelloMultipleRequiresByNames(ctx context.Context, reps []*generated.MultiHelloMultipleRequiresByNamesInput) ([]*generated.MultiHelloMultipleRequires, error) {
 	results := make([]*generated.MultiHelloMultipleRequires, len(reps))
 
@@ -56,6 +61,7 @@ func (r *entityResolver) FindManyMultiHelloMultipleRequiresByNames(ctx context.C
 	return results, nil
 }
 
+// FindManyMultiHelloRequiresByNames is the resolver for the findManyMultiHelloRequiresByNames field.
 func (r *entityResolver) FindManyMultiHelloRequiresByNames(ctx context.Context, reps []*generated.MultiHelloRequiresByNamesInput) ([]*generated.MultiHelloRequires, error) {
 	results := make([]*generated.MultiHelloRequires, len(reps))
 
@@ -68,10 +74,12 @@ func (r *entityResolver) FindManyMultiHelloRequiresByNames(ctx context.Context, 
 	return results, nil
 }
 
+// FindManyMultiHelloWithErrorByNames is the resolver for the findManyMultiHelloWithErrorByNames field.
 func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*generated.MultiHelloWithErrorByNamesInput) ([]*generated.MultiHelloWithError, error) {
 	return nil, fmt.Errorf("error resolving MultiHelloWorldWithError")
 }
 
+// FindManyMultiPlanetRequiresNestedByNames is the resolver for the findManyMultiPlanetRequiresNestedByNames field.
 func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Context, reps []*generated.MultiPlanetRequiresNestedByNamesInput) ([]*generated.MultiPlanetRequiresNested, error) {
 	worlds := map[string]*generated.World{
 		"earth": {
@@ -100,16 +108,19 @@ func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Co
 	return results, nil
 }
 
+// FindPlanetMultipleRequiresByName is the resolver for the findPlanetMultipleRequiresByName field.
 func (r *entityResolver) FindPlanetMultipleRequiresByName(ctx context.Context, name string) (*generated.PlanetMultipleRequires, error) {
 	return &generated.PlanetMultipleRequires{Name: name}, nil
 }
 
+// FindPlanetRequiresByName is the resolver for the findPlanetRequiresByName field.
 func (r *entityResolver) FindPlanetRequiresByName(ctx context.Context, name string) (*generated.PlanetRequires, error) {
 	return &generated.PlanetRequires{
 		Name: name,
 	}, nil
 }
 
+// FindPlanetRequiresNestedByName is the resolver for the findPlanetRequiresNestedByName field.
 func (r *entityResolver) FindPlanetRequiresNestedByName(ctx context.Context, name string) (*generated.PlanetRequiresNested, error) {
 	worlds := map[string]*generated.World{
 		"earth": {
@@ -130,6 +141,7 @@ func (r *entityResolver) FindPlanetRequiresNestedByName(ctx context.Context, nam
 	}, nil
 }
 
+// FindWorldByHelloNameAndFoo is the resolver for the findWorldByHelloNameAndFoo field.
 func (r *entityResolver) FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.World, error) {
 	return &generated.World{
 		Hello: &generated.Hello{
@@ -139,12 +151,14 @@ func (r *entityResolver) FindWorldByHelloNameAndFoo(ctx context.Context, helloNa
 	}, nil
 }
 
+// FindWorldNameByName is the resolver for the findWorldNameByName field.
 func (r *entityResolver) FindWorldNameByName(ctx context.Context, name string) (*generated.WorldName, error) {
 	return &generated.WorldName{
 		Name: name,
 	}, nil
 }
 
+// FindWorldWithMultipleKeysByHelloNameAndFoo is the resolver for the findWorldWithMultipleKeysByHelloNameAndFoo field.
 func (r *entityResolver) FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.WorldWithMultipleKeys, error) {
 	return &generated.WorldWithMultipleKeys{
 		Hello: &generated.Hello{
@@ -154,6 +168,7 @@ func (r *entityResolver) FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.
 	}, nil
 }
 
+// FindWorldWithMultipleKeysByBar is the resolver for the findWorldWithMultipleKeysByBar field.
 func (r *entityResolver) FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*generated.WorldWithMultipleKeys, error) {
 	return &generated.WorldWithMultipleKeys{
 		Bar: bar,

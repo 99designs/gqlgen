@@ -7,6 +7,7 @@ import (
 	"context"
 )
 
+// Name is the resolver for the name field.
 func (r *roleResolver) Name(ctx context.Context, obj *UserRole) (string, error) {
 	if obj == nil {
 		return "", nil

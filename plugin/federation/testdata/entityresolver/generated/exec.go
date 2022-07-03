@@ -764,7 +764,7 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
 	{Name: "../../../federation/directives.graphql", Input: `
 	scalar _Any
 	scalar _FieldSet
-	
+
 	directive @external on FIELD_DEFINITION
 	directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
@@ -5772,7 +5772,12 @@ func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Con
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"Name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "Name":
 			var err error
@@ -5795,7 +5800,12 @@ func (ec *executionContext) unmarshalInputMultiHelloMultipleRequiresByNamesInput
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"Name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "Name":
 			var err error
@@ -5818,7 +5828,12 @@ func (ec *executionContext) unmarshalInputMultiHelloRequiresByNamesInput(ctx con
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"Name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "Name":
 			var err error
@@ -5841,7 +5856,12 @@ func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx co
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"Name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "Name":
 			var err error
@@ -5864,7 +5884,12 @@ func (ec *executionContext) unmarshalInputMultiPlanetRequiresNestedByNamesInput(
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"Name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "Name":
 			var err error

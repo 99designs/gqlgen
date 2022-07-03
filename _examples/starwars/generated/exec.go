@@ -4730,7 +4730,12 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"stars", "commentary", "time"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "stars":
 			var err error

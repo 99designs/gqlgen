@@ -131,7 +131,7 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 			}
 			for _, path := range paths {
 				upload = graphql.Upload{
-					File:        &bytesReader{s: &fileBytes, i: 0, prevRune: -1},
+					File:        &bytesReader{s: &fileBytes, i: 0},
 					Size:        int64(len(fileBytes)),
 					Filename:    filename,
 					ContentType: contentType,

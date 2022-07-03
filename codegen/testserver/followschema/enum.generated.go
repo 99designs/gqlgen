@@ -34,7 +34,12 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 		asMap[k] = v
 	}
 
-	for k, v := range asMap {
+	fieldsInOrder := [...]string{"enum"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
 		switch k {
 		case "enum":
 			var err error

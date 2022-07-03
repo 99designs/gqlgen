@@ -90,6 +90,10 @@ type EmbeddedDefaultScalar struct {
 	Value *string `json:"value"`
 }
 
+type FieldsOrderPayload struct {
+	FirstFieldValue *string `json:"firstFieldValue"`
+}
+
 type InnerDirectives struct {
 	Message string `json:"message"`
 }

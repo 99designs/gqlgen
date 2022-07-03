@@ -28,9 +28,10 @@ type Stub struct {
 		ResolverField func(ctx context.Context, obj *ModelMethods) (bool, error)
 	}
 	MutationResolver struct {
-		DefaultInput    func(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
-		UpdateSomething func(ctx context.Context, input SpecialInput) (string, error)
-		UpdatePtrToPtr  func(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
+		DefaultInput          func(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
+		OverrideValueViaInput func(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error)
+		UpdateSomething       func(ctx context.Context, input SpecialInput) (string, error)
+		UpdatePtrToPtr        func(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
 	}
 	OverlappingFieldsResolver struct {
 		OldFoo func(ctx context.Context, obj *OverlappingFields) (int, error)
@@ -136,6 +137,10 @@ type Stub struct {
 	WrappedSliceResolver struct {
 		Get func(ctx context.Context, obj WrappedSlice, idx int) (string, error)
 	}
+
+	FieldsOrderInputResolver struct {
+		OverrideFirstField func(ctx context.Context, obj *FieldsOrderInput, data *string) error
+	}
 }
 
 func (r *Stub) BackedByInterface() BackedByInterfaceResolver {
@@ -184,6 +189,10 @@ func (r *Stub) WrappedSlice() WrappedSliceResolver {
 	return &stubWrappedSlice{r}
 }
 
+func (r *Stub) FieldsOrderInput() FieldsOrderInputResolver {
+	return &stubFieldsOrderInput{r}
+}
+
 type stubBackedByInterface struct{ *Stub }
 
 func (r *stubBackedByInterface) ID(ctx context.Context, obj BackedByInterface) (string, error) {
@@ -224,6 +233,9 @@ type stubMutation struct{ *Stub }
 
 func (r *stubMutation) DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error) {
 	return r.MutationResolver.DefaultInput(ctx, input)
+}
+func (r *stubMutation) OverrideValueViaInput(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error) {
+	return r.MutationResolver.OverrideValueViaInput(ctx, input)
 }
 func (r *stubMutation) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	return r.MutationResolver.UpdateSomething(ctx, input)
@@ -512,4 +524,10 @@ type stubWrappedSlice struct{ *Stub }
 
 func (r *stubWrappedSlice) Get(ctx context.Context, obj WrappedSlice, idx int) (string, error) {
 	return r.WrappedSliceResolver.Get(ctx, obj, idx)
+}
+
+type stubFieldsOrderInput struct{ *Stub }
+
+func (r *stubFieldsOrderInput) OverrideFirstField(ctx context.Context, obj *FieldsOrderInput, data *string) error {
+	return r.FieldsOrderInputResolver.OverrideFirstField(ctx, obj, data)
 }

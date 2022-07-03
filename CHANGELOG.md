@@ -5,10 +5,105 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.10...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.11...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.11"></a>
+## [v0.17.11](https://github.com/99designs/gqlgen/compare/v0.17.10...v0.17.11) - 2022-07-03
+- <a href="https://github.com/99designs/gqlgen/commit/ea294c4ea344186c3b41b82d5f1c60138f6ce05e"><tt>ea294c4e</tt></a> release v0.17.11
+
+- <a href="https://github.com/99designs/gqlgen/commit/8ebf75c19d775ddbd12b3d94461b605ef4c5f711"><tt>8ebf75c1</tt></a> Update gqlparser (<a href="https://github.com/99designs/gqlgen/pull/2270">#2270</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/b8497f52fde0803277d981405cd2e42ce0455a70"><tt>b8497f52</tt></a> github: Fix CI pipelines (<a href="https://github.com/99designs/gqlgen/pull/2266">#2266</a>)</summary>
+
+* github: Test more go versions
+
+* github: Fix ci tests
+
+* github: Increase verbosity, sleep
+
+* github: Drop bash
+
+* github: Test go 1.18 and newer node verisons
+
+* github: Pull out node 16 for now
+
+* github: Only lint 1.16 for now
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c287a7b0b40cdd8c94077ed54fff257fe383e796"><tt>c287a7b0</tt></a> codegen: fix resolvers execution order (<a href="https://github.com/99designs/gqlgen/pull/2267">#2267</a>)</summary>
+
+* codegen: fix run order of resolver
+
+
+* fix: update code generate
+
+* fix: update stub, root to generate resolver for input
+
+* fix: added unit-test for input field order
+
+* fix: added test for singlefile
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8481457f2fd6ae711f688fc4726d724df5992b8c"><tt>8481457f</tt></a> gqlgen: Add resolver comment generation and preservation (<a href="https://github.com/99designs/gqlgen/pull/2263">#2263</a>)</summary>
+
+* gqlgen: Add resolver comment generation and preservation
+
+* gqlgen: Regenerate
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/532d46af5b2b97f5b69ebd1ce261a191e2690fa3"><tt>532d46af</tt></a> Make uploads content seekable (<a href="https://github.com/99designs/gqlgen/pull/2247">#2247</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/34bbc450c502919cd46c5eefcc66341ef697c0e8"><tt>34bbc450</tt></a> Use the go:embed API to lookup templates (<a href="https://github.com/99designs/gqlgen/pull/2262">#2262</a>)</summary>
+
+* Switch the templates package internally to read from TemplateFS
+
+Users are expected to pass in the FS by using the embed API.
+
+* Update all usages of templates.Render to use the TemplateFS option
+
+* Fix unit tests
+
+* Fix linter error
+
+* Commit generated changes
+
+Doesn't look like anything has changed though. Maybe just a different
+whitespace character.
+
+* Fix test
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/53ca207a4c53c78e4dec1e4d34d3b9251dd00b0b"><tt>53ca207a</tt></a> Fix PR links in CHANGELOG.md (<a href="https://github.com/99designs/gqlgen/pull/2257">#2257</a>)</summary>
+
+* fix "PR" regex in CHANGELOG-full-history.tpl.md
+
+* regenerate CHANGELOG.md
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/53ada82edb7e8bb91059cbf3f344270a668934c5"><tt>53ada82e</tt></a> Replace deprecated ioutil pkg with os & io (<a href="https://github.com/99designs/gqlgen/pull/2254">#2254</a>)</summary>
+
+As of Go 1.16, the same functionality is now provided by package io or
+package os, and those implementations should be preferred in new code.
+
+So replacing all usage of ioutil pkg with io & os.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/a8f112e0c5b3466de2f550e68cbe872233f052ac"><tt>a8f112e0</tt></a> update changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/82fbbe4163459cbb8d862c99931fcd015ed756e6"><tt>82fbbe41</tt></a> v0.17.10 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.10"></a>
 ## [v0.17.10](https://github.com/99designs/gqlgen/compare/v0.17.9...v0.17.10) - 2022-06-13
 - <a href="https://github.com/99designs/gqlgen/commit/4ff9ea92b0d90f7fdc7c22bec592fbec1aca60a6"><tt>4ff9ea92</tt></a> release v0.17.10

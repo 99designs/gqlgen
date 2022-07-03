@@ -1,35 +1,52 @@
 name: Integration
 on: [push, pull_request]
 
-env:
-  GO_VERSION: 1.16
-
 jobs:
   integration:
+    strategy:
+      matrix:
+        go: [1.16, 1.18]
+        node: [14]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    container: golang:${{ env.GO_VERSION }}-alpine
     steps:
       - uses: actions/checkout@v3
-      - run: apk add --no-cache --no-progress nodejs npm git bash
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
       - run: go mod download
       - run: cd integration ; npm install
       - run: .github/workflows/check-integration
 
   federation:
+    strategy:
+      matrix:
+        go: [1.16, 1.18]
+        node: [14]
     runs-on: ubuntu-latest
-    container: golang:${{ env.GO_VERSION }}-alpine
     steps:
       - uses: actions/checkout@v3
-      - run: apk add --no-cache --no-progress nodejs npm git bash
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
       - run: go mod download
       - run: cd _examples/federation ; npm install
       - run: .github/workflows/check-federation
 
   init:
+    strategy:
+      matrix:
+        go: [1.16, 1.18]
     runs-on: ubuntu-latest
-    container: golang:${{ env.GO_VERSION }}-alpine
     steps:
       - uses: actions/checkout@v3
-      - run: apk add --no-cache --no-progress alpine-sdk bash
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
       - run: .github/workflows/check-init

@@ -12,6 +12,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/v2/ast"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Field struct {
@@ -469,10 +471,11 @@ func (f *Field) GoNameUnexported() string {
 }
 
 func (f *Field) ShortInvocation() string {
+	caser := cases.Title(language.English, cases.NoLower)
 	if f.Object.Kind == ast.InputObject {
-		return fmt.Sprintf("%s().%s(ctx, &it, data)", strings.Title(f.Object.Definition.Name), f.GoFieldName)
+		return fmt.Sprintf("%s().%s(ctx, &it, data)", caser.String(f.Object.Definition.Name), f.GoFieldName)
 	}
-	return fmt.Sprintf("%s().%s(%s)", strings.Title(f.Object.Definition.Name), f.GoFieldName, f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", caser.String(f.Object.Definition.Name), f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ArgsFunc() string {

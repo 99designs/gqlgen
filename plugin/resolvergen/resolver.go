@@ -14,6 +14,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 //go:embed resolver.gotpl
@@ -104,8 +106,9 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				files[fn] = &File{}
 			}
 
+			caser := cases.Title(language.English, cases.NoLower)
 			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
-			rewriter.GetMethodBody(data.Config.Resolver.Type, strings.Title(o.Name))
+			rewriter.GetMethodBody(data.Config.Resolver.Type, caser.String(o.Name))
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
 		for _, f := range o.Fields {

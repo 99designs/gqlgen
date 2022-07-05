@@ -5,10 +5,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.11...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.12...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.12"></a>
+## [v0.17.12](https://github.com/99designs/gqlgen/compare/v0.17.11...v0.17.12) - 2022-07-04
+- <a href="https://github.com/99designs/gqlgen/commit/94c02b0de6d483d87453fc18a7f7625ae4adaa6c"><tt>94c02b0d</tt></a> release v0.17.12
+
+- <a href="https://github.com/99designs/gqlgen/commit/7eb8ba93daacef77ca7266fdfb9e5abc8a720eb7"><tt>7eb8ba93</tt></a> Fix CreateTodo (<a href="https://github.com/99designs/gqlgen/pull/2256">#2256</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/0b0e5ce4afc5b503217304f89914b2e903c05fa5"><tt>0b0e5ce4</tt></a> Replace use of strings.Title with cases.Title (<a href="https://github.com/99designs/gqlgen/pull/2268">#2268</a>)</summary>
+
+* github: Test more go versions
+
+* github: Fix ci tests
+
+* github: Increase verbosity, sleep
+
+* github: Drop bash
+
+* github: Test go 1.18 and newer node verisons
+
+* github: Pull out node 16 for now
+
+* github: Only lint 1.16 for now
+
+* cases: Use cases.Title over strings.Title which is deprecated
+
+* gqlgen: Remove use of deprecated strings.Title
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/0c11e5fdd8ec4fd7612b857c4c554e1ef463d194"><tt>0c11e5fd</tt></a> parse at beginning of do function (<a href="https://github.com/99designs/gqlgen/pull/2269">#2269</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/edb1c585c1c49102dc962e0ac3bd271688e51ecf"><tt>edb1c585</tt></a> Update Changelog for v0.17.11
+
+- <a href="https://github.com/99designs/gqlgen/commit/5e6b52fddab835611513e3572f23716666ebae58"><tt>5e6b52fd</tt></a> v0.17.11 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.11"></a>
 ## [v0.17.11](https://github.com/99designs/gqlgen/compare/v0.17.10...v0.17.11) - 2022-07-03
 - <a href="https://github.com/99designs/gqlgen/commit/ea294c4ea344186c3b41b82d5f1c60138f6ce05e"><tt>ea294c4e</tt></a> release v0.17.11

@@ -1,0 +1,16 @@
+# GraphQL schema example
+#
+
+type Dummy {
+  id: ID!
+  text: String!
+  done: Boolean!
+}
+
+type Mutation {
+  postMessageTo(subscriber: String!, content: String!): ID!
+}
+
+type Subscription {
+  subscribe(subscriber: String!): String!
+}

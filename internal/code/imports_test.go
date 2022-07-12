@@ -40,6 +40,6 @@ func TestNameForDir(t *testing.T) {
 
 	assert.Equal(t, "tmp", NameForDir("/tmp"))
 	assert.Equal(t, "code", NameForDir(wd))
-	assert.Equal(t, "internal", NameForDir(wd+"/.."))
+	assert.Equal(t, "docs", NameForDir(wd+"/../../docs"))
 	assert.Equal(t, "main", NameForDir(wd+"/../.."))
 }

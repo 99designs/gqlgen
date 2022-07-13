@@ -562,7 +562,7 @@ func (f *Field) CallArgs() string {
 	for _, arg := range f.Args {
 		tmp := "fc.Args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
 
-		if types.IsInterface(arg.TypeReference.GO) {
+		if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
 			tmp = fmt.Sprintf(`
 				func () interface{} {
 					if fc.Args["%s"] == nil {

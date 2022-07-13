@@ -123,7 +123,7 @@ func TestField_CallArgs(t *testing.T) {
 		Expected string
 	}{
 		{
-			Name: "Field with method that has context, and two args (string, interface)",
+			Name: "Field with method that has context, and three args (string, interface, named interface)",
 			Field: Field{
 				MethodHasContext: true,
 				Args: []*FieldArgument{
@@ -132,12 +132,24 @@ func TestField_CallArgs(t *testing.T) {
 							Name: "test",
 						},
 						TypeReference: &config.TypeReference{
-							GO: &types.Interface{},
+							GO: (&types.Interface{}).Complete(),
 						},
 					},
 					{
 						ArgumentDefinition: &ast2.ArgumentDefinition{
 							Name: "test2",
+						},
+						TypeReference: &config.TypeReference{
+							GO: types.NewNamed(
+								types.NewTypeName(token.NoPos, nil, "TestInterface", nil),
+								(&types.Interface{}).Complete(),
+								nil,
+							),
+						},
+					},
+					{
+						ArgumentDefinition: &ast2.ArgumentDefinition{
+							Name: "test3",
 						},
 						TypeReference: &config.TypeReference{
 							GO: types.Typ[types.String],
@@ -151,7 +163,7 @@ func TestField_CallArgs(t *testing.T) {
 						return nil
 					}
 					return fc.Args["test"].(interface{})
-				}(), fc.Args["test2"].(string)`,
+				}(), fc.Args["test2"].(TestInterface), fc.Args["test3"].(string)`,
 		},
 		{
 			Name: "Resolver field that isn't root object with single int argument",

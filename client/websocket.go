@@ -116,14 +116,15 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 					return err
 				}
 
-				if op.Type != dataMsg {
-					if op.Type == connectionKaMsg {
-						continue
-					} else if op.Type == errorMsg {
-						return fmt.Errorf(string(op.Payload))
-					} else {
-						return fmt.Errorf("expected data message, got %#v", op)
-					}
+				switch op.Type {
+				case dataMsg:
+					break
+				case connectionKaMsg:
+					continue
+				case errorMsg:
+					return fmt.Errorf(string(op.Payload))
+				default:
+					return fmt.Errorf("expected data message, got %#v", op)
 				}
 
 				var respDataRaw Response

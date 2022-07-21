@@ -1,6 +1,8 @@
 package code
 
 import (
+	"bufio"
+	"fmt"
 	"go/build"
 	"go/parser"
 	"go/token"
@@ -74,7 +76,7 @@ func goModuleRoot(dir string) (string, bool) {
 		}
 
 		if content, err := os.ReadFile(filepath.Join(modDir, "go.mod")); err == nil {
-			moduleName := string(modregex.FindSubmatch(content)[1])
+			moduleName := extractModuleName(content)
 			result = goModuleSearchResult{
 				path:       moduleName,
 				goModPath:  modDir,
@@ -124,6 +126,27 @@ func goModuleRoot(dir string) (string, bool) {
 		return "", false
 	}
 	return res.path, true
+}
+
+func extractModuleName(content []byte) string {
+	for {
+		advance, tkn, err := bufio.ScanLines(content, false)
+		if err != nil {
+			panic(fmt.Errorf("error parsing mod file: %w", err))
+		}
+		if advance == 0 {
+			break
+		}
+		s := strings.Trim(string(tkn), " \t")
+		if len(s) != 0 && !strings.HasPrefix(s, "//") {
+			break
+		}
+		if advance <= len(content) {
+			content = content[advance:]
+		}
+	}
+	moduleName := string(modregex.FindSubmatch(content)[1])
+	return moduleName
 }
 
 // ImportPathForDir takes a path and returns a golang import path for the package

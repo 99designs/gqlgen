@@ -8,6 +8,8 @@ import (
 
 type Event interface {
 	IsEvent()
+	GetSelection() []string
+	GetCollected() []string
 }
 
 type Like struct {
@@ -17,7 +19,9 @@ type Like struct {
 	Collected []string  `json:"collected"`
 }
 
-func (Like) IsEvent() {}
+func (Like) IsEvent()                    {}
+func (this Like) GetSelection() []string { return this.Selection }
+func (this Like) GetCollected() []string { return this.Collected }
 
 type Post struct {
 	Message   string    `json:"message"`
@@ -26,4 +30,6 @@ type Post struct {
 	Collected []string  `json:"collected"`
 }
 
-func (Post) IsEvent() {}
+func (Post) IsEvent()                    {}
+func (this Post) GetSelection() []string { return this.Selection }
+func (this Post) GetCollected() []string { return this.Collected }

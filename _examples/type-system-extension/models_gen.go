@@ -14,6 +14,7 @@ type Data interface {
 
 type Node interface {
 	IsNode()
+	GetID() string
 }
 
 type Todo struct {
@@ -23,7 +24,9 @@ type Todo struct {
 	Verified bool   `json:"verified"`
 }
 
-func (Todo) IsNode() {}
+func (Todo) IsNode()            {}
+func (this Todo) GetID() string { return this.ID }
+
 func (Todo) IsData() {}
 
 type TodoInput struct {

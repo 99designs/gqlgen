@@ -10,6 +10,11 @@ import (
 
 type Character interface {
 	IsCharacter()
+	GetID() string
+	GetName() string
+	GetFriends() []Character
+	GetFriendsConnection() *FriendsConnection
+	GetAppearsIn() []Episode
 }
 
 type SearchResult interface {

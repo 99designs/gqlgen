@@ -11,6 +11,7 @@ import (
 
 type Animal interface {
 	IsAnimal()
+	GetSpecies() string
 }
 
 type ContentChild interface {
@@ -46,7 +47,8 @@ type Cat struct {
 	CatBreed string `json:"catBreed"`
 }
 
-func (Cat) IsAnimal() {}
+func (Cat) IsAnimal()               {}
+func (this Cat) GetSpecies() string { return this.Species }
 
 type CheckIssue896 struct {
 	ID *int `json:"id"`
@@ -84,7 +86,8 @@ type Dog struct {
 	DogBreed string `json:"dogBreed"`
 }
 
-func (Dog) IsAnimal() {}
+func (Dog) IsAnimal()               {}
+func (this Dog) GetSpecies() string { return this.Species }
 
 type EmbeddedDefaultScalar struct {
 	Value *string `json:"value"`

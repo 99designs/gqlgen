@@ -6,6 +6,7 @@ import (
 	"go/types"
 	"sort"
 	"strings"
+	"text/template"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
@@ -40,6 +41,7 @@ type ModelBuild struct {
 type Interface struct {
 	Description string
 	Name        string
+	Fields      []*Field
 	Implements  []string
 }
 
@@ -90,7 +92,6 @@ func (m *Plugin) Name() string {
 }
 
 func (m *Plugin) MutateConfig(cfg *config.Config) error {
-	binder := cfg.NewBinder()
 
 	b := &ModelBuild{
 		PackageName: cfg.Model.Package,
@@ -102,10 +103,16 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 		switch schemaType.Kind {
 		case ast.Interface, ast.Union:
+			fields, err := m.generateFields(cfg, schemaType)
+			if err != nil {
+				return err
+			}
+
 			it := &Interface{
 				Description: schemaType.Description,
 				Name:        schemaType.Name,
 				Implements:  schemaType.Interfaces,
+				Fields:      fields,
 			}
 
 			b.Interfaces = append(b.Interfaces, it)
@@ -113,9 +120,16 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			if schemaType == cfg.Schema.Query || schemaType == cfg.Schema.Mutation || schemaType == cfg.Schema.Subscription {
 				continue
 			}
+
+			fields, err := m.generateFields(cfg, schemaType)
+			if err != nil {
+				return err
+			}
+
 			it := &Object{
 				Description: schemaType.Description,
 				Name:        schemaType.Name,
+				Fields:      fields,
 			}
 
 			// If Interface A implements interface B, and Interface C also implements interface B
@@ -134,87 +148,6 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 						uniqueMap[iface] = true
 					}
 				}
-			}
-
-			for _, field := range schemaType.Fields {
-				var typ types.Type
-				fieldDef := cfg.Schema.Types[field.Type.Name()]
-
-				if cfg.Models.UserDefined(field.Type.Name()) {
-					var err error
-					typ, err = binder.FindTypeFromName(cfg.Models[field.Type.Name()].Model[0])
-					if err != nil {
-						return err
-					}
-				} else {
-					switch fieldDef.Kind {
-					case ast.Scalar:
-						// no user defined model, referencing a default scalar
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), "string", nil),
-							nil,
-							nil,
-						)
-
-					case ast.Interface, ast.Union:
-						// no user defined model, referencing a generated interface type
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-							types.NewInterfaceType([]*types.Func{}, []types.Type{}),
-							nil,
-						)
-
-					case ast.Enum:
-						// no user defined model, must reference a generated enum
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-							nil,
-							nil,
-						)
-
-					case ast.Object, ast.InputObject:
-						// no user defined model, must reference a generated struct
-						typ = types.NewNamed(
-							types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
-							types.NewStruct(nil, nil),
-							nil,
-						)
-
-					default:
-						panic(fmt.Errorf("unknown ast type %s", fieldDef.Kind))
-					}
-				}
-
-				name := templates.ToGo(field.Name)
-				if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
-					name = nameOveride
-				}
-
-				typ = binder.CopyModifiersFromAst(field.Type, typ)
-
-				if cfg.StructFieldsAlwaysPointers {
-					if isStruct(typ) && (fieldDef.Kind == ast.Object || fieldDef.Kind == ast.InputObject) {
-						typ = types.NewPointer(typ)
-					}
-				}
-
-				f := &Field{
-					Name:        field.Name,
-					GoName:      name,
-					Type:        typ,
-					Description: field.Description,
-					Tag:         `json:"` + field.Name + `"`,
-				}
-
-				if m.FieldHook != nil {
-					mf, err := m.FieldHook(schemaType, field, f)
-					if err != nil {
-						return fmt.Errorf("generror: field %v.%v: %w", it.Name, field.Name, err)
-					}
-					f = mf
-				}
-
-				it.Fields = append(it.Fields, f)
 			}
 
 			b.Models = append(b.Models, it)
@@ -267,6 +200,59 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		b = m.MutateHook(b)
 	}
 
+	getInterfaceByName := func(name string) *Interface {
+		// Allow looking up interfaces, so template can generate getters for each field
+		for _, i := range b.Interfaces {
+			if i.Name == name {
+				return i
+			}
+		}
+
+		return nil
+	}
+	gettersGenerated := make(map[string]map[string]struct{})
+	generateGetter := func(model *Object, field *Field) string {
+		if model == nil || field == nil {
+			return ""
+		}
+
+		// Let templates check if a given getter has been generated already
+		typeGetters, exists := gettersGenerated[model.Name]
+		if !exists {
+			typeGetters = make(map[string]struct{})
+			gettersGenerated[model.Name] = typeGetters
+		}
+
+		_, exists = typeGetters[field.GoName]
+		typeGetters[field.GoName] = struct{}{}
+		if exists {
+			return ""
+		}
+
+		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, field.Type.String())
+		_, interfaceFieldTypeIsPointer := field.Type.(*types.Pointer)
+		var structFieldTypeIsPointer bool
+		for _, f := range model.Fields {
+			if f.GoName == field.GoName {
+				_, structFieldTypeIsPointer = f.Type.(*types.Pointer)
+				break
+			}
+		}
+
+		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
+			getter += "&"
+		} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
+			getter += "*"
+		}
+
+		getter += fmt.Sprintf("this.%s }", field.GoName)
+		return getter
+	}
+	funcMap := template.FuncMap{
+		"getInterfaceByName": getInterfaceByName,
+		"generateGetter":     generateGetter,
+	}
+
 	err := templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,
 		Filename:        cfg.Model.Filename,
@@ -274,6 +260,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		GeneratedHeader: true,
 		Packages:        cfg.Packages,
 		Template:        modelTemplate,
+		Funcs:           funcMap,
 	})
 	if err != nil {
 		return err
@@ -284,6 +271,94 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	cfg.ReloadAllPackages()
 
 	return nil
+}
+
+func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) ([]*Field, error) {
+	binder := cfg.NewBinder()
+	fields := make([]*Field, 0)
+
+	for _, field := range schemaType.Fields {
+		var typ types.Type
+		fieldDef := cfg.Schema.Types[field.Type.Name()]
+
+		if cfg.Models.UserDefined(field.Type.Name()) {
+			var err error
+			typ, err = binder.FindTypeFromName(cfg.Models[field.Type.Name()].Model[0])
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			switch fieldDef.Kind {
+			case ast.Scalar:
+				// no user defined model, referencing a default scalar
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), "string", nil),
+					nil,
+					nil,
+				)
+
+			case ast.Interface, ast.Union:
+				// no user defined model, referencing a generated interface type
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					types.NewInterfaceType([]*types.Func{}, []types.Type{}),
+					nil,
+				)
+
+			case ast.Enum:
+				// no user defined model, must reference a generated enum
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					nil,
+					nil,
+				)
+
+			case ast.Object, ast.InputObject:
+				// no user defined model, must reference a generated struct
+				typ = types.NewNamed(
+					types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					types.NewStruct(nil, nil),
+					nil,
+				)
+
+			default:
+				panic(fmt.Errorf("unknown ast type %s", fieldDef.Kind))
+			}
+		}
+
+		name := templates.ToGo(field.Name)
+		if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
+			name = nameOveride
+		}
+
+		typ = binder.CopyModifiersFromAst(field.Type, typ)
+
+		if cfg.StructFieldsAlwaysPointers {
+			if isStruct(typ) && (fieldDef.Kind == ast.Object || fieldDef.Kind == ast.InputObject) {
+				typ = types.NewPointer(typ)
+			}
+		}
+
+		f := &Field{
+			Name:        field.Name,
+			GoName:      name,
+			Type:        typ,
+			Description: field.Description,
+			Tag:         `json:"` + field.Name + `"`,
+		}
+
+		if m.FieldHook != nil {
+			mf, err := m.FieldHook(schemaType, field, f)
+			if err != nil {
+				return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
+			}
+			f = mf
+		}
+
+		fields = append(fields, f)
+	}
+
+	return fields, nil
 }
 
 // GoTagFieldHook applies the goTag directive to the generated Field f. When applying the Tag to the field, the field

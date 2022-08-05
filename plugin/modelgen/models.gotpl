@@ -36,10 +36,12 @@
 		{{- end }}
 	}
 
-	{{ range $if := .Interfaces }}
-		func ({{ $model.Name|go }}) Is{{ $if.Name }}() {}
-		{{- range $field := .Fields }}
-			func (this {{ $model.Name|go }}) Get{{ $field.GoName }}() {{ $field.Type | ref }} { return this.{{ $field.GoName }} }
+	{{ range .Implements }}
+		func ({{ $model.Name|go }}) Is{{ .|go }}() {}
+		{{- with getInterfaceByName . }}
+			{{- range .Fields }}
+				{{ generateGetter $model . }}
+			{{- end }}
 		{{- end }}
 	{{ end }}
 {{- end}}

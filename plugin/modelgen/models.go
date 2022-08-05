@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"go/types"
+	"html/template"
 	"sort"
 	"strings"
 
@@ -49,27 +50,6 @@ type Object struct {
 	Name        string
 	Fields      []*Field
 	Implements  []string
-}
-
-var mbInterfaces []*Interface
-
-func (o Object) Interfaces() []*Interface {
-	getInterfaceByName := func(name string) *Interface {
-		for _, i := range mbInterfaces {
-			if i.Name == name {
-				return i
-			}
-		}
-
-		panic("not found")
-	}
-
-	ifs := make([]*Interface, 0)
-	for _, ifName := range o.Implements {
-		ifs = append(ifs, getInterfaceByName(ifName))
-	}
-
-	return ifs
 }
 
 type Field struct {
@@ -220,7 +200,58 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		b = m.MutateHook(b)
 	}
 
-	mbInterfaces = b.Interfaces
+	getInterfaceByName := func(name string) *Interface {
+		// Allow looking up interfaces, so template can generate getters for each field
+		for _, i := range b.Interfaces {
+			if i.Name == name {
+				return i
+			}
+		}
+
+		return nil
+	}
+	gettersGenerated := make(map[string]map[string]struct{})
+	generateGetter := func(model *Object, field *Field) string {
+		if model == nil || field == nil {
+			return ""
+		}
+
+		// Let templates check if a given getter has been generated already
+		typeGetters, exists := gettersGenerated[model.Name]
+		if !exists {
+			typeGetters = make(map[string]struct{})
+			gettersGenerated[model.Name] = typeGetters
+		}
+
+		_, exists = typeGetters[field.GoName]
+		typeGetters[field.GoName] = struct{}{}
+		if exists {
+			return ""
+		}
+
+		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, field.Type.String())
+		_, interfaceFieldTypeIsPointer := field.Type.(*types.Pointer)
+		var structFieldTypeIsPointer bool
+		for _, f := range model.Fields {
+			if f.GoName == field.GoName {
+				_, structFieldTypeIsPointer = f.Type.(*types.Pointer)
+				break
+			}
+		}
+
+		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
+			getter += "&"
+		} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
+			getter += "*"
+		}
+
+		getter += fmt.Sprintf("this.%s }", field.GoName)
+		return getter
+	}
+	funcMap := template.FuncMap{
+		"getInterfaceByName": getInterfaceByName,
+		"generateGetter":     generateGetter,
+	}
 
 	err := templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,
@@ -229,6 +260,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		GeneratedHeader: true,
 		Packages:        cfg.Packages,
 		Template:        modelTemplate,
+		Funcs:           funcMap,
 	})
 	if err != nil {
 		return err

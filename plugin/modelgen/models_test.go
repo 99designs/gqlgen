@@ -116,6 +116,10 @@ func TestModelGeneration(t *testing.T) {
 						typ:  "method",
 						name: "IsA",
 					},
+					{
+						typ:  "method",
+						name: "GetA",
+					},
 				},
 			},
 			{
@@ -125,18 +129,30 @@ func TestModelGeneration(t *testing.T) {
 						typ:  "method",
 						name: "IsB",
 					},
+					{
+						typ:  "method",
+						name: "GetB",
+					},
 				},
 			},
 			{
 				name: "C",
 				wantFields: []field{
 					{
-						typ:  "ident",
-						name: "A",
+						typ:  "method",
+						name: "IsA",
 					},
 					{
 						typ:  "method",
 						name: "IsC",
+					},
+					{
+						typ:  "method",
+						name: "GetA",
+					},
+					{
+						typ:  "method",
+						name: "GetC",
 					},
 				},
 			},
@@ -144,16 +160,28 @@ func TestModelGeneration(t *testing.T) {
 				name: "D",
 				wantFields: []field{
 					{
-						typ:  "ident",
-						name: "A",
+						typ:  "method",
+						name: "IsA",
 					},
 					{
-						typ:  "ident",
-						name: "B",
+						typ:  "method",
+						name: "IsB",
 					},
 					{
 						typ:  "method",
 						name: "IsD",
+					},
+					{
+						typ:  "method",
+						name: "GetA",
+					},
+					{
+						typ:  "method",
+						name: "GetB",
+					},
+					{
+						typ:  "method",
+						name: "GetD",
 					},
 				},
 			},

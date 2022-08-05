@@ -4,9 +4,9 @@ import (
 	_ "embed"
 	"fmt"
 	"go/types"
-	"html/template"
 	"sort"
 	"strings"
+	"text/template"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"

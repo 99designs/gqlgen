@@ -49,7 +49,7 @@ func (n *ConcreteNodeA) Child() (Node, error) {
 	return n.child, nil
 }
 
-//  Implements the Node interface with another interface
+// Implements the Node interface with another interface
 type ConcreteNodeInterface interface {
 	Node
 	ID() string

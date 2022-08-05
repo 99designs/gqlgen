@@ -229,7 +229,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			return ""
 		}
 
-		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, field.Type.String())
+		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, templates.CurrentImports.LookupType(field.Type))
 		_, interfaceFieldTypeIsPointer := field.Type.(*types.Pointer)
 		var structFieldTypeIsPointer bool
 		for _, f := range model.Fields {

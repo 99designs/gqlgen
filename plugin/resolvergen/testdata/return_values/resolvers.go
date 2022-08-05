@@ -8,10 +8,12 @@ import (
 
 type Resolver struct{}
 
+// // foo
 func (r *queryResolver) User(ctx context.Context) (User, error) {
 	panic("not implemented")
 }
 
+// // foo
 func (r *queryResolver) UserPointer(ctx context.Context) (*User, error) {
 	panic("not implemented")
 }

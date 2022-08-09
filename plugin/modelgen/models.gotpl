@@ -20,6 +20,9 @@
 		{{- end }}
 		Is{{.Name|go }}()
 		{{- range $field := .Fields }}
+			{{- with .Description }}
+				{{.|prefixLines "// "}}
+			{{- end}}
 			Get{{ $field.GoName }}() {{ $field.Type | ref }}
 		{{- end }}
 	}
@@ -40,6 +43,9 @@
 		func ({{ $model.Name|go }}) Is{{ .|go }}() {}
 		{{- with getInterfaceByName . }}
 			{{- range .Fields }}
+				{{- with .Description }}
+					{{.|prefixLines "// "}}
+				{{- end}}
 				{{ generateGetter $model . }}
 			{{- end }}
 		{{- end }}

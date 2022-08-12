@@ -2,6 +2,7 @@ package templates
 
 import (
 	"embed"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -74,9 +75,69 @@ func TestToGoPrivate(t *testing.T) {
 	require.Equal(t, "_", ToGoPrivate("_"))
 }
 
+func TestToGoModelName(t *testing.T) {
+	type aTest struct {
+		input    [][]string
+		expected []string
+	}
+
+	theTests := []aTest{
+		{
+			input:    [][]string{{"MyValue"}},
+			expected: []string{"MyValue"},
+		},
+		{
+			input:    [][]string{{"MyValue"}, {"myValue"}},
+			expected: []string{"MyValue", "MyValue0"},
+		},
+		{
+			input:    [][]string{{"MyValue"}, {"YourValue"}},
+			expected: []string{"MyValue", "YourValue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "Value"}},
+			expected: []string{"MyEnumNameValue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "Value"}, {"MyEnumName", "value"}},
+			expected: []string{"MyEnumNameValue", "MyEnumNamevalue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "value"}, {"MyEnumName", "Value"}},
+			expected: []string{"MyEnumNameValue", "MyEnumNameValue0"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "Value"}, {"MyEnumName", "value"}, {"MyEnumName", "vALue"}, {"MyEnumName", "VALue"}},
+			expected: []string{"MyEnumNameValue", "MyEnumNamevalue", "MyEnumNameVALue", "MyEnumNameVALue0"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "TitleValue"}, {"MyEnumName", "title_value"}, {"MyEnumName", "title_Value"}, {"MyEnumName", "Title_Value"}},
+			expected: []string{"MyEnumNameTitleValue", "MyEnumNametitle_value", "MyEnumNametitle_Value", "MyEnumNameTitle_Value"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}},
+			expected: []string{"MyEnumNameTitleValueOtherValue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}, {"MyEnumName", "title_value", "OtherValue"}},
+			expected: []string{"MyEnumNameTitleValueOtherValue", "MyEnumNametitle_valueOtherValue"},
+		},
+	}
+
+	for ti, at := range theTests {
+		resetModelNames()
+		t.Run(fmt.Sprintf("modelname-%d", ti), func(t *testing.T) {
+			at := at
+			for i, n := range at.input {
+				require.Equal(t, at.expected[i], ToGoModelName(n...))
+			}
+		})
+	}
+}
+
 func Test_wordWalker(t *testing.T) {
 	helper := func(str string) []*wordInfo {
-		resultList := []*wordInfo{}
+		var resultList []*wordInfo
 		wordWalker(str, func(info *wordInfo) {
 			resultList = append(resultList, info)
 		})

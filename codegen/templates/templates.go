@@ -8,10 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"unicode"
 
@@ -202,6 +204,7 @@ func Funcs() template.FuncMap {
 		"lookupImport":  CurrentImports.Lookup,
 		"go":            ToGo,
 		"goPrivate":     ToGoPrivate,
+		"goModelName":   ToGoModelName,
 		"add": func(a, b int) int {
 			return a + b
 		},
@@ -289,6 +292,115 @@ func Call(p *types.Func) string {
 	}
 
 	return pkg + p.Name()
+}
+
+var (
+	modelNamesMu sync.Mutex
+	modelNames   = make(map[string]string, 0)
+)
+
+func resetModelNames() {
+	modelNamesMu.Lock()
+	defer modelNamesMu.Unlock()
+	modelNames = make(map[string]string, 0)
+}
+
+func buildGoModelNameKey(parts []string) string {
+	const sep = ":"
+	return strings.Join(parts, sep)
+}
+
+func ToGoModelName(parts ...string) string {
+	modelNamesMu.Lock()
+	defer modelNamesMu.Unlock()
+
+	var (
+		goNameKey string
+		partLen   int
+
+		nameExists = func(n string) bool {
+			for _, v := range modelNames {
+				if n == v {
+					return true
+				}
+			}
+			return false
+		}
+
+		applyToGo = func(parts []string) string {
+			var out string
+			for _, p := range parts {
+				out = fmt.Sprintf("%s%s", out, ToGo(p))
+			}
+			return out
+		}
+
+		applyValidGoName = func(parts []string) string {
+			var out string
+			for _, p := range parts {
+				out = fmt.Sprintf("%s%s", out, ValidGoName(p))
+			}
+			return out
+		}
+	)
+
+	// build key for this entity
+	goNameKey = buildGoModelNameKey(parts)
+
+	// determine if we've seen this entity before, and reuse if so
+	if goName, ok := modelNames[goNameKey]; ok {
+		return goName
+	}
+
+	// attempt first pass
+
+	// test first pass
+	if goName := applyToGo(parts); !nameExists(goName) {
+		modelNames[goNameKey] = goName
+		return goName
+	}
+
+	// determine number of parts
+	partLen = len(parts)
+
+	// if there is only 1 part, append incrementing number until no conflict
+	if partLen == 1 {
+		base := applyToGo(parts)
+		for i := 0; ; i++ {
+			tmp := fmt.Sprintf("%s%d", base, i)
+			if !nameExists(tmp) {
+				modelNames[goNameKey] = tmp
+				return tmp
+			}
+		}
+	}
+
+	// best effort "pretty" name
+	for i := partLen - 1; i >= 1; i-- {
+		tmp := fmt.Sprintf("%s%s", applyToGo(parts[0:i]), applyValidGoName(parts[i:]))
+		if !nameExists(tmp) {
+			modelNames[goNameKey] = tmp
+			return tmp
+		}
+	}
+
+	// finally, fallback to just adding an incrementing number
+	base := applyToGo(parts)
+	for i := 0; ; i++ {
+		tmp := fmt.Sprintf("%s%d", base, i)
+		if !nameExists(tmp) {
+			modelNames[goNameKey] = tmp
+			return tmp
+		}
+	}
+}
+
+var (
+	goNameRe = regexp.MustCompile("[^a-zA-Z0-9_]")
+)
+
+func ValidGoName(in string) string {
+	return goNameRe.ReplaceAllString(in, "_")
 }
 
 func ToGo(name string) string {

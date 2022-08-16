@@ -338,7 +338,7 @@ func ToGoModelName(parts ...string) string {
 		applyValidGoName = func(parts []string) string {
 			var out string
 			for _, p := range parts {
-				out = fmt.Sprintf("%s%s", out, ValidGoName(p))
+				out = fmt.Sprintf("%s%s", out, replaceInvalidCharacters(p))
 			}
 			return out
 		}
@@ -399,8 +399,8 @@ var (
 	goNameRe = regexp.MustCompile("[^a-zA-Z0-9_]")
 )
 
-func ValidGoName(in string) string {
-	return goNameRe.ReplaceAllString(in, "_")
+func replaceInvalidCharacters(in string) string {
+	return goNameRe.ReplaceAllLiteralString(in, "_")
 }
 
 func ToGo(name string) string {

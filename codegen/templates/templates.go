@@ -353,8 +353,6 @@ func ToGoModelName(parts ...string) string {
 	}
 
 	// attempt first pass
-
-	// test first pass
 	if goName := applyToGo(parts); !nameExists(goName) {
 		modelNames[goNameKey] = goName
 		return goName

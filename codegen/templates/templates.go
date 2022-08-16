@@ -190,21 +190,22 @@ func center(width int, pad string, s string) string {
 
 func Funcs() template.FuncMap {
 	return template.FuncMap{
-		"ucFirst":       UcFirst,
-		"lcFirst":       LcFirst,
-		"quote":         strconv.Quote,
-		"rawQuote":      rawQuote,
-		"dump":          Dump,
-		"ref":           ref,
-		"ts":            TypeIdentifier,
-		"call":          Call,
-		"prefixLines":   prefixLines,
-		"notNil":        notNil,
-		"reserveImport": CurrentImports.Reserve,
-		"lookupImport":  CurrentImports.Lookup,
-		"go":            ToGo,
-		"goPrivate":     ToGoPrivate,
-		"goModelName":   ToGoModelName,
+		"ucFirst":            UcFirst,
+		"lcFirst":            LcFirst,
+		"quote":              strconv.Quote,
+		"rawQuote":           rawQuote,
+		"dump":               Dump,
+		"ref":                ref,
+		"ts":                 TypeIdentifier,
+		"call":               Call,
+		"prefixLines":        prefixLines,
+		"notNil":             notNil,
+		"reserveImport":      CurrentImports.Reserve,
+		"lookupImport":       CurrentImports.Lookup,
+		"go":                 ToGo,
+		"goPrivate":          ToGoPrivate,
+		"goModelName":        ToGoModelName,
+		"goPrivateModelName": ToGoPrivateModelName,
 		"add": func(a, b int) int {
 			return a + b
 		},
@@ -310,7 +311,7 @@ func buildGoModelNameKey(parts []string) string {
 	return strings.Join(parts, sep)
 }
 
-func ToGoModelName(parts ...string) string {
+func goModelName(toGoFunc func(string) string, parts []string) string {
 	modelNamesMu.Lock()
 	defer modelNamesMu.Unlock()
 
@@ -327,10 +328,10 @@ func ToGoModelName(parts ...string) string {
 			return false
 		}
 
-		applyToGo = func(parts []string) string {
+		applyToGoFunc = func(parts []string) string {
 			var out string
 			for _, p := range parts {
-				out = fmt.Sprintf("%s%s", out, ToGo(p))
+				out = fmt.Sprintf("%s%s", out, toGoFunc(p))
 			}
 			return out
 		}
@@ -353,7 +354,7 @@ func ToGoModelName(parts ...string) string {
 	}
 
 	// attempt first pass
-	if goName := applyToGo(parts); !nameExists(goName) {
+	if goName := applyToGoFunc(parts); !nameExists(goName) {
 		modelNames[goNameKey] = goName
 		return goName
 	}
@@ -363,7 +364,7 @@ func ToGoModelName(parts ...string) string {
 
 	// if there is only 1 part, append incrementing number until no conflict
 	if partLen == 1 {
-		base := applyToGo(parts)
+		base := applyToGoFunc(parts)
 		for i := 0; ; i++ {
 			tmp := fmt.Sprintf("%s%d", base, i)
 			if !nameExists(tmp) {
@@ -375,7 +376,7 @@ func ToGoModelName(parts ...string) string {
 
 	// best effort "pretty" name
 	for i := partLen - 1; i >= 1; i-- {
-		tmp := fmt.Sprintf("%s%s", applyToGo(parts[0:i]), applyValidGoName(parts[i:]))
+		tmp := fmt.Sprintf("%s%s", applyToGoFunc(parts[0:i]), applyValidGoName(parts[i:]))
 		if !nameExists(tmp) {
 			modelNames[goNameKey] = tmp
 			return tmp
@@ -383,7 +384,7 @@ func ToGoModelName(parts ...string) string {
 	}
 
 	// finally, fallback to just adding an incrementing number
-	base := applyToGo(parts)
+	base := applyToGoFunc(parts)
 	for i := 0; ; i++ {
 		tmp := fmt.Sprintf("%s%d", base, i)
 		if !nameExists(tmp) {
@@ -391,6 +392,14 @@ func ToGoModelName(parts ...string) string {
 			return tmp
 		}
 	}
+}
+
+func ToGoModelName(parts ...string) string {
+	return goModelName(ToGo, parts)
+}
+
+func ToGoPrivateModelName(parts ...string) string {
+	return goModelName(ToGoPrivate, parts)
 }
 
 var (

@@ -137,7 +137,7 @@ func TestToGoModelName(t *testing.T) {
 
 func Test_wordWalker(t *testing.T) {
 	helper := func(str string) []*wordInfo {
-		var resultList []*wordInfo
+		resultList := make([]*wordInfo, 0)
 		wordWalker(str, func(info *wordInfo) {
 			resultList = append(resultList, info)
 		})
@@ -162,7 +162,7 @@ func Test_wordWalker(t *testing.T) {
 	require.Equal(t, []*wordInfo{{Word: "A"}}, helper("A"))
 	require.Equal(t, []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}}, helper("ID"))
 	require.Equal(t, []*wordInfo{{Word: "id", HasCommonInitial: true, MatchCommonInitial: true}}, helper("id"))
-	require.Equal(t, []*wordInfo{}, helper(""))
+	require.Equal(t, make([]*wordInfo, 0), helper(""))
 
 	require.Equal(t, []*wordInfo{{Word: "Related"}, {Word: "Urls"}}, helper("RelatedUrls"))
 	require.Equal(t, []*wordInfo{{Word: "ITicket"}}, helper("ITicket"))

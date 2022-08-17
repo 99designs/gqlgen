@@ -135,6 +135,66 @@ func TestToGoModelName(t *testing.T) {
 	}
 }
 
+func TestToGoPrivateModelName(t *testing.T) {
+	type aTest struct {
+		input    [][]string
+		expected []string
+	}
+
+	theTests := []aTest{
+		{
+			input:    [][]string{{"MyValue"}},
+			expected: []string{"myValue"},
+		},
+		{
+			input:    [][]string{{"MyValue"}, {"myValue"}},
+			expected: []string{"myValue", "myValue0"},
+		},
+		{
+			input:    [][]string{{"MyValue"}, {"YourValue"}},
+			expected: []string{"myValue", "yourValue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "Value"}},
+			expected: []string{"myEnumNameValue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "Value"}, {"MyEnumName", "value"}},
+			expected: []string{"myEnumNameValue", "myEnumNamevalue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "value"}, {"MyEnumName", "Value"}},
+			expected: []string{"myEnumNameValue", "myEnumNameValue0"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "Value"}, {"MyEnumName", "value"}, {"MyEnumName", "vALue"}, {"MyEnumName", "VALue"}},
+			expected: []string{"myEnumNameValue", "myEnumNamevalue", "myEnumNameVALue", "myEnumNameVALue0"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "TitleValue"}, {"MyEnumName", "title_value"}, {"MyEnumName", "title_Value"}, {"MyEnumName", "Title_Value"}},
+			expected: []string{"myEnumNameTitleValue", "myEnumNametitle_value", "myEnumNametitle_Value", "myEnumNameTitle_Value"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}},
+			expected: []string{"myEnumNameTitleValueOtherValue"},
+		},
+		{
+			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}, {"MyEnumName", "title_value", "OtherValue"}},
+			expected: []string{"myEnumNameTitleValueOtherValue", "myEnumNametitle_valueOtherValue"},
+		},
+	}
+
+	for ti, at := range theTests {
+		resetModelNames()
+		t.Run(fmt.Sprintf("modelname-%d", ti), func(t *testing.T) {
+			at := at
+			for i, n := range at.input {
+				require.Equal(t, at.expected[i], ToGoPrivateModelName(n...))
+			}
+		})
+	}
+}
+
 func Test_wordWalker(t *testing.T) {
 	helper := func(str string) []*wordInfo {
 		resultList := make([]*wordInfo, 0)

@@ -311,7 +311,7 @@ func buildGoModelNameKey(parts []string) string {
 	return strings.Join(parts, sep)
 }
 
-func goModelName(toGoFunc func(string) string, parts []string) string {
+func goModelName(primaryToGoFunc func(string) string, parts []string) string {
 	modelNamesMu.Lock()
 	defer modelNamesMu.Unlock()
 
@@ -330,8 +330,16 @@ func goModelName(toGoFunc func(string) string, parts []string) string {
 
 		applyToGoFunc = func(parts []string) string {
 			var out string
-			for _, p := range parts {
-				out = fmt.Sprintf("%s%s", out, toGoFunc(p))
+			switch len(parts) {
+			case 0:
+				return ""
+			case 1:
+				return primaryToGoFunc(parts[0])
+			default:
+				out = primaryToGoFunc(parts[0])
+			}
+			for _, p := range parts[1:] {
+				out = fmt.Sprintf("%s%s", out, ToGo(p))
 			}
 			return out
 		}

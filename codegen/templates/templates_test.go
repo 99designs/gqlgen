@@ -196,7 +196,7 @@ func TestToGoPrivateModelName(t *testing.T) {
 }
 
 func Test_wordWalker(t *testing.T) {
-	helper := func(str string) []*wordInfo {
+	makeInput := func(str string) []*wordInfo {
 		resultList := make([]*wordInfo, 0)
 		wordWalker(str, func(info *wordInfo) {
 			resultList = append(resultList, info)
@@ -204,28 +204,95 @@ func Test_wordWalker(t *testing.T) {
 		return resultList
 	}
 
-	require.Equal(t, []*wordInfo{{Word: "TO"}, {Word: "CAMEL"}}, helper("TO_CAMEL"))
-	require.Equal(t, []*wordInfo{{Word: "to"}, {Word: "camel"}}, helper("to_camel"))
-	require.Equal(t, []*wordInfo{{Word: "to"}, {Word: "Camel"}}, helper("toCamel"))
-	require.Equal(t, []*wordInfo{{Word: "To"}, {Word: "Camel"}}, helper("ToCamel"))
-	require.Equal(t, []*wordInfo{{Word: "to"}, {Word: "camel"}}, helper("to-camel"))
+	type aTest struct {
+		expected []*wordInfo
+		input    []*wordInfo
+	}
 
-	require.Equal(t, []*wordInfo{{Word: "Related"}, {Word: "URLs", HasCommonInitial: true}}, helper("RelatedURLs"))
-	require.Equal(t, []*wordInfo{{Word: "Image"}, {Word: "IDs", HasCommonInitial: true}}, helper("ImageIDs"))
-	require.Equal(t, []*wordInfo{{Word: "Foo"}, {Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}}, helper("FooID"))
-	require.Equal(t, []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}, {Word: "Foo"}}, helper("IDFoo"))
-	require.Equal(t, []*wordInfo{{Word: "Foo"}, {Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}}, helper("FooASCII"))
-	require.Equal(t, []*wordInfo{{Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}, {Word: "Foo"}}, helper("ASCIIFoo"))
-	require.Equal(t, []*wordInfo{{Word: "Foo"}, {Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}}, helper("FooUTF8"))
-	require.Equal(t, []*wordInfo{{Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}, {Word: "Foo"}}, helper("UTF8Foo"))
+	theTests := []aTest{
+		{
+			input:    makeInput("TO_CAMEL"),
+			expected: []*wordInfo{{Word: "TO"}, {WordOffset: 1, Word: "CAMEL"}},
+		},
+		{
+			input:    makeInput("to_camel"),
+			expected: []*wordInfo{{Word: "to"}, {WordOffset: 1, Word: "camel"}},
+		},
+		{
+			input:    makeInput("toCamel"),
+			expected: []*wordInfo{{Word: "to"}, {WordOffset: 1, Word: "Camel"}},
+		},
+		{
+			input:    makeInput("ToCamel"),
+			expected: []*wordInfo{{Word: "To"}, {WordOffset: 1, Word: "Camel"}},
+		},
+		{
+			input:    makeInput("to-camel"),
+			expected: []*wordInfo{{Word: "to"}, {WordOffset: 1, Word: "camel"}},
+		},
+		{
+			input:    makeInput("RelatedURLs"),
+			expected: []*wordInfo{{Word: "Related"}, {WordOffset: 1, Word: "URLs", HasCommonInitial: true}},
+		},
+		{
+			input:    makeInput("ImageIDs"),
+			expected: []*wordInfo{{Word: "Image"}, {WordOffset: 1, Word: "IDs", HasCommonInitial: true}},
+		},
+		{
+			input:    makeInput("FooID"),
+			expected: []*wordInfo{{Word: "Foo"}, {WordOffset: 1, Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}},
+		},
+		{
+			input:    makeInput("IDFoo"),
+			expected: []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}, {WordOffset: 1, Word: "Foo"}},
+		},
+		{
+			input:    makeInput("FooASCII"),
+			expected: []*wordInfo{{Word: "Foo"}, {WordOffset: 1, Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}},
+		},
+		{
+			input:    makeInput("ASCIIFoo"),
+			expected: []*wordInfo{{Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}, {WordOffset: 1, Word: "Foo"}},
+		},
+		{
+			input:    makeInput("FooUTF8"),
+			expected: []*wordInfo{{Word: "Foo"}, {WordOffset: 1, Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}},
+		},
+		{
+			input:    makeInput("UTF8Foo"),
+			expected: []*wordInfo{{Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}, {WordOffset: 1, Word: "Foo"}},
+		},
+		{
+			input:    makeInput("A"),
+			expected: []*wordInfo{{Word: "A"}},
+		},
+		{
+			input:    makeInput("ID"),
+			expected: []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}},
+		},
+		{
+			input:    makeInput("id"),
+			expected: []*wordInfo{{Word: "id", HasCommonInitial: true, MatchCommonInitial: true}},
+		},
+		{
+			input:    makeInput(""),
+			expected: make([]*wordInfo, 0),
+		},
+		{
+			input:    makeInput("RelatedUrls"),
+			expected: []*wordInfo{{Word: "Related"}, {WordOffset: 1, Word: "Urls"}},
+		},
+		{
+			input:    makeInput("ITicket"),
+			expected: []*wordInfo{{Word: "ITicket"}},
+		},
+	}
 
-	require.Equal(t, []*wordInfo{{Word: "A"}}, helper("A"))
-	require.Equal(t, []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}}, helper("ID"))
-	require.Equal(t, []*wordInfo{{Word: "id", HasCommonInitial: true, MatchCommonInitial: true}}, helper("id"))
-	require.Equal(t, make([]*wordInfo, 0), helper(""))
-
-	require.Equal(t, []*wordInfo{{Word: "Related"}, {Word: "Urls"}}, helper("RelatedUrls"))
-	require.Equal(t, []*wordInfo{{Word: "ITicket"}}, helper("ITicket"))
+	for i, at := range theTests {
+		t.Run(fmt.Sprintf("wordWalker-%d", i), func(t *testing.T) {
+			require.Equal(t, at.input, at.expected)
+		})
+	}
 }
 
 func TestCenter(t *testing.T) {

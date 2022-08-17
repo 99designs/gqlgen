@@ -60,6 +60,12 @@ type Options struct {
 	Packages *code.Packages
 }
 
+var (
+	modelNamesMu sync.Mutex
+	modelNames   = make(map[string]string, 0)
+	goNameRe     = regexp.MustCompile("[^a-zA-Z0-9_]")
+)
+
 // Render renders a gql plugin template from the given Options. Render is an
 // abstraction of the text/template package that makes it easier to write gqlgen
 // plugins. If Options.Template is empty, the Render function will look for `.gotpl`
@@ -295,11 +301,6 @@ func Call(p *types.Func) string {
 	return pkg + p.Name()
 }
 
-var (
-	modelNamesMu sync.Mutex
-	modelNames   = make(map[string]string, 0)
-)
-
 func resetModelNames() {
 	modelNamesMu.Lock()
 	defer modelNamesMu.Unlock()
@@ -410,23 +411,22 @@ func ToGoPrivateModelName(parts ...string) string {
 	return goModelName(ToGoPrivate, parts)
 }
 
-var (
-	goNameRe = regexp.MustCompile("[^a-zA-Z0-9_]")
-)
-
 func replaceInvalidCharacters(in string) string {
 	return goNameRe.ReplaceAllLiteralString(in, "_")
 }
 
-func ToGo(name string) string {
-	if name == "_" {
-		return "_"
-	}
-	runes := make([]rune, 0, len(name))
-
-	wordWalker(name, func(info *wordInfo) {
+func wordWalkerFunc(private bool, nameRunes *[]rune) func(*wordInfo) {
+	return func(info *wordInfo) {
 		word := info.Word
-		if info.MatchCommonInitial {
+		if private && info.WordOffset == 0 {
+			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
+				// ID → id, CAMEL → camel
+				word = strings.ToLower(info.Word)
+			} else {
+				// ITicket → iTicket
+				word = LcFirst(info.Word)
+			}
+		} else if info.MatchCommonInitial {
 			word = strings.ToUpper(word)
 		} else if !info.HasCommonInitial {
 			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
@@ -435,8 +435,17 @@ func ToGo(name string) string {
 				word = UcFirst(strings.ToLower(word))
 			}
 		}
-		runes = append(runes, []rune(word)...)
-	})
+		*nameRunes = append(*nameRunes, []rune(word)...)
+	}
+}
+
+func ToGo(name string) string {
+	if name == "_" {
+		return "_"
+	}
+	runes := make([]rune, 0, len(name))
+
+	wordWalker(name, wordWalkerFunc(false, &runes))
 
 	return string(runes)
 }
@@ -447,31 +456,13 @@ func ToGoPrivate(name string) string {
 	}
 	runes := make([]rune, 0, len(name))
 
-	first := true
-	wordWalker(name, func(info *wordInfo) {
-		word := info.Word
-		switch {
-		case first:
-			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
-				// ID → id, CAMEL → camel
-				word = strings.ToLower(info.Word)
-			} else {
-				// ITicket → iTicket
-				word = LcFirst(info.Word)
-			}
-			first = false
-		case info.MatchCommonInitial:
-			word = strings.ToUpper(word)
-		case !info.HasCommonInitial:
-			word = UcFirst(strings.ToLower(word))
-		}
-		runes = append(runes, []rune(word)...)
-	})
+	wordWalker(name, wordWalkerFunc(true, &runes))
 
 	return sanitizeKeywords(string(runes))
 }
 
 type wordInfo struct {
+	WordOffset         int
 	Word               string
 	MatchCommonInitial bool
 	HasCommonInitial   bool
@@ -481,7 +472,7 @@ type wordInfo struct {
 // https://github.com/golang/lint/blob/06c8688daad7faa9da5a0c2f163a3d14aac986ca/lint.go#L679
 func wordWalker(str string, f func(*wordInfo)) {
 	runes := []rune(strings.TrimFunc(str, isDelimiter))
-	w, i := 0, 0 // index of start of word, scan
+	w, i, wo := 0, 0, 0 // index of start of word, scan, word offset
 	hasCommonInitial := false
 	for i+1 <= len(runes) {
 		eow := false // whether we hit the end of a word
@@ -529,12 +520,14 @@ func wordWalker(str string, f func(*wordInfo)) {
 		}
 
 		f(&wordInfo{
+			WordOffset:         wo,
 			Word:               word,
 			MatchCommonInitial: matchCommonInitial,
 			HasCommonInitial:   hasCommonInitial,
 		})
 		hasCommonInitial = false
 		w = i
+		wo++
 	}
 }
 

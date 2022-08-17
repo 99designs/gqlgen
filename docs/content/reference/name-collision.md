@@ -75,7 +75,10 @@ Which immediately leads to compilation errors as we now have three constants wit
 ### Resolution
 
 1. Store each name generated as part of a run for later comparison
-2. Try pretty approach first.  Use if no conflicts
+2. Try to coerce name into `CapitalCase`.  Use if no conflicts.
+	- This process attempts to break apart identifiers into "words", identified by separating on capital letters,
+    underscores, hyphens, and spaces.
+  - Each "word" is capitalized and appended to previous word.
 3. If non-composite name, append integer to end of name, starting at 0 and going to `math.MaxInt`
 4. If composite name, in reverse order, the pieces of the name have a less opinionated converter applied
 5. If all else fails, append integer to end of name, starting at 0 and going to `math.MaxInt`

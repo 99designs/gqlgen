@@ -8,10 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"unicode"
 
@@ -57,6 +59,12 @@ type Options struct {
 	// Packages cache, you can find me on config.Config
 	Packages *code.Packages
 }
+
+var (
+	modelNamesMu sync.Mutex
+	modelNames   = make(map[string]string, 0)
+	goNameRe     = regexp.MustCompile("[^a-zA-Z0-9_]")
+)
 
 // Render renders a gql plugin template from the given Options. Render is an
 // abstraction of the text/template package that makes it easier to write gqlgen
@@ -188,20 +196,22 @@ func center(width int, pad string, s string) string {
 
 func Funcs() template.FuncMap {
 	return template.FuncMap{
-		"ucFirst":       UcFirst,
-		"lcFirst":       LcFirst,
-		"quote":         strconv.Quote,
-		"rawQuote":      rawQuote,
-		"dump":          Dump,
-		"ref":           ref,
-		"ts":            TypeIdentifier,
-		"call":          Call,
-		"prefixLines":   prefixLines,
-		"notNil":        notNil,
-		"reserveImport": CurrentImports.Reserve,
-		"lookupImport":  CurrentImports.Lookup,
-		"go":            ToGo,
-		"goPrivate":     ToGoPrivate,
+		"ucFirst":            UcFirst,
+		"lcFirst":            LcFirst,
+		"quote":              strconv.Quote,
+		"rawQuote":           rawQuote,
+		"dump":               Dump,
+		"ref":                ref,
+		"ts":                 TypeIdentifier,
+		"call":               Call,
+		"prefixLines":        prefixLines,
+		"notNil":             notNil,
+		"reserveImport":      CurrentImports.Reserve,
+		"lookupImport":       CurrentImports.Lookup,
+		"go":                 ToGo,
+		"goPrivate":          ToGoPrivate,
+		"goModelName":        ToGoModelName,
+		"goPrivateModelName": ToGoPrivateModelName,
 		"add": func(a, b int) int {
 			return a + b
 		},
@@ -291,25 +301,154 @@ func Call(p *types.Func) string {
 	return pkg + p.Name()
 }
 
+func resetModelNames() {
+	modelNamesMu.Lock()
+	defer modelNamesMu.Unlock()
+	modelNames = make(map[string]string, 0)
+}
+
+func buildGoModelNameKey(parts []string) string {
+	const sep = ":"
+	return strings.Join(parts, sep)
+}
+
+func goModelName(primaryToGoFunc func(string) string, parts []string) string {
+	modelNamesMu.Lock()
+	defer modelNamesMu.Unlock()
+
+	var (
+		goNameKey string
+		partLen   int
+
+		nameExists = func(n string) bool {
+			for _, v := range modelNames {
+				if n == v {
+					return true
+				}
+			}
+			return false
+		}
+
+		applyToGoFunc = func(parts []string) string {
+			var out string
+			switch len(parts) {
+			case 0:
+				return ""
+			case 1:
+				return primaryToGoFunc(parts[0])
+			default:
+				out = primaryToGoFunc(parts[0])
+			}
+			for _, p := range parts[1:] {
+				out = fmt.Sprintf("%s%s", out, ToGo(p))
+			}
+			return out
+		}
+
+		applyValidGoName = func(parts []string) string {
+			var out string
+			for _, p := range parts {
+				out = fmt.Sprintf("%s%s", out, replaceInvalidCharacters(p))
+			}
+			return out
+		}
+	)
+
+	// build key for this entity
+	goNameKey = buildGoModelNameKey(parts)
+
+	// determine if we've seen this entity before, and reuse if so
+	if goName, ok := modelNames[goNameKey]; ok {
+		return goName
+	}
+
+	// attempt first pass
+	if goName := applyToGoFunc(parts); !nameExists(goName) {
+		modelNames[goNameKey] = goName
+		return goName
+	}
+
+	// determine number of parts
+	partLen = len(parts)
+
+	// if there is only 1 part, append incrementing number until no conflict
+	if partLen == 1 {
+		base := applyToGoFunc(parts)
+		for i := 0; ; i++ {
+			tmp := fmt.Sprintf("%s%d", base, i)
+			if !nameExists(tmp) {
+				modelNames[goNameKey] = tmp
+				return tmp
+			}
+		}
+	}
+
+	// best effort "pretty" name
+	for i := partLen - 1; i >= 1; i-- {
+		tmp := fmt.Sprintf("%s%s", applyToGoFunc(parts[0:i]), applyValidGoName(parts[i:]))
+		if !nameExists(tmp) {
+			modelNames[goNameKey] = tmp
+			return tmp
+		}
+	}
+
+	// finally, fallback to just adding an incrementing number
+	base := applyToGoFunc(parts)
+	for i := 0; ; i++ {
+		tmp := fmt.Sprintf("%s%d", base, i)
+		if !nameExists(tmp) {
+			modelNames[goNameKey] = tmp
+			return tmp
+		}
+	}
+}
+
+func ToGoModelName(parts ...string) string {
+	return goModelName(ToGo, parts)
+}
+
+func ToGoPrivateModelName(parts ...string) string {
+	return goModelName(ToGoPrivate, parts)
+}
+
+func replaceInvalidCharacters(in string) string {
+	return goNameRe.ReplaceAllLiteralString(in, "_")
+}
+
+func wordWalkerFunc(private bool, nameRunes *[]rune) func(*wordInfo) {
+	return func(info *wordInfo) {
+		word := info.Word
+
+		switch {
+		case private && info.WordOffset == 0:
+			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
+				// ID → id, CAMEL → camel
+				word = strings.ToLower(info.Word)
+			} else {
+				// ITicket → iTicket
+				word = LcFirst(info.Word)
+			}
+
+		case info.MatchCommonInitial:
+			word = strings.ToUpper(word)
+
+		case !info.HasCommonInitial && strings.ToUpper(word) == word || strings.ToLower(word) == word:
+			// FOO or foo → Foo
+			// FOo → FOo
+			word = UcFirst(strings.ToLower(word))
+		}
+
+		*nameRunes = append(*nameRunes, []rune(word)...)
+	}
+}
+
 func ToGo(name string) string {
 	if name == "_" {
 		return "_"
 	}
 	runes := make([]rune, 0, len(name))
 
-	wordWalker(name, func(info *wordInfo) {
-		word := info.Word
-		if info.MatchCommonInitial {
-			word = strings.ToUpper(word)
-		} else if !info.HasCommonInitial {
-			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
-				// FOO or foo → Foo
-				// FOo → FOo
-				word = UcFirst(strings.ToLower(word))
-			}
-		}
-		runes = append(runes, []rune(word)...)
-	})
+	wordWalker(name, wordWalkerFunc(false, &runes))
 
 	return string(runes)
 }
@@ -320,31 +459,13 @@ func ToGoPrivate(name string) string {
 	}
 	runes := make([]rune, 0, len(name))
 
-	first := true
-	wordWalker(name, func(info *wordInfo) {
-		word := info.Word
-		switch {
-		case first:
-			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
-				// ID → id, CAMEL → camel
-				word = strings.ToLower(info.Word)
-			} else {
-				// ITicket → iTicket
-				word = LcFirst(info.Word)
-			}
-			first = false
-		case info.MatchCommonInitial:
-			word = strings.ToUpper(word)
-		case !info.HasCommonInitial:
-			word = UcFirst(strings.ToLower(word))
-		}
-		runes = append(runes, []rune(word)...)
-	})
+	wordWalker(name, wordWalkerFunc(true, &runes))
 
 	return sanitizeKeywords(string(runes))
 }
 
 type wordInfo struct {
+	WordOffset         int
 	Word               string
 	MatchCommonInitial bool
 	HasCommonInitial   bool
@@ -354,7 +475,7 @@ type wordInfo struct {
 // https://github.com/golang/lint/blob/06c8688daad7faa9da5a0c2f163a3d14aac986ca/lint.go#L679
 func wordWalker(str string, f func(*wordInfo)) {
 	runes := []rune(strings.TrimFunc(str, isDelimiter))
-	w, i := 0, 0 // index of start of word, scan
+	w, i, wo := 0, 0, 0 // index of start of word, scan, word offset
 	hasCommonInitial := false
 	for i+1 <= len(runes) {
 		eow := false // whether we hit the end of a word
@@ -402,12 +523,14 @@ func wordWalker(str string, f func(*wordInfo)) {
 		}
 
 		f(&wordInfo{
+			WordOffset:         wo,
 			Word:               word,
 			MatchCommonInitial: matchCommonInitial,
 			HasCommonInitial:   hasCommonInitial,
 		})
 		hasCommonInitial = false
 		w = i
+		wo++
 	}
 }
 

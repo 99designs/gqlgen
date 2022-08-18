@@ -48,3 +48,4 @@ jobs:
           # skip cache because of flaky behaviors
           skip-build-cache: true
           skip-pkg-cache: true
+          args: '--timeout 5m'

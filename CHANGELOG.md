@@ -5,10 +5,122 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.12...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.14...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.14"></a>
+## [v0.17.14](https://github.com/99designs/gqlgen/compare/v0.17.13...v0.17.14) - 2022-08-18
+- <a href="https://github.com/99designs/gqlgen/commit/581bf6eb063a0d6a3cec3b6bc7a16ca10e310a97"><tt>581bf6eb</tt></a> release v0.17.14
+
+- <a href="https://github.com/99designs/gqlgen/commit/d3384377aefb4b7d34ba52f8def6c0a6a3dec27f"><tt>d3384377</tt></a> Update gqlparser
+
+- <a href="https://github.com/99designs/gqlgen/commit/c2d02d352f8d531fa0bd9b246fc152eeb6dbf10a"><tt>c2d02d35</tt></a> More descriptive `not implemented` stubs (<a href="https://github.com/99designs/gqlgen/pull/2328">#2328</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2327"> #2327</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9f919d2cee464acdaf4a490aeb42d63369dbd572"><tt>9f919d2c</tt></a> Avoid GraphQL to Go Naming Collision with "ToGoModelName" func (<a href="https://github.com/99designs/gqlgen/pull/2322">#2322</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2321"> #2321</a>)</summary>
+
+* using ReplaceAllStringLiteral
+
+* fixing wordInfo template test
+
+* bumping linter timeout to 5m
+
+* comment cleanup
+
+* some cleanup, adding "ToGoPrivateModelName" func
+
+* adding "ToGoPrivateModelName" func
+
+* refactoring word walker impl and tests
+
+* hopefully making linter happy
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/2304c104fc8d26487f50e80e9c5eaee113005a30"><tt>2304c104</tt></a> Include docstrings on interface getters (<a href="https://github.com/99designs/gqlgen/pull/2317">#2317</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/f5d603269502b50e19d0ed966e2dfe3ecd74049f"><tt>f5d60326</tt></a> Leverage (*Imports).LookupType when generating interface field getters (<a href="https://github.com/99designs/gqlgen/pull/2315">#2315</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/242c3ba217ee740e37445ce4b14e0808554263f5"><tt>242c3ba2</tt></a> Generate getters for interface fields (<a href="https://github.com/99designs/gqlgen/pull/2314">#2314</a>)</summary>
+
+* Generate getters for interface fields
+
+* Changes to make models_test.go pass
+
+* Use text/template, not html/template
+
+* Re-run go generate ./...
+
+* gofmt a few files that were failing lint checks
+
+* Another gofmt straggler
+
+* Try making the "generated" match the exact whitespace github is disliking
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/0d91c893e285cc14330c80643b663cd2bebeb911"><tt>0d91c893</tt></a> Add hackernews graphql api tutorial to other resources (<a href="https://github.com/99designs/gqlgen/pull/2305">#2305</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/c2526ba50ff3a69b5eca88a62a571c47f3c245ed"><tt>c2526ba5</tt></a> Update gqlparser to v2.4.7 (<a href="https://github.com/99designs/gqlgen/pull/2300">#2300</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/f283124d1cea309e054afb197d16012364b88097"><tt>f283124d</tt></a> <a href="https://github.com/99designs/gqlgen/pull/2298">#2298</a>: fix gqlgen extracting module name from comment line (<a href="https://github.com/99designs/gqlgen/pull/2299">#2299</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/779d7cdd4991e3cf4bf1ecbdea1f02664a56ac8d"><tt>779d7cdd</tt></a> Add support for KeepAlive message in websocket client (<a href="https://github.com/99designs/gqlgen/pull/2293">#2293</a>)</summary>
+
+* Add support for KeepAlive message in websocket client
+
+* rewrite if-else to switch statement
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/5a37d1dc079f5212b6e043b0f6889cae7b08dea9"><tt>5a37d1dc</tt></a> v0.17.13 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.13"></a>
+## [v0.17.13](https://github.com/99designs/gqlgen/compare/v0.17.12...v0.17.13) - 2022-07-15
+- <a href="https://github.com/99designs/gqlgen/commit/e82b6bf1cf311d6af2e280127f47b15ae35ca6ac"><tt>e82b6bf1</tt></a> release v0.17.13
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f0e9047df5f86efbfbceea9c04593bb1f52e06de"><tt>f0e9047d</tt></a> Hide dependencies in `tools.go` from importers (<a href="https://github.com/99designs/gqlgen/pull/2287">#2287</a>)</summary>
+
+Projects that use `go mod vendor` will vendor `github.com/matryer/moq`
+despite it not being required at runtime.
+
+Moving `tools.go` to `internal` hides this import from downstream
+users and avoids `github.com/matryer/moq` being vendored.
+
+`go generate` of the mocks still works as expected.
+
+The assumption behind the import test broke, so I've pointed it at a
+different path that has no Go code. This seems to match the intent
+behind the original test for the `internal/code/..` path.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/6310e6a736ccbf3bb8caea981553ee7549aea748"><tt>6310e6a7</tt></a> support named interface to Field.CallArgs (<a href="https://github.com/99designs/gqlgen/pull/2289">#2289</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/30493696aacf79090bb5e144a304a5a7df488c67"><tt>30493696</tt></a> fix: return the original error (<a href="https://github.com/99designs/gqlgen/pull/2288">#2288</a>)</summary>
+
+* fix: return the original error
+
+close https://github.com/99designs/gqlgen/issues/2286
+
+* Update error.go
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/fb13091df76b47b936224336fe19b15fe310b41d"><tt>fb13091d</tt></a> updated WebSocker InitFunc recipe (<a href="https://github.com/99designs/gqlgen/pull/2275">#2275</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/770c09fb9db0485943590b9986afe36818c2a70e"><tt>770c09fb</tt></a> Update changelog for v0.17.12
+
+- <a href="https://github.com/99designs/gqlgen/commit/b4c186a7142c0a151b6a21b40914fe317e13819d"><tt>b4c186a7</tt></a> v0.17.12 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.12"></a>
 ## [v0.17.12](https://github.com/99designs/gqlgen/compare/v0.17.11...v0.17.12) - 2022-07-04
 - <a href="https://github.com/99designs/gqlgen/commit/94c02b0de6d483d87453fc18a7f7625ae4adaa6c"><tt>94c02b0d</tt></a> release v0.17.12

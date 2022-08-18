@@ -120,7 +120,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
 			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
 			if implementation == "" {
-				implementation = `panic(fmt.Errorf("not implemented"))`
+				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
 			}
 			if comment == "" {
 				comment = fmt.Sprintf("%v is the resolver for the %v field.", f.GoFieldName, f.Name)

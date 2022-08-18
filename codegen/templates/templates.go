@@ -418,7 +418,9 @@ func replaceInvalidCharacters(in string) string {
 func wordWalkerFunc(private bool, nameRunes *[]rune) func(*wordInfo) {
 	return func(info *wordInfo) {
 		word := info.Word
-		if private && info.WordOffset == 0 {
+
+		switch {
+		case private && info.WordOffset == 0:
 			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
 				// ID → id, CAMEL → camel
 				word = strings.ToLower(info.Word)
@@ -426,15 +428,16 @@ func wordWalkerFunc(private bool, nameRunes *[]rune) func(*wordInfo) {
 				// ITicket → iTicket
 				word = LcFirst(info.Word)
 			}
-		} else if info.MatchCommonInitial {
+
+		case info.MatchCommonInitial:
 			word = strings.ToUpper(word)
-		} else if !info.HasCommonInitial {
-			if strings.ToUpper(word) == word || strings.ToLower(word) == word {
-				// FOO or foo → Foo
-				// FOo → FOo
-				word = UcFirst(strings.ToLower(word))
-			}
+
+		case !info.HasCommonInitial && strings.ToUpper(word) == word || strings.ToLower(word) == word:
+			// FOO or foo → Foo
+			// FOo → FOo
+			word = UcFirst(strings.ToLower(word))
 		}
+
 		*nameRunes = append(*nameRunes, []rune(word)...)
 	}
 }

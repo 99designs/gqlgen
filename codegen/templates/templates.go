@@ -432,7 +432,7 @@ func wordWalkerFunc(private bool, nameRunes *[]rune) func(*wordInfo) {
 		case info.MatchCommonInitial:
 			word = strings.ToUpper(word)
 
-		case !info.HasCommonInitial && strings.ToUpper(word) == word || strings.ToLower(word) == word:
+		case !info.HasCommonInitial && (strings.ToUpper(word) == word || strings.ToLower(word) == word):
 			// FOO or foo → Foo
 			// FOo → FOo
 			word = UcFirst(strings.ToLower(word))

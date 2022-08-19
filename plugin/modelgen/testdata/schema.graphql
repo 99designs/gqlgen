@@ -172,8 +172,10 @@ type RenameFieldTest {
 
 interface ArrayOfA {
     trickyField: [A!]!
+    trickyFieldPointer: [A]
 }
 
 type ImplArrayOfA implements ArrayOfA {
     trickyField: [CDImplemented!]!
+    trickyFieldPointer: [CDImplemented]
 }

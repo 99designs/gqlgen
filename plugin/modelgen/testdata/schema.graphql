@@ -169,3 +169,13 @@ type RenameFieldTest {
     badName: String!
     otherField: String!
 }
+
+interface ArrayOfA {
+    trickyField: [A!]!
+    trickyFieldPointer: [A]
+}
+
+type ImplArrayOfA implements ArrayOfA {
+    trickyField: [CDImplemented!]!
+    trickyFieldPointer: [CDImplemented]
+}

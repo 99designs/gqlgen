@@ -19,9 +19,27 @@ type Like struct {
 	Collected []string  `json:"collected"`
 }
 
-func (Like) IsEvent()                    {}
-func (this Like) GetSelection() []string { return this.Selection }
-func (this Like) GetCollected() []string { return this.Collected }
+func (Like) IsEvent() {}
+func (this Like) GetSelection() []string {
+	if this.Selection == nil {
+		return nil
+	}
+	interfaceSlice := make([]string, 0, len(this.Selection))
+	for _, concrete := range this.Selection {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Like) GetCollected() []string {
+	if this.Collected == nil {
+		return nil
+	}
+	interfaceSlice := make([]string, 0, len(this.Collected))
+	for _, concrete := range this.Collected {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type Post struct {
 	Message   string    `json:"message"`
@@ -30,6 +48,24 @@ type Post struct {
 	Collected []string  `json:"collected"`
 }
 
-func (Post) IsEvent()                    {}
-func (this Post) GetSelection() []string { return this.Selection }
-func (this Post) GetCollected() []string { return this.Collected }
+func (Post) IsEvent() {}
+func (this Post) GetSelection() []string {
+	if this.Selection == nil {
+		return nil
+	}
+	interfaceSlice := make([]string, 0, len(this.Selection))
+	for _, concrete := range this.Selection {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Post) GetCollected() []string {
+	if this.Collected == nil {
+		return nil
+	}
+	interfaceSlice := make([]string, 0, len(this.Collected))
+	for _, concrete := range this.Collected {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}

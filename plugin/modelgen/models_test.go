@@ -1,10 +1,12 @@
 package modelgen
 
 import (
+	"errors"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -27,6 +29,7 @@ func TestModelGeneration(t *testing.T) {
 		FieldHook:  defaultFieldMutateHook,
 	}
 	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out/"))
 
 	require.True(t, cfg.Models.UserDefined("MissingTypeNotNull"))
 	require.True(t, cfg.Models.UserDefined("MissingTypeNullable"))
@@ -329,4 +332,15 @@ func parseAst(path string) (*ast.Package, error) {
 		return nil, err
 	}
 	return pkgs["out"], nil
+}
+
+func goBuild(t *testing.T, path string) error {
+	t.Helper()
+	cmd := exec.Command("go", "build", path)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return errors.New(string(out))
+	}
+
+	return nil
 }

@@ -13,6 +13,12 @@ type A interface {
 	GetA() string
 }
 
+type ArrayOfA interface {
+	IsArrayOfA()
+	GetTrickyField() []A
+	GetTrickyFieldPointer() []A
+}
+
 type B interface {
 	IsB()
 	GetB() int
@@ -99,6 +105,33 @@ type FieldMutationHook struct {
 	Enum     *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`
 	NoVal    *string       `json:"noVal" yaml:"noVal" repeated:"true" database:"FieldMutationHooknoVal"`
 	Repeated *string       `json:"repeated" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
+}
+
+type ImplArrayOfA struct {
+	TrickyField        []*CDImplemented `json:"trickyField" database:"ImplArrayOfAtrickyField"`
+	TrickyFieldPointer []*CDImplemented `json:"trickyFieldPointer" database:"ImplArrayOfAtrickyFieldPointer"`
+}
+
+func (ImplArrayOfA) IsArrayOfA() {}
+func (this ImplArrayOfA) GetTrickyField() []A {
+	if this.TrickyField == nil {
+		return nil
+	}
+	interfaceSlice := make([]A, 0, len(this.TrickyField))
+	for _, concrete := range this.TrickyField {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this ImplArrayOfA) GetTrickyFieldPointer() []A {
+	if this.TrickyFieldPointer == nil {
+		return nil
+	}
+	interfaceSlice := make([]A, 0, len(this.TrickyFieldPointer))
+	for _, concrete := range this.TrickyFieldPointer {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
 }
 
 type MissingInput struct {

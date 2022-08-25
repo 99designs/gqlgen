@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,7 @@ import (
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
@@ -102,7 +103,10 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
 
-	if err := yaml.UnmarshalStrict(b, config); err != nil {
+	dec := yaml.NewDecoder(bytes.NewReader(b))
+	dec.KnownFields(true)
+
+	if err := dec.Decode(config); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
 

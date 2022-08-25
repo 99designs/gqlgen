@@ -9,17 +9,19 @@ import (
 var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 <html>
   <head>
-    <title>{{.title}}</title>
-    <link
-		rel="stylesheet"
-		href="https://cdn.jsdelivr.net/npm/graphiql@{{.version}}/graphiql.min.css"
-		integrity="{{.cssSRI}}"
-		crossorigin="anonymous"
-	/>
-  </head>
-  <body style="margin: 0;">
-    <div id="graphiql" style="height: 100vh;"></div>
+  	<title>{{.title}}</title>
+	<style>
+		body {
+			height: 100%;
+			margin: 0;
+			width: 100%;
+			overflow: hidden;
+		}
 
+		#graphiql {
+			height: 100vh;
+		}
+	</style>
 	<script
 		src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.production.min.js"
 		integrity="{{.reactSRI}}"
@@ -30,6 +32,16 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 		integrity="{{.reactDOMSRI}}"
 		crossorigin="anonymous"
 	></script>
+    <link
+		rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/graphiql@{{.version}}/graphiql.min.css"
+		integrity="{{.cssSRI}}"
+		crossorigin="anonymous"
+	/>
+  </head>
+  <body>
+    <div id="graphiql">Loading...</div>
+
 	<script
 		src="https://cdn.jsdelivr.net/npm/graphiql@{{.version}}/graphiql.min.js"
 		integrity="{{.jsSRI}}"
@@ -50,8 +62,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
       ReactDOM.render(
         React.createElement(GraphiQL, {
           fetcher: fetcher,
-          tabs: true,
-          headerEditorEnabled: true,
+          isHeadersEditorEnabled: true,
           shouldPersistHeaders: true
         }),
         document.getElementById('graphiql'),
@@ -70,9 +81,9 @@ func Handler(title string, endpoint string) http.HandlerFunc {
 			"endpoint":             endpoint,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
-			"version":              "1.8.2",
-			"cssSRI":               "sha256-CDHiHbYkDSUc3+DS2TU89I9e2W3sJRUOqSmp7JC+LBw=",
-			"jsSRI":                "sha256-X8vqrqZ6Rvvoq4tvRVM3LoMZCQH8jwW92tnX0iPiHPc=",
+			"version":              "2.0.1",
+			"cssSRI":               "sha256-hYUgpHapGug0ucdB5kG0zSipubcQOJcGjclIZke2rl8=",
+			"jsSRI":                "sha256-jMXGO5+Y4OhcHPSR34jpzpzlz4OZTlxcvaDXSWmUMRo=",
 			"reactSRI":             "sha256-Ipu/TQ50iCCVZBUsZyNJfxrDk0E2yhaEIz0vqI+kFG8=",
 			"reactDOMSRI":          "sha256-nbMykgB6tsOFJ7OdVmPpdqMFVk4ZsqWocT6issAPUF0=",
 		})

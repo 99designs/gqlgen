@@ -72,11 +72,12 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 		return rc, gqlerror.List{err}
 	}
 
-	var err *gqlerror.Error
+	var err error
 	rc.Variables, err = validator.VariableValues(e.es.Schema(), rc.Operation, params.Variables)
-	if err != nil {
-		errcode.Set(err, errcode.ValidationFailed)
-		return rc, gqlerror.List{err}
+	gqlErr, _ := err.(*gqlerror.Error)
+	if gqlErr != nil {
+		errcode.Set(gqlErr, errcode.ValidationFailed)
+		return rc, gqlerror.List{gqlErr}
 	}
 	rc.Stats.Validation.End = graphql.Now()
 
@@ -141,7 +142,7 @@ func (e *Executor) DispatchError(ctx context.Context, list gqlerror.List) *graph
 	return resp
 }
 
-func (e *Executor) PresentRecoveredError(ctx context.Context, err interface{}) *gqlerror.Error {
+func (e *Executor) PresentRecoveredError(ctx context.Context, err interface{}) error {
 	return e.errorPresenter(ctx, e.recoverFunc(ctx, err))
 }
 
@@ -173,9 +174,10 @@ func (e *Executor) parseQuery(ctx context.Context, stats *graphql.Stats, query s
 	}
 
 	doc, err := parser.ParseQuery(&ast.Source{Input: query})
-	if err != nil {
-		errcode.Set(err, errcode.ParseFailed)
-		return nil, gqlerror.List{err}
+	gqlErr, _ := err.(*gqlerror.Error)
+	if gqlErr != nil {
+		errcode.Set(gqlErr, errcode.ParseFailed)
+		return nil, gqlerror.List{gqlErr}
 	}
 	stats.Parsing.End = graphql.Now()
 
@@ -183,8 +185,9 @@ func (e *Executor) parseQuery(ctx context.Context, stats *graphql.Stats, query s
 
 	if len(doc.Operations) == 0 {
 		err = gqlerror.Errorf("no operation provided")
+		gqlErr, _ := err.(*gqlerror.Error)
 		errcode.Set(err, errcode.ValidationFailed)
-		return nil, gqlerror.List{err}
+		return nil, gqlerror.List{gqlErr}
 	}
 
 	listErr := validator.Validate(e.es.Schema(), doc)

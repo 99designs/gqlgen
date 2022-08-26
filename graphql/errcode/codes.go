@@ -29,12 +29,13 @@ func RegisterErrorType(code string, kind ErrorKind) {
 }
 
 // Set the error code on a given graphql error extension
-func Set(err *gqlerror.Error, value string) {
-	if err.Extensions == nil {
-		err.Extensions = map[string]interface{}{}
+func Set(err error, value string) {
+	gqlErr, _ := err.(*gqlerror.Error)
+	if gqlErr.Extensions == nil {
+		gqlErr.Extensions = map[string]interface{}{}
 	}
 
-	err.Extensions["code"] = value
+	gqlErr.Extensions["code"] = value
 }
 
 // get the kind of the first non User error, defaults to User if no errors have a custom extension

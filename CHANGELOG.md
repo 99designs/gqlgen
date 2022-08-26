@@ -5,10 +5,65 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.14...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.16...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.16"></a>
+## [v0.17.16](https://github.com/99designs/gqlgen/compare/v0.17.15...v0.17.16) - 2022-08-26
+- <a href="https://github.com/99designs/gqlgen/commit/9593ceadd6e07c6fd0f0b0e0c55b9f1bf8ade762"><tt>9593cead</tt></a> release v0.17.16
+
+- <a href="https://github.com/99designs/gqlgen/commit/2390af2db920dc632fe47bc778a24c30495b9efd"><tt>2390af2d</tt></a> Update gqlparser to v2.5.0 (<a href="https://github.com/99designs/gqlgen/pull/2341">#2341</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/2a87fe0645fd271e4e71d2b7bde34ecf31bf844c"><tt>2a87fe06</tt></a> feat: update Graphiql to version 2 (<a href="https://github.com/99designs/gqlgen/pull/2340">#2340</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/32e2ccd30e82fc566ca022a65dcc4a67c4b6125a"><tt>32e2ccd3</tt></a> Update yaml to v3 (<a href="https://github.com/99designs/gqlgen/pull/2339">#2339</a>)</summary>
+
+* update yaml to v3
+
+* add missing go entry for yaml on _example
+
+* add missing sum file
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/7949117a524be7f8882a61e2d4ade1bedf105107"><tt>7949117a</tt></a> v0.17.15 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.15"></a>
+## [v0.17.15](https://github.com/99designs/gqlgen/compare/v0.17.14...v0.17.15) - 2022-08-23
+- <a href="https://github.com/99designs/gqlgen/commit/23cc749256b4e2edc4b11ce9e84c643a7bb3194f"><tt>23cc7492</tt></a> release v0.17.15
+
+- <a href="https://github.com/99designs/gqlgen/commit/577a570cdb6b1b9185f24940690a14cdced37a36"><tt>577a570c</tt></a> Markdown formatting fixes (<a href="https://github.com/99designs/gqlgen/pull/2335">#2335</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/2b584011fc64a55cbda67f46637a280bf94d9cc1"><tt>2b584011</tt></a> Fix Interface Slice Getter Generation (<a href="https://github.com/99designs/gqlgen/pull/2332">#2332</a>)</summary>
+
+* Make modelgen test fail if generated doesn't build
+Added returning list of interface to modelgen test schema
+
+* Implement slice copying when returning interface slices
+
+* Re-generate to satisfy the linter
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/aee57b4c521e527ebc0538b8edfbe610973abf21"><tt>aee57b4c</tt></a> Correct boolean logic (<a href="https://github.com/99designs/gqlgen/pull/2330">#2330</a>)</summary>
+
+Correcting boolean logic issue
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/da0610e11accf3afd34903f03bfc0abd045d07ed"><tt>da0610e1</tt></a> Update changelog for v0.17.14
+
+- <a href="https://github.com/99designs/gqlgen/commit/ddcb524e3321d849505f6937307ef3dcbd3acace"><tt>ddcb524e</tt></a> v0.17.14 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.14"></a>
 ## [v0.17.14](https://github.com/99designs/gqlgen/compare/v0.17.13...v0.17.14) - 2022-08-18
 - <a href="https://github.com/99designs/gqlgen/commit/581bf6eb063a0d6a3cec3b6bc7a16ca10e310a97"><tt>581bf6eb</tt></a> release v0.17.14

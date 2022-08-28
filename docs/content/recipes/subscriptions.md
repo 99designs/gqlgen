@@ -29,7 +29,7 @@ To add the WebSocket transport change your `main.go` by calling `AddTransport(&t
 on your query handler.
 
 **If you are using an external router, remember to send *ALL* `/query`-requests to your handler!**
-**Not just GET requests!**
+**Not just POST requests!**
 
 ```go
 package main

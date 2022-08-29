@@ -312,6 +312,12 @@ func TestModelGenerationStructFieldPointers(t *testing.T) {
 		require.Nil(t, out_struct_pointers.Recursive{}.FieldThree)
 		require.NotNil(t, out_struct_pointers.Recursive{}.FieldFour)
 	})
+
+	t.Run("no getters", func(t *testing.T) {
+		generated, err := os.ReadFile("./out_struct_pointers/generated.go")
+		require.NoError(t, err)
+		require.NotContains(t, string(generated), "func (this")
+	})
 }
 
 func mutateHook(b *ModelBuild) *ModelBuild {

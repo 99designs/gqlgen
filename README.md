@@ -142,6 +142,16 @@ first model in this list is used as the default type and it will always be used 
 
 There isn't any way around this, gqlgen has no way to know what you want in a given context.
 
+### Why do my interfaces have getters? Can I disable these?
+These were added in v0.17.14 to allow accessing common interface fields without casting to a concrete type.
+However, certain fields, like Relay-style Connections, cannot be implemented with simple getters.
+
+If you'd prefer to not have getters generated in your interfaces, you can add the following in your `gqlgen.yml`:
+```yaml
+# gqlgen.yml
+omit_getters: true
+```
+
 ## Other Resources
 
 - [Christopher Biscardi @ Gophercon UK 2018](https://youtu.be/FdURVezcdcw)

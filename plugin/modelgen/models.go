@@ -103,9 +103,13 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 		switch schemaType.Kind {
 		case ast.Interface, ast.Union:
-			fields, err := m.generateFields(cfg, schemaType)
-			if err != nil {
-				return err
+			var fields []*Field
+			var err error
+			if !cfg.OmitGetters {
+				fields, err = m.generateFields(cfg, schemaType)
+				if err != nil {
+					return err
+				}
 			}
 
 			it := &Interface{

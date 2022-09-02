@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/federation/products/graph/generated"
 	"github.com/99designs/gqlgen/_examples/federation/products/graph/model"
 )
 
@@ -15,7 +14,7 @@ func (r *queryResolver) TopProducts(ctx context.Context, first *int) ([]*model.P
 	return hats, nil
 }
 
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }

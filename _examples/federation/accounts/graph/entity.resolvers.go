@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/federation/accounts/graph/generated"
 	"github.com/99designs/gqlgen/_examples/federation/accounts/graph/model"
 )
 
@@ -31,7 +30,7 @@ func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*model.Us
 	}, nil
 }
 
-// Entity returns generated.EntityResolver implementation.
-func (r *Resolver) Entity() generated.EntityResolver { return &entityResolver{r} }
+// Entity returns EntityResolver implementation.
+func (r *Resolver) Entity() EntityResolver { return &entityResolver{r} }
 
 type entityResolver struct{ *Resolver }

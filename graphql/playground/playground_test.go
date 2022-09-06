@@ -35,6 +35,11 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 	if !wantSubURL.Match(b) {
 		t.Errorf("no match for %s in response body", wantSubURL.String())
 	}
+
+	wantMetaCharsetElement := regexp.MustCompile(`<head>\n\s{0,}<meta charset="utf-8">\n\s{0,}.*<title>`) // <meta> element must be in <head> and before <title>
+	if !wantMetaCharsetElement.Match(b) {
+		t.Errorf("no match for %s in response body", wantMetaCharsetElement.String())
+	}
 }
 
 func TestHandler_createsRelativeURLs(t *testing.T) {
@@ -47,6 +52,9 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("res.StatusCode = %d; want %d", res.StatusCode, http.StatusOK)
+	}
+	if res.Header.Get("Content-Type") != "text/html; charset=UTF-8" {
+		t.Errorf("res.Header.Get(\"Content-Type\") = %q; want %q", res.Header.Get("Content-Type"), "text/html; charset=UTF-8")
 	}
 
 	b, err := io.ReadAll(res.Body)

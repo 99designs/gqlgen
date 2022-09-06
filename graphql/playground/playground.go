@@ -9,6 +9,7 @@ import (
 var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 <html>
   <head>
+  	<meta charset="utf-8">
   	<title>{{.title}}</title>
 	<style>
 		body {
@@ -75,7 +76,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 // Handler responsible for setting up the playground
 func Handler(title string, endpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "text/html")
+		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
 		err := page.Execute(w, map[string]interface{}{
 			"title":                title,
 			"endpoint":             endpoint,

@@ -13,7 +13,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.1
 	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.8.1
-	github.com/vektah/gqlparser/v2 v2.5.0
+	github.com/vektah/gqlparser/v2 v2.5.1
 	golang.org/x/text v0.3.7
 	golang.org/x/tools v0.1.10
 	google.golang.org/protobuf v1.28.0

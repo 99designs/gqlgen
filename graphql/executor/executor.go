@@ -58,6 +58,7 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 
 	rc.RawQuery = params.Query
 	rc.OperationName = params.OperationName
+	rc.Headers = params.Headers
 
 	var listErr gqlerror.List
 	rc.Doc, listErr = e.parseQuery(ctx, &rc.Stats, params.Query)

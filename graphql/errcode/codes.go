@@ -23,14 +23,19 @@ var codeType = map[string]ErrorKind{
 	ParseFailed:      KindProtocol,
 }
 
-// RegisterErrorType should be called by extensions that want to customize the http status codes for errors they return
+// RegisterErrorType should be called by extensions that want to customize the http status codes for
+// errors they return
 func RegisterErrorType(code string, kind ErrorKind) {
 	codeType[code] = kind
 }
 
 // Set the error code on a given graphql error extension
 func Set(err error, value string) {
-	gqlErr, _ := err.(*gqlerror.Error)
+	gqlErr, ok := err.(*gqlerror.Error)
+	if !ok {
+		return
+	}
+
 	if gqlErr.Extensions == nil {
 		gqlErr.Extensions = map[string]interface{}{}
 	}

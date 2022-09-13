@@ -31,6 +31,9 @@ func RegisterErrorType(code string, kind ErrorKind) {
 
 // Set the error code on a given graphql error extension
 func Set(err error, value string) {
+	if err == nil {
+		return
+	}
 	gqlErr, ok := err.(*gqlerror.Error)
 	if !ok {
 		return

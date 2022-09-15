@@ -5,10 +5,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.17...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.19...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.19"></a>
+## [v0.17.19](https://github.com/99designs/gqlgen/compare/v0.17.18...v0.17.19) - 2022-09-15
+- <a href="https://github.com/99designs/gqlgen/commit/588c6ac137b8ed7aea1bc7c009ea23cb9dec5caa"><tt>588c6ac1</tt></a> release v0.17.19
+
+- <a href="https://github.com/99designs/gqlgen/commit/c671317056298db8073498c8db02120b6f737032"><tt>c6713170</tt></a> v0.17.18 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.18"></a>
+## [v0.17.18](https://github.com/99designs/gqlgen/compare/v0.17.17...v0.17.18) - 2022-09-15
+- <a href="https://github.com/99designs/gqlgen/commit/1d41c808a93446fca8ff867e957ef552e56f6ae3"><tt>1d41c808</tt></a> release v0.17.18
+
+- <a href="https://github.com/99designs/gqlgen/commit/4dbe2e475f15ce77a498c841ea6c9149ef5ceaba"><tt>4dbe2e47</tt></a> update graphiql to 2.0.7 (<a href="https://github.com/99designs/gqlgen/pull/2375">#2375</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/b7cc094a49e3d348cfc457aa76f1640c86cdcae9"><tt>b7cc094a</tt></a> testfix: make apollo federated tracer test more consistent (<a href="https://github.com/99designs/gqlgen/pull/2374">#2374</a>)</summary>
+
+* Update tracing_test.go
+
+* add missing imports
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/d096fb9b08531b0dc389a786b6f44add045ea75e"><tt>d096fb9b</tt></a> Update directives (<a href="https://github.com/99designs/gqlgen/pull/2371">#2371</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/1acfea2fbdf3564df16f8023f4e736e90a05b909"><tt>1acfea2f</tt></a> Add v0.17.17 changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/c273adc8ad45e15940bbb6fe211603670d9f3220"><tt>c273adc8</tt></a> v0.17.17 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.17"></a>
 ## [v0.17.17](https://github.com/99designs/gqlgen/compare/v0.17.16...v0.17.17) - 2022-09-13
 - <a href="https://github.com/99designs/gqlgen/commit/d50bc5aca10c5a5dd6a1680b2288c35a61327ade"><tt>d50bc5ac</tt></a> release v0.17.17

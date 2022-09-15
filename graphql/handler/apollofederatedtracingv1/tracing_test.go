@@ -9,7 +9,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
 	"github.com/99designs/gqlgen/graphql/handler/apollotracing"

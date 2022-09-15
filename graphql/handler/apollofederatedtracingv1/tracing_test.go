@@ -9,9 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
 	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
@@ -26,15 +24,6 @@ import (
 )
 
 func TestApolloTracing(t *testing.T) {
-	now := time.Unix(0, 0)
-
-	graphql.Now = func() time.Time {
-		defer func() {
-			now = now.Add(100 * time.Nanosecond)
-		}()
-		return now
-	}
-
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(&apollofederatedtracingv1.Tracer{})
@@ -50,14 +39,16 @@ func TestApolloTracing(t *testing.T) {
 	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &respData))
 
 	tracing := respData.Extensions.FTV1
-	pbuf, _ := base64.StdEncoding.DecodeString(tracing)
-	ftv1 := &generated.Trace{}
-	err := proto.Unmarshal(pbuf, ftv1)
+	pbuf, err := base64.StdEncoding.DecodeString(tracing)
 	require.Nil(t, err)
 
-	require.Zero(t, ftv1.StartTime.Nanos, ftv1.StartTime.Nanos)
-	require.EqualValues(t, 900, ftv1.EndTime.Nanos)
-	require.EqualValues(t, 900, ftv1.DurationNs)
+	ftv1 := &generated.Trace{}
+	err = proto.Unmarshal(pbuf, ftv1)
+	require.Nil(t, err)
+
+	require.NotZero(t, ftv1.StartTime.Nanos)
+	require.Less(t, ftv1.StartTime.Nanos, ftv1.EndTime.Nanos)
+	require.EqualValues(t, ftv1.EndTime.Nanos-ftv1.StartTime.Nanos, ftv1.DurationNs)
 
 	fmt.Printf("%#v\n", resp.Body.String())
 	require.Equal(t, "Query", ftv1.Root.Child[0].ParentType)
@@ -65,16 +56,34 @@ func TestApolloTracing(t *testing.T) {
 	require.Equal(t, "String!", ftv1.Root.Child[0].Type)
 }
 
-func TestApolloTracing_withFail(t *testing.T) {
-	now := time.Unix(0, 0)
+func TestApolloTracing_Concurrent(t *testing.T) {
+	h := testserver.New()
+	h.AddTransport(transport.POST{})
+	h.Use(&apollofederatedtracingv1.Tracer{})
+	for i := 0; i < 2; i++ {
+		go func() {
+			resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
+			assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+			var respData struct {
+				Extensions struct {
+					FTV1 string `json:"ftv1"`
+				} `json:"extensions"`
+			}
+			require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &respData))
 
-	graphql.Now = func() time.Time {
-		defer func() {
-			now = now.Add(100 * time.Nanosecond)
+			tracing := respData.Extensions.FTV1
+			pbuf, err := base64.StdEncoding.DecodeString(tracing)
+			require.Nil(t, err)
+
+			ftv1 := &generated.Trace{}
+			err = proto.Unmarshal(pbuf, ftv1)
+			require.Nil(t, err)
+			require.NotZero(t, ftv1.StartTime.Nanos)
 		}()
-		return now
 	}
+}
 
+func TestApolloTracing_withFail(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})

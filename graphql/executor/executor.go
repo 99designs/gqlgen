@@ -37,7 +37,10 @@ func New(es graphql.ExecutableSchema) *Executor {
 	return e
 }
 
-func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.RawParams) (*graphql.OperationContext, gqlerror.List) {
+func (e *Executor) CreateOperationContext(
+	ctx context.Context,
+	params *graphql.RawParams,
+) (*graphql.OperationContext, gqlerror.List) {
 	rc := &graphql.OperationContext{
 		DisableIntrospection:   true,
 		RecoverFunc:            e.recoverFunc,
@@ -58,6 +61,7 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 
 	rc.RawQuery = params.Query
 	rc.OperationName = params.OperationName
+	rc.Headers = params.Headers
 
 	var listErr gqlerror.List
 	rc.Doc, listErr = e.parseQuery(ctx, &rc.Stats, params.Query)
@@ -74,10 +78,13 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 
 	var err error
 	rc.Variables, err = validator.VariableValues(e.es.Schema(), rc.Operation, params.Variables)
-	gqlErr, _ := err.(*gqlerror.Error)
-	if gqlErr != nil {
-		errcode.Set(gqlErr, errcode.ValidationFailed)
-		return rc, gqlerror.List{gqlErr}
+
+	if err != nil {
+		gqlErr, ok := err.(*gqlerror.Error)
+		if ok {
+			errcode.Set(gqlErr, errcode.ValidationFailed)
+			return rc, gqlerror.List{gqlErr}
+		}
 	}
 	rc.Stats.Validation.End = graphql.Now()
 
@@ -90,7 +97,10 @@ func (e *Executor) CreateOperationContext(ctx context.Context, params *graphql.R
 	return rc, nil
 }
 
-func (e *Executor) DispatchOperation(ctx context.Context, rc *graphql.OperationContext) (graphql.ResponseHandler, context.Context) {
+func (e *Executor) DispatchOperation(
+	ctx context.Context,
+	rc *graphql.OperationContext,
+) (graphql.ResponseHandler, context.Context) {
 	ctx = graphql.WithOperationContext(ctx, rc)
 
 	var innerCtx context.Context
@@ -160,9 +170,14 @@ func (e *Executor) SetRecoverFunc(f graphql.RecoverFunc) {
 
 // parseQuery decodes the incoming query and validates it, pulling from cache if present.
 //
-// NOTE: This should NOT look at variables, they will change per request. It should only parse and validate
+// NOTE: This should NOT look at variables, they will change per request. It should only parse and
+// validate
 // the raw query string.
-func (e *Executor) parseQuery(ctx context.Context, stats *graphql.Stats, query string) (*ast.QueryDocument, gqlerror.List) {
+func (e *Executor) parseQuery(
+	ctx context.Context,
+	stats *graphql.Stats,
+	query string,
+) (*ast.QueryDocument, gqlerror.List) {
 	stats.Parsing.Start = graphql.Now()
 
 	if doc, ok := e.queryCache.Get(ctx, query); ok {
@@ -174,10 +189,12 @@ func (e *Executor) parseQuery(ctx context.Context, stats *graphql.Stats, query s
 	}
 
 	doc, err := parser.ParseQuery(&ast.Source{Input: query})
-	gqlErr, _ := err.(*gqlerror.Error)
-	if gqlErr != nil {
-		errcode.Set(gqlErr, errcode.ParseFailed)
-		return nil, gqlerror.List{gqlErr}
+	if err != nil {
+		gqlErr, ok := err.(*gqlerror.Error)
+		if ok {
+			errcode.Set(gqlErr, errcode.ParseFailed)
+			return nil, gqlerror.List{gqlErr}
+		}
 	}
 	stats.Parsing.End = graphql.Now()
 

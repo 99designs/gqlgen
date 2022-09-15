@@ -1,6 +1,7 @@
 package apollofederatedtracingv1_test
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -37,6 +38,7 @@ func TestApolloTracing(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(&apollofederatedtracingv1.Tracer{})
+	h.Use(&delayMiddleware{})
 
 	resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 	assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -98,4 +100,19 @@ func doRequest(handler http.Handler, method, target, body string) *httptest.Resp
 
 	handler.ServeHTTP(w, r)
 	return w
+}
+
+type delayMiddleware struct{}
+
+func (*delayMiddleware) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+	time.Sleep(time.Millisecond)
+	return next(ctx)
+}
+
+func (*delayMiddleware) ExtensionName() string {
+	return "delay"
+}
+
+func (*delayMiddleware) Validate(schema graphql.ExecutableSchema) error {
+	return nil
 }

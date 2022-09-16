@@ -42,14 +42,14 @@ type (
 	// Its important to understand the lifecycle of a graphql request and the terminology we use in gqlgen
 	// before working with these
 	//
-	// +--- REQUEST   POST /graphql --------------------------------------------+
-	// | +- OPERATION query OpName { viewer { name } } -----------------------+ |
-	// | |  RESPONSE  { "data": { "viewer": { "name": "bob" } } }             | |
-	// | +- OPERATION subscription OpName2 { chat { message } } --------------+ |
-	// | |  RESPONSE  { "data": { "chat": { "message": "hello" } } }          | |
-	// | |  RESPONSE  { "data": { "chat": { "message": "byee" } } }           | |
-	// | +--------------------------------------------------------------------+ |
-	// +------------------------------------------------------------------------+
+	//  +--- REQUEST   POST /graphql --------------------------------------------+
+	//  | +- OPERATION query OpName { viewer { name } } -----------------------+ |
+	//  | |  RESPONSE  { "data": { "viewer": { "name": "bob" } } }             | |
+	//  | +- OPERATION subscription OpName2 { chat { message } } --------------+ |
+	//  | |  RESPONSE  { "data": { "chat": { "message": "hello" } } }          | |
+	//  | |  RESPONSE  { "data": { "chat": { "message": "byee" } } }           | |
+	//  | +--------------------------------------------------------------------+ |
+	//  +------------------------------------------------------------------------+
 	HandlerExtension interface {
 		// ExtensionName should be a CamelCase string version of the extension which may be shown in stats and logging.
 		ExtensionName() string

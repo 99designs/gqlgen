@@ -253,4 +253,45 @@ func TestInterfaces(t *testing.T) {
 		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.X)
 		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.Y)
 	})
+
+	t.Run("fragment on interface must return merged fields", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.Dog = func(ctx context.Context) (dog *Dog, err error) {
+			return &Dog{
+				Size: &Size{
+					Height: 100,
+					Weight: 35,
+				},
+			}, nil
+		}
+
+		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		var resp struct {
+			Dog struct {
+				Size struct {
+					Height int
+					Weight int
+				}
+			}
+		}
+
+		c.MustPost(`
+			{
+				dog {
+					size {
+						height
+   					}
+					...AnimalWeight
+				}
+			}
+			fragment AnimalWeight on Animal  {
+ 				size {
+					weight
+				}
+            }
+		`, &resp)
+
+		require.Equal(t, 100, resp.Dog.Size.Height)
+		require.Equal(t, 35, resp.Dog.Size.Weight)
+	})
 }

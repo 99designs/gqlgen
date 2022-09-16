@@ -98,6 +98,7 @@ type ComplexityRoot struct {
 
 	Cat struct {
 		CatBreed func(childComplexity int) int
+		Size     func(childComplexity int) int
 		Species  func(childComplexity int) int
 	}
 
@@ -142,6 +143,7 @@ type ComplexityRoot struct {
 
 	Dog struct {
 		DogBreed func(childComplexity int) int
+		Size     func(childComplexity int) int
 		Species  func(childComplexity int) int
 	}
 
@@ -306,6 +308,7 @@ type ComplexityRoot struct {
 		DirectiveObject                  func(childComplexity int) int
 		DirectiveObjectWithCustomGoModel func(childComplexity int) int
 		DirectiveUnimplemented           func(childComplexity int) int
+		Dog                              func(childComplexity int) int
 		EmbeddedCase1                    func(childComplexity int) int
 		EmbeddedCase2                    func(childComplexity int) int
 		EmbeddedCase3                    func(childComplexity int) int
@@ -361,6 +364,11 @@ type ComplexityRoot struct {
 		Coordinates func(childComplexity int) int
 		Length      func(childComplexity int) int
 		Width       func(childComplexity int) int
+	}
+
+	Size struct {
+		Height func(childComplexity int) int
+		Weight func(childComplexity int) int
 	}
 
 	Slices struct {
@@ -544,6 +552,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Cat.CatBreed(childComplexity), true
 
+	case "Cat.size":
+		if e.complexity.Cat.Size == nil {
+			break
+		}
+
+		return e.complexity.Cat.Size(childComplexity), true
+
 	case "Cat.species":
 		if e.complexity.Cat.Species == nil {
 			break
@@ -662,6 +677,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Dog.DogBreed(childComplexity), true
+
+	case "Dog.size":
+		if e.complexity.Dog.Size == nil {
+			break
+		}
+
+		return e.complexity.Dog.Size(childComplexity), true
 
 	case "Dog.species":
 		if e.complexity.Dog.Species == nil {
@@ -1256,6 +1278,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveUnimplemented(childComplexity), true
 
+	case "Query.dog":
+		if e.complexity.Query.Dog == nil {
+			break
+		}
+
+		return e.complexity.Query.Dog(childComplexity), true
+
 	case "Query.embeddedCase1":
 		if e.complexity.Query.EmbeddedCase1 == nil {
 			break
@@ -1674,6 +1703,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Rectangle.Width(childComplexity), true
+
+	case "Size.height":
+		if e.complexity.Size.Height == nil {
+			break
+		}
+
+		return e.complexity.Size.Height(childComplexity), true
+
+	case "Size.weight":
+		if e.complexity.Size.Weight == nil {
+			break
+		}
+
+		return e.complexity.Size.Weight(childComplexity), true
 
 	case "Slices.test1":
 		if e.complexity.Slices.Test1 == nil {

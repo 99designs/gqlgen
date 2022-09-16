@@ -293,6 +293,11 @@ func (r *queryResolver) NotAnInterface(ctx context.Context) (BackedByInterface, 
 }
 
 // // foo
+func (r *queryResolver) Dog(ctx context.Context) (*Dog, error) {
+	panic("not implemented")
+}
+
+// // foo
 func (r *queryResolver) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
 	panic("not implemented")
 }

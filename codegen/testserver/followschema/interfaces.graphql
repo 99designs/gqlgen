@@ -5,10 +5,17 @@ extend type Query {
     noShapeTypedNil: Shape @makeTypedNil
     animal: Animal @makeTypedNil
     notAnInterface: BackedByInterface
+    dog: Dog
 }
 
 interface Animal {
     species: String!
+    size: Size!
+}
+
+type Size {
+    height: Int!
+    weight: Int!
 }
 
 type BackedByInterface {
@@ -19,11 +26,13 @@ type BackedByInterface {
 
 type Dog implements Animal {
     species: String!
+    size: Size!
     dogBreed: String!
 }
 
 type Cat implements Animal {
     species: String!
+    size: Size!
     catBreed: String!
 }
 

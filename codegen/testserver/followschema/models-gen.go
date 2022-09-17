@@ -12,6 +12,7 @@ import (
 type Animal interface {
 	IsAnimal()
 	GetSpecies() string
+	GetSize() *Size
 }
 
 type ContentChild interface {
@@ -44,11 +45,13 @@ func (B) IsTestUnion() {}
 
 type Cat struct {
 	Species  string `json:"species"`
+	Size     *Size  `json:"size"`
 	CatBreed string `json:"catBreed"`
 }
 
 func (Cat) IsAnimal()               {}
 func (this Cat) GetSpecies() string { return this.Species }
+func (this Cat) GetSize() *Size     { return this.Size }
 
 type CheckIssue896 struct {
 	ID *int `json:"id"`
@@ -83,11 +86,13 @@ type DefaultParametersMirror struct {
 
 type Dog struct {
 	Species  string `json:"species"`
+	Size     *Size  `json:"size"`
 	DogBreed string `json:"dogBreed"`
 }
 
 func (Dog) IsAnimal()               {}
 func (this Dog) GetSpecies() string { return this.Species }
+func (this Dog) GetSize() *Size     { return this.Size }
 
 type EmbeddedDefaultScalar struct {
 	Value *string `json:"value"`
@@ -160,6 +165,11 @@ type OuterObject struct {
 type Pet struct {
 	ID      int    `json:"id"`
 	Friends []*Pet `json:"friends"`
+}
+
+type Size struct {
+	Height int `json:"height"`
+	Weight int `json:"weight"`
 }
 
 type Slices struct {

@@ -108,6 +108,7 @@ type ComplexityRoot struct {
 
 	Cat struct {
 		CatBreed func(childComplexity int) int
+		Size     func(childComplexity int) int
 		Species  func(childComplexity int) int
 	}
 
@@ -152,6 +153,7 @@ type ComplexityRoot struct {
 
 	Dog struct {
 		DogBreed func(childComplexity int) int
+		Size     func(childComplexity int) int
 		Species  func(childComplexity int) int
 	}
 
@@ -316,6 +318,7 @@ type ComplexityRoot struct {
 		DirectiveObject                  func(childComplexity int) int
 		DirectiveObjectWithCustomGoModel func(childComplexity int) int
 		DirectiveUnimplemented           func(childComplexity int) int
+		Dog                              func(childComplexity int) int
 		EmbeddedCase1                    func(childComplexity int) int
 		EmbeddedCase2                    func(childComplexity int) int
 		EmbeddedCase3                    func(childComplexity int) int
@@ -371,6 +374,11 @@ type ComplexityRoot struct {
 		Coordinates func(childComplexity int) int
 		Length      func(childComplexity int) int
 		Width       func(childComplexity int) int
+	}
+
+	Size struct {
+		Height func(childComplexity int) int
+		Weight func(childComplexity int) int
 	}
 
 	Slices struct {
@@ -527,6 +535,7 @@ type QueryResolver interface {
 	NoShapeTypedNil(ctx context.Context) (Shape, error)
 	Animal(ctx context.Context) (Animal, error)
 	NotAnInterface(ctx context.Context) (BackedByInterface, error)
+	Dog(ctx context.Context) (*Dog, error)
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
 	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
 	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
@@ -688,6 +697,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Cat.CatBreed(childComplexity), true
 
+	case "Cat.size":
+		if e.complexity.Cat.Size == nil {
+			break
+		}
+
+		return e.complexity.Cat.Size(childComplexity), true
+
 	case "Cat.species":
 		if e.complexity.Cat.Species == nil {
 			break
@@ -806,6 +822,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Dog.DogBreed(childComplexity), true
+
+	case "Dog.size":
+		if e.complexity.Dog.Size == nil {
+			break
+		}
+
+		return e.complexity.Dog.Size(childComplexity), true
 
 	case "Dog.species":
 		if e.complexity.Dog.Species == nil {
@@ -1400,6 +1423,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DirectiveUnimplemented(childComplexity), true
 
+	case "Query.dog":
+		if e.complexity.Query.Dog == nil {
+			break
+		}
+
+		return e.complexity.Query.Dog(childComplexity), true
+
 	case "Query.embeddedCase1":
 		if e.complexity.Query.EmbeddedCase1 == nil {
 			break
@@ -1818,6 +1848,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Rectangle.Width(childComplexity), true
+
+	case "Size.height":
+		if e.complexity.Size.Height == nil {
+			break
+		}
+
+		return e.complexity.Size.Height(childComplexity), true
+
+	case "Size.weight":
+		if e.complexity.Size.Weight == nil {
+			break
+		}
+
+		return e.complexity.Size.Weight(childComplexity), true
 
 	case "Slices.test1":
 		if e.complexity.Slices.Test1 == nil {
@@ -3895,6 +3939,53 @@ func (ec *executionContext) fieldContext_Cat_species(ctx context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Cat_size(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Size, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Size)
+	fc.Result = res
+	return ec.marshalNSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSize(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Cat_size(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Cat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "height":
+				return ec.fieldContext_Size_height(ctx, field)
+			case "weight":
+				return ec.fieldContext_Size_weight(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Size", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Cat_catBreed(ctx, field)
 	if err != nil {
@@ -4569,6 +4660,53 @@ func (ec *executionContext) fieldContext_Dog_species(ctx context.Context, field 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Dog_size(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Size, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Size)
+	fc.Result = res
+	return ec.marshalNSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSize(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Dog_size(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Dog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "height":
+				return ec.fieldContext_Size_height(ctx, field)
+			case "weight":
+				return ec.fieldContext_Size_weight(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Size", field.Name)
 		},
 	}
 	return fc, nil
@@ -9104,6 +9242,52 @@ func (ec *executionContext) fieldContext_Query_notAnInterface(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_dog(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Dog(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Dog)
+	fc.Result = res
+	return ec.marshalODog2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDog(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_dog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "species":
+				return ec.fieldContext_Dog_species(ctx, field)
+			case "size":
+				return ec.fieldContext_Dog_size(ctx, field)
+			case "dogBreed":
+				return ec.fieldContext_Dog_dogBreed(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Dog", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_issue896a(ctx, field)
 	if err != nil {
@@ -10660,6 +10844,88 @@ func (ec *executionContext) fieldContext_Rectangle_coordinates(ctx context.Conte
 				return ec.fieldContext_Coordinates_y(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Coordinates", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Size_height(ctx context.Context, field graphql.CollectedField, obj *Size) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Size_height(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Height, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Size_height(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Size",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.CollectedField, obj *Size) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Size_weight(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Weight, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Size_weight(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Size",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -15084,6 +15350,13 @@ func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "size":
+
+			out.Values[i] = ec._Cat_size(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "catBreed":
 
 			out.Values[i] = ec._Cat_catBreed(ctx, field, obj)
@@ -15364,6 +15637,13 @@ func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj 
 		case "species":
 
 			out.Values[i] = ec._Dog_species(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "size":
+
+			out.Values[i] = ec._Dog_size(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -17370,6 +17650,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "dog":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_dog(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "issue896a":
 			field := field
 
@@ -18021,6 +18321,41 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 
 			out.Values[i] = ec._Rectangle_coordinates(ctx, field, obj)
 
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var sizeImplementors = []string{"Size"}
+
+func (ec *executionContext) _Size(ctx context.Context, sel ast.SelectionSet, obj *Size) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sizeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Size")
+		case "height":
+
+			out.Values[i] = ec._Size_height(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "weight":
+
+			out.Values[i] = ec._Size_weight(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -19361,6 +19696,16 @@ func (ec *executionContext) marshalNShapeUnion2githubᚗcomᚋ99designsᚋgqlgen
 	return ec._ShapeUnion(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSize(ctx context.Context, sel ast.SelectionSet, v *Size) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Size(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNSpecialInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSpecialInput(ctx context.Context, v interface{}) (SpecialInput, error) {
 	res, err := ec.unmarshalInputSpecialInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -20071,6 +20416,13 @@ func (ec *executionContext) marshalODefaultScalarImplementation2ᚖstring(ctx co
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalODog2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDog(ctx context.Context, sel ast.SelectionSet, v *Dog) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Dog(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOEmbeddedCase12ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐEmbeddedCase1(ctx context.Context, sel ast.SelectionSet, v *EmbeddedCase1) graphql.Marshaler {

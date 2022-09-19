@@ -5,10 +5,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.19...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.20...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.20"></a>
+## [v0.17.20](https://github.com/99designs/gqlgen/compare/v0.17.19...v0.17.20) - 2022-09-19
+- <a href="https://github.com/99designs/gqlgen/commit/0e4cbd109c7bed3966b13546d8b9cc87feebf4a1"><tt>0e4cbd10</tt></a> release v0.17.20
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/12ae8ffaaa2f2ce0ecc82c003b941b91c9633c5f"><tt>12ae8ffa</tt></a> Update go-colorable and x/tools. (<a href="https://github.com/99designs/gqlgen/pull/2382">#2382</a>)</summary>
+
+This picks up a new 2022 version of golang.org/x/sys which is caused by
+https://github.com/golang/go/issues/49219 and is needed to fix building
+using Go 1.18 on aarch64-darwin.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/68136ffb237eb7b51bab59a08f51f8a08e8035a5"><tt>68136ffb</tt></a> Update diagram in documentation (<a href="https://github.com/99designs/gqlgen/pull/2381">#2381</a>)</summary>
+
+The diagram wasn't rendering properly in Go docs, which was a shame because it's a great diagram. This PR fixes that by indenting it another space.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/d29d098fdf508b2e36cbc1c8c1415b2ca995ff8a"><tt>d29d098f</tt></a> fix field merging behavior for fragments on interfaces (<a href="https://github.com/99designs/gqlgen/pull/2380">#2380</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/6bb31862f05d37e7381a84704a8db5e0b849b7eb"><tt>6bb31862</tt></a> Update changelog for v0.17.19
+
+- <a href="https://github.com/99designs/gqlgen/commit/bb7fbc0f2cb6320c015efce80c0ff0764f2a3884"><tt>bb7fbc0f</tt></a> v0.17.19 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.19"></a>
 ## [v0.17.19](https://github.com/99designs/gqlgen/compare/v0.17.18...v0.17.19) - 2022-09-15
 - <a href="https://github.com/99designs/gqlgen/commit/588c6ac137b8ed7aea1bc7c009ea23cb9dec5caa"><tt>588c6ac1</tt></a> release v0.17.19

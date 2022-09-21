@@ -7,7 +7,7 @@ replace github.com/99designs/gqlgen => ../
 require (
 	github.com/99designs/gqlgen v0.16.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/mitchellh/mapstructure v1.3.1
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/rs/cors v1.8.0
 	github.com/stretchr/testify v1.7.1

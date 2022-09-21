@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -47,6 +48,10 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option) error {
 	sock := p.Websocket(query, options...)
 	defer sock.Close()
+	if reflect.ValueOf(resp).Kind() == reflect.Ptr {
+		return sock.Next(resp)
+	}
+	//TODO: verify this is never called and remove it
 	return sock.Next(&resp)
 }
 

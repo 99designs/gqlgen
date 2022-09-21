@@ -14,7 +14,7 @@
     "babel-jest": "^24.9.0",
     "graphql": "^16.3.0",
     "graphql-tag": "^2.12.6",
-    "jest": "^24.9.0",
+    "jest": "^29.0.3",
     "node-fetch": "^2.6.7",
     "subscriptions-transport-ws": "^0.9.18",
     "ws": "^7.4.6"

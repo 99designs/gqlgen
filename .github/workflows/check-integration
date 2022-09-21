@@ -15,7 +15,8 @@ curl -s --connect-timeout 5 \
     --retry-max-time 40 \
     --retry-connrefused \
     localhost:8080 > /dev/null
-
+npm install -g typescript
+npm link typescript
 echo "### running jest integration spec"
 ./node_modules/.bin/jest --color
 

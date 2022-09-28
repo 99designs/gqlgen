@@ -25,7 +25,7 @@ func TestString(t *testing.T) {
 		assert.Equal(t, "123", mustUnmarshalString("123"))
 		assert.Equal(t, "123", mustUnmarshalString(123))
 		assert.Equal(t, "123", mustUnmarshalString(int64(123)))
-		assert.Equal(t, "123.000000", mustUnmarshalString(float64(123)))
+		assert.Equal(t, "123", mustUnmarshalString(float64(123)))
 		assert.Equal(t, "123", mustUnmarshalString(json.Number("123")))
 		assert.Equal(t, "true", mustUnmarshalString(true))
 		assert.Equal(t, "false", mustUnmarshalString(false))

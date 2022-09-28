@@ -56,6 +56,8 @@ func UnmarshalString(v interface{}) (string, error) {
 		return strconv.FormatInt(v, 10), nil
 	case float64:
 		return fmt.Sprintf("%f", v), nil
+	case json.Number:
+		return string(v), nil
 	case bool:
 		if v {
 			return "true", nil

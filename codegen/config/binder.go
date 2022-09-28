@@ -183,15 +183,16 @@ func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 
 // TypeReference is used by args and field types. The Definition can refer to both input and output types.
 type TypeReference struct {
-	Definition  *ast.Definition
-	GQL         *ast.Type
-	GO          types.Type  // Type of the field being bound. Could be a pointer or a value type of Target.
-	Target      types.Type  // The actual type that we know how to bind to. May require pointer juggling when traversing to fields.
-	CastType    types.Type  // Before calling marshalling functions cast from/to this base type
-	Marshaler   *types.Func // When using external marshalling functions this will point to the Marshal function
-	Unmarshaler *types.Func // When using external marshalling functions this will point to the Unmarshal function
-	IsMarshaler bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
-	IsContext   bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
+	Definition              *ast.Definition
+	GQL                     *ast.Type
+	GO                      types.Type  // Type of the field being bound. Could be a pointer or a value type of Target.
+	Target                  types.Type  // The actual type that we know how to bind to. May require pointer juggling when traversing to fields.
+	CastType                types.Type  // Before calling marshalling functions cast from/to this base type
+	Marshaler               *types.Func // When using external marshalling functions this will point to the Marshal function
+	Unmarshaler             *types.Func // When using external marshalling functions this will point to the Unmarshal function
+	IsMarshaler             bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
+	IsContext               bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
+	PointersInUmarshalInput bool        // Inverse values and pointers in return.
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
@@ -411,6 +412,8 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			}
 			ref.GO = bindTarget
 		}
+
+		ref.PointersInUmarshalInput = b.cfg.ReturnPointersInUmarshalInput
 
 		return ref, nil
 	}

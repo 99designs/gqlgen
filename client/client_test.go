@@ -2,12 +2,13 @@ package client_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
 	"testing"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/stretchr/testify/require"

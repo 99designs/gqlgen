@@ -1,8 +1,9 @@
 package transport
 
 import (
-	"encoding/json"
 	"errors"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/gorilla/websocket"
 )

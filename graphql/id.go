@@ -1,10 +1,11 @@
 package graphql
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
+
+	json "github.com/goccy/go-json"
 )
 
 func MarshalID(s string) Marshaler {

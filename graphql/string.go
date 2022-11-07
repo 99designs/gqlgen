@@ -1,10 +1,11 @@
 package graphql
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
+
+	json "github.com/goccy/go-json"
 )
 
 const encodeHex = "0123456789ABCDEF"

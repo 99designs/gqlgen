@@ -2,11 +2,12 @@ package graphql
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math"
 	"strconv"
+
+	json "github.com/goccy/go-json"
 )
 
 func MarshalFloat(f float64) Marshaler {

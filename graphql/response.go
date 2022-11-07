@@ -2,8 +2,9 @@ package graphql
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )

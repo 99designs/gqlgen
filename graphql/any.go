@@ -1,8 +1,9 @@
 package graphql
 
 import (
-	"encoding/json"
 	"io"
+
+	json "github.com/goccy/go-json"
 )
 
 func MarshalAny(v interface{}) Marshaler {

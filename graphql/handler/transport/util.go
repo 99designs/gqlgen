@@ -1,9 +1,10 @@
 package transport
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"

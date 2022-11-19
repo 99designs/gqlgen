@@ -72,7 +72,7 @@ var initCmd = &cli.Command{
 		if !fileExists("go.mod") {
 			return fmt.Errorf("go.mod is missing. Please, do 'go mod init' first\n")
 		}
-		
+
 		// check schema and config don't already exist
 		for _, filename := range []string{configFilename, schemaFilename, serverFilename} {
 			if fileExists(filename) {

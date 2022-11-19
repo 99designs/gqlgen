@@ -69,10 +69,10 @@ var initCmd = &cli.Command{
 			return fmt.Errorf("unable to determine import path for current directory, you probably need to run 'go mod init' first")
 		}
 
-		// 
 		if !fileExists("go.mod") {
-			return fmt.Errorf("go.mod is missing! Please, do `go mod init your-project` first\n")
+			return fmt.Errorf("go.mod is missing. Please, do 'go mod init' first\n")
 		}
+		
 		// check schema and config don't already exist
 		for _, filename := range []string{configFilename, schemaFilename, serverFilename} {
 			if fileExists(filename) {

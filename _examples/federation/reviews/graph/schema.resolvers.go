@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/generated"
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
 
@@ -22,7 +21,7 @@ func (r *userResolver) Reviews(ctx context.Context, obj *model.User) ([]*model.R
 	return productReviews, nil
 }
 
-// User returns generated.UserResolver implementation.
-func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
+// User returns UserResolver implementation.
+func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
 type userResolver struct{ *Resolver }

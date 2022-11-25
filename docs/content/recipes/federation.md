@@ -15,8 +15,8 @@ Uncomment federation configuration in your `gqlgen.yml`
 ```yml
 # Uncomment to enable federation
 federation:
-  filename: graph/generated/federation.go
-  package: generated
+  filename: graph/federation.go
+  package: graph
 ```
 
 ### Federation 2
@@ -25,8 +25,8 @@ If you are using Apollo's Federation 2 standard, your schema should automaticall
 
 ```yml
 federation:
-  filename: graph/generated/federation.go
-  package: generated
+  filename: graph/federation.go
+  package: graph
   version: 2
 ```
 

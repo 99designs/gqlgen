@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/federation/products/graph/generated"
 	"github.com/99designs/gqlgen/_examples/federation/products/graph/model"
 )
 
@@ -39,7 +38,7 @@ func (r *entityResolver) FindProductByUpc(ctx context.Context, upc string) (*mod
 	return nil, nil
 }
 
-// Entity returns generated.EntityResolver implementation.
-func (r *Resolver) Entity() generated.EntityResolver { return &entityResolver{r} }
+// Entity returns EntityResolver implementation.
+func (r *Resolver) Entity() EntityResolver { return &entityResolver{r} }
 
 type entityResolver struct{ *Resolver }

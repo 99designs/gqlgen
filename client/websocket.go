@@ -1,12 +1,13 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http/httptest"
 	"reflect"
 	"strings"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/gorilla/websocket"
 )

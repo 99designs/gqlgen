@@ -1,9 +1,10 @@
 package graphql
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
+
+	json "github.com/goccy/go-json"
 )
 
 func MarshalMap(val map[string]interface{}) Marshaler {

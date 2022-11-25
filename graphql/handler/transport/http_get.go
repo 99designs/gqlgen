@@ -1,11 +1,12 @@
 package transport
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"

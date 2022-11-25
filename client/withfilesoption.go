@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -10,6 +9,8 @@ import (
 	"net/textproto"
 	"os"
 	"strings"
+
+	json "github.com/goccy/go-json"
 )
 
 type fileFormDataMap struct {

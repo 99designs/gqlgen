@@ -1,10 +1,11 @@
 package followschema
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"regexp"
+
+	json "github.com/goccy/go-json"
 )
 
 var re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")

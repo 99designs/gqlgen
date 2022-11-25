@@ -3,10 +3,11 @@ package testexecutor
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"time"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/executor"

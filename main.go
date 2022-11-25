@@ -12,12 +12,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/urfave/cli/v2"
+
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin/servergen"
-	"github.com/urfave/cli/v2"
 )
 
 //go:embed init-templates/schema.graphqls
@@ -39,6 +40,28 @@ func fileExists(filename string) bool {
 	return !errors.Is(err, fs.ErrNotExist)
 }
 
+// see Go source code:
+// https://github.com/golang/go/blob/f57ebed35132d02e5cf016f324853217fb545e91/src/cmd/go/internal/modload/init.go#L1283
+func findModuleRoot(dir string) (roots string) {
+	if dir == "" {
+		panic("dir not set")
+	}
+	dir = filepath.Clean(dir)
+
+	// Look for enclosing go.mod.
+	for {
+		if fi, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil && !fi.IsDir() {
+			return dir
+		}
+		d := filepath.Dir(dir)
+		if d == dir { // the parent of the root is itself, so we can go no further
+			break
+		}
+		dir = d
+	}
+	return ""
+}
+
 func initFile(filename, contents string) error {
 	if err := os.MkdirAll(filepath.Dir(filename), 0o755); err != nil {
 		return fmt.Errorf("unable to create directory for file '%s': %w\n", filename, err)
@@ -56,17 +79,36 @@ var initCmd = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
 		&cli.StringFlag{Name: "config, c", Usage: "the config filename", Value: "gqlgen.yml"},
-		&cli.StringFlag{Name: "server", Usage: "where to write the server stub to", Value: "server.go"},
-		&cli.StringFlag{Name: "schema", Usage: "where to write the schema stub to", Value: "graph/schema.graphqls"},
+		&cli.StringFlag{
+			Name:  "server",
+			Usage: "where to write the server stub to",
+			Value: "server.go",
+		},
+		&cli.StringFlag{
+			Name:  "schema",
+			Usage: "where to write the schema stub to",
+			Value: "graph/schema.graphqls",
+		},
 	},
 	Action: func(ctx *cli.Context) error {
 		configFilename := ctx.String("config")
 		serverFilename := ctx.String("server")
 		schemaFilename := ctx.String("schema")
 
-		pkgName := code.ImportPathForDir(".")
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Println(err)
+			return fmt.Errorf("unable to determine current directory:%w", err)
+		}
+		pkgName := code.ImportPathForDir(cwd)
 		if pkgName == "" {
-			return fmt.Errorf("unable to determine import path for current directory, you probably need to run 'go mod init' first")
+			return fmt.Errorf(
+				"unable to determine import path for current directory, you probably need to run 'go mod init' first",
+			)
+		}
+		modRoot := findModuleRoot(cwd)
+		if modRoot == "" {
+			return fmt.Errorf("go.mod is missing. Please, do 'go mod init' first\n")
 		}
 
 		// check schema and config don't already exist
@@ -75,7 +117,7 @@ var initCmd = &cli.Command{
 				return fmt.Errorf("%s already exists", filename)
 			}
 		}
-		_, err := config.LoadConfigFromDefaultLocations()
+		_, err = config.LoadConfigFromDefaultLocations()
 		if err == nil {
 			return fmt.Errorf("gqlgen.yml already exists in a parent directory\n")
 		}

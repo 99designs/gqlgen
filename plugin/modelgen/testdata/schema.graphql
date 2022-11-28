@@ -3,6 +3,11 @@ directive @goTag(
     value: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
+directive @goField(
+	forceResolver: Boolean
+	name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | INTERFACE
+
 type Query {
     thisShoudlntGetGenerated: Boolean
 }
@@ -178,4 +183,13 @@ interface ArrayOfA {
 type ImplArrayOfA implements ArrayOfA {
     trickyField: [CDImplemented!]!
     trickyFieldPointer: [CDImplemented]
+}
+
+interface X {
+    Id: String! @goField(name: "Id")
+}
+
+type Xer implements X {
+    Id: String! @goField(name: "Id")
+    Name: String!
 }

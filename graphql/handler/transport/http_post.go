@@ -3,7 +3,7 @@ package transport
 import (
 	"mime"
 	"net/http"
-
+	"log"
 	"github.com/99designs/gqlgen/graphql"
 )
 
@@ -33,7 +33,8 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 	start := graphql.Now()
 	if err := jsonDecode(r.Body, &params); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		writeJsonErrorf(w, "json body could not be decoded: "+err.Error())
+		log.Printf("decoding error: %s", err.Error())
+		writeJsonErrorf(w, "json body could not be decoded")
 		return
 	}
 

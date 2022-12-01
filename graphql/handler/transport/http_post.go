@@ -1,10 +1,10 @@
 package transport
 
 import (
-		"github.com/99designs/gqlgen/graphql"
-		"log"
-		 "mime"
-		 "net/http"
+	"github.com/99designs/gqlgen/graphql"
+	"log"
+	"mime"
+	"net/http"
 )
 
 // POST implements the POST side of the default HTTP transport

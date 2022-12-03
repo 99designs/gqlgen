@@ -26,7 +26,7 @@ func TestPOST(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", "notjson")
 		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"json body could not be decoded: invalid character 'o' in literal null (expecting 'u')"}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {

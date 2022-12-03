@@ -23,6 +23,11 @@ type FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Fiel
 
 // defaultFieldMutateHook is the default hook for the Plugin which applies the GoTagFieldHook.
 func defaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+	var err error
+	f, err = GoFieldHook(td, fd, f)
+	if err != nil {
+		return f, err
+	}
 	return GoTagFieldHook(td, fd, f)
 }
 
@@ -409,6 +414,20 @@ func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Fie
 		f.Tag = f.Tag + " " + strings.Join(args, " ")
 	}
 
+	return f, nil
+}
+
+// GoFieldHook applies the goField directive to the generated Field f.
+func GoFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+	args := make([]string, 0)
+	_ = args
+	for _, goField := range fd.Directives.ForNames("goField") {
+		if arg := goField.Arguments.ForName("name"); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				f.GoName = k.(string)
+			}
+		}
+	}
 	return f, nil
 }
 

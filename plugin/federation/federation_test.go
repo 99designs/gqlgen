@@ -121,6 +121,8 @@ func TestCodeGenerationFederation2(t *testing.T) {
 	err := f.MutateConfig(cfg)
 
 	require.NoError(t, err)
+	require.Equal(t, "Hello", f.Entities[0].Name)
+	require.Empty(t, f.Entities[0].Resolvers)
 
 	data, err := codegen.BuildData(cfg)
 	if err != nil {

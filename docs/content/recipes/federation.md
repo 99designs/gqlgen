@@ -47,12 +47,12 @@ type Review {
 }
 
 extend type User @key(fields: "id") {
-  id: ID! @external
+  id: ID! @external # External directive not required for key fields in federation v2
   reviews: [Review]
 }
 
 extend type Product @key(fields: "upc") {
-  upc: String! @external
+  upc: String! @external # External directive not required for key fields in federation v2
   reviews: [Review]
 }
 ```

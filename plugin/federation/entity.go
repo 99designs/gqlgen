@@ -47,11 +47,12 @@ func (e *Entity) allFieldsAreExternal(federationVersion int) bool {
 // In federation v2, key fields are implicitly external.
 func (e *Entity) isFieldImplicitlyExternal(field *ast.FieldDefinition, federationVersion int) bool {
 	// Key fields are only implicitly external in Federation 2
-	if federationVersion == 1 {
+	if federationVersion != 2 {
 		return false
 	}
-	// Only allow non resolvable entities to have implicit external fields.
-	// This may not be required, but it's safer incase there are edge cases.
+	// TODO: From the spec, it seems like if an entity is not resolvable then it should not only not have a resolver, but should not appear in the _Entitiy union.
+	// The current implementation is a less drastic departure from the previous behavior, but should probably be reviewed.
+	// See https://www.apollographql.com/docs/federation/subgraph-spec/
 	if e.isResolvable() {
 		return false
 	}

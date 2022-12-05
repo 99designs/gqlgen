@@ -125,6 +125,8 @@ func TestCodeGenerationFederation2(t *testing.T) {
 	require.Len(t, f.Entities[0].Resolvers, 1)
 	require.Equal(t, "Hello", f.Entities[1].Name)
 	require.Empty(t, f.Entities[1].Resolvers)
+	require.Equal(t, "World", f.Entities[2].Name)
+	require.Empty(t, f.Entities[2].Resolvers)
 
 	data, err := codegen.BuildData(cfg)
 	if err != nil {

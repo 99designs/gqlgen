@@ -102,8 +102,8 @@ func (e *Entity) keyFields() []string {
 	}
 	fieldSet := fieldset.New(fields.Value.Raw, nil)
 	keyFields := make([]string, len(fieldSet))
-	for _, field := range fieldSet {
-		keyFields = append(keyFields, field[0])
+	for i, field := range fieldSet {
+		keyFields[i] = field[0]
 	}
 	return keyFields
 }

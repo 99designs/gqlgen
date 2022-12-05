@@ -92,16 +92,17 @@ func (e *Entity) isKeyField(field *ast.FieldDefinition) bool {
 
 // Get the key fields for this entity.
 func (e *Entity) keyFields() []string {
-	var keyFields []string
 	key := e.Def.Directives.ForName("key")
 	if key == nil {
-		return keyFields
+		return []string{}
 	}
 	fields := key.Arguments.ForName("fields")
 	if fields == nil {
-		return keyFields
+		return []string{}
 	}
-	for _, field := range fieldset.New(fields.Value.Raw, nil) {
+	fieldSet := fieldset.New(fields.Value.Raw, nil)
+	keyFields := make([]string, len(fieldSet))
+	for _, field := range fieldSet {
 		keyFields = append(keyFields, field[0])
 	}
 	return keyFields

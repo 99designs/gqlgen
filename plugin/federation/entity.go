@@ -37,10 +37,7 @@ type Requires struct {
 
 func (e *Entity) allFieldsAreExternal(federationVersion int) bool {
 	for _, field := range e.Def.Fields {
-		if field.Directives.ForName("external") == nil {
-			if e.isFieldImplicitlyExternal(field, federationVersion) {
-				continue
-			}
+		if !e.isFieldImplicitlyExternal(field, federationVersion) && field.Directives.ForName("external") == nil {
 			return false
 		}
 	}

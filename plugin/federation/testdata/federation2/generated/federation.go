@@ -80,6 +80,26 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
+		case "ExternalExtension":
+			resolverName, err := entityResolverNameForExternalExtension(ctx, rep)
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "ExternalExtension": %w`, err)
+			}
+			switch resolverName {
+
+			case "findExternalExtensionByUpc":
+				id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findExternalExtensionByUpc(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindExternalExtensionByUpc(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "ExternalExtension": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
+			}
 
 		}
 		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
@@ -147,4 +167,21 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
+}
+
+func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["upc"]; !ok {
+			break
+		}
+		return "findExternalExtensionByUpc", nil
+	}
+	return "", fmt.Errorf("%w for ExternalExtension", ErrTypeNotFound)
 }

@@ -80,26 +80,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-		case "Hello":
-			resolverName, err := entityResolverNameForHello(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "Hello": %w`, err)
-			}
-			switch resolverName {
-
-			case "findHelloByName":
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findHelloByName(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindHelloByName(ctx, id0)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "Hello": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			}
 
 		}
 		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
@@ -167,21 +147,4 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
-}
-
-func entityResolverNameForHello(ctx context.Context, rep map[string]interface{}) (string, error) {
-	for {
-		var (
-			m   map[string]interface{}
-			val interface{}
-			ok  bool
-		)
-		_ = val
-		m = rep
-		if _, ok = m["name"]; !ok {
-			break
-		}
-		return "findHelloByName", nil
-	}
-	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
 }

@@ -54,7 +54,7 @@ func (e *Entity) isFieldImplicitlyExternal(field *ast.FieldDefinition, federatio
 		return false
 	}
 	// Only allow non resolvable entities to have implicit external fields.
-	// This may not be required, but it's a safer incase there are edge cases.
+	// This may not be required, but it's safer incase there are edge cases.
 	if e.isResolvable() {
 		return false
 	}
@@ -66,15 +66,19 @@ func (e *Entity) isFieldImplicitlyExternal(field *ast.FieldDefinition, federatio
 	return false
 }
 
+// Determine if the entity is resolvable.
 func (e *Entity) isResolvable() bool {
 	key := e.Def.Directives.ForName("key")
 	if key == nil {
+		// If there is no key directive, the entity is resolvable.
 		return true
 	}
 	resolvable := key.Arguments.ForName("resolvable")
 	if resolvable == nil {
+		// If there is no resolvable argument, the entity is resolvable.
 		return true
 	}
+	// only if resolvable: false has been set on the @key directive do we consider the entity non-resolvable.
 	return resolvable.Value.Raw != "false"
 }
 

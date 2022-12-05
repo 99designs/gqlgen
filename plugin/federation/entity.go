@@ -80,7 +80,7 @@ func (e *Entity) isResolvable() bool {
 	return resolvable.Value.Raw != "false"
 }
 
-// Determine if a field is part of the entity's key.
+// Determine if a field is part of the entities key.
 func (e *Entity) isKeyField(field *ast.FieldDefinition) bool {
 	for _, keyField := range e.keyFields() {
 		if keyField == field.Name {

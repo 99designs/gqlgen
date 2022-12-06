@@ -65,6 +65,11 @@ type UnionWithDescription interface {
 	IsUnionWithDescription()
 }
 
+type X interface {
+	IsX()
+	GetId() string
+}
+
 type CDImplemented struct {
 	A string  `json:"a" database:"CDImplementeda"`
 	B int     `json:"b" database:"CDImplementedb"`
@@ -201,6 +206,14 @@ type TypeWithDescription struct {
 }
 
 func (TypeWithDescription) IsUnionWithDescription() {}
+
+type Xer struct {
+	Id   string `json:"Id" database:"XerId"`
+	Name string `json:"Name" database:"XerName"`
+}
+
+func (Xer) IsX()               {}
+func (this Xer) GetId() string { return this.Id }
 
 type FooBarr struct {
 	Name string `json:"name" database:"_Foo_Barrname"`

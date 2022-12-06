@@ -5,10 +5,176 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.20...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.21...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.21"></a>
+## [v0.17.21](https://github.com/99designs/gqlgen/compare/v0.17.20...v0.17.21) - 2022-12-03
+- <a href="https://github.com/99designs/gqlgen/commit/9deb8381725196dc2a7f2234457d8f6b0e145aab"><tt>9deb8381</tt></a> release v0.17.21
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5c083c792afa0b0ab9fd61221df7681922b6c723"><tt>5c083c79</tt></a> use goField directive for getters generation (<a href="https://github.com/99designs/gqlgen/pull/2447">#2447</a>)</summary>
+
+* consider goField directive for getters generation
+
+* Re-generate to pass linting
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/463d213465bb561fbceb1374cf1ea89bd8e54705"><tt>463d2134</tt></a> fix: safe http error response  (<a href="https://github.com/99designs/gqlgen/pull/2438">#2438</a>)</summary>
+
+* safe http error when parsing body
+
+* fix tests
+
+* fix linting
+
+* fix linting
+
+* Dispatch decoding errors so hook can present them
+
+
+* Revert test expectation to original
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/86c144fc7cd2772ae9bf5137cc9c521a7fc8b242"><tt>86c144fc</tt></a> Bump decode-uri-component from 0.2.0 to 0.2.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2445">#2445</a>)</summary>
+
+Bumps [decode-uri-component](https://github.com/SamVerschueren/decode-uri-component) from 0.2.0 to 0.2.2.
+- [Release notes](https://github.com/SamVerschueren/decode-uri-component/releases)
+- [Commits](https://github.com/SamVerschueren/decode-uri-component/compare/v0.2.0...v0.2.2)
+
+---
+updated-dependencies:
+- dependency-name: decode-uri-component
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f28ffccd265e7f9eeb3c921459d7162decf94645"><tt>f28ffccd</tt></a> Bump minimatch from 3.0.4 to 3.1.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2435">#2435</a>)</summary>
+
+Bumps [minimatch](https://github.com/isaacs/minimatch) from 3.0.4 to 3.1.2.
+- [Release notes](https://github.com/isaacs/minimatch/releases)
+- [Commits](https://github.com/isaacs/minimatch/compare/v3.0.4...v3.1.2)
+
+---
+updated-dependencies:
+- dependency-name: minimatch
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/e3af4459021800e71f5c48246ada4fc43f43ba3d"><tt>e3af4459</tt></a> docs : embedding schema in generated code (<a href="https://github.com/99designs/gqlgen/pull/2351">#2351</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/efb31b54320f1311aec963fd751cfee874c353cf"><tt>efb31b54</tt></a> Check if go.mod exists while init (<a href="https://github.com/99designs/gqlgen/pull/2432">#2432</a>)</summary>
+
+* Add check go.mod first to prevent cascade errors in "init" directive
+
+* Fix formatting
+
+* Fix formatting with gofmt
+
+
+
+This reverts commit c23d183d9da4e33993e600beefcccd1fc4ec6264.
+
+
+* Adjust go.mod file to look in parent directories as well
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/89e91da1b724073d1c723ba1d90d8ad0cb610499"><tt>89e91da1</tt></a> Add resolver commit (<a href="https://github.com/99designs/gqlgen/pull/2434">#2434</a>)</summary>
+
+* Add resolver commit
+
+* Add version to comment and re-generate
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/3087cf3a9830f80d01f508cf49d55e2370f60a19"><tt>3087cf3a</tt></a> Fix for <a href="https://github.com/99designs/gqlgen/pull/1274">#1274</a>. (<a href="https://github.com/99designs/gqlgen/pull/2411">#2411</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/906c0dee5abe3e173f0cac7b7c9e207f9471755e"><tt>906c0dee</tt></a> optional return pointers in unmarshalInput (<a href="https://github.com/99designs/gqlgen/pull/2397">#2397</a>)</summary>
+
+* optional return pointers in unmarshalInput
+
+* add docs for return_pointers_in_unmarshalinput
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a9d06036ff999ce6245f4b730c38cf69422e6937"><tt>a9d06036</tt></a> Add json.Number support to UnmarshalString (<a href="https://github.com/99designs/gqlgen/pull/2396">#2396</a>)</summary>
+
+* Add json.Number support to UnmarshalString
+
+* Add UnmarshalString tests
+
+* Remove trailing zeros when calling UnmarshalString with float64
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/daa440791ff2377bb5f3b0f5c61bb4d7ab5ce119"><tt>daa44079</tt></a> Update README.md (<a href="https://github.com/99designs/gqlgen/pull/2391">#2391</a>)</summary>
+
+fix: execute gqlgen generate command error.  eg: systems failed: unable to build object definition: unable to find type: github.com/99designs/gqlgen/graphql/introspection.InputValue. need import  github.com/99designs/gqlgen/graphql/introspection .
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/419dd96c96975be33ae35d016ad272ac72392135"><tt>419dd96c</tt></a> Bump got and [@graphql](https://github.com/graphql)-codegen/cli in /integration (<a href="https://github.com/99designs/gqlgen/pull/2389">#2389</a>)</summary>
+
+Removes `got`
+
+- [Release notes](https://github.com/dotansimha/graphql-code-generator/releases)
+- [Changelog](https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/CHANGELOG.md)
+
+---
+updated-dependencies:
+- dependency-name: got
+  dependency-type: indirect
+  dependency-type: direct:development
+...
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/b1ca215aa7f9dcbd167e1354c7a40925ee59c909"><tt>b1ca215a</tt></a> Add global typescript (<a href="https://github.com/99designs/gqlgen/pull/2390">#2390</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/265888c6812c6f0784a020b5082c142a387d4776"><tt>265888c6</tt></a> Bump jsdom and jest in /integration (<a href="https://github.com/99designs/gqlgen/pull/2388">#2388</a>)</summary>
+
+Bumps [jsdom](https://github.com/jsdom/jsdom) and [jest](https://github.com/facebook/jest/tree/HEAD/packages/jest). These dependencies needed to be updated together.
+
+Removes `jsdom`
+
+Updates `jest` from 24.9.0 to 29.0.3
+- [Release notes](https://github.com/facebook/jest/releases)
+- [Changelog](https://github.com/facebook/jest/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/facebook/jest/commits/v29.0.3/packages/jest)
+
+---
+updated-dependencies:
+- dependency-name: jsdom
+  dependency-type: indirect
+- dependency-name: jest
+  dependency-type: direct:development
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/56f6db04b9d90b4a8de5f0177c787b99d9386e52"><tt>56f6db04</tt></a> Update module mitchellh/mapstructure to 1.5.0 (<a href="https://github.com/99designs/gqlgen/pull/2111">#2111</a>)</summary>
+
+* Update mitchellh/mapstructure
+
+
+* Avoid double pointer
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/ea9590a44419b9d56ea8c2afcdfa6a7fc7a55699"><tt>ea9590a4</tt></a> update changelog for v0.17.20
+
+- <a href="https://github.com/99designs/gqlgen/commit/4c06e6c6287fef6ad619abd3ca86f96c62afa67f"><tt>4c06e6c6</tt></a> v0.17.20 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.20"></a>
 ## [v0.17.20](https://github.com/99designs/gqlgen/compare/v0.17.19...v0.17.20) - 2022-09-19
 - <a href="https://github.com/99designs/gqlgen/commit/0e4cbd109c7bed3966b13546d8b9cc87feebf4a1"><tt>0e4cbd10</tt></a> release v0.17.20

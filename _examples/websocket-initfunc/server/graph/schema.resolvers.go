@@ -6,8 +6,6 @@ package graph
 import (
 	"context"
 	"fmt"
-
-	"github.com/gqlgen/_examples/websocket-initfunc/server/graph/generated"
 )
 
 // PostMessageTo is the resolver for the postMessageTo field.
@@ -20,11 +18,11 @@ func (r *subscriptionResolver) Subscribe(ctx context.Context, subscriber string)
 	panic(fmt.Errorf("not implemented"))
 }
 
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Subscription returns generated.SubscriptionResolver implementation.
-func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+// Subscription returns SubscriptionResolver implementation.
+func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }

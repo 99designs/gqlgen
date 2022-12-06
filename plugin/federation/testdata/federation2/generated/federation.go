@@ -80,21 +80,21 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-		case "Hello":
-			resolverName, err := entityResolverNameForHello(ctx, rep)
+		case "ExternalExtension":
+			resolverName, err := entityResolverNameForExternalExtension(ctx, rep)
 			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "Hello": %w`, err)
+				return fmt.Errorf(`finding resolver for Entity "ExternalExtension": %w`, err)
 			}
 			switch resolverName {
 
-			case "findHelloByName":
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+			case "findExternalExtensionByUpc":
+				id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
 				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findHelloByName(): %w`, err)
+					return fmt.Errorf(`unmarshalling param 0 for findExternalExtensionByUpc(): %w`, err)
 				}
-				entity, err := ec.resolvers.Entity().FindHelloByName(ctx, id0)
+				entity, err := ec.resolvers.Entity().FindExternalExtensionByUpc(ctx, id0)
 				if err != nil {
-					return fmt.Errorf(`resolving Entity "Hello": %w`, err)
+					return fmt.Errorf(`resolving Entity "ExternalExtension": %w`, err)
 				}
 
 				list[idx[i]] = entity
@@ -169,7 +169,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 	}
 }
 
-func entityResolverNameForHello(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
 			m   map[string]interface{}
@@ -178,10 +178,10 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 		)
 		_ = val
 		m = rep
-		if _, ok = m["name"]; !ok {
+		if _, ok = m["upc"]; !ok {
 			break
 		}
-		return "findHelloByName", nil
+		return "findExternalExtensionByUpc", nil
 	}
-	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for ExternalExtension", ErrTypeNotFound)
 }

@@ -198,44 +198,6 @@ type Entity {
 	}
 }
 
-// Entity represents a federated type
-// that was declared in the GQL schema.
-type Entity struct {
-	Name      string // The same name as the type declaration
-	Def       *ast.Definition
-	Resolvers []*EntityResolver
-	Requires  []*Requires
-	Multi     bool
-}
-
-type EntityResolver struct {
-	ResolverName string      // The resolver name, such as FindUserByID
-	KeyFields    []*KeyField // The fields declared in @key.
-	InputType    string      // The Go generated input type for multi entity resolvers
-}
-
-type KeyField struct {
-	Definition *ast.FieldDefinition
-	Field      fieldset.Field        // len > 1 for nested fields
-	Type       *config.TypeReference // The Go representation of that field type
-}
-
-// Requires represents an @requires clause
-type Requires struct {
-	Name  string                // the name of the field
-	Field fieldset.Field        // source Field, len > 1 for nested fields
-	Type  *config.TypeReference // The Go representation of that field type
-}
-
-func (e *Entity) allFieldsAreExternal() bool {
-	for _, field := range e.Def.Fields {
-		if field.Directives.ForName("external") == nil {
-			return false
-		}
-	}
-	return true
-}
-
 func (f *federation) GenerateCode(data *codegen.Data) error {
 	if len(f.Entities) > 0 {
 		if data.Objects.ByName("Entity") != nil {
@@ -323,7 +285,7 @@ func (f *federation) setEntities(schema *ast.Schema) {
 		//    extend TypeDefinedInOtherService @key(fields: "id") {
 		//       id: ID @external
 		//    }
-		if !e.allFieldsAreExternal() {
+		if !e.allFieldsAreExternal(f.Version) {
 			for _, dir := range keys {
 				if len(dir.Arguments) > 2 {
 					panic("More than two arguments provided for @key declaration.")

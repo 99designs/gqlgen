@@ -83,7 +83,11 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 	// Merge again now that the generated models have been injected into the typemap
-	data, err := codegen.BuildData(cfg)
+	data_plugins := make([]interface{}, len(plugins))
+	for index := range plugins {
+		data_plugins[index] = plugins[index]
+	}
+	data, err := codegen.BuildData(cfg, data_plugins...)
 	if err != nil {
 		return fmt.Errorf("merging type systems failed: %w", err)
 	}

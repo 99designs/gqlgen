@@ -502,6 +502,14 @@ func (f *Field) ResolverType() string {
 	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.Name, f.GoFieldName, f.CallArgs())
 }
 
+func (f *Field) IsInputObject() bool {
+	return f.Object.Kind == ast.InputObject
+}
+
+func (f *Field) IsRoot() bool {
+	return f.Object.Root
+}
+
 func (f *Field) ShortResolverDeclaration() string {
 	if f.Object.Kind == ast.InputObject {
 		return fmt.Sprintf("(ctx context.Context, obj %s, data %s) error",

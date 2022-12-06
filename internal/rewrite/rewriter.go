@@ -99,6 +99,7 @@ func (r *Rewriter) GetMethodComment(structname string, methodname string) string
 
 	return ""
 }
+
 func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
 	for _, f := range r.pkg.Syntax {
 		for _, d := range f.Decls {

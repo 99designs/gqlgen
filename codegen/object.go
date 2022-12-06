@@ -153,6 +153,16 @@ func (o *Object) Description() string {
 	return o.Definition.Description
 }
 
+func (o *Object) HasField(name string) bool {
+	for _, f := range o.Fields {
+		if f.Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (os Objects) ByName(name string) *Object {
 	for i, o := range os {
 		if strings.EqualFold(o.Definition.Name, name) {

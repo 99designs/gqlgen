@@ -116,7 +116,7 @@ func (c *OperationContext) Error(ctx context.Context, err error) {
 		}
 		return
 	}
-	
+
 	AddError(ctx, err)
 }
 

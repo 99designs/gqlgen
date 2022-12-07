@@ -109,6 +109,13 @@ func (c *OperationContext) Errorf(ctx context.Context, format string, args ...in
 // Error sends an error to the client, passing it through the formatter.
 // Deprecated: use graphql.AddError(ctx, err) instead
 func (c *OperationContext) Error(ctx context.Context, err error) {
+	if errList, ok := err.(gqlerror.List); ok {
+		for _, e := range errList {
+			AddError(ctx, e)
+		}
+		return
+	}
+	
 	AddError(ctx, err)
 }
 

@@ -15,25 +15,25 @@ var _ ExecutableSchema = &ExecutableSchemaMock{}
 
 // ExecutableSchemaMock is a mock implementation of ExecutableSchema.
 //
-// 	func TestSomethingThatUsesExecutableSchema(t *testing.T) {
+//	func TestSomethingThatUsesExecutableSchema(t *testing.T) {
 //
-// 		// make and configure a mocked ExecutableSchema
-// 		mockedExecutableSchema := &ExecutableSchemaMock{
-// 			ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (int, bool) {
-// 				panic("mock out the Complexity method")
-// 			},
-// 			ExecFunc: func(ctx context.Context) ResponseHandler {
-// 				panic("mock out the Exec method")
-// 			},
-// 			SchemaFunc: func() *ast.Schema {
-// 				panic("mock out the Schema method")
-// 			},
-// 		}
+//		// make and configure a mocked ExecutableSchema
+//		mockedExecutableSchema := &ExecutableSchemaMock{
+//			ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (int, bool) {
+//				panic("mock out the Complexity method")
+//			},
+//			ExecFunc: func(ctx context.Context) ResponseHandler {
+//				panic("mock out the Exec method")
+//			},
+//			SchemaFunc: func() *ast.Schema {
+//				panic("mock out the Schema method")
+//			},
+//		}
 //
-// 		// use mockedExecutableSchema in code that requires ExecutableSchema
-// 		// and then make assertions.
+//		// use mockedExecutableSchema in code that requires ExecutableSchema
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ExecutableSchemaMock struct {
 	// ComplexityFunc mocks the Complexity method.
 	ComplexityFunc func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (int, bool)
@@ -95,7 +95,8 @@ func (mock *ExecutableSchemaMock) Complexity(typeName string, fieldName string, 
 
 // ComplexityCalls gets all the calls that were made to Complexity.
 // Check the length with:
-//     len(mockedExecutableSchema.ComplexityCalls())
+//
+//	len(mockedExecutableSchema.ComplexityCalls())
 func (mock *ExecutableSchemaMock) ComplexityCalls() []struct {
 	TypeName        string
 	FieldName       string
@@ -132,7 +133,8 @@ func (mock *ExecutableSchemaMock) Exec(ctx context.Context) ResponseHandler {
 
 // ExecCalls gets all the calls that were made to Exec.
 // Check the length with:
-//     len(mockedExecutableSchema.ExecCalls())
+//
+//	len(mockedExecutableSchema.ExecCalls())
 func (mock *ExecutableSchemaMock) ExecCalls() []struct {
 	Ctx context.Context
 } {
@@ -160,7 +162,8 @@ func (mock *ExecutableSchemaMock) Schema() *ast.Schema {
 
 // SchemaCalls gets all the calls that were made to Schema.
 // Check the length with:
-//     len(mockedExecutableSchema.SchemaCalls())
+//
+//	len(mockedExecutableSchema.SchemaCalls())
 func (mock *ExecutableSchemaMock) SchemaCalls() []struct {
 } {
 	var calls []struct {

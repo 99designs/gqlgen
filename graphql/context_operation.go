@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Deprecated: Please update all references to OperationContext instead

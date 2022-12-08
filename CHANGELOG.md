@@ -5,10 +5,83 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.21...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.22...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.22"></a>
+## [v0.17.22](https://github.com/99designs/gqlgen/compare/v0.17.21...v0.17.22) - 2022-12-08
+- <a href="https://github.com/99designs/gqlgen/commit/d6579466a12896270f8b96543f8b9490ce3626e1"><tt>d6579466</tt></a> release v0.17.22
+
+- <a href="https://github.com/99designs/gqlgen/commit/9a2922997512939cd116983d267720505d45584b"><tt>9a292299</tt></a> graphql.Error is not deprecated anymore (<a href="https://github.com/99designs/gqlgen/pull/2455">#2455</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a44685b258710d56e1ce9f2374ca7ee577d37295"><tt>a44685b2</tt></a> Ability to return multiple errors from resolvers raise than add it to stack. (<a href="https://github.com/99designs/gqlgen/pull/2454">#2454</a>)</summary>
+
+* Remove DO NOT EDIT
+
+Sometimes vscode warn about this while editing resolvers code.
+Finally the resolver's code is editable and generated at the same time.
+
+* Ability to return multiple errors from resolver.
+
+* Multiple errors return example
+
+* Fix missing import
+
+* reformat
+
+* gofmt
+
+* go generate ./...
+
+* go generate ./...
+
+* Regenerate
+
+
+* remove trailing period
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/db1e3b81e71adcbad5143cf4b91fb402bb7ceba6"><tt>db1e3b81</tt></a> Implicit external check (<a href="https://github.com/99designs/gqlgen/pull/2449">#2449</a>)</summary>
+
+* Prevent entity resolver generation for stub types.
+In Federation 2 key fields are implicitly external
+
+* Add more comments to "isResolvable"
+
+* Check that no resolvers are set for stub "Hello"
+
+* Run generate with go 1.16
+
+* Simplify implicit external check
+
+* Add stricter federation version check.
+Update comment on expected behavior of the resolvable argument.
+Add comment to documentation about external directive.
+
+* Preallocate keyFields slice
+
+* Add non stub type to federation v2 test
+
+* Do not append to preallocated slice
+
+* Add test coverage for multiple fields in key
+
+* Fix typo in comment
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/5065163c99cda23ae9d789da5cdd5896107540a3"><tt>5065163c</tt></a> Re-generate and update release checklist to regenerate for new version
+
+- <a href="https://github.com/99designs/gqlgen/commit/5cfc22de31bbcb17ca15d090d9c2565f825950bd"><tt>5cfc22de</tt></a> Add v0.17.21 Release notes
+
+- <a href="https://github.com/99designs/gqlgen/commit/5d39046df9cea9cb83e3fca08e2f60e972adbb96"><tt>5d39046d</tt></a> v0.17.21 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.21"></a>
 ## [v0.17.21](https://github.com/99designs/gqlgen/compare/v0.17.20...v0.17.21) - 2022-12-03
 - <a href="https://github.com/99designs/gqlgen/commit/9deb8381725196dc2a7f2234457d8f6b0e145aab"><tt>9deb8381</tt></a> release v0.17.21

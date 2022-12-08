@@ -27,8 +27,9 @@ package graphql
 
 const Version = "$VERSION"
 EOF
-
+go generate ./...; cd _examples; go generate ./...; cd ..
 git add .
+
 git commit -m "release $VERSION"
 git tag $VERSION
 git push origin $VERSION
@@ -39,7 +40,7 @@ package graphql
 
 const Version = "$VERSION-dev"
 EOF
-
+go generate ./...; cd _examples; go generate ./...; cd ..
 git add .
 git commit -m "$VERSION postrelease bump"
 git push origin HEAD:master

@@ -15,7 +15,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
-	"github.com/gqlgen/_examples/websocket-initfunc/server/graph/generated"
 	"github.com/rs/cors"
 )
 
@@ -54,7 +53,7 @@ func main() {
 		Debug:            false,
 	})
 
-	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,

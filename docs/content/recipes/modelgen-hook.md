@@ -2,7 +2,7 @@
 title: "Allowing mutation of generated models before rendering"
 description: How to use a model mutation function to insert a ORM-specific tags onto struct fields.
 linkTitle: "Modelgen hook"
-menu: { main: { parent: 'recipes' } }
+menu: { main: { parent: "recipes" } }
 ---
 
 ## BuildMutateHook
@@ -16,7 +16,7 @@ the generated data structure.
 First of all, we need to create a function that will mutate the generated model.
 Then we can attach the function to the plugin and use it like any other plugin.
 
-``` go
+```go
 import (
 	"fmt"
 	"os"
@@ -64,8 +64,8 @@ This schema:
 
 ```graphql
 type Object {
-    field1: String
-    field2: Int
+	field1: String
+	field2: Int
 }
 ```
 
@@ -84,7 +84,7 @@ For more fine grained control over model generation, a graphql schema aware a Fi
 
 The below recipe uses this feature to add validate tags to the generated model for use with `go-playground/validator` where the validate tags are defined in a constraint directive in the schema.
 
-``` go
+```go
 import (
 	"fmt"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -97,6 +97,11 @@ import (
 
 // Defining mutation function
 func constraintFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *modelgen.Field) (*modelgen.Field, error) {
+	// Call default hook to proceed standard directives like goField and goTag.
+	// You can omit it, if you don't need.
+	if f, err := modelgen.DefaultFieldMutateHook(td, fd, f); err != nil {
+		return f, err
+	}
 
 	c := fd.Directives.ForName("constraint")
 	if c != nil {
@@ -136,12 +141,12 @@ This schema:
 
 ```graphql
 directive @constraint(
-    format: String
+	format: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 input ObjectInput {
-    contactEmail: String @constraint(format: "email")
-    website: String @constraint(format: "uri")
+	contactEmail: String @constraint(format: "email")
+	website: String @constraint(format: "uri")
 }
 ```
 
@@ -155,10 +160,11 @@ type ObjectInput struct {
 ```
 
 If a constraint being used during generation should not be published during introspection, the directive should be listed with `skip_runtime:true` in gqlgen.yml
+
 ```yaml
 directives:
   constraint:
     skip_runtime: true
 ```
 
-The built-in directive `@goTag` is implemented using the FieldMutateHook. See: `plugin/modelgen/models.go` function `GoTagFieldHook`
+The built-in directives `@goField` and `@goTag` is implemented using the FieldMutateHook. See: `plugin/modelgen/models.go` functions `GoFieldHook` and `GoTagFieldHook`

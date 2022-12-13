@@ -26,7 +26,7 @@ func TestModelGeneration(t *testing.T) {
 	require.NoError(t, cfg.Init())
 	p := Plugin{
 		MutateHook: mutateHook,
-		FieldHook:  defaultFieldMutateHook,
+		FieldHook:  DefaultFieldMutateHook,
 	}
 	require.NoError(t, p.MutateConfig(cfg))
 	require.NoError(t, goBuild(t, "./out/"))
@@ -279,7 +279,7 @@ func TestModelGenerationStructFieldPointers(t *testing.T) {
 	require.NoError(t, cfg.Init())
 	p := Plugin{
 		MutateHook: mutateHook,
-		FieldHook:  defaultFieldMutateHook,
+		FieldHook:  DefaultFieldMutateHook,
 	}
 	require.NoError(t, p.MutateConfig(cfg))
 

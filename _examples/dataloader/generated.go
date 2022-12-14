@@ -933,7 +933,6 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -984,7 +983,6 @@ func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -1046,7 +1044,6 @@ func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -1108,7 +1105,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -1182,7 +1178,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -3207,7 +3202,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	})
 
 	out := graphql.NewFieldSet(fields)
-	var invalids uint32
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -3294,9 +3288,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		}
 	}
 	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
 	return out
 }
 

@@ -1,6 +1,7 @@
 schema:
   - "schema.graphql"
   - "user.graphql"
+  - "testomitempty.graphql"
 
 exec:
   filename: generated.go
@@ -9,6 +10,11 @@ model:
 resolver:
   filename: resolver.go
   type: Resolver
+
+struct_tag: json
+
+autobind:
+  - "github.com/99designs/gqlgen/integration/testomitempty"
 
 models:
   Element:

@@ -46,6 +46,10 @@ type Query {
   viewer: Viewer
 }
 
+type RemoteModelWithOmitempty {
+  newDesc: String
+}
+
 type User {
   likes: [String!]!
   name: String!

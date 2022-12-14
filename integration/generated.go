@@ -16,6 +16,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	models "github.com/99designs/gqlgen/integration/models-go"
 	"github.com/99designs/gqlgen/integration/remote_api"
+	"github.com/99designs/gqlgen/integration/testomitempty"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -62,6 +63,10 @@ type ComplexityRoot struct {
 		JSONEncoding func(childComplexity int) int
 		Path         func(childComplexity int) int
 		Viewer       func(childComplexity int) int
+	}
+
+	RemoteModelWithOmitempty struct {
+		Description func(childComplexity int) int
 	}
 
 	User struct {
@@ -197,6 +202,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Viewer(childComplexity), true
 
+	case "RemoteModelWithOmitempty.newDesc":
+		if e.complexity.RemoteModelWithOmitempty.Description == nil {
+			break
+		}
+
+		return e.complexity.RemoteModelWithOmitempty.Description(childComplexity), true
+
 	case "User.likes":
 		if e.complexity.User.Likes == nil {
 			break
@@ -272,7 +284,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "schema.graphql" "user.graphql"
+//go:embed "schema.graphql" "user.graphql" "testomitempty.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -286,6 +298,7 @@ func sourceData(filename string) string {
 var sources = []*ast.Source{
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 	{Name: "user.graphql", Input: sourceData("user.graphql"), BuiltIn: false},
+	{Name: "testomitempty.graphql", Input: sourceData("testomitempty.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -1040,6 +1053,47 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteModelWithOmitempty_newDesc(ctx context.Context, field graphql.CollectedField, obj *testomitempty.RemoteModelWithOmitempty) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteModelWithOmitempty_newDesc(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteModelWithOmitempty_newDesc(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteModelWithOmitempty",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3339,6 +3393,31 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var remoteModelWithOmitemptyImplementors = []string{"RemoteModelWithOmitempty"}
+
+func (ec *executionContext) _RemoteModelWithOmitempty(ctx context.Context, sel ast.SelectionSet, obj *testomitempty.RemoteModelWithOmitempty) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, remoteModelWithOmitemptyImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RemoteModelWithOmitempty")
+		case "newDesc":
+
+			out.Values[i] = ec._RemoteModelWithOmitempty_newDesc(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *remote_api.User) graphql.Marshaler {
@@ -4403,6 +4482,16 @@ func (ec *executionContext) marshalOMap2ᚕmap(ctx context.Context, sel ast.Sele
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {

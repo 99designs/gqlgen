@@ -1,0 +1,32 @@
+{{ $object := . }}
+
+const (
+	{{- range $field := $object.Fields }}
+		{{- if $field.IsResolver }}
+			{{ $field.GoFieldName }} = "{{ $field.Name }}"
+		{{- end }}
+	{{- end }}
+)
+
+{{- range $field := $object.Fields }}
+	{{- if $field.IsResolver }}
+		{{- if $field.Args }}
+			type argsOf{{ $field.GoFieldName }} struct {
+				{{- range $arg := $field.Args }}
+					// GraphQL schema argument name for {{ $field.Name }}: {{ $arg.Name }}
+					{{ goName $arg.VarName }} string
+				{{- end }}
+			}
+
+			{{ $helperName := print $field.GoFieldName "Args" }}
+			// {{ $helperName }} returns GraphQL schema argument names for {{ $object.Name }}: {{ $field.Name }}.
+			func {{ $helperName }}() argsOf{{ $field.GoFieldName }} {
+				return argsOf{{ $field.GoFieldName }}{
+					{{- range $arg := $field.Args }}
+						{{ goName $arg.VarName }}: "{{ $arg.Name }}",
+					{{- end }}
+				}
+			}
+		{{ end }}
+	{{- end }}
+{{- end }}

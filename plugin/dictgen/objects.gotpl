@@ -1,0 +1,37 @@
+{{ $objects := . }}
+
+const (
+	{{- range $object := $objects }}
+        {{ goName $object.Name }} = "{{ $object.Name }}"
+	{{- end }}
+)
+
+{{- range $object := $objects }}
+    {{- if .Fields }}
+        {{ $goObjectName := goName $object.Name }}
+        // GraphQL schema field names for {{ $goObjectName }}.
+        type fieldsOf{{ $goObjectName }} struct {
+            {{- range $field := .Fields }}
+                // GraphQL schema field name for {{ $object.Name }}: {{ $field.Name }}
+                {{ $field.GoFieldName }} string
+            {{- end }}
+        }
+
+        {{ $helperName := print $goObjectName "Fields" }}
+        // {{ $helperName }} returns GraphQL schema field names for {{ $object.Name }}.
+        func {{ $helperName }}() fieldsOf{{ $goObjectName }} {
+            return fieldsOf{{ $goObjectName }}{
+                {{- range $field := .Fields }}
+                    {{ $field.GoFieldName }}: "{{ $field.Name }}",
+                {{- end }}
+            }
+        }
+
+        type {{ $goObjectName }}Helpers struct {}
+
+        // F returns structure with GraphQL schema field names.
+        func (t *{{ $goObjectName }}Helpers) F() fieldsOf{{ $goObjectName }} {
+            return {{ $helperName }}()
+        }
+    {{ end }}
+{{- end }}

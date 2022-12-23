@@ -1,3 +1,25 @@
 type RemoteModelWithOmitempty {
     newDesc: String
 }
+
+type DummyUserWithRemoteNamedBasics {
+    newString: String!
+    newInt: Int!
+    newInt32: Int!
+    newInt64: Int!
+    newBool: Boolean!
+    newFloat64: Float!
+    newID: ID!
+
+    ### BELOW ARE NOT SUPPORTED AS BASIC - MUST CREATE SCALAR WITH MARSHALFUNC AND UNMARSHARLFUNC ###
+    #newInt8: Int!
+    #newInt16: Int!
+    #newFloat32: Float!
+    newUint: Uint! # scalar created for uint
+    #newUint8: Int!
+    #newUint16: Int!
+    #newUint32: Int!
+    #newUint64: Int!
+}
+
+scalar Uint

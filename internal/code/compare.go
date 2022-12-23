@@ -39,12 +39,19 @@ func CompatibleTypes(expected types.Type, actual types.Type) error {
 		}
 
 	case *types.Basic:
-		if actual, ok := actual.(*types.Basic); ok {
-			if actual.Kind() != expected.Kind() {
-				return fmt.Errorf("basic kind differs, %s != %s", expected.Name(), actual.Name())
+		if actualBasic, ok := actual.(*types.Basic); ok {
+			if actualBasic.Kind() != expected.Kind() {
+				return fmt.Errorf("basic kind differs, %s != %s", expected.Name(), actualBasic.Name())
 			}
 
 			return nil
+		} else if actual, ok := actual.(*types.Named); ok {
+			if underlyingBasic, ok := actual.Underlying().(*types.Basic); ok {
+				if underlyingBasic.Kind() != expected.Kind() {
+					return fmt.Errorf("basic kind differs with underlying, %s != %s", expected.Name(), underlyingBasic.Name())
+				}
+				return nil
+			}
 		}
 
 	case *types.Struct:

@@ -252,6 +252,15 @@ func (t *TypeReference) IsStruct() bool {
 	return isStruct
 }
 
+func (t *TypeReference) IsUnderlyingBasic() bool {
+	_, isUnderlyingBasic := t.GO.Underlying().(*types.Basic)
+	return isUnderlyingBasic
+}
+
+func (t *TypeReference) IsScalarID() bool {
+	return t.Definition.Kind == ast.Scalar && t.Marshaler.Name() == "MarshalID"
+}
+
 func (t *TypeReference) IsScalar() bool {
 	return t.Definition.Kind == ast.Scalar
 }

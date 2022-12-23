@@ -56,6 +56,8 @@
 						return *res, graphql.ErrorOnPath(ctx, err)
 					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
 						return &res, graphql.ErrorOnPath(ctx, err)
+					{{- else if and $type.IsNamed $type.Definition.BuiltIn (not $type.IsScalarID) }}
+						return {{ $type.GO | ref }}(res), graphql.ErrorOnPath(ctx, err)
 					{{- else}}
 						return res, graphql.ErrorOnPath(ctx, err)
 					{{- end }}
@@ -172,7 +174,11 @@
 					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
 						{{- $v = "*v" }}
 					{{- end }}
-					res := {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
+					{{- if and $type.IsNamed $type.Definition.BuiltIn (not $type.IsScalarID) }}
+						res := {{ $type.Marshaler | call }}({{- if and $type.GO.Underlying $type.IsUnderlyingBasic }}{{ $type.GO.Underlying | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
+					{{- else }}
+						res := {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
+					{{- end }}
 					{{- if $type.GQL.NonNull }}
 						if res == graphql.Null {
 							if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

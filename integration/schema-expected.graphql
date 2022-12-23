@@ -16,6 +16,17 @@ input DateFilter {
   value: String!
 }
 
+type DummyUserWithRemoteNamedBasics {
+  newBool: Boolean!
+  newFloat64: Float!
+  newID: ID!
+  newInt: Int!
+  newInt32: Int!
+  newInt64: Int!
+  newString: String!
+  newUint: Uint!
+}
+
 type Element {
   child: Element!
   error: Boolean!
@@ -49,6 +60,8 @@ type Query {
 type RemoteModelWithOmitempty {
   newDesc: String
 }
+
+scalar Uint
 
 type User {
   likes: [String!]!

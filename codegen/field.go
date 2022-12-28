@@ -3,6 +3,7 @@ package codegen
 import (
 	"errors"
 	"fmt"
+	goast "go/ast"
 	"go/types"
 	"log"
 	"reflect"
@@ -503,6 +504,12 @@ func (f *Field) ResolverType() string {
 }
 
 func (f *Field) ShortResolverDeclaration() string {
+	return f.ShortResolverSignature(nil)
+}
+
+// ShortResolverSignature is identical to ShortResolverDeclaration,
+// but respects previous naming (return) conventions, if any.
+func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 	if f.Object.Kind == ast.InputObject {
 		return fmt.Sprintf("(ctx context.Context, obj %s, data %s) error",
 			templates.CurrentImports.LookupType(f.Object.Reference()),
@@ -523,8 +530,17 @@ func (f *Field) ShortResolverDeclaration() string {
 	if f.Object.Stream {
 		result = "<-chan " + result
 	}
-
-	res += fmt.Sprintf(") (%s, error)", result)
+	// Named return.
+	var namedV, namedE string
+	if ft != nil {
+		if ft.Results != nil && len(ft.Results.List) > 0 && len(ft.Results.List[0].Names) > 0 {
+			namedV = ft.Results.List[0].Names[0].Name
+		}
+		if ft.Results != nil && len(ft.Results.List) > 1 && len(ft.Results.List[1].Names) > 0 {
+			namedE = ft.Results.List[1].Names[0].Name
+		}
+	}
+	res += fmt.Sprintf(") (%s %s, %s error)", namedV, result, namedE)
 	return res
 }
 

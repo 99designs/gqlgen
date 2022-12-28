@@ -68,7 +68,7 @@ func (r *Rewriter) getFile(filename string) string {
 	return r.files[filename]
 }
 
-func (r *Rewriter) GetMethodComment(structname string, methodname string) string {
+func (r *Rewriter) GetPrevDecl(structname string, methodname string) *ast.FuncDecl {
 	for _, f := range r.pkg.Syntax {
 		for _, d := range f.Decls {
 			d, isFunc := d.(*ast.FuncDecl)
@@ -89,48 +89,29 @@ func (r *Rewriter) GetMethodComment(structname string, methodname string) string
 			if !ok {
 				continue
 			}
-
 			if ident.Name != structname {
 				continue
 			}
-			return d.Doc.Text()
+			r.copied[d] = true
+			return d
 		}
 	}
+	return nil
+}
 
+func (r *Rewriter) GetMethodComment(structname string, methodname string) string {
+	d := r.GetPrevDecl(structname, methodname)
+	if d != nil {
+		return d.Doc.Text()
+	}
 	return ""
 }
+
 func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
-	for _, f := range r.pkg.Syntax {
-		for _, d := range f.Decls {
-			d, isFunc := d.(*ast.FuncDecl)
-			if !isFunc {
-				continue
-			}
-			if d.Name.Name != methodname {
-				continue
-			}
-			if d.Recv == nil || len(d.Recv.List) == 0 {
-				continue
-			}
-			recv := d.Recv.List[0].Type
-			if star, isStar := recv.(*ast.StarExpr); isStar {
-				recv = star.X
-			}
-			ident, ok := recv.(*ast.Ident)
-			if !ok {
-				continue
-			}
-
-			if ident.Name != structname {
-				continue
-			}
-
-			r.copied[d] = true
-
-			return r.getSource(d.Body.Pos()+1, d.Body.End()-1)
-		}
+	d := r.GetPrevDecl(structname, methodname)
+	if d != nil {
+		return r.getSource(d.Body.Pos()+1, d.Body.End()-1)
 	}
-
 	return ""
 }
 

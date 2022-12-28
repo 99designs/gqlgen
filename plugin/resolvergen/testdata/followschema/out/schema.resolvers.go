@@ -11,9 +11,9 @@ import (
 )
 
 // Resolver is the resolver for the resolver field.
-func (r *queryCustomResolverType) Resolver(ctx context.Context) (*customresolver.Resolver, error) {
-	// CustomerResolverType.Resolver implementation
-	return nil, nil
+func (r *queryCustomResolverType) Resolver(ctx context.Context) (_ *customresolver.Resolver, err error) {
+	// Named return values are supported.
+	return
 }
 
 // Name is the resolver for the name field.

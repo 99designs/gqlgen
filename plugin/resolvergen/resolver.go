@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"go/ast"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -67,7 +68,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 				continue
 			}
 
-			resolver := Resolver{o, f, "// foo", `panic("not implemented")`}
+			resolver := Resolver{o, f, nil, "// foo", `panic("not implemented")`}
 			file.Resolvers = append(file.Resolvers, &resolver)
 		}
 	}
@@ -119,16 +120,16 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
-			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
 			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
-			if implementation == "" {
-				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
-			}
 			if comment == "" {
 				comment = fmt.Sprintf("%v is the resolver for the %v field.", f.GoFieldName, f.Name)
 			}
+			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
+			if implementation == "" {
+				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
+			}
 
-			resolver := Resolver{o, f, comment, implementation}
+			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation}
 			fn := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			if files[fn] == nil {
 				files[fn] = &File{}
@@ -215,6 +216,7 @@ func (f *File) Imports() string {
 type Resolver struct {
 	Object         *codegen.Object
 	Field          *codegen.Field
+	PrevDecl       *ast.FuncDecl
 	Comment        string
 	Implementation string
 }

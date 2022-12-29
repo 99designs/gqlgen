@@ -51,6 +51,7 @@
 	}
 
 	type ComplexityRoot struct {
+	{{- if not .Config.OmitComplexity }}
 	{{ range $object := .Objects }}
 		{{ if not $object.IsReserved -}}
 			{{ ucFirst $object.Name }} struct {
@@ -63,6 +64,7 @@
 			}
 		{{- end }}
 	{{ end }}
+	{{- end }}
 	}
 {{ end }}
 
@@ -104,6 +106,7 @@
 	func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 		ec := executionContext{nil, e}
 		_ = ec
+		{{ if not .Config.OmitComplexity -}}
 		switch typeName + "." + field {
 		{{ range $object := .Objects }}
 			{{ if not $object.IsReserved }}
@@ -130,6 +133,7 @@
 			{{ end }}
 		{{ end }}
 		}
+		{{- end }}
 		return 0, false
 	}
 

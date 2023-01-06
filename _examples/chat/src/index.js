@@ -11,14 +11,17 @@ import { WebSocketLink as ApolloWebSocketLink} from '@apollo/client/link/ws';
 import { getMainDefinition } from 'apollo-utilities';
 import { App } from './App';
 import { WebSocketLink as GraphQLWSWebSocketLink } from './graphql-ws'
+import { SSELink } from './graphql-sse';
 
-let wsLink;
-if (process.env.REACT_APP_WS_PROTOCOL === 'graphql-transport-ws') {
-    wsLink = new GraphQLWSWebSocketLink({
+let subscriptionLink;
+if (process.env.REACT_APP_SSE_PROTOCOL) {
+  subscriptionLink = new SSELink({ url: 'http://localhost:8085/query' });
+} else if (process.env.REACT_APP_WS_PROTOCOL === 'graphql-transport-ws') {
+    subscriptionLink = new GraphQLWSWebSocketLink({
         url: `ws://localhost:8085/query`
     });
 } else {
-    wsLink = new ApolloWebSocketLink({
+    subscriptionLink = new ApolloWebSocketLink({
         uri: `ws://localhost:8085/query`,
         options: {
             reconnect: true
@@ -36,7 +39,7 @@ const link = split(
         const { kind, operation } = getMainDefinition(query);
         return kind === 'OperationDefinition' && operation === 'subscription';
     },
-    wsLink,
+    subscriptionLink,
     httpLink,
 );
 

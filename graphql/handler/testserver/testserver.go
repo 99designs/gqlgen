@@ -15,6 +15,7 @@ import (
 // a generated server, but it aims to be good enough to test the handler package without relying on codegen.
 func New() *TestServer {
 	next := make(chan struct{})
+	completeSubscription := make(chan struct{})
 
 	schema := gqlparser.MustLoadSchema(&ast.Source{Input: `
 		type Query {
@@ -30,7 +31,8 @@ func New() *TestServer {
 	`})
 
 	srv := &TestServer{
-		next: next,
+		next:                 next,
+		completeSubscription: completeSubscription,
 	}
 
 	srv.Server = handler.New(&graphql.ExecutableSchemaMock{
@@ -74,6 +76,8 @@ func New() *TestServer {
 						return &graphql.Response{
 							Data: []byte(`{"name":"test"}`),
 						}
+					case <-completeSubscription:
+						return nil
 					}
 				}
 			default:
@@ -143,13 +147,22 @@ func NewError() *TestServer {
 
 type TestServer struct {
 	*handler.Server
-	next       chan struct{}
-	complexity int
+	next                 chan struct{}
+	completeSubscription chan struct{}
+	complexity           int
 }
 
 func (s *TestServer) SendNextSubscriptionMessage() {
 	select {
 	case s.next <- struct{}{}:
+	case <-time.After(1 * time.Second):
+		fmt.Println("WARNING: no active subscription")
+	}
+}
+
+func (s *TestServer) SendCompleteSubscriptionMessage() {
+	select {
+	case s.completeSubscription <- struct{}{}:
 	case <-time.After(1 * time.Second):
 		fmt.Println("WARNING: no active subscription")
 	}

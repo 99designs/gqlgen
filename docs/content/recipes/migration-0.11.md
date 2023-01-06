@@ -117,7 +117,7 @@ Many of the old interfaces collapse down into just a few extension points:
 
 ![Anatomy of a request](/request_anatomy.png)
 
-The tracing interface has also been removed, tracing stats are now measured in core (eg time to parse query) and made available on the operation/response contexts. Much of the old interface was designed so that users of a tracer dont need to know which extension points it was listening to, the new handler extensions have the same goal.
+The tracing interface has also been removed, tracing stats are now measured in core (eg time to parse query) and made available on the operation/response contexts. Much of the old interface was designed so that users of a tracer don't need to know which extension points it was listening to, the new handler extensions have the same goal.
 
 ### Backward compatibility
 

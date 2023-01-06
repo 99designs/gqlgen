@@ -118,7 +118,7 @@ func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 	}
 }
 
-// IntrospectionEnabled = false will forbid clients from calling introspection endpoints. Can be useful in prod when you dont
+// IntrospectionEnabled = false will forbid clients from calling introspection endpoints. Can be useful in prod when you don't
 // want clients introspecting the full schema.
 // Deprecated: switch to graphql/handler.New
 func IntrospectionEnabled(enabled bool) Option {

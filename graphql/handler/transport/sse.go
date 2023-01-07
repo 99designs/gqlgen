@@ -3,13 +3,15 @@ package transport
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	"io"
 	"log"
 	"mime"
 	"net/http"
 	"strings"
+
+	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type SSE struct{}

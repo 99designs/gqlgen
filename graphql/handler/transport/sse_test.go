@@ -2,15 +2,18 @@ package transport_test
 
 import (
 	"bufio"
-	"github.com/99designs/gqlgen/graphql/handler/testserver"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/graphql/handler/testserver"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestSSE(t *testing.T) {
@@ -88,8 +91,10 @@ func TestSSE(t *testing.T) {
 
 		var Client = &http.Client{}
 		req, err := createHTTPRequest(srv.URL, `{"query":"subscription { name }"}`)
+		require.NoError(t, err, "Create request threw error -> %s", err)
 		res, err := Client.Do(req)
-		assert.NoError(t, err, "Request threw error -> %s", err)
+		require.NoError(t, err, "Request threw error -> %s", err)
+		defer res.Body.Close()
 		assert.Equal(t, 200, res.StatusCode, "Request return wrong status -> %s", res.Status)
 		assert.Equal(t, "keep-alive", res.Header.Get("Connection"))
 		assert.Equal(t, "text/event-stream", res.Header.Get("Content-Type"))

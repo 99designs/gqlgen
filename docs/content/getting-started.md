@@ -139,10 +139,10 @@ Returning to `graph/schema.resolvers.go`, let's implement the bodies of those au
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-  rand, _ := rand.Int(rand.Reader, big.NewInt(100))
+	rand, _ := rand.Int(rand.Reader, big.NewInt(100))
 	todo := &model.Todo{
-		Text:   input.Text,
-		ID:     fmt.Sprintf("T%d", rand),
+		Text: input.Text,
+		ID:   fmt.Sprintf("T%d", rand),
 		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
 	}
 	r.todos = append(r.todos, todo)
@@ -190,7 +190,7 @@ query findTodos {
 
 ### Don't eagerly fetch the user
 
-This example is great, but in the real world fetching most objects is expensive. We dont want to load the User on the
+This example is great, but in the real world fetching most objects is expensive. We don't want to load the User on the
 todo unless the user actually asked for it. So lets replace the generated `Todo` model with something slightly more
 realistic.
 

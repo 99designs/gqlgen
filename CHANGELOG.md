@@ -725,7 +725,7 @@ This reverts commits 64b882c3c9901f25edc0684ce2a1f9b63443416b and 670cf22272b490
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5f5bfcb97fdb01026cf35a5dc46f1246a30f9b26"><tt>5f5bfcb9</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/2204">#2204</a> - don't try to embed builtin sources (<a href="https://github.com/99designs/gqlgen/pull/2214">#2214</a>)</summary>
 
-* dont't try to embed builtins
+* don't try to embed builtins
 
 * add test
 
@@ -3068,7 +3068,7 @@ Remove stale bot
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/34a442c7980f5ba363f58aaee67b9ddaa77d7520"><tt>34a442c7</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/1399">#1399</a> from 99designs/prevent-possible-error-deadlock</summary>
 
-Dont hold error lock when calling into error presenters
+Don't hold error lock when calling into error presenters
 
 </details></dd></dl>
 
@@ -6353,7 +6353,7 @@ duration of inactivity.
 
 - <a href="https://github.com/99designs/gqlgen/commit/693753fcc69329fba282ad5f1d69c02979cbce08"><tt>693753fc</tt></a> Add websocket keepalive support
 
-- <a href="https://github.com/99designs/gqlgen/commit/162afad73b653d9456d21ec38d00c3476ab2dde4"><tt>162afad7</tt></a> enums dont exist in runtime
+- <a href="https://github.com/99designs/gqlgen/commit/162afad73b653d9456d21ec38d00c3476ab2dde4"><tt>162afad7</tt></a> enums don't exist in runtime
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d0b6485b23f259588e9ecd34e23924c741d9c6f2"><tt>d0b6485b</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/525">#525</a> from 99designs/stop-grc-panic</summary>
 
@@ -8322,7 +8322,7 @@ Validate at end
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/b16e84295a1e72d27c6b96784c0266058d8716bb"><tt>b16e8429</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/159">#159</a> from vektah/enum-only-generation</summary>
 
-Dont skip model generation if there are enums defined
+Don't skip model generation if there are enums defined
 
 </details></dd></dl>
 

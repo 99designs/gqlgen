@@ -12,13 +12,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/urfave/cli/v2"
-
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin/servergen"
+	"github.com/urfave/cli/v2"
 )
 
 //go:embed init-templates/schema.graphqls

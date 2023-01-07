@@ -31,6 +31,7 @@ func main() {
 
 	srv := handler.New(chat.NewExecutableSchema(chat.New()))
 
+	srv.AddTransport(transport.SSE{})
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,

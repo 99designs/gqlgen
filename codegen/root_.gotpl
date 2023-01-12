@@ -78,7 +78,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	ec := executionContext{nil, e}
 	_ = ec
-	{{ if not .Config.OmitComplexity }}
+	{{- if not .Config.OmitComplexity }}
 	switch typeName + "." + field {
 	{{ range $object := .Objects }}
 		{{ if not $object.IsReserved }}

@@ -49,7 +49,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	DummyUserWithRemoteNamedBasics struct {
+	DefinedTypeFromBasics struct {
 		NewBool    func(childComplexity int) int
 		NewFloat64 func(childComplexity int) int
 		NewID      func(childComplexity int) int
@@ -123,61 +123,61 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "DummyUserWithRemoteNamedBasics.newBool":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewBool == nil {
+	case "DefinedTypeFromBasics.newBool":
+		if e.complexity.DefinedTypeFromBasics.NewBool == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewBool(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewBool(childComplexity), true
 
-	case "DummyUserWithRemoteNamedBasics.newFloat64":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewFloat64 == nil {
+	case "DefinedTypeFromBasics.newFloat64":
+		if e.complexity.DefinedTypeFromBasics.NewFloat64 == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewFloat64(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewFloat64(childComplexity), true
 
-	case "DummyUserWithRemoteNamedBasics.newID":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewID == nil {
+	case "DefinedTypeFromBasics.newID":
+		if e.complexity.DefinedTypeFromBasics.NewID == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewID(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewID(childComplexity), true
 
-	case "DummyUserWithRemoteNamedBasics.newInt":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewInt == nil {
+	case "DefinedTypeFromBasics.newInt":
+		if e.complexity.DefinedTypeFromBasics.NewInt == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewInt(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewInt(childComplexity), true
 
-	case "DummyUserWithRemoteNamedBasics.newInt32":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewInt32 == nil {
+	case "DefinedTypeFromBasics.newInt32":
+		if e.complexity.DefinedTypeFromBasics.NewInt32 == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewInt32(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewInt32(childComplexity), true
 
-	case "DummyUserWithRemoteNamedBasics.newInt64":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewInt64 == nil {
+	case "DefinedTypeFromBasics.newInt64":
+		if e.complexity.DefinedTypeFromBasics.NewInt64 == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewInt64(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewInt64(childComplexity), true
 
-	case "DummyUserWithRemoteNamedBasics.newString":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewString == nil {
+	case "DefinedTypeFromBasics.newString":
+		if e.complexity.DefinedTypeFromBasics.NewString == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewString(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewString(childComplexity), true
 
-	case "DummyUserWithRemoteNamedBasics.newUint":
-		if e.complexity.DummyUserWithRemoteNamedBasics.NewUint == nil {
+	case "DefinedTypeFromBasics.newUint":
+		if e.complexity.DefinedTypeFromBasics.NewUint == nil {
 			break
 		}
 
-		return e.complexity.DummyUserWithRemoteNamedBasics.NewUint(childComplexity), true
+		return e.complexity.DefinedTypeFromBasics.NewUint(childComplexity), true
 
 	case "Element.child":
 		if e.complexity.Element.Child == nil {
@@ -501,8 +501,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newString(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newString(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newString(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newString(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -532,9 +532,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newString(ctx contex
 	return ec.marshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedString(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newString(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newString(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -545,8 +545,8 @@ func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newStrin
 	return fc, nil
 }
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newInt(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newInt(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newInt(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -576,9 +576,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newInt(ctx context.C
 	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newInt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -589,8 +589,8 @@ func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newInt(c
 	return fc, nil
 }
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newInt32(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newInt32(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newInt32(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt32(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -620,9 +620,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newInt32(ctx context
 	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newInt32(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt32(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -633,8 +633,8 @@ func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newInt32
 	return fc, nil
 }
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newInt64(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newInt64(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newInt64(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt64(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -664,9 +664,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newInt64(ctx context
 	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newInt64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -677,8 +677,8 @@ func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newInt64
 	return fc, nil
 }
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newBool(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newBool(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newBool(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newBool(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -708,9 +708,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newBool(ctx context.
 	return ec.marshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedBool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newBool(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newBool(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -721,8 +721,8 @@ func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newBool(
 	return fc, nil
 }
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newFloat64(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newFloat64(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newFloat64(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newFloat64(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -752,9 +752,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newFloat64(ctx conte
 	return ec.marshalNFloat2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedFloat64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newFloat64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newFloat64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -765,8 +765,8 @@ func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newFloat
 	return fc, nil
 }
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newID(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newID(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newID(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newID(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -796,9 +796,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newID(ctx context.Co
 	return ec.marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedID(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -809,8 +809,8 @@ func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newID(ct
 	return fc, nil
 }
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newUint(ctx context.Context, field graphql.CollectedField, obj *remote_api.DummyUserWithRemoteNamedBasics) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DummyUserWithRemoteNamedBasics_newUint(ctx, field)
+func (ec *executionContext) _DefinedTypeFromBasics_newUint(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newUint(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -840,9 +840,9 @@ func (ec *executionContext) _DummyUserWithRemoteNamedBasics_newUint(ctx context.
 	return ec.marshalNUint2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DummyUserWithRemoteNamedBasics_newUint(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newUint(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DummyUserWithRemoteNamedBasics",
+		Object:     "DefinedTypeFromBasics",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3528,68 +3528,68 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 
 // region    **************************** object.gotpl ****************************
 
-var dummyUserWithRemoteNamedBasicsImplementors = []string{"DummyUserWithRemoteNamedBasics"}
+var definedTypeFromBasicsImplementors = []string{"DefinedTypeFromBasics"}
 
-func (ec *executionContext) _DummyUserWithRemoteNamedBasics(ctx context.Context, sel ast.SelectionSet, obj *remote_api.DummyUserWithRemoteNamedBasics) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, dummyUserWithRemoteNamedBasicsImplementors)
+func (ec *executionContext) _DefinedTypeFromBasics(ctx context.Context, sel ast.SelectionSet, obj *remote_api.DefinedTypeFromBasics) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, definedTypeFromBasicsImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("DummyUserWithRemoteNamedBasics")
+			out.Values[i] = graphql.MarshalString("DefinedTypeFromBasics")
 		case "newString":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newString(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newString(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "newInt":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newInt(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "newInt32":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newInt32(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt32(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "newInt64":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newInt64(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt64(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "newBool":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newBool(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newBool(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "newFloat64":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newFloat64(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newFloat64(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "newID":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newID(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newID(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "newUint":
 
-			out.Values[i] = ec._DummyUserWithRemoteNamedBasics_newUint(ctx, field, obj)
+			out.Values[i] = ec._DefinedTypeFromBasics_newUint(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

@@ -16,7 +16,7 @@ input DateFilter {
   value: String!
 }
 
-type DummyUserWithRemoteNamedBasics {
+type DefinedTypeFromBasics {
   newBool: Boolean!
   newFloat64: Float!
   newID: ID!

@@ -2,7 +2,7 @@ type RemoteModelWithOmitempty {
     newDesc: String
 }
 
-type DummyUserWithRemoteNamedBasics {
+type DefinedTypeFromBasics {
     newString: String!
     newInt: Int!
     newInt32: Int!

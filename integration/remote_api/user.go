@@ -14,7 +14,7 @@ type User struct {
 	Likes []string
 }
 
-type DummyUserWithRemoteNamedBasics struct {
+type DefinedTypeFromBasics struct {
 	NewString  testomitempty.NamedString  `json:"newString"`
 	NewInt     testomitempty.NamedInt     `json:"newInt"`
 	NewInt8    testomitempty.NamedInt8    `json:"newInt8"`

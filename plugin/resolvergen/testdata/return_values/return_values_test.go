@@ -1,9 +1,10 @@
 package return_values
 
 import (
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 //go:generate rm -f resolvers.go

@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -19,7 +20,7 @@ type subscriptionError struct {
 
 // AddSubscriptionError is used to let websocket return an error message after subscription resolver returns a channel.
 // for example:
-//func (r *subscriptionResolver) Method(ctx context.Context) (<-chan *model.Message, error) {
+// func (r *subscriptionResolver) Method(ctx context.Context) (<-chan *model.Message, error) {
 //	ch := make(chan *model.Message)
 //	go func() {
 //      defer func() {

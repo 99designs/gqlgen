@@ -15,6 +15,7 @@ struct_tag: json
 
 autobind:
   - "github.com/99designs/gqlgen/integration/testomitempty"
+  - "github.com/99designs/gqlgen/integration/remote_api"
 
 models:
   Element:
@@ -26,3 +27,7 @@ models:
     fields:
       likes:
         resolver: true
+  Uint:
+    model: github.com/99designs/gqlgen/integration/remote_api.Uint
+  ID:
+    model: github.com/99designs/gqlgen/integration/remote_api.ID

@@ -1,6 +1,6 @@
 type Query {
     user(id: ID!): User
-    search(input: SearchArgs = {location: "37,144", isBanned: false}): [User!]!
+    search(input: SearchArgs = { location: "37,144", isBanned: false }): [User!]!
     userByTier(tier: Tier!, darkMode: DarkMode!): [User!]!
 }
 
@@ -12,10 +12,13 @@ type User {
     valPrefs: DarkMode
     ptrPrefs: DarkMode
     isBanned: Banned!
+    isLoginBanned: Boolean!
+    isQueryBanned: Boolean!
     primitiveResolver: String!
     customResolver: Point!
     address: Address
     tier: Tier
+    carManufacturer: String!
 }
 
 type Address {

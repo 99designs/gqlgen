@@ -32,21 +32,38 @@ type DefinedTypeFromBasics struct {
 	NewID      testomitempty.NamedID      `json:"newID"`
 }
 
-// Lets redefine the base Uint type to use an id from an external library
-func MarshalUint(id testomitempty.NamedUint) graphql.Marshaler {
+// Lets redefine the base Float32 type
+func MarshalFloat32(id testomitempty.NamedFloat32) graphql.Marshaler {
+	return graphql.WriterFunc(func(w io.Writer) {
+		io.WriteString(w, strconv.Quote(fmt.Sprintf("=%v=", id)))
+	})
+}
+
+// And the same for the unmarshaler
+func UnmarshalFloat32(v interface{}) (testomitempty.NamedFloat32, error) {
+	str, ok := v.(string)
+	if !ok {
+		return 0, fmt.Errorf("float32 must be Float32")
+	}
+	i, err := strconv.Atoi(str[1 : len(str)-1])
+	return testomitempty.NamedFloat32(i), err
+}
+
+// Lets redefine the base Uint64 type
+func MarshalUint64(id testomitempty.NamedUint64) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
 		io.WriteString(w, strconv.Quote(fmt.Sprintf("=%d=", id)))
 	})
 }
 
 // And the same for the unmarshaler
-func UnmarshalUint(v interface{}) (testomitempty.NamedUint, error) {
+func UnmarshalUint64(v interface{}) (testomitempty.NamedUint64, error) {
 	str, ok := v.(string)
 	if !ok {
-		return 0, fmt.Errorf("ids must be strings")
+		return 0, fmt.Errorf("uint64 must be Uint64")
 	}
 	i, err := strconv.Atoi(str[1 : len(str)-1])
-	return testomitempty.NamedUint(i), err
+	return testomitempty.NamedUint64(i), err
 }
 
 // Lets redefine the base ID type to use an id from an external library

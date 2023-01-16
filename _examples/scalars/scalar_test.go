@@ -22,6 +22,9 @@ type RawUser struct {
 	IsBanned          bool
 	IsLoginBanned     bool
 	IsQueryBanned     bool
+	Children          int
+	Cars              int
+	Weddings          int
 }
 
 func TestScalars(t *testing.T) {
@@ -75,6 +78,16 @@ func TestScalars(t *testing.T) {
 		require.Equal(t, false, resp.User.IsBanned)
 		require.Equal(t, true, resp.User.IsLoginBanned)
 		require.Equal(t, true, resp.User.IsQueryBanned)
+	})
+
+	t.Run("unusual basic", func(t *testing.T) {
+		var resp struct{ User RawUser }
+
+		err := c.Post(`{ user(id:"=1=") { children cars weddings } }`, &resp)
+		require.NoError(t, err)
+		require.Equal(t, 3, resp.User.Children)
+		require.Equal(t, 5, resp.User.Cars)
+		require.Equal(t, 2, resp.User.Weddings)
 	})
 
 	t.Run("custom error messages", func(t *testing.T) {

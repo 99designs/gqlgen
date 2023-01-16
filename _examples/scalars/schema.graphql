@@ -19,6 +19,9 @@ type User {
     address: Address
     tier: Tier
     carManufacturer: String!
+    children: Int!
+    cars: Int!
+    weddings: Int!
 }
 
 type Address {

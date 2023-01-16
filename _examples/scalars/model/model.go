@@ -16,6 +16,7 @@ type (
 	Banned      bool
 	LoginBanned bool
 	QueryBanned = bool
+	Sum         uint16 // local named uint16
 )
 
 func (b Banned) MarshalGQL(w io.Writer) {
@@ -52,6 +53,9 @@ type User struct {
 	Address         Address
 	Tier            Tier
 	CarManufacturer external.Manufacturer
+	Children        uint
+	Cars            external.Count
+	Weddings        Sum
 }
 
 // Point is serialized as a simple array, eg [1, 2]

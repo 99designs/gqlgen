@@ -37,6 +37,9 @@ func (r *queryResolver) User(ctx context.Context, id external.ObjectID) (*model.
 		CarManufacturer: external.ManufacturerTesla,
 		IsLoginBanned:   true,
 		IsQueryBanned:   true,
+		Children:        3,
+		Cars:            5,
+		Weddings:        2,
 	}, nil
 }
 

@@ -164,7 +164,7 @@ returned from here will also go through the error presenter.
 
 You change this when creating the server:
 ```go
-server := handler.NewDefaultServer(MakeExecutableSchema(resolvers)
+server := handler.NewDefaultServer(MakeExecutableSchema(resolvers))
 server.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
     // notify bug tracker...
 

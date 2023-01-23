@@ -536,6 +536,13 @@ func (f *Field) ShortResolverDeclaration() string {
 	return res
 }
 
+func (f *Field) GoResultName() (string, bool) {
+	name := fmt.Sprintf("%v", f.TypeReference.GO)
+	splits := strings.Split(name, "/")
+
+	return splits[len(splits)-1], strings.HasPrefix(name, "[]")
+}
+
 func (f *Field) ComplexitySignature() string {
 	res := "func(childComplexity int"
 	for _, arg := range f.Args {

@@ -5,10 +5,146 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.22...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.24...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.24"></a>
+## [v0.17.24](https://github.com/99designs/gqlgen/compare/v0.17.23...v0.17.24) - 2023-01-23
+- <a href="https://github.com/99designs/gqlgen/commit/77c63865f2df7ee6d4475861b3f57d37a7ef1787"><tt>77c63865</tt></a> release v0.17.24
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.23"></a>
+## [v0.17.23](https://github.com/99designs/gqlgen/compare/v0.17.22...v0.17.23) - 2023-01-23
+- <a href="https://github.com/99designs/gqlgen/commit/9573b5955a5aa18c180ec6f4a213a1472e36b112"><tt>9573b595</tt></a> release v0.17.23
+
+- <a href="https://github.com/99designs/gqlgen/commit/866187fd2510121d1b5f0d0636c8d37d80191c91"><tt>866187fd</tt></a> missed a closing parenthesis (<a href="https://github.com/99designs/gqlgen/pull/2513">#2513</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/ec3b4711662704e7231ed8dc9ba008b5ceaaa75c"><tt>ec3b4711</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/2485">#2485</a> for some types requiring a scalar (<a href="https://github.com/99designs/gqlgen/pull/2508">#2508</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/11c3a4da9d995c39bee01a4009530564148b42a5"><tt>11c3a4da</tt></a> Enable Subscription Resolver to return websocket error message (<a href="https://github.com/99designs/gqlgen/pull/2506">#2506</a>)</summary>
+
+* Enanble Subscription Resolver to return websocket error message
+
+* add PR link
+
+* lint
+
+* fmt and regenerate
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/2bd7cfefc603159b9188a0a76a0336123edc7783"><tt>2bd7cfef</tt></a> Add omit_complexity config option for issue <a href="https://github.com/99designs/gqlgen/pull/2502">#2502</a> (<a href="https://github.com/99designs/gqlgen/pull/2504">#2504</a>)</summary>
+
+* Add omit_complexity config option to skip generation of ComplexityRoot struct content and Complexity function
+
+* fix lint error
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/867b61a5c6b5efa083b0aa384732be343be5bef8"><tt>867b61a5</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/2485">#2485</a> Defined type from a basic type should not need scalar (<a href="https://github.com/99designs/gqlgen/pull/2486">#2486</a>)</summary>
+
+* following review
+
+* better way to compare basic type
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/43c9a1d217309b1bfe2ad408ada4e131e267432c"><tt>43c9a1d2</tt></a> fix: gin sample code error in v0.17.22 (<a href="https://github.com/99designs/gqlgen/pull/2503">#2503</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f5764a83d54d1f645c942f7a3cf74f1eade34d82"><tt>f5764a83</tt></a> Bump json5 from 2.2.1 to 2.2.3 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2500">#2500</a>)</summary>
+
+Bumps [json5](https://github.com/json5/json5) from 2.2.1 to 2.2.3.
+- [Release notes](https://github.com/json5/json5/releases)
+- [Changelog](https://github.com/json5/json5/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/json5/json5/compare/v2.2.1...v2.2.3)
+
+---
+updated-dependencies:
+- dependency-name: json5
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/32bfdfb7d32839ac0298c2e34cf8da290083f0c7"><tt>32bfdfb7</tt></a> Bump jsonwebtoken and [@graphql](https://github.com/graphql)-tools/prisma-loader in /integration (<a href="https://github.com/99designs/gqlgen/pull/2501">#2501</a>)</summary>
+
+Updates `jsonwebtoken` from 8.5.1 to 9.0.0
+- [Release notes](https://github.com/auth0/node-jsonwebtoken/releases)
+- [Changelog](https://github.com/auth0/node-jsonwebtoken/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/auth0/node-jsonwebtoken/compare/v8.5.1...v9.0.0)
+
+- [Release notes](https://github.com/ardatan/graphql-tools/releases)
+- [Changelog](https://github.com/ardatan/graphql-tools/blob/master/packages/loaders/prisma/CHANGELOG.md)
+
+---
+updated-dependencies:
+- dependency-name: jsonwebtoken
+  dependency-type: indirect
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f0a090d0c282105e67e41c9ca45f8904f65920da"><tt>f0a090d0</tt></a> Add Server-Sent Events transport (<a href="https://github.com/99designs/gqlgen/pull/2498">#2498</a>)</summary>
+
+* Add new transport via server-sent events
+
+* Add graphql-sse option to chat example
+
+* Add SSE transport to documentation
+
+* Reorder imports and handle test err to fix golangci-lint remarks
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/b09608d2f4c74f068e8925ce2d5a1643c9cc106e"><tt>b09608d2</tt></a> fix misspelling and format code (<a href="https://github.com/99designs/gqlgen/pull/2497">#2497</a>)</summary>
+
+* fix: misspelling dont
+
+* fix: sort import order
+
+* fix example indent
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/e8d61150d7b222f7e1212c727ed7159ccd857919"><tt>e8d61150</tt></a> plugin/resolvergen: respect named return values (<a href="https://github.com/99designs/gqlgen/pull/2488">#2488</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c2b8eabb4e863ffc1c81a49e711c7eb4689b6bea"><tt>c2b8eabb</tt></a> feat: support Altair playground (<a href="https://github.com/99designs/gqlgen/pull/2437">#2437</a>)</summary>
+
+* feat: support Altair playground
+
+* fix method params
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5cb6e3ecb07a292daa37f5ce8e5bcf364e1190af"><tt>5cb6e3ec</tt></a> Fix issue <a href="https://github.com/99designs/gqlgen/pull/2470">#2470</a>: Incorrect response when errors occurred (<a href="https://github.com/99designs/gqlgen/pull/2471">#2471</a>)</summary>
+
+* go generate ./...
+
+* regenerate examples
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/3008f4e292741cb9d083c182caaa21b030af6c81"><tt>3008f4e2</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/2465">#2465</a> remote model with omitempty (<a href="https://github.com/99designs/gqlgen/pull/2468">#2468</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/da43147fcafd0bab9759fbdd5810ed9483df2d9d"><tt>da43147f</tt></a> Export default modelgen hooks (<a href="https://github.com/99designs/gqlgen/pull/2467">#2467</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/6b8c6ee7b136a54738a40f19bc25b56ecec8d91d"><tt>6b8c6ee7</tt></a> Fix <a href="https://github.com/99designs/gqlgen/pull/2457">#2457</a> update websocket example (<a href="https://github.com/99designs/gqlgen/pull/2461">#2461</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/aaf1638b861b1fcf44f5d4da8bc764105a00d334"><tt>aaf1638b</tt></a> Update Release script to generate after version bumps
+
+- <a href="https://github.com/99designs/gqlgen/commit/95437035bb160aca25e89e7fb000a3579cd58215"><tt>95437035</tt></a> Increment version, regenerate, and make changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/99e036bedfba79c52b6cd788953d8824c0d4f871"><tt>99e036be</tt></a> v0.17.22 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.22"></a>
 ## [v0.17.22](https://github.com/99designs/gqlgen/compare/v0.17.21...v0.17.22) - 2022-12-08
 - <a href="https://github.com/99designs/gqlgen/commit/d6579466a12896270f8b96543f8b9490ce3626e1"><tt>d6579466</tt></a> release v0.17.22
@@ -725,7 +861,7 @@ This reverts commits 64b882c3c9901f25edc0684ce2a1f9b63443416b and 670cf22272b490
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5f5bfcb97fdb01026cf35a5dc46f1246a30f9b26"><tt>5f5bfcb9</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/2204">#2204</a> - don't try to embed builtin sources (<a href="https://github.com/99designs/gqlgen/pull/2214">#2214</a>)</summary>
 
-* don't try to embed builtins
+* dont't try to embed builtins
 
 * add test
 
@@ -3068,7 +3204,7 @@ Remove stale bot
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/34a442c7980f5ba363f58aaee67b9ddaa77d7520"><tt>34a442c7</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/1399">#1399</a> from 99designs/prevent-possible-error-deadlock</summary>
 
-Don't hold error lock when calling into error presenters
+Dont hold error lock when calling into error presenters
 
 </details></dd></dl>
 
@@ -6353,7 +6489,7 @@ duration of inactivity.
 
 - <a href="https://github.com/99designs/gqlgen/commit/693753fcc69329fba282ad5f1d69c02979cbce08"><tt>693753fc</tt></a> Add websocket keepalive support
 
-- <a href="https://github.com/99designs/gqlgen/commit/162afad73b653d9456d21ec38d00c3476ab2dde4"><tt>162afad7</tt></a> enums don't exist in runtime
+- <a href="https://github.com/99designs/gqlgen/commit/162afad73b653d9456d21ec38d00c3476ab2dde4"><tt>162afad7</tt></a> enums dont exist in runtime
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d0b6485b23f259588e9ecd34e23924c741d9c6f2"><tt>d0b6485b</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/525">#525</a> from 99designs/stop-grc-panic</summary>
 
@@ -8322,7 +8458,7 @@ Validate at end
 
 <dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/b16e84295a1e72d27c6b96784c0266058d8716bb"><tt>b16e8429</tt></a> Merge pull request <a href="https://github.com/99designs/gqlgen/pull/159">#159</a> from vektah/enum-only-generation</summary>
 
-Don't skip model generation if there are enums defined
+Dont skip model generation if there are enums defined
 
 </details></dd></dl>
 

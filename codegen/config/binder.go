@@ -252,6 +252,39 @@ func (t *TypeReference) IsStruct() bool {
 	return isStruct
 }
 
+func (t *TypeReference) IsUnderlyingBasic() bool {
+	_, isUnderlyingBasic := t.GO.Underlying().(*types.Basic)
+	return isUnderlyingBasic
+}
+
+func (t *TypeReference) IsUnusualBasic() bool {
+	if basic, isBasic := t.GO.(*types.Basic); isBasic {
+		switch basic.Kind() {
+		case types.Int8, types.Int16, types.Uint, types.Uint8, types.Uint16, types.Uint32:
+			return true
+		default:
+			return false
+		}
+	}
+	return false
+}
+
+func (t *TypeReference) IsUnderlyingUnusualBasic() bool {
+	if basic, isUnderlyingBasic := t.GO.Underlying().(*types.Basic); isUnderlyingBasic {
+		switch basic.Kind() {
+		case types.Int8, types.Int16, types.Uint, types.Uint8, types.Uint16, types.Uint32:
+			return true
+		default:
+			return false
+		}
+	}
+	return false
+}
+
+func (t *TypeReference) IsScalarID() bool {
+	return t.Definition.Kind == ast.Scalar && t.Marshaler.Name() == "MarshalID"
+}
+
 func (t *TypeReference) IsScalar() bool {
 	return t.Definition.Kind == ast.Scalar
 }

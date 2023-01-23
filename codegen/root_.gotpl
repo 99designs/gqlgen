@@ -49,6 +49,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+{{- if not .Config.OmitComplexity }}
 {{ range $object := .Objects }}
 	{{ if not $object.IsReserved -}}
 		{{ ucFirst $object.Name }} struct {
@@ -61,6 +62,7 @@ type ComplexityRoot struct {
 		}
 	{{- end }}
 {{ end }}
+{{- end }}
 }
 
 type executableSchema struct {
@@ -76,6 +78,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	ec := executionContext{nil, e}
 	_ = ec
+	{{- if not .Config.OmitComplexity }}
 	switch typeName + "." + field {
 	{{ range $object := .Objects }}
 		{{ if not $object.IsReserved }}
@@ -102,6 +105,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		{{ end }}
 	{{ end }}
 	}
+	{{- end }}
 	return 0, false
 }
 

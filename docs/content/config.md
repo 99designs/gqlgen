@@ -44,6 +44,9 @@ resolver:
 # Optional: turn on to use []Thing instead of []*Thing
 # omit_slice_element_pointers: false
 
+# Optional: turn on to skip generation of ComplexityRoot struct content and Complexity function
+# omit_complexity: false
+
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
 # struct_fields_always_pointers: true

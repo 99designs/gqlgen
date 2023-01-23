@@ -32,3 +32,9 @@ or to run the app with the `graphql-ws` implementation (and the newer `graphql-t
 ```bash
 npm run start:graphql-transport-ws
 ```
+
+or to run the app with the `graphql-sse` implementation do
+
+```bash
+npm run start:graphql-sse
+```

@@ -2,13 +2,14 @@ package chat
 
 import (
 	"fmt"
+	"runtime"
+	"sync"
+	"testing"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"runtime"
-	"sync"
-	"testing"
 )
 
 func TestChatSubscriptions(t *testing.T) {

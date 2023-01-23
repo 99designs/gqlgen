@@ -171,6 +171,41 @@ subscription {
 Run your query and you should see a response updating with the current timestamp every
 second. To gracefully stop the connection click the `Execute query` button again.
 
+
+## Adding Server-Sent Events transport
+You can use instead of WebSocket (or in addition) [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events)
+as transport for subscriptions. This can have advantages and disadvantages over transport via WebSocket and requires a
+compatible client library, for instance [graphql-sse](https://github.com/enisdenjo/graphql-sse). The connection between
+server and client should be HTTP/2+. The client must send the subscription request via POST with
+the header `accept: text/event-stream` and `content-type: application/json` in order to be accepted by the SSE transport.
+The underling protocol is documented at [distinct connections mode](https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md).
+
+Add the SSE transport as first of all other transports, as the order is important. For that reason, `New` instead of
+`NewDefaultServer` will be used.
+```go
+srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+srv.AddTransport(transport.SSE{}) // <---- This is the important
+
+// default server
+srv.AddTransport(transport.Options{})
+srv.AddTransport(transport.GET{})
+srv.AddTransport(transport.POST{})
+srv.AddTransport(transport.MultipartForm{})
+srv.SetQueryCache(lru.New(1000))
+srv.Use(extension.Introspection{})
+srv.Use(extension.AutomaticPersistedQuery{
+	Cache: lru.New(100),
+})
+```
+
+The GraphQL playground does not support SSE yet. You can try out the subscription via curl:
+```bash
+curl -N --request POST --url http://localhost:8080/query \
+--data '{"query":"subscription { currentTime { unixTime timeStamp } }"}' \
+-H "accept: text/event-stream" -H 'content-type: application/json' \
+--verbose
+```
+
 ## Full Files
 
 Here are all files at the end of this tutorial. Only files changed from the end

@@ -12,7 +12,12 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-type Banned bool
+type (
+	Banned      bool
+	LoginBanned bool
+	QueryBanned = bool
+	Sum         uint16 // local named uint16
+)
 
 func (b Banned) MarshalGQL(w io.Writer) {
 	if b {
@@ -36,15 +41,21 @@ func (b *Banned) UnmarshalGQL(v interface{}) error {
 }
 
 type User struct {
-	ID       external.ObjectID
-	Name     string
-	Created  time.Time  // direct binding to builtin types with external Marshal/Unmarshal methods
-	Modified *time.Time // direct binding to builtin types with external Marshal/Unmarshal methods
-	ValPrefs Prefs      // external un/marshal that act on pointers
-	PtrPrefs *Prefs
-	IsBanned Banned
-	Address  Address
-	Tier     Tier
+	ID              external.ObjectID
+	Name            string
+	Created         time.Time  // direct binding to builtin types with external Marshal/Unmarshal methods
+	Modified        *time.Time // direct binding to builtin types with external Marshal/Unmarshal methods
+	ValPrefs        Prefs      // external un/marshal that act on pointers
+	PtrPrefs        *Prefs
+	IsBanned        Banned
+	IsLoginBanned   LoginBanned
+	IsQueryBanned   QueryBanned
+	Address         Address
+	Tier            Tier
+	CarManufacturer external.Manufacturer
+	Children        uint
+	Cars            external.Count
+	Weddings        Sum
 }
 
 // Point is serialized as a simple array, eg [1, 2]

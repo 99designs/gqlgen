@@ -85,7 +85,7 @@ func TestTodo(t *testing.T) {
 			}
 		}
 		err := c.Post(`mutation { updateTodo(id: 3, changes:{done:true}) { text, done } }`, &resp)
-		require.EqualError(t, err, "[{\"message\":\"you dont own that\",\"path\":[\"updateTodo\",\"done\"]}]")
+		require.EqualError(t, err, "[{\"message\":\"you don't own that\",\"path\":[\"updateTodo\",\"done\"]}]")
 
 		require.Nil(t, resp.UpdateTodo)
 	})
@@ -120,7 +120,7 @@ func TestTodo(t *testing.T) {
 		}
 		err := c.Post(`{ todo(id:3) { text, done } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"you dont own that","path":["todo","done"]}]`)
+		require.EqualError(t, err, `[{"message":"you don't own that","path":["todo","done"]}]`)
 		require.Nil(t, resp.Todo)
 	})
 

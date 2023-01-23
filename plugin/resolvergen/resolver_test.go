@@ -37,7 +37,8 @@ func TestLayoutFollowSchema(t *testing.T) {
 	require.NoError(t, err)
 	source := string(b)
 
-	require.Contains(t, source, "// CustomerResolverType.Resolver implementation")
+	require.Contains(t, source, "(_ *customresolver.Resolver, err error)")
+	require.Contains(t, source, "// Named return values are supported.")
 	require.Contains(t, source, "// CustomerResolverType.Name implementation")
 	require.Contains(t, source, "// AUserHelperFunction implementation")
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	models "github.com/99designs/gqlgen/integration/models-go"
 	"github.com/99designs/gqlgen/integration/remote_api"
+	"github.com/99designs/gqlgen/integration/testomitempty"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -48,6 +49,24 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	DefinedTypeFromBasics struct {
+		NewBool    func(childComplexity int) int
+		NewFloat32 func(childComplexity int) int
+		NewFloat64 func(childComplexity int) int
+		NewID      func(childComplexity int) int
+		NewInt     func(childComplexity int) int
+		NewInt16   func(childComplexity int) int
+		NewInt32   func(childComplexity int) int
+		NewInt64   func(childComplexity int) int
+		NewInt8    func(childComplexity int) int
+		NewString  func(childComplexity int) int
+		NewUint    func(childComplexity int) int
+		NewUint16  func(childComplexity int) int
+		NewUint32  func(childComplexity int) int
+		NewUint64  func(childComplexity int) int
+		NewUint8   func(childComplexity int) int
+	}
+
 	Element struct {
 		Child      func(childComplexity int) int
 		Error      func(childComplexity int) int
@@ -62,6 +81,10 @@ type ComplexityRoot struct {
 		JSONEncoding func(childComplexity int) int
 		Path         func(childComplexity int) int
 		Viewer       func(childComplexity int) int
+	}
+
+	RemoteModelWithOmitempty struct {
+		Description func(childComplexity int) int
 	}
 
 	User struct {
@@ -106,6 +129,111 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "DefinedTypeFromBasics.newBool":
+		if e.complexity.DefinedTypeFromBasics.NewBool == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewBool(childComplexity), true
+
+	case "DefinedTypeFromBasics.newFloat32":
+		if e.complexity.DefinedTypeFromBasics.NewFloat32 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewFloat32(childComplexity), true
+
+	case "DefinedTypeFromBasics.newFloat64":
+		if e.complexity.DefinedTypeFromBasics.NewFloat64 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewFloat64(childComplexity), true
+
+	case "DefinedTypeFromBasics.newID":
+		if e.complexity.DefinedTypeFromBasics.NewID == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewID(childComplexity), true
+
+	case "DefinedTypeFromBasics.newInt":
+		if e.complexity.DefinedTypeFromBasics.NewInt == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewInt(childComplexity), true
+
+	case "DefinedTypeFromBasics.newInt16":
+		if e.complexity.DefinedTypeFromBasics.NewInt16 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewInt16(childComplexity), true
+
+	case "DefinedTypeFromBasics.newInt32":
+		if e.complexity.DefinedTypeFromBasics.NewInt32 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewInt32(childComplexity), true
+
+	case "DefinedTypeFromBasics.newInt64":
+		if e.complexity.DefinedTypeFromBasics.NewInt64 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewInt64(childComplexity), true
+
+	case "DefinedTypeFromBasics.newInt8":
+		if e.complexity.DefinedTypeFromBasics.NewInt8 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewInt8(childComplexity), true
+
+	case "DefinedTypeFromBasics.newString":
+		if e.complexity.DefinedTypeFromBasics.NewString == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewString(childComplexity), true
+
+	case "DefinedTypeFromBasics.newUint":
+		if e.complexity.DefinedTypeFromBasics.NewUint == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewUint(childComplexity), true
+
+	case "DefinedTypeFromBasics.newUint16":
+		if e.complexity.DefinedTypeFromBasics.NewUint16 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewUint16(childComplexity), true
+
+	case "DefinedTypeFromBasics.newUint32":
+		if e.complexity.DefinedTypeFromBasics.NewUint32 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewUint32(childComplexity), true
+
+	case "DefinedTypeFromBasics.newUint64":
+		if e.complexity.DefinedTypeFromBasics.NewUint64 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewUint64(childComplexity), true
+
+	case "DefinedTypeFromBasics.newUint8":
+		if e.complexity.DefinedTypeFromBasics.NewUint8 == nil {
+			break
+		}
+
+		return e.complexity.DefinedTypeFromBasics.NewUint8(childComplexity), true
 
 	case "Element.child":
 		if e.complexity.Element.Child == nil {
@@ -197,6 +325,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Viewer(childComplexity), true
 
+	case "RemoteModelWithOmitempty.newDesc":
+		if e.complexity.RemoteModelWithOmitempty.Description == nil {
+			break
+		}
+
+		return e.complexity.RemoteModelWithOmitempty.Description(childComplexity), true
+
 	case "User.likes":
 		if e.complexity.User.Likes == nil {
 			break
@@ -272,7 +407,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "schema.graphql" "user.graphql"
+//go:embed "schema.graphql" "user.graphql" "testomitempty.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -286,6 +421,7 @@ func sourceData(filename string) string {
 var sources = []*ast.Source{
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 	{Name: "user.graphql", Input: sourceData("user.graphql"), BuiltIn: false},
+	{Name: "testomitempty.graphql", Input: sourceData("testomitempty.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -420,6 +556,666 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _DefinedTypeFromBasics_newString(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newString(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewString, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedString)
+	fc.Result = res
+	return ec.marshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedString(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newString(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newInt(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewInt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedInt)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newInt8(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt8(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewInt8, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedInt8)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt8(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt8(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newInt16(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt16(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewInt16, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedInt16)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt16(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt16(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newInt32(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt32(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewInt32, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedInt32)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt32(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newInt64(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newInt64(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewInt64, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedInt64)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newInt64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newBool(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newBool(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewBool, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedBool)
+	fc.Result = res
+	return ec.marshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedBool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newBool(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newFloat64(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newFloat64(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewFloat64, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedFloat64)
+	fc.Result = res
+	return ec.marshalNFloat2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedFloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newFloat64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newUint(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newUint(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewUint, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedUint)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newUint(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newUint8(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newUint8(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewUint8, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedUint8)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint8(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newUint8(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newUint16(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newUint16(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewUint16, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedUint16)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint16(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newUint16(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newUint32(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newUint32(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewUint32, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedUint32)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newUint32(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newID(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedID)
+	fc.Result = res
+	return ec.marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newFloat32(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newFloat32(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewFloat32, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedFloat32)
+	fc.Result = res
+	return ec.marshalNFloat322githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedFloat32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newFloat32(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float32 does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DefinedTypeFromBasics_newUint64(ctx context.Context, field graphql.CollectedField, obj *remote_api.DefinedTypeFromBasics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DefinedTypeFromBasics_newUint64(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewUint64, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(testomitempty.NamedUint64)
+	fc.Result = res
+	return ec.marshalNUint642githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DefinedTypeFromBasics_newUint64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DefinedTypeFromBasics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Uint64 does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Element_child(ctx context.Context, field graphql.CollectedField, obj *models.Element) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Element_child(ctx, field)
@@ -576,7 +1372,6 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -625,7 +1420,6 @@ func (ec *executionContext) _Query_date(ctx context.Context, field graphql.Colle
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
@@ -680,7 +1474,6 @@ func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.Col
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -725,7 +1518,6 @@ func (ec *executionContext) _Query_jsonEncoding(ctx context.Context, field graph
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
@@ -769,7 +1561,6 @@ func (ec *executionContext) _Query_error(ctx context.Context, field graphql.Coll
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
@@ -824,7 +1615,6 @@ func (ec *executionContext) _Query_complexity(ctx context.Context, field graphql
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
@@ -879,7 +1669,6 @@ func (ec *executionContext) _Query_coercion(ctx context.Context, field graphql.C
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
@@ -934,7 +1723,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -1008,7 +1796,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -1040,6 +1827,47 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoteModelWithOmitempty_newDesc(ctx context.Context, field graphql.CollectedField, obj *testomitempty.RemoteModelWithOmitempty) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RemoteModelWithOmitempty_newDesc(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RemoteModelWithOmitempty_newDesc(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoteModelWithOmitempty",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3064,6 +3892,132 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 
 // region    **************************** object.gotpl ****************************
 
+var definedTypeFromBasicsImplementors = []string{"DefinedTypeFromBasics"}
+
+func (ec *executionContext) _DefinedTypeFromBasics(ctx context.Context, sel ast.SelectionSet, obj *remote_api.DefinedTypeFromBasics) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, definedTypeFromBasicsImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DefinedTypeFromBasics")
+		case "newString":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newString(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newInt":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newInt8":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt8(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newInt16":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt16(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newInt32":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt32(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newInt64":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newInt64(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newBool":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newBool(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newFloat64":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newFloat64(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newUint":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newUint(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newUint8":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newUint8(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newUint16":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newUint16(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newUint32":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newUint32(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newID":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newID(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newFloat32":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newFloat32(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "newUint64":
+
+			out.Values[i] = ec._DefinedTypeFromBasics_newUint64(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var elementImplementors = []string{"Element"}
 
 func (ec *executionContext) _Element(ctx context.Context, sel ast.SelectionSet, obj *models.Element) graphql.Marshaler {
@@ -3151,7 +4105,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	})
 
 	out := graphql.NewFieldSet(fields)
-	var invalids uint32
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -3191,9 +4144,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_date(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -3234,9 +4184,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_jsonEncoding(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -3257,9 +4204,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_error(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -3280,9 +4224,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_complexity(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -3303,9 +4244,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_coercion(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -3327,6 +4265,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	return out
+}
+
+var remoteModelWithOmitemptyImplementors = []string{"RemoteModelWithOmitempty"}
+
+func (ec *executionContext) _RemoteModelWithOmitempty(ctx context.Context, sel ast.SelectionSet, obj *testomitempty.RemoteModelWithOmitempty) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, remoteModelWithOmitemptyImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RemoteModelWithOmitempty")
+		case "newDesc":
+
+			out.Values[i] = ec._RemoteModelWithOmitempty_newDesc(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -3745,6 +4705,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedBool(ctx context.Context, v interface{}) (testomitempty.NamedBool, error) {
+	res, err := graphql.UnmarshalBoolean(v)
+	return testomitempty.NamedBool(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedBool(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedBool) graphql.Marshaler {
+	res := graphql.MarshalBoolean(bool(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐDateFilter(ctx context.Context, v interface{}) (models.DateFilter, error) {
 	res, err := ec.unmarshalInputDateFilter(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3762,6 +4737,186 @@ func (ec *executionContext) marshalNElement2ᚖgithubᚗcomᚋ99designsᚋgqlgen
 		return graphql.Null
 	}
 	return ec._Element(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFloat2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedFloat64(ctx context.Context, v interface{}) (testomitempty.NamedFloat64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return testomitempty.NamedFloat64(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedFloat64(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedFloat64) graphql.Marshaler {
+	res := graphql.MarshalFloatContext(float64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
+func (ec *executionContext) unmarshalNFloat322githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedFloat32(ctx context.Context, v interface{}) (testomitempty.NamedFloat32, error) {
+	res, err := remote_api.UnmarshalFloat32(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat322githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedFloat32(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedFloat32) graphql.Marshaler {
+	res := remote_api.MarshalFloat32(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedID(ctx context.Context, v interface{}) (testomitempty.NamedID, error) {
+	res, err := remote_api.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedID(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedID) graphql.Marshaler {
+	res := remote_api.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt(ctx context.Context, v interface{}) (testomitempty.NamedInt, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return testomitempty.NamedInt(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedInt) graphql.Marshaler {
+	res := graphql.MarshalInt(int(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt16(ctx context.Context, v interface{}) (testomitempty.NamedInt16, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return testomitempty.NamedInt16(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt16(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedInt16) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt32(ctx context.Context, v interface{}) (testomitempty.NamedInt32, error) {
+	res, err := graphql.UnmarshalInt32(v)
+	return testomitempty.NamedInt32(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt32(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedInt32) graphql.Marshaler {
+	res := graphql.MarshalInt32(int32(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt64(ctx context.Context, v interface{}) (testomitempty.NamedInt64, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return testomitempty.NamedInt64(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt64(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedInt64) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt8(ctx context.Context, v interface{}) (testomitempty.NamedInt8, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return testomitempty.NamedInt8(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedInt8(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedInt8) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint(ctx context.Context, v interface{}) (testomitempty.NamedUint, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return testomitempty.NamedUint(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedUint) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint16(ctx context.Context, v interface{}) (testomitempty.NamedUint16, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return testomitempty.NamedUint16(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint16(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedUint16) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint32(ctx context.Context, v interface{}) (testomitempty.NamedUint32, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return testomitempty.NamedUint32(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint32(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedUint32) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint8(ctx context.Context, v interface{}) (testomitempty.NamedUint8, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return testomitempty.NamedUint8(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint8(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedUint8) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
@@ -3782,6 +4937,21 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 func (ec *executionContext) unmarshalNListCoercion2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋmodelsᚑgoᚐListCoercion(ctx context.Context, v interface{}) (*models.ListCoercion, error) {
 	res, err := ec.unmarshalInputListCoercion(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedString(ctx context.Context, v interface{}) (testomitempty.NamedString, error) {
+	res, err := graphql.UnmarshalString(v)
+	return testomitempty.NamedString(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedString(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedString) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -3829,6 +4999,21 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalNUint642githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint64(ctx context.Context, v interface{}) (testomitempty.NamedUint64, error) {
+	res, err := remote_api.UnmarshalUint64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUint642githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋtestomitemptyᚐNamedUint64(ctx context.Context, sel ast.SelectionSet, v testomitempty.NamedUint64) graphql.Marshaler {
+	res := remote_api.MarshalUint64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4403,6 +5588,16 @@ func (ec *executionContext) marshalOMap2ᚕmap(ctx context.Context, sel ast.Sele
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {

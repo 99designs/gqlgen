@@ -50,7 +50,7 @@ func New() Config {
 			}
 
 			if ownable.Owner().ID != getUserId(ctx) {
-				return nil, fmt.Errorf("you dont own that")
+				return nil, fmt.Errorf("you don't own that")
 			}
 		}
 

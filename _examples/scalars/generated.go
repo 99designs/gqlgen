@@ -60,16 +60,22 @@ type ComplexityRoot struct {
 
 	User struct {
 		Address           func(childComplexity int) int
+		CarManufacturer   func(childComplexity int) int
+		Cars              func(childComplexity int) int
+		Children          func(childComplexity int) int
 		Created           func(childComplexity int) int
 		CustomResolver    func(childComplexity int) int
 		ID                func(childComplexity int) int
 		IsBanned          func(childComplexity int) int
+		IsLoginBanned     func(childComplexity int) int
+		IsQueryBanned     func(childComplexity int) int
 		Modified          func(childComplexity int) int
 		Name              func(childComplexity int) int
 		PrimitiveResolver func(childComplexity int) int
 		PtrPrefs          func(childComplexity int) int
 		Tier              func(childComplexity int) int
 		ValPrefs          func(childComplexity int) int
+		Weddings          func(childComplexity int) int
 	}
 }
 
@@ -155,6 +161,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Address(childComplexity), true
 
+	case "User.carManufacturer":
+		if e.complexity.User.CarManufacturer == nil {
+			break
+		}
+
+		return e.complexity.User.CarManufacturer(childComplexity), true
+
+	case "User.cars":
+		if e.complexity.User.Cars == nil {
+			break
+		}
+
+		return e.complexity.User.Cars(childComplexity), true
+
+	case "User.children":
+		if e.complexity.User.Children == nil {
+			break
+		}
+
+		return e.complexity.User.Children(childComplexity), true
+
 	case "User.created":
 		if e.complexity.User.Created == nil {
 			break
@@ -182,6 +209,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.IsBanned(childComplexity), true
+
+	case "User.isLoginBanned":
+		if e.complexity.User.IsLoginBanned == nil {
+			break
+		}
+
+		return e.complexity.User.IsLoginBanned(childComplexity), true
+
+	case "User.isQueryBanned":
+		if e.complexity.User.IsQueryBanned == nil {
+			break
+		}
+
+		return e.complexity.User.IsQueryBanned(childComplexity), true
 
 	case "User.modified":
 		if e.complexity.User.Modified == nil {
@@ -224,6 +265,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ValPrefs(childComplexity), true
+
+	case "User.weddings":
+		if e.complexity.User.Weddings == nil {
+			break
+		}
+
+		return e.complexity.User.Weddings(childComplexity), true
 
 	}
 	return 0, false
@@ -508,7 +556,6 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -540,6 +587,10 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_ptrPrefs(ctx, field)
 			case "isBanned":
 				return ec.fieldContext_User_isBanned(ctx, field)
+			case "isLoginBanned":
+				return ec.fieldContext_User_isLoginBanned(ctx, field)
+			case "isQueryBanned":
+				return ec.fieldContext_User_isQueryBanned(ctx, field)
 			case "primitiveResolver":
 				return ec.fieldContext_User_primitiveResolver(ctx, field)
 			case "customResolver":
@@ -548,6 +599,14 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_address(ctx, field)
 			case "tier":
 				return ec.fieldContext_User_tier(ctx, field)
+			case "carManufacturer":
+				return ec.fieldContext_User_carManufacturer(ctx, field)
+			case "children":
+				return ec.fieldContext_User_children(ctx, field)
+			case "cars":
+				return ec.fieldContext_User_cars(ctx, field)
+			case "weddings":
+				return ec.fieldContext_User_weddings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -584,7 +643,6 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
@@ -619,6 +677,10 @@ func (ec *executionContext) fieldContext_Query_search(ctx context.Context, field
 				return ec.fieldContext_User_ptrPrefs(ctx, field)
 			case "isBanned":
 				return ec.fieldContext_User_isBanned(ctx, field)
+			case "isLoginBanned":
+				return ec.fieldContext_User_isLoginBanned(ctx, field)
+			case "isQueryBanned":
+				return ec.fieldContext_User_isQueryBanned(ctx, field)
 			case "primitiveResolver":
 				return ec.fieldContext_User_primitiveResolver(ctx, field)
 			case "customResolver":
@@ -627,6 +689,14 @@ func (ec *executionContext) fieldContext_Query_search(ctx context.Context, field
 				return ec.fieldContext_User_address(ctx, field)
 			case "tier":
 				return ec.fieldContext_User_tier(ctx, field)
+			case "carManufacturer":
+				return ec.fieldContext_User_carManufacturer(ctx, field)
+			case "children":
+				return ec.fieldContext_User_children(ctx, field)
+			case "cars":
+				return ec.fieldContext_User_cars(ctx, field)
+			case "weddings":
+				return ec.fieldContext_User_weddings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -663,7 +733,6 @@ func (ec *executionContext) _Query_userByTier(ctx context.Context, field graphql
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
@@ -698,6 +767,10 @@ func (ec *executionContext) fieldContext_Query_userByTier(ctx context.Context, f
 				return ec.fieldContext_User_ptrPrefs(ctx, field)
 			case "isBanned":
 				return ec.fieldContext_User_isBanned(ctx, field)
+			case "isLoginBanned":
+				return ec.fieldContext_User_isLoginBanned(ctx, field)
+			case "isQueryBanned":
+				return ec.fieldContext_User_isQueryBanned(ctx, field)
 			case "primitiveResolver":
 				return ec.fieldContext_User_primitiveResolver(ctx, field)
 			case "customResolver":
@@ -706,6 +779,14 @@ func (ec *executionContext) fieldContext_Query_userByTier(ctx context.Context, f
 				return ec.fieldContext_User_address(ctx, field)
 			case "tier":
 				return ec.fieldContext_User_tier(ctx, field)
+			case "carManufacturer":
+				return ec.fieldContext_User_carManufacturer(ctx, field)
+			case "children":
+				return ec.fieldContext_User_children(ctx, field)
+			case "cars":
+				return ec.fieldContext_User_cars(ctx, field)
+			case "weddings":
+				return ec.fieldContext_User_weddings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -742,7 +823,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -816,7 +896,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	})
 	if err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
 	}
 	if resTmp == nil {
 		return graphql.Null
@@ -1149,6 +1228,94 @@ func (ec *executionContext) fieldContext_User_isBanned(ctx context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _User_isLoginBanned(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_isLoginBanned(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsLoginBanned, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.LoginBanned)
+	fc.Result = res
+	return ec.marshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐLoginBanned(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_isLoginBanned(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_isQueryBanned(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_isQueryBanned(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsQueryBanned, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_isQueryBanned(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_primitiveResolver(ctx, field)
 	if err != nil {
@@ -1320,6 +1487,182 @@ func (ec *executionContext) fieldContext_User_tier(ctx context.Context, field gr
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Tier does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_carManufacturer(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_carManufacturer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CarManufacturer, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(external.Manufacturer)
+	fc.Result = res
+	return ec.marshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐManufacturer(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_carManufacturer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_children(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_children(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Children, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uint)
+	fc.Result = res
+	return ec.marshalNInt2uint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_children(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_cars(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_cars(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cars, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(external.Count)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐCount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_cars(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_weddings(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_weddings(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Weddings, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Sum)
+	fc.Result = res
+	return ec.marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐSum(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_weddings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3191,7 +3534,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	})
 
 	out := graphql.NewFieldSet(fields)
-	var invalids uint32
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -3231,9 +3573,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_search(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -3254,9 +3593,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_userByTier(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -3284,9 +3620,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		}
 	}
 	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
 	return out
 }
 
@@ -3333,6 +3666,20 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "isBanned":
 
 			out.Values[i] = ec._User_isBanned(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "isLoginBanned":
+
+			out.Values[i] = ec._User_isLoginBanned(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "isQueryBanned":
+
+			out.Values[i] = ec._User_isQueryBanned(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -3385,6 +3732,34 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Values[i] = ec._User_tier(ctx, field, obj)
 
+		case "carManufacturer":
+
+			out.Values[i] = ec._User_carManufacturer(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "children":
+
+			out.Values[i] = ec._User_children(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "cars":
+
+			out.Values[i] = ec._User_cars(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "weddings":
+
+			out.Values[i] = ec._User_weddings(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3739,6 +4114,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐLoginBanned(ctx context.Context, v interface{}) (model.LoginBanned, error) {
+	res, err := graphql.UnmarshalBoolean(v)
+	return model.LoginBanned(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐLoginBanned(ctx context.Context, sel ast.SelectionSet, v model.LoginBanned) graphql.Marshaler {
+	res := graphql.MarshalBoolean(bool(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNDarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPrefs(ctx context.Context, v interface{}) (*model.Prefs, error) {
 	res, err := model.UnmarshalPreferences(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3775,6 +4165,51 @@ func (ec *executionContext) marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋ_exam
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐCount(ctx context.Context, v interface{}) (external.Count, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return external.Count(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐCount(ctx context.Context, sel ast.SelectionSet, v external.Count) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐSum(ctx context.Context, v interface{}) (model.Sum, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return model.Sum(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐSum(ctx context.Context, sel ast.SelectionSet, v model.Sum) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2uint(ctx context.Context, v interface{}) (uint, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return uint(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2uint(ctx context.Context, sel ast.SelectionSet, v uint) graphql.Marshaler {
+	res := graphql.MarshalInt64(int64(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNPoint2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx context.Context, v interface{}) (model.Point, error) {
 	var res model.Point
 	err := res.UnmarshalGQL(v)
@@ -3799,6 +4234,21 @@ func (ec *executionContext) marshalNPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐManufacturer(ctx context.Context, v interface{}) (external.Manufacturer, error) {
+	res, err := graphql.UnmarshalString(v)
+	return external.Manufacturer(res), graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v external.Manufacturer) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

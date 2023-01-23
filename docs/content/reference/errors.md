@@ -19,11 +19,13 @@ package foo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/99designs/gqlgen/graphql"
 )
 
+// DoThings add errors to the stack.
 func (r Query) DoThings(ctx context.Context) (bool, error) {
 	// Print a formatted string
 	graphql.AddErrorf(ctx, "Error %d", 1)
@@ -56,6 +58,58 @@ They will be returned in the same order in the response, eg:
     { "message": "zzzzzt", "path": [ "todo" ] },
     { "message": "A descriptive error message", "path": [ "todo" ], "extensions": { "code": "10-4" } },
     { "message": "BOOM! Headshot", "path": [ "todo" ] }
+  ]
+}
+```
+
+or you can simply return multiple errors
+
+```go
+package foo
+
+import (
+	"context"
+	"errors"
+
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"github.com/99designs/gqlgen/graphql"
+)
+
+var errSomethingWrong = errors.New("some validation failed")
+
+// DoThingsReturnMultipleErrors collect errors and returns it if any.
+func (r Query) DoThingsReturnMultipleErrors(ctx context.Context) (bool, error) {
+	errList := gqlerror.List{}
+		
+	// Add existing error
+	errList = append(errList, gqlerror.Wrap(errSomethingWrong))
+
+	// Create new formatted and append
+	errList = append(errList, gqlerror.Errorf("invalid value: %s", "invalid"))
+
+	// Or fully customize the error and append
+	errList = append(errList, &gqlerror.Error{
+		Path:       graphql.GetPath(ctx),
+		Message:    "A descriptive error message",
+		Extensions: map[string]interface{}{
+			"code": "10-4",
+		},
+	})
+	
+	return false, errList
+}
+```
+
+They will be returned in the same order in the response, eg:
+```json
+{
+  "data": {
+    "todo": null
+  },
+  "errors": [
+    { "message": "some validation failed", "path": [ "todo" ] },
+    { "message": "invalid value: invalid", "path": [ "todo" ] },
+    { "message": "A descriptive error message", "path": [ "todo" ], "extensions": { "code": "10-4" } },
   ]
 }
 ```
@@ -110,7 +164,7 @@ returned from here will also go through the error presenter.
 
 You change this when creating the server:
 ```go
-server := handler.NewDefaultServer(MakeExecutableSchema(resolvers)
+server := handler.NewDefaultServer(MakeExecutableSchema(resolvers))
 server.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
     // notify bug tracker...
 

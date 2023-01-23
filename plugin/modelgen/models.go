@@ -17,12 +17,13 @@ import (
 //go:embed models.gotpl
 var modelTemplate string
 
-type BuildMutateHook = func(b *ModelBuild) *ModelBuild
+type (
+	BuildMutateHook = func(b *ModelBuild) *ModelBuild
+	FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error)
+)
 
-type FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error)
-
-// defaultFieldMutateHook is the default hook for the Plugin which applies the GoTagFieldHook.
-func defaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+// DefaultFieldMutateHook is the default hook for the Plugin which applies the GoFieldHook and GoTagFieldHook.
+func DefaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
 	var err error
 	f, err = GoFieldHook(td, fd, f)
 	if err != nil {
@@ -31,7 +32,8 @@ func defaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Fiel
 	return GoTagFieldHook(td, fd, f)
 }
 
-func defaultBuildMutateHook(b *ModelBuild) *ModelBuild {
+// DefaultBuildMutateHook is the default hook for the Plugin which mutate ModelBuild.
+func DefaultBuildMutateHook(b *ModelBuild) *ModelBuild {
 	return b
 }
 
@@ -80,8 +82,8 @@ type EnumValue struct {
 
 func New() plugin.Plugin {
 	return &Plugin{
-		MutateHook: defaultBuildMutateHook,
-		FieldHook:  defaultFieldMutateHook,
+		MutateHook: DefaultBuildMutateHook,
+		FieldHook:  DefaultFieldMutateHook,
 	}
 }
 
@@ -97,7 +99,6 @@ func (m *Plugin) Name() string {
 }
 
 func (m *Plugin) MutateConfig(cfg *config.Config) error {
-
 	b := &ModelBuild{
 		PackageName: cfg.Model.Package,
 	}

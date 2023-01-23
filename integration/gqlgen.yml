@@ -1,6 +1,7 @@
 schema:
   - "schema.graphql"
   - "user.graphql"
+  - "testomitempty.graphql"
 
 exec:
   filename: generated.go
@@ -9,6 +10,12 @@ model:
 resolver:
   filename: resolver.go
   type: Resolver
+
+struct_tag: json
+
+autobind:
+  - "github.com/99designs/gqlgen/integration/testomitempty"
+  - "github.com/99designs/gqlgen/integration/remote_api"
 
 models:
   Element:
@@ -20,3 +27,9 @@ models:
     fields:
       likes:
         resolver: true
+  Float32:
+    model: github.com/99designs/gqlgen/integration/remote_api.Float32
+  Uint64:
+    model: github.com/99designs/gqlgen/integration/remote_api.Uint64
+  ID:
+    model: github.com/99designs/gqlgen/integration/remote_api.ID

@@ -165,6 +165,9 @@ func CompatibleTypes(expected types.Type, actual types.Type) error {
 }
 
 func similarBasicKind(kind types.BasicKind) types.BasicKind {
+	if kind == types.Byte {
+		return kind
+	}
 	switch kind {
 	case types.Int8, types.Int16:
 		return types.Int64

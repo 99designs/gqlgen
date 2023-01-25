@@ -63,6 +63,25 @@ func TestCompatibleTypes(t *testing.T) {
 	}
 }
 
+func TestSimilarBasicKind(t *testing.T) {
+	valid := []struct {
+		name     string
+		expected types.BasicKind
+		actual   types.BasicKind
+	}{
+		{name: "string=string", expected: types.String, actual: types.String},
+		{name: "int8=int", expected: types.Int64, actual: types.Int8},
+		{name: "byte=byte", expected: types.Byte, actual: types.Byte},
+	}
+
+	for _, tc := range valid {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.expected, similarBasicKind(tc.actual))
+
+		})
+	}
+}
+
 func parseTypeStr(t *testing.T, s string) types.Type {
 	t.Helper()
 

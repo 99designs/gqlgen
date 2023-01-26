@@ -16,7 +16,7 @@ srv := handler.New(es)
 srv.AddTransport(transport.Options{})
 srv.AddTransport(transport.POST{})
 
-if os.GetEnv("ENVIRONMENT") == "development" {
+if os.Getenv("ENVIRONMENT") == "development" {
     srv.Use(extension.Introspection{})
 }
 ```

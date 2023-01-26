@@ -25,6 +25,8 @@ type User {
     someBytes: Bytes!
     someOtherBytes: Bytes!
     someRunes: Runes!
+    remoteBytes: DefinedTypeBytes!
+    remoteRunes: DefinedTypeRunes!
 }
 
 type Address {
@@ -50,3 +52,5 @@ scalar Banned
 scalar DarkMode
 scalar Bytes
 scalar Runes
+scalar DefinedTypeBytes
+scalar DefinedTypeRunes

@@ -59,6 +59,8 @@ type User struct {
 	SomeBytes       []byte
 	SomeOtherBytes  []byte
 	SomeRunes       []rune
+	RemoteBytes     external.ExternalBytes
+	RemoteRunes     external.ExternalRunes
 }
 
 // Point is serialized as a simple array, eg [1, 2]

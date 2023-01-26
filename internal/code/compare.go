@@ -40,7 +40,7 @@ func CompatibleTypes(expected types.Type, actual types.Type) error {
 
 	case *types.Basic:
 		if actualBasic, ok := actual.(*types.Basic); ok {
-			if similarBasicKind(actualBasic.Kind()) != expected.Kind() {
+			if actualBasic.Kind() != expected.Kind() && similarBasicKind(actualBasic.Kind()) != expected.Kind() {
 				return fmt.Errorf("basic kind differs, %s != %s", expected.Name(), actualBasic.Name())
 			}
 

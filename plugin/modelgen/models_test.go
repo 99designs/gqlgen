@@ -372,28 +372,28 @@ func TestRemoveDuplicate(t *testing.T) {
 			args: args{
 				t: "json:\"name\" json:\"name2\"",
 			},
-			want: "json:\"name2\"",
+			want: "json:\"name\"",
 		},
 		{
 			name: "Duplicate Test with 3",
 			args: args{
 				t: "json:\"name\" json:\"name2\" json:\"name3\"",
 			},
-			want: "json:\"name3\"",
+			want: "json:\"name\"",
 		},
 		{
 			name: "Duplicate Test with 3 and 1 unrelated",
 			args: args{
 				t: "json:\"name\" something:\"name2\" json:\"name3\"",
 			},
-			want: "json:\"name3\" something:\"name2\"",
+			want: "json:\"name\" something:\"name2\"",
 		},
 		{
 			name: "Duplicate Test with 3 and 2 unrelated",
 			args: args{
 				t: "something:\"name1\" json:\"name\" something:\"name2\" json:\"name3\"",
 			},
-			want: "something:\"name2\" json:\"name3\"",
+			want: "something:\"name1\" json:\"name\"",
 		},
 	}
 	for _, tt := range tests {

@@ -82,14 +82,14 @@ func TestModelGeneration(t *testing.T) {
 		fileText := string(file)
 
 		expectedTags := []string{
-			`json:"name" anotherTag:"tag"`,
-			`json:"enum" yetAnotherTag:"12"`,
-			`json:"noVal" yaml:"noVal"`,
-			`json:"repeated" someTag:"value" repeated:"true"`,
+			`anotherTag:"tag" json:"name"`,
+			`yetAnotherTag:"12" json:"enum"`,
+			`yaml:"noVal" repeated:"true" json:"noVal"`,
+			`someTag:"value" repeated:"true" json:"repeated"`,
 		}
 
 		for _, tag := range expectedTags {
-			require.True(t, strings.Contains(fileText, tag))
+			require.True(t, strings.Contains(fileText, tag), tag)
 		}
 	})
 

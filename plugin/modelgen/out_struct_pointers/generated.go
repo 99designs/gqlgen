@@ -88,10 +88,10 @@ type CyclicalB struct {
 }
 
 type FieldMutationHook struct {
-	Name     *string       `json:"name" anotherTag:"tag" database:"FieldMutationHookname"`
+	Name     *string       `anotherTag:"tag" json:"name" database:"FieldMutationHookname"`
 	Enum     *ExistingEnum `yetAnotherTag:"12" json:"enum" database:"FieldMutationHookenum"`
-	NoVal    *string       `repeated:"true" json:"noVal" yaml:"noVal" database:"FieldMutationHooknoVal"`
-	Repeated *string       `json:"repeated" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
+	NoVal    *string       `yaml:"noVal" repeated:"true" json:"noVal" database:"FieldMutationHooknoVal"`
+	Repeated *string       `someTag:"value" repeated:"true" json:"repeated" database:"FieldMutationHookrepeated"`
 }
 
 type ImplArrayOfA struct {

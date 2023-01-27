@@ -415,7 +415,38 @@ func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Fie
 		f.Tag = f.Tag + " " + strings.Join(args, " ")
 	}
 
+	f.Tag = removeDuplicateTags(f.Tag)
+
 	return f, nil
+}
+
+// removeDuplicateTags removes duplicate tags
+func removeDuplicateTags(t string) string {
+
+	tt := strings.Split(t, " ")
+
+	if len(tt) > 0 {
+		tagMap := map[string]string{}
+		returnTags := ""
+
+		for _, ti := range tt {
+			kv := strings.Split(ti, ":")
+			if len(kv) > 0 {
+				tagMap[kv[0]] = kv[1]
+			}
+		}
+
+		for k, v := range tagMap {
+			if len(returnTags) > 0 {
+				returnTags += " "
+			}
+			returnTags += k + ":" + v
+		}
+		return returnTags
+
+	}
+
+	return t
 }
 
 // GoFieldHook applies the goField directive to the generated Field f.

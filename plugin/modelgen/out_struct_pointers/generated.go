@@ -89,8 +89,8 @@ type CyclicalB struct {
 
 type FieldMutationHook struct {
 	Name     *string       `json:"name" anotherTag:"tag" database:"FieldMutationHookname"`
-	Enum     *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`
-	NoVal    *string       `json:"noVal" yaml:"noVal" repeated:"true" database:"FieldMutationHooknoVal"`
+	Enum     *ExistingEnum `yetAnotherTag:"12" json:"enum" database:"FieldMutationHookenum"`
+	NoVal    *string       `repeated:"true" json:"noVal" yaml:"noVal" database:"FieldMutationHooknoVal"`
 	Repeated *string       `json:"repeated" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
 }
 

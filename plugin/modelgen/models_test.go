@@ -350,3 +350,57 @@ func goBuild(t *testing.T, path string) error {
 
 	return nil
 }
+
+func TestRemoveDuplicate(t *testing.T) {
+	type args struct {
+		t string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Duplicate Test with 1",
+			args: args{
+				t: "json:\"name\"",
+			},
+			want: "json:\"name\"",
+		},
+		{
+			name: "Duplicate Test with 2",
+			args: args{
+				t: "json:\"name\" json:\"name2\"",
+			},
+			want: "json:\"name2\"",
+		},
+		{
+			name: "Duplicate Test with 3",
+			args: args{
+				t: "json:\"name\" json:\"name2\" json:\"name3\"",
+			},
+			want: "json:\"name3\"",
+		},
+		{
+			name: "Duplicate Test with 3 and 1 unrelated",
+			args: args{
+				t: "json:\"name\" something:\"name2\" json:\"name3\"",
+			},
+			want: "json:\"name3\" something:\"name2\"",
+		},
+		{
+			name: "Duplicate Test with 3 and 2 unrelated",
+			args: args{
+				t: "something:\"name1\" json:\"name\" something:\"name2\" json:\"name3\"",
+			},
+			want: "something:\"name2\" json:\"name3\"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := removeDuplicateTags(tt.args.t); got != tt.want {
+				t.Errorf("removeDuplicate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

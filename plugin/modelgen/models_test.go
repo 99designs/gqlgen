@@ -82,14 +82,14 @@ func TestModelGeneration(t *testing.T) {
 		fileText := string(file)
 
 		expectedTags := []string{
-			`json:"name" anotherTag:"tag"`,
-			`json:"enum" yetAnotherTag:"12"`,
-			`json:"noVal" yaml:"noVal"`,
-			`json:"repeated" someTag:"value" repeated:"true"`,
+			`anotherTag:"tag" json:"name"`,
+			`yetAnotherTag:"12" json:"enum"`,
+			`yaml:"noVal" repeated:"true" json:"noVal"`,
+			`someTag:"value" repeated:"true" json:"repeated"`,
 		}
 
 		for _, tag := range expectedTags {
-			require.True(t, strings.Contains(fileText, tag))
+			require.True(t, strings.Contains(fileText, tag), tag)
 		}
 	})
 
@@ -349,4 +349,58 @@ func goBuild(t *testing.T, path string) error {
 	}
 
 	return nil
+}
+
+func TestRemoveDuplicate(t *testing.T) {
+	type args struct {
+		t string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Duplicate Test with 1",
+			args: args{
+				t: "json:\"name\"",
+			},
+			want: "json:\"name\"",
+		},
+		{
+			name: "Duplicate Test with 2",
+			args: args{
+				t: "json:\"name\" json:\"name2\"",
+			},
+			want: "json:\"name\"",
+		},
+		{
+			name: "Duplicate Test with 3",
+			args: args{
+				t: "json:\"name\" json:\"name2\" json:\"name3\"",
+			},
+			want: "json:\"name\"",
+		},
+		{
+			name: "Duplicate Test with 3 and 1 unrelated",
+			args: args{
+				t: "json:\"name\" something:\"name2\" json:\"name3\"",
+			},
+			want: "json:\"name\" something:\"name2\"",
+		},
+		{
+			name: "Duplicate Test with 3 and 2 unrelated",
+			args: args{
+				t: "something:\"name1\" json:\"name\" something:\"name2\" json:\"name3\"",
+			},
+			want: "something:\"name1\" json:\"name\"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := removeDuplicateTags(tt.args.t); got != tt.want {
+				t.Errorf("removeDuplicate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

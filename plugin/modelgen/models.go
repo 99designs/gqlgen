@@ -388,8 +388,9 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 	return fields, nil
 }
 
-// GoTagFieldHook applies the goTag directive to the generated Field f. When applying the Tag to the field, the field
-// name is used when no value argument is present.
+// GoTagFieldHook prepends the goTag directive to the generated Field f.
+// When applying the Tag to the field, the field
+// name is used if no value argument is present.
 func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
 	args := make([]string, 0)
 	for _, goTag := range fd.Directives.ForNames("goTag") {
@@ -412,10 +413,31 @@ func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Fie
 	}
 
 	if len(args) > 0 {
-		f.Tag = f.Tag + " " + strings.Join(args, " ")
+		f.Tag = removeDuplicateTags(strings.Join(args, " ") + " " + f.Tag)
 	}
 
 	return f, nil
+}
+
+func removeDuplicateTags(t string) string {
+	processed := make(map[string]bool)
+	tt := strings.Split(t, " ")
+	returnTags := ""
+
+	for _, ti := range tt {
+		kv := strings.Split(ti, ":")
+		if len(kv) == 0 || processed[kv[0]] {
+			continue
+		}
+
+		processed[kv[0]] = true
+		if len(returnTags) > 0 {
+			returnTags += " "
+		}
+		returnTags += kv[0] + ":" + kv[1]
+	}
+
+	return returnTags
 }
 
 // GoFieldHook applies the goField directive to the generated Field f.

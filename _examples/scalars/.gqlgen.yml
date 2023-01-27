@@ -18,3 +18,11 @@ models:
     model: github.com/99designs/gqlgen/_examples/scalars/model.Banned
   DarkMode:
     model: github.com/99designs/gqlgen/_examples/scalars/model.Preferences
+  Bytes:
+    model: "github.com/99designs/gqlgen/codegen/testserver/singlefile.Bytes"
+  Runes:
+    model: "github.com/99designs/gqlgen/_examples/scalars/model.Runes"
+  DefinedTypeBytes:
+    model: "github.com/99designs/gqlgen/_examples/scalars/external.Bytes"
+  DefinedTypeRunes:
+    model: "github.com/99designs/gqlgen/_examples/scalars/external.Runes"

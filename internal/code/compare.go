@@ -40,7 +40,7 @@ func CompatibleTypes(expected types.Type, actual types.Type) error {
 
 	case *types.Basic:
 		if actualBasic, ok := actual.(*types.Basic); ok {
-			if similarBasicKind(actualBasic.Kind()) != expected.Kind() {
+			if actualBasic.Kind() != expected.Kind() && similarBasicKind(actualBasic.Kind()) != expected.Kind() {
 				return fmt.Errorf("basic kind differs, %s != %s", expected.Name(), actualBasic.Name())
 			}
 
@@ -168,7 +168,7 @@ func similarBasicKind(kind types.BasicKind) types.BasicKind {
 	switch kind {
 	case types.Int8, types.Int16:
 		return types.Int64
-	case types.Uint, types.Uint8, types.Uint16, types.Uint32: // exclude Uint64: it still needs scalar with custom marshalling/unmarshalling because it is bigger then int64
+	case types.Uint, types.Uint8, types.Uint16, types.Uint32: // exclude Uint64: it still needs scalar with custom marshalling/unmarshalling because it is bigger than int64
 		return types.Int64
 	default:
 		return kind

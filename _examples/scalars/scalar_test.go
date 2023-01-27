@@ -25,6 +25,11 @@ type RawUser struct {
 	Children          int
 	Cars              int
 	Weddings          int
+	SomeBytes         string
+	SomeOtherBytes    string
+	SomeRunes         string
+	RemoteBytes       string
+	RemoteRunes       string
 }
 
 func TestScalars(t *testing.T) {
@@ -88,6 +93,18 @@ func TestScalars(t *testing.T) {
 		require.Equal(t, 3, resp.User.Children)
 		require.Equal(t, 5, resp.User.Cars)
 		require.Equal(t, 2, resp.User.Weddings)
+	})
+
+	t.Run("basic aliases byte and rune", func(t *testing.T) {
+		var resp struct{ User RawUser }
+
+		err := c.Post(`{ user(id:"=1=") { someBytes someOtherBytes someRunes remoteBytes remoteRunes } }`, &resp)
+		require.NoError(t, err)
+		require.Equal(t, "abcdef", resp.User.SomeBytes)
+		require.Equal(t, "abcdef", resp.User.SomeOtherBytes)
+		require.Equal(t, "Hello 世界", resp.User.SomeRunes)
+		require.Equal(t, "fedcba", resp.User.RemoteBytes)
+		require.Equal(t, "界世 Hello", resp.User.RemoteRunes)
 	})
 
 	t.Run("custom error messages", func(t *testing.T) {

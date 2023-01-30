@@ -69,7 +69,15 @@ type FieldMutationHook {
     enum: ExistingEnum @goTag(key: "yetAnotherTag", value: "12")
     noVal: String @goTag(key: "yaml") @goTag(key : "repeated", value: "true")
     repeated: String @goTag(key: "someTag", value: "value") @goTag(key : "repeated", value: "true")
+}
 
+type GoTagHookDuplicationTest {
+    name0: String @goTag(key: "someOtherTag", value: "someOtherTagValue")
+    name1: String @goTag(key: "json", value: "Name1")
+    name2: String @goTag(key: "json", value: "name2") @goTag(key: "json", value: "Name2")
+    name3: String @goTag(key: "json", value: "name2") @goTag(key: "json", value: "name3") @goTag(key: "json", value: "Name3")
+    name4: String @goTag(key: "json", value: "name2") @goTag(key: "someOtherTag", value: "someOtherTagValue") @goTag(key: "json", value: "Name4")
+    name5: String @goTag(key: "json", value: "name2") @goTag(key: "someOtherTag", value: "someOtherTagValue") @goTag(key: "json", value: "Name4") @goTag(key: "someOtherTag", value: "someOtherTagValue2")
 }
 
 enum ExistingEnum {

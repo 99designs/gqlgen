@@ -89,9 +89,18 @@ type CyclicalB struct {
 
 type FieldMutationHook struct {
 	Name     *string       `anotherTag:"tag" json:"name" database:"FieldMutationHookname"`
-	Enum     *ExistingEnum `yetAnotherTag:"12" json:"enum" database:"FieldMutationHookenum"`
-	NoVal    *string       `yaml:"noVal" repeated:"true" json:"noVal" database:"FieldMutationHooknoVal"`
-	Repeated *string       `someTag:"value" repeated:"true" json:"repeated" database:"FieldMutationHookrepeated"`
+	Enum     *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`
+	NoVal    *string       `json:"noVal" repeated:"true" yaml:"noVal" database:"FieldMutationHooknoVal"`
+	Repeated *string       `json:"repeated" repeated:"true" someTag:"value" database:"FieldMutationHookrepeated"`
+}
+
+type GoTagHookDuplicationTest struct {
+	Name0 *string `json:"name0" someOtherTag:"someOtherTagValue" database:"GoTagHookDuplicationTestname0"`
+	Name1 *string `json:"name1" database:"GoTagHookDuplicationTestname1"`
+	Name2 *string `json:"name2" database:"GoTagHookDuplicationTestname2"`
+	Name3 *string `json:"name3" database:"GoTagHookDuplicationTestname3"`
+	Name4 *string `json:"name4" someOtherTag:"someOtherTagValue" database:"GoTagHookDuplicationTestname4"`
+	Name5 *string `json:"name5" someOtherTag:"someOtherTagValue2" database:"GoTagHookDuplicationTestname5"`
 }
 
 type ImplArrayOfA struct {

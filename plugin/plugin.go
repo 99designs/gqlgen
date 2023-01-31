@@ -29,3 +29,8 @@ type EarlySourceInjector interface {
 type LateSourceInjector interface {
 	InjectSourceLate(schema *ast.Schema) *ast.Source
 }
+
+// Implementer is used to generate code inside resolvers
+type ResolverImplementer interface {
+	Implement(field *codegen.Field) string
+}

@@ -121,12 +121,29 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
 			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
+
 			if comment == "" {
 				comment = fmt.Sprintf("%v is the resolver for the %v field.", f.GoFieldName, f.Name)
 			}
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
 			if implementation == "" {
-				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
+				// Check for Implementer Plugin
+				var resolver_implementer plugin.ResolverImplementer
+				var exists bool
+				for _, p := range data.Plugins {
+					if p_cast, ok := p.(plugin.ResolverImplementer); ok {
+						resolver_implementer = p_cast
+						exists = true
+						break
+					}
+				}
+
+				if exists {
+					implementation = resolver_implementer.Implement(f)
+				} else {
+					implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
+				}
+
 			}
 
 			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation}

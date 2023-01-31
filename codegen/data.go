@@ -34,6 +34,7 @@ type Data struct {
 	MutationRoot     *Object
 	SubscriptionRoot *Object
 	AugmentedSources []AugmentedSource
+	Plugins          []interface{}
 }
 
 func (d *Data) HasEmbeddableSources() bool {
@@ -76,7 +77,7 @@ func (d *Data) Directives() DirectiveList {
 	return res
 }
 
-func BuildData(cfg *config.Config) (*Data, error) {
+func BuildData(cfg *config.Config, plugins ...interface{}) (*Data, error) {
 	// We reload all packages to allow packages to be compared correctly.
 	cfg.ReloadAllPackages()
 
@@ -105,6 +106,7 @@ func BuildData(cfg *config.Config) (*Data, error) {
 		AllDirectives: dataDirectives,
 		Schema:        b.Schema,
 		Interfaces:    map[string]*Interface{},
+		Plugins:       plugins,
 	}
 
 	for _, schemaType := range b.Schema.Types {

@@ -503,6 +503,14 @@ func (f *Field) ResolverType() string {
 	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.Name, f.GoFieldName, f.CallArgs())
 }
 
+func (f *Field) IsInputObject() bool {
+	return f.Object.Kind == ast.InputObject
+}
+
+func (f *Field) IsRoot() bool {
+	return f.Object.Root
+}
+
 func (f *Field) ShortResolverDeclaration() string {
 	return f.ShortResolverSignature(nil)
 }
@@ -542,6 +550,13 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 	}
 	res += fmt.Sprintf(") (%s %s, %s error)", namedV, result, namedE)
 	return res
+}
+
+func (f *Field) GoResultName() (string, bool) {
+	name := fmt.Sprintf("%v", f.TypeReference.GO)
+	splits := strings.Split(name, "/")
+
+	return splits[len(splits)-1], strings.HasPrefix(name, "[]")
 }
 
 func (f *Field) ComplexitySignature() string {

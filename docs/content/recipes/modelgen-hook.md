@@ -16,7 +16,13 @@ the generated data structure.
 First of all, we need to create a function that will mutate the generated model.
 Then we can attach the function to the plugin and use it like any other plugin.
 
+Create `generate.go` file in the same folder as `resolver.go` (usually in `graph` folder) and add the following code:
+
 ```go
+//go:build ignore
+
+package main
+
 import (
 	"fmt"
 	"os"
@@ -57,6 +63,10 @@ func main() {
 	}
 }
 ```
+
+In `resolver.go`, add `//go:generate go run generate.go` (or replace `//go:generate go run github.com/99designs/gqlgen generate` if you have it there). 
+
+Now you can run `go generate ./...` to generate the code.
 
 Now fields from generated models will contain a additional tag `orm_binding`.
 

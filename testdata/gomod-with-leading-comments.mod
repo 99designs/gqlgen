@@ -4,4 +4,4 @@
 
 module github.com/99designs/gqlgen // replace it for new project
 
-go 1.16
+go 1.18

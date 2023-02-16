@@ -5,7 +5,7 @@ jobs:
   lint:
     strategy:
       matrix:
-        go: [1.16, 1.18]
+        go: [1.18, 1.20]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
   coverage:
     strategy:
       matrix:
-        go: [1.16, 1.18]
+        go: [1.18, 1.20]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
   golangci-lint:
     strategy:
       matrix:
-        go: [1.16, 1.18]
+        go: [1.18, 1.20]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

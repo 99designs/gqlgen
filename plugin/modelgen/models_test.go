@@ -83,9 +83,29 @@ func TestModelGeneration(t *testing.T) {
 
 		expectedTags := []string{
 			`anotherTag:"tag" json:"name"`,
-			`yetAnotherTag:"12" json:"enum"`,
-			`yaml:"noVal" repeated:"true" json:"noVal"`,
-			`someTag:"value" repeated:"true" json:"repeated"`,
+			`json:"enum" yetAnotherTag:"12"`,
+			`json:"noVal" repeated:"true" yaml:"noVal"`,
+			`json:"repeated" repeated:"true" someTag:"value"`,
+		}
+
+		for _, tag := range expectedTags {
+			require.True(t, strings.Contains(fileText, tag), tag)
+		}
+	})
+
+	t.Run("tags can be overridden", func(t *testing.T) {
+		file, err := os.ReadFile("./out/generated.go")
+		require.NoError(t, err)
+
+		fileText := string(file)
+
+		expectedTags := []string{
+			`json:"name0" someOtherTag:"someOtherTagValue" database:"GoTagHookDuplicationTestname0"`,
+			`json:"name1" database:"GoTagHookDuplicationTestname1"`,
+			`json:"name2" database:"GoTagHookDuplicationTestname2"`,
+			`json:"name3" database:"GoTagHookDuplicationTestname3"`,
+			`json:"name4" someOtherTag:"someOtherTagValue" database:"GoTagHookDuplicationTestname4"`,
+			`json:"name5" someOtherTag:"someOtherTagValue2" database:"GoTagHookDuplicationTestname5"`,
 		}
 
 		for _, tag := range expectedTags {
@@ -372,28 +392,28 @@ func TestRemoveDuplicate(t *testing.T) {
 			args: args{
 				t: "json:\"name\" json:\"name2\"",
 			},
-			want: "json:\"name\"",
+			want: "json:\"name2\"",
 		},
 		{
 			name: "Duplicate Test with 3",
 			args: args{
 				t: "json:\"name\" json:\"name2\" json:\"name3\"",
 			},
-			want: "json:\"name\"",
+			want: "json:\"name3\"",
 		},
 		{
 			name: "Duplicate Test with 3 and 1 unrelated",
 			args: args{
 				t: "json:\"name\" something:\"name2\" json:\"name3\"",
 			},
-			want: "json:\"name\" something:\"name2\"",
+			want: "json:\"name3\" something:\"name2\"",
 		},
 		{
 			name: "Duplicate Test with 3 and 2 unrelated",
 			args: args{
 				t: "something:\"name1\" json:\"name\" something:\"name2\" json:\"name3\"",
 			},
-			want: "something:\"name1\" json:\"name\"",
+			want: "json:\"name3\" something:\"name2\"",
 		},
 	}
 	for _, tt := range tests {

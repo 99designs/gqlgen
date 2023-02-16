@@ -34,7 +34,7 @@ jobs:
   golangci-lint:
     strategy:
       matrix:
-        go: ["1.18", "1.20"]
+        go: ["1.19", "1.20"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

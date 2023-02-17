@@ -413,7 +413,7 @@ func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Fie
 	}
 
 	if len(args) > 0 {
-		f.Tag = removeDuplicateTags(strings.Join(args, " ") + " " + f.Tag)
+		f.Tag = removeDuplicateTags(f.Tag + " " + strings.Join(args, " "))
 	}
 
 	return f, nil
@@ -424,7 +424,9 @@ func removeDuplicateTags(t string) string {
 	tt := strings.Split(t, " ")
 	returnTags := ""
 
-	for _, ti := range tt {
+	// iterate backwards through tags so appended goTag directives are prioritized
+	for i := len(tt) - 1; i >= 0; i-- {
+		ti := tt[i]
 		kv := strings.Split(ti, ":")
 		if len(kv) == 0 || processed[kv[0]] {
 			continue
@@ -432,9 +434,9 @@ func removeDuplicateTags(t string) string {
 
 		processed[kv[0]] = true
 		if len(returnTags) > 0 {
-			returnTags += " "
+			returnTags = " " + returnTags
 		}
-		returnTags += kv[0] + ":" + kv[1]
+		returnTags = kv[0] + ":" + kv[1] + returnTags
 	}
 
 	return returnTags

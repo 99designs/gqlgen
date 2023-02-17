@@ -1,12 +1,16 @@
 name: Test
 on: [push, pull_request]
-
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        go: [1.16, 1.18]
+        go: ["1.18", "1.20"]
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     steps:

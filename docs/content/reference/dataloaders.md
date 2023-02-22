@@ -112,7 +112,7 @@ func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*data
 	for index, userKey := range keys {
 		user, ok := userById[userKey.String()]
 		if ok {
-			output[index] = &dataloader.Result{Data: record, Error: nil}
+			output[index] = &dataloader.Result{Data: user, Error: nil}
 		} else {
 			err := fmt.Errorf("user not found %s", userKey.String())
 			output[index] = &dataloader.Result{Data: nil, Error: err}

@@ -5,10 +5,106 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.24...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.25...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.25"></a>
+## [v0.17.25](https://github.com/99designs/gqlgen/compare/v0.17.24...v0.17.25) - 2023-02-28
+- <a href="https://github.com/99designs/gqlgen/commit/ea6a4e65f4f07222d723fa13cb786540ea07af72"><tt>ea6a4e65</tt></a> release v0.17.25
+
+- <a href="https://github.com/99designs/gqlgen/commit/7e013e1d0412f9b33ab82f1ab17eec8b611c5cd9"><tt>7e013e1d</tt></a> Freshen dependencies (<a href="https://github.com/99designs/gqlgen/pull/2571">#2571</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c5dfc26bd860b1e04dd4db4996e5a5e487230ebc"><tt>c5dfc26b</tt></a> Update lru package (<a href="https://github.com/99designs/gqlgen/pull/2570">#2570</a>)</summary>
+
+* update
+
+* Adjust example go mod and go sum
+
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/ff19a5a553b7f2b5d259d4e69eaa83085fecb098"><tt>ff19a5a5</tt></a> fix typo in dataloaders docs example (<a href="https://github.com/99designs/gqlgen/pull/2562">#2562</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a9e42e168ed0de0f0e003abde38fcb62793d2d42"><tt>a9e42e16</tt></a> Move minimum supported version to Go 1.18 (<a href="https://github.com/99designs/gqlgen/pull/2556">#2556</a>)</summary>
+
+* Move minimum supported version to Go 1.18
+
+
+* Update matrix to use strings instead of floats
+
+
+* Change test to match Go order
+
+
+* lint on Go 1.19 and Go 1.20
+
+
+* Attempt to limit github action concurrency
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/01d46b85a2d7432c4d6cf1e700f26ae01d58c79e"><tt>01d46b85</tt></a> Bump undici from 5.14.0 to 5.19.1 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2557">#2557</a>)</summary>
+
+Bumps [undici](https://github.com/nodejs/undici) from 5.14.0 to 5.19.1.
+- [Release notes](https://github.com/nodejs/undici/releases)
+- [Commits](https://github.com/nodejs/undici/compare/v5.14.0...v5.19.1)
+
+---
+updated-dependencies:
+- dependency-name: undici
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/e36095f54b4d6e5037127de11bb12792d5adffce"><tt>e36095f5</tt></a> Updated the documentation on using the plugins (<a href="https://github.com/99designs/gqlgen/pull/2553">#2553</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/cf1607ad8fe83ccc8322a0a77dc82b0fa3ff8489"><tt>cf1607ad</tt></a> Add ability to customize resolvergen behavior using additional plugins (<a href="https://github.com/99designs/gqlgen/pull/2516">#2516</a>)</summary>
+
+* Add ability to customize resolvergen behavior using additional plugins
+
+* Add field.GoResultName()
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/356f4f909624f787060cea14deb905b643246085"><tt>356f4f90</tt></a> prepend goTag directive on struct tags and omit overridden duplicate struct tags per  <a href="https://github.com/99designs/gqlgen/pull/2514">#2514</a> (<a href="https://github.com/99designs/gqlgen/pull/2533">#2533</a>)</summary>
+
+* Change to prepend goTag directive
+
+
+* Fix test for field_hooks_are_applied to prepend
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5b85e93e79d7698a749d69a00d60e283a699dcbb"><tt>5b85e93e</tt></a> fix <a href="https://github.com/99designs/gqlgen/pull/2524">#2524</a> basic alias Byte was not binded properly (<a href="https://github.com/99designs/gqlgen/pull/2528">#2528</a>)</summary>
+
+* add tests for defined types as []byte and []rune
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/49ac94faf27baefd7efeca3c3ca2924ee16761ff"><tt>49ac94fa</tt></a> fix introspection doc typo (<a href="https://github.com/99designs/gqlgen/pull/2529">#2529</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/e6114a2c6af22bcdc92180660a58e6125e7946ad"><tt>e6114a2c</tt></a> remove extra call to packages.Load fix <a href="https://github.com/99designs/gqlgen/pull/2505">#2505</a> (<a href="https://github.com/99designs/gqlgen/pull/2519">#2519</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/9d22d98c792ba7214dc1aad4366e3f7eba0299f7"><tt>9d22d98c</tt></a> Changelog for v0.17.24
+
+- <a href="https://github.com/99designs/gqlgen/commit/2d048b382b642fb1767116916c42dd9118b6f709"><tt>2d048b38</tt></a> v0.17.24 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.24"></a>
 ## [v0.17.24](https://github.com/99designs/gqlgen/compare/v0.17.23...v0.17.24) - 2023-01-23
 - <a href="https://github.com/99designs/gqlgen/commit/77c63865f2df7ee6d4475861b3f57d37a7ef1787"><tt>77c63865</tt></a> release v0.17.24

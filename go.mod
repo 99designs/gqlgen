@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/gorilla/websocket v1.5.0
-	github.com/hashicorp/golang-lru v0.5.4
+	github.com/hashicorp/golang-lru/v2 v2.0.1
 	github.com/kevinmbeaulieu/eq-go v1.0.0
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/matryer/moq v0.2.7

@@ -30,8 +30,10 @@ func (r *CustomResolverType) Resolver() customresolver.ResolverResolver {
 	return &resolverCustomResolverType{r}
 }
 
-type queryCustomResolverType struct{ *CustomResolverType }
-type resolverCustomResolverType struct{ *CustomResolverType }
+type (
+	queryCustomResolverType    struct{ *CustomResolverType }
+	resolverCustomResolverType struct{ *CustomResolverType }
+)
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have

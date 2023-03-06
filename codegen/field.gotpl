@@ -26,9 +26,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		})
 		if err != nil {
 			ec.Error(ctx, err)
-			{{- if not $object.Root }}
-				return {{ $null }}
-    		{{- end }}
+			return {{ $null }}
 		}
 	{{- end }}
 	if resTmp == nil {

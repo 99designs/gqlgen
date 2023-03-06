@@ -321,6 +321,7 @@ type ComplexityRoot struct {
 		Infinity                         func(childComplexity int) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
 		InputSlice                       func(childComplexity int, arg []string) int
+		Invalid                          func(childComplexity int) int
 		InvalidIdentifier                func(childComplexity int) int
 		Issue896a                        func(childComplexity int) int
 		MapInput                         func(childComplexity int, input map[string]interface{}) int
@@ -1388,6 +1389,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.InputSlice(childComplexity, args["arg"].([]string)), true
+
+	case "Query.invalid":
+		if e.complexity.Query.Invalid == nil {
+			break
+		}
+
+		return e.complexity.Query.Invalid(childComplexity), true
 
 	case "Query.invalidIdentifier":
 		if e.complexity.Query.InvalidIdentifier == nil {

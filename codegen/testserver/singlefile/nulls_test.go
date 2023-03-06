@@ -2,6 +2,7 @@ package singlefile
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -13,6 +14,9 @@ func TestNullBubbling(t *testing.T) {
 	resolvers := &Stub{}
 	resolvers.QueryResolver.Valid = func(ctx context.Context) (s string, e error) {
 		return "Ok", nil
+	}
+	resolvers.QueryResolver.Invalid = func(ctx context.Context) (s string, e error) {
+		return "Ok", errors.New("ERROR")
 	}
 	resolvers.QueryResolver.Errors = func(ctx context.Context) (errors *Errors, e error) {
 		return &Errors{}, nil
@@ -131,5 +135,13 @@ func TestNullBubbling(t *testing.T) {
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "the requested element is null which the schema does not allow")
+	})
+
+	t.Run("when non-nullable field returns content while error occured", func(t *testing.T) {
+		var resp any
+		err := c.Post(`query { invalid }`, &resp)
+		require.Nil(t, resp)
+		require.NotNil(t, err)
+		require.Contains(t, err.Error(), `{"message":"ERROR","path":["invalid"]}`)
 	})
 }

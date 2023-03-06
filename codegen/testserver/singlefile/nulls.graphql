@@ -4,10 +4,11 @@ extend type Query {
     errorList: [Error]
     errors: Errors
     valid: String!
+    invalid: String!
 }
 
 extend type Subscription {
-	errorRequired: Error!
+    errorRequired: Error!
 }
 
 type Errors {

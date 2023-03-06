@@ -137,7 +137,7 @@ func TestNullBubbling(t *testing.T) {
 		require.Contains(t, err.Error(), "the requested element is null which the schema does not allow")
 	})
 
-	t.Run("when non-nullable field returns content while error occured", func(t *testing.T) {
+	t.Run("when non-nullable field returns content while error occurred", func(t *testing.T) {
 		var resp any
 		err := c.Post(`query { invalid }`, &resp)
 		require.Nil(t, resp)

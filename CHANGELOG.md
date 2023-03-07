@@ -5,10 +5,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.25...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.26...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.26"></a>
+## [v0.17.26](https://github.com/99designs/gqlgen/compare/v0.17.25...v0.17.26) - 2023-03-07
+- <a href="https://github.com/99designs/gqlgen/commit/8ad59302f9f772a72b875acb6797c863e30ee3d1"><tt>8ad59302</tt></a> release v0.17.26
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/dcd755593ca890e9497c0e7bc6f70ffcd6d20648"><tt>dcd75559</tt></a> Revert issue 2470 (<a href="https://github.com/99designs/gqlgen/pull/2577">#2577</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2471"> #2471</a>, <a href="https://github.com/99designs/gqlgen/issues/2523"> #2523</a>, <a href="https://github.com/99designs/gqlgen/issues/2541"> #2541</a>)</summary>
+
+This reverts commit 5cb6e3ecb07a292daa37f5ce8e5bcf364e1190af.
+
+
+* misspell lint fix
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/cac5f0f4e146a05f8dc4e8947600896a8cf03038"><tt>cac5f0f4</tt></a> Post release version bump for examples
+
+- <a href="https://github.com/99designs/gqlgen/commit/9e9af41aad9ea998dff458150b89baeeb1ed936b"><tt>9e9af41a</tt></a> Update Changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/a8f647cb4e948cb0c952a86a16d325e66230bfa2"><tt>a8f647cb</tt></a> v0.17.25 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.25"></a>
 ## [v0.17.25](https://github.com/99designs/gqlgen/compare/v0.17.24...v0.17.25) - 2023-02-28
 - <a href="https://github.com/99designs/gqlgen/commit/ea6a4e65f4f07222d723fa13cb786540ea07af72"><tt>ea6a4e65</tt></a> release v0.17.25

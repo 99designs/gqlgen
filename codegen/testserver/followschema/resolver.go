@@ -338,6 +338,11 @@ func (r *queryResolver) Valid(ctx context.Context) (string, error) {
 }
 
 // // foo
+func (r *queryResolver) Invalid(ctx context.Context) (string, error) {
+	panic("not implemented")
+}
+
+// // foo
 func (r *queryResolver) Panics(ctx context.Context) (*Panics, error) {
 	panic("not implemented")
 }

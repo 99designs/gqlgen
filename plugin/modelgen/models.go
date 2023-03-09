@@ -371,7 +371,7 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 			GoName:      name,
 			Type:        typ,
 			Description: field.Description,
-			Tag:         `json:"` + field.Name + `"`,
+			Tag:         getStructTagFromField(field),
 		}
 
 		if m.FieldHook != nil {
@@ -386,6 +386,13 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 	}
 
 	return fields, nil
+}
+
+func getStructTagFromField(field *ast.FieldDefinition) string {
+	if !field.Type.NonNull {
+		return `json:"` + field.Name + `,omitempty"`
+	}
+	return `json:"` + field.Name + `"`
 }
 
 // GoTagFieldHook prepends the goTag directive to the generated Field f.

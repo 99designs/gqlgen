@@ -107,7 +107,7 @@ func (PlanetRequiresNested) IsEntity() {}
 type World struct {
 	Foo   string `json:"foo"`
 	Bar   int    `json:"bar"`
-	Hello *Hello `json:"hello"`
+	Hello *Hello `json:"hello,omitempty"`
 }
 
 func (World) IsEntity() {}
@@ -121,7 +121,7 @@ func (WorldName) IsEntity() {}
 type WorldWithMultipleKeys struct {
 	Foo   string `json:"foo"`
 	Bar   int    `json:"bar"`
-	Hello *Hello `json:"hello"`
+	Hello *Hello `json:"hello,omitempty"`
 }
 
 func (WorldWithMultipleKeys) IsEntity() {}

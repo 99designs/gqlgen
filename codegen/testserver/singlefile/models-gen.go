@@ -54,17 +54,17 @@ func (this Cat) GetSpecies() string { return this.Species }
 func (this Cat) GetSize() *Size     { return this.Size }
 
 type CheckIssue896 struct {
-	ID *int `json:"id"`
+	ID *int `json:"id,omitempty"`
 }
 
 type ContentPost struct {
-	Foo *string `json:"foo"`
+	Foo *string `json:"foo,omitempty"`
 }
 
 func (ContentPost) IsContentChild() {}
 
 type ContentUser struct {
-	Foo *string `json:"foo"`
+	Foo *string `json:"foo,omitempty"`
 }
 
 func (ContentUser) IsContentChild() {}
@@ -75,13 +75,13 @@ type Coordinates struct {
 }
 
 type DefaultInput struct {
-	FalsyBoolean  *bool `json:"falsyBoolean"`
-	TruthyBoolean *bool `json:"truthyBoolean"`
+	FalsyBoolean  *bool `json:"falsyBoolean,omitempty"`
+	TruthyBoolean *bool `json:"truthyBoolean,omitempty"`
 }
 
 type DefaultParametersMirror struct {
-	FalsyBoolean  *bool `json:"falsyBoolean"`
-	TruthyBoolean *bool `json:"truthyBoolean"`
+	FalsyBoolean  *bool `json:"falsyBoolean,omitempty"`
+	TruthyBoolean *bool `json:"truthyBoolean,omitempty"`
 }
 
 type Dog struct {
@@ -95,11 +95,11 @@ func (this Dog) GetSpecies() string { return this.Species }
 func (this Dog) GetSize() *Size     { return this.Size }
 
 type EmbeddedDefaultScalar struct {
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 }
 
 type FieldsOrderPayload struct {
-	FirstFieldValue *string `json:"firstFieldValue"`
+	FirstFieldValue *string `json:"firstFieldValue,omitempty"`
 }
 
 type InnerDirectives struct {
@@ -116,10 +116,10 @@ type InnerObject struct {
 
 type InputDirectives struct {
 	Text          string           `json:"text"`
-	NullableText  *string          `json:"nullableText"`
+	NullableText  *string          `json:"nullableText,omitempty"`
 	Inner         *InnerDirectives `json:"inner"`
-	InnerNullable *InnerDirectives `json:"innerNullable"`
-	ThirdParty    *ThirdParty      `json:"thirdParty"`
+	InnerNullable *InnerDirectives `json:"innerNullable,omitempty"`
+	ThirdParty    *ThirdParty      `json:"thirdParty,omitempty"`
 }
 
 type InputWithEnumValue struct {
@@ -145,12 +145,12 @@ type NestedInput struct {
 }
 
 type NestedMapInput struct {
-	Map map[string]interface{} `json:"map"`
+	Map map[string]interface{} `json:"map,omitempty"`
 }
 
 type ObjectDirectives struct {
 	Text         string   `json:"text"`
-	NullableText *string  `json:"nullableText"`
+	NullableText *string  `json:"nullableText,omitempty"`
 	Order        []string `json:"order"`
 }
 
@@ -164,7 +164,7 @@ type OuterObject struct {
 
 type Pet struct {
 	ID      int    `json:"id"`
-	Friends []*Pet `json:"friends"`
+	Friends []*Pet `json:"friends,omitempty"`
 }
 
 type Size struct {
@@ -173,8 +173,8 @@ type Size struct {
 }
 
 type Slices struct {
-	Test1 []*string `json:"test1"`
-	Test2 []string  `json:"test2"`
+	Test1 []*string `json:"test1,omitempty"`
+	Test2 []string  `json:"test2,omitempty"`
 	Test3 []*string `json:"test3"`
 	Test4 []string  `json:"test4"`
 }
@@ -187,8 +187,8 @@ type User struct {
 	ID      int        `json:"id"`
 	Friends []*User    `json:"friends"`
 	Created time.Time  `json:"created"`
-	Updated *time.Time `json:"updated"`
-	Pets    []*Pet     `json:"pets"`
+	Updated *time.Time `json:"updated,omitempty"`
+	Pets    []*Pet     `json:"pets,omitempty"`
 }
 
 type ValidInput struct {

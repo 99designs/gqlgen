@@ -61,7 +61,7 @@ type CDImplemented struct {
 	A string  `json:"a" database:"CDImplementeda"`
 	B int     `json:"b" database:"CDImplementedb"`
 	C bool    `json:"c" database:"CDImplementedc"`
-	D *string `json:"d" database:"CDImplementedd"`
+	D *string `json:"d,omitempty" database:"CDImplementedd"`
 }
 
 func (CDImplemented) IsC() {}
@@ -73,37 +73,37 @@ func (CDImplemented) IsD() {}
 func (CDImplemented) IsB() {}
 
 type CyclicalA struct {
-	FieldOne   *CyclicalB `json:"field_one" database:"CyclicalAfield_one"`
-	FieldTwo   *CyclicalB `json:"field_two" database:"CyclicalAfield_two"`
-	FieldThree *CyclicalB `json:"field_three" database:"CyclicalAfield_three"`
+	FieldOne   *CyclicalB `json:"field_one,omitempty" database:"CyclicalAfield_one"`
+	FieldTwo   *CyclicalB `json:"field_two,omitempty" database:"CyclicalAfield_two"`
+	FieldThree *CyclicalB `json:"field_three,omitempty" database:"CyclicalAfield_three"`
 	FieldFour  string     `json:"field_four" database:"CyclicalAfield_four"`
 }
 
 type CyclicalB struct {
-	FieldOne   *CyclicalA `json:"field_one" database:"CyclicalBfield_one"`
-	FieldTwo   *CyclicalA `json:"field_two" database:"CyclicalBfield_two"`
-	FieldThree *CyclicalA `json:"field_three" database:"CyclicalBfield_three"`
-	FieldFour  *CyclicalA `json:"field_four" database:"CyclicalBfield_four"`
+	FieldOne   *CyclicalA `json:"field_one,omitempty" database:"CyclicalBfield_one"`
+	FieldTwo   *CyclicalA `json:"field_two,omitempty" database:"CyclicalBfield_two"`
+	FieldThree *CyclicalA `json:"field_three,omitempty" database:"CyclicalBfield_three"`
+	FieldFour  *CyclicalA `json:"field_four,omitempty" database:"CyclicalBfield_four"`
 	FieldFive  string     `json:"field_five" database:"CyclicalBfield_five"`
 }
 
 type FieldMutationHook struct {
-	Name     *string       `json:"name" anotherTag:"tag" database:"FieldMutationHookname"`
-	Enum     *ExistingEnum `json:"enum" yetAnotherTag:"12" database:"FieldMutationHookenum"`
-	NoVal    *string       `json:"noVal" yaml:"noVal" repeated:"true" database:"FieldMutationHooknoVal"`
-	Repeated *string       `json:"repeated" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
+	Name     *string       `json:"name,omitempty" anotherTag:"tag" database:"FieldMutationHookname"`
+	Enum     *ExistingEnum `json:"enum,omitempty" yetAnotherTag:"12" database:"FieldMutationHookenum"`
+	NoVal    *string       `json:"noVal,omitempty" yaml:"noVal" repeated:"true" database:"FieldMutationHooknoVal"`
+	Repeated *string       `json:"repeated,omitempty" someTag:"value" repeated:"true" database:"FieldMutationHookrepeated"`
 }
 
 type ImplArrayOfA struct {
 	TrickyField        []*CDImplemented `json:"trickyField" database:"ImplArrayOfAtrickyField"`
-	TrickyFieldPointer []*CDImplemented `json:"trickyFieldPointer" database:"ImplArrayOfAtrickyFieldPointer"`
+	TrickyFieldPointer []*CDImplemented `json:"trickyFieldPointer,omitempty" database:"ImplArrayOfAtrickyFieldPointer"`
 }
 
 func (ImplArrayOfA) IsArrayOfA() {}
 
 type MissingInput struct {
-	Name *string      `json:"name" database:"MissingInputname"`
-	Enum *MissingEnum `json:"enum" database:"MissingInputenum"`
+	Name *string      `json:"name,omitempty" database:"MissingInputname"`
+	Enum *MissingEnum `json:"enum,omitempty" database:"MissingInputenum"`
 }
 
 type MissingTypeNotNull struct {
@@ -123,11 +123,11 @@ func (MissingTypeNotNull) IsMissingUnion() {}
 func (MissingTypeNotNull) IsExistingUnion() {}
 
 type MissingTypeNullable struct {
-	Name     *string             `json:"name" database:"MissingTypeNullablename"`
-	Enum     *MissingEnum        `json:"enum" database:"MissingTypeNullableenum"`
-	Int      MissingInterface    `json:"int" database:"MissingTypeNullableint"`
-	Existing *ExistingType       `json:"existing" database:"MissingTypeNullableexisting"`
-	Missing2 *MissingTypeNotNull `json:"missing2" database:"MissingTypeNullablemissing2"`
+	Name     *string             `json:"name,omitempty" database:"MissingTypeNullablename"`
+	Enum     *MissingEnum        `json:"enum,omitempty" database:"MissingTypeNullableenum"`
+	Int      MissingInterface    `json:"int,omitempty" database:"MissingTypeNullableint"`
+	Existing *ExistingType       `json:"existing,omitempty" database:"MissingTypeNullableexisting"`
+	Missing2 *MissingTypeNotNull `json:"missing2,omitempty" database:"MissingTypeNullablemissing2"`
 }
 
 func (MissingTypeNullable) IsMissingInterface() {}
@@ -162,7 +162,7 @@ type RenameFieldTest struct {
 
 // TypeWithDescription is a type with a description
 type TypeWithDescription struct {
-	Name *string `json:"name" database:"TypeWithDescriptionname"`
+	Name *string `json:"name,omitempty" database:"TypeWithDescriptionname"`
 }
 
 func (TypeWithDescription) IsUnionWithDescription() {}

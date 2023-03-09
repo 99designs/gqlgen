@@ -10,15 +10,15 @@ import (
 
 type DateFilter struct {
 	Value    string        `json:"value"`
-	Timezone *string       `json:"timezone"`
-	Op       *DateFilterOp `json:"op"`
+	Timezone *string       `json:"timezone,omitempty"`
+	Op       *DateFilterOp `json:"op,omitempty"`
 }
 
 type ListCoercion struct {
-	EnumVal   []*ErrorType             `json:"enumVal"`
-	StrVal    []*string                `json:"strVal"`
-	IntVal    []*int                   `json:"intVal"`
-	ScalarVal []map[string]interface{} `json:"scalarVal"`
+	EnumVal   []*ErrorType             `json:"enumVal,omitempty"`
+	StrVal    []*string                `json:"strVal,omitempty"`
+	IntVal    []*int                   `json:"intVal,omitempty"`
+	ScalarVal []map[string]interface{} `json:"scalarVal,omitempty"`
 }
 
 type DateFilterOp string

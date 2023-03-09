@@ -65,13 +65,13 @@ func TestModelGeneration(t *testing.T) {
 
 		expectedTags := []string{
 			`json:"missing2" database:"MissingTypeNotNullmissing2"`,
-			`json:"name" database:"MissingInputname"`,
-			`json:"missing2" database:"MissingTypeNullablemissing2"`,
-			`json:"name" database:"TypeWithDescriptionname"`,
+			`json:"name,omitempty" database:"MissingInputname"`,
+			`json:"missing2,omitempty" database:"MissingTypeNullablemissing2"`,
+			`json:"name,omitempty" database:"TypeWithDescriptionname"`,
 		}
 
 		for _, tag := range expectedTags {
-			require.True(t, strings.Contains(fileText, tag))
+			require.True(t, strings.Contains(fileText, tag), "\nexpected:\n"+tag+"\ngot\n"+fileText)
 		}
 	})
 
@@ -82,10 +82,10 @@ func TestModelGeneration(t *testing.T) {
 		fileText := string(file)
 
 		expectedTags := []string{
-			`json:"name" anotherTag:"tag"`,
-			`json:"enum" yetAnotherTag:"12"`,
-			`json:"noVal" yaml:"noVal" repeated:"true"`,
-			`json:"repeated" someTag:"value" repeated:"true"`,
+			`json:"name,omitempty" anotherTag:"tag"`,
+			`json:"enum,omitempty" yetAnotherTag:"12"`,
+			`json:"noVal,omitempty" yaml:"noVal" repeated:"true"`,
+			`json:"repeated,omitempty" someTag:"value" repeated:"true"`,
 		}
 
 		for _, tag := range expectedTags {

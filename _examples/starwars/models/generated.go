@@ -23,7 +23,7 @@ type SearchResult interface {
 
 type FriendsEdge struct {
 	Cursor string    `json:"cursor"`
-	Node   Character `json:"node"`
+	Node   Character `json:"node,omitempty"`
 }
 
 type PageInfo struct {

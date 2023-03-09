@@ -15,8 +15,8 @@ type Event interface {
 type Like struct {
 	Reaction  string    `json:"reaction"`
 	Sent      time.Time `json:"sent"`
-	Selection []string  `json:"selection"`
-	Collected []string  `json:"collected"`
+	Selection []string  `json:"selection,omitempty"`
+	Collected []string  `json:"collected,omitempty"`
 }
 
 func (Like) IsEvent() {}
@@ -44,8 +44,8 @@ func (this Like) GetCollected() []string {
 type Post struct {
 	Message   string    `json:"message"`
 	Sent      time.Time `json:"sent"`
-	Selection []string  `json:"selection"`
-	Collected []string  `json:"collected"`
+	Selection []string  `json:"selection,omitempty"`
+	Collected []string  `json:"collected,omitempty"`
 }
 
 func (Post) IsEvent() {}

@@ -35,6 +35,10 @@ var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doc
     target: '#embedded-sandbox',
     initialEndpoint: url,
 		persistExplorerState: true,
+		initialState: {
+			includeCookies: true,
+			pollForSchemaUpdates: false,
+		}
   });
   </script>
 </body>

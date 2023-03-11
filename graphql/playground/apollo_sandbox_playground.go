@@ -31,6 +31,7 @@ var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doc
 {{- else}}
 	const url = location.protocol + '//' + location.host + {{.endpoint}};
 {{- end}}
+	<!-- See https://www.apollographql.com/docs/graphos/explorer/sandbox/#options -->
   new window.EmbeddedSandbox({
     target: '#embedded-sandbox',
     initialEndpoint: url,

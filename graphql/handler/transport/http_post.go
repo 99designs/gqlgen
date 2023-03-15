@@ -60,6 +60,7 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
 		log.Printf("could not get json request body: %+v", err.Error())
 		writeJson(w, resp)
+		return
 	}
 
 	bodyReader := io.NopCloser(strings.NewReader(bodyString))

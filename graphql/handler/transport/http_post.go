@@ -3,7 +3,6 @@ package transport
 import (
 	"fmt"
 	"io"
-	"log"
 	"mime"
 	"net/http"
 	"strings"
@@ -58,7 +57,6 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 	if err != nil {
 		gqlErr := gqlerror.Errorf("could not get json request body: %+v", err)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-		log.Printf("could not get json request body: %+v", err.Error())
 		writeJson(w, resp)
 		return
 	}
@@ -72,7 +70,6 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 			bodyString,
 		)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-		log.Printf("decoding error: %+v body:%s", err.Error(), bodyString)
 		writeJson(w, resp)
 		return
 	}

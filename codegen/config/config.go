@@ -34,6 +34,7 @@ type Config struct {
 	StructFieldsAlwaysPointers    bool                       `yaml:"struct_fields_always_pointers,omitempty"`
 	ReturnPointersInUmarshalInput bool                       `yaml:"return_pointers_in_unmarshalinput,omitempty"`
 	ResolversAlwaysReturnPointers bool                       `yaml:"resolvers_always_return_pointers,omitempty"`
+	NullableInputOmittable        bool                       `yaml:"nullable_input_omittable,omitempty"`
 	SkipValidation                bool                       `yaml:"skip_validation,omitempty"`
 	SkipModTidy                   bool                       `yaml:"skip_mod_tidy,omitempty"`
 	Sources                       []*ast.Source              `yaml:"-"`
@@ -57,6 +58,7 @@ func DefaultConfig() *Config {
 		StructFieldsAlwaysPointers:    true,
 		ReturnPointersInUmarshalInput: false,
 		ResolversAlwaysReturnPointers: true,
+		NullableInputOmittable:        false,
 	}
 }
 

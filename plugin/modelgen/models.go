@@ -64,9 +64,10 @@ type Field struct {
 	// Name is the field's name as it appears in the schema
 	Name string
 	// GoName is the field's name as it appears in the generated Go code
-	GoName string
-	Type   types.Type
-	Tag    string
+	GoName    string
+	Type      types.Type
+	Tag       string
+	Omittable bool
 }
 
 type Enum struct {
@@ -304,6 +305,8 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 	binder := cfg.NewBinder()
 	fields := make([]*Field, 0)
 
+	var omittableType types.Type
+
 	for _, field := range schemaType.Fields {
 		var typ types.Type
 		fieldDef := cfg.Schema.Types[field.Type.Name()]
@@ -372,6 +375,7 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 			Type:        typ,
 			Description: field.Description,
 			Tag:         getStructTagFromField(field),
+			Omittable:   cfg.NullableInputOmittable && schemaType.Kind == ast.InputObject && !field.Type.NonNull,
 		}
 
 		if m.FieldHook != nil {
@@ -380,6 +384,26 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 				return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
 			}
 			f = mf
+		}
+
+		if f.Omittable {
+			if schemaType.Kind != ast.InputObject || field.Type.NonNull {
+				return nil, fmt.Errorf("generror: field %v.%v: omittable is only applicable to nullable input fields", schemaType.Name, field.Name)
+			}
+
+			var err error
+
+			if omittableType == nil {
+				omittableType, err = binder.FindTypeFromName("github.com/99designs/gqlgen/graphql.Omittable")
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			f.Type, err = binder.InstantiateType(omittableType, []types.Type{f.Type})
+			if err != nil {
+				return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
+			}
 		}
 
 		fields = append(fields, f)
@@ -462,6 +486,12 @@ func GoFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field,
 		if arg := goField.Arguments.ForName("name"); arg != nil {
 			if k, err := arg.Value.Value(nil); err == nil {
 				f.GoName = k.(string)
+			}
+		}
+
+		if arg := goField.Arguments.ForName("omittable"); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				f.Omittable = k.(bool)
 			}
 		}
 	}

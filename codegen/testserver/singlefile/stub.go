@@ -62,6 +62,7 @@ type Stub struct {
 		NullableArg                      func(ctx context.Context, arg *int) (*string, error)
 		InputSlice                       func(ctx context.Context, arg []string) (bool, error)
 		InputNullableSlice               func(ctx context.Context, arg []string) (bool, error)
+		InputOmittable                   func(ctx context.Context, arg OmittableInput) (string, error)
 		ShapeUnion                       func(ctx context.Context) (ShapeUnion, error)
 		Autobind                         func(ctx context.Context) (*Autobind, error)
 		DeprecatedField                  func(ctx context.Context) (string, error)
@@ -316,6 +317,9 @@ func (r *stubQuery) InputSlice(ctx context.Context, arg []string) (bool, error) 
 }
 func (r *stubQuery) InputNullableSlice(ctx context.Context, arg []string) (bool, error) {
 	return r.QueryResolver.InputNullableSlice(ctx, arg)
+}
+func (r *stubQuery) InputOmittable(ctx context.Context, arg OmittableInput) (string, error) {
+	return r.QueryResolver.InputOmittable(ctx, arg)
 }
 func (r *stubQuery) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	return r.QueryResolver.ShapeUnion(ctx)

@@ -142,10 +142,11 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
-			it.Map, err = ec.unmarshalOMapStringInterfaceInput2map(ctx, v)
+			data, err := ec.unmarshalOMapStringInterfaceInput2map(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Map = data
 		}
 	}
 

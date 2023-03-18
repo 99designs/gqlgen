@@ -163,6 +163,11 @@ func (r *queryResolver) InputNullableSlice(ctx context.Context, arg []string) (b
 }
 
 // // foo
+func (r *queryResolver) InputOmittable(ctx context.Context, arg OmittableInput) (string, error) {
+	panic("not implemented")
+}
+
+// // foo
 func (r *queryResolver) ShapeUnion(ctx context.Context) (ShapeUnion, error) {
 	panic("not implemented")
 }

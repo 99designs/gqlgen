@@ -18,3 +18,5 @@ jobs:
           go-version: ${{ matrix.go }}
       - run: go mod download && go list -json -deps all > go.list
       - uses: sonatype-nexus-community/nancy-github-action@main
+        with:
+          nancyVersion: "v1.0.42"

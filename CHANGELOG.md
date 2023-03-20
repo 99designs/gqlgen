@@ -5,10 +5,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.26...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.27...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.27"></a>
+## [v0.17.27](https://github.com/99designs/gqlgen/compare/v0.17.26...v0.17.27) - 2023-03-20
+- <a href="https://github.com/99designs/gqlgen/commit/5bfcdd63e32837969f611922458451460411a79d"><tt>5bfcdd63</tt></a> release v0.17.27
+
+- <a href="https://github.com/99designs/gqlgen/commit/aab9b96839f4e3252e67dd81396c2288e545a7d2"><tt>aab9b968</tt></a> Revert mstephano <a href="https://github.com/99designs/gqlgen/pull/2486">#2486</a> <a href="https://github.com/99designs/gqlgen/pull/2508">#2508</a> <a href="https://github.com/99designs/gqlgen/pull/2528">#2528</a> (<a href="https://github.com/99designs/gqlgen/pull/2587">#2587</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/05500c9d18a95af909ab07712bd470ec6783d047"><tt>05500c9d</tt></a> POST transport: missing return and unnecessary logs (<a href="https://github.com/99designs/gqlgen/pull/2584">#2584</a>)</summary>
+
+* Add missing return in HTTP POST transport
+
+* Remove HTTP POST transport logs
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/622039cb5042631cda3195a4838359e156775e2d"><tt>622039cb</tt></a> feat: support ApolloSandbox playground (<a href="https://github.com/99designs/gqlgen/pull/2581">#2581</a>)</summary>
+
+* feat: support ApolloSandbox playground
+
+* add initialState to be same behavior as others
+
+* add docs link of configuration values
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/0bbc7f8ca2b460a9c7e4c17326a84b607546ee52"><tt>0bbc7f8c</tt></a> Add omitempty to struct tags for nullable types (<a href="https://github.com/99designs/gqlgen/pull/2436">#2436</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/acbae6f0867e6fc31992afd55ebf9c28ad0c59a7"><tt>acbae6f0</tt></a> Update Changelog for v0.17.26
+
+- <a href="https://github.com/99designs/gqlgen/commit/fbfa16ea9c7423db854b25e8d51f570d48d05c08"><tt>fbfa16ea</tt></a> v0.17.26 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.26"></a>
 ## [v0.17.26](https://github.com/99designs/gqlgen/compare/v0.17.25...v0.17.26) - 2023-03-07
 - <a href="https://github.com/99designs/gqlgen/commit/8ad59302f9f772a72b875acb6797c863e30ee3d1"><tt>8ad59302</tt></a> release v0.17.26

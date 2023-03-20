@@ -22,7 +22,7 @@ type DefinedTypeFromBasics {
     # for example, value of 5.76 comes out as 5.760000228881836, anyone knows how to fix this?
     newFloat32: Float32!
 
-    # uint64 needs a scalar because it is bigger than int64
+    # uint64 need a scalar because it is bigger than int64
     newUint64: Uint64!
 }
 

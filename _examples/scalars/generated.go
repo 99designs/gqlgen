@@ -15,7 +15,6 @@ import (
 
 	"github.com/99designs/gqlgen/_examples/scalars/external"
 	"github.com/99designs/gqlgen/_examples/scalars/model"
-	"github.com/99designs/gqlgen/codegen/testserver/singlefile"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
@@ -74,11 +73,6 @@ type ComplexityRoot struct {
 		Name              func(childComplexity int) int
 		PrimitiveResolver func(childComplexity int) int
 		PtrPrefs          func(childComplexity int) int
-		RemoteBytes       func(childComplexity int) int
-		RemoteRunes       func(childComplexity int) int
-		SomeBytes         func(childComplexity int) int
-		SomeOtherBytes    func(childComplexity int) int
-		SomeRunes         func(childComplexity int) int
 		Tier              func(childComplexity int) int
 		ValPrefs          func(childComplexity int) int
 		Weddings          func(childComplexity int) int
@@ -257,41 +251,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.PtrPrefs(childComplexity), true
-
-	case "User.remoteBytes":
-		if e.complexity.User.RemoteBytes == nil {
-			break
-		}
-
-		return e.complexity.User.RemoteBytes(childComplexity), true
-
-	case "User.remoteRunes":
-		if e.complexity.User.RemoteRunes == nil {
-			break
-		}
-
-		return e.complexity.User.RemoteRunes(childComplexity), true
-
-	case "User.someBytes":
-		if e.complexity.User.SomeBytes == nil {
-			break
-		}
-
-		return e.complexity.User.SomeBytes(childComplexity), true
-
-	case "User.someOtherBytes":
-		if e.complexity.User.SomeOtherBytes == nil {
-			break
-		}
-
-		return e.complexity.User.SomeOtherBytes(childComplexity), true
-
-	case "User.someRunes":
-		if e.complexity.User.SomeRunes == nil {
-			break
-		}
-
-		return e.complexity.User.SomeRunes(childComplexity), true
 
 	case "User.tier":
 		if e.complexity.User.Tier == nil {
@@ -649,16 +608,6 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_cars(ctx, field)
 			case "weddings":
 				return ec.fieldContext_User_weddings(ctx, field)
-			case "someBytes":
-				return ec.fieldContext_User_someBytes(ctx, field)
-			case "someOtherBytes":
-				return ec.fieldContext_User_someOtherBytes(ctx, field)
-			case "someRunes":
-				return ec.fieldContext_User_someRunes(ctx, field)
-			case "remoteBytes":
-				return ec.fieldContext_User_remoteBytes(ctx, field)
-			case "remoteRunes":
-				return ec.fieldContext_User_remoteRunes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -750,16 +699,6 @@ func (ec *executionContext) fieldContext_Query_search(ctx context.Context, field
 				return ec.fieldContext_User_cars(ctx, field)
 			case "weddings":
 				return ec.fieldContext_User_weddings(ctx, field)
-			case "someBytes":
-				return ec.fieldContext_User_someBytes(ctx, field)
-			case "someOtherBytes":
-				return ec.fieldContext_User_someOtherBytes(ctx, field)
-			case "someRunes":
-				return ec.fieldContext_User_someRunes(ctx, field)
-			case "remoteBytes":
-				return ec.fieldContext_User_remoteBytes(ctx, field)
-			case "remoteRunes":
-				return ec.fieldContext_User_remoteRunes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -851,16 +790,6 @@ func (ec *executionContext) fieldContext_Query_userByTier(ctx context.Context, f
 				return ec.fieldContext_User_cars(ctx, field)
 			case "weddings":
 				return ec.fieldContext_User_weddings(ctx, field)
-			case "someBytes":
-				return ec.fieldContext_User_someBytes(ctx, field)
-			case "someOtherBytes":
-				return ec.fieldContext_User_someOtherBytes(ctx, field)
-			case "someRunes":
-				return ec.fieldContext_User_someRunes(ctx, field)
-			case "remoteBytes":
-				return ec.fieldContext_User_remoteBytes(ctx, field)
-			case "remoteRunes":
-				return ec.fieldContext_User_remoteRunes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1739,226 +1668,6 @@ func (ec *executionContext) fieldContext_User_weddings(ctx context.Context, fiel
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_someBytes(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_someBytes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SomeBytes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]byte)
-	fc.Result = res
-	return ec.marshalNBytes2ᚕbyte(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_someBytes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Bytes does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_someOtherBytes(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_someOtherBytes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SomeOtherBytes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]byte)
-	fc.Result = res
-	return ec.marshalNBytes2ᚕbyte(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_someOtherBytes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Bytes does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_someRunes(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_someRunes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SomeRunes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]rune)
-	fc.Result = res
-	return ec.marshalNRunes2ᚕrune(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_someRunes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Runes does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_remoteBytes(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_remoteBytes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.RemoteBytes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(external.ExternalBytes)
-	fc.Result = res
-	return ec.marshalNDefinedTypeBytes2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐExternalBytes(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_remoteBytes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DefinedTypeBytes does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_remoteRunes(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_remoteRunes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.RemoteRunes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(external.ExternalRunes)
-	fc.Result = res
-	return ec.marshalNDefinedTypeRunes2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐExternalRunes(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_remoteRunes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DefinedTypeRunes does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4066,41 +3775,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "someBytes":
-
-			out.Values[i] = ec._User_someBytes(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "someOtherBytes":
-
-			out.Values[i] = ec._User_someOtherBytes(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "someRunes":
-
-			out.Values[i] = ec._User_someRunes(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "remoteBytes":
-
-			out.Values[i] = ec._User_remoteBytes(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "remoteRunes":
-
-			out.Values[i] = ec._User_remoteRunes(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4470,27 +4144,6 @@ func (ec *executionContext) marshalNBoolean2githubᚗcomᚋ99designsᚋgqlgenᚋ
 	return res
 }
 
-func (ec *executionContext) unmarshalNBytes2ᚕbyte(ctx context.Context, v interface{}) ([]byte, error) {
-	res, err := singlefile.UnmarshalBytes(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNBytes2ᚕbyte(ctx context.Context, sel ast.SelectionSet, v []byte) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	res := singlefile.MarshalBytes(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNDarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPrefs(ctx context.Context, v interface{}) (*model.Prefs, error) {
 	res, err := model.UnmarshalPreferences(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4504,48 +4157,6 @@ func (ec *executionContext) marshalNDarkMode2ᚖgithubᚗcomᚋ99designsᚋgqlge
 		return graphql.Null
 	}
 	res := model.MarshalPreferences(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNDefinedTypeBytes2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐExternalBytes(ctx context.Context, v interface{}) (external.ExternalBytes, error) {
-	res, err := external.UnmarshalBytes(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNDefinedTypeBytes2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐExternalBytes(ctx context.Context, sel ast.SelectionSet, v external.ExternalBytes) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	res := external.MarshalBytes(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNDefinedTypeRunes2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐExternalRunes(ctx context.Context, v interface{}) (external.ExternalRunes, error) {
-	res, err := external.UnmarshalRunes(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNDefinedTypeRunes2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐExternalRunes(ctx context.Context, sel ast.SelectionSet, v external.ExternalRunes) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	res := external.MarshalRunes(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4638,27 +4249,6 @@ func (ec *executionContext) marshalNPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return v
-}
-
-func (ec *executionContext) unmarshalNRunes2ᚕrune(ctx context.Context, v interface{}) ([]rune, error) {
-	res, err := model.UnmarshalRunes(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNRunes2ᚕrune(ctx context.Context, sel ast.SelectionSet, v []rune) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	res := model.MarshalRunes(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNString2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋexternalᚐManufacturer(ctx context.Context, v interface{}) (external.Manufacturer, error) {

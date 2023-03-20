@@ -56,11 +56,6 @@ type User struct {
 	Children        uint
 	Cars            external.Count
 	Weddings        Sum
-	SomeBytes       []byte
-	SomeOtherBytes  []byte
-	SomeRunes       []rune
-	RemoteBytes     external.ExternalBytes
-	RemoteRunes     external.ExternalRunes
 }
 
 // Point is serialized as a simple array, eg [1, 2]
@@ -208,23 +203,4 @@ func UnmarshalPreferences(v interface{}) (*Prefs, error) {
 		return nil, err
 	}
 	return &Prefs{DarkMode: tmp}, nil
-}
-
-func MarshalRunes(r []rune) graphql.Marshaler {
-	return graphql.WriterFunc(func(w io.Writer) {
-		_, _ = fmt.Fprintf(w, "%q", string(r))
-	})
-}
-
-func UnmarshalRunes(v interface{}) ([]rune, error) {
-	switch v := v.(type) {
-	case string:
-		return []rune(v), nil
-	case *string:
-		return []rune(*v), nil
-	case []rune:
-		return v, nil
-	default:
-		return nil, fmt.Errorf("%T is not []rune", v)
-	}
 }

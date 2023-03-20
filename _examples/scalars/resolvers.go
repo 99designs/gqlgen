@@ -40,11 +40,6 @@ func (r *queryResolver) User(ctx context.Context, id external.ObjectID) (*model.
 		Children:        3,
 		Cars:            5,
 		Weddings:        2,
-		SomeBytes:       []byte("abcdef"),
-		SomeOtherBytes:  []byte{97, 98, 99, 100, 101, 102},
-		SomeRunes:       []rune{'H', 'e', 'l', 'l', 'o', ' ', '世', '界'},
-		RemoteBytes:     external.ExternalBytes("fedcba"),
-		RemoteRunes:     external.ExternalRunes{'界', '世', ' ', 'H', 'e', 'l', 'l', 'o'},
 	}, nil
 }
 

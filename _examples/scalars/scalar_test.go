@@ -18,18 +18,6 @@ type RawUser struct {
 	PrimitiveResolver string
 	CustomResolver    string
 	Tier              string
-	CarManufacturer   string
-	IsBanned          bool
-	IsLoginBanned     bool
-	IsQueryBanned     bool
-	Children          int
-	Cars              int
-	Weddings          int
-	SomeBytes         string
-	SomeOtherBytes    string
-	SomeRunes         string
-	RemoteBytes       string
-	RemoteRunes       string
 }
 
 func TestScalars(t *testing.T) {
@@ -65,46 +53,6 @@ func TestScalars(t *testing.T) {
 		err := c.Post(`{ search {  address { location }  } }`, &resp)
 		require.NoError(t, err)
 		require.Equal(t, "37,144", resp.Search[0].Address.Location)
-	})
-
-	t.Run("remote named string", func(t *testing.T) {
-		var resp struct{ User RawUser }
-
-		err := c.Post(`{ user(id:"=1=") { carManufacturer } }`, &resp)
-		require.NoError(t, err)
-		require.Equal(t, "TESLA", resp.User.CarManufacturer)
-	})
-
-	t.Run("alias declaration and type definition", func(t *testing.T) {
-		var resp struct{ User RawUser }
-
-		err := c.Post(`{ user(id:"=1=") { isBanned isLoginBanned isQueryBanned } }`, &resp)
-		require.NoError(t, err)
-		require.Equal(t, false, resp.User.IsBanned)
-		require.Equal(t, true, resp.User.IsLoginBanned)
-		require.Equal(t, true, resp.User.IsQueryBanned)
-	})
-
-	t.Run("unusual basic", func(t *testing.T) {
-		var resp struct{ User RawUser }
-
-		err := c.Post(`{ user(id:"=1=") { children cars weddings } }`, &resp)
-		require.NoError(t, err)
-		require.Equal(t, 3, resp.User.Children)
-		require.Equal(t, 5, resp.User.Cars)
-		require.Equal(t, 2, resp.User.Weddings)
-	})
-
-	t.Run("basic aliases byte and rune", func(t *testing.T) {
-		var resp struct{ User RawUser }
-
-		err := c.Post(`{ user(id:"=1=") { someBytes someOtherBytes someRunes remoteBytes remoteRunes } }`, &resp)
-		require.NoError(t, err)
-		require.Equal(t, "abcdef", resp.User.SomeBytes)
-		require.Equal(t, "abcdef", resp.User.SomeOtherBytes)
-		require.Equal(t, "Hello 世界", resp.User.SomeRunes)
-		require.Equal(t, "fedcba", resp.User.RemoteBytes)
-		require.Equal(t, "界世 Hello", resp.User.RemoteRunes)
 	})
 
 	t.Run("custom error messages", func(t *testing.T) {

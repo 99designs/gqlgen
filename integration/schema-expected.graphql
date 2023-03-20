@@ -16,24 +16,6 @@ input DateFilter {
   value: String!
 }
 
-type DefinedTypeFromBasics {
-  newBool: Boolean!
-  newFloat32: Float32!
-  newFloat64: Float!
-  newID: ID!
-  newInt: Int!
-  newInt8: Int!
-  newInt16: Int!
-  newInt32: Int!
-  newInt64: Int!
-  newString: String!
-  newUint: Int!
-  newUint8: Int!
-  newUint16: Int!
-  newUint32: Int!
-  newUint64: Uint64!
-}
-
 type Element {
   child: Element!
   error: Boolean!
@@ -44,8 +26,6 @@ enum ErrorType {
   CUSTOM
   NORMAL
 }
-
-scalar Float32
 
 input ListCoercion {
   enumVal: [ErrorType]
@@ -69,8 +49,6 @@ type Query {
 type RemoteModelWithOmitempty {
   newDesc: String
 }
-
-scalar Uint64
 
 type User {
   likes: [String!]!

@@ -14,7 +14,11 @@ import (
 
 // POST implements the POST side of the default HTTP transport
 // defined in https://github.com/APIs-guru/graphql-over-http#post
-type POST struct{}
+type POST struct {
+	// Map of all headers that are added to graphql response. If not
+	// set, only one header: Content-Type: application/json will be set.
+	ResponseHeaders map[string][]string
+}
 
 var _ graphql.Transport = POST{}
 
@@ -44,7 +48,7 @@ func getRequestBody(r *http.Request) (string, error) {
 
 func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
-	w.Header().Set("Content-Type", "application/json")
+	writeHeaders(w, h.ResponseHeaders)
 	params := &graphql.RawParams{}
 	start := graphql.Now()
 	params.Headers = r.Header

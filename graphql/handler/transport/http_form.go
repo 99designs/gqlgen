@@ -20,6 +20,10 @@ type MultipartForm struct {
 	// as multipart/form-data in memory, with the remainder stored on disk in
 	// temporary files.
 	MaxMemory int64
+
+	// Map of all headers that are added to graphql response. If not
+	// set, only one header: Content-Type: application/json will be set.
+	ResponseHeaders map[string][]string
 }
 
 var _ graphql.Transport = MultipartForm{}
@@ -52,7 +56,7 @@ func (f MultipartForm) maxMemory() int64 {
 }
 
 func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
-	w.Header().Set("Content-Type", "application/json")
+	writeHeaders(w, f.ResponseHeaders)
 
 	start := graphql.Now()
 

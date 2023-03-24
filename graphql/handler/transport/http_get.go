@@ -15,7 +15,11 @@ import (
 
 // GET implements the GET side of the default HTTP transport
 // defined in https://github.com/APIs-guru/graphql-over-http#get
-type GET struct{}
+type GET struct {
+	// Map of all headers that are added to graphql response. If not
+	// set, only one header: Content-Type: application/json will be set.
+	ResponseHeaders map[string][]string
+}
 
 var _ graphql.Transport = GET{}
 
@@ -34,7 +38,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		writeJsonError(w, err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	writeHeaders(w, h.ResponseHeaders)
 
 	raw := &graphql.RawParams{
 		Query:         query.Get("query"),

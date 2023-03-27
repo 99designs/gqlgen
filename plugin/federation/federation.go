@@ -134,12 +134,12 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 				if entityResolverInputDefinitions != "" {
 					entityResolverInputDefinitions += "\n\n"
 				}
-				entityResolverInputDefinitions += "input " + r.InputType + " {\n"
+				entityResolverInputDefinitions += "input " + r.InputTypeName + " {\n"
 				for _, keyField := range r.KeyFields {
 					entityResolverInputDefinitions += fmt.Sprintf("\t%s: %s\n", keyField.Field.ToGo(), keyField.Definition.Type.String())
 				}
 				entityResolverInputDefinitions += "}"
-				resolvers += fmt.Sprintf("\t%s(reps: [%s!]!): [%s]\n", r.ResolverName, r.InputType, e.Name)
+				resolvers += fmt.Sprintf("\t%s(reps: [%s!]!): [%s]\n", r.ResolverName, r.InputTypeName, e.Name)
 			} else {
 				resolverArgs := ""
 				for _, keyField := range r.KeyFields {
@@ -231,6 +231,23 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 				cgField := reqField.Field.TypeReference(obj, data.Objects)
 				reqField.Type = cgField.TypeReference
 			}
+		}
+	}
+
+	// fill in types for resolver inputs
+	//
+	for _, entity := range f.Entities {
+		if !entity.Multi {
+			continue
+		}
+
+		for _, resolver := range entity.Resolvers {
+			obj := data.Inputs.ByName(resolver.InputTypeName)
+			if obj == nil {
+				return fmt.Errorf("input object %s not found", resolver.InputTypeName)
+			}
+
+			resolver.InputType = obj.Type
 		}
 	}
 
@@ -327,9 +344,9 @@ func (f *federation) setEntities(schema *ast.Schema) {
 				}
 
 				e.Resolvers = append(e.Resolvers, &EntityResolver{
-					ResolverName: resolverName,
-					KeyFields:    keyFields,
-					InputType:    resolverFieldsToGo + "Input",
+					ResolverName:  resolverName,
+					KeyFields:     keyFields,
+					InputTypeName: resolverFieldsToGo + "Input",
 				})
 			}
 

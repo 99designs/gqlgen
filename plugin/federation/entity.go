@@ -1,7 +1,10 @@
 package federation
 
 import (
+	"go/types"
+
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -17,9 +20,14 @@ type Entity struct {
 }
 
 type EntityResolver struct {
-	ResolverName string      // The resolver name, such as FindUserByID
-	KeyFields    []*KeyField // The fields declared in @key.
-	InputType    string      // The Go generated input type for multi entity resolvers
+	ResolverName  string      // The resolver name, such as FindUserByID
+	KeyFields     []*KeyField // The fields declared in @key.
+	InputType     types.Type  // The Go generated input type for multi entity resolvers
+	InputTypeName string
+}
+
+func (e *EntityResolver) LookupInputType() string {
+	return templates.CurrentImports.LookupType(e.InputType)
 }
 
 type KeyField struct {

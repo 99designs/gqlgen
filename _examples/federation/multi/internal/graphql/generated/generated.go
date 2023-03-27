@@ -15,7 +15,6 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -3447,14 +3446,13 @@ func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	return ret
 }
 
-func (ec *executionContext) unmarshalN_FieldSet2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfieldsetᚐFieldSet(ctx context.Context, v interface{}) (fieldset.FieldSet, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := fieldset.FieldSet(tmp)
+func (ec *executionContext) unmarshalN_FieldSet2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalN_FieldSet2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfieldsetᚐFieldSet(ctx context.Context, sel ast.SelectionSet, v fieldset.FieldSet) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
+func (ec *executionContext) marshalN_FieldSet2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

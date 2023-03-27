@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/99designs/gqlgen/_examples/federation/multi/internal/graphql/gqlmodels"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/federatedentityresolver/gqlmodels"
 )
 
 var (
@@ -66,7 +66,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 	isMulti := func(typeName string) bool {
 		switch typeName {
-		case "ExternalExtension":
+		case "Customer":
 			return true
 		default:
 			return false
@@ -83,26 +83,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
-		case "Hello":
-			resolverName, err := entityResolverNameForHello(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "Hello": %w`, err)
-			}
-			switch resolverName {
-
-			case "findHelloByName":
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findHelloByName(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindHelloByName(ctx, id0)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "Hello": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			}
 
 		}
 		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
@@ -119,21 +99,21 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 		switch typeName {
 
-		case "ExternalExtension":
-			_reps := make([]*gqlmodels.ExternalExtensionByUpcsInput, len(reps))
+		case "Customer":
+			_reps := make([]*gqlmodels.CustomerByIDsInput, len(reps))
 
 			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
+				id0, err := ec.unmarshalNID2string(ctx, rep["id"])
 				if err != nil {
-					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "upc"))
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
 				}
 
-				_reps[i] = &gqlmodels.ExternalExtensionByUpcsInput{
-					Upc: id0,
+				_reps[i] = &gqlmodels.CustomerByIDsInput{
+					ID: id0,
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyExternalExtensionByUpcs(ctx, _reps)
+			entities, err := ec.resolvers.Entity().FindManyCustomerByIDs(ctx, _reps)
 			if err != nil {
 				return err
 			}
@@ -196,7 +176,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 	}
 }
 
-func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForCustomer(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
 			m   map[string]interface{}
@@ -205,27 +185,10 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]
 		)
 		_ = val
 		m = rep
-		if _, ok = m["upc"]; !ok {
+		if _, ok = m["id"]; !ok {
 			break
 		}
-		return "findManyExternalExtensionByUpcs", nil
+		return "findManyCustomerByIDs", nil
 	}
-	return "", fmt.Errorf("%w for ExternalExtension", ErrTypeNotFound)
-}
-
-func entityResolverNameForHello(ctx context.Context, rep map[string]interface{}) (string, error) {
-	for {
-		var (
-			m   map[string]interface{}
-			val interface{}
-			ok  bool
-		)
-		_ = val
-		m = rep
-		if _, ok = m["name"]; !ok {
-			break
-		}
-		return "findHelloByName", nil
-	}
-	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for Customer", ErrTypeNotFound)
 }

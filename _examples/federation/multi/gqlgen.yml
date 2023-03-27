@@ -1,0 +1,28 @@
+schema:
+  - internal/graphql/schema/**/*.graphql
+
+exec:
+  filename: internal/graphql/generated/generated.go
+  package: generated
+
+federation:
+  filename: internal/graphql/generated/federation.go
+  package: generated
+  version: 2
+
+model:
+  filename: internal/graphql/gqlmodels/gqlmodels.go
+  package: gqlmodels
+
+resolver:
+  layout: follow-schema
+  dir: internal/graphql/resolvers
+  package: resolvers
+  filename_template: "{name}.resolvers.go"
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.String
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.ID

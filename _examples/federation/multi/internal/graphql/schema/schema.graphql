@@ -1,0 +1,10 @@
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type Customer @key(fields: "id") @entityResolver(multi: true) {
+    id: ID!
+    name: String
+}
+
+type Query {
+    customers(ids: [ID!]!): [Customer]
+}

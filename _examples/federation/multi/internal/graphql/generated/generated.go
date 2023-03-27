@@ -11,10 +11,11 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/99designs/gqlgen/_examples/federation/multi/internal/graphql/gqlmodels"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/federatedentityresolver/gqlmodels"
+	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -37,8 +38,8 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	CustomQuery() CustomQueryResolver
 	Entity() EntityResolver
+	Query() QueryResolver
 }
 
 type DirectiveRoot struct {
@@ -46,25 +47,19 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	CustomQuery struct {
-		Hello              func(childComplexity int) int
-		__resolve__service func(childComplexity int) int
-		__resolve_entities func(childComplexity int, representations []map[string]interface{}) int
+	Customer struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
 	}
 
 	Entity struct {
-		FindHelloByName                 func(childComplexity int, name string) int
-		FindManyExternalExtensionByUpcs func(childComplexity int, reps []gqlmodels.ExternalExtensionByUpcsInput) int
+		FindManyCustomerByIDs func(childComplexity int, reps []*gqlmodels.CustomerByIDsInput) int
 	}
 
-	ExternalExtension struct {
-		Reviews func(childComplexity int) int
-		Upc     func(childComplexity int) int
-	}
-
-	Hello struct {
-		Name      func(childComplexity int) int
-		Secondary func(childComplexity int) int
+	Query struct {
+		Customers          func(childComplexity int, ids []string) int
+		__resolve__service func(childComplexity int) int
+		__resolve_entities func(childComplexity int, representations []map[string]interface{}) int
 	}
 
 	_Service struct {
@@ -72,12 +67,11 @@ type ComplexityRoot struct {
 	}
 }
 
-type CustomQueryResolver interface {
-	Hello(ctx context.Context) (*gqlmodels.Hello, error)
-}
 type EntityResolver interface {
-	FindManyExternalExtensionByUpcs(ctx context.Context, reps []gqlmodels.ExternalExtensionByUpcsInput) ([]*gqlmodels.ExternalExtension, error)
-	FindHelloByName(ctx context.Context, name string) (*gqlmodels.Hello, error)
+	FindManyCustomerByIDs(ctx context.Context, reps []*gqlmodels.CustomerByIDsInput) ([]*gqlmodels.Customer, error)
+}
+type QueryResolver interface {
+	Customers(ctx context.Context, ids []string) ([]*gqlmodels.Customer, error)
 }
 
 type executableSchema struct {
@@ -95,83 +89,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "CustomQuery.hello":
-		if e.complexity.CustomQuery.Hello == nil {
+	case "Customer.id":
+		if e.complexity.Customer.ID == nil {
 			break
 		}
 
-		return e.complexity.CustomQuery.Hello(childComplexity), true
+		return e.complexity.Customer.ID(childComplexity), true
 
-	case "CustomQuery._service":
-		if e.complexity.CustomQuery.__resolve__service == nil {
+	case "Customer.name":
+		if e.complexity.Customer.Name == nil {
 			break
 		}
 
-		return e.complexity.CustomQuery.__resolve__service(childComplexity), true
+		return e.complexity.Customer.Name(childComplexity), true
 
-	case "CustomQuery._entities":
-		if e.complexity.CustomQuery.__resolve_entities == nil {
+	case "Entity.findManyCustomerByIDs":
+		if e.complexity.Entity.FindManyCustomerByIDs == nil {
 			break
 		}
 
-		args, err := ec.field_CustomQuery__entities_args(context.TODO(), rawArgs)
+		args, err := ec.field_Entity_findManyCustomerByIDs_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.CustomQuery.__resolve_entities(childComplexity, args["representations"].([]map[string]interface{})), true
+		return e.complexity.Entity.FindManyCustomerByIDs(childComplexity, args["reps"].([]*gqlmodels.CustomerByIDsInput)), true
 
-	case "Entity.findHelloByName":
-		if e.complexity.Entity.FindHelloByName == nil {
+	case "Query.customers":
+		if e.complexity.Query.Customers == nil {
 			break
 		}
 
-		args, err := ec.field_Entity_findHelloByName_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_customers_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindHelloByName(childComplexity, args["name"].(string)), true
+		return e.complexity.Query.Customers(childComplexity, args["ids"].([]string)), true
 
-	case "Entity.findManyExternalExtensionByUpcs":
-		if e.complexity.Entity.FindManyExternalExtensionByUpcs == nil {
+	case "Query._service":
+		if e.complexity.Query.__resolve__service == nil {
 			break
 		}
 
-		args, err := ec.field_Entity_findManyExternalExtensionByUpcs_args(context.TODO(), rawArgs)
+		return e.complexity.Query.__resolve__service(childComplexity), true
+
+	case "Query._entities":
+		if e.complexity.Query.__resolve_entities == nil {
+			break
+		}
+
+		args, err := ec.field_Query__entities_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyExternalExtensionByUpcs(childComplexity, args["reps"].([]gqlmodels.ExternalExtensionByUpcsInput)), true
-
-	case "ExternalExtension.reviews":
-		if e.complexity.ExternalExtension.Reviews == nil {
-			break
-		}
-
-		return e.complexity.ExternalExtension.Reviews(childComplexity), true
-
-	case "ExternalExtension.upc":
-		if e.complexity.ExternalExtension.Upc == nil {
-			break
-		}
-
-		return e.complexity.ExternalExtension.Upc(childComplexity), true
-
-	case "Hello.name":
-		if e.complexity.Hello.Name == nil {
-			break
-		}
-
-		return e.complexity.Hello.Name(childComplexity), true
-
-	case "Hello.secondary":
-		if e.complexity.Hello.Secondary == nil {
-			break
-		}
-
-		return e.complexity.Hello.Secondary(childComplexity), true
+		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]interface{})), true
 
 	case "_Service.sdl":
 		if e.complexity._Service.SDL == nil {
@@ -188,7 +161,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputExternalExtensionByUpcsInput,
+		ec.unmarshalInputCustomerByIDsInput,
 	)
 	first := true
 
@@ -200,7 +173,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._CustomQuery(ctx, rc.Operation.SelectionSet)
+			data := ec._Query(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -234,39 +207,15 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `extend schema
-    @link(
-        url: "https://specs.apollo.dev/federation/v2.0"
-        import: [
-            "@key"
-            "@shareable"
-            "@provides"
-            "@external"
-            "@tag"
-            "@extends"
-            "@override"
-            "@inaccessible"
-        ]
-    )
+	{Name: "../schema/schema.graphql", Input: `directive @entityResolver(multi: Boolean) on OBJECT
 
-schema {
-    query: CustomQuery
+type Customer @key(fields: "id") @entityResolver(multi: true) {
+    id: ID!
+    name: String
 }
 
-directive @entityResolver(multi: Boolean) on OBJECT
-
-type Hello @key(fields: "name") {
-    name: String!
-    secondary: String!
-}
-
-extend type ExternalExtension @key(fields: "upc") @entityResolver(multi: true) {
-    upc: String!
-    reviews: [Hello]
-}
-
-type CustomQuery {
-    hello: Hello
+type Query {
+    customers(ids: [ID!]!): [Customer]
 }
 `, BuiltIn: false},
 	{Name: "../../../federation/directives.graphql", Input: `
@@ -287,16 +236,15 @@ type CustomQuery {
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = ExternalExtension | Hello
+union _Entity = Customer
 
-input ExternalExtensionByUpcsInput {
-	Upc: String!
+input CustomerByIDsInput {
+	ID: ID!
 }
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
-		findManyExternalExtensionByUpcs(reps: [ExternalExtensionByUpcsInput!]!): [ExternalExtension]
-	findHelloByName(name: String!,): Hello!
+		findManyCustomerByIDs(reps: [CustomerByIDsInput!]!): [Customer]
 
 }
 
@@ -304,7 +252,7 @@ type _Service {
   sdl: String
 }
 
-extend type CustomQuery {
+extend type Query {
   _entities(representations: [_Any!]!): [_Entity]!
   _service: _Service!
 }
@@ -331,7 +279,22 @@ func (ec *executionContext) dir_entityResolver_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_CustomQuery___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Entity_findManyCustomerByIDs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*gqlmodels.CustomerByIDsInput
+	if tmp, ok := rawArgs["reps"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
+		arg0, err = ec.unmarshalNCustomerByIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomerByIDsInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["reps"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -346,7 +309,7 @@ func (ec *executionContext) field_CustomQuery___type_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_CustomQuery__entities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 []map[string]interface{}
@@ -361,33 +324,18 @@ func (ec *executionContext) field_CustomQuery__entities_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_customers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 []string
+	if tmp, ok := rawArgs["ids"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
+		arg0, err = ec.unmarshalNID2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Entity_findManyExternalExtensionByUpcs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 []gqlmodels.ExternalExtensionByUpcsInput
-	if tmp, ok := rawArgs["reps"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNExternalExtensionByUpcsInput2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtensionByUpcsInputᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["reps"] = arg0
+	args["ids"] = arg0
 	return args, nil
 }
 
@@ -429,8 +377,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _CustomQuery_hello(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CustomQuery_hello(ctx, field)
+func (ec *executionContext) _Customer_id(ctx context.Context, field graphql.CollectedField, obj *gqlmodels.Customer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Customer_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -443,7 +391,51 @@ func (ec *executionContext) _CustomQuery_hello(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.CustomQuery().Hello(rctx)
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Customer_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Customer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Customer_name(ctx context.Context, field graphql.CollectedField, obj *gqlmodels.Customer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Customer_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -452,32 +444,190 @@ func (ec *executionContext) _CustomQuery_hello(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gqlmodels.Hello)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CustomQuery_hello(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Customer_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CustomQuery",
+		Object:     "Customer",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return ec.fieldContext_Hello_name(ctx, field)
-			case "secondary":
-				return ec.fieldContext_Hello_secondary(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _CustomQuery__entities(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CustomQuery__entities(ctx, field)
+func (ec *executionContext) _Entity_findManyCustomerByIDs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Entity_findManyCustomerByIDs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Entity().FindManyCustomerByIDs(rctx, fc.Args["reps"].([]*gqlmodels.CustomerByIDsInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.EntityResolver == nil {
+				return nil, errors.New("directive entityResolver is not implemented")
+			}
+			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*gqlmodels.Customer); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/_examples/federation/multi/internal/graphql/gqlmodels.Customer`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*gqlmodels.Customer)
+	fc.Result = res
+	return ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomer(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Entity_findManyCustomerByIDs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Customer_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Customer_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Customer", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findManyCustomerByIDs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_customers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Customers(rctx, fc.Args["ids"].([]string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.EntityResolver == nil {
+				return nil, errors.New("directive entityResolver is not implemented")
+			}
+			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*gqlmodels.Customer); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/_examples/federation/multi/internal/graphql/gqlmodels.Customer`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*gqlmodels.Customer)
+	fc.Result = res
+	return ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomer(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_customers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Customer_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Customer_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Customer", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_customers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query__entities(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query__entities(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -507,9 +657,9 @@ func (ec *executionContext) _CustomQuery__entities(ctx context.Context, field gr
 	return ec.marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CustomQuery__entities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query__entities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CustomQuery",
+		Object:     "Query",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: false,
@@ -524,15 +674,15 @@ func (ec *executionContext) fieldContext_CustomQuery__entities(ctx context.Conte
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_CustomQuery__entities_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query__entities_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _CustomQuery__service(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CustomQuery__service(ctx, field)
+func (ec *executionContext) _Query__service(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query__service(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -562,9 +712,9 @@ func (ec *executionContext) _CustomQuery__service(ctx context.Context, field gra
 	return ec.marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐService(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CustomQuery__service(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query__service(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CustomQuery",
+		Object:     "Query",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: false,
@@ -579,8 +729,8 @@ func (ec *executionContext) fieldContext_CustomQuery__service(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _CustomQuery___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CustomQuery___type(ctx, field)
+func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -607,9 +757,9 @@ func (ec *executionContext) _CustomQuery___type(ctx context.Context, field graph
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CustomQuery___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CustomQuery",
+		Object:     "Query",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: false,
@@ -646,15 +796,15 @@ func (ec *executionContext) fieldContext_CustomQuery___type(ctx context.Context,
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_CustomQuery___type_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query___type_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _CustomQuery___schema(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CustomQuery___schema(ctx, field)
+func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query___schema(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -681,9 +831,9 @@ func (ec *executionContext) _CustomQuery___schema(ctx context.Context, field gra
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CustomQuery___schema(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CustomQuery",
+		Object:     "Query",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: false,
@@ -703,328 +853,6 @@ func (ec *executionContext) fieldContext_CustomQuery___schema(ctx context.Contex
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Entity_findManyExternalExtensionByUpcs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Entity_findManyExternalExtensionByUpcs(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyExternalExtensionByUpcs(rctx, fc.Args["reps"].([]gqlmodels.ExternalExtensionByUpcsInput))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.EntityResolver == nil {
-				return nil, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*gqlmodels.ExternalExtension); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/federatedentityresolver/gqlmodels.ExternalExtension`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*gqlmodels.ExternalExtension)
-	fc.Result = res
-	return ec.marshalOExternalExtension2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtension(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Entity_findManyExternalExtensionByUpcs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Entity",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "upc":
-				return ec.fieldContext_ExternalExtension_upc(ctx, field)
-			case "reviews":
-				return ec.fieldContext_ExternalExtension_reviews(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ExternalExtension", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Entity_findManyExternalExtensionByUpcs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Entity_findHelloByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Entity_findHelloByName(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Entity().FindHelloByName(rctx, fc.Args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*gqlmodels.Hello)
-	fc.Result = res
-	return ec.marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Entity_findHelloByName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Entity",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return ec.fieldContext_Hello_name(ctx, field)
-			case "secondary":
-				return ec.fieldContext_Hello_secondary(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Entity_findHelloByName_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ExternalExtension_upc(ctx context.Context, field graphql.CollectedField, obj *gqlmodels.ExternalExtension) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ExternalExtension_upc(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Upc, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ExternalExtension_upc(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ExternalExtension",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ExternalExtension_reviews(ctx context.Context, field graphql.CollectedField, obj *gqlmodels.ExternalExtension) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ExternalExtension_reviews(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Reviews, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*gqlmodels.Hello)
-	fc.Result = res
-	return ec.marshalOHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ExternalExtension_reviews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ExternalExtension",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return ec.fieldContext_Hello_name(ctx, field)
-			case "secondary":
-				return ec.fieldContext_Hello_secondary(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Hello_name(ctx context.Context, field graphql.CollectedField, obj *gqlmodels.Hello) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Hello_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Hello_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Hello",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Hello_secondary(ctx context.Context, field graphql.CollectedField, obj *gqlmodels.Hello) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Hello_secondary(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Secondary, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Hello_secondary(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Hello",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2844,25 +2672,25 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputExternalExtensionByUpcsInput(ctx context.Context, obj interface{}) (gqlmodels.ExternalExtensionByUpcsInput, error) {
-	var it gqlmodels.ExternalExtensionByUpcsInput
+func (ec *executionContext) unmarshalInputCustomerByIDsInput(ctx context.Context, obj interface{}) (gqlmodels.CustomerByIDsInput, error) {
+	var it gqlmodels.CustomerByIDsInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"Upc"}
+	fieldsInOrder := [...]string{"ID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "Upc":
+		case "ID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Upc"))
-			it.Upc, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ID"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2880,20 +2708,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case gqlmodels.ExternalExtension:
-		return ec._ExternalExtension(ctx, sel, &obj)
-	case *gqlmodels.ExternalExtension:
+	case gqlmodels.Customer:
+		return ec._Customer(ctx, sel, &obj)
+	case *gqlmodels.Customer:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._ExternalExtension(ctx, sel, obj)
-	case gqlmodels.Hello:
-		return ec._Hello(ctx, sel, &obj)
-	case *gqlmodels.Hello:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Hello(ctx, sel, obj)
+		return ec._Customer(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -2903,102 +2724,26 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 
 // region    **************************** object.gotpl ****************************
 
-var customQueryImplementors = []string{"CustomQuery"}
+var customerImplementors = []string{"Customer", "_Entity"}
 
-func (ec *executionContext) _CustomQuery(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, customQueryImplementors)
-	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
-		Object: "CustomQuery",
-	})
-
+func (ec *executionContext) _Customer(ctx context.Context, sel ast.SelectionSet, obj *gqlmodels.Customer) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, customerImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
-		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
-			Object: field.Name,
-			Field:  field,
-		})
-
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("CustomQuery")
-		case "hello":
-			field := field
+			out.Values[i] = graphql.MarshalString("Customer")
+		case "id":
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._CustomQuery_hello(ctx, field)
-				return res
+			out.Values[i] = ec._Customer_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
 			}
+		case "name":
 
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "_entities":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._CustomQuery__entities(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "_service":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._CustomQuery__service(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "__type":
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._CustomQuery___type(ctx, field)
-			})
-
-		case "__schema":
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._CustomQuery___schema(ctx, field)
-			})
+			out.Values[i] = ec._Customer_name(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -3030,7 +2775,7 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Entity")
-		case "findManyExternalExtensionByUpcs":
+		case "findManyCustomerByIDs":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3039,7 +2784,7 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Entity_findManyExternalExtensionByUpcs(ctx, field)
+				res = ec._Entity_findManyCustomerByIDs(ctx, field)
 				return res
 			}
 
@@ -3050,7 +2795,37 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "findHelloByName":
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var queryImplementors = []string{"Query"}
+
+func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, queryImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Query",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Query")
+		case "customers":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -3059,7 +2834,27 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Entity_findHelloByName(ctx, field)
+				res = ec._Query_customers(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "_entities":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query__entities(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3073,73 +2868,41 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
+		case "_service":
+			field := field
 
-var externalExtensionImplementors = []string{"ExternalExtension", "_Entity"}
-
-func (ec *executionContext) _ExternalExtension(ctx context.Context, sel ast.SelectionSet, obj *gqlmodels.ExternalExtension) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, externalExtensionImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ExternalExtension")
-		case "upc":
-
-			out.Values[i] = ec._ExternalExtension_upc(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query__service(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
-		case "reviews":
 
-			out.Values[i] = ec._ExternalExtension_reviews(ctx, field, obj)
-
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var helloImplementors = []string{"Hello", "_Entity"}
-
-func (ec *executionContext) _Hello(ctx context.Context, sel ast.SelectionSet, obj *gqlmodels.Hello) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, helloImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Hello")
-		case "name":
-
-			out.Values[i] = ec._Hello_name(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
 			}
-		case "secondary":
 
-			out.Values[i] = ec._Hello_secondary(ctx, field, obj)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "__type":
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Query___type(ctx, field)
+			})
+
+		case "__schema":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Query___schema(ctx, field)
+			})
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3509,21 +3272,16 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNExternalExtensionByUpcsInput2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtensionByUpcsInput(ctx context.Context, v interface{}) (gqlmodels.ExternalExtensionByUpcsInput, error) {
-	res, err := ec.unmarshalInputExternalExtensionByUpcsInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNExternalExtensionByUpcsInput2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtensionByUpcsInputᚄ(ctx context.Context, v interface{}) ([]gqlmodels.ExternalExtensionByUpcsInput, error) {
+func (ec *executionContext) unmarshalNCustomerByIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomerByIDsInputᚄ(ctx context.Context, v interface{}) ([]*gqlmodels.CustomerByIDsInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]gqlmodels.ExternalExtensionByUpcsInput, len(vSlice))
+	res := make([]*gqlmodels.CustomerByIDsInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNExternalExtensionByUpcsInput2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtensionByUpcsInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNCustomerByIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomerByIDsInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -3531,18 +3289,56 @@ func (ec *executionContext) unmarshalNExternalExtensionByUpcsInput2ᚕgithubᚗc
 	return res, nil
 }
 
-func (ec *executionContext) marshalNHello2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx context.Context, sel ast.SelectionSet, v gqlmodels.Hello) graphql.Marshaler {
-	return ec._Hello(ctx, sel, &v)
+func (ec *executionContext) unmarshalNCustomerByIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomerByIDsInput(ctx context.Context, v interface{}) (*gqlmodels.CustomerByIDsInput, error) {
+	res, err := ec.unmarshalInputCustomerByIDsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx context.Context, sel ast.SelectionSet, v *gqlmodels.Hello) graphql.Marshaler {
-	if v == nil {
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
-		return graphql.Null
 	}
-	return ec._Hello(ctx, sel, v)
+	return res
+}
+
+func (ec *executionContext) unmarshalNID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -3651,13 +3447,14 @@ func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	return ret
 }
 
-func (ec *executionContext) unmarshalN_FieldSet2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
+func (ec *executionContext) unmarshalN_FieldSet2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfieldsetᚐFieldSet(ctx context.Context, v interface{}) (fieldset.FieldSet, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := fieldset.FieldSet(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalN_FieldSet2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
+func (ec *executionContext) marshalN_FieldSet2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfieldsetᚐFieldSet(ctx context.Context, sel ast.SelectionSet, v fieldset.FieldSet) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3949,7 +3746,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOExternalExtension2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtension(ctx context.Context, sel ast.SelectionSet, v []*gqlmodels.ExternalExtension) graphql.Marshaler {
+func (ec *executionContext) marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomer(ctx context.Context, sel ast.SelectionSet, v []*gqlmodels.Customer) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3976,7 +3773,7 @@ func (ec *executionContext) marshalOExternalExtension2ᚕᚖgithubᚗcomᚋ99des
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOExternalExtension2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtension(ctx, sel, v[i])
+			ret[i] = ec.marshalOCustomer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomer(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3990,59 +3787,11 @@ func (ec *executionContext) marshalOExternalExtension2ᚕᚖgithubᚗcomᚋ99des
 	return ret
 }
 
-func (ec *executionContext) marshalOExternalExtension2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐExternalExtension(ctx context.Context, sel ast.SelectionSet, v *gqlmodels.ExternalExtension) graphql.Marshaler {
+func (ec *executionContext) marshalOCustomer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋmultiᚋinternalᚋgraphqlᚋgqlmodelsᚐCustomer(ctx context.Context, sel ast.SelectionSet, v *gqlmodels.Customer) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._ExternalExtension(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx context.Context, sel ast.SelectionSet, v []*gqlmodels.Hello) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋfederatedentityresolverᚋgqlmodelsᚐHello(ctx context.Context, sel ast.SelectionSet, v *gqlmodels.Hello) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Hello(ctx, sel, v)
+	return ec._Customer(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

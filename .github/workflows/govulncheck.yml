@@ -1,0 +1,22 @@
+name: govulncheck
+
+on: [push, pull_request]
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@main
+      - name: Scan for Vulnerabilities in Code
+        uses: Templum/govulncheck-action@main
+        with:
+          go-version: 1.19
+          vulncheck-version: latest
+          package: ./...
+          fail-on-vuln: true
+          skip-upload: true

@@ -4,7 +4,7 @@ package gqlmodels
 
 type ExternalExtension struct {
 	Upc     string   `json:"upc"`
-	Reviews []*Hello `json:"reviews"`
+	Reviews []*Hello `json:"reviews,omitempty"`
 }
 
 func (ExternalExtension) IsEntity() {}

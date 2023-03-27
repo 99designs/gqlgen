@@ -10,6 +10,8 @@ federation:
 model:
   filename: testdata/federatedentityresolver/gqlmodels/gqlmodels.go
   package: gqlmodels
+autobind:
+  - "github.com/99designs/gqlgen/plugin/federation/testdata/federatedentityresolver/gqlmodels"
 resolver:
   layout: follow-schema
   dir: testdata/federatedentityresolver/resolvers

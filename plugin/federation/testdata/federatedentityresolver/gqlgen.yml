@@ -1,0 +1,26 @@
+schema:
+  - "testdata/federatedentityresolver/schema.graphql"
+exec:
+  filename: testdata/federatedentityresolver/generated/exec.go
+  package: generated
+federation:
+  filename: testdata/federatedentityresolver/generated/federation.go
+  package: generated
+  version: 2
+model:
+  filename: testdata/federatedentityresolver/gqlmodels/gqlmodels.go
+  package: gqlmodels
+resolver:
+  layout: follow-schema
+  dir: testdata/federatedentityresolver/resolvers
+  package: resolvers
+  filename_template: "{name}.resolvers.go"
+
+omit_slice_element_pointers: true
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.String
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.ID

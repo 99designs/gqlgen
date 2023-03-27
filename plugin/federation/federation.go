@@ -11,6 +11,7 @@ import (
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
@@ -19,8 +20,21 @@ import (
 var federationTemplate string
 
 type federation struct {
-	Entities []*Entity
-	Version  int
+	Entities     []*Entity
+	Version      int
+	imports      []rewrite.Import
+	ModelPackage string
+}
+
+func (f *federation) Imports() string {
+	for _, imp := range f.imports {
+		if imp.Alias == "" {
+			_, _ = templates.CurrentImports.Reserve(imp.ImportPath)
+		} else {
+			_, _ = templates.CurrentImports.Reserve(imp.ImportPath, imp.Alias)
+		}
+	}
+	return ""
 }
 
 // New returns a federation plugin that injects
@@ -199,6 +213,13 @@ type Entity {
 }
 
 func (f *federation) GenerateCode(data *codegen.Data) error {
+	if data.Config.Federation.Package != data.Config.Model.Package {
+		f.ModelPackage = fmt.Sprintf("%v.", data.Config.Model.Package)
+		f.imports = []rewrite.Import{
+			{ImportPath: data.Config.Model.ImportPath(),
+				Alias: ""},
+		}
+	}
 	if len(f.Entities) > 0 {
 		if data.Objects.ByName("Entity") != nil {
 			data.Objects.ByName("Entity").Root = true

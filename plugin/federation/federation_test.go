@@ -116,6 +116,16 @@ func TestCodeGeneration(t *testing.T) {
 	require.NoError(t, f.GenerateCode(data))
 }
 
+func TestCodeGenerationFederation2SplitDir(t *testing.T) {
+	f, cfg := load(t, "testdata/federatedentityresolver/gqlgen.yml")
+	err := f.MutateConfig(cfg)
+	require.NoError(t, err)
+	data, err := codegen.BuildData(cfg)
+	require.NoError(t, err)
+	err = f.GenerateCode(data)
+	require.NoError(t, err)
+}
+
 func TestCodeGenerationFederation2(t *testing.T) {
 	f, cfg := load(t, "testdata/federation2/federation2.yml")
 	err := f.MutateConfig(cfg)

@@ -1,0 +1,34 @@
+extend schema
+    @link(
+        url: "https://specs.apollo.dev/federation/v2.0"
+        import: [
+            "@key"
+            "@shareable"
+            "@provides"
+            "@external"
+            "@tag"
+            "@extends"
+            "@override"
+            "@inaccessible"
+        ]
+    )
+
+schema {
+    query: CustomQuery
+}
+
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type Hello @key(fields: "name") {
+    name: String!
+    secondary: String!
+}
+
+extend type ExternalExtension @key(fields: "upc") @entityResolver(multi: true) {
+    upc: String!
+    reviews: [Hello]
+}
+
+type CustomQuery {
+    hello: Hello
+}

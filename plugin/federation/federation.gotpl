@@ -4,12 +4,16 @@
 {{ reserveImport "strings"  }}
 {{ reserveImport "sync"  }}
 
+{{ .Imports }}
+
 {{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
 
 var (
 	ErrUnknownType = errors.New("unknown type")
 	ErrTypeNotFound = errors.New("type not found")
 )
+
+{{$out := .}}
 
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
 	if ec.DisableIntrospection {
@@ -133,7 +137,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				{{ if and .Resolvers .Multi -}}
 				case "{{.Def.Name}}":
 					{{range $i, $_ := .Resolvers -}}
-						_reps := make([]*{{.InputType}}, len(reps))
+						_reps := make([]*{{$out.ModelPackage}}{{.InputType}}, len(reps))
 
 						for i, rep := range reps {
 							{{ range $i, $keyField := .KeyFields -}}
@@ -143,7 +147,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 								}
 							{{end}}
 
-							_reps[i] = &{{.InputType}} {
+							_reps[i] = &{{$out.ModelPackage}}{{.InputType}} {
 							{{ range $i, $keyField := .KeyFields -}}
 								{{$keyField.Field.ToGo}}: id{{$i}},
 							{{end}}

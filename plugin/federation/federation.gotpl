@@ -133,7 +133,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				{{ if and .Resolvers .Multi -}}
 				case "{{.Def.Name}}":
 					{{range $i, $_ := .Resolvers -}}
-						_reps := make([]*{{.InputType}}, len(reps))
+						_reps := make([]*{{.LookupInputType}}, len(reps))
 
 						for i, rep := range reps {
 							{{ range $i, $keyField := .KeyFields -}}
@@ -143,7 +143,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 								}
 							{{end}}
 
-							_reps[i] = &{{.InputType}} {
+							_reps[i] = &{{.LookupInputType}} {
 							{{ range $i, $keyField := .KeyFields -}}
 								{{$keyField.Field.ToGo}}: id{{$i}},
 							{{end}}

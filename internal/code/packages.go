@@ -7,9 +7,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
+	"strings"
+	"sync"
 
 	"golang.org/x/tools/go/packages"
 )
+
+var once = sync.Once{}
+var modInfo *debug.BuildInfo
 
 var mode = packages.NeedName |
 	packages.NeedFiles |
@@ -31,10 +37,38 @@ type Packages struct {
 	numNameCalls int // stupid test steam. ignore.
 }
 
+func (p *Packages) CleanupUserPackages() {
+	once.Do(func() {
+		var ok bool
+		modInfo, ok = debug.ReadBuildInfo()
+		if !ok {
+			modInfo = nil
+		}
+	})
+
+	// Don't cleanup github.com/99designs/gqlgen prefixed packages, they haven't changed and do not need to be reloaded
+	if modInfo != nil {
+		var toRemove []string
+		for k := range p.packages {
+			if !strings.HasPrefix(k, modInfo.Main.Path) {
+				toRemove = append(toRemove, k)
+			}
+		}
+
+		for _, k := range toRemove {
+			delete(p.packages, k)
+		}
+	} else {
+		p.packages = nil // Cleanup all packages if we don't know for some reason which ones to keep
+	}
+}
+
 // ReloadAll will call LoadAll after clearing the package cache, so we can reload
 // packages in the case that the packages have changed
 func (p *Packages) ReloadAll(importPaths ...string) []*packages.Package {
-	p.packages = nil
+	if p.packages != nil {
+		p.CleanupUserPackages()
+	}
 	return p.LoadAll(importPaths...)
 }
 

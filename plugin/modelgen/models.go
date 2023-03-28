@@ -434,6 +434,11 @@ func removeDuplicateTags(t string) string {
 	// iterate backwards through tags so appended goTag directives are prioritized
 	for i := len(tt) - 1; i >= 0; i-- {
 		ti := tt[i]
+		// check if ti contains ":", and not contains any empty space. if not, tag is in wrong format
+		if !strings.Contains(ti, ":") || strings.Contains(ti, " ") {
+			panic(fmt.Errorf("wrong format of tags: %s. goTag directive should be in format: @goTag(key: \"something\", value:\"value1,value2,etc\"), no empty space is allowed", t))
+		}
+
 		kv := strings.Split(ti, ":")
 		if len(kv) == 0 || processed[kv[0]] {
 			continue

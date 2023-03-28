@@ -356,9 +356,10 @@ func TestRemoveDuplicate(t *testing.T) {
 		t string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name      string
+		args      args
+		want      string
+		wantPanic bool
 	}{
 		{
 			name: "Duplicate Test with 1",
@@ -395,11 +396,23 @@ func TestRemoveDuplicate(t *testing.T) {
 			},
 			want: "something:\"name2\" json:\"name3\"",
 		},
+		{
+			name: "Test value with empty space",
+			args: args{
+				t: "json:\"name, name2\"",
+			},
+			want:      "json:\"name, name2\"",
+			wantPanic: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := removeDuplicateTags(tt.args.t); got != tt.want {
-				t.Errorf("removeDuplicate() = %v, want %v", got, tt.want)
+			if tt.wantPanic {
+				assert.Panics(t, func() { removeDuplicateTags(tt.args.t) }, "The code did not panic")
+			} else {
+				if got := removeDuplicateTags(tt.args.t); got != tt.want {
+					t.Errorf("removeDuplicate() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}

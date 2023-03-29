@@ -89,8 +89,6 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	input := `
 	scalar _Any
 	scalar _FieldSet
-
-	directive @external on FIELD_DEFINITION
 	directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @extends on OBJECT | INTERFACE
@@ -99,10 +97,12 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	if f.Version == 1 {
 		input += `
 	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+	directive @external on FIELD_DEFINITION
 `
 	} else if f.Version == 2 {
 		input += `
 	directive @key(fields: _FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+	directive @external on FIELD_DEFINITION | OBJECT
 	directive @link(import: [String!], url: String!) repeatable on SCHEMA
 	directive @shareable on OBJECT | FIELD_DEFINITION
 	directive @tag(name: String!) repeatable on FIELD_DEFINITION | INTERFACE | OBJECT | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION

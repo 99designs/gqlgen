@@ -24,6 +24,7 @@ type (
 		InitFunc              WebsocketInitFunc
 		InitTimeout           time.Duration
 		ErrorFunc             WebsocketErrorFunc
+		CloseFunc             WebsocketCloseFunc
 		KeepAlivePingInterval time.Duration
 		PingPongInterval      time.Duration
 
@@ -45,6 +46,9 @@ type (
 
 	WebsocketInitFunc  func(ctx context.Context, initPayload InitPayload) (context.Context, error)
 	WebsocketErrorFunc func(ctx context.Context, err error)
+
+	// Callback called when websocket is closed.
+	WebsocketCloseFunc func(ctx context.Context, closeCode int)
 )
 
 var errReadTimeout = errors.New("read timeout")
@@ -433,4 +437,5 @@ func (c *wsConnection) close(closeCode int, message string) {
 	}
 	c.mu.Unlock()
 	_ = c.conn.Close()
+	c.CloseFunc(c.ctx, closeCode)
 }

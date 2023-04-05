@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -100,14 +101,18 @@ var path2regex = strings.NewReplacer(
 
 // LoadConfig reads the gqlgen.yml config file
 func LoadConfig(filename string) (*Config, error) {
-	config := DefaultConfig()
-
 	b, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
 
-	dec := yaml.NewDecoder(bytes.NewReader(b))
+	return ReadConfig(bytes.NewReader(b))
+}
+
+func ReadConfig(cfgFile io.Reader) (*Config, error) {
+	config := DefaultConfig()
+
+	dec := yaml.NewDecoder(cfgFile)
 	dec.KnownFields(true)
 
 	if err := dec.Decode(config); err != nil {
@@ -117,8 +122,6 @@ func LoadConfig(filename string) (*Config, error) {
 	if err := CompleteConfig(config); err != nil {
 		return nil, err
 	}
-
-	return config, nil
 }
 
 // CompleteConfig fills in the schema and other values to a config loaded from

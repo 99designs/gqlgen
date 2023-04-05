@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,19 +22,30 @@ func TestLoadConfig(t *testing.T) {
 		_, err := LoadConfig("doesnotexist.yml")
 		require.Error(t, err)
 	})
+}
+
+func TestReadConfig(t *testing.T) {
+	t.Run("empty config", func(t *testing.T) {
+		_, err := ReadConfig(strings.NewReader(""))
+		require.EqualError(t, err, "unable to parse config: EOF")
+	})
+
 
 	t.Run("malformed config", func(t *testing.T) {
-		_, err := LoadConfig("testdata/cfg/malformedconfig.yml")
+		cfgFile, _ := os.Open("testdata/cfg/malformedconfig.yml")
+		_, err := ReadConfig(cfgFile)
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `asdf` into config.Config")
 	})
 
 	t.Run("unknown keys", func(t *testing.T) {
-		_, err := LoadConfig("testdata/cfg/unknownkeys.yml")
+		cfgFile, _ := os.Open("testdata/cfg/unknownkeys.yml")
+		_, err := ReadConfig(cfgFile)
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 2: field unknown not found in type config.Config")
 	})
 
 	t.Run("globbed filenames", func(t *testing.T) {
-		c, err := LoadConfig("testdata/cfg/glob.yml")
+		cfgFile, _ := os.Open("testdata/cfg/glob.yml")
+		c, err := ReadConfig(cfgFile)
 		require.NoError(t, err)
 
 		if runtime.GOOS == "windows" {
@@ -46,7 +58,8 @@ func TestLoadConfig(t *testing.T) {
 	})
 
 	t.Run("unwalkable path", func(t *testing.T) {
-		_, err := LoadConfig("testdata/cfg/unwalkable.yml")
+		cfgFile, _ := os.Open("testdata/cfg/unwalkable.yml")
+		_, err := ReadConfig(cfgFile)
 		if runtime.GOOS == "windows" {
 			require.EqualError(t, err, "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified.")
 		} else {

@@ -122,6 +122,8 @@ func ReadConfig(cfgFile io.Reader) (*Config, error) {
 	if err := CompleteConfig(config); err != nil {
 		return nil, err
 	}
+
+	return nil, nil
 }
 
 // CompleteConfig fills in the schema and other values to a config loaded from

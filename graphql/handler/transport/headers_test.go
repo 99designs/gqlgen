@@ -21,7 +21,7 @@ func TestHeadersWithPOST(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.POST{})
 
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, 1, len(resp.Header()))
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
@@ -36,7 +36,7 @@ func TestHeadersWithPOST(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.POST{ResponseHeaders: headers})
 
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, 2, len(resp.Header()))
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
@@ -50,7 +50,7 @@ func TestHeadersWithGET(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GET{})
 
-		resp := doRequest(h, "GET", "/graphql?query={name}", "")
+		resp := doRequest(h, "GET", "/graphql?query={name}", "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, 1, len(resp.Header()))
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
@@ -65,11 +65,39 @@ func TestHeadersWithGET(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GET{ResponseHeaders: headers})
 
-		resp := doRequest(h, "GET", "/graphql?query={name}", "")
+		resp := doRequest(h, "GET", "/graphql?query={name}", "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, 2, len(resp.Header()))
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
 		assert.Equal(t, "dummy-get", resp.Header().Get("Other-Header"))
+	})
+}
+
+func TestHeadersWithGRAPHQL(t *testing.T) {
+	t.Run("Headers not set", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.GRAPHQL{})
+
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/graphql")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, 1, len(resp.Header()))
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+	})
+
+	t.Run("Headers set", func(t *testing.T) {
+		headers := map[string][]string{
+			"Content-Type": {"application/json; charset: utf8"},
+			"Other-Header": {"dummy-get-qraphql"},
+		}
+
+		h := testserver.New()
+		h.AddTransport(transport.GRAPHQL{ResponseHeaders: headers})
+
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/graphql")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, 2, len(resp.Header()))
+		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
+		assert.Equal(t, "dummy-get-qraphql", resp.Header().Get("Other-Header"))
 	})
 }
 

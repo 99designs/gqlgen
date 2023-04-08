@@ -447,6 +447,58 @@ func TestWebSocketErrorFunc(t *testing.T) {
 	})
 }
 
+func TestWebSocketCloseFunc(t *testing.T) {
+	t.Run("the on close handler gets called when the websocket is closed", func(t *testing.T) {
+		closeFuncCalled := make(chan bool, 1)
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			CloseFunc: func(_ context.Context, _closeCode int) {
+				closeFuncCalled <- true
+			},
+		})
+
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionTerminateMsg}))
+
+		select {
+		case res := <-closeFuncCalled:
+			assert.True(t, res)
+		case <-time.NewTimer(time.Millisecond * 20).C:
+			assert.Fail(t, "The close handler was not called in time")
+		}
+	})
+
+	t.Run("init func errors call the close handler", func(t *testing.T) {
+		h := testserver.New()
+		closeFuncCalled := make(chan bool, 1)
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
+				return ctx, errors.New("error during init")
+			},
+			CloseFunc: func(_ context.Context, _closeCode int) {
+				closeFuncCalled <- true
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		select {
+		case res := <-closeFuncCalled:
+			assert.True(t, res)
+		case <-time.NewTimer(time.Millisecond * 20).C:
+			assert.Fail(t, "The close handler was not called in time")
+		}
+	})
+}
+
 func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 	initialize := func(ws transport.Websocket) (*testserver.TestServer, *httptest.Server) {
 		h := testserver.New()

@@ -123,7 +123,7 @@ func ReadConfig(cfgFile io.Reader) (*Config, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return config, nil
 }
 
 // CompleteConfig fills in the schema and other values to a config loaded from

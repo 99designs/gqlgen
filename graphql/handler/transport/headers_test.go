@@ -101,6 +101,34 @@ func TestHeadersWithGRAPHQL(t *testing.T) {
 	})
 }
 
+func TestHeadersWithFormUrlEncoded(t *testing.T) {
+	t.Run("Headers not set", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.UrlEncodedForm{})
+
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/x-www-form-urlencoded")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, 1, len(resp.Header()))
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+	})
+
+	t.Run("Headers set", func(t *testing.T) {
+		headers := map[string][]string{
+			"Content-Type": {"application/json; charset: utf8"},
+			"Other-Header": {"dummy-get-urlencoded-form"},
+		}
+
+		h := testserver.New()
+		h.AddTransport(transport.UrlEncodedForm{ResponseHeaders: headers})
+
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/x-www-form-urlencoded")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, 2, len(resp.Header()))
+		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
+		assert.Equal(t, "dummy-get-urlencoded-form", resp.Header().Get("Other-Header"))
+	})
+}
+
 func TestHeadersWithMULTIPART(t *testing.T) {
 	t.Run("Headers not set", func(t *testing.T) {
 		es := &graphql.ExecutableSchemaMock{

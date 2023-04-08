@@ -76,15 +76,14 @@ func (h UrlEncodedForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.
 }
 
 func (h UrlEncodedForm) parseBody(bodyString string) (*graphql.RawParams, error) {
-	if strings.Contains(bodyString, "\"query\":") {
+	switch {
+	case strings.Contains(bodyString, "\"query\":"):
 		// body is json
 		return h.parseJson(bodyString)
-
-	} else if strings.HasPrefix(bodyString, "query=%7B") {
+	case strings.HasPrefix(bodyString, "query=%7B"):
 		// body is urlencoded
 		return h.parseEncoded(bodyString)
-
-	} else {
+	default:
 		// body is plain text
 		params := &graphql.RawParams{}
 		params.Query = strings.TrimPrefix(bodyString, "query=")

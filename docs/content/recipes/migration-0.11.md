@@ -28,6 +28,8 @@ response. Supported transports are:
  - GET
  - JSON POST
  - Multipart form
+ - UrlEncoded form
+ - GRAPHQL
  - Websockets
 
 new usage looks like this
@@ -41,6 +43,8 @@ srv.AddTransport(transport.Options{})
 srv.AddTransport(transport.GET{})
 srv.AddTransport(transport.POST{})
 srv.AddTransport(transport.MultipartForm{})
+srv.AddTransport(transport.UrlEncodedForm{})
+srv.AddTransport(transport.GRAPHQL{})
 ```
 
 ### New handler extension API

@@ -12,46 +12,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPOST(t *testing.T) {
+func TestGRAPHQL(t *testing.T) {
 	h := testserver.New()
-	h.AddTransport(transport.POST{})
+	h.AddTransport(transport.GRAPHQL{})
 
 	t.Run("success", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "application/json")
+		resp := doGraphqlRequest(h, "POST", "/graphql", `{ name }`)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
-	t.Run("decode failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", "notjson", "application/json")
-		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
-		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`, resp.Body.String())
+	t.Run("success even if url encoded", func(t *testing.T) {
+		resp := doGraphqlRequest(h, "POST", "/graphql", `%7B%20name%20%7D`)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "!"}`, "application/json")
+		resp := doGraphqlRequest(h, "POST", "/graphql", `{"!"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"Expected Name, found String","locations":[{"line":1,"column":3}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("validation failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "{ title }"}`, "application/json")
+		resp := doGraphqlRequest(h, "POST", "/graphql", `{ title }`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"Cannot query field \"title\" on type \"Query\".","locations":[{"line":1,"column":3}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
-	t.Run("invalid variable", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "query($id:Int!){find(id:$id)}","variables":{"id":false}}`, "application/json")
-		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
-	})
-
 	t.Run("execution failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "mutation { name }"}`, "application/json")
+		resp := doGraphqlRequest(h, "POST", "/graphql", `mutation { name }`)
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
 		assert.Equal(t, `{"errors":[{"message":"mutations are not supported"}],"data":null}`, resp.Body.String())
@@ -70,13 +62,13 @@ func TestPOST(t *testing.T) {
 		}
 
 		validContentTypes := []string{
-			"application/json",
-			"application/json; charset=utf-8",
+			"application/graphql",
+			"application/graphql; charset=utf-8",
 		}
 
 		for _, contentType := range validContentTypes {
 			t.Run(fmt.Sprintf("allow for content type %s", contentType), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, contentType)
+				resp := doReq(h, "POST", "/graphql", `{ name }`, contentType)
 				assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 				assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 			})
@@ -97,9 +89,9 @@ func TestPOST(t *testing.T) {
 	})
 }
 
-func doRequest(handler http.Handler, method string, target string, body string, contentType string) *httptest.ResponseRecorder {
+func doGraphqlRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
-	r.Header.Set("Content-Type", contentType)
+	r.Header.Set("Content-Type", "application/graphql")
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, r)

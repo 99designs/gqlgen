@@ -30,7 +30,6 @@ func TestReadConfig(t *testing.T) {
 		require.EqualError(t, err, "unable to parse config: EOF")
 	})
 
-
 	t.Run("malformed config", func(t *testing.T) {
 		cfgFile, _ := os.Open("testdata/cfg/malformedconfig.yml")
 		_, err := ReadConfig(cfgFile)

@@ -437,5 +437,8 @@ func (c *wsConnection) close(closeCode int, message string) {
 	}
 	c.mu.Unlock()
 	_ = c.conn.Close()
-	c.CloseFunc(c.ctx, closeCode)
+
+	if c.CloseFunc != nil {
+		c.CloseFunc(c.ctx, closeCode)
+	}
 }

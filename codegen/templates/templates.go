@@ -431,6 +431,10 @@ func wordWalkerFunc(private bool, nameRunes *[]rune) func(*wordInfo) {
 
 		case info.MatchCommonInitial:
 			word = strings.ToUpper(word)
+			word = strings.ToUpper(word)
+			if word == "ID" {
+				word = "Id"
+			}
 
 		case !info.HasCommonInitial && (strings.ToUpper(word) == word || strings.ToLower(word) == word):
 			// FOO or foo → Foo

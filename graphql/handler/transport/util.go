@@ -28,3 +28,23 @@ func writeJsonErrorf(w io.Writer, format string, args ...interface{}) {
 func writeJsonGraphqlError(w io.Writer, err ...*gqlerror.Error) {
 	writeJson(w, &graphql.Response{Errors: err})
 }
+
+//func writeError(enableMsgpackEncoding bool, w io.Writer, msg string) {
+//	writeResponse(enableMsgpackEncoding, w, &graphql.Response{Errors: gqlerror.List{{Message: msg}}})
+//}
+//
+//func writeErrorf(enableMsgpackEncoding bool, w io.Writer, format string, args ...interface{}) {
+//	writeResponse(enableMsgpackEncoding, w, &graphql.Response{Errors: gqlerror.List{{Message: fmt.Sprintf(format, args...)}}})
+//}
+//
+//func writeGraphqlError(enableMsgpackEncoding bool, w io.Writer, err ...*gqlerror.Error) {
+//	writeResponse(enableMsgpackEncoding, w, &graphql.Response{Errors: err})
+//}
+
+//func decode(enableMsgpackEncoding bool, r io.Reader, val interface{}) error {
+//	if enableMsgpackEncoding {
+//		return msgpackDecode(r, val)
+//	}
+//
+//	return jsonDecode(r, val)
+//}

@@ -5,10 +5,200 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.27...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.29...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.29"></a>
+## [v0.17.29](https://github.com/99designs/gqlgen/compare/v0.17.28...v0.17.29) - 2023-04-11
+- <a href="https://github.com/99designs/gqlgen/commit/325405ba3959d11886e64a7eca486c0714cb61ac"><tt>325405ba</tt></a> release v0.17.29
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/7bc1f626a1dc738a524473dc7c587acc91a41c18"><tt>7bc1f626</tt></a> Read gqlgen.yml from io.Reader. (<a href="https://github.com/99designs/gqlgen/pull/2607">#2607</a>)</summary>
+
+* Update config.go
+
+Add ReadConfig
+
+* Add tests
+
+* Update config_test.go
+
+remove extra space to fix lint checks
+
+* Update config.go
+
+Need to return the config
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/50c2829c367bc8cdc6dfc6e00688ad4de69238c5"><tt>50c2829c</tt></a> Transport for application/x-www-form-urlencoded content type (<a href="https://github.com/99designs/gqlgen/pull/2611">#2611</a>)</summary>
+
+* Renamed 'form' transport to 'form_multipart'.
+
+There are multiple ways form data can be encoded. 'multipart' is
+just one of them - there are also 'application/x-www-form-urlencoded'
+(which will be added in next commit) and 'text/plain' encodings.
+
+Let each encoding have it's own form_xxxx file and tests.
+
+* Adds transport for application/x-www-form-urlencoded content type.
+
+This commit adds transport that handles form POST with content
+type set to 'application/x-www-form-urlencoded'.
+
+Form body can be json, urlencoded parameters or plain text.
+
+Example:
+
+```
+ curl -X POST 'http://server/query' -d '{name}' -H "Content-Type: application/x-www-form-urlencoded"
+```
+
+Enable it in your GQL server with:
+
+```
+srv.AddTransport(transport.UrlEncodedForm{})
+```
+
+* golangci-lint: change ifElseChain to switch.
+
+No other changes but this rewrite to switch.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8b38c0e9effae523d65d6d631349936c6977228f"><tt>8b38c0e9</tt></a> Add on-close handler for websockets. (<a href="https://github.com/99designs/gqlgen/pull/2612">#2612</a>)</summary>
+
+* working without test
+
+* test
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4548815789eee960ec6ce876ea02a8cb3b0953eb"><tt>45488157</tt></a> Transport for application/graphql contentType (<a href="https://github.com/99designs/gqlgen/pull/2592">#2592</a>)</summary>
+
+* Adds application/graphql transport layer
+
+This commit adds 'application/graphql' transport. It is based
+on POST metod and has only the 'query' part in it's body.
+
+See: https://graphql.org/learn/serving-over-http/#post-request and
+it's comment about this content-type.
+
+An example of correct application/graphql query is:
+
+```
+curl 'http://host/graphql' -d '{time{now}}' -H "Content-Type: application/graphql"
+```
+
+Some clients prefix body with 'query=':
+
+```
+-d 'query={time{now}}'
+```
+
+Some clients html encode body payload:
+
+```
+-d 'query=%7Btime%7Bnow%7D%7D'
+```
+
+We cleanup both in cleanupBody() method.
+
+Tests are in http_graphql_test.go file.
+
+* Adds tests for GRAPHQL transport response headers.
+
+GRAPHQL transport (like GET, POST and MULTIPART transports) can
+have specific response headers added.
+
+This commit adds tests for it and changes doRequest() method
+so that we can set inbound Content-Type. Graphql transport
+uses 'application/graphql' content-type and not 'application/json'.
+
+* Adds GRAPHQL transfer to the documentation.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/21054ebab22290f6484d20a25370e10a39ae7531"><tt>21054eba</tt></a> Cleanup only non-gqlgen packages when reloading all packages (<a href="https://github.com/99designs/gqlgen/pull/2598">#2598</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/1c6bf9bd7426ab68c73e4955d0896833cad0e415"><tt>1c6bf9bd</tt></a> v0.17.28 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.28"></a>
+## [v0.17.28](https://github.com/99designs/gqlgen/compare/v0.17.27...v0.17.28) - 2023-04-03
+- <a href="https://github.com/99designs/gqlgen/commit/f2b346553aa79e49fe978a3779fe31acc573fe18"><tt>f2b34655</tt></a> release v0.17.28
+
+- <a href="https://github.com/99designs/gqlgen/commit/a1a6f231d8756567e4346897733b123ceb905edf"><tt>a1a6f231</tt></a> Re-generate after <a href="https://github.com/99designs/gqlgen/pull/2599">#2599</a> (<a href="https://github.com/99designs/gqlgen/pull/2601">#2601</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/9a644c5415585cb3be6c4f5cb51610b8e23d1b89"><tt>9a644c54</tt></a> Fix 2546: Relax external for object (<a href="https://github.com/99designs/gqlgen/pull/2599">#2599</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/db534792898e0870e15cb0788bfaf775e7c0da70"><tt>db534792</tt></a> EntityResolver input type fix (<a href="https://github.com/99designs/gqlgen/pull/2594">#2594</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2326"> #2326</a>)</summary>
+
+* EntityResolver input type fix
+
+the entity resolver may be in a different package (usually `model`).
+The fix is to pull the types.Type of the resolver input, and use
+templates.CurrentImports.LookupType in order to render it correctly
+(possibly adding another import)
+
+* entityResolver input type fix: update tests
+
+change testdata/entityresolver/gqlgen.yml to use a dedicated package for
+the model (as in the default sample yml), and run go generate.
+
+before the input type fix, generation fails with errors like -
+plugin/federation/testdata/entityresolver/generated/federation.go:338:17:
+  undeclared name: MultiHelloByNamesInput
+plugin/federation/testdata/entityresolver/generated/federation.go:354:21:
+  undeclared name: MultiHelloMultipleRequiresByNamesInput
+plugin/federation/testdata/entityresolver/generated/federation.go:362:17:
+  undeclared name: MultiHelloMultipleRequiresByNamesInput
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/6da735ce5cc9690caf610a72f8e4976aa9c7c60e"><tt>6da735ce</tt></a> feat: removeDuplicateTags() validates tags and panic with meaningful error message (<a href="https://github.com/99designs/gqlgen/pull/2597">#2597</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/677d854a37861e73cda6bf98fecaa94bb6638e79"><tt>677d854a</tt></a> Allow setting headers in HTTP transports (<a href="https://github.com/99designs/gqlgen/pull/2590">#2590</a>)</summary>
+
+Currently gqlgen sets Content-Type header to 'application/json'. There's
+no easy way to change it or add additional headers.
+
+This commit adds struct variable ResponseHeaders that can hold any
+headers you want to be returned with response. It is standard
+`map[string][]string` variable.
+
+If user does not set this map, we default to the Content-Type
+header with 'application/json' value - nothing will be changed
+for existing users.
+
+Usage:
+
+as simple as:
+
+```
+headers := map[string][]string{
+    "Content-Type": {"application/json; charset: utf8"},
+    "Other-Header": {"dummy-post-header","another-value"},
+}
+
+h.AddTransport(transport.POST{ResponseHeaders: headers})
+```
+
+Added tests in transport/headers_test.go.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/65ec8b5a0774970ff7f7d74cbe4de7407a946b4a"><tt>65ec8b5a</tt></a> Add Changelog entry for v0.17.27
+
+- <a href="https://github.com/99designs/gqlgen/commit/a3400ff4e7d7434616f4dfecacf4eab871cc0063"><tt>a3400ff4</tt></a> v0.17.27 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.27"></a>
 ## [v0.17.27](https://github.com/99designs/gqlgen/compare/v0.17.26...v0.17.27) - 2023-03-20
 - <a href="https://github.com/99designs/gqlgen/commit/5bfcdd63e32837969f611922458451460411a79d"><tt>5bfcdd63</tt></a> release v0.17.27

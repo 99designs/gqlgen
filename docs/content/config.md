@@ -47,7 +47,10 @@ resolver:
 # Optional: turn on to skip generation of ComplexityRoot struct content and Complexity function
 # omit_complexity: false
 
-# Optional: turn on to exclude the gqlgen version in the generated comments
+# Optional: turn on to not generate any file notice comments in generated files
+# omit_gqlgen_file_notice: false
+
+# Optional: turn on to exclude the gqlgen version in the generated comments. No effect if `omit_gqlgen_file_notice` is true.
 # omit_gqlgen_version_comment: false
 
 # Optional: turn off to make struct-type struct fields not use pointers

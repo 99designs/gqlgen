@@ -50,8 +50,8 @@ resolver:
 # Optional: turn on to not generate any file notice comments in generated files
 # omit_gqlgen_file_notice: false
 
-# Optional: turn on to exclude the gqlgen version in the generated comments. No effect if `omit_gqlgen_file_notice` is true.
-# omit_gqlgen_version_comment: false
+# Optional: turn on to exclude the gqlgen version in the generated file notice. No effect if `omit_gqlgen_file_notice` is true.
+# omit_gqlgen_version_in_file_notice: false
 
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
@@ -140,6 +140,7 @@ The builtin directives `goField`, `goModel` and `goTag` are automatically regist
 If you have created a new code generation plugin using a directive which does not require runtime execution, the directive will need to be set to `skip_runtime`.
 
 e.g. a custom directive called `constraint` would be set as `skip_runtime` using the following configuration
+
 ```yml
 # custom directives which are not exposed during introspection. These directives are
 # used for code generation only

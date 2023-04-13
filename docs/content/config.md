@@ -47,6 +47,9 @@ resolver:
 # Optional: turn on to skip generation of ComplexityRoot struct content and Complexity function
 # omit_complexity: false
 
+# Optional: turn on to exclude the gqlgen version in the generated comments
+# omit_gqlgen_version_comment: false
+
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
 # struct_fields_always_pointers: true

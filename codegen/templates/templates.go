@@ -147,7 +147,6 @@ func Render(cfg Options) error {
 		return err
 	}
 	CurrentImports = nil
-
 	err = write(cfg.Filename, result.Bytes(), cfg.Packages)
 	if err != nil {
 		return err

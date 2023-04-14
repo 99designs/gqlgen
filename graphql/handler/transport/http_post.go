@@ -77,7 +77,6 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		writeJson(w, resp)
 		return
 	}
-
 	rc, OpErr := exec.CreateOperationContext(ctx, params)
 	if OpErr != nil {
 		w.WriteHeader(statusFor(OpErr))

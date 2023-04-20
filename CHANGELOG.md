@@ -5,10 +5,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.29...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.30...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.30"></a>
+## [v0.17.30](https://github.com/99designs/gqlgen/compare/v0.17.29...v0.17.30) - 2023-04-20
+- <a href="https://github.com/99designs/gqlgen/commit/4754e2b3c11870300277831e8f7183bc2d4c213e"><tt>4754e2b3</tt></a> release v0.17.30
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/acd4b07fc3c8417cdbd807cc43a454a2a727a121"><tt>acd4b07f</tt></a> feat: gqlgen ver in generated file notice and entire file notice optional (<a href="https://github.com/99designs/gqlgen/pull/2617">#2617</a>)</summary>
+
+* feat: gqlgen ver in filenotice optional
+
+This commit allows the user of gqlgen to configure whether or not the
+version of gqlgen used to generate the files is included in the
+filenotice/comment header for generated files.
+
+* feat: filenotice in generated files optional
+
+* chore: rename config var for omit gqlgen ver in file notice
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/498ce3f36ff9f5dc507c072d9fe0d5f9c793bcf8"><tt>498ce3f3</tt></a> Add Changelog entry
+
+- <a href="https://github.com/99designs/gqlgen/commit/024430a1bdc7b029fa38d82e0ec99de1625af15e"><tt>024430a1</tt></a> v0.17.29 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.29"></a>
 ## [v0.17.29](https://github.com/99designs/gqlgen/compare/v0.17.28...v0.17.29) - 2023-04-11
 - <a href="https://github.com/99designs/gqlgen/commit/325405ba3959d11886e64a7eca486c0714cb61ac"><tt>325405ba</tt></a> release v0.17.29

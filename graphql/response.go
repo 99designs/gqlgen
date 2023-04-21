@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -15,6 +16,8 @@ type Response struct {
 	Errors     gqlerror.List          `json:"errors,omitempty"`
 	Data       json.RawMessage        `json:"data"`
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
+	HasNext    bool                   `json:"hasNext"`
+	Path       ast.Path               `json:"path"`
 }
 
 func ErrorResponse(ctx context.Context, messagef string, args ...interface{}) *Response {

@@ -47,6 +47,27 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
             {{- if $field.IsConcurrent }}
                 field := field
 
+                {{if not $object.Root}}
+                    deferred := false
+                    for _, dir := range field.Directives {
+                        if dir.Name == "defer" {
+                            out.Values[i] = graphql.Null
+                            deferred = true
+                            ec.pendingDeferred++
+                            go func(ctx context.Context, field graphql.CollectedField) {
+                                deferredOut := graphql.NewFieldSet([]graphql.CollectedField{field})
+                                deferredOut.Values[0] = ec._{{$object.Name}}_{{$field.Name}}(ctx, field, obj)
+                                ec.deferredResults <- graphql.DeferredResult{
+                                    Result: deferredOut,
+                                    Path:   graphql.GetPath(ctx),
+                                }
+                            }(ctx, field)
+                            break
+                        }
+                    }
+                    if deferred { break }
+                {{end}}
+
                 innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
                     defer func() {
                         if r := recover(); r != nil {

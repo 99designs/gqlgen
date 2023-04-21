@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"fmt"
 	"io"
 	"sync"
 )
@@ -57,6 +58,7 @@ func (m *FieldSet) MarshalGQL(writer io.Writer) {
 		}
 		writeQuotedString(writer, field.Alias)
 		writer.Write(colon)
+		fmt.Println(m.fields[i].Name, "=>", m.Values[i])
 		m.Values[i].MarshalGQL(writer)
 	}
 	writer.Write(closeBrace)

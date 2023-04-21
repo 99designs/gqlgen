@@ -14,7 +14,6 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
-
 {{ if eq .Config.Exec.Layout "single-file" }}
 	// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 	func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -104,7 +103,7 @@
 	}
 
 	func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-		ec := executionContext{nil, e}
+		ec := executionContext{nil, e, 0, nil}
 		_ = ec
 		{{ if not .Config.OmitComplexity -}}
 		switch typeName + "." + field {
@@ -139,7 +138,7 @@
 
 	func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		rc := graphql.GetOperationContext(ctx)
-		ec := executionContext{rc, e}
+		ec := executionContext{rc, e, 0, make(chan graphql.DeferredResult)}
 		inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 			{{- range $input := .Inputs -}}
 				{{ if not $input.HasUnmarshal }}
@@ -152,21 +151,35 @@
 		switch rc.Operation.Operation {
 		{{- if .QueryRoot }} case ast.Query:
 			return func(ctx context.Context) *graphql.Response {
-				if !first { return nil }
-				first = false
-				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				{{ if .Directives.LocationDirectives "QUERY" -}}
-					data := ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
-						return ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet), nil
-					})
-				{{- else -}}
-					data := ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet)
-				{{- end }}
+				var data graphql.Marshaler
+				var path ast.Path
+				if first {
+					first = false
+					ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+					{{ if .Directives.LocationDirectives "QUERY" -}}
+						data = ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
+							return ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet), nil
+						})
+					{{- else -}}
+						data = ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet)
+					{{- end }}
+				} else {
+					if ec.pendingDeferred > 0 {
+						res := <-ec.deferredResults
+						path = res.Path
+						data = res.Result
+						ec.pendingDeferred--
+					} else {
+						return nil
+					}
+				}
 				var buf bytes.Buffer
 				data.MarshalGQL(&buf)
 
 				return &graphql.Response{
 					Data:       buf.Bytes(),
+					Path:       path,
+					HasNext:    ec.pendingDeferred > 0,
 				}
 			}
 		{{ end }}
@@ -224,6 +237,8 @@
 	type executionContext struct {
 		*graphql.OperationContext
 		*executableSchema
+		pendingDeferred int
+		deferredResults chan graphql.DeferredResult
 	}
 
 	func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {

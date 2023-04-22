@@ -7,9 +7,10 @@ import (
 )
 
 type FieldSet struct {
-	fields  []CollectedField
-	Values  []Marshaler
-	delayed []delayedResult
+	fields   []CollectedField
+	Values   []Marshaler
+	Invalids uint32
+	delayed  []delayedResult
 }
 
 type delayedResult struct {
@@ -22,6 +23,11 @@ func NewFieldSet(fields []CollectedField) *FieldSet {
 		fields: fields,
 		Values: make([]Marshaler, len(fields)),
 	}
+}
+
+func (m *FieldSet) AddField(field CollectedField) {
+	m.fields = append(m.fields, field)
+	m.Values = append(m.Values, nil)
 }
 
 func (m *FieldSet) Concurrently(i int, f func() Marshaler) {
@@ -58,7 +64,7 @@ func (m *FieldSet) MarshalGQL(writer io.Writer) {
 		}
 		writeQuotedString(writer, field.Alias)
 		writer.Write(colon)
-		fmt.Println(m.fields[i].Name, "=>", m.Values[i])
+		fmt.Println(i, m.fields[i].Name, "=>", m.Values[i])
 		m.Values[i].MarshalGQL(writer)
 	}
 	writer.Write(closeBrace)

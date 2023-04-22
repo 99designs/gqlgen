@@ -15,9 +15,10 @@ import (
 type Response struct {
 	Errors     gqlerror.List          `json:"errors,omitempty"`
 	Data       json.RawMessage        `json:"data"`
-	Extensions map[string]interface{} `json:"extensions,omitempty"`
+	Label      string                 `json:"label,omitempty"`
+	Path       ast.Path               `json:"path,omitempty"`
 	HasNext    bool                   `json:"hasNext"`
-	Path       ast.Path               `json:"path"`
+	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }
 
 func ErrorResponse(ctx context.Context, messagef string, args ...interface{}) *Response {

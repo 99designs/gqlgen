@@ -103,7 +103,7 @@
 	}
 
 	func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-		ec := executionContext{nil, e, 0, nil}
+		ec := executionContext{nil, e, nil, 0, nil}
 		_ = ec
 		{{ if not .Config.OmitComplexity -}}
 		switch typeName + "." + field {
@@ -138,7 +138,7 @@
 
 	func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		rc := graphql.GetOperationContext(ctx)
-		ec := executionContext{rc, e, 0, make(chan graphql.DeferredResult)}
+		ec := executionContext{rc, e, nil, 0, make(chan graphql.DeferredResult)}
 		inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 			{{- range $input := .Inputs -}}
 				{{ if not $input.HasUnmarshal }}
@@ -151,8 +151,8 @@
 		switch rc.Operation.Operation {
 		{{- if .QueryRoot }} case ast.Query:
 			return func(ctx context.Context) *graphql.Response {
+                var response graphql.Response
 				var data graphql.Marshaler
-				var path ast.Path
 				if first {
 					first = false
 					ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
@@ -165,22 +165,40 @@
 					{{- end }}
 				} else {
 					if ec.pendingDeferred > 0 {
-						res := <-ec.deferredResults
-						path = res.Path
-						data = res.Result
-						ec.pendingDeferred--
+						result := <-ec.deferredResults
+                        ec.pendingDeferred--
+						data = result.Result
+						response.Path = result.Path
+                        response.Label = result.Label
 					} else {
 						return nil
 					}
 				}
 				var buf bytes.Buffer
 				data.MarshalGQL(&buf)
+                response.Data = buf.Bytes()
+                response.HasNext = ec.pendingDeferred+len(ec.deferredGroups) > 0
 
-				return &graphql.Response{
-					Data:       buf.Bytes(),
-					Path:       path,
-					HasNext:    ec.pendingDeferred > 0,
-				}
+                // dispatch deferred calls
+                dg := ec.deferredGroups
+                ec.deferredGroups = nil
+                for _, deferred := range dg {
+                    ec.pendingDeferred++
+                    go func (deferred graphql.DeferredGroup) {
+                        deferred.FieldSet.Dispatch()
+                        ds := graphql.DeferredResult{
+                            Path: deferred.Path,
+                            Label: deferred.Label,
+                            Result: deferred.FieldSet,
+                        }
+                        if deferred.FieldSet.Invalids > 0 {
+                            ds.Result = graphql.Null
+                        }
+                        ec.deferredResults <- ds
+                    }(deferred)
+                }
+
+				return &response
 			}
 		{{ end }}
 
@@ -237,8 +255,9 @@
 	type executionContext struct {
 		*graphql.OperationContext
 		*executableSchema
-		pendingDeferred int
-		deferredResults chan graphql.DeferredResult
+		deferredGroups  []graphql.DeferredGroup
+        pendingDeferred int
+        deferredResults chan graphql.DeferredResult
 	}
 
 	func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {

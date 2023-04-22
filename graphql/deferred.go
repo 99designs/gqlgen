@@ -1,6 +1,9 @@
 package graphql
 
-import "github.com/vektah/gqlparser/v2/ast"
+import (
+	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+)
 
 type Deferrable struct {
 	Label string
@@ -16,4 +19,5 @@ type DeferredResult struct {
 	Path   ast.Path
 	Label  string
 	Result Marshaler
+	Errors gqlerror.List
 }

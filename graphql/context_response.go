@@ -36,6 +36,14 @@ func WithResponseContext(ctx context.Context, presenterFunc ErrorPresenterFunc, 
 	})
 }
 
+func WithFreshResponseContext(ctx context.Context) context.Context {
+	e := getResponseContext(ctx)
+	return context.WithValue(ctx, resultCtx, &responseContext{
+		errorPresenter: e.errorPresenter,
+		recover:        e.recover,
+	})
+}
+
 // AddErrorf writes a formatted error to the client, first passing it through the error presenter.
 func AddErrorf(ctx context.Context, format string, args ...interface{}) {
 	AddError(ctx, fmt.Errorf(format, args...))

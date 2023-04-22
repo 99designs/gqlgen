@@ -170,6 +170,7 @@
 						data = result.Result
 						response.Path = result.Path
                         response.Label = result.Label
+                        response.Errors = result.Errors
 					} else {
 						return nil
 					}
@@ -185,12 +186,15 @@
                 for _, deferred := range dg {
                     ec.pendingDeferred++
                     go func (deferred graphql.DeferredGroup) {
-                        deferred.FieldSet.Dispatch()
+                        ctx = graphql.WithFreshResponseContext(ctx)
+                        deferred.FieldSet.Dispatch(ctx)
                         ds := graphql.DeferredResult{
                             Path: deferred.Path,
                             Label: deferred.Label,
                             Result: deferred.FieldSet,
+                            Errors: graphql.GetErrors(ctx),
                         }
+                        // null fields should bubble up
                         if deferred.FieldSet.Invalids > 0 {
                             ds.Result = graphql.Null
                         }

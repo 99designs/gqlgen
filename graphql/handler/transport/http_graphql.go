@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"log"
 	"mime"
 	"net/http"
 	"net/url"
@@ -52,16 +51,17 @@ func (h GRAPHQL) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphEx
 	if err != nil {
 		gqlErr := gqlerror.Errorf("could not get request body: %+v", err)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-		log.Printf("could not get request body: %+v", err.Error())
 		writeJson(w, resp)
+		return
 	}
 
 	params.Query, err = cleanupBody(bodyString)
 	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		gqlErr := gqlerror.Errorf("could not cleanup body: %+v", err)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-		log.Printf("could not cleanup body: %+v", err.Error())
 		writeJson(w, resp)
+		return
 	}
 
 	rc, OpErr := exec.CreateOperationContext(ctx, params)

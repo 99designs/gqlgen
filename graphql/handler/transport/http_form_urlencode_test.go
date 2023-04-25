@@ -48,6 +48,13 @@ func TestUrlEncodedForm(t *testing.T) {
 		assert.Equal(t, `{"errors":[{"message":"Expected Name, found \u003cInvalid\u003e","locations":[{"line":1,"column":6}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
+	t.Run("parse query failure", func(t *testing.T) {
+		resp := doRequest(h, "POST", "/graphql", `{"query":{"wrong": "format"}}`, "application/x-www-form-urlencoded")
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
+		assert.Equal(t, resp.Body.String(), `{"errors":[{"message":"could not cleanup body: json: cannot unmarshal object into Go struct field RawParams.query of type string"}],"data":null}`)
+	})
+
 	t.Run("validate content type", func(t *testing.T) {
 		doReq := func(handler http.Handler, method string, target string, body string, contentType string) *httptest.ResponseRecorder {
 			r := httptest.NewRequest(method, target, strings.NewReader(body))

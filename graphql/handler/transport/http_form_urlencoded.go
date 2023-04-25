@@ -2,7 +2,6 @@ package transport
 
 import (
 	"io"
-	"log"
 	"mime"
 	"net/http"
 	"net/url"
@@ -48,18 +47,20 @@ func (h UrlEncodedForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.
 
 	bodyString, err := getRequestBody(r)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		gqlErr := gqlerror.Errorf("could not get form body: %+v", err)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-		log.Printf("could not get json request body: %+v", err.Error())
 		writeJson(w, resp)
+		return
 	}
 
 	params, err = h.parseBody(bodyString)
 	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		gqlErr := gqlerror.Errorf("could not cleanup body: %+v", err)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-		log.Printf("could not cleanup body: %+v", err.Error())
 		writeJson(w, resp)
+		return
 	}
 
 	rc, OpErr := exec.CreateOperationContext(ctx, params)

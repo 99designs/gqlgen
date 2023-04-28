@@ -3116,26 +3116,29 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
-			it.Location, err = ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx, v)
+			data, err := ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Location = data
 		case "createdAfter":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAfter"))
-			it.CreatedAfter, err = ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, v)
+			data, err := ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.CreatedAfter = data
 		case "isBanned":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isBanned"))
-			it.IsBanned, err = ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐBanned(ctx, v)
+			data, err := ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐBanned(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.IsBanned = data
 		}
 	}
 

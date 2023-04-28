@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type A interface {
@@ -140,8 +142,12 @@ func (this ImplArrayOfA) GetTrickyFieldPointer() []A {
 }
 
 type MissingInput struct {
-	Name *string      `json:"name,omitempty" database:"MissingInputname"`
-	Enum *MissingEnum `json:"enum,omitempty" database:"MissingInputenum"`
+	Name          *string                           `json:"name,omitempty" database:"MissingInputname"`
+	Enum          *MissingEnum                      `json:"enum,omitempty" database:"MissingInputenum"`
+	NonNullString string                            `json:"nonNullString" database:"MissingInputnonNullString"`
+	NullString    graphql.Omittable[*string]        `json:"nullString,omitempty" database:"MissingInputnullString"`
+	NullEnum      graphql.Omittable[*MissingEnum]   `json:"nullEnum,omitempty" database:"MissingInputnullEnum"`
+	NullObject    graphql.Omittable[*ExistingInput] `json:"nullObject,omitempty" database:"MissingInputnullObject"`
 }
 
 type MissingTypeNotNull struct {

@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -271,6 +273,12 @@ func TestModelGeneration(t *testing.T) {
 	t.Run("overridden struct field names use same capitalization as config", func(t *testing.T) {
 		require.NotNil(t, out.RenameFieldTest{}.GOODnaME)
 	})
+
+	t.Run("nullable input fields can be made omittable with goField", func(t *testing.T) {
+		require.IsType(t, out.MissingInput{}.NullString, graphql.Omittable[*string]{})
+		require.IsType(t, out.MissingInput{}.NullEnum, graphql.Omittable[*out.MissingEnum]{})
+		require.IsType(t, out.MissingInput{}.NullObject, graphql.Omittable[*out.ExistingInput]{})
+	})
 }
 
 func TestModelGenerationStructFieldPointers(t *testing.T) {
@@ -317,6 +325,29 @@ func TestModelGenerationStructFieldPointers(t *testing.T) {
 		generated, err := os.ReadFile("./out_struct_pointers/generated.go")
 		require.NoError(t, err)
 		require.NotContains(t, string(generated), "func (this")
+	})
+}
+
+func TestModelGenerationNullableInputOmittable(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_nullable_input_omittable.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+
+	t.Run("nullable input fields are omittable", func(t *testing.T) {
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Name, graphql.Omittable[*string]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Enum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullString, graphql.Omittable[*string]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullEnum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullObject, graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{})
+	})
+
+	t.Run("non-nullable input fields are not omittable", func(t *testing.T) {
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NonNullString, "")
 	})
 }
 

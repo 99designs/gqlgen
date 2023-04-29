@@ -68,7 +68,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 				continue
 			}
 
-			resolver := Resolver{o, f, nil, "// foo", `panic("not implemented")`}
+			resolver := Resolver{o, f, nil, "", `panic("not implemented")`}
 			file.Resolvers = append(file.Resolvers, &resolver)
 		}
 	}

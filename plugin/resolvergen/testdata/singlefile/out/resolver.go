@@ -8,10 +8,12 @@ import (
 
 type CustomResolverType struct{}
 
+// Resolver is the resolver for the resolver field.
 func (r *queryCustomResolverType) Resolver(ctx context.Context) (*Resolver, error) {
 	panic("not implemented")
 }
 
+// Name is the resolver for the name field.
 func (r *resolverCustomResolverType) Name(ctx context.Context, obj *Resolver) (string, error) {
 	panic("not implemented")
 }

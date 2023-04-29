@@ -74,10 +74,11 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	}
 
 	resolverBuild := &ResolverBuild{
-		File:         &file,
-		PackageName:  data.Config.Resolver.Package,
-		ResolverType: data.Config.Resolver.Type,
-		HasRoot:      true,
+		File:                &file,
+		PackageName:         data.Config.Resolver.Package,
+		ResolverType:        data.Config.Resolver.Type,
+		HasRoot:             true,
+		OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
 	}
 
 	return templates.Render(templates.Options{
@@ -122,9 +123,6 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
 			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
 
-			if comment == "" {
-				comment = fmt.Sprintf("%v is the resolver for the %v field.", f.GoFieldName, f.Name)
-			}
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
 			if implementation == "" {
 				// Check for Implementer Plugin
@@ -163,9 +161,10 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 	for filename, file := range files {
 		resolverBuild := &ResolverBuild{
-			File:         file,
-			PackageName:  data.Config.Resolver.Package,
-			ResolverType: data.Config.Resolver.Type,
+			File:                file,
+			PackageName:         data.Config.Resolver.Package,
+			ResolverType:        data.Config.Resolver.Type,
+			OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
 		}
 
 		var fileNotice strings.Builder
@@ -215,9 +214,10 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 type ResolverBuild struct {
 	*File
-	HasRoot      bool
-	PackageName  string
-	ResolverType string
+	HasRoot             bool
+	PackageName         string
+	ResolverType        string
+	OmitTemplateComment bool
 }
 
 type File struct {

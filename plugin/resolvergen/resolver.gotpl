@@ -19,7 +19,11 @@
 {{ end }}
 
 {{ range $resolver := .Resolvers -}}
-    // {{ $resolver.Comment }}
+	{{ if $resolver.Comment -}}
+		// {{ $resolver.Comment }}
+	{{- else if not $.OmitTemplateComment -}}
+		// {{ $resolver.Field.GoFieldName }} is the resolver for the {{ $resolver.Field.Name }} field.
+	{{- end }}
 	func (r *{{lcFirst $resolver.Object.Name}}{{ucFirst $.ResolverType}}) {{$resolver.Field.GoFieldName}}{{ with $resolver.PrevDecl }}{{ $resolver.Field.ShortResolverSignature .Type }}{{ else }}{{ $resolver.Field.ShortResolverDeclaration }}{{ end }}{
 		{{ $resolver.Implementation }}
 	}
@@ -27,7 +31,9 @@
 {{ end }}
 
 {{ range $object := .Objects -}}
-	// {{ucFirst $object.Name}} returns {{ $object.ResolverInterface | ref }} implementation.
+	{{ if not $.OmitTemplateComment -}}
+		// {{ucFirst $object.Name}} returns {{ $object.ResolverInterface | ref }} implementation.
+	{{- end }}
 	func (r *{{$.ResolverType}}) {{ucFirst $object.Name}}() {{ $object.ResolverInterface | ref }} { return &{{lcFirst $object.Name}}{{ucFirst $.ResolverType}}{r} }
 {{ end }}
 

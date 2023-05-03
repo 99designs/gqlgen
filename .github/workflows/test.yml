@@ -26,7 +26,6 @@ jobs:
           command: |
             go mod download
             go test -race ./...
-      - run: go mod download && go test -race ./...
       - name: Example tests
         uses: nick-fields/retry@v2
         with:

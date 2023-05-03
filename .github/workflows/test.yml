@@ -23,11 +23,15 @@ jobs:
         with:
           max_attempts: 3
           timeout_minutes: 20
-          command: go mod download && go test -race ./...
+          command: |
+            go mod download
+            go test -race ./...
       - run: go mod download && go test -race ./...
       - name: Example tests
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3
           timeout_minutes: 20
-          command: cd _examples && go mod download && go test -race ./...
+          command: |
+            cd _examples
+            go mod download && go test -race ./...

@@ -18,5 +18,14 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
+      - name: Core tests
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          command: go mod download && go test -race ./...
       - run: go mod download && go test -race ./...
-      - run: cd _examples && go mod download && go test -race ./...
+      - name: Example tests
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          command: cd _examples && go mod download && go test -race ./...

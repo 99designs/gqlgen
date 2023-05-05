@@ -450,17 +450,71 @@ func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Fie
 	return f, nil
 }
 
+// splitTagsBySpace split tags by space, except when space is inside quotes
+func splitTagsBySpace(tagsString string) []string {
+	var tags []string
+	var currentTag string
+	inQuotes := false
+
+	for _, c := range tagsString {
+		if c == '"' {
+			inQuotes = !inQuotes
+		}
+		if c == ' ' && !inQuotes {
+			tags = append(tags, currentTag)
+			currentTag = ""
+		} else {
+			currentTag += string(c)
+		}
+	}
+	tags = append(tags, currentTag)
+
+	return tags
+}
+
+// containsInvalidSpace checks if the tagsString contains invalid space
+func containsInvalidSpace(valuesString string) bool {
+	// get rid of quotes
+	valuesString = strings.ReplaceAll(valuesString, "\"", "")
+	if strings.Contains(valuesString, ",") {
+		// split by comma,
+		values := strings.Split(valuesString, ",")
+		for _, value := range values {
+			if strings.TrimSpace(value) != value {
+				return true
+			}
+		}
+		return false
+	}
+	if strings.Contains(valuesString, ";") {
+		// split by semicolon, which is common in gorm
+		values := strings.Split(valuesString, ";")
+		for _, value := range values {
+			if strings.TrimSpace(value) != value {
+				return true
+			}
+		}
+		return false
+	}
+	// single value
+	if strings.TrimSpace(valuesString) != valuesString {
+		return true
+	}
+	return false
+}
+
 func removeDuplicateTags(t string) string {
 	processed := make(map[string]bool)
-	tt := strings.Split(t, " ")
+	tt := splitTagsBySpace(t)
 	returnTags := ""
 
 	// iterate backwards through tags so appended goTag directives are prioritized
 	for i := len(tt) - 1; i >= 0; i-- {
 		ti := tt[i]
 		// check if ti contains ":", and not contains any empty space. if not, tag is in wrong format
-		if !strings.Contains(ti, ":") || strings.Contains(ti, " ") {
-			panic(fmt.Errorf("wrong format of tags: %s. goTag directive should be in format: @goTag(key: \"something\", value:\"value1,value2,etc\"), no empty space is allowed", t))
+		// correct example: json:"name"
+		if !strings.Contains(ti, ":") {
+			panic(fmt.Errorf("wrong format of tags: %s. goTag directive should be in format: @goTag(key: \"something\", value:\"value\"), ", t))
 		}
 
 		kv := strings.Split(ti, ":")
@@ -472,6 +526,12 @@ func removeDuplicateTags(t string) string {
 		if len(returnTags) > 0 {
 			returnTags = " " + returnTags
 		}
+
+		isContained := containsInvalidSpace(kv[1])
+		if isContained {
+			panic(fmt.Errorf("tag value should not contain any leading or trailing spaces: %s", kv[1]))
+		}
+
 		returnTags = kv[0] + ":" + kv[1] + returnTags
 	}
 

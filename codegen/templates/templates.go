@@ -517,7 +517,14 @@ func wordWalker(str string, f func(*wordInfo)) {
 		}
 
 		matchCommonInitial := false
-		if commonInitialisms[strings.ToUpper(word)] {
+		upperWord := strings.ToUpper(word)
+		if commonInitialisms[upperWord] {
+			switch upperWord {
+			case "ID", "IP":
+				if word == str[:2] && !eow && len(str) > 3 && unicode.IsUpper(runes[3]) {
+					continue
+				}
+			}
 			hasCommonInitial = true
 			matchCommonInitial = true
 		}

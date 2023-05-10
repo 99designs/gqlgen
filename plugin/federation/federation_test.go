@@ -87,12 +87,21 @@ func TestNoEntities(t *testing.T) {
 	require.Len(t, f.Entities, 0)
 }
 
+func TestUnusedInterfaceKeyDirective(t *testing.T) {
+	f, cfg := load(t, "testdata/interfaces/unused_key.yml")
+
+	err := f.MutateConfig(cfg)
+	require.NoError(t, err)
+	require.Len(t, f.Entities, 0)
+}
+
 func TestInterfaceKeyDirective(t *testing.T) {
 	f, cfg := load(t, "testdata/interfaces/key.yml")
 
 	err := f.MutateConfig(cfg)
 	require.NoError(t, err)
-	require.Len(t, f.Entities, 0)
+	require.Len(t, cfg.Schema.Types["_Entity"].Types, 1)
+	require.Len(t, f.Entities, 2)
 }
 
 func TestInterfaceExtendsDirective(t *testing.T) {

@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"encoding/json"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,6 +32,7 @@ func mustUnmarshalUint(v interface{}) uint {
 func TestUint32(t *testing.T) {
 	t.Run("marshal", func(t *testing.T) {
 		assert.Equal(t, "123", m2s(MarshalUint32(123)))
+		assert.Equal(t, "4294967295", m2s(MarshalUint32(math.MaxUint32)))
 	})
 
 	t.Run("unmarshal", func(t *testing.T) {
@@ -38,6 +40,7 @@ func TestUint32(t *testing.T) {
 		assert.Equal(t, uint32(123), mustUnmarshalUint32(int64(123)))
 		assert.Equal(t, uint32(123), mustUnmarshalUint32(json.Number("123")))
 		assert.Equal(t, uint32(123), mustUnmarshalUint32("123"))
+		assert.Equal(t, uint32(4294967295), mustUnmarshalUint32("4294967295"))
 	})
 }
 

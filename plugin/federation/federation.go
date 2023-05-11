@@ -123,11 +123,18 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 	f.setEntities(schema)
 
 	var entities, resolvers, entityResolverInputDefinitions string
-	for i, e := range f.Entities {
-		if i != 0 {
-			entities += " | "
+	for _, e := range f.Entities {
+
+		if e.Def.Kind != ast.Interface {
+			if entities != "" {
+				entities += " | "
+			}
+			entities += e.Name
+		} else if len(schema.GetPossibleTypes(e.Def)) == 0 {
+			fmt.Println(
+				"skipping @key field on interface " + e.Def.Name + " as no types implement it",
+			)
 		}
-		entities += e.Name
 
 		for _, r := range e.Resolvers {
 			if e.Multi {
@@ -206,6 +213,16 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		for _, e := range f.Entities {
 			obj := data.Objects.ByName(e.Def.Name)
 
+			if e.Def.Kind == ast.Interface {
+				if len(data.Interfaces[e.Def.Name].Implementors) == 0 {
+					fmt.Println(
+						"skipping @key field on interface " + e.Def.Name + " as no types implement it",
+					)
+					continue
+				}
+				obj = data.Objects.ByName(data.Interfaces[e.Def.Name].Implementors[0].Name)
+			}
+
 			for _, r := range e.Resolvers {
 				// fill in types for key fields
 				//
@@ -267,6 +284,12 @@ func (f *federation) setEntities(schema *ast.Schema) {
 		if !ok {
 			continue
 		}
+
+		if (schemaType.Kind == ast.Interface) && (len(schema.GetPossibleTypes(schemaType)) == 0) {
+			fmt.Printf("@key directive found on unused \"interface %s\". Will be ignored.\n", schemaType.Name)
+			continue
+		}
+
 		e := &Entity{
 			Name:      schemaType.Name,
 			Def:       schemaType,
@@ -385,10 +408,12 @@ func isFederatedEntity(schemaType *ast.Definition) ([]*ast.Directive, bool) {
 			return keys, true
 		}
 	case ast.Interface:
-		// TODO: support @key and @extends for interfaces
-		if dir := schemaType.Directives.ForName("key"); dir != nil {
-			fmt.Printf("@key directive found on \"interface %s\". Will be ignored.\n", schemaType.Name)
+		keys := schemaType.Directives.ForNames("key")
+		if len(keys) > 0 {
+			return keys, true
 		}
+
+		// TODO: support @extends for interfaces
 		if dir := schemaType.Directives.ForName("extends"); dir != nil {
 			panic(
 				fmt.Sprintf(

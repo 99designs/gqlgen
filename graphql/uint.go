@@ -60,7 +60,7 @@ func MarshalUint32(i uint32) Marshaler {
 func UnmarshalUint32(v interface{}) (uint32, error) {
 	switch v := v.(type) {
 	case string:
-		iv, err := strconv.ParseInt(v, 10, 32)
+		iv, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
 			return 0, err
 		}

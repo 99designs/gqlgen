@@ -167,7 +167,7 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapStringInterfaceTypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet) // deferred-labels=>fieldsets
+	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":

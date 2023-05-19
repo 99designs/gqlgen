@@ -32,7 +32,7 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 	{{end}}
 
 	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet) // deferred-labels=>fieldsets
+	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		{{- if $object.Root }}
 			innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{

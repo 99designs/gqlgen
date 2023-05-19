@@ -222,7 +222,7 @@
 				data.MarshalGQL(&buf)
 
 				return &graphql.Response{
-					Data:	   buf.Bytes(),
+					Data:       buf.Bytes(),
 				}
 			}
 		{{ end }}
@@ -247,7 +247,7 @@
 				data.MarshalGQL(&buf)
 
 				return &graphql.Response{
-					Data:	   buf.Bytes(),
+					Data:       buf.Bytes(),
 				}
 			}
 		{{ end }}

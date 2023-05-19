@@ -275,7 +275,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			for _, deferred := range dg {
 				ec.pendingDeferred++
 				go func(deferred graphql.DeferredGroup) {
-					ctx = graphql.WithFreshResponseContext(ctx)
+					ctx = graphql.WithFreshResponseContext(deferred.Context)
 					deferred.FieldSet.Dispatch(ctx)
 					ds := graphql.DeferredResult{
 						Path:   deferred.Path,
@@ -3293,6 +3293,7 @@ func (ec *executionContext) _Element(ctx context.Context, sel ast.SelectionSet, 
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3489,6 +3490,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3523,6 +3525,7 @@ func (ec *executionContext) _RemoteModelWithOmitempty(ctx context.Context, sel a
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3596,6 +3599,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3630,6 +3634,7 @@ func (ec *executionContext) _Viewer(ctx context.Context, sel ast.SelectionSet, o
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3684,6 +3689,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3730,6 +3736,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3786,6 +3793,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3832,6 +3840,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3885,6 +3894,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 
@@ -3940,6 +3950,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
+			Context:  ctx,
 		})
 	}
 

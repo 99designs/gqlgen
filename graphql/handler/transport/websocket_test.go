@@ -124,13 +124,13 @@ func TestWebsocket(t *testing.T) {
 		msg := readOp(c)
 		require.Equal(t, dataMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"},"hasNext":false}`, string(msg.Payload))
 
 		handler.SendNextSubscriptionMessage()
 		msg = readOp(c)
 		require.Equal(t, dataMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"},"hasNext":false}`, string(msg.Payload))
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: stopMsg, ID: "test_1"}))
 
@@ -537,13 +537,13 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		msg := readOp(c)
 		require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"},"hasNext":false}`, string(msg.Payload))
 
 		handler.SendNextSubscriptionMessage()
 		msg = readOp(c)
 		require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"},"hasNext":false}`, string(msg.Payload))
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsCompleteMsg, ID: "test_1"}))
 

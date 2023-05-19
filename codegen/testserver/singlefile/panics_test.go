@@ -43,7 +43,7 @@ func TestPanics(t *testing.T) {
 		var resp interface{}
 		err := c.Post(`query { panics { fieldScalarMarshal } }`, &resp)
 
-		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}")
+		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null,\"hasNext\":false}")
 	})
 
 	t.Run("panics in unmarshalers will not kill server", func(t *testing.T) {
@@ -64,6 +64,6 @@ func TestPanics(t *testing.T) {
 		var resp interface{}
 		err := c.Post(`query { panics { fieldFuncMarshal(u: []) } }`, &resp)
 
-		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}")
+		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null,\"hasNext\":false}")
 	})
 }

@@ -322,14 +322,21 @@ func (c *Config) injectTypesFromSchema() error {
 }
 
 type TypeMapEntry struct {
-	Model  StringList              `yaml:"model"`
-	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
+	Model       StringList                 `yaml:"model"`
+	Fields      map[string]TypeMapField    `yaml:"fields,omitempty"`
+	ExtraFields map[string]ModelExtraField `yaml:"extraFields,omitempty"`
 }
 
 type TypeMapField struct {
 	Resolver        bool   `yaml:"resolver"`
 	FieldName       string `yaml:"fieldName"`
 	GeneratedMethod string `yaml:"-"`
+}
+
+type ModelExtraField struct {
+	Type         string `yaml:"type"`
+	IsPointer    bool   `yaml:"isPointer"`
+	OverrideTags string `yaml:"overrideTags"`
 }
 
 type StringList []string

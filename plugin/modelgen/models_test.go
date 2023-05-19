@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
 
@@ -42,6 +43,8 @@ func TestModelGeneration(t *testing.T) {
 	require.True(t, cfg.Models.UserDefined("EnumWithDescription"))
 	require.True(t, cfg.Models.UserDefined("InterfaceWithDescription"))
 	require.True(t, cfg.Models.UserDefined("UnionWithDescription"))
+	require.True(t, cfg.Models.UserDefined("RenameFieldTest"))
+	require.True(t, cfg.Models.UserDefined("ExtraFieldsTest"))
 
 	t.Run("no pointer pointers", func(t *testing.T) {
 		generated, err := os.ReadFile("./out/generated.go")
@@ -278,6 +281,14 @@ func TestModelGeneration(t *testing.T) {
 		require.IsType(t, out.MissingInput{}.NullString, graphql.Omittable[*string]{})
 		require.IsType(t, out.MissingInput{}.NullEnum, graphql.Omittable[*out.MissingEnum]{})
 		require.IsType(t, out.MissingInput{}.NullObject, graphql.Omittable[*out.ExistingInput]{})
+	})
+
+	t.Run("extra fields are present", func(t *testing.T) {
+		var m out.ExtraFieldsTest
+
+		require.IsType(t, m.FieldInt, int64(0))
+		require.IsType(t, m.FieldInternalType, extrafields.Type{})
+		require.IsType(t, m.FieldStringPtr, new(string))
 	})
 }
 

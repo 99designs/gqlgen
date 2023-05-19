@@ -89,6 +89,10 @@ type CyclicalB struct {
 	FieldFive  string     `json:"field_five" database:"CyclicalBfield_five"`
 }
 
+type ExtraFieldsTest struct {
+	SchemaField string `json:"SchemaField" database:"ExtraFieldsTestSchemaField"`
+}
+
 type FieldMutationHook struct {
 	Name     *string       `json:"name,omitempty" anotherTag:"tag" database:"FieldMutationHookname"`
 	Enum     *ExistingEnum `json:"enum,omitempty" yetAnotherTag:"12" database:"FieldMutationHookenum"`

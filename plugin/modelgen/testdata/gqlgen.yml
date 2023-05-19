@@ -23,4 +23,13 @@ models:
     fields:
       badName:
         fieldName: GOODnaME
-
+  ExtraFieldsTest:
+    extraFields:
+      FieldInternalType:
+        type: github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields.Type
+      FieldStringPtr:
+        type: "string"
+        isPointer: true
+      FieldInt:
+        type: "int64"
+        overrideTags: 'json:"field_int_tag"'

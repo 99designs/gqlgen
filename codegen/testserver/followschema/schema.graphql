@@ -5,6 +5,7 @@ directive @goModel(
 directive @goField(
     forceResolver: Boolean
     name: String
+    omittable: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Query {
@@ -19,6 +20,7 @@ type Query {
     nullableArg(arg: Int = 123): String
     inputSlice(arg: [String!]!): Boolean!
     inputNullableSlice(arg: [String!]): Boolean!
+    inputOmittable(arg: OmittableInput!): String!
     shapeUnion: ShapeUnion!
     autobind: Autobind
     deprecatedField: String! @deprecated(reason: "test deprecated directive")
@@ -80,6 +82,17 @@ input InnerInput {
 
 input OuterInput {
     inner: InnerInput!
+}
+
+input OmittableInput {
+    id: ID @goField(omittable: true)
+    bool: Boolean @goField(omittable: true)
+    str: String @goField(omittable: true)
+    int: Int @goField(omittable: true)
+    time: Time @goField(omittable: true)
+    enum: Status @goField(omittable: true)
+    scalar: ThirdParty @goField(omittable: true)
+    object: OuterInput @goField(omittable: true)
 }
 
 scalar ThirdParty @goModel(model:"followschema.ThirdParty")

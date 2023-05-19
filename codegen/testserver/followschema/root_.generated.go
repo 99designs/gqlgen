@@ -320,6 +320,7 @@ type ComplexityRoot struct {
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
 		Infinity                         func(childComplexity int) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
+		InputOmittable                   func(childComplexity int, arg OmittableInput) int
 		InputSlice                       func(childComplexity int, arg []string) int
 		Invalid                          func(childComplexity int) int
 		InvalidIdentifier                func(childComplexity int) int
@@ -1378,6 +1379,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.InputNullableSlice(childComplexity, args["arg"].([]string)), true
 
+	case "Query.inputOmittable":
+		if e.complexity.Query.InputOmittable == nil {
+			break
+		}
+
+		args, err := ec.field_Query_inputOmittable_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.InputOmittable(childComplexity, args["arg"].(OmittableInput)), true
+
 	case "Query.inputSlice":
 		if e.complexity.Query.InputSlice == nil {
 			break
@@ -2006,6 +2019,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputInputWithEnumValue,
 		ec.unmarshalInputNestedInput,
 		ec.unmarshalInputNestedMapInput,
+		ec.unmarshalInputOmittableInput,
 		ec.unmarshalInputOuterInput,
 		ec.unmarshalInputRecursiveInputSlice,
 		ec.unmarshalInputSpecialInput,

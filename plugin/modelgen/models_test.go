@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -271,6 +273,12 @@ func TestModelGeneration(t *testing.T) {
 	t.Run("overridden struct field names use same capitalization as config", func(t *testing.T) {
 		require.NotNil(t, out.RenameFieldTest{}.GOODnaME)
 	})
+
+	t.Run("nullable input fields can be made omittable with goField", func(t *testing.T) {
+		require.IsType(t, out.MissingInput{}.NullString, graphql.Omittable[*string]{})
+		require.IsType(t, out.MissingInput{}.NullEnum, graphql.Omittable[*out.MissingEnum]{})
+		require.IsType(t, out.MissingInput{}.NullObject, graphql.Omittable[*out.ExistingInput]{})
+	})
 }
 
 func TestModelGenerationStructFieldPointers(t *testing.T) {
@@ -317,6 +325,29 @@ func TestModelGenerationStructFieldPointers(t *testing.T) {
 		generated, err := os.ReadFile("./out_struct_pointers/generated.go")
 		require.NoError(t, err)
 		require.NotContains(t, string(generated), "func (this")
+	})
+}
+
+func TestModelGenerationNullableInputOmittable(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_nullable_input_omittable.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+
+	t.Run("nullable input fields are omittable", func(t *testing.T) {
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Name, graphql.Omittable[*string]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Enum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullString, graphql.Omittable[*string]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullEnum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullObject, graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{})
+	})
+
+	t.Run("non-nullable input fields are not omittable", func(t *testing.T) {
+		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NonNullString, "")
 	})
 }
 
@@ -397,12 +428,36 @@ func TestRemoveDuplicate(t *testing.T) {
 			want: "something:\"name2\" json:\"name3\"",
 		},
 		{
-			name: "Test value with empty space",
+			name: "Test tag value with leading empty space",
 			args: args{
 				t: "json:\"name, name2\"",
 			},
 			want:      "json:\"name, name2\"",
 			wantPanic: true,
+		},
+		{
+			name: "Test tag value with trailing empty space",
+			args: args{
+				t: "json:\"name,name2 \"",
+			},
+			want:      "json:\"name,name2 \"",
+			wantPanic: true,
+		},
+		{
+			name: "Test tag value with space in between",
+			args: args{
+				t: "gorm:\"unique;not null\"",
+			},
+			want:      "gorm:\"unique;not null\"",
+			wantPanic: false,
+		},
+		{
+			name: "Test mix use of gorm and json tags",
+			args: args{
+				t: "gorm:\"unique;not null\" json:\"name,name2\"",
+			},
+			want:      "gorm:\"unique;not null\" json:\"name,name2\"",
+			wantPanic: false,
 		},
 	}
 	for _, tt := range tests {
@@ -414,6 +469,96 @@ func TestRemoveDuplicate(t *testing.T) {
 					t.Errorf("removeDuplicate() = %v, want %v", got, tt.want)
 				}
 			}
+		})
+	}
+}
+
+func Test_containsInvalidSpace(t *testing.T) {
+	type args struct {
+		valuesString string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "Test tag value with leading empty space",
+			args: args{
+				valuesString: "name, name2",
+			},
+			want: true,
+		},
+		{
+			name: "Test tag value with trailing empty space",
+			args: args{
+				valuesString: "name ,name2",
+			},
+			want: true,
+		},
+		{
+			name: "Test tag value with valid empty space in words",
+			args: args{
+				valuesString: "accept this,name2",
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, containsInvalidSpace(tt.args.valuesString), "containsInvalidSpace(%v)", tt.args.valuesString)
+		})
+	}
+}
+
+func Test_splitTagsBySpace(t *testing.T) {
+	type args struct {
+		tagsString string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "multiple tags, single value",
+			args: args{
+				tagsString: "json:\"name\" something:\"name2\" json:\"name3\"",
+			},
+			want: []string{"json:\"name\"", "something:\"name2\"", "json:\"name3\""},
+		},
+		{
+			name: "multiple tag, multiple values",
+			args: args{
+				tagsString: "json:\"name\" something:\"name2\" json:\"name3,name4\"",
+			},
+			want: []string{"json:\"name\"", "something:\"name2\"", "json:\"name3,name4\""},
+		},
+		{
+			name: "single tag, single value",
+			args: args{
+				tagsString: "json:\"name\"",
+			},
+			want: []string{"json:\"name\""},
+		},
+		{
+			name: "single tag, multiple values",
+			args: args{
+				tagsString: "json:\"name,name2\"",
+			},
+			want: []string{"json:\"name,name2\""},
+		},
+		{
+			name: "space in value",
+			args: args{
+				tagsString: "gorm:\"not nul,name2\"",
+			},
+			want: []string{"gorm:\"not nul,name2\""},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, splitTagsBySpace(tt.args.tagsString), "splitTagsBySpace(%v)", tt.args.tagsString)
 		})
 	}
 }

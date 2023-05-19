@@ -424,18 +424,20 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("falsyBoolean"))
-			it.FalsyBoolean, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.FalsyBoolean = data
 		case "truthyBoolean":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("truthyBoolean"))
-			it.TruthyBoolean, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.TruthyBoolean = data
 		}
 	}
 

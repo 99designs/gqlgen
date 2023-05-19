@@ -763,14 +763,13 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
 }
 `, BuiltIn: false},
 	{Name: "../../../federation/directives.graphql", Input: `
-	scalar _Any
-	scalar _FieldSet
+	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
 	directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @extends on OBJECT | INTERFACE
-
-	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
 	directive @external on FIELD_DEFINITION
+	scalar _Any
+	scalar _FieldSet
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
@@ -5783,10 +5782,11 @@ func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Con
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Name = data
 		}
 	}
 
@@ -5811,10 +5811,11 @@ func (ec *executionContext) unmarshalInputMultiHelloMultipleRequiresByNamesInput
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Name = data
 		}
 	}
 
@@ -5839,10 +5840,11 @@ func (ec *executionContext) unmarshalInputMultiHelloRequiresByNamesInput(ctx con
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Name = data
 		}
 	}
 
@@ -5867,10 +5869,11 @@ func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx co
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Name = data
 		}
 	}
 
@@ -5895,10 +5898,11 @@ func (ec *executionContext) unmarshalInputMultiPlanetRequiresNestedByNamesInput(
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Name = data
 		}
 	}
 

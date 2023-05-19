@@ -43,6 +43,7 @@ type QueryResolver interface {
 	NullableArg(ctx context.Context, arg *int) (*string, error)
 	InputSlice(ctx context.Context, arg []string) (bool, error)
 	InputNullableSlice(ctx context.Context, arg []string) (bool, error)
+	InputOmittable(ctx context.Context, arg OmittableInput) (string, error)
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
 	DeprecatedField(ctx context.Context) (string, error)
@@ -427,6 +428,21 @@ func (ec *executionContext) field_Query_inputNullableSlice_args(ctx context.Cont
 	if tmp, ok := rawArgs["arg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
 		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_inputOmittable_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 OmittableInput
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOmittableInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1948,6 +1964,58 @@ func (ec *executionContext) fieldContext_Query_inputNullableSlice(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_inputNullableSlice_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_inputOmittable(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().InputOmittable(rctx, fc.Args["arg"].(OmittableInput))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_inputOmittable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_inputOmittable_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -5545,10 +5613,103 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNInt2int(ctx, v)
+			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj interface{}) (OmittableInput, error) {
+	var it OmittableInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "bool", "str", "int", "time", "enum", "scalar", "object"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = graphql.OmittableOf(data)
+		case "bool":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bool"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Bool = graphql.OmittableOf(data)
+		case "str":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("str"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Str = graphql.OmittableOf(data)
+		case "int":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("int"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Int = graphql.OmittableOf(data)
+		case "time":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("time"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Time = graphql.OmittableOf(data)
+		case "enum":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enum"))
+			data, err := ec.unmarshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Enum = graphql.OmittableOf(data)
+		case "scalar":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scalar"))
+			data, err := ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐThirdParty(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scalar = graphql.OmittableOf(data)
+		case "object":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("object"))
+			data, err := ec.unmarshalOOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Object = graphql.OmittableOf(data)
 		}
 	}
 
@@ -5573,10 +5734,11 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
-			it.Inner, err = ec.unmarshalNInnerInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerInput(ctx, v)
+			data, err := ec.unmarshalNInnerInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Inner = data
 		}
 	}
 
@@ -5601,10 +5763,11 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("self"))
-			it.Self, err = ec.unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐRecursiveInputSliceᚄ(ctx, v)
+			data, err := ec.unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐRecursiveInputSliceᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Self = data
 		}
 	}
 
@@ -6202,6 +6365,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_inputNullableSlice(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "inputOmittable":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_inputOmittable(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -7555,6 +7741,11 @@ func (ec *executionContext) marshalNInnerObject2ᚖgithubᚗcomᚋ99designsᚋgq
 	return ec._InnerObject(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOmittableInput(ctx context.Context, v interface{}) (OmittableInput, error) {
+	res, err := ec.unmarshalInputOmittableInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNPet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPet(ctx context.Context, sel ast.SelectionSet, v *Pet) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -7903,6 +8094,22 @@ func (ec *executionContext) unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99de
 	}
 	res, err := ec.unmarshalInputRecursiveInputSlice(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStatus(ctx context.Context, v interface{}) (*Status, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(Status)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStatus(ctx context.Context, sel ast.SelectionSet, v *Status) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐThirdParty(ctx context.Context, v interface{}) (*ThirdParty, error) {

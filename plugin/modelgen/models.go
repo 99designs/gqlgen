@@ -64,9 +64,10 @@ type Field struct {
 	// Name is the field's name as it appears in the schema
 	Name string
 	// GoName is the field's name as it appears in the generated Go code
-	GoName string
-	Type   types.Type
-	Tag    string
+	GoName    string
+	Type      types.Type
+	Tag       string
+	Omittable bool
 }
 
 type Enum struct {
@@ -304,6 +305,8 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 	binder := cfg.NewBinder()
 	fields := make([]*Field, 0)
 
+	var omittableType types.Type
+
 	for _, field := range schemaType.Fields {
 		var typ types.Type
 		fieldDef := cfg.Schema.Types[field.Type.Name()]
@@ -372,6 +375,7 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 			Type:        typ,
 			Description: field.Description,
 			Tag:         getStructTagFromField(field),
+			Omittable:   cfg.NullableInputOmittable && schemaType.Kind == ast.InputObject && !field.Type.NonNull,
 		}
 
 		if m.FieldHook != nil {
@@ -380,6 +384,26 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 				return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
 			}
 			f = mf
+		}
+
+		if f.Omittable {
+			if schemaType.Kind != ast.InputObject || field.Type.NonNull {
+				return nil, fmt.Errorf("generror: field %v.%v: omittable is only applicable to nullable input fields", schemaType.Name, field.Name)
+			}
+
+			var err error
+
+			if omittableType == nil {
+				omittableType, err = binder.FindTypeFromName("github.com/99designs/gqlgen/graphql.Omittable")
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			f.Type, err = binder.InstantiateType(omittableType, []types.Type{f.Type})
+			if err != nil {
+				return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
+			}
 		}
 
 		fields = append(fields, f)
@@ -426,17 +450,71 @@ func GoTagFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Fie
 	return f, nil
 }
 
+// splitTagsBySpace split tags by space, except when space is inside quotes
+func splitTagsBySpace(tagsString string) []string {
+	var tags []string
+	var currentTag string
+	inQuotes := false
+
+	for _, c := range tagsString {
+		if c == '"' {
+			inQuotes = !inQuotes
+		}
+		if c == ' ' && !inQuotes {
+			tags = append(tags, currentTag)
+			currentTag = ""
+		} else {
+			currentTag += string(c)
+		}
+	}
+	tags = append(tags, currentTag)
+
+	return tags
+}
+
+// containsInvalidSpace checks if the tagsString contains invalid space
+func containsInvalidSpace(valuesString string) bool {
+	// get rid of quotes
+	valuesString = strings.ReplaceAll(valuesString, "\"", "")
+	if strings.Contains(valuesString, ",") {
+		// split by comma,
+		values := strings.Split(valuesString, ",")
+		for _, value := range values {
+			if strings.TrimSpace(value) != value {
+				return true
+			}
+		}
+		return false
+	}
+	if strings.Contains(valuesString, ";") {
+		// split by semicolon, which is common in gorm
+		values := strings.Split(valuesString, ";")
+		for _, value := range values {
+			if strings.TrimSpace(value) != value {
+				return true
+			}
+		}
+		return false
+	}
+	// single value
+	if strings.TrimSpace(valuesString) != valuesString {
+		return true
+	}
+	return false
+}
+
 func removeDuplicateTags(t string) string {
 	processed := make(map[string]bool)
-	tt := strings.Split(t, " ")
+	tt := splitTagsBySpace(t)
 	returnTags := ""
 
 	// iterate backwards through tags so appended goTag directives are prioritized
 	for i := len(tt) - 1; i >= 0; i-- {
 		ti := tt[i]
 		// check if ti contains ":", and not contains any empty space. if not, tag is in wrong format
-		if !strings.Contains(ti, ":") || strings.Contains(ti, " ") {
-			panic(fmt.Errorf("wrong format of tags: %s. goTag directive should be in format: @goTag(key: \"something\", value:\"value1,value2,etc\"), no empty space is allowed", t))
+		// correct example: json:"name"
+		if !strings.Contains(ti, ":") {
+			panic(fmt.Errorf("wrong format of tags: %s. goTag directive should be in format: @goTag(key: \"something\", value:\"value\"), ", t))
 		}
 
 		kv := strings.Split(ti, ":")
@@ -448,6 +526,12 @@ func removeDuplicateTags(t string) string {
 		if len(returnTags) > 0 {
 			returnTags = " " + returnTags
 		}
+
+		isContained := containsInvalidSpace(kv[1])
+		if isContained {
+			panic(fmt.Errorf("tag value should not contain any leading or trailing spaces: %s", kv[1]))
+		}
+
 		returnTags = kv[0] + ":" + kv[1] + returnTags
 	}
 
@@ -462,6 +546,12 @@ func GoFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field,
 		if arg := goField.Arguments.ForName("name"); arg != nil {
 			if k, err := arg.Value.Value(nil); err == nil {
 				f.GoName = k.(string)
+			}
+		}
+
+		if arg := goField.Arguments.ForName("omittable"); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				f.Omittable = k.(bool)
 			}
 		}
 	}

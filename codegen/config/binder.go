@@ -20,6 +20,7 @@ type Binder struct {
 	pkgs        *code.Packages
 	schema      *ast.Schema
 	cfg         *Config
+	tctx        *types.Context
 	References  []*TypeReference
 	SawInvalid  bool
 	objectCache map[string]map[string]types.Object
@@ -79,6 +80,14 @@ func (b *Binder) FindType(pkgName string, typeName string) (types.Type, error) {
 		return fun.Type().(*types.Signature).Params().At(0).Type(), nil
 	}
 	return obj.Type(), nil
+}
+
+func (b *Binder) InstantiateType(orig types.Type, targs []types.Type) (types.Type, error) {
+	if b.tctx == nil {
+		b.tctx = types.NewContext()
+	}
+
+	return types.Instantiate(b.tctx, orig, targs, false)
 }
 
 var (
@@ -191,6 +200,7 @@ type TypeReference struct {
 	Marshaler               *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler             *types.Func // When using external marshalling functions this will point to the Unmarshal function
 	IsMarshaler             bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
+	IsOmittable             bool        // Is the type wrapped with Omittable
 	IsContext               bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
 	PointersInUmarshalInput bool        // Inverse values and pointers in return.
 }
@@ -318,7 +328,35 @@ func isIntf(t types.Type) bool {
 	return ok
 }
 
+func unwrapOmittable(t types.Type) (types.Type, bool) {
+	if t == nil {
+		return t, false
+	}
+	named, ok := t.(*types.Named)
+	if !ok {
+		return t, false
+	}
+	if named.Origin().String() != "github.com/99designs/gqlgen/graphql.Omittable[T any]" {
+		return t, false
+	}
+	return named.TypeArgs().At(0), true
+}
+
 func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret *TypeReference, err error) {
+	if innerType, ok := unwrapOmittable(bindTarget); ok {
+		if schemaType.NonNull {
+			return nil, fmt.Errorf("%s is wrapped with Omittable but non-null", schemaType.Name())
+		}
+
+		ref, err := b.TypeReference(schemaType, innerType)
+		if err != nil {
+			return nil, err
+		}
+
+		ref.IsOmittable = true
+		return ref, err
+	}
+
 	if !isValid(bindTarget) {
 		b.SawInvalid = true
 		return nil, fmt.Errorf("%s has an invalid type", schemaType.Name())

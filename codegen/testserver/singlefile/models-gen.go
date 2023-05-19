@@ -7,6 +7,8 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Animal interface {
@@ -152,6 +154,17 @@ type ObjectDirectives struct {
 	Text         string   `json:"text"`
 	NullableText *string  `json:"nullableText,omitempty"`
 	Order        []string `json:"order"`
+}
+
+type OmittableInput struct {
+	ID     graphql.Omittable[*string]     `json:"id,omitempty"`
+	Bool   graphql.Omittable[*bool]       `json:"bool,omitempty"`
+	Str    graphql.Omittable[*string]     `json:"str,omitempty"`
+	Int    graphql.Omittable[*int]        `json:"int,omitempty"`
+	Time   graphql.Omittable[*time.Time]  `json:"time,omitempty"`
+	Enum   graphql.Omittable[*Status]     `json:"enum,omitempty"`
+	Scalar graphql.Omittable[*ThirdParty] `json:"scalar,omitempty"`
+	Object graphql.Omittable[*OuterInput] `json:"object,omitempty"`
 }
 
 type OuterInput struct {

@@ -43,6 +43,8 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	ComposeDirective func(ctx context.Context, obj interface{}, next graphql.Resolver, name string) (res interface{}, err error)
+	InterfaceObject  func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -251,20 +253,40 @@ func sourceData(filename string) string {
 var sources = []*ast.Source{
 	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
 	{Name: "../federation/directives.graphql", Input: `
-	scalar _Any
-	scalar _FieldSet
-
-	directive @external on FIELD_DEFINITION
-	directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
-	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+	directive @composeDirective(name: String!) repeatable on SCHEMA
 	directive @extends on OBJECT | INTERFACE
-
-	directive @key(fields: _FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+	directive @external on OBJECT | FIELD_DEFINITION
+	directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+	directive @inaccessible on
+	  | ARGUMENT_DEFINITION
+	  | ENUM
+	  | ENUM_VALUE
+	  | FIELD_DEFINITION
+	  | INPUT_FIELD_DEFINITION
+	  | INPUT_OBJECT
+	  | INTERFACE
+	  | OBJECT
+	  | SCALAR
+	  | UNION
+	directive @interfaceObject on OBJECT
 	directive @link(import: [String!], url: String!) repeatable on SCHEMA
-	directive @shareable on OBJECT | FIELD_DEFINITION
-	directive @tag(name: String!) repeatable on FIELD_DEFINITION | INTERFACE | OBJECT | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
 	directive @override(from: String!) on FIELD_DEFINITION
-	directive @inaccessible on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | INTERFACE | UNION | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
+	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
+	directive @shareable repeatable on FIELD_DEFINITION | OBJECT
+	directive @tag(name: String!) repeatable on
+	  | ARGUMENT_DEFINITION
+	  | ENUM
+	  | ENUM_VALUE
+	  | FIELD_DEFINITION
+	  | INPUT_FIELD_DEFINITION
+	  | INPUT_OBJECT
+	  | INTERFACE
+	  | OBJECT
+	  | SCALAR
+	  | UNION
+    scalar _Any
+	scalar FieldSet
 `, BuiltIn: true},
 	{Name: "../federation/entity.graphql", Input: `
 type _Service {
@@ -281,6 +303,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_composeDirective_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -2748,18 +2785,20 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
-			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Text = data
 		case "userId":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.UserID = data
 		}
 	}
 
@@ -3343,6 +3382,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNFieldSet2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFieldSet2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3444,21 +3498,6 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalN_FieldSet2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalN_FieldSet2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐService(ctx context.Context, sel ast.SelectionSet, v fedruntime.Service) graphql.Marshaler {

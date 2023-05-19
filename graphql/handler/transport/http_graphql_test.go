@@ -35,6 +35,13 @@ func TestGRAPHQL(t *testing.T) {
 		assert.Equal(t, `{"errors":[{"message":"Expected Name, found String","locations":[{"line":1,"column":3}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
+	t.Run("parse query failure", func(t *testing.T) {
+		resp := doGraphqlRequest(h, "POST", "/graphql", `%7B%H7U6Z`)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
+		assert.Equal(t, resp.Body.String(), `{"errors":[{"message":"could not cleanup body: invalid URL escape \"%H7\""}],"data":null}`)
+	})
+
 	t.Run("validation failure", func(t *testing.T) {
 		resp := doGraphqlRequest(h, "POST", "/graphql", `{ title }`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())

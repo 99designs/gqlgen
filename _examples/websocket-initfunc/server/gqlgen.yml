@@ -23,7 +23,7 @@ resolver:
   dir: graph
   package: graph
 
-# Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
+# Optional: turn on use `gqlgen:"fieldName"` tags in your models
 # struct_tag: json
 
 # Optional: turn on to use []Thing instead of []*Thing
@@ -35,6 +35,12 @@ resolver:
 
 # Optional: turn off to make resolvers return values instead of pointers for structs
 # resolvers_always_return_pointers: true
+
+# Optional: turn on to return pointers instead of values in unmarshalInput
+# return_pointers_in_unmarshalinput: false
+
+# Optional: wrap nullable input fields with Omittable
+# nullable_input_omittable: true
 
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true

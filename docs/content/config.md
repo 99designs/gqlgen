@@ -37,6 +37,8 @@ resolver:
   dir: graph
   package: graph
   filename_template: "{name}.resolvers.go"
+  # Optional: turn on to not generate template comments above resolvers
+  # omit_template_comment: false
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
@@ -59,6 +61,12 @@ resolver:
 
 # Optional: turn off to make resolvers return values instead of pointers for structs
 # resolvers_always_return_pointers: true
+
+# Optional: turn on to return pointers instead of values in unmarshalInput
+# return_pointers_in_unmarshalinput: false
+
+# Optional: wrap nullable input fields with Omittable
+# nullable_input_omittable: true
 
 # Optional: turn on to return pointers instead of values in unmarshalInput
 # return_pointers_in_unmarshalinput: false
@@ -110,6 +118,7 @@ directive @goModel(
 directive @goField(
 	forceResolver: Boolean
 	name: String
+  omittable: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goTag(

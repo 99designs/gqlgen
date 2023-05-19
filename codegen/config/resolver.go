@@ -10,12 +10,13 @@ import (
 )
 
 type ResolverConfig struct {
-	Filename         string         `yaml:"filename,omitempty"`
-	FilenameTemplate string         `yaml:"filename_template,omitempty"`
-	Package          string         `yaml:"package,omitempty"`
-	Type             string         `yaml:"type,omitempty"`
-	Layout           ResolverLayout `yaml:"layout,omitempty"`
-	DirName          string         `yaml:"dir"`
+	Filename            string         `yaml:"filename,omitempty"`
+	FilenameTemplate    string         `yaml:"filename_template,omitempty"`
+	Package             string         `yaml:"package,omitempty"`
+	Type                string         `yaml:"type,omitempty"`
+	Layout              ResolverLayout `yaml:"layout,omitempty"`
+	DirName             string         `yaml:"dir"`
+	OmitTemplateComment bool           `yaml:"omit_template_comment,omitempty"`
 }
 
 type ResolverLayout string

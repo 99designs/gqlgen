@@ -43,12 +43,20 @@
 								return {{$it}}, err
 							}
 						{{- else }}
-							it.{{$field.GoFieldName}} = data
+							{{- if $field.TypeReference.IsOmittable }}
+								it.{{$field.GoFieldName}} = graphql.OmittableOf(data)
+							{{- else }}
+								it.{{$field.GoFieldName}} = data
+							{{- end }}
 						{{- end }}
 					{{- if $field.TypeReference.IsNilable }}
 						{{- if not $field.IsResolver }}
 						} else if tmp == nil {
-							it.{{$field.GoFieldName}} = nil
+							{{- if $field.TypeReference.IsOmittable }}
+								it.{{$field.GoFieldName}} = graphql.OmittableOf[{{ $field.TypeReference.GO | ref }}](nil)
+							{{- else }}
+								it.{{$field.GoFieldName}} = nil
+							{{- end }}
 						{{- end }}
 					{{- end }}
 					} else {
@@ -65,10 +73,15 @@
 							return {{$it}}, err
 						}
 					{{- else }}
-						it.{{$field.GoFieldName}}, err = ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
+						data, err := ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
 						if err != nil {
 							return {{$it}}, err
 						}
+						{{- if $field.TypeReference.IsOmittable }}
+							it.{{$field.GoFieldName}} = graphql.OmittableOf(data)
+						{{- else }}
+							it.{{$field.GoFieldName}} = data
+						{{- end }}
 					{{- end }}
 				{{- end }}
 			{{- end }}

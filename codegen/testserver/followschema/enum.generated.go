@@ -45,10 +45,11 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enum"))
-			it.Enum, err = ec.unmarshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEnumTest(ctx, v)
+			data, err := ec.unmarshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEnumTest(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Enum = data
 		}
 	}
 

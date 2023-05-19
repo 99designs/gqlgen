@@ -89,10 +89,11 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstField"))
-			it.FirstField, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.FirstField = data
 		case "overrideFirstField":
 			var err error
 

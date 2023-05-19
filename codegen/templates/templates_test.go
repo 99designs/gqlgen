@@ -44,6 +44,15 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "RelatedUrls", ToGo("RelatedUrls"))
 	require.Equal(t, "ITicket", ToGo("ITicket"))
 	require.Equal(t, "FooTicket", ToGo("fooTicket"))
+
+	require.Equal(t, "Idle", ToGo("IDLE"))
+	require.Equal(t, "Idle", ToGo("Idle"))
+	require.Equal(t, "Idle", ToGo("idle"))
+	require.Equal(t, "Identities", ToGo("IDENTITIES"))
+	require.Equal(t, "Identities", ToGo("Identities"))
+	require.Equal(t, "Identities", ToGo("identities"))
+	require.Equal(t, "Iphone", ToGo("IPHONE"))
+	require.Equal(t, "IPhone", ToGo("iPHONE"))
 }
 
 func TestToGoPrivate(t *testing.T) {
@@ -73,6 +82,15 @@ func TestToGoPrivate(t *testing.T) {
 	require.Equal(t, "id", ToGoPrivate("id"))
 	require.Equal(t, "", ToGoPrivate(""))
 	require.Equal(t, "_", ToGoPrivate("_"))
+
+	require.Equal(t, "idle", ToGoPrivate("IDLE"))
+	require.Equal(t, "idle", ToGoPrivate("Idle"))
+	require.Equal(t, "idle", ToGoPrivate("idle"))
+	require.Equal(t, "identities", ToGoPrivate("IDENTITIES"))
+	require.Equal(t, "identities", ToGoPrivate("Identities"))
+	require.Equal(t, "identities", ToGoPrivate("identities"))
+	require.Equal(t, "iphone", ToGoPrivate("IPHONE"))
+	require.Equal(t, "iPhone", ToGoPrivate("iPHONE"))
 }
 
 func TestToGoModelName(t *testing.T) {

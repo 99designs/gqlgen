@@ -170,14 +170,13 @@ var sources = []*ast.Source{
 `, BuiltIn: false},
 	{Name: "subdir.graphqls", Input: sourceData("subdir.graphqls"), BuiltIn: false},
 	{Name: "federation/directives.graphql", Input: `
-	scalar _Any
-	scalar _FieldSet
+	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
 	directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @extends on OBJECT | INTERFACE
-
-	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
 	directive @external on FIELD_DEFINITION
+	scalar _Any
+	scalar _FieldSet
 `, BuiltIn: true},
 	{Name: "federation/entity.graphql", Input: `
 type _Service {

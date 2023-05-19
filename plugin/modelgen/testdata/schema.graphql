@@ -6,6 +6,7 @@ directive @goTag(
 directive @goField(
 	forceResolver: Boolean
 	name: String
+    omittable: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | INTERFACE
 
 type Query {
@@ -39,6 +40,10 @@ type MissingTypeNullable implements MissingInterface & ExistingInterface {
 input MissingInput {
     name: String
     enum: MissingEnum
+    nonNullString: String!
+    nullString: String @goField(omittable: true)
+    nullEnum: MissingEnum @goField(omittable: true)
+    nullObject: ExistingInput @goField(omittable: true)
 }
 
 enum MissingEnum {

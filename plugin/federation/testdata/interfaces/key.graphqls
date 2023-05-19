@@ -2,3 +2,8 @@ extend interface Hello @key(fields: "name") {
     name: String!
     secondary: String!
 }
+
+type World implements Hello @key(fields: "name") {
+    name: String!
+    secondary: String!
+}

@@ -1,6 +1,8 @@
 package graphql
 
 import (
+	"context"
+
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -13,6 +15,7 @@ type DeferredGroup struct {
 	Path     ast.Path
 	Label    string
 	FieldSet *FieldSet
+	Context  context.Context
 }
 
 type DeferredResult struct {

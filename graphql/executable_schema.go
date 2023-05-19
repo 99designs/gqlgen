@@ -54,7 +54,9 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 					func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 				if shouldDefer {
-					f.Deferrable = &Deferrable{Label: label}
+					f.Deferrable = &Deferrable{
+						Label: label,
+					}
 				}
 			}
 

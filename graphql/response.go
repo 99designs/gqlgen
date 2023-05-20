@@ -17,7 +17,7 @@ type Response struct {
 	Data       json.RawMessage        `json:"data"`
 	Label      string                 `json:"label,omitempty"`
 	Path       ast.Path               `json:"path,omitempty"`
-	HasNext    bool                   `json:"hasNext"`
+	HasNext    bool                   `json:"hasNext,omitempty"`
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
 }
 

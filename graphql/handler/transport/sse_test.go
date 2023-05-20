@@ -58,7 +58,7 @@ func TestSSE(t *testing.T) {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code, "Request return wrong status -> %s", w.Code)
-		assert.Equal(t, `{"errors":[{"message":"transport not supported"}],"data":null,"hasNext":false}`, w.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, w.Body.String())
 	})
 
 	t.Run("decode failure", func(t *testing.T) {
@@ -67,7 +67,7 @@ func TestSSE(t *testing.T) {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code, "Request return wrong status -> %s", w.Code)
-		assert.Equal(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null,"hasNext":false}`, w.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`, w.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {
@@ -104,7 +104,7 @@ func TestSSE(t *testing.T) {
 		assert.Equal(t, ":\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 		assert.Equal(t, "event: next\n", readLine(br))
-		assert.Equal(t, "data: {\"data\":{\"name\":\"test\"},\"hasNext\":false}\n", readLine(br))
+		assert.Equal(t, "data: {\"data\":{\"name\":\"test\"}}\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 
 		wg.Add(1)
@@ -114,7 +114,7 @@ func TestSSE(t *testing.T) {
 		}()
 
 		assert.Equal(t, "event: next\n", readLine(br))
-		assert.Equal(t, "data: {\"data\":{\"name\":\"test\"},\"hasNext\":false}\n", readLine(br))
+		assert.Equal(t, "data: {\"data\":{\"name\":\"test\"}}\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 
 		wg.Add(1)

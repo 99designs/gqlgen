@@ -51,6 +51,7 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	Custom        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Defer         func(ctx context.Context, obj interface{}, next graphql.Resolver, ifArg *bool, label *string) (res interface{}, err error)
 	Directive1    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Directive2    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Directive3    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
@@ -459,7 +460,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 }
 
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	ec := executionContext{nil, e}
+	ec := executionContext{nil, e, nil, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
 
@@ -2009,7 +2010,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
-	ec := executionContext{rc, e}
+	ec := executionContext{rc, e, nil, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputDefaultInput,
 		ec.unmarshalInputFieldsOrderInput,
@@ -2032,18 +2033,51 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	switch rc.Operation.Operation {
 	case ast.Query:
 		return func(ctx context.Context) *graphql.Response {
-			if !first {
-				return nil
+			var response graphql.Response
+			var data graphql.Marshaler
+			if first {
+				first = false
+				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				data = ec._Query(ctx, rc.Operation.SelectionSet)
+			} else {
+				if ec.pendingDeferred > 0 {
+					result := <-ec.deferredResults
+					ec.pendingDeferred--
+					data = result.Result
+					response.Path = result.Path
+					response.Label = result.Label
+					response.Errors = result.Errors
+				} else {
+					return nil
+				}
 			}
-			first = false
-			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Query(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
+			response.Data = buf.Bytes()
+			response.HasNext = ec.pendingDeferred+len(ec.deferredGroups) > 0
 
-			return &graphql.Response{
-				Data: buf.Bytes(),
+			// dispatch deferred calls
+			dg := ec.deferredGroups
+			ec.deferredGroups = nil
+			for _, deferred := range dg {
+				ec.pendingDeferred++
+				go func(deferred graphql.DeferredGroup) {
+					ctx = graphql.WithFreshResponseContext(deferred.Context)
+					deferred.FieldSet.Dispatch(ctx)
+					ds := graphql.DeferredResult{
+						Path:   deferred.Path,
+						Label:  deferred.Label,
+						Result: deferred.FieldSet,
+						Errors: graphql.GetErrors(ctx),
+					}
+					// null fields should bubble up
+					if deferred.FieldSet.Invalids > 0 {
+						ds.Result = graphql.Null
+					}
+					ec.deferredResults <- ds
+				}(deferred)
 			}
+			return &response
 		}
 	case ast.Mutation:
 		return func(ctx context.Context) *graphql.Response {
@@ -2086,6 +2120,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
+	deferredGroups  []graphql.DeferredGroup
+	pendingDeferred int
+	deferredResults chan graphql.DeferredResult
 }
 
 func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {

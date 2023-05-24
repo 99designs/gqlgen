@@ -102,6 +102,7 @@ type Stub struct {
 		Panics                           func(ctx context.Context) (*Panics, error)
 		PrimitiveObject                  func(ctx context.Context) ([]Primitive, error)
 		PrimitiveStringObject            func(ctx context.Context) ([]PrimitiveString, error)
+		PtrToAnyContainer                func(ctx context.Context) (*PtrToAnyContainer, error)
 		PtrToSliceContainer              func(ctx context.Context) (*PtrToSliceContainer, error)
 		Infinity                         func(ctx context.Context) (float64, error)
 		StringFromContextInterface       func(ctx context.Context) (*StringFromContextInterface, error)
@@ -437,6 +438,9 @@ func (r *stubQuery) PrimitiveObject(ctx context.Context) ([]Primitive, error) {
 }
 func (r *stubQuery) PrimitiveStringObject(ctx context.Context) ([]PrimitiveString, error) {
 	return r.QueryResolver.PrimitiveStringObject(ctx)
+}
+func (r *stubQuery) PtrToAnyContainer(ctx context.Context) (*PtrToAnyContainer, error) {
+	return r.QueryResolver.PtrToAnyContainer(ctx)
 }
 func (r *stubQuery) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
 	return r.QueryResolver.PtrToSliceContainer(ctx)

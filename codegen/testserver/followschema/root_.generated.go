@@ -276,6 +276,11 @@ type ComplexityRoot struct {
 		Value   func(childComplexity int) int
 	}
 
+	PtrToAnyContainer struct {
+		Binding  func(childComplexity int) int
+		PtrToAny func(childComplexity int) int
+	}
+
 	PtrToPtrInner struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
@@ -342,6 +347,7 @@ type ComplexityRoot struct {
 		Panics                           func(childComplexity int) int
 		PrimitiveObject                  func(childComplexity int) int
 		PrimitiveStringObject            func(childComplexity int) int
+		PtrToAnyContainer                func(childComplexity int) int
 		PtrToSliceContainer              func(childComplexity int) int
 		Recursive                        func(childComplexity int, input *RecursiveInputSlice) int
 		ScalarSlice                      func(childComplexity int) int
@@ -1080,6 +1086,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PrimitiveString.Value(childComplexity), true
 
+	case "PtrToAnyContainer.binding":
+		if e.complexity.PtrToAnyContainer.Binding == nil {
+			break
+		}
+
+		return e.complexity.PtrToAnyContainer.Binding(childComplexity), true
+
+	case "PtrToAnyContainer.ptrToAny":
+		if e.complexity.PtrToAnyContainer.PtrToAny == nil {
+			break
+		}
+
+		return e.complexity.PtrToAnyContainer.PtrToAny(childComplexity), true
+
 	case "PtrToPtrInner.key":
 		if e.complexity.PtrToPtrInner.Key == nil {
 			break
@@ -1561,6 +1581,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PrimitiveStringObject(childComplexity), true
+
+	case "Query.ptrToAnyContainer":
+		if e.complexity.Query.PtrToAnyContainer == nil {
+			break
+		}
+
+		return e.complexity.Query.PtrToAnyContainer(childComplexity), true
 
 	case "Query.ptrToSliceContainer":
 		if e.complexity.Query.PtrToSliceContainer == nil {
@@ -2139,7 +2166,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
+//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -2166,6 +2193,7 @@ var sources = []*ast.Source{
 	{Name: "nulls.graphql", Input: sourceData("nulls.graphql"), BuiltIn: false},
 	{Name: "panics.graphql", Input: sourceData("panics.graphql"), BuiltIn: false},
 	{Name: "primitive_objects.graphql", Input: sourceData("primitive_objects.graphql"), BuiltIn: false},
+	{Name: "ptr_to_any.graphql", Input: sourceData("ptr_to_any.graphql"), BuiltIn: false},
 	{Name: "ptr_to_ptr_input.graphql", Input: sourceData("ptr_to_ptr_input.graphql"), BuiltIn: false},
 	{Name: "ptr_to_slice.graphql", Input: sourceData("ptr_to_slice.graphql"), BuiltIn: false},
 	{Name: "scalar_context.graphql", Input: sourceData("scalar_context.graphql"), BuiltIn: false},

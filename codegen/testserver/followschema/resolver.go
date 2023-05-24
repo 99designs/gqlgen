@@ -362,6 +362,11 @@ func (r *queryResolver) PrimitiveStringObject(ctx context.Context) ([]PrimitiveS
 	panic("not implemented")
 }
 
+// PtrToAnyContainer is the resolver for the ptrToAnyContainer field.
+func (r *queryResolver) PtrToAnyContainer(ctx context.Context) (*PtrToAnyContainer, error) {
+	panic("not implemented")
+}
+
 // PtrToSliceContainer is the resolver for the ptrToSliceContainer field.
 func (r *queryResolver) PtrToSliceContainer(ctx context.Context) (*PtrToSliceContainer, error) {
 	panic("not implemented")

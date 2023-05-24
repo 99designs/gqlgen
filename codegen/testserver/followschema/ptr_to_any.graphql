@@ -1,0 +1,10 @@
+scalar Any
+
+type PtrToAnyContainer {
+    ptrToAny: Any
+    binding: Any
+}
+
+extend type Query {
+    ptrToAnyContainer: PtrToAnyContainer!
+}

@@ -252,6 +252,14 @@ func (t *TypeReference) IsPtrToSlice() bool {
 	return false
 }
 
+func (t *TypeReference) IsPtrToIntf() bool {
+	if t.IsPtr() {
+		_, isPointerToInterface := t.GO.(*types.Pointer).Elem().(*types.Interface)
+		return isPointerToInterface
+	}
+	return false
+}
+
 func (t *TypeReference) IsNamed() bool {
 	_, isSlice := t.GO.(*types.Named)
 	return isSlice

@@ -4045,6 +4045,8 @@ func (ec *executionContext) fieldContext_Query_ptrToAnyContainer(ctx context.Con
 			switch field.Name {
 			case "ptrToAny":
 				return ec.fieldContext_PtrToAnyContainer_ptrToAny(ctx, field)
+			case "binding":
+				return ec.fieldContext_PtrToAnyContainer_binding(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PtrToAnyContainer", field.Name)
 		},

@@ -22,16 +22,16 @@ func TestPtrToAny(t *testing.T) {
 		return &ptrToAnyContainer, nil
 	}
 
-	t.Run("pointer to any", func(t *testing.T) {
+	t.Run("binding to pointer to any", func(t *testing.T) {
 		var resp struct {
 			PtrToAnyContainer struct {
-				PtrToAny *any
+				Binding *any
 			}
 		}
 
-		err := c.Post(`query { ptrToAnyContainer {  ptrToAny }}`, &resp)
+		err := c.Post(`query { ptrToAnyContainer { binding }}`, &resp)
 		require.NoError(t, err)
 
-		require.Equal(t, &a, resp.PtrToAnyContainer.PtrToAny)
+		require.Equal(t, &a, resp.PtrToAnyContainer.Binding)
 	})
 }

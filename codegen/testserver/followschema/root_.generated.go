@@ -277,6 +277,7 @@ type ComplexityRoot struct {
 	}
 
 	PtrToAnyContainer struct {
+		Binding  func(childComplexity int) int
 		PtrToAny func(childComplexity int) int
 	}
 
@@ -1084,6 +1085,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PrimitiveString.Value(childComplexity), true
+
+	case "PtrToAnyContainer.binding":
+		if e.complexity.PtrToAnyContainer.Binding == nil {
+			break
+		}
+
+		return e.complexity.PtrToAnyContainer.Binding(childComplexity), true
 
 	case "PtrToAnyContainer.ptrToAny":
 		if e.complexity.PtrToAnyContainer.PtrToAny == nil {

@@ -287,6 +287,7 @@ type ComplexityRoot struct {
 	}
 
 	PtrToAnyContainer struct {
+		Binding  func(childComplexity int) int
 		PtrToAny func(childComplexity int) int
 	}
 
@@ -1232,6 +1233,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PrimitiveString.Value(childComplexity), true
+
+	case "PtrToAnyContainer.binding":
+		if e.complexity.PtrToAnyContainer.Binding == nil {
+			break
+		}
+
+		return e.complexity.PtrToAnyContainer.Binding(childComplexity), true
 
 	case "PtrToAnyContainer.ptrToAny":
 		if e.complexity.PtrToAnyContainer.PtrToAny == nil {
@@ -7273,6 +7281,44 @@ func (ec *executionContext) fieldContext_PtrToAnyContainer_ptrToAny(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, field graphql.CollectedField, obj *PtrToAnyContainer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PtrToAnyContainer_binding(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Binding(), nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*any)
+	fc.Result = res
+	return ec.marshalOAny2ᚖinterface(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PtrToAnyContainer_binding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PtrToAnyContainer",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Any does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PtrToPtrInner_key(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrInner) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PtrToPtrInner_key(ctx, field)
 	if err != nil {
@@ -10108,6 +10154,8 @@ func (ec *executionContext) fieldContext_Query_ptrToAnyContainer(ctx context.Con
 			switch field.Name {
 			case "ptrToAny":
 				return ec.fieldContext_PtrToAnyContainer_ptrToAny(ctx, field)
+			case "binding":
+				return ec.fieldContext_PtrToAnyContainer_binding(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PtrToAnyContainer", field.Name)
 		},
@@ -17851,6 +17899,8 @@ func (ec *executionContext) _PtrToAnyContainer(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("PtrToAnyContainer")
 		case "ptrToAny":
 			out.Values[i] = ec._PtrToAnyContainer_ptrToAny(ctx, field, obj)
+		case "binding":
+			out.Values[i] = ec._PtrToAnyContainer_binding(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -35,6 +35,7 @@ type Config struct {
 	ReturnPointersInUmarshalInput bool                       `yaml:"return_pointers_in_unmarshalinput,omitempty"`
 	ResolversAlwaysReturnPointers bool                       `yaml:"resolvers_always_return_pointers,omitempty"`
 	NullableInputOmittable        bool                       `yaml:"nullable_input_omittable,omitempty"`
+	EnableModelJsonOmitemptyTag   *bool                      `yaml:"enable_model_json_omitempty_tag,omitempty"`
 	SkipValidation                bool                       `yaml:"skip_validation,omitempty"`
 	SkipModTidy                   bool                       `yaml:"skip_mod_tidy,omitempty"`
 	Sources                       []*ast.Source              `yaml:"-"`

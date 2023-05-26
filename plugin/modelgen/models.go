@@ -375,7 +375,7 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 			GoName:      name,
 			Type:        typ,
 			Description: field.Description,
-			Tag:         getStructTagFromField(field),
+			Tag:         getStructTagFromField(cfg, field),
 			Omittable:   cfg.NullableInputOmittable && schemaType.Kind == ast.InputObject && !field.Type.NonNull,
 		}
 
@@ -461,8 +461,8 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 	return fields, nil
 }
 
-func getStructTagFromField(field *ast.FieldDefinition) string {
-	if !field.Type.NonNull {
+func getStructTagFromField(cfg *config.Config, field *ast.FieldDefinition) string {
+	if !field.Type.NonNull && (cfg.EnableModelJsonOmitemptyTag == nil || *cfg.EnableModelJsonOmitemptyTag) {
 		return `json:"` + field.Name + `,omitempty"`
 	}
 	return `json:"` + field.Name + `"`

@@ -2,23 +2,27 @@ package modelgen
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
+	"github.com/99designs/gqlgen/plugin/modelgen/out"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_false"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_nil"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_true"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
-
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin/modelgen/out"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -360,6 +364,65 @@ func TestModelGenerationNullableInputOmittable(t *testing.T) {
 	t.Run("non-nullable input fields are not omittable", func(t *testing.T) {
 		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NonNullString, "")
 	})
+}
+
+func TestModelGenerationOmitemptyConfig(t *testing.T) {
+	suites := []struct {
+		n       string
+		cfg     string
+		enabled bool
+		t       any
+	}{
+		{
+			n:       "nil",
+			cfg:     "gqlgen_enable_model_json_omitempty_tag_nil.yml",
+			enabled: true,
+			t:       out_enable_model_json_omitempty_tag_nil.OmitEmptyJSONTagTest{},
+		},
+		{
+			n:       "true",
+			cfg:     "gqlgen_enable_model_json_omitempty_tag_true.yml",
+			enabled: true,
+			t:       out_enable_model_json_omitempty_tag_true.OmitEmptyJSONTagTest{},
+		},
+		{
+			n:       "false",
+			cfg:     "gqlgen_enable_model_json_omitempty_tag_false.yml",
+			enabled: false,
+			t:       out_enable_model_json_omitempty_tag_false.OmitEmptyJSONTagTest{},
+		},
+	}
+
+	for _, s := range suites {
+		t.Run(s.n, func(t *testing.T) {
+			cfg, err := config.LoadConfig(fmt.Sprintf("testdata/%s", s.cfg))
+			require.NoError(t, err)
+			require.NoError(t, cfg.Init())
+			p := Plugin{
+				MutateHook: mutateHook,
+				FieldHook:  DefaultFieldMutateHook,
+			}
+			require.NoError(t, p.MutateConfig(cfg))
+			rt := reflect.TypeOf(s.t)
+
+			// ensure non-nullable fields are never omitempty
+			sfn, ok := rt.FieldByName("ValueNonNil")
+			require.True(t, ok)
+			require.Equal(t, "ValueNonNil", sfn.Tag.Get("json"))
+
+			// test nullable fields for configured omitempty
+			sf, ok := rt.FieldByName("Value")
+			require.True(t, ok)
+
+			var expected string
+			if s.enabled {
+				expected = "Value,omitempty"
+			} else {
+				expected = "Value"
+			}
+			require.Equal(t, expected, sf.Tag.Get("json"))
+		})
+	}
 }
 
 func mutateHook(b *ModelBuild) *ModelBuild {

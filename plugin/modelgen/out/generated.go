@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 )
 
 type A interface {
@@ -105,6 +106,16 @@ type CyclicalB struct {
 	FieldThree *CyclicalA `json:"field_three,omitempty" database:"CyclicalBfield_three"`
 	FieldFour  *CyclicalA `json:"field_four,omitempty" database:"CyclicalBfield_four"`
 	FieldFive  string     `json:"field_five" database:"CyclicalBfield_five"`
+}
+
+type ExtraFieldsTest struct {
+	SchemaField string `json:"SchemaField" database:"ExtraFieldsTestSchemaField"`
+	// User defined extra field
+	FieldInt int64 `json:"field_int_tag" database:"ExtraFieldsTestFieldInt"`
+	// User defined extra field
+	FieldInternalType extrafields.Type `json:"-" database:"ExtraFieldsTestFieldInternalType"`
+	// User defined extra field
+	FieldStringPtr *string `json:"-" database:"ExtraFieldsTestFieldStringPtr"`
 }
 
 type FieldMutationHook struct {

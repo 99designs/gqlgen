@@ -198,3 +198,7 @@ type Xer implements X {
     Id: String! @goField(name: "Id")
     Name: String!
 }
+
+type ExtraFieldsTest {
+  SchemaField: String!
+}

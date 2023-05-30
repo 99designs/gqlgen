@@ -293,6 +293,7 @@ func TestModelGeneration(t *testing.T) {
 		require.IsType(t, m.FieldInt, int64(0))
 		require.IsType(t, m.FieldInternalType, extrafields.Type{})
 		require.IsType(t, m.FieldStringPtr, new(string))
+		require.IsType(t, m.FieldIntSlice, []int64{})
 	})
 }
 

@@ -26,10 +26,12 @@ models:
   ExtraFieldsTest:
     extraFields:
       FieldInternalType:
+        description: "Internal field"
         type: github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields.Type
       FieldStringPtr:
-        type: "string"
-        isPointer: true
+        type: "*string"
       FieldInt:
         type: "int64"
         overrideTags: 'json:"field_int_tag"'
+      FieldIntSlice:
+        type: "[]int64"

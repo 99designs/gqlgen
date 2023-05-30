@@ -323,8 +323,10 @@ func (c *Config) injectTypesFromSchema() error {
 }
 
 type TypeMapEntry struct {
-	Model       StringList                 `yaml:"model"`
-	Fields      map[string]TypeMapField    `yaml:"fields,omitempty"`
+	Model  StringList              `yaml:"model"`
+	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
+
+	// Key is the Go name of the field.
 	ExtraFields map[string]ModelExtraField `yaml:"extraFields,omitempty"`
 }
 
@@ -335,9 +337,29 @@ type TypeMapField struct {
 }
 
 type ModelExtraField struct {
-	Type         string `yaml:"type"`
-	IsPointer    bool   `yaml:"isPointer"`
+	// Type is the Go type of the field.
+	//
+	// It supports the builtin basic types (like string or int64), named types
+	// (qualified by the full package path), pointers to those types (prefixed
+	// with `*`), and slices of those types (prefixed with `[]`).
+	//
+	// For example, the following are valid types:
+	//  string
+	//  *github.com/author/package.Type
+	//  []string
+	//  []*github.com/author/package.Type
+	//
+	// Note that the type will be referenced from the generated/graphql, which
+	// means the package it lives in must not reference the generated/graphql
+	// package to avoid circular imports.
+	// restrictions.
+	Type string `yaml:"type"`
+
+	// OverrideTags is an optional override of the Go field tag.
 	OverrideTags string `yaml:"overrideTags"`
+
+	// Description is an optional the Go field doc-comment.
+	Description string `yaml:"description"`
 }
 
 type StringList []string

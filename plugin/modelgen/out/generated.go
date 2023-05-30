@@ -205,6 +205,11 @@ type NotCyclicalB struct {
 	FieldTwo *NotCyclicalA `json:"FieldTwo" database:"NotCyclicalBFieldTwo"`
 }
 
+type OmitEmptyJSONTagTest struct {
+	ValueNonNil string  `json:"ValueNonNil" database:"OmitEmptyJsonTagTestValueNonNil"`
+	Value       *string `json:"Value,omitempty" database:"OmitEmptyJsonTagTestValue"`
+}
+
 type Recursive struct {
 	FieldOne   *Recursive `json:"FieldOne" database:"RecursiveFieldOne"`
 	FieldTwo   *Recursive `json:"FieldTwo" database:"RecursiveFieldTwo"`

@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 	"github.com/99designs/gqlgen/plugin/modelgen/out"
 )
 
@@ -111,12 +110,6 @@ type CyclicalB struct {
 
 type ExtraFieldsTest struct {
 	SchemaField string `json:"SchemaField" database:"ExtraFieldsTestSchemaField"`
-	// User defined extra field
-	FieldInt int64 `json:"field_int_tag" database:"ExtraFieldsTestFieldInt"`
-	// User defined extra field
-	FieldInternalType extrafields.Type `json:"-" database:"ExtraFieldsTestFieldInternalType"`
-	// User defined extra field
-	FieldStringPtr *string `json:"-" database:"ExtraFieldsTestFieldStringPtr"`
 }
 
 type FieldMutationHook struct {
@@ -219,7 +212,7 @@ type Recursive struct {
 }
 
 type RenameFieldTest struct {
-	GOODnaME   string `json:"badName" database:"RenameFieldTestbadName"`
+	BadName    string `json:"badName" database:"RenameFieldTestbadName"`
 	OtherField string `json:"otherField" database:"RenameFieldTestotherField"`
 }
 

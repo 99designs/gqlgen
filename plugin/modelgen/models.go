@@ -10,7 +10,6 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -415,26 +414,7 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 	if len(modelcfg.ExtraFields) > 0 {
 		ff := make([]*Field, 0, len(modelcfg.ExtraFields))
 		for fname, fspec := range modelcfg.ExtraFields {
-			var ftype types.Type
-			pkg, typeName := code.PkgAndType(fspec.Type)
-			if pkg != "" {
-				var err error
-				ftype, err = binder.FindType(pkg, typeName)
-				if err != nil {
-					return nil, fmt.Errorf("extra fields: find type %s.%s: %w", pkg, typeName, err)
-				}
-			} else {
-				// switching to builtin types
-				ftype = types.NewNamed(
-					types.NewTypeName(0, cfg.Model.Pkg(), typeName, nil),
-					nil,
-					nil,
-				)
-			}
-
-			if fspec.IsPointer {
-				ftype = types.NewPointer(ftype)
-			}
+			ftype := buildType(fspec.Type)
 
 			tag := `json:"-"`
 			if fspec.OverrideTags != "" {
@@ -446,7 +426,7 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 					Name:        fname,
 					GoName:      fname,
 					Type:        ftype,
-					Description: "User defined extra field",
+					Description: fspec.Description,
 					Tag:         tag,
 				})
 		}

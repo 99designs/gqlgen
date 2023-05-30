@@ -109,13 +109,12 @@ type CyclicalB struct {
 }
 
 type ExtraFieldsTest struct {
-	SchemaField string `json:"SchemaField" database:"ExtraFieldsTestSchemaField"`
-	// User defined extra field
-	FieldInt int64 `json:"field_int_tag" database:"ExtraFieldsTestFieldInt"`
-	// User defined extra field
+	SchemaField   string  `json:"SchemaField" database:"ExtraFieldsTestSchemaField"`
+	FieldInt      int64   `json:"field_int_tag" database:"ExtraFieldsTestFieldInt"`
+	FieldIntSlice []int64 `json:"-" database:"ExtraFieldsTestFieldIntSlice"`
+	// Internal field
 	FieldInternalType extrafields.Type `json:"-" database:"ExtraFieldsTestFieldInternalType"`
-	// User defined extra field
-	FieldStringPtr *string `json:"-" database:"ExtraFieldsTestFieldStringPtr"`
+	FieldStringPtr    *string          `json:"-" database:"ExtraFieldsTestFieldStringPtr"`
 }
 
 type FieldMutationHook struct {
@@ -203,6 +202,11 @@ type NotCyclicalA struct {
 type NotCyclicalB struct {
 	FieldOne string        `json:"FieldOne" database:"NotCyclicalBFieldOne"`
 	FieldTwo *NotCyclicalA `json:"FieldTwo" database:"NotCyclicalBFieldTwo"`
+}
+
+type OmitEmptyJSONTagTest struct {
+	ValueNonNil string  `json:"ValueNonNil" database:"OmitEmptyJsonTagTestValueNonNil"`
+	Value       *string `json:"Value,omitempty" database:"OmitEmptyJsonTagTestValue"`
 }
 
 type Recursive struct {

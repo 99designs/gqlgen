@@ -495,7 +495,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{

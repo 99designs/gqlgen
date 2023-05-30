@@ -314,7 +314,7 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -425,7 +425,7 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{

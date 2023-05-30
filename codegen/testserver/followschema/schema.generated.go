@@ -5899,7 +5899,7 @@ func (ec *executionContext) _Autobind(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -5937,7 +5937,7 @@ func (ec *executionContext) _EmbeddedPointer(ctx context.Context, sel ast.Select
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -6004,7 +6004,7 @@ func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -6043,7 +6043,7 @@ func (ec *executionContext) _InnerObject(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -6082,7 +6082,7 @@ func (ec *executionContext) _InvalidIdentifier(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -6121,7 +6121,7 @@ func (ec *executionContext) _It(ctx context.Context, sel ast.SelectionSet, obj *
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -6232,7 +6232,7 @@ func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.Selection
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -6271,7 +6271,7 @@ func (ec *executionContext) _OuterObject(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -6343,7 +6343,7 @@ func (ec *executionContext) _Pet(ctx context.Context, sel ast.SelectionSet, obj 
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -7782,7 +7782,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{
@@ -7931,7 +7931,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{

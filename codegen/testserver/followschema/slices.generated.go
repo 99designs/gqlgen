@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -229,7 +230,7 @@ func (ec *executionContext) _Slices(ctx context.Context, sel ast.SelectionSet, o
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{

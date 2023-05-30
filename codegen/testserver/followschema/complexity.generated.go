@@ -323,7 +323,7 @@ func (ec *executionContext) _OverlappingFields(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 
-	ec.deferred.Add(int32(len(deferred)))
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
 		ec.processDeferredGroup(graphql.DeferredGroup{

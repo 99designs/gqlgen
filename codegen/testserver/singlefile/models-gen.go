@@ -86,6 +86,12 @@ type DefaultParametersMirror struct {
 	TruthyBoolean *bool `json:"truthyBoolean,omitempty"`
 }
 
+type DeferModel struct {
+	ID     string   `json:"id"`
+	Name   string   `json:"name"`
+	Values []string `json:"values"`
+}
+
 type Dog struct {
 	Species  string `json:"species"`
 	Size     *Size  `json:"size"`

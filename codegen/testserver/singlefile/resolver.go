@@ -17,6 +17,11 @@ func (r *backedByInterfaceResolver) ID(ctx context.Context, obj BackedByInterfac
 	panic("not implemented")
 }
 
+// Values is the resolver for the values field.
+func (r *deferModelResolver) Values(ctx context.Context, obj *DeferModel) ([]string, error) {
+	panic("not implemented")
+}
+
 // A is the resolver for the a field.
 func (r *errorsResolver) A(ctx context.Context, obj *Errors) (*Error, error) {
 	panic("not implemented")
@@ -189,6 +194,16 @@ func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, er
 
 // DefaultParameters is the resolver for the defaultParameters field.
 func (r *queryResolver) DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error) {
+	panic("not implemented")
+}
+
+// DeferCase1 is the resolver for the deferCase1 field.
+func (r *queryResolver) DeferCase1(ctx context.Context) (*DeferModel, error) {
+	panic("not implemented")
+}
+
+// DeferCase2 is the resolver for the deferCase2 field.
+func (r *queryResolver) DeferCase2(ctx context.Context) ([]*DeferModel, error) {
 	panic("not implemented")
 }
 
@@ -517,6 +532,9 @@ func (r *Resolver) BackedByInterface() BackedByInterfaceResolver {
 	return &backedByInterfaceResolver{r}
 }
 
+// DeferModel returns DeferModelResolver implementation.
+func (r *Resolver) DeferModel() DeferModelResolver { return &deferModelResolver{r} }
+
 // Errors returns ErrorsResolver implementation.
 func (r *Resolver) Errors() ErrorsResolver { return &errorsResolver{r} }
 
@@ -562,6 +580,7 @@ func (r *Resolver) WrappedMap() WrappedMapResolver { return &wrappedMapResolver{
 func (r *Resolver) WrappedSlice() WrappedSliceResolver { return &wrappedSliceResolver{r} }
 
 type backedByInterfaceResolver struct{ *Resolver }
+type deferModelResolver struct{ *Resolver }
 type errorsResolver struct{ *Resolver }
 type forcedResolverResolver struct{ *Resolver }
 type modelMethodsResolver struct{ *Resolver }

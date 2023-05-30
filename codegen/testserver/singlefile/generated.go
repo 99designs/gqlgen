@@ -42,6 +42,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	BackedByInterface() BackedByInterfaceResolver
+	DeferModel() DeferModelResolver
 	Errors() ErrorsResolver
 	ForcedResolver() ForcedResolverResolver
 	ModelMethods() ModelMethodsResolver
@@ -150,6 +151,12 @@ type ComplexityRoot struct {
 	DefaultParametersMirror struct {
 		FalsyBoolean  func(childComplexity int) int
 		TruthyBoolean func(childComplexity int) int
+	}
+
+	DeferModel struct {
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Values func(childComplexity int) int
 	}
 
 	Dog struct {
@@ -312,6 +319,8 @@ type ComplexityRoot struct {
 		Collision                        func(childComplexity int) int
 		DefaultParameters                func(childComplexity int, falsyBoolean *bool, truthyBoolean *bool) int
 		DefaultScalar                    func(childComplexity int, arg string) int
+		DeferCase1                       func(childComplexity int) int
+		DeferCase2                       func(childComplexity int) int
 		DeprecatedField                  func(childComplexity int) int
 		DirectiveArg                     func(childComplexity int, arg string) int
 		DirectiveDouble                  func(childComplexity int) int
@@ -468,6 +477,9 @@ type ComplexityRoot struct {
 type BackedByInterfaceResolver interface {
 	ID(ctx context.Context, obj BackedByInterface) (string, error)
 }
+type DeferModelResolver interface {
+	Values(ctx context.Context, obj *DeferModel) ([]string, error)
+}
 type ErrorsResolver interface {
 	A(ctx context.Context, obj *Errors) (*Error, error)
 	B(ctx context.Context, obj *Errors) (*Error, error)
@@ -524,6 +536,8 @@ type QueryResolver interface {
 	DeprecatedField(ctx context.Context) (string, error)
 	Overlapping(ctx context.Context) (*OverlappingFields, error)
 	DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
+	DeferCase1(ctx context.Context) (*DeferModel, error)
+	DeferCase2(ctx context.Context) ([]*DeferModel, error)
 	DirectiveArg(ctx context.Context, arg string) (*string, error)
 	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
 	DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error)
@@ -827,6 +841,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DefaultParametersMirror.TruthyBoolean(childComplexity), true
+
+	case "DeferModel.id":
+		if e.complexity.DeferModel.ID == nil {
+			break
+		}
+
+		return e.complexity.DeferModel.ID(childComplexity), true
+
+	case "DeferModel.name":
+		if e.complexity.DeferModel.Name == nil {
+			break
+		}
+
+		return e.complexity.DeferModel.Name(childComplexity), true
+
+	case "DeferModel.values":
+		if e.complexity.DeferModel.Values == nil {
+			break
+		}
+
+		return e.complexity.DeferModel.Values(childComplexity), true
 
 	case "Dog.dogBreed":
 		if e.complexity.Dog.DogBreed == nil {
@@ -1334,6 +1369,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
+
+	case "Query.deferCase1":
+		if e.complexity.Query.DeferCase1 == nil {
+			break
+		}
+
+		return e.complexity.Query.DeferCase1(childComplexity), true
+
+	case "Query.deferCase2":
+		if e.complexity.Query.DeferCase2 == nil {
+			break
+		}
+
+		return e.complexity.Query.DeferCase2(childComplexity), true
 
 	case "Query.deprecatedField":
 		if e.complexity.Query.DeprecatedField == nil {
@@ -2315,7 +2364,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
+//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "defer.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -2330,6 +2379,7 @@ var sources = []*ast.Source{
 	{Name: "builtinscalar.graphql", Input: sourceData("builtinscalar.graphql"), BuiltIn: false},
 	{Name: "complexity.graphql", Input: sourceData("complexity.graphql"), BuiltIn: false},
 	{Name: "defaults.graphql", Input: sourceData("defaults.graphql"), BuiltIn: false},
+	{Name: "defer.graphql", Input: sourceData("defer.graphql"), BuiltIn: false},
 	{Name: "directive.graphql", Input: sourceData("directive.graphql"), BuiltIn: false},
 	{Name: "embedded.graphql", Input: sourceData("embedded.graphql"), BuiltIn: false},
 	{Name: "enum.graphql", Input: sourceData("enum.graphql"), BuiltIn: false},
@@ -4749,6 +4799,129 @@ func (ec *executionContext) fieldContext_DefaultParametersMirror_truthyBoolean(c
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeferModel_id(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeferModel_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeferModel_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeferModel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeferModel_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeferModel_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeferModel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeferModel_values(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.DeferModel().Values(rctx, obj)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeferModel_values(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeferModel",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8392,6 +8565,98 @@ func (ec *executionContext) fieldContext_Query_defaultParameters(ctx context.Con
 	if fc.Args, err = ec.field_Query_defaultParameters_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_deferCase1(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_deferCase1(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DeferCase1(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*DeferModel)
+	fc.Result = res
+	return ec.marshalODeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModel(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_deferCase1(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_DeferModel_id(ctx, field)
+			case "name":
+				return ec.fieldContext_DeferModel_name(ctx, field)
+			case "values":
+				return ec.fieldContext_DeferModel_values(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeferModel", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_deferCase2(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_deferCase2(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DeferCase2(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*DeferModel)
+	fc.Result = res
+	return ec.marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModelᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_deferCase2(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_DeferModel_id(ctx, field)
+			case "name":
+				return ec.fieldContext_DeferModel_name(ctx, field)
+			case "values":
+				return ec.fieldContext_DeferModel_values(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeferModel", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -16256,6 +16521,86 @@ func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel as
 	return out
 }
 
+var deferModelImplementors = []string{"DeferModel"}
+
+func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSet, obj *DeferModel) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deferModelImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeferModel")
+		case "id":
+			out.Values[i] = ec._DeferModel_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "name":
+			out.Values[i] = ec._DeferModel_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "values":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DeferModel_values(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var dogImplementors = []string{"Dog", "Animal"}
 
 func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *Dog) graphql.Marshaler {
@@ -18443,6 +18788,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "deferCase1":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_deferCase1(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "deferCase2":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_deferCase2(ctx, field)
 				return res
 			}
 
@@ -20747,6 +21130,16 @@ func (ec *executionContext) marshalNDefaultScalarImplementation2string(ctx conte
 	return res
 }
 
+func (ec *executionContext) marshalNDeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModel(ctx context.Context, sel ast.SelectionSet, v *DeferModel) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DeferModel(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNEmail2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐEmail(ctx context.Context, v interface{}) (Email, error) {
 	var res Email
 	err := res.UnmarshalGQL(v)
@@ -21929,6 +22322,60 @@ func (ec *executionContext) marshalODefaultScalarImplementation2ᚖstring(ctx co
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModelᚄ(ctx context.Context, sel ast.SelectionSet, v []*DeferModel) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModel(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalODeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModel(ctx context.Context, sel ast.SelectionSet, v *DeferModel) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeferModel(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalODog2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDog(ctx context.Context, sel ast.SelectionSet, v *Dog) graphql.Marshaler {

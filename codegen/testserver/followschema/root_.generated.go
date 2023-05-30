@@ -33,6 +33,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	BackedByInterface() BackedByInterfaceResolver
+	DeferModel() DeferModelResolver
 	Errors() ErrorsResolver
 	ForcedResolver() ForcedResolverResolver
 	ModelMethods() ModelMethodsResolver
@@ -141,6 +142,12 @@ type ComplexityRoot struct {
 	DefaultParametersMirror struct {
 		FalsyBoolean  func(childComplexity int) int
 		TruthyBoolean func(childComplexity int) int
+	}
+
+	DeferModel struct {
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Values func(childComplexity int) int
 	}
 
 	Dog struct {
@@ -303,6 +310,8 @@ type ComplexityRoot struct {
 		Collision                        func(childComplexity int) int
 		DefaultParameters                func(childComplexity int, falsyBoolean *bool, truthyBoolean *bool) int
 		DefaultScalar                    func(childComplexity int, arg string) int
+		DeferCase1                       func(childComplexity int) int
+		DeferCase2                       func(childComplexity int) int
 		DeprecatedField                  func(childComplexity int) int
 		DirectiveArg                     func(childComplexity int, arg string) int
 		DirectiveDouble                  func(childComplexity int) int
@@ -680,6 +689,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DefaultParametersMirror.TruthyBoolean(childComplexity), true
+
+	case "DeferModel.id":
+		if e.complexity.DeferModel.ID == nil {
+			break
+		}
+
+		return e.complexity.DeferModel.ID(childComplexity), true
+
+	case "DeferModel.name":
+		if e.complexity.DeferModel.Name == nil {
+			break
+		}
+
+		return e.complexity.DeferModel.Name(childComplexity), true
+
+	case "DeferModel.values":
+		if e.complexity.DeferModel.Values == nil {
+			break
+		}
+
+		return e.complexity.DeferModel.Values(childComplexity), true
 
 	case "Dog.dogBreed":
 		if e.complexity.Dog.DogBreed == nil {
@@ -1187,6 +1217,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
+
+	case "Query.deferCase1":
+		if e.complexity.Query.DeferCase1 == nil {
+			break
+		}
+
+		return e.complexity.Query.DeferCase1(childComplexity), true
+
+	case "Query.deferCase2":
+		if e.complexity.Query.DeferCase2 == nil {
+			break
+		}
+
+		return e.complexity.Query.DeferCase2(childComplexity), true
 
 	case "Query.deprecatedField":
 		if e.complexity.Query.DeprecatedField == nil {
@@ -2168,7 +2212,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
+//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "defer.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -2183,6 +2227,7 @@ var sources = []*ast.Source{
 	{Name: "builtinscalar.graphql", Input: sourceData("builtinscalar.graphql"), BuiltIn: false},
 	{Name: "complexity.graphql", Input: sourceData("complexity.graphql"), BuiltIn: false},
 	{Name: "defaults.graphql", Input: sourceData("defaults.graphql"), BuiltIn: false},
+	{Name: "defer.graphql", Input: sourceData("defer.graphql"), BuiltIn: false},
 	{Name: "directive.graphql", Input: sourceData("directive.graphql"), BuiltIn: false},
 	{Name: "embedded.graphql", Input: sourceData("embedded.graphql"), BuiltIn: false},
 	{Name: "enum.graphql", Input: sourceData("enum.graphql"), BuiltIn: false},

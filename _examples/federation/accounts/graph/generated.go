@@ -93,7 +93,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 }
 
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	ec := executionContext{nil, e, nil, 0, nil}
+	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
 
@@ -202,7 +202,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
-	ec := executionContext{rc, e, nil, 0, make(chan graphql.DeferredResult)}
+	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
 	first := true
 
@@ -216,9 +216,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				data = ec._Query(ctx, rc.Operation.SelectionSet)
 			} else {
-				if ec.pendingDeferred > 0 {
+				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
 					result := <-ec.deferredResults
-					ec.pendingDeferred--
+					atomic.AddInt32(&ec.pendingDeferred, -1)
 					data = result.Result
 					response.Path = result.Path
 					response.Label = result.Label
@@ -230,28 +230,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
-			response.HasNext = ec.pendingDeferred+len(ec.deferredGroups) > 0
-
-			// dispatch deferred calls
-			dg := ec.deferredGroups
-			ec.deferredGroups = nil
-			for _, deferred := range dg {
-				ec.pendingDeferred++
-				go func(deferred graphql.DeferredGroup) {
-					ctx = graphql.WithFreshResponseContext(deferred.Context)
-					deferred.FieldSet.Dispatch(ctx)
-					ds := graphql.DeferredResult{
-						Path:   deferred.Path,
-						Label:  deferred.Label,
-						Result: deferred.FieldSet,
-						Errors: graphql.GetErrors(ctx),
-					}
-					// null fields should bubble up
-					if deferred.FieldSet.Invalids > 0 {
-						ds.Result = graphql.Null
-					}
-					ec.deferredResults <- ds
-				}(deferred)
+			if atomic.LoadInt32(&ec.deferred) > 0 {
+				hasNext := atomic.LoadInt32(&ec.pendingDeferred) > 0
+				response.HasNext = &hasNext
 			}
 
 			return &response
@@ -265,9 +246,28 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
-	deferredGroups  []graphql.DeferredGroup
-	pendingDeferred int
+	deferred        int32
+	pendingDeferred int32
 	deferredResults chan graphql.DeferredResult
+}
+
+func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
+	atomic.AddInt32(&ec.pendingDeferred, 1)
+	go func() {
+		ctx := graphql.WithFreshResponseContext(dg.Context)
+		dg.FieldSet.Dispatch(ctx)
+		ds := graphql.DeferredResult{
+			Path:   dg.Path,
+			Label:  dg.Label,
+			Result: dg.FieldSet,
+			Errors: graphql.GetErrors(ctx),
+		}
+		// null fields should bubble up
+		if dg.FieldSet.Invalids > 0 {
+			ds.Result = graphql.Null
+		}
+		ec.deferredResults <- ds
+	}()
 }
 
 func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
@@ -2985,9 +2985,10 @@ func (ec *executionContext) _EmailHost(ctx context.Context, sel ast.SelectionSet
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3070,9 +3071,10 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3182,9 +3184,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3235,9 +3238,10 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3270,9 +3274,10 @@ func (ec *executionContext) __Service(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3325,9 +3330,10 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3372,9 +3378,10 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3429,9 +3436,10 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3476,9 +3484,10 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3530,9 +3539,10 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -3586,9 +3596,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,

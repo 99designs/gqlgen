@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -154,9 +155,10 @@ func (ec *executionContext) _VariadicModel(ctx context.Context, sel ast.Selectio
 		return graphql.Null
 	}
 
-	// assign deferred groups to main executionContext
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
 	for label, dfs := range deferred {
-		ec.deferredGroups = append(ec.deferredGroups, graphql.DeferredGroup{
+		ec.processDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,

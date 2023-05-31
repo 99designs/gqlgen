@@ -14,6 +14,9 @@ type Stub struct {
 	BackedByInterfaceResolver struct {
 		ID func(ctx context.Context, obj BackedByInterface) (string, error)
 	}
+	DeferModelResolver struct {
+		Values func(ctx context.Context, obj *DeferModel) ([]string, error)
+	}
 	ErrorsResolver struct {
 		A func(ctx context.Context, obj *Errors) (*Error, error)
 		B func(ctx context.Context, obj *Errors) (*Error, error)
@@ -68,6 +71,8 @@ type Stub struct {
 		DeprecatedField                  func(ctx context.Context) (string, error)
 		Overlapping                      func(ctx context.Context) (*OverlappingFields, error)
 		DefaultParameters                func(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
+		DeferCase1                       func(ctx context.Context) (*DeferModel, error)
+		DeferCase2                       func(ctx context.Context) ([]*DeferModel, error)
 		DirectiveArg                     func(ctx context.Context, arg string) (*string, error)
 		DirectiveNullableArg             func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
 		DirectiveInputNullable           func(ctx context.Context, arg *InputDirectives) (*string, error)
@@ -150,6 +155,9 @@ type Stub struct {
 func (r *Stub) BackedByInterface() BackedByInterfaceResolver {
 	return &stubBackedByInterface{r}
 }
+func (r *Stub) DeferModel() DeferModelResolver {
+	return &stubDeferModel{r}
+}
 func (r *Stub) Errors() ErrorsResolver {
 	return &stubErrors{r}
 }
@@ -201,6 +209,12 @@ type stubBackedByInterface struct{ *Stub }
 
 func (r *stubBackedByInterface) ID(ctx context.Context, obj BackedByInterface) (string, error) {
 	return r.BackedByInterfaceResolver.ID(ctx, obj)
+}
+
+type stubDeferModel struct{ *Stub }
+
+func (r *stubDeferModel) Values(ctx context.Context, obj *DeferModel) ([]string, error) {
+	return r.DeferModelResolver.Values(ctx, obj)
 }
 
 type stubErrors struct{ *Stub }
@@ -336,6 +350,12 @@ func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error)
 }
 func (r *stubQuery) DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error) {
 	return r.QueryResolver.DefaultParameters(ctx, falsyBoolean, truthyBoolean)
+}
+func (r *stubQuery) DeferCase1(ctx context.Context) (*DeferModel, error) {
+	return r.QueryResolver.DeferCase1(ctx)
+}
+func (r *stubQuery) DeferCase2(ctx context.Context) ([]*DeferModel, error) {
+	return r.QueryResolver.DeferCase2(ctx)
 }
 func (r *stubQuery) DirectiveArg(ctx context.Context, arg string) (*string, error) {
 	return r.QueryResolver.DirectiveArg(ctx, arg)

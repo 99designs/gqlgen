@@ -1,0 +1,10 @@
+extend type Query {
+    deferCase1: DeferModel
+    deferCase2: [DeferModel!]
+}
+
+type DeferModel {
+    id: ID!
+    name: String!
+    values: [String!]! @goField(forceResolver: true)
+}

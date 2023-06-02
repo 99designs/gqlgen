@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"golang.org/x/exp/constraints"
 )
 
 func MarshalUint(i uint) Marshaler {
@@ -19,9 +21,9 @@ func UnmarshalUint(v interface{}) (uint, error) {
 		u64, err := strconv.ParseUint(v, 10, 64)
 		return uint(u64), err
 	case int:
-		return uint(v), nil
+		return safeUintCast[int, uint](v)
 	case int64:
-		return uint(v), nil
+		return safeUintCast[int64, uint](v)
 	case json.Number:
 		u64, err := strconv.ParseUint(string(v), 10, 64)
 		return uint(u64), err
@@ -41,9 +43,9 @@ func UnmarshalUint64(v interface{}) (uint64, error) {
 	case string:
 		return strconv.ParseUint(v, 10, 64)
 	case int:
-		return uint64(v), nil
+		return safeUintCast[int, uint64](v)
 	case int64:
-		return uint64(v), nil
+		return safeUintCast[int64, uint64](v)
 	case json.Number:
 		return strconv.ParseUint(string(v), 10, 64)
 	default:
@@ -66,9 +68,9 @@ func UnmarshalUint32(v interface{}) (uint32, error) {
 		}
 		return uint32(iv), nil
 	case int:
-		return uint32(v), nil
+		return safeUintCast[int, uint32](v)
 	case int64:
-		return uint32(v), nil
+		return safeUintCast[int64, uint32](v)
 	case json.Number:
 		iv, err := strconv.ParseUint(string(v), 10, 32)
 		if err != nil {
@@ -78,4 +80,11 @@ func UnmarshalUint32(v interface{}) (uint32, error) {
 	default:
 		return 0, fmt.Errorf("%T is not an uint", v)
 	}
+}
+
+func safeUintCast[F constraints.Signed, T constraints.Unsigned](f F) (T, error) {
+	if f < 0 {
+		return 0, fmt.Errorf("cannot cast %d to uint", f)
+	}
+	return T(f), nil
 }

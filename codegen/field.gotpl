@@ -94,7 +94,7 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}(ctx context.Context, f
 		ctx = graphql.WithFieldContext(ctx, fc)
 		if fc.Args, err = ec.{{ $field.ArgsFunc }}(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 			ec.Error(ctx, err)
-			return
+			return fc, err
 		}
 	{{- end }}
 	return fc, nil

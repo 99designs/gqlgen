@@ -1,4 +1,3 @@
 package extrafields
 
-type Type struct {
-}
+type Type struct{}

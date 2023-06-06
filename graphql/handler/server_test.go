@@ -169,7 +169,7 @@ func (t panicTransport) Supports(r *http.Request) bool {
 	return true
 }
 
-func (h panicTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
+func (t panicTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	panic(fmt.Errorf("panic in transport"))
 }
 

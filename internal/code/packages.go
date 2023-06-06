@@ -14,8 +14,10 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var once = sync.Once{}
-var modInfo *debug.BuildInfo
+var (
+	once    = sync.Once{}
+	modInfo *debug.BuildInfo
+)
 
 var mode = packages.NeedName |
 	packages.NeedFiles |

@@ -103,9 +103,9 @@ nextArg:
 	return newArgs, nil
 }
 
-func (a *Data) Args() map[string][]*FieldArgument {
+func (d *Data) Args() map[string][]*FieldArgument {
 	ret := map[string][]*FieldArgument{}
-	for _, o := range a.Objects {
+	for _, o := range d.Objects {
 		for _, f := range o.Fields {
 			if len(f.Args) > 0 {
 				ret[f.ArgsFunc()] = f.Args
@@ -113,9 +113,9 @@ func (a *Data) Args() map[string][]*FieldArgument {
 		}
 	}
 
-	for _, d := range a.Directives() {
-		if len(d.Args) > 0 {
-			ret[d.ArgsFunc()] = d.Args
+	for _, directive := range d.Directives() {
+		if len(directive.Args) > 0 {
+			ret[directive.ArgsFunc()] = directive.Args
 		}
 	}
 	return ret

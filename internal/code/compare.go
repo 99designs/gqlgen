@@ -6,7 +6,7 @@ import (
 )
 
 // CompatibleTypes isnt a strict comparison, it allows for pointer differences
-func CompatibleTypes(expected types.Type, actual types.Type) error {
+func CompatibleTypes(expected, actual types.Type) error {
 	// Special case to deal with pointer mismatches
 	{
 		expectedPtr, expectedIsPtr := expected.(*types.Pointer)
@@ -84,11 +84,8 @@ func CompatibleTypes(expected types.Type, actual types.Type) error {
 			if err := CompatibleTypes(expected.Params(), actual.Params()); err != nil {
 				return err
 			}
-			if err := CompatibleTypes(expected.Results(), actual.Results()); err != nil {
-				return err
-			}
-
-			return nil
+			err := CompatibleTypes(expected.Results(), actual.Results())
+			return err
 		}
 	case *types.Interface:
 		if actual, ok := actual.(*types.Interface); ok {
@@ -114,11 +111,8 @@ func CompatibleTypes(expected types.Type, actual types.Type) error {
 				return err
 			}
 
-			if err := CompatibleTypes(expected.Elem(), actual.Elem()); err != nil {
-				return err
-			}
-
-			return nil
+			err := CompatibleTypes(expected.Elem(), actual.Elem())
+			return err
 		}
 
 	case *types.Chan:

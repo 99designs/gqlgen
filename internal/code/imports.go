@@ -138,7 +138,7 @@ func extractModuleName(content []byte) string {
 			break
 		}
 		s := strings.Trim(string(tkn), " \t")
-		if len(s) != 0 && !strings.HasPrefix(s, "//") {
+		if s != "" && !strings.HasPrefix(s, "//") {
 			break
 		}
 		if advance <= len(content) {
@@ -171,4 +171,4 @@ func ImportPathForDir(dir string) (res string) {
 	return ""
 }
 
-var modregex = regexp.MustCompile(`module ([^\s]*)`)
+var modregex = regexp.MustCompile(`module (\S*)`)

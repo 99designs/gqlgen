@@ -89,7 +89,7 @@ func TestSSE(t *testing.T) {
 			handler.SendNextSubscriptionMessage()
 		}()
 
-		var Client = &http.Client{}
+		Client := &http.Client{}
 		req, err := createHTTPRequest(srv.URL, `{"query":"subscription { name }"}`)
 		require.NoError(t, err, "Create request threw error -> %s", err)
 		res, err := Client.Do(req)

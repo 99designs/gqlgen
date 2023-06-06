@@ -68,7 +68,7 @@ func (r *Rewriter) getFile(filename string) string {
 	return r.files[filename]
 }
 
-func (r *Rewriter) GetPrevDecl(structname string, methodname string) *ast.FuncDecl {
+func (r *Rewriter) GetPrevDecl(structname, methodname string) *ast.FuncDecl {
 	for _, f := range r.pkg.Syntax {
 		for _, d := range f.Decls {
 			d, isFunc := d.(*ast.FuncDecl)
@@ -99,7 +99,7 @@ func (r *Rewriter) GetPrevDecl(structname string, methodname string) *ast.FuncDe
 	return nil
 }
 
-func (r *Rewriter) GetMethodComment(structname string, methodname string) string {
+func (r *Rewriter) GetMethodComment(structname, methodname string) string {
 	d := r.GetPrevDecl(structname, methodname)
 	if d != nil {
 		return d.Doc.Text()
@@ -107,7 +107,7 @@ func (r *Rewriter) GetMethodComment(structname string, methodname string) string
 	return ""
 }
 
-func (r *Rewriter) GetMethodBody(structname string, methodname string) string {
+func (r *Rewriter) GetMethodBody(structname, methodname string) string {
 	d := r.GetPrevDecl(structname, methodname)
 	if d != nil {
 		return r.getSource(d.Body.Pos()+1, d.Body.End()-1)

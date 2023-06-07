@@ -8,7 +8,6 @@ import (
 )
 
 func TestCoerceList(t *testing.T) {
-
 	mapInput := map[string]interface{}{
 		"test": "value",
 		"nested": map[string]interface{}{
@@ -34,5 +33,4 @@ func TestCoerceList(t *testing.T) {
 	assert.Equal(t, []interface{}{mapInput}, CoerceList([]interface{}{mapInput}))
 	assert.Equal(t, []interface{}{mapInput}, CoerceList([]map[string]interface{}{mapInput}))
 	assert.Empty(t, CoerceList(nil))
-
 }

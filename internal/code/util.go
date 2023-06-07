@@ -54,7 +54,7 @@ func QualifyPackagePath(importPath string) string {
 	return pkg.ImportPath
 }
 
-var invalidPackageNameChar = regexp.MustCompile(`[^\w]`)
+var invalidPackageNameChar = regexp.MustCompile(`\W`)
 
 func SanitizePackageName(pkg string) string {
 	return invalidPackageNameChar.ReplaceAllLiteralString(filepath.Base(pkg), "_")

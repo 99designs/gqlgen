@@ -221,99 +221,99 @@ func (ref *TypeReference) Elem() *TypeReference {
 	return nil
 }
 
-func (t *TypeReference) IsPtr() bool {
-	_, isPtr := t.GO.(*types.Pointer)
+func (ref *TypeReference) IsPtr() bool {
+	_, isPtr := ref.GO.(*types.Pointer)
 	return isPtr
 }
 
 // fix for https://github.com/golang/go/issues/31103 may make it possible to remove this (may still be useful)
-func (t *TypeReference) IsPtrToPtr() bool {
-	if p, isPtr := t.GO.(*types.Pointer); isPtr {
+func (ref *TypeReference) IsPtrToPtr() bool {
+	if p, isPtr := ref.GO.(*types.Pointer); isPtr {
 		_, isPtr := p.Elem().(*types.Pointer)
 		return isPtr
 	}
 	return false
 }
 
-func (t *TypeReference) IsNilable() bool {
-	return IsNilable(t.GO)
+func (ref *TypeReference) IsNilable() bool {
+	return IsNilable(ref.GO)
 }
 
-func (t *TypeReference) IsSlice() bool {
-	_, isSlice := t.GO.(*types.Slice)
-	return t.GQL.Elem != nil && isSlice
+func (ref *TypeReference) IsSlice() bool {
+	_, isSlice := ref.GO.(*types.Slice)
+	return ref.GQL.Elem != nil && isSlice
 }
 
-func (t *TypeReference) IsPtrToSlice() bool {
-	if t.IsPtr() {
-		_, isPointerToSlice := t.GO.(*types.Pointer).Elem().(*types.Slice)
+func (ref *TypeReference) IsPtrToSlice() bool {
+	if ref.IsPtr() {
+		_, isPointerToSlice := ref.GO.(*types.Pointer).Elem().(*types.Slice)
 		return isPointerToSlice
 	}
 	return false
 }
 
-func (t *TypeReference) IsPtrToIntf() bool {
-	if t.IsPtr() {
-		_, isPointerToInterface := t.GO.(*types.Pointer).Elem().(*types.Interface)
+func (ref *TypeReference) IsPtrToIntf() bool {
+	if ref.IsPtr() {
+		_, isPointerToInterface := ref.GO.(*types.Pointer).Elem().(*types.Interface)
 		return isPointerToInterface
 	}
 	return false
 }
 
-func (t *TypeReference) IsNamed() bool {
-	_, isSlice := t.GO.(*types.Named)
+func (ref *TypeReference) IsNamed() bool {
+	_, isSlice := ref.GO.(*types.Named)
 	return isSlice
 }
 
-func (t *TypeReference) IsStruct() bool {
-	_, isStruct := t.GO.Underlying().(*types.Struct)
+func (ref *TypeReference) IsStruct() bool {
+	_, isStruct := ref.GO.Underlying().(*types.Struct)
 	return isStruct
 }
 
-func (t *TypeReference) IsScalar() bool {
-	return t.Definition.Kind == ast.Scalar
+func (ref *TypeReference) IsScalar() bool {
+	return ref.Definition.Kind == ast.Scalar
 }
 
-func (t *TypeReference) UniquenessKey() string {
+func (ref *TypeReference) UniquenessKey() string {
 	nullability := "O"
-	if t.GQL.NonNull {
+	if ref.GQL.NonNull {
 		nullability = "N"
 	}
 
 	elemNullability := ""
-	if t.GQL.Elem != nil && t.GQL.Elem.NonNull {
+	if ref.GQL.Elem != nil && ref.GQL.Elem.NonNull {
 		// Fix for #896
 		elemNullability = "ᚄ"
 	}
-	return nullability + t.Definition.Name + "2" + templates.TypeIdentifier(t.GO) + elemNullability
+	return nullability + ref.Definition.Name + "2" + templates.TypeIdentifier(ref.GO) + elemNullability
 }
 
-func (t *TypeReference) MarshalFunc() string {
-	if t.Definition == nil {
-		panic(errors.New("Definition missing for " + t.GQL.Name()))
+func (ref *TypeReference) MarshalFunc() string {
+	if ref.Definition == nil {
+		panic(errors.New("Definition missing for " + ref.GQL.Name()))
 	}
 
-	if t.Definition.Kind == ast.InputObject {
+	if ref.Definition.Kind == ast.InputObject {
 		return ""
 	}
 
-	return "marshal" + t.UniquenessKey()
+	return "marshal" + ref.UniquenessKey()
 }
 
-func (t *TypeReference) UnmarshalFunc() string {
-	if t.Definition == nil {
-		panic(errors.New("Definition missing for " + t.GQL.Name()))
+func (ref *TypeReference) UnmarshalFunc() string {
+	if ref.Definition == nil {
+		panic(errors.New("Definition missing for " + ref.GQL.Name()))
 	}
 
-	if !t.Definition.IsInputType() {
+	if !ref.Definition.IsInputType() {
 		return ""
 	}
 
-	return "unmarshal" + t.UniquenessKey()
+	return "unmarshal" + ref.UniquenessKey()
 }
 
-func (t *TypeReference) IsTargetNilable() bool {
-	return IsNilable(t.Target)
+func (ref *TypeReference) IsTargetNilable() bool {
+	return IsNilable(ref.Target)
 }
 
 func (b *Binder) PushRef(ret *TypeReference) {

@@ -149,7 +149,6 @@ func TestWebsocket(t *testing.T) {
 		} else {
 			assert.Contains(t, err.Error(), "timeout")
 		}
-
 	})
 }
 

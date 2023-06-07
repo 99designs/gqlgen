@@ -67,7 +67,7 @@ func TestPtrToPtr(t *testing.T) {
 				}
 			}
 		}
-		return
+		return ret, err
 	}
 
 	t.Run("pointer to pointer input missing", func(t *testing.T) {

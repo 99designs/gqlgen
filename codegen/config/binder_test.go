@@ -173,7 +173,6 @@ func TestOmittableBinding(t *testing.T) {
 
 		require.True(t, ta.IsOmittable)
 	})
-
 }
 
 func createBinder(cfg Config) (*Binder, *ast.Schema) {

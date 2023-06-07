@@ -5,10 +5,132 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.31...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.32...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.32"></a>
+## [v0.17.32](https://github.com/99designs/gqlgen/compare/v0.17.31...v0.17.32) - 2023-06-06
+- <a href="https://github.com/99designs/gqlgen/commit/3a81a78bb7370f067c6bf4f3ce79de0e77f885a1"><tt>3a81a78b</tt></a> release v0.17.32
+
+- <a href="https://github.com/99designs/gqlgen/commit/dbb61174f81ef5e30cb33e772f650abdc41da90a"><tt>dbb61174</tt></a> Added unit tests for defer (<a href="https://github.com/99designs/gqlgen/pull/2657">#2657</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5c19c84141c643fa8e3ef59a63d9788ebc966c43"><tt>5c19c841</tt></a> Addressing few issues in defer feature (<a href="https://github.com/99designs/gqlgen/pull/2656">#2656</a>)</summary>
+
+And fixed hasNext to only appear in the payload when there is deferred usage
+
+* Regenerate
+
+* Use go 1.18 compatible atomic operations
+
+* Regenerate
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8e295024ada297c219aa2e79754a9e4f601d0b56"><tt>8e295024</tt></a> Update extra fields type definition and plus docs about the feature (<a href="https://github.com/99designs/gqlgen/pull/2655">#2655</a>)</summary>
+
+* Update extra fields type definition and plus docs about the feature
+
+* Update docs
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/adf5da27cd1bec2ce81b9a3e8e705ed80714f47a"><tt>adf5da27</tt></a> Make usage of omitempty tag optional (<a href="https://github.com/99designs/gqlgen/pull/2649">#2649</a>)</summary>
+
+* Make usage of omitempty tag optional
+
+* adding probably good enough test
+
+* some kinda docs
+
+* lintersssssssssssssssssssssssssssss
+
+* removing unnecessary fields from config
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/7ab3317689c9ee85bcebb454a123ba8f70307058"><tt>7ab33176</tt></a> Extra fields (<a href="https://github.com/99designs/gqlgen/pull/2638">#2638</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/22deb8bd6c7662bb8eacc29c9a08df0b85444721"><tt>22deb8bd</tt></a> allow binding a GraphQL `Any` field to a struct method returning `*any` (<a href="https://github.com/99designs/gqlgen/pull/2644">#2644</a>)</summary>
+
+* allow binding GQL `Any` field to struct method returning `*any`
+
+* add singlefile tests for binding to `*any` case
+
+* add followschema tests for binding to `*any` case
+
+* make ptr_to_any binding tests follow binding conventions better
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c313bf3d289985768fdca4e26162d3c429431711"><tt>c313bf3d</tt></a> `[@defer](https://github.com/defer)` initial support (<a href="https://github.com/99designs/gqlgen/pull/2642">#2642</a>)</summary>
+
+* support returning errors with deferred fragments.
+
+
+* update integration tests.
+
+* fix gotpl indent and pass the correct context to deferred .Dispatch().
+
+* Added hasNext in the tests
+
+* Added back root_.gotpl
+
+* Regenerate
+
+* Regenerate recursively
+
+* Updated schema-expected.graphql
+
+
+* Fixed starwars_test.go
+
+* Cleanup
+
+* Add graphql response hasnext omitempty and update tests to match
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4d945da283950a9cd66fb6df58abe2bb5f0cf836"><tt>4d945da2</tt></a> feat(federation): update Apollo Federation v2 definitions (<a href="https://github.com/99designs/gqlgen/pull/2635">#2635</a>)</summary>
+
+* feat(federation): update Apollo Federation v2 definitions
+
+Fix Apollo Federation v2 directive definitions:
+* `_FieldSet` was renamed `FieldSet`
+
+
+* regenerate examples
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/9796f91dba461051d70a9101c9113b99f7ee82df"><tt>9796f91d</tt></a> Generate entity resolvers for interfaces with [@key](https://github.com/key) defined (<a href="https://github.com/99designs/gqlgen/pull/2634">#2634</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/33fdd1b5c0b4784c3aece793f1e5e315773dfb0d"><tt>33fdd1b5</tt></a> fix enum capitalization (<a href="https://github.com/99designs/gqlgen/pull/2630">#2630</a>)</summary>
+
+* fix enum capitalization
+
+* apply suggestion: adding comment
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/82a110ce861ebf6a208d98c6b1514c6e845f2b98"><tt>82a110ce</tt></a> Fix uint32 unmarshal (<a href="https://github.com/99designs/gqlgen/pull/2631">#2631</a>)</summary>
+
+The string unmarshal for uint32 used ParseInt instead of ParseUint,
+which would parse the wrong range of valid numbers.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/e62a02772ec7cf3c6f526c68e5689a2bad2e8f3b"><tt>e62a0277</tt></a> Add Changelog entries for v0.17.31
+
+- <a href="https://github.com/99designs/gqlgen/commit/f707aa8d88c494f23ed981add5b43944c27a88f2"><tt>f707aa8d</tt></a> v0.17.31 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.31"></a>
 ## [v0.17.31](https://github.com/99designs/gqlgen/compare/v0.17.30...v0.17.31) - 2023-05-05
 - <a href="https://github.com/99designs/gqlgen/commit/37b262075d385c49505ba76e09aec520f23f70f0"><tt>37b26207</tt></a> release v0.17.31

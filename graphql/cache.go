@@ -15,15 +15,15 @@ type Cache interface {
 type MapCache map[string]interface{}
 
 // Get looks up a key's value from the cache.
-func (m MapCache) Get(ctx context.Context, key string) (value interface{}, ok bool) {
+func (m MapCache) Get(_ context.Context, key string) (value interface{}, ok bool) {
 	v, ok := m[key]
 	return v, ok
 }
 
 // Add adds a value to the cache.
-func (m MapCache) Add(ctx context.Context, key string, value interface{}) { m[key] = value }
+func (m MapCache) Add(_ context.Context, key string, value interface{}) { m[key] = value }
 
 type NoCache struct{}
 
-func (n NoCache) Get(ctx context.Context, key string) (value interface{}, ok bool) { return nil, false }
-func (n NoCache) Add(ctx context.Context, key string, value interface{})           {}
+func (n NoCache) Get(_ context.Context, _ string) (value interface{}, ok bool) { return nil, false }
+func (n NoCache) Add(_ context.Context, _ string, _ interface{})               {}

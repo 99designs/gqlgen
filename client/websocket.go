@@ -51,7 +51,7 @@ func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option
 	if reflect.ValueOf(resp).Kind() == reflect.Ptr {
 		return sock.Next(resp)
 	}
-	//TODO: verify this is never called and remove it
+	// TODO: verify this is never called and remove it
 	return sock.Next(&resp)
 }
 

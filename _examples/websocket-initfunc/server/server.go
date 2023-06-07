@@ -20,8 +20,8 @@ import (
 
 func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
 	// Get the token from payload
-	any := initPayload["authToken"]
-	token, ok := any.(string)
+	payload := initPayload["authToken"]
+	token, ok := payload.(string)
 	if !ok || token == "" {
 		return nil, errors.New("authToken not found in transport payload")
 	}

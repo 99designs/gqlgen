@@ -6,18 +6,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
-
-	"github.com/mitchellh/mapstructure"
 )
 
 type (
 	// Client used for testing GraphQL servers. Not for production use.
 	Client struct {
 		h    http.Handler
+		dh   *mapstructure.DecodeHookFunc
 		opts []Option
 	}
 
@@ -45,9 +45,10 @@ type (
 
 // New creates a graphql client
 // Options can be set that should be applied to all requests made with this client
-func New(h http.Handler, opts ...Option) *Client {
+func New(h http.Handler, customDecodeHook *mapstructure.DecodeHookFunc, opts ...Option) *Client {
 	p := &Client{
 		h:    h,
+		dh:   customDecodeHook,
 		opts: opts,
 	}
 
@@ -70,7 +71,7 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 	}
 
 	// we want to unpack even if there is an error, so we can see partial responses
-	unpackErr := unpack(respDataRaw.Data, response)
+	unpackErr := unpack(respDataRaw.Data, response, p.dh)
 
 	if respDataRaw.Errors != nil {
 		return RawJsonError{respDataRaw.Errors}
@@ -138,13 +139,18 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 	return bd.HTTP, nil
 }
 
-func unpack(data interface{}, into interface{}) error {
-	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+func unpack(data interface{}, into interface{}, decodeHook *mapstructure.DecodeHookFunc) error {
+	dc := &mapstructure.DecoderConfig{
 		Result:      into,
 		TagName:     "json",
 		ErrorUnused: true,
 		ZeroFields:  true,
-	})
+	}
+	if decodeHook != nil {
+		dc.DecodeHook = mapstructure.ComposeDecodeHookFunc(decodeHook)
+	}
+
+	d, err := mapstructure.NewDecoder(dc)
 	if err != nil {
 		return fmt.Errorf("mapstructure: %w", err)
 	}

@@ -139,7 +139,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 				}
 
 				// we want to unpack even if there is an error, so we can see partial responses
-				unpackErr := unpack(respDataRaw.Data, response)
+				unpackErr := unpack(respDataRaw.Data, response, p.dh)
 
 				if respDataRaw.Errors != nil {
 					return RawJsonError{respDataRaw.Errors}

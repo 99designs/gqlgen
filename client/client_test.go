@@ -31,7 +31,7 @@ func TestClient(t *testing.T) {
 		}
 	})
 
-	c := client.New(h)
+	c := client.New(h, nil)
 
 	var resp struct {
 		Name string
@@ -57,7 +57,7 @@ func TestClientMultipartFormData(t *testing.T) {
 		w.Write([]byte(`{}`))
 	})
 
-	c := client.New(h)
+	c := client.New(h, nil)
 
 	var resp struct{}
 	c.MustPost("{ id }", &resp,
@@ -87,7 +87,7 @@ func TestAddHeader(t *testing.T) {
 		w.Write([]byte(`{}`))
 	})
 
-	c := client.New(h)
+	c := client.New(h, nil)
 
 	var resp struct{}
 	c.MustPost("{ id }", &resp,
@@ -102,7 +102,7 @@ func TestAddClientHeader(t *testing.T) {
 		w.Write([]byte(`{}`))
 	})
 
-	c := client.New(h, client.AddHeader("Test-Key", "ASDF"))
+	c := client.New(h, nil, client.AddHeader("Test-Key", "ASDF"))
 
 	var resp struct{}
 	c.MustPost("{ id }", &resp)
@@ -118,7 +118,7 @@ func TestBasicAuth(t *testing.T) {
 		w.Write([]byte(`{}`))
 	})
 
-	c := client.New(h)
+	c := client.New(h, nil)
 
 	var resp struct{}
 	c.MustPost("{ id }", &resp,
@@ -135,7 +135,7 @@ func TestAddCookie(t *testing.T) {
 		w.Write([]byte(`{}`))
 	})
 
-	c := client.New(h)
+	c := client.New(h, nil)
 
 	var resp struct{}
 	c.MustPost("{ id }", &resp,
@@ -160,7 +160,7 @@ func TestAddExtensions(t *testing.T) {
 		}
 	})
 
-	c := client.New(h)
+	c := client.New(h, nil)
 
 	var resp struct {
 		Name string

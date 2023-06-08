@@ -58,7 +58,7 @@ func TestWithFiles(t *testing.T) {
 			w.Write([]byte(`{}`))
 		})
 
-		c := client.New(h, nil)
+		c := client.New(h)
 
 		var resp struct{}
 		c.MustPost("{ id }", &resp,
@@ -109,7 +109,7 @@ func TestWithFiles(t *testing.T) {
 			w.Write([]byte(`{}`))
 		})
 
-		c := client.New(h, nil)
+		c := client.New(h)
 
 		var resp struct{}
 		c.MustPost("{ id }", &resp,
@@ -165,7 +165,7 @@ func TestWithFiles(t *testing.T) {
 			w.Write([]byte(`{}`))
 		})
 
-		c := client.New(h, nil)
+		c := client.New(h)
 
 		var resp struct{}
 		c.MustPost("{ id }", &resp,
@@ -225,7 +225,7 @@ func TestWithFiles(t *testing.T) {
 			w.Write([]byte(`{}`))
 		})
 
-		c := client.New(h, nil)
+		c := client.New(h)
 
 		var resp struct{}
 		c.MustPost("{ id }", &resp,

@@ -6,11 +6,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type (
@@ -45,10 +46,9 @@ type (
 
 // New creates a graphql client
 // Options can be set that should be applied to all requests made with this client
-func New(h http.Handler, customDecodeHook *mapstructure.DecodeHookFunc, opts ...Option) *Client {
+func New(h http.Handler, opts ...Option) *Client {
 	p := &Client{
 		h:    h,
-		dh:   customDecodeHook,
 		opts: opts,
 	}
 
@@ -137,6 +137,11 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 	}
 
 	return bd.HTTP, nil
+}
+
+// SetCustomDecodeHook sets a custom decode hook for the client
+func (p *Client) SetCustomDecodeHook(hook *mapstructure.DecodeHookFunc) {
+	p.dh = hook
 }
 
 func unpack(data interface{}, into interface{}, decodeHook *mapstructure.DecodeHookFunc) error {

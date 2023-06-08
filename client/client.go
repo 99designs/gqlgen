@@ -152,7 +152,7 @@ func unpack(data interface{}, into interface{}, decodeHook *mapstructure.DecodeH
 		ZeroFields:  true,
 	}
 	if decodeHook != nil {
-		dc.DecodeHook = mapstructure.ComposeDecodeHookFunc(decodeHook)
+		dc.DecodeHook = mapstructure.ComposeDecodeHookFunc(*decodeHook)
 	}
 
 	d, err := mapstructure.NewDecoder(dc)

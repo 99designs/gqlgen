@@ -89,7 +89,7 @@ func (p *Client) SSE(ctx context.Context, query string, options ...Option) *SSE 
 					}
 
 					// we want to unpack even if there is an error, so we can see partial responses
-					unpackErr := unpack(respDataRaw, response)
+					unpackErr := unpack(respDataRaw, response, p.dh)
 
 					if respDataRaw.Errors != nil {
 						return RawJsonError{respDataRaw.Errors}

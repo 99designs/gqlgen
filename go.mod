@@ -4,19 +4,19 @@ go 1.18
 
 require (
 	github.com/gorilla/websocket v1.5.0
-	github.com/hashicorp/golang-lru/v2 v2.0.1
+	github.com/hashicorp/golang-lru/v2 v2.0.3
 	github.com/kevinmbeaulieu/eq-go v1.0.0
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/matryer/moq v0.2.7
 	github.com/mattn/go-colorable v0.1.13
-	github.com/mattn/go-isatty v0.0.17
+	github.com/mattn/go-isatty v0.0.19
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.8.2
-	github.com/urfave/cli/v2 v2.24.4
-	github.com/vektah/gqlparser/v2 v2.5.2-0.20230422221642-25e09f9d292d
-	golang.org/x/text v0.7.0
+	github.com/urfave/cli/v2 v2.25.5
+	github.com/vektah/gqlparser/v2 v2.5.3
+	golang.org/x/text v0.9.0
 	golang.org/x/tools v0.9.3
-	google.golang.org/protobuf v1.28.1
+	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

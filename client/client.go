@@ -18,7 +18,7 @@ type (
 	// Client used for testing GraphQL servers. Not for production use.
 	Client struct {
 		h    http.Handler
-		dh   *mapstructure.DecodeHookFunc
+		dc   *mapstructure.DecoderConfig
 		opts []Option
 	}
 
@@ -71,7 +71,7 @@ func (p *Client) Post(query string, response interface{}, options ...Option) err
 	}
 
 	// we want to unpack even if there is an error, so we can see partial responses
-	unpackErr := unpack(respDataRaw.Data, response, p.dh)
+	unpackErr := unpack(respDataRaw.Data, response, p.dc)
 
 	if respDataRaw.Errors != nil {
 		return RawJsonError{respDataRaw.Errors}
@@ -139,21 +139,21 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 	return bd.HTTP, nil
 }
 
-// SetCustomDecodeHook sets a custom decode hook for the client
-func (p *Client) SetCustomDecodeHook(hook *mapstructure.DecodeHookFunc) {
-	p.dh = hook
+// SetCustomDecodeConfig sets a custom decode hook for the client
+func (p *Client) SetCustomDecodeConfig(dc *mapstructure.DecoderConfig) {
+	p.dc = dc
 }
 
-func unpack(data interface{}, into interface{}, decodeHook *mapstructure.DecodeHookFunc) error {
+func unpack(data interface{}, into interface{}, customDc *mapstructure.DecoderConfig) error {
 	dc := &mapstructure.DecoderConfig{
-		Result:      into,
 		TagName:     "json",
 		ErrorUnused: true,
 		ZeroFields:  true,
 	}
-	if decodeHook != nil {
-		dc.DecodeHook = mapstructure.ComposeDecodeHookFunc(*decodeHook)
+	if customDc != nil {
+		dc = customDc
 	}
+	dc.Result = into
 
 	d, err := mapstructure.NewDecoder(dc)
 	if err != nil {

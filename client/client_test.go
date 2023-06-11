@@ -3,11 +3,15 @@ package client_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/stretchr/testify/require"
@@ -168,4 +172,46 @@ func TestAddExtensions(t *testing.T) {
 	c.MustPost("user(id:1){name}", &resp,
 		client.Extensions(map[string]interface{}{"persistedQuery": map[string]interface{}{"version": 1, "sha256Hash": "ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7"}}),
 	)
+}
+
+func TestSetCustomDecodeConfig(t *testing.T) {
+	now := time.Now()
+
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(fmt.Sprintf(`{"data": {"created_at":"%s"}}`, now.Format(time.RFC3339))))
+	})
+
+	dc := &mapstructure.DecoderConfig{
+		TagName:     "json",
+		ErrorUnused: true,
+		ZeroFields:  true,
+		DecodeHook: func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+			if t != reflect.TypeOf(time.Time{}) {
+				return data, nil
+			}
+
+			switch f.Kind() {
+			case reflect.String:
+				return time.Parse(time.RFC3339, data.(string))
+			default:
+				return data, nil
+			}
+		},
+	}
+
+	c := client.New(h)
+
+	var resp struct {
+		CreatedAt time.Time `json:"created_at"`
+	}
+
+	err := c.Post("user(id: 1) {created_at}", &resp)
+	require.Error(t, err)
+
+	c.SetCustomDecodeConfig(dc)
+
+	c.MustPost("user(id: 1) {created_at}", &resp)
+	require.WithinDuration(t, now, resp.CreatedAt, time.Second)
 }

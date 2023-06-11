@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -71,9 +70,8 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt func(childComplexity int) int
-		Likes     func(childComplexity int) int
-		Name      func(childComplexity int) int
+		Likes func(childComplexity int) int
+		Name  func(childComplexity int) int
 	}
 
 	Viewer struct {
@@ -210,13 +208,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RemoteModelWithOmitempty.Description(childComplexity), true
-
-	case "User.created_at":
-		if e.complexity.User.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.User.CreatedAt(childComplexity), true
 
 	case "User.likes":
 		if e.complexity.User.Likes == nil {
@@ -1233,50 +1224,6 @@ func (ec *executionContext) fieldContext_User_likes(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _User_created_at(ctx context.Context, field graphql.CollectedField, obj *remote_api.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_created_at(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_created_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.CollectedField, obj *models.Viewer) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Viewer_user(ctx, field)
 	if err != nil {
@@ -1317,8 +1264,6 @@ func (ec *executionContext) fieldContext_Viewer_user(ctx context.Context, field 
 				return ec.fieldContext_User_name(ctx, field)
 			case "likes":
 				return ec.fieldContext_User_likes(ctx, field)
-			case "created_at":
-				return ec.fieldContext_User_created_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -3642,11 +3587,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "created_at":
-			out.Values[i] = ec._User_created_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4131,21 +4071,6 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	}
 
 	return ret
-}
-
-func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
-	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	res := graphql.MarshalTime(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

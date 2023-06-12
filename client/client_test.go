@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/require"
 )
 

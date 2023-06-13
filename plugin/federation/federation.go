@@ -3,6 +3,9 @@ package federation
 import (
 	_ "embed"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -11,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/rewrite"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
@@ -233,6 +237,13 @@ type Entity {
 }
 
 func (f *federation) GenerateCode(data *codegen.Data) error {
+	// requires imports
+	requiresImports := make(map[string]bool, 0)
+	requiresImports["context"] = true
+	requiresImports["fmt"] = true
+
+	requiresEntities := make(map[string]*Entity, 0)
+
 	if len(f.Entities) > 0 {
 		if data.Objects.ByName("Entity") != nil {
 			data.Objects.ByName("Entity").Root = true
@@ -272,9 +283,19 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 					fmt.Println("skipping @requires field " + reqField.Name + " in " + e.Def.Name)
 					continue
 				}
+				// keep track of which entities have requires
+				requiresEntities[e.Def.Name] = e
+				// make a proper import path
+				typeString := strings.Split(obj.Type.String(), ".")
+				requiresImports[strings.Join(typeString[:len(typeString)-1], ".")] = true
+
 				cgField := reqField.Field.TypeReference(obj, data.Objects)
 				reqField.Type = cgField.TypeReference
 			}
+
+			// add type info to entity
+			e.Type = obj.Type
+
 		}
 	}
 
@@ -292,6 +313,81 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 			}
 
 			resolver.InputType = obj.Type
+		}
+	}
+
+	if len(requiresEntities) > 0 {
+		// check for existing requires functions
+		type Populator struct {
+			FuncName       string
+			Exists         bool
+			Comment        string
+			Implementation string
+			Entity         *Entity
+		}
+		populators := make([]Populator, 0)
+
+		rewriter, err := rewrite.New(data.Config.Federation.Dir())
+		if err != nil {
+			return err
+		}
+
+		for name, entity := range requiresEntities {
+			populator := Populator{
+				FuncName: fmt.Sprintf("Populate%sRequires", name),
+				Entity:   entity,
+			}
+
+			populator.Comment = strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment("executionContext", populator.FuncName), `\`))
+			populator.Implementation = strings.TrimSpace(rewriter.GetMethodBody("executionContext", populator.FuncName))
+
+			if populator.Implementation == "" {
+				populator.Exists = false
+				populator.Implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v\"))", populator.FuncName)
+			}
+			populators = append(populators, populator)
+		}
+
+		// find and read requires template
+		_, callerFile, _, _ := runtime.Caller(0)
+		currentDir := filepath.Dir(callerFile)
+		requiresTemplate, err := os.ReadFile(currentDir + "/requires.gotpl")
+
+		if err != nil {
+			return err
+		}
+
+		requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
+		existingImports := rewriter.ExistingImports(requiresFile)
+		for _, imp := range existingImports {
+			if imp.Alias == "" {
+				if _, ok := requiresImports[imp.ImportPath]; ok {
+					// import exists in both places, remove
+					delete(requiresImports, imp.ImportPath)
+				}
+			}
+		}
+
+		for k := range requiresImports {
+			existingImports = append(existingImports, rewrite.Import{ImportPath: k})
+		}
+
+		// render requires populators
+		err = templates.Render(templates.Options{
+			PackageName: data.Config.Federation.Package,
+			Filename:    requiresFile,
+			Data: struct {
+				federation
+				ExistingImports []rewrite.Import
+				Populators      []Populator
+				OriginalSource  string
+			}{*f, existingImports, populators, ""},
+			GeneratedHeader: false,
+			Packages:        data.Config.Packages,
+			Template:        string(requiresTemplate),
+		})
+		if err != nil {
+			return err
 		}
 	}
 

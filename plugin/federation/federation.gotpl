@@ -103,10 +103,10 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						if err != nil {
 							return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
-						{{ range $entity.Requires }}
-							entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+						{{ if $entity.Requires }}
+							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, entity, rep)
 							if err != nil {
-								return err
+								return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
 							}
 						{{- end }}
 						list[idx[i]] = entity

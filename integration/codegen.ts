@@ -5,8 +5,8 @@ const config: CodegenConfig = {
     schema: process.env.VITE_SERVER_URL ?? 'http://localhost:8080/query',
     documents: 'src/**/*.graphql',
     generates: {
-        'src/generated/graphql.ts': {
-            plugins: ['typescript', 'typescript-operations', 'typed-document-node'],
+        'src/generated/': {
+            preset: 'client-preset'
         },
         'src/generated/schema-fetched.graphql': {
             plugins: ['schema-ast'],

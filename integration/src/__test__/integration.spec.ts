@@ -5,14 +5,16 @@ import {GraphQLWsLink} from "@apollo/client/link/subscriptions";
 import {WebSocket} from 'ws';
 import {createClient as createClientWS} from "graphql-ws";
 import {Client as ClientSSE, ClientOptions as ClientOptionsSSE, createClient as createClientSSE} from 'graphql-sse';
-import {CoercionDocument, ComplexityDocument, DateDocument, ErrorDocument, ErrorType, JsonEncodingDocument, PathDocument} from '../generated/graphql.ts';
+import {CoercionDocument, ComplexityDocument, DateDocument, ErrorDocument, ErrorType, JsonEncodingDocument, PathDocument, UserFragmentFragmentDoc, ViewerDocument} from '../generated/graphql.ts';
+import {cacheExchange, Client, dedupExchange, subscriptionExchange} from 'urql';
+import {isFragmentReady, useFragment} from "../generated";
 
 const uri = process.env.VITE_SERVER_URL || 'http://localhost:8080/query';
 
 function test(client: ApolloClient<NormalizedCacheObject>) {
     describe('Json', () => {
         it('should follow json escaping rules', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: JsonEncodingDocument,
             });
 
@@ -25,7 +27,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
 
     describe('Input defaults', () => {
         it('should pass default values to resolver', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: DateDocument,
                 variables: {
                     filter: {
@@ -42,7 +44,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
 
     describe('Complexity', () => {
         it('should fail when complexity is too high', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: ComplexityDocument,
                 variables: {
                     value: 2000,
@@ -58,7 +60,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
 
 
         it('should succeed when complexity is not too high', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: ComplexityDocument,
                 variables: {
                     value: 1000,
@@ -72,9 +74,8 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
     });
 
     describe('List Coercion', () => {
-
         it('should succeed when nested single values are passed', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: CoercionDocument,
                 variables: {
                     value: {
@@ -90,7 +91,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
         });
 
         it('should succeed when nested array of values are passed', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: CoercionDocument,
                 variables: {
                     value: {
@@ -106,7 +107,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
         });
 
         it('should succeed when single value is passed', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: CoercionDocument,
                 variables: {
                     value: {
@@ -120,7 +121,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
         });
 
         it('should succeed when single scalar value is passed', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: CoercionDocument,
                 variables: {
                     value: [{
@@ -136,11 +137,11 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
         });
 
         it('should succeed when multiple values are passed', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: CoercionDocument,
                 variables: {
                     value: [{
-                        enumVal: [ErrorType.Custom,ErrorType.Normal]
+                        enumVal: [ErrorType.Custom, ErrorType.Normal]
                     }]
                 }
             });
@@ -148,12 +149,11 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
             expect(res.data.coercion).toBe(true);
             return null;
         });
-
     });
 
     describe('Errors', () => {
         it('should respond with correct paths', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: PathDocument,
             });
 
@@ -183,7 +183,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
         });
 
         it('should pass through for other errors', async () => {
-            let res = await client.query({
+            const res = await client.query({
                 query: ErrorDocument,
                 variables: {
                     type: ErrorType.Normal
@@ -297,5 +297,53 @@ describe('SSE client', () => {
 
     afterAll(() => {
         client.stop();
+    });
+});
+
+
+describe('URQL SSE client', () => {
+    const wsClient = createClientWS({
+        url: uri.replace('http://', 'ws://').replace('https://', 'wss://'),
+        webSocketImpl: WebSocket,
+    });
+
+    const client = new Client({
+        url: uri,
+        exchanges: [
+            dedupExchange,
+            cacheExchange,
+            subscriptionExchange({
+                enableAllOperations: true,
+                forwardSubscription(request) {
+                    const input = {...request, query: request.query || ''};
+                    return {
+                        subscribe(sink) {
+                            const unsubscribe = wsClient.subscribe(input, sink);
+                            return {unsubscribe};
+                        },
+                    };
+                },
+            }),
+        ],
+    });
+
+    describe('Defer', () => {
+        it('test using defer', async () => {
+            const res = await client.query(ViewerDocument, {});
+
+            expect(res.error).toBe(undefined);
+            expect(res.data).toBeDefined()
+            expect(res.data?.viewer).toBeDefined();
+            expect(res.data?.viewer?.user).toBeDefined();
+            expect(res.data?.viewer?.user?.name).toBe('Bob');
+            let ready: boolean
+            if ((ready = isFragmentReady(ViewerDocument, UserFragmentFragmentDoc, res.data?.viewer?.user))) {
+                const userFragment = useFragment(UserFragmentFragmentDoc, res.data?.viewer?.user);
+                expect(userFragment).toBeDefined();
+                expect(userFragment?.likes).toStrictEqual(['Alice']);
+            }
+            expect(ready).toBeTruthy();
+            return null;
+        });
     });
 });

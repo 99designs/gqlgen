@@ -1,0 +1,12 @@
+query viewer {
+    viewer {
+        user {
+            name
+            ... userFragment @defer
+        }
+    }
+}
+
+fragment userFragment on User {
+    likes
+}

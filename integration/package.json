@@ -9,8 +9,9 @@
     },
     "devDependencies": {
         "@apollo/client": "^3.7.14",
+        "urql": "^4.0.3",
         "@graphql-codegen/cli": "^4.0.0",
-        "@graphql-codegen/named-operations-object": "^2.3.1",
+        "@graphql-codegen/client-preset": "^4.0.0",
         "@graphql-codegen/schema-ast": "^4.0.0",
         "@graphql-codegen/typed-document-node": "^5.0.0",
         "@graphql-codegen/typescript": "^4.0.0",

@@ -172,13 +172,9 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return fmt.Errorf(`resolving Entity "PlanetMultipleRequires": %w`, err)
 				}
 
-				entity.Diameter, err = ec.unmarshalNInt2int(ctx, rep["diameter"])
+				err = ec.PopulatePlanetMultipleRequiresRequires(ctx, entity, rep)
 				if err != nil {
-					return err
-				}
-				entity.Density, err = ec.unmarshalNInt2int(ctx, rep["density"])
-				if err != nil {
-					return err
+					return fmt.Errorf(`populating requires for Entity "PlanetMultipleRequires": %w`, err)
 				}
 				list[idx[i]] = entity
 				return nil
@@ -200,9 +196,9 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return fmt.Errorf(`resolving Entity "PlanetRequires": %w`, err)
 				}
 
-				entity.Diameter, err = ec.unmarshalNInt2int(ctx, rep["diameter"])
+				err = ec.PopulatePlanetRequiresRequires(ctx, entity, rep)
 				if err != nil {
-					return err
+					return fmt.Errorf(`populating requires for Entity "PlanetRequires": %w`, err)
 				}
 				list[idx[i]] = entity
 				return nil
@@ -224,9 +220,9 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return fmt.Errorf(`resolving Entity "PlanetRequiresNested": %w`, err)
 				}
 
-				entity.World.Foo, err = ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
+				err = ec.PopulatePlanetRequiresNestedRequires(ctx, entity, rep)
 				if err != nil {
-					return err
+					return fmt.Errorf(`populating requires for Entity "PlanetRequiresNested": %w`, err)
 				}
 				list[idx[i]] = entity
 				return nil

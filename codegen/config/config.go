@@ -305,8 +305,9 @@ func (c *Config) injectTypesFromSchema() error {
 
 					if c.Models[schemaType.Name].Fields == nil {
 						c.Models[schemaType.Name] = TypeMapEntry{
-							Model:  c.Models[schemaType.Name].Model,
-							Fields: map[string]TypeMapField{},
+							Model:       c.Models[schemaType.Name].Model,
+							ExtraFields: c.Models[schemaType.Name].ExtraFields,
+							Fields:      map[string]TypeMapField{},
 						}
 					}
 

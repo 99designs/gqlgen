@@ -1,14 +1,14 @@
-//go:generate go run ../testdata/gqlgen.go
+//go:generate go run ../../testdata/gqlgen.go
 
-package integration
+package server
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	models "github.com/99designs/gqlgen/integration/models-go"
-	"github.com/99designs/gqlgen/integration/remote_api"
+	models "github.com/99designs/gqlgen/integration/server/models-go"
+	"github.com/99designs/gqlgen/integration/server/remote_api"
 )
 
 type CustomError struct {

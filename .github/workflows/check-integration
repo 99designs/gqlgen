@@ -5,7 +5,7 @@ set -euo pipefail
 cd integration
 
 date
-go run ./server/server.go &
+go run ./server/cmd/integration/server.go &
 
 sleep 5
 curl -s --connect-timeout 5 \
@@ -15,16 +15,14 @@ curl -s --connect-timeout 5 \
     --retry-max-time 40 \
     --retry-connrefused \
     localhost:8080 > /dev/null
-npm install -g typescript
-npm link typescript
-echo "### running jest integration spec"
-./node_modules/.bin/jest --color
+echo "### running integration spec"
+npm run test
 
 
 echo "### validating introspected schema"
-./node_modules/.bin/graphql-codegen
+npm run gen
 
-if ! diff <(tail -n +3 schema-expected.graphql) <(tail -n +3 schema-fetched.graphql) ; then
+if ! diff <(tail -n +3 src/generated/schema-expected.graphql) <(tail -n +3 src/generated/schema-fetched.graphql) ; then
     echo "The expected schema has changed, you need to update schema-expected.graphql with any expected changes"
     exit 1
 fi

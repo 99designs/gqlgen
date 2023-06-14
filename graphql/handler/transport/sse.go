@@ -73,29 +73,26 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		return
 	}
 
-	rc, OpErr := exec.CreateOperationContext(ctx, params)
-	if OpErr != nil {
-		w.WriteHeader(statusFor(OpErr))
-		resp := exec.DispatchError(graphql.WithOperationContext(ctx, rc), OpErr)
-		writeJson(w, resp)
-		return
-	}
-
+	rc, opErr := exec.CreateOperationContext(ctx, params)
 	ctx = graphql.WithOperationContext(ctx, rc)
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	fmt.Fprint(w, ":\n\n")
 	flusher.Flush()
 
-	responses, ctx := exec.DispatchOperation(ctx, rc)
-
-	for {
-		response := responses(ctx)
-		if response == nil {
-			break
+	if opErr != nil {
+		resp := exec.DispatchError(ctx, opErr)
+		writeJsonWithSSE(w, resp)
+	} else {
+		responses, ctx := exec.DispatchOperation(ctx, rc)
+		for {
+			response := responses(ctx)
+			if response == nil {
+				break
+			}
+			writeJsonWithSSE(w, response)
+			flusher.Flush()
 		}
-		writeJsonWithSSE(w, response)
-		flusher.Flush()
 	}
 
 	fmt.Fprint(w, "event: complete\n\n")

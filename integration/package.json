@@ -1,25 +1,26 @@
 {
-  "scripts": {
-    "test": "jest"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.11.4",
-    "@graphql-codegen/cli": "^2.12.1",
-    "@graphql-codegen/schema-ast": "^2.4.1",
-    "apollo-cache-inmemory": "^1.6.6",
-    "apollo-client": "^2.6.10",
-    "apollo-link-http": "^1.5.17",
-    "apollo-link-persisted-queries": "^0.2.2",
-    "apollo-link-ws": "^1.0.20",
-    "babel-jest": "^24.9.0",
-    "graphql": "^16.3.0",
-    "graphql-tag": "^2.12.6",
-    "jest": "^29.0.3",
-    "node-fetch": "^2.6.7",
-    "subscriptions-transport-ws": "^0.9.18",
-    "ws": "^7.4.6"
-  },
-  "dependencies": {
-    "@babel/preset-env": "^7.11.0"
-  }
+    "name": "integration",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "test": "vitest",
+        "gen": "graphql-codegen --config codegen.ts"
+    },
+    "devDependencies": {
+        "@apollo/client": "^3.7.14",
+        "@graphql-codegen/cli": "^4.0.0",
+        "@graphql-codegen/named-operations-object": "^2.3.1",
+        "@graphql-codegen/schema-ast": "^4.0.0",
+        "@graphql-codegen/typed-document-node": "^5.0.0",
+        "@graphql-codegen/typescript": "^4.0.0",
+        "@graphql-codegen/typescript-operations": "^4.0.0",
+        "graphql": "^16.6.0",
+        "graphql-codegen": "^0.4.0",
+        "graphql-sse": "^2.1.4",
+        "graphql-ws": "^5.13.1",
+        "typescript": "^5.0.2",
+        "vite": "^4.3.9",
+        "vitest": "^0.32.0"
+    }
 }

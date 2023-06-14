@@ -1,0 +1,3 @@
+query complexity($value: Int!) {
+    complexity(value: $value)
+}

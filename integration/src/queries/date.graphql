@@ -1,0 +1,3 @@
+query date($filter: DateFilter!) {
+    date(filter: $filter)
+}

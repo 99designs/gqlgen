@@ -1,0 +1,7 @@
+name: Schema
+schema: src/generated/schema-expected.graphql
+extensions:
+  endpoints:
+    dev:
+      url: http://localhost:8080/query
+      introspect: true

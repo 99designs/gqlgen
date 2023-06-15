@@ -1,14 +1,14 @@
-//go:generate go run ../testdata/gqlgen.go
+//go:generate go run ../../testdata/gqlgen.go
 
-package integration
+package server
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	models "github.com/99designs/gqlgen/integration/models-go"
-	"github.com/99designs/gqlgen/integration/remote_api"
+	models "github.com/99designs/gqlgen/integration/server/models-go"
+	"github.com/99designs/gqlgen/integration/server/remote_api"
 )
 
 type CustomError struct {
@@ -87,7 +87,7 @@ func (r *queryResolver) Date(ctx context.Context, filter models.DateFilter) (boo
 
 func (r *queryResolver) Viewer(ctx context.Context) (*models.Viewer, error) {
 	return &models.Viewer{
-		User: &remote_api.User{Name: "Bob"},
+		User: &remote_api.User{Name: "Bob", Likes: []string{"Alice"}},
 	}, nil
 }
 

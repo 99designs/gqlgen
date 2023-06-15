@@ -4,7 +4,7 @@ These tests run a gqlgen server against the apollo client to test real world con
 
 First start the go server
 ```bash
-go run integration/server/server.go
+go run server/cmd/integration/server.go
 ```
 
 And in another terminal:

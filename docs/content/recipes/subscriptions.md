@@ -133,16 +133,17 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 				TimeStamp: currentTime.Format(time.RFC3339),
 			}
 
-			// The channel may have gotten closed due to the client disconnecting.
-			// To not have our Goroutine block or panic, we do the send in a select block.
-			// This will jump to the default case if the channel is closed.
+			// The subscription may have got closed due to the client disconnecting.
+			// Hence we do send in a select block with a check for context cancellation.
+			// This avoids goroutine getting blocked forever or panicking,
 			select {
+			case <-ctx.Done(): // This runs when context gets cancelled. Subscription closes.
+				fmt.Println("Subscription Closed")
+				// Handle deregistration of the channel here. `close(ch)`
+				return // Remember to return to end the routine.
+			
 			case ch <- t: // This is the actual send.
-				// Our message went through, do nothing
-			default: // This is run when our send does not work.
-				fmt.Println("Channel closed.")
-				// You can handle any deregistration of the channel here.
-				return // We'll just return ending the routine.
+				// Our message went through, do nothing	
 			}
 		}
 	}()
@@ -305,11 +306,13 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 			}
 
 			select {
+			case <-ctx.Done():
+				// Exit on cancellation 
+				fmt.Println("Subscription closed.")
+				return
+			
 			case ch <- t:
 				// Our message went through, do nothing
-			default:
-				fmt.Println("Channel closed.")
-				return
 			}
 
 		}

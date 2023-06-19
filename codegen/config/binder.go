@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 
-	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -285,7 +285,7 @@ func (ref *TypeReference) UniquenessKey() string {
 		// Fix for #896
 		elemNullability = "ᚄ"
 	}
-	return nullability + ref.Definition.Name + "2" + templates.TypeIdentifier(ref.GO) + elemNullability
+	return nullability + ref.Definition.Name + "2" + TypeIdentifier(ref.GO) + elemNullability
 }
 
 func (ref *TypeReference) MarshalFunc() string {
@@ -539,4 +539,42 @@ func basicUnderlying(it types.Type) *types.Basic {
 	}
 
 	return nil
+}
+
+var pkgReplacer = strings.NewReplacer(
+	"/", "ᚋ",
+	".", "ᚗ",
+	"-", "ᚑ",
+	"~", "א",
+)
+
+func TypeIdentifier(t types.Type) string {
+	res := ""
+	for {
+		switch it := t.(type) {
+		case *types.Pointer:
+			t.Underlying()
+			res += "ᚖ"
+			t = it.Elem()
+		case *types.Slice:
+			res += "ᚕ"
+			t = it.Elem()
+		case *types.Named:
+			res += pkgReplacer.Replace(it.Obj().Pkg().Path())
+			res += "ᚐ"
+			res += it.Obj().Name()
+			return res
+		case *types.Basic:
+			res += it.Name()
+			return res
+		case *types.Map:
+			res += "map"
+			return res
+		case *types.Interface:
+			res += "interface"
+			return res
+		default:
+			panic(fmt.Errorf("unexpected type %T", it))
+		}
+	}
 }

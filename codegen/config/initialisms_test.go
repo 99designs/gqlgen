@@ -34,12 +34,12 @@ func TestGoInitialismsConfig(t *testing.T) {
 		assert.Equal(t, 1, len(result))
 		assert.True(t, result["ASDF"])
 	})
-	t.Run("initialism config uppercases the initials", func(t *testing.T) {
+	t.Run("initialism config uppercases the initialsms", func(t *testing.T) {
 		tt := GoInitialismsConfig{Initialisms: []string{"asdf"}}
 		result := tt.determineGoInitialisms()
 		assert.True(t, result["ASDF"])
 	})
-	t.Run("initialism config overrides the initials to use", func(t *testing.T) {
+	t.Run("initialism config overrides the initialsms to use", func(t *testing.T) {
 		tt := GoInitialismsConfig{Initialisms: []string{"ASDF"}}
 		tt.setInitialisms()
 		assert.True(t, GetInitialisms()["ASDF"])

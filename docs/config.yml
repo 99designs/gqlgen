@@ -31,3 +31,9 @@ security:
     - '^HUGO_'
     - 'VERSIONS'
     - 'CURRENT_VERSION'
+
+go_initialisms:
+  replace_defaults: true
+  initialisms:
+    - 'ID'
+    - 'BCC'

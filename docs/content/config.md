@@ -77,6 +77,13 @@ resolver:
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
 
+# Optional: set to modify the initialisms regarded for Go names
+#go_initialisms:
+#  replace_defaults: true # if true, the default initialisms will get dropped in favor of the new ones instead of being added
+#  initialisms: # List of initialisms to for Go names
+#    - 'ID'
+#    - 'BCC'
+
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 # autobind:

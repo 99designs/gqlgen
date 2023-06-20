@@ -33,7 +33,7 @@ security:
     - 'CURRENT_VERSION'
 
 go_initialisms:
-  replace_defaults: true
+  replace_defaults: false
   initialisms:
-    - 'ID'
-    - 'BCC'
+  - 'ID'
+  - 'BCC'

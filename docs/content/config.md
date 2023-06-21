@@ -81,8 +81,8 @@ resolver:
 # go_initialisms:
 #   replace_defaults: false # if true, the default initialisms will get dropped in favor of the new ones instead of being added
 #   initialisms: # List of initialisms to for Go names
-#   - 'CC'
-#   - 'BCC'
+#     - 'CC'
+#     - 'BCC'
 
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.

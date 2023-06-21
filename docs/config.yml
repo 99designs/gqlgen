@@ -28,12 +28,12 @@ menu:
 security:
   funcs:
     getenv:
-    - '^HUGO_'
-    - 'VERSIONS'
-    - 'CURRENT_VERSION'
+      - '^HUGO_'
+      - 'VERSIONS'
+      - 'CURRENT_VERSION'
 
 go_initialisms:
   replace_defaults: false
   initialisms:
-  - 'ID'
-  - 'BCC'
+    - 'CC'
+    - 'BCC'

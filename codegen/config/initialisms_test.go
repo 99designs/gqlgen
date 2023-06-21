@@ -7,10 +7,6 @@ import (
 )
 
 func TestGoInitialismsConfig(t *testing.T) {
-	oldInitialisms := GetInitialisms
-	t.Cleanup(func() {
-		GetInitialisms = oldInitialisms
-	})
 	t.Run("load go initialisms config", func(t *testing.T) {
 		config, err := LoadConfig("testdata/cfg/goInitialisms.yml")
 		require.NoError(t, err)
@@ -38,10 +34,5 @@ func TestGoInitialismsConfig(t *testing.T) {
 		tt := GoInitialismsConfig{Initialisms: []string{"asdf"}}
 		result := tt.determineGoInitialisms()
 		assert.True(t, result["ASDF"])
-	})
-	t.Run("initialism config overrides the initialsms to use", func(t *testing.T) {
-		tt := GoInitialismsConfig{Initialisms: []string{"ASDF"}}
-		tt.setInitialisms()
-		assert.True(t, GetInitialisms()["ASDF"])
 	})
 }

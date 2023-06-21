@@ -1,5 +1,5 @@
 go_initialisms:
   replace_defaults: true
   initialisms:
-  - 'ID'
-  - 'BCC'
+    - 'CC'
+    - 'BCC'

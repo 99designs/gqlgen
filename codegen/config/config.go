@@ -26,6 +26,7 @@ type Config struct {
 	Models                        TypeMap                    `yaml:"models,omitempty"`
 	StructTag                     string                     `yaml:"struct_tag,omitempty"`
 	Directives                    map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	GoInitialisms                 GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
 	OmitSliceElementPointers      bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	OmitGetters                   bool                       `yaml:"omit_getters,omitempty"`
 	OmitComplexity                bool                       `yaml:"omit_complexity,omitempty"`
@@ -201,6 +202,9 @@ func CompleteConfig(config *Config) error {
 
 		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
+
+	config.GoInitialisms.setInitialisms()
+
 	return nil
 }
 

@@ -1,0 +1,5 @@
+go_initialisms:
+  replace_defaults: true
+  initialisms:
+    - 'CC'
+    - 'BCC'

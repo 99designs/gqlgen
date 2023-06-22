@@ -15,10 +15,12 @@
 {{- range $model := .Interfaces }}
 	{{ with .Description }} {{.|prefixLines "// "}} {{ end }}
 	type {{ goModelName .Name }} interface {
-		{{- range $impl := .Implements }}
-			Is{{ goModelName $impl }}()
+		{{- if not .OmitCheck }}
+			{{- range $impl := .Implements }}
+				Is{{ goModelName $impl }}()
+			{{- end }}
+			Is{{ goModelName .Name }}()
 		{{- end }}
-		Is{{ goModelName .Name }}()
 		{{- range $field := .Fields }}
 			{{- with .Description }}
 				{{.|prefixLines "// "}}

@@ -74,13 +74,15 @@ func (f *Field) IsDeprecated() bool {
 }
 
 func (f *Field) DeprecationReason() *string {
-	if f.deprecation == nil {
+	if f.deprecation == nil || !f.IsDeprecated() {
 		return nil
 	}
 
 	reason := f.deprecation.Arguments.ForName("reason")
+
 	if reason == nil {
-		return nil
+		defaultReason := "No longer supported"
+		return &defaultReason
 	}
 
 	return &reason.Value.Raw

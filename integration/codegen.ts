@@ -11,6 +11,9 @@ const config: CodegenConfig = {
         'src/generated/schema-fetched.graphql': {
             plugins: ['schema-ast'],
         },
+        'src/generated/schema-introspection.json': {
+            plugins: ['introspection'],
+        }
     },
 };
 

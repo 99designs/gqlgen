@@ -8,6 +8,8 @@ import {Client as ClientSSE, ClientOptions as ClientOptionsSSE, createClient as 
 import {CoercionDocument, ComplexityDocument, DateDocument, ErrorDocument, ErrorType, JsonEncodingDocument, PathDocument, UserFragmentFragmentDoc, ViewerDocument} from '../generated/graphql.ts';
 import {cacheExchange, Client, dedupExchange, subscriptionExchange} from 'urql';
 import {isFragmentReady, useFragment} from "../generated";
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 const uri = process.env.VITE_SERVER_URL || 'http://localhost:8080/query';
 
@@ -223,6 +225,25 @@ describe('HTTP client', () => {
     afterAll(() => {
         client.stop();
     });
+});
+
+describe('Schema Introspection', () => {
+
+    const schemaJson = readFileSync(join(__dirname, '../generated/schema-introspection.json'), 'utf-8');
+    const schema = JSON.parse(schemaJson);
+
+    it('User.phoneNumber is deprecated and deprecationReason has the default value: `No longer supported`', async () => {
+
+        const userType = schema.__schema.types.find((type: any) => type.name === 'User');
+
+        expect(userType).toBeDefined();
+
+        const phoneNumberField = userType.fields.find((field: any) => field.name === 'phoneNumber');
+        expect(phoneNumberField).toBeDefined();
+
+        expect(phoneNumberField.isDeprecated).toBe(true);
+        expect(phoneNumberField.deprecationReason).toBe('No longer supported');
+    })
 });
 
 describe('Websocket client', () => {

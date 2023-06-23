@@ -58,6 +58,7 @@ type RemoteModelWithOmitempty {
 type User {
   likes: [String!]!
   name: String!
+  phoneNumber: String @deprecated
 }
 
 type Viewer {

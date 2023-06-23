@@ -87,7 +87,7 @@ func (r *queryResolver) Date(ctx context.Context, filter models.DateFilter) (boo
 
 func (r *queryResolver) Viewer(ctx context.Context) (*models.Viewer, error) {
 	return &models.Viewer{
-		User: &remote_api.User{Name: "Bob", Likes: []string{"Alice"}},
+		User: &remote_api.User{Name: "Bob", Likes: []string{"Alice"}, PhoneNumber: "1234567890"},
 	}, nil
 }
 

@@ -91,6 +91,8 @@ export type User = {
   __typename?: 'User';
   likes: Array<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  /** @deprecated No longer supported */
+  phoneNumber?: Maybe<Scalars['String']['output']>;
 };
 
 export type Viewer = {
@@ -139,7 +141,7 @@ export type PathQuery = { __typename?: 'Query', path?: Array<{ __typename?: 'Ele
 export type ViewerQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ViewerQuery = { __typename?: 'Query', viewer?: { __typename?: 'Viewer', user?: ( { __typename?: 'User', name: string } & (
+export type ViewerQuery = { __typename?: 'Query', viewer?: { __typename?: 'Viewer', user?: ( { __typename?: 'User', name: string, phoneNumber?: string | null } & (
       { __typename?: 'User' }
       & { ' $fragmentRefs'?: { 'UserFragmentFragment': Incremental<UserFragmentFragment> } }
     ) ) | null } | null };
@@ -153,4 +155,4 @@ export const DateDocument = {"kind":"Document","definitions":[{"kind":"Operation
 export const ErrorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"error"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ErrorType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"error"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}}]}]}}]} as unknown as DocumentNode<ErrorQuery, ErrorQueryVariables>;
 export const JsonEncodingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"jsonEncoding"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jsonEncoding"}}]}}]} as unknown as DocumentNode<JsonEncodingQuery, JsonEncodingQueryVariables>;
 export const PathDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"path"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"path"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"cc"},"name":{"kind":"Name","value":"child"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"error"}}]}}]}}]}}]} as unknown as DocumentNode<PathQuery, PathQueryVariables>;
-export const ViewerDocument = {"__meta__":{"deferredFields":{"userFragment":["likes"]}},"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"viewer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"viewer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"userFragment"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"defer"}}]}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"userFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"likes"}}]}}]} as unknown as DocumentNode<ViewerQuery, ViewerQueryVariables>;
+export const ViewerDocument = {"__meta__":{"deferredFields":{"userFragment":["likes"]}},"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"viewer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"viewer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"userFragment"},"directives":[{"kind":"Directive","name":{"kind":"Name","value":"defer"}}]}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"userFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"likes"}}]}}]} as unknown as DocumentNode<ViewerQuery, ViewerQueryVariables>;

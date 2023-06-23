@@ -50,6 +50,7 @@ type Interface struct {
 	Name        string
 	Fields      []*Field
 	Implements  []string
+	OmitCheck   bool
 }
 
 type Object struct {
@@ -124,6 +125,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				Name:        schemaType.Name,
 				Implements:  schemaType.Interfaces,
 				Fields:      fields,
+				OmitCheck:   cfg.OmitInterfaceChecks,
 			}
 
 			b.Interfaces = append(b.Interfaces, it)

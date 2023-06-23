@@ -11,14 +11,15 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/playground"
 
-	"github.com/99designs/gqlgen/_examples/chat"
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/gorilla/websocket"
 	"github.com/opentracing/opentracing-go"
 	"github.com/rs/cors"
 	"sourcegraph.com/sourcegraph/appdash"
 	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"
 	"sourcegraph.com/sourcegraph/appdash/traceapp"
+
+	"github.com/99designs/gqlgen/_examples/chat"
+	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func main() {

@@ -9,15 +9,16 @@
     },
     "devDependencies": {
         "@apollo/client": "^3.7.14",
-        "urql": "^4.0.3",
         "@graphql-codegen/cli": "^4.0.0",
         "@graphql-codegen/client-preset": "^4.0.0",
+        "@graphql-codegen/introspection": "^4.0.0",
         "@graphql-codegen/schema-ast": "^4.0.0",
         "graphql": "^16.6.0",
         "graphql-codegen": "^0.4.0",
         "graphql-sse": "^2.1.4",
         "graphql-ws": "^5.13.1",
         "typescript": "^5.0.2",
+        "urql": "^4.0.3",
         "vite": "^4.3.9",
         "vitest": "^0.32.0"
     }

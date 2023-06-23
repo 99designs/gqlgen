@@ -2,6 +2,7 @@ query viewer {
     viewer {
         user {
             name
+            phoneNumber
             ... userFragment @defer
         }
     }

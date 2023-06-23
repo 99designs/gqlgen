@@ -19,7 +19,7 @@ const documents = {
     "query error($type: ErrorType) {\n  error(type: $type)\n}": types.ErrorDocument,
     "query jsonEncoding {\n  jsonEncoding\n}": types.JsonEncodingDocument,
     "query path {\n  path {\n    cc: child {\n      error\n    }\n  }\n}": types.PathDocument,
-    "query viewer {\n  viewer {\n    user {\n      name\n      ...userFragment @defer\n    }\n  }\n}\n\nfragment userFragment on User {\n  likes\n}": types.ViewerDocument,
+    "query viewer {\n  viewer {\n    user {\n      name\n      phoneNumber\n      ...userFragment @defer\n    }\n  }\n}\n\nfragment userFragment on User {\n  likes\n}": types.ViewerDocument,
 };
 
 /**
@@ -63,7 +63,7 @@ export function graphql(source: "query path {\n  path {\n    cc: child {\n      
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "query viewer {\n  viewer {\n    user {\n      name\n      ...userFragment @defer\n    }\n  }\n}\n\nfragment userFragment on User {\n  likes\n}"): (typeof documents)["query viewer {\n  viewer {\n    user {\n      name\n      ...userFragment @defer\n    }\n  }\n}\n\nfragment userFragment on User {\n  likes\n}"];
+export function graphql(source: "query viewer {\n  viewer {\n    user {\n      name\n      phoneNumber\n      ...userFragment @defer\n    }\n  }\n}\n\nfragment userFragment on User {\n  likes\n}"): (typeof documents)["query viewer {\n  viewer {\n    user {\n      name\n      phoneNumber\n      ...userFragment @defer\n    }\n  }\n}\n\nfragment userFragment on User {\n  likes\n}"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

@@ -5,10 +5,144 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.32...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.34...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.34"></a>
+## [v0.17.34](https://github.com/99designs/gqlgen/compare/v0.17.33...v0.17.34) - 2023-06-23
+- <a href="https://github.com/99designs/gqlgen/commit/5a70585758275a186b3e76e729644cb0c3e4bd37"><tt>5a705857</tt></a> release v0.17.34
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1a9dbadd3e1a803e89ff9c6103ba4d9bbcf38029"><tt>1a9dbadd</tt></a> Use  "No longer supported" as the default deprecationReason for deprecations without a reason specified (<a href="https://github.com/99designs/gqlgen/pull/2692">#2692</a>)</summary>
+
+* fix: use "No longer supported" as the default deprecationReason for deprecated fields with no reason specified
+
+* test: add integration tests to ensure deprecated fields with no reason set get the default reason defined in the spec `No longer supported`
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/640f383651dee93b64a5cd72a70af4c5dce0831d"><tt>640f3836</tt></a> Update gqlparser dependency (<a href="https://github.com/99designs/gqlgen/pull/2694">#2694</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/5ac9fe5945a59cf7ce6370da4dd5dbc6a8d098ff"><tt>5ac9fe59</tt></a> Added flag to omit interface checks (<a href="https://github.com/99designs/gqlgen/pull/2689">#2689</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/abc3c627d6dfc9f70e22f40f2457b002310a84c7"><tt>abc3c627</tt></a> feat: always use latest apollo sandbox (<a href="https://github.com/99designs/gqlgen/pull/2686">#2686</a>)</summary>
+
+* feat: removeDuplicateTags() validates tags and panic with meaningful error message
+
+* Instead of pinning on _latest without subresource integrity check, update both url and integrity to latest
+
+* Update graphql/playground/apollo_sandbox_playground.go
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3b295bb4a70486a16e82877422a7b7c55d21f4f9"><tt>3b295bb4</tt></a> added GoInitialismsConfig which overrides the initialisms to be regarded (<a href="https://github.com/99designs/gqlgen/pull/2683">#2683</a>)</summary>
+
+* added GoInitialismsConfig which overrides the initialisms to be regarded
+
+* typo
+
+* adjusted examples and documentation
+
+* removed test with side-effects, adjustend yaml indentations, changed example entry "ID" to "CC" (again? I though I already did that)
+
+* comply with linter
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/ee6add4bddd7ee05e31a37815f281c320eb44e26"><tt>ee6add4b</tt></a> Refactor TypeIdentifier to avoid circular imports (<a href="https://github.com/99designs/gqlgen/pull/2682">#2682</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/44376e52e7857a6b7e16d40088d57234c8eeaf64"><tt>44376e52</tt></a> fix subscription example in documentation (<a href="https://github.com/99designs/gqlgen/pull/2677">#2677</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d508082896d5ab6de6ea40b42478e54dc2feb74c"><tt>d5080828</tt></a> Reworked integration testing using vitest (<a href="https://github.com/99designs/gqlgen/pull/2675">#2675</a>)</summary>
+
+* Reworked integration using vitest
+Added SSE client testing
+Fixed SSE Transport parse errors not being sent as event-stream
+
+* Added defer testing using urql
+
+* Cleanup unnecessary dependencies
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d16f498f5b3659bfe23749ee78993b816df04322"><tt>d16f498f</tt></a> fix: issue with extraFields being thrown away (<a href="https://github.com/99designs/gqlgen/pull/2674">#2674</a>)</summary>
+
+* fix: issue with extraFields being thrown away
+
+* Go fumpt on file
+
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/71d16aa052167358d95a4dd2ae89806b636b9a1d"><tt>71d16aa0</tt></a> v0.17.33 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.33"></a>
+## [v0.17.33](https://github.com/99designs/gqlgen/compare/v0.17.32...v0.17.33) - 2023-06-13
+- <a href="https://github.com/99designs/gqlgen/commit/a1e34ca0f6c1f4fdbb113485187eeef77fb8cc1f"><tt>a1e34ca0</tt></a> release v0.17.33
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/790a72c1642200c6530da34ae2c094a088ae1dfe"><tt>790a72c1</tt></a> issue-1372: add custom decode func (<a href="https://github.com/99designs/gqlgen/pull/2666">#2666</a>)</summary>
+
+* issue-1372: add custom decode func
+
+* issue-1372: add custom decode method
+
+* issue-1372: fix lint
+
+* issue-1372: add custom decode func
+
+* issue-1372: add custom decode method
+
+* issue-1372: fix lint
+
+* issue-1372: extend functionality by setting up the whole decode config instead of one nested field
+
+* issue-1372: rollback generated.go file
+
+* issue-1372: fix lint
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c63c60eb910b532c10677caac42b78c02735f4e2"><tt>c63c60eb</tt></a> Update all modules (<a href="https://github.com/99designs/gqlgen/pull/2667">#2667</a>)</summary>
+
+* Update all modules
+
+
+* Add gqlparser v2.5.3
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4a78eb0c9be84793df821616b4ebfa4bfb42a49c"><tt>4a78eb0c</tt></a> minor cleaning: fix some stricter lint rule warnings (<a href="https://github.com/99designs/gqlgen/pull/2665">#2665</a>)</summary>
+
+* Add Changelog notes
+
+
+* Some spring cleaning
+
+
+* Update golangci-lint to latest
+
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/1e925f7e5b13566c9f7cdd115e59d39f0df0e4f3"><tt>1e925f7e</tt></a> v0.17.32 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.32"></a>
 ## [v0.17.32](https://github.com/99designs/gqlgen/compare/v0.17.31...v0.17.32) - 2023-06-06
 - <a href="https://github.com/99designs/gqlgen/commit/3a81a78bb7370f067c6bf4f3ce79de0e77f885a1"><tt>3a81a78b</tt></a> release v0.17.32

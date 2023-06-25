@@ -1,0 +1,23 @@
+schema:
+  - "testdata/schema.graphql"
+
+exec:
+  filename: out_omit_force_resolver_fields_false/ignored.go
+model:
+  filename: out_omit_force_resolver_fields_false/generated.go
+
+omit_force_resolver_fields: false
+
+models:
+  ExistingModel:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_false.ExistingModel
+  ExistingInput:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_false.ExistingInput
+  ExistingEnum:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_false.ExistingEnum
+  ExistingInterface:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_false.ExistingInterface
+  ExistingUnion:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_false.ExistingUnion
+  ExistingType:
+    model: github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_false.ExistingType

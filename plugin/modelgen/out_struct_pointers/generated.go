@@ -107,6 +107,12 @@ type ImplArrayOfA struct {
 
 func (ImplArrayOfA) IsArrayOfA() {}
 
+type MissingForceResolvers struct {
+	Enabled  string `json:"enabled" database:"MissingForceResolversenabled"`
+	Disabled string `json:"disabled" database:"MissingForceResolversdisabled"`
+	NotSet   string `json:"notSet" database:"MissingForceResolversnotSet"`
+}
+
 type MissingInput struct {
 	Name          *string                           `json:"name,omitempty" database:"MissingInputname"`
 	Enum          *MissingEnum                      `json:"enum,omitempty" database:"MissingInputenum"`

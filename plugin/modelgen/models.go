@@ -19,15 +19,18 @@ var modelTemplate string
 
 type (
 	BuildMutateHook = func(b *ModelBuild) *ModelBuild
-	FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error)
+	FieldMutateHook = func(cfg *config.Config, td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error)
 )
 
 // DefaultFieldMutateHook is the default hook for the Plugin which applies the GoFieldHook and GoTagFieldHook.
-func DefaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+func DefaultFieldMutateHook(cfg *config.Config, td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
 	var err error
-	f, err = GoFieldHook(td, fd, f)
+	f, err = GoFieldHook(cfg, td, fd, f)
 	if err != nil {
 		return f, err
+	}
+	if f == nil {
+		return nil, nil
 	}
 	return GoTagFieldHook(td, fd, f)
 }
@@ -381,9 +384,12 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 		}
 
 		if m.FieldHook != nil {
-			mf, err := m.FieldHook(schemaType, field, f)
+			mf, err := m.FieldHook(cfg, schemaType, field, f)
 			if err != nil {
 				return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
+			}
+			if mf == nil {
+				continue
 			}
 			f = mf
 		}
@@ -570,10 +576,20 @@ func removeDuplicateTags(t string) string {
 }
 
 // GoFieldHook applies the goField directive to the generated Field f.
-func GoFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
+func GoFieldHook(cfg *config.Config, td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
 	args := make([]string, 0)
 	_ = args
 	for _, goField := range fd.Directives.ForNames("goField") {
+		if cfg.OmitForceResolverFields {
+			if arg := goField.Arguments.ForName("forceResolver"); arg != nil {
+				if k, err := arg.Value.Value(nil); err == nil {
+					if forceResolver, ok := k.(bool); ok && forceResolver {
+						return nil, nil
+					}
+				}
+			}
+		}
+
 		if arg := goField.Arguments.ForName("name"); arg != nil {
 			if k, err := arg.Value.Value(nil); err == nil {
 				f.GoName = k.(string)

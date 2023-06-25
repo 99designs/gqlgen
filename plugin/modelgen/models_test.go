@@ -22,6 +22,8 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_nil"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_true"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_false"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_omit_force_resolver_fields_true"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -422,6 +424,51 @@ func TestModelGenerationOmitemptyConfig(t *testing.T) {
 				expected = "Value"
 			}
 			require.Equal(t, expected, sf.Tag.Get("json"))
+		})
+	}
+}
+
+func TestModelGenerationOmitForceResolverFields(t *testing.T) {
+	suites := []struct {
+		n       string
+		cfg     string
+		enabled bool
+		t       any
+	}{
+		{
+			n:       "true",
+			cfg:     "gqlgen_omit_force_resolver_fields_false.yml",
+			enabled: true,
+			t:       out_omit_force_resolver_fields_true.MissingForceResolvers{},
+		},
+		{
+			n:       "false",
+			cfg:     "gqlgen_omit_force_resolver_fields_true.yml",
+			enabled: false,
+			t:       out_omit_force_resolver_fields_false.MissingForceResolvers{},
+		},
+	}
+
+	for _, s := range suites {
+		t.Run(s.n, func(t *testing.T) {
+			cfg, err := config.LoadConfig(fmt.Sprintf("testdata/%s", s.cfg))
+			require.NoError(t, err)
+			require.NoError(t, cfg.Init())
+			p := Plugin{
+				MutateHook: mutateHook,
+				FieldHook:  DefaultFieldMutateHook,
+			}
+			require.NoError(t, p.MutateConfig(cfg))
+			rt := reflect.TypeOf(s.t)
+
+			_, enabled := rt.FieldByName("Enabled")
+			assert.Equal(t, !s.enabled, enabled)
+
+			_, disabled := rt.FieldByName("Disabled")
+			assert.True(t, disabled)
+
+			_, notSet := rt.FieldByName("NotSet")
+			assert.True(t, notSet)
 		})
 	}
 }

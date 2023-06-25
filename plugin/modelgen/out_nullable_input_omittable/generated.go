@@ -145,6 +145,12 @@ func (this ImplArrayOfA) GetTrickyFieldPointer() []A {
 	return interfaceSlice
 }
 
+type MissingForceResolvers struct {
+	Enabled  string `json:"enabled" database:"MissingForceResolversenabled"`
+	Disabled string `json:"disabled" database:"MissingForceResolversdisabled"`
+	NotSet   string `json:"notSet" database:"MissingForceResolversnotSet"`
+}
+
 type MissingInput struct {
 	Name          graphql.Omittable[*string]        `json:"name,omitempty" database:"MissingInputname"`
 	Enum          graphql.Omittable[*MissingEnum]   `json:"enum,omitempty" database:"MissingInputenum"`

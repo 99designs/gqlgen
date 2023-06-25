@@ -4,8 +4,8 @@ directive @goTag(
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goField(
-	forceResolver: Boolean
-	name: String
+    forceResolver: Boolean
+    name: String
     omittable: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | INTERFACE
 
@@ -35,6 +35,12 @@ type MissingTypeNullable implements MissingInterface & ExistingInterface {
     int: MissingInterface
     existing: ExistingType
     missing2: MissingTypeNotNull
+}
+
+type MissingForceResolvers {
+    enabled: String! @goField(forceResolver: true)
+    disabled: String! @goField(forceResolver: false)
+    notSet: String!
 }
 
 input MissingInput {
@@ -200,7 +206,7 @@ type Xer implements X {
 }
 
 type ExtraFieldsTest {
-  SchemaField: String!
+    SchemaField: String!
 }
 
 type OmitEmptyJsonTagTest {

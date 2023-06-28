@@ -80,6 +80,8 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["tag"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["override"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["inaccessible"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["interfaceObject"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["composeDirective"] = config.DirectiveConfig{SkipRuntime: true}
 	}
 
 	return nil

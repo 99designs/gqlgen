@@ -71,7 +71,9 @@ resolver:
 # Optional: wrap nullable input fields with Omittable
 # nullable_input_omittable: true
 
-# Optional: omit generated model fields with `@goField(forceResolver: true)`
+# Optional: omit the field annotated with the directive `@goField(forceResolver: true)` from the generated model.
+# If you apply the directive `@goField(forceResolver: true)` to a field while using a generated model, it enables you to define the resolver individually.
+# However, the field with this directive in the generated model can become noise in the resolver implementation. This option helps to resolve that issue.
 # omit_force_resolver_fields: true
 
 # Optional: turn on to return pointers instead of values in unmarshalInput

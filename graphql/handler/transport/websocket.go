@@ -36,7 +36,7 @@ type (
 		conn            *websocket.Conn
 		me              messageExchanger
 		active          map[string]context.CancelFunc
-		mu              sync.Mutex
+		mu              sync.RWMutex
 		keepAliveTicker *time.Ticker
 		pingPongTicker  *time.Ticker
 		exec            graphql.GraphExecutor
@@ -157,7 +157,7 @@ func (c *wsConnection) init() bool {
 
 	if err != nil {
 		if err == errReadTimeout {
-			c.close(websocket.CloseProtocolError, "connection initialisation timeout")
+			c.close(4408, "Connection initialisation timeout")
 			return false
 		}
 
@@ -194,9 +194,12 @@ func (c *wsConnection) init() bool {
 	case connectionCloseMessageType:
 		c.close(websocket.CloseNormalClosure, "terminated")
 		return false
+	case startMessageType:
+		c.sendConnectionError("Unauthorized")
+		c.close(4401, "Unauthorized")
 	default:
 		c.sendConnectionError("unexpected message %s", m.t)
-		c.close(websocket.CloseProtocolError, "unexpected message")
+		c.close(4400, "unexpected message")
 		return false
 	}
 
@@ -258,6 +261,14 @@ func (c *wsConnection) run() {
 
 		switch m.t {
 		case startMessageType:
+			c.mu.RLock()
+			_, ok := c.active[m.id]
+			c.mu.RUnlock()
+			if ok {
+				c.sendConnectionError("Subscriber for %s already exists", m.id)
+				c.close(4409, fmt.Sprintf("Subscriber for %s already exists", m.id))
+				return
+			}
 			c.subscribe(start, &m)
 		case stopMessageType:
 			c.mu.Lock()
@@ -273,6 +284,9 @@ func (c *wsConnection) run() {
 			c.write(&message{t: pongMessageType, payload: m.payload})
 		case pongMessageType:
 			c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+		case initMessageType:
+			c.sendConnectionError("Too many initialization requests")
+			c.close(4429, "Too many initialization requests")
 		default:
 			c.sendConnectionError("unexpected message %s", m.t)
 			c.close(websocket.CloseProtocolError, "unexpected message")

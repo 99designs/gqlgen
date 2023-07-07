@@ -53,7 +53,7 @@ func ApolloSandboxHandler(title, endpoint string) http.HandlerFunc {
 			"title":              title,
 			"endpoint":           endpoint,
 			"endpointIsAbsolute": endpointHasScheme(endpoint),
-			"mainSRI":            "sha256-/ldbSJ7EovavF815TfCN50qKB9AMvzskb9xiG71bmg2I=",
+			"mainSRI":            "sha256-ldbSJ7EovavF815TfCN50qKB9AMvzskb9xiG71bmg2I=",
 		})
 		if err != nil {
 			panic(err)

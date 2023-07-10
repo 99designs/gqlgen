@@ -144,7 +144,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	}
 }
 
-// InjectSources creates a GraphQL Entity type with all
+// InjectSourceLate creates a GraphQL Entity type with all
 // the fields that had the @key directive
 func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 	f.setEntities(schema)

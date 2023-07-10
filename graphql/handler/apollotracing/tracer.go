@@ -85,6 +85,10 @@ func (Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (interf
 }
 
 func (Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+	if !graphql.HasOperationContext(ctx) {
+		return next(ctx)
+	}
+
 	rc := graphql.GetOperationContext(ctx)
 
 	start := rc.Stats.OperationStart

@@ -24,12 +24,12 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 		}
 	</style>
 	<script
-		src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.production.min.js"
+		src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"
 		integrity="{{.reactSRI}}"
 		crossorigin="anonymous"
 	></script>
 	<script
-		src="https://cdn.jsdelivr.net/npm/react-dom@17.0.2/umd/react-dom.production.min.js"
+		src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"
 		integrity="{{.reactDOMSRI}}"
 		crossorigin="anonymous"
 	></script>
@@ -82,11 +82,11 @@ func Handler(title string, endpoint string) http.HandlerFunc {
 			"endpoint":             endpoint,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
-			"version":              "2.0.7",
-			"cssSRI":               "sha256-gQryfbGYeYFxnJYnfPStPYFt0+uv8RP8Dm++eh00G9c=",
-			"jsSRI":                "sha256-qQ6pw7LwTLC+GfzN+cJsYXfVWRKH9O5o7+5H96gTJhQ=",
-			"reactSRI":             "sha256-Ipu/TQ50iCCVZBUsZyNJfxrDk0E2yhaEIz0vqI+kFG8=",
-			"reactDOMSRI":          "sha256-nbMykgB6tsOFJ7OdVmPpdqMFVk4ZsqWocT6issAPUF0=",
+			"version":              "3.0.1",
+			"cssSRI":               "sha256-wTzfn13a+pLMB5rMeysPPR1hO7x0SwSeQI+cnw7VdbE=",
+			"jsSRI":                "sha256-dLnxjV+d2rFUCtYKjbPy413/8O+Ahy7QqAhaPNlL8fk=",
+			"reactSRI":             "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
+			"reactDOMSRI":          "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
 		})
 		if err != nil {
 			panic(err)

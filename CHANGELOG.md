@@ -5,10 +5,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.34...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.35...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.35"></a>
+## [v0.17.35](https://github.com/99designs/gqlgen/compare/v0.17.34...v0.17.35) - 2023-07-15
+- <a href="https://github.com/99designs/gqlgen/commit/05006bf1dcb9451b0960d07fd68370145c2697b4"><tt>05006bf1</tt></a> release v0.17.35
+
+- <a href="https://github.com/99designs/gqlgen/commit/d95d614f8fc2c5983390adf0507027a1efdd778a"><tt>d95d614f</tt></a> Update gqlparser to v2.5.7 (<a href="https://github.com/99designs/gqlgen/pull/2714">#2714</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/8c378e6bdd1962822216053ae2c01e89ef35034a"><tt>8c378e6b</tt></a> Updated GraphiQL playground 2.0.7 -> 3.0.1 and react 17 -> 18 (<a href="https://github.com/99designs/gqlgen/pull/2713">#2713</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/7880739d48a9aa2d6f4be87129cb361d2c2c0345"><tt>7880739d</tt></a> Add op ctx safety for apollo tracing (<a href="https://github.com/99designs/gqlgen/pull/2709">#2709</a>)</summary>
+
+* Add automated tests for both tracing and tracer to simulate a client disconnect
+* Check for existence of operation context before proceeding to avoid panic
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/6ed9337bce0daf05c1c3bda29fd86368768cdb68"><tt>6ed9337b</tt></a> fix function name in comment (<a href="https://github.com/99designs/gqlgen/pull/2707">#2707</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/2cfb9f98c4c2b090a6a65816ed28a67501303768"><tt>2cfb9f98</tt></a> Fix apollo integrity hash (<a href="https://github.com/99designs/gqlgen/pull/2706">#2706</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/470fca87d3002399fb02e14cf014c3c26755d87b"><tt>470fca87</tt></a> Update gqlparser again (<a href="https://github.com/99designs/gqlgen/pull/2697">#2697</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/280441b1a0c46652f3b16692839fbdbd024aa06d"><tt>280441b1</tt></a> Update changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/5bc36e142dfffceb96ac8b23bb9c13b492504474"><tt>5bc36e14</tt></a> v0.17.34 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.34"></a>
 ## [v0.17.34](https://github.com/99designs/gqlgen/compare/v0.17.33...v0.17.34) - 2023-06-23
 - <a href="https://github.com/99designs/gqlgen/commit/5a70585758275a186b3e76e729644cb0c3e4bd37"><tt>5a705857</tt></a> release v0.17.34

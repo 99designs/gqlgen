@@ -64,7 +64,7 @@ go get -u github.com/graph-gophers/dataloader
 Next, we implement a data loader and a middleware for injecting the data loader on a request context.
 
 ```go
-package storage
+package loaders
 
 // import graph gophers with your other imports
 import (
@@ -137,7 +137,9 @@ func NewLoaders(conn *sql.DB) *Loaders {
 }
 
 // Middleware injects data loaders into the context
-func Middleware(loaders *Loaders, next http.Handler) http.Handler {
+func Middleware(conn *sql.DB, next http.Handler) http.Handler {
+	// create a request-scoped data loader
+	loader := NewLoaders(conn)
 	// return a middleware that injects the loader to the request context
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		nextCtx := context.WithValue(r.Context(), loadersKey, loaders)
@@ -164,10 +166,20 @@ func GetUser(ctx context.Context, userID string) (*model.User, error) {
 
 ```
 
+Add the dataloader middleware to your server...
+```go
+// create the query handler
+var srv http.Handler = handler.NewDefaultServer(generated.NewExecutableSchema(...))
+// wrap the query handler with middleware to inject dataloader in requests
+srv = dataloader.Middleware(db, srv)
+// register the wrapped handler
+http.Handle("/query", srv)
+```
+
 Now lets update our resolver to call the dataloader:
 ```go
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	return storage.GetUser(ctx, obj.UserID)
+	return loaders.GetUser(ctx, obj.UserID)
 }
 ```
 

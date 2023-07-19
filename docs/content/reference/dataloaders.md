@@ -172,7 +172,7 @@ Add the dataloader middleware to your server...
 var srv http.Handler = handler.NewDefaultServer(generated.NewExecutableSchema(...))
 // wrap the query handler with middleware to inject dataloader in requests.
 // pass in your dataloader depenendicies, in this case the db connection.
-srv = dataloader.Middleware(db, srv)
+srv = loaders.Middleware(db, srv)
 // register the wrapped handler
 http.Handle("/query", srv)
 ```

@@ -39,8 +39,8 @@ resolver:
   filename_template: "{name}.resolvers.go"
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false
-	# Optional: Pass in a path to a new gotpl template to use for generating resolvers
-	# resolver_template: [your/path/resolver.gotpl]
+  # Optional: Pass in a path to a new gotpl template to use for generating resolvers
+  # resolver_template: [your/path/resolver.gotpl]
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json

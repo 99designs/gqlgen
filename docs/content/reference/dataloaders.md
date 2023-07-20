@@ -138,10 +138,11 @@ func NewLoaders(conn *sql.DB) *Loaders {
 
 // Middleware injects data loaders into the context
 func Middleware(conn *sql.DB, next http.Handler) http.Handler {
-	// create a request-scoped data loader
-	loader := NewLoaders(conn)
 	// return a middleware that injects the loader to the request context
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// create a request-scoped data loader
+		loader := NewLoaders(conn)
+		// inject to context
 		nextCtx := context.WithValue(r.Context(), loadersKey, loader)
 		r = r.WithContext(nextCtx)
 		next.ServeHTTP(w, r)

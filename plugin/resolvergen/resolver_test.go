@@ -83,6 +83,24 @@ func TestOmitTemplateComment(t *testing.T) {
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/omit_template_comment/out")
 }
 
+func TestCustomResolverTemplate(t *testing.T) {
+	_ = syscall.Unlink("testdata/resolvertemplate/out/resolver.go")
+	cfg, err := config.LoadConfig("testdata/resolvertemplate/gqlgen.yml")
+	require.NoError(t, err)
+	p := Plugin{}
+
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	require.NoError(t, p.GenerateCode(data))
+	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/resolvertemplate/out")
+
+}
+
 func testFollowSchemaPersistence(t *testing.T, dir string) {
 	_ = syscall.Unlink(dir + "/out/resolver.go")
 

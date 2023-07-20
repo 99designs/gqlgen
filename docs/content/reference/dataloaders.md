@@ -18,22 +18,30 @@ query { todos { user { name } } }
 and the `todo.user` resolver reads the `User` from a database...
 ```go
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	res := db.LogAndQuery(
-		r.Conn,
-		"SELECT id, name FROM users WHERE id = ?",
-		obj.UserID,
-	)
-	defer res.Close()
-
-	if !res.Next() {
-		return nil, nil
+	stmt, err := r.db.PrepareContext(ctx, "SELECT id, name FROM users WHERE id = ?")
+	if err != nil {
+		return nil, err
 	}
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, obj.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, rows.Err()
+	}
+
 	var user model.User
-	if err := res.Scan(&user.ID, &user.Name); err != nil {
-		panic(err)
+	if err := rows.Scan(&user.ID, &user.Name); err != nil {
+		return nil, err
 	}
 	return &user, nil
 }
+
+
 ```
 
 The query executor will call the `Query.Todos` resolver which does a `select * from todo` and returns `N` todos. If the nested `User` is selected, the above `UserRaw` resolver will run a separate query for each user, resulting in `N+1` database queries.
@@ -58,7 +66,7 @@ Dataloaders allow us to consolidate the fetching of `todo.user` across all resol
 We're going to use [graph-gophers/dataloader](https://github.com/graph-gophers/dataloader) to implement a dataloader for bulk-fetching users.
 
 ```bash
-go get -u github.com/graph-gophers/dataloader
+go get -u github.com/graph-gophers/dataloader/v7
 ```
 
 Next, we implement a data loader and a middleware for injecting the data loader on a request context.
@@ -68,7 +76,13 @@ package loaders
 
 // import graph gophers with your other imports
 import (
-	"github.com/graph-gophers/dataloader"
+	"context"
+	"database/sql"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/graph-gophers/dataloader/v7"
 )
 
 type ctxKey string
@@ -77,74 +91,66 @@ const (
 	loadersKey = ctxKey("dataloaders")
 )
 
-// UserReader reads Users from a database
-type UserReader struct {
-	conn *sql.DB
+// userReader reads Users from a database
+type userReader struct {
+	db *sql.DB
 }
 
-// GetUsers implements a batch function that can retrieve many users by ID,
+// getUsers implements a batch function that can retrieve many users by ID,
 // for use in a dataloader
-func (u *UserReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
-	// read all requested users in a single query
-	userIDs := make([]string, len(keys))
-	for ix, key := range keys {
-		userIDs[ix] = key.String()
+func (u *userReader) getUsers(ctx context.Context, userIds []string) []*dataloader.Result[*model.User] {
+	stmt, err := u.db.PrepareContext(ctx, `SELECT id, name FROM users WHERE id IN (?`+strings.Repeat(",?", len(userIds)-1)+`)`)
+	if err != nil {
+		return handleError[*model.User](len(userIds), err)
 	}
-	res := u.db.Exec(
-		r.Conn,
-		"SELECT id, name
-		FROM users
-		WHERE id IN (?" + strings.Repeat(",?", len(userIDs-1)) + ")",
-		userIDs...,
-	)
-	defer res.Close()
-	// return User records into a map by ID
-	userById := map[string]*model.User{}
-	for res.Next() {
-		user := model.User{}
-		if err := res.Scan(&user.ID, &user.Name); err != nil {
-			panic(err)
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, userIds)
+	if err != nil {
+		return handleError[*model.User](len(userIds), err)
+	}
+	defer rows.Close()
+
+	result := make([]*dataloader.Result[*model.User], 0, len(userIds))
+	for rows.Next() {
+		var user model.User
+		if err := rows.Scan(&user.ID, &user.Name); err != nil {
+			result = append(result, &dataloader.Result[*model.User]{Error: err})
+			continue
 		}
-		userById[user.ID] = &user
+		result = append(result, &dataloader.Result[*model.User]{Data: &user})
 	}
-	// return users in the same order requested
-	output := make([]*dataloader.Result, len(keys))
-	for index, userKey := range keys {
-		user, ok := userById[userKey.String()]
-		if ok {
-			output[index] = &dataloader.Result{Data: user, Error: nil}
-		} else {
-			err := fmt.Errorf("user not found %s", userKey.String())
-			output[index] = &dataloader.Result{Data: nil, Error: err}
-		}
+	return result
+}
+
+// handleError creates array of result with the same error repeated for as many items requested
+func handleError[T any](itemsLength int, err error) []*dataloader.Result[T] {
+	result := make([]*dataloader.Result[T], itemsLength)
+	for i := 0; i < itemsLength; i++ {
+		result[i] = &dataloader.Result[T]{Error: err}
 	}
-	return output
+	return result
 }
 
 // Loaders wrap your data loaders to inject via middleware
 type Loaders struct {
-	UserLoader *dataloader.Loader
+	UserLoader *dataloader.Loader[string, *model.User]
 }
 
 // NewLoaders instantiates data loaders for the middleware
 func NewLoaders(conn *sql.DB) *Loaders {
 	// define the data loader
-	userReader := &UserReader{conn: conn}
-	loaders := &Loaders{
-		UserLoader: dataloader.NewBatchedLoader(userReader.GetUsers),
+	ur := &userReader{db: conn}
+	return &Loaders{
+		UserLoader: dataloader.NewBatchedLoader(ur.getUsers, dataloader.WithWait[string, *model.User](time.Millisecond)),
 	}
-	return loaders
 }
 
 // Middleware injects data loaders into the context
-func Middleware(conn *sql.DB, next http.Handler) http.Handler {
+func Middleware(loaders *Loaders, next http.Handler) http.Handler {
 	// return a middleware that injects the loader to the request context
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// create a request-scoped data loader
-		loader := NewLoaders(conn)
-		// inject to context
-		nextCtx := context.WithValue(r.Context(), loadersKey, loader)
-		r = r.WithContext(nextCtx)
+		r = r.WithContext(context.WithValue(r.Context(), loadersKey, loaders))
 		next.ServeHTTP(w, r)
 	})
 }
@@ -154,15 +160,16 @@ func For(ctx context.Context) *Loaders {
 	return ctx.Value(loadersKey).(*Loaders)
 }
 
-// GetUser wraps the User dataloader for efficient retrieval by user ID
+// GetUser returns single user by id efficiently
 func GetUser(ctx context.Context, userID string) (*model.User, error) {
-	loader := For(ctx)
-	thunk := loader.UserLoader.Load(ctx, dataloader.StringKey(userID))
-	result, err := thunk()
-	if err != nil {
-		return nil, err
-	}
-	return result.(*model.User), nil
+	loaders := For(ctx)
+	return loaders.UserLoader.Load(ctx, userID)()
+}
+
+// GetUsers returns many users by ids efficiently
+func GetUsers(ctx context.Context, userIDs []string) ([]*model.User, []error) {
+	loaders := For(ctx)
+	return loaders.UserLoader.LoadMany(ctx, userIDs)()
 }
 
 ```
@@ -172,7 +179,7 @@ Add the dataloader middleware to your server...
 // create the query handler
 var srv http.Handler = handler.NewDefaultServer(generated.NewExecutableSchema(...))
 // wrap the query handler with middleware to inject dataloader in requests.
-// pass in your dataloader depenendicies, in this case the db connection.
+// pass in your dataloader dependencies, in this case the db connection.
 srv = loaders.Middleware(db, srv)
 // register the wrapped handler
 http.Handle("/query", srv)

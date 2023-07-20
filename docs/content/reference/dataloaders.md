@@ -142,7 +142,7 @@ func Middleware(conn *sql.DB, next http.Handler) http.Handler {
 	loader := NewLoaders(conn)
 	// return a middleware that injects the loader to the request context
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		nextCtx := context.WithValue(r.Context(), loadersKey, loaders)
+		nextCtx := context.WithValue(r.Context(), loadersKey, loader)
 		r = r.WithContext(nextCtx)
 		next.ServeHTTP(w, r)
 	})
@@ -155,8 +155,8 @@ func For(ctx context.Context) *Loaders {
 
 // GetUser wraps the User dataloader for efficient retrieval by user ID
 func GetUser(ctx context.Context, userID string) (*model.User, error) {
-	loaders := For(ctx)
-	thunk := loaders.UserLoader.Load(ctx, dataloader.StringKey(userID))
+	loader := For(ctx)
+	thunk := loader.UserLoader.Load(ctx, dataloader.StringKey(userID))
 	result, err := thunk()
 	if err != nil {
 		return nil, err

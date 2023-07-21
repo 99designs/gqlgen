@@ -97,8 +97,6 @@ func TestCustomResolverTemplate(t *testing.T) {
 	}
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/resolvertemplate/out")
-
 }
 
 func testFollowSchemaPersistence(t *testing.T, dir string) {

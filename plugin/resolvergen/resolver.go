@@ -81,6 +81,10 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
 	}
 
+	if data.Config.Resolver.ResolverTemplate != "" {
+		resolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
+	}
+
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Resolver.Package,
 		FileNotice:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
@@ -157,6 +161,10 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 	for filename, file := range files {
 		file.imports = rewriter.ExistingImports(filename)
 		file.RemainingSource = rewriter.RemainingSource(filename)
+	}
+
+	if data.Config.Resolver.ResolverTemplate != "" {
+		resolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
 	}
 
 	for filename, file := range files {
@@ -256,4 +264,12 @@ func gqlToResolverName(base string, gqlname, filenameTmpl string) string {
 	}
 	filename := strings.ReplaceAll(filenameTmpl, "{name}", strings.TrimSuffix(gqlname, ext))
 	return filepath.Join(base, filename)
+}
+
+func readResolverTemplate(customResolverTemplate string) string {
+	contentBytes, err := os.ReadFile(customResolverTemplate)
+	if err != nil {
+		panic(err)
+	}
+	return string(contentBytes)
 }

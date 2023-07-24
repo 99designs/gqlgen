@@ -81,8 +81,9 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
 	}
 
+	newResolverTemplate := resolverTemplate
 	if data.Config.Resolver.ResolverTemplate != "" {
-		resolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
+		newResolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
 	}
 
 	return templates.Render(templates.Options{
@@ -91,7 +92,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,
-		Template:    resolverTemplate,
+		Template:    newResolverTemplate,
 	})
 }
 
@@ -162,9 +163,9 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		file.imports = rewriter.ExistingImports(filename)
 		file.RemainingSource = rewriter.RemainingSource(filename)
 	}
-
+	newResolverTemplate := resolverTemplate
 	if data.Config.Resolver.ResolverTemplate != "" {
-		resolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
+		newResolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
 	}
 
 	for filename, file := range files {
@@ -194,7 +195,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			Filename:    filename,
 			Data:        resolverBuild,
 			Packages:    data.Config.Packages,
-			Template:    resolverTemplate,
+			Template:    newResolverTemplate,
 		})
 		if err != nil {
 			return err

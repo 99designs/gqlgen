@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"go/types"
+	"os"
 	"sort"
 	"strings"
 	"text/template"
@@ -282,6 +283,10 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		"getInterfaceByName": getInterfaceByName,
 		"generateGetter":     generateGetter,
 	}
+	newModelTemplate := modelTemplate
+	if cfg.Model.ModelTemplate != "" {
+		newModelTemplate = readModelTemplate(cfg.Model.ModelTemplate)
+	}
 
 	err := templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,
@@ -289,7 +294,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		Data:            b,
 		GeneratedHeader: true,
 		Packages:        cfg.Packages,
-		Template:        modelTemplate,
+		Template:        newModelTemplate,
 		Funcs:           funcMap,
 	})
 	if err != nil {
@@ -644,4 +649,12 @@ func findAndHandleCyclicalRelationships(b *ModelBuild) {
 			}
 		}
 	}
+}
+
+func readModelTemplate(customModelTemplate string) string {
+	contentBytes, err := os.ReadFile(customModelTemplate)
+	if err != nil {
+		panic(err)
+	}
+	return string(contentBytes)
 }

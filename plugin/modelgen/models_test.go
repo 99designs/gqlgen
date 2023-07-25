@@ -637,3 +637,14 @@ func Test_splitTagsBySpace(t *testing.T) {
 		})
 	}
 }
+
+func TestCustomTemplate(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_custom_model_template.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+}

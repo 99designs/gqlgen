@@ -30,6 +30,8 @@ federation:
 model:
   filename: graph/model/models_gen.go
   package: model
+  # Optional: Pass in a path to a new gotpl template to use for generating the models
+  # model_template: [your/path/model.gotpl]
 
 # Where should the resolver implementations go?
 resolver:

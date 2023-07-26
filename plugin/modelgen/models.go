@@ -52,6 +52,7 @@ type Interface struct {
 	Fields      []*Field
 	Implements  []string
 	OmitCheck   bool
+	Models      []*Object
 }
 
 type Object struct {
@@ -200,6 +201,15 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+templates.ToGo(it.Name))
 	}
 	for _, it := range b.Interfaces {
+		// On a given interface we want to keep a reference to all the models that implement it
+		for _, model := range b.Models {
+			for _, impl := range model.Implements {
+				if impl == it.Name {
+					// If it does, add it to the Interface's Models
+					it.Models = append(it.Models, model)
+				}
+			}
+		}
 		cfg.Models.Add(it.Name, cfg.Model.ImportPath()+"."+templates.ToGo(it.Name))
 	}
 	for _, it := range b.Scalars {

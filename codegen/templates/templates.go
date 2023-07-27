@@ -172,7 +172,7 @@ func parseTemplates(cfg Options, t *template.Template) (*template.Template, erro
 		fileSystem = cfg.TemplateFS
 	} else {
 		// load path relative to calling source file
-		_, callerFile, _, _ := runtime.Caller(1)
+		_, callerFile, _, _ := runtime.Caller(2)
 		rootDir := filepath.Dir(callerFile)
 		fileSystem = os.DirFS(rootDir)
 	}

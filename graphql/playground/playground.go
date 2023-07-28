@@ -58,8 +58,13 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
       const wsProto = location.protocol == 'https:' ? 'wss:' : 'ws:';
       const subscriptionUrl = wsProto + '//' + location.host + {{.endpoint}};
 {{- end}}
+{{- if .headers}}
+      const headers = {{.headers}};
+{{- else}}
+      const headers = undefined;
+{{- end}}
 
-      const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl });
+      const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl, headers });
       ReactDOM.render(
         React.createElement(GraphiQL, {
           fetcher: fetcher,
@@ -75,11 +80,16 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 
 // Handler responsible for setting up the playground
 func Handler(title string, endpoint string) http.HandlerFunc {
+	return HandlerWithHeaders(title, endpoint, nil)
+}
+
+func HandlerWithHeaders(title string, endpoint string, headers map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
 		err := page.Execute(w, map[string]interface{}{
 			"title":                title,
 			"endpoint":             endpoint,
+			"headers":              headers,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
 			"version":              "3.0.1",

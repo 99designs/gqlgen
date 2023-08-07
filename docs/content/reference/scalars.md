@@ -249,3 +249,21 @@ input ContactDetailsInput {
 ```
 
 **Note:** Marshaling errors can only be returned when using the `graphql.ContextMarshaler` style interface.
+
+## UUID type
+
+add to gqlgen.yalm
+
+```yaml
+models:
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
+```
+
+add UUID scalar to schema.graphqls
+
+```graphql
+scalar UUID
+```
+See the _examples/uuid package for more examples.

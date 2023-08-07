@@ -9,8 +9,7 @@ import (
 
 func MarshalUUID(id uuid.UUID) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		bs, _ := id.MarshalText()
-		w.Write(bs)
+		writeQuotedString(w, id.String())
 	})
 }
 

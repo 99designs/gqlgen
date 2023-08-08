@@ -3,13 +3,14 @@ package graphql
 import (
 	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/google/uuid"
 )
 
 func MarshalUUID(id uuid.UUID) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		writeQuotedString(w, id.String())
+		io.WriteString(w, strconv.Quote(id.String()))
 	})
 }
 

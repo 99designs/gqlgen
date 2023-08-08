@@ -126,6 +126,14 @@ func (f Field) LastIndex() int {
 	return len(f) - 1
 }
 
+// Get first in first
+func (f Field) First() string {
+	if len(f) > 0 {
+		return f[0]
+	}
+	return ""
+}
+
 // local functions
 
 // parseUnnestedKeyFieldSet // handles simple case where none of the fields are nested.

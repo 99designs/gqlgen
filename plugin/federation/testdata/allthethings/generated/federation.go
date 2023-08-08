@@ -179,11 +179,13 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 				entity.ID, err = ec.unmarshalNString2string(ctx, rep["id"])
 				if err != nil {
-					return err
+					fmt.Println(fmt.Errorf(`Unable to set ID due to error: %w, skipping`, err))
 				}
-				entity.Hello.Secondary, err = ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["secondary"])
-				if err != nil {
-					return err
+				if rep["hello"] != nil {
+					entity.Hello.Secondary, err = ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["secondary"])
+					if err != nil {
+						fmt.Println(fmt.Errorf(`Unable to set Hello.Secondary due to error: %w, skipping`, err))
+					}
 				}
 				list[idx[i]] = entity
 				return nil

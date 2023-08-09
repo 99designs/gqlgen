@@ -121,6 +121,9 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 	// You can (and probably should) handle your channels in a central place outside of `schema.resolvers.go`.
 	// For this example we'll simply use a Goroutine with a simple loop.
 	go func() {
+		// Handle deregistration of the channel here. Note the `defer`
+    defer close(ch)
+
 		for {
 			// In our example we'll send the current time every second.
 			time.Sleep(1 * time.Second)
@@ -294,6 +297,8 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 	ch := make(chan *model.Time)
 
 	go func() {
+		defer close(ch)
+
 		for {
 			time.Sleep(1 * time.Second)
 			fmt.Println("Tick")

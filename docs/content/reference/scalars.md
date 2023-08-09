@@ -252,7 +252,7 @@ input ContactDetailsInput {
 
 ## UUID type
 
-add to gqlgen.yalm
+add to gqlgen.yml
 
 ```yaml
 models:

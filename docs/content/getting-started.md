@@ -182,6 +182,7 @@ query findTodos {
   todos {
     text
     done
+    id
     user {
       name
     }

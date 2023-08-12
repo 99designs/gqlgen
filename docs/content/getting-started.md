@@ -130,6 +130,8 @@ We just need to implement these two methods to get our server working:
 First we need somewhere to track our state, lets put it in `graph/resolver.go`. The `graph/resolver.go` file is where we declare our app's dependencies, like our database. It gets initialized once in `server.go` when we create the graph.
 
 ```go
+import "example/graph/model"
+
 type Resolver struct{
 	todos []*model.Todo
 }
@@ -139,10 +141,9 @@ Returning to `graph/schema.resolvers.go`, let's implement the bodies of those au
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	rand, _ := rand.Int(rand.Reader, big.NewInt(100))
 	todo := &model.Todo{
 		Text: input.Text,
-		ID:   fmt.Sprintf("T%d", rand),
+		ID:   fmt.Sprintf("T%d", rand.Intn(100)),
 		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
 	}
 	r.todos = append(r.todos, todo)

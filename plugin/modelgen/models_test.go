@@ -534,6 +534,22 @@ func TestRemoveDuplicate(t *testing.T) {
 			want:      "gorm:\"unique;not null\" json:\"name,name2\"",
 			wantPanic: false,
 		},
+		{
+			name: "Test gorm tag with colon",
+			args: args{
+				t: "gorm:\"type:varchar(63);unique_index\"",
+			},
+			want:      "gorm:\"type:varchar(63);unique_index\"",
+			wantPanic: false,
+		},
+		{
+			name: "Test mix use of gorm and duplicate json tags with colon",
+			args: args{
+				t: "json:\"name0\" gorm:\"type:varchar(63);unique_index\" json:\"name,name2\"",
+			},
+			want:      "gorm:\"type:varchar(63);unique_index\" json:\"name,name2\"",
+			wantPanic: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

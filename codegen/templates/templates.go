@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"github.com/Masterminds/sprig/v3"
 	"go/types"
 	"io/fs"
 	"os"
@@ -81,7 +82,7 @@ func Render(cfg Options) error {
 		funcs[n] = f
 	}
 
-	t := template.New("").Funcs(funcs)
+	t := template.New("").Funcs(sprig.FuncMap()).Funcs(funcs)
 	t, err := parseTemplates(cfg, t)
 	if err != nil {
 		return err
@@ -633,7 +634,7 @@ func resolveName(name string, skip int) string {
 }
 
 func render(filename string, tpldata interface{}) (*bytes.Buffer, error) {
-	t := template.New("").Funcs(Funcs())
+	t := template.New("").Funcs(sprig.FuncMap()).Funcs(Funcs())
 
 	b, err := os.ReadFile(filename)
 	if err != nil {

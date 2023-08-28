@@ -3,10 +3,32 @@ package graphql
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 )
+
+// implement context.Context interface
+type testGraphRequestContext struct {
+	opContext *OperationContext
+}
+
+func (t *testGraphRequestContext) Deadline() (deadline time.Time, ok bool) {
+	return time.Time{}, false
+}
+
+func (t *testGraphRequestContext) Done() <-chan struct{} {
+	return nil
+}
+
+func (t *testGraphRequestContext) Err() error {
+	return nil
+}
+
+func (t *testGraphRequestContext) Value(key interface{}) interface{} {
+	return t.opContext
+}
 
 func TestGetOperationContext(t *testing.T) {
 	rc := &OperationContext{}
@@ -20,6 +42,15 @@ func TestGetOperationContext(t *testing.T) {
 
 	t.Run("without operation context", func(t *testing.T) {
 		ctx := context.Background()
+
+		require.False(t, HasOperationContext(ctx))
+		require.Panics(t, func() {
+			GetOperationContext(ctx)
+		})
+	})
+
+	t.Run("with nil operation context", func(t *testing.T) {
+		ctx := &testGraphRequestContext{opContext: nil}
 
 		require.False(t, HasOperationContext(ctx))
 		require.Panics(t, func() {

@@ -134,7 +134,7 @@ func NewLoaders(conn *sql.DB) *Loaders {
 	// define the data loader
 	ur := &userReader{db: conn}
 	return &Loaders{
-		UserLoader: dataloader.NewBatchedLoader(ur.getUsers, dataloader.WithWait[string, *model.User](time.Millisecond)),
+		UserLoader: dataloadgen.NewLoader(ur.getUsers, dataloadgen.WithWait(time.Millisecond)),
 	}
 }
 

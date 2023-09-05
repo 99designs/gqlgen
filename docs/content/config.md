@@ -127,12 +127,13 @@ To start using them you first need to define them:
 directive @goModel(
 	model: String
 	models: [String!]
+	forceGenerate: Boolean
 ) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 
 directive @goField(
 	forceResolver: Boolean
 	name: String
-  omittable: Boolean
+	omittable: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goTag(

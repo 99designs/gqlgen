@@ -72,8 +72,9 @@ go get github.com/vikstrous/dataloadgen
 Next, we implement a data loader and a middleware for injecting the data loader on a request context.
 
 ```go
-package loader
+package loaders
 
+// import vikstrous/dataloadgen with your other imports
 import (
 	"context"
 	"database/sql"
@@ -84,46 +85,20 @@ import (
 	"github.com/vikstrous/dataloadgen"
 )
 
-// Get returns the Loaders bundle from the context. It must be used only in XXXXXXXXXXXX resolvers where Middleware has put the Loaders struct into the context already.
-func Get(ctx context.Context) *Loaders {
-	return ctx.Value(ctxKey{}).(*Loaders)
-}
+type ctxKey string
 
+const (
+	loadersKey = ctxKey("dataloaders")
+)
 
-// Loaders provide access for loading various objects from the underlying object's storage system while batching concurrent requests and caching responses.
-type Loaders struct {
-	User *dataloadgen.Loader[string, *model.User]
-}
-
-// Middleware injects data loaders into the context
-func Middleware(conn *sql.DB, next http.Handler) http.Handler {
-	// return a middleware that injects the loader to the request context
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Note that the loaders are being created per-request. This is important because they contain caching and batching logic that must be request-scoped.
-		loaders := newLoaders(conn)
-		r = r.WithContext(context.WithValue(r.Context(), ctxKey{}, loaders))
-		next.ServeHTTP(w, r)
-	})
-}
-
-type ctxKey struct{}
-
-// newLoaders creates the Loaders struct
-func newLoaders(conn *sql.DB) *Loaders {
-	ur := &userFetcher{db: conn}
-	return &Loaders{
-		User: dataloadgen.NewLoader(ur.getUsers, dataloadgen.WithWait(time.Millisecond)),
-	}
-}
-
-// userFetcher reads Users from a database
-type userFetcher struct {
+// userReader reads Users from a database
+type userReader struct {
 	db *sql.DB
 }
 
 // getUsers implements a batch function that can retrieve many users by ID,
 // for use in a dataloader
-func (u *userFetcher) getUsers(ctx context.Context, userIDs []string) ([]*model.User, []error) {
+func (u *userReader) getUsers(ctx context.Context, userIDs []string) ([]*model.User, []error) {
 	stmt, err := u.db.PrepareContext(ctx, `SELECT id, name FROM users WHERE id IN (?`+strings.Repeat(",?", len(userIDs)-1)+`)`)
 	if err != nil {
 		return nil, []error{err}
@@ -149,6 +124,48 @@ func (u *userFetcher) getUsers(ctx context.Context, userIDs []string) ([]*model.
 	return users, errs
 }
 
+// Loaders wrap your data loaders to inject via middleware
+type Loaders struct {
+	UserLoader *dataloadgen.Loader[string, *model.User]
+}
+
+// NewLoaders instantiates data loaders for the middleware
+func NewLoaders(conn *sql.DB) *Loaders {
+	// define the data loader
+	ur := &userReader{db: conn}
+	return &Loaders{
+		UserLoader: dataloader.NewBatchedLoader(ur.getUsers, dataloader.WithWait[string, *model.User](time.Millisecond)),
+	}
+}
+
+// Middleware injects data loaders into the context
+func Middleware(conn *sql.DB, next http.Handler) http.Handler {
+	// return a middleware that injects the loader to the request context
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		loader := NewLoaders(conn)
+		r = r.WithContext(context.WithValue(r.Context(), loadersKey, loader))
+		next.ServeHTTP(w, r)
+	})
+}
+
+// For returns the dataloader for a given context
+func For(ctx context.Context) *Loaders {
+	return ctx.Value(loadersKey).(*Loaders)
+}
+
+
+// GetUser returns single user by id efficiently
+func GetUser(ctx context.Context, userID string) (*model.User, error) {
+	loaders := For(ctx)
+	return loaders.UserLoader.Load(ctx, userID)
+}
+
+// GetUsers returns many users by ids efficiently
+func GetUsers(ctx context.Context, userIDs []string) ([]*model.User, []error) {
+	loaders := For(ctx)
+	return loaders.UserLoader.LoadAll(ctx, userIDs)
+}
+
 ```
 
 Add the dataloader middleware to your server...
@@ -165,7 +182,7 @@ http.Handle("/query", srv)
 Now lets update our resolver to call the dataloader:
 ```go
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	return loaders.Get(ctx).User.Load(ctx, obj.UserID)
+	return loaders.GetUser(ctx, obj.UserID)
 }
 ```
 

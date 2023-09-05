@@ -161,7 +161,7 @@ func GetUser(ctx context.Context, userID string) (*model.User, error) {
 }
 
 // GetUsers returns many users by ids efficiently
-func GetUsers(ctx context.Context, userIDs []string) ([]*model.User, []error) {
+func GetUsers(ctx context.Context, userIDs []string) ([]*model.User, error) {
 	loaders := For(ctx)
 	return loaders.UserLoader.LoadAll(ctx, userIDs)
 }

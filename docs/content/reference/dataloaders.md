@@ -153,7 +153,6 @@ func For(ctx context.Context) *Loaders {
 	return ctx.Value(loadersKey).(*Loaders)
 }
 
-
 // GetUser returns single user by id efficiently
 func GetUser(ctx context.Context, userID string) (*model.User, error) {
 	loaders := For(ctx)

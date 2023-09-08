@@ -192,7 +192,7 @@ func TestAutobinding(t *testing.T) {
 				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat",
 				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model",
 			},
-			Packages: &code.Packages{},
+			Packages: code.NewPackages(),
 		}
 
 		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
@@ -212,7 +212,7 @@ func TestAutobinding(t *testing.T) {
 			AutoBind: []string{
 				"../chat",
 			},
-			Packages: &code.Packages{},
+			Packages: code.NewPackages(),
 		}
 
 		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `

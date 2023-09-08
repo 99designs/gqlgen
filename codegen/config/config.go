@@ -26,6 +26,7 @@ type Config struct {
 	Models                        TypeMap                    `yaml:"models,omitempty"`
 	StructTag                     string                     `yaml:"struct_tag,omitempty"`
 	Directives                    map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	GoBuildTags                   StringList                 `yaml:"go_build_tags,omitempty"`
 	GoInitialisms                 GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
 	OmitSliceElementPointers      bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	OmitGetters                   bool                       `yaml:"omit_getters,omitempty"`
@@ -211,7 +212,9 @@ func CompleteConfig(config *Config) error {
 
 func (c *Config) Init() error {
 	if c.Packages == nil {
-		c.Packages = &code.Packages{}
+		c.Packages = code.NewPackages(
+			code.WithBuildTags(c.GoBuildTags...),
+		)
 	}
 
 	if c.Schema == nil {
@@ -671,7 +674,9 @@ func (c *Config) injectBuiltins() {
 
 func (c *Config) LoadSchema() error {
 	if c.Packages != nil {
-		c.Packages = &code.Packages{}
+		c.Packages = code.NewPackages(
+			code.WithBuildTags(c.GoBuildTags...),
+		)
 	}
 
 	if err := c.check(); err != nil {

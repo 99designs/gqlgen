@@ -51,7 +51,7 @@ func TestNameForPackage(t *testing.T) {
 }
 
 func initialState(t *testing.T) *Packages {
-	p := &Packages{}
+	p := NewPackages()
 	pkgs := p.LoadAll(
 		"github.com/99designs/gqlgen/internal/code/testdata/a",
 		"github.com/99designs/gqlgen/internal/code/testdata/b",

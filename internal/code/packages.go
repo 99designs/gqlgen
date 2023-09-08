@@ -28,15 +28,37 @@ var mode = packages.NeedName |
 	packages.NeedModule |
 	packages.NeedDeps
 
-// Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache of packages
-// that can be invalidated as writes are made and packages are known to change.
-type Packages struct {
-	packages     map[string]*packages.Package
-	importToName map[string]string
-	loadErrors   []error
+type (
+	// Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache of packages
+	// that can be invalidated as writes are made and packages are known to change.
+	Packages struct {
+		packages     map[string]*packages.Package
+		importToName map[string]string
+		loadErrors   []error
+		buildFlags   []string
 
-	numLoadCalls int // stupid test steam. ignore.
-	numNameCalls int // stupid test steam. ignore.
+		numLoadCalls int // stupid test steam. ignore.
+		numNameCalls int // stupid test steam. ignore.
+	}
+	// Option is a function that can be passed to NewPackages to configure the package loader
+	Option func(p *Packages)
+)
+
+// WithBuildTags adds build tags to the packages.Load call
+func WithBuildTags(tags ...string) func(p *Packages) {
+	return func(p *Packages) {
+		p.buildFlags = append(p.buildFlags, "-tags", strings.Join(tags, ","))
+	}
+}
+
+// NewPackages creates a new packages cache
+// It will load all packages in the current module, and any packages that are passed to Load or LoadAll
+func NewPackages(opts ...Option) *Packages {
+	p := &Packages{}
+	for _, opt := range opts {
+		opt(p)
+	}
+	return p
 }
 
 func (p *Packages) CleanupUserPackages() {
@@ -47,8 +69,8 @@ func (p *Packages) CleanupUserPackages() {
 			modInfo = nil
 		}
 	})
-
-	// Don't cleanup github.com/99designs/gqlgen prefixed packages, they haven't changed and do not need to be reloaded
+	// Don't cleanup github.com/99designs/gqlgen prefixed packages,
+	// they haven't changed and do not need to be reloaded
 	if modInfo != nil {
 		var toRemove []string
 		for k := range p.packages {
@@ -56,7 +78,6 @@ func (p *Packages) CleanupUserPackages() {
 				toRemove = append(toRemove, k)
 			}
 		}
-
 		for _, k := range toRemove {
 			delete(p.packages, k)
 		}
@@ -91,7 +112,10 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 
 	if len(missing) > 0 {
 		p.numLoadCalls++
-		pkgs, err := packages.Load(&packages.Config{Mode: mode}, missing...)
+		pkgs, err := packages.Load(&packages.Config{
+			Mode:       mode,
+			BuildFlags: p.buildFlags,
+		}, missing...)
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)
 		}
@@ -140,7 +164,10 @@ func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
 	pkg := p.Load(importPath)
 	if pkg == nil || pkg.TypesInfo == nil {
 		p.numLoadCalls++
-		pkgs, err := packages.Load(&packages.Config{Mode: mode}, importPath)
+		pkgs, err := packages.Load(&packages.Config{
+			Mode:       mode,
+			BuildFlags: p.buildFlags,
+		}, importPath)
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)
 			return nil
@@ -173,7 +200,10 @@ func (p *Packages) NameForPackage(importPath string) string {
 	if pkg == nil {
 		// otherwise do a name only lookup for it but don't put it in the package cache.
 		p.numNameCalls++
-		pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName}, importPath)
+		pkgs, err := packages.Load(&packages.Config{
+			Mode:       packages.NeedName,
+			BuildFlags: p.buildFlags,
+		}, importPath)
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)
 		} else {
